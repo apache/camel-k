@@ -15,8 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package version
+package action
 
-var (
-	Version = "0.0.1-SNAPSHOT"
+import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
+
+type Action interface {
+
+	CanExecute(integration *v1alpha1.Integration) bool
+
+	Execute(syndesis *v1alpha1.Integration) error
+
+}

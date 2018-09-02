@@ -1,8 +1,8 @@
 # Binary files
-camel-k
+/camel-k
 
 # We do not stage vendor directory
-vendor
+/vendor
 
 # IDEs
 .idea
