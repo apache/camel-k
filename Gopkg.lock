@@ -169,6 +169,22 @@
   version = "1.0.1"
 
 [[projects]]
+  name = "github.com/openshift/api"
+  packages = [
+    "apps/v1",
+    "authorization/v1",
+    "build/v1",
+    "image/docker10",
+    "image/dockerpre012",
+    "image/v1",
+    "pkg/serialization",
+    "route/v1",
+    "template/v1"
+  ]
+  revision = "0d921e363e951d89f583292c60d013c318df64dc"
+  version = "v3.9.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
@@ -179,6 +195,18 @@
     "version"
   ]
   revision = "0f60da86a138f7e79f275d539c18615bc2727014"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
@@ -227,6 +255,12 @@
   packages = ["."]
   revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
   version = "v1.0.2"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"
@@ -538,6 +572,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "22a3131aff0c3b6f0a97bc22324996cfa5dabe1f626a90facb0daf29bbe0d52a"
+  inputs-digest = "fe3fc8a50615445124a1a85023b09a54b2aa9f0dfc077f6c4823b46ee4ba7ef1"
   solver-name = "gps-cdcl"
   solver-version = 1

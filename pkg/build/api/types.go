@@ -15,5 +15,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package build
+package api
 
+// a request to build a specific code
+type BuildSource struct {
+	Identifier	string
+	Code		string
+}
+
+// represents the result of a build
+type BuildResult struct {
+	Source		*BuildSource
+	Status		BuildStatus
+	Image		string
+	Error		error
+}
+
+// supertype of all builders
+type Builder interface {
+	Build(BuildSource) <- chan BuildResult
+}
+
+type BuildStatus int
+const (
+	BuildStatusNotRequested		BuildStatus = iota
+	BuildStatusStarted
+	BuildStatusCompleted
+	BuildStatusError
+)

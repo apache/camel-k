@@ -23,8 +23,10 @@ import (
 
 type Action interface {
 
-	CanExecute(integration *v1alpha1.Integration) bool
+	// returns true if the action can handle the integration
+	CanHandle(integration *v1alpha1.Integration) bool
 
-	Execute(syndesis *v1alpha1.Integration) error
+	// executes the handling function
+	Handle(integration *v1alpha1.Integration) error
 
 }

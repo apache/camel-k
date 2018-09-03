@@ -15,40 +15,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package stub
+package action
 
 import (
-	"context"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/apache/camel-k/pkg/stub/action"
+	"math/rand"
+	"strconv"
 )
 
-func NewHandler(ctx context.Context, namespace string) sdk.Handler {
-	return &Handler{
-		actionPool: []action.Action{
-			action.NewInitializeAction(),
-			action.NewBuildAction(ctx, namespace),
-		},
-	}
+// initializes the integration status to trigger the deployment
+type InitializeAction struct {
+
 }
 
-type Handler struct {
-	actionPool	[]action.Action
+func NewInitializeAction() *InitializeAction {
+	return &InitializeAction{}
 }
 
-func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
-	switch o := event.Object.(type) {
-	case *v1alpha1.Integration:
-		for _, a := range h.actionPool {
-			if a.CanHandle(o) {
-				if err := a.Handle(o); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
+func (b *InitializeAction) CanHandle(integration *v1alpha1.Integration) bool {
+	return integration.Status.Phase == ""
+}
+
+func (b *InitializeAction) Handle(integration *v1alpha1.Integration) error {
+	target := integration.DeepCopy()
+	target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
+	target.Status.Identifier = strconv.Itoa(rand.Int()) // TODO replace with hash
+	return sdk.Update(target)
 }

@@ -48,13 +48,15 @@ type SourceSpec struct {
 }
 
 type IntegrationStatus struct {
-	Phase   IntegrationPhase    `json:"phase,omitempty"`
+	Phase   	IntegrationPhase    `json:"phase,omitempty"`
+	Identifier	string				`json:"identifier,omitempty"`
 }
 
 type IntegrationPhase string
 
 const (
     IntegrationPhaseBuilding    IntegrationPhase = "Building"
+	IntegrationPhaseDeploying   IntegrationPhase = "Deploying"
     IntegrationPhaseRunning     IntegrationPhase = "Running"
     IntegrationPhaseError       IntegrationPhase = "Error"
 )
