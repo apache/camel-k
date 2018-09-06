@@ -33,6 +33,7 @@ func NewHandler(ctx context.Context, namespace string) sdk.Handler {
 			action.NewInitializeAction(),
 			action.NewBuildAction(ctx, namespace),
 			action.NewDeployAction(),
+			action.NewMonitorAction(),
 		},
 	}
 }

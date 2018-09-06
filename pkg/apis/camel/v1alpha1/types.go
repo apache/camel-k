@@ -48,9 +48,9 @@ type SourceSpec struct {
 }
 
 type IntegrationStatus struct {
-	Phase IntegrationPhase `json:"phase,omitempty"`
-	Hash  string           `json:"hash,omitempty"`
-	Image string           `json:"image,omitempty"`
+	Phase  IntegrationPhase `json:"phase,omitempty"`
+	Digest string           `json:"digest,omitempty"`
+	Image  string           `json:"image,omitempty"`
 }
 
 type IntegrationPhase string

@@ -45,11 +45,14 @@ func (b *BuildAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
-
-	buildResult := b.buildManager.Get(integration.Status.Hash)
+	buildIdentifier := api.BuildIdentifier{
+		Name: integration.Name,
+		Digest: integration.Status.Digest,
+	}
+	buildResult := b.buildManager.Get(buildIdentifier)
 	if buildResult.Status == api.BuildStatusNotRequested {
 		b.buildManager.Start(api.BuildSource{
-			Identifier: integration.Status.Hash,
+			Identifier: buildIdentifier,
 			Code: *integration.Spec.Source.Code, // FIXME possible panic
 		})
 		logrus.Info("Build started")

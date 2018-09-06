@@ -15,36 +15,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package api
+package digest
 
-// a request to build a specific code
-type BuildSource struct {
-	Identifier	BuildIdentifier
-	Code		string
-}
-
-type BuildIdentifier struct {
-	Name	string
-	Digest	string
-}
-
-// represents the result of a build
-type BuildResult struct {
-	Source		*BuildSource
-	Status		BuildStatus
-	Image		string
-	Error		error
-}
-
-// supertype of all builders
-type Builder interface {
-	Build(BuildSource) <- chan BuildResult
-}
-
-type BuildStatus int
-const (
-	BuildStatusNotRequested		BuildStatus = iota
-	BuildStatusStarted
-	BuildStatusCompleted
-	BuildStatusError
+import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"crypto/sha256"
+	"github.com/apache/camel-k/version"
+	"encoding/base64"
 )
+
+// Compute a digest of the fields that are relevant for the deployment
+// Produces a digest that can be used as docker image tag
+func Compute(integration *v1alpha1.Integration) string {
+	hash := sha256.New()
+	// Operator version is relevant
+	hash.Write([]byte(version.Version))
+	// Integration relevant fields
+	if integration.Spec.Source.Code != nil {
+		hash.Write([]byte(*integration.Spec.Source.Code))
+	}
+	// Add a letter at the beginning and use URL safe encoding
+	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+}

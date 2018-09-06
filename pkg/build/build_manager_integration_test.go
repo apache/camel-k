@@ -31,16 +31,19 @@ import (
 func TestBuild(t *testing.T) {
 	ctx := context.TODO()
 	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
-
+	identifier := build.BuildIdentifier{
+		Name: "example",
+		Digest: "sadsadasdsadasdafwefwef",
+	}
 	buildManager.Start(build.BuildSource{
-		Identifier: "1",
+		Identifier: identifier,
 		Code: code(),
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
 	var result build.BuildResult
 	for time.Now().Before(deadline) {
-		result = buildManager.Get("1")
+		result = buildManager.Get(identifier)
 		if result.Status == build.BuildStatusCompleted || result.Status == build.BuildStatusError {
 			break
 		}
@@ -56,16 +59,19 @@ func TestFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
 	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
-
+	identifier := build.BuildIdentifier{
+		Name: "example",
+		Digest: "545454",
+	}
 	buildManager.Start(build.BuildSource{
-		Identifier: "1",
+		Identifier: identifier,
 		Code: code() + "XX",
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
 	var result build.BuildResult
 	for time.Now().Before(deadline) {
-		result = buildManager.Get("1")
+		result = buildManager.Get(identifier)
 		if result.Status == build.BuildStatusCompleted || result.Status == build.BuildStatusError {
 			break
 		}

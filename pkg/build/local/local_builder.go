@@ -139,7 +139,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 			Kind: "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "kamel",
+			Name: "kamel-" + source.Identifier.Name,
 			Namespace: b.namespace,
 		},
 		Spec: buildv1.BuildConfigSpec{
@@ -158,7 +158,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 				Output: buildv1.BuildOutput{
 					To: &v1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: "kamel:latest",
+						Name: "kamel-" + source.Identifier.Name + ":" + source.Identifier.Digest,
 					},
 				},
 			},
@@ -177,7 +177,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 			Kind: "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "kamel",
+			Name: "kamel-" + source.Identifier.Name,
 			Namespace: b.namespace,
 		},
 		Spec: imagev1.ImageStreamSpec{
@@ -224,7 +224,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 		Namespace(b.namespace).
 		Body(resource).
 		Resource("buildconfigs").
-		Name("kamel").
+		Name("kamel-" + source.Identifier.Name).
 		SubResource("instantiatebinary").
 		Do()
 
@@ -269,7 +269,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 	if is.Status.DockerImageRepository == "" {
 		return "", errors.New("dockerImageRepository not available in ImageStream")
 	}
-	return is.Status.DockerImageRepository + ":latest", nil
+	return is.Status.DockerImageRepository + ":" + source.Identifier.Digest, nil
 }
 
 func (b *localBuilder) createTar(buildDir string, source build.BuildSource) (string, error) {

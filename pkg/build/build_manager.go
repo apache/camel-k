@@ -26,19 +26,19 @@ import (
 
 // main facade to the image build system
 type BuildManager struct {
-	builds	map[string]*api.BuildResult
+	builds	map[api.BuildIdentifier]*api.BuildResult
 	mutex	sync.Mutex
 	builder	api.Builder
 }
 
 func NewBuildManager(ctx context.Context, namespace string) *BuildManager {
 	return &BuildManager{
-		builds: make(map[string]*api.BuildResult),
+		builds: make(map[api.BuildIdentifier]*api.BuildResult),
 		builder: local.NewLocalBuilder(ctx, namespace),
 	}
 }
 
-func (m *BuildManager) Get(identifier string) api.BuildResult {
+func (m *BuildManager) Get(identifier api.BuildIdentifier) api.BuildResult {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -53,7 +53,7 @@ func (m *BuildManager) Start(source api.BuildSource) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	initialBuildInfo := initialBuildInfo()
+	initialBuildInfo := initialBuildInfo(&source)
 	m.builds[source.Identifier] = &initialBuildInfo
 
 	resChannel := m.builder.Build(source)
@@ -72,8 +72,9 @@ func noBuildInfo() api.BuildResult {
 	}
 }
 
-func initialBuildInfo() api.BuildResult {
+func initialBuildInfo(source *api.BuildSource) api.BuildResult {
 	return api.BuildResult{
+		Source: source,
 		Status: api.BuildStatusStarted,
 	}
 }

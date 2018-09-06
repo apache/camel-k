@@ -21,34 +21,37 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/sirupsen/logrus"
 )
 
-// initializes the integration status to trigger the deployment
-type InitializeAction struct {
-
+type MonitorAction struct {
 }
 
-func NewInitializeAction() *InitializeAction {
-	return &InitializeAction{}
+func NewMonitorAction() *MonitorAction {
+	return &MonitorAction{}
 }
 
-func (b *InitializeAction) Name() string {
-	return "initialize"
+func (b *MonitorAction) Name() string {
+	return "monitor"
 }
 
-func (b *InitializeAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == ""
+func (a *MonitorAction) CanHandle(integration *v1alpha1.Integration) bool {
+	return integration.Status.Phase == v1alpha1.IntegrationPhaseRunning ||
+		integration.Status.Phase == v1alpha1.IntegrationPhaseError
 }
 
-func (b *InitializeAction) Handle(integration *v1alpha1.Integration) error {
-	target := integration.DeepCopy()
-	// set default values
-	var defaultReplicas int32 = 1
-	if target.Spec.Replicas == nil {
-		target.Spec.Replicas = &defaultReplicas
+func (a *MonitorAction) Handle(integration *v1alpha1.Integration) error {
+
+	hash := digest.Compute(integration)
+	if hash != integration.Status.Digest {
+		logrus.Info("Integration ", integration.Name, " needs a rebuild")
+
+		target := integration.DeepCopy()
+		target.Status.Digest=hash
+		target.Status.Phase=v1alpha1.IntegrationPhaseBuilding
+		return sdk.Update(target)
 	}
-	// update the status
-	target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
-	target.Status.Digest = digest.Compute(integration)
-	return sdk.Update(target)
+
+	// TODO check also if deployment matches (e.g. replicas)
+	return nil
 }
