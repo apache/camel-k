@@ -50,6 +50,12 @@ func (m *BuildManager) Get(identifier string) api.BuildResult {
 }
 
 func (m *BuildManager) Start(source api.BuildSource) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	initialBuildInfo := initialBuildInfo()
+	m.builds[source.Identifier] = &initialBuildInfo
+
 	resChannel := m.builder.Build(source)
 	go func() {
 		res := <-resChannel
@@ -63,5 +69,11 @@ func (m *BuildManager) Start(source api.BuildSource) {
 func noBuildInfo() api.BuildResult {
 	return api.BuildResult{
 		Status: api.BuildStatusNotRequested,
+	}
+}
+
+func initialBuildInfo() api.BuildResult {
+	return api.BuildResult{
+		Status: api.BuildStatusStarted,
 	}
 }

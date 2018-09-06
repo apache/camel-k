@@ -82,7 +82,7 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 		case op := <- b.buffer:
 			now := time.Now()
 			logrus.Info("Starting new build")
-			err := b.execute(op.source)
+			image, err := b.execute(op.source)
 			elapsed := time.Now().Sub(now)
 			if err != nil {
 				logrus.Error("Error during build (total time ", elapsed.Seconds(), " seconds): ", err)
@@ -100,7 +100,7 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 				op.output <- build.BuildResult{
 					Source: &op.source,
 					Status: build.BuildStatusCompleted,
-					Image: "kamel:latest",
+					Image: image,
 				}
 			}
 
@@ -108,10 +108,10 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 	}
 }
 
-func (b *localBuilder) execute(source build.BuildSource) error {
+func (b *localBuilder) execute(source build.BuildSource) (string, error) {
 	buildDir, err := ioutil.TempDir("", "kamel-")
 	if err != nil {
-		return errors.Wrap(err, "could not create temporary dir for maven artifacts")
+		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
 	}
 	//defer os.RemoveAll(buildDir)
 
@@ -119,19 +119,19 @@ func (b *localBuilder) execute(source build.BuildSource) error {
 
 	tarFileName, err := b.createTar(buildDir, source)
 	if err != nil {
-		return err
+		return "", err
 	}
 	logrus.Info("Created tar file ", tarFileName)
 
-	err = b.publish(tarFileName, source)
+	image, err := b.publish(tarFileName, source)
 	if err != nil {
-		return errors.Wrap(err, "could not publish docker image")
+		return "", errors.Wrap(err, "could not publish docker image")
 	}
 
-	return nil
+	return image, nil
 }
 
-func (b *localBuilder) publish(tarFile string, source build.BuildSource) error {
+func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string, error) {
 
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
@@ -168,7 +168,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) error {
 	sdk.Delete(&bc)
 	err := sdk.Create(&bc)
 	if err != nil {
-		return errors.Wrap(err, "cannot create build config")
+		return "", errors.Wrap(err, "cannot create build config")
 	}
 
 	is := imagev1.ImageStream{
@@ -190,7 +190,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) error {
 	sdk.Delete(&is)
 	err = sdk.Create(&is)
 	if err != nil {
-		return errors.Wrap(err, "cannot create image stream")
+		return "", errors.Wrap(err, "cannot create image stream")
 	}
 
 	inConfig := k8sclient.GetKubeConfig()
@@ -211,12 +211,12 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) error {
 
 	restClient, err := rest.RESTClientFor(config)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	resource, err := ioutil.ReadFile(tarFile)
 	if err != nil {
-		return errors.Wrap(err, "cannot fully read tar file " + tarFile)
+		return "", errors.Wrap(err, "cannot fully read tar file " + tarFile)
 	}
 
 	result := restClient.
@@ -229,25 +229,24 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) error {
 		Do()
 
 	if result.Error() != nil {
-		return errors.Wrap(result.Error(), "cannot instantiate binary")
+		return "", errors.Wrap(result.Error(), "cannot instantiate binary")
 	}
 
 	data, err := result.Raw()
 	if err != nil {
-		return errors.Wrap(err, "no raw data retrieved")
+		return "", errors.Wrap(err, "no raw data retrieved")
 	}
 
 	u := unstructured.Unstructured{}
 	err = u.UnmarshalJSON(data)
 	if err != nil {
-		return errors.Wrap(err, "cannot unmarshal instantiate binary response")
+		return "", errors.Wrap(err, "cannot unmarshal instantiate binary response")
 	}
 
 	ocbuild, err := k8sutil.RuntimeObjectFromUnstructured(&u)
 	if err != nil {
-		return err
+		return "", err
 	}
-	logrus.Info(ocbuild)
 
 	err = kubernetes.WaitCondition(ocbuild, func(obj interface{})(bool, error) {
 		if val, ok := obj.(*buildv1.Build); ok {
@@ -262,7 +261,15 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) error {
 		return false, nil
 	}, 5 * time.Minute)
 
-	return err
+	err = sdk.Get(&is)
+	if err != nil {
+		return "", err
+	}
+
+	if is.Status.DockerImageRepository == "" {
+		return "", errors.New("dockerImageRepository not available in ImageStream")
+	}
+	return is.Status.DockerImageRepository + ":latest", nil
 }
 
 func (b *localBuilder) createTar(buildDir string, source build.BuildSource) (string, error) {
@@ -385,6 +392,22 @@ func (b *localBuilder) createMavenStructure(buildDir string, source build.BuildS
 		return "", err
 	}
 
+	resourcesDir := path.Join(buildDir, "src", "main", "resources")
+	err = os.MkdirAll(resourcesDir, 0777)
+	if err != nil {
+		return "", err
+	}
+	log4jFileName := path.Join(resourcesDir, "log4j2.properties")
+	log4jFile, err := os.Create(log4jFileName)
+	if err != nil {
+		return "", err
+	}
+	defer log4jFile.Close()
+
+	_, err = log4jFile.WriteString(b.log4jFile())
+	if err != nil {
+		return "", err
+	}
 
 	envFileName := path.Join(buildDir, "environment")
 	envFile, err := os.Create(envFileName)
@@ -426,8 +449,32 @@ func (b *localBuilder) createPom() string {
       <artifactId>camel-java-runtime</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
+	<dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.11.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.11.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>2.11.1</version>
+    </dependency>
   </dependencies>
 
 </project>
 `
+}
+
+func (b *localBuilder) log4jFile() string {
+	return `appender.out.type = Console
+appender.out.name = out
+appender.out.layout.type = PatternLayout
+appender.out.layout.pattern = [%30.30t] %-30.30c{1} %-5p %m%n
+rootLogger.level = INFO
+rootLogger.appenderRef.out.ref = out`
 }

@@ -33,13 +33,23 @@ func NewInitializeAction() *InitializeAction {
 	return &InitializeAction{}
 }
 
+func (b *InitializeAction) Name() string {
+	return "initialize"
+}
+
 func (b *InitializeAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == ""
 }
 
 func (b *InitializeAction) Handle(integration *v1alpha1.Integration) error {
 	target := integration.DeepCopy()
+	// set default values
+	var defaultReplicas int32 = 1
+	if target.Spec.Replicas == nil {
+		target.Spec.Replicas = &defaultReplicas
+	}
+	// update the status
 	target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
-	target.Status.Identifier = strconv.Itoa(rand.Int()) // TODO replace with hash
+	target.Status.Hash = strconv.Itoa(rand.Int()) // TODO replace with hash
 	return sdk.Update(target)
 }

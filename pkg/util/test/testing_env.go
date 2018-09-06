@@ -15,21 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package test
 
-import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+import "os"
+
+const (
+	EnvWatchNamespace = "WATCH_NAMESPACE"
 )
 
-type Action interface {
-
-	// a user friendly name for the action
-	Name() string
-
-	// returns true if the action can handle the integration
-	CanHandle(integration *v1alpha1.Integration) bool
-
-	// executes the handling function
-	Handle(integration *v1alpha1.Integration) error
-
+func GetTargetNamespace() string {
+	return os.Getenv(EnvWatchNamespace)
 }

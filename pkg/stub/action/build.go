@@ -36,16 +36,20 @@ func NewBuildAction(ctx context.Context, namespace string) *BuildAction {
 	}
 }
 
+func (b *BuildAction) Name() string {
+	return "build"
+}
+
 func (b *BuildAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuilding
 }
 
 func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
 
-	buildResult := b.buildManager.Get(integration.Status.Identifier)
+	buildResult := b.buildManager.Get(integration.Status.Hash)
 	if buildResult.Status == api.BuildStatusNotRequested {
 		b.buildManager.Start(api.BuildSource{
-			Identifier: integration.Status.Identifier,
+			Identifier: integration.Status.Hash,
 			Code: *integration.Spec.Source.Code, // FIXME possible panic
 		})
 		logrus.Info("Build started")
@@ -55,6 +59,7 @@ func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
 		return sdk.Update(target)
 	} else if buildResult.Status == api.BuildStatusCompleted {
 		target := integration.DeepCopy()
+		target.Status.Image = buildResult.Image
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 		return sdk.Update(target)
 	}

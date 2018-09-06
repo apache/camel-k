@@ -2,3 +2,21 @@ apiVersion: "camel.apache.org/v1alpha1"
 kind: "Integration"
 metadata:
   name: "example"
+spec:
+  replicas: 1
+  source:
+    code: |-
+      package kamel;
+
+      import org.apache.camel.builder.RouteBuilder;
+
+      public class Routes extends RouteBuilder {
+
+          @Override
+          public void configure() throws Exception {
+              from("timer:tick")
+                .setBody(constant("Hello World!!!"))
+                .to("log:info");
+          }
+
+      }

@@ -24,6 +24,7 @@ import (
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/apache/camel-k/pkg/stub/action"
+	"github.com/sirupsen/logrus"
 )
 
 func NewHandler(ctx context.Context, namespace string) sdk.Handler {
@@ -31,6 +32,7 @@ func NewHandler(ctx context.Context, namespace string) sdk.Handler {
 		actionPool: []action.Action{
 			action.NewInitializeAction(),
 			action.NewBuildAction(ctx, namespace),
+			action.NewDeployAction(),
 		},
 	}
 }
@@ -44,6 +46,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	case *v1alpha1.Integration:
 		for _, a := range h.actionPool {
 			if a.CanHandle(o) {
+				logrus.Info("Invoking action ", a.Name(), " on integration ", o.Name)
 				if err := a.Handle(o); err != nil {
 					return err
 				}

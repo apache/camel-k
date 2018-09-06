@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -15,61 +17,64 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package local
+package build
 
 import (
 	"testing"
 	"context"
 	"github.com/stretchr/testify/assert"
 	build "github.com/apache/camel-k/pkg/build/api"
+	"time"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestBuild(t *testing.T) {
-
 	ctx := context.TODO()
-	builder := NewLocalBuilder(ctx, "test")
+	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
 
-	execution := builder.Build(build.BuildSource{
+	buildManager.Start(build.BuildSource{
+		Identifier: "1",
 		Code: code(),
 	})
 
-	res := <- execution
+	deadline := time.Now().Add(5 * time.Minute)
+	var result build.BuildResult
+	for time.Now().Before(deadline) {
+		result = buildManager.Get("1")
+		if result.Status == build.BuildStatusCompleted || result.Status == build.BuildStatusError {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
 
-	assert.Nil(t, res.Error, "Build failed")
-}
-
-func TestDoubleBuild(t *testing.T) {
-
-	ctx := context.TODO()
-	builder := NewLocalBuilder(ctx, "test")
-
-	execution1 := builder.Build(build.BuildSource{
-		Code: code(),
-	})
-
-	execution2 := builder.Build(build.BuildSource{
-		Code: code(),
-	})
-
-	res1 := <- execution1
-	res2 := <- execution2
-
-	assert.Nil(t, res1.Error, "Build failed")
-	assert.Nil(t, res2.Error, "Build failed")
+	assert.NotEqual(t, build.BuildStatusError, result.Status)
+	assert.Equal(t, build.BuildStatusCompleted, result.Status)
+	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
 func TestFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	builder := NewLocalBuilder(ctx, "test")
+	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
 
-	execution := builder.Build(build.BuildSource{
-		Code: code() + "-",
+	buildManager.Start(build.BuildSource{
+		Identifier: "1",
+		Code: code() + "XX",
 	})
 
-	res := <- execution
+	deadline := time.Now().Add(5 * time.Minute)
+	var result build.BuildResult
+	for time.Now().Before(deadline) {
+		result = buildManager.Get("1")
+		if result.Status == build.BuildStatusCompleted || result.Status == build.BuildStatusError {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
 
-	assert.NotNil(t, res.Error, "Build should fail")
+	assert.Equal(t, build.BuildStatusError, result.Status)
+	assert.NotEqual(t, build.BuildStatusCompleted, result.Status)
+	assert.Empty(t, result.Image)
 }
 
 func code() string {
