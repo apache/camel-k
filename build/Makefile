@@ -1,7 +1,12 @@
 VERSION := $(shell ./build/get_version.sh)
 
-install:
-	go build -o camel-k ./cmd/camel-k/*.go
+build: build-operator build-kamel
+
+build-operator:
+	go build -o operator ./cmd/camel-k/*.go
+
+build-kamel:
+	go build -o kamel ./cmd/kamel/*.go
 
 images:
 	operator-sdk build docker.io/apache/camel-k:$(VERSION)

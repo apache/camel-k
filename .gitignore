@@ -1,5 +1,6 @@
 # Binary files
-/camel-k
+/operator
+/kamel
 
 # We do not stage vendor directory
 /vendor
