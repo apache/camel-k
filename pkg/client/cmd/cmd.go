@@ -18,29 +18,51 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/apache/camel-k/pkg/client/cmd/version"
+	"os"
+
 	"github.com/apache/camel-k/pkg/client/cmd/run"
+	"github.com/apache/camel-k/pkg/client/cmd/version"
+	"github.com/spf13/cobra"
 )
 
+const completionCmdLongDescription = `
+To load completion run
+
+. <(kamel completion)
+
+To configure your bash shell to load completions for each session add to your bashrc
+
+# ~/.bashrc or ~/.profile
+. <(kamel completion)
+`
+
 func NewKamelCommand() (*cobra.Command, error) {
-
-	var rootCmd = cobra.Command{
-		Use: "kamel",
+	var cmd = cobra.Command{
+		Use:   "kamel",
 		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
-		Long: "Apache Camel K (a.k.a. Kamel) is a lightweight integration framework\nbuilt from Apache Camel that runs natively on Kubernetes and is\nspecifically designed for serverless and microservice architectures.",
-
+		Long:  "Apache Camel K (a.k.a. Kamel) is a lightweight integration framework\nbuilt from Apache Camel that runs natively on Kubernetes and is\nspecifically designed for serverless and microservice architectures.",
 	}
 
 	var kubeconfig string
-	rootCmd.PersistentFlags().StringVar(&kubeconfig, "config", "", "Path to the config file to use for CLI requests")
+	cmd.PersistentFlags().StringVar(&kubeconfig, "config", "", "Path to the config file to use for CLI requests")
 
 	// Initialize the Kubernetes client to allow using the operator-sdk
-	err := initKubeClient(&rootCmd)
+	err := initKubeClient(&cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	rootCmd.AddCommand(version.NewCmdVersion(), run.NewCmdRun())
-	return &rootCmd, nil
+	cmd.AddCommand(&cobra.Command{
+		Use:   "completion",
+		Short: "Generates bash completion scripts",
+		Long:  completionCmdLongDescription,
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.GenBashCompletion(os.Stdout)
+		},
+	})
+
+	cmd.AddCommand(version.NewCmdVersion())
+	cmd.AddCommand(run.NewCmdRun())
+
+	return &cmd, nil
 }
