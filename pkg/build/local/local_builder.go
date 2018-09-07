@@ -42,6 +42,7 @@ import (
 	_ "github.com/apache/camel-k/pkg/util/openshift"
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/version"
 )
 
 type localBuilder struct {
@@ -109,7 +110,7 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 }
 
 func (b *localBuilder) execute(source build.BuildSource) (string, error) {
-	buildDir, err := ioutil.TempDir("", "kamel-")
+	buildDir, err := ioutil.TempDir("", "camel-k-")
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
 	}
@@ -139,7 +140,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 			Kind: "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "kamel-" + source.Identifier.Name,
+			Name: "camel-k-" + source.Identifier.Name,
 			Namespace: b.namespace,
 		},
 		Spec: buildv1.BuildConfigSpec{
@@ -158,7 +159,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 				Output: buildv1.BuildOutput{
 					To: &v1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: "kamel-" + source.Identifier.Name + ":" + source.Identifier.Digest,
+						Name: "camel-k-" + source.Identifier.Name + ":" + source.Identifier.Digest,
 					},
 				},
 			},
@@ -177,7 +178,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 			Kind: "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "kamel-" + source.Identifier.Name,
+			Name: "camel-k-" + source.Identifier.Name,
 			Namespace: b.namespace,
 		},
 		Spec: imagev1.ImageStreamSpec{
@@ -224,7 +225,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 		Namespace(b.namespace).
 		Body(resource).
 		Resource("buildconfigs").
-		Name("kamel-" + source.Identifier.Name).
+		Name("camel-k-" + source.Identifier.Name).
 		SubResource("instantiatebinary").
 		Do()
 
@@ -295,7 +296,7 @@ func (b *localBuilder) createTar(buildDir string, source build.BuildSource) (str
 	}
 	logrus.Info("Maven build completed successfully")
 
-	tarFileName := path.Join(buildDir, "kamel-app.tar")
+	tarFileName := path.Join(buildDir, "camel-k-integration.tar")
 	tarFile, err := os.Create(tarFileName)
 	if err != nil {
 		return "", errors.Wrap(err, "cannot create tar file")
@@ -303,7 +304,7 @@ func (b *localBuilder) createTar(buildDir string, source build.BuildSource) (str
 	defer tarFile.Close()
 
 	writer := tar.NewWriter(tarFile)
-	err = b.appendToTar(path.Join(buildDir, "target", "kamel-app-1.0.0.jar"), "", writer)
+	err = b.appendToTar(path.Join(buildDir, "target", "camel-k-integration-1.0.0.jar"), "", writer)
 	if err != nil {
 		return "", err
 	}
@@ -392,23 +393,6 @@ func (b *localBuilder) createMavenStructure(buildDir string, source build.BuildS
 		return "", err
 	}
 
-	resourcesDir := path.Join(buildDir, "src", "main", "resources")
-	err = os.MkdirAll(resourcesDir, 0777)
-	if err != nil {
-		return "", err
-	}
-	log4jFileName := path.Join(resourcesDir, "log4j2.properties")
-	log4jFile, err := os.Create(log4jFileName)
-	if err != nil {
-		return "", err
-	}
-	defer log4jFile.Close()
-
-	_, err = log4jFile.WriteString(b.log4jFile())
-	if err != nil {
-		return "", err
-	}
-
 	envFileName := path.Join(buildDir, "environment")
 	envFile, err := os.Create(envFileName)
 	if err != nil {
@@ -439,42 +423,18 @@ func (b *localBuilder) createPom() string {
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>me.nicolaferraro.kamel.app</groupId>
-  <artifactId>kamel-app</artifactId>
+  <groupId>org.apache.camel.k.integration</groupId>
+  <artifactId>camel-k-integration</artifactId>
   <version>1.0.0</version>
 
   <dependencies>
     <dependency>
-      <groupId>me.nicolaferraro.kamel</groupId>
-      <artifactId>camel-java-runtime</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-	<dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <version>2.11.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>2.11.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
-      <version>2.11.1</version>
+      <groupId>org.apache.camel.k</groupId>
+      <artifactId>camel-k-runtime-jvm</artifactId>
+      <version>` + version.Version + `</version>
     </dependency>
   </dependencies>
 
 </project>
 `
-}
-
-func (b *localBuilder) log4jFile() string {
-	return `appender.out.type = Console
-appender.out.name = out
-appender.out.layout.type = PatternLayout
-appender.out.layout.pattern = [%30.30t] %-30.30c{1} %-5p %m%n
-rootLogger.level = INFO
-rootLogger.appenderRef.out.ref = out`
 }

@@ -1,12 +1,15 @@
 VERSION := $(shell ./build/get_version.sh)
 
-build: build-operator build-kamel
+build: build-runtime build-operator build-kamel
 
 build-operator:
 	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
+
+build-runtime:
+	mvn clean install -f ./runtime/pom.xml
 
 codegen:
 	./tmp/codegen/update-generated.sh
