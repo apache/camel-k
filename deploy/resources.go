@@ -24,7 +24,26 @@ var Resources map[string]string
 func init() {
 	Resources = make(map[string]string)
 
-	Resources["crd.yaml"] =
+	Resources["crd-integration-context.yaml"] =
+		`
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: integrationcontexts.camel.apache.org
+  labels:
+    app: "camel-k"
+spec:
+  group: camel.apache.org
+  names:
+    kind: IntegrationContext
+    listKind: IntegrationContextList
+    plural: integrationcontexts
+    singular: integrationcontext
+  scope: Namespaced
+  version: v1alpha1
+
+`
+	Resources["crd-integration.yaml"] =
 		`
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition

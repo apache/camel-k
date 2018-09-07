@@ -63,6 +63,7 @@ func NewKamelCommand() (*cobra.Command, error) {
 	cmd.AddCommand(NewCmdRun(&options))
 	cmd.AddCommand(NewCmdGet(&options))
 	cmd.AddCommand(NewCmdInstall(&options))
+	cmd.AddCommand(NewCmdContext(&options))
 
 	return &cmd, nil
 }
