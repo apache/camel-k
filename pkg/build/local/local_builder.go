@@ -115,8 +115,8 @@ func (b *localBuilder) execute(source build.BuildSource) (string, error) {
 			"kamel/Routes.java": source.Code,
 		},
 		Env: map[string]string{
-			"JAVA_MAIN_CLASS": "org.apache.camel.k.jvm.Application",
-			"KAMEL_CLASS":     "kamel.Routes",
+			"JAVA_MAIN_CLASS":    "org.apache.camel.k.jvm.Application",
+			"CAMEL_K_ROUTES_URI": "classpath:kamel.Routes",
 		},
 		Dependencies: []maven.Dependency{
 			{

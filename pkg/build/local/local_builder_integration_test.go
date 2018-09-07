@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/apache/camel-k/pkg/util/digest"
 )
 
 func TestBuild(t *testing.T) {
@@ -33,10 +34,14 @@ func TestBuild(t *testing.T) {
 	builder := NewLocalBuilder(ctx, test.GetTargetNamespace())
 
 	execution := builder.Build(build.BuildSource{
+		Identifier: build.BuildIdentifier{
+			Name:   "test0",
+			Digest: digest.Random(),
+		},
 		Code: code(),
 	})
 
-	res := <- execution
+	res := <-execution
 
 	assert.Nil(t, res.Error, "Build failed")
 }
@@ -47,15 +52,23 @@ func TestDoubleBuild(t *testing.T) {
 	builder := NewLocalBuilder(ctx, test.GetTargetNamespace())
 
 	execution1 := builder.Build(build.BuildSource{
+		Identifier: build.BuildIdentifier{
+			Name:   "test1",
+			Digest: digest.Random(),
+		},
 		Code: code(),
 	})
 
 	execution2 := builder.Build(build.BuildSource{
+		Identifier: build.BuildIdentifier{
+			Name:   "test2",
+			Digest: digest.Random(),
+		},
 		Code: code(),
 	})
 
-	res1 := <- execution1
-	res2 := <- execution2
+	res1 := <-execution1
+	res2 := <-execution2
 
 	assert.Nil(t, res1.Error, "Build failed")
 	assert.Nil(t, res2.Error, "Build failed")
@@ -67,10 +80,14 @@ func TestFailedBuild(t *testing.T) {
 	builder := NewLocalBuilder(ctx, test.GetTargetNamespace())
 
 	execution := builder.Build(build.BuildSource{
+		Identifier: build.BuildIdentifier{
+			Name:   "test3",
+			Digest: digest.Random(),
+		},
 		Code: code() + "-",
 	})
 
-	res := <- execution
+	res := <-execution
 
 	assert.NotNil(t, res.Error, "Build should fail")
 }

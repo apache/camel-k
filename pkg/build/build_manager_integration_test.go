@@ -26,18 +26,19 @@ import (
 	build "github.com/apache/camel-k/pkg/build/api"
 	"time"
 	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/apache/camel-k/pkg/util/digest"
 )
 
 func TestBuild(t *testing.T) {
 	ctx := context.TODO()
 	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
 	identifier := build.BuildIdentifier{
-		Name: "example",
-		Digest: "sadsadasdsadasdafwefwef",
+		Name:   "man-test",
+		Digest: digest.Random(),
 	}
 	buildManager.Start(build.BuildSource{
 		Identifier: identifier,
-		Code: code(),
+		Code:       code(),
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
@@ -60,12 +61,12 @@ func TestFailedBuild(t *testing.T) {
 	ctx := context.TODO()
 	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
 	identifier := build.BuildIdentifier{
-		Name: "example",
-		Digest: "545454",
+		Name:   "man-test-2",
+		Digest: digest.Random(),
 	}
 	buildManager.Start(build.BuildSource{
 		Identifier: identifier,
-		Code: code() + "XX",
+		Code:       code() + "XX",
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)

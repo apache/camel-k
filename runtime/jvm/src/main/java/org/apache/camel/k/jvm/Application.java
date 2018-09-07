@@ -20,15 +20,15 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.main.Main;
 
 public class Application {
-    public static final String ENV_KAMEL_ROUTES_URI = "KAMEL_ROUTES_PATH";
+    public static final String ENV_CAMEL_K_ROUTES_URI = "CAMEL_K_ROUTES_URI";
     public static final String SCHEME_CLASSPATH = "classpath:";
     public static final String SCHEME_FILE = "file:";
 
     public static void main(String[] args) throws Exception {
-        final String resource = System.getenv(ENV_KAMEL_ROUTES_URI);
+        final String resource = System.getenv(ENV_CAMEL_K_ROUTES_URI);
 
         if (resource == null || resource.trim().length() == 0) {
-            throw new IllegalStateException("No valid resource found in " + ENV_KAMEL_ROUTES_URI + " environment variable");
+            throw new IllegalStateException("No valid resource found in " + ENV_CAMEL_K_ROUTES_URI + " environment variable");
         }
         if (!resource.startsWith(SCHEME_CLASSPATH) && !resource.startsWith(SCHEME_FILE)) {
             throw new IllegalStateException("No valid resource format, expected scheme:path, found " + resource);
