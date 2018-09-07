@@ -426,7 +426,7 @@ func (b *localBuilder) createMavenStructure(buildDir string, source build.BuildS
 
 func (b *localBuilder) createEnvFile() string {
 	return `
-JAVA_MAIN_CLASS=me.nicolaferraro.kamel.Application
+JAVA_MAIN_CLASS=org.apache.camel.k.jvm.Application
 KAMEL_CLASS=kamel.Routes
 `
 }
