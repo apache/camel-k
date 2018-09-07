@@ -27,7 +27,7 @@ import (
 type InitializeAction struct {
 }
 
-func NewInitializeAction() *InitializeAction {
+func NewInitializeAction() IntegrationAction {
 	return &InitializeAction{}
 }
 

@@ -31,10 +31,17 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
+const resyncPeriod = time.Duration(5) * time.Second
+
 func printVersion() {
 	logrus.Infof("Go Version: %s", runtime.Version())
 	logrus.Infof("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH)
 	logrus.Infof("operator-sdk Version: %v", sdkVersion.Version)
+}
+
+func watch(resource string, kind string, namespace string, resyncPeriod time.Duration) {
+	logrus.Infof("Watching %s, %s, %s, %d", resource, kind, namespace, resyncPeriod)
+	sdk.Watch(resource, kind, namespace, resyncPeriod)
 }
 
 func main() {
@@ -43,15 +50,16 @@ func main() {
 	sdk.ExposeMetricsPort()
 
 	resource := "camel.apache.org/v1alpha1"
-	kind := "Integration"
 	namespace, err := k8sutil.GetWatchNamespace()
 	if err != nil {
 		logrus.Fatalf("failed to get watch namespace: %v", err)
 	}
+
 	ctx := context.TODO()
-	resyncPeriod := time.Duration(5) * time.Second
-	logrus.Infof("Watching %s, %s, %s, %d", resource, kind, namespace, resyncPeriod)
-	sdk.Watch(resource, kind, namespace, resyncPeriod)
+
+	watch(resource, "Integration", namespace, resyncPeriod)
+	watch(resource, "IntegrationContext", namespace, resyncPeriod)
+
 	sdk.Handle(stub.NewHandler(ctx, namespace))
 	sdk.Run(ctx)
 }

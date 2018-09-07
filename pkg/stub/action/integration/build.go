@@ -19,6 +19,7 @@ package action
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/build/api"
@@ -30,7 +31,7 @@ type BuildAction struct {
 	buildManager *build.BuildManager
 }
 
-func NewBuildAction(ctx context.Context, namespace string) *BuildAction {
+func NewBuildAction(ctx context.Context, namespace string) IntegrationAction {
 	return &BuildAction{
 		buildManager: build.NewBuildManager(ctx, namespace),
 	}

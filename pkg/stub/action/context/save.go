@@ -19,39 +19,28 @@ package action
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/sirupsen/logrus"
 )
 
-type MonitorAction struct {
+func NewIntegrationContextSaveAction() IntegrationContextAction {
+	return &integrationContexSaveAction{}
 }
 
-func NewMonitorAction() *MonitorAction {
-	return &MonitorAction{}
+// start edit context
+type integrationContexSaveAction struct {
 }
 
-func (b *MonitorAction) Name() string {
-	return "monitor"
+func (action *integrationContexSaveAction) Name() string {
+	return "Edit"
 }
 
-func (a *MonitorAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseRunning ||
-		integration.Status.Phase == v1alpha1.IntegrationPhaseError
+func (action *integrationContexSaveAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+	// TODO: implement
+	return false
 }
 
-func (a *MonitorAction) Handle(integration *v1alpha1.Integration) error {
-
-	hash := digest.Compute(integration)
-	if hash != integration.Status.Digest {
-		logrus.Info("Integration ", integration.Name, " needs a rebuild")
-
-		target := integration.DeepCopy()
-		target.Status.Digest = hash
-		target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
-		return sdk.Update(target)
-	}
-
-	// TODO check also if deployment matches (e.g. replicas)
-	return nil
+func (action *integrationContexSaveAction) Handle(integration *v1alpha1.IntegrationContext) error {
+	target := integration.DeepCopy()
+	// TODO: implement
+	return sdk.Update(target)
 }

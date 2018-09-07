@@ -19,16 +19,28 @@ package action
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
 
-type Action interface {
+func NewIntegrationContextBuildAction() IntegrationContextAction {
+	return &integrationContextBuildAction{}
+}
 
-	// a user friendly name for the action
-	Name() string
+// start edit context
+type integrationContextBuildAction struct {
+}
 
-	// returns true if the action can handle the integration
-	CanHandle(integration *v1alpha1.Integration) bool
+func (action *integrationContextBuildAction) Name() string {
+	return "Edit"
+}
 
-	// executes the handling function
-	Handle(integration *v1alpha1.Integration) error
+func (action *integrationContextBuildAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+	// TODO: implement
+	return false
+}
+
+func (action *integrationContextBuildAction) Handle(integration *v1alpha1.IntegrationContext) error {
+	target := integration.DeepCopy()
+	// TODO: implement
+	return sdk.Update(target)
 }

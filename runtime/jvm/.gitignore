@@ -1,5 +1,10 @@
+target
+
+*.iml
+
 .idea
 .project
 .metadata
-target
-*.iml
+.settings
+.factorypath
+.classpath

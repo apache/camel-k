@@ -25,46 +25,48 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GetCmdOptions struct {
-	*RootCmdOptions
-}
-
-func NewCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := GetCmdOptions{
+func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	options := contextGetCommand{
 		RootCmdOptions: rootCmdOptions,
 	}
+
 	cmd := cobra.Command{
 		Use:   "get",
-		Short: "Get all integrations deployed on Kubernetes",
-		Long:  `Get the status of all integrations deployed on on Kubernetes.`,
+		Short: "Get defined Integration Context",
+		Long:  `Get defined Integration Context.`,
 		RunE:  options.run,
 	}
 
 	return &cmd
 }
 
-func (o *GetCmdOptions) run(cmd *cobra.Command, args []string) error {
-	integrationList := v1alpha1.IntegrationList{
+type contextGetCommand struct {
+	*RootCmdOptions
+}
+
+func (command *contextGetCommand) run(cmd *cobra.Command, args []string) error {
+	ctxList := v1alpha1.IntegrationContextList{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "Integration",
+			Kind:       "IntegrationContext",
 		},
 	}
 
-	namespace := o.Namespace
+	namespace := command.Namespace
 
-	err := sdk.List(namespace, &integrationList)
+	err := sdk.List(namespace, &ctxList)
 	if err != nil {
 		return err
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(w, "NAME\tCONTEXT\tSTATUS")
-	for _, integration := range integrationList.Items {
-		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, integration.Context, string(integration.Status.Phase))
+	fmt.Fprintln(w, "NAME\tSTATUS")
+	for _, ctx := range ctxList.Items {
+		fmt.Fprintf(w, "%s\t%s\n", ctx.Name, string(ctx.Status.Phase))
 	}
 	w.Flush()
 
