@@ -3,10 +3,13 @@ VERSION := $(shell ./build/get_version.sh)
 build: build-operator build-kamel
 
 build-operator:
-	go build -o operator ./cmd/camel-k/*.go
+	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
+
+codegen:
+	./tmp/codegen/update-generated.sh
 
 images:
 	operator-sdk build docker.io/apache/camel-k:$(VERSION)

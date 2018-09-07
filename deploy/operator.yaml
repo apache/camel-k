@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: camel-k
+  name: camel-k-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: camel-k
+      name: camel-k-operator
   template:
     metadata:
       labels:
-        name: camel-k
+        name: camel-k-operator
     spec:
       containers:
-        - name: camel-k
+        - name: camel-k-operator
           image: docker.io/apache/camel-k:0.0.1-SNAPSHOT
           ports:
           - containerPort: 60000
             name: metrics
           command:
-          - camel-k
+          - camel-k-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -27,4 +27,4 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
-              value: "camel-k"
+              value: "camel-k-operator"

@@ -24,6 +24,7 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	build "github.com/apache/camel-k/pkg/build/api"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestBuild(t *testing.T) {
