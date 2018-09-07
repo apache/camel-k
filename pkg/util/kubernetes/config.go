@@ -15,26 +15,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package kubernetes
 
 import (
 	"os/user"
 	"path/filepath"
-
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-	"github.com/spf13/cobra"
 	"k8s.io/client-go/tools/clientcmd"
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 )
 
-func initKubeClient(cmd *cobra.Command) error {
-	kubeconfig := cmd.Flag("config").Value.String()
+func InitKubeClient(kubeconfig string) error {
 	if kubeconfig == "" {
-		usr, err := user.Current()
-		if err != nil {
-			return err
-		}
-
-		kubeconfig = filepath.Join(usr.HomeDir, ".kube", "config")
+		kubeconfig = GetDefaultKubeConfigFile()
 	}
 
 	// use the current context in kubeconfig
@@ -45,4 +37,13 @@ func initKubeClient(cmd *cobra.Command) error {
 
 	k8sclient.CustomConfig = config
 	return nil
+}
+
+func GetDefaultKubeConfigFile() string {
+	usr, err := user.Current()
+	if err != nil {
+		panic(err) // TODO handle error
+	}
+
+	return filepath.Join(usr.HomeDir, ".kube", "config")
 }
