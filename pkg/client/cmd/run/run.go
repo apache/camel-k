@@ -22,8 +22,12 @@ import (
 	"errors"
 	"strconv"
 	"os"
-	"github.com/apache/camel-k/pkg/cmd/config"
-	"fmt"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"io/ioutil"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 type runCmdFlags struct {
@@ -59,11 +63,51 @@ func validateArgs(cmd *cobra.Command, args []string) error {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	_, err := config.NewKubeClient(cmd)
+	code, err := loadCode(args[0])
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Now something should run")
-	return nil
+	name := kubernetes.SanitizeName(args[0])
+	if name == "" {
+		name = "integration"
+	}
+
+	integration := v1alpha1.Integration{
+		TypeMeta: v1.TypeMeta{
+			Kind: "Integration",
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: v1.ObjectMeta{
+			Namespace: "test", // TODO discover current namespace dynamically (and with command option)
+			Name: name,
+		},
+		Spec: v1alpha1.IntegrationSpec{
+			Source: v1alpha1.SourceSpec{
+				Code: &code,
+			},
+		},
+	}
+
+	err = sdk.Create(&integration)
+	if err != nil && k8serrors.IsAlreadyExists(err) {
+		clone := integration.DeepCopy()
+		err = sdk.Get(clone)
+		if err != nil {
+			return err
+		}
+		integration.ResourceVersion = clone.ResourceVersion
+		err = sdk.Update(&integration)
+	}
+
+	return err
+}
+
+func loadCode(fileName string) (string, error) {
+	content, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return "", err
+	}
+	// TODO check encoding issues
+	return string(content), err
 }

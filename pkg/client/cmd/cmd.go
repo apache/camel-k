@@ -19,11 +19,12 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/apache/camel-k/pkg/cmd/version"
-	"github.com/apache/camel-k/pkg/cmd/run"
+	"github.com/apache/camel-k/pkg/client/cmd/version"
+	"github.com/apache/camel-k/pkg/client/cmd/run"
 )
 
-func NewKamelCommand() *cobra.Command {
+func NewKamelCommand() (*cobra.Command, error) {
+
 	var rootCmd = cobra.Command{
 		Use: "kamel",
 		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
@@ -34,6 +35,12 @@ func NewKamelCommand() *cobra.Command {
 	var kubeconfig string
 	rootCmd.PersistentFlags().StringVar(&kubeconfig, "config", "", "Path to the config file to use for CLI requests")
 
+	// Initialize the Kubernetes client to allow using the operator-sdk
+	err := initKubeClient(&rootCmd)
+	if err != nil {
+		return nil, err
+	}
+
 	rootCmd.AddCommand(version.NewCmdVersion(), run.NewCmdRun())
-	return &rootCmd
+	return &rootCmd, nil
 }

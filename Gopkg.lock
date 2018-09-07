@@ -4,8 +4,8 @@
 [[projects]]
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
-  revision = "64a2037ec6be8a4b0c1d1f706ed35b428b989239"
-  version = "v0.26.0"
+  revision = "c728a003b238b26cef9ab6753a5dc424b331c3ad"
+  version = "v0.27.0"
 
 [[projects]]
   name = "github.com/PuerkitoBio/purell"
@@ -191,7 +191,7 @@
   version = "v3.9.0"
 
 [[projects]]
-  branch = "master"
+  branch = "custom-init"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
     "pkg/k8sclient",
@@ -200,7 +200,8 @@
     "pkg/util/k8sutil",
     "version"
   ]
-  revision = "0f60da86a138f7e79f275d539c18615bc2727014"
+  revision = "1f054f1486dfe08ab250696ed0d786253638e7ca"
+  source = "git@github.com:nicolaferraro/operator-sdk.git"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -278,7 +279,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
+  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
 
 [[projects]]
   branch = "master"
@@ -291,7 +292,7 @@
     "http2/hpack",
     "idna"
   ]
-  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
+  revision = "161cd47e91fd58ac17490ef4d742dc98bb4cf60e"
 
 [[projects]]
   branch = "master"
@@ -312,7 +313,7 @@
     "unix",
     "windows"
   ]
-  revision = "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a"
+  revision = "8cf3aee429924738c56c34bb819c4ea8273fc434"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -350,7 +351,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "7ca132754999accbaa5c1735eda29e7ce0f3bf03"
+  revision = "0aa4b8830f481fed77b73cf7cea2bc3129e05148"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -584,6 +585,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c389a066bf0697a6e8a5b618cb76954f299b9d346e69cc46dade09c1de436ce8"
+  inputs-digest = "48fe81abc082944be87772c4562916fb9fe53b198f41ca770d84957d6b785516"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -15,22 +15,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package cmd
 
 import (
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"fmt"
+	"path/filepath"
+	"k8s.io/client-go/tools/clientcmd"
 	"os"
-	"github.com/apache/camel-k/pkg/cmd"
+	"github.com/spf13/cobra"
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 )
 
-func main() {
-
-	rootCmd := cmd.NewKamelCommand()
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+func initKubeClient(cmd *cobra.Command) error {
+	kubeconfig := cmd.Flag("config").Value.String()
+	if kubeconfig == "" {
+		kubeconfig = filepath.Join(homeDir(), ".kube", "config")
 	}
 
+	// use the current context in kubeconfig
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		return err
+	}
+
+	k8sclient.CustomConfig = config
+	return nil
+}
+
+func homeDir() string {
+	if h := os.Getenv("HOME"); h != "" {
+		return h
+	}
+	return os.Getenv("USERPROFILE") // windows
 }

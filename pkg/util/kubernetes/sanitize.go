@@ -15,39 +15,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package kubernetes
 
 import (
-	"path/filepath"
-	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"k8s.io/client-go/kubernetes"
-	"github.com/spf13/cobra"
+	"strings"
+	"regexp"
+	"unicode"
 )
 
-func NewKubeClient(cmd *cobra.Command) (*kubernetes.Clientset, error) {
-	kubeconfig := cmd.Flag("config").Value.String()
-	if kubeconfig == "" {
-		kubeconfig = filepath.Join(homeDir(), ".kube", "config")
-	}
+var disallowedChars *regexp.Regexp
 
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-
-	// create the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	return clientset, nil
+func init() {
+	disallowedChars = regexp.MustCompile("[^a-z0-9-]")
 }
 
-func homeDir() string {
-	if h := os.Getenv("HOME"); h != "" {
-		return h
-	}
-	return os.Getenv("USERPROFILE") // windows
+func SanitizeName(name string) string {
+	name = strings.Split(name, ".")[0]
+	name = strings.ToLower(name)
+	name = disallowedChars.ReplaceAllString(name, "")
+	name = strings.TrimFunc(name, isDisallowedStartEndChar)
+	return name
+}
+
+func isDisallowedStartEndChar(rune rune) bool {
+	return !unicode.IsLetter(rune)
 }
