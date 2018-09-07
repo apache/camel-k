@@ -22,6 +22,8 @@ import (
 	"crypto/sha256"
 	"github.com/apache/camel-k/version"
 	"encoding/base64"
+	"strconv"
+	"math/rand"
 )
 
 // Compute a digest of the fields that are relevant for the deployment
@@ -36,4 +38,8 @@ func Compute(integration *v1alpha1.Integration) string {
 	}
 	// Add a letter at the beginning and use URL safe encoding
 	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+}
+
+func Random() string {
+	return "v" + strconv.FormatInt(rand.Int63(), 10)
 }
