@@ -28,6 +28,7 @@ import (
 	"io/ioutil"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"fmt"
 )
 
 type runCmdFlags struct {
@@ -89,8 +90,10 @@ func run(cmd *cobra.Command, args []string) error {
 		},
 	}
 
+	existed := false
 	err = sdk.Create(&integration)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
+		existed = true
 		clone := integration.DeepCopy()
 		err = sdk.Get(clone)
 		if err != nil {
@@ -100,7 +103,16 @@ func run(cmd *cobra.Command, args []string) error {
 		err = sdk.Update(&integration)
 	}
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	if !existed {
+		fmt.Printf("integration \"%s\" created\n", name)
+	} else {
+		fmt.Printf("integration \"%s\" updated\n", name)
+	}
+	return nil
 }
 
 func loadCode(fileName string) (string, error) {

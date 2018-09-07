@@ -14,8 +14,13 @@ build-runtime:
 codegen:
 	./tmp/codegen/update-generated.sh
 
-images:
+images: images-build
+
+images-build:
 	operator-sdk build docker.io/apache/camel-k:$(VERSION)
+
+images-push:
+	docker push docker.io/apache/camel-k:$(VERSION)
 
 test: check
 check:

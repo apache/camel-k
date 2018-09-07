@@ -22,12 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"time"
 	"io/ioutil"
-	"path"
-	"os"
-	"os/exec"
 	"github.com/pkg/errors"
-	"archive/tar"
-	"io"
 	buildv1 "github.com/openshift/api/build/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/api/core/v1"
@@ -43,28 +38,29 @@ import (
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/version"
+	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 type localBuilder struct {
-	buffer     chan buildOperation
-	namespace  string
+	buffer    chan buildOperation
+	namespace string
 }
 
 type buildOperation struct {
-	source	build.BuildSource
-	output	chan build.BuildResult
+	source build.BuildSource
+	output chan build.BuildResult
 }
 
 func NewLocalBuilder(ctx context.Context, namespace string) build.Builder {
 	builder := localBuilder{
-		buffer: make(chan buildOperation, 100),
+		buffer:    make(chan buildOperation, 100),
 		namespace: namespace,
 	}
 	go builder.buildCycle(ctx)
 	return &builder
 }
 
-func (b *localBuilder) Build(source build.BuildSource) <- chan build.BuildResult {
+func (b *localBuilder) Build(source build.BuildSource) <-chan build.BuildResult {
 	res := make(chan build.BuildResult, 1)
 	op := buildOperation{
 		source: source,
@@ -77,10 +73,10 @@ func (b *localBuilder) Build(source build.BuildSource) <- chan build.BuildResult
 func (b *localBuilder) buildCycle(ctx context.Context) {
 	for {
 		select {
-		case <- ctx.Done():
+		case <-ctx.Done():
 			b.buffer = nil
 			return
-		case op := <- b.buffer:
+		case op := <-b.buffer:
 			now := time.Now()
 			logrus.Info("Starting new build")
 			image, err := b.execute(op.source)
@@ -95,13 +91,13 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 				op.output <- build.BuildResult{
 					Source: &op.source,
 					Status: build.BuildStatusError,
-					Error: err,
+					Error:  err,
 				}
 			} else {
 				op.output <- build.BuildResult{
 					Source: &op.source,
 					Status: build.BuildStatusCompleted,
-					Image: image,
+					Image:  image,
 				}
 			}
 
@@ -110,15 +106,28 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 }
 
 func (b *localBuilder) execute(source build.BuildSource) (string, error) {
-	buildDir, err := ioutil.TempDir("", "camel-k-")
-	if err != nil {
-		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
+
+	project := maven.Project{
+		GroupId:    "org.apache.camel.k.integration",
+		ArtifactId: "camel-k-integration",
+		Version:    "1.0.0",
+		JavaSources: map[string]string{
+			"kamel/Routes.java": source.Code,
+		},
+		Env: map[string]string{
+			"JAVA_MAIN_CLASS": "org.apache.camel.k.jvm.Application",
+			"KAMEL_CLASS":     "kamel.Routes",
+		},
+		Dependencies: []maven.Dependency{
+			{
+				GroupId:    "org.apache.camel.k",
+				ArtifactId: "camel-k-runtime-jvm",
+				Version:    version.Version,
+			},
+		},
 	}
-	//defer os.RemoveAll(buildDir)
 
-	logrus.Info("Using build dir : ", buildDir)
-
-	tarFileName, err := b.createTar(buildDir, source)
+	tarFileName, err := maven.Build(project)
 	if err != nil {
 		return "", err
 	}
@@ -137,10 +146,10 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: buildv1.SchemeGroupVersion.String(),
-			Kind: "BuildConfig",
+			Kind:       "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "camel-k-" + source.Identifier.Name,
+			Name:      "camel-k-" + source.Identifier.Name,
 			Namespace: b.namespace,
 		},
 		Spec: buildv1.BuildConfigSpec{
@@ -175,10 +184,10 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 	is := imagev1.ImageStream{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: imagev1.SchemeGroupVersion.String(),
-			Kind: "ImageStream",
+			Kind:       "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "camel-k-" + source.Identifier.Name,
+			Name:      "camel-k-" + source.Identifier.Name,
 			Namespace: b.namespace,
 		},
 		Spec: imagev1.ImageStreamSpec{
@@ -197,7 +206,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 	inConfig := k8sclient.GetKubeConfig()
 	config := rest.CopyConfig(inConfig)
 	config.GroupVersion = &schema.GroupVersion{
-		Group: "build.openshift.io",
+		Group:   "build.openshift.io",
 		Version: "v1",
 	}
 	config.APIPath = "/apis"
@@ -217,7 +226,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 
 	resource, err := ioutil.ReadFile(tarFile)
 	if err != nil {
-		return "", errors.Wrap(err, "cannot fully read tar file " + tarFile)
+		return "", errors.Wrap(err, "cannot fully read tar file "+tarFile)
 	}
 
 	result := restClient.
@@ -249,7 +258,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 		return "", err
 	}
 
-	err = kubernetes.WaitCondition(ocbuild, func(obj interface{})(bool, error) {
+	err = kubernetes.WaitCondition(ocbuild, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*buildv1.Build); ok {
 			if val.Status.Phase == buildv1.BuildPhaseComplete {
 				return true, nil
@@ -260,7 +269,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 			}
 		}
 		return false, nil
-	}, 5 * time.Minute)
+	}, 5*time.Minute)
 
 	err = sdk.Get(&is)
 	if err != nil {
@@ -271,170 +280,4 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 		return "", errors.New("dockerImageRepository not available in ImageStream")
 	}
 	return is.Status.DockerImageRepository + ":" + source.Identifier.Digest, nil
-}
-
-func (b *localBuilder) createTar(buildDir string, source build.BuildSource) (string, error) {
-	dir, err := b.createMavenStructure(buildDir, source)
-	if err != nil {
-		return "", err
-	}
-
-	mavenBuild := exec.Command("mvn", "clean", "install", "-DskipTests")
-	mavenBuild.Dir = dir
-	logrus.Info("Starting maven build: mvn clean install -DskipTests")
-	err = mavenBuild.Run()
-	if err != nil {
-		return "", errors.Wrap(err, "failure while executing maven build")
-	}
-
-	mavenDep := exec.Command("mvn", "dependency:copy-dependencies")
-	mavenDep.Dir = dir
-	logrus.Info("Copying maven dependencies: mvn dependency:copy-dependencies")
-	err = mavenDep.Run()
-	if err != nil {
-		return "", errors.Wrap(err, "failure while extracting maven dependencies")
-	}
-	logrus.Info("Maven build completed successfully")
-
-	tarFileName := path.Join(buildDir, "camel-k-integration.tar")
-	tarFile, err := os.Create(tarFileName)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot create tar file")
-	}
-	defer tarFile.Close()
-
-	writer := tar.NewWriter(tarFile)
-	err = b.appendToTar(path.Join(buildDir, "target", "camel-k-integration-1.0.0.jar"), "", writer)
-	if err != nil {
-		return "", err
-	}
-
-	err = b.appendToTar(path.Join(buildDir, "environment"), ".s2i", writer)
-	if err != nil {
-		return "", err
-	}
-
-	dependenciesDir := path.Join(buildDir, "target", "dependency")
-	dependencies, err := ioutil.ReadDir(dependenciesDir)
-	if err != nil {
-		return "", err
-	}
-
-	for _, dep := range dependencies {
-		err = b.appendToTar(path.Join(dependenciesDir, dep.Name()), "", writer)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	writer.Close()
-
-	return tarFileName, nil
-}
-
-func (b *localBuilder) appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return err
-	}
-	_, fileName := path.Split(filePath)
-	if tarPath != "" {
-		fileName = path.Join(tarPath, fileName)
-	}
-
-	writer.WriteHeader(&tar.Header{
-		Name: fileName,
-		Size: info.Size(),
-		Mode: int64(info.Mode()),
-		ModTime: info.ModTime(),
-	})
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(writer, file)
-	if err != nil {
-		return errors.Wrap(err, "cannot add file to the tar archive")
-	}
-	return nil
-}
-
-func (b *localBuilder) createMavenStructure(buildDir string, source build.BuildSource) (string, error) {
-	pomFileName := path.Join(buildDir, "pom.xml")
-	pom, err := os.Create(pomFileName)
-	if err != nil {
-		return "", err
-	}
-	defer pom.Close()
-
-	_, err = pom.WriteString(b.createPom())
-	if err != nil {
-		return "", err
-	}
-
-	packageDir := path.Join(buildDir, "src", "main", "java", "kamel")
-	err = os.MkdirAll(packageDir, 0777)
-	if err != nil {
-		return "", err
-	}
-
-	sourceFileName := path.Join(packageDir, "Routes.java")
-	sourceFile, err := os.Create(sourceFileName)
-	if err != nil {
-		return "", err
-	}
-	defer sourceFile.Close()
-
-	_, err = sourceFile.WriteString(source.Code)
-	if err != nil {
-		return "", err
-	}
-
-	envFileName := path.Join(buildDir, "environment")
-	envFile, err := os.Create(envFileName)
-	if err != nil {
-		return "", err
-	}
-	defer envFile.Close()
-
-	_, err = envFile.WriteString(b.createEnvFile())
-	if err != nil {
-		return "", err
-	}
-
-	return buildDir, nil
-}
-
-func (b *localBuilder) createEnvFile() string {
-	return `
-JAVA_MAIN_CLASS=org.apache.camel.k.jvm.Application
-KAMEL_CLASS=kamel.Routes
-`
-}
-
-
-func (b *localBuilder) createPom() string {
-	return `<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <groupId>org.apache.camel.k.integration</groupId>
-  <artifactId>camel-k-integration</artifactId>
-  <version>1.0.0</version>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.camel.k</groupId>
-      <artifactId>camel-k-runtime-jvm</artifactId>
-      <version>` + version.Version + `</version>
-    </dependency>
-  </dependencies>
-
-</project>
-`
 }
