@@ -30,7 +30,7 @@ import (
 type DeployAction struct {
 }
 
-func NewDeployAction() *DeployAction {
+func NewDeployAction() IntegrationAction {
 	return &DeployAction{}
 }
 

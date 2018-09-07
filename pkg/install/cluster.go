@@ -30,15 +30,15 @@ import (
 )
 
 func SetupClusterwideResources() error {
-	// Installing CRD
-	crdInstalled, err := isCRDInstalled()
-	if err != nil {
+
+	// Install CRD for Integration Context (if needed)
+	if err := installCRD("IntegrationContext", "crd-integration-context.yaml"); err != nil {
 		return err
 	}
-	if !crdInstalled {
-		if err := installCRD(); err != nil {
-			return err
-		}
+
+	// Install CRD for Integration (if needed)
+	if err := installCRD("Integration", "crd-integration.yaml"); err != nil {
+		return err
 	}
 
 	// Installing ClusterRole
@@ -56,7 +56,7 @@ func SetupClusterwideResources() error {
 	return nil
 }
 
-func isCRDInstalled() (bool, error) {
+func isCRDInstalled(name string) (bool, error) {
 	lst, err := k8sclient.GetKubeClient().Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
@@ -64,15 +64,24 @@ func isCRDInstalled() (bool, error) {
 		return false, err
 	}
 	for _, res := range lst.APIResources {
-		if res.Kind == "Integration" {
+		if res.Kind == name {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-func installCRD() error {
-	crd := []byte(deploy.Resources["crd.yaml"])
+func installCRD(kind string, resourceName string) error {
+	// Installing Integration CRD
+	installed, err := isCRDInstalled(kind)
+	if err != nil {
+		return err
+	}
+	if installed {
+		return nil
+	}
+
+	crd := []byte(deploy.Resources[resourceName])
 	crdJson, err := yaml.ToJSON(crd)
 	if err != nil {
 		return err
