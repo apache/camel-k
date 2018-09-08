@@ -19,7 +19,6 @@ package get
 
 import (
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	"text/tabwriter"
 	"os"
 	"fmt"
@@ -62,13 +61,4 @@ func run(cmd *cobra.Command, args []string) error {
 	w.Flush()
 
 	return nil
-}
-
-func loadCode(fileName string) (string, error) {
-	content, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return "", err
-	}
-	// TODO check encoding issues
-	return string(content), err
 }
