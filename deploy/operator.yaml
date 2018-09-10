@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
 spec:
   replicas: 1
   selector:
@@ -12,6 +14,7 @@ spec:
       labels:
         name: camel-k-operator
     spec:
+      serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:0.0.1-SNAPSHOT
@@ -20,7 +23,7 @@ spec:
             name: metrics
           command:
           - camel-k-operator
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
               valueFrom:

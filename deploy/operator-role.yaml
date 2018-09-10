@@ -1,7 +1,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: camel-k
+  name: camel-k-operator
 rules:
 - apiGroups:
   - camel.apache.org
@@ -30,17 +30,3 @@ rules:
   - statefulsets
   verbs:
   - "*"
-
----
-
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: default-account-camel-k
-subjects:
-- kind: ServiceAccount
-  name: default
-roleRef:
-  kind: Role
-  name: camel-k
-  apiGroup: rbac.authorization.k8s.io
