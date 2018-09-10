@@ -80,7 +80,7 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	integration := v1alpha1.Integration{
 		TypeMeta: v1.TypeMeta{
-			Kind: "Integration",
+			Kind:       "Integration",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{

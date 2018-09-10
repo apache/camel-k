@@ -20,17 +20,14 @@ package cmd
 import (
 	"os"
 
-	"github.com/apache/camel-k/pkg/client/cmd/run"
-	"github.com/apache/camel-k/pkg/client/cmd/version"
 	"github.com/spf13/cobra"
-	"github.com/apache/camel-k/pkg/client/cmd/get"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 )
 
 type rootCmdOptions struct {
-	KubeConfig	string
-	Namespace	string
+	KubeConfig string
+	Namespace  string
 }
 
 func NewKamelCommand() (*cobra.Command, error) {
