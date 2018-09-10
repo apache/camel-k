@@ -27,12 +27,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 
-import net.openhft.compiler.CompilerUtils;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joor.Reflect;
 
 public enum RouteLoaders implements RoutesLoader {
     JavaClass {
@@ -64,19 +65,11 @@ public enum RouteLoaders implements RoutesLoader {
         @Override
         public RouteBuilder load(String resource) throws Exception {
             try (InputStream is = is(resource)) {
-                String name = resource.substring(0, resource.length() - ".java".length()).split(":", -1)[1];
-                if (name.startsWith("/")) {
-                    name = name.substring(1);
-                }
+                String name = StringUtils.substringAfter(resource, ":");
+                name = StringUtils.removeEnd(name, ".java");
+                name = StringUtils.removeStart(name, "/");
 
-                String content = IOUtils.toString(is);
-
-                Class<?> type = CompilerUtils.CACHED_COMPILER.loadFromJava(name.replace("/", "."), content);
-                if (!RouteBuilder.class.isAssignableFrom(type)) {
-                    throw new IllegalStateException("The class provided (" + resource + ") is not a org.apache.camel.builder.RouteBuilder");
-                }
-
-                return (RouteBuilder) type.newInstance();
+                return Reflect.compile(name.replace("/", "."), IOUtils.toString(is)).create().get();
             }
         }
     },
