@@ -27,9 +27,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/api/core/v1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"k8s.io/client-go/rest"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	imagev1 "github.com/openshift/api/image/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
@@ -39,6 +36,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/version"
 	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 )
 
 type localBuilder struct {
@@ -203,34 +201,17 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 		return "", errors.Wrap(err, "cannot create image stream")
 	}
 
-	inConfig := k8sclient.GetKubeConfig()
-	config := rest.CopyConfig(inConfig)
-	config.GroupVersion = &schema.GroupVersion{
-		Group:   "build.openshift.io",
-		Version: "v1",
-	}
-	config.APIPath = "/apis"
-	config.AcceptContentTypes = "application/json"
-	config.ContentType = "application/json"
-
-	// this gets used for discovery and error handling types
-	config.NegotiatedSerializer = basicNegotiatedSerializer{}
-	if config.UserAgent == "" {
-		config.UserAgent = rest.DefaultKubernetesUserAgent()
-	}
-
-	restClient, err := rest.RESTClientFor(config)
-	if err != nil {
-		return "", err
-	}
-
 	resource, err := ioutil.ReadFile(tarFile)
 	if err != nil {
 		return "", errors.Wrap(err, "cannot fully read tar file "+tarFile)
 	}
 
-	result := restClient.
-		Post().
+	restClient, err := customclient.GetClientFor("build.openshift.io", "v1")
+	if err != nil {
+		return "", err
+	}
+
+	result := restClient.Post().
 		Namespace(b.namespace).
 		Body(resource).
 		Resource("buildconfigs").

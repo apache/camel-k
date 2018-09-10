@@ -1,12 +1,15 @@
 VERSION := $(shell ./build/get_version.sh)
 
-build: build-runtime build-operator build-kamel
+build: build-runtime build-embed-resources build-operator build-kamel
 
 build-operator:
 	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
+
+build-embed-resources:
+	./build/embed_resources.sh deploy
 
 build-runtime:
 	mvn clean install -f ./runtime/pom.xml
