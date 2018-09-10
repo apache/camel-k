@@ -17,7 +17,8 @@
 
         <camel.version>2.22.0</camel.version>
         <junit.version>4.12</junit.version>
-        <openhft-compiler.version>2.3.1</openhft-compiler.version>
+        <joor.version>0.9.9</joor.version>
+        <commons-io.version>2.6</commons-io.version>
         <assertj.version>3.11.1</assertj.version>
         <log4j2.version>2.11.0</log4j2.version>
         <slf4j.version>1.7.25</slf4j.version>
