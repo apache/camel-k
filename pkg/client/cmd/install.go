@@ -25,10 +25,14 @@ import (
 )
 
 type InstallCmdOptions struct {
+	*RootCmdOptions
+	ClusterSetupOnly bool
 }
 
-func NewCmdInstall() *cobra.Command {
-	options := InstallCmdOptions{}
+func NewCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	options := InstallCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
 	cmd := cobra.Command{
 		Use:   "install",
 		Short: "Install Camel K on a Kubernetes cluster",
@@ -47,7 +51,7 @@ func (o *InstallCmdOptions) install(cmd *cobra.Command, args []string) error {
 		return nil // TODO better error handling: if here we return err the help page is shown
 	}
 
-	namespace := cmd.Flag("namespace").Value.String()
+	namespace := o.Namespace
 
 	err = installutils.InstallOperator(namespace)
 	if err != nil {
