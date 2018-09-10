@@ -39,7 +39,7 @@ func init() {
 EOM
 
 for f in $(ls $destdir | grep ".yaml"); do
-	printf "Resources[\"$f\"] =\n\`\n" >> $destfile
+	printf "\tResources[\"$f\"] =\n\t\t\`\n" >> $destfile
 	cat $destdir/$f >> $destfile
 	printf "\n\`\n" >> $destfile
 done

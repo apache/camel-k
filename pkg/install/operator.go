@@ -28,9 +28,9 @@ import (
 func Operator(namespace string) error {
 	return installResources(namespace,
 		"operator-service-account.yaml",
-		"operator-role.yaml",
+		"operator-role-openshift.yaml", // TODO distinguish between Openshift and Kubernetes
 		"operator-role-binding.yaml",
-		"operator.yaml",
+		"operator-deployment.yaml",
 	)
 }
 

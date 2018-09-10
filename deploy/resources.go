@@ -24,8 +24,8 @@ var Resources map[string]string
 func init() {
 	Resources = make(map[string]string)
 
-Resources["crd.yaml"] =
-`
+	Resources["crd.yaml"] =
+		`
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -41,8 +41,8 @@ spec:
   version: v1alpha1
 
 `
-Resources["cr.yaml"] =
-`
+	Resources["cr.yaml"] =
+		`
 apiVersion: "camel.apache.org/v1alpha1"
 kind: "Integration"
 metadata:
@@ -67,8 +67,45 @@ spec:
       }
 
 `
-Resources["operator-role-binding.yaml"] =
+	Resources["operator-deployment.yaml"] =
+		`
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: camel-k-operator
+  template:
+    metadata:
+      labels:
+        name: camel-k-operator
+    spec:
+      serviceAccountName: camel-k-operator
+      containers:
+        - name: camel-k-operator
+          image: docker.io/apache/camel-k:0.0.1-SNAPSHOT
+          ports:
+          - containerPort: 60000
+            name: metrics
+          command:
+          - camel-k-operator
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OPERATOR_NAME
+              value: "camel-k-operator"
+
 `
+	Resources["operator-role-binding.yaml"] =
+		`
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -81,8 +118,8 @@ roleRef:
   name: camel-k-operator
   apiGroup: rbac.authorization.k8s.io
 `
-Resources["operator-role.yaml"] =
-`
+	Resources["operator-role-kubernetes.yaml"] =
+		`
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -145,21 +182,127 @@ rules:
   - list
   - watch
 `
-Resources["operator-service-account.yaml"] =
+	Resources["operator-role-openshift.yaml"] =
+		`
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-operator
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - endpoints
+  - persistentvolumeclaims
+  - configmaps
+  - secrets
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  attributeRestrictions: null
+  resources:
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  - "build.openshift.io"
+  resources:
+  - buildconfigs
+  - buildconfigs/webhooks
+  - builds
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  - "image.openshift.io"
+  resources:
+  - imagestreamimages
+  - imagestreammappings
+  - imagestreams
+  - imagestreams/secrets
+  - imagestreamtags
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  - build.openshift.io
+  attributeRestrictions: null
+  resources:
+  - buildconfigs/instantiate
+  - buildconfigs/instantiatebinary
+  - builds/clone
+  verbs:
+  - create
 `
+	Resources["operator-service-account.yaml"] =
+		`
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: camel-k-operator
 `
-Resources["operator.yaml"] =
-`
+	Resources["operator.yaml"] =
+		`
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: camel-k-operator
-  labels:
-    app: "camel-k"
 spec:
   replicas: 1
   selector:
@@ -170,7 +313,6 @@ spec:
       labels:
         name: camel-k-operator
     spec:
-      serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:0.0.1-SNAPSHOT
@@ -179,7 +321,7 @@ spec:
             name: metrics
           command:
           - camel-k-operator
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
@@ -189,8 +331,8 @@ spec:
               value: "camel-k-operator"
 
 `
-Resources["user-cluster-role.yaml"] =
-`
+	Resources["user-cluster-role.yaml"] =
+		`
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:

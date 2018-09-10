@@ -29,7 +29,7 @@ codegen:
 images: images-build
 
 images-build:
-	operator-sdk build docker.io/apache/camel-k:$(VERSION)
+	./build/package_maven_artifacts.sh && operator-sdk build docker.io/apache/camel-k:$(VERSION)
 
 images-push:
 	docker push docker.io/apache/camel-k:$(VERSION)
