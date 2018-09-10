@@ -33,11 +33,14 @@ import (
 )
 
 type RunCmdOptions struct {
+	*RootCmdOptions
 	Language string
 }
 
-func NewCmdRun() *cobra.Command {
-	options := RunCmdOptions{}
+func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	options := RunCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
 	cmd := cobra.Command{
 		Use:   "run [file to run]",
 		Short: "Run a integration on Kubernetes",
@@ -71,7 +74,7 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	namespace := cmd.Flag("namespace").Value.String()
+	namespace := o.Namespace
 
 	name := kubernetes.SanitizeName(args[0])
 	if name == "" {

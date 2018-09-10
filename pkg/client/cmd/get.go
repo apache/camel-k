@@ -27,18 +27,25 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
 
-func NewCmdGet() *cobra.Command {
+type GetCmdOptions struct {
+	*RootCmdOptions
+}
+
+func NewCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	options := GetCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
 	cmd := cobra.Command{
 		Use:   "get",
 		Short: "Get all integrations deployed on Kubernetes",
 		Long:  `Get the status of all integrations deployed on on Kubernetes.`,
-		RunE:  run,
+		RunE:  options.run,
 	}
 
 	return &cmd
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func (o *GetCmdOptions) run(cmd *cobra.Command, args []string) error {
 	integrationList := v1alpha1.IntegrationList{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -46,7 +53,7 @@ func run(cmd *cobra.Command, args []string) error {
 		},
 	}
 
-	namespace := cmd.Flag("namespace").Value.String()
+	namespace := o.Namespace
 
 	err := sdk.List(namespace, &integrationList)
 	if err != nil {
