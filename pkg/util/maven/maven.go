@@ -58,23 +58,30 @@ func Build(project Project) (string, error) {
 }
 
 func runMavenBuild(buildDir string) error {
-	mavenBuild := exec.Command("mvn", "clean", "install", "-DskipTests")
+	mavenBuild := exec.Command("mvn", mavenExtraOptions(), "clean", "install", "-DskipTests")
 	mavenBuild.Dir = buildDir
-	logrus.Info("Starting maven build: mvn clean install -DskipTests")
+	logrus.Info("Starting maven build: mvn " + mavenExtraOptions() + " clean install -DskipTests")
 	err := mavenBuild.Run()
 	if err != nil {
 		return errors.Wrap(err, "failure while executing maven build")
 	}
 
-	mavenDep := exec.Command("mvn", "dependency:copy-dependencies")
+	mavenDep := exec.Command("mvn", mavenExtraOptions(), "dependency:copy-dependencies")
 	mavenDep.Dir = buildDir
-	logrus.Info("Copying maven dependencies: mvn dependency:copy-dependencies")
+	logrus.Info("Copying maven dependencies: mvn " + mavenExtraOptions() + " dependency:copy-dependencies")
 	err = mavenDep.Run()
 	if err != nil {
 		return errors.Wrap(err, "failure while extracting maven dependencies")
 	}
 	logrus.Info("Maven build completed successfully")
 	return nil
+}
+
+func mavenExtraOptions() string {
+	if _, err := os.Stat("/tmp/artifacts/m2"); err == nil {
+		return "-Dmaven.repo.local=/tmp/artifacts/m2"
+	}
+	return ""
 }
 
 func createTar(buildDir string, project Project) (string, error) {
