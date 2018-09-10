@@ -18,7 +18,7 @@ limitations under the License.
 package cmd
 
 import (
-	"os"
+	"os/user"
 	"path/filepath"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
@@ -29,7 +29,12 @@ import (
 func initKubeClient(cmd *cobra.Command) error {
 	kubeconfig := cmd.Flag("config").Value.String()
 	if kubeconfig == "" {
-		kubeconfig = filepath.Join(homeDir(), ".kube", "config")
+		usr, err := user.Current()
+		if err != nil {
+			return err
+		}
+
+		kubeconfig = filepath.Join(usr.HomeDir, ".kube", "config")
 	}
 
 	// use the current context in kubeconfig
@@ -40,11 +45,4 @@ func initKubeClient(cmd *cobra.Command) error {
 
 	k8sclient.CustomConfig = config
 	return nil
-}
-
-func homeDir() string {
-	if h := os.Getenv("HOME"); h != "" {
-		return h
-	}
-	return os.Getenv("USERPROFILE") // windows
 }
