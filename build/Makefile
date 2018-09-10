@@ -1,6 +1,9 @@
 VERSION := $(shell ./build/get_version.sh)
 
-build: build-runtime build-embed-resources build-operator build-kamel
+build: build-runtime build-embed-resources get-go-deps build-operator build-kamel
+
+get-go-deps:
+	go get -v -d ./...
 
 build-operator:
 	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
