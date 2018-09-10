@@ -20,8 +20,6 @@ package cmd
 import (
 	"os"
 
-	"github.com/apache/camel-k/pkg/client/cmd/run"
-	"github.com/apache/camel-k/pkg/client/cmd/version"
 	"github.com/spf13/cobra"
 )
 
@@ -36,33 +34,13 @@ To configure your bash shell to load completions for each session add to your ba
 . <(kamel completion)
 `
 
-func NewKamelCommand() (*cobra.Command, error) {
-	var cmd = cobra.Command{
-		Use:   "kamel",
-		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
-		Long:  "Apache Camel K (a.k.a. Kamel) is a lightweight integration framework\nbuilt from Apache Camel that runs natively on Kubernetes and is\nspecifically designed for serverless and microservice architectures.",
-	}
-
-	var kubeconfig string
-	cmd.PersistentFlags().StringVar(&kubeconfig, "config", "", "Path to the config file to use for CLI requests")
-
-	// Initialize the Kubernetes client to allow using the operator-sdk
-	err := initKubeClient(&cmd)
-	if err != nil {
-		return nil, err
-	}
-
-	cmd.AddCommand(&cobra.Command{
+func NewCmdCompletion() *cobra.Command {
+	return &cobra.Command{
 		Use:   "completion",
 		Short: "Generates bash completion scripts",
 		Long:  completionCmdLongDescription,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.GenBashCompletion(os.Stdout)
 		},
-	})
-
-	cmd.AddCommand(version.NewCmdVersion())
-	cmd.AddCommand(run.NewCmdRun())
-
-	return &cmd, nil
+	}
 }

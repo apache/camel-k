@@ -18,33 +18,28 @@ limitations under the License.
 package cmd
 
 import (
-	"os"
-	"path/filepath"
-
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
-func initKubeClient(cmd *cobra.Command) error {
-	kubeconfig := cmd.Flag("config").Value.String()
-	if kubeconfig == "" {
-		kubeconfig = filepath.Join(homeDir(), ".kube", "config")
+func NewKamelCommand() (*cobra.Command, error) {
+	var cmd = cobra.Command{
+		Use:   "kamel",
+		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
+		Long:  "Apache Camel K (a.k.a. Kamel) is a lightweight integration framework\nbuilt from Apache Camel that runs natively on Kubernetes and is\nspecifically designed for serverless and microservice architectures.",
 	}
 
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	var kubeconfig string
+	cmd.PersistentFlags().StringVar(&kubeconfig, "config", "", "Path to the config file to use for CLI requests")
+
+	// Initialize the Kubernetes client to allow using the operator-sdk
+	err := initKubeClient(&cmd)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	k8sclient.CustomConfig = config
-	return nil
-}
+	cmd.AddCommand(NewCmdCompletion())
+	cmd.AddCommand(NewCmdVersion())
+	cmd.AddCommand(NewCmdRun())
 
-func homeDir() string {
-	if h := os.Getenv("HOME"); h != "" {
-		return h
-	}
-	return os.Getenv("USERPROFILE") // windows
+	return &cmd, nil
 }

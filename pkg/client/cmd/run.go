@@ -15,42 +15,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package run
+package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"errors"
-	"strconv"
-	"os"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"io/ioutil"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strconv"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/spf13/cobra"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type runCmdFlags struct {
-	language string
-}
-
 func NewCmdRun() *cobra.Command {
-	flags := runCmdFlags{}
+	impl := runCmd{}
+
 	cmd := cobra.Command{
 		Use:   "run [file to run]",
 		Short: "Run a integration on Kubernetes",
 		Long:  `Deploys and execute a integration pod on Kubernetes.`,
-		Args: validateArgs,
-		RunE: run,
+		Args:  impl.validateArgs,
+		RunE:  impl.execute,
 	}
 
-	cmd.Flags().StringVarP(&flags.language, "language", "l", "", "Programming Language used to write the file")
+	cmd.Flags().StringVarP(&impl.language, "language", "l", "", "Programming Language used to write the file")
 
 	return &cmd
 }
 
-func validateArgs(cmd *cobra.Command, args []string) error {
+type runCmd struct {
+	language string
+}
+
+func (target runCmd) validateArgs(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
 	}
@@ -63,8 +65,8 @@ func validateArgs(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func run(cmd *cobra.Command, args []string) error {
-	code, err := loadCode(args[0])
+func (target runCmd) execute(cmd *cobra.Command, args []string) error {
+	code, err := target.loadCode(args[0])
 	if err != nil {
 		return err
 	}
@@ -76,12 +78,12 @@ func run(cmd *cobra.Command, args []string) error {
 
 	integration := v1alpha1.Integration{
 		TypeMeta: v1.TypeMeta{
-			Kind: "Integration",
+			Kind:       "Integration",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Namespace: "test", // TODO discover current namespace dynamically (and with command option)
-			Name: name,
+			Name:      name,
 		},
 		Spec: v1alpha1.IntegrationSpec{
 			Source: v1alpha1.SourceSpec{
@@ -115,7 +117,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func loadCode(fileName string) (string, error) {
+func (target runCmd) loadCode(fileName string) (string, error) {
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return "", err

@@ -15,14 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package version
+package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"fmt"
-	rootVersion "github.com/apache/camel-k/version"
-)
 
+	rootVersion "github.com/apache/camel-k/version"
+	"github.com/spf13/cobra"
+)
 
 func NewCmdVersion() *cobra.Command {
 	return &cobra.Command{
@@ -34,4 +34,3 @@ func NewCmdVersion() *cobra.Command {
 		},
 	}
 }
-
