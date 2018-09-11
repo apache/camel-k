@@ -22,6 +22,7 @@ clean:
 	go clean
 	rm -f camel-k-operator
 	rm -f kamel
+	rm -rf tmp/_maven_output
 
 codegen:
 	./tmp/codegen/update-generated.sh
