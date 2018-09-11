@@ -15,7 +15,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <camel.version>2.22.0</camel.version>
+        <camel.version>2.22.1</camel.version>
         <junit.version>4.12</junit.version>
         <joor.version>0.9.9</joor.version>
         <commons-io.version>2.6</commons-io.version>
