@@ -30,6 +30,8 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: integrations.camel.apache.org
+  labels:
+    app: "camel-k"
 spec:
   group: camel.apache.org
   names:
@@ -84,6 +86,7 @@ spec:
     metadata:
       labels:
         name: camel-k-operator
+        app: "camel-k"
     spec:
       serviceAccountName: camel-k-operator
       containers:
@@ -110,6 +113,8 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
 subjects:
 - kind: ServiceAccount
   name: camel-k-operator
@@ -117,6 +122,7 @@ roleRef:
   kind: Role
   name: camel-k-operator
   apiGroup: rbac.authorization.k8s.io
+
 `
 	Resources["operator-role-kubernetes.yaml"] =
 		`
@@ -124,6 +130,8 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
 rules:
 - apiGroups:
   - camel.apache.org
@@ -181,6 +189,7 @@ rules:
   - get
   - list
   - watch
+
 `
 	Resources["operator-role-openshift.yaml"] =
 		`
@@ -188,6 +197,8 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
 rules:
 - apiGroups:
   - camel.apache.org
@@ -289,6 +300,7 @@ rules:
   - builds/clone
   verbs:
   - create
+
 `
 	Resources["operator-service-account.yaml"] =
 		`
@@ -296,6 +308,9 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
+
 `
 	Resources["operator.yaml"] =
 		`
@@ -303,6 +318,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
 spec:
   replicas: 1
   selector:
@@ -338,6 +355,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: camel-k:edit
   labels:
+    app: "camel-k"
     # Add these permissions to the "admin" and "edit" default roles.
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
