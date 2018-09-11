@@ -23,6 +23,7 @@
         <assertj.version>3.11.1</assertj.version>
         <log4j2.version>2.11.0</log4j2.version>
         <slf4j.version>1.7.25</slf4j.version>
+        <groovy.version>2.5.2</groovy.version>
 
         <fabric8-maven-plugin.version>3.5.40</fabric8-maven-plugin.version>
     </properties>
