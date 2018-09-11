@@ -19,31 +19,32 @@ package api
 
 // a request to build a specific code
 type BuildSource struct {
-	Identifier	BuildIdentifier
-	Code		string
+	Identifier BuildIdentifier
+	Code       string
 }
 
 type BuildIdentifier struct {
-	Name	string
-	Digest	string
+	Name   string
+	Digest string
 }
 
 // represents the result of a build
 type BuildResult struct {
-	Source		*BuildSource
-	Status		BuildStatus
-	Image		string
-	Error		error
+	Source *BuildSource
+	Status BuildStatus
+	Image  string
+	Error  error
 }
 
 // supertype of all builders
 type Builder interface {
-	Build(BuildSource) <- chan BuildResult
+	Build(BuildSource) <-chan BuildResult
 }
 
 type BuildStatus int
+
 const (
-	BuildStatusNotRequested		BuildStatus = iota
+	BuildStatusNotRequested BuildStatus = iota
 	BuildStatusStarted
 	BuildStatusCompleted
 	BuildStatusError

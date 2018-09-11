@@ -18,12 +18,12 @@ limitations under the License.
 package digest
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"crypto/sha256"
-	"github.com/apache/camel-k/version"
 	"encoding/base64"
-	"strconv"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/version"
 	"math/rand"
+	"strconv"
 )
 
 // Compute a digest of the fields that are relevant for the deployment

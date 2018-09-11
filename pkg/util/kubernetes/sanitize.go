@@ -18,8 +18,8 @@ limitations under the License.
 package kubernetes
 
 import (
-	"strings"
 	"regexp"
+	"strings"
 	"unicode"
 )
 

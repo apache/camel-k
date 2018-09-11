@@ -19,13 +19,12 @@ package action
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
 
 // initializes the integration status to trigger the deployment
 type InitializeAction struct {
-
 }
 
 func NewInitializeAction() *InitializeAction {

@@ -1,15 +1,15 @@
 package kubernetes
 
 import (
-	"time"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"time"
 )
 
-type ResourceRetrieveFunction func()(interface{}, error)
+type ResourceRetrieveFunction func() (interface{}, error)
 
-type ResourceCheckFunction func(interface{})(bool, error)
+type ResourceCheckFunction func(interface{}) (bool, error)
 
 const (
 	sleepTime = 400 * time.Millisecond

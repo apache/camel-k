@@ -20,13 +20,13 @@ limitations under the License.
 package build
 
 import (
-	"testing"
 	"context"
-	"github.com/stretchr/testify/assert"
 	build "github.com/apache/camel-k/pkg/build/api"
-	"time"
-	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
+	"testing"
+	"time"
 )
 
 func TestBuild(t *testing.T) {

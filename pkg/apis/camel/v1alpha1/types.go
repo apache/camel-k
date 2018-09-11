@@ -39,12 +39,12 @@ type Integration struct {
 }
 
 type IntegrationSpec struct {
-	Replicas   *int32       `json:"replicas,omitempty"`
-	Source     SourceSpec   `json:"source,omitempty"`
+	Replicas *int32     `json:"replicas,omitempty"`
+	Source   SourceSpec `json:"source,omitempty"`
 }
 
 type SourceSpec struct {
-    Code    *string `json:"code,omitempty"`
+	Code *string `json:"code,omitempty"`
 }
 
 type IntegrationStatus struct {
@@ -56,8 +56,8 @@ type IntegrationStatus struct {
 type IntegrationPhase string
 
 const (
-    IntegrationPhaseBuilding    IntegrationPhase = "Building"
-	IntegrationPhaseDeploying   IntegrationPhase = "Deploying"
-    IntegrationPhaseRunning     IntegrationPhase = "Running"
-    IntegrationPhaseError       IntegrationPhase = "Error"
+	IntegrationPhaseBuilding  IntegrationPhase = "Building"
+	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
+	IntegrationPhaseRunning   IntegrationPhase = "Running"
+	IntegrationPhaseError     IntegrationPhase = "Error"
 )

@@ -18,9 +18,9 @@ limitations under the License.
 package customclient
 
 import (
-	"k8s.io/client-go/rest"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/rest"
 )
 
 func GetClientFor(group string, version string) (*rest.RESTClient, error) {

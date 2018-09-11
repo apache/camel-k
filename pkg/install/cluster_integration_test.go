@@ -18,8 +18,8 @@ limitations under the License.
 package install
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestInstallation(t *testing.T) {
