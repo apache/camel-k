@@ -31,6 +31,7 @@ func Operator(namespace string) error {
 		"operator-role-openshift.yaml", // TODO distinguish between Openshift and Kubernetes
 		"operator-role-binding.yaml",
 		"operator-deployment.yaml",
+		"operator-service.yaml",
 	)
 }
 
