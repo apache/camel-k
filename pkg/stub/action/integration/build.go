@@ -54,7 +54,10 @@ func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
 	if buildResult.Status == api.BuildStatusNotRequested {
 		b.buildManager.Start(api.BuildSource{
 			Identifier: buildIdentifier,
-			Code:       *integration.Spec.Source.Code, // FIXME possible panic
+			Code: api.Code{
+				Name:    *integration.Spec.Source.Name,
+				Content: *integration.Spec.Source.Content,
+			}, // FIXME possible panic
 		})
 		logrus.Info("Build started")
 	} else if buildResult.Status == api.BuildStatusError {

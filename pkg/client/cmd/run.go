@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -81,6 +82,11 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		name = "integration"
 	}
 
+	codeName := args[0]
+	if idx := strings.LastIndexByte(args[0], os.PathSeparator); idx > -1 {
+		codeName = codeName[idx:]
+	}
+
 	integration := v1alpha1.Integration{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "Integration",
@@ -92,7 +98,9 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		},
 		Spec: v1alpha1.IntegrationSpec{
 			Source: v1alpha1.SourceSpec{
-				Code: &code,
+				Name:     &codeName,
+				Content:  &code,
+				Language: &o.Language,
 			},
 		},
 	}

@@ -17,7 +17,9 @@ limitations under the License.
 
 package maven
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+)
 
 type ProjectDefinition struct {
 	Project     Project
@@ -45,5 +47,17 @@ type Dependencies struct {
 type Dependency struct {
 	GroupId    string `xml:"groupId"`
 	ArtifactId string `xml:"artifactId"`
-	Version    string `xml:"version"`
+	Version    string `xml:"version,omitempty"`
+	Type       string `xml:"type,omitempty"`
+	Classifier string `xml:"classifier,omitempty"`
+}
+
+func NewDependency(groupId string, artifactId string, version string) Dependency {
+	return Dependency{
+		GroupId:    groupId,
+		ArtifactId: artifactId,
+		Version:    version,
+		Type:       "jar",
+		Classifier: "",
+	}
 }

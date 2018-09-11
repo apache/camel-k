@@ -46,7 +46,7 @@ public class RouteLoadersTest {
 
     @Test
     public void testLoadJava() throws Exception {
-        String resource = "classpath:/MyRoutes.java";
+        String resource = "classpath:MyRoutes.java";
         RoutesLoader loader = RouteLoaders.loaderFor(resource);
         RouteBuilder builder = loader.load(resource);
 
@@ -63,7 +63,7 @@ public class RouteLoadersTest {
 
     @Test
     public void testLoadJavaScript() throws Exception {
-        String resource = "classpath:/routes.js";
+        String resource = "classpath:routes.js";
         RoutesLoader loader = RouteLoaders.loaderFor(resource);
         RouteBuilder builder = loader.load(resource);
 
@@ -80,7 +80,7 @@ public class RouteLoadersTest {
 
     @Test
     public void testLoadGroovy() throws Exception {
-        String resource = "classpath:/routes.groovy";
+        String resource = "classpath:routes.groovy";
         RoutesLoader loader = RouteLoaders.loaderFor(resource);
         RouteBuilder builder = loader.load(resource);
 
