@@ -21,12 +21,13 @@ package build
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestBuild(t *testing.T) {
@@ -38,7 +39,9 @@ func TestBuild(t *testing.T) {
 	}
 	buildManager.Start(build.BuildSource{
 		Identifier: identifier,
-		Code:       code(),
+		Code: build.Code{
+			Content: code(),
+		},
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
@@ -66,7 +69,9 @@ func TestFailedBuild(t *testing.T) {
 	}
 	buildManager.Start(build.BuildSource{
 		Identifier: identifier,
-		Code:       code() + "XX",
+		Code: build.Code{
+			Content: code() + "XX",
+		},
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)

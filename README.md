@@ -55,10 +55,16 @@ For Minishift, this means executing `oc login -u system:admin` then `kamel insta
 After the initial setup, you can run a Camel integration on the cluster executing:
 
 ```
-kamel run Sample.java
+kamel run runtime/examples/Sample.java
 ```
 
-A "Sample.java" file is included in the root of this repository. You can change the content of the file and execute the command again to see the changes.
+A "Sample.java" file is included in the folder runtime/examples of this repository. You can change the content of the file and execute the command again to see the changes.
+
+A JavaScript integration has also been provided as example, to run it:
+
+```
+kamel run runtime/examples/routes.js
+```
 
 ### Monitoring the Status
 

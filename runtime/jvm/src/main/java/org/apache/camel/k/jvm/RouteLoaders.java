@@ -95,7 +95,7 @@ public enum RouteLoaders implements RoutesLoader {
                     // Exposed to the underlying script, but maybe better to have
                     // a nice dsl
                     bindings.put("context", context);
-                    bindings.put("components", context);
+                    bindings.put("components", new Components(context));
                     bindings.put("from", (Function<String, RouteDefinition>) uri -> from(uri));
 
                     try (InputStream is = is(resource)) {
@@ -166,9 +166,12 @@ public enum RouteLoaders implements RoutesLoader {
 
     private static InputStream is(String resource) throws IOException {
         if (resource.startsWith(Application.SCHEME_CLASSPATH)) {
-            return Application.class.getResourceAsStream(
-                resource.substring(Application.SCHEME_CLASSPATH.length())
-            );
+            String location = StringUtils.removeStart(resource, Application.SCHEME_CLASSPATH);
+            if (!location.startsWith("/")) {
+                location = "/" + location;
+            }
+
+            return Application.class.getResourceAsStream(location);
         } else {
             return Files.newInputStream(
                 Paths.get(resource.substring(Application.SCHEME_FILE.length()))

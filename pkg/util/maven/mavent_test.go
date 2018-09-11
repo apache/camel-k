@@ -67,3 +67,36 @@ func TestPomGeneration(t *testing.T) {
 
 	assert.Equal(t, pom, expectedPom)
 }
+
+func TestParseSimpleGAV(t *testing.T) {
+	dep, err := ParseGAV("org.apache.camel:camel-core:2.21.1")
+
+	assert.Nil(t, err)
+	assert.Equal(t, dep.GroupId, "org.apache.camel")
+	assert.Equal(t, dep.ArtifactId, "camel-core")
+	assert.Equal(t, dep.Version, "2.21.1")
+	assert.Equal(t, dep.Type, "jar")
+	assert.Equal(t, dep.Classifier, "")
+}
+
+func TestParseGAVWithType(t *testing.T) {
+	dep, err := ParseGAV("org.apache.camel:camel-core:war:2.21.1")
+
+	assert.Nil(t, err)
+	assert.Equal(t, dep.GroupId, "org.apache.camel")
+	assert.Equal(t, dep.ArtifactId, "camel-core")
+	assert.Equal(t, dep.Version, "2.21.1")
+	assert.Equal(t, dep.Type, "war")
+	assert.Equal(t, dep.Classifier, "")
+}
+
+func TestParseGAVWithClassifierAndType(t *testing.T) {
+	dep, err := ParseGAV("org.apache.camel:camel-core:war:test:2.21.1")
+
+	assert.Nil(t, err)
+	assert.Equal(t, dep.GroupId, "org.apache.camel")
+	assert.Equal(t, dep.ArtifactId, "camel-core")
+	assert.Equal(t, dep.Version, "2.21.1")
+	assert.Equal(t, dep.Type, "war")
+	assert.Equal(t, dep.Classifier, "test")
+}

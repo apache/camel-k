@@ -45,7 +45,9 @@ type IntegrationSpec struct {
 }
 
 type SourceSpec struct {
-	Code *string `json:"code,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Content  *string `json:"content,omitempty"`
+	Language *string `json:"language,omitempty"`
 }
 
 type IntegrationStatus struct {
