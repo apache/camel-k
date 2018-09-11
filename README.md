@@ -100,7 +100,7 @@ $GOPATH/src/github.com/apache/camel-k/
 
 This is a high level overview of the project structure:
 
-- [/cmd](/cmd): contains the entry points (the *main* function) for the **camel-k-operator** binary and the **kamel** client tool.
+- [/cmd](/cmd): contains the entry points (the *main* functions) for the **camel-k-operator** binary and the **kamel** client tool.
 - [/build](/build): contains scripts used during make operations for building the project.
 - [/deploy](/deploy): contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
 - [/pkg](/pkg): this is where the code resides. The code is divided in multiple subpackages.
@@ -181,7 +181,7 @@ If you want to install everything you have in your source code and see it runnin
 Now you can play with Camel K:
 
 ```
-kamel run Sample.java
+./kamel run Sample.java
 ```
 
 ### Debugging and Running from IDE
@@ -204,15 +204,15 @@ oc scale deployment/camel-k-operator --replicas 0
 
 You can scale it back to 1 when you're done and you have updated the operator image.
 
-You can setup the IDE to execute the [/cmd/camel-k-operator/camel_k_operator.go]([/cmd/camel-k-operator/camel_k_operator.go]) file from the IDE (e.g. Goland) in debug mode.
+You can setup the IDE (e.g. Goland) to execute the [/cmd/camel-k-operator/camel_k_operator.go]([/cmd/camel-k-operator/camel_k_operator.go]) file in debug mode.
 
-When configuring the IDE task, make sure to add all required environment variables (such as `KUBERNETES_CONFIG`, as explained in the [testing](#testing) section) in
-the IDE task configuration.
+When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen* (such as `KUBERNETES_CONFIG`, as explained in the [testing](#testing) section).
 
 ## Uninstalling Camel K
 
-If required, it is possible to uninstall Camel K from OpenShift or Kubernetes with the following command using the "oc" or "kubectl" tool:
+If required, it is possible to completely uninstall Camel K from OpenShift or Kubernetes with the following command, using the "oc" or "kubectl" tool:
 
 ```
-delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
+# kubectl if using kubernetes
+oc delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
 ```
