@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
 spec:
   replicas: 1
   selector:

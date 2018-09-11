@@ -2,6 +2,8 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: camel-k-operator
+  labels:
+    app: "camel-k"
 rules:
 - apiGroups:
   - camel.apache.org
