@@ -19,6 +19,7 @@ package org.apache.camel.k.jvm;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.function.Function;
@@ -27,20 +28,23 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import groovy.util.DelegatingScript;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.groovy.control.CompilerConfiguration;
 import org.joor.Reflect;
 
 public enum RouteLoaders implements RoutesLoader {
     JavaClass {
         @Override
         public boolean test(String resource) {
-            return !resource.endsWith(".java") && !resource.endsWith(".js")
-                && (resource.startsWith(Application.SCHEME_CLASSPATH) || resource.startsWith(Application.SCHEME_FILE));
+            return !isScripting(resource) && hasSupportedScheme(resource);
         }
 
         @Override
@@ -58,8 +62,7 @@ public enum RouteLoaders implements RoutesLoader {
     JavaSource {
         @Override
         public boolean test(String resource) {
-            return resource.endsWith(".java")
-                && (resource.startsWith(Application.SCHEME_CLASSPATH) || resource.startsWith(Application.SCHEME_FILE));
+            return isScripting(resource, "java") && hasSupportedScheme(resource);
         }
 
         @Override
@@ -76,8 +79,7 @@ public enum RouteLoaders implements RoutesLoader {
     JavaScript {
         @Override
         public boolean test(String resource) {
-            return resource.endsWith(".js")
-                && (resource.startsWith(Application.SCHEME_CLASSPATH) || resource.startsWith(Application.SCHEME_FILE));
+            return isScripting(resource, "js") && hasSupportedScheme(resource);
         }
 
         @Override
@@ -102,8 +104,36 @@ public enum RouteLoaders implements RoutesLoader {
                 }
             };
         }
-    };
+    },
+    Groovy {
+        @Override
+        public boolean test(String resource) {
+            return isScripting(resource, "groovy") && hasSupportedScheme(resource);
+        }
 
+        @Override
+        public RouteBuilder load(String resource) throws Exception {
+            return new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    CompilerConfiguration cc = new CompilerConfiguration();
+                    cc.setScriptBaseClass(DelegatingScript.class.getName());
+
+                    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                    GroovyShell sh = new GroovyShell(cl, new Binding(), cc);
+
+                    try (InputStream is = is(resource)) {
+                        Reader reader = new InputStreamReader(is);
+                        DelegatingScript script = (DelegatingScript) sh.parse(reader);
+
+                        // set the delegate target
+                        script.setDelegate(new ScriptingDsl(this));
+                        script.run();
+                    }
+                }
+            };
+        }
+    };
 
     // ********************************
     //
@@ -111,6 +141,18 @@ public enum RouteLoaders implements RoutesLoader {
     //
     // TODO: move to a dedicate class
     // ********************************
+
+    public static boolean isScripting(String resource, String type) {
+        return type.startsWith(".") ? resource.endsWith(type) : resource.endsWith("." + type);
+    }
+
+    public static boolean isScripting(String resource) {
+        return resource.endsWith(".java") || resource.endsWith(".js") || resource.endsWith(".groovy");
+    }
+
+    public static boolean hasSupportedScheme(String resource) {
+        return resource.startsWith(Application.SCHEME_CLASSPATH) || resource.startsWith(Application.SCHEME_FILE);
+    }
 
     public static RoutesLoader loaderFor(String resource) {
         for (RoutesLoader loader: RouteLoaders.values()) {
@@ -158,6 +200,23 @@ public enum RouteLoaders implements RoutesLoader {
             context.addComponent(scheme, instance);
 
             return instance;
+        }
+    }
+
+    private static class ScriptingDsl {
+        private final RouteBuilder builder;
+
+        public final CamelContext context;
+        public final Components components;
+
+        public ScriptingDsl(RouteBuilder builder) {
+            this.builder = builder;
+            this.context = builder.getContext();
+            this.components = new Components(builder.getContext());
+        }
+
+        public RouteDefinition from(String endpoint) {
+            return builder.from(endpoint);
         }
     }
 }

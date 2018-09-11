@@ -42,7 +42,6 @@ public class RouteLoadersTest {
         assertThat(routes).hasSize(1);
         assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
         assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
-        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
     }
 
     @Test
@@ -60,16 +59,32 @@ public class RouteLoadersTest {
         assertThat(routes).hasSize(1);
         assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
         assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
-        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
     }
 
     @Test
-    public void testLoadScript() throws Exception {
+    public void testLoadJavaScript() throws Exception {
         String resource = "classpath:/routes.js";
         RoutesLoader loader = RouteLoaders.loaderFor(resource);
         RouteBuilder builder = loader.load(resource);
 
         assertThat(loader).isSameAs(RouteLoaders.JavaScript);
+        assertThat(builder).isNotNull();
+
+        builder.configure();
+
+        List<RouteDefinition> routes = builder.getRouteCollection().getRoutes();
+        assertThat(routes).hasSize(1);
+        assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
+        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
+    }
+
+    @Test
+    public void testLoadGroovy() throws Exception {
+        String resource = "classpath:/routes.groovy";
+        RoutesLoader loader = RouteLoaders.loaderFor(resource);
+        RouteBuilder builder = loader.load(resource);
+
+        assertThat(loader).isSameAs(RouteLoaders.Groovy);
         assertThat(builder).isNotNull();
 
         builder.configure();
