@@ -69,6 +69,14 @@ You can check the status of all integrations by executing the following command:
 kamel get
 ```
 
+### Uninstalling Camel K
+
+If requires to uninstall Camel K from the OpenShift or Kubernetes, it's nessesary to run following command using "oc" or "kubectl" tool:
+
+```
+delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
+```
+
 ## Building
 
 In order to build the project follow these steps:
