@@ -20,9 +20,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 type RootCmdOptions struct {

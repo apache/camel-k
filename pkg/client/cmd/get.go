@@ -18,13 +18,13 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"text/tabwriter"
-	"os"
 	"fmt"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
+	"text/tabwriter"
 )
 
 type GetCmdOptions struct {

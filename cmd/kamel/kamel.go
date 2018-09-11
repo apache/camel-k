@@ -18,10 +18,10 @@ limitations under the License.
 package main
 
 import (
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"fmt"
-	"os"
 	"github.com/apache/camel-k/pkg/client/cmd"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"os"
 )
 
 func main() {

@@ -18,15 +18,15 @@ limitations under the License.
 package install
 
 import (
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"github.com/apache/camel-k/deploy"
-	"k8s.io/apimachinery/pkg/util/yaml"
-	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 func SetupClusterwideResources() error {

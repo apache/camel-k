@@ -31,5 +31,4 @@ type Action interface {
 
 	// executes the handling function
 	Handle(integration *v1alpha1.Integration) error
-
 }

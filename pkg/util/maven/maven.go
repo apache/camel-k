@@ -18,20 +18,19 @@ limitations under the License.
 package maven
 
 import (
-	"io/ioutil"
-	"os"
 	"archive/tar"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
-	"github.com/pkg/errors"
+	"io/ioutil"
+	"os"
+	"os/exec"
 	"path"
 	"strings"
-	"os/exec"
 )
 
-
 const (
-	buildDirPrefix = "maven-"
+	buildDirPrefix    = "maven-"
 	artifactDirPrefix = "maven-bin-"
 )
 
@@ -84,15 +83,15 @@ func createTar(buildDir string, project Project) (string, error) {
 		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
 	}
 
-	tarFileName := path.Join(artifactDir, project.ArtifactId + ".tar")
+	tarFileName := path.Join(artifactDir, project.ArtifactId+".tar")
 	tarFile, err := os.Create(tarFileName)
 	if err != nil {
-		return "", errors.Wrap(err, "cannot create tar file " + tarFileName)
+		return "", errors.Wrap(err, "cannot create tar file "+tarFileName)
 	}
 	defer tarFile.Close()
 
 	writer := tar.NewWriter(tarFile)
-	err = appendToTar(path.Join(buildDir, "target", project.ArtifactId + "-" + project.Version + ".jar"), "", writer)
+	err = appendToTar(path.Join(buildDir, "target", project.ArtifactId+"-"+project.Version+".jar"), "", writer)
 	if err != nil {
 		return "", err
 	}
@@ -138,9 +137,9 @@ func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
 	}
 
 	writer.WriteHeader(&tar.Header{
-		Name: fileName,
-		Size: info.Size(),
-		Mode: int64(info.Mode()),
+		Name:    fileName,
+		Size:    info.Size(),
+		Mode:    int64(info.Mode()),
 		ModTime: info.ModTime(),
 	})
 
@@ -193,34 +192,32 @@ func writeFile(buildDir string, relativePath string, content string) error {
 	// Create dir if not present
 	err := os.MkdirAll(fileDir, 0777)
 	if err != nil {
-		return errors.Wrap(err, "could not create dir for file " + relativePath)
+		return errors.Wrap(err, "could not create dir for file "+relativePath)
 	}
 	// Create file
 	file, err := os.Create(filePath)
 	if err != nil {
-		return errors.Wrap(err, "could not create file " + relativePath)
+		return errors.Wrap(err, "could not create file "+relativePath)
 	}
 	defer file.Close()
 
 	_, err = file.WriteString(content)
 	if err != nil {
-		errors.Wrap(err, "could not write to file " + relativePath)
+		errors.Wrap(err, "could not write to file "+relativePath)
 	}
 	return nil
 }
-
 
 func envFileContent(env map[string]string) string {
 	if env == nil {
 		return ""
 	}
 	content := ""
-	for k,v := range env {
+	for k, v := range env {
 		content = content + "export " + k + "=" + v + "\n"
 	}
 	return content
 }
-
 
 func pomFileContent(project Project) string {
 	basePom := `<?xml version="1.0" encoding="UTF-8"?>

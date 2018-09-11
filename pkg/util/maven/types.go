@@ -28,7 +28,7 @@ type Project struct {
 }
 
 type Dependency struct {
-	GroupId      string
-	ArtifactId   string
-	Version      string
+	GroupId    string
+	ArtifactId string
+	Version    string
 }
