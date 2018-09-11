@@ -17,18 +17,33 @@ limitations under the License.
 
 package maven
 
+import "encoding/xml"
+
+type ProjectDefinition struct {
+	Project     Project
+	JavaSources map[string]string
+	Resources   map[string]string
+	Env         map[string]string
+}
+
 type Project struct {
-	GroupId      string
-	ArtifactId   string
-	Version      string
-	Dependencies []Dependency
-	JavaSources  map[string]string
-	Resources    map[string]string
-	Env          map[string]string
+	XMLName           xml.Name
+	XmlNs             string       `xml:"xmlns,attr"`
+	XmlNsXsi          string       `xml:"xmlns:xsi,attr"`
+	XsiSchemaLocation string       `xml:"xsi:schemaLocation,attr"`
+	ModelVersion      string       `xml:"modelVersion"`
+	GroupId           string       `xml:"groupId"`
+	ArtifactId        string       `xml:"artifactId"`
+	Version           string       `xml:"version"`
+	Dependencies      Dependencies `xml:"dependencies"`
+}
+
+type Dependencies struct {
+	Dependencies []Dependency `xml:"dependency"`
 }
 
 type Dependency struct {
-	GroupId    string
-	ArtifactId string
-	Version    string
+	GroupId    string `xml:"groupId"`
+	ArtifactId string `xml:"artifactId"`
+	Version    string `xml:"version"`
 }
