@@ -14,6 +14,15 @@ build-embed-resources:
 build-runtime:
 	mvn clean install -f ./runtime/pom.xml
 
+dep:
+	dep ensure -v
+
+clean:
+	mvn clean -f ./runtime/pom.xml
+	go clean
+	rm -f camel-k-operator
+	rm -f kamel
+
 codegen:
 	./tmp/codegen/update-generated.sh
 
@@ -47,3 +56,5 @@ else
 require-kubeconfig:
 	@echo "KUBERNETES_CONFIG set"
 endif
+
+.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean 
