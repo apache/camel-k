@@ -19,24 +19,24 @@ package local
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
-	"time"
-	"io/ioutil"
-	"github.com/pkg/errors"
 	buildv1 "github.com/openshift/api/build/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/api/core/v1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	imagev1 "github.com/openshift/api/image/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"time"
 
-	_ "github.com/apache/camel-k/pkg/util/openshift"
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/version"
-	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
+	"github.com/apache/camel-k/pkg/util/maven"
+	_ "github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/apache/camel-k/version"
 )
 
 type localBuilder struct {

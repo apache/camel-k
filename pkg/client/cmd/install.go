@@ -18,9 +18,9 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	installutils "github.com/apache/camel-k/pkg/install"
 	"fmt"
+	installutils "github.com/apache/camel-k/pkg/install"
+	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 

@@ -18,10 +18,10 @@ limitations under the License.
 package kubernetes
 
 import (
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
-	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 func LoadResourceFromYaml(data string) (runtime.Object, error) {

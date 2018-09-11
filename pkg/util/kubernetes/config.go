@@ -18,10 +18,10 @@ limitations under the License.
 package kubernetes
 
 import (
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
+	"k8s.io/client-go/tools/clientcmd"
 	"os/user"
 	"path/filepath"
-	"k8s.io/client-go/tools/clientcmd"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 )
 
 func InitKubeClient(kubeconfig string) error {

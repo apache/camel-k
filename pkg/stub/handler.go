@@ -22,8 +22,8 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/apache/camel-k/pkg/stub/action"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
 )
 
@@ -39,7 +39,7 @@ func NewHandler(ctx context.Context, namespace string) sdk.Handler {
 }
 
 type Handler struct {
-	actionPool	[]action.Action
+	actionPool []action.Action
 }
 
 func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {

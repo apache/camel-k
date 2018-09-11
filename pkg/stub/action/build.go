@@ -18,16 +18,16 @@ limitations under the License.
 package action
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"context"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/build"
-	"github.com/sirupsen/logrus"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/apache/camel-k/pkg/build/api"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/sirupsen/logrus"
 )
 
 type BuildAction struct {
-	buildManager	*build.BuildManager
+	buildManager *build.BuildManager
 }
 
 func NewBuildAction(ctx context.Context, namespace string) *BuildAction {
@@ -46,14 +46,14 @@ func (b *BuildAction) CanHandle(integration *v1alpha1.Integration) bool {
 
 func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
 	buildIdentifier := api.BuildIdentifier{
-		Name: integration.Name,
+		Name:   integration.Name,
 		Digest: integration.Status.Digest,
 	}
 	buildResult := b.buildManager.Get(buildIdentifier)
 	if buildResult.Status == api.BuildStatusNotRequested {
 		b.buildManager.Start(api.BuildSource{
 			Identifier: buildIdentifier,
-			Code: *integration.Spec.Source.Code, // FIXME possible panic
+			Code:       *integration.Spec.Source.Code, // FIXME possible panic
 		})
 		logrus.Info("Build started")
 	} else if buildResult.Status == api.BuildStatusError {

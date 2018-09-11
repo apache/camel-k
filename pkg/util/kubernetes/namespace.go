@@ -18,12 +18,12 @@ limitations under the License.
 package kubernetes
 
 import (
+	"github.com/pkg/errors"
+	"io/ioutil"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
-	"io/ioutil"
-	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func GetClientCurrentNamespace(kubeconfig string) (string, error) {

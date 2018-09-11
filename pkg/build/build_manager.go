@@ -18,22 +18,22 @@ limitations under the License.
 package build
 
 import (
-	"sync"
-	"github.com/apache/camel-k/pkg/build/local"
 	"context"
 	"github.com/apache/camel-k/pkg/build/api"
+	"github.com/apache/camel-k/pkg/build/local"
+	"sync"
 )
 
 // main facade to the image build system
 type BuildManager struct {
-	builds	map[api.BuildIdentifier]*api.BuildResult
-	mutex	sync.Mutex
-	builder	api.Builder
+	builds  map[api.BuildIdentifier]*api.BuildResult
+	mutex   sync.Mutex
+	builder api.Builder
 }
 
 func NewBuildManager(ctx context.Context, namespace string) *BuildManager {
 	return &BuildManager{
-		builds: make(map[api.BuildIdentifier]*api.BuildResult),
+		builds:  make(map[api.BuildIdentifier]*api.BuildResult),
 		builder: local.NewLocalBuilder(ctx, namespace),
 	}
 }

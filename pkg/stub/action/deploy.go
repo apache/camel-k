@@ -19,12 +19,12 @@ package action
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"github.com/pkg/errors"
+	"k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type DeployAction struct {
@@ -51,7 +51,7 @@ func (a *DeployAction) Handle(integration *v1alpha1.Integration) error {
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "could not create or replace deployment for integration " + integration.Name)
+		return errors.Wrap(err, "could not create or replace deployment for integration "+integration.Name)
 	}
 
 	target := integration.DeepCopy()
@@ -67,22 +67,22 @@ func (*DeployAction) getDeploymentFor(integration *v1alpha1.Integration) *v1.Dep
 	}
 	deployment := v1.Deployment{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "Deployment",
+			Kind:       "Deployment",
 			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: integration.Name,
-			Namespace: integration.Namespace,
-			Labels: integration.Labels,
+			Name:        integration.Name,
+			Namespace:   integration.Namespace,
+			Labels:      integration.Labels,
 			Annotations: integration.Annotations,
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					APIVersion: integration.APIVersion,
-					Kind: integration.Kind,
-					Name: integration.Name,
-					Controller: &controller,
+					APIVersion:         integration.APIVersion,
+					Kind:               integration.Kind,
+					Name:               integration.Name,
+					Controller:         &controller,
 					BlockOwnerDeletion: &blockOwnerDeletion,
-					UID: integration.UID,
+					UID:                integration.UID,
 				},
 			},
 		},
@@ -98,7 +98,7 @@ func (*DeployAction) getDeploymentFor(integration *v1alpha1.Integration) *v1.Dep
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name: integration.Name,
+							Name:  integration.Name,
 							Image: integration.Status.Image,
 						},
 					},

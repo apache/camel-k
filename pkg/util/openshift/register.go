@@ -52,7 +52,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	err = doAdd(build.AddToScheme, scheme, err)
 	err = doAdd(authorization.AddToScheme, scheme, err)
 
-
 	// Legacy "oapi" resources
 	err = doAdd(apps.AddToSchemeInCoreGroup, scheme, err)
 	err = doAdd(template.AddToSchemeInCoreGroup, scheme, err)

@@ -19,8 +19,8 @@ package action
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,8 +47,8 @@ func (a *MonitorAction) Handle(integration *v1alpha1.Integration) error {
 		logrus.Info("Integration ", integration.Name, " needs a rebuild")
 
 		target := integration.DeepCopy()
-		target.Status.Digest=hash
-		target.Status.Phase=v1alpha1.IntegrationPhaseBuilding
+		target.Status.Digest = hash
+		target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
 		return sdk.Update(target)
 	}
 
