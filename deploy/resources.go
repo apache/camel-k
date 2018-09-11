@@ -86,7 +86,6 @@ spec:
     metadata:
       labels:
         name: camel-k-operator
-        app: "camel-k"
     spec:
       serviceAccountName: camel-k-operator
       containers:
@@ -310,6 +309,29 @@ metadata:
   name: camel-k-operator
   labels:
     app: "camel-k"
+
+`
+	Resources["operator-service.yaml"] =
+		`
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: camel-k-operator
+    app: "camel-k"
+  name: camel-k-operator
+spec:
+  ports:
+    - name: metrics
+      port: 60000
+      protocol: TCP
+      targetPort: metrics
+  selector:
+    name: camel-k-operator
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
 
 `
 	Resources["operator.yaml"] =
