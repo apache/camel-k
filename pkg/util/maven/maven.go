@@ -19,14 +19,16 @@ package maven
 
 import (
 	"archive/tar"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"bytes"
+	"encoding/xml"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
-	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -35,7 +37,7 @@ const (
 )
 
 // Takes a project description and returns a binary tar with the built artifacts
-func Build(project Project) (string, error) {
+func Build(project ProjectDefinition) (string, error) {
 	buildDir, err := ioutil.TempDir("", buildDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven source files")
@@ -84,13 +86,13 @@ func mavenExtraOptions() string {
 	return ""
 }
 
-func createTar(buildDir string, project Project) (string, error) {
+func createTar(buildDir string, project ProjectDefinition) (string, error) {
 	artifactDir, err := ioutil.TempDir("", artifactDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
 	}
 
-	tarFileName := path.Join(artifactDir, project.ArtifactId+".tar")
+	tarFileName := path.Join(artifactDir, project.Project.ArtifactId+".tar")
 	tarFile, err := os.Create(tarFileName)
 	if err != nil {
 		return "", errors.Wrap(err, "cannot create tar file "+tarFileName)
@@ -98,7 +100,7 @@ func createTar(buildDir string, project Project) (string, error) {
 	defer tarFile.Close()
 
 	writer := tar.NewWriter(tarFile)
-	err = appendToTar(path.Join(buildDir, "target", project.ArtifactId+"-"+project.Version+".jar"), "", writer)
+	err = appendToTar(path.Join(buildDir, "target", project.Project.ArtifactId+"-"+project.Project.Version+".jar"), "", writer)
 	if err != nil {
 		return "", err
 	}
@@ -163,8 +165,12 @@ func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
 	return nil
 }
 
-func createMavenStructure(buildDir string, project Project) error {
-	err := writeFile(buildDir, "pom.xml", pomFileContent(project))
+func createMavenStructure(buildDir string, project ProjectDefinition) error {
+	pom, err := pomFileContent(project.Project)
+	if err != nil {
+		return err
+	}
+	err = writeFile(buildDir, "pom.xml", pom)
 	if err != nil {
 		return err
 	}
@@ -226,35 +232,17 @@ func envFileContent(env map[string]string) string {
 	return content
 }
 
-func pomFileContent(project Project) string {
-	basePom := `<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+func pomFileContent(project Project) (string, error) {
+	w := &bytes.Buffer{}
+	w.WriteString(xml.Header)
 
-  <groupId>` + project.GroupId + `</groupId>
-  <artifactId>` + project.ArtifactId + `</artifactId>
-  <version>` + project.Version + `</version>
+	e := xml.NewEncoder(w)
+	e.Indent("", "  ")
 
-  <dependencies>
-    #dependencies#
-  </dependencies>
-
-</project>
-`
-	depStr := ""
-	for _, dep := range project.Dependencies {
-		depStr += "\t\t<dependency>"
-		depStr += "\t\t\t<groupId>" + dep.GroupId + "</groupId>"
-		depStr += "\t\t\t<artifactId>" + dep.ArtifactId + "</artifactId>"
-		if dep.Version != "" {
-			depStr += "\t\t\t<version>" + dep.Version + "</version>"
-		}
-		depStr += "\t\t</dependency>"
-		depStr += "\n"
+	err := e.Encode(project)
+	if err != nil {
+		return "", err
 	}
 
-	pom := strings.Replace(basePom, "#dependencies#", depStr, 1)
-	return pom
+	return w.String(), nil
 }

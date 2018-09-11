@@ -19,17 +19,19 @@ package local
 
 import (
 	"context"
+	"encoding/xml"
+	"io/ioutil"
+	"time"
+
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"time"
 
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -105,23 +107,32 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 
 func (b *localBuilder) execute(source build.BuildSource) (string, error) {
 
-	project := maven.Project{
-		GroupId:    "org.apache.camel.k.integration",
-		ArtifactId: "camel-k-integration",
-		Version:    "1.0.0",
+	project := maven.ProjectDefinition{
+		Project: maven.Project{
+			XMLName:           xml.Name{Local: "project"},
+			XmlNs:             "http://maven.apache.org/POM/4.0.0",
+			XmlNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+			XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
+			ModelVersion:      "4.0.0",
+			GroupId:           "org.apache.camel.k.integration",
+			ArtifactId:        "camel-k-integration",
+			Version:           "1.0.0",
+			Dependencies: maven.Dependencies{
+				Dependencies: []maven.Dependency{
+					{
+						GroupId:    "org.apache.camel.k",
+						ArtifactId: "camel-k-runtime-jvm",
+						Version:    version.Version,
+					},
+				},
+			},
+		},
 		JavaSources: map[string]string{
 			"kamel/Routes.java": source.Code,
 		},
 		Env: map[string]string{
 			"JAVA_MAIN_CLASS":    "org.apache.camel.k.jvm.Application",
 			"CAMEL_K_ROUTES_URI": "classpath:kamel.Routes",
-		},
-		Dependencies: []maven.Dependency{
-			{
-				GroupId:    "org.apache.camel.k",
-				ArtifactId: "camel-k-runtime-jvm",
-				Version:    version.Version,
-			},
 		},
 	}
 
