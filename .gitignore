@@ -10,6 +10,7 @@
 *.iml
 .project
 .metadata
+.gopath
 
 # Temporary Build Files
 tmp/_output
