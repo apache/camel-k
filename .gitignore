@@ -17,6 +17,10 @@ tmp/_output
 tmp/_test
 tmp/_maven_output
 
+# eclipse / vscode
+.settings
+.classpath
+.factorypath
 
 # Created by https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
 
