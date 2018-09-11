@@ -48,7 +48,7 @@ This will configure the cluster with the Camel K custom resource definitions and
 
 **Note:** Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately this
 operation can be done once per cluster. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
-For Minishift, this means executing `oc login -u system:admin` before first-time installation only.
+For Minishift, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for first-time installation.
 
 ### Running a Integration
 
