@@ -19,7 +19,8 @@ package cmd
 
 import (
 	"fmt"
-	installutils "github.com/apache/camel-k/pkg/install"
+
+	"github.com/apache/camel-k/pkg/install"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
@@ -43,7 +44,7 @@ func NewCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 }
 
 func (o *InstallCmdOptions) install(cmd *cobra.Command, args []string) error {
-	err := installutils.SetupClusterwideResources()
+	err := install.SetupClusterwideResources()
 	if err != nil && errors.IsForbidden(err) {
 		// TODO explain that this is a one time operation and add a flag to do cluster-level operations only when logged as admin
 		fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
@@ -53,7 +54,7 @@ func (o *InstallCmdOptions) install(cmd *cobra.Command, args []string) error {
 
 	namespace := o.Namespace
 
-	err = installutils.InstallOperator(namespace)
+	err = install.Operator(namespace)
 	if err != nil {
 		return err
 	}
