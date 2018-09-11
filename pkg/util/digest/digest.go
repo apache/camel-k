@@ -20,10 +20,11 @@ package digest
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/version"
 	"math/rand"
 	"strconv"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/version"
 )
 
 // Compute a digest of the fields that are relevant for the deployment
@@ -33,8 +34,8 @@ func Compute(integration *v1alpha1.Integration) string {
 	// Operator version is relevant
 	hash.Write([]byte(version.Version))
 	// Integration relevant fields
-	if integration.Spec.Source.Code != nil {
-		hash.Write([]byte(*integration.Spec.Source.Code))
+	if integration.Spec.Source.Content != nil {
+		hash.Write([]byte(*integration.Spec.Source.Content))
 	}
 	// Add a letter at the beginning and use URL safe encoding
 	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))

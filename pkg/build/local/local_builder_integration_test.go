@@ -21,11 +21,12 @@ package local
 
 import (
 	"context"
+	"testing"
+
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestBuild(t *testing.T) {
@@ -38,7 +39,9 @@ func TestBuild(t *testing.T) {
 			Name:   "test0",
 			Digest: digest.Random(),
 		},
-		Code: code(),
+		Code: build.Code{
+			Content: code(),
+		},
 	})
 
 	res := <-execution
@@ -56,7 +59,9 @@ func TestDoubleBuild(t *testing.T) {
 			Name:   "test1",
 			Digest: digest.Random(),
 		},
-		Code: code(),
+		Code: build.Code{
+			Content: code(),
+		},
 	})
 
 	execution2 := builder.Build(build.BuildSource{
@@ -64,7 +69,9 @@ func TestDoubleBuild(t *testing.T) {
 			Name:   "test2",
 			Digest: digest.Random(),
 		},
-		Code: code(),
+		Code: build.Code{
+			Content: code(),
+		},
 	})
 
 	res1 := <-execution1
@@ -84,7 +91,9 @@ func TestFailedBuild(t *testing.T) {
 			Name:   "test3",
 			Digest: digest.Random(),
 		},
-		Code: code() + "-",
+		Code: build.Code{
+			Content: code() + "-",
+		},
 	})
 
 	res := <-execution

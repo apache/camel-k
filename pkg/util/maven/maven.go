@@ -26,6 +26,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -245,4 +247,29 @@ func pomFileContent(project Project) (string, error) {
 	}
 
 	return w.String(), nil
+}
+
+func ParseGAV(gav string) (Dependency, error) {
+	// <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
+	dep := Dependency{}
+	rex := regexp.MustCompile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?(:([^: ]+))?")
+	res := rex.FindStringSubmatch(gav)
+
+	dep.GroupId = res[1]
+	dep.ArtifactId = res[2]
+	dep.Type = "jar"
+
+	cnt := strings.Count(gav, ":")
+	if cnt == 2 {
+		dep.Version = res[4]
+	} else if cnt == 3 {
+		dep.Type = res[4]
+		dep.Version = res[6]
+	} else {
+		dep.Type = res[4]
+		dep.Classifier = res[6]
+		dep.Version = res[8]
+	}
+
+	return dep, nil
 }

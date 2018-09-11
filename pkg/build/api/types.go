@@ -20,12 +20,17 @@ package api
 // a request to build a specific code
 type BuildSource struct {
 	Identifier BuildIdentifier
-	Code       string
+	Code       Code
 }
 
 type BuildIdentifier struct {
 	Name   string
 	Digest string
+}
+
+type Code struct {
+	Name    string
+	Content string
 }
 
 // represents the result of a build

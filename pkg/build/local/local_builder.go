@@ -127,12 +127,12 @@ func (b *localBuilder) execute(source build.BuildSource) (string, error) {
 				},
 			},
 		},
-		JavaSources: map[string]string{
-			"kamel/Routes.java": source.Code,
+		Resources: map[string]string{
+			source.Code.Name: source.Code.Content,
 		},
 		Env: map[string]string{
 			"JAVA_MAIN_CLASS":    "org.apache.camel.k.jvm.Application",
-			"CAMEL_K_ROUTES_URI": "classpath:kamel.Routes",
+			"CAMEL_K_ROUTES_URI": "classpath:" + source.Code.Name,
 		},
 	}
 
