@@ -31,6 +31,7 @@ import (
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/util/watch"
 )
 
 type RunCmdOptions struct {
@@ -38,6 +39,7 @@ type RunCmdOptions struct {
 	Language        string
 	IntegrationName string
 	Dependencies    []string
+	Wait            bool
 }
 
 func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -54,8 +56,10 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&options.Language, "language", "l", "", "Programming Language used to write the file")
-	cmd.Flags().StringVarP(&options.IntegrationName, "name", "", "", "The integration name")
+	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
+	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
+	cmd.ParseFlags(os.Args)
 
 	return &cmd
 }
@@ -74,9 +78,61 @@ func (*RunCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 }
 
 func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
-	code, err := o.loadCode(args[0])
+	integration, err := o.createIntegration(cmd, args)
 	if err != nil {
 		return err
+	}
+	if o.Wait {
+		err = o.waitForIntegrationReady(integration)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (o *RunCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) error {
+	// Block this goroutine until the integration is in a final status
+	changes, err := watch.WatchStateChanges(o.Context, integration)
+	if err != nil {
+		return err
+	}
+
+	var lastStatusSeen *v1alpha1.IntegrationStatus
+
+watcher:
+	for {
+		select {
+		case <-o.Context.Done():
+			return nil
+		case i, ok := <-changes:
+			if !ok {
+				break watcher
+			}
+			lastStatusSeen = &i.Status
+			phase := string(i.Status.Phase)
+			if phase != "" {
+				fmt.Println("integration \""+integration.Name+"\" in phase", phase)
+				// TODO when we add health checks, we should wait until they are passed
+				if i.Status.Phase == v1alpha1.IntegrationPhaseRunning || i.Status.Phase == v1alpha1.IntegrationPhaseError {
+					// TODO display some error info when available in the status
+					break watcher
+				}
+			}
+		}
+	}
+
+	// TODO we may not be able to reach this state, since the build will be done without sources (until we add health checks)
+	if lastStatusSeen != nil && lastStatusSeen.Phase == v1alpha1.IntegrationPhaseError {
+		return errors.New("integration deployment failed")
+	}
+	return nil
+}
+
+func (o *RunCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v1alpha1.Integration, error) {
+	code, err := o.loadCode(args[0])
+	if err != nil {
+		return nil, err
 	}
 
 	namespace := o.Namespace
@@ -124,14 +180,14 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		clone := integration.DeepCopy()
 		err = sdk.Get(clone)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		integration.ResourceVersion = clone.ResourceVersion
 		err = sdk.Update(&integration)
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !existed {
@@ -139,7 +195,7 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Printf("integration \"%s\" updated\n", name)
 	}
-	return nil
+	return &integration, nil
 }
 
 func (*RunCmdOptions) loadCode(fileName string) (string, error) {
