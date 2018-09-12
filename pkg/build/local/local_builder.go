@@ -280,10 +280,8 @@ func generateProjectDefinition(source build.BuildSource) (maven.ProjectDefinitio
 				Dependencies: make([]maven.Dependency, 0),
 			},
 		},
-		Resources: map[string]string{
-			source.Code.Name: source.Code.Content,
-		},
-		Env: make(map[string]string),
+		Resources: make(map[string]string),
+		Env:       make(map[string]string),
 	}
 
 	//
@@ -310,18 +308,6 @@ func generateProjectDefinition(source build.BuildSource) (maven.ProjectDefinitio
 		} else {
 			return maven.ProjectDefinition{}, fmt.Errorf("unknown dependency type: %s", d)
 		}
-	}
-
-	//
-	// set-up env
-	//
-
-	project.Env["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
-	project.Env["CAMEL_K_ROUTES_URI"] = "classpath:" + source.Code.Name
-
-	// Don't set the language if not set
-	if source.Code.Language != "" {
-		project.Env["CAMEL_K_ROUTES_LANGUAGE"] = source.Code.Language
 	}
 
 	return project, nil
