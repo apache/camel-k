@@ -277,6 +277,11 @@ func (in *SourceSpec) DeepCopyInto(out *SourceSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Language != nil {
+		in, out := &in.Language, &out.Language
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 

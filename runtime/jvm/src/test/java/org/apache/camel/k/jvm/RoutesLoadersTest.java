@@ -25,15 +25,15 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RouteLoadersTest {
+public class RoutesLoadersTest {
 
     @Test
     public void testLoadClass() throws Exception {
         String resource = "classpath:" + MyRoutes.class.getCanonicalName();
-        RoutesLoader loader = RouteLoaders.loaderFor(resource);
+        RoutesLoader loader = Routes.loaderForResource(resource);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RouteLoaders.JavaClass);
+        assertThat(loader).isSameAs(RoutesLoaders.JavaClass);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -47,10 +47,10 @@ public class RouteLoadersTest {
     @Test
     public void testLoadJava() throws Exception {
         String resource = "classpath:MyRoutes.java";
-        RoutesLoader loader = RouteLoaders.loaderFor(resource);
+        RoutesLoader loader = Routes.loaderForResource(resource);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RouteLoaders.JavaSource);
+        assertThat(loader).isSameAs(RoutesLoaders.JavaSource);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -64,10 +64,27 @@ public class RouteLoadersTest {
     @Test
     public void testLoadJavaScript() throws Exception {
         String resource = "classpath:routes.js";
-        RoutesLoader loader = RouteLoaders.loaderFor(resource);
+        RoutesLoader loader = Routes.loaderForResource(resource);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RouteLoaders.JavaScript);
+        assertThat(loader).isSameAs(RoutesLoaders.JavaScript);
+        assertThat(builder).isNotNull();
+
+        builder.configure();
+
+        List<RouteDefinition> routes = builder.getRouteCollection().getRoutes();
+        assertThat(routes).hasSize(1);
+        assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
+        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
+    }
+
+    @Test
+    public void testLoadJavaScriptWithCustomExtension() throws Exception {
+        String resource = "classpath:routes.mytype";
+        RoutesLoader loader = Routes.loaderFor(resource, "js");
+        RouteBuilder builder = loader.load(resource);
+
+        assertThat(loader).isSameAs(RoutesLoaders.JavaScript);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -81,10 +98,10 @@ public class RouteLoadersTest {
     @Test
     public void testLoadGroovy() throws Exception {
         String resource = "classpath:routes.groovy";
-        RoutesLoader loader = RouteLoaders.loaderFor(resource);
+        RoutesLoader loader = Routes.loaderForResource(resource);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RouteLoaders.Groovy);
+        assertThat(loader).isSameAs(RoutesLoaders.Groovy);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -97,11 +114,16 @@ public class RouteLoadersTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testResourceWithoutScheme() {
-        RouteLoaders.loaderFor("routes.js");
+        Routes.loaderForResource("routes.js");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testResourceWithIllegalScheme() {
-        RouteLoaders.loaderFor("http:routes.js");
+        Routes.loaderForResource("http:routes.js");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnsupportedLanguage() {
+        Routes.loaderForLanguage("  test");
     }
 }

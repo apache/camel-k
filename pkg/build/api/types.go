@@ -29,8 +29,9 @@ type BuildIdentifier struct {
 }
 
 type Code struct {
-	Name    string
-	Content string
+	Name     string
+	Content  string
+	Language string
 }
 
 // represents the result of a build
