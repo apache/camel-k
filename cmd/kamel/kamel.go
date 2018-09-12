@@ -22,10 +22,12 @@ import (
 	"github.com/apache/camel-k/pkg/client/cmd"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"os"
+	"context"
 )
 
 func main() {
-	rootCmd, err := cmd.NewKamelCommand()
+	ctx := context.Background()
+	rootCmd, err := cmd.NewKamelCommand(ctx)
 	exitOnError(err)
 
 	err = rootCmd.Execute()

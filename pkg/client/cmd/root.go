@@ -23,15 +23,19 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"context"
 )
 
 type RootCmdOptions struct {
+	Context    context.Context
 	KubeConfig string
 	Namespace  string
 }
 
-func NewKamelCommand() (*cobra.Command, error) {
-	options := RootCmdOptions{}
+func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
+	options := RootCmdOptions{
+		Context: ctx,
+	}
 	var cmd = cobra.Command{
 		Use:   "kamel",
 		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
