@@ -131,8 +131,9 @@ func (b *localBuilder) execute(source build.BuildSource) (string, error) {
 			source.Code.Name: source.Code.Content,
 		},
 		Env: map[string]string{
-			"JAVA_MAIN_CLASS":    "org.apache.camel.k.jvm.Application",
-			"CAMEL_K_ROUTES_URI": "classpath:" + source.Code.Name,
+			"JAVA_MAIN_CLASS":         "org.apache.camel.k.jvm.Application",
+			"CAMEL_K_ROUTES_URI":      "classpath:" + source.Code.Name,
+			"CAMEL_K_ROUTES_LANGUAGE": source.Code.Language,
 		},
 	}
 

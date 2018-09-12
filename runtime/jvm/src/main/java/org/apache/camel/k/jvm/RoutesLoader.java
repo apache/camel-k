@@ -16,10 +16,25 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.apache.camel.builder.RouteBuilder;
 
 public interface RoutesLoader extends Predicate<String> {
+    /**
+     * Provides a list of the languages supported by this loader.
+     *
+     * @return the supported languages.
+     */
+    List<String> getSupportedLanguages();
+
+    /**
+     * Creates a camel {@link RouteBuilder} from the given resource.
+     *
+     * @param resource the location fo the resource to load.
+     * @return the RouteBuilder.
+     * @throws Exception
+     */
     RouteBuilder load(String resource) throws Exception;
 }
