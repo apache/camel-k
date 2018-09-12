@@ -56,6 +56,10 @@ func installResource(namespace string, name string) error {
 
 	err = sdk.Create(obj)
 	if err != nil && errors.IsAlreadyExists(err) {
+		// Don't recreate Service object
+		if obj.GetObjectKind().GroupVersionKind().Kind == "Service" {
+			return nil
+		}
 		return sdk.Update(obj)
 	}
 	return err
