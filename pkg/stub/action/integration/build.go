@@ -55,8 +55,9 @@ func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
 		b.buildManager.Start(api.BuildSource{
 			Identifier: buildIdentifier,
 			Code: api.Code{
-				Name:    *integration.Spec.Source.Name,
-				Content: *integration.Spec.Source.Content,
+				Name:     *integration.Spec.Source.Name,
+				Content:  *integration.Spec.Source.Content,
+				Language: *integration.Spec.Source.Language,
 			}, // FIXME possible panic
 		})
 		logrus.Info("Build started")

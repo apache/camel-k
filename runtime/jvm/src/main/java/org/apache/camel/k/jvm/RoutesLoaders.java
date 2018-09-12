@@ -16,12 +16,11 @@
  */
 package org.apache.camel.k.jvm;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -40,16 +39,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.joor.Reflect;
 
-public enum RouteLoaders implements RoutesLoader {
+import static org.apache.camel.k.jvm.Routes.SCHEME_CLASSPATH;
+
+public enum RoutesLoaders implements RoutesLoader {
     JavaClass {
         @Override
+        public List<String> getSupportedLanguages() {
+            return Arrays.asList("class");
+        }
+
+        @Override
         public boolean test(String resource) {
-            return !isScripting(resource) && hasSupportedScheme(resource);
+            //TODO: add support for compiled classes
+            return !Routes.isScripting(resource) && !resource.endsWith(".class");
         }
 
         @Override
         public RouteBuilder load(String resource) throws Exception {
-            String path = resource.substring(Application.SCHEME_CLASSPATH.length());
+            String path = resource.substring(SCHEME_CLASSPATH.length());
             Class<?> type = Class.forName(path);
 
             if (!RouteBuilder.class.isAssignableFrom(type)) {
@@ -61,13 +68,21 @@ public enum RouteLoaders implements RoutesLoader {
     },
     JavaSource {
         @Override
+        public List<String> getSupportedLanguages() {
+            return Arrays.asList("java");
+        }
+
+        @Override
         public boolean test(String resource) {
-            return isScripting(resource, "java") && hasSupportedScheme(resource);
+            String ext = StringUtils.substringAfterLast(resource, ".");
+            List<String> langs = getSupportedLanguages();
+
+            return langs.contains(ext);
         }
 
         @Override
         public RouteBuilder load(String resource) throws Exception {
-            try (InputStream is = is(resource)) {
+            try (InputStream is = Routes.loadResourceAsInputStream(resource)) {
                 String name = StringUtils.substringAfter(resource, ":");
                 name = StringUtils.removeEnd(name, ".java");
                 name = StringUtils.removeStart(name, "/");
@@ -78,8 +93,16 @@ public enum RouteLoaders implements RoutesLoader {
     },
     JavaScript {
         @Override
+        public List<String> getSupportedLanguages() {
+            return Arrays.asList("js");
+        }
+
+        @Override
         public boolean test(String resource) {
-            return isScripting(resource, "js") && hasSupportedScheme(resource);
+            String ext = StringUtils.substringAfterLast(resource, ".");
+            List<String> langs = getSupportedLanguages();
+
+            return langs.contains(ext);
         }
 
         @Override
@@ -98,7 +121,7 @@ public enum RouteLoaders implements RoutesLoader {
                     bindings.put("components", new Components(context));
                     bindings.put("from", (Function<String, RouteDefinition>) uri -> from(uri));
 
-                    try (InputStream is = is(resource)) {
+                    try (InputStream is = Routes.loadResourceAsInputStream(resource)) {
                         engine.eval(new InputStreamReader(is), bindings);
                     }
                 }
@@ -107,8 +130,16 @@ public enum RouteLoaders implements RoutesLoader {
     },
     Groovy {
         @Override
+        public List<String> getSupportedLanguages() {
+            return Arrays.asList("groovy");
+        }
+
+        @Override
         public boolean test(String resource) {
-            return isScripting(resource, "groovy") && hasSupportedScheme(resource);
+            String ext = StringUtils.substringAfterLast(resource, ".");
+            List<String> langs = getSupportedLanguages();
+
+            return langs.contains(ext);
         }
 
         @Override
@@ -122,7 +153,7 @@ public enum RouteLoaders implements RoutesLoader {
                     ClassLoader cl = Thread.currentThread().getContextClassLoader();
                     GroovyShell sh = new GroovyShell(cl, new Binding(), cc);
 
-                    try (InputStream is = is(resource)) {
+                    try (InputStream is = Routes.loadResourceAsInputStream(resource)) {
                         Reader reader = new InputStreamReader(is);
                         DelegatingScript script = (DelegatingScript) sh.parse(reader);
 
@@ -142,42 +173,6 @@ public enum RouteLoaders implements RoutesLoader {
     // TODO: move to a dedicate class
     // ********************************
 
-    public static boolean isScripting(String resource, String type) {
-        return type.startsWith(".") ? resource.endsWith(type) : resource.endsWith("." + type);
-    }
-
-    public static boolean isScripting(String resource) {
-        return resource.endsWith(".java") || resource.endsWith(".js") || resource.endsWith(".groovy");
-    }
-
-    public static boolean hasSupportedScheme(String resource) {
-        return resource.startsWith(Application.SCHEME_CLASSPATH) || resource.startsWith(Application.SCHEME_FILE);
-    }
-
-    public static RoutesLoader loaderFor(String resource) {
-        for (RoutesLoader loader: RouteLoaders.values()) {
-            if (loader.test(resource)) {
-                return loader;
-            }
-        }
-
-        throw new IllegalArgumentException("Unable to find loader for: " + resource);
-    }
-
-    private static InputStream is(String resource) throws IOException {
-        if (resource.startsWith(Application.SCHEME_CLASSPATH)) {
-            String location = StringUtils.removeStart(resource, Application.SCHEME_CLASSPATH);
-            if (!location.startsWith("/")) {
-                location = "/" + location;
-            }
-
-            return Application.class.getResourceAsStream(location);
-        } else {
-            return Files.newInputStream(
-                Paths.get(resource.substring(Application.SCHEME_FILE.length()))
-            );
-        }
-    }
 
     public static class Components {
         private CamelContext context;
