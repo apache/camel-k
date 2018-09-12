@@ -35,7 +35,8 @@ import (
 
 type RunCmdOptions struct {
 	*RootCmdOptions
-	Language string
+	Language        string
+	IntegrationName string
 }
 
 func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -51,6 +52,7 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&options.Language, "language", "l", "", "Programming Language used to write the file")
+	cmd.Flags().StringVarP(&options.IntegrationName, "integrationName", "i", "", "The integration name")
 	cmd.ParseFlags(os.Args)
 
 	return &cmd
@@ -77,12 +79,18 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	namespace := o.Namespace
 
-	name := kubernetes.SanitizeName(args[0])
-	if name == "" {
-		name = "integration"
+	name := ""
+	if o.IntegrationName != "" {
+		name = o.IntegrationName
+	} else {
+		name = kubernetes.SanitizeName(args[0])
+		if name == "" {
+			name = "integration"
+		}
 	}
 
 	codeName := args[0]
+
 	if idx := strings.LastIndexByte(args[0], os.PathSeparator); idx > -1 {
 		codeName = codeName[idx:]
 	}
