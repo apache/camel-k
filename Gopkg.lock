@@ -342,6 +342,14 @@
   version = "v1.0.2"
 
 [[projects]]
+  digest = "1:65c01b68bc4f813c18cdd48c98c38867dd0681b9584138c0403a0865b9bfdfb2"
+  name = "github.com/stoewer/go-strcase"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "c8136b55823dc6af966d084a06056c5575f6400f"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:bacb8b590716ab7c33f2277240972c9582d389593ee8d66fc10074e0508b8126"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
@@ -705,6 +713,7 @@
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
+    "github.com/stoewer/go-strcase",
     "github.com/stretchr/testify/assert",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
