@@ -39,15 +39,16 @@ type Integration struct {
 }
 
 type IntegrationSpec struct {
-	Replicas *int32     `json:"replicas,omitempty"`
-	Source   SourceSpec `json:"source,omitempty"`
-	Context  string     `json:"context,omitempty"`
+	Replicas     *int32     `json:"replicas,omitempty"`
+	Source       SourceSpec `json:"source,omitempty"`
+	Context      string     `json:"context,omitempty"`
+	Dependencies []string   `json:"dependencies,omitempty"`
 }
 
 type SourceSpec struct {
-	Name     *string `json:"name,omitempty"`
-	Content  *string `json:"content,omitempty"`
-	Language *string `json:"language,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Content  string `json:"content,omitempty"`
+	Language string `json:"language,omitempty"`
 }
 
 type IntegrationStatus struct {

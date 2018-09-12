@@ -34,8 +34,8 @@ func Compute(integration *v1alpha1.Integration) string {
 	// Operator version is relevant
 	hash.Write([]byte(version.Version))
 	// Integration relevant fields
-	if integration.Spec.Source.Content != nil {
-		hash.Write([]byte(*integration.Spec.Source.Content))
+	if integration.Spec.Source.Content != "" {
+		hash.Write([]byte(integration.Spec.Source.Content))
 	}
 	// Add a letter at the beginning and use URL safe encoding
 	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))

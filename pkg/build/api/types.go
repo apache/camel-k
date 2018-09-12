@@ -19,8 +19,9 @@ package api
 
 // a request to build a specific code
 type BuildSource struct {
-	Identifier BuildIdentifier
-	Code       Code
+	Identifier   BuildIdentifier
+	Code         Code
+	Dependencies []string
 }
 
 type BuildIdentifier struct {

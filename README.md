@@ -187,8 +187,15 @@ If you want to install everything you have in your source code and see it runnin
 Now you can play with Camel K:
 
 ```
-./kamel run Sample.java
+./kamel run runtime/examples/Sample.java
 ```
+
+To add additional dependencies to your routes: 
+
+```
+./kamel run -d camel:dns runtime/examples/dns.js
+```
+
 
 ### Debugging and Running from IDE
 

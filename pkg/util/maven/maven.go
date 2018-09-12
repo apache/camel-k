@@ -168,7 +168,7 @@ func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
 }
 
 func createMavenStructure(buildDir string, project ProjectDefinition) error {
-	pom, err := pomFileContent(project.Project)
+	pom, err := GeneratePomFileContent(project.Project)
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func envFileContent(env map[string]string) string {
 	return content
 }
 
-func pomFileContent(project Project) (string, error) {
+func GeneratePomFileContent(project Project) (string, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
 
