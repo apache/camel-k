@@ -372,6 +372,9 @@ spec:
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:0.0.1-SNAPSHOT
+          ports:
+          - containerPort: 60000
+            name: metrics
           command:
           - camel-k-operator
           imagePullPolicy: Always
@@ -380,6 +383,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: OPERATOR_NAME
+              value: "camel-k-operator"
 
 `
 	Resources["user-cluster-role.yaml"] =

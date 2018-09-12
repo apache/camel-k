@@ -19,50 +19,40 @@ package build
 
 import (
 	"context"
+	"sync"
+
 	"github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/build/local"
-	"sync"
 )
 
 // main facade to the image build system
-type BuildManager struct {
-	builds  map[api.BuildIdentifier]*api.BuildResult
-	mutex   sync.Mutex
+type Manager struct {
+	builds  sync.Map
 	builder api.Builder
 }
 
-func NewBuildManager(ctx context.Context, namespace string) *BuildManager {
-	return &BuildManager{
-		builds:  make(map[api.BuildIdentifier]*api.BuildResult),
+func NewManager(ctx context.Context, namespace string) *Manager {
+	return &Manager{
 		builder: local.NewLocalBuilder(ctx, namespace),
 	}
 }
 
-func (m *BuildManager) Get(identifier api.BuildIdentifier) api.BuildResult {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	if info, present := m.builds[identifier]; !present || info == nil {
+func (m *Manager) Get(identifier api.BuildIdentifier) api.BuildResult {
+	if info, present := m.builds.Load(identifier); !present || info == nil {
 		return noBuildInfo()
 	} else {
-		return *info
+		return *info.(*api.BuildResult)
 	}
 }
 
-func (m *BuildManager) Start(source api.BuildSource) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
+func (m *Manager) Start(source api.BuildSource) {
 	initialBuildInfo := initialBuildInfo(&source)
-	m.builds[source.Identifier] = &initialBuildInfo
+	m.builds.Store(source.Identifier, &initialBuildInfo)
 
 	resChannel := m.builder.Build(source)
 	go func() {
 		res := <-resChannel
-		m.mutex.Lock()
-		defer m.mutex.Unlock()
-
-		m.builds[res.Source.Identifier] = &res
+		m.builds.Store(res.Source.Identifier, &res)
 	}()
 }
 

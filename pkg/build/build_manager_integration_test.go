@@ -32,7 +32,7 @@ import (
 
 func TestBuild(t *testing.T) {
 	ctx := context.TODO()
-	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
+	buildManager := NewManager(ctx, test.GetTargetNamespace())
 	identifier := build.BuildIdentifier{
 		Name:   "man-test",
 		Digest: digest.Random(),
@@ -62,7 +62,7 @@ func TestBuild(t *testing.T) {
 func TestFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	buildManager := NewBuildManager(ctx, test.GetTargetNamespace())
+	buildManager := NewManager(ctx, test.GetTargetNamespace())
 	identifier := build.BuildIdentifier{
 		Name:   "man-test-2",
 		Digest: digest.Random(),

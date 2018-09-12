@@ -29,7 +29,8 @@ func NewCmdContext(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Long:  `Configure an Integration Context.`,
 	}
 
-	cmd.AddCommand(newContextEditCmd(rootCmdOptions))
+	cmd.AddCommand(newContextCreateCmd(rootCmdOptions))
+	cmd.AddCommand(newContextDeleteCmd(rootCmdOptions))
 	cmd.AddCommand(newContextGetCmd(rootCmdOptions))
 
 	return &cmd

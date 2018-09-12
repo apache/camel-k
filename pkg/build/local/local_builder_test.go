@@ -27,8 +27,8 @@ import (
 func TestProjectGeneration(t *testing.T) {
 	source := api.BuildSource{
 		Identifier: api.BuildIdentifier{
-			Name:   "my-integration",
-			Digest: "",
+			Name:      "my-integration",
+			Qualifier: "",
 		},
 		Code: api.Code{
 			Name:     "my-code.js",
@@ -59,8 +59,8 @@ func TestProjectGeneration(t *testing.T) {
 func TestProjectGenerationWithFailure(t *testing.T) {
 	source := api.BuildSource{
 		Identifier: api.BuildIdentifier{
-			Name:   "my-integration",
-			Digest: "",
+			Name:      "my-integration",
+			Qualifier: "",
 		},
 		Code: api.Code{
 			Name:     "my-code.js",

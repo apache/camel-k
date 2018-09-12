@@ -18,29 +18,58 @@ limitations under the License.
 package action
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"context"
+
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/sirupsen/logrus"
+
+	"github.com/apache/camel-k/pkg/build/api"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/build"
 )
 
-func NewIntegrationContextBuildAction() IntegrationContextAction {
-	return &integrationContextBuildAction{}
+func NewIntegrationContextBuildAction(ctx context.Context, namespace string) IntegrationContextAction {
+	return &integrationContextBuildAction{
+		buildManager: build.NewManager(ctx, namespace),
+	}
 }
 
-// start edit context
 type integrationContextBuildAction struct {
+	buildManager *build.Manager
 }
 
 func (action *integrationContextBuildAction) Name() string {
-	return "Edit"
+	return "build"
 }
 
 func (action *integrationContextBuildAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
-	// TODO: implement
-	return false
+	return context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding
 }
 
-func (action *integrationContextBuildAction) Handle(integration *v1alpha1.IntegrationContext) error {
-	target := integration.DeepCopy()
-	// TODO: implement
-	return sdk.Update(target)
+func (action *integrationContextBuildAction) Handle(context *v1alpha1.IntegrationContext) error {
+	buildIdentifier := api.BuildIdentifier{
+		Name:      "context-" + context.Name,
+		Qualifier: context.ResourceVersion,
+	}
+
+	buildResult := action.buildManager.Get(buildIdentifier)
+	if buildResult.Status == api.BuildStatusNotRequested {
+		action.buildManager.Start(api.BuildSource{
+			Identifier:   buildIdentifier,
+			Dependencies: context.Spec.Dependencies,
+		})
+		logrus.Info("Build started")
+	} else if buildResult.Status == api.BuildStatusError {
+		target := context.DeepCopy()
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
+		return sdk.Update(target)
+	} else if buildResult.Status == api.BuildStatusCompleted {
+		target := context.DeepCopy()
+		target.Status.Image = buildResult.Image
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
+		return sdk.Update(target)
+	}
+
+	return nil
 }

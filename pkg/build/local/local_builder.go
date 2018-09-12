@@ -154,7 +154,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 				Output: buildv1.BuildOutput{
 					To: &v1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: "camel-k-" + source.Identifier.Name + ":" + source.Identifier.Digest,
+						Name: "camel-k-" + source.Identifier.Name + ":" + source.Identifier.Qualifier,
 					},
 				},
 			},
@@ -248,7 +248,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 	if is.Status.DockerImageRepository == "" {
 		return "", errors.New("dockerImageRepository not available in ImageStream")
 	}
-	return is.Status.DockerImageRepository + ":" + source.Identifier.Digest, nil
+	return is.Status.DockerImageRepository + ":" + source.Identifier.Qualifier, nil
 }
 
 func generateProjectDefinition(source build.BuildSource) (maven.ProjectDefinition, error) {
