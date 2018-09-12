@@ -52,7 +52,7 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&options.Language, "language", "l", "", "Programming Language used to write the file")
-	cmd.Flags().StringVarP(&options.IntegrationName, "integrationName", "i", "", "The integration name")
+	cmd.Flags().StringVarP(&options.IntegrationName, "name", "", "", "The integration name")
 	cmd.ParseFlags(os.Args)
 
 	return &cmd
@@ -82,6 +82,7 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 	name := ""
 	if o.IntegrationName != "" {
 		name = o.IntegrationName
+		name = kubernetes.SanitizeName(name)
 	} else {
 		name = kubernetes.SanitizeName(args[0])
 		if name == "" {
