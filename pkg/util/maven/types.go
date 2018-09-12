@@ -29,19 +29,39 @@ type ProjectDefinition struct {
 }
 
 type Project struct {
-	XMLName           xml.Name
-	XmlNs             string       `xml:"xmlns,attr"`
-	XmlNsXsi          string       `xml:"xmlns:xsi,attr"`
-	XsiSchemaLocation string       `xml:"xsi:schemaLocation,attr"`
-	ModelVersion      string       `xml:"modelVersion"`
-	GroupId           string       `xml:"groupId"`
-	ArtifactId        string       `xml:"artifactId"`
-	Version           string       `xml:"version"`
-	Dependencies      Dependencies `xml:"dependencies"`
+	XMLName              xml.Name
+	XmlNs                string               `xml:"xmlns,attr"`
+	XmlNsXsi             string               `xml:"xmlns:xsi,attr"`
+	XsiSchemaLocation    string               `xml:"xsi:schemaLocation,attr"`
+	ModelVersion         string               `xml:"modelVersion"`
+	GroupId              string               `xml:"groupId"`
+	ArtifactId           string               `xml:"artifactId"`
+	Version              string               `xml:"version"`
+	DependencyManagement DependencyManagement `xml:"dependencyManagement"`
+	Dependencies         Dependencies         `xml:"dependencies"`
+}
+
+type DependencyManagement struct {
+	Dependencies Dependencies `xml:"dependencies"`
 }
 
 type Dependencies struct {
 	Dependencies []Dependency `xml:"dependency"`
+}
+
+func (deps *Dependencies) Add(dep Dependency) {
+	deps.Dependencies = append(deps.Dependencies, dep)
+}
+
+func (deps *Dependencies) AddGAV(groupId string, artifactId string, version string) {
+	deps.Add(NewDependency(groupId, artifactId, version))
+}
+
+func (deps *Dependencies) AddEncodedGAV(gav string) {
+	if d, err := ParseGAV(gav); err == nil {
+		// TODO: error handling
+		deps.Add(d)
+	}
 }
 
 type Dependency struct {
@@ -50,6 +70,7 @@ type Dependency struct {
 	Version    string `xml:"version,omitempty"`
 	Type       string `xml:"type,omitempty"`
 	Classifier string `xml:"classifier,omitempty"`
+	Scope      string `xml:"scope,omitempty"`
 }
 
 func NewDependency(groupId string, artifactId string, version string) Dependency {

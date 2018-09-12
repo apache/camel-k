@@ -17,6 +17,9 @@ build-runtime:
 dep:
 	dep ensure -v
 
+generate:
+	operator-sdk generate k8s
+
 clean:
 	mvn clean -f ./runtime/pom.xml
 	go clean

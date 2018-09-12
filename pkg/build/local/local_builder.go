@@ -20,7 +20,9 @@ package local
 import (
 	"context"
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	buildv1 "github.com/openshift/api/build/v1"
@@ -106,41 +108,15 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 }
 
 func (b *localBuilder) execute(source build.BuildSource) (string, error) {
-
-	project := maven.ProjectDefinition{
-		Project: maven.Project{
-			XMLName:           xml.Name{Local: "project"},
-			XmlNs:             "http://maven.apache.org/POM/4.0.0",
-			XmlNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
-			XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-			ModelVersion:      "4.0.0",
-			GroupId:           "org.apache.camel.k.integration",
-			ArtifactId:        "camel-k-integration",
-			Version:           "1.0.0",
-			Dependencies: maven.Dependencies{
-				Dependencies: []maven.Dependency{
-					{
-						GroupId:    "org.apache.camel.k",
-						ArtifactId: "camel-k-runtime-jvm",
-						Version:    version.Version,
-					},
-				},
-			},
-		},
-		Resources: map[string]string{
-			source.Code.Name: source.Code.Content,
-		},
-		Env: map[string]string{
-			"JAVA_MAIN_CLASS":         "org.apache.camel.k.jvm.Application",
-			"CAMEL_K_ROUTES_URI":      "classpath:" + source.Code.Name,
-			"CAMEL_K_ROUTES_LANGUAGE": source.Code.Language,
-		},
+	project, err := generateProjectDefinition(source)
+	if err != nil {
+		return "", err
 	}
-
 	tarFileName, err := maven.Build(project)
 	if err != nil {
 		return "", err
 	}
+
 	logrus.Info("Created tar file ", tarFileName)
 
 	image, err := b.publish(tarFileName, source)
@@ -273,4 +249,80 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 		return "", errors.New("dockerImageRepository not available in ImageStream")
 	}
 	return is.Status.DockerImageRepository + ":" + source.Identifier.Digest, nil
+}
+
+func generateProjectDefinition(source build.BuildSource) (maven.ProjectDefinition, error) {
+	project := maven.ProjectDefinition{
+		Project: maven.Project{
+			XMLName:           xml.Name{Local: "project"},
+			XmlNs:             "http://maven.apache.org/POM/4.0.0",
+			XmlNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+			XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
+			ModelVersion:      "4.0.0",
+			GroupId:           "org.apache.camel.k.integration",
+			ArtifactId:        "camel-k-integration",
+			Version:           version.Version,
+			DependencyManagement: maven.DependencyManagement{
+				Dependencies: maven.Dependencies{
+					Dependencies: []maven.Dependency{
+						{
+							//TODO: camel version should be retrieved from an external source or provided as static version
+							GroupId:    "org.apache.camel",
+							ArtifactId: "camel-bom",
+							Version:    "2.22.1",
+							Type:       "pom",
+							Scope:      "import",
+						},
+					},
+				},
+			},
+			Dependencies: maven.Dependencies{
+				Dependencies: make([]maven.Dependency, 0),
+			},
+		},
+		Resources: map[string]string{
+			source.Code.Name: source.Code.Content,
+		},
+		Env: make(map[string]string),
+	}
+
+	//
+	// set-up dependencies
+	//
+
+	deps := &project.Project.Dependencies
+	deps.AddGAV("org.apache.camel.k", "camel-k-runtime-jvm", version.Version)
+
+	for _, d := range source.Dependencies {
+		if strings.HasPrefix(d, "camel:") {
+			artifactId := strings.TrimPrefix(d, "camel:")
+
+			if !strings.HasPrefix(artifactId, "camel-") {
+				artifactId = "camel-" + artifactId
+			}
+
+			deps.AddGAV("org.apache.camel", artifactId, "")
+		} else if strings.HasPrefix(d, "mvn:") {
+			mid := strings.TrimPrefix(d, "mvn:")
+			gav := strings.Replace(mid, "/", ":", -1)
+
+			deps.AddEncodedGAV(gav)
+		} else {
+			return maven.ProjectDefinition{}, fmt.Errorf("unknown dependency type: %s", d)
+		}
+	}
+
+	//
+	// set-up env
+	//
+
+	project.Env["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
+	project.Env["CAMEL_K_ROUTES_URI"] = "classpath:" + source.Code.Name
+
+	// Don't set the language if not set
+	if source.Code.Language != "" {
+		project.Env["CAMEL_K_ROUTES_LANGUAGE"] = source.Code.Language
+	}
+
+	return project, nil
 }

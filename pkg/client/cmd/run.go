@@ -37,12 +37,14 @@ type RunCmdOptions struct {
 	*RootCmdOptions
 	Language        string
 	IntegrationName string
+	Dependencies    []string
 }
 
 func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	options := RunCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
+
 	cmd := cobra.Command{
 		Use:   "run [file to run]",
 		Short: "Run a integration on Kubernetes",
@@ -53,7 +55,7 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	cmd.Flags().StringVarP(&options.Language, "language", "l", "", "Programming Language used to write the file")
 	cmd.Flags().StringVarP(&options.IntegrationName, "name", "", "", "The integration name")
-	cmd.ParseFlags(os.Args)
+	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 
 	return &cmd
 }
@@ -107,10 +109,11 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		},
 		Spec: v1alpha1.IntegrationSpec{
 			Source: v1alpha1.SourceSpec{
-				Name:     &codeName,
-				Content:  &code,
-				Language: &o.Language,
+				Name:     codeName,
+				Content:  code,
+				Language: o.Language,
 			},
+			Dependencies: o.Dependencies,
 		},
 	}
 
