@@ -18,9 +18,12 @@ limitations under the License.
 package kubernetes
 
 import (
+	"path"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/stoewer/go-strcase"
 )
 
 var disallowedChars *regexp.Regexp
@@ -31,7 +34,9 @@ func init() {
 
 func SanitizeName(name string) string {
 	name = strings.Split(name, ".")[0]
+	name = path.Base(name)
 	name = strings.ToLower(name)
+	name = strcase.KebabCase(name)
 	name = disallowedChars.ReplaceAllString(name, "")
 	name = strings.TrimFunc(name, isDisallowedStartEndChar)
 	return name
