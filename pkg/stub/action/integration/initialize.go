@@ -48,6 +48,6 @@ func (b *InitializeAction) Handle(integration *v1alpha1.Integration) error {
 	}
 	// update the status
 	target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
-	target.Status.Digest = digest.Compute(integration)
+	target.Status.Digest = digest.ComputeForIntegration(integration)
 	return sdk.Update(target)
 }

@@ -18,46 +18,54 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"os"
-	"text/tabwriter"
+	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 )
 
-func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := contextGetCommand{
+func newContextDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	impl := contextDeleteCommand{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:   "get",
-		Short: "Get defined Integration Context",
-		Long:  `Get defined Integration Context.`,
-		RunE:  options.run,
+		Use:   "delete",
+		Short: "Delete an Integration Context",
+		Long:  `Delete anIntegration Context.`,
+		Args:  impl.validateArgs,
+		RunE:  impl.run,
 	}
 
 	return &cmd
 }
 
-type contextGetCommand struct {
+type contextDeleteCommand struct {
 	*RootCmdOptions
 }
 
-func (command *contextGetCommand) run(cmd *cobra.Command, args []string) error {
-	ctxList := v1alpha1.NewIntegrationContextList()
-	if err := sdk.List(command.Namespace, &ctxList); err != nil {
+func (command *contextDeleteCommand) validateArgs(cmd *cobra.Command, args []string) error {
+	if len(args) != 1 {
+		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
+	}
+
+	return nil
+}
+
+func (command *contextDeleteCommand) run(cmd *cobra.Command, args []string) error {
+	name := kubernetes.SanitizeName(args[0])
+	ctx := v1alpha1.NewIntegrationContext(command.Namespace, name)
+
+	if err := sdk.Delete(&ctx); err != nil {
+		fmt.Printf("error deleting integration context %s, %s", ctx.Name, err)
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(w, "NAME\tSTATUS")
-	for _, ctx := range ctxList.Items {
-		fmt.Fprintf(w, "%s\t%s\n", ctx.Name, string(ctx.Status.Phase))
-	}
-	w.Flush()
+	fmt.Printf("integration context %s has been deleted", ctx.Name)
 
 	return nil
 }

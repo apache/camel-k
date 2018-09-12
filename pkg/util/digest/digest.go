@@ -27,16 +27,45 @@ import (
 	"github.com/apache/camel-k/version"
 )
 
-// Compute a digest of the fields that are relevant for the deployment
+// ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func Compute(integration *v1alpha1.Integration) string {
+func ComputeForIntegration(integration *v1alpha1.Integration) string {
 	hash := sha256.New()
 	// Operator version is relevant
 	hash.Write([]byte(version.Version))
-	// Integration relevant fields
+	// Integration Context is relevant
+	hash.Write([]byte(integration.Spec.Context))
+
+	// Integration code
 	if integration.Spec.Source.Content != "" {
 		hash.Write([]byte(integration.Spec.Source.Content))
 	}
+	// Integration dependencies
+	for _, item := range integration.Spec.Dependencies {
+		hash.Write([]byte(item))
+	}
+
+	// Add a letter at the beginning and use URL safe encoding
+	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+}
+
+// ComputeForIntegrationContext a digest of the fields that are relevant for the deployment
+// Produces a digest that can be used as docker image tag
+func ComputeForIntegrationContext(integration *v1alpha1.IntegrationContext) string {
+	hash := sha256.New()
+	// Operator version is relevant
+	hash.Write([]byte(version.Version))
+
+	for _, item := range integration.Spec.Dependencies {
+		hash.Write([]byte(item))
+	}
+	for _, item := range integration.Spec.Environment {
+		hash.Write([]byte(item.String()))
+	}
+	for _, item := range integration.Spec.Properties {
+		hash.Write([]byte(item.String()))
+	}
+
 	// Add a letter at the beginning and use URL safe encoding
 	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
 }

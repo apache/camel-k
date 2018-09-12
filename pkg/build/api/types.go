@@ -25,8 +25,8 @@ type BuildSource struct {
 }
 
 type BuildIdentifier struct {
-	Name   string
-	Digest string
+	Name      string
+	Qualifier string
 }
 
 type Code struct {

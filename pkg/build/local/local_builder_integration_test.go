@@ -36,8 +36,8 @@ func TestBuild(t *testing.T) {
 
 	execution := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
-			Name:   "test0",
-			Digest: digest.Random(),
+			Name:      "test0",
+			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
 			Content: code(),
@@ -56,8 +56,8 @@ func TestDoubleBuild(t *testing.T) {
 
 	execution1 := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
-			Name:   "test1",
-			Digest: digest.Random(),
+			Name:      "test1",
+			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
 			Content: code(),
@@ -66,8 +66,8 @@ func TestDoubleBuild(t *testing.T) {
 
 	execution2 := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
-			Name:   "test2",
-			Digest: digest.Random(),
+			Name:      "test2",
+			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
 			Content: code(),
@@ -88,8 +88,8 @@ func TestFailedBuild(t *testing.T) {
 
 	execution := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
-			Name:   "test3",
-			Digest: digest.Random(),
+			Name:      "test3",
+			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
 			Content: code() + "-",

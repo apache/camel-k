@@ -93,6 +93,7 @@ type PropertySpec struct {
 	Name  string
 	Value string
 }
+
 type EnvironmentSpec struct {
 	Name  string
 	Value string
@@ -100,18 +101,22 @@ type EnvironmentSpec struct {
 
 type IntegrationContextStatus struct {
 	Phase  IntegrationContextPhase `json:"phase,omitempty"`
-	Digest string                  `json:"digest,omitempty"`
 	Image  string                  `json:"image,omitempty"`
-	From   int                     `json:"from,omitempty"`
+	Digest string                  `json:"digest,omitempty"`
 }
 
 type IntegrationContextPhase string
 
 const (
-	// IntegrationContextPhaseDraft --
-	IntegrationContextPhaseDraft IntegrationContextPhase = "Draft"
+	// IntegrationContextKind --
+	IntegrationContextKind string = "IntegrationContext"
+
 	// IntegrationContextPhaseBuilding --
 	IntegrationContextPhaseBuilding IntegrationContextPhase = "Building"
+	// IntegrationContextPhaseDeploying --
+	IntegrationContextPhaseDeploying IntegrationContextPhase = "Deploying"
 	// IntegrationContextPhaseReady --
 	IntegrationContextPhaseReady IntegrationContextPhase = "Ready"
+	// IntegrationContextPhaseError --
+	IntegrationContextPhaseError IntegrationContextPhase = "Error"
 )

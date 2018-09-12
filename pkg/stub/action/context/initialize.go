@@ -19,28 +19,31 @@ package action
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
 
-func NewIntegrationContextSaveAction() IntegrationContextAction {
-	return &integrationContexSaveAction{}
+func NewIntegrationContextInitializeAction() IntegrationContextAction {
+	return &integrationContexInitializeAction{}
 }
 
-// start edit context
-type integrationContexSaveAction struct {
+type integrationContexInitializeAction struct {
 }
 
-func (action *integrationContexSaveAction) Name() string {
-	return "Edit"
+func (action *integrationContexInitializeAction) Name() string {
+	return "initialize"
 }
 
-func (action *integrationContexSaveAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
-	// TODO: implement
-	return false
+func (action *integrationContexInitializeAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+	return context.Status.Phase == ""
 }
 
-func (action *integrationContexSaveAction) Handle(integration *v1alpha1.IntegrationContext) error {
-	target := integration.DeepCopy()
-	// TODO: implement
+func (action *integrationContexInitializeAction) Handle(context *v1alpha1.IntegrationContext) error {
+	target := context.DeepCopy()
+
+	// update the status
+	target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
+	target.Status.Digest = digest.ComputeForIntegrationContext(context)
+
 	return sdk.Update(target)
 }
