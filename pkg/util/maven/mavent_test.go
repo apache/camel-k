@@ -30,6 +30,17 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
   <groupId>org.apache.camel.k.integration</groupId>
   <artifactId>camel-k-integration</artifactId>
   <version>1.0.0</version>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-bom</artifactId>
+        <version>2.22.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.apache.camel.k</groupId>
@@ -49,6 +60,19 @@ func TestPomGeneration(t *testing.T) {
 		GroupId:           "org.apache.camel.k.integration",
 		ArtifactId:        "camel-k-integration",
 		Version:           "1.0.0",
+		DependencyManagement: DependencyManagement{
+			Dependencies: Dependencies{
+				Dependencies: []Dependency{
+					{
+						GroupId:    "org.apache.camel",
+						ArtifactId: "camel-bom",
+						Version:    "2.22.1",
+						Type:       "pom",
+						Scope:      "import",
+					},
+				},
+			},
+		},
 		Dependencies: Dependencies{
 			Dependencies: []Dependency{
 				{
