@@ -36,7 +36,11 @@ func NewHandler(ctx context.Context, namespace string) sdk.Handler {
 			iaction.NewDeployAction(),
 			iaction.NewMonitorAction(),
 		},
-		integrationContextActionPool: []caction.IntegrationContextAction{},
+		integrationContextActionPool: []caction.IntegrationContextAction{
+			caction.NewIntegrationContextInitializeAction(),
+			caction.NewIntegrationContextBuildAction(ctx, namespace),
+			caction.NewIntegrationContextMonitorAction(),
+		},
 	}
 }
 

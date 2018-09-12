@@ -24,16 +24,17 @@ import (
 	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/build/api"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 type BuildAction struct {
-	buildManager *build.BuildManager
+	buildManager *build.Manager
 }
 
 func NewBuildAction(ctx context.Context, namespace string) IntegrationAction {
 	return &BuildAction{
-		buildManager: build.NewBuildManager(ctx, namespace),
+		buildManager: build.NewManager(ctx, namespace),
 	}
 }
 
@@ -46,9 +47,28 @@ func (b *BuildAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
+	if integration.Spec.Context != "" {
+		name := integration.Spec.Context
+		ctx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
+
+		if err := sdk.Get(&ctx); err != nil {
+			//TODO: we may need to add a wait strategy, i.e give up after some time
+			return errors.Wrapf(err, "unable to find integration context %s, %s", ctx.Name, err)
+		}
+
+		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+			target := integration.DeepCopy()
+			target.Status.Image = ctx.Status.Image
+			target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+			return sdk.Update(target)
+		}
+
+		return nil
+	}
+
 	buildIdentifier := api.BuildIdentifier{
-		Name:   integration.Name,
-		Digest: integration.Status.Digest,
+		Name:      integration.Name,
+		Qualifier: integration.Status.Digest,
 	}
 	buildResult := b.buildManager.Get(buildIdentifier)
 	if buildResult.Status == api.BuildStatusNotRequested {

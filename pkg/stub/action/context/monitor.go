@@ -19,28 +19,36 @@ package action
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/sirupsen/logrus"
 )
 
 func NewIntegrationContextMonitorAction() IntegrationContextAction {
-	return &integrationContexMonitorAction{}
+	return &integrationContextMonitorAction{}
 }
 
-// start edit context
-type integrationContexMonitorAction struct {
+type integrationContextMonitorAction struct {
 }
 
-func (action *integrationContexMonitorAction) Name() string {
-	return "Monitor"
+func (action *integrationContextMonitorAction) Name() string {
+	return "monitor"
 }
 
-func (action *integrationContexMonitorAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
-	// TODO: implement
-	return false
+func (action *integrationContextMonitorAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+	return context.Status.Phase == v1alpha1.IntegrationContextPhaseReady || context.Status.Phase == v1alpha1.IntegrationContextPhaseError
 }
 
-func (action *integrationContexMonitorAction) Handle(integration *v1alpha1.IntegrationContext) error {
-	target := integration.DeepCopy()
-	// TODO: implement
-	return sdk.Update(target)
+func (action *integrationContextMonitorAction) Handle(context *v1alpha1.IntegrationContext) error {
+	hash := digest.ComputeForIntegrationContext(context)
+	if hash != context.Status.Digest {
+		logrus.Info("IntegrationContext ", context.Name, " needs a rebuild")
+
+		target := context.DeepCopy()
+		target.Status.Digest = hash
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
+		return sdk.Update(target)
+	}
+
+	return nil
 }

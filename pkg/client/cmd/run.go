@@ -27,19 +27,20 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/watch"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/apache/camel-k/pkg/util/watch"
 )
 
 type RunCmdOptions struct {
 	*RootCmdOptions
-	Language        string
-	IntegrationName string
-	Dependencies    []string
-	Wait            bool
+	IntegrationContext string
+	Language           string
+	IntegrationName    string
+	Dependencies       []string
+	Wait               bool
 }
 
 func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -59,7 +60,7 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
-	cmd.ParseFlags(os.Args)
+	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The contex used to run the integration")
 
 	return &cmd
 }
@@ -170,6 +171,7 @@ func (o *RunCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 				Language: o.Language,
 			},
 			Dependencies: o.Dependencies,
+			Context:      o.IntegrationContext,
 		},
 	}
 
