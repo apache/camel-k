@@ -11,5 +11,7 @@ spec:
     listKind: IntegrationList
     plural: integrations
     singular: integration
+    shortNames:
+    - it
   scope: Namespaced
   version: v1alpha1
