@@ -12,13 +12,16 @@ build-embed-resources:
 build-runtime:
 	mvn clean install -f ./runtime/pom.xml
 
-release: prepare-release build images-build images-push test-integration cross-compile
+release: prepare-release build images-build images-push test-integration cross-compile git-tag
 
 prepare-release:
 	./build/prepare_release.sh
 
 cross-compile:
 	./build/cross_compile.sh
+
+git-tag:
+	./build/git_tag.sh
 
 dep:
 	dep ensure -v
