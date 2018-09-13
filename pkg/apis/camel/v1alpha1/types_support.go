@@ -29,12 +29,8 @@ import (
 //
 // **********************************
 
-func (spec PropertySpec) String() string {
-	return fmt.Sprintf("%s=%s", spec.Name, spec.Value)
-}
-
-func (spec EnvironmentSpec) String() string {
-	return fmt.Sprintf("%s=%s", spec.Name, spec.Value)
+func (spec ConfigurationSpec) String() string {
+	return fmt.Sprintf("%s=%s", spec.Type, spec.Value)
 }
 
 // **********************************

@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 
@@ -46,9 +45,10 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:  impl.run,
 	}
 
-	cmd.Flags().StringSliceVarP(&impl.env, "env", "e", nil, "Add an environment variable")
-	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a system property")
 	cmd.Flags().StringSliceVarP(&impl.dependencies, "dependency", "d", nil, "Add a dependency")
+	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
+	cmd.Flags().StringSliceVar(&impl.configmaps, "configmap", nil, "Add a ConfigMap")
+	cmd.Flags().StringSliceVar(&impl.secrets, "secret", nil, "Add a Secret")
 
 	return &cmd
 }
@@ -56,9 +56,10 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 type contextCreateCommand struct {
 	*RootCmdOptions
 
-	env          []string
-	properties   []string
 	dependencies []string
+	properties   []string
+	configmaps   []string
+	secrets      []string
 }
 
 func (command *contextCreateCommand) validateArgs(cmd *cobra.Command, args []string) error {
@@ -75,22 +76,27 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 
 	ctx := v1alpha1.NewIntegrationContext(namespace, name)
 	ctx.Spec = v1alpha1.IntegrationContextSpec{
-		Dependencies: command.dependencies,
-		Environment:  make([]v1alpha1.EnvironmentSpec, 0),
-		Properties:   make([]v1alpha1.PropertySpec, 0),
+		Dependencies:  command.dependencies,
+		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
 	}
 
-	for _, item := range command.env {
-		pair := strings.Split(item, "=")
-		if len(pair) == 2 {
-			ctx.Spec.Environment = append(ctx.Spec.Environment, v1alpha1.EnvironmentSpec{Name: pair[0], Value: pair[1]})
-		}
-	}
 	for _, item := range command.properties {
-		pair := strings.Split(item, "=")
-		if len(pair) == 2 {
-			ctx.Spec.Properties = append(ctx.Spec.Properties, v1alpha1.PropertySpec{Name: pair[0], Value: pair[1]})
-		}
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+			Type:  "property",
+			Value: item,
+		})
+	}
+	for _, item := range command.configmaps {
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+			Type:  "configmap",
+			Value: item,
+		})
+	}
+	for _, item := range command.secrets {
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+			Type:  "secret",
+			Value: item,
+		})
 	}
 
 	existed := false
