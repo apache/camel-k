@@ -30,11 +30,11 @@ import (
 // **********************************
 
 func (spec PropertySpec) String() string {
-	return fmt.Sprint("%s=%s", spec.Name, spec.Value)
+	return fmt.Sprintf("%s=%s", spec.Name, spec.Value)
 }
 
 func (spec EnvironmentSpec) String() string {
-	return fmt.Sprint("%s=%s", spec.Name, spec.Value)
+	return fmt.Sprintf("%s=%s", spec.Name, spec.Value)
 }
 
 // **********************************
