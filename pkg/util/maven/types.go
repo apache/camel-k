@@ -25,7 +25,7 @@ type ProjectDefinition struct {
 	Project     Project
 	JavaSources map[string]string
 	Resources   map[string]string
-	Env         map[string]string
+	Env         map[string]string // TODO: should we deprecate it ? env are set on deployment
 }
 
 type Project struct {

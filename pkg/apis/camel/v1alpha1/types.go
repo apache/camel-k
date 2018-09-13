@@ -23,6 +23,7 @@ import (
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// IntegrationList --
 type IntegrationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
@@ -31,6 +32,7 @@ type IntegrationList struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// Integration --
 type Integration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
@@ -38,36 +40,50 @@ type Integration struct {
 	Status            IntegrationStatus `json:"status,omitempty"`
 }
 
+// IntegrationSpec --
 type IntegrationSpec struct {
-	Replicas     *int32     `json:"replicas,omitempty"`
-	Source       SourceSpec `json:"source,omitempty"`
-	Context      string     `json:"context,omitempty"`
-	Dependencies []string   `json:"dependencies,omitempty"`
+	Replicas     *int32            `json:"replicas,omitempty"`
+	Source       SourceSpec        `json:"source,omitempty"`
+	Context      string            `json:"context,omitempty"`
+	Dependencies []string          `json:"dependencies,omitempty"`
+	Properties   []PropertySpec    `json:"properties,omitempty"`
+	Environment  []EnvironmentSpec `json:"environment,omitempty"`
 }
 
+// SourceSpec --
 type SourceSpec struct {
 	Name     string `json:"name,omitempty"`
 	Content  string `json:"content,omitempty"`
 	Language string `json:"language,omitempty"`
 }
 
+// IntegrationStatus --
 type IntegrationStatus struct {
 	Phase  IntegrationPhase `json:"phase,omitempty"`
 	Digest string           `json:"digest,omitempty"`
 	Image  string           `json:"image,omitempty"`
 }
 
+// IntegrationPhase --
 type IntegrationPhase string
 
 const (
-	IntegrationPhaseBuilding  IntegrationPhase = "Building"
+	// IntegrationKind --
+	IntegrationKind string = "Integration"
+
+	// IntegrationPhaseBuilding --
+	IntegrationPhaseBuilding IntegrationPhase = "Building"
+	// IntegrationPhaseDeploying --
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
-	IntegrationPhaseRunning   IntegrationPhase = "Running"
-	IntegrationPhaseError     IntegrationPhase = "Error"
+	// IntegrationPhaseRunning --
+	IntegrationPhaseRunning IntegrationPhase = "Running"
+	// IntegrationPhaseError --
+	IntegrationPhaseError IntegrationPhase = "Error"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// IntegrationContextList --
 type IntegrationContextList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
@@ -76,6 +92,7 @@ type IntegrationContextList struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// IntegrationContext --
 type IntegrationContext struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
@@ -83,28 +100,33 @@ type IntegrationContext struct {
 	Status            IntegrationContextStatus `json:"status,omitempty"`
 }
 
+// IntegrationContextSpec --
 type IntegrationContextSpec struct {
 	Dependencies []string          `json:"dependencies,omitempty"`
 	Properties   []PropertySpec    `json:"properties,omitempty"`
 	Environment  []EnvironmentSpec `json:"environment,omitempty"`
 }
 
+// PropertySpec --
 type PropertySpec struct {
-	Name  string
-	Value string
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
+// EnvironmentSpec --
 type EnvironmentSpec struct {
-	Name  string
-	Value string
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
+// IntegrationContextStatus --
 type IntegrationContextStatus struct {
 	Phase  IntegrationContextPhase `json:"phase,omitempty"`
 	Image  string                  `json:"image,omitempty"`
 	Digest string                  `json:"digest,omitempty"`
 }
 
+// IntegrationContextPhase --
 type IntegrationContextPhase string
 
 const (

@@ -29,26 +29,31 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type DeployAction struct {
-}
-
+// NewDeployAction create an action that handles integration deploy
 func NewDeployAction() IntegrationAction {
-	return &DeployAction{}
+	return &deployAction{}
 }
 
-func (b *DeployAction) Name() string {
+type deployAction struct {
+}
+
+func (action *deployAction) Name() string {
 	return "deploy"
 }
 
-func (a *DeployAction) CanHandle(integration *v1alpha1.Integration) bool {
+func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
 }
 
-func (a *DeployAction) Handle(integration *v1alpha1.Integration) error {
-	if err := createOrUpdateConfigMap(integration); err != nil {
+func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
+	ctx, err := LookupContextForIntegration(integration)
+	if err != nil {
 		return err
 	}
-	if err := createOrUpdateDeployment(integration); err != nil {
+	if err = createOrUpdateConfigMap(ctx, integration); err != nil {
+		return err
+	}
+	if err = createOrUpdateDeployment(ctx, integration); err != nil {
 		return err
 	}
 
@@ -61,11 +66,15 @@ func (a *DeployAction) Handle(integration *v1alpha1.Integration) error {
 //
 // **********************************
 
-func getConfigMapFor(integration *v1alpha1.Integration) *corev1.ConfigMap {
+func getConfigMapFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) (*corev1.ConfigMap, error) {
 	controller := true
 	blockOwnerDeletion := true
 
-	return &corev1.ConfigMap{
+	// combine properties of integration with context, integration
+	// properties have the priority
+	properties := CombinePropertiesAsMap(ctx, integration)
+
+	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
 			APIVersion: "v1",
@@ -91,14 +100,20 @@ func getConfigMapFor(integration *v1alpha1.Integration) *corev1.ConfigMap {
 		},
 		Data: map[string]string{
 			"integration": integration.Spec.Source.Content,
+			"properties":  PropertiesString(properties),
 		},
 	}
+
+	return &cm, nil
 }
 
-func createOrUpdateConfigMap(integration *v1alpha1.Integration) error {
-	cm := getConfigMapFor(integration)
+func createOrUpdateConfigMap(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) error {
+	cm, err := getConfigMapFor(ctx, integration)
+	if err != nil {
+		return err
+	}
 
-	err := sdk.Create(cm)
+	err = sdk.Create(cm)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		err = sdk.Update(cm)
 	}
@@ -115,10 +130,20 @@ func createOrUpdateConfigMap(integration *v1alpha1.Integration) error {
 //
 // **********************************
 
-func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
+func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) (*appsv1.Deployment, error) {
 	controller := true
 	blockOwnerDeletion := true
-	integrationName := strings.TrimPrefix(integration.Spec.Source.Name, "/")
+	sourceName := strings.TrimPrefix(integration.Spec.Source.Name, "/")
+
+	// combine environment of integration with context, integration
+	// environment has the priority
+	environment := CombineEnvironmentAsMap(ctx, integration)
+
+	// set env vars needed by the runtime
+	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
+	environment["CAMEL_K_ROUTES_URI"] = "file:/etc/camel/" + sourceName
+	environment["CAMEL_K_ROUTES_LANGUAGE"] = integration.Spec.Source.Language
+	environment["CAMEL_K_PROPERTIES"] = "file:/etc/camel/application.properties"
 
 	labels := map[string]string{
 		"camel.apache.org/integration": integration.Name,
@@ -158,31 +183,18 @@ func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
 						{
 							Name:  integration.Name,
 							Image: integration.Status.Image,
+							Env:   EnvironmentAsEnvVarSlice(environment),
 							VolumeMounts: []corev1.VolumeMount{
 								{
-									Name:      "integration",
+									Name:      "integration-volume",
 									MountPath: "/etc/camel",
-								},
-							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  "JAVA_MAIN_CLASS",
-									Value: "org.apache.camel.k.jvm.Application",
-								},
-								{
-									Name:  "CAMEL_K_ROUTES_URI",
-									Value: "file:/etc/camel/" + integrationName,
-								},
-								{
-									Name:  "CAMEL_K_ROUTES_LANGUAGE",
-									Value: integration.Spec.Source.Language,
 								},
 							},
 						},
 					},
 					Volumes: []corev1.Volume{
 						{
-							Name: "integration",
+							Name: "integration-volume",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
@@ -191,7 +203,10 @@ func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
 									Items: []corev1.KeyToPath{
 										{
 											Key:  "integration",
-											Path: integrationName,
+											Path: sourceName,
+										}, {
+											Key:  "properties",
+											Path: "application.properties",
 										},
 									},
 								},
@@ -203,13 +218,16 @@ func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
 		},
 	}
 
-	return &deployment
+	return &deployment, nil
 }
 
-func createOrUpdateDeployment(integration *v1alpha1.Integration) error {
-	deployment := getDeploymentFor(integration)
+func createOrUpdateDeployment(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) error {
+	deployment, err := getDeploymentFor(ctx, integration)
+	if err != nil {
+		return err
+	}
 
-	err := sdk.Create(deployment)
+	err = sdk.Create(deployment)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		err = sdk.Update(deployment)
 	}
