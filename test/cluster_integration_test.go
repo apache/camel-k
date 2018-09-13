@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -17,12 +19,22 @@ limitations under the License.
 
 package test
 
-import "os"
-
-const (
-	EnvWatchNamespace = "WATCH_NAMESPACE"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+	"github.com/apache/camel-k/pkg/install"
 )
 
-func GetTargetNamespace() string {
-	return os.Getenv(EnvWatchNamespace)
+func TestInstallation(t *testing.T) {
+	installedCtxCRD, err := install.IsCRDInstalled("IntegrationContext")
+	assert.Nil(t, err)
+	assert.True(t, installedCtxCRD)
+
+	installedCRD, err := install.IsCRDInstalled("Integration")
+	assert.Nil(t, err)
+	assert.True(t, installedCRD)
+
+	installedClusterRole, err := install.IsClusterRoleInstalled()
+	assert.Nil(t, err)
+	assert.True(t, installedClusterRole)
 }

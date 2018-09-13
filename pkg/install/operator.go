@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Operator(namespace string) error {
+func InstallOperator(namespace string) error {
 	return installResources(namespace,
 		"operator-service-account.yaml",
 		"operator-role-openshift.yaml", // TODO distinguish between Openshift and Kubernetes

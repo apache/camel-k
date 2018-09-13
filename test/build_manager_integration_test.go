@@ -17,91 +17,81 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package build
+package test
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	build "github.com/apache/camel-k/pkg/build/api"
+	buildapi "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/build"
 )
 
-func TestBuild(t *testing.T) {
+func TestBuildManagerBuild(t *testing.T) {
 	ctx := context.TODO()
-	buildManager := NewManager(ctx, test.GetTargetNamespace())
-	identifier := build.BuildIdentifier{
+	buildManager := build.NewManager(ctx, GetTargetNamespace())
+	identifier := buildapi.BuildIdentifier{
 		Name:   "man-test",
 		Digest: digest.Random(),
 	}
-	buildManager.Start(build.BuildSource{
+	buildManager.Start(buildapi.BuildSource{
 		Identifier: identifier,
-		Code: build.Code{
-			Content: code(),
+		Code: buildapi.Code{
+			Content: TimerToLogIntegrationCode(),
+		},
+		Dependencies: []string{
+			"mvn:org.apache.camel/camel-core",
+			"camel:telegram",
 		},
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
-	var result build.BuildResult
+	var result buildapi.BuildResult
 	for time.Now().Before(deadline) {
 		result = buildManager.Get(identifier)
-		if result.Status == build.BuildStatusCompleted || result.Status == build.BuildStatusError {
+		if result.Status == buildapi.BuildStatusCompleted || result.Status == buildapi.BuildStatusError {
 			break
 		}
 		time.Sleep(2 * time.Second)
 	}
 
-	assert.NotEqual(t, build.BuildStatusError, result.Status)
-	assert.Equal(t, build.BuildStatusCompleted, result.Status)
+	assert.NotEqual(t, buildapi.BuildStatusError, result.Status)
+	assert.Equal(t, buildapi.BuildStatusCompleted, result.Status)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
-func TestFailedBuild(t *testing.T) {
+func TestBuildManagerFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	buildManager := NewManager(ctx, test.GetTargetNamespace())
-	identifier := build.BuildIdentifier{
+	buildManager := build.NewManager(ctx, GetTargetNamespace())
+	identifier := buildapi.BuildIdentifier{
 		Name:   "man-test-2",
 		Digest: digest.Random(),
 	}
-	buildManager.Start(build.BuildSource{
+	buildManager.Start(buildapi.BuildSource{
 		Identifier: identifier,
-		Code: build.Code{
-			Content: code() + "XX",
+		Code: buildapi.Code{
+			Content: TimerToLogIntegrationCode(),
+		},
+		Dependencies: []string{
+			"mvn:org.apache.camel/camel-cippalippa",
 		},
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
-	var result build.BuildResult
+	var result buildapi.BuildResult
 	for time.Now().Before(deadline) {
 		result = buildManager.Get(identifier)
-		if result.Status == build.BuildStatusCompleted || result.Status == build.BuildStatusError {
+		if result.Status == buildapi.BuildStatusCompleted || result.Status == buildapi.BuildStatusError {
 			break
 		}
 		time.Sleep(2 * time.Second)
 	}
 
-	assert.Equal(t, build.BuildStatusError, result.Status)
-	assert.NotEqual(t, build.BuildStatusCompleted, result.Status)
+	assert.Equal(t, buildapi.BuildStatusError, result.Status)
+	assert.NotEqual(t, buildapi.BuildStatusCompleted, result.Status)
 	assert.Empty(t, result.Image)
-}
-
-func code() string {
-	return `package kamel;
-
-import org.apache.camel.builder.RouteBuilder;
-
-public class Routes extends RouteBuilder {
-
-	@Override
-    public void configure() throws Exception {
-        from("timer:tick")
-		  .to("log:info");
-    }
-
-}
-`
 }

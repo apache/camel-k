@@ -1,6 +1,6 @@
 VERSION := $(shell ./build/get_version.sh)
 
-build: build-runtime build-operator build-kamel
+build: build-runtime build-operator build-kamel test
 
 build-operator: build-embed-resources
 	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
@@ -13,6 +13,14 @@ build-embed-resources:
 
 build-runtime:
 	mvn clean install -f ./runtime/pom.xml
+
+release: prepare-release build images-build images-push test-integration cross-compile
+
+prepare-release:
+	./build/prepare_release.sh
+
+cross-compile:
+	./build/cross_compile.sh
 
 dep:
 	dep ensure -v
@@ -43,22 +51,9 @@ check:
 	go test ./...
 
 test-integration: check-integration
-check-integration: require-kubeconfig require-namespace
+check-integration:
 	go test ./... -tags=integration
 
-ifndef WATCH_NAMESPACE
-require-namespace:
-	$(error WATCH_NAMESPACE not set)
-else
-require-namespace:
-	@echo "WATCH_NAMESPACE set"
-endif
-ifndef KUBERNETES_CONFIG
-require-kubeconfig:
-	$(error KUBERNETES_CONFIG not set)
-else
-require-kubeconfig:
-	@echo "KUBERNETES_CONFIG set"
-endif
 
-.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean 
+
+.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile
