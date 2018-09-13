@@ -39,6 +39,8 @@ spec:
     listKind: IntegrationContextList
     plural: integrationcontexts
     singular: integrationcontext
+    shortNames:
+    - ictx
   scope: Namespaced
   version: v1alpha1
 
@@ -58,6 +60,8 @@ spec:
     listKind: IntegrationList
     plural: integrations
     singular: integration
+    shortNames:
+    - it
   scope: Namespaced
   version: v1alpha1
 
