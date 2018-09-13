@@ -42,7 +42,7 @@ func SetupClusterwideResources() error {
 	}
 
 	// Installing ClusterRole
-	clusterRoleInstalled, err := isClusterRoleInstalled()
+	clusterRoleInstalled, err := IsClusterRoleInstalled()
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func SetupClusterwideResources() error {
 	return nil
 }
 
-func isCRDInstalled(name string) (bool, error) {
+func IsCRDInstalled(kind string) (bool, error) {
 	lst, err := k8sclient.GetKubeClient().Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
@@ -64,7 +64,7 @@ func isCRDInstalled(name string) (bool, error) {
 		return false, err
 	}
 	for _, res := range lst.APIResources {
-		if res.Kind == name {
+		if res.Kind == kind {
 			return true, nil
 		}
 	}
@@ -73,7 +73,7 @@ func isCRDInstalled(name string) (bool, error) {
 
 func installCRD(kind string, resourceName string) error {
 	// Installing Integration CRD
-	installed, err := isCRDInstalled(kind)
+	installed, err := IsCRDInstalled(kind)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func installCRD(kind string, resourceName string) error {
 	return nil
 }
 
-func isClusterRoleInstalled() (bool, error) {
+func IsClusterRoleInstalled() (bool, error) {
 	clusterRole := v1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRole",

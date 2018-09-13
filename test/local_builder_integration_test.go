@@ -17,7 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package local
+package test
 
 import (
 	"context"
@@ -25,14 +25,14 @@ import (
 
 	build "github.com/apache/camel-k/pkg/build/api"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/build/local"
 )
 
-func TestBuild(t *testing.T) {
+func TestLocalBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	builder := NewLocalBuilder(ctx, test.GetTargetNamespace())
+	builder := local.NewLocalBuilder(ctx, GetTargetNamespace())
 
 	execution := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
@@ -40,7 +40,7 @@ func TestBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: code(),
+			Content: TimerToLogIntegrationCode(),
 		},
 	})
 
@@ -49,10 +49,10 @@ func TestBuild(t *testing.T) {
 	assert.Nil(t, res.Error, "Build failed")
 }
 
-func TestDoubleBuild(t *testing.T) {
+func TestLocalDoubleBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	builder := NewLocalBuilder(ctx, test.GetTargetNamespace())
+	builder := local.NewLocalBuilder(ctx, GetTargetNamespace())
 
 	execution1 := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
@@ -60,7 +60,7 @@ func TestDoubleBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: code(),
+			Content: TimerToLogIntegrationCode(),
 		},
 	})
 
@@ -70,7 +70,7 @@ func TestDoubleBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: code(),
+			Content: TimerToLogIntegrationCode(),
 		},
 	})
 
@@ -81,10 +81,10 @@ func TestDoubleBuild(t *testing.T) {
 	assert.Nil(t, res2.Error, "Build failed")
 }
 
-func TestFailedBuild(t *testing.T) {
+func TestLocalFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	builder := NewLocalBuilder(ctx, test.GetTargetNamespace())
+	builder := local.NewLocalBuilder(ctx, GetTargetNamespace())
 
 	execution := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
@@ -92,28 +92,14 @@ func TestFailedBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: code() + "-",
+			Content: TimerToLogIntegrationCode(),
+		},
+		Dependencies: []string{
+			"camel:cippalippa",
 		},
 	})
 
 	res := <-execution
 
 	assert.NotNil(t, res.Error, "Build should fail")
-}
-
-func code() string {
-	return `package kamel;
-
-import org.apache.camel.builder.RouteBuilder;
-
-public class Routes extends RouteBuilder {
-
-	@Override
-    public void configure() throws Exception {
-        from("timer:tick")
-		  .to("log:info");
-    }
-
-}
-`
 }
