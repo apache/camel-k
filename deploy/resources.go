@@ -357,40 +357,6 @@ status:
   loadBalancer: {}
 
 `
-	Resources["operator.yaml"] =
-		`
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: camel-k-operator
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: camel-k-operator
-  template:
-    metadata:
-      labels:
-        name: camel-k-operator
-    spec:
-      containers:
-        - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.0.1-SNAPSHOT
-          ports:
-          - containerPort: 60000
-            name: metrics
-          command:
-          - camel-k-operator
-          imagePullPolicy: Always
-          env:
-            - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: OPERATOR_NAME
-              value: "camel-k-operator"
-
-`
 	Resources["user-cluster-role.yaml"] =
 		`
 kind: ClusterRole

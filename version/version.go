@@ -15,8 +15,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Do not change this file manually
 package version
 
 var (
+	// Global Camel K Version
 	Version = "0.0.1-SNAPSHOT"
 )

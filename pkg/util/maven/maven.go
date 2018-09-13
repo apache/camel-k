@@ -64,6 +64,8 @@ func Build(project ProjectDefinition) (string, error) {
 func runMavenBuild(buildDir string) error {
 	mavenBuild := exec.Command("mvn", mavenExtraOptions(), "clean", "install", "-DskipTests")
 	mavenBuild.Dir = buildDir
+	mavenBuild.Stdout = os.Stdout
+	mavenBuild.Stderr = os.Stderr
 	logrus.Info("Starting maven build: mvn " + mavenExtraOptions() + " clean install -DskipTests")
 	err := mavenBuild.Run()
 	if err != nil {
@@ -85,7 +87,7 @@ func mavenExtraOptions() string {
 	if _, err := os.Stat("/tmp/artifacts/m2"); err == nil {
 		return "-Dmaven.repo.local=/tmp/artifacts/m2"
 	}
-	return ""
+	return "-Dcamel.noop=true"
 }
 
 func createTar(buildDir string, project ProjectDefinition) (string, error) {

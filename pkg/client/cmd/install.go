@@ -62,7 +62,7 @@ func (o *InstallCmdOptions) install(cmd *cobra.Command, args []string) error {
 	} else {
 		namespace := o.Namespace
 
-		err = install.Operator(namespace)
+		err = install.InstallOperator(namespace)
 		if err != nil {
 			return err
 		}

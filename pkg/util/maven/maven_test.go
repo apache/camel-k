@@ -84,7 +84,7 @@ func TestPomGeneration(t *testing.T) {
 		},
 	}
 
-	pom, err := pomFileContent(project)
+	pom, err := GeneratePomFileContent(project)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, pom)

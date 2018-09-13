@@ -111,6 +111,7 @@ This is a high level overview of the project structure:
 - [/deploy](/deploy): contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
 - [/pkg](/pkg): this is where the code resides. The code is divided in multiple subpackages.
 - [/runtime](/runtime): the Java runtime code that is used inside the integration Docker containers.
+- [/test](/test): include integration tests to ensure that the software interacts correctly with Kubernetes and Openshift.
 - [/tmp](/tmp): scripts and Docker configuration files used by the operator-sdk.
 - [/vendor](/vendor): project dependencies.
 - [/version](/version): contains the global version of the project.
@@ -151,6 +152,7 @@ Unit tests are executed automatically as part of the build. They use the standar
 Integration tests (aimed at ensuring that the code integrates correctly with Kubernetes and Openshift), need special care.
 
 The **convention** used in this repo is to name unit tests `xxx_test.go`, and name integration tests `yyy_integration_test.go`.
+Integration tests are all in the [/test](/test) dir.
 
 Since both names end with `_test.go`, both would be executed by go during build, so you need to put a special **build tag** to mark
 integration tests. A integration test should start with the following line:

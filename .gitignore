@@ -2,6 +2,12 @@
 /camel-k-operator
 /kamel
 
+# Released Packages
+*.tar.gz
+
+# Unuseful file
+/deploy/operator.yaml
+
 # We do not stage vendor directory
 /vendor
 
