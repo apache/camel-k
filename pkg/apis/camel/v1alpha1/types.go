@@ -21,6 +21,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// ConfigurationSpec --
+type ConfigurationSpec struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // IntegrationList --
@@ -42,12 +48,11 @@ type Integration struct {
 
 // IntegrationSpec --
 type IntegrationSpec struct {
-	Replicas     *int32            `json:"replicas,omitempty"`
-	Source       SourceSpec        `json:"source,omitempty"`
-	Context      string            `json:"context,omitempty"`
-	Dependencies []string          `json:"dependencies,omitempty"`
-	Properties   []PropertySpec    `json:"properties,omitempty"`
-	Environment  []EnvironmentSpec `json:"environment,omitempty"`
+	Replicas      *int32              `json:"replicas,omitempty"`
+	Source        SourceSpec          `json:"source,omitempty"`
+	Context       string              `json:"context,omitempty"`
+	Dependencies  []string            `json:"dependencies,omitempty"`
+	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 }
 
 // SourceSpec --
@@ -102,21 +107,8 @@ type IntegrationContext struct {
 
 // IntegrationContextSpec --
 type IntegrationContextSpec struct {
-	Dependencies []string          `json:"dependencies,omitempty"`
-	Properties   []PropertySpec    `json:"properties,omitempty"`
-	Environment  []EnvironmentSpec `json:"environment,omitempty"`
-}
-
-// PropertySpec --
-type PropertySpec struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
-// EnvironmentSpec --
-type EnvironmentSpec struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Dependencies  []string            `json:"dependencies,omitempty"`
+	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 }
 
 // IntegrationContextStatus --
