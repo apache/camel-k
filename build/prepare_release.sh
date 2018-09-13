@@ -7,6 +7,7 @@ global_version_file=$location/../version/version.go
 
 # Set the new global version by removing "-SNAPSHOT"
 sed -i "s/-SNAPSHOT//g" $global_version_file
+find $location/../deploy -type f -exec sed -i "s/-SNAPSHOT//g" {} \;
 
 # Get the new version
 version=$($location/get_version.sh)
