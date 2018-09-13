@@ -11,5 +11,7 @@ spec:
     listKind: IntegrationContextList
     plural: integrationcontexts
     singular: integrationcontext
+    shortNames:
+    - ictx
   scope: Namespaced
   version: v1alpha1
