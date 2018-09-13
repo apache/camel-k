@@ -54,6 +54,7 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
 	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The contex used to run the integration")
 	cmd.Flags().StringSliceVarP(&options.Properties, "property", "p", nil, "Add a system property")
+	cmd.Flags().StringSliceVarP(&options.Environment, "env", "e", nil, "Add an environment variable")
 
 	return &cmd
 }
@@ -65,6 +66,7 @@ type runCmdOptions struct {
 	IntegrationName    string
 	Dependencies       []string
 	Properties         []string
+	Environment        []string
 	Wait               bool
 }
 
@@ -183,6 +185,13 @@ func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 		pair := strings.Split(item, "=")
 		if len(pair) == 2 {
 			integration.Spec.Properties = append(integration.Spec.Properties, v1alpha1.PropertySpec{Name: pair[0], Value: pair[1]})
+		}
+	}
+	integration.Spec.Environment = make([]v1alpha1.EnvironmentSpec, 0)
+	for _, item := range o.Environment {
+		pair := strings.Split(item, "=")
+		if len(pair) == 2 {
+			integration.Spec.Environment = append(integration.Spec.Environment, v1alpha1.EnvironmentSpec{Name: pair[0], Value: pair[1]})
 		}
 	}
 
