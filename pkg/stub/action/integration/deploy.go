@@ -29,22 +29,23 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type DeployAction struct {
-}
-
+// NewDeployAction create an action that handles integration deploy
 func NewDeployAction() IntegrationAction {
-	return &DeployAction{}
+	return &deployAction{}
 }
 
-func (b *DeployAction) Name() string {
+type deployAction struct {
+}
+
+func (action *deployAction) Name() string {
 	return "deploy"
 }
 
-func (a *DeployAction) CanHandle(integration *v1alpha1.Integration) bool {
+func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
 }
 
-func (a *DeployAction) Handle(integration *v1alpha1.Integration) error {
+func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
 	if err := createOrUpdateConfigMap(integration); err != nil {
 		return err
 	}
@@ -61,11 +62,20 @@ func (a *DeployAction) Handle(integration *v1alpha1.Integration) error {
 //
 // **********************************
 
-func getConfigMapFor(integration *v1alpha1.Integration) *corev1.ConfigMap {
+func getConfigMapFor(integration *v1alpha1.Integration) (*corev1.ConfigMap, error) {
 	controller := true
 	blockOwnerDeletion := true
 
-	return &corev1.ConfigMap{
+	ctx, err := LookupContextForIntegration(integration)
+	if err != nil {
+		return nil, err
+	}
+
+	// combine properties of integration with context, integration
+	// properties have the priority
+	properties := CombinePropertiesAsMap(ctx, integration)
+
+	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
 			APIVersion: "v1",
@@ -91,14 +101,20 @@ func getConfigMapFor(integration *v1alpha1.Integration) *corev1.ConfigMap {
 		},
 		Data: map[string]string{
 			"integration": integration.Spec.Source.Content,
+			"properties":  PropertiesString(properties),
 		},
 	}
+
+	return &cm, nil
 }
 
 func createOrUpdateConfigMap(integration *v1alpha1.Integration) error {
-	cm := getConfigMapFor(integration)
+	cm, err := getConfigMapFor(integration)
+	if err != nil {
+		return err
+	}
 
-	err := sdk.Create(cm)
+	err = sdk.Create(cm)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		err = sdk.Update(cm)
 	}
@@ -115,7 +131,7 @@ func createOrUpdateConfigMap(integration *v1alpha1.Integration) error {
 //
 // **********************************
 
-func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
+func getDeploymentFor(integration *v1alpha1.Integration) (*appsv1.Deployment, error) {
 	controller := true
 	blockOwnerDeletion := true
 	integrationName := strings.TrimPrefix(integration.Spec.Source.Name, "/")
@@ -160,7 +176,7 @@ func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
 							Image: integration.Status.Image,
 							VolumeMounts: []corev1.VolumeMount{
 								{
-									Name:      "integration",
+									Name:      "integration-volume",
 									MountPath: "/etc/camel",
 								},
 							},
@@ -177,12 +193,16 @@ func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
 									Name:  "CAMEL_K_ROUTES_LANGUAGE",
 									Value: integration.Spec.Source.Language,
 								},
+								{
+									Name:  "CAMEL_K_PROPERTIES",
+									Value: "file:/etc/camel/application.properties",
+								},
 							},
 						},
 					},
 					Volumes: []corev1.Volume{
 						{
-							Name: "integration",
+							Name: "integration-volume",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
@@ -192,6 +212,9 @@ func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
 										{
 											Key:  "integration",
 											Path: integrationName,
+										}, {
+											Key:  "properties",
+											Path: "application.properties",
 										},
 									},
 								},
@@ -203,13 +226,16 @@ func getDeploymentFor(integration *v1alpha1.Integration) *appsv1.Deployment {
 		},
 	}
 
-	return &deployment
+	return &deployment, nil
 }
 
 func createOrUpdateDeployment(integration *v1alpha1.Integration) error {
-	deployment := getDeploymentFor(integration)
+	deployment, err := getDeploymentFor(integration)
+	if err != nil {
+		return err
+	}
 
-	err := sdk.Create(deployment)
+	err = sdk.Create(deployment)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		err = sdk.Update(deployment)
 	}

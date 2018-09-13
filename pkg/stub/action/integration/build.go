@@ -24,38 +24,37 @@ import (
 	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/build/api"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-type BuildAction struct {
-	buildManager *build.Manager
-}
-
+// NewBuildAction create an action that handles integration build
 func NewBuildAction(ctx context.Context, namespace string) IntegrationAction {
-	return &BuildAction{
+	return &buildAction{
 		buildManager: build.NewManager(ctx, namespace),
 	}
 }
 
-func (b *BuildAction) Name() string {
+type buildAction struct {
+	buildManager *build.Manager
+}
+
+func (action *buildAction) Name() string {
 	return "build"
 }
 
-func (b *BuildAction) CanHandle(integration *v1alpha1.Integration) bool {
+func (action *buildAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuilding
 }
 
-func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
-	if integration.Spec.Context != "" {
-		name := integration.Spec.Context
-		ctx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
+func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
+	ctx, err := LookupContextForIntegration(integration)
+	if err != nil {
+		//TODO: we may need to add a wait strategy, i.e give up after some time
+		return err
+	}
 
-		if err := sdk.Get(&ctx); err != nil {
-			//TODO: we may need to add a wait strategy, i.e give up after some time
-			return errors.Wrapf(err, "unable to find integration context %s, %s", ctx.Name, err)
-		}
 
+	if ctx != nil {
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
 			target := integration.DeepCopy()
 			target.Status.Image = ctx.Status.Image
@@ -70,9 +69,9 @@ func (b *BuildAction) Handle(integration *v1alpha1.Integration) error {
 		Name:      integration.Name,
 		Qualifier: integration.Status.Digest,
 	}
-	buildResult := b.buildManager.Get(buildIdentifier)
+	buildResult := action.buildManager.Get(buildIdentifier)
 	if buildResult.Status == api.BuildStatusNotRequested {
-		b.buildManager.Start(api.BuildSource{
+		action.buildManager.Start(api.BuildSource{
 			Identifier: buildIdentifier,
 			Code: api.Code{
 				Name:     integration.Spec.Source.Name,
