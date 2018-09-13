@@ -1,5 +1,3 @@
-VERSION := $(shell ./build/get_version.sh)
-
 build: build-runtime build-operator build-kamel test
 
 build-operator: build-embed-resources
@@ -41,10 +39,10 @@ codegen:
 images: images-build
 
 images-build:
-	./build/package_maven_artifacts.sh && operator-sdk build docker.io/apache/camel-k:$(VERSION)
+	./build/images_build.sh
 
 images-push:
-	docker push docker.io/apache/camel-k:$(VERSION)
+	./build/images_push.sh
 
 test: check
 check:
