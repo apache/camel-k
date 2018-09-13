@@ -1,5 +1,7 @@
 // +build integration
 
+// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
+
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -35,7 +37,7 @@ func TestBuildManagerBuild(t *testing.T) {
 	buildManager := build.NewManager(ctx, GetTargetNamespace())
 	identifier := buildapi.BuildIdentifier{
 		Name:   "man-test",
-		Digest: digest.Random(),
+		Qualifier: digest.Random(),
 	}
 	buildManager.Start(buildapi.BuildSource{
 		Identifier: identifier,
@@ -69,7 +71,7 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	buildManager := build.NewManager(ctx, GetTargetNamespace())
 	identifier := buildapi.BuildIdentifier{
 		Name:   "man-test-2",
-		Digest: digest.Random(),
+		Qualifier: digest.Random(),
 	}
 	buildManager.Start(buildapi.BuildSource{
 		Identifier: identifier,
