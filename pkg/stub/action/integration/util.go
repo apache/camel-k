@@ -5,6 +5,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"k8s.io/api/core/v1"
 
 	"github.com/pkg/errors"
 )
@@ -35,6 +36,17 @@ func PropertiesString(m map[string]string) string {
 	return properties
 }
 
+// EnvironmentAsEnvVarSlice --
+func EnvironmentAsEnvVarSlice(m map[string]string) []v1.EnvVar {
+	env := make([]v1.EnvVar, 0, len(m))
+
+	for k, v := range m {
+		env = append(env, v1.EnvVar{Name: k, Value: v})
+	}
+
+	return env
+}
+
 // CombinePropertiesAsMap --
 func CombinePropertiesAsMap(context *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) map[string]string {
 	properties := make(map[string]string)
@@ -53,4 +65,24 @@ func CombinePropertiesAsMap(context *v1alpha1.IntegrationContext, integration *v
 	}
 
 	return properties
+}
+
+// CombineEnvironmentAsMap --
+func CombineEnvironmentAsMap(context *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) map[string]string {
+	environment := make(map[string]string)
+	if context != nil {
+		// Add context environment first so integrations can
+		// override it
+		for _, p := range context.Spec.Environment {
+			environment[p.Name] = p.Value
+		}
+	}
+
+	if integration != nil {
+		for _, p := range integration.Spec.Environment {
+			environment[p.Name] = p.Value
+		}
+	}
+
+	return environment
 }
