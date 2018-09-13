@@ -46,10 +46,14 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
-	if err := createOrUpdateConfigMap(integration); err != nil {
+	ctx, err := LookupContextForIntegration(integration)
+	if err != nil {
 		return err
 	}
-	if err := createOrUpdateDeployment(integration); err != nil {
+	if err = createOrUpdateConfigMap(ctx, integration); err != nil {
+		return err
+	}
+	if err = createOrUpdateDeployment(ctx, integration); err != nil {
 		return err
 	}
 
@@ -62,14 +66,9 @@ func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
 //
 // **********************************
 
-func getConfigMapFor(integration *v1alpha1.Integration) (*corev1.ConfigMap, error) {
+func getConfigMapFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) (*corev1.ConfigMap, error) {
 	controller := true
 	blockOwnerDeletion := true
-
-	ctx, err := LookupContextForIntegration(integration)
-	if err != nil {
-		return nil, err
-	}
 
 	// combine properties of integration with context, integration
 	// properties have the priority
@@ -108,8 +107,8 @@ func getConfigMapFor(integration *v1alpha1.Integration) (*corev1.ConfigMap, erro
 	return &cm, nil
 }
 
-func createOrUpdateConfigMap(integration *v1alpha1.Integration) error {
-	cm, err := getConfigMapFor(integration)
+func createOrUpdateConfigMap(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) error {
+	cm, err := getConfigMapFor(ctx, integration)
 	if err != nil {
 		return err
 	}
@@ -131,10 +130,20 @@ func createOrUpdateConfigMap(integration *v1alpha1.Integration) error {
 //
 // **********************************
 
-func getDeploymentFor(integration *v1alpha1.Integration) (*appsv1.Deployment, error) {
+func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) (*appsv1.Deployment, error) {
 	controller := true
 	blockOwnerDeletion := true
-	integrationName := strings.TrimPrefix(integration.Spec.Source.Name, "/")
+	sourceName := strings.TrimPrefix(integration.Spec.Source.Name, "/")
+
+	// combine environment of integration with context, integration
+	// environment has the priority
+	environment := CombineEnvironmentAsMap(ctx, integration)
+
+	// set env vars needed by the runtime
+	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
+	environment["CAMEL_K_ROUTES_URI"] = "file:/etc/camel/" + sourceName
+	environment["CAMEL_K_ROUTES_LANGUAGE"] = integration.Spec.Source.Language
+	environment["CAMEL_K_PROPERTIES"] = "file:/etc/camel/application.properties"
 
 	labels := map[string]string{
 		"camel.apache.org/integration": integration.Name,
@@ -174,28 +183,11 @@ func getDeploymentFor(integration *v1alpha1.Integration) (*appsv1.Deployment, er
 						{
 							Name:  integration.Name,
 							Image: integration.Status.Image,
+							Env:   EnvironmentAsEnvVarSlice(environment),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "integration-volume",
 									MountPath: "/etc/camel",
-								},
-							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  "JAVA_MAIN_CLASS",
-									Value: "org.apache.camel.k.jvm.Application",
-								},
-								{
-									Name:  "CAMEL_K_ROUTES_URI",
-									Value: "file:/etc/camel/" + integrationName,
-								},
-								{
-									Name:  "CAMEL_K_ROUTES_LANGUAGE",
-									Value: integration.Spec.Source.Language,
-								},
-								{
-									Name:  "CAMEL_K_PROPERTIES",
-									Value: "file:/etc/camel/application.properties",
 								},
 							},
 						},
@@ -211,7 +203,7 @@ func getDeploymentFor(integration *v1alpha1.Integration) (*appsv1.Deployment, er
 									Items: []corev1.KeyToPath{
 										{
 											Key:  "integration",
-											Path: integrationName,
+											Path: sourceName,
 										}, {
 											Key:  "properties",
 											Path: "application.properties",
@@ -229,8 +221,8 @@ func getDeploymentFor(integration *v1alpha1.Integration) (*appsv1.Deployment, er
 	return &deployment, nil
 }
 
-func createOrUpdateDeployment(integration *v1alpha1.Integration) error {
-	deployment, err := getDeploymentFor(integration)
+func createOrUpdateDeployment(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) error {
+	deployment, err := getDeploymentFor(ctx, integration)
 	if err != nil {
 		return err
 	}

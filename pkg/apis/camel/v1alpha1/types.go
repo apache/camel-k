@@ -42,11 +42,12 @@ type Integration struct {
 
 // IntegrationSpec --
 type IntegrationSpec struct {
-	Replicas     *int32         `json:"replicas,omitempty"`
-	Source       SourceSpec     `json:"source,omitempty"`
-	Context      string         `json:"context,omitempty"`
-	Dependencies []string       `json:"dependencies,omitempty"`
-	Properties   []PropertySpec `json:"properties,omitempty"`
+	Replicas     *int32            `json:"replicas,omitempty"`
+	Source       SourceSpec        `json:"source,omitempty"`
+	Context      string            `json:"context,omitempty"`
+	Dependencies []string          `json:"dependencies,omitempty"`
+	Properties   []PropertySpec    `json:"properties,omitempty"`
+	Environment  []EnvironmentSpec `json:"environment,omitempty"`
 }
 
 // SourceSpec --
