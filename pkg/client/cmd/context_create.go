@@ -89,7 +89,7 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 	for _, item := range command.properties {
 		pair := strings.Split(item, "=")
 		if len(pair) == 2 {
-			ctx.Spec.Environment = append(ctx.Spec.Environment, v1alpha1.EnvironmentSpec{Name: pair[0], Value: pair[1]})
+			ctx.Spec.Properties = append(ctx.Spec.Properties, v1alpha1.PropertySpec{Name: pair[0], Value: pair[1]})
 		}
 	}
 

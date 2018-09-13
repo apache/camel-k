@@ -25,6 +25,7 @@ public class Application {
     public static void main(String[] args) throws Exception {
         final String resource = System.getenv(Routes.ENV_CAMEL_K_ROUTES_URI);
         final String language = System.getenv(Routes.ENV_CAMEL_K_ROUTES_LANGUAGE);
+        final String properties = System.getenv(Routes.ENV_CAMEL_K_PROPERTIES);
 
         if (ObjectHelper.isEmpty(resource)) {
             throw new IllegalStateException("No valid resource found in " + Routes.ENV_CAMEL_K_ROUTES_URI + " environment variable");
@@ -38,6 +39,12 @@ public class Application {
         }
 
         Main main = new Main();
+
+        // Load properties
+        if (ObjectHelper.isNotEmpty(properties)) {
+            main.setPropertyPlaceholderLocations(properties);
+        }
+
         main.addRouteBuilder(routes);
         main.run();
     }

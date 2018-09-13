@@ -43,6 +43,7 @@ func (spec EnvironmentSpec) String() string {
 //
 // **********************************
 
+// NewIntegrationContext --
 func NewIntegrationContext(namespace string, name string) IntegrationContext {
 	return IntegrationContext{
 		TypeMeta: metav1.TypeMeta{
@@ -56,6 +57,7 @@ func NewIntegrationContext(namespace string, name string) IntegrationContext {
 	}
 }
 
+// NewIntegrationContextList --
 func NewIntegrationContextList() IntegrationContextList {
 	return IntegrationContextList{
 		TypeMeta: metav1.TypeMeta{
