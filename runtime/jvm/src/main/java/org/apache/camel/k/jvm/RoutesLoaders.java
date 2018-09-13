@@ -19,6 +19,7 @@ package org.apache.camel.k.jvm;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -85,9 +86,12 @@ public enum RoutesLoaders implements RoutesLoader {
             try (InputStream is = Routes.loadResourceAsInputStream(resource)) {
                 String name = StringUtils.substringAfter(resource, ":");
                 name = StringUtils.removeEnd(name, ".java");
-                name = StringUtils.removeStart(name, "/");
 
-                return Reflect.compile(name.replace("/", "."), IOUtils.toString(is)).create().get();
+                if (name.contains("/")) {
+                    name = StringUtils.substringAfterLast(name, "/");
+                }
+                
+                return Reflect.compile(name, IOUtils.toString(is, StandardCharsets.UTF_8)).create().get();
             }
         }
     },
