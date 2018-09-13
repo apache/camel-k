@@ -18,6 +18,7 @@ limitations under the License.
 package action
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -72,7 +73,7 @@ func getConfigMapFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Int
 
 	// combine properties of integration with context, integration
 	// properties have the priority
-	properties := CombinePropertiesAsMap(ctx, integration)
+	properties := CombineConfigurationAsMap("property", ctx, integration)
 
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -137,13 +138,14 @@ func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.In
 
 	// combine environment of integration with context, integration
 	// environment has the priority
-	environment := CombineEnvironmentAsMap(ctx, integration)
+	environment := CombineConfigurationAsMap("env", ctx, integration)
 
 	// set env vars needed by the runtime
 	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
-	environment["CAMEL_K_ROUTES_URI"] = "file:/etc/camel/" + sourceName
+	environment["CAMEL_K_ROUTES_URI"] = "file:/etc/camel/conf/" + sourceName
 	environment["CAMEL_K_ROUTES_LANGUAGE"] = integration.Spec.Source.Language
-	environment["CAMEL_K_PROPERTIES"] = "file:/etc/camel/application.properties"
+	environment["CAMEL_K_CONF"] = "/etc/camel/conf/application.properties"
+	environment["CAMEL_K_CONF_D"] = "/etc/camel/conf.d"
 
 	labels := map[string]string{
 		"camel.apache.org/integration": integration.Name,
@@ -184,39 +186,104 @@ func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.In
 							Name:  integration.Name,
 							Image: integration.Status.Image,
 							Env:   EnvironmentAsEnvVarSlice(environment),
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "integration-volume",
-									MountPath: "/etc/camel",
-								},
-							},
-						},
-					},
-					Volumes: []corev1.Volume{
-						{
-							Name: "integration-volume",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: integration.Name,
-									},
-									Items: []corev1.KeyToPath{
-										{
-											Key:  "integration",
-											Path: sourceName,
-										}, {
-											Key:  "properties",
-											Path: "application.properties",
-										},
-									},
-								},
-							},
 						},
 					},
 				},
 			},
 		},
 	}
+
+	//
+	// Volumes :: Setup
+	//
+
+	vols := make([]corev1.Volume, 0)
+	mnts := make([]corev1.VolumeMount, 0)
+	cnt := 0
+
+	//
+	// Volumes :: Defaults
+	//
+
+	vols = append(vols, corev1.Volume{
+		Name: "integration",
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: integration.Name,
+				},
+				Items: []corev1.KeyToPath{
+					{
+						Key:  "integration",
+						Path: sourceName,
+					}, {
+						Key:  "properties",
+						Path: "application.properties",
+					},
+				},
+			},
+		},
+	})
+
+	mnts = append(mnts, corev1.VolumeMount{
+		Name:      "integration",
+		MountPath: "/etc/camel/conf",
+	})
+
+	//
+	// Volumes :: Additional ConfigMaps
+	//
+
+	cmList := CombineConfigurationAsSlice("configmap", ctx, integration)
+	for _, cmName := range cmList {
+		cnt++
+
+		vols = append(vols, corev1.Volume{
+			Name: "integration-cm-" + cmName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: cmName,
+					},
+				},
+			},
+		})
+
+		mnts = append(mnts, corev1.VolumeMount{
+			Name:      "integration-cm-" + cmName,
+			MountPath: fmt.Sprintf("/etc/camel/conf.d/%03d_%s", cnt, cmName),
+		})
+	}
+
+	//
+	// Volumes :: Additional Secrets
+	//
+
+	secretList := CombineConfigurationAsSlice("secret", ctx, integration)
+	for _, secretName := range secretList {
+		cnt++
+
+		vols = append(vols, corev1.Volume{
+			Name: "integration-secret-" + secretName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: secretName,
+				},
+			},
+		})
+
+		mnts = append(mnts, corev1.VolumeMount{
+			Name:      "integration-secret-" + secretName,
+			MountPath: fmt.Sprintf("/etc/camel/conf.d/%03d_%s", cnt, secretName),
+		})
+	}
+
+	//
+	// Volumes
+	//
+
+	deployment.Spec.Template.Spec.Volumes = vols
+	deployment.Spec.Template.Spec.Containers[0].VolumeMounts = mnts
 
 	return &deployment, nil
 }

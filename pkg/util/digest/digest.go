@@ -44,6 +44,10 @@ func ComputeForIntegration(integration *v1alpha1.Integration) string {
 	for _, item := range integration.Spec.Dependencies {
 		hash.Write([]byte(item))
 	}
+	// Integration configuration
+	for _, item := range integration.Spec.Configuration {
+		hash.Write([]byte(item.String()))
+	}
 
 	// Add a letter at the beginning and use URL safe encoding
 	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
@@ -51,18 +55,15 @@ func ComputeForIntegration(integration *v1alpha1.Integration) string {
 
 // ComputeForIntegrationContext a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegrationContext(integration *v1alpha1.IntegrationContext) string {
+func ComputeForIntegrationContext(context *v1alpha1.IntegrationContext) string {
 	hash := sha256.New()
 	// Operator version is relevant
 	hash.Write([]byte(version.Version))
 
-	for _, item := range integration.Spec.Dependencies {
+	for _, item := range context.Spec.Dependencies {
 		hash.Write([]byte(item))
 	}
-	for _, item := range integration.Spec.Environment {
-		hash.Write([]byte(item.String()))
-	}
-	for _, item := range integration.Spec.Properties {
+	for _, item := range context.Spec.Configuration {
 		hash.Write([]byte(item.String()))
 	}
 
@@ -70,6 +71,7 @@ func ComputeForIntegrationContext(integration *v1alpha1.IntegrationContext) stri
 	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
 }
 
+// Random --
 func Random() string {
 	return "v" + strconv.FormatInt(rand.Int63(), 10)
 }

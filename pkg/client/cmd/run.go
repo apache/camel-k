@@ -53,8 +53,9 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
 	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The contex used to run the integration")
-	cmd.Flags().StringSliceVarP(&options.Properties, "property", "p", nil, "Add a system property")
-	cmd.Flags().StringSliceVarP(&options.Environment, "env", "e", nil, "Add an environment variable")
+	cmd.Flags().StringSliceVarP(&options.Properties, "property", "p", nil, "Add a camel property")
+	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
+	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
 
 	return &cmd
 }
@@ -66,7 +67,8 @@ type runCmdOptions struct {
 	IntegrationName    string
 	Dependencies       []string
 	Properties         []string
-	Environment        []string
+	ConfigMaps         []string
+	Secrets            []string
 	Wait               bool
 }
 
@@ -175,24 +177,29 @@ func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 				Content:  code,
 				Language: o.Language,
 			},
-			Dependencies: o.Dependencies,
-			Context:      o.IntegrationContext,
+			Dependencies:  o.Dependencies,
+			Context:       o.IntegrationContext,
+			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
 		},
 	}
 
-	integration.Spec.Properties = make([]v1alpha1.PropertySpec, 0)
 	for _, item := range o.Properties {
-		pair := strings.Split(item, "=")
-		if len(pair) == 2 {
-			integration.Spec.Properties = append(integration.Spec.Properties, v1alpha1.PropertySpec{Name: pair[0], Value: pair[1]})
-		}
+		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
+			Type:  "property",
+			Value: item,
+		})
 	}
-	integration.Spec.Environment = make([]v1alpha1.EnvironmentSpec, 0)
-	for _, item := range o.Environment {
-		pair := strings.Split(item, "=")
-		if len(pair) == 2 {
-			integration.Spec.Environment = append(integration.Spec.Environment, v1alpha1.EnvironmentSpec{Name: pair[0], Value: pair[1]})
-		}
+	for _, item := range o.ConfigMaps {
+		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
+			Type:  "configmap",
+			Value: item,
+		})
+	}
+	for _, item := range o.Secrets {
+		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
+			Type:  "secret",
+			Value: item,
+		})
 	}
 
 	existed := false

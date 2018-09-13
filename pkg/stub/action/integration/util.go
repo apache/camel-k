@@ -2,6 +2,7 @@ package action
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
@@ -47,42 +48,59 @@ func EnvironmentAsEnvVarSlice(m map[string]string) []v1.EnvVar {
 	return env
 }
 
-// CombinePropertiesAsMap --
-func CombinePropertiesAsMap(context *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) map[string]string {
-	properties := make(map[string]string)
+// CombineConfigurationAsMap --
+func CombineConfigurationAsMap(configurationType string, context *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) map[string]string {
+	result := make(map[string]string)
 	if context != nil {
 		// Add context properties first so integrations can
 		// override it
-		for _, p := range context.Spec.Properties {
-			properties[p.Name] = p.Value
+		for _, c := range context.Spec.Configuration {
+			if c.Type == configurationType {
+				pair := strings.Split(c.Value, "=")
+				if len(pair) == 2 {
+					result[pair[0]] = pair[1]
+				}
+			}
 		}
 	}
 
 	if integration != nil {
-		for _, p := range integration.Spec.Properties {
-			properties[p.Name] = p.Value
+		for _, c := range integration.Spec.Configuration {
+			if c.Type == configurationType {
+				pair := strings.Split(c.Value, "=")
+				if len(pair) == 2 {
+					result[pair[0]] = pair[1]
+				}
+			}
 		}
 	}
 
-	return properties
+	return result
 }
 
-// CombineEnvironmentAsMap --
-func CombineEnvironmentAsMap(context *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) map[string]string {
-	environment := make(map[string]string)
+// CombineConfigurationAsSlice --
+func CombineConfigurationAsSlice(configurationType string, context *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) []string {
+	result := make(map[string]bool, 0)
 	if context != nil {
-		// Add context environment first so integrations can
+		// Add context properties first so integrations can
 		// override it
-		for _, p := range context.Spec.Environment {
-			environment[p.Name] = p.Value
+		for _, c := range context.Spec.Configuration {
+			if c.Type == configurationType {
+				result[c.Value] = true
+			}
 		}
 	}
 
-	if integration != nil {
-		for _, p := range integration.Spec.Environment {
-			environment[p.Name] = p.Value
+	for _, c := range integration.Spec.Configuration {
+		if c.Type == configurationType {
+			result[c.Value] = true
 		}
 	}
 
-	return environment
+	keys := make([]string, 0, len(result))
+	for k := range result {
+		keys = append(keys, k)
+	}
+
+	return keys
 }

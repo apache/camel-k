@@ -27,7 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 public final class Routes {
     public static final String ENV_CAMEL_K_ROUTES_URI = "CAMEL_K_ROUTES_URI";
     public static final String ENV_CAMEL_K_ROUTES_LANGUAGE = "CAMEL_K_ROUTES_LANGUAGE";
-    public static final String ENV_CAMEL_K_PROPERTIES = "CAMEL_K_PROPERTIES";
+    public static final String ENV_CAMEL_K_CONF = "CAMEL_K_CONF";
+    public static final String ENV_CAMEL_K_CONF_D = "CAMEL_K_CONF_D";
     public static final String SCHEME_CLASSPATH = "classpath:";
     public static final String SCHEME_FILE = "file:";
 
