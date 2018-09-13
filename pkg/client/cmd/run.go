@@ -34,17 +34,9 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type RunCmdOptions struct {
-	*RootCmdOptions
-	IntegrationContext string
-	Language           string
-	IntegrationName    string
-	Dependencies       []string
-	Wait               bool
-}
-
+// NewCmdRun --
 func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := RunCmdOptions{
+	options := runCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
@@ -61,11 +53,22 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
 	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The contex used to run the integration")
+	cmd.Flags().StringSliceVarP(&options.Properties, "property", "p", nil, "Add a system property")
 
 	return &cmd
 }
 
-func (*RunCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
+type runCmdOptions struct {
+	*RootCmdOptions
+	IntegrationContext string
+	Language           string
+	IntegrationName    string
+	Dependencies       []string
+	Properties         []string
+	Wait               bool
+}
+
+func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
 	}
@@ -78,7 +81,7 @@ func (*RunCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	integration, err := o.createIntegration(cmd, args)
 	if err != nil {
 		return err
@@ -92,7 +95,7 @@ func (o *RunCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *RunCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) error {
+func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) error {
 	// Block this goroutine until the integration is in a final status
 	changes, err := watch.WatchStateChanges(o.Context, integration)
 	if err != nil {
@@ -130,7 +133,7 @@ watcher:
 	return nil
 }
 
-func (o *RunCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v1alpha1.Integration, error) {
+func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v1alpha1.Integration, error) {
 	code, err := o.loadCode(args[0])
 	if err != nil {
 		return nil, err
@@ -157,7 +160,7 @@ func (o *RunCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 
 	integration := v1alpha1.Integration{
 		TypeMeta: v1.TypeMeta{
-			Kind:       "Integration",
+			Kind:       v1alpha1.IntegrationKind,
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
@@ -173,6 +176,14 @@ func (o *RunCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 			Dependencies: o.Dependencies,
 			Context:      o.IntegrationContext,
 		},
+	}
+
+	integration.Spec.Properties = make([]v1alpha1.PropertySpec, 0)
+	for _, item := range o.Properties {
+		pair := strings.Split(item, "=")
+		if len(pair) == 2 {
+			integration.Spec.Properties = append(integration.Spec.Properties, v1alpha1.PropertySpec{Name: pair[0], Value: pair[1]})
+		}
 	}
 
 	existed := false
@@ -200,7 +211,7 @@ func (o *RunCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 	return &integration, nil
 }
 
-func (*RunCmdOptions) loadCode(fileName string) (string, error) {
+func (*runCmdOptions) loadCode(fileName string) (string, error) {
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return "", err

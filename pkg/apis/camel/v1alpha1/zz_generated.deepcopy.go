@@ -224,6 +224,11 @@ func (in *IntegrationSpec) DeepCopyInto(out *IntegrationSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.Properties != nil {
+		in, out := &in.Properties, &out.Properties
+		*out = make([]PropertySpec, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 
