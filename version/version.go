@@ -20,5 +20,5 @@ package version
 
 var (
 	// Global Camel K Version
-	Version = "0.0.1-SNAPSHOT"
+	Version = "0.0.2-SNAPSHOT"
 )
