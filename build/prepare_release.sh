@@ -3,17 +3,10 @@
 set -e
 
 location=$(dirname $0)
-global_version_file=$location/../version/version.go
 
-# Set the new global version by removing "-SNAPSHOT"
-sed -i "s/-SNAPSHOT//g" $global_version_file
-find $location/../deploy -type f -exec sed -i "s/-SNAPSHOT//g" {} \;
-
-# Get the new version
 version=$($location/get_version.sh)
+version_num=$(echo $version | sed -E "s/([0-9.]*)-SNAPSHOT/\1/g")
 
-# Updating the Java modules
-mvn versions:set -DgenerateBackupPoms=false -DnewVersion=$version -f $location/../runtime
+$location/set_version.sh $version_num
 
-echo "Camel K prepared for releasing version: $version"
-
+echo "Camel K prepared for releasing version: $version_num"
