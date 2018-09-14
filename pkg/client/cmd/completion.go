@@ -34,13 +34,14 @@ To configure your bash shell to load completions for each session add to your ba
 . <(kamel completion)
 `
 
-func NewCmdCompletion() *cobra.Command {
+// NewCmdCompletion --
+func NewCmdCompletion(root *cobra.Command) *cobra.Command {
 	return &cobra.Command{
 		Use:   "completion",
 		Short: "Generates bash completion scripts",
 		Long:  completionCmdLongDescription,
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.GenBashCompletion(os.Stdout)
+			root.GenBashCompletion(os.Stdout)
 		},
 	}
 }

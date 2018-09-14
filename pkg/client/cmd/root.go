@@ -20,10 +20,11 @@ package cmd
 import (
 	"os"
 
+	"context"
+
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"context"
 )
 
 type RootCmdOptions struct {
@@ -62,7 +63,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		return nil, err
 	}
 
-	cmd.AddCommand(NewCmdCompletion())
+	cmd.AddCommand(NewCmdCompletion(&cmd))
 	cmd.AddCommand(NewCmdVersion())
 	cmd.AddCommand(NewCmdRun(&options))
 	cmd.AddCommand(NewCmdGet(&options))
