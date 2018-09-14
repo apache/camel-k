@@ -20,19 +20,16 @@ package cmd
 import (
 	"fmt"
 
+	"os"
+
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"os"
 )
 
-type InstallCmdOptions struct {
-	*RootCmdOptions
-	ClusterSetupOnly bool
-}
-
+// NewCmdInstall --
 func NewCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := InstallCmdOptions{
+	options := installCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
@@ -42,13 +39,18 @@ func NewCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:  options.install,
 	}
 
-	cmd.Flags().BoolVar(&options.ClusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
+	cmd.Flags().BoolVar(&options.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
 	cmd.ParseFlags(os.Args)
 
 	return &cmd
 }
 
-func (o *InstallCmdOptions) install(cmd *cobra.Command, args []string) error {
+type installCmdOptions struct {
+	*RootCmdOptions
+	clusterSetupOnly bool
+}
+
+func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 	err := install.SetupClusterwideResources()
 	if err != nil && errors.IsForbidden(err) {
 		// TODO explain that this is a one time operation and add a flag to do cluster-level operations only when logged as admin
@@ -57,15 +59,21 @@ func (o *InstallCmdOptions) install(cmd *cobra.Command, args []string) error {
 		return nil // TODO better error handling: if here we return err the help page is shown
 	}
 
-	if o.ClusterSetupOnly {
+	if o.clusterSetupOnly {
 		fmt.Println("Camel K cluster setup completed successfully")
 	} else {
 		namespace := o.Namespace
 
-		err = install.InstallOperator(namespace)
+		err = install.Operator(namespace)
 		if err != nil {
 			return err
 		}
+
+		err = install.PlatformContexts(namespace)
+		if err != nil {
+			return err
+		}
+
 		fmt.Println("Camel K installed in namespace", namespace)
 	}
 

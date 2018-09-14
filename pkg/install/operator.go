@@ -19,19 +19,29 @@ package install
 
 import (
 	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func InstallOperator(namespace string) error {
+// Operator --
+func Operator(namespace string) error {
 	return installResources(namespace,
 		"operator-service-account.yaml",
 		"operator-role-openshift.yaml", // TODO distinguish between Openshift and Kubernetes
 		"operator-role-binding.yaml",
 		"operator-deployment.yaml",
 		"operator-service.yaml",
+	)
+}
+
+// PlatformContexts --
+func PlatformContexts(namespace string) error {
+	return installResources(namespace,
+		"platform-integration-context-core.yaml",
+		"platform-integration-context-groovy.yaml",
 	)
 }
 
@@ -50,14 +60,18 @@ func installResource(namespace string, name string) error {
 		return err
 	}
 
-	if kObj, ok := obj.(metav1.Object); ok {
-		kObj.SetNamespace(namespace)
+	if metaObject, ok := obj.(metav1.Object); ok {
+		metaObject.SetNamespace(namespace)
 	}
 
 	err = sdk.Create(obj)
 	if err != nil && errors.IsAlreadyExists(err) {
 		// Don't recreate Service object
 		if obj.GetObjectKind().GroupVersionKind().Kind == "Service" {
+			return nil
+		}
+		// Don't recreate integration contexts
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationContextKind {
 			return nil
 		}
 		return sdk.Update(obj)

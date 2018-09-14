@@ -2,6 +2,7 @@ package action
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -24,7 +25,81 @@ func LookupContextForIntegration(integration *v1alpha1.Integration) (*v1alpha1.I
 		return &ctx, nil
 	}
 
-	return nil, nil
+	ctxList := v1alpha1.NewIntegrationContextList()
+	if err := sdk.List(integration.Namespace, &ctxList); err != nil {
+		return nil, err
+	}
+
+	var c *v1alpha1.IntegrationContext
+
+	if len(integration.Spec.Dependencies) == 0 {
+		// The integration has no dependencies, try to find the one that
+		// has minimum dependencies requirement.
+
+		ndeps := math.MaxUint16
+
+		for _, ctx := range ctxList.Items {
+			cdeps := len(ctx.Spec.Dependencies)
+			if cdeps < ndeps {
+				ndeps = cdeps
+				c = &ctx
+			}
+			if ndeps == 0 {
+				break
+			}
+		}
+	} else {
+		ndeps := math.MaxUint16
+
+		for _, ctx := range ctxList.Items {
+			// The integration has some dependencies, try to find the one that matches
+			// the required dependencies with minimum "dependency overhead"
+
+			if ctx.Labels["camel.apache.org/context.type"] == "platform" {
+				if StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
+					ideps := len(integration.Spec.Dependencies)
+					cdeps := len(ctx.Spec.Dependencies)
+
+					if cdeps < ndeps || ideps == cdeps {
+						c = &ctx
+						ndeps = cdeps
+					}
+
+					if ideps == ndeps {
+						break
+					}
+				}
+			}
+		}
+	}
+
+	if c == nil {
+		// TODO: generate a new platform context
+	}
+
+	return c, nil
+}
+
+// StringSliceContains --
+func StringSliceContains(slice []string, items []string) bool {
+	for i := 0; i < len(items); i++ {
+		if !StringSliceExists(slice, items[i]) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// StringSliceExists --
+func StringSliceExists(slice []string, item string) bool {
+	for i := 0; i < len(slice); i++ {
+		if slice[i] == item {
+			return true
+		}
+	}
+
+	return false
 }
 
 // PropertiesString --
