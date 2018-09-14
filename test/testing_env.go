@@ -22,8 +22,8 @@ limitations under the License.
 package test
 
 import (
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func init() {
@@ -35,7 +35,7 @@ func init() {
 		panic(err)
 	}
 
-	err = install.InstallOperator(GetTargetNamespace())
+	err = install.Operator(GetTargetNamespace())
 	if err != nil {
 		panic(err)
 	}

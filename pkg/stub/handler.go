@@ -28,11 +28,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// NewHandler --
 func NewHandler(ctx context.Context, namespace string) sdk.Handler {
-	return &Handler{
+	return &handler{
 		integrationActionPool: []iaction.IntegrationAction{
 			iaction.NewInitializeAction(),
-			iaction.NewBuildAction(ctx, namespace),
+			iaction.NewBuildAction(namespace),
 			iaction.NewDeployAction(),
 			iaction.NewMonitorAction(),
 		},
@@ -44,12 +45,12 @@ func NewHandler(ctx context.Context, namespace string) sdk.Handler {
 	}
 }
 
-type Handler struct {
+type handler struct {
 	integrationActionPool        []iaction.IntegrationAction
 	integrationContextActionPool []caction.IntegrationContextAction
 }
 
-func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
+func (h *handler) Handle(ctx context.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
 	case *v1alpha1.Integration:
 		for _, a := range h.integrationActionPool {

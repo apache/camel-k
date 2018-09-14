@@ -357,6 +357,33 @@ status:
   loadBalancer: {}
 
 `
+	Resources["platform-integration-context-core.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationContext
+metadata:
+  name: root.integrationcontexts.camel.apache.org
+  labels:
+    app: "camel-k"
+    camel.apache.org/context.created.by.kind: Operator
+    camel.apache.org/context.created.by.name: core
+    camel.apache.org/context.type: platform
+`
+	Resources["platform-integration-context-groovy.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationContext
+metadata:
+  name: groovy.integrationcontexts.camel.apache.org
+  labels:
+    app: "camel-k"
+    camel.apache.org/context.created.by.kind: Operator
+    camel.apache.org/context.created.by.name: core
+    camel.apache.org/context.type: platform
+spec:
+  dependencies:
+    - camel:groovy
+`
 	Resources["user-cluster-role.yaml"] =
 		`
 kind: ClusterRole

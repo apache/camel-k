@@ -18,24 +18,21 @@ limitations under the License.
 package action
 
 import (
-	"context"
+	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/build"
-	"github.com/apache/camel-k/pkg/build/api"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/sirupsen/logrus"
 )
 
 // NewBuildAction create an action that handles integration build
-func NewBuildAction(ctx context.Context, namespace string) IntegrationAction {
+func NewBuildAction(namespace string) IntegrationAction {
 	return &buildAction{
-		buildManager: build.NewManager(ctx, namespace),
+		namespace: namespace,
 	}
 }
 
 type buildAction struct {
-	buildManager *build.Manager
+	namespace string
 }
 
 func (action *buildAction) Name() string {
@@ -53,44 +50,65 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 		return err
 	}
 
-
 	if ctx != nil {
+		if ctx.Labels["camel.apache.org/context.type"] == "platform" {
+			// This is a platform context and as it is auto generated it may get
+			// out of sync if the integration that has generated it, has been
+			// amended to add/remove dependencies
+
+			//TODO: this is a very simple check, we may need to provide a deps comparison strategy
+			if !StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
+				// We need to re-generate a context or search for a new one that
+				// satisfies integrations needs so let's remove the association
+				// with a context
+				target := integration.DeepCopy()
+				target.Spec.Context = ""
+				return sdk.Update(target)
+			}
+		}
+
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
 			target := integration.DeepCopy()
 			target.Status.Image = ctx.Status.Image
+			target.Spec.Context = ctx.Name
 			target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+			return sdk.Update(target)
+		}
+
+		if integration.Spec.Context == "" {
+			// We need to set the context
+			target := integration.DeepCopy()
+			target.Spec.Context = ctx.Name
 			return sdk.Update(target)
 		}
 
 		return nil
 	}
 
-	buildIdentifier := api.BuildIdentifier{
-		Name:      integration.Name,
-		Qualifier: integration.Status.Digest,
-	}
-	buildResult := action.buildManager.Get(buildIdentifier)
-	if buildResult.Status == api.BuildStatusNotRequested {
-		action.buildManager.Start(api.BuildSource{
-			Identifier: buildIdentifier,
-			Code: api.Code{
-				Name:     integration.Spec.Source.Name,
-				Content:  integration.Spec.Source.Content,
-				Language: integration.Spec.Source.Language,
-			},
-			Dependencies: integration.Spec.Dependencies,
-		})
-		logrus.Info("Build started")
-	} else if buildResult.Status == api.BuildStatusError {
-		target := integration.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationPhaseError
-		return sdk.Update(target)
-	} else if buildResult.Status == api.BuildStatusCompleted {
-		target := integration.DeepCopy()
-		target.Status.Image = buildResult.Image
-		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
-		return sdk.Update(target)
+	platformCtxName := fmt.Sprintf("ctx-%s-%s", integration.Name, integration.ResourceVersion)
+	platformCtx := v1alpha1.NewIntegrationContext(action.namespace, platformCtxName)
+
+	// Add some information for post-processing, this may need to be refactored
+	// to a proper data structure
+	platformCtx.Labels = map[string]string{
+		"camel.apache.org/context.type":               "platform",
+		"camel.apache.org/context.created.by.kind":    v1alpha1.IntegrationKind,
+		"camel.apache.org/context.created.by.name":    integration.Name,
+		"camel.apache.org/context.created.by.version": integration.ResourceVersion,
 	}
 
-	return nil
+	// Set the context to have the same dependencies as the integrations
+	platformCtx.Spec = v1alpha1.IntegrationContextSpec{
+		Dependencies: integration.Spec.Dependencies,
+	}
+
+	if err := sdk.Create(&platformCtx); err != nil {
+		return err
+	}
+
+	// Set the context name so the next handle loop, will fall through the
+	// same path as integration with a user defined context
+	target := integration.DeepCopy()
+	target.Spec.Context = platformCtxName
+	return sdk.Update(target)
 }
