@@ -147,6 +147,10 @@ func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.In
 	environment["CAMEL_K_CONF"] = "/etc/camel/conf/application.properties"
 	environment["CAMEL_K_CONF_D"] = "/etc/camel/conf.d"
 
+	// add a dummy env var to trigger deployment if everything but the code
+	// has been changed
+	environment["CAMEL_K_DIGEST"] = integration.Status.Digest
+
 	labels := map[string]string{
 		"camel.apache.org/integration": integration.Name,
 	}
