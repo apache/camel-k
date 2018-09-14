@@ -17,6 +17,9 @@ release: prepare-release build images-build images-push test-integration cross-c
 prepare-release:
 	./build/prepare_release.sh
 
+new-version:
+	./build/next_snapshot.sh
+
 cross-compile:
 	./build/cross_compile.sh
 
@@ -57,4 +60,4 @@ check-integration:
 
 
 
-.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile
+.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile new-version git-tag
