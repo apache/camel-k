@@ -112,6 +112,23 @@ public class RoutesLoadersTest {
         assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
     }
 
+    @Test
+    public void testLoadXml() throws Exception {
+        String resource = "classpath:routes.xml";
+        RoutesLoader loader = Routes.loaderForResource(resource);
+        RouteBuilder builder = loader.load(resource);
+
+        assertThat(loader).isSameAs(RoutesLoaders.Xml);
+        assertThat(builder).isNotNull();
+
+        builder.configure();
+
+        List<RouteDefinition> routes = builder.getRouteCollection().getRoutes();
+        assertThat(routes).hasSize(1);
+        assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
+        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testResourceWithoutScheme() {
         Routes.loaderForResource("routes.js");

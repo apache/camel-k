@@ -36,7 +36,7 @@ public final class Routes {
     }
 
     public static boolean isScripting(String resource) {
-        return resource.endsWith(".java") || resource.endsWith(".js") || resource.endsWith(".groovy");
+        return resource.endsWith(".java") || resource.endsWith(".js") || resource.endsWith(".groovy") || resource.endsWith(".xml");
     }
 
     public static RoutesLoader loaderForLanguage(String language) {
