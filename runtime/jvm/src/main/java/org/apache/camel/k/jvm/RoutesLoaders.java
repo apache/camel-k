@@ -35,6 +35,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.model.RoutesDefinition;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -164,6 +165,35 @@ public enum RoutesLoaders implements RoutesLoader {
                         // set the delegate target
                         script.setDelegate(new ScriptingDsl(this));
                         script.run();
+                    }
+                }
+            };
+        }
+    },
+    Xml {
+        @Override
+        public List<String> getSupportedLanguages() {
+            return Arrays.asList("xml");
+        }
+
+        @Override
+        public boolean test(String resource) {
+            String ext = StringUtils.substringAfterLast(resource, ".");
+            List<String> langs = getSupportedLanguages();
+
+            return langs.contains(ext);
+        }
+
+        @Override
+        public RouteBuilder load(String resource) throws Exception {
+            return new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    try (InputStream is = Routes.loadResourceAsInputStream(resource)) {
+                        final CamelContext context = getContext();
+                        final RoutesDefinition definitions = context.loadRoutesDefinition(is);
+
+                        setRouteCollection(definitions);
                     }
                 }
             };
