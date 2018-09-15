@@ -318,6 +318,14 @@
   revision = "05ee40e3a273f7245e8777337fc7b46e533a9a92"
 
 [[projects]]
+  digest = "1:0975c74a2cd70df6c2ae353c6283a25ce759dda7e1e706e5c07458baf3faca22"
+  name = "github.com/rs/xid"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "15d26544def341f036c5f8dca987a4cbe575032c"
+  version = "v1.2.1"
+
+[[projects]]
   digest = "1:b2339e83ce9b5c4f79405f949429a7f68a9a904fed903c672aac1e7ceb7f5f02"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -711,6 +719,7 @@
     "github.com/operator-framework/operator-sdk/pkg/util/k8sutil",
     "github.com/operator-framework/operator-sdk/version",
     "github.com/pkg/errors",
+    "github.com/rs/xid",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/stoewer/go-strcase",
