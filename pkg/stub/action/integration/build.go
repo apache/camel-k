@@ -20,6 +20,8 @@ package action
 import (
 	"fmt"
 
+	"github.com/rs/xid"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
@@ -85,7 +87,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 		return nil
 	}
 
-	platformCtxName := fmt.Sprintf("ctx-%s-%s", integration.Name, integration.ResourceVersion)
+	platformCtxName := fmt.Sprintf("ctx-%s", xid.New())
 	platformCtx := v1alpha1.NewIntegrationContext(action.namespace, platformCtxName)
 
 	// Add some information for post-processing, this may need to be refactored
