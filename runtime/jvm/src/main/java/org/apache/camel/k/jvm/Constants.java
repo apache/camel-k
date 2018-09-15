@@ -16,14 +16,14 @@
  */
 package org.apache.camel.k.jvm;
 
-import org.junit.Ignore;
-import org.junit.Test;
+public final class Constants {
+    public static final String ENV_CAMEL_K_ROUTES_URI = "CAMEL_K_ROUTES_URI";
+    public static final String ENV_CAMEL_K_ROUTES_LANGUAGE = "CAMEL_K_ROUTES_LANGUAGE";
+    public static final String ENV_CAMEL_K_CONF = "CAMEL_K_CONF";
+    public static final String ENV_CAMEL_K_CONF_D = "CAMEL_K_CONF_D";
+    public static final String SCHEME_CLASSPATH = "classpath:";
+    public static final String SCHEME_FILE = "file:";
 
-public class ApplicationTest {
-    @Test
-    @Ignore
-    public void applicationTest() throws Exception {
-        Application.main(new String[] { MyRoutes.class.getCanonicalName() });
+    private Constants() {
     }
-
 }
