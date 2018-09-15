@@ -104,7 +104,9 @@ public class Application {
                 }
             };
 
-            Files.walkFileTree(root, visitor);
+            if (Files.exists(root)) {
+                Files.walkFileTree(root, visitor);
+            }
         }
 
         return String.join(",", locations);
