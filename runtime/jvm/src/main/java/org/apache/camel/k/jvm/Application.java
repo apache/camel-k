@@ -39,24 +39,24 @@ public class Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws Exception {
-        final String resource = System.getenv(Routes.ENV_CAMEL_K_ROUTES_URI);
-        final String language = System.getenv(Routes.ENV_CAMEL_K_ROUTES_LANGUAGE);
+        final String resource = System.getenv(Constants.ENV_CAMEL_K_ROUTES_URI);
+        final String language = System.getenv(Constants.ENV_CAMEL_K_ROUTES_LANGUAGE);
 
         if (ObjectHelper.isEmpty(resource)) {
-            throw new IllegalStateException("No valid resource found in " + Routes.ENV_CAMEL_K_ROUTES_URI + " environment variable");
+            throw new IllegalStateException("No valid resource found in " + Constants.ENV_CAMEL_K_ROUTES_URI + " environment variable");
         }
 
         String locations = computePropertyPlaceholderLocations();
-        RoutesLoader loader = Routes.loaderFor(resource, language);
+        RoutesLoader loader = RoutesLoaders.loaderFor(resource, language);
         RouteBuilder routes = loader.load(resource);
 
         if (routes == null) {
             throw new IllegalStateException("Unable to load route from: " + resource);
         }
 
-        LOGGER.info("Routes    : {}", resource);
-        LOGGER.info("Language  : {}", language);
-        LOGGER.info("Locations : {}", locations);
+        LOGGER.info("Routes: {}", resource);
+        LOGGER.info("Language: {}", language);
+        LOGGER.info("Locations: {}", locations);
 
         Main main = new Main();
 
@@ -75,8 +75,8 @@ public class Application {
     // *******************************
 
     private static String computePropertyPlaceholderLocations() throws IOException {
-        final String conf = System.getenv(Routes.ENV_CAMEL_K_CONF);
-        final String confd = System.getenv(Routes.ENV_CAMEL_K_CONF_D);
+        final String conf = System.getenv(Constants.ENV_CAMEL_K_CONF);
+        final String confd = System.getenv(Constants.ENV_CAMEL_K_CONF_D);
         final List<String> locations = new ArrayList<>();
 
         // Main location
