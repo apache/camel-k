@@ -71,10 +71,21 @@ func (command *contextCreateCommand) validateArgs(cmd *cobra.Command, args []str
 }
 
 func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) error {
-	namespace := command.Namespace
-	name := kubernetes.SanitizeName(args[0])
+	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
+	if err := sdk.Get(&ctx); err == nil {
+		// the integration context already exists, let's check that it is
+		// not a platform one which is supposed to be "read only"
 
-	ctx := v1alpha1.NewIntegrationContext(namespace, name)
+		if ctx.Labels["camel.apache.org/context.type"] == "platform" {
+			fmt.Printf("integration context \"%s\" is not editable\n", ctx.Name)
+			return nil
+		}
+	}
+
+	ctx = v1alpha1.NewIntegrationContext(command.Namespace, kubernetes.SanitizeName(args[0]))
+	ctx.Labels = map[string]string{
+		"camel.apache.org/context.type": "user",
+	}
 	ctx.Spec = v1alpha1.IntegrationContextSpec{
 		Dependencies:  command.dependencies,
 		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
@@ -106,20 +117,22 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		clone := ctx.DeepCopy()
 		err = sdk.Get(clone)
 		if err != nil {
-			return err
+			fmt.Printf(err.Error())
+			return nil
 		}
 		ctx.ResourceVersion = clone.ResourceVersion
 		err = sdk.Update(&ctx)
 	}
 
 	if err != nil {
-		return err
+		fmt.Printf(err.Error())
+		return nil
 	}
 
 	if !existed {
-		fmt.Printf("integration context \"%s\" created\n", name)
+		fmt.Printf("integration context \"%s\" created\n", ctx.Name)
 	} else {
-		fmt.Printf("integration context \"%s\" updated\n", name)
+		fmt.Printf("integration context \"%s\" updated\n", ctx.Name)
 	}
 
 	return nil

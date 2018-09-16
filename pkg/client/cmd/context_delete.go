@@ -23,7 +23,6 @@ import (
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 )
@@ -57,15 +56,25 @@ func (command *contextDeleteCommand) validateArgs(cmd *cobra.Command, args []str
 }
 
 func (command *contextDeleteCommand) run(cmd *cobra.Command, args []string) error {
-	name := kubernetes.SanitizeName(args[0])
-	ctx := v1alpha1.NewIntegrationContext(command.Namespace, name)
+	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
 
-	if err := sdk.Delete(&ctx); err != nil {
-		fmt.Printf("error deleting integration context %s, %s", ctx.Name, err)
+	if err := sdk.Get(&ctx); err != nil {
 		return err
 	}
 
-	fmt.Printf("integration context %s has been deleted", ctx.Name)
+	// let's check that it is not a platform one which is supposed to be "read only"
+	// thus not managed by the end user
+	if ctx.Labels["camel.apache.org/context.type"] == "platform" {
+		fmt.Printf("integration context \"%s\" is not editable\n", ctx.Name)
+		return nil
+	}
+
+	if err := sdk.Delete(&ctx); err != nil {
+		fmt.Printf("error deleting integration context \"%s\", %s\n", ctx.Name, err)
+		return err
+	}
+
+	fmt.Printf("integration context \"%s\" has been deleted\n", ctx.Name)
 
 	return nil
 }

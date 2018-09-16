@@ -52,10 +52,10 @@ func (command *contextGetCommand) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(w, "NAME\tSTATUS")
+	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
+	fmt.Fprintln(w, "NAME\tTYPE\tSTATUS")
 	for _, ctx := range ctxList.Items {
-		fmt.Fprintf(w, "%s\t%s\n", ctx.Name, string(ctx.Status.Phase))
+		fmt.Fprintf(w, "%s\t%s\t%s\n", ctx.Name, ctx.Labels["camel.apache.org/context.type"], string(ctx.Status.Phase))
 	}
 	w.Flush()
 
