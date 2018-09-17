@@ -178,7 +178,8 @@ make test-integration
 ### Running
 
 If you want to install everything you have in your source code and see it running on Kubernetes, you need to run the following command:
-- `make install-minishift`: to build the project and run it on Minishift
+- `make install-minishift`: to build the project and run it on Minishift, the default namespace for this is `myproject`
+- you can specify a different namespace with `make install-minishift project=myawesomeproject`
 
 This command assumes you have an already running Minishift instance.
 
