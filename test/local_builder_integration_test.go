@@ -34,7 +34,7 @@ import (
 func TestLocalBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	builder := local.NewLocalBuilder(ctx, GetTargetNamespace())
+	builder := local.NewLocalBuilder(ctx, getTargetNamespace())
 
 	execution := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
@@ -42,7 +42,7 @@ func TestLocalBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: TimerToLogIntegrationCode(),
+			Content: createTimerToLogIntegrationCode(),
 		},
 	})
 
@@ -54,7 +54,7 @@ func TestLocalBuild(t *testing.T) {
 func TestLocalDoubleBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	builder := local.NewLocalBuilder(ctx, GetTargetNamespace())
+	builder := local.NewLocalBuilder(ctx, getTargetNamespace())
 
 	execution1 := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
@@ -62,7 +62,7 @@ func TestLocalDoubleBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: TimerToLogIntegrationCode(),
+			Content: createTimerToLogIntegrationCode(),
 		},
 	})
 
@@ -72,7 +72,7 @@ func TestLocalDoubleBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: TimerToLogIntegrationCode(),
+			Content: createTimerToLogIntegrationCode(),
 		},
 	})
 
@@ -86,7 +86,7 @@ func TestLocalDoubleBuild(t *testing.T) {
 func TestLocalFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	builder := local.NewLocalBuilder(ctx, GetTargetNamespace())
+	builder := local.NewLocalBuilder(ctx, getTargetNamespace())
 
 	execution := builder.Build(build.BuildSource{
 		Identifier: build.BuildIdentifier{
@@ -94,7 +94,7 @@ func TestLocalFailedBuild(t *testing.T) {
 			Qualifier: digest.Random(),
 		},
 		Code: build.Code{
-			Content: TimerToLogIntegrationCode(),
+			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
 			"camel:cippalippa",

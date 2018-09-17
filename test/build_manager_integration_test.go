@@ -34,7 +34,7 @@ import (
 
 func TestBuildManagerBuild(t *testing.T) {
 	ctx := context.TODO()
-	buildManager := build.NewManager(ctx, GetTargetNamespace())
+	buildManager := build.NewManager(ctx, getTargetNamespace())
 	identifier := buildapi.BuildIdentifier{
 		Name:   "man-test",
 		Qualifier: digest.Random(),
@@ -42,7 +42,7 @@ func TestBuildManagerBuild(t *testing.T) {
 	buildManager.Start(buildapi.BuildSource{
 		Identifier: identifier,
 		Code: buildapi.Code{
-			Content: TimerToLogIntegrationCode(),
+			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-core",
@@ -68,7 +68,7 @@ func TestBuildManagerBuild(t *testing.T) {
 func TestBuildManagerFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	buildManager := build.NewManager(ctx, GetTargetNamespace())
+	buildManager := build.NewManager(ctx, getTargetNamespace())
 	identifier := buildapi.BuildIdentifier{
 		Name:   "man-test-2",
 		Qualifier: digest.Random(),
@@ -76,7 +76,7 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	buildManager.Start(buildapi.BuildSource{
 		Identifier: identifier,
 		Code: buildapi.Code{
-			Content: TimerToLogIntegrationCode(),
+			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-cippalippa",
