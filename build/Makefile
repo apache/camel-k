@@ -52,6 +52,9 @@ images-build:
 images-push:
 	./build/images_push.sh
 
+install-minishift:
+	./build/install_minishift.sh
+
 test: check
 check:
 	go test ./...
@@ -62,4 +65,4 @@ check-integration:
 
 
 
-.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile new-version git-tag increment-snapshot
+.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile new-version git-tag increment-snapshot install-minishift
