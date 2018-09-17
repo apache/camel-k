@@ -45,6 +45,13 @@ func PlatformContexts(namespace string) error {
 	)
 }
 
+// Example --
+func Example(namespace string) error {
+	return installResources(namespace,
+		"cr-example.yaml",
+	)
+}
+
 func installResources(namespace string, names ...string) error {
 	for _, name := range names {
 		if err := installResource(namespace, name); err != nil {
