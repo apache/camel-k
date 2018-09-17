@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const completionCmdLongDescription = `
+const bashCompletionCmdLongDescription = `
 To load completion run
 
 . <(kamel completion)
@@ -34,14 +34,38 @@ To configure your bash shell to load completions for each session add to your ba
 . <(kamel completion)
 `
 
+const zshCompletionCmdLongDescription = `
+To configure your zsh shell to load completions for each session add to your zshrc
+
+if [ $commands[kamel] ]; then
+  source <(kamel completion zsh)
+fi
+`
+
 // NewCmdCompletion --
 func NewCmdCompletion(root *cobra.Command) *cobra.Command {
-	return &cobra.Command{
+	completion := cobra.Command{
 		Use:   "completion",
+		Short: "Generates completion scripts",
+	}
+
+	completion.AddCommand(&cobra.Command{
+		Use:   "bash",
 		Short: "Generates bash completion scripts",
-		Long:  completionCmdLongDescription,
+		Long:  bashCompletionCmdLongDescription,
 		Run: func(cmd *cobra.Command, args []string) {
 			root.GenBashCompletion(os.Stdout)
 		},
-	}
+	})
+
+	completion.AddCommand(&cobra.Command{
+		Use:   "zsh",
+		Short: "Generates zsh completion scripts",
+		Long:  zshCompletionCmdLongDescription,
+		Run: func(cmd *cobra.Command, args []string) {
+			root.GenZshCompletion(os.Stdout)
+		},
+	})
+
+	return &completion
 }
