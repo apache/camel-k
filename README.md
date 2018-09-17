@@ -177,14 +177,10 @@ make test-integration
 
 ### Running
 
-If you want to install everything you have in your source code and see it running on Kubernetes, you need to follow these steps:
-- `make`: to build the project.
-- `eval $(minishift docker-env)`: to connect to your Minishift Docker daemon.
-- `make images`: to build the operator docker image.
-- `./kamel install`: to install Camel K into the namespace.
-- `oc delete pod -l name=camel-k-operator`: to ensure the operator is using latest image (delete the pod to let Openshift recreate it).
+If you want to install everything you have in your source code and see it running on Kubernetes, you need to run the following command:
+- `make install-minishift`: to build the project and run it on Minishift
 
-**Note for contributors:** why don't you embed all those steps in a `make install-minishift` command?
+This command assumes you have an already running Minishift instance.
 
 Now you can play with Camel K:
 
