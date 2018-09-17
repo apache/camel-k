@@ -32,6 +32,8 @@ import (
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/util/log"
+	"io"
 )
 
 // NewCmdRun --
@@ -56,6 +58,7 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&options.Properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
+	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
 
 	return &cmd
 }
@@ -70,6 +73,7 @@ type runCmdOptions struct {
 	ConfigMaps         []string
 	Secrets            []string
 	Wait               bool
+	Logs               bool
 }
 
 func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -92,6 +96,12 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 	if o.Wait {
 		err = o.waitForIntegrationReady(integration)
+		if err != nil {
+			return err
+		}
+	}
+	if o.Logs {
+		err = o.printLogs(integration)
 		if err != nil {
 			return err
 		}
@@ -133,6 +143,21 @@ watcher:
 	// TODO we may not be able to reach this state, since the build will be done without sources (until we add health checks)
 	if lastStatusSeen != nil && lastStatusSeen.Phase == v1alpha1.IntegrationPhaseError {
 		return errors.New("integration deployment failed")
+	}
+	return nil
+}
+
+func (o *runCmdOptions) printLogs(integration *v1alpha1.Integration) error {
+	scraper := log.NewSelectorScraper(integration.Namespace, "camel.apache.org/integration=" + integration.Name)
+	reader := scraper.Start(o.Context)
+	for {
+		str, err := reader.ReadString('\n')
+		if err == io.EOF || o.Context.Err() != nil {
+			break
+		} else if err != nil {
+			return err
+		}
+		fmt.Print(str)
 	}
 	return nil
 }
