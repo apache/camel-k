@@ -66,31 +66,30 @@ spec:
   version: v1alpha1
 
 `
-	Resources["cr.yaml"] =
+	Resources["cr-example.yaml"] =
 		`
-apiVersion: "camel.apache.org/v1alpha1"
-kind: "Integration"
+apiVersion: camel.apache.org/v1alpha1
+kind: Integration
 metadata:
-  name: "example"
+  name: example
 spec:
-  replicas: 1
+  dependencies:
+    - camel:groovy
   source:
-    code: |-
-      package kamel;
+    content: |-
+      // This is Camel K Groovy example route
 
-      import org.apache.camel.builder.RouteBuilder;
+      rnd = new Random()
 
-      public class Routes extends RouteBuilder {
-
-          @Override
-          public void configure() throws Exception {
-              from("timer:tick")
-                .setBody(constant("Hello World!!!"))
-                .to("log:info");
+      from('timer:groovy?period=1s')
+          .routeId('groovy')
+          .setBody()
+              .constant('Hello Camel K!')
+          .process {
+              it.in.headers['RandomValue'] = rnd.nextInt()
           }
-
-      }
-
+          .to('log:info?showHeaders=true')
+    name: routes.groovy
 `
 	Resources["operator-deployment.yaml"] =
 		`

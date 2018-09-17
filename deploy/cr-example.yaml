@@ -1,0 +1,22 @@
+apiVersion: camel.apache.org/v1alpha1
+kind: Integration
+metadata:
+  name: example
+spec:
+  dependencies:
+    - camel:groovy
+  source:
+    content: |-
+      // This is Camel K Groovy example route
+
+      rnd = new Random()
+
+      from('timer:groovy?period=1s')
+          .routeId('groovy')
+          .setBody()
+              .constant('Hello Camel K!')
+          .process {
+              it.in.headers['RandomValue'] = rnd.nextInt()
+          }
+          .to('log:info?showHeaders=true')
+    name: routes.groovy

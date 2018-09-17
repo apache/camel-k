@@ -40,6 +40,7 @@ func NewCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&options.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
+	cmd.Flags().BoolVar(&options.exampleSetup, "example", false, "Install example integration")
 	cmd.ParseFlags(os.Args)
 
 	return &cmd
@@ -48,6 +49,7 @@ func NewCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 type installCmdOptions struct {
 	*RootCmdOptions
 	clusterSetupOnly bool
+	exampleSetup     bool
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
@@ -72,6 +74,13 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 		err = install.PlatformContexts(namespace)
 		if err != nil {
 			return err
+		}
+
+		if o.exampleSetup {
+			err = install.Example(namespace)
+			if err != nil {
+				return err
+			}
 		}
 
 		fmt.Println("Camel K installed in namespace", namespace)
