@@ -25,15 +25,16 @@ import (
 	"strconv"
 	"strings"
 
+	"io"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/watch"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/apache/camel-k/pkg/util/log"
-	"io"
 )
 
 // NewCmdRun --
@@ -148,7 +149,7 @@ watcher:
 }
 
 func (o *runCmdOptions) printLogs(integration *v1alpha1.Integration) error {
-	scraper := log.NewSelectorScraper(integration.Namespace, "camel.apache.org/integration=" + integration.Name)
+	scraper := log.NewSelectorScraper(integration.Namespace, "camel.apache.org/integration="+integration.Name)
 	reader := scraper.Start(o.Context)
 	for {
 		str, err := reader.ReadString('\n')
@@ -184,7 +185,7 @@ func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 	codeName := args[0]
 
 	if idx := strings.LastIndexByte(args[0], os.PathSeparator); idx > -1 {
-		codeName = codeName[idx:]
+		codeName = codeName[idx+1:]
 	}
 
 	integration := v1alpha1.Integration{
