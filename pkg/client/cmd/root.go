@@ -27,20 +27,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const kamelCommandLongDescription = `
+Long:  "Apache Camel K (a.k.a. Kamel) is a lightweight integration framework
+built from Apache Camel that runs natively on Kubernetes and is
+specifically designed for serverless and microservice architectures.",,	
+`
+
+// RootCmdOptions --
 type RootCmdOptions struct {
 	Context    context.Context
 	KubeConfig string
 	Namespace  string
 }
 
+// NewKamelCommand --
 func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	options := RootCmdOptions{
 		Context: ctx,
 	}
 	var cmd = cobra.Command{
-		Use:   "kamel",
-		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
-		Long:  "Apache Camel K (a.k.a. Kamel) is a lightweight integration framework\nbuilt from Apache Camel that runs natively on Kubernetes and is\nspecifically designed for serverless and microservice architectures.",
+		Use:                    "kamel",
+		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
+		Long:                   kamelCommandLongDescription,
+		BashCompletionFunction: bashCompletionFunction,
 	}
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", "", "Path to the config file to use for CLI requests")
@@ -63,7 +72,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		return nil, err
 	}
 
-	cmd.AddCommand(NewCmdCompletion(&cmd))
+	cmd.AddCommand(newCmdCompletion(&cmd))
 	cmd.AddCommand(NewCmdVersion())
 	cmd.AddCommand(NewCmdRun(&options))
 	cmd.AddCommand(NewCmdGet(&options))
