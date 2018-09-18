@@ -61,6 +61,9 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
 	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
 
+	// completion support
+	configureKnownCompletions(&cmd)
+
 	return &cmd
 }
 
