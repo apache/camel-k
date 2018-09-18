@@ -19,6 +19,7 @@ package action
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/digest"
 
 	"github.com/rs/xid"
 
@@ -74,6 +75,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 			target.Status.Image = ctx.Status.Image
 			target.Spec.Context = ctx.Name
 			target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+			target.Status.Digest = digest.ComputeForIntegration(target)
 			return sdk.Update(target)
 		}
 
