@@ -15,32 +15,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+// Package sync provides useful tools to get notified when a file system resource changes
+package sync
 
 import (
-	"fmt"
-	"github.com/apache/camel-k/pkg/client/cmd"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"math/rand"
-	"os"
 	"context"
+	"github.com/radovskyb/watcher"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
-	ctx := context.Background()
-	rootCmd, err := cmd.NewKamelCommand(ctx)
-	exitOnError(err)
-
-	err = rootCmd.Execute()
-	exitOnError(err)
-}
-
-func exitOnError(err error) {
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+// File returns a channel that signals each time the content of the file changes
+func File(ctx context.Context, path string) (<-chan bool, error) {
+	w := watcher.New()
+	if err := w.Add(path); err != nil {
+		return nil, err
 	}
+	w.FilterOps(watcher.Write)
+
+	out := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-w.Event:
+				out <- true
+			}
+		}
+	}()
+
+	go func() {
+		if err := w.Start(200 * time.Millisecond); err != nil {
+			logrus.Error("Error while starting watcher: ", err)
+			close(out)
+		}
+	}()
+
+	return out, nil
 }
