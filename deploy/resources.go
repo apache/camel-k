@@ -102,6 +102,8 @@ metadata:
     app: "camel-k"
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       name: camel-k-operator

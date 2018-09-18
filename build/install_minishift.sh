@@ -1,22 +1,30 @@
 #!/bin/sh
 
+# Exit on error
+set -e
+
 if [ "$project" = "" ]; then
-  project="myproject"
+  project=$(oc project -q)
+else
+  oc new-project $project 2>/dev/null || true
 fi
-echo $project
-if [ "$project" != "myproject" ]; then
-  oc new-project $project
-  oc project $project
-fi
-oc login -u system:admin 
+
+# Compile and build images
 make
 eval $(minishift docker-env)
 make images
-./kamel install --cluster-setup
-oc delete pod -l name=camel-k-operator
-oc login -u developer 
-if [ "$project" != "myproject" ]; then
-  oc project $project
-fi
-./kamel install
 
+# Try setup with standard user
+ret=0
+./kamel install -n $project 2>/dev/null || export ret=$?
+
+if [ $ret -ne 0 ]; then
+  # Login as admin if cluster setup fails with standard user
+  olduser=$(oc whoami)
+  oc login -u system:admin
+  ./kamel install --cluster-setup
+  oc login -u $olduser
+  ./kamel install -n $project
+fi
+
+oc delete pod -l name=camel-k-operator -n $project || true

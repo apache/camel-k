@@ -52,6 +52,7 @@ images-build:
 images-push:
 	./build/images_push.sh
 
+install: install-minishift
 install-minishift:
 	./build/install_minishift.sh
 

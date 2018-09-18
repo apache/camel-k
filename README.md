@@ -4,8 +4,7 @@ Apache Camel K (a.k.a. Kamel) is a lightweight integration framework built from 
 
 ## Getting Started
 
-You can run Camel K integrations on a Kubernetes or Openshift cluster, so you can choose to create a development cluster or use a cloud instance
-for Camel K.
+Camel K allows to run integrations on a Kubernetes or Openshift cluster. If you don't have a cloud instance of Kubernetes or Openshift, you can create a development cluster following the instructions below.
 
 ### Creating a Development Cluster
 There are various options for creating a development cluster:
@@ -34,8 +33,9 @@ Minikube and Kubernetes are not yet supported (but support is coming soon).
 ### Setting Up the Cluster
 
 To start using Camel K you need the **"kamel"** binary, that can be used to both configure the cluster and run integrations.
+Look into the [release page](https://github.com/apache/camel-k/releases) for latest version of the `kamel` tool.
 
-There's currently no release channel for the "kamel" binary, so you need to **build it from source!** Refer to the [contributing guide](#contributing)
+If you wanto to contribute, you can also **build it from source!** Refer to the [contributing guide](#contributing)
 for information on how to do it.
 
 Once you have the "kamel" binary, log into your cluster using the "oc" or "kubectl" tool and execute the following command to install Camel K:
@@ -178,8 +178,8 @@ make test-integration
 ### Running
 
 If you want to install everything you have in your source code and see it running on Kubernetes, you need to run the following command:
-- `make install-minishift`: to build the project and run it on Minishift, the default namespace for this is `myproject`
-- you can specify a different namespace with `make install-minishift project=myawesomeproject`
+- Run `make install-minishift` (or just `make install`): to build the project and install it in the current namespace on Minishift
+- You can specify a different namespace with `make install-minishift project=myawesomeproject`
 
 This command assumes you have an already running Minishift instance.
 
@@ -194,7 +194,6 @@ To add additional dependencies to your routes:
 ```
 ./kamel run -d camel:dns runtime/examples/dns.js
 ```
-
 
 ### Debugging and Running from IDE
 
