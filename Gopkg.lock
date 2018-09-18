@@ -318,6 +318,14 @@
   revision = "05ee40e3a273f7245e8777337fc7b46e533a9a92"
 
 [[projects]]
+  digest = "1:669828a2363f1ecad15fff9f008dd1d07d449fb25c9060998b15f83fec896458"
+  name = "github.com/radovskyb/watcher"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "6145e1439b9de93806925353403f91d2abbad8a5"
+  version = "v1.0.2"
+
+[[projects]]
   digest = "1:0975c74a2cd70df6c2ae353c6283a25ce759dda7e1e706e5c07458baf3faca22"
   name = "github.com/rs/xid"
   packages = ["."]
@@ -719,6 +727,7 @@
     "github.com/operator-framework/operator-sdk/pkg/util/k8sutil",
     "github.com/operator-framework/operator-sdk/version",
     "github.com/pkg/errors",
+    "github.com/radovskyb/watcher",
     "github.com/rs/xid",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
