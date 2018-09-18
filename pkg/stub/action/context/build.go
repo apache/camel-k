@@ -19,6 +19,7 @@ package action
 
 import (
 	"context"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
@@ -29,6 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/build"
 )
 
+// NewIntegrationContextBuildAction creates a new build handling action for the context
 func NewIntegrationContextBuildAction(ctx context.Context, namespace string) IntegrationContextAction {
 	return &integrationContextBuildAction{
 		buildManager: build.NewManager(ctx, namespace),
@@ -68,8 +70,37 @@ func (action *integrationContextBuildAction) Handle(context *v1alpha1.Integratio
 		target := context.DeepCopy()
 		target.Status.Image = buildResult.Image
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
-		return sdk.Update(target)
+		if err := sdk.Update(target); err != nil {
+			return err
+		}
+		if err := action.informIntegrations(target); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+// informIntegrations triggers the processing of all integrations waiting for this context to be built
+func (action *integrationContextBuildAction) informIntegrations(context *v1alpha1.IntegrationContext) error {
+	list := v1alpha1.NewIntegrationList()
+	err := sdk.List(context.Namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
+	if err != nil {
+		return err
+	}
+	for _, integration := range list.Items {
+		if integration.Spec.Context != context.Name {
+			continue
+		}
+
+		if integration.Annotations == nil {
+			integration.Annotations = make(map[string]string)
+		}
+		integration.Annotations["camel.apache.org/context.digest"] = context.Status.Digest
+		err = sdk.Update(&integration)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

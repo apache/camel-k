@@ -39,6 +39,16 @@ func (spec ConfigurationSpec) String() string {
 //
 // **********************************
 
+// NewIntegrationList --
+func NewIntegrationList() IntegrationList {
+	return IntegrationList{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       IntegrationKind,
+		},
+	}
+}
+
 // NewIntegrationContext --
 func NewIntegrationContext(namespace string, name string) IntegrationContext {
 	return IntegrationContext{
