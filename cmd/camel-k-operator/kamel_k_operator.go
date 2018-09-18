@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"math/rand"
 	"runtime"
 	"time"
 
@@ -45,6 +46,8 @@ func watch(resource string, kind string, namespace string, resyncPeriod time.Dur
 }
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	printVersion()
 
 	sdk.ExposeMetricsPort()

@@ -20,6 +20,8 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/sync"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -60,6 +62,8 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
 	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
+	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
+	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -78,6 +82,8 @@ type runCmdOptions struct {
 	Secrets            []string
 	Wait               bool
 	Logs               bool
+	Sync               bool
+	Dev                bool
 }
 
 func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -98,17 +104,28 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if o.Wait {
+	if o.Sync || o.Dev {
+		err = o.syncIntegration(args[0])
+		if err != nil {
+			return err
+		}
+	}
+	if o.Wait || o.Dev {
 		err = o.waitForIntegrationReady(integration)
 		if err != nil {
 			return err
 		}
 	}
-	if o.Logs {
+	if o.Logs || o.Dev {
 		err = o.printLogs(integration)
 		if err != nil {
 			return err
 		}
+	}
+
+	if o.Sync && !o.Logs && !o.Dev {
+		// Let's add a wait point, otherwise the script terminates
+		<- o.Context.Done()
 	}
 	return nil
 }
@@ -166,8 +183,33 @@ func (o *runCmdOptions) printLogs(integration *v1alpha1.Integration) error {
 	return nil
 }
 
+func (o *runCmdOptions) syncIntegration(file string) error {
+	changes, err := sync.File(o.Context, file)
+	if err != nil {
+		return err
+	}
+	go func() {
+		for {
+			select {
+			case <- o.Context.Done():
+				return
+			case <- changes:
+				_, err := o.updateIntegrationCode(file)
+				if err != nil {
+					logrus.Error("Unable to sync integration: ", err)
+				}
+			}
+		}
+	}()
+	return nil
+}
+
 func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v1alpha1.Integration, error) {
-	code, err := o.loadCode(args[0])
+	return o.updateIntegrationCode(args[0])
+}
+
+func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integration, error) {
+	code, err := o.loadCode(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -179,15 +221,15 @@ func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v
 		name = o.IntegrationName
 		name = kubernetes.SanitizeName(name)
 	} else {
-		name = kubernetes.SanitizeName(args[0])
+		name = kubernetes.SanitizeName(filename)
 		if name == "" {
 			name = "integration"
 		}
 	}
 
-	codeName := args[0]
+	codeName := filename
 
-	if idx := strings.LastIndexByte(args[0], os.PathSeparator); idx > -1 {
+	if idx := strings.LastIndexByte(filename, os.PathSeparator); idx > -1 {
 		codeName = codeName[idx+1:]
 	}
 
