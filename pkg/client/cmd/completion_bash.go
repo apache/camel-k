@@ -20,6 +20,8 @@ package cmd
 import (
 	"os"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	"github.com/spf13/cobra"
 )
 
@@ -40,10 +42,28 @@ To configure your bash shell to load completions for each session add to your ba
 . <(kamel completion bash)
 `
 
-const bashCompletionFunction = `
+var bashCompletionFunction = `
 __kamel_dependency_type() {
-    COMPREPLY=( $( compgen -W "camel: mvn: file:" -- "$cur") )
-	compopt -o nospace
+    case ${cur} in
+    c*)
+        local type_list="` + computeCamelDependencies() + `"
+        COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+        ;;
+    m*)
+        local type_list="mvn:""
+        COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+		compopt -o nospace
+        ;;
+    f*)
+        local type_list="file:""
+        COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+		compopt -o nospace
+        ;;
+    *)
+        local type_list="camel: mvn: file:"
+        COMPREPLY=( $( compgen -W "camel mvn: file:" -- "$cur") )
+	    compopt -o nospace
+    esac
 }
 
 __kamel_kubectl_get_configmap() {
@@ -104,4 +124,18 @@ func configureKnownBashCompletions(command *cobra.Command) {
 	secretFlag.Annotations = map[string][]string{
 		cobra.BashCompCustom: {"__kamel_kubectl_get_secret"},
 	}
+}
+
+func computeCamelDependencies() string {
+	result := ""
+
+	for _, v := range catalog.Runtime.Components {
+		if result != "" {
+			result = result + " " + v.Dependency.ArtifactID
+		} else {
+			result = v.Dependency.ArtifactID
+		}
+	}
+
+	return result
 }

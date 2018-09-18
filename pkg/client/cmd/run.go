@@ -248,10 +248,20 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 				Content:  code,
 				Language: o.Language,
 			},
-			Dependencies:  o.Dependencies,
+			Dependencies:  make([]string, 0, len(o.Dependencies)),
 			Context:       o.IntegrationContext,
 			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
 		},
+	}
+
+	for _, item := range o.Dependencies {
+		if strings.HasPrefix(item, "mvn:") {
+			integration.Spec.Dependencies = append(integration.Spec.Dependencies, item)
+		} else if strings.HasPrefix(item, "file:") {
+			integration.Spec.Dependencies = append(integration.Spec.Dependencies, item)
+		} else if strings.HasPrefix(item, "camel-") {
+			integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
+		}
 	}
 
 	for _, item := range o.Properties {

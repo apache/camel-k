@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 
@@ -90,8 +91,18 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		"camel.apache.org/context.type": "user",
 	}
 	ctx.Spec = v1alpha1.IntegrationContextSpec{
-		Dependencies:  command.dependencies,
+		Dependencies:  make([]string, 0, len(command.dependencies)),
 		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+	}
+
+	for _, item := range command.dependencies {
+		if strings.HasPrefix(item, "mvn:") {
+			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
+		} else if strings.HasPrefix(item, "file:") {
+			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
+		} else if strings.HasPrefix(item, "camel-") {
+			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
+		}
 	}
 
 	for _, item := range command.properties {
