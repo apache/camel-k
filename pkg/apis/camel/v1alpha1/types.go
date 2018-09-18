@@ -127,8 +127,6 @@ const (
 
 	// IntegrationContextPhaseBuilding --
 	IntegrationContextPhaseBuilding IntegrationContextPhase = "Building"
-	// IntegrationContextPhaseDeploying --
-	IntegrationContextPhaseDeploying IntegrationContextPhase = "Deploying"
 	// IntegrationContextPhaseReady --
 	IntegrationContextPhaseReady IntegrationContextPhase = "Ready"
 	// IntegrationContextPhaseError --

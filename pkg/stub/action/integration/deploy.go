@@ -151,6 +151,9 @@ func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.In
 	// has been changed
 	environment["CAMEL_K_DIGEST"] = integration.Status.Digest
 
+	// optimizations
+	environment["AB_JOLOKIA_OFF"] = "true"
+
 	labels := map[string]string{
 		"camel.apache.org/integration": integration.Name,
 	}
