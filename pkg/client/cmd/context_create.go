@@ -50,6 +50,9 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&impl.configmaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&impl.secrets, "secret", nil, "Add a Secret")
 
+	// completion support
+	configureKnownCompletions(&cmd)
+
 	return &cmd
 }
 

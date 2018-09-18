@@ -18,22 +18,41 @@ limitations under the License.
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
-func newCmdCompletion(root *cobra.Command) *cobra.Command {
-	completion := cobra.Command{
-		Use:   "completion",
-		Short: "Generates completion scripts",
+// ******************************
+//
+//
+//
+// ******************************
+
+const zshCompletionCmdLongDescription = `
+To configure your zsh shell to load completions for each session add to your zshrc
+
+if [ $commands[kamel] ]; then
+  source <(kamel completion zsh)
+fi
+`
+
+// ******************************
+//
+// COMMAND
+//
+// ******************************
+
+func newCmdCompletionZsh(root *cobra.Command) *cobra.Command {
+	return &cobra.Command{
+		Use:   "zsh",
+		Short: "Generates zsh completion scripts",
+		Long:  zshCompletionCmdLongDescription,
+		Run: func(cmd *cobra.Command, args []string) {
+			root.GenZshCompletion(os.Stdout)
+		},
 	}
-
-	completion.AddCommand(newCmdCompletionBash(root))
-	completion.AddCommand(newCmdCompletionZsh(root))
-
-	return &completion
 }
 
-func configureKnownCompletions(command *cobra.Command) {
-	configureKnownBashCompletions(command)
-	configureKnownZshCompletions(command)
+func configureKnownZshCompletions(command *cobra.Command) {
 }
