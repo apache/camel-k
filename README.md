@@ -145,6 +145,12 @@ After a successful build, if you're connected to a Docker daemon, you can build 
 make images
 ```
 
+In case of the OpenShift "oc cluster up" Wrapper script using, the docker images are storing inside the local store and its necessary to tag them by running:
+
+```
+make images-tag
+```
+
 ### Testing
 
 Unit tests are executed automatically as part of the build. They use the standard go testing framework.
