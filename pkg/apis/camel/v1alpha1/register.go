@@ -31,14 +31,15 @@ const (
 )
 
 var (
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-	AddToScheme   = SchemeBuilder.AddToScheme
 	// SchemeGroupVersion is the group version used to register these objects.
 	SchemeGroupVersion = schema.GroupVersion{Group: groupName, Version: version}
 )
 
 func init() {
-	sdkK8sutil.AddToSDKScheme(AddToScheme)
+	schemeBuilder := runtime.NewSchemeBuilder(addKnownTypes)
+	addToScheme := schemeBuilder.AddToScheme
+
+	sdkK8sutil.AddToSDKScheme(addToScheme)
 }
 
 // addKnownTypes adds the set of types defined in this package to the supplied scheme.
