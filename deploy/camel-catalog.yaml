@@ -1,2252 +1,2074 @@
-components:
-  ahc:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ahc
-      version: 2.22.1
+artifacts:
+  camel-ahc:
+    groupId: org.apache.camel
+    artifactId: camel-ahc
+    version: 2.22.1
     schemes:
     - ahc
-  ahc-ws:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ahc-ws
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ahc-ws:
+    groupId: org.apache.camel
+    artifactId: camel-ahc-ws
+    version: 2.22.1
     schemes:
     - ahc-ws
-    - ahc-ws
     - ahc-wss
-  ahc-wss:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ahc-ws
-      version: 2.22.1
-    schemes:
-    - ahc-wss
-    - ahc-ws
-    - ahc-wss
-  amqp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-amqp
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-amqp:
+    groupId: org.apache.camel
+    artifactId: camel-amqp
+    version: 2.22.1
     schemes:
     - amqp
-  apns:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-apns
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-apns:
+    groupId: org.apache.camel
+    artifactId: camel-apns
+    version: 2.22.1
     schemes:
     - apns
-  as2:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-as2
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-as2:
+    groupId: org.apache.camel
+    artifactId: camel-as2
+    version: 2.22.1
     schemes:
     - as2
-  asterisk:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-asterisk
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-asterisk:
+    groupId: org.apache.camel
+    artifactId: camel-asterisk
+    version: 2.22.1
     schemes:
     - asterisk
-  atmos:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atmos
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-atmos:
+    groupId: org.apache.camel
+    artifactId: camel-atmos
+    version: 2.22.1
     schemes:
     - atmos
-  atmosphere-websocket:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atmosphere-websocket
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-atmosphere-websocket:
+    groupId: org.apache.camel
+    artifactId: camel-atmosphere-websocket
+    version: 2.22.1
     schemes:
     - atmosphere-websocket
-  atom:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atom
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-atom:
+    groupId: org.apache.camel
+    artifactId: camel-atom
+    version: 2.22.1
     schemes:
     - atom
-  atomix-map:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-atomix:
+    groupId: org.apache.camel
+    artifactId: camel-atomix
+    version: 2.22.1
     schemes:
     - atomix-map
-  atomix-messaging:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      version: 2.22.1
-    schemes:
     - atomix-messaging
-  atomix-multimap:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      version: 2.22.1
-    schemes:
     - atomix-multimap
-  atomix-queue:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      version: 2.22.1
-    schemes:
     - atomix-queue
-  atomix-set:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      version: 2.22.1
-    schemes:
     - atomix-set
-  atomix-value:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      version: 2.22.1
-    schemes:
     - atomix-value
-  avro:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-avro
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-avro:
+    groupId: org.apache.camel
+    artifactId: camel-avro
+    version: 2.22.1
     schemes:
     - avro
-  aws-cw:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - avro
+  camel-aws:
+    groupId: org.apache.camel
+    artifactId: camel-aws
+    version: 2.22.1
     schemes:
     - aws-cw
-  aws-ddb:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-ddb
-  aws-ddbstream:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-ddbstream
-  aws-ec2:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-ec2
-  aws-kinesis:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-kinesis
-  aws-kinesis-firehose:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-kinesis-firehose
-  aws-kms:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-kms
-  aws-lambda:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-lambda
-  aws-mq:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-mq
-  aws-s3:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-s3
-  aws-sdb:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-sdb
-  aws-ses:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-ses
-  aws-sns:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-sns
-  aws-sqs:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-sqs
-  aws-swf:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      version: 2.22.1
-    schemes:
     - aws-swf
-  azure-blob:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-azure
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-azure:
+    groupId: org.apache.camel
+    artifactId: camel-azure
+    version: 2.22.1
     schemes:
     - azure-blob
-  azure-queue:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-azure
-      version: 2.22.1
-    schemes:
     - azure-queue
-  bean:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-core:
+    groupId: org.apache.camel
+    artifactId: camel-core
+    version: 2.22.1
     schemes:
     - bean
-  bean-validator:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-bean-validator
-      version: 2.22.1
+    - binding
+    - browse
+    - class
+    - controlbus
+    - dataformat
+    - dataset
+    - direct
+    - direct-vm
+    - file
+    - language
+    - log
+    - mock
+    - properties
+    - ref
+    - rest
+    - rest-api
+    - saga
+    - scheduler
+    - seda
+    - stub
+    - test
+    - timer
+    - validator
+    - vm
+    - xslt
+    languages:
+    - bean
+    - constant
+    - exchangeProperty
+    - file
+    - header
+    - ref
+    - simple
+    - tokenize
+    - xpath
+    - xtokenize
+    dataformats:
+    - gzip
+    - serialization
+    - string
+    - zip
+  camel-bean-validator:
+    groupId: org.apache.camel
+    artifactId: camel-bean-validator
+    version: 2.22.1
     schemes:
     - bean-validator
-  beanstalk:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-beanstalk
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-beanstalk:
+    groupId: org.apache.camel
+    artifactId: camel-beanstalk
+    version: 2.22.1
     schemes:
     - beanstalk
-  binding:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - binding
-  bonita:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-bonita
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-bonita:
+    groupId: org.apache.camel
+    artifactId: camel-bonita
+    version: 2.22.1
     schemes:
     - bonita
-  box:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-box
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-box:
+    groupId: org.apache.camel
+    artifactId: camel-box
+    version: 2.22.1
     schemes:
     - box
-  braintree:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-braintree
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-braintree:
+    groupId: org.apache.camel
+    artifactId: camel-braintree
+    version: 2.22.1
     schemes:
     - braintree
-  browse:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - browse
-  cache:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cache
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-cache:
+    groupId: org.apache.camel
+    artifactId: camel-cache
+    version: 2.22.1
     schemes:
     - cache
-  caffeine-cache:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-caffeine
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-caffeine:
+    groupId: org.apache.camel
+    artifactId: camel-caffeine
+    version: 2.22.1
     schemes:
     - caffeine-cache
-  caffeine-loadcache:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-caffeine
-      version: 2.22.1
-    schemes:
     - caffeine-loadcache
-  chronicle-engine:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-chronicle
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-chronicle:
+    groupId: org.apache.camel
+    artifactId: camel-chronicle
+    version: 2.22.1
     schemes:
     - chronicle-engine
-  chunk:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-chunk
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-chunk:
+    groupId: org.apache.camel
+    artifactId: camel-chunk
+    version: 2.22.1
     schemes:
     - chunk
-  class:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - class
-  cm-sms:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cm-sms
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-cm-sms:
+    groupId: org.apache.camel
+    artifactId: camel-cm-sms
+    version: 2.22.1
     schemes:
     - cm-sms
-  cmis:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cmis
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-cmis:
+    groupId: org.apache.camel
+    artifactId: camel-cmis
+    version: 2.22.1
     schemes:
     - cmis
-  coap:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-coap
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-coap:
+    groupId: org.apache.camel
+    artifactId: camel-coap
+    version: 2.22.1
     schemes:
     - coap
-  cometd:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cometd
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-cometd:
+    groupId: org.apache.camel
+    artifactId: camel-cometd
+    version: 2.22.1
     schemes:
     - cometd
-    - cometd
     - cometds
-  cometds:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cometd
-      version: 2.22.1
-    schemes:
-    - cometds
-    - cometd
-    - cometds
-  consul:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-consul
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-consul:
+    groupId: org.apache.camel
+    artifactId: camel-consul
+    version: 2.22.1
     schemes:
     - consul
-  context:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-context
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-context:
+    groupId: org.apache.camel
+    artifactId: camel-context
+    version: 2.22.1
     schemes:
     - context
-  controlbus:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - controlbus
-  couchbase:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-couchbase
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-couchbase:
+    groupId: org.apache.camel
+    artifactId: camel-couchbase
+    version: 2.22.1
     schemes:
     - couchbase
-  couchdb:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-couchdb
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-couchdb:
+    groupId: org.apache.camel
+    artifactId: camel-couchdb
+    version: 2.22.1
     schemes:
     - couchdb
-  cql:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cassandraql
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-cassandraql:
+    groupId: org.apache.camel
+    artifactId: camel-cassandraql
+    version: 2.22.1
     schemes:
     - cql
-  crypto:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-crypto
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-crypto:
+    groupId: org.apache.camel
+    artifactId: camel-crypto
+    version: 2.22.1
     schemes:
     - crypto
-  crypto-cms:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-crypto-cms
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - crypto
+    - pgp
+  camel-crypto-cms:
+    groupId: org.apache.camel
+    artifactId: camel-crypto-cms
+    version: 2.22.1
     schemes:
     - crypto-cms
-  cxf:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cxf
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-cxf:
+    groupId: org.apache.camel
+    artifactId: camel-cxf
+    version: 2.22.1
     schemes:
     - cxf
-  cxfrs:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-cxf
-      version: 2.22.1
-    schemes:
     - cxfrs
-  dataformat:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - dataformat
-  dataset:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - dataset
-  digitalocean:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-digitalocean
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-digitalocean:
+    groupId: org.apache.camel
+    artifactId: camel-digitalocean
+    version: 2.22.1
     schemes:
     - digitalocean
-  direct:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - direct
-  direct-vm:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - direct-vm
-  disruptor:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-disruptor
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-disruptor:
+    groupId: org.apache.camel
+    artifactId: camel-disruptor
+    version: 2.22.1
     schemes:
     - disruptor
-    - disruptor
     - disruptor-vm
-  disruptor-vm:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-disruptor
-      version: 2.22.1
-    schemes:
-    - disruptor-vm
-    - disruptor
-    - disruptor-vm
-  dns:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-dns
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-dns:
+    groupId: org.apache.camel
+    artifactId: camel-dns
+    version: 2.22.1
     schemes:
     - dns
-  docker:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-docker
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-docker:
+    groupId: org.apache.camel
+    artifactId: camel-docker
+    version: 2.22.1
     schemes:
     - docker
-  dozer:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-dozer
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-dozer:
+    groupId: org.apache.camel
+    artifactId: camel-dozer
+    version: 2.22.1
     schemes:
     - dozer
-  drill:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-drill
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-drill:
+    groupId: org.apache.camel
+    artifactId: camel-drill
+    version: 2.22.1
     schemes:
     - drill
-  dropbox:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-dropbox
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-dropbox:
+    groupId: org.apache.camel
+    artifactId: camel-dropbox
+    version: 2.22.1
     schemes:
     - dropbox
-  ehcache:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ehcache
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ehcache:
+    groupId: org.apache.camel
+    artifactId: camel-ehcache
+    version: 2.22.1
     schemes:
     - ehcache
-  ejb:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ejb
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ejb:
+    groupId: org.apache.camel
+    artifactId: camel-ejb
+    version: 2.22.1
     schemes:
     - ejb
-  elasticsearch:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-elasticsearch:
+    groupId: org.apache.camel
+    artifactId: camel-elasticsearch
+    version: 2.22.1
     schemes:
     - elasticsearch
-  elasticsearch-rest:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch-rest
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-elasticsearch-rest:
+    groupId: org.apache.camel
+    artifactId: camel-elasticsearch-rest
+    version: 2.22.1
     schemes:
     - elasticsearch-rest
-  elasticsearch5:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch5
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-elasticsearch5:
+    groupId: org.apache.camel
+    artifactId: camel-elasticsearch5
+    version: 2.22.1
     schemes:
     - elasticsearch5
-  elsql:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-elsql
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-elsql:
+    groupId: org.apache.camel
+    artifactId: camel-elsql
+    version: 2.22.1
     schemes:
     - elsql
-  etcd:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-etcd
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-etcd:
+    groupId: org.apache.camel
+    artifactId: camel-etcd
+    version: 2.22.1
     schemes:
     - etcd
-  eventadmin:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-eventadmin
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-eventadmin:
+    groupId: org.apache.camel
+    artifactId: camel-eventadmin
+    version: 2.22.1
     schemes:
     - eventadmin
-  exec:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-exec
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-exec:
+    groupId: org.apache.camel
+    artifactId: camel-exec
+    version: 2.22.1
     schemes:
     - exec
-  facebook:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-facebook
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-facebook:
+    groupId: org.apache.camel
+    artifactId: camel-facebook
+    version: 2.22.1
     schemes:
     - facebook
-  file:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - file
-  flatpack:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-flatpack
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-flatpack:
+    groupId: org.apache.camel
+    artifactId: camel-flatpack
+    version: 2.22.1
     schemes:
     - flatpack
-  flink:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-flink
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - flatpack
+  camel-flink:
+    groupId: org.apache.camel
+    artifactId: camel-flink
+    version: 2.22.1
     schemes:
     - flink
-  fop:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-fop
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-fop:
+    groupId: org.apache.camel
+    artifactId: camel-fop
+    version: 2.22.1
     schemes:
     - fop
-  freemarker:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-freemarker
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-freemarker:
+    groupId: org.apache.camel
+    artifactId: camel-freemarker
+    version: 2.22.1
     schemes:
     - freemarker
-  ftp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ftp
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ftp:
+    groupId: org.apache.camel
+    artifactId: camel-ftp
+    version: 2.22.1
     schemes:
     - ftp
-  ftps:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ftp
-      version: 2.22.1
-    schemes:
     - ftps
-  ganglia:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ganglia
-      version: 2.22.1
+    - sftp
+    languages: []
+    dataformats: []
+  camel-ganglia:
+    groupId: org.apache.camel
+    artifactId: camel-ganglia
+    version: 2.22.1
     schemes:
     - ganglia
-  geocoder:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-geocoder
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-geocoder:
+    groupId: org.apache.camel
+    artifactId: camel-geocoder
+    version: 2.22.1
     schemes:
     - geocoder
-  git:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-git
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-git:
+    groupId: org.apache.camel
+    artifactId: camel-git
+    version: 2.22.1
     schemes:
     - git
-  github:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-github
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-github:
+    groupId: org.apache.camel
+    artifactId: camel-github
+    version: 2.22.1
     schemes:
     - github
-  google-bigquery:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-google-bigquery
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-google-bigquery:
+    groupId: org.apache.camel
+    artifactId: camel-google-bigquery
+    version: 2.22.1
     schemes:
     - google-bigquery
-  google-calendar:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-google-calendar
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-google-calendar:
+    groupId: org.apache.camel
+    artifactId: camel-google-calendar
+    version: 2.22.1
     schemes:
     - google-calendar
-  google-drive:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-google-drive
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-google-drive:
+    groupId: org.apache.camel
+    artifactId: camel-google-drive
+    version: 2.22.1
     schemes:
     - google-drive
-  google-mail:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-google-mail
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-google-mail:
+    groupId: org.apache.camel
+    artifactId: camel-google-mail
+    version: 2.22.1
     schemes:
     - google-mail
-  google-mail-stream:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-google-mail
-      version: 2.22.1
-    schemes:
     - google-mail-stream
-  google-pubsub:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-google-pubsub
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-google-pubsub:
+    groupId: org.apache.camel
+    artifactId: camel-google-pubsub
+    version: 2.22.1
     schemes:
     - google-pubsub
-  gora:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-gora
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-gora:
+    groupId: org.apache.camel
+    artifactId: camel-gora
+    version: 2.22.1
     schemes:
     - gora
-  grape:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-grape
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-grape:
+    groupId: org.apache.camel
+    artifactId: camel-grape
+    version: 2.22.1
     schemes:
     - grape
-  grpc:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-grpc
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-grpc:
+    groupId: org.apache.camel
+    artifactId: camel-grpc
+    version: 2.22.1
     schemes:
     - grpc
-  guava-eventbus:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-guava-eventbus
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-guava-eventbus:
+    groupId: org.apache.camel
+    artifactId: camel-guava-eventbus
+    version: 2.22.1
     schemes:
     - guava-eventbus
-  hazelcast-atomicvalue:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-hazelcast:
+    groupId: org.apache.camel
+    artifactId: camel-hazelcast
+    version: 2.22.1
     schemes:
     - hazelcast-atomicvalue
-  hazelcast-instance:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-instance
-  hazelcast-list:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-list
-  hazelcast-map:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-map
-  hazelcast-multimap:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-multimap
-  hazelcast-queue:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-queue
-  hazelcast-replicatedmap:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-replicatedmap
-  hazelcast-ringbuffer:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-ringbuffer
-  hazelcast-seda:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-seda
-  hazelcast-set:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-set
-  hazelcast-topic:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      version: 2.22.1
-    schemes:
     - hazelcast-topic
-  hbase:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hbase
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-hbase:
+    groupId: org.apache.camel
+    artifactId: camel-hbase
+    version: 2.22.1
     schemes:
     - hbase
-  hdfs:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-hdfs:
+    groupId: org.apache.camel
+    artifactId: camel-hdfs
+    version: 2.22.1
     schemes:
     - hdfs
-  hdfs2:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs2
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-hdfs2:
+    groupId: org.apache.camel
+    artifactId: camel-hdfs2
+    version: 2.22.1
     schemes:
     - hdfs2
-  hipchat:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-hipchat
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-hipchat:
+    groupId: org.apache.camel
+    artifactId: camel-hipchat
+    version: 2.22.1
     schemes:
     - hipchat
-  http:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-http
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-http:
+    groupId: org.apache.camel
+    artifactId: camel-http
+    version: 2.22.1
     schemes:
     - http
-    - http
     - https
-  http4:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-http4
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-http4:
+    groupId: org.apache.camel
+    artifactId: camel-http4
+    version: 2.22.1
     schemes:
     - http4
-    - http4
     - https4
-  https:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-http
-      version: 2.22.1
-    schemes:
-    - https
-    - http
-    - https
-  https4:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-http4
-      version: 2.22.1
-    schemes:
-    - https4
-    - http4
-    - https4
-  ibatis:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ibatis
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ibatis:
+    groupId: org.apache.camel
+    artifactId: camel-ibatis
+    version: 2.22.1
     schemes:
     - ibatis
-  iec60870-client:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-iec60870
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-iec60870:
+    groupId: org.apache.camel
+    artifactId: camel-iec60870
+    version: 2.22.1
     schemes:
     - iec60870-client
-  iec60870-server:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-iec60870
-      version: 2.22.1
-    schemes:
     - iec60870-server
-  ignite-cache:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ignite:
+    groupId: org.apache.camel
+    artifactId: camel-ignite
+    version: 2.22.1
     schemes:
     - ignite-cache
-  ignite-compute:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      version: 2.22.1
-    schemes:
     - ignite-compute
-  ignite-events:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      version: 2.22.1
-    schemes:
     - ignite-events
-  ignite-idgen:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      version: 2.22.1
-    schemes:
     - ignite-idgen
-  ignite-messaging:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      version: 2.22.1
-    schemes:
     - ignite-messaging
-  ignite-queue:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      version: 2.22.1
-    schemes:
     - ignite-queue
-  ignite-set:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      version: 2.22.1
-    schemes:
     - ignite-set
-  imap:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mail:
+    groupId: org.apache.camel
+    artifactId: camel-mail
+    version: 2.22.1
     schemes:
-    - imap
     - imap
     - imaps
     - pop3
     - pop3s
     - smtp
     - smtps
-  imaps:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      version: 2.22.1
-    schemes:
-    - imaps
-    - imap
-    - imaps
-    - pop3
-    - pop3s
-    - smtp
-    - smtps
-  infinispan:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-infinispan
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - mime-multipart
+  camel-infinispan:
+    groupId: org.apache.camel
+    artifactId: camel-infinispan
+    version: 2.22.1
     schemes:
     - infinispan
-  influxdb:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-influxdb
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-influxdb:
+    groupId: org.apache.camel
+    artifactId: camel-influxdb
+    version: 2.22.1
     schemes:
     - influxdb
-  irc:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-irc
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-irc:
+    groupId: org.apache.camel
+    artifactId: camel-irc
+    version: 2.22.1
     schemes:
     - irc
-  ironmq:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ironmq
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ironmq:
+    groupId: org.apache.camel
+    artifactId: camel-ironmq
+    version: 2.22.1
     schemes:
     - ironmq
-  javaspace:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-javaspace
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-javaspace:
+    groupId: org.apache.camel
+    artifactId: camel-javaspace
+    version: 2.22.1
     schemes:
     - javaspace
-  jbpm:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jbpm
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jbpm:
+    groupId: org.apache.camel
+    artifactId: camel-jbpm
+    version: 2.22.1
     schemes:
     - jbpm
-  jcache:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jcache
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jcache:
+    groupId: org.apache.camel
+    artifactId: camel-jcache
+    version: 2.22.1
     schemes:
     - jcache
-  jclouds:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jclouds
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jclouds:
+    groupId: org.apache.camel
+    artifactId: camel-jclouds
+    version: 2.22.1
     schemes:
     - jclouds
-  jcr:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jcr
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jcr:
+    groupId: org.apache.camel
+    artifactId: camel-jcr
+    version: 2.22.1
     schemes:
     - jcr
-  jdbc:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jdbc
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jdbc:
+    groupId: org.apache.camel
+    artifactId: camel-jdbc
+    version: 2.22.1
     schemes:
     - jdbc
-  jetty:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jetty9
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jetty9:
+    groupId: org.apache.camel
+    artifactId: camel-jetty9
+    version: 2.22.1
     schemes:
     - jetty
-  jgroups:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jgroups
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jgroups:
+    groupId: org.apache.camel
+    artifactId: camel-jgroups
+    version: 2.22.1
     schemes:
     - jgroups
-  jing:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jing
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jing:
+    groupId: org.apache.camel
+    artifactId: camel-jing
+    version: 2.22.1
     schemes:
     - jing
-  jira:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jira
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jira:
+    groupId: org.apache.camel
+    artifactId: camel-jira
+    version: 2.22.1
     schemes:
     - jira
-  jms:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jms
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jms:
+    groupId: org.apache.camel
+    artifactId: camel-jms
+    version: 2.22.1
     schemes:
     - jms
-  jmx:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jmx
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jmx:
+    groupId: org.apache.camel
+    artifactId: camel-jmx
+    version: 2.22.1
     schemes:
     - jmx
-  jolt:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jolt
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jolt:
+    groupId: org.apache.camel
+    artifactId: camel-jolt
+    version: 2.22.1
     schemes:
     - jolt
-  jpa:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jpa
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jpa:
+    groupId: org.apache.camel
+    artifactId: camel-jpa
+    version: 2.22.1
     schemes:
     - jpa
-  json-validator:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-json-validator
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-json-validator:
+    groupId: org.apache.camel
+    artifactId: camel-json-validator
+    version: 2.22.1
     schemes:
     - json-validator
-  jt400:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jt400
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jt400:
+    groupId: org.apache.camel
+    artifactId: camel-jt400
+    version: 2.22.1
     schemes:
     - jt400
-  kafka:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kafka
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-kafka:
+    groupId: org.apache.camel
+    artifactId: camel-kafka
+    version: 2.22.1
     schemes:
     - kafka
-  kestrel:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kestrel
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-kestrel:
+    groupId: org.apache.camel
+    artifactId: camel-kestrel
+    version: 2.22.1
     schemes:
     - kestrel
-  krati:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-krati
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-krati:
+    groupId: org.apache.camel
+    artifactId: camel-krati
+    version: 2.22.1
     schemes:
     - krati
-  kubernetes:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-kubernetes:
+    groupId: org.apache.camel
+    artifactId: camel-kubernetes
+    version: 2.22.1
     schemes:
     - kubernetes
-  kubernetes-config-maps:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-config-maps
-  kubernetes-deployments:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-deployments
-  kubernetes-namespaces:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-namespaces
-  kubernetes-nodes:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-nodes
-  kubernetes-persistent-volumes:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-persistent-volumes
-  kubernetes-persistent-volumes-claims:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-persistent-volumes-claims
-  kubernetes-pods:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-pods
-  kubernetes-replication-controllers:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-replication-controllers
-  kubernetes-resources-quota:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-resources-quota
-  kubernetes-secrets:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-secrets
-  kubernetes-service-accounts:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-service-accounts
-  kubernetes-services:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
     - kubernetes-services
-  language:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - language
-  ldap:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ldap
-      version: 2.22.1
+    - openshift-build-configs
+    - openshift-builds
+    languages: []
+    dataformats: []
+  camel-ldap:
+    groupId: org.apache.camel
+    artifactId: camel-ldap
+    version: 2.22.1
     schemes:
     - ldap
-  ldif:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ldif
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ldif:
+    groupId: org.apache.camel
+    artifactId: camel-ldif
+    version: 2.22.1
     schemes:
     - ldif
-  linkedin:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-linkedin
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-linkedin:
+    groupId: org.apache.camel
+    artifactId: camel-linkedin
+    version: 2.22.1
     schemes:
     - linkedin
-  log:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - log
-  lpr:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-printer
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-printer:
+    groupId: org.apache.camel
+    artifactId: camel-printer
+    version: 2.22.1
     schemes:
     - lpr
-  lucene:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-lucene
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-lucene:
+    groupId: org.apache.camel
+    artifactId: camel-lucene
+    version: 2.22.1
     schemes:
     - lucene
-  lumberjack:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-lumberjack
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-lumberjack:
+    groupId: org.apache.camel
+    artifactId: camel-lumberjack
+    version: 2.22.1
     schemes:
     - lumberjack
-  master:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-master
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-master:
+    groupId: org.apache.camel
+    artifactId: camel-master
+    version: 2.22.1
     schemes:
     - master
-  metrics:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-metrics
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-metrics:
+    groupId: org.apache.camel
+    artifactId: camel-metrics
+    version: 2.22.1
     schemes:
     - metrics
-  micrometer:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-micrometer
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-micrometer:
+    groupId: org.apache.camel
+    artifactId: camel-micrometer
+    version: 2.22.1
     schemes:
     - micrometer
-  milo-client:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-milo
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-milo:
+    groupId: org.apache.camel
+    artifactId: camel-milo
+    version: 2.22.1
     schemes:
     - milo-client
-  milo-server:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-milo
-      version: 2.22.1
-    schemes:
     - milo-server
-  mina:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mina
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mina:
+    groupId: org.apache.camel
+    artifactId: camel-mina
+    version: 2.22.1
     schemes:
     - mina
-  mina2:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mina2
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mina2:
+    groupId: org.apache.camel
+    artifactId: camel-mina2
+    version: 2.22.1
     schemes:
     - mina2
-  mllp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mllp
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mllp:
+    groupId: org.apache.camel
+    artifactId: camel-mllp
+    version: 2.22.1
     schemes:
     - mllp
-  mock:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - mock
-  mongodb:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mongodb:
+    groupId: org.apache.camel
+    artifactId: camel-mongodb
+    version: 2.22.1
     schemes:
     - mongodb
-  mongodb-gridfs:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb-gridfs
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mongodb-gridfs:
+    groupId: org.apache.camel
+    artifactId: camel-mongodb-gridfs
+    version: 2.22.1
     schemes:
     - mongodb-gridfs
-  mongodb3:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb3
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mongodb3:
+    groupId: org.apache.camel
+    artifactId: camel-mongodb3
+    version: 2.22.1
     schemes:
     - mongodb3
-  mqtt:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mqtt
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mqtt:
+    groupId: org.apache.camel
+    artifactId: camel-mqtt
+    version: 2.22.1
     schemes:
     - mqtt
-  msv:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-msv
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-msv:
+    groupId: org.apache.camel
+    artifactId: camel-msv
+    version: 2.22.1
     schemes:
     - msv
-  mustache:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mustache
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mustache:
+    groupId: org.apache.camel
+    artifactId: camel-mustache
+    version: 2.22.1
     schemes:
     - mustache
-  mvel:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mvel
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-mvel:
+    groupId: org.apache.camel
+    artifactId: camel-mvel
+    version: 2.22.1
     schemes:
     - mvel
-  mybatis:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mybatis
-      version: 2.22.1
+    languages:
+    - mvel
+    dataformats: []
+  camel-mybatis:
+    groupId: org.apache.camel
+    artifactId: camel-mybatis
+    version: 2.22.1
     schemes:
     - mybatis
-  mybatis-bean:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mybatis
-      version: 2.22.1
-    schemes:
     - mybatis-bean
-  nagios:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-nagios
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-nagios:
+    groupId: org.apache.camel
+    artifactId: camel-nagios
+    version: 2.22.1
     schemes:
     - nagios
-  nats:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-nats
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-nats:
+    groupId: org.apache.camel
+    artifactId: camel-nats
+    version: 2.22.1
     schemes:
     - nats
-  netty:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-netty
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-netty:
+    groupId: org.apache.camel
+    artifactId: camel-netty
+    version: 2.22.1
     schemes:
     - netty
-  netty-http:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-netty-http
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-netty-http:
+    groupId: org.apache.camel
+    artifactId: camel-netty-http
+    version: 2.22.1
     schemes:
     - netty-http
-  netty4:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-netty4
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-netty4:
+    groupId: org.apache.camel
+    artifactId: camel-netty4
+    version: 2.22.1
     schemes:
     - netty4
-  netty4-http:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-netty4-http
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-netty4-http:
+    groupId: org.apache.camel
+    artifactId: camel-netty4-http
+    version: 2.22.1
     schemes:
     - netty4-http
-  olingo2:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-olingo2
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-olingo2:
+    groupId: org.apache.camel
+    artifactId: camel-olingo2
+    version: 2.22.1
     schemes:
     - olingo2
-  olingo4:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-olingo4
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-olingo4:
+    groupId: org.apache.camel
+    artifactId: camel-olingo4
+    version: 2.22.1
     schemes:
     - olingo4
-  openshift:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-openshift
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-openshift:
+    groupId: org.apache.camel
+    artifactId: camel-openshift
+    version: 2.22.1
     schemes:
     - openshift
-  openshift-build-configs:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
-    - openshift-build-configs
-  openshift-builds:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      version: 2.22.1
-    schemes:
-    - openshift-builds
-  openstack-cinder:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-openstack:
+    groupId: org.apache.camel
+    artifactId: camel-openstack
+    version: 2.22.1
     schemes:
     - openstack-cinder
-  openstack-glance:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      version: 2.22.1
-    schemes:
     - openstack-glance
-  openstack-keystone:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      version: 2.22.1
-    schemes:
     - openstack-keystone
-  openstack-neutron:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      version: 2.22.1
-    schemes:
     - openstack-neutron
-  openstack-nova:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      version: 2.22.1
-    schemes:
     - openstack-nova
-  openstack-swift:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      version: 2.22.1
-    schemes:
     - openstack-swift
-  optaplanner:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-optaplanner
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-optaplanner:
+    groupId: org.apache.camel
+    artifactId: camel-optaplanner
+    version: 2.22.1
     schemes:
     - optaplanner
-  paho:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-paho
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-paho:
+    groupId: org.apache.camel
+    artifactId: camel-paho
+    version: 2.22.1
     schemes:
     - paho
-  paxlogging:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-paxlogging
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-paxlogging:
+    groupId: org.apache.camel
+    artifactId: camel-paxlogging
+    version: 2.22.1
     schemes:
     - paxlogging
-  pdf:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-pdf
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-pdf:
+    groupId: org.apache.camel
+    artifactId: camel-pdf
+    version: 2.22.1
     schemes:
     - pdf
-  pgevent:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-pgevent
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-pgevent:
+    groupId: org.apache.camel
+    artifactId: camel-pgevent
+    version: 2.22.1
     schemes:
     - pgevent
-  pop3:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      version: 2.22.1
-    schemes:
-    - pop3
-    - imap
-    - imaps
-    - pop3
-    - pop3s
-    - smtp
-    - smtps
-  pop3s:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      version: 2.22.1
-    schemes:
-    - pop3s
-    - imap
-    - imaps
-    - pop3
-    - pop3s
-    - smtp
-    - smtps
-  properties:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - properties
-  pubnub:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-pubnub
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-pubnub:
+    groupId: org.apache.camel
+    artifactId: camel-pubnub
+    version: 2.22.1
     schemes:
     - pubnub
-  quartz:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-quartz
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-quartz:
+    groupId: org.apache.camel
+    artifactId: camel-quartz
+    version: 2.22.1
     schemes:
     - quartz
-  quartz2:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-quartz2
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-quartz2:
+    groupId: org.apache.camel
+    artifactId: camel-quartz2
+    version: 2.22.1
     schemes:
     - quartz2
-  quickfix:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-quickfix
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-quickfix:
+    groupId: org.apache.camel
+    artifactId: camel-quickfix
+    version: 2.22.1
     schemes:
     - quickfix
-  rabbitmq:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-rabbitmq
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-rabbitmq:
+    groupId: org.apache.camel
+    artifactId: camel-rabbitmq
+    version: 2.22.1
     schemes:
     - rabbitmq
-  reactive-streams:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-reactive-streams
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-reactive-streams:
+    groupId: org.apache.camel
+    artifactId: camel-reactive-streams
+    version: 2.22.1
     schemes:
     - reactive-streams
-  ref:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - ref
-  rest:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - rest
-  rest-api:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - rest-api
-  rest-swagger:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-rest-swagger
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-rest-swagger:
+    groupId: org.apache.camel
+    artifactId: camel-rest-swagger
+    version: 2.22.1
     schemes:
     - rest-swagger
-  restlet:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-restlet
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-restlet:
+    groupId: org.apache.camel
+    artifactId: camel-restlet
+    version: 2.22.1
     schemes:
     - restlet
-  rmi:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-rmi
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-rmi:
+    groupId: org.apache.camel
+    artifactId: camel-rmi
+    version: 2.22.1
     schemes:
     - rmi
-  routebox:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-routebox
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-routebox:
+    groupId: org.apache.camel
+    artifactId: camel-routebox
+    version: 2.22.1
     schemes:
     - routebox
-  rss:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-rss
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-rss:
+    groupId: org.apache.camel
+    artifactId: camel-rss
+    version: 2.22.1
     schemes:
     - rss
-  saga:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - saga
-  salesforce:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-salesforce
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - rss
+  camel-salesforce:
+    groupId: org.apache.camel
+    artifactId: camel-salesforce
+    version: 2.22.1
     schemes:
     - salesforce
-  sap-netweaver:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sap-netweaver
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-sap-netweaver:
+    groupId: org.apache.camel
+    artifactId: camel-sap-netweaver
+    version: 2.22.1
     schemes:
     - sap-netweaver
-  scheduler:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - scheduler
-  schematron:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-schematron
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-schematron:
+    groupId: org.apache.camel
+    artifactId: camel-schematron
+    version: 2.22.1
     schemes:
     - schematron
-  scp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-jsch
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-jsch:
+    groupId: org.apache.camel
+    artifactId: camel-jsch
+    version: 2.22.1
     schemes:
     - scp
-  seda:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - seda
-  service:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-service
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-service:
+    groupId: org.apache.camel
+    artifactId: camel-service
+    version: 2.22.1
     schemes:
     - service
-  servicenow:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-servicenow
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-servicenow:
+    groupId: org.apache.camel
+    artifactId: camel-servicenow
+    version: 2.22.1
     schemes:
     - servicenow
-  servlet:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-servlet
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-servlet:
+    groupId: org.apache.camel
+    artifactId: camel-servlet
+    version: 2.22.1
     schemes:
     - servlet
-  sftp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ftp
-      version: 2.22.1
-    schemes:
-    - sftp
-  sip:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sip
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-sip:
+    groupId: org.apache.camel
+    artifactId: camel-sip
+    version: 2.22.1
     schemes:
     - sip
-    - sip
     - sips
-  sips:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sip
-      version: 2.22.1
-    schemes:
-    - sips
-    - sip
-    - sips
-  sjms:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sjms
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-sjms:
+    groupId: org.apache.camel
+    artifactId: camel-sjms
+    version: 2.22.1
     schemes:
     - sjms
-  sjms-batch:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sjms
-      version: 2.22.1
-    schemes:
     - sjms-batch
-  sjms2:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sjms2
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-sjms2:
+    groupId: org.apache.camel
+    artifactId: camel-sjms2
+    version: 2.22.1
     schemes:
     - sjms2
-  slack:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-slack
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-slack:
+    groupId: org.apache.camel
+    artifactId: camel-slack
+    version: 2.22.1
     schemes:
     - slack
-  smpp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-smpp
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-smpp:
+    groupId: org.apache.camel
+    artifactId: camel-smpp
+    version: 2.22.1
     schemes:
     - smpp
-    - smpp
     - smpps
-  smpps:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-smpp
-      version: 2.22.1
-    schemes:
-    - smpps
-    - smpp
-    - smpps
-  smtp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      version: 2.22.1
-    schemes:
-    - smtp
-    - imap
-    - imaps
-    - pop3
-    - pop3s
-    - smtp
-    - smtps
-  smtps:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      version: 2.22.1
-    schemes:
-    - smtps
-    - imap
-    - imaps
-    - pop3
-    - pop3s
-    - smtp
-    - smtps
-  snmp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-snmp
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-snmp:
+    groupId: org.apache.camel
+    artifactId: camel-snmp
+    version: 2.22.1
     schemes:
     - snmp
-  solr:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-solr
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-solr:
+    groupId: org.apache.camel
+    artifactId: camel-solr
+    version: 2.22.1
     schemes:
     - solr
-    - solr
     - solrs
     - solrCloud
-  solrCloud:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-solr
-      version: 2.22.1
-    schemes:
-    - solrCloud
-    - solr
-    - solrs
-    - solrCloud
-  solrs:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-solr
-      version: 2.22.1
-    schemes:
-    - solrs
-    - solr
-    - solrs
-    - solrCloud
-  spark:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spark
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-spark:
+    groupId: org.apache.camel
+    artifactId: camel-spark
+    version: 2.22.1
     schemes:
     - spark
-  spark-rest:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spark-rest
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-spark-rest:
+    groupId: org.apache.camel
+    artifactId: camel-spark-rest
+    version: 2.22.1
     schemes:
     - spark-rest
-  splunk:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-splunk
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-splunk:
+    groupId: org.apache.camel
+    artifactId: camel-splunk
+    version: 2.22.1
     schemes:
     - splunk
-  spring-batch:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spring-batch
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-spring-batch:
+    groupId: org.apache.camel
+    artifactId: camel-spring-batch
+    version: 2.22.1
     schemes:
     - spring-batch
-  spring-event:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spring
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-spring:
+    groupId: org.apache.camel
+    artifactId: camel-spring
+    version: 2.22.1
     schemes:
     - spring-event
-  spring-integration:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spring-integration
-      version: 2.22.1
+    languages:
+    - spel
+    dataformats: []
+  camel-spring-integration:
+    groupId: org.apache.camel
+    artifactId: camel-spring-integration
+    version: 2.22.1
     schemes:
     - spring-integration
-  spring-ldap:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ldap
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-spring-ldap:
+    groupId: org.apache.camel
+    artifactId: camel-spring-ldap
+    version: 2.22.1
     schemes:
     - spring-ldap
-  spring-redis:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spring-redis
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-spring-redis:
+    groupId: org.apache.camel
+    artifactId: camel-spring-redis
+    version: 2.22.1
     schemes:
     - spring-redis
-  spring-ws:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ws
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-spring-ws:
+    groupId: org.apache.camel
+    artifactId: camel-spring-ws
+    version: 2.22.1
     schemes:
     - spring-ws
-  sql:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sql
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-sql:
+    groupId: org.apache.camel
+    artifactId: camel-sql
+    version: 2.22.1
     schemes:
     - sql
-  sql-stored:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-sql
-      version: 2.22.1
-    schemes:
     - sql-stored
-  ssh:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-ssh
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-ssh:
+    groupId: org.apache.camel
+    artifactId: camel-ssh
+    version: 2.22.1
     schemes:
     - ssh
-  stax:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-stax
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-stax:
+    groupId: org.apache.camel
+    artifactId: camel-stax
+    version: 2.22.1
     schemes:
     - stax
-  stomp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-stomp
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-stomp:
+    groupId: org.apache.camel
+    artifactId: camel-stomp
+    version: 2.22.1
     schemes:
     - stomp
-  stream:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-stream
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-stream:
+    groupId: org.apache.camel
+    artifactId: camel-stream
+    version: 2.22.1
     schemes:
     - stream
-  string-template:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-stringtemplate
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-stringtemplate:
+    groupId: org.apache.camel
+    artifactId: camel-stringtemplate
+    version: 2.22.1
     schemes:
     - string-template
-  stub:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - stub
-  telegram:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-telegram
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-telegram:
+    groupId: org.apache.camel
+    artifactId: camel-telegram
+    version: 2.22.1
     schemes:
     - telegram
-  test:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - test
-  thrift:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-thrift
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-thrift:
+    groupId: org.apache.camel
+    artifactId: camel-thrift
+    version: 2.22.1
     schemes:
     - thrift
-  tika:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-tika
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - thrift
+  camel-tika:
+    groupId: org.apache.camel
+    artifactId: camel-tika
+    version: 2.22.1
     schemes:
     - tika
-  timer:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - timer
-  twilio:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-twilio
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-twilio:
+    groupId: org.apache.camel
+    artifactId: camel-twilio
+    version: 2.22.1
     schemes:
     - twilio
-  twitter:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-twitter:
+    groupId: org.apache.camel
+    artifactId: camel-twitter
+    version: 2.22.1
     schemes:
     - twitter
-  twitter-directmessage:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      version: 2.22.1
-    schemes:
     - twitter-directmessage
-  twitter-search:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      version: 2.22.1
-    schemes:
     - twitter-search
-  twitter-streaming:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      version: 2.22.1
-    schemes:
     - twitter-streaming
-  twitter-timeline:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      version: 2.22.1
-    schemes:
     - twitter-timeline
-  undertow:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-undertow
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-undertow:
+    groupId: org.apache.camel
+    artifactId: camel-undertow
+    version: 2.22.1
     schemes:
     - undertow
-  validator:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - validator
-  velocity:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-velocity
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-velocity:
+    groupId: org.apache.camel
+    artifactId: camel-velocity
+    version: 2.22.1
     schemes:
     - velocity
-  vertx:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-vertx
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-vertx:
+    groupId: org.apache.camel
+    artifactId: camel-vertx
+    version: 2.22.1
     schemes:
     - vertx
-  vm:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - vm
-  weather:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-weather
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-weather:
+    groupId: org.apache.camel
+    artifactId: camel-weather
+    version: 2.22.1
     schemes:
     - weather
-  web3j:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-web3j
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-web3j:
+    groupId: org.apache.camel
+    artifactId: camel-web3j
+    version: 2.22.1
     schemes:
     - web3j
-  websocket:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-websocket
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-websocket:
+    groupId: org.apache.camel
+    artifactId: camel-websocket
+    version: 2.22.1
     schemes:
     - websocket
-  wordpress:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-wordpress
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-wordpress:
+    groupId: org.apache.camel
+    artifactId: camel-wordpress
+    version: 2.22.1
     schemes:
     - wordpress
-  xchange:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-xchange
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-xchange:
+    groupId: org.apache.camel
+    artifactId: camel-xchange
+    version: 2.22.1
     schemes:
     - xchange
-  xmlrpc:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-xmlrpc
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-xmlrpc:
+    groupId: org.apache.camel
+    artifactId: camel-xmlrpc
+    version: 2.22.1
     schemes:
     - xmlrpc
-  xmlsecurity:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-xmlsecurity
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - xmlrpc
+  camel-xmlsecurity:
+    groupId: org.apache.camel
+    artifactId: camel-xmlsecurity
+    version: 2.22.1
     schemes:
     - xmlsecurity
-  xmpp:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-xmpp
-      version: 2.22.1
+    languages: []
+    dataformats:
+    - secureXML
+  camel-xmpp:
+    groupId: org.apache.camel
+    artifactId: camel-xmpp
+    version: 2.22.1
     schemes:
     - xmpp
-  xquery:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-saxon
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-saxon:
+    groupId: org.apache.camel
+    artifactId: camel-saxon
+    version: 2.22.1
     schemes:
     - xquery
-  xslt:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      version: 2.22.1
-    schemes:
-    - xslt
-  yammer:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-yammer
-      version: 2.22.1
+    languages:
+    - xquery
+    dataformats: []
+  camel-yammer:
+    groupId: org.apache.camel
+    artifactId: camel-yammer
+    version: 2.22.1
     schemes:
     - yammer
-  yql:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-yql
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-yql:
+    groupId: org.apache.camel
+    artifactId: camel-yql
+    version: 2.22.1
     schemes:
     - yql
-  zendesk:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-zendesk
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-zendesk:
+    groupId: org.apache.camel
+    artifactId: camel-zendesk
+    version: 2.22.1
     schemes:
     - zendesk
-  zookeeper:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-zookeeper:
+    groupId: org.apache.camel
+    artifactId: camel-zookeeper
+    version: 2.22.1
     schemes:
     - zookeeper
-  zookeeper-master:
-    dependency:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper-master
-      version: 2.22.1
+    languages: []
+    dataformats: []
+  camel-zookeeper-master:
+    groupId: org.apache.camel
+    artifactId: camel-zookeeper-master
+    version: 2.22.1
     schemes:
     - zookeeper-master
+    languages: []
+    dataformats: []
+  camel-juel:
+    groupId: org.apache.camel
+    artifactId: camel-juel
+    version: 2.22.1
+    components: []
+    languages:
+    - el
+    dataformats: []
+  camel-groovy:
+    groupId: org.apache.camel
+    artifactId: camel-groovy
+    version: 2.22.1
+    components: []
+    languages:
+    - groovy
+    dataformats: []
+  camel-script:
+    groupId: org.apache.camel
+    artifactId: camel-script
+    version: 2.22.1
+    components: []
+    languages:
+    - javaScript
+    - php
+    - python
+    - ruby
+    dataformats: []
+  camel-jsonpath:
+    groupId: org.apache.camel
+    artifactId: camel-jsonpath
+    version: 2.22.1
+    components: []
+    languages:
+    - jsonpath
+    dataformats: []
+  camel-jxpath:
+    groupId: org.apache.camel
+    artifactId: camel-jxpath
+    version: 2.22.1
+    components: []
+    languages:
+    - jxpath
+    dataformats: []
+  camel-ognl:
+    groupId: org.apache.camel
+    artifactId: camel-ognl
+    version: 2.22.1
+    components: []
+    languages:
+    - ognl
+    dataformats: []
+  camel-josql:
+    groupId: org.apache.camel
+    artifactId: camel-josql
+    version: 2.22.1
+    components: []
+    languages:
+    - sql
+    dataformats: []
+  camel-hl7:
+    groupId: org.apache.camel
+    artifactId: camel-hl7
+    version: 2.22.1
+    components: []
+    languages:
+    - terser
+    dataformats:
+    - hl7
+  camel-asn1:
+    groupId: org.apache.camel
+    artifactId: camel-asn1
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - asn1
+  camel-barcode:
+    groupId: org.apache.camel
+    artifactId: camel-barcode
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - barcode
+  camel-base64:
+    groupId: org.apache.camel
+    artifactId: camel-base64
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - base64
+  camel-beanio:
+    groupId: org.apache.camel
+    artifactId: camel-beanio
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - beanio
+  camel-bindy:
+    groupId: org.apache.camel
+    artifactId: camel-bindy
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - bindy-csv
+    - bindy-fixed
+    - bindy-kvp
+  camel-boon:
+    groupId: org.apache.camel
+    artifactId: camel-boon
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - boon
+  camel-castor:
+    groupId: org.apache.camel
+    artifactId: camel-castor
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - castor
+  camel-csv:
+    groupId: org.apache.camel
+    artifactId: camel-csv
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - csv
+  camel-fhir:
+    groupId: org.apache.camel
+    artifactId: camel-fhir
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - fhirJson
+    - fhirXml
+  camel-hessian:
+    groupId: org.apache.camel
+    artifactId: camel-hessian
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - hessian
+  camel-ical:
+    groupId: org.apache.camel
+    artifactId: camel-ical
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - ical
+  camel-jacksonxml:
+    groupId: org.apache.camel
+    artifactId: camel-jacksonxml
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - jacksonxml
+  camel-jaxb:
+    groupId: org.apache.camel
+    artifactId: camel-jaxb
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - jaxb
+  camel-jibx:
+    groupId: org.apache.camel
+    artifactId: camel-jibx
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - jibx
+  camel-fastjson:
+    groupId: org.apache.camel
+    artifactId: camel-fastjson
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - json-fastjson
+  camel-gson:
+    groupId: org.apache.camel
+    artifactId: camel-gson
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - json-gson
+  camel-jackson:
+    groupId: org.apache.camel
+    artifactId: camel-jackson
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - json-jackson
+  camel-johnzon:
+    groupId: org.apache.camel
+    artifactId: camel-johnzon
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - json-johnzon
+  camel-xstream:
+    groupId: org.apache.camel
+    artifactId: camel-xstream
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - json-xstream
+    - xstream
+  camel-lzf:
+    groupId: org.apache.camel
+    artifactId: camel-lzf
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - lzf
+  camel-protobuf:
+    groupId: org.apache.camel
+    artifactId: camel-protobuf
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - protobuf
+  camel-soap:
+    groupId: org.apache.camel
+    artifactId: camel-soap
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - soapjaxb
+  camel-syslog:
+    groupId: org.apache.camel
+    artifactId: camel-syslog
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - syslog
+  camel-tarfile:
+    groupId: org.apache.camel
+    artifactId: camel-tarfile
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - tarfile
+  camel-tagsoup:
+    groupId: org.apache.camel
+    artifactId: camel-tagsoup
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - tidyMarkup
+  camel-univocity-parsers:
+    groupId: org.apache.camel
+    artifactId: camel-univocity-parsers
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - univocity-csv
+    - univocity-fixed
+    - univocity-tsv
+  camel-xmlbeans:
+    groupId: org.apache.camel
+    artifactId: camel-xmlbeans
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - xmlBeans
+  camel-xmljson:
+    groupId: org.apache.camel
+    artifactId: camel-xmljson
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - xmljson
+  camel-snakeyaml:
+    groupId: org.apache.camel
+    artifactId: camel-snakeyaml
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - yaml-snakeyaml
+  camel-zipfile:
+    groupId: org.apache.camel
+    artifactId: camel-zipfile
+    version: 2.22.1
+    components: []
+    languages: []
+    dataformats:
+    - zipfile
 version: 2.22.1
