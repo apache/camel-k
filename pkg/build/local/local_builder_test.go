@@ -25,7 +25,7 @@ import (
 )
 
 func TestProjectGeneration(t *testing.T) {
-	source := build.Request{
+	request := build.Request{
 		Identifier: build.Identifier{
 			Name:      "my-integration",
 			Qualifier: "",
@@ -43,7 +43,8 @@ func TestProjectGeneration(t *testing.T) {
 		},
 	}
 
-	prj, err := generateProject(source)
+	prj, err := generateProject(&request)
+
 	assert.Nil(t, err)
 	assert.NotNil(t, prj)
 	assert.Equal(t, len(prj.Dependencies.Dependencies), 5)
@@ -57,7 +58,7 @@ func TestProjectGeneration(t *testing.T) {
 }
 
 func TestProjectGenerationWithFailure(t *testing.T) {
-	source := build.Request{
+	request := build.Request{
 		Identifier: build.Identifier{
 			Name:      "my-integration",
 			Qualifier: "",
@@ -75,6 +76,7 @@ func TestProjectGenerationWithFailure(t *testing.T) {
 		},
 	}
 
-	_, err := generateProject(source)
+	_, err := generateProject(&request)
+
 	assert.NotNil(t, err)
 }

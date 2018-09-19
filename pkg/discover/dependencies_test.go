@@ -18,14 +18,15 @@ limitations under the License.
 package discover
 
 import (
+	"testing"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestDependenciesJavaSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name: "Source.java",
+		Name:     "Request.java",
 		Language: v1alpha1.LanguageJavaSource,
 		Content: `
 			from("telegram:bots/cippa").to("log:stash");
@@ -40,7 +41,7 @@ func TestDependenciesJavaSource(t *testing.T) {
 
 func TestDependenciesJavaClass(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name: "Source.class",
+		Name:     "Request.class",
 		Language: v1alpha1.LanguageJavaClass,
 		Content: `
 			from("telegram:bots/cippa").to("log:stash");
@@ -54,7 +55,7 @@ func TestDependenciesJavaClass(t *testing.T) {
 
 func TestDependenciesJavaScript(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name: "source.js",
+		Name:     "source.js",
 		Language: v1alpha1.LanguageJavaScript,
 		Content: `
 			from('telegram:bots/cippa').to("log:stash");
@@ -70,7 +71,7 @@ func TestDependenciesJavaScript(t *testing.T) {
 
 func TestDependenciesGroovy(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name: "source.groovy",
+		Name:     "source.groovy",
 		Language: v1alpha1.LanguageGroovy,
 		Content: `
 			from('telegram:bots/cippa').to("log:stash");

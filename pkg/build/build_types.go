@@ -30,7 +30,7 @@ type Identifier struct {
 	Qualifier string
 }
 
-// Source represent the integration code
+// Request represent the integration code
 type Source struct {
 	Name     string
 	Content  string
@@ -39,11 +39,11 @@ type Source struct {
 
 // Result represents the result of a build
 type Result struct {
-	Source               *Request
-	Status               Status
-	Image                string
-	Error                error
-	ResolvedDependencies []string
+	Request   *Request
+	Status    Status
+	Image     string
+	Error     error
+	Classpath []string
 }
 
 // Builder is supertype of all builders

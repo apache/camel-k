@@ -51,8 +51,8 @@ type localBuilder struct {
 }
 
 type buildOperation struct {
-	source build.Request
-	output chan build.Result
+	request build.Request
+	output  chan build.Result
 }
 
 // NewLocalBuilder create a new builder
@@ -65,11 +65,11 @@ func NewLocalBuilder(ctx context.Context, namespace string) build.Builder {
 	return &builder
 }
 
-func (b *localBuilder) Build(source build.Request) <-chan build.Result {
+func (b *localBuilder) Build(request build.Request) <-chan build.Result {
 	res := make(chan build.Result, 1)
 	op := buildOperation{
-		source: source,
-		output: res,
+		request: request,
+		output:  res,
 	}
 	b.buffer <- op
 	return res
@@ -84,53 +84,57 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 		case op := <-b.buffer:
 			now := time.Now()
 			logrus.Info("Starting new build")
-			image, err := b.execute(op.source)
+			res := b.execute(&op.request)
 			elapsed := time.Now().Sub(now)
-			if err != nil {
-				logrus.Error("Error during build (total time ", elapsed.Seconds(), " seconds): ", err)
+
+			if res.Error != nil {
+				logrus.Error("Error during build (total time ", elapsed.Seconds(), " seconds): ", res.Error)
 			} else {
 				logrus.Info("Build completed in ", elapsed.Seconds(), " seconds")
 			}
 
-			if err != nil {
-				op.output <- build.Result{
-					Source: &op.source,
-					Status: build.StatusError,
-					Error:  err,
-				}
-			} else {
-				op.output <- build.Result{
-					Source: &op.source,
-					Status: build.StatusCompleted,
-					Image:  image,
-				}
-			}
-
+			op.output <- res
 		}
 	}
 }
 
-func (b *localBuilder) execute(source build.Request) (string, error) {
-	project, err := generateProject(source)
+func (b *localBuilder) execute(request *build.Request) build.Result {
+	project, err := generateProject(request)
 	if err != nil {
-		return "", err
-	}
-	tarFileName, err := maven.Build(project)
-	if err != nil {
-		return "", err
-	}
-
-	logrus.Info("Created tar file ", tarFileName)
-
-	image, err := b.publish(tarFileName, source)
-	if err != nil {
-		return "", errors.Wrap(err, "could not publish docker image")
+		return build.Result{
+			Error:  err,
+			Status: build.StatusError,
+		}
 	}
 
-	return image, nil
+	res, err := maven.Build(project)
+	if err != nil {
+		return build.Result{
+			Error:  err,
+			Status: build.StatusError,
+		}
+	}
+
+	logrus.Info("Created tar file ", res.TarFilePath)
+
+	image, err := b.publish(res.TarFilePath, request)
+	if err != nil {
+		return build.Result{
+			Error:  errors.Wrap(err, "could not publish docker image"),
+			Status: build.StatusError,
+		}
+	}
+
+	return build.Result{
+		Request:   request,
+		Image:     image,
+		Error:     nil,
+		Status:    build.StatusCompleted,
+		Classpath: res.Classpath,
+	}
 }
 
-func (b *localBuilder) publish(tarFile string, source build.Request) (string, error) {
+func (b *localBuilder) publish(tarFile string, source *build.Request) (string, error) {
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: buildv1.SchemeGroupVersion.String(),
@@ -253,7 +257,7 @@ func (b *localBuilder) publish(tarFile string, source build.Request) (string, er
 	return is.Status.DockerImageRepository + ":" + source.Identifier.Qualifier, nil
 }
 
-func generateProject(source build.Request) (maven.Project, error) {
+func generateProject(source *build.Request) (maven.Project, error) {
 	project := maven.Project{
 		XMLName:           xml.Name{Local: "project"},
 		XMLNs:             "http://maven.apache.org/POM/4.0.0",
@@ -267,7 +271,7 @@ func generateProject(source build.Request) (maven.Project, error) {
 			Dependencies: maven.Dependencies{
 				Dependencies: []maven.Dependency{
 					{
-						//TODO: camel version should be retrieved from an external source or provided as static version
+						//TODO: camel version should be retrieved from an external request or provided as static version
 						GroupID:    "org.apache.camel",
 						ArtifactID: "camel-bom",
 						Version:    "2.22.1",

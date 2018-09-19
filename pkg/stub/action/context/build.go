@@ -73,6 +73,7 @@ func (action *integrationContextBuildAction) Handle(context *v1alpha1.Integratio
 		target := context.DeepCopy()
 		target.Status.Image = buildResult.Image
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
+		target.Spec.Classpath = buildResult.Classpath
 		if err := sdk.Update(target); err != nil {
 			return err
 		}
