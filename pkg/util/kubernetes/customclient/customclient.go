@@ -23,6 +23,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+// GetClientFor returns a RESTClient for the given group and version
 func GetClientFor(group string, version string) (*rest.RESTClient, error) {
 	inConfig := k8sclient.GetKubeConfig()
 	config := rest.CopyConfig(inConfig)
