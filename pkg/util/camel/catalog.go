@@ -24,21 +24,18 @@ import (
 
 // Catalog --
 type Catalog struct {
-	Version    string               `yaml:"version"`
-	Components map[string]Component `yaml:"components"`
+	Version  string              `yaml:"version"`
+	Artifact map[string]Artifact `yaml:"artifacts"`
 }
 
-// Dependency --
-type Dependency struct {
-	GroupID    string `yaml:"groupId"`
-	ArtifactID string `yaml:"artifactId"`
-	Version    string `yaml:"version"`
-}
-
-// Component --
-type Component struct {
-	Dependency Dependency `yaml:"dependency"`
-	Schemes    []string   `yaml:"schemes"`
+// Artifact --
+type Artifact struct {
+	GroupID     string   `yaml:"groupId"`
+	ArtifactID  string   `yaml:"artifactId"`
+	Version     string   `yaml:"version"`
+	Schemes     []string `yaml:"schemes"`
+	Languages   []string `yaml:"languages"`
+	DataFormats []string `yaml:"dataformats"`
 }
 
 func init() {
