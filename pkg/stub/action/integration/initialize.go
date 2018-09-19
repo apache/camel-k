@@ -18,34 +18,34 @@ limitations under the License.
 package action
 
 import (
+	"sort"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/discover"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"sort"
 )
-
-// InitializeAction initializes the integration status to trigger the deployment
-type InitializeAction struct {
-}
 
 // NewInitializeAction creates a new inititialize action
 func NewInitializeAction() IntegrationAction {
-	return &InitializeAction{}
+	return &initializeAction{}
+}
+
+type initializeAction struct {
 }
 
 // Name returns a common name of the action
-func (b *InitializeAction) Name() string {
+func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
 // CanHandle tells whether this action can handle the integration
-func (b *InitializeAction) CanHandle(integration *v1alpha1.Integration) bool {
+func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == ""
 }
 
 // Handle handles the integratios
-func (b *InitializeAction) Handle(integration *v1alpha1.Integration) error {
+func (action *initializeAction) Handle(integration *v1alpha1.Integration) error {
 	target := integration.DeepCopy()
 	// set default values
 	if target.Spec.Replicas == nil {
@@ -62,7 +62,7 @@ func (b *InitializeAction) Handle(integration *v1alpha1.Integration) error {
 	}
 	if *target.Spec.DependenciesAutoDiscovery {
 		discovered := discover.Dependencies(target.Spec.Source)
-		target.Spec.Dependencies = b.mergeDependencies(target.Spec.Dependencies, discovered)
+		target.Spec.Dependencies = action.mergeDependencies(target.Spec.Dependencies, discovered)
 	}
 	// sort the dependencies to get always the same list if they don't change
 	sort.Strings(target.Spec.Dependencies)
@@ -72,7 +72,7 @@ func (b *InitializeAction) Handle(integration *v1alpha1.Integration) error {
 	return sdk.Update(target)
 }
 
-func (b *InitializeAction) mergeDependencies(list1 []string, list2 []string) []string {
+func (action *initializeAction) mergeDependencies(list1 []string, list2 []string) []string {
 	set := make(map[string]bool, 0)
 	for _, d := range list1 {
 		set[d] = true
