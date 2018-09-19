@@ -28,12 +28,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GetCmdOptions struct {
+type getCmdOptions struct {
 	*RootCmdOptions
 }
 
-func NewCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := GetCmdOptions{
+func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	options := getCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
@@ -46,7 +46,7 @@ func NewCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	return &cmd
 }
 
-func (o *GetCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 	integrationList := v1alpha1.IntegrationList{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),

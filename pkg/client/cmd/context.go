@@ -21,8 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewCmdContext --
-func NewCmdContext(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdContext(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
 		Use:   "context",
 		Short: "Configure an Integration Context",

@@ -23,13 +23,12 @@ import (
 	"os"
 
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"github.com/pkg/errors"
 )
 
-// NewCmdInstall --
-func NewCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	options := installCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
