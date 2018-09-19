@@ -25,7 +25,7 @@ import (
 // Catalog --
 type Catalog struct {
 	Version          string              `yaml:"version"`
-	Artifact         map[string]Artifact `yaml:"artifacts"`
+	Artifacts        map[string]Artifact `yaml:"artifacts"`
 	artifactByScheme map[string]string   `yaml:"-"`
 }
 
@@ -45,7 +45,7 @@ func init() {
 		panic(err)
 	}
 	Runtime.artifactByScheme = make(map[string]string)
-	for id, artifact := range Runtime.Artifact {
+	for id, artifact := range Runtime.Artifacts {
 		for _, scheme := range artifact.Schemes {
 			Runtime.artifactByScheme[scheme] = id
 		}
@@ -55,7 +55,7 @@ func init() {
 // GetArtifactByScheme returns the artifact corresponding to the given component scheme
 func (c Catalog) GetArtifactByScheme(scheme string) *Artifact {
 	if id, ok := c.artifactByScheme[scheme]; ok {
-		if artifact, present := c.Artifact[id]; present {
+		if artifact, present := c.Artifacts[id]; present {
 			return &artifact
 		}
 	}
