@@ -111,11 +111,11 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 }
 
 func (b *localBuilder) execute(source build.Request) (string, error) {
-	project, err := generateProjectDefinition(source)
+	integration, err := generateIntegration(source)
 	if err != nil {
 		return "", err
 	}
-	tarFileName, err := maven.Build(project)
+	tarFileName, err := maven.Build(integration)
 	if err != nil {
 		return "", err
 	}
@@ -254,24 +254,24 @@ func (b *localBuilder) publish(tarFile string, source build.Request) (string, er
 	return is.Status.DockerImageRepository + ":" + source.Identifier.Qualifier, nil
 }
 
-func generateProjectDefinition(source build.Request) (maven.ProjectDefinition, error) {
-	project := maven.ProjectDefinition{
+func generateIntegration(source build.Request) (maven.Integration, error) {
+	integration := maven.Integration{
 		Project: maven.Project{
 			XMLName:           xml.Name{Local: "project"},
-			XmlNs:             "http://maven.apache.org/POM/4.0.0",
-			XmlNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+			XMLNs:             "http://maven.apache.org/POM/4.0.0",
+			XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
 			XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
 			ModelVersion:      "4.0.0",
-			GroupId:           "org.apache.camel.k.integration",
-			ArtifactId:        "camel-k-integration",
+			GroupID:           "org.apache.camel.k.integration",
+			ArtifactID:        "camel-k-integration",
 			Version:           version.Version,
 			DependencyManagement: maven.DependencyManagement{
 				Dependencies: maven.Dependencies{
 					Dependencies: []maven.Dependency{
 						{
 							//TODO: camel version should be retrieved from an external source or provided as static version
-							GroupId:    "org.apache.camel",
-							ArtifactId: "camel-bom",
+							GroupID:    "org.apache.camel",
+							ArtifactID: "camel-bom",
 							Version:    "2.22.1",
 							Type:       "pom",
 							Scope:      "import",
@@ -291,7 +291,7 @@ func generateProjectDefinition(source build.Request) (maven.ProjectDefinition, e
 	// set-up dependencies
 	//
 
-	deps := &project.Project.Dependencies
+	deps := &integration.Project.Dependencies
 	deps.AddGAV("org.apache.camel.k", "camel-k-runtime-jvm", version.Version)
 
 	for _, d := range source.Dependencies {
@@ -309,9 +309,9 @@ func generateProjectDefinition(source build.Request) (maven.ProjectDefinition, e
 
 			deps.AddEncodedGAV(gav)
 		} else {
-			return maven.ProjectDefinition{}, fmt.Errorf("unknown dependency type: %s", d)
+			return maven.Integration{}, fmt.Errorf("unknown dependency type: %s", d)
 		}
 	}
 
-	return project, nil
+	return integration, nil
 }
