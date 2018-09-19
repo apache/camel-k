@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdVersion() *cobra.Command {
+func newCmdVersion() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Display client version",
