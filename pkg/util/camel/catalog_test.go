@@ -24,5 +24,5 @@ import (
 
 func TestCatalog(t *testing.T) {
 	assert.NotNil(t, Runtime)
-	assert.NotEmpty(t, Runtime.Artifact)
+	assert.NotEmpty(t, Runtime.Artifacts)
 }

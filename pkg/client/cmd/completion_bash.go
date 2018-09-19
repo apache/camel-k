@@ -129,7 +129,7 @@ func configureKnownBashCompletions(command *cobra.Command) {
 func computeCamelDependencies() string {
 	result := ""
 
-	for k := range camel.Runtime.Artifact {
+	for k := range camel.Runtime.Artifacts {
 		if result != "" {
 			result = result + " " + k
 		} else {
