@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
+// SetupClusterwideResources --
 func SetupClusterwideResources() error {
 
 	// Install CRD for Integration Context (if needed)
@@ -56,6 +57,7 @@ func SetupClusterwideResources() error {
 	return nil
 }
 
+// IsCRDInstalled check if the given CRT kind is installed
 func IsCRDInstalled(kind string) (bool, error) {
 	lst, err := k8sclient.GetKubeClient().Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
 	if err != nil && errors.IsNotFound(err) {
@@ -82,7 +84,7 @@ func installCRD(kind string, resourceName string) error {
 	}
 
 	crd := []byte(deploy.Resources[resourceName])
-	crdJson, err := yaml.ToJSON(crd)
+	crdJSON, err := yaml.ToJSON(crd)
 	if err != nil {
 		return err
 	}
@@ -93,7 +95,7 @@ func installCRD(kind string, resourceName string) error {
 	// Post using dynamic client
 	result := restClient.
 		Post().
-		Body(crdJson).
+		Body(crdJSON).
 		Resource("customresourcedefinitions").
 		Do()
 	// Check result
@@ -104,6 +106,7 @@ func installCRD(kind string, resourceName string) error {
 	return nil
 }
 
+// IsClusterRoleInstalled check if cluster role camel-k:edit is installed
 func IsClusterRoleInstalled() (bool, error) {
 	clusterRole := v1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
