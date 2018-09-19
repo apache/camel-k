@@ -23,22 +23,23 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
 
+// NewIntegrationContextInitializeAction creates a new initialization handling action for the context
 func NewIntegrationContextInitializeAction() IntegrationContextAction {
-	return &integrationContexInitializeAction{}
+	return &integrationContextInitializeAction{}
 }
 
-type integrationContexInitializeAction struct {
+type integrationContextInitializeAction struct {
 }
 
-func (action *integrationContexInitializeAction) Name() string {
+func (action *integrationContextInitializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *integrationContexInitializeAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+func (action *integrationContextInitializeAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
 	return context.Status.Phase == ""
 }
 
-func (action *integrationContexInitializeAction) Handle(context *v1alpha1.IntegrationContext) error {
+func (action *integrationContextInitializeAction) Handle(context *v1alpha1.IntegrationContext) error {
 	target := context.DeepCopy()
 
 	// update the status

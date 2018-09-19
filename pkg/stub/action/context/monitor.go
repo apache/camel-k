@@ -24,6 +24,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// NewIntegrationContextMonitorAction creates a new monitoring handling action for the context
 func NewIntegrationContextMonitorAction() IntegrationContextAction {
 	return &integrationContextMonitorAction{}
 }
