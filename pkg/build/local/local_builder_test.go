@@ -43,16 +43,16 @@ func TestProjectGeneration(t *testing.T) {
 		},
 	}
 
-	prj, err := generateProjectDefinition(source)
+	prj, err := generateIntegration(source)
 	assert.Nil(t, err)
 	assert.NotNil(t, prj)
 	assert.Equal(t, len(prj.Project.Dependencies.Dependencies), 5)
-	assert.Equal(t, prj.Project.Dependencies.Dependencies[0].ArtifactId, "camel-k-runtime-jvm")
-	assert.Equal(t, prj.Project.Dependencies.Dependencies[1].ArtifactId, "camel-mail")
-	assert.Equal(t, prj.Project.Dependencies.Dependencies[2].ArtifactId, "camel-netty4")
-	assert.Equal(t, prj.Project.Dependencies.Dependencies[3].ArtifactId, "camel-servicenow")
+	assert.Equal(t, prj.Project.Dependencies.Dependencies[0].ArtifactID, "camel-k-runtime-jvm")
+	assert.Equal(t, prj.Project.Dependencies.Dependencies[1].ArtifactID, "camel-mail")
+	assert.Equal(t, prj.Project.Dependencies.Dependencies[2].ArtifactID, "camel-netty4")
+	assert.Equal(t, prj.Project.Dependencies.Dependencies[3].ArtifactID, "camel-servicenow")
 	assert.Equal(t, prj.Project.Dependencies.Dependencies[3].Version, "2.21.1")
-	assert.Equal(t, prj.Project.Dependencies.Dependencies[4].ArtifactId, "camel-salesforce")
+	assert.Equal(t, prj.Project.Dependencies.Dependencies[4].ArtifactID, "camel-salesforce")
 	assert.Equal(t, prj.Project.Dependencies.Dependencies[4].Version, "")
 }
 
@@ -75,6 +75,6 @@ func TestProjectGenerationWithFailure(t *testing.T) {
 		},
 	}
 
-	_, err := generateProjectDefinition(source)
+	_, err := generateIntegration(source)
 	assert.NotNil(t, err)
 }

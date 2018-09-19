@@ -53,19 +53,19 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
 func TestPomGeneration(t *testing.T) {
 	project := Project{
 		XMLName:           xml.Name{Local: "project"},
-		XmlNs:             "http://maven.apache.org/POM/4.0.0",
-		XmlNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+		XMLNs:             "http://maven.apache.org/POM/4.0.0",
+		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
 		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
 		ModelVersion:      "4.0.0",
-		GroupId:           "org.apache.camel.k.integration",
-		ArtifactId:        "camel-k-integration",
+		GroupID:           "org.apache.camel.k.integration",
+		ArtifactID:        "camel-k-integration",
 		Version:           "1.0.0",
 		DependencyManagement: DependencyManagement{
 			Dependencies: Dependencies{
 				Dependencies: []Dependency{
 					{
-						GroupId:    "org.apache.camel",
-						ArtifactId: "camel-bom",
+						GroupID:    "org.apache.camel",
+						ArtifactID: "camel-bom",
 						Version:    "2.22.1",
 						Type:       "pom",
 						Scope:      "import",
@@ -76,8 +76,8 @@ func TestPomGeneration(t *testing.T) {
 		Dependencies: Dependencies{
 			Dependencies: []Dependency{
 				{
-					GroupId:    "org.apache.camel.k",
-					ArtifactId: "camel-k-runtime-jvm",
+					GroupID:    "org.apache.camel.k",
+					ArtifactID: "camel-k-runtime-jvm",
 					Version:    "1.0.0",
 				},
 			},
@@ -96,8 +96,8 @@ func TestParseSimpleGAV(t *testing.T) {
 	dep, err := ParseGAV("org.apache.camel:camel-core:2.21.1")
 
 	assert.Nil(t, err)
-	assert.Equal(t, dep.GroupId, "org.apache.camel")
-	assert.Equal(t, dep.ArtifactId, "camel-core")
+	assert.Equal(t, dep.GroupID, "org.apache.camel")
+	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Equal(t, dep.Version, "2.21.1")
 	assert.Equal(t, dep.Type, "jar")
 	assert.Equal(t, dep.Classifier, "")
@@ -107,8 +107,8 @@ func TestParseGAVWithType(t *testing.T) {
 	dep, err := ParseGAV("org.apache.camel:camel-core:war:2.21.1")
 
 	assert.Nil(t, err)
-	assert.Equal(t, dep.GroupId, "org.apache.camel")
-	assert.Equal(t, dep.ArtifactId, "camel-core")
+	assert.Equal(t, dep.GroupID, "org.apache.camel")
+	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Equal(t, dep.Version, "2.21.1")
 	assert.Equal(t, dep.Type, "war")
 	assert.Equal(t, dep.Classifier, "")
@@ -118,8 +118,8 @@ func TestParseGAVWithClassifierAndType(t *testing.T) {
 	dep, err := ParseGAV("org.apache.camel:camel-core:war:test:2.21.1")
 
 	assert.Nil(t, err)
-	assert.Equal(t, dep.GroupId, "org.apache.camel")
-	assert.Equal(t, dep.ArtifactId, "camel-core")
+	assert.Equal(t, dep.GroupID, "org.apache.camel")
+	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Equal(t, dep.Version, "2.21.1")
 	assert.Equal(t, dep.Type, "war")
 	assert.Equal(t, dep.Classifier, "test")

@@ -38,15 +38,15 @@ const (
 	artifactDirPrefix = "maven-bin-"
 )
 
-// Takes a project description and returns a binary tar with the built artifacts
-func Build(project ProjectDefinition) (string, error) {
+// Build takes a project description and returns a binary tar with the built artifacts
+func Build(integration Integration) (string, error) {
 	buildDir, err := ioutil.TempDir("", buildDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven source files")
 	}
 	defer os.RemoveAll(buildDir)
 
-	err = createMavenStructure(buildDir, project)
+	err = createMavenStructure(buildDir, integration)
 	if err != nil {
 		return "", errors.Wrap(err, "could not write maven source files")
 	}
@@ -54,7 +54,7 @@ func Build(project ProjectDefinition) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	tarfile, err := createTar(buildDir, project)
+	tarfile, err := createTar(buildDir, integration)
 	if err != nil {
 		return "", err
 	}
@@ -90,13 +90,13 @@ func mavenExtraOptions() string {
 	return "-Dcamel.noop=true"
 }
 
-func createTar(buildDir string, project ProjectDefinition) (string, error) {
+func createTar(buildDir string, integration Integration) (string, error) {
 	artifactDir, err := ioutil.TempDir("", artifactDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
 	}
 
-	tarFileName := path.Join(artifactDir, project.Project.ArtifactId+".tar")
+	tarFileName := path.Join(artifactDir, integration.Project.ArtifactID+".tar")
 	tarFile, err := os.Create(tarFileName)
 	if err != nil {
 		return "", errors.Wrap(err, "cannot create tar file "+tarFileName)
@@ -104,14 +104,14 @@ func createTar(buildDir string, project ProjectDefinition) (string, error) {
 	defer tarFile.Close()
 
 	writer := tar.NewWriter(tarFile)
-	err = appendToTar(path.Join(buildDir, "target", project.Project.ArtifactId+"-"+project.Project.Version+".jar"), "", writer)
+	err = appendToTar(path.Join(buildDir, "target", integration.Project.ArtifactID+"-"+integration.Project.Version+".jar"), "", writer)
 	if err != nil {
 		return "", err
 	}
 
 	// Environment variables
-	if project.Env != nil {
-		err = writeFile(buildDir, "run-env.sh", envFileContent(project.Env))
+	if integration.Env != nil {
+		err = writeFile(buildDir, "run-env.sh", envFileContent(integration.Env))
 		if err != nil {
 			return "", err
 		}
@@ -169,7 +169,7 @@ func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
 	return nil
 }
 
-func createMavenStructure(buildDir string, project ProjectDefinition) error {
+func createMavenStructure(buildDir string, project Integration) error {
 	pom, err := GeneratePomFileContent(project.Project)
 	if err != nil {
 		return err
@@ -236,6 +236,7 @@ func envFileContent(env map[string]string) string {
 	return content
 }
 
+// GeneratePomFileContent generate a pom.xml file from the given project definition
 func GeneratePomFileContent(project Project) (string, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
@@ -251,14 +252,20 @@ func GeneratePomFileContent(project Project) (string, error) {
 	return w.String(), nil
 }
 
+// ParseGAV decode a maven artifact id to a dependency definition.
+//
+// The artifact id is in the form of:
+//
+//     <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
+//
 func ParseGAV(gav string) (Dependency, error) {
 	// <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
 	dep := Dependency{}
 	rex := regexp.MustCompile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?(:([^: ]+))?")
 	res := rex.FindStringSubmatch(gav)
 
-	dep.GroupId = res[1]
-	dep.ArtifactId = res[2]
+	dep.GroupID = res[1]
+	dep.ArtifactID = res[2]
 	dep.Type = "jar"
 
 	cnt := strings.Count(gav, ":")
