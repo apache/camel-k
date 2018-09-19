@@ -20,32 +20,37 @@ package build
 import (
 	"context"
 	"sync"
-
-	"github.com/apache/camel-k/pkg/build/api"
-	"github.com/apache/camel-k/pkg/build/local"
 )
 
-// main facade to the image build system
+// Manager represent the main facade to the image build system
 type Manager struct {
-	builds  sync.Map
-	builder api.Builder
+	builds    sync.Map
+	ctx       context.Context
+	namespace string
+	builder   Builder
 }
 
-func NewManager(ctx context.Context, namespace string) *Manager {
+// NewManager creates an instance of the build manager using the given builder
+func NewManager(ctx context.Context, namespace string, builder Builder) *Manager {
 	return &Manager{
-		builder: local.NewLocalBuilder(ctx, namespace),
+		ctx:       ctx,
+		namespace: namespace,
+		builder:   builder,
 	}
 }
 
-func (m *Manager) Get(identifier api.BuildIdentifier) api.BuildResult {
-	if info, present := m.builds.Load(identifier); !present || info == nil {
+// Get retrieve the build result associated to the given build identifier
+func (m *Manager) Get(identifier Identifier) Result {
+	info, present := m.builds.Load(identifier)
+	if !present || info == nil {
 		return noBuildInfo()
-	} else {
-		return *info.(*api.BuildResult)
 	}
+
+	return *info.(*Result)
 }
 
-func (m *Manager) Start(source api.BuildSource) {
+// Start starts a new build
+func (m *Manager) Start(source Request) {
 	initialBuildInfo := initialBuildInfo(&source)
 	m.builds.Store(source.Identifier, &initialBuildInfo)
 
@@ -56,15 +61,15 @@ func (m *Manager) Start(source api.BuildSource) {
 	}()
 }
 
-func noBuildInfo() api.BuildResult {
-	return api.BuildResult{
-		Status: api.BuildStatusNotRequested,
+func noBuildInfo() Result {
+	return Result{
+		Status: StatusNotRequested,
 	}
 }
 
-func initialBuildInfo(source *api.BuildSource) api.BuildResult {
-	return api.BuildResult{
+func initialBuildInfo(source *Request) Result {
+	return Result{
 		Source: source,
-		Status: api.BuildStatusStarted,
+		Status: StatusStarted,
 	}
 }

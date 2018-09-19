@@ -20,17 +20,17 @@ package local
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/build/api"
+	"github.com/apache/camel-k/pkg/build"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestProjectGeneration(t *testing.T) {
-	source := api.BuildSource{
-		Identifier: api.BuildIdentifier{
+	source := build.Request{
+		Identifier: build.Identifier{
 			Name:      "my-integration",
 			Qualifier: "",
 		},
-		Code: api.Code{
+		Code: build.Source{
 			Name:     "my-code.js",
 			Content:  `from("timer:start").to("log:end")`,
 			Language: "",
@@ -57,12 +57,12 @@ func TestProjectGeneration(t *testing.T) {
 }
 
 func TestProjectGenerationWithFailure(t *testing.T) {
-	source := api.BuildSource{
-		Identifier: api.BuildIdentifier{
+	source := build.Request{
+		Identifier: build.Identifier{
 			Name:      "my-integration",
 			Qualifier: "",
 		},
-		Code: api.Code{
+		Code: build.Source{
 			Name:     "my-code.js",
 			Content:  `from("timer:start").to("log:end")`,
 			Language: "",
