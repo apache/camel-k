@@ -23,25 +23,26 @@ package test
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/build/local"
 	"testing"
 	"time"
 
-	buildapi "github.com/apache/camel-k/pkg/build/api"
+	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/stretchr/testify/assert"
-	"github.com/apache/camel-k/pkg/build"
 )
 
 func TestBuildManagerBuild(t *testing.T) {
 	ctx := context.TODO()
-	buildManager := build.NewManager(ctx, getTargetNamespace())
-	identifier := buildapi.BuildIdentifier{
+	namespace := getTargetNamespace()
+	buildManager := build.NewManager(ctx, namespace, local.NewLocalBuilder(ctx, namespace))
+	identifier := build.Identifier{
 		Name:   "man-test",
 		Qualifier: digest.Random(),
 	}
-	buildManager.Start(buildapi.BuildSource{
+	buildManager.Start(build.Request{
 		Identifier: identifier,
-		Code: buildapi.Code{
+		Code: build.Source{
 			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
@@ -51,31 +52,32 @@ func TestBuildManagerBuild(t *testing.T) {
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
-	var result buildapi.BuildResult
+	var result build.Result
 	for time.Now().Before(deadline) {
 		result = buildManager.Get(identifier)
-		if result.Status == buildapi.BuildStatusCompleted || result.Status == buildapi.BuildStatusError {
+		if result.Status == build.StatusCompleted || result.Status == build.StatusError {
 			break
 		}
 		time.Sleep(2 * time.Second)
 	}
 
-	assert.NotEqual(t, buildapi.BuildStatusError, result.Status)
-	assert.Equal(t, buildapi.BuildStatusCompleted, result.Status)
+	assert.NotEqual(t, build.StatusError, result.Status)
+	assert.Equal(t, build.StatusCompleted, result.Status)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
 func TestBuildManagerFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
-	buildManager := build.NewManager(ctx, getTargetNamespace())
-	identifier := buildapi.BuildIdentifier{
+	namespace := getTargetNamespace()
+	buildManager := build.NewManager(ctx, namespace, local.NewLocalBuilder(ctx, namespace))
+	identifier := build.Identifier{
 		Name:   "man-test-2",
 		Qualifier: digest.Random(),
 	}
-	buildManager.Start(buildapi.BuildSource{
+	buildManager.Start(build.Request{
 		Identifier: identifier,
-		Code: buildapi.Code{
+		Code: build.Source{
 			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
@@ -84,16 +86,16 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	})
 
 	deadline := time.Now().Add(5 * time.Minute)
-	var result buildapi.BuildResult
+	var result build.Result
 	for time.Now().Before(deadline) {
 		result = buildManager.Get(identifier)
-		if result.Status == buildapi.BuildStatusCompleted || result.Status == buildapi.BuildStatusError {
+		if result.Status == build.StatusCompleted || result.Status == build.StatusError {
 			break
 		}
 		time.Sleep(2 * time.Second)
 	}
 
-	assert.Equal(t, buildapi.BuildStatusError, result.Status)
-	assert.NotEqual(t, buildapi.BuildStatusCompleted, result.Status)
+	assert.Equal(t, build.StatusError, result.Status)
+	assert.NotEqual(t, build.StatusCompleted, result.Status)
 	assert.Empty(t, result.Image)
 }

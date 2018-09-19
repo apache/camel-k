@@ -25,7 +25,7 @@ import (
 	"context"
 	"testing"
 
-	build "github.com/apache/camel-k/pkg/build/api"
+	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/stretchr/testify/assert"
 	"github.com/apache/camel-k/pkg/build/local"
@@ -36,12 +36,12 @@ func TestLocalBuild(t *testing.T) {
 	ctx := context.TODO()
 	builder := local.NewLocalBuilder(ctx, getTargetNamespace())
 
-	execution := builder.Build(build.BuildSource{
-		Identifier: build.BuildIdentifier{
+	execution := builder.Build(build.Request{
+		Identifier: build.Identifier{
 			Name:      "test0",
 			Qualifier: digest.Random(),
 		},
-		Code: build.Code{
+		Code: build.Source{
 			Content: createTimerToLogIntegrationCode(),
 		},
 	})
@@ -56,22 +56,22 @@ func TestLocalDoubleBuild(t *testing.T) {
 	ctx := context.TODO()
 	builder := local.NewLocalBuilder(ctx, getTargetNamespace())
 
-	execution1 := builder.Build(build.BuildSource{
-		Identifier: build.BuildIdentifier{
+	execution1 := builder.Build(build.Request{
+		Identifier: build.Identifier{
 			Name:      "test1",
 			Qualifier: digest.Random(),
 		},
-		Code: build.Code{
+		Code: build.Source{
 			Content: createTimerToLogIntegrationCode(),
 		},
 	})
 
-	execution2 := builder.Build(build.BuildSource{
-		Identifier: build.BuildIdentifier{
+	execution2 := builder.Build(build.Request{
+		Identifier: build.Identifier{
 			Name:      "test2",
 			Qualifier: digest.Random(),
 		},
-		Code: build.Code{
+		Code: build.Source{
 			Content: createTimerToLogIntegrationCode(),
 		},
 	})
@@ -88,12 +88,12 @@ func TestLocalFailedBuild(t *testing.T) {
 	ctx := context.TODO()
 	builder := local.NewLocalBuilder(ctx, getTargetNamespace())
 
-	execution := builder.Build(build.BuildSource{
-		Identifier: build.BuildIdentifier{
+	execution := builder.Build(build.Request{
+		Identifier: build.Identifier{
 			Name:      "test3",
 			Qualifier: digest.Random(),
 		},
-		Code: build.Code{
+		Code: build.Source{
 			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
