@@ -2441,12 +2441,15 @@ status:
 apiVersion: camel.apache.org/v1alpha1
 kind: IntegrationContext
 metadata:
-  name: root.integrationcontexts.camel.apache.org
+  name: core.integrationcontexts.camel.apache.org
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
     camel.apache.org/context.created.by.name: core
     camel.apache.org/context.type: platform
+spec:
+  dependencies:
+    - camel:core
 `
 	Resources["platform-integration-context-groovy.yaml"] =
 		`

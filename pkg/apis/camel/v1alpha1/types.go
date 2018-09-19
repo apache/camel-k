@@ -125,6 +125,7 @@ type IntegrationContext struct {
 // IntegrationContextSpec --
 type IntegrationContextSpec struct {
 	Dependencies  []string            `json:"dependencies,omitempty"`
+	Classpath     []string            `json:"classpath,omitempty"`
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 }
 

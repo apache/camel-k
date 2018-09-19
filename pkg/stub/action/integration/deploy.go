@@ -19,7 +19,10 @@ package action
 
 import (
 	"fmt"
+	"os"
 	"strings"
+
+	"github.com/apache/camel-k/version"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
@@ -74,6 +77,12 @@ func getConfigMapFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Int
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", ctx, integration)
+	classpath := make([]string, 0, len(ctx.Spec.Classpath))
+
+	//TODO: we need some constants
+	for _, path := range ctx.Spec.Classpath {
+		classpath = append(classpath, strings.Replace(path, "/tmp/artifacts/m2", "/deployments/m2", 1))
+	}
 
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -102,6 +111,7 @@ func getConfigMapFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Int
 		Data: map[string]string{
 			"integration": integration.Spec.Source.Content,
 			"properties":  PropertiesString(properties),
+			"classpath":   strings.Join(classpath, string(os.PathListSeparator)),
 		},
 	}
 
@@ -142,6 +152,11 @@ func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.In
 
 	// set env vars needed by the runtime
 	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
+	environment["JAVA_LIB_DIR"] = "/etc/camel/conf"
+
+	//TODO: remove this hack !!! s2i java (/opt/run-java/run-java.sh) fails if JAVA_APP_JAR is not set
+	environment["JAVA_APP_JAR"] = fmt.Sprintf("/deployments/m2/org/apache/camel/k/camel-k-runtime-jvm/%s/camel-k-runtime-jvm-%s.jar", version.Version, version.Version)
+
 	environment["CAMEL_K_ROUTES_URI"] = "file:/etc/camel/conf/" + sourceName
 	environment["CAMEL_K_ROUTES_LANGUAGE"] = string(integration.Spec.Source.Language)
 	environment["CAMEL_K_CONF"] = "/etc/camel/conf/application.properties"
@@ -226,6 +241,9 @@ func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.In
 					}, {
 						Key:  "properties",
 						Path: "application.properties",
+					}, {
+						Key:  "classpath",
+						Path: "classpath",
 					},
 				},
 			},

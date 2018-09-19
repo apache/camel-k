@@ -19,6 +19,7 @@ package maven
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"io"
@@ -38,38 +39,63 @@ const (
 	artifactDirPrefix = "maven-bin-"
 )
 
+// BuildResult --
+type BuildResult struct {
+	TarFilePath string
+	Classpath   []string
+}
+
 // Build takes a project description and returns a binary tar with the built artifacts
-func Build(project Project) (string, error) {
+func Build(project Project) (BuildResult, error) {
+	res := BuildResult{}
 	buildDir, err := ioutil.TempDir("", buildDirPrefix)
 	if err != nil {
-		return "", errors.Wrap(err, "could not create temporary dir for maven source files")
+		return res, errors.Wrap(err, "could not create temporary dir for maven source files")
 	}
+
 	defer os.RemoveAll(buildDir)
 
 	err = createMavenStructure(buildDir, project)
 	if err != nil {
-		return "", errors.Wrap(err, "could not write maven source files")
+		return res, errors.Wrap(err, "could not write maven source files")
 	}
-	err = runMavenBuild(buildDir)
+	err = runMavenBuild(buildDir, &res)
 	if err != nil {
-		return "", err
+		return res, err
 	}
-	tarfile, err := createTar(buildDir, project)
+
+	res.TarFilePath, err = createTar(project, &res)
 	if err != nil {
-		return "", err
+		return res, err
 	}
-	return tarfile, nil
+
+	return res, nil
 }
 
-func runMavenBuild(buildDir string) error {
-	copyDepsCmd := exec.Command("mvn", mavenExtraOptions(), "clean", "dependency:copy-dependencies")
-	copyDepsCmd.Dir = buildDir
-	copyDepsCmd.Stdout = os.Stdout
-	copyDepsCmd.Stderr = os.Stderr
+func runMavenBuild(buildDir string, result *BuildResult) error {
+	// file where the classpath is listed
+	out := path.Join(buildDir, "integration.classpath")
 
-	logrus.Infof("Copying maven dependencies: mvn %v", copyDepsCmd.Args)
-	if err := copyDepsCmd.Run(); err != nil {
-		return errors.Wrap(err, "failure while extracting maven dependencies")
+	cmd := exec.Command("mvn", mavenExtraOptions(), "-Dmdep.outputFile="+out, "dependency:build-classpath")
+	cmd.Dir = buildDir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	logrus.Infof("determine classpath: mvn: %v", cmd.Args)
+	if err := cmd.Run(); err != nil {
+		return errors.Wrap(err, "failure while determining classpath")
+	}
+
+	lines, err := readLines(out)
+	if err != nil {
+		return err
+	}
+
+	result.Classpath = make([]string, 0)
+	for _, line := range lines {
+		for _, item := range strings.Split(line, string(os.PathListSeparator)) {
+			result.Classpath = append(result.Classpath, item)
+		}
 	}
 
 	logrus.Info("Maven build completed successfully")
@@ -83,7 +109,7 @@ func mavenExtraOptions() string {
 	return "-Dcamel.noop=true"
 }
 
-func createTar(buildDir string, project Project) (string, error) {
+func createTar(project Project, result *BuildResult) (string, error) {
 	artifactDir, err := ioutil.TempDir("", artifactDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
@@ -97,21 +123,14 @@ func createTar(buildDir string, project Project) (string, error) {
 	defer tarFile.Close()
 
 	writer := tar.NewWriter(tarFile)
+	defer writer.Close()
 
-	dependenciesDir := path.Join(buildDir, "target", "dependency")
-	dependencies, err := ioutil.ReadDir(dependenciesDir)
-	if err != nil {
-		return "", err
-	}
-
-	for _, dep := range dependencies {
-		err = appendToTar(path.Join(dependenciesDir, dep.Name()), "", writer)
+	for _, path := range result.Classpath {
+		err = appendToTarWithPath(path, writer)
 		if err != nil {
 			return "", err
 		}
 	}
-
-	writer.Close()
 
 	return tarFileName, nil
 }
@@ -134,6 +153,35 @@ func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
 	})
 
 	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(writer, file)
+	if err != nil {
+		return errors.Wrap(err, "cannot add file to the tar archive")
+	}
+	return nil
+}
+
+func appendToTarWithPath(path string, writer *tar.Writer) error {
+	info, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+
+	//TODO: we ned some constants
+	relocatedPath := strings.TrimPrefix(path, "/tmp/artifacts")
+
+	writer.WriteHeader(&tar.Header{
+		Name:    relocatedPath,
+		Size:    info.Size(),
+		Mode:    int64(info.Mode()),
+		ModTime: info.ModTime(),
+	})
+
+	file, err := os.Open(path)
 	if err != nil {
 		return err
 	}
@@ -182,15 +230,20 @@ func writeFile(buildDir string, relativePath string, content string) error {
 	return nil
 }
 
-func envFileContent(env map[string]string) string {
-	if env == nil {
-		return ""
+//TODO: move to a file utility package
+func readLines(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
 	}
-	content := ""
-	for k, v := range env {
-		content = content + "export " + k + "=" + v + "\n"
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
 	}
-	return content
+	return lines, scanner.Err()
 }
 
 // GeneratePomFileContent generate a pom.xml file from the given project definition

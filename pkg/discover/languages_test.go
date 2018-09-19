@@ -18,14 +18,15 @@ limitations under the License.
 package discover
 
 import (
+	"testing"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestLanguageJavaSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name: "Source.java",
+		Name: "Request.java",
 	}
 	language := Language(code)
 	assert.Equal(t, v1alpha1.LanguageJavaSource, language)
@@ -33,7 +34,7 @@ func TestLanguageJavaSource(t *testing.T) {
 
 func TestLanguageAlreadySet(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Source.java",
+		Name:     "Request.java",
 		Language: v1alpha1.LanguageJavaScript,
 	}
 	language := Language(code)
