@@ -134,7 +134,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) error {
 	// Block this goroutine until the integration is in a final status
-	changes, err := watch.WatchStateChanges(o.Context, integration)
+	changes, err := watch.StateChanges(o.Context, integration)
 	if err != nil {
 		return err
 	}
