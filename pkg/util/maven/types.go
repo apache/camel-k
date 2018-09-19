@@ -21,14 +21,6 @@ import (
 	"encoding/xml"
 )
 
-// Integration --
-type Integration struct {
-	Project     Project
-	JavaSources map[string]string
-	Resources   map[string]string
-	Env         map[string]string // TODO: should we deprecate it ? env are set on deployment
-}
-
 // Project represent a maven project
 type Project struct {
 	XMLName              xml.Name
@@ -41,6 +33,8 @@ type Project struct {
 	Version              string               `xml:"version"`
 	DependencyManagement DependencyManagement `xml:"dependencyManagement"`
 	Dependencies         Dependencies         `xml:"dependencies"`
+	Repositories         Repositories         `xml:"repositories"`
+	PluginRepositories   PluginRepositories   `xml:"pluginRepositories"`
 }
 
 // DependencyManagement represent maven's dependency management block
@@ -90,4 +84,35 @@ func NewDependency(groupID string, artifactID string, version string) Dependency
 		Type:       "jar",
 		Classifier: "",
 	}
+}
+
+// Repositories --
+type Repositories struct {
+	Repositories []Repository `xml:"repository"`
+}
+
+// PluginRepositories --
+type PluginRepositories struct {
+	Repositories []Repository `xml:"pluginRepository"`
+}
+
+// Repository --
+type Repository struct {
+	ID        string    `xml:"id"`
+	Name      string    `xml:"name"`
+	URL       string    `xml:"url"`
+	Snapshots Snapshots `xml:"snapshots"`
+	Releases  Releases  `xml:"releases"`
+}
+
+// Snapshots --
+type Snapshots struct {
+	Enabled      bool   `xml:"enabled"`
+	UpdatePolicy string `xml:"updatePolicy"`
+}
+
+// Releases --
+type Releases struct {
+	Enabled      bool   `xml:"enabled"`
+	UpdatePolicy string `xml:"updatePolicy"`
 }
