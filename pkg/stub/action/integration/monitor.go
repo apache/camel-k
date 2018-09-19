@@ -24,23 +24,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type MonitorAction struct {
-}
-
+// NewMonitorAction creates a new monitoring action for an integration
 func NewMonitorAction() IntegrationAction {
-	return &MonitorAction{}
+	return &monitorAction{}
 }
 
-func (b *MonitorAction) Name() string {
+type monitorAction struct {
+}
+
+func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (a *MonitorAction) CanHandle(integration *v1alpha1.Integration) bool {
+func (action *monitorAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == v1alpha1.IntegrationPhaseRunning ||
 		integration.Status.Phase == v1alpha1.IntegrationPhaseError
 }
 
-func (a *MonitorAction) Handle(integration *v1alpha1.Integration) error {
+func (action *monitorAction) Handle(integration *v1alpha1.Integration) error {
 
 	hash := digest.ComputeForIntegration(integration)
 	if hash != integration.Status.Digest {

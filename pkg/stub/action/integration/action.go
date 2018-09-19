@@ -21,6 +21,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
+// IntegrationAction --
 type IntegrationAction interface {
 
 	// a user friendly name for the action
