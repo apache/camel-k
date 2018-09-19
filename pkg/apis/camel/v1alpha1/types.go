@@ -48,19 +48,36 @@ type Integration struct {
 
 // IntegrationSpec --
 type IntegrationSpec struct {
-	Replicas      *int32              `json:"replicas,omitempty"`
-	Source        SourceSpec          `json:"source,omitempty"`
-	Context       string              `json:"context,omitempty"`
-	Dependencies  []string            `json:"dependencies,omitempty"`
-	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
+	Replicas                  *int32              `json:"replicas,omitempty"`
+	Source                    SourceSpec          `json:"source,omitempty"`
+	Context                   string              `json:"context,omitempty"`
+	Dependencies              []string            `json:"dependencies,omitempty"`
+	DependenciesAutoDiscovery *bool               `json:"dependenciesAutoDiscovery,omitempty"`
+	Configuration             []ConfigurationSpec `json:"configuration,omitempty"`
 }
 
 // SourceSpec --
 type SourceSpec struct {
-	Name     string `json:"name,omitempty"`
-	Content  string `json:"content,omitempty"`
-	Language string `json:"language,omitempty"`
+	Name     string   `json:"name,omitempty"`
+	Content  string   `json:"content,omitempty"`
+	Language Language `json:"language,omitempty"`
 }
+
+// Language --
+type Language string
+
+const (
+	// LanguageJavaSource --
+	LanguageJavaSource Language = "java"
+	// LanguageJavaClass --
+	LanguageJavaClass Language = "class"
+	// LanguageGroovy --
+	LanguageGroovy Language = "groovy"
+	// LanguageJavaScript --
+	LanguageJavaScript Language = "js"
+	// LanguageXML --
+	LanguageXML Language = "xml"
+)
 
 // IntegrationStatus --
 type IntegrationStatus struct {
