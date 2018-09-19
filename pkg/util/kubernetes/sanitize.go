@@ -32,6 +32,7 @@ func init() {
 	disallowedChars = regexp.MustCompile("[^a-z0-9-]")
 }
 
+// SanitizeName sanitizes the given name to be compatible with k8s
 func SanitizeName(name string) string {
 	name = strings.Split(name, ".")[0]
 	name = path.Base(name)
