@@ -24,14 +24,15 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
+// LoadResourceFromYaml loads a k8s resource from a yaml definition
 func LoadResourceFromYaml(data string) (runtime.Object, error) {
 	role := []byte(data)
-	roleJson, err := yaml.ToJSON(role)
+	roleJSON, err := yaml.ToJSON(role)
 	if err != nil {
 		return nil, err
 	}
 	u := unstructured.Unstructured{}
-	err = u.UnmarshalJSON(roleJson)
+	err = u.UnmarshalJSON(roleJSON)
 	if err != nil {
 		return nil, err
 	}

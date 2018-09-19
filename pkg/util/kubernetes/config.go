@@ -18,15 +18,17 @@ limitations under the License.
 package kubernetes
 
 import (
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-	"k8s.io/client-go/tools/clientcmd"
 	"os/user"
 	"path/filepath"
+
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
+// InitKubeClient initialize the k8s client
 func InitKubeClient(kubeconfig string) error {
 	if kubeconfig == "" {
-		kubeconfig = GetDefaultKubeConfigFile()
+		kubeconfig = getDefaultKubeConfigFile()
 	}
 
 	// use the current context in kubeconfig
@@ -39,7 +41,7 @@ func InitKubeClient(kubeconfig string) error {
 	return nil
 }
 
-func GetDefaultKubeConfigFile() string {
+func getDefaultKubeConfigFile() string {
 	usr, err := user.Current()
 	if err != nil {
 		panic(err) // TODO handle error
