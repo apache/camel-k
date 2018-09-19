@@ -219,6 +219,11 @@ func (in *IntegrationSpec) DeepCopyInto(out *IntegrationSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.DependenciesAutoDiscovery != nil {
+		in, out := &in.DependenciesAutoDiscovery, &out.DependenciesAutoDiscovery
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Configuration != nil {
 		in, out := &in.Configuration, &out.Configuration
 		*out = make([]ConfigurationSpec, len(*in))

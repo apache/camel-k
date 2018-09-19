@@ -64,6 +64,7 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
 	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
+	cmd.Flags().BoolVar(&options.DependenciesAutoDiscovery, "auto-discovery", true, "Automatically discover Camel modules by analyzing user code")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -73,17 +74,18 @@ func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type runCmdOptions struct {
 	*RootCmdOptions
-	IntegrationContext string
-	Language           string
-	IntegrationName    string
-	Dependencies       []string
-	Properties         []string
-	ConfigMaps         []string
-	Secrets            []string
-	Wait               bool
-	Logs               bool
-	Sync               bool
-	Dev                bool
+	IntegrationContext        string
+	Language                  string
+	IntegrationName           string
+	Dependencies              []string
+	Properties                []string
+	ConfigMaps                []string
+	Secrets                   []string
+	Wait                      bool
+	Logs                      bool
+	Sync                      bool
+	Dev                       bool
+	DependenciesAutoDiscovery bool
 }
 
 func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -125,7 +127,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	if o.Sync && !o.Logs && !o.Dev {
 		// Let's add a wait point, otherwise the script terminates
-		<- o.Context.Done()
+		<-o.Context.Done()
 	}
 	return nil
 }
@@ -191,9 +193,9 @@ func (o *runCmdOptions) syncIntegration(file string) error {
 	go func() {
 		for {
 			select {
-			case <- o.Context.Done():
+			case <-o.Context.Done():
 				return
-			case <- changes:
+			case <-changes:
 				_, err := o.updateIntegrationCode(file)
 				if err != nil {
 					logrus.Error("Unable to sync integration: ", err)
@@ -246,11 +248,12 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 			Source: v1alpha1.SourceSpec{
 				Name:     codeName,
 				Content:  code,
-				Language: o.Language,
+				Language: v1alpha1.Language(o.Language),
 			},
-			Dependencies:  make([]string, 0, len(o.Dependencies)),
-			Context:       o.IntegrationContext,
-			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+			Dependencies:              make([]string, 0, len(o.Dependencies)),
+			DependenciesAutoDiscovery: &o.DependenciesAutoDiscovery,
+			Context:                   o.IntegrationContext,
+			Configuration:             make([]v1alpha1.ConfigurationSpec, 0),
 		},
 	}
 
