@@ -138,6 +138,11 @@ func (in *IntegrationContextSpec) DeepCopyInto(out *IntegrationContextSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.Classpath != nil {
+		in, out := &in.Classpath, &out.Classpath
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Configuration != nil {
 		in, out := &in.Configuration, &out.Configuration
 		*out = make([]ConfigurationSpec, len(*in))

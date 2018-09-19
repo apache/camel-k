@@ -57,7 +57,7 @@ func (m *Manager) Start(source Request) {
 	resChannel := m.builder.Build(source)
 	go func() {
 		res := <-resChannel
-		m.builds.Store(res.Source.Identifier, &res)
+		m.builds.Store(res.Request.Identifier, &res)
 	}()
 }
 
@@ -69,7 +69,7 @@ func noBuildInfo() Result {
 
 func initialBuildInfo(source *Request) Result {
 	return Result{
-		Source: source,
-		Status: StatusStarted,
+		Request: source,
+		Status:  StatusStarted,
 	}
 }
