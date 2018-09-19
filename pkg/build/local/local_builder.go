@@ -35,10 +35,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	build "github.com/apache/camel-k/pkg/build/api"
+	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/apache/camel-k/pkg/util/maven"
+
+	// import openshift utilities
 	_ "github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/apache/camel-k/version"
 )
@@ -49,10 +51,11 @@ type localBuilder struct {
 }
 
 type buildOperation struct {
-	source build.BuildSource
-	output chan build.BuildResult
+	source build.Request
+	output chan build.Result
 }
 
+// NewLocalBuilder create a new builder
 func NewLocalBuilder(ctx context.Context, namespace string) build.Builder {
 	builder := localBuilder{
 		buffer:    make(chan buildOperation, 100),
@@ -62,8 +65,8 @@ func NewLocalBuilder(ctx context.Context, namespace string) build.Builder {
 	return &builder
 }
 
-func (b *localBuilder) Build(source build.BuildSource) <-chan build.BuildResult {
-	res := make(chan build.BuildResult, 1)
+func (b *localBuilder) Build(source build.Request) <-chan build.Result {
+	res := make(chan build.Result, 1)
 	op := buildOperation{
 		source: source,
 		output: res,
@@ -90,15 +93,15 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 			}
 
 			if err != nil {
-				op.output <- build.BuildResult{
+				op.output <- build.Result{
 					Source: &op.source,
-					Status: build.BuildStatusError,
+					Status: build.StatusError,
 					Error:  err,
 				}
 			} else {
-				op.output <- build.BuildResult{
+				op.output <- build.Result{
 					Source: &op.source,
-					Status: build.BuildStatusCompleted,
+					Status: build.StatusCompleted,
 					Image:  image,
 				}
 			}
@@ -107,7 +110,7 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 	}
 }
 
-func (b *localBuilder) execute(source build.BuildSource) (string, error) {
+func (b *localBuilder) execute(source build.Request) (string, error) {
 	project, err := generateProjectDefinition(source)
 	if err != nil {
 		return "", err
@@ -127,7 +130,7 @@ func (b *localBuilder) execute(source build.BuildSource) (string, error) {
 	return image, nil
 }
 
-func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string, error) {
+func (b *localBuilder) publish(tarFile string, source build.Request) (string, error) {
 
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
@@ -251,7 +254,7 @@ func (b *localBuilder) publish(tarFile string, source build.BuildSource) (string
 	return is.Status.DockerImageRepository + ":" + source.Identifier.Qualifier, nil
 }
 
-func generateProjectDefinition(source build.BuildSource) (maven.ProjectDefinition, error) {
+func generateProjectDefinition(source build.Request) (maven.ProjectDefinition, error) {
 	project := maven.ProjectDefinition{
 		Project: maven.Project{
 			XMLName:           xml.Name{Local: "project"},
@@ -293,13 +296,13 @@ func generateProjectDefinition(source build.BuildSource) (maven.ProjectDefinitio
 
 	for _, d := range source.Dependencies {
 		if strings.HasPrefix(d, "camel:") {
-			artifactId := strings.TrimPrefix(d, "camel:")
+			artifactID := strings.TrimPrefix(d, "camel:")
 
-			if !strings.HasPrefix(artifactId, "camel-") {
-				artifactId = "camel-" + artifactId
+			if !strings.HasPrefix(artifactID, "camel-") {
+				artifactID = "camel-" + artifactID
 			}
 
-			deps.AddGAV("org.apache.camel", artifactId, "")
+			deps.AddGAV("org.apache.camel", artifactID, "")
 		} else if strings.HasPrefix(d, "mvn:") {
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)

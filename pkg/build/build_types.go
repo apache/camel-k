@@ -15,44 +15,54 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package api
+package build
 
-// a request to build a specific code
-type BuildSource struct {
-	Identifier   BuildIdentifier
-	Code         Code
+// Request represent a request to build a specific code
+type Request struct {
+	Identifier   Identifier
+	Code         Source
 	Dependencies []string
 }
 
-type BuildIdentifier struct {
+// Identifier identifies a build
+type Identifier struct {
 	Name      string
 	Qualifier string
 }
 
-type Code struct {
+// Source represent the integration code
+type Source struct {
 	Name     string
 	Content  string
 	Language string
 }
 
-// represents the result of a build
-type BuildResult struct {
-	Source *BuildSource
-	Status BuildStatus
+// Result represents the result of a build
+type Result struct {
+	Source *Request
+	Status Status
 	Image  string
 	Error  error
 }
 
-// supertype of all builders
+// Builder is supertype of all builders
 type Builder interface {
-	Build(BuildSource) <-chan BuildResult
+	Build(Request) <-chan Result
 }
 
-type BuildStatus int
+// Status --
+type Status int
 
 const (
-	BuildStatusNotRequested BuildStatus = iota
-	BuildStatusStarted
-	BuildStatusCompleted
-	BuildStatusError
+	// StatusNotRequested --
+	StatusNotRequested Status = iota
+
+	// StatusStarted --
+	StatusStarted
+
+	// StatusCompleted --
+	StatusCompleted
+
+	// StatusError --
+	StatusError
 )

@@ -19,21 +19,24 @@ package action
 
 import (
 	"context"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
 
-	"github.com/apache/camel-k/pkg/build/api"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/build"
+	"github.com/apache/camel-k/pkg/build/local"
 )
 
 // NewIntegrationContextBuildAction creates a new build handling action for the context
 func NewIntegrationContextBuildAction(ctx context.Context, namespace string) IntegrationContextAction {
+	builder := local.NewLocalBuilder(ctx, namespace)
+	manager := build.NewManager(ctx, namespace, builder)
+
 	return &integrationContextBuildAction{
-		buildManager: build.NewManager(ctx, namespace),
+		buildManager: manager,
 	}
 }
 
@@ -50,23 +53,23 @@ func (action *integrationContextBuildAction) CanHandle(context *v1alpha1.Integra
 }
 
 func (action *integrationContextBuildAction) Handle(context *v1alpha1.IntegrationContext) error {
-	buildIdentifier := api.BuildIdentifier{
+	buildIdentifier := build.Identifier{
 		Name:      "context-" + context.Name,
 		Qualifier: context.ResourceVersion,
 	}
 
 	buildResult := action.buildManager.Get(buildIdentifier)
-	if buildResult.Status == api.BuildStatusNotRequested {
-		action.buildManager.Start(api.BuildSource{
+	if buildResult.Status == build.StatusNotRequested {
+		action.buildManager.Start(build.Request{
 			Identifier:   buildIdentifier,
 			Dependencies: context.Spec.Dependencies,
 		})
 		logrus.Info("Build started")
-	} else if buildResult.Status == api.BuildStatusError {
+	} else if buildResult.Status == build.StatusError {
 		target := context.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
 		return sdk.Update(target)
-	} else if buildResult.Status == api.BuildStatusCompleted {
+	} else if buildResult.Status == build.StatusCompleted {
 		target := context.DeepCopy()
 		target.Status.Image = buildResult.Image
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
