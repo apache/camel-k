@@ -20,9 +20,10 @@ package sync
 
 import (
 	"context"
+	"time"
+
 	"github.com/radovskyb/watcher"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 // File returns a channel that signals each time the content of the file changes
