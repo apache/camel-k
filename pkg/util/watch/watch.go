@@ -18,18 +18,19 @@ limitations under the License.
 package watch
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"context"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// Watches a integration resource and send it through a channel when its status changes
-func WatchStateChanges(ctx context.Context, integration *v1alpha1.Integration) (<-chan *v1alpha1.Integration, error) {
+// StateChanges watches a integration resource and send it through a channel when its status changes
+func StateChanges(ctx context.Context, integration *v1alpha1.Integration) (<-chan *v1alpha1.Integration, error) {
 	resourceClient, _, err := k8sclient.GetResourceClient(integration.APIVersion, integration.Kind, integration.Namespace)
 	if err != nil {
 		return nil, err
