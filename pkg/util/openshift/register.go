@@ -15,7 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Register all Openshift types that we want to manage.
 package openshift
 
 import (
@@ -30,13 +29,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+// Register all Openshift types that we want to manage.
 func init() {
-	k8sutil.AddToSDKScheme(AddToScheme)
+	k8sutil.AddToSDKScheme(addKnownTypes)
 }
-
-var (
-	AddToScheme = addKnownTypes
-)
 
 type registerFunction func(*runtime.Scheme) error
 
