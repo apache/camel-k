@@ -39,10 +39,11 @@ type Source struct {
 
 // Result represents the result of a build
 type Result struct {
-	Source *Request
-	Status Status
-	Image  string
-	Error  error
+	Source               *Request
+	Status               Status
+	Image                string
+	Error                error
+	ResolvedDependencies []string
 }
 
 // Builder is supertype of all builders
