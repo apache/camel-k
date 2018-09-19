@@ -39,14 +39,14 @@ const (
 )
 
 // Build takes a project description and returns a binary tar with the built artifacts
-func Build(integration Integration) (string, error) {
+func Build(project Project) (string, error) {
 	buildDir, err := ioutil.TempDir("", buildDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven source files")
 	}
 	defer os.RemoveAll(buildDir)
 
-	err = createMavenStructure(buildDir, integration)
+	err = createMavenStructure(buildDir, project)
 	if err != nil {
 		return "", errors.Wrap(err, "could not write maven source files")
 	}
@@ -54,7 +54,7 @@ func Build(integration Integration) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	tarfile, err := createTar(buildDir, integration)
+	tarfile, err := createTar(buildDir, project)
 	if err != nil {
 		return "", err
 	}
@@ -62,23 +62,16 @@ func Build(integration Integration) (string, error) {
 }
 
 func runMavenBuild(buildDir string) error {
-	mavenBuild := exec.Command("mvn", mavenExtraOptions(), "clean", "install", "-DskipTests")
-	mavenBuild.Dir = buildDir
-	mavenBuild.Stdout = os.Stdout
-	mavenBuild.Stderr = os.Stderr
-	logrus.Info("Starting maven build: mvn " + mavenExtraOptions() + " clean install -DskipTests")
-	err := mavenBuild.Run()
-	if err != nil {
-		return errors.Wrap(err, "failure while executing maven build")
-	}
+	copyDepsCmd := exec.Command("mvn", mavenExtraOptions(), "clean", "dependency:copy-dependencies")
+	copyDepsCmd.Dir = buildDir
+	copyDepsCmd.Stdout = os.Stdout
+	copyDepsCmd.Stderr = os.Stderr
 
-	mavenDep := exec.Command("mvn", mavenExtraOptions(), "dependency:copy-dependencies")
-	mavenDep.Dir = buildDir
-	logrus.Info("Copying maven dependencies: mvn " + mavenExtraOptions() + " dependency:copy-dependencies")
-	err = mavenDep.Run()
-	if err != nil {
+	logrus.Infof("Copying maven dependencies: mvn %v", copyDepsCmd.Args)
+	if err := copyDepsCmd.Run(); err != nil {
 		return errors.Wrap(err, "failure while extracting maven dependencies")
 	}
+
 	logrus.Info("Maven build completed successfully")
 	return nil
 }
@@ -90,13 +83,13 @@ func mavenExtraOptions() string {
 	return "-Dcamel.noop=true"
 }
 
-func createTar(buildDir string, integration Integration) (string, error) {
+func createTar(buildDir string, project Project) (string, error) {
 	artifactDir, err := ioutil.TempDir("", artifactDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
 	}
 
-	tarFileName := path.Join(artifactDir, integration.Project.ArtifactID+".tar")
+	tarFileName := path.Join(artifactDir, project.ArtifactID+".tar")
 	tarFile, err := os.Create(tarFileName)
 	if err != nil {
 		return "", errors.Wrap(err, "cannot create tar file "+tarFileName)
@@ -104,22 +97,6 @@ func createTar(buildDir string, integration Integration) (string, error) {
 	defer tarFile.Close()
 
 	writer := tar.NewWriter(tarFile)
-	err = appendToTar(path.Join(buildDir, "target", integration.Project.ArtifactID+"-"+integration.Project.Version+".jar"), "", writer)
-	if err != nil {
-		return "", err
-	}
-
-	// Environment variables
-	if integration.Env != nil {
-		err = writeFile(buildDir, "run-env.sh", envFileContent(integration.Env))
-		if err != nil {
-			return "", err
-		}
-		err = appendToTar(path.Join(buildDir, "run-env.sh"), "", writer)
-		if err != nil {
-			return "", err
-		}
-	}
 
 	dependenciesDir := path.Join(buildDir, "target", "dependency")
 	dependencies, err := ioutil.ReadDir(dependenciesDir)
@@ -169,37 +146,17 @@ func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
 	return nil
 }
 
-func createMavenStructure(buildDir string, project Integration) error {
-	pom, err := GeneratePomFileContent(project.Project)
+func createMavenStructure(buildDir string, project Project) error {
+	pom, err := GeneratePomFileContent(project)
 	if err != nil {
 		return err
 	}
+
 	err = writeFile(buildDir, "pom.xml", pom)
 	if err != nil {
 		return err
 	}
-	err = writeFiles(path.Join(buildDir, "src", "main", "java"), project.JavaSources)
-	if err != nil {
-		return err
-	}
-	err = writeFiles(path.Join(buildDir, "src", "main", "resources"), project.Resources)
-	if err != nil {
-		return err
-	}
 
-	return nil
-}
-
-func writeFiles(buildDir string, files map[string]string) error {
-	if files == nil {
-		return nil
-	}
-	for fileName, fileContent := range files {
-		err := writeFile(buildDir, fileName, fileContent)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
