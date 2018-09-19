@@ -20,12 +20,13 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/sync"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/sync"
+	"github.com/sirupsen/logrus"
 
 	"io"
 
@@ -39,8 +40,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewCmdRun --
-func NewCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	options := runCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
