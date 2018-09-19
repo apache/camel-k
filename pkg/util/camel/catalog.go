@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package catalog
+package camel
 
 import (
 	"github.com/apache/camel-k/deploy"
@@ -24,8 +24,9 @@ import (
 
 // Catalog --
 type Catalog struct {
-	Version  string              `yaml:"version"`
-	Artifact map[string]Artifact `yaml:"artifacts"`
+	Version          string              `yaml:"version"`
+	Artifact         map[string]Artifact `yaml:"artifacts"`
+	artifactByScheme map[string]string   `yaml:"-"`
 }
 
 // Artifact --
@@ -43,6 +44,22 @@ func init() {
 	if err := yaml.Unmarshal([]byte(data), &Runtime); err != nil {
 		panic(err)
 	}
+	Runtime.artifactByScheme = make(map[string]string)
+	for id, artifact := range Runtime.Artifact {
+		for _, scheme := range artifact.Schemes {
+			Runtime.artifactByScheme[scheme] = id
+		}
+	}
+}
+
+// GetArtifactByScheme returns the artifact corresponding to the given component scheme
+func (c Catalog) GetArtifactByScheme(scheme string) *Artifact {
+	if id, ok := c.artifactByScheme[scheme]; ok {
+		if artifact, present := c.Artifact[id]; present {
+			return &artifact
+		}
+	}
+	return nil
 }
 
 // Runtime --

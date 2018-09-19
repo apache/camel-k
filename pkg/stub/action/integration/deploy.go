@@ -85,7 +85,7 @@ func getConfigMapFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Int
 			Namespace: integration.Namespace,
 			Labels:    integration.Labels,
 			Annotations: map[string]string{
-				"camel.apache.org/source.language": integration.Spec.Source.Language,
+				"camel.apache.org/source.language": string(integration.Spec.Source.Language),
 				"camel.apache.org/source.name":     integration.Spec.Source.Name,
 			},
 			OwnerReferences: []metav1.OwnerReference{
@@ -143,7 +143,7 @@ func getDeploymentFor(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.In
 	// set env vars needed by the runtime
 	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
 	environment["CAMEL_K_ROUTES_URI"] = "file:/etc/camel/conf/" + sourceName
-	environment["CAMEL_K_ROUTES_LANGUAGE"] = integration.Spec.Source.Language
+	environment["CAMEL_K_ROUTES_LANGUAGE"] = string(integration.Spec.Source.Language)
 	environment["CAMEL_K_CONF"] = "/etc/camel/conf/application.properties"
 	environment["CAMEL_K_CONF_D"] = "/etc/camel/conf.d"
 
