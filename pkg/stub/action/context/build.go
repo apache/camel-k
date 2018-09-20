@@ -73,7 +73,12 @@ func (action *integrationContextBuildAction) Handle(context *v1alpha1.Integratio
 		target := context.DeepCopy()
 		target.Status.Image = buildResult.Image
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
-		target.Spec.Classpath = buildResult.Classpath
+
+		target.Status.Classpath = make([]string, len(buildResult.Classpath))
+		for i, entry := range buildResult.Classpath {
+			target.Status.Classpath[i] = entry.ID
+		}
+
 		if err := sdk.Update(target); err != nil {
 			return err
 		}
