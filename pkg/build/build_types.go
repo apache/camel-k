@@ -17,8 +17,6 @@ limitations under the License.
 
 package build
 
-import "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
 // Request represent a request to build a specific code
 type Request struct {
 	Identifier   Identifier
@@ -45,7 +43,13 @@ type Result struct {
 	Status    Status
 	Image     string
 	Error     error
-	Classpath []v1alpha1.ClasspathEntry
+	Classpath []ClasspathEntry
+}
+
+// ClasspathEntry --
+type ClasspathEntry struct {
+	ID       string `json:"id" yaml:"id"`
+	Location string `json:"location,omitempty" yaml:"location,omitempty"`
 }
 
 // Builder is supertype of all builders
