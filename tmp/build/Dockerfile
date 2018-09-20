@@ -1,4 +1,4 @@
-FROM fabric8/s2i-java:2.1
+FROM fabric8/s2i-java:2.3
 
 #RUN adduser -D camel-k-operator
 #USER camel-k-operator
