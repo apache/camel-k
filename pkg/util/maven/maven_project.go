@@ -116,3 +116,55 @@ type Releases struct {
 	Enabled      bool   `xml:"enabled"`
 	UpdatePolicy string `xml:"updatePolicy"`
 }
+
+// Build --
+type Build struct {
+	Plugins Plugins `xml:"plugins,omitempty"`
+}
+
+// Plugin --
+type Plugin struct {
+	GroupID    string     `xml:"groupId"`
+	ArtifactID string     `xml:"artifactId"`
+	Version    string     `xml:"version,omitempty"`
+	Executions Executions `xml:"executions"`
+}
+
+// Plugins --
+type Plugins struct {
+	Plugins []Plugin `xml:"plugin"`
+}
+
+// Execution --
+type Execution struct {
+	ID    string `xml:"id"`
+	Phase string `xml:"phase"`
+	Goals Goals  `xml:"goals,omitempty"`
+}
+
+// Executions --
+type Executions struct {
+	Executions []Execution `xml:"execution"`
+}
+
+// Goals --
+type Goals struct {
+	Goals []string `xml:"goal"`
+}
+
+/*
+ <plugin>
+        <groupId>org.apache.camel.k</groupId>
+        <artifactId>camel-k-runtime-dependency-lister</artifactId>
+        <version>0.0.3-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>generate-dependency-list</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>generate-dependency-list</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+*/

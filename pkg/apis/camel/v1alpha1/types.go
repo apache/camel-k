@@ -125,7 +125,7 @@ type IntegrationContext struct {
 // IntegrationContextSpec --
 type IntegrationContextSpec struct {
 	Dependencies  []string            `json:"dependencies,omitempty"`
-	Classpath     []string            `json:"classpath,omitempty"`
+	Classpath     []ClasspathEntry    `json:"classpath,omitempty"`
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 }
 
@@ -134,6 +134,12 @@ type IntegrationContextStatus struct {
 	Phase  IntegrationContextPhase `json:"phase,omitempty"`
 	Image  string                  `json:"image,omitempty"`
 	Digest string                  `json:"digest,omitempty"`
+}
+
+// ClasspathEntry --
+type ClasspathEntry struct {
+	ID       string `json:"id" yaml:"id"`
+	Location string `json:"location,omitempty" yaml:"location,omitempty"`
 }
 
 // IntegrationContextPhase --
