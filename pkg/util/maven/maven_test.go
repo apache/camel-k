@@ -48,6 +48,36 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
       <version>1.0.0</version>
     </dependency>
   </dependencies>
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name></name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <name></name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
 </project>`
 
 func TestPomGeneration(t *testing.T) {
@@ -79,6 +109,38 @@ func TestPomGeneration(t *testing.T) {
 					GroupID:    "org.apache.camel.k",
 					ArtifactID: "camel-k-runtime-jvm",
 					Version:    "1.0.0",
+				},
+			},
+		},
+		Repositories: Repositories{
+			Repositories: []Repository{
+				{
+					ID:  "central",
+					URL: "https://repo.maven.apache.org/maven2",
+					Snapshots: Snapshots{
+						Enabled:      false,
+						UpdatePolicy: "never",
+					},
+					Releases: Releases{
+						Enabled:      true,
+						UpdatePolicy: "never",
+					},
+				},
+			},
+		},
+		PluginRepositories: PluginRepositories{
+			Repositories: []Repository{
+				{
+					ID:  "central",
+					URL: "https://repo.maven.apache.org/maven2",
+					Snapshots: Snapshots{
+						Enabled:      false,
+						UpdatePolicy: "never",
+					},
+					Releases: Releases{
+						Enabled:      true,
+						UpdatePolicy: "never",
+					},
 				},
 			},
 		},
