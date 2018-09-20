@@ -1,0 +1,164 @@
+[[developers]]
+Developer's Guide
+=================
+
+We love contributions!
+
+The project is written in https://golang.org/[go] and contains some parts written in Java for the [integration runtime](/runtime).
+Camel K is built on top of Kubernetes through *Custom Resource Definitions*. The https://github.com/operator-framework/operator-sdk[Operator SDK] is used
+to manage the lifecycle of those custom resources.
+
+[[requirements]]
+== Requirements
+
+In order to build the project, you need to comply with the following requirements:
+
+* **Go version 1.10+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
+* **Dep version 0.5.0**: for managing dependencies. You can find installation instructions in the https://github.com/golang/dep[dep GitHub repository].
+* **Operator SDK v0.0.6+**: used to build the operator and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website].
+* **GNU Make**: used to define composite build actions. This should be already installed or available as package if you have a good OS (https://www.gnu.org/software/make/).
+
+[[checking-out]]
+== Checking Out the Sources
+
+You can create a fork of this project from Github, then clone your fork with the `git` command line tool.
+
+You need to put the project in your $GOPATH (refer to https://golang.org/doc/install[Go documentation] for information).
+So, make sure that the **root** of the github repo is in the path:
+
+```
+$GOPATH/src/github.com/apache/camel-k/
+```
+
+[[structure]]
+== Structure
+
+This is a high level overview of the project structure:
+
+.Structure
+[options="header"]
+|=======================
+| Path						| Content
+| link:/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k-operator** binary and the **kamel** client tool.
+| link:/build[/build]		| Contains scripts used during make operations for building the project.
+| link:/deploy[/deploy]		| Contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
+| link:/docs[/docs]			| Contains this documentation.
+| link:/pkg[/pkg]			| This is where the code resides. The code is divided in multiple subpackages.
+| link:/runtime[/runtime]	| The Java runtime code that is used inside the integration Docker containers.
+| link:/test[/test]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and Openshift.
+| link:/tmp[/tmp]			| Scripts and Docker configuration files used by the operator-sdk.
+| /vendor					| Project dependencies (not staged in git).
+| link:/version[/version]	| Contains the global version of the project.
+|=======================
+
+
+[[building]]
+== Building
+
+Go dependencies in the *vendor* directory are not included when you clone the project.
+
+Before compiling the source code, you need to sync your local *vendor* directory with the project dependencies, using the following command:
+
+```
+make dep
+```
+
+The `make dep` command runs `dep ensure -v` under the hood, so make sure that `dep` is properly installed.
+
+To build the whole project you now need to run:
+
+```
+make
+```
+
+This execute a full build of both the Java and Go code. If you need to build the components separately you can execute:
+
+* `make build-operator`: to build the operator binary only.
+* `make build-kamel`: to build the `kamel` client tool only.
+* `make build-runtime`: to build the Java-based runtime code only.
+
+After a successful build, if you're connected to a Docker daemon, you can build the operator Docker image by running:
+
+```
+make images
+```
+
+[[testing]]
+== Testing
+
+Unit tests are executed automatically as part of the build. They use the standard go testing framework.
+
+Integration tests (aimed at ensuring that the code integrates correctly with Kubernetes and Openshift), need special care.
+
+The **convention** used in this repo is to name unit tests `xxx_test.go`, and name integration tests `yyy_integration_test.go`.
+Integration tests are all in the link:/test[/test] dir.
+
+Since both names end with `_test.go`, both would be executed by go during build, so you need to put a special **build tag** to mark
+integration tests. A integration test should start with the following line:
+
+```
+// +build integration
+```
+
+Look into the link:/test[/test] directory for examples of integration tests.
+
+Before running a integration test, you need to be connected to a Kubernetes/Openshift namespace.
+After you log in into your cluster, you can run the following command to execute **all** integration tests:
+
+```
+make test-integration
+```
+
+[running]
+== Running
+
+If you want to install everything you have in your source code and see it running on Kubernetes, you need to run the following command:
+
+* Run `make install-minishift` (or just `make install`): to build the project and install it in the current namespace on Minishift
+* You can specify a different namespace with `make install-minishift project=myawesomeproject`
+
+This command assumes you have an already running Minishift instance.
+
+Now you can play with Camel K:
+
+```
+./kamel run runtime/examples/Sample.java
+```
+
+To add additional dependencies to your routes:
+
+```
+./kamel run -d camel:dns runtime/examples/dns.js
+```
+
+[[debugging]]
+== Debugging and Running from IDE
+
+Sometimes it's useful to debug the code from the IDE when troubleshooting.
+
+.**Debugging the `kamel` binary**
+
+It should be straightforward: just execute the link:/cmd/kamel/kamel.go[/cmd/kamel/kamel.go] file from the IDE (e.g. Goland) in debug mode.
+
+.**Debugging the operator**
+
+It is a bit more complex (but not so much).
+
+You are going to run the operator code **outside** Openshift in your IDE so, first of all, you need to **stop the operator running inside**:
+
+```
+// use kubectl in plain Kubernetes
+oc scale deployment/camel-k-operator --replicas 0
+```
+
+You can scale it back to 1 when you're done and you have updated the operator image.
+
+You can setup the IDE (e.g. Goland) to execute the link:/cmd/camel-k-operator/camel_k_operator.go[/cmd/camel-k-operator/camel_k_operator.go] file in debug mode.
+
+When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen*:
+
+* Set the `KUBERNETES_CONFIG` environment variable to point to your Kubernetes configuration file (usually `<homedir>/.kube/config`).
+* Set the `WATCH_NAMESPACE` environment variable to a Kubernetes namespace you have access to.
+* Set the `OPERATOR_NAME` environment variable to `camel-k-operator`.
+
+After you setup the IDE task, you can run and debug the operator process.
