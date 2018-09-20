@@ -125,20 +125,28 @@ func createTar(project Project, result *BuildResult) (string, error) {
 	writer := tar.NewWriter(tarFile)
 	defer writer.Close()
 
-	for _, path := range result.Classpath {
-		err = appendToTarWithPath(path, writer)
+	cp := ""
+	for _, filePath := range result.Classpath {
+		fileName, err := appendFileToTar(filePath, "dependencies", writer)
 		if err != nil {
 			return "", err
 		}
+
+		cp += fileName + "\n"
+	}
+
+	err = appendDataToTar([]byte(cp), "classpath", writer)
+	if err != nil {
+		return "", err
 	}
 
 	return tarFileName, nil
 }
 
-func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
+func appendFileToTar(filePath string, tarPath string, writer *tar.Writer) (string, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	_, fileName := path.Split(filePath)
 	if tarPath != "" {
@@ -154,42 +162,28 @@ func appendToTar(filePath string, tarPath string, writer *tar.Writer) error {
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 
 	_, err = io.Copy(writer, file)
 	if err != nil {
-		return errors.Wrap(err, "cannot add file to the tar archive")
+		return "", errors.Wrap(err, "cannot add file to the tar archive")
 	}
-	return nil
+
+	return fileName, nil
 }
 
-func appendToTarWithPath(path string, writer *tar.Writer) error {
-	info, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-
-	//TODO: we ned some constants
-	relocatedPath := strings.TrimPrefix(path, "/tmp/artifacts")
-
+func appendDataToTar(data []byte, tarPath string, writer *tar.Writer) error {
 	writer.WriteHeader(&tar.Header{
-		Name:    relocatedPath,
-		Size:    info.Size(),
-		Mode:    int64(info.Mode()),
-		ModTime: info.ModTime(),
+		Name: tarPath,
+		Size: int64(len(data)),
+		Mode: 0644,
 	})
 
-	file, err := os.Open(path)
+	_, err := writer.Write(data)
 	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(writer, file)
-	if err != nil {
-		return errors.Wrap(err, "cannot add file to the tar archive")
+		return errors.Wrap(err, "cannot add data to the tar archive")
 	}
 	return nil
 }

@@ -153,7 +153,7 @@ func (b *localBuilder) publish(tarFile string, source *build.Request) (string, e
 					SourceStrategy: &buildv1.SourceBuildStrategy{
 						From: v1.ObjectReference{
 							Kind: "DockerImage",
-							Name: "fabric8/s2i-java:2.1",
+							Name: "fabric8/s2i-java:2.3",
 						},
 					},
 				},

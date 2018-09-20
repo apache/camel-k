@@ -2441,7 +2441,7 @@ status:
 apiVersion: camel.apache.org/v1alpha1
 kind: IntegrationContext
 metadata:
-  name: core.integrationcontexts.camel.apache.org
+  name: core
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
@@ -2456,7 +2456,7 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: IntegrationContext
 metadata:
-  name: groovy.integrationcontexts.camel.apache.org
+  name: groovy
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
