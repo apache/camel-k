@@ -1,6 +1,10 @@
 Apache Camel K
 ==============
 
+image:https://goreportcard.com/badge/github.com/apache/camel-k["Go Report Card", link="https://goreportcard.com/report/github.com/apache/camel-k"]
+image:https://godoc.org/github.com/apache/camel-k?status.svg["GoDoc", link="https://godoc.org/github.com/apache/camel-k"]
+image:https://img.shields.io/github/license/openshift/origin.svg?maxAge=2592000["Licensed under Apache License version 2.0", link="https://www.apache.org/licenses/LICENSE-2.0"]
+
 Apache Camel K (a.k.a. Kamel) is a lightweight integration framework built from Apache Camel that runs natively on Kubernetes and is specifically designed for serverless and microservice architectures.
 
 [[getting-started]]
