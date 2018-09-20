@@ -19,9 +19,9 @@ package maven
 
 import (
 	"archive/tar"
-	"bufio"
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -29,6 +29,11 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/apache/camel-k/version"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"gopkg.in/yaml.v1"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -42,11 +47,11 @@ const (
 // BuildResult --
 type BuildResult struct {
 	TarFilePath string
-	Classpath   []string
+	Classpath   []v1alpha1.ClasspathEntry
 }
 
-// Build takes a project description and returns a binary tar with the built artifacts
-func Build(project Project) (BuildResult, error) {
+// Process takes a project description and returns a binary tar with the built artifacts
+func Process(project Project) (BuildResult, error) {
 	res := BuildResult{}
 	buildDir, err := ioutil.TempDir("", buildDirPrefix)
 	if err != nil {
@@ -73,30 +78,29 @@ func Build(project Project) (BuildResult, error) {
 }
 
 func runMavenBuild(buildDir string, result *BuildResult) error {
-	// file where the classpath is listed
-	out := path.Join(buildDir, "integration.classpath")
-
-	cmd := exec.Command("mvn", mavenExtraOptions(), "-Dmdep.outputFile="+out, "dependency:build-classpath")
+	goal := fmt.Sprintf("org.apache.camel.k:camel-k-runtime-dependency-lister:%s:generate-dependency-list", version.Version)
+	cmd := exec.Command("mvn", mavenExtraOptions(), goal)
 	cmd.Dir = buildDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	logrus.Infof("determine classpath: mvn: %v", cmd.Args)
+	logrus.Infof("determine classpath: %v", cmd.Args)
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "failure while determining classpath")
 	}
 
-	lines, err := readLines(out)
+	dependencies := path.Join(buildDir, "target", "dependencies.yaml")
+	content, err := ioutil.ReadFile(dependencies)
 	if err != nil {
 		return err
 	}
 
-	result.Classpath = make([]string, 0)
-	for _, line := range lines {
-		for _, item := range strings.Split(line, string(os.PathListSeparator)) {
-			result.Classpath = append(result.Classpath, item)
-		}
+	cp := make(map[string][]v1alpha1.ClasspathEntry)
+	if err := yaml.Unmarshal(content, &cp); err != nil {
+		return err
 	}
+
+	result.Classpath = cp["dependencies"]
 
 	logrus.Info("Maven build completed successfully")
 	return nil
@@ -126,8 +130,14 @@ func createTar(project Project, result *BuildResult) (string, error) {
 	defer writer.Close()
 
 	cp := ""
-	for _, filePath := range result.Classpath {
-		fileName, err := appendFileToTar(filePath, "dependencies", writer)
+	for _, entry := range result.Classpath {
+		gav, err := ParseGAV(entry.ID)
+		if err != nil {
+			return "", nil
+		}
+
+		tarPath := path.Join("dependencies/", gav.GroupID)
+		fileName, err := appendFileToTar(entry.Location, tarPath, writer)
 		if err != nil {
 			return "", err
 		}
@@ -222,22 +232,6 @@ func writeFile(buildDir string, relativePath string, content string) error {
 		errors.Wrap(err, "could not write to file "+relativePath)
 	}
 	return nil
-}
-
-//TODO: move to a file utility package
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines, scanner.Err()
 }
 
 // GeneratePomFileContent generate a pom.xml file from the given project definition

@@ -90,7 +90,7 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 			if res.Error != nil {
 				logrus.Error("Error during build (total time ", elapsed.Seconds(), " seconds): ", res.Error)
 			} else {
-				logrus.Info("Build completed in ", elapsed.Seconds(), " seconds")
+				logrus.Info("Process completed in ", elapsed.Seconds(), " seconds")
 			}
 
 			op.output <- res
@@ -107,7 +107,7 @@ func (b *localBuilder) execute(request *build.Request) build.Result {
 		}
 	}
 
-	res, err := maven.Build(project)
+	res, err := maven.Process(project)
 	if err != nil {
 		return build.Result{
 			Error:  err,
