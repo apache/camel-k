@@ -2464,6 +2464,7 @@ metadata:
     camel.apache.org/context.type: platform
 spec:
   dependencies:
+    - camel:core
     - camel:groovy
 `
 	Resources["user-cluster-role.yaml"] =
