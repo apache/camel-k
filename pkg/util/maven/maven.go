@@ -32,7 +32,7 @@ import (
 
 	"github.com/apache/camel-k/version"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/build"
 	"gopkg.in/yaml.v1"
 
 	"github.com/pkg/errors"
@@ -47,7 +47,7 @@ const (
 // BuildResult --
 type BuildResult struct {
 	TarFilePath string
-	Classpath   []v1alpha1.ClasspathEntry
+	Classpath   []build.ClasspathEntry
 }
 
 // Process takes a project description and returns a binary tar with the built artifacts
@@ -95,7 +95,7 @@ func runMavenBuild(buildDir string, result *BuildResult) error {
 		return err
 	}
 
-	cp := make(map[string][]v1alpha1.ClasspathEntry)
+	cp := make(map[string][]build.ClasspathEntry)
 	if err := yaml.Unmarshal(content, &cp); err != nil {
 		return err
 	}
