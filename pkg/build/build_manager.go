@@ -19,23 +19,24 @@ package build
 
 import (
 	"context"
+	"errors"
 	"sync"
 )
 
 // Manager represent the main facade to the image build system
 type Manager struct {
-	builds    sync.Map
 	ctx       context.Context
-	namespace string
-	builder   Builder
+	builds    sync.Map
+	assembler Assembler
+	publisher Publisher
 }
 
 // NewManager creates an instance of the build manager using the given builder
-func NewManager(ctx context.Context, namespace string, builder Builder) *Manager {
+func NewManager(ctx context.Context, assembler Assembler, publisher Publisher) *Manager {
 	return &Manager{
 		ctx:       ctx,
-		namespace: namespace,
-		builder:   builder,
+		assembler: assembler,
+		publisher: publisher,
 	}
 }
 
@@ -46,18 +47,41 @@ func (m *Manager) Get(identifier Identifier) Result {
 		return noBuildInfo()
 	}
 
-	return *info.(*Result)
+	return info.(Result)
 }
 
 // Start starts a new build
-func (m *Manager) Start(source Request) {
-	initialBuildInfo := initialBuildInfo(&source)
-	m.builds.Store(source.Identifier, &initialBuildInfo)
+func (m *Manager) Start(request Request) {
+	m.builds.Store(request.Identifier, initialBuildInfo(request))
 
-	resChannel := m.builder.Build(source)
+	assembleChannel := m.assembler.Assemble(request)
 	go func() {
-		res := <-resChannel
-		m.builds.Store(res.Request.Identifier, &res)
+		var assembled AssembledOutput
+		select {
+		case <-m.ctx.Done():
+			m.builds.Store(request.Identifier, canceledBuildInfo(request))
+			return
+		case assembled = <-assembleChannel:
+			if assembled.Error != nil {
+				m.builds.Store(request.Identifier, failedAssembleBuildInfo(request, assembled))
+				return
+			}
+		}
+
+		publishChannel := m.publisher.Publish(request, assembled)
+		var published PublishedOutput
+		select {
+		case <-m.ctx.Done():
+			m.builds.Store(request.Identifier, canceledBuildInfo(request))
+			return
+		case published = <-publishChannel:
+			if published.Error != nil {
+				m.builds.Store(request.Identifier, failedPublishBuildInfo(request, published))
+				return
+			}
+		}
+
+		m.builds.Store(request.Identifier, completeResult(request, assembled, published))
 	}()
 }
 
@@ -67,9 +91,42 @@ func noBuildInfo() Result {
 	}
 }
 
-func initialBuildInfo(source *Request) Result {
+func initialBuildInfo(request Request) Result {
 	return Result{
-		Request: source,
+		Request: request,
 		Status:  StatusStarted,
+	}
+}
+
+func canceledBuildInfo(request Request) Result {
+	return Result{
+		Request: request,
+		Error:   errors.New("build canceled"),
+		Status:  StatusError,
+	}
+}
+
+func failedAssembleBuildInfo(request Request, output AssembledOutput) Result {
+	return Result{
+		Request: request,
+		Error:   output.Error,
+		Status:  StatusError,
+	}
+}
+
+func failedPublishBuildInfo(request Request, output PublishedOutput) Result {
+	return Result{
+		Request: request,
+		Error:   output.Error,
+		Status:  StatusError,
+	}
+}
+
+func completeResult(request Request, a AssembledOutput, p PublishedOutput) Result {
+	return Result{
+		Request:   request,
+		Status:    StatusCompleted,
+		Classpath: a.Classpath,
+		Image:     p.Image,
 	}
 }

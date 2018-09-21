@@ -15,67 +15,66 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package local
+package publish
 
 import (
 	"context"
-	"encoding/xml"
-	"fmt"
-	"io/ioutil"
-	"strings"
-	"time"
-
+	"github.com/apache/camel-k/pkg/build"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
+	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/pkg/util/tar"
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
-	"github.com/apache/camel-k/pkg/build"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-	"github.com/apache/camel-k/pkg/util/maven"
-
-	// import openshift utilities
-	_ "github.com/apache/camel-k/pkg/util/openshift"
-	"github.com/apache/camel-k/version"
+	"path"
+	"time"
 )
 
-type localBuilder struct {
-	buffer    chan buildOperation
+const (
+	artifactDirPrefix = "s2i-"
+)
+
+type s2iPublisher struct {
+	buffer    chan publishOperation
 	namespace string
 }
 
-type buildOperation struct {
-	request build.Request
-	output  chan build.Result
+type publishOperation struct {
+	request   build.Request
+	assembled build.AssembledOutput
+	output    chan build.PublishedOutput
 }
 
-// NewLocalBuilder create a new builder
-func NewLocalBuilder(ctx context.Context, namespace string) build.Builder {
-	builder := localBuilder{
-		buffer:    make(chan buildOperation, 100),
+// NewS2IPublisher creates a new publisher doing a Openshift S2I binary build
+func NewS2IPublisher(ctx context.Context, namespace string) build.Publisher {
+	publisher := s2iPublisher{
+		buffer:    make(chan publishOperation, 100),
 		namespace: namespace,
 	}
-	go builder.buildCycle(ctx)
-	return &builder
+	go publisher.publishCycle(ctx)
+	return &publisher
 }
 
-func (b *localBuilder) Build(request build.Request) <-chan build.Result {
-	res := make(chan build.Result, 1)
-	op := buildOperation{
-		request: request,
-		output:  res,
+func (b *s2iPublisher) Publish(request build.Request, assembled build.AssembledOutput) <-chan build.PublishedOutput {
+	res := make(chan build.PublishedOutput, 1)
+	op := publishOperation{
+		request:   request,
+		assembled: assembled,
+		output:    res,
 	}
 	b.buffer <- op
 	return res
 }
 
-func (b *localBuilder) buildCycle(ctx context.Context) {
+func (b *s2iPublisher) publishCycle(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -83,14 +82,14 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 			return
 		case op := <-b.buffer:
 			now := time.Now()
-			logrus.Info("Starting new build")
-			res := b.execute(&op.request)
+			logrus.Info("Starting a new image publication")
+			res := b.execute(op.request, op.assembled)
 			elapsed := time.Now().Sub(now)
 
 			if res.Error != nil {
-				logrus.Error("Error during build (total time ", elapsed.Seconds(), " seconds): ", res.Error)
+				logrus.Error("Error during publication (total time ", elapsed.Seconds(), " seconds): ", res.Error)
 			} else {
-				logrus.Info("Process completed in ", elapsed.Seconds(), " seconds")
+				logrus.Info("Publication completed in ", elapsed.Seconds(), " seconds")
 			}
 
 			op.output <- res
@@ -98,43 +97,22 @@ func (b *localBuilder) buildCycle(ctx context.Context) {
 	}
 }
 
-func (b *localBuilder) execute(request *build.Request) build.Result {
-	project, err := generateProject(request)
+func (b *s2iPublisher) execute(request build.Request, assembled build.AssembledOutput) build.PublishedOutput {
+	tarFile, err := b.createTar(assembled)
 	if err != nil {
-		return build.Result{
-			Error:  err,
-			Status: build.StatusError,
-		}
+		return build.PublishedOutput{Error: err}
 	}
 
-	res, err := maven.Process(project)
+	image, err := b.publish(tarFile, request)
 	if err != nil {
-		return build.Result{
-			Error:  err,
-			Status: build.StatusError,
-		}
+		return build.PublishedOutput{Error: err}
 	}
 
-	logrus.Info("Created tar file ", res.TarFilePath)
-
-	image, err := b.publish(res.TarFilePath, request)
-	if err != nil {
-		return build.Result{
-			Error:  errors.Wrap(err, "could not publish docker image"),
-			Status: build.StatusError,
-		}
-	}
-
-	return build.Result{
-		Request:   request,
-		Image:     image,
-		Error:     nil,
-		Status:    build.StatusCompleted,
-		Classpath: res.Classpath,
-	}
+	return build.PublishedOutput{Image: image}
 }
 
-func (b *localBuilder) publish(tarFile string, source *build.Request) (string, error) {
+func (b *s2iPublisher) publish(tarFile string, source build.Request) (string, error) {
+
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: buildv1.SchemeGroupVersion.String(),
@@ -257,60 +235,39 @@ func (b *localBuilder) publish(tarFile string, source *build.Request) (string, e
 	return is.Status.DockerImageRepository + ":" + source.Identifier.Qualifier, nil
 }
 
-func generateProject(source *build.Request) (maven.Project, error) {
-	project := maven.Project{
-		XMLName:           xml.Name{Local: "project"},
-		XMLNs:             "http://maven.apache.org/POM/4.0.0",
-		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
-		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-		ModelVersion:      "4.0.0",
-		GroupID:           "org.apache.camel.k.integration",
-		ArtifactID:        "camel-k-integration",
-		Version:           version.Version,
-		DependencyManagement: maven.DependencyManagement{
-			Dependencies: maven.Dependencies{
-				Dependencies: []maven.Dependency{
-					{
-						//TODO: camel version should be retrieved from an external request or provided as static version
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-bom",
-						Version:    "2.22.1",
-						Type:       "pom",
-						Scope:      "import",
-					},
-				},
-			},
-		},
-		Dependencies: maven.Dependencies{
-			Dependencies: make([]maven.Dependency, 0),
-		},
+func (b *s2iPublisher) createTar(assembled build.AssembledOutput) (string, error) {
+	artifactDir, err := ioutil.TempDir("", artifactDirPrefix)
+	if err != nil {
+		return "", errors.Wrap(err, "could not create temporary dir for s2i artifacts")
 	}
 
-	//
-	// set-up dependencies
-	//
+	tarFileName := path.Join(artifactDir, "occi.tar")
+	tarAppender, err := tar.NewAppender(tarFileName)
+	if err != nil {
+		return "", err
+	}
+	defer tarAppender.Close()
 
-	deps := &project.Dependencies
-	deps.AddGAV("org.apache.camel.k", "camel-k-runtime-jvm", version.Version)
-
-	for _, d := range source.Dependencies {
-		if strings.HasPrefix(d, "camel:") {
-			artifactID := strings.TrimPrefix(d, "camel:")
-
-			if !strings.HasPrefix(artifactID, "camel-") {
-				artifactID = "camel-" + artifactID
-			}
-
-			deps.AddGAV("org.apache.camel", artifactID, "")
-		} else if strings.HasPrefix(d, "mvn:") {
-			mid := strings.TrimPrefix(d, "mvn:")
-			gav := strings.Replace(mid, "/", ":", -1)
-
-			deps.AddEncodedGAV(gav)
-		} else {
-			return maven.Project{}, fmt.Errorf("unknown dependency type: %s", d)
+	cp := ""
+	for _, entry := range assembled.Classpath {
+		gav, err := maven.ParseGAV(entry.ID)
+		if err != nil {
+			return "", nil
 		}
+
+		tarPath := path.Join("dependencies/", gav.GroupID)
+		fileName, err := tarAppender.AddFile(entry.Location, tarPath)
+		if err != nil {
+			return "", err
+		}
+
+		cp += fileName + "\n"
 	}
 
-	return project, nil
+	err = tarAppender.AppendData([]byte(cp), "classpath")
+	if err != nil {
+		return "", err
+	}
+
+	return tarFileName, nil
 }
