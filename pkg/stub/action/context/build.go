@@ -136,7 +136,7 @@ func (l contextLister) ListPublishedImages() ([]publish.PublishedImage, error) {
 	}
 	images := make([]publish.PublishedImage, 0)
 	for _, ctx := range list.Items {
-		if ctx.Labels == nil {
+		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
 			continue
 		}
 		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != "platform" {
