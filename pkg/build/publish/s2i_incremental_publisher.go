@@ -74,13 +74,17 @@ func (p *s2iIncrementalPublisher) selectArtifactsToUpload(entries []build.Classp
 }
 
 func (p *s2iIncrementalPublisher) findBestImage(images []PublishedImage, entries []build.ClasspathEntry) (*PublishedImage, map[string]bool) {
+	if len(images) == 0 {
+		return nil, nil
+	}
 	requiredLibs := make(map[string]bool, len(entries))
 	for _, entry := range entries {
 		requiredLibs[entry.ID] = true
 	}
 
-	var bestImage *PublishedImage
+	var bestImage PublishedImage
 	bestImageCommonLibs := make(map[string]bool, 0)
+	bestImageSurplusLibs := 0
 	for _, image := range images {
 		common := make(map[string]bool)
 		for _, id := range image.Classpath {
@@ -95,11 +99,12 @@ func (p *s2iIncrementalPublisher) findBestImage(images []PublishedImage, entries
 			continue
 		}
 
-		if (numCommonLibs > len(bestImageCommonLibs)) {
-			bestImage = &image
+		if numCommonLibs > len(bestImageCommonLibs) || (numCommonLibs == len(bestImageCommonLibs) && surplus < bestImageSurplusLibs) {
+			bestImage = image
 			bestImageCommonLibs = common
+			bestImageSurplusLibs = surplus
 		}
 	}
 
-	return bestImage, bestImageCommonLibs
+	return &bestImage, bestImageCommonLibs
 }

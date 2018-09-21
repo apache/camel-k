@@ -280,8 +280,13 @@ func (b *s2iPublisher) createTar(assembled build.AssembledOutput, selectedArtifa
 
 	cp := ""
 	for _, entry := range assembled.Classpath {
+		gav, err := maven.ParseGAV(entry.ID)
+		if err != nil {
+			return "", nil
+		}
+		tarPath := path.Join(tarDir, gav.GroupID)
 		_, fileName := path.Split(entry.Location)
-		fileName = path.Join(tarDir, fileName)
+		fileName = path.Join(tarPath, fileName)
 		cp += fileName + "\n"
 	}
 
