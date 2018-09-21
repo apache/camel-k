@@ -23,7 +23,8 @@ package test
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/build/local"
+	"github.com/apache/camel-k/pkg/build/assemble"
+	"github.com/apache/camel-k/pkg/build/publish"
 	"testing"
 	"time"
 
@@ -35,9 +36,11 @@ import (
 func TestBuildManagerBuild(t *testing.T) {
 	ctx := context.TODO()
 	namespace := getTargetNamespace()
-	buildManager := build.NewManager(ctx, namespace, local.NewLocalBuilder(ctx, namespace))
+	assembler := assemble.NewMavenAssembler(ctx)
+	publisher := publish.NewS2IPublisher(ctx, namespace)
+	buildManager := build.NewManager(ctx, assembler, publisher)
 	identifier := build.Identifier{
-		Name:   "man-test",
+		Name:      "man-test",
 		Qualifier: digest.Random(),
 	}
 	buildManager.Start(build.Request{
@@ -70,9 +73,11 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 
 	ctx := context.TODO()
 	namespace := getTargetNamespace()
-	buildManager := build.NewManager(ctx, namespace, local.NewLocalBuilder(ctx, namespace))
+	assembler := assemble.NewMavenAssembler(ctx)
+	publisher := publish.NewS2IPublisher(ctx, namespace)
+	buildManager := build.NewManager(ctx, assembler, publisher)
 	identifier := build.Identifier{
-		Name:   "man-test-2",
+		Name:      "man-test-2",
 		Qualifier: digest.Random(),
 	}
 	buildManager.Start(build.Request{

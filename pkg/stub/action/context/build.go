@@ -19,6 +19,8 @@ package action
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/build/assemble"
+	"github.com/apache/camel-k/pkg/build/publish"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -27,13 +29,13 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/build"
-	"github.com/apache/camel-k/pkg/build/local"
 )
 
 // NewIntegrationContextBuildAction creates a new build handling action for the context
 func NewIntegrationContextBuildAction(ctx context.Context, namespace string) IntegrationContextAction {
-	builder := local.NewLocalBuilder(ctx, namespace)
-	manager := build.NewManager(ctx, namespace, builder)
+	assembler := assemble.NewMavenAssembler(ctx)
+	publisher := publish.NewS2IPublisher(ctx, namespace)
+	manager := build.NewManager(ctx, assembler, publisher)
 
 	return &integrationContextBuildAction{
 		buildManager: manager,

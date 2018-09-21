@@ -18,11 +18,9 @@ limitations under the License.
 package maven
 
 import (
-	"archive/tar"
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -32,7 +30,6 @@ import (
 
 	"github.com/apache/camel-k/version"
 
-	"github.com/apache/camel-k/pkg/build"
 	"gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
@@ -41,13 +38,18 @@ import (
 
 const (
 	buildDirPrefix    = "maven-"
-	artifactDirPrefix = "maven-bin-"
+
 )
 
 // BuildResult --
 type BuildResult struct {
-	TarFilePath string
-	Classpath   []build.ClasspathEntry
+	Classpath []ClasspathLibrary
+}
+
+// ClasspathLibrary --
+type ClasspathLibrary struct {
+	ID       string `json:"id" yaml:"id"`
+	Location string `json:"location,omitempty" yaml:"location,omitempty"`
 }
 
 // Process takes a project description and returns a binary tar with the built artifacts
@@ -65,16 +67,7 @@ func Process(project Project) (BuildResult, error) {
 		return res, errors.Wrap(err, "could not write maven source files")
 	}
 	err = runMavenBuild(buildDir, &res)
-	if err != nil {
-		return res, err
-	}
-
-	res.TarFilePath, err = createTar(project, &res)
-	if err != nil {
-		return res, err
-	}
-
-	return res, nil
+	return res, err
 }
 
 func runMavenBuild(buildDir string, result *BuildResult) error {
@@ -95,7 +88,7 @@ func runMavenBuild(buildDir string, result *BuildResult) error {
 		return err
 	}
 
-	cp := make(map[string][]build.ClasspathEntry)
+	cp := make(map[string][]ClasspathLibrary)
 	if err := yaml.Unmarshal(content, &cp); err != nil {
 		return err
 	}
@@ -111,91 +104,6 @@ func mavenExtraOptions() string {
 		return "-Dmaven.repo.local=/tmp/artifacts/m2"
 	}
 	return "-Dcamel.noop=true"
-}
-
-func createTar(project Project, result *BuildResult) (string, error) {
-	artifactDir, err := ioutil.TempDir("", artifactDirPrefix)
-	if err != nil {
-		return "", errors.Wrap(err, "could not create temporary dir for maven artifacts")
-	}
-
-	tarFileName := path.Join(artifactDir, project.ArtifactID+".tar")
-	tarFile, err := os.Create(tarFileName)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot create tar file "+tarFileName)
-	}
-	defer tarFile.Close()
-
-	writer := tar.NewWriter(tarFile)
-	defer writer.Close()
-
-	cp := ""
-	for _, entry := range result.Classpath {
-		gav, err := ParseGAV(entry.ID)
-		if err != nil {
-			return "", nil
-		}
-
-		tarPath := path.Join("dependencies/", gav.GroupID)
-		fileName, err := appendFileToTar(entry.Location, tarPath, writer)
-		if err != nil {
-			return "", err
-		}
-
-		cp += fileName + "\n"
-	}
-
-	err = appendDataToTar([]byte(cp), "classpath", writer)
-	if err != nil {
-		return "", err
-	}
-
-	return tarFileName, nil
-}
-
-func appendFileToTar(filePath string, tarPath string, writer *tar.Writer) (string, error) {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return "", err
-	}
-	_, fileName := path.Split(filePath)
-	if tarPath != "" {
-		fileName = path.Join(tarPath, fileName)
-	}
-
-	writer.WriteHeader(&tar.Header{
-		Name:    fileName,
-		Size:    info.Size(),
-		Mode:    int64(info.Mode()),
-		ModTime: info.ModTime(),
-	})
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(writer, file)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot add file to the tar archive")
-	}
-
-	return fileName, nil
-}
-
-func appendDataToTar(data []byte, tarPath string, writer *tar.Writer) error {
-	writer.WriteHeader(&tar.Header{
-		Name: tarPath,
-		Size: int64(len(data)),
-		Mode: 0644,
-	})
-
-	_, err := writer.Write(data)
-	if err != nil {
-		return errors.Wrap(err, "cannot add data to the tar archive")
-	}
-	return nil
 }
 
 func createMavenStructure(buildDir string, project Project) error {

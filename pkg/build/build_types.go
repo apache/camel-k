@@ -39,7 +39,7 @@ type Source struct {
 
 // Result represents the result of a build
 type Result struct {
-	Request   *Request
+	Request   Request
 	Status    Status
 	Image     string
 	Error     error
@@ -52,9 +52,26 @@ type ClasspathEntry struct {
 	Location string `json:"location,omitempty" yaml:"location,omitempty"`
 }
 
-// Builder is supertype of all builders
-type Builder interface {
-	Build(Request) <-chan Result
+// AssembledOutput represents the output of the assemble phase
+type AssembledOutput struct {
+	Error     error
+	Classpath []ClasspathEntry
+}
+
+// A Assembler can be used to compute the classpath of a integration context
+type Assembler interface {
+	Assemble(Request) <-chan AssembledOutput
+}
+
+// PublishedOutput is the output of the publish phase
+type PublishedOutput struct {
+	Error error
+	Image string
+}
+
+// A Publisher publishes a docker image of a build request
+type Publisher interface {
+	Publish(Request, AssembledOutput) <-chan PublishedOutput
 }
 
 // Status --
