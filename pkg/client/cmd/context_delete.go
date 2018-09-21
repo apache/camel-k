@@ -20,11 +20,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
+
+	k8errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 func newContextDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -36,45 +37,102 @@ func newContextDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:   "delete",
 		Short: "Delete an Integration Context",
 		Long:  `Delete anIntegration Context.`,
-		Args:  impl.validateArgs,
-		RunE:  impl.run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := impl.validate(cmd, args); err != nil {
+				return err
+			}
+			if err := impl.run(cmd, args); err != nil {
+				fmt.Println(err.Error())
+			}
+
+			return nil
+		},
 	}
+
+	cmd.Flags().BoolVar(&impl.all, "all", false, "Delete all integration contexts")
 
 	return &cmd
 }
 
 type contextDeleteCommand struct {
 	*RootCmdOptions
+	all bool
 }
 
-func (command *contextDeleteCommand) validateArgs(cmd *cobra.Command, args []string) error {
-	if len(args) != 1 {
-		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
+func (command *contextDeleteCommand) validate(cmd *cobra.Command, args []string) error {
+	if command.all && len(args) > 0 {
+		return errors.New("invalid combination: both all flag and named contexts are set")
+	}
+	if !command.all && len(args) == 0 {
+		return errors.New("invalid combination: neither all flag nor named contexts are set")
 	}
 
 	return nil
 }
 
 func (command *contextDeleteCommand) run(cmd *cobra.Command, args []string) error {
-	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
+	names := args
 
-	if err := sdk.Get(&ctx); err != nil {
+	if command.all {
+		ctxList := v1alpha1.NewIntegrationContextList()
+		if err := sdk.List(command.Namespace, &ctxList); err != nil {
+			return err
+		}
+
+		names = make([]string, 0, len(ctxList.Items))
+		for _, item := range ctxList.Items {
+			// only include non platform contexts
+			if item.Labels["camel.apache.org/context.type"] != "platform" {
+				names = append(names, item.Name)
+			}
+		}
+	}
+
+	for _, name := range names {
+		if err := command.delete(name); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (command *contextDeleteCommand) delete(name string) error {
+	ctx := v1alpha1.NewIntegrationContext(command.Namespace, name)
+
+	err := sdk.Get(&ctx)
+
+	// pass through if the context is not found
+	if err != nil && k8errors.IsNotFound(err) {
+		return fmt.Errorf("no integration context found with name \"%s\"", ctx.Name)
+	}
+
+	// fail otherwise
+	if err != nil {
 		return err
 	}
 
-	// let's check that it is not a platform one which is supposed to be "read only"
+	// check that it is not a platform one which is supposed to be "read only"
 	// thus not managed by the end user
 	if ctx.Labels["camel.apache.org/context.type"] == "platform" {
-		fmt.Printf("integration context \"%s\" is not editable\n", ctx.Name)
-		return nil
+		// skip platform contexts while deleting all contexts
+		if command.all {
+			return nil
+		}
+
+		return fmt.Errorf("integration context \"%s\" is not editable", ctx.Name)
 	}
 
-	if err := sdk.Delete(&ctx); err != nil {
-		fmt.Printf("error deleting integration context \"%s\", %s\n", ctx.Name, err)
-		return err
+	err = sdk.Delete(&ctx)
+
+	if err != nil && !k8errors.IsNotFound(err) {
+		return fmt.Errorf("error deleting integration context \"%s\", %s", ctx.Name, err)
+	}
+	if err != nil && k8errors.IsNotFound(err) {
+		return fmt.Errorf("no integration context found with name \"%s\"", ctx.Name)
 	}
 
 	fmt.Printf("integration context \"%s\" has been deleted\n", ctx.Name)
 
-	return nil
+	return err
 }
