@@ -87,6 +87,54 @@ __kamel_kubectl_get_secret() {
         COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
     fi
 }
+
+__kamel_kubectl_get_integrations() {
+    local template
+    local kubectl_out
+
+    template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
+
+    if kubectl_out=$(kubectl get -o template --template="${template}" integrations 2>/dev/null); then
+        COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
+    fi
+}
+
+__kamel_kubectl_get_integrationcontexts() {
+    local template
+    local kubectl_out
+
+    template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
+
+    if kubectl_out=$(kubectl get -o template --template="${template}" integrationcontexts 2>/dev/null); then
+        COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
+    fi
+}
+
+__kamel_kubectl_get_user_integrationcontexts() {
+    local template
+    local kubectl_out
+
+    template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
+
+    if kubectl_out=$(kubectl get -l camel.apache.org/context.type=user -o template --template="${template}" integrationcontexts 2>/dev/null); then
+        COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
+    fi
+}
+
+__custom_func() {
+    case ${last_command} in
+        kamel_delete)
+            __kamel_kubectl_get_integrations
+            return
+            ;;
+        kamel_context_delete)
+            __kamel_kubectl_get_user_integrationcontexts
+            return
+            ;;
+        *)
+            ;;
+    esac
+}
 `
 
 // ******************************
@@ -107,22 +155,41 @@ func newCmdCompletionBash(root *cobra.Command) *cobra.Command {
 }
 
 func configureKnownBashCompletions(command *cobra.Command) {
-	// completion support
-	dependencyFlag := command.Flag("dependency")
-	if dependencyFlag != nil {
-		dependencyFlag.Annotations = map[string][]string{
+	configureBashAnnotationForFlag(
+		command,
+		"dependency",
+		map[string][]string{
 			cobra.BashCompCustom: {"__kamel_dependency_type"},
-		}
-	}
+		},
+	)
+	configureBashAnnotationForFlag(
+		command,
+		"configmap",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_kubectl_get_configmap"},
+		},
+	)
+	configureBashAnnotationForFlag(
+		command,
+		"secret",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_kubectl_get_secret"},
+		},
+	)
+	configureBashAnnotationForFlag(
+		command,
+		"context",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_kubectl_get_user_integrationcontexts"},
+		},
+	)
+}
 
-	configMapFlag := command.Flag("configmap")
-	configMapFlag.Annotations = map[string][]string{
-		cobra.BashCompCustom: {"__kamel_kubectl_get_configmap"},
-	}
+func configureBashAnnotationForFlag(command *cobra.Command, flagName string, annotations map[string][]string) {
 
-	secretFlag := command.Flag("secret")
-	secretFlag.Annotations = map[string][]string{
-		cobra.BashCompCustom: {"__kamel_kubectl_get_secret"},
+	flag := command.Flag(flagName)
+	if flag != nil {
+		flag.Annotations = annotations
 	}
 }
 
