@@ -28,7 +28,7 @@ import (
 )
 
 func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := contextGetCommand{
+	impl := contextGetCommand{
 		RootCmdOptions: rootCmdOptions,
 	}
 
@@ -36,14 +36,33 @@ func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:   "get",
 		Short: "Get defined Integration Context",
 		Long:  `Get defined Integration Context.`,
-		RunE:  options.run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := impl.validate(cmd, args); err != nil {
+				return err
+			}
+			if err := impl.run(cmd, args); err != nil {
+				fmt.Println(err.Error())
+			}
+
+			return nil
+		},
 	}
+
+	cmd.Flags().BoolVar(&impl.user, "user", true, "Includes user contexts")
+	cmd.Flags().BoolVar(&impl.platform, "platform", true, "Includes platform contexts")
 
 	return &cmd
 }
 
 type contextGetCommand struct {
 	*RootCmdOptions
+	user     bool
+	platform bool
+}
+
+func (command *contextGetCommand) validate(cmd *cobra.Command, args []string) error {
+	return nil
+
 }
 
 func (command *contextGetCommand) run(cmd *cobra.Command, args []string) error {
@@ -55,7 +74,13 @@ func (command *contextGetCommand) run(cmd *cobra.Command, args []string) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tTYPE\tSTATUS")
 	for _, ctx := range ctxList.Items {
-		fmt.Fprintf(w, "%s\t%s\t%s\n", ctx.Name, ctx.Labels["camel.apache.org/context.type"], string(ctx.Status.Phase))
+		t := ctx.Labels["camel.apache.org/context.type"]
+		u := command.user && t == "user"
+		p := command.platform && t == "platform"
+
+		if u || p {
+			fmt.Fprintf(w, "%s\t%s\t%s\n", ctx.Name, t, string(ctx.Status.Phase))
+		}
 	}
 	w.Flush()
 

@@ -20,7 +20,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -32,16 +31,25 @@ import (
 
 // NewCmdDelete --
 func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := deleteCmdOptions{
+	impl := deleteCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
 		Use:   "delete [integration1] [integration2] ...",
 		Short: "Delete integrations deployed on Kubernetes",
-		RunE:  options.run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := impl.validate(cmd, args); err != nil {
+				return err
+			}
+			if err := impl.run(cmd, args); err != nil {
+				fmt.Println(err.Error())
+			}
+
+			return nil
+		},
 	}
-	cmd.Flags().BoolVar(&options.deleteAll, "all", false, "Delete all integrations")
-	cmd.ParseFlags(os.Args)
+
+	cmd.Flags().BoolVar(&impl.deleteAll, "all", false, "Delete all integrations")
 
 	return &cmd
 }
@@ -51,27 +59,29 @@ type deleteCmdOptions struct {
 	deleteAll bool
 }
 
-func (o *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
-	namespace := o.Namespace
-
-	integrationList := v1alpha1.IntegrationList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       v1alpha1.IntegrationKind,
-		},
+func (command *deleteCmdOptions) validate(cmd *cobra.Command, args []string) error {
+	if command.deleteAll && len(args) > 0 {
+		return errors.New("invalid combination: both all flag and named integrations are set")
+	}
+	if !command.deleteAll && len(args) == 0 {
+		return errors.New("invalid combination: neither all flag nor named integrations are set")
 	}
 
-	if len(args) != 0 && !o.deleteAll {
-		i := 0
-		for i < len(args) {
+	return nil
+}
+
+func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
+
+	if len(args) != 0 && !command.deleteAll {
+		for _, arg := range args {
 			integration := v1alpha1.Integration{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       v1alpha1.IntegrationKind,
 					APIVersion: v1alpha1.SchemeGroupVersion.String(),
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      args[i],
+					Namespace: command.Namespace,
+					Name:      arg,
 				},
 			}
 
@@ -85,11 +95,17 @@ func (o *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 			} else {
 				fmt.Println("Integration " + integration.GetName() + " deleted")
 			}
-			i++
 		}
-	} else if o.deleteAll {
+	} else if command.deleteAll {
+		integrationList := v1alpha1.IntegrationList{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+				Kind:       v1alpha1.IntegrationKind,
+			},
+		}
+
 		//Looks like Operator SDK doesn't support deletion of all objects with one command
-		err := sdk.List(namespace, &integrationList)
+		err := sdk.List(command.Namespace, &integrationList)
 		if err != nil {
 			return err
 		}
@@ -104,10 +120,6 @@ func (o *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		} else {
 			fmt.Println(strconv.Itoa(len(integrationList.Items)) + " integration(s) deleted")
 		}
-	} else {
-		err := errors.New("The integration name(s) or --all option must be specified")
-		return err
-
 	}
 
 	return nil
