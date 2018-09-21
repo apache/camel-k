@@ -33,7 +33,7 @@ import (
 	"github.com/apache/camel-k/version"
 
 	"github.com/apache/camel-k/pkg/build"
-	"gopkg.in/yaml.v1"
+	"gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
