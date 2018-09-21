@@ -34,7 +34,7 @@ import (
 // NewIntegrationContextBuildAction creates a new build handling action for the context
 func NewIntegrationContextBuildAction(ctx context.Context, namespace string) IntegrationContextAction {
 	assembler := assemble.NewMavenAssembler(ctx)
-	publisher := publish.NewS2IPublisher(ctx, namespace)
+	publisher := publish.NewS2IIncrementalPublisher(ctx, namespace, newContextLister(namespace))
 	manager := build.NewManager(ctx, assembler, publisher)
 
 	return &integrationContextBuildAction{
@@ -114,4 +114,39 @@ func (action *integrationContextBuildAction) informIntegrations(context *v1alpha
 		}
 	}
 	return nil
+}
+
+// =================================================================
+
+type contextLister struct {
+	namespace string
+}
+
+func newContextLister(namespace string) contextLister {
+	return contextLister{
+		namespace: namespace,
+	}
+}
+
+func (l contextLister) ListPublishedImages() ([]publish.PublishedImage, error) {
+	list := v1alpha1.NewIntegrationContextList()
+	err := sdk.List(l.namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
+	if err != nil {
+		return nil, err
+	}
+	images := make([]publish.PublishedImage, 0)
+	for _, ctx := range list.Items {
+		if ctx.Labels == nil {
+			continue
+		}
+		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != "platform" {
+			continue
+		}
+
+		images = append(images, publish.PublishedImage{
+			Image:     ctx.Status.Image,
+			Classpath: ctx.Status.Classpath,
+		})
+	}
+	return images, nil
 }
