@@ -40,11 +40,13 @@ import (
 
 const (
 	artifactDirPrefix = "s2i-"
+	baseImage         = "fabric8/s2i-java:2.3"
 )
 
 type s2iPublisher struct {
 	buffer    chan publishOperation
 	namespace string
+	uploadedArtifactsSelector
 }
 
 type publishOperation struct {
@@ -53,11 +55,20 @@ type publishOperation struct {
 	output    chan build.PublishedOutput
 }
 
+type uploadedArtifactsSelector func([]build.ClasspathEntry) (string, []build.ClasspathEntry, error)
+
 // NewS2IPublisher creates a new publisher doing a Openshift S2I binary build
 func NewS2IPublisher(ctx context.Context, namespace string) build.Publisher {
+	identitySelector := func(entries []build.ClasspathEntry) (string, []build.ClasspathEntry, error) { return baseImage, entries, nil }
+	return newS2IPublisher(ctx, namespace, identitySelector)
+}
+
+// NewS2IPublisher creates a new publisher doing a Openshift S2I binary build
+func newS2IPublisher(ctx context.Context, namespace string, uploadedArtifactsSelector uploadedArtifactsSelector) *s2iPublisher {
 	publisher := s2iPublisher{
-		buffer:    make(chan publishOperation, 100),
-		namespace: namespace,
+		buffer:                    make(chan publishOperation, 100),
+		namespace:                 namespace,
+		uploadedArtifactsSelector: uploadedArtifactsSelector,
 	}
 	go publisher.publishCycle(ctx)
 	return &publisher
@@ -98,12 +109,17 @@ func (b *s2iPublisher) publishCycle(ctx context.Context) {
 }
 
 func (b *s2iPublisher) execute(request build.Request, assembled build.AssembledOutput) build.PublishedOutput {
-	tarFile, err := b.createTar(assembled)
+	baseImageName, selectedArtifacts, err := b.uploadedArtifactsSelector(assembled.Classpath)
 	if err != nil {
 		return build.PublishedOutput{Error: err}
 	}
 
-	image, err := b.publish(tarFile, request)
+	tarFile, err := b.createTar(assembled, selectedArtifacts)
+	if err != nil {
+		return build.PublishedOutput{Error: err}
+	}
+
+	image, err := b.publish(tarFile, baseImageName, request)
 	if err != nil {
 		return build.PublishedOutput{Error: err}
 	}
@@ -111,7 +127,7 @@ func (b *s2iPublisher) execute(request build.Request, assembled build.AssembledO
 	return build.PublishedOutput{Image: image}
 }
 
-func (b *s2iPublisher) publish(tarFile string, source build.Request) (string, error) {
+func (b *s2iPublisher) publish(tarFile string, imageName string, source build.Request) (string, error) {
 
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
@@ -131,7 +147,7 @@ func (b *s2iPublisher) publish(tarFile string, source build.Request) (string, er
 					SourceStrategy: &buildv1.SourceBuildStrategy{
 						From: v1.ObjectReference{
 							Kind: "DockerImage",
-							Name: "fabric8/s2i-java:2.3",
+							Name: imageName,
 						},
 					},
 				},
@@ -235,7 +251,7 @@ func (b *s2iPublisher) publish(tarFile string, source build.Request) (string, er
 	return is.Status.DockerImageRepository + ":" + source.Identifier.Qualifier, nil
 }
 
-func (b *s2iPublisher) createTar(assembled build.AssembledOutput) (string, error) {
+func (b *s2iPublisher) createTar(assembled build.AssembledOutput, selectedArtifacts []build.ClasspathEntry) (string, error) {
 	artifactDir, err := ioutil.TempDir("", artifactDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for s2i artifacts")
@@ -248,19 +264,24 @@ func (b *s2iPublisher) createTar(assembled build.AssembledOutput) (string, error
 	}
 	defer tarAppender.Close()
 
-	cp := ""
-	for _, entry := range assembled.Classpath {
+	tarDir := "dependencies/"
+	for _, entry := range selectedArtifacts {
 		gav, err := maven.ParseGAV(entry.ID)
 		if err != nil {
 			return "", nil
 		}
 
-		tarPath := path.Join("dependencies/", gav.GroupID)
-		fileName, err := tarAppender.AddFile(entry.Location, tarPath)
+		tarPath := path.Join(tarDir, gav.GroupID)
+		_, err = tarAppender.AddFile(entry.Location, tarPath)
 		if err != nil {
 			return "", err
 		}
+	}
 
+	cp := ""
+	for _, entry := range assembled.Classpath {
+		_, fileName := path.Split(entry.Location)
+		fileName = path.Join(tarDir, fileName)
 		cp += fileName + "\n"
 	}
 
