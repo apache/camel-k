@@ -66,6 +66,11 @@ __kamel_dependency_type() {
     esac
 }
 
+__kamel_languages() {
+    local type_list="js groovy java xml"
+    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+}
+
 __kamel_kubectl_get_configmap() {
     local template
     local kubectl_out
@@ -181,6 +186,13 @@ func configureKnownBashCompletions(command *cobra.Command) {
 		"context",
 		map[string][]string{
 			cobra.BashCompCustom: {"__kamel_kubectl_get_user_integrationcontexts"},
+		},
+	)
+	configureBashAnnotationForFlag(
+		command,
+		"language",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_languages"},
 		},
 	)
 }
