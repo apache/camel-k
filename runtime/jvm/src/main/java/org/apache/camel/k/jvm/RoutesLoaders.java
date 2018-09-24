@@ -23,10 +23,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
+import javax.xml.bind.UnmarshalException;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -35,12 +37,16 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.model.rest.RestConfigurationDefinition;
+import org.apache.camel.model.rest.RestDefinition;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.ResourceHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.joor.Reflect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.camel.k.jvm.Constants.SCHEME_CLASSPATH;
 import static org.apache.camel.k.jvm.Constants.SCHEME_FILE;
@@ -116,6 +122,8 @@ public enum RoutesLoaders implements RoutesLoader {
                     bindings.put("context", context);
                     bindings.put("components", new Components(context));
                     bindings.put("from", (Function<String, RouteDefinition>) uri -> from(uri));
+                    bindings.put("rest", (Supplier<RestDefinition>) () -> rest());
+                    bindings.put("restConfiguration", (Supplier<RestConfigurationDefinition>) () -> restConfiguration());
 
                     try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(context, resource)) {
                         engine.eval(new InputStreamReader(is), bindings);
@@ -165,14 +173,28 @@ public enum RoutesLoaders implements RoutesLoader {
                 @Override
                 public void configure() throws Exception {
                     try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(getContext(), resource)) {
-                        setRouteCollection(
-                            getContext().loadRoutesDefinition(is)
-                        );
+                        try {
+                            setRouteCollection(
+                                getContext().loadRoutesDefinition(is)
+                            );
+                        } catch (UnmarshalException e) {
+                            LOGGER.debug("Unable to load RoutesDefinition: {}", e.getMessage());
+                        }
+
+                        try {
+                            setRestCollection(
+                                getContext().loadRestsDefinition(is)
+                            );
+                        } catch (UnmarshalException e) {
+                            LOGGER.debug("Unbale to load RestsDefinition: {}", e.getMessage());
+                        }
                     }
                 }
             };
         }
     };
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoutesLoaders.class);
 
     public static RoutesLoader loaderFor(String resource, String languageName) {
         if (!resource.startsWith(SCHEME_CLASSPATH) && !resource.startsWith(SCHEME_FILE)) {
@@ -241,6 +263,14 @@ public enum RoutesLoaders implements RoutesLoader {
 
         public RouteDefinition from(String endpoint) {
             return builder.from(endpoint);
+        }
+
+        public RestDefinition rest() {
+            return builder.rest();
+        }
+
+        public RestConfigurationDefinition restConfiguration() {
+            return builder.restConfiguration();
         }
     }
 }
