@@ -19,6 +19,8 @@ package action
 
 import (
 	"fmt"
+
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
 
 	"github.com/rs/xid"
@@ -60,7 +62,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 			// amended to add/remove dependencies
 
 			//TODO: this is a very simple check, we may need to provide a deps comparison strategy
-			if !StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
+			if !util.StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
 				// We need to re-generate a context or search for a new one that
 				// satisfies integrations needs so let's remove the association
 				// with a context

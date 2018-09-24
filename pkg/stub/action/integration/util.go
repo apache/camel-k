@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"k8s.io/api/core/v1"
@@ -38,35 +40,13 @@ func LookupContextForIntegration(integration *v1alpha1.Integration) (*v1alpha1.I
 				continue
 			}
 
-			if StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
+			if util.StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
 				return &ctx, nil
 			}
 		}
 	}
 
 	return nil, nil
-}
-
-// StringSliceContains --
-func StringSliceContains(slice []string, items []string) bool {
-	for i := 0; i < len(items); i++ {
-		if !StringSliceExists(slice, items[i]) {
-			return false
-		}
-	}
-
-	return true
-}
-
-// StringSliceExists --
-func StringSliceExists(slice []string, item string) bool {
-	for i := 0; i < len(slice); i++ {
-		if slice[i] == item {
-			return true
-		}
-	}
-
-	return false
 }
 
 // PropertiesString --
