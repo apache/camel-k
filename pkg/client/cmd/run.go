@@ -25,6 +25,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
+
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/sirupsen/logrus"
 
@@ -265,6 +267,15 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 		} else if strings.HasPrefix(item, "camel-") {
 			integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
+	}
+
+	// special handling for groovy
+	// TODO: we should define handlers for languages and/or file extensions
+	if o.Language == "groovy" && !util.StringSliceExists(o.Dependencies, "camel:groovy") {
+		integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:groovy")
+	}
+	if o.Language == "" && strings.HasSuffix(filename, ".groovy") {
+		integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:groovy")
 	}
 
 	for _, item := range o.Properties {
