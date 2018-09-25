@@ -21,6 +21,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NewStartAction returns a action that waits for all required platform resources to start
@@ -40,40 +41,41 @@ func (action *startAction) CanHandle(platform *v1alpha1.IntegrationPlatform) boo
 }
 
 func (action *startAction) Handle(platform *v1alpha1.IntegrationPlatform) error {
-
-	coreStatus, err := action.getContextReady(platform.Namespace, "core")
+	aggregatePhase, err := action.aggregatePlatformPhaseFromContexts(platform.Namespace)
 	if err != nil {
 		return err
 	}
-
-	groovyStatus, err := action.getContextReady(platform.Namespace, "groovy")
-	if err != nil {
-		return err
-	}
-
-	if coreStatus == v1alpha1.IntegrationContextPhaseError || groovyStatus == v1alpha1.IntegrationContextPhaseError {
-		if platform.Status.Phase != v1alpha1.IntegrationPlatformPhaseError {
-			target := platform.DeepCopy()
-			logrus.Info("Platform ", target.Name, " transitioning to state ", v1alpha1.IntegrationPlatformPhaseError)
-			target.Status.Phase = v1alpha1.IntegrationPlatformPhaseError
-			return sdk.Update(target)
-		}
-		return nil
-	} else if coreStatus == v1alpha1.IntegrationContextPhaseReady && groovyStatus == v1alpha1.IntegrationContextPhaseReady {
+	if platform.Status.Phase != aggregatePhase {
 		target := platform.DeepCopy()
-		logrus.Info("Platform ", target.Name, " transitioning to state ", v1alpha1.IntegrationPlatformPhaseReady)
-		target.Status.Phase = v1alpha1.IntegrationPlatformPhaseReady
+		logrus.Info("Platform ", target.Name, " transitioning to state ", aggregatePhase)
+		target.Status.Phase = aggregatePhase
 		return sdk.Update(target)
 	}
-
 	// wait
 	return nil
 }
 
-func (action *startAction) getContextReady(namespace string, name string) (v1alpha1.IntegrationContextPhase, error) {
-	ctx := v1alpha1.NewIntegrationContext(namespace, name)
-	if err := sdk.Get(&ctx); err != nil {
+func (action *startAction) aggregatePlatformPhaseFromContexts(namespace string) (v1alpha1.IntegrationPlatformPhase, error) {
+	ctxs := v1alpha1.NewIntegrationContextList()
+	options := metav1.ListOptions{
+		LabelSelector: "camel.apache.org/context.type=platform",
+	}
+	if err := sdk.List(namespace, &ctxs, sdk.WithListOptions(&options)); err != nil {
 		return "", err
 	}
-	return ctx.Status.Phase, nil
+
+	countReady := 0
+	for _, ctx := range ctxs.Items {
+		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
+			return v1alpha1.IntegrationPlatformPhaseError, nil
+		} else if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+			countReady++
+		}
+	}
+
+	if countReady < len(ctxs.Items) {
+		return v1alpha1.IntegrationPlatformPhaseStarting, nil
+	}
+
+	return v1alpha1.IntegrationPlatformPhaseReady, nil
 }
