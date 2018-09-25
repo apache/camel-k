@@ -87,7 +87,7 @@ public enum RoutesLoaders implements RoutesLoader {
                         }
 
                         // Wrap routes builder
-                        addRoutes(
+                        includeRoutes(
                             Reflect.compile(name, IOUtils.toString(is, StandardCharsets.UTF_8)).create().get()
                         );
                     }
