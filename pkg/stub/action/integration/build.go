@@ -15,10 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package integration
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
@@ -30,7 +31,7 @@ import (
 )
 
 // NewBuildAction create an action that handles integration build
-func NewBuildAction(namespace string) IntegrationAction {
+func NewBuildAction(namespace string) Action {
 	return &buildAction{
 		namespace: namespace,
 	}
@@ -76,6 +77,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 			target := integration.DeepCopy()
 			target.Status.Image = ctx.Status.Image
 			target.Spec.Context = ctx.Name
+			logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseDeploying)
 			target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 			target.Status.Digest = digest.ComputeForIntegration(target)
 			return sdk.Update(target)

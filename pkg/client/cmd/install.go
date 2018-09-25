@@ -35,7 +35,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
 		Use:   "install",
 		Short: "Install Camel K on a Kubernetes cluster",
-		Long:  `Installs Camel K on a Kubernetes or Openshift cluster.`,
+		Long:  `Installs Camel K on a Kubernetes or OpenShift cluster.`,
 		RunE:  options.install,
 	}
 
@@ -69,7 +69,7 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		err = install.PlatformContexts(namespace)
+		err = install.Platform(namespace)
 		if err != nil {
 			return err
 		}

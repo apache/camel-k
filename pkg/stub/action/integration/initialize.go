@@ -15,9 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package integration
 
 import (
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/sirupsen/logrus"
 	"sort"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -27,7 +29,7 @@ import (
 )
 
 // NewInitializeAction creates a new inititialize action
-func NewInitializeAction() IntegrationAction {
+func NewInitializeAction() Action {
 	return &initializeAction{}
 }
 
@@ -46,6 +48,12 @@ func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) boo
 
 // Handle handles the integratios
 func (action *initializeAction) Handle(integration *v1alpha1.Integration) error {
+	// The integration platform needs to be ready before starting to create integrations
+	if pl, err := platform.GetCurrentPlatform(integration.Namespace); err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
+		logrus.Info("Waiting for a integration platform to be ready")
+		return nil
+	}
+
 	target := integration.DeepCopy()
 	// set default values
 	if target.Spec.Replicas == nil {
@@ -67,6 +75,7 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 	// sort the dependencies to get always the same list if they don't change
 	sort.Strings(target.Spec.Dependencies)
 	// update the status
+	logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseBuilding)
 	target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
 	target.Status.Digest = digest.ComputeForIntegration(integration)
 	return sdk.Update(target)

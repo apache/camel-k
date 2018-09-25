@@ -15,27 +15,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package install
-
-// Operator --
-func Operator(namespace string) error {
-	return Resources(namespace,
-		"operator-service-account.yaml",
-		"operator-role-openshift.yaml", // TODO distinguish between Openshift and Kubernetes
-		"operator-role-binding.yaml",
-		"operator-deployment.yaml",
-		"operator-service.yaml",
-	)
-}
-
-// Platform installs the platform custom resource
-func Platform(namespace string) error {
-	return Resource(namespace,"platform-cr.yaml")
-}
-
-// Example --
-func Example(namespace string) error {
-	return Resources(namespace,
-		"cr-example.yaml",
-	)
-}
+// Package platform allows to retrieve information about the current installed platform
+package platform

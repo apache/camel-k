@@ -15,27 +15,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package install
+package platform
 
-// Operator --
-func Operator(namespace string) error {
-	return Resources(namespace,
-		"operator-service-account.yaml",
-		"operator-role-openshift.yaml", // TODO distinguish between Openshift and Kubernetes
-		"operator-role-binding.yaml",
-		"operator-deployment.yaml",
-		"operator-service.yaml",
-	)
-}
+import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+)
 
-// Platform installs the platform custom resource
-func Platform(namespace string) error {
-	return Resource(namespace,"platform-cr.yaml")
-}
+// Action --
+type Action interface {
+	// a user friendly name for the action
+	Name() string
 
-// Example --
-func Example(namespace string) error {
-	return Resources(namespace,
-		"cr-example.yaml",
-	)
+	// returns true if the action can handle the integration context
+	CanHandle(platform *v1alpha1.IntegrationPlatform) bool
+
+	// executes the handling function
+	Handle(platform *v1alpha1.IntegrationPlatform) error
 }

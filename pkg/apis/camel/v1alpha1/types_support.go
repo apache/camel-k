@@ -39,6 +39,16 @@ func (spec ConfigurationSpec) String() string {
 //
 // **********************************
 
+// NewIntegrationPlatformList --
+func NewIntegrationPlatformList() IntegrationPlatformList {
+	return IntegrationPlatformList{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       IntegrationPlatformKind,
+		},
+	}
+}
+
 // NewIntegrationList --
 func NewIntegrationList() IntegrationList {
 	return IntegrationList{

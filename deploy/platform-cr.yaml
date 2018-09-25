@@ -1,0 +1,6 @@
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+  labels:
+    app: "camel-k"

@@ -15,10 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package integration
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -31,7 +32,7 @@ import (
 )
 
 // NewDeployAction create an action that handles integration deploy
-func NewDeployAction() IntegrationAction {
+func NewDeployAction() Action {
 	return &deployAction{}
 }
 
@@ -60,7 +61,11 @@ func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
 		return err
 	}
 
-	return nil
+	target := integration.DeepCopy()
+	logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseRunning)
+	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
+
+	return sdk.Update(target)
 }
 
 // **********************************
@@ -313,8 +318,5 @@ func createOrUpdateDeployment(ctx *v1alpha1.IntegrationContext, integration *v1a
 		return errors.Wrap(err, "could not create or replace deployment for integration "+integration.Name)
 	}
 
-	target := integration.DeepCopy()
-	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
-
-	return sdk.Update(target)
+	return nil
 }
