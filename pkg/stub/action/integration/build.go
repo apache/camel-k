@@ -81,6 +81,15 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 			return sdk.Update(target)
 		}
 
+		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
+			target := integration.DeepCopy()
+			target.Status.Image = ctx.Status.Image
+			target.Spec.Context = ctx.Name
+			target.Status.Phase = v1alpha1.IntegrationPhaseError
+			target.Status.Digest = digest.ComputeForIntegration(target)
+			return sdk.Update(target)
+		}
+
 		if integration.Spec.Context == "" {
 			// We need to set the context
 			target := integration.DeepCopy()
