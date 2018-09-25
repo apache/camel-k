@@ -4,7 +4,7 @@ Developer's Guide
 
 We love contributions!
 
-The project is written in https://golang.org/[go] and contains some parts written in Java for the [integration runtime](/runtime).
+The project is written in https://golang.org/[go] and contains some parts written in Java for the link:/runtime[integration runtime]
 Camel K is built on top of Kubernetes through *Custom Resource Definitions*. The https://github.com/operator-framework/operator-sdk[Operator SDK] is used
 to manage the lifecycle of those custom resources.
 
