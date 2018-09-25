@@ -22,13 +22,14 @@ limitations under the License.
 package test
 
 import (
-	"testing"
-	"github.com/apache/camel-k/pkg/util/log"
 	"context"
-	"time"
-	"github.com/stretchr/testify/assert"
 	"strings"
+	"testing"
+	"time"
+
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPodLogScrape(t *testing.T) {
@@ -37,7 +38,8 @@ func TestPodLogScrape(t *testing.T) {
 	defer sdk.Delete(pod)
 	assert.Nil(t, err)
 
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	defer cancel()
 	scraper := log.NewPodScraper(pod.Namespace, pod.Name)
 	in := scraper.Start(ctx)
 
@@ -71,7 +73,8 @@ func TestSelectorLogScrape(t *testing.T) {
 	defer sdk.Delete(deployment)
 	assert.Nil(t, err)
 
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	defer cancel()
 	scraper := log.NewSelectorScraper(deployment.Namespace, "scrape=me")
 	in := scraper.Start(ctx)
 
