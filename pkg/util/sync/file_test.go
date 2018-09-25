@@ -19,7 +19,6 @@ package sync
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -27,6 +26,8 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFile(t *testing.T) {
@@ -36,7 +37,8 @@ func TestFile(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(fileName)
 
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(100*time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(100*time.Second))
+	defer cancel()
 	changes, err := File(ctx, fileName)
 	assert.Nil(t, err)
 
@@ -55,7 +57,7 @@ watch:
 			return
 		case <-changes:
 			numChanges++
-			if (numChanges == expectedNumChanges) {
+			if numChanges == expectedNumChanges {
 				break watch
 			}
 		}
