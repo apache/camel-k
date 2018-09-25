@@ -20,17 +20,18 @@ package log
 import (
 	"bufio"
 	"context"
+	"io"
+	"time"
+
 	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
-	"time"
 )
 
 // PodScraper scrapes logs of a specific pod
@@ -171,5 +172,4 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, na
 		}
 	}
 
-	return nil
 }
