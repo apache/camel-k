@@ -1,0 +1,4 @@
+org.apache.camel.k.jvm.RoutesLoaders$JavaClass
+org.apache.camel.k.jvm.RoutesLoaders$JavaSource
+org.apache.camel.k.jvm.RoutesLoaders$JavaScript
+org.apache.camel.k.jvm.RoutesLoaders$Xml

@@ -30,7 +30,7 @@ func Operator(namespace string) error {
 
 // Platform installs the platform custom resource
 func Platform(namespace string) error {
-	return Resource(namespace,"platform-cr.yaml")
+	return Resource(namespace, "platform-cr.yaml")
 }
 
 // Example --

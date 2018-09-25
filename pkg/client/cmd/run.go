@@ -56,6 +56,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&options.Language, "language", "l", "", "Programming Language used to write the file")
+	cmd.Flags().StringVarP(&options.Runtime, "runtime", "r", "jvm", "Runtime used by the integration")
 	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
@@ -78,6 +79,7 @@ type runCmdOptions struct {
 	*RootCmdOptions
 	IntegrationContext        string
 	Language                  string
+	Runtime                   string
 	IntegrationName           string
 	Dependencies              []string
 	Properties                []string
@@ -269,13 +271,22 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 		}
 	}
 
-	// special handling for groovy
-	// TODO: we should define handlers for languages and/or file extensions
-	if o.Language == "groovy" && !util.StringSliceExists(o.Dependencies, "camel:groovy") {
-		integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:groovy")
+	if o.Language == "groovy" || strings.HasSuffix(filename, ".groovy") {
+		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:groovy")
 	}
-	if o.Language == "" && strings.HasSuffix(filename, ".groovy") {
-		integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:groovy")
+	if o.Language == "kotlin" || strings.HasSuffix(filename, ".kts") {
+		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:kotlin")
+	}
+
+	// jvm runtime required by default
+	util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:jvm")
+
+	if o.Runtime != "" {
+		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:"+o.Runtime)
+	}
+
+	switch o.Runtime {
+
 	}
 
 	for _, item := range o.Properties {

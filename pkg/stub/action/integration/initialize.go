@@ -22,6 +22,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"sort"
 
+	"github.com/apache/camel-k/pkg/util"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/discover"
 	"github.com/apache/camel-k/pkg/util/digest"
@@ -46,7 +48,7 @@ func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) boo
 	return integration.Status.Phase == ""
 }
 
-// Handle handles the integratios
+// Handle handles the integrations
 func (action *initializeAction) Handle(integration *v1alpha1.Integration) error {
 	// The integration platform needs to be ready before starting to create integrations
 	if pl, err := platform.GetCurrentPlatform(integration.Namespace); err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
@@ -63,6 +65,11 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 	// set the correct language
 	language := discover.Language(target.Spec.Source)
 	target.Spec.Source.Language = language
+
+	if !util.StringSliceExists(target.Spec.Dependencies, "camel:core") {
+		target.Spec.Dependencies = append(target.Spec.Dependencies, "camel:core")
+	}
+
 	// discover dependencies
 	if target.Spec.DependenciesAutoDiscovery == nil {
 		var autoDiscoveryDependencies = true

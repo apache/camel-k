@@ -114,6 +114,7 @@ Camel K supports multiple languages for writing integrations:
 | XML				| Integrations written in plain XML DSL are supported (Spring XML or Blueprint not supported).
 | Groovy			| Groovy `.groovy` files are supported (experimental).
 | JavaScript		| JavaScript `.js` files are supported (experimental).
+| Kotlin			| Kotlin Script `.kts` files are supported (experimental).
 |=======================
 
 Integrations written in different languages are provided in the link:/runtime/examples[examples] directory.

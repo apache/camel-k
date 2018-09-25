@@ -18,11 +18,12 @@ limitations under the License.
 package discover
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 var (
@@ -65,6 +66,8 @@ func getRegexpsForLanguage(language v1alpha1.Language) []*regexp.Regexp {
 		return []*regexp.Regexp{singleQuotedURI, doubleQuotedURI}
 	case v1alpha1.LanguageJavaScript:
 		return []*regexp.Regexp{singleQuotedURI, doubleQuotedURI}
+	case v1alpha1.LanguageKotlin:
+		return []*regexp.Regexp{doubleQuotedURI}
 	}
 	return []*regexp.Regexp{}
 }

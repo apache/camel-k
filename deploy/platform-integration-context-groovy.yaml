@@ -9,5 +9,6 @@ metadata:
     camel.apache.org/context.type: platform
 spec:
   dependencies:
+    - runtime:jvm
+    - runtime:groovy
     - camel:core
-    - camel:groovy

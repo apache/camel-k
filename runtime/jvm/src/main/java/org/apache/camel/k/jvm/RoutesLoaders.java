@@ -18,10 +18,10 @@ package org.apache.camel.k.jvm;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.script.Bindings;
@@ -30,12 +30,9 @@ import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 import javax.xml.bind.UnmarshalException;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.util.DelegatingScript;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Component;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.k.jvm.dsl.Components;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.rest.RestConfigurationDefinition;
 import org.apache.camel.model.rest.RestDefinition;
@@ -43,7 +40,6 @@ import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.ResourceHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
 import org.joor.Reflect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +47,13 @@ import org.slf4j.LoggerFactory;
 import static org.apache.camel.k.jvm.Constants.SCHEME_CLASSPATH;
 import static org.apache.camel.k.jvm.Constants.SCHEME_FILE;
 
-public enum RoutesLoaders implements RoutesLoader {
-    JavaClass {
+public final class RoutesLoaders {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoutesLoaders.class);
+
+    private RoutesLoaders() {
+    }
+
+    public static class JavaClass implements RoutesLoader {
         @Override
         public List<Language> getSupportedLanguages() {
             return Collections.singletonList(Language.JavaClass);
@@ -72,8 +73,9 @@ public enum RoutesLoaders implements RoutesLoader {
 
             return (RouteBuilder)type.newInstance();
         }
-    },
-    JavaSource {
+    }
+
+    public static class JavaSource implements RoutesLoader {
         @Override
         public List<Language> getSupportedLanguages() {
             return Collections.singletonList(Language.JavaSource);
@@ -93,15 +95,16 @@ public enum RoutesLoaders implements RoutesLoader {
                         }
 
                         // Wrap routes builder
-                        includeRoutes(
+                        addRoutes(
                             Reflect.compile(name, IOUtils.toString(is, StandardCharsets.UTF_8)).create().get()
                         );
                     }
                 }
             };
         }
-    },
-    JavaScript {
+    }
+
+    public static class JavaScript implements RoutesLoader {
         @Override
         public List<Language> getSupportedLanguages() {
             return Collections.singletonList(Language.JavaScript);
@@ -119,6 +122,7 @@ public enum RoutesLoaders implements RoutesLoader {
 
                     // Exposed to the underlying script, but maybe better to have
                     // a nice dsl
+                    bindings.put("builder", this);
                     bindings.put("context", context);
                     bindings.put("components", new Components(context));
                     bindings.put("from", (Function<String, RouteDefinition>) uri -> from(uri));
@@ -131,37 +135,9 @@ public enum RoutesLoaders implements RoutesLoader {
                 }
             };
         }
-    },
-    Groovy {
-        @Override
-        public List<Language> getSupportedLanguages() {
-            return Collections.singletonList(Language.Groovy);
-        }
+    }
 
-        @Override
-        public RouteBuilder load(String resource) throws Exception {
-            return new RouteBuilder() {
-                @Override
-                public void configure() throws Exception {
-                    CompilerConfiguration cc = new CompilerConfiguration();
-                    cc.setScriptBaseClass(DelegatingScript.class.getName());
-
-                    ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                    GroovyShell sh = new GroovyShell(cl, new Binding(), cc);
-
-                    try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(getContext(), resource)) {
-                        Reader reader = new InputStreamReader(is);
-                        DelegatingScript script = (DelegatingScript) sh.parse(reader);
-
-                        // set the delegate target
-                        script.setDelegate(new ScriptingDsl(this));
-                        script.run();
-                    }
-                }
-            };
-        }
-    },
-    Xml {
+    public static class Xml implements RoutesLoader {
         @Override
         public List<Language> getSupportedLanguages() {
             return Collections.singletonList(Language.Xml);
@@ -192,9 +168,8 @@ public enum RoutesLoaders implements RoutesLoader {
                 }
             };
         }
-    };
+    }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoutesLoaders.class);
 
     public static RoutesLoader loaderFor(String resource, String languageName) {
         if (!resource.startsWith(SCHEME_CLASSPATH) && !resource.startsWith(SCHEME_FILE)) {
@@ -205,72 +180,12 @@ public enum RoutesLoaders implements RoutesLoader {
             ? Language.fromLanguageName(languageName)
             : Language.fromResource(resource);
 
-        for (RoutesLoader loader: RoutesLoaders.values()) {
+        for (RoutesLoader loader: ServiceLoader.load(RoutesLoader.class)) {
             if (loader.getSupportedLanguages().contains(language)) {
                 return loader;
             }
         }
 
         throw new IllegalArgumentException("Unable to find loader for: resource=" + resource + " language=" + languageName);
-    }
-
-    // ********************************
-    //
-    // Helpers
-    //
-    // TODO: move to a dedicate class
-    // ********************************
-
-
-    public static class Components {
-        private CamelContext context;
-
-        public Components(CamelContext context) {
-            this.context = context;
-        }
-
-        public Component get(String scheme) {
-            return context.getComponent(scheme, true);
-        }
-
-        public Component put(String scheme, Component instance) {
-            context.addComponent(scheme, instance);
-
-            return instance;
-        }
-
-        public Component make(String scheme, String type) {
-            final Class<?> clazz = context.getClassResolver().resolveClass(type);
-            final Component instance = (Component)context.getInjector().newInstance(clazz);
-
-            context.addComponent(scheme, instance);
-
-            return instance;
-        }
-    }
-
-    private static class ScriptingDsl {
-        private final RouteBuilder builder;
-
-        public final CamelContext context;
-        public final Components components;
-
-        public ScriptingDsl(RouteBuilder builder) {
-            this.builder = builder;
-            this.context = builder.getContext();
-            this.components = new Components(builder.getContext());
-        }
-
-        public RouteDefinition from(String endpoint) {
-            return builder.from(endpoint);
-        }
-
-        public RestDefinition rest() {
-            return builder.rest();
-        }
-
-        public RestConfigurationDefinition restConfiguration() {
-            return builder.restConfiguration();
-        }
     }
 }
