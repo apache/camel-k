@@ -45,7 +45,7 @@ This is a high level overview of the project structure:
 | link:/docs[/docs]			| Contains this documentation.
 | link:/pkg[/pkg]			| This is where the code resides. The code is divided in multiple subpackages.
 | link:/runtime[/runtime]	| The Java runtime code that is used inside the integration Docker containers.
-| link:/test[/test]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and Openshift.
+| link:/test[/test]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
 | link:/tmp[/tmp]			| Scripts and Docker configuration files used by the operator-sdk.
 | /vendor					| Project dependencies (not staged in git).
 | link:/version[/version]	| Contains the global version of the project.
@@ -88,7 +88,7 @@ make images
 
 Unit tests are executed automatically as part of the build. They use the standard go testing framework.
 
-Integration tests (aimed at ensuring that the code integrates correctly with Kubernetes and Openshift), need special care.
+Integration tests (aimed at ensuring that the code integrates correctly with Kubernetes and OpenShift), need special care.
 
 The **convention** used in this repo is to name unit tests `xxx_test.go`, and name integration tests `yyy_integration_test.go`.
 Integration tests are all in the link:/test[/test] dir.
@@ -102,7 +102,7 @@ integration tests. A integration test should start with the following line:
 
 Look into the link:/test[/test] directory for examples of integration tests.
 
-Before running a integration test, you need to be connected to a Kubernetes/Openshift namespace.
+Before running a integration test, you need to be connected to a Kubernetes/OpenShift namespace.
 After you log in into your cluster, you can run the following command to execute **all** integration tests:
 
 ```
@@ -144,7 +144,7 @@ It should be straightforward: just execute the link:/cmd/kamel/kamel.go[/cmd/kam
 
 It is a bit more complex (but not so much).
 
-You are going to run the operator code **outside** Openshift in your IDE so, first of all, you need to **stop the operator running inside**:
+You are going to run the operator code **outside** OpenShift in your IDE so, first of all, you need to **stop the operator running inside**:
 
 ```
 // use kubectl in plain Kubernetes
