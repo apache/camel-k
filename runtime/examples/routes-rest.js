@@ -1,7 +1,7 @@
 //
 // To run this integrations use:
 //
-//     kamel run --name=withrest --dependency=camel:undertow runtime/examples/routes-rest.js
+//     kamel run --name=withrest --dependency=camel-undertow runtime/examples/routes-rest.js
 //
 
 // ****************
