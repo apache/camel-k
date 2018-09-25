@@ -7,7 +7,7 @@ There are various options for creating a development cluster:
 [[minishift]]
 == Minishift
 
-You can run Camel K integrations on Openshift using the Minishift cluster creation tool.
+You can run Camel K integrations on OpenShift using the Minishift cluster creation tool.
 Follow the instructions in the https://github.com/minishift/minishift#getting-started[getting started guide] for the installation.
 
 After installing the `minishift` binary, you need to enable the `admin-user` addon:
@@ -15,6 +15,8 @@ After installing the `minishift` binary, you need to enable the `admin-user` add
 ```
 minishift addons enable admin-user
 ```
+
+NOTE: the admin user addon should be enabled before starting the cluster for the first time
 
 Then you can start the cluster with:
 
