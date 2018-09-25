@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package context
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -24,29 +24,30 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// NewIntegrationContextMonitorAction creates a new monitoring handling action for the context
-func NewIntegrationContextMonitorAction() IntegrationContextAction {
-	return &integrationContextMonitorAction{}
+// NewMonitorAction creates a new monitoring handling action for the context
+func NewMonitorAction() Action {
+	return &monitorAction{}
 }
 
-type integrationContextMonitorAction struct {
+type monitorAction struct {
 }
 
-func (action *integrationContextMonitorAction) Name() string {
+func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *integrationContextMonitorAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+func (action *monitorAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
 	return context.Status.Phase == v1alpha1.IntegrationContextPhaseReady || context.Status.Phase == v1alpha1.IntegrationContextPhaseError
 }
 
-func (action *integrationContextMonitorAction) Handle(context *v1alpha1.IntegrationContext) error {
+func (action *monitorAction) Handle(context *v1alpha1.IntegrationContext) error {
 	hash := digest.ComputeForIntegrationContext(context)
 	if hash != context.Status.Digest {
 		logrus.Info("IntegrationContext ", context.Name, " needs a rebuild")
 
 		target := context.DeepCopy()
 		target.Status.Digest = hash
+		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseBuilding)
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
 		return sdk.Update(target)
 	}

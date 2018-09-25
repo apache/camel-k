@@ -15,34 +15,43 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package context
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/sirupsen/logrus"
 )
 
-// NewIntegrationContextInitializeAction creates a new initialization handling action for the context
-func NewIntegrationContextInitializeAction() IntegrationContextAction {
-	return &integrationContextInitializeAction{}
+// NewInitializeAction creates a new initialization handling action for the context
+func NewInitializeAction() Action {
+	return &initializeAction{}
 }
 
-type integrationContextInitializeAction struct {
+type initializeAction struct {
 }
 
-func (action *integrationContextInitializeAction) Name() string {
+func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *integrationContextInitializeAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+func (action *initializeAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
 	return context.Status.Phase == ""
 }
 
-func (action *integrationContextInitializeAction) Handle(context *v1alpha1.IntegrationContext) error {
+func (action *initializeAction) Handle(context *v1alpha1.IntegrationContext) error {
+	// The integration platform needs to be initialized before starting to create contexts
+	if _, err := platform.GetCurrentPlatform(context.Namespace); err != nil {
+		logrus.Info("Waiting for a integration platform to be initialized")
+		return nil
+	}
+
 	target := context.DeepCopy()
 
 	// update the status
+	logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseBuilding)
 	target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
 	target.Status.Digest = digest.ComputeForIntegrationContext(context)
 

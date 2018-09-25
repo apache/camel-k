@@ -15,14 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package integration
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-// IntegrationAction --
-type IntegrationAction interface {
+// Action --
+type Action interface {
 
 	// a user friendly name for the action
 	Name() string
