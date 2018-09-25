@@ -38,3 +38,16 @@ func StringSliceExists(slice []string, item string) bool {
 
 	return false
 }
+
+// StringSliceUniqueAdd append the given item if not already present in the slice
+func StringSliceUniqueAdd(slice *[]string, item string) bool {
+	for _, i := range *slice {
+		if i == item {
+			return false
+		}
+	}
+
+	*slice = append(*slice, item)
+
+	return true
+}

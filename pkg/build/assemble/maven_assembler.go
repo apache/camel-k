@@ -162,6 +162,10 @@ func generateProject(source *build.Request) (maven.Project, error) {
 			gav := strings.Replace(mid, "/", ":", -1)
 
 			deps.AddEncodedGAV(gav)
+		} else if strings.HasPrefix(d, "runtime:") {
+			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
+
+			deps.AddGAV("org.apache.camel.k", artifactID, version.Version)
 		} else {
 			return maven.Project{}, fmt.Errorf("unknown dependency type: %s", d)
 		}

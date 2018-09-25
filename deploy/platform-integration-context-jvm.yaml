@@ -1,12 +1,13 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: IntegrationContext
 metadata:
-  name: core
+  name: jvm
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: core
+    camel.apache.org/context.created.by.name: jvm
     camel.apache.org/context.type: platform
 spec:
   dependencies:
+    - runtime:jvm
     - camel:core

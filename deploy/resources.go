@@ -2467,21 +2467,6 @@ metadata:
     app: "camel-k"
 
 `
-	Resources["platform-integration-context-core.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
-metadata:
-  name: core
-  labels:
-    app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: core
-    camel.apache.org/context.type: platform
-spec:
-  dependencies:
-    - camel:core
-`
 	Resources["platform-integration-context-groovy.yaml"] =
 		`
 apiVersion: camel.apache.org/v1alpha1
@@ -2495,8 +2480,42 @@ metadata:
     camel.apache.org/context.type: platform
 spec:
   dependencies:
+    - runtime:jvm
+    - runtime:groovy
     - camel:core
-    - camel:groovy
+`
+	Resources["platform-integration-context-jvm.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationContext
+metadata:
+  name: jvm
+  labels:
+    app: "camel-k"
+    camel.apache.org/context.created.by.kind: Operator
+    camel.apache.org/context.created.by.name: jvm
+    camel.apache.org/context.type: platform
+spec:
+  dependencies:
+    - runtime:jvm
+    - camel:core
+`
+	Resources["platform-integration-context-kotlin.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationContext
+metadata:
+  name: kotlin
+  labels:
+    app: "camel-k"
+    camel.apache.org/context.created.by.kind: Operator
+    camel.apache.org/context.created.by.name: jvm
+    camel.apache.org/context.type: platform
+spec:
+  dependencies:
+    - runtime:jvm
+    - runtime:kotlin
+    - camel:core
 `
 	Resources["user-cluster-role.yaml"] =
 		`

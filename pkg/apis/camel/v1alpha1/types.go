@@ -77,6 +77,8 @@ const (
 	LanguageJavaScript Language = "js"
 	// LanguageXML --
 	LanguageXML Language = "xml"
+	// LanguageKotlin --
+	LanguageKotlin Language = "kts"
 )
 
 // IntegrationStatus --
