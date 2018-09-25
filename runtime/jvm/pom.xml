@@ -11,7 +11,18 @@
 
     <artifactId>camel-k-runtime-jvm</artifactId>
 
+    <properties>
+        <kotlin.version>1.2.71</kotlin.version>
+    </properties>
+
     <dependencies>
+
+        <!-- ****************************** -->
+        <!--                                -->
+        <!-- RUNTIME                        -->
+        <!--                                -->
+        <!-- ****************************** -->
+
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
@@ -25,6 +36,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j2.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
@@ -41,12 +53,12 @@
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>${groovy.version}</version>
-            <optional>true</optional>
-        </dependency>
+
+        <!-- ****************************** -->
+        <!--                                -->
+        <!-- TESTS                          -->
+        <!--                                -->
+        <!-- ****************************** -->
 
         <dependency>
             <groupId>junit</groupId>

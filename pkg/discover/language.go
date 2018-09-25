@@ -19,8 +19,9 @@ limitations under the License.
 package discover
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 // Language discovers the code language from file extension if not set
@@ -33,7 +34,8 @@ func Language(source v1alpha1.SourceSpec) v1alpha1.Language {
 		v1alpha1.LanguageJavaClass,
 		v1alpha1.LanguageJavaScript,
 		v1alpha1.LanguageGroovy,
-		v1alpha1.LanguageJavaScript} {
+		v1alpha1.LanguageJavaScript,
+		v1alpha1.LanguageKotlin} {
 
 		if strings.HasSuffix(source.Name, "."+string(l)) {
 			return l

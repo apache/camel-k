@@ -16,29 +16,45 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 public enum Language {
-    Unknow("", Collections.emptyList()),
-    JavaClass("class", Collections.singletonList("class")),
-    JavaSource("java", Collections.singletonList("java")),
-    JavaScript("js", Collections.singletonList("js")),
-    Groovy("groovy", Collections.singletonList("groovy")),
-    Xml("xml", Collections.singletonList("xml"));
+    Unknown(
+        Collections.emptyList(),
+        Collections.emptyList()),
+    JavaClass(
+        Collections.singletonList("class"),
+        Collections.singletonList("class")),
+    JavaSource(
+        Collections.singletonList("java"),
+        Collections.singletonList("java")),
+    JavaScript(
+        Arrays.asList("js", "javascript"),
+        Collections.singletonList("js")),
+    Groovy(
+        Collections.singletonList("groovy"),
+        Collections.singletonList("groovy")),
+    Xml(
+        Collections.singletonList("xml"),
+        Collections.singletonList("xml")),
+    Kotlin(
+        Arrays.asList("kotlin", "kts"),
+        Collections.singletonList("kts"));
 
-    private final String name;
+    private final List<String> names;
     private final List<String> extensions;
 
-    Language(String name, List<String> extensions) {
-        this.name = name;
+    Language(List<String> names, List<String> extensions) {
+        this.names = names;
         this.extensions = extensions;
     }
 
-    public String getName() {
-        return name;
+    public List<String> getNames() {
+        return names;
     }
 
     public List<String> getExtensions() {
@@ -47,12 +63,12 @@ public enum Language {
 
     public static Language fromLanguageName(String name) {
         for (Language language: values()) {
-            if (language.getName().equals(name)) {
+            if (language.getNames().contains(name)) {
                 return language;
             }
         }
 
-        return Unknow;
+        return Unknown;
     }
 
     public static Language fromResource(String resource) {
@@ -66,6 +82,6 @@ public enum Language {
             }
         }
 
-        return Unknow;
+        return Unknown;
     }
 }

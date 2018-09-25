@@ -33,7 +33,7 @@ public class RoutesLoadersTest {
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RoutesLoaders.JavaClass);
+        assertThat(loader).isInstanceOf(RoutesLoaders.JavaClass.class);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -50,7 +50,7 @@ public class RoutesLoadersTest {
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RoutesLoaders.JavaSource);
+        assertThat(loader).isInstanceOf(RoutesLoaders.JavaSource.class);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -67,7 +67,7 @@ public class RoutesLoadersTest {
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RoutesLoaders.JavaScript);
+        assertThat(loader).isInstanceOf(RoutesLoaders.JavaScript.class);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -84,24 +84,7 @@ public class RoutesLoadersTest {
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, "js");
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RoutesLoaders.JavaScript);
-        assertThat(builder).isNotNull();
-
-        builder.configure();
-
-        List<RouteDefinition> routes = builder.getRouteCollection().getRoutes();
-        assertThat(routes).hasSize(1);
-        assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
-        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
-    }
-
-    @Test
-    public void testLoadGroovy() throws Exception {
-        String resource = "classpath:routes.groovy";
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(resource);
-
-        assertThat(loader).isSameAs(RoutesLoaders.Groovy);
+        assertThat(loader).isInstanceOf(RoutesLoaders.JavaScript.class);
         assertThat(builder).isNotNull();
 
         builder.configure();
@@ -118,7 +101,7 @@ public class RoutesLoadersTest {
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
         RouteBuilder builder = loader.load(resource);
 
-        assertThat(loader).isSameAs(RoutesLoaders.Xml);
+        assertThat(loader).isInstanceOf(RoutesLoaders.Xml.class);
         assertThat(builder).isNotNull();
 
         builder.configure();

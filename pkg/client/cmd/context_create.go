@@ -23,6 +23,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
+
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -46,6 +48,7 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:  impl.run,
 	}
 
+	cmd.Flags().StringVarP(&impl.runtime, "runtime", "r", "jvm", "Runtime provided by the context")
 	cmd.Flags().StringSliceVarP(&impl.dependencies, "dependency", "d", nil, "Add a dependency")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&impl.configmaps, "configmap", nil, "Add a ConfigMap")
@@ -60,6 +63,7 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 type contextCreateCommand struct {
 	*RootCmdOptions
 
+	runtime      string
 	dependencies []string
 	properties   []string
 	configmaps   []string
@@ -103,6 +107,13 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		} else if strings.HasPrefix(item, "camel-") {
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
+	}
+
+	// jvm runtime required by default
+	util.StringSliceUniqueAdd(&ctx.Spec.Dependencies, "runtime:jvm")
+
+	if command.runtime != "" {
+		util.StringSliceUniqueAdd(&ctx.Spec.Dependencies, "runtime:"+command.runtime)
 	}
 
 	for _, item := range command.properties {

@@ -50,24 +50,29 @@ __kamel_dependency_type() {
         COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
         ;;
     m*)
-        local type_list="mvn:""
+        local type_list="mvn:"
         COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 		compopt -o nospace
         ;;
     f*)
-        local type_list="file:""
+        local type_list="file:"
         COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 		compopt -o nospace
         ;;
     *)
-        local type_list="camel: mvn: file:"
-        COMPREPLY=( $( compgen -W "camel mvn: file:" -- "$cur") )
+        local type_list="camel mvn: file:"
+        COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 	    compopt -o nospace
     esac
 }
 
 __kamel_languages() {
-    local type_list="js groovy java xml"
+    local type_list="js groovy kotlin java xml"
+    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+}
+
+__kamel_runtimes() {
+    local type_list="jvm groovy kotlin"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 }
 
@@ -193,6 +198,13 @@ func configureKnownBashCompletions(command *cobra.Command) {
 		"language",
 		map[string][]string{
 			cobra.BashCompCustom: {"__kamel_languages"},
+		},
+	)
+	configureBashAnnotationForFlag(
+		command,
+		"runtime",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_runtimes"},
 		},
 	)
 }

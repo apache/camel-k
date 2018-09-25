@@ -24,6 +24,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var resources = []string{
+	"platform-integration-context-jvm.yaml",
+	"platform-integration-context-groovy.yaml",
+	"platform-integration-context-kotlin.yaml",
+}
+
 // NewCreateAction returns a action that creates resources needed by the platform
 func NewCreateAction() Action {
 	return &createAction{}
@@ -41,7 +47,7 @@ func (action *createAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bo
 }
 
 func (action *createAction) Handle(platform *v1alpha1.IntegrationPlatform) error {
-	err := install.Resources(platform.Namespace, "platform-integration-context-core.yaml", "platform-integration-context-groovy.yaml")
+	err := install.Resources(platform.Namespace, resources...)
 	if err != nil {
 		return err
 	}
