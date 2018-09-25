@@ -18,44 +18,50 @@ limitations under the License.
 package stub
 
 import (
-	"context"
-
+	ctx "context"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/stub/action/platform"
 
-	caction "github.com/apache/camel-k/pkg/stub/action/context"
-	iaction "github.com/apache/camel-k/pkg/stub/action/integration"
+	"github.com/apache/camel-k/pkg/stub/action/context"
+	"github.com/apache/camel-k/pkg/stub/action/integration"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
 )
 
 // NewHandler --
-func NewHandler(ctx context.Context, namespace string) sdk.Handler {
+func NewHandler(ctx ctx.Context, namespace string) sdk.Handler {
 	return &handler{
-		integrationActionPool: []iaction.IntegrationAction{
-			iaction.NewInitializeAction(),
-			iaction.NewBuildAction(namespace),
-			iaction.NewDeployAction(),
-			iaction.NewMonitorAction(),
+		integrationActionPool: []integration.Action{
+			integration.NewInitializeAction(),
+			integration.NewBuildAction(namespace),
+			integration.NewDeployAction(),
+			integration.NewMonitorAction(),
 		},
-		integrationContextActionPool: []caction.IntegrationContextAction{
-			caction.NewIntegrationContextInitializeAction(),
-			caction.NewIntegrationContextBuildAction(ctx, namespace),
-			caction.NewIntegrationContextMonitorAction(),
+		integrationContextActionPool: []context.Action{
+			context.NewInitializeAction(),
+			context.NewBuildAction(ctx),
+			context.NewMonitorAction(),
+		},
+		integrationPlatformActionPool: []platform.Action{
+			platform.NewInitializeAction(),
+			platform.NewCreateAction(),
+			platform.NewStartAction(),
 		},
 	}
 }
 
 type handler struct {
-	integrationActionPool        []iaction.IntegrationAction
-	integrationContextActionPool []caction.IntegrationContextAction
+	integrationActionPool         []integration.Action
+	integrationContextActionPool  []context.Action
+	integrationPlatformActionPool []platform.Action
 }
 
-func (h *handler) Handle(ctx context.Context, event sdk.Event) error {
+func (h *handler) Handle(ctx ctx.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
 	case *v1alpha1.Integration:
 		for _, a := range h.integrationActionPool {
 			if a.CanHandle(o) {
-				logrus.Info("Invoking action ", a.Name(), " on integration ", o.Name)
+				logrus.Debug("Invoking action ", a.Name(), " on integration ", o.Name)
 				if err := a.Handle(o); err != nil {
 					return err
 				}
@@ -64,7 +70,16 @@ func (h *handler) Handle(ctx context.Context, event sdk.Event) error {
 	case *v1alpha1.IntegrationContext:
 		for _, a := range h.integrationContextActionPool {
 			if a.CanHandle(o) {
-				logrus.Info("Invoking action ", a.Name(), " on context ", o.Name)
+				logrus.Debug("Invoking action ", a.Name(), " on context ", o.Name)
+				if err := a.Handle(o); err != nil {
+					return err
+				}
+			}
+		}
+	case *v1alpha1.IntegrationPlatform:
+		for _, a := range h.integrationPlatformActionPool {
+			if a.CanHandle(o) {
+				logrus.Debug("Invoking action ", a.Name(), " on platform ", o.Name)
 				if err := a.Handle(o); err != nil {
 					return err
 				}

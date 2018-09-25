@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package integration
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -25,7 +25,7 @@ import (
 )
 
 // NewMonitorAction creates a new monitoring action for an integration
-func NewMonitorAction() IntegrationAction {
+func NewMonitorAction() Action {
 	return &monitorAction{}
 }
 
@@ -49,6 +49,7 @@ func (action *monitorAction) Handle(integration *v1alpha1.Integration) error {
 
 		target := integration.DeepCopy()
 		target.Status.Digest = hash
+		logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseBuilding)
 		target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
 		return sdk.Update(target)
 	}

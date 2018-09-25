@@ -150,3 +150,79 @@ const (
 	// IntegrationContextPhaseError --
 	IntegrationContextPhaseError IntegrationContextPhase = "Error"
 )
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// IntegrationPlatformList --
+type IntegrationPlatformList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+	Items           []IntegrationPlatform `json:"items"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// IntegrationPlatform --
+type IntegrationPlatform struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata"`
+	Spec              IntegrationPlatformSpec   `json:"spec"`
+	Status            IntegrationPlatformStatus `json:"status,omitempty"`
+}
+
+// IntegrationPlatformSpec --
+type IntegrationPlatformSpec struct {
+	Cluster IntegrationPlatformCluster   `json:"cluster,omitempty"`
+	Build   IntegrationPlatformBuildSpec `json:"build,omitempty"`
+}
+
+// IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into
+type IntegrationPlatformCluster string
+
+const (
+	// IntegrationPlatformClusterOpenShift is used when targeting a OpenShift cluster
+	IntegrationPlatformClusterOpenShift = "OpenShift"
+	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster
+	IntegrationPlatformClusterKubernetes = "Kubernetes"
+)
+
+// IntegrationPlatformBuildSpec contains platform related build information
+type IntegrationPlatformBuildSpec struct {
+	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	Registry        string                                  `json:"registry,omitempty"`
+}
+
+// IntegrationPlatformBuildPublishStrategy enumerates all implemented build strategies
+type IntegrationPlatformBuildPublishStrategy string
+
+const (
+	// IntegrationPlatformBuildPublishStrategyS2I performs a OpenShift binary S2I build
+	IntegrationPlatformBuildPublishStrategyS2I = "S2I"
+
+	// IntegrationPlatformBuildPublishStrategyKaniko performs
+	IntegrationPlatformBuildPublishStrategyKaniko = "Kaniko"
+)
+
+// IntegrationPlatformStatus --
+type IntegrationPlatformStatus struct {
+	Phase IntegrationPlatformPhase `json:"phase,omitempty"`
+}
+
+// IntegrationPlatformPhase --
+type IntegrationPlatformPhase string
+
+const (
+	// IntegrationPlatformKind --
+	IntegrationPlatformKind string = "IntegrationPlatform"
+
+	// IntegrationPlatformPhaseCreating --
+	IntegrationPlatformPhaseCreating IntegrationPlatformPhase = "Creating"
+	// IntegrationPlatformPhaseStarting --
+	IntegrationPlatformPhaseStarting IntegrationPlatformPhase = "Starting"
+	// IntegrationPlatformPhaseReady --
+	IntegrationPlatformPhaseReady IntegrationPlatformPhase = "Ready"
+	// IntegrationPlatformPhaseError --
+	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
+	// IntegrationPlatformPhaseDuplicate --
+	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
+)

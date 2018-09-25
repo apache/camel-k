@@ -2123,6 +2123,27 @@ spec:
   version: v1alpha1
 
 `
+	Resources["crd-integration-platform.yaml"] =
+		`
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: integrationplatforms.camel.apache.org
+  labels:
+    app: "camel-k"
+spec:
+  group: camel.apache.org
+  names:
+    kind: IntegrationPlatform
+    listKind: IntegrationPlatformList
+    plural: integrationplatforms
+    singular: integrationplatform
+    shortNames:
+    - ip
+  scope: Namespaced
+  version: v1alpha1
+
+`
 	Resources["crd-integration.yaml"] =
 		`
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -2434,6 +2455,16 @@ spec:
   type: ClusterIP
 status:
   loadBalancer: {}
+
+`
+	Resources["platform-cr.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+  labels:
+    app: "camel-k"
 
 `
 	Resources["platform-integration-context-core.yaml"] =

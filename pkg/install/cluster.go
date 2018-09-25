@@ -32,6 +32,11 @@ import (
 // SetupClusterwideResources --
 func SetupClusterwideResources() error {
 
+	// Install CRD for Integration Platform (if needed)
+	if err := installCRD("IntegrationPlatform", "crd-integration-platform.yaml"); err != nil {
+		return err
+	}
+
 	// Install CRD for Integration Context (if needed)
 	if err := installCRD("IntegrationContext", "crd-integration-context.yaml"); err != nil {
 		return err

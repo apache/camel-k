@@ -15,12 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package action
+package context
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/build/assemble"
-	"github.com/apache/camel-k/pkg/build/publish"
+	"github.com/apache/camel-k/pkg/platform"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -31,49 +30,52 @@ import (
 	"github.com/apache/camel-k/pkg/build"
 )
 
-// NewIntegrationContextBuildAction creates a new build handling action for the context
-func NewIntegrationContextBuildAction(ctx context.Context, namespace string) IntegrationContextAction {
-	assembler := assemble.NewMavenAssembler(ctx)
-	publisher := publish.NewS2IIncrementalPublisher(ctx, namespace, newContextLister(namespace))
-	manager := build.NewManager(ctx, assembler, publisher)
-
-	return &integrationContextBuildAction{
-		buildManager: manager,
+// NewBuildAction creates a new build handling action for the context
+func NewBuildAction(ctx context.Context) Action {
+	return &buildAction{
+		ctx,
 	}
 }
 
-type integrationContextBuildAction struct {
-	buildManager *build.Manager
+type buildAction struct {
+	context.Context
 }
 
-func (action *integrationContextBuildAction) Name() string {
+func (action *buildAction) Name() string {
 	return "build"
 }
 
-func (action *integrationContextBuildAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
+func (action *buildAction) CanHandle(context *v1alpha1.IntegrationContext) bool {
 	return context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding
 }
 
-func (action *integrationContextBuildAction) Handle(context *v1alpha1.IntegrationContext) error {
+func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
+	buildManager, err := platform.GetPlatformBuildManager(action.Context, context.Namespace)
+	if err != nil {
+		return err
+	}
+
 	buildIdentifier := build.Identifier{
 		Name:      "context-" + context.Name,
 		Qualifier: context.ResourceVersion,
 	}
 
-	buildResult := action.buildManager.Get(buildIdentifier)
+	buildResult := buildManager.Get(buildIdentifier)
 	if buildResult.Status == build.StatusNotRequested {
-		action.buildManager.Start(build.Request{
+		buildManager.Start(build.Request{
 			Identifier:   buildIdentifier,
 			Dependencies: context.Spec.Dependencies,
 		})
 		logrus.Info("Build started")
 	} else if buildResult.Status == build.StatusError {
 		target := context.DeepCopy()
+		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseError)
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
 		return sdk.Update(target)
 	} else if buildResult.Status == build.StatusCompleted {
 		target := context.DeepCopy()
 		target.Status.Image = buildResult.Image
+		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseReady)
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
 
 		target.Status.Classpath = make([]string, len(buildResult.Classpath))
@@ -93,7 +95,7 @@ func (action *integrationContextBuildAction) Handle(context *v1alpha1.Integratio
 }
 
 // informIntegrations triggers the processing of all integrations waiting for this context to be built
-func (action *integrationContextBuildAction) informIntegrations(context *v1alpha1.IntegrationContext) error {
+func (action *buildAction) informIntegrations(context *v1alpha1.IntegrationContext) error {
 	list := v1alpha1.NewIntegrationList()
 	err := sdk.List(context.Namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
 	if err != nil {
@@ -116,37 +118,4 @@ func (action *integrationContextBuildAction) informIntegrations(context *v1alpha
 	return nil
 }
 
-// =================================================================
 
-type contextLister struct {
-	namespace string
-}
-
-func newContextLister(namespace string) contextLister {
-	return contextLister{
-		namespace: namespace,
-	}
-}
-
-func (l contextLister) ListPublishedImages() ([]publish.PublishedImage, error) {
-	list := v1alpha1.NewIntegrationContextList()
-	err := sdk.List(l.namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
-	if err != nil {
-		return nil, err
-	}
-	images := make([]publish.PublishedImage, 0)
-	for _, ctx := range list.Items {
-		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
-			continue
-		}
-		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != "platform" {
-			continue
-		}
-
-		images = append(images, publish.PublishedImage{
-			Image:     ctx.Status.Image,
-			Classpath: ctx.Status.Classpath,
-		})
-	}
-	return images, nil
-}

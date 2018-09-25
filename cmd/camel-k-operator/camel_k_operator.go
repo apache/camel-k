@@ -62,6 +62,7 @@ func main() {
 
 	watch(resource, "Integration", namespace, resyncPeriod)
 	watch(resource, "IntegrationContext", namespace, resyncPeriod)
+	watch(resource, "IntegrationPlatform", namespace, resyncPeriod)
 
 	sdk.Handle(stub.NewHandler(ctx, namespace))
 	sdk.Run(ctx)
