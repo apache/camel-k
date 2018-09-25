@@ -10,7 +10,7 @@ Apache Camel K (a.k.a. Kamel) is a lightweight integration framework built from 
 [[getting-started]]
 == Getting Started
 
-Camel K allows to run integrations directly on a Kubernetes or Openshift cluster.
+Camel K allows to run integrations directly on a Kubernetes or OpenShift cluster.
 To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
 If you need help on how to create a local development environment based on *Minishift* or *Minikube* (Minikube will be supported soon, stay tuned!), you can follow the link:/docs/cluster-setup.adoc[local cluster setup guide].
@@ -24,7 +24,7 @@ Look into the https://github.com/apache/camel-k/releases[release page] for lates
 If you want to contribute, you can also **build it from source!** Refer to the link:/docs/developers.adoc[developer's guide]
 for information on how to do it.
 
-Once you have the "kamel" binary, log into your cluster using the standard "oc" (Openshift) or "kubectl" (Kubernetes) client tool and execute the following command to install Camel K:
+Once you have the "kamel" binary, log into your cluster using the standard "oc" (OpenShift) or "kubectl" (Kubernetes) client tool and execute the following command to install Camel K:
 
 ```
 kamel install
