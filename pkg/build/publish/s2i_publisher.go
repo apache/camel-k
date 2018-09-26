@@ -19,6 +19,10 @@ package publish
 
 import (
 	"context"
+	"io/ioutil"
+	"path"
+	"time"
+
 	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
@@ -30,12 +34,9 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"path"
-	"time"
 )
 
 const (
@@ -59,7 +60,9 @@ type uploadedArtifactsSelector func([]build.ClasspathEntry) (string, []build.Cla
 
 // NewS2IPublisher creates a new publisher doing a Openshift S2I binary build
 func NewS2IPublisher(ctx context.Context, namespace string) build.Publisher {
-	identitySelector := func(entries []build.ClasspathEntry) (string, []build.ClasspathEntry, error) { return baseImage, entries, nil }
+	identitySelector := func(entries []build.ClasspathEntry) (string, []build.ClasspathEntry, error) {
+		return baseImage, entries, nil
+	}
 	return newS2IPublisher(ctx, namespace, identitySelector)
 }
 

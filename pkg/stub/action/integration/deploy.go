@@ -51,10 +51,12 @@ func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
 	if err != nil {
 		return err
 	}
-	if err = createOrUpdateConfigMap(ctx, integration); err != nil {
+	err = createOrUpdateConfigMap(ctx, integration)
+	if err != nil {
 		return err
 	}
-	if err = createOrUpdateDeployment(ctx, integration); err != nil {
+	err = createOrUpdateDeployment(ctx, integration)
+	if err != nil {
 		return err
 	}
 

@@ -19,6 +19,7 @@ package publish
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/build"
 )
 
@@ -58,7 +59,7 @@ func (p *s2iIncrementalPublisher) selectArtifactsToUpload(entries []build.Classp
 	}
 
 	bestImage, commonLibs := p.findBestImage(images, entries)
-	if (bestImage != nil) {
+	if bestImage != nil {
 		selectedClasspath := make([]build.ClasspathEntry, 0)
 		for _, entry := range entries {
 			if _, isCommon := commonLibs[entry.ID]; !isCommon {
