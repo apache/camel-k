@@ -19,10 +19,11 @@ package tar
 
 import (
 	atar "archive/tar"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"path"
+
+	"github.com/pkg/errors"
 )
 
 // Appender provides a high level abstraction over writing tar files
@@ -51,7 +52,8 @@ func (t *Appender) Close() error {
 	if err := t.writer.Close(); err != nil {
 		return err
 	}
-	if err := t.tarFile.Close(); err != nil {
+	err := t.tarFile.Close()
+	if err != nil {
 		return err
 	}
 	return nil

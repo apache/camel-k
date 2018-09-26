@@ -22,14 +22,15 @@ limitations under the License.
 package test
 
 import (
+	"time"
+
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"time"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func init() {
@@ -94,7 +95,7 @@ func createDummyDeployment(name string, replicas *int32, labelKey string, labelV
 		}
 
 		if len(list.Items) > 0 {
-			time.Sleep(1*time.Second)
+			time.Sleep(1 * time.Second)
 		} else {
 			break
 		}
@@ -110,8 +111,8 @@ func getDummyDeployment(name string, replicas *int32, labelKey string, labelValu
 			APIVersion: appsv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   getTargetNamespace(),
+			Name:      name,
+			Namespace: getTargetNamespace(),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: replicas,
@@ -175,4 +176,3 @@ func getDummyPod(name string, command ...string) v1.Pod {
 		},
 	}
 }
-

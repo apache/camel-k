@@ -37,8 +37,7 @@ import (
 )
 
 const (
-	buildDirPrefix    = "maven-"
-
+	buildDirPrefix = "maven-"
 )
 
 // BuildResult --
