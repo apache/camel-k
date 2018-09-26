@@ -19,16 +19,17 @@ package log
 
 import (
 	"bufio"
-	"io"
 	"context"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"k8s.io/api/core/v1"
+	"io"
+	"strconv"
 	"sync"
 	"sync/atomic"
-	"strconv"
-	"github.com/sirupsen/logrus"
 	"time"
+
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/sirupsen/logrus"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // SelectorScraper scrapes all pods with a given selector
@@ -66,7 +67,7 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 		logrus.Warn("Could not synchronize log by label " + s.labelSelector)
 	}
 	select {
-	case <- ctx.Done():
+	case <-ctx.Done():
 		// cleanup
 		s.podScrapers.Range(func(k, v interface{}) bool {
 			if canc, isCanc := v.(context.CancelFunc); isCanc {
@@ -76,7 +77,7 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 			return true
 		})
 		clientCloser()
-	case <- time.After(2*time.Second):
+	case <-time.After(2 * time.Second):
 		go s.periodicSynchronize(ctx, out, clientCloser)
 	}
 }

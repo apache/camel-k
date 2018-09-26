@@ -18,13 +18,14 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/apache/camel-k/pkg/client/cmd"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"math/rand"
 	"os"
-	"context"
 	"time"
+
+	"github.com/apache/camel-k/pkg/client/cmd"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func main() {

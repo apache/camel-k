@@ -22,9 +22,10 @@ limitations under the License.
 package test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInstallation(t *testing.T) {
