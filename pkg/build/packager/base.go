@@ -125,7 +125,12 @@ func (b *commonPackager) execute(request build.Request, assembled build.Assemble
 }
 
 func (b *commonPackager) createTar(assembled build.AssembledOutput, selectedArtifacts []build.ClasspathEntry) (string, error) {
-	artifactDir, err := ioutil.TempDir(sharedDir, artifactDirPrefix)
+	buildBaseDir := sharedDir
+	if _, err := os.Stat(buildBaseDir); os.IsNotExist(err) {
+		// use default OS temp dir if a shared dir is not present
+		buildBaseDir = ""
+	}
+	artifactDir, err := ioutil.TempDir(buildBaseDir, artifactDirPrefix)
 	if err != nil {
 		return "", errors.Wrap(err, "could not create temporary dir for packaged artifacts")
 	}
