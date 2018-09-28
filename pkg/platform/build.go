@@ -23,6 +23,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/build"
 	"github.com/apache/camel-k/pkg/build/assemble"
+	"github.com/apache/camel-k/pkg/build/packager"
 	"github.com/apache/camel-k/pkg/build/publish"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,8 +45,13 @@ func GetPlatformBuildManager(ctx context.Context, namespace string) (*build.Mana
 
 	assembler := assemble.NewMavenAssembler(ctx)
 	if pl.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyS2I {
-		publisher := publish.NewS2IIncrementalPublisher(ctx, namespace, newContextLister(namespace))
-		buildManager = build.NewManager(ctx, assembler, publisher)
+		packaging := packager.NewS2IIncrementalPackager(ctx, newContextLister(namespace))
+		publisher := publish.NewS2IPublisher(ctx, namespace)
+		buildManager = build.NewManager(ctx, assembler, packaging, publisher)
+	} else if pl.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && pl.Spec.Build.Registry != "" {
+		packaging := packager.NewJavaStandardPackager(ctx)
+		publisher := publish.NewKanikoPublisher(ctx, namespace, pl.Spec.Build.Registry)
+		buildManager = build.NewManager(ctx, assembler, packaging, publisher)
 	}
 
 	if buildManager == nil {
@@ -66,14 +72,14 @@ func newContextLister(namespace string) contextLister {
 	}
 }
 
-func (l contextLister) ListPublishedImages() ([]publish.PublishedImage, error) {
+func (l contextLister) ListPublishedImages() ([]packager.PublishedImage, error) {
 	list := v1alpha1.NewIntegrationContextList()
 
 	err := sdk.List(l.namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
 	if err != nil {
 		return nil, err
 	}
-	images := make([]publish.PublishedImage, 0)
+	images := make([]packager.PublishedImage, 0)
 	for _, ctx := range list.Items {
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
 			continue
@@ -82,7 +88,7 @@ func (l contextLister) ListPublishedImages() ([]publish.PublishedImage, error) {
 			continue
 		}
 
-		images = append(images, publish.PublishedImage{
+		images = append(images, packager.PublishedImage{
 			Image:     ctx.Status.Image,
 			Classpath: ctx.Status.Classpath,
 		})

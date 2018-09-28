@@ -24,6 +24,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // Resources installs named resources from the project resource directory
@@ -43,11 +44,16 @@ func Resource(namespace string, name string) error {
 		return err
 	}
 
+	return RuntimeObject(namespace, obj)
+}
+
+// RuntimeObject installs a single runtime object
+func RuntimeObject(namespace string, obj runtime.Object) error {
 	if metaObject, ok := obj.(metav1.Object); ok {
 		metaObject.SetNamespace(namespace)
 	}
 
-	err = sdk.Create(obj)
+	err := sdk.Create(obj)
 	if err != nil && errors.IsAlreadyExists(err) {
 		// Don't recreate Service object
 		if obj.GetObjectKind().GroupVersionKind().Kind == "Service" {
@@ -58,6 +64,9 @@ func Resource(namespace string, name string) error {
 			return nil
 		}
 		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationPlatformKind {
+			return nil
+		}
+		if obj.GetObjectKind().GroupVersionKind().Kind == "PersistentVolumeClaim" {
 			return nil
 		}
 		return sdk.Update(obj)

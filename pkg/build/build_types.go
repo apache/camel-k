@@ -63,6 +63,19 @@ type Assembler interface {
 	Assemble(Request) <-chan AssembledOutput
 }
 
+// PackagedOutput is the new image layer that needs to be pushed
+type PackagedOutput struct {
+	Error     error
+	BaseImage string
+	TarFile   string
+}
+
+// A Packager produces the image layer that needs to be pushed
+type Packager interface {
+	Package(Request, AssembledOutput) <-chan PackagedOutput
+	Cleanup(PackagedOutput)
+}
+
 // PublishedOutput is the output of the publish phase
 type PublishedOutput struct {
 	Error error
@@ -71,7 +84,7 @@ type PublishedOutput struct {
 
 // A Publisher publishes a docker image of a build request
 type Publisher interface {
-	Publish(Request, AssembledOutput) <-chan PublishedOutput
+	Publish(Request, AssembledOutput, PackagedOutput) <-chan PublishedOutput
 }
 
 // Status --

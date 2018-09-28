@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package publish
+package packager
 
 import (
 	"context"
@@ -23,36 +23,31 @@ import (
 	"github.com/apache/camel-k/pkg/build"
 )
 
-type s2iIncrementalPublisher struct {
-	s2iPublisher *s2iPublisher
-	lister       PublishedImagesLister
+type incrementalPackager struct {
+	commonPackager *commonPackager
+	lister         PublishedImagesLister
+	rootImage      string
 }
 
-// PublishedImage represent a base image that can be used as starting point
-type PublishedImage struct {
-	Image     string
-	Classpath []string
-}
-
-// PublishedImagesLister allows to list all images already published
-type PublishedImagesLister interface {
-	ListPublishedImages() ([]PublishedImage, error)
-}
-
-// NewS2IIncrementalPublisher creates a new publisher that is able to do a Openshift S2I binary builds on top of other builds
-func NewS2IIncrementalPublisher(ctx context.Context, namespace string, lister PublishedImagesLister) build.Publisher {
-	layeredPublisher := s2iIncrementalPublisher{
-		lister: lister,
+// newIncrementalPackager creates a new packager that is able to create a layer on top of a existing image
+func newIncrementalPackager(ctx context.Context, lister PublishedImagesLister, rootImage string) build.Packager {
+	layeredPackager := incrementalPackager{
+		lister:    lister,
+		rootImage: rootImage,
 	}
-	layeredPublisher.s2iPublisher = newS2IPublisher(ctx, namespace, layeredPublisher.selectArtifactsToUpload)
-	return &layeredPublisher
+	layeredPackager.commonPackager = newBasePackagerWithSelector(ctx, layeredPackager.selectArtifactsToUpload)
+	return &layeredPackager
 }
 
-func (p *s2iIncrementalPublisher) Publish(req build.Request, assembled build.AssembledOutput) <-chan build.PublishedOutput {
-	return p.s2iPublisher.Publish(req, assembled)
+func (p *incrementalPackager) Package(req build.Request, assembled build.AssembledOutput) <-chan build.PackagedOutput {
+	return p.commonPackager.Package(req, assembled)
 }
 
-func (p *s2iIncrementalPublisher) selectArtifactsToUpload(entries []build.ClasspathEntry) (string, []build.ClasspathEntry, error) {
+func (p *incrementalPackager) Cleanup(output build.PackagedOutput) {
+	p.commonPackager.Cleanup(output)
+}
+
+func (p *incrementalPackager) selectArtifactsToUpload(entries []build.ClasspathEntry) (string, []build.ClasspathEntry, error) {
 	images, err := p.lister.ListPublishedImages()
 	if err != nil {
 		return "", nil, err
@@ -71,10 +66,10 @@ func (p *s2iIncrementalPublisher) selectArtifactsToUpload(entries []build.Classp
 	}
 
 	// return default selection
-	return baseImage, entries, nil
+	return p.rootImage, entries, nil
 }
 
-func (p *s2iIncrementalPublisher) findBestImage(images []PublishedImage, entries []build.ClasspathEntry) (*PublishedImage, map[string]bool) {
+func (p *incrementalPackager) findBestImage(images []PublishedImage, entries []build.ClasspathEntry) (*PublishedImage, map[string]bool) {
 	if len(images) == 0 {
 		return nil, nil
 	}

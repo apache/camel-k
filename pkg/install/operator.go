@@ -17,20 +17,68 @@ limitations under the License.
 
 package install
 
+import (
+	"errors"
+	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/minishift"
+	"github.com/apache/camel-k/pkg/util/openshift"
+)
+
 // Operator --
 func Operator(namespace string) error {
+	isOpenshift, err := openshift.IsOpenShift()
+	if err != nil {
+		return err
+	}
+	var operatorRole string
+	if isOpenshift {
+		operatorRole = "operator-role-openshift.yaml"
+	} else {
+		operatorRole = "operator-role-kubernetes.yaml"
+	}
 	return Resources(namespace,
 		"operator-service-account.yaml",
-		"operator-role-openshift.yaml", // TODO distinguish between Openshift and Kubernetes
+		operatorRole,
 		"operator-role-binding.yaml",
+		"builder-pvc.yaml",
 		"operator-deployment.yaml",
 		"operator-service.yaml",
 	)
 }
 
 // Platform installs the platform custom resource
-func Platform(namespace string) error {
-	return Resource(namespace, "platform-cr.yaml")
+func Platform(namespace string, registry string) error {
+	isOpenshift, err := openshift.IsOpenShift()
+	if err != nil {
+		return err
+	}
+	if isOpenshift {
+		return Resource(namespace, "platform-cr.yaml")
+	}
+	platform, err := kubernetes.LoadResourceFromYaml(deploy.Resources["platform-cr.yaml"])
+	if err != nil {
+		return err
+	}
+	if pl, ok := platform.(*v1alpha1.IntegrationPlatform); !ok {
+		panic("cannot find integration platform template")
+	} else {
+		if registry == "" {
+			// This operation should be done here in the installer
+			// because the operator is not allowed to look into the "kube-system" namespace
+			minishiftRegistry, err := minishift.FindRegistry()
+			if err != nil {
+				return err
+			}
+			if minishiftRegistry == nil {
+				return errors.New("cannot find automatically a registry where to push images")
+			}
+			registry = *minishiftRegistry
+		}
+		pl.Spec.Build.Registry = registry
+		return RuntimeObject(namespace, pl)
+	}
 }
 
 // Example --
