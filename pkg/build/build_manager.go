@@ -28,14 +28,16 @@ type Manager struct {
 	ctx       context.Context
 	builds    sync.Map
 	assembler Assembler
+	packager  Packager
 	publisher Publisher
 }
 
-// NewManager creates an instance of the build manager using the given builder
-func NewManager(ctx context.Context, assembler Assembler, publisher Publisher) *Manager {
+// NewManager creates an instance of the build manager using the given assembler, packager and publisher
+func NewManager(ctx context.Context, assembler Assembler, packager Packager, publisher Publisher) *Manager {
 	return &Manager{
 		ctx:       ctx,
 		assembler: assembler,
+		packager:  packager,
 		publisher: publisher,
 	}
 }
@@ -68,7 +70,21 @@ func (m *Manager) Start(request Request) {
 			}
 		}
 
-		publishChannel := m.publisher.Publish(request, assembled)
+		packageChannel := m.packager.Package(request, assembled)
+		var packaged PackagedOutput
+		select {
+		case <-m.ctx.Done():
+			m.builds.Store(request.Identifier, canceledBuildInfo(request))
+			return
+		case packaged = <-packageChannel:
+			if packaged.Error != nil {
+				m.builds.Store(request.Identifier, failedPackageBuildInfo(request, packaged))
+				return
+			}
+		}
+		defer m.packager.Cleanup(packaged)
+
+		publishChannel := m.publisher.Publish(request, assembled, packaged)
 		var published PublishedOutput
 		select {
 		case <-m.ctx.Done():
@@ -107,6 +123,14 @@ func canceledBuildInfo(request Request) Result {
 }
 
 func failedAssembleBuildInfo(request Request, output AssembledOutput) Result {
+	return Result{
+		Request: request,
+		Error:   output.Error,
+		Status:  StatusError,
+	}
+}
+
+func failedPackageBuildInfo(request Request, output PackagedOutput) Result {
 	return Result{
 		Request: request,
 		Error:   output.Error,
