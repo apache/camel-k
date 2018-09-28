@@ -167,7 +167,7 @@ func (b *kanikoPublisher) publish(tarFile string, baseImageName string, source b
 			}
 		}
 		return false, nil
-	}, 5*time.Minute)
+	}, 10*time.Minute)
 
 	if err != nil {
 		return "", err
