@@ -56,6 +56,9 @@ install: install-minishift
 install-minishift:
 	./build/install_minishift.sh
 
+install-minikube:
+	./build/install_minikube.sh
+
 test: check
 check:
 	go test ./...
