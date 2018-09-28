@@ -32,18 +32,29 @@ func Operator(namespace string) error {
 	if err != nil {
 		return err
 	}
-	var operatorRole string
 	if isOpenshift {
-		operatorRole = "operator-role-openshift.yaml"
-	} else {
-		operatorRole = "operator-role-kubernetes.yaml"
+		return installOpenshift(namespace)
 	}
+	return installKubernetes(namespace)
+}
+
+func installOpenshift(namespace string) error {
 	return Resources(namespace,
 		"operator-service-account.yaml",
-		operatorRole,
+		"operator-role-openshift.yaml",
+		"operator-role-binding.yaml",
+		"operator-deployment-openshift.yaml",
+		"operator-service.yaml",
+	)
+}
+
+func installKubernetes(namespace string) error {
+	return Resources(namespace,
+		"operator-service-account.yaml",
+		"operator-role-kubernetes.yaml",
 		"operator-role-binding.yaml",
 		"builder-pvc.yaml",
-		"operator-deployment.yaml",
+		"operator-deployment-kubernetes.yaml",
 		"operator-service.yaml",
 	)
 }
