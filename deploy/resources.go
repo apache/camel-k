@@ -2206,7 +2206,7 @@ spec:
           .to('log:info?showHeaders=true')
     name: routes.groovy
 `
-	Resources["operator-deployment.yaml"] =
+	Resources["operator-deployment-kubernetes.yaml"] =
 		`
 apiVersion: apps/v1
 kind: Deployment
@@ -2250,6 +2250,45 @@ spec:
       - name: camel-k-builder
         persistentVolumeClaim:
           claimName: camel-k-builder
+
+`
+	Resources["operator-deployment-openshift.yaml"] =
+		`
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: camel-k-operator
+  template:
+    metadata:
+      labels:
+        name: camel-k-operator
+    spec:
+      serviceAccountName: camel-k-operator
+      containers:
+        - name: camel-k-operator
+          image: docker.io/apache/camel-k:0.0.3-SNAPSHOT
+          ports:
+          - containerPort: 60000
+            name: metrics
+          command:
+          - camel-k-operator
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OPERATOR_NAME
+              value: "camel-k-operator"
 
 `
 	Resources["operator-role-binding.yaml"] =
