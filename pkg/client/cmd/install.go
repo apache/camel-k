@@ -41,6 +41,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	cmd.Flags().BoolVar(&options.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
 	cmd.Flags().BoolVar(&options.exampleSetup, "example", false, "Install example integration")
+	cmd.Flags().StringVar(&options.registry, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.ParseFlags(os.Args)
 
 	return &cmd
@@ -50,6 +51,7 @@ type installCmdOptions struct {
 	*RootCmdOptions
 	clusterSetupOnly bool
 	exampleSetup     bool
+	registry         string
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
@@ -69,7 +71,7 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		err = install.Platform(namespace)
+		err = install.Platform(namespace, o.registry)
 		if err != nil {
 			return err
 		}

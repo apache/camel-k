@@ -18,12 +18,12 @@ limitations under the License.
 package platform
 
 import (
+	"errors"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
+	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 // NewInitializeAction returns a action that initializes the platform configuration when not provided by the user
@@ -63,9 +63,9 @@ func (action *initializeAction) Handle(platform *v1alpha1.IntegrationPlatform) e
 	// update missing fields in the resource
 	if target.Spec.Cluster == "" {
 		// determine the kind of cluster the platform in installed into
-		if openshift, err := action.isOpenshift(); err != nil {
+		if isOpenshift, err := openshift.IsOpenShift(); err != nil {
 			return err
-		} else if openshift {
+		} else if isOpenshift {
 			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 		} else {
 			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
@@ -77,24 +77,17 @@ func (action *initializeAction) Handle(platform *v1alpha1.IntegrationPlatform) e
 			target.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
 			target.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko
-			// TODO discover registry location
 		}
+	}
+
+	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && target.Spec.Build.Registry == "" {
+		return errors.New("no registry specified for publishing images")
 	}
 
 	// next status
 	logrus.Info("Platform ", target.Name, " transitioning to state ", v1alpha1.IntegrationPlatformPhaseCreating)
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 	return sdk.Update(target)
-}
-
-func (action *initializeAction) isOpenshift() (bool, error) {
-	_, err := k8sclient.GetKubeClient().Discovery().ServerResourcesForGroupVersion("image.openshift.io/v1")
-	if err != nil && errors.IsNotFound(err) {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	}
-	return true, nil
 }
 
 func (action *initializeAction) isDuplicate(thisPlatform *v1alpha1.IntegrationPlatform) (bool, error) {

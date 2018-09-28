@@ -24,6 +24,22 @@ var Resources map[string]string
 func init() {
 	Resources = make(map[string]string)
 
+	Resources["builder-pvc.yaml"] =
+		`
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: camel-k-builder
+  labels:
+    app: "camel-k"
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+`
 	Resources["camel-catalog.yaml"] =
 		`
 artifacts:
@@ -2227,6 +2243,13 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "camel-k-operator"
+          volumeMounts:
+          - mountPath: /workspace
+            name: camel-k-builder
+      volumes:
+      - name: camel-k-builder
+        persistentVolumeClaim:
+          claimName: camel-k-builder
 
 `
 	Resources["operator-role-binding.yaml"] =
