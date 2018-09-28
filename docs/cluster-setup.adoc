@@ -24,7 +24,24 @@ Then you can start the cluster with:
 minishift start
 ```
 
+You can now proceed to link:/README.adoc[install Camel K].
+
 [[minikube]]
 == Minikube
 
-Minikube and Kubernetes are not yet supported (but support is coming soon).
+You can run Camel K integrations on plain Kubernetes using the Minikube cluster creation tool.
+Follow the instructions in the https://github.com/kubernetes/minikube#installation[official doc] for the installation.
+
+Start a new instance of Minikube using the command:
+
+```
+minikube start
+```
+
+After the startup process is completed, you need to **enable the `registry` addon**:
+
+```
+minikube addons enable registry
+```
+
+You can now proceed to link:/README.adoc[install Camel K].

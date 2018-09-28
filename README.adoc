@@ -13,7 +13,7 @@ Apache Camel K (a.k.a. Kamel) is a lightweight integration framework built from 
 Camel K allows to run integrations directly on a Kubernetes or OpenShift cluster.
 To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
-If you need help on how to create a local development environment based on *Minishift* or *Minikube* (Minikube will be supported soon, stay tuned!), you can follow the link:/docs/cluster-setup.adoc[local cluster setup guide].
+If you need help on how to create a local development environment based on *Minishift* or *Minikube*, you can follow the link:/docs/cluster-setup.adoc[local cluster setup guide].
 
 [[installation]]
 === Installation
