@@ -46,6 +46,37 @@ kamel run runtime/examples/Sample.java
 
 A "Sample.java" file is included in the link:/runtime/examples[/runtime/examples] folder of this repository. You can change the content of the file and execute the command again to see the changes.
 
+==== Configure Integration properties
+
+Properties associated to an integration can be configured either using a ConfigMap/Secret or by setting using the "--property" flag, i.e.
+
+```
+kamel run --property my.message=test runtime/examples/props.js
+```
+
+==== Configure Integration Logging
+
+camel-k runtime uses log4j2 as logging framework and can be configured through integration properties.
+If you need to change the logging level of various loggers, you can do so by using the `logging.level` prefix:
+
+```
+logging.level.org.apache.camel = DEBUG
+```
+
+==== Configure Integration Components
+
+camel-k component can be configured programmatically inside an integration or using properties with the following syntax.
+
+```
+camel.component.${scheme}.${property} = ${value}
+```
+
+As example if you want to change the queue size of the seda component, you can use the following property:
+
+```
+camel.component.seda.queueSize = 10
+```
+
 === Running Integrations in "Dev" Mode for Fast Feedback
 
 If you want to iterate quickly on a integration to have fast feedback on the code you're writing, you can use run it in **"dev" mode**:
