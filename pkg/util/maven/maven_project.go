@@ -49,6 +49,13 @@ type Dependencies struct {
 
 // Add a dependency to maven's dependencies
 func (deps *Dependencies) Add(dep Dependency) {
+	for _, d := range deps.Dependencies {
+		// Check if the given dependency is already included in the dependency list
+		if d == dep {
+			return
+		}
+	}
+
 	deps.Dependencies = append(deps.Dependencies, dep)
 }
 
