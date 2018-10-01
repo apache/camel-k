@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.k.jvm.RoutesLoader;
 import org.apache.camel.k.jvm.RoutesLoaders;
+import org.apache.camel.k.jvm.RuntimeRegistry;
 import org.apache.camel.model.ProcessDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.ToDefinition;
@@ -34,7 +35,7 @@ public class RoutesLoadersTest {
     public void testLoadKotlin() throws Exception {
         String resource = "classpath:routes.kts";
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(resource);
+        RouteBuilder builder = loader.load(new RuntimeRegistry(), resource);
 
         assertThat(loader).isInstanceOf(KotlinRoutesLoader.class);
         assertThat(builder).isNotNull();

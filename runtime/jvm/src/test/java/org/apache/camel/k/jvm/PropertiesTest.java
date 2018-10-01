@@ -20,7 +20,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.seda.SedaComponent;
-import org.apache.camel.main.Main;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.main.MainSupport;
 import org.junit.Test;
@@ -34,10 +33,10 @@ public class PropertiesTest {
         System.setProperty("my.property", "my.value");
 
         try {
-            Main main = new Main();
-            main.setDuration(5);
-            main.addMainListener(new Application.ComponentPropertiesBinder());
-            main.addMainListener(new MainListenerSupport() {
+            Runtime runtime = new Runtime();
+            runtime.setDuration(5);
+            runtime.addMainListener(new Application.ComponentPropertiesBinder());
+            runtime.addMainListener(new MainListenerSupport() {
                 @Override
                 public void afterStart(MainSupport main) {
                     try {
@@ -53,7 +52,7 @@ public class PropertiesTest {
                 }
             });
 
-            main.run();
+            runtime.run();
         } finally {
             System.getProperties().remove("my.property");
         }
@@ -69,11 +68,11 @@ public class PropertiesTest {
         System.setProperty("camel.component.my-seda.queueSize", Integer.toString(queueSize2));
 
         try {
-            Main main = new Main();
-            main.setDuration(5);
-            main.bind("my-seda", new SedaComponent());
-            main.addMainListener(new Application.ComponentPropertiesBinder());
-            main.addMainListener(new MainListenerSupport() {
+            Runtime runtime = new Runtime();
+            runtime.setDuration(5);
+            runtime.getRegistry().bind("my-seda", new SedaComponent());
+            runtime.addMainListener(new Application.ComponentPropertiesBinder());
+            runtime.addMainListener(new MainListenerSupport() {
                 @Override
                 public void afterStart(MainSupport main) {
                     try {
@@ -89,7 +88,7 @@ public class PropertiesTest {
                 }
             });
 
-            main.run();
+            runtime.run();
         } finally {
             System.getProperties().remove("camel.component.seda.queueSize");
         }

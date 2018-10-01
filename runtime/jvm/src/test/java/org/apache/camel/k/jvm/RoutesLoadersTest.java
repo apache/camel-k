@@ -31,7 +31,7 @@ public class RoutesLoadersTest {
     public void testLoadClass() throws Exception {
         String resource = "classpath:" + MyRoutes.class.getName() + ".class";
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(resource);
+        RouteBuilder builder = loader.load(new RuntimeRegistry(), resource);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaClass.class);
         assertThat(builder).isNotNull();
@@ -48,7 +48,7 @@ public class RoutesLoadersTest {
     public void testLoadJava() throws Exception {
         String resource = "classpath:MyRoutes.java";
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(resource);
+        RouteBuilder builder = loader.load(new RuntimeRegistry(), resource);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaSource.class);
         assertThat(builder).isNotNull();
@@ -65,7 +65,7 @@ public class RoutesLoadersTest {
     public void testLoadJavaScript() throws Exception {
         String resource = "classpath:routes.js";
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(resource);
+        RouteBuilder builder = loader.load(new RuntimeRegistry(), resource);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaScript.class);
         assertThat(builder).isNotNull();
@@ -82,7 +82,7 @@ public class RoutesLoadersTest {
     public void testLoadJavaScriptWithCustomExtension() throws Exception {
         String resource = "classpath:routes.mytype";
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, "js");
-        RouteBuilder builder = loader.load(resource);
+        RouteBuilder builder = loader.load(new RuntimeRegistry(), resource);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaScript.class);
         assertThat(builder).isNotNull();
@@ -99,7 +99,7 @@ public class RoutesLoadersTest {
     public void testLoadXml() throws Exception {
         String resource = "classpath:routes.xml";
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(resource);
+        RouteBuilder builder = loader.load(new RuntimeRegistry(), resource);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.Xml.class);
         assertThat(builder).isNotNull();

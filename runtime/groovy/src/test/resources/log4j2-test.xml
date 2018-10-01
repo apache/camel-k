@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5level|%t|%c{1} - %msg%n"/>
+    </Console>
+    <File name="FILE" fileName="target/camel-k-runtime-groovy-test.log">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5level|%t|%c{1} - %msg%n"/>
+    </File>
+  </Appenders>
+
+  <Loggers>
+    <Root level="INFO">
+      <!--<AppenderRef ref="STDOUT"/>-->
+      <AppenderRef ref="FILE"/>
+    </Root>
+  </Loggers>
+
+</Configuration>
