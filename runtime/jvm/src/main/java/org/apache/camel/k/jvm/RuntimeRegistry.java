@@ -80,16 +80,19 @@ public class RuntimeRegistry implements Registry {
             .collect(Collectors.toSet());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object lookup(String name) {
         return lookupByName(name);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public <T> T lookup(String name, Class<T> type) {
         return lookupByNameAndType(name, type);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public <T> Map<String, T> lookupByType(Class<T> type) {
         return findByTypeWithName(type);
