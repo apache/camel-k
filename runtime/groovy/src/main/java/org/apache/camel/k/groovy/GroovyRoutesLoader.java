@@ -92,15 +92,20 @@ public class GroovyRoutesLoader implements RoutesLoader {
             callable.setResolveStrategy(Closure.DELEGATE_ONLY);
             callable.setDelegate(new GroovyObjectSupport() {
                 public Object invokeMethod(String name, Object arg) {
+                    final Object value;
+
                     if (arg == null) {
-                        return super.invokeMethod(name, arg);
-                    }
-                    if (!arg.getClass().isArray()) {
-                        return super.invokeMethod(name, arg);
+                        value = null;
+                    } else if (!arg.getClass().isArray()) {
+                        value = arg;
+                    } else if (Array.getLength(arg) == 1) {
+                        value = Array.get(arg, 0);
+                    } else {
+                        throw new IllegalArgumentException("Unable to set property \"" + name + "\" on component \"" + name + "\"");
                     }
 
                     try {
-                        IntrospectionSupport.setProperty(component, name, Array.get(arg, 0), true);
+                        IntrospectionSupport.setProperty(component, name, value, true);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
