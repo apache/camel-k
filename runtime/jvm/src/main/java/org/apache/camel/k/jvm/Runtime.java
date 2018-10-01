@@ -58,17 +58,18 @@ public final class Runtime extends MainSupport {
         return registry;
     }
 
-    public CamelContext getOrCreateCamelContext() {
+    public CamelContext getCamelContext() {
         return contextMap.computeIfAbsent("camel-1", key -> {
-            DefaultCamelContext camelContext = new DefaultCamelContext();
+            DefaultCamelContext context = new DefaultCamelContext();
+            context.setName(key);
 
             CompositeRegistry registry = new CompositeRegistry();
             registry.addRegistry(this.registry);
-            registry.addRegistry(camelContext.getRegistry());
+            registry.addRegistry(context.getRegistry());
 
-            camelContext.setRegistry(registry);
+            context.setRegistry(registry);
 
-            return camelContext;
+            return context;
         });
     }
 
@@ -86,7 +87,7 @@ public final class Runtime extends MainSupport {
 
     @Override
     protected Map<String, CamelContext> getCamelContextMap() {
-        getOrCreateCamelContext();
+        getCamelContext();
 
         return contextMap;
     }
