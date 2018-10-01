@@ -21,18 +21,19 @@ import java.util.List;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.k.jvm.RoutesLoader;
 import org.apache.camel.k.jvm.RoutesLoaders;
+import org.apache.camel.k.jvm.RuntimeRegistry;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.ToDefinition;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RoutesLoadersTest {
+public class RoutesLoaderTest {
     @Test
     public void testLoadGroovy() throws Exception {
         String resource = "classpath:routes.groovy";
         RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(resource);
+        RouteBuilder builder = loader.load(new RuntimeRegistry(), resource);
 
         assertThat(loader).isInstanceOf(GroovyRoutesLoader.class);
         assertThat(builder).isNotNull();

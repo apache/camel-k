@@ -27,6 +27,7 @@ import javax.script.SimpleBindings;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.k.jvm.RuntimeRegistry;
 import org.apache.camel.k.jvm.dsl.Components;
 import org.apache.camel.k.jvm.Language;
 import org.apache.camel.k.jvm.RoutesLoader;
@@ -40,7 +41,7 @@ public class KotlinRoutesLoader implements RoutesLoader {
     }
 
     @Override
-    public RouteBuilder load(String resource) throws Exception {
+    public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
         return new RouteBuilder() {
             @Override
             public void configure() throws Exception {
@@ -52,6 +53,7 @@ public class KotlinRoutesLoader implements RoutesLoader {
                 // Exposed to the underlying script, but maybe better to have
                 // a nice dsl
                 bindings.put("builder", this);
+                bindings.put("registry", registry);
                 bindings.put("context", context);
                 bindings.put("components", new Components(context));
 
@@ -62,6 +64,7 @@ public class KotlinRoutesLoader implements RoutesLoader {
                     builder.append("val builder = bindings[\"builder\"] as org.apache.camel.builder.RouteBuilder").append('\n');
                     builder.append("val context = bindings[\"context\"] as org.apache.camel.CamelContext").append('\n');
                     builder.append("val components = bindings[\"components\"] as org.apache.camel.k.jvm.dsl.Components").append('\n');
+                    builder.append("val registry = bindings[\"registry\"] as org.apache.camel.k.jvm.RuntimeRegistry").append('\n');
 
                     // create aliases for common functions
                     builder.append("fun from(uri: String): org.apache.camel.model.RouteDefinition = builder.from(uri)").append('\n');
