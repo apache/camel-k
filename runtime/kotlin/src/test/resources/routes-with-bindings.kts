@@ -1,4 +1,7 @@
 
+registry.bind("myEntry", "myRegistryEntry")
+
+
 from("timer:tick")
     .process().message {
         m -> m.headers["MyHeader"] = "MyHeaderValue"

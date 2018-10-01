@@ -60,7 +60,7 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(String resource) throws Exception {
+        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
             String path = resource;
             path = StringUtils.removeStart(path, SCHEME_CLASSPATH);
             path = StringUtils.removeEnd(path, ".class");
@@ -82,7 +82,7 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(String resource) throws Exception {
+        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
@@ -111,7 +111,7 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(String resource) throws Exception {
+        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
@@ -125,6 +125,7 @@ public final class RoutesLoaders {
                     bindings.put("builder", this);
                     bindings.put("context", context);
                     bindings.put("components", new Components(context));
+                    bindings.put("registry", registry);
                     bindings.put("from", (Function<String, RouteDefinition>) uri -> from(uri));
                     bindings.put("rest", (Supplier<RestDefinition>) () -> rest());
                     bindings.put("restConfiguration", (Supplier<RestConfigurationDefinition>) () -> restConfiguration());
@@ -144,7 +145,7 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(String resource) throws Exception {
+        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {

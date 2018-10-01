@@ -20,8 +20,6 @@ import java.util.Properties;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.main.Main;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.IntrospectionSupport;
@@ -64,20 +62,10 @@ public class Application {
             throw new IllegalStateException("No valid resource found in " + Constants.ENV_CAMEL_K_ROUTES_URI + " environment variable");
         }
 
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, language);
-        RouteBuilder routes = loader.load(resource);
-
-        if (routes == null) {
-            throw new IllegalStateException("Unable to load route from: " + resource);
-        }
-
-        LOGGER.info("Routes: {}", resource);
-        LOGGER.info("Language: {}", language);
-
-        Main main = new Main();
-        main.addMainListener(new ComponentPropertiesBinder());
-        main.addRouteBuilder(routes);
-        main.run();
+        Runtime runtime = new Runtime();
+        runtime.load(resource, language);
+        runtime.addMainListener(new ComponentPropertiesBinder());
+        runtime.run();
     }
 
     // *******************************
