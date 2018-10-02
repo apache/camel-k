@@ -8,7 +8,7 @@ version=$($location/get_version.sh)
 git branch -D staging-$version || true
 git checkout -b staging-$version
 git add * || true
-git commit -m "Release $version"
+git commit -a -m "Release $version"
 git tag --force $version staging-$version
 git push --force upstream $version
 
