@@ -1,4 +1,4 @@
-build: build-runtime build-operator build-kamel test
+build: build-runtime build-operator build-kamel build-compile-integration-tests test
 
 build-operator: build-embed-resources
 	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
@@ -8,6 +8,9 @@ build-kamel:
 
 build-embed-resources:
 	./build/embed_resources.sh deploy
+
+build-compile-integration-tests:
+	go test -run xxxxx -tags=integration ./test/*.go
 
 build-runtime:
 	./mvnw clean install -f ./runtime/pom.xml
