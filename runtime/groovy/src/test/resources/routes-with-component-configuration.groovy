@@ -1,15 +1,19 @@
 
-component('seda') {
-    // set value as method
-    queueSize 1234
+context {
+    components {
+        'seda' {
+            // set value as method
+            queueSize 1234
 
-    // set value as property
-    concurrentConsumers = 12
-}
+            // set value as property
+            concurrentConsumers = 12
+        }
 
-component('log') {
-    formatter {
-        'body ==> ' + in.body
+        'log' {
+            formatter {
+                'body ==> ' + it.in.body
+            }
+        }
     }
 }
 
