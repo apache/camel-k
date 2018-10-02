@@ -24,6 +24,7 @@ package test
 import (
 	"context"
 	"github.com/apache/camel-k/pkg/build/assemble"
+	"github.com/apache/camel-k/pkg/build/packager"
 	"github.com/apache/camel-k/pkg/build/publish"
 	"testing"
 	"time"
@@ -37,8 +38,9 @@ func TestBuildManagerBuild(t *testing.T) {
 	ctx := context.TODO()
 	namespace := getTargetNamespace()
 	assembler := assemble.NewMavenAssembler(ctx)
+	pack := packager.NewJavaStandardPackager(ctx)
 	publisher := publish.NewS2IPublisher(ctx, namespace)
-	buildManager := build.NewManager(ctx, assembler, publisher)
+	buildManager := build.NewManager(ctx, assembler, pack, publisher)
 	identifier := build.Identifier{
 		Name:      "man-test",
 		Qualifier: digest.Random(),
@@ -74,8 +76,9 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	ctx := context.TODO()
 	namespace := getTargetNamespace()
 	assembler := assemble.NewMavenAssembler(ctx)
+	pack := packager.NewJavaStandardPackager(ctx)
 	publisher := publish.NewS2IPublisher(ctx, namespace)
-	buildManager := build.NewManager(ctx, assembler, publisher)
+	buildManager := build.NewManager(ctx, assembler, pack, publisher)
 	identifier := build.Identifier{
 		Name:      "man-test-2",
 		Qualifier: digest.Random(),
