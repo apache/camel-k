@@ -124,6 +124,9 @@ tags
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Unix line endings for the Maven wrapper script
+mvnw text eol=lf
 .history
 
 # End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode

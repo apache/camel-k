@@ -10,7 +10,7 @@ build-embed-resources:
 	./build/embed_resources.sh deploy
 
 build-runtime:
-	mvn clean install -f ./runtime/pom.xml
+	./mvnw clean install -f ./runtime/pom.xml
 
 release: prepare-release build images-build images-push test-integration cross-compile git-tag
 
@@ -35,7 +35,7 @@ generate:
 	operator-sdk generate k8s
 
 clean:
-	mvn clean -f ./runtime/pom.xml
+	./mvnw clean -f ./runtime/pom.xml
 	go clean
 	rm -f camel-k-operator
 	rm -f kamel
