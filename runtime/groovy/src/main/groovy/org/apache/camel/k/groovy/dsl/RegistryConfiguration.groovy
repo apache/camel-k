@@ -14,30 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k.groovy.dsl.extension
+package org.apache.camel.k.groovy.dsl
 
-import org.apache.camel.component.log.LogComponent
-import org.apache.camel.impl.DefaultCamelContext
-import org.apache.camel.impl.DefaultExchange
-import spock.lang.Specification
+import org.apache.camel.k.jvm.RuntimeRegistry
 
-class LogExtensionTest extends Specification {
+class RegistryConfiguration {
+    private final RuntimeRegistry registry
 
-    def "invoke extension method - formatter"()  {
-        given:
-        def ctx = new DefaultCamelContext()
+    RegistryConfiguration(RuntimeRegistry registry) {
+        this.registry = registry
+    }
 
-        when:
-        def log = new LogComponent()
-        log.formatter {
-            "body: " + it.in.body
-        }
-
-        def ex = new DefaultExchange(ctx)
-        ex.in.body = 'hello'
-        def result = log.exchangeFormatter.format(ex)
-
-        then:
-        result == 'body: hello'
+    def bind(String name, value) {
+        registry.bind(name, value)
     }
 }

@@ -25,9 +25,8 @@ class LogComponentExtension {
         self.exchangeFormatter = new ExchangeFormatter() {
             @Override
             String format(Exchange exchange) {
-                callable.resolveStrategy = Closure.DELEGATE_ONLY
-                callable.delegate = exchange
-                callable.call()
+                callable.resolveStrategy = Closure.DELEGATE_FIRST
+                callable.call(exchange)
             }
         }
     }

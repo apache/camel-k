@@ -17,6 +17,9 @@
 package org.apache.camel.k.groovy.dsl
 
 import org.apache.camel.CamelContext
+import org.apache.camel.Exchange
+import org.apache.camel.Predicate
+import org.apache.camel.Processor
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.k.jvm.RuntimeRegistry
 import org.apache.camel.k.jvm.dsl.Components
@@ -24,25 +27,23 @@ import org.apache.camel.model.RouteDefinition
 import org.apache.camel.model.rest.RestConfigurationDefinition
 import org.apache.camel.model.rest.RestDefinition
 
-class Integration {
+class IntegrationConfiguration {
     private final RuntimeRegistry registry
 
     final CamelContext context
     final Components components
     final RouteBuilder builder
 
-    Integration(RuntimeRegistry registry, RouteBuilder builder) {
+    IntegrationConfiguration(RuntimeRegistry registry, RouteBuilder builder) {
         this.registry = registry
         this.context = builder.getContext()
         this.components = new Components(this.context)
         this.builder = builder
     }
 
-    def component(String name, Closure<?> callable) {
-        def component = context.getComponent(name, true, false)
-
-        callable.resolveStrategy = Closure.DELEGATE_ONLY
-        callable.delegate = new ComponentConfiguration(component)
+    def context(Closure<?> callable) {
+        callable.resolveStrategy = Closure.DELEGATE_FIRST
+        callable.delegate = new ContextConfiguration(context, registry)
         callable.call()
     }
 
@@ -55,7 +56,7 @@ class Integration {
     }
 
     def rest(Closure<?> callable) {
-        callable.resolveStrategy = Closure.DELEGATE_ONLY
+        callable.resolveStrategy = Closure.DELEGATE_FIRST
         callable.delegate = builder.rest()
         callable.call()
     }
@@ -65,20 +66,35 @@ class Integration {
     }
 
     def restConfiguration(Closure<?> callable) {
-        callable.resolveStrategy = Closure.DELEGATE_ONLY
+        callable.resolveStrategy = Closure.DELEGATE_FIRST
         callable.delegate = builder.restConfiguration()
         callable.call()
     }
 
     def restConfiguration(String component, Closure<?> callable) {
-        callable.resolveStrategy = Closure.DELEGATE_ONLY
+        callable.resolveStrategy = Closure.DELEGATE_FIRST
         callable.delegate = builder.restConfiguration(component)
         callable.call()
     }
 
-    def registry(Closure<?> callable) {
-        callable.resolveStrategy = Closure.DELEGATE_ONLY
-        callable.delegate = registry
-        callable.call()
+    def processor(Closure<?> callable) {
+        return new Processor() {
+            @Override
+            void process(Exchange exchange) throws Exception {
+                callable.resolveStrategy = Closure.DELEGATE_FIRST
+                callable.call(exchange)
+            }
+        }
+    }
+
+
+    def predicate(Closure<?> callable) {
+        return new Predicate() {
+            @Override
+            boolean matches(Exchange exchange) throws Exception {
+                callable.resolveStrategy = Closure.DELEGATE_FIRST
+                return callable.call(exchange)
+            }
+        }
     }
 }

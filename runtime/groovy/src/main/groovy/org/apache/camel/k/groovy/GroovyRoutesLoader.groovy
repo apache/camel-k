@@ -18,7 +18,7 @@ package org.apache.camel.k.groovy
 
 
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.k.groovy.dsl.Integration
+import org.apache.camel.k.groovy.dsl.IntegrationConfiguration
 import org.apache.camel.k.jvm.Language
 import org.apache.camel.k.jvm.RoutesLoader
 import org.apache.camel.k.jvm.RuntimeRegistry
@@ -48,7 +48,7 @@ class GroovyRoutesLoader implements RoutesLoader {
                     def script = (DelegatingScript) sh.parse(reader)
 
                     // set the delegate target
-                    script.setDelegate(new Integration(registry, this))
+                    script.setDelegate(new IntegrationConfiguration(registry, this))
                     script.run()
                 }
             }

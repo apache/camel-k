@@ -18,8 +18,6 @@ package org.apache.camel.k.groovy.dsl
 
 import org.apache.camel.component.log.LogComponent
 import org.apache.camel.component.seda.SedaComponent
-import org.apache.camel.impl.DefaultCamelContext
-import org.apache.camel.impl.DefaultExchange
 import org.apache.camel.k.jvm.Runtime
 import org.apache.camel.main.MainListenerSupport
 import org.apache.camel.main.MainSupport
@@ -102,26 +100,5 @@ class IntegrationTest extends Specification {
         size == 1234
         consumers == 12
         format != null
-    }
-
-
-
-    def "xyz"()  {
-        given:
-        def ctx = new DefaultCamelContext()
-
-        def log = new LogComponent()
-        log.formatter {
-            "body: " + in.body
-        }
-
-        def ex = new DefaultExchange(ctx)
-        ex.in.body = 'hello'
-
-        when:
-        def result = log.exchangeFormatter.format(ex)
-
-        then:
-        result == 'body: hello'
     }
 }
