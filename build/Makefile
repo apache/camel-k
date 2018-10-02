@@ -12,7 +12,7 @@ build-embed-resources:
 build-runtime:
 	./mvnw clean install -f ./runtime/pom.xml
 
-release: clean prepare-release build images-build images-push test-integration cross-compile git-tag
+release: clean prepare-release build images-build images-push cross-compile git-tag
 
 prepare-release:
 	./build/prepare_release.sh
