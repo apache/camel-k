@@ -24,8 +24,6 @@ import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.k.jvm.RuntimeRegistry
 import org.apache.camel.k.jvm.dsl.Components
 import org.apache.camel.model.RouteDefinition
-import org.apache.camel.model.rest.RestConfigurationDefinition
-import org.apache.camel.model.rest.RestDefinition
 
 class IntegrationConfiguration {
     private final RuntimeRegistry registry
@@ -47,34 +45,14 @@ class IntegrationConfiguration {
         callable.call()
     }
 
-    RouteDefinition from(String endpoint) {
-        return builder.from(endpoint)
-    }
-
-    RestDefinition rest() {
-        return builder.rest()
-    }
-
     def rest(Closure<?> callable) {
         callable.resolveStrategy = Closure.DELEGATE_FIRST
-        callable.delegate = builder.rest()
+        callable.delegate = new RestConfiguration(builder)
         callable.call()
     }
 
-    RestConfigurationDefinition restConfiguration() {
-        return builder.restConfiguration()
-    }
-
-    def restConfiguration(Closure<?> callable) {
-        callable.resolveStrategy = Closure.DELEGATE_FIRST
-        callable.delegate = builder.restConfiguration()
-        callable.call()
-    }
-
-    def restConfiguration(String component, Closure<?> callable) {
-        callable.resolveStrategy = Closure.DELEGATE_FIRST
-        callable.delegate = builder.restConfiguration(component)
-        callable.call()
+    RouteDefinition from(String endpoint) {
+        return builder.from(endpoint)
     }
 
     def processor(Closure<?> callable) {
@@ -86,7 +64,6 @@ class IntegrationConfiguration {
             }
         }
     }
-
 
     def predicate(Closure<?> callable) {
         return new Predicate() {

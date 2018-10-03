@@ -49,18 +49,8 @@ class KotlinRoutesLoader : RoutesLoader {
                     val pre = """
                         val builder = bindings["builder"] as org.apache.camel.builder.RouteBuilder
 
-                        fun rest(block: org.apache.camel.model.rest.RestDefinition.() -> Unit) {
-                            val delegate = builder.rest()
-                            delegate.block()
-                        }
-
-                        fun restConfiguration(block: org.apache.camel.model.rest.RestConfigurationDefinition.() -> Unit) {
-                            val delegate = builder.restConfiguration()
-                            delegate.block()
-                        }
-
-                        fun restConfiguration(component: String, block: org.apache.camel.model.rest.RestConfigurationDefinition.() -> Unit) {
-                            val delegate = builder.restConfiguration(component)
+                        fun rest(block: org.apache.camel.k.kotlin.dsl.RestConfiguration.() -> Unit) {
+                            val delegate = org.apache.camel.k.kotlin.dsl.RestConfiguration(builder)
                             delegate.block()
                         }
 
