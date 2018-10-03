@@ -48,12 +48,13 @@ type Integration struct {
 
 // IntegrationSpec --
 type IntegrationSpec struct {
-	Replicas                  *int32              `json:"replicas,omitempty"`
-	Source                    SourceSpec          `json:"source,omitempty"`
-	Context                   string              `json:"context,omitempty"`
-	Dependencies              []string            `json:"dependencies,omitempty"`
-	DependenciesAutoDiscovery *bool               `json:"dependenciesAutoDiscovery,omitempty"`
-	Configuration             []ConfigurationSpec `json:"configuration,omitempty"`
+	Replicas                  *int32                          `json:"replicas,omitempty"`
+	Source                    SourceSpec                      `json:"source,omitempty"`
+	Context                   string                          `json:"context,omitempty"`
+	Dependencies              []string                        `json:"dependencies,omitempty"`
+	Traits                    map[string]IntegrationTraitSpec `json:"traits,omitempty"`
+	DependenciesAutoDiscovery *bool                           `json:"dependenciesAutoDiscovery,omitempty"`
+	Configuration             []ConfigurationSpec             `json:"configuration,omitempty"`
 }
 
 // SourceSpec --
@@ -80,6 +81,12 @@ const (
 	// LanguageKotlin --
 	LanguageKotlin Language = "kts"
 )
+
+// A IntegrationTraitSpec contains the configuration of a trait
+type IntegrationTraitSpec struct {
+	Enabled       *bool             `json:"enabled,omitempty"`
+	Configuration map[string]string `json:"configuration,omitempty"`
+}
 
 // IntegrationStatus --
 type IntegrationStatus struct {
