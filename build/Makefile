@@ -10,7 +10,7 @@ build-embed-resources:
 	./build/embed_resources.sh deploy
 
 build-compile-integration-tests:
-	go test -run xxxxx -tags=integration ./test/*.go
+	go test -c -tags=integration ./test/*.go
 
 build-runtime:
 	./mvnw clean install -f ./runtime/pom.xml

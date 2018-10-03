@@ -6,8 +6,8 @@
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
   pruneopts = "NUT"
-  revision = "c728a003b238b26cef9ab6753a5dc424b331c3ad"
-  version = "v0.27.0"
+  revision = "6cb29e61d96723a38dcac44d4c15c36744d96d07"
+  version = "v0.29.0"
 
 [[projects]]
   digest = "1:d8ebbd207f3d3266d4423ce4860c9f3794956306ded6c7ba312ecc69cdfbf04c"
@@ -190,6 +190,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:c8a452cc8dd4ef9f857570ce2be31ca257a0928bf3c2b08cd7e11972b985c6d7"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
+
+[[projects]]
+  branch = "master"
   digest = "1:84a5a2b67486d5d67060ac393aa255d05d24ed5ee41daecd5635ec22657b6492"
   name = "github.com/mailru/easyjson"
   packages = [
@@ -243,8 +251,7 @@
   version = "v3.9.0"
 
 [[projects]]
-  branch = "custom-init"
-  digest = "1:009a82f6212472e4072118827964619c4ea8c913a1482c33a8e2c323561e60e0"
+  digest = "1:8809516dcbfea012372b937388ec89bc929b97824840f43a3cd5c168fea1076e"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
     "pkg/k8sclient",
@@ -254,8 +261,8 @@
     "version",
   ]
   pruneopts = "NUT"
-  revision = "1f054f1486dfe08ab250696ed0d786253638e7ca"
-  source = "https://github.com/nicolaferraro/operator-sdk.git"
+  revision = "cb89692cdd145f084798749c16baaf44a6e62cac"
+  version = "v0.0.6"
 
 [[projects]]
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
@@ -306,7 +313,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6621142cd60b7150ab66f38ff36303ca55843dc5a635c1f9a28f95ecddab72b4"
+  digest = "1:26a2f5e891cc4d2321f18a0caa84c8e788663c17bed6a487f3cbe2c4295292d0"
   name = "github.com/prometheus/procfs"
   packages = [
     ".",
@@ -315,7 +322,7 @@
     "xfs",
   ]
   pruneopts = "NUT"
-  revision = "05ee40e3a273f7245e8777337fc7b46e533a9a92"
+  revision = "418d78d0b9a7b7de3a6bbc8a23def624cc977bb2"
 
 [[projects]]
   digest = "1:669828a2363f1ecad15fff9f008dd1d07d449fb25c9060998b15f83fec896458"
@@ -334,12 +341,12 @@
   version = "v1.2.1"
 
 [[projects]]
-  digest = "1:b2339e83ce9b5c4f79405f949429a7f68a9a904fed903c672aac1e7ceb7f5f02"
+  digest = "1:01252cd79aac70f16cac02a72a1067dd136e0ad6d5b597d0129cf74c739fd8d1"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:343d44e06621142ab09ae0c76c1799104cdfddd3ffb445d78b1adf8dc3ffaf3d"
@@ -350,12 +357,12 @@
   version = "v0.0.3"
 
 [[projects]]
-  digest = "1:e3707aeaccd2adc89eba6c062fec72116fe1fc1ba71097da85b4d8ae1668a675"
+  digest = "1:9d8420bbf131d1618bde6530af37c3799340d3762cc47210c1d9532a4c3a2779"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
-  version = "v1.0.2"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [[projects]]
   digest = "1:65c01b68bc4f813c18cdd48c98c38867dd0681b9584138c0403a0865b9bfdfb2"
@@ -379,11 +386,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
+  revision = "e3636079e1a4c1f337f212cc5cd2aca108f6c900"
 
 [[projects]]
   branch = "master"
-  digest = "1:1400b8e87c2c9bd486ea1a13155f59f8f02d385761206df05c0b7db007a53b2c"
+  digest = "1:2fa379f32ae3b5110f7f4393c98200804c0934d8b24087e433cda464eb5d7859"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -394,11 +401,11 @@
     "idna",
   ]
   pruneopts = "NUT"
-  revision = "161cd47e91fd58ac17490ef4d742dc98bb4cf60e"
+  revision = "f5e5bdd778241bfefa8627f7124c39cd6ad8d74f"
 
 [[projects]]
   branch = "master"
-  digest = "1:bc2b221d465bb28ce46e8d472ecdc424b9a9b541bd61d8c311c5f29c8dd75b1b"
+  digest = "1:dcb89c032286a9c3c5118a1496f8e0e237c1437f5356ac9602f6fdef560a5c21"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -408,18 +415,18 @@
     "jwt",
   ]
   pruneopts = "NUT"
-  revision = "d2e6202438beef2727060aa7cabdd924d92ebfd9"
+  revision = "c57b0facaced709681d9f90397429b9430a74754"
 
 [[projects]]
   branch = "master"
-  digest = "1:9e598304881c18eaf7e1ae0f1326fb6e1068084b5a231d6c2ecca67d57aa6f88"
+  digest = "1:847ffe30bb2463c17bf12bac2558b63f5dc104fd5920c8adf8c150a08cd176fb"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "8cf3aee429924738c56c34bb819c4ea8273fc434"
+  revision = "af653ce8b74f808d092db8ca9741fbb63d2a469d"
 
 [[projects]]
   digest = "1:e33513a825fcd765e97b5de639a2f7547542d1a8245df0cef18e1fd390b778a9"
@@ -455,7 +462,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a05bd2d296bc727082abcb63ff52615b4dcc6219d8b61e99fd83d605dc779a18"
+  digest = "1:45751dc3302c90ea55913674261b2d74286b05cdd8e3ae9606e02e4e77f4353f"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -463,10 +470,10 @@
     "internal/fastwalk",
   ]
   pruneopts = "NUT"
-  revision = "0aa4b8830f481fed77b73cf7cea2bc3129e05148"
+  revision = "140737fa61ecd083e4967b36551743e4d3c4600f"
 
 [[projects]]
-  digest = "1:b5aeceb800276be69165a745328380c8a4b6f2edc7a6bac112e22c8596ed8a49"
+  digest = "1:e2da54c7866453ac5831c61c7ec5d887f39328cac088c806553303bff4048e6f"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -481,8 +488,8 @@
     "urlfetch",
   ]
   pruneopts = "NUT"
-  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
-  version = "v1.1.0"
+  revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -700,7 +707,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:396d31417183c4e572d907cee379238ea343c23dde9e028465ca3692498017c1"
+  digest = "1:11a6835553568158414400041e840b68e1128453e65240a986f197605b0345eb"
   name = "k8s.io/kube-openapi"
   packages = [
     "cmd/openapi-gen/args",
@@ -710,7 +717,7 @@
     "pkg/util/sets",
   ]
   pruneopts = "NUT"
-  revision = "e3762e86a74c878ffed47484592986685639c2cd"
+  revision = "9dfdf9be683f61f82cda12362c44c784e0778b56"
 
 [solve-meta]
   analyzer-name = "dep"
