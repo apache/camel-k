@@ -46,6 +46,8 @@ class IntegrationTest extends Specification {
         runtime.camelContext.restConfiguration.port == 9192
         runtime.camelContext.getRestConfiguration('undertow', false).host == 'my-undertow-host'
         runtime.camelContext.getRestConfiguration('undertow', false).port == 9193
+        runtime.camelContext.restDefinitions.size() == 1
+        runtime.camelContext.restDefinitions[0].path == '/my/path'
     }
 
     def "load integration with bindings"()  {
