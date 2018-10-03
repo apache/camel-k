@@ -29,6 +29,8 @@ class IntegrationTest {
         assertThat(runtime.camelContext.restConfiguration.port).isEqualTo(9192)
         assertThat(runtime.camelContext.getRestConfiguration("undertow", false).host).isEqualTo("my-undertow-host")
         assertThat(runtime.camelContext.getRestConfiguration("undertow", false).port).isEqualTo(9193)
+        assertThat(runtime.camelContext.restDefinitions.size).isEqualTo(1)
+        assertThat(runtime.camelContext.restDefinitions[0].path).isEqualTo("/my/path")
     }
 
     @Test
