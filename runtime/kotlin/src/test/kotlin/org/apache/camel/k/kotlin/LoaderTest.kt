@@ -27,7 +27,7 @@ class LoaderTest {
 
     @Test
     @Throws(Exception::class)
-    fun `load integration with bindings`() {
+    fun `load route from classpath`() {
         val resource = "classpath:routes.kts"
         val loader = RoutesLoaders.loaderFor(resource, null)
         val builder = loader.load(RuntimeRegistry(), resource)
