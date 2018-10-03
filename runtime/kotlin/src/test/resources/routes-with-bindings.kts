@@ -1,8 +1,10 @@
 
 context {
     registry {
-        bind("myEntry1", "myRegistryEntry1")
-        bind("myEntry2", "myRegistryEntry2")
+        bind("my-entry", "myRegistryEntry1")
+        bind("my-proc", processor {
+            e -> e.getIn().body = "Hello"
+        })
     }
 }
 

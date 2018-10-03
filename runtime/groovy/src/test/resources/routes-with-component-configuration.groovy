@@ -10,9 +10,9 @@ context {
         }
 
         'log' {
-            formatter {
+            exchangeFormatter = {
                 'body ==> ' + it.in.body
-            }
+            } as org.apache.camel.spi.ExchangeFormatter
         }
     }
 }

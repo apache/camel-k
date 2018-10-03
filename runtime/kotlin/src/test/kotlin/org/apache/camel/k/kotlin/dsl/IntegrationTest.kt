@@ -1,5 +1,6 @@
 package org.apache.camel.k.kotlin.dsl
 
+import org.apache.camel.Processor
 import org.apache.camel.component.log.LogComponent
 import org.apache.camel.component.seda.SedaComponent
 import org.apache.camel.main.MainListenerSupport
@@ -47,8 +48,8 @@ class IntegrationTest {
 
         runtime.run()
 
-        assertThat(runtime.camelContext.registry.lookup("myEntry1")).isEqualTo("myRegistryEntry1")
-        assertThat(runtime.camelContext.registry.lookup("myEntry2")).isEqualTo("myRegistryEntry2")
+        assertThat(runtime.camelContext.registry.lookup("my-entry")).isEqualTo("myRegistryEntry1")
+        assertThat(runtime.camelContext.registry.lookup("my-proc")).isInstanceOf(Processor::class.java)
     }
 
     @Test

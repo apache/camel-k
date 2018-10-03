@@ -64,6 +64,17 @@ class KotlinRoutesLoader : RoutesLoader {
                         }
 
                         fun from(uri: String): org.apache.camel.model.RouteDefinition = builder.from(uri)
+
+                        fun processor(fn: (org.apache.camel.Exchange) -> Unit) : org.apache.camel.Processor {
+                             return object: org.apache.camel.Processor {
+                                override fun process(exchange: org.apache.camel.Exchange) = fn(exchange)
+                            }
+                        }
+                        fun predicate(fn: (org.apache.camel.Exchange) -> Boolean) : org.apache.camel.Predicate {
+                            return object: org.apache.camel.Predicate {
+                                override fun matches(exchange: org.apache.camel.Exchange) : Boolean = fn(exchange)
+                            }
+                        }
                     """.trimIndent()
 
                     engine.eval(pre, bindings)
