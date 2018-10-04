@@ -17,7 +17,7 @@ l.exchangeFormatter = function(e) {
 
 c = restConfiguration()
 c.component = 'undertow'
-c.port = 8081
+c.port = 8080
 
 // ****************
 //
@@ -37,6 +37,7 @@ function proc(e) {
 
 rest()
     .path('/say/hello')
+    .produces("text/plain")
     .get().route()
         .transform().constant("Hello World");
 
