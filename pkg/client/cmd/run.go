@@ -100,9 +100,9 @@ func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	fileName := args[0]
 	if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
 		if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
-			return errors.New("file " + fileName + " does not exist")
+			return errors.Wrap(err, "file "+fileName+" does not exist")
 		} else if err != nil {
-			return errors.New("error while accessing file " + fileName)
+			return errors.Wrap(err, "error while accessing file "+fileName)
 		}
 	} else {
 		resp, err := http.Get(fileName)
