@@ -17,6 +17,7 @@
 package org.apache.camel.k.groovy.dsl
 
 import org.apache.camel.CamelContext
+import org.apache.camel.Component
 
 import java.lang.reflect.Array
 
@@ -27,28 +28,57 @@ class ComponentsConfiguration {
         this.context = context
     }
 
+    def component(String name, Closure<?> callable) {
+        def component = context.getComponent(name, true, false)
+
+        callable.resolveStrategy = Closure.DELEGATE_FIRST
+        callable.delegate = new ComponentConfiguration(component)
+        callable.call()
+    }
+
+    def component(String name, Class<? extends Component> type, Closure <?> callable) {
+        def component = context.getComponent(name, true, false)
+
+        // if the component is not found, let's create a new one. This is
+        // equivalent to create a new named component, useful to create
+        // multiple instances of the same component but with different setup
+        if (component == null) {
+            component = context.injector.newInstance(type)
+
+            // let's the camel context be aware of the new component
+            context.addComponent(name, component)
+        }
+
+        if (type.isAssignableFrom(component.class)) {
+            callable.resolveStrategy = Closure.DELEGATE_FIRST
+            callable.delegate = new ComponentConfiguration(component)
+            callable.call()
+
+            return
+        }
+
+        throw new IllegalArgumentException("Type mismatch, expected: " + type + ", got: " + component.class)
+    }
+
     def methodMissing(String name, args) {
-        final Object value
+        if (args != null && args.getClass().isArray()) {
+            if (Array.getLength(args) == 1) {
+                def clos = Array.get(args, 0)
 
-        if (args == null) {
-            value = null
-        } else if (!args.getClass().isArray()) {
-            value = args
-        } else if (Array.getLength(args) == 1) {
-            value = Array.get(args, 0)
-        } else {
-            throw new IllegalArgumentException("Unexpected argument type: " + args)
+                if (clos instanceof Closure) {
+                    return component(name, clos)
+                }
+            }
+            if (Array.getLength(args) == 2) {
+                def type = Array.get(args, 0)
+                def clos = Array.get(args, 1)
+
+                if (type instanceof Class && Component.class.isAssignableFrom(type) && clos instanceof Closure) {
+                    return component(name,type, clos)
+                }
+            }
         }
 
-        if (value instanceof Closure<?>) {
-            def component = context.getComponent(name, true, false)
-
-            value.resolveStrategy = Closure.DELEGATE_FIRST
-            value.delegate = new ComponentConfiguration(component)
-
-            return value.call()
-        }
-
-        throw new MissingMethodException("Missing method \"" + name + "\"")
+        throw new MissingMethodException("Missing method: \"$name\", args: $args")
     }
 }

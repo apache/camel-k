@@ -5,6 +5,10 @@ import java.util.concurrent.ThreadLocalRandom
 //
 //     kamel run --runtime groovy runtime/examples/routes.groovy
 //
+// Or leveraging runtime detection
+//
+//     kamel run runtime/examples/routes.groovy
+//
 
 context {
 
@@ -12,7 +16,7 @@ context {
     // configure components
     //
     components {
-        'log' {
+        log {
             formatter {
                 'body: ' + it.in.body + ', random-value: ' + it.in.headers['RandomValue']
             }
