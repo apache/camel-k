@@ -30,7 +30,7 @@ var (
 )
 
 // customizersFor returns a Catalog for the given integration details
-func customizersFor(environment environment) customizer {
+func customizersFor(environment *environment) customizer {
 	switch environment.Platform.Spec.Cluster {
 	case v1alpha1.IntegrationPlatformClusterOpenShift:
 		return compose(
@@ -66,7 +66,7 @@ func (c *chainedCustomizer) id() id {
 	return id("")
 }
 
-func (c *chainedCustomizer) customize(environment environment, resources *kubernetes.Collection) (bool, error) {
+func (c *chainedCustomizer) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
 	atLeastOne := false
 	for _, custom := range c.customizers {
 		if environment.isEnabled(custom.id()) {

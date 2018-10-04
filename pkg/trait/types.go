@@ -32,7 +32,7 @@ type customizer interface {
 	// The Name of the customizer
 	id() id
 	// Customize executes the trait customization on the resources and return true if the resources have been changed
-	customize(environment environment, resources *kubernetes.Collection) (bool, error)
+	customize(environment *environment, resources *kubernetes.Collection) (bool, error)
 }
 
 // A environment provides the context where the trait is executed
@@ -43,7 +43,7 @@ type environment struct {
 	ExecutedCustomizers []id
 }
 
-func (e environment) getTraitSpec(traitID id) *v1alpha1.IntegrationTraitSpec {
+func (e *environment) getTraitSpec(traitID id) *v1alpha1.IntegrationTraitSpec {
 	if e.Integration.Spec.Traits == nil {
 		return nil
 	}
@@ -53,12 +53,12 @@ func (e environment) getTraitSpec(traitID id) *v1alpha1.IntegrationTraitSpec {
 	return nil
 }
 
-func (e environment) isEnabled(traitID id) bool {
+func (e *environment) isEnabled(traitID id) bool {
 	conf := e.getTraitSpec(traitID)
 	return conf == nil || conf.Enabled == nil || *conf.Enabled
 }
 
-func (e environment) getConfig(traitID id, key string) *string {
+func (e *environment) getConfig(traitID id, key string) *string {
 	conf := e.getTraitSpec(traitID)
 	if conf == nil || conf.Configuration == nil {
 		return nil
@@ -69,7 +69,7 @@ func (e environment) getConfig(traitID id, key string) *string {
 	return nil
 }
 
-func (e environment) getConfigOr(traitID id, key string, defaultValue string) string {
+func (e *environment) getConfigOr(traitID id, key string, defaultValue string) string {
 	val := e.getConfig(traitID, key)
 	if val != nil {
 		return *val
@@ -77,7 +77,7 @@ func (e environment) getConfigOr(traitID id, key string, defaultValue string) st
 	return defaultValue
 }
 
-func (e environment) getIntConfig(traitID id, key string) (*int, error) {
+func (e *environment) getIntConfig(traitID id, key string) (*int, error) {
 	val := e.getConfig(traitID, key)
 	if val == nil {
 		return nil, nil
@@ -89,7 +89,7 @@ func (e environment) getIntConfig(traitID id, key string) (*int, error) {
 	return &intVal, nil
 }
 
-func (e environment) getIntConfigOr(traitID id, key string, defaultValue int) (int, error) {
+func (e *environment) getIntConfigOr(traitID id, key string, defaultValue int) (int, error) {
 	val, err := e.getIntConfig(traitID, key)
 	if err != nil {
 		return 0, err

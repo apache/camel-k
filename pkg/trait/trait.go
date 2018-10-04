@@ -32,9 +32,9 @@ func ComputeDeployment(integration *v1alpha1.Integration) ([]runtime.Object, err
 		return nil, err
 	}
 	resources := kubernetes.NewCollection()
-	customizers := customizersFor(*environment)
+	customizers := customizersFor(environment)
 	// invoke the trait framework to determine the needed resources
-	if _, err = customizers.customize(*environment, resources); err != nil {
+	if _, err = customizers.customize(environment, resources); err != nil {
 		return nil, errors.Wrap(err, "error during trait customization")
 	}
 	return resources.Items(), nil
