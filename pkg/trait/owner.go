@@ -24,11 +24,11 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 type ownerTrait struct {
 }
 
-func (*ownerTrait) ID() ID {
-	return ID("identity")
+func (*ownerTrait) id() id {
+	return id("owner")
 }
 
-func (*ownerTrait) Customize(e Environment, resources *kubernetes.Collection) (bool, error) {
+func (*ownerTrait) customize(e environment, resources *kubernetes.Collection) (bool, error) {
 	controller := true
 	blockOwnerDeletion := true
 	resources.VisitMetaObject(func(res metav1.Object) {
