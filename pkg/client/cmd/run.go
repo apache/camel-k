@@ -326,7 +326,9 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 	}
 
 	for _, traitConf := range o.Traits {
-		o.configureTrait(&integration, traitConf)
+		if err := o.configureTrait(&integration, traitConf); err != nil {
+			return nil, err
+		}
 	}
 
 	existed := false
