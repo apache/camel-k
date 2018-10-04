@@ -23,14 +23,14 @@ import (
 )
 
 var (
-	tBase = &baseTrait{}
+	tBase    = &baseTrait{}
 	tService = &serviceTrait{}
-	tRoute = &routeTrait{}
-	tOwner = &ownerTrait{}
+	tRoute   = &routeTrait{}
+	tOwner   = &ownerTrait{}
 )
 
-// CustomizersFor returns a Catalog for the given integration details
-func CustomizersFor(environment Environment) Customizer {
+// customizersFor returns a Catalog for the given integration details
+func customizersFor(environment environment) customizer {
 	switch environment.Platform.Spec.Cluster {
 	case v1alpha1.IntegrationPlatformClusterOpenShift:
 		return compose(
@@ -50,46 +50,33 @@ func CustomizersFor(environment Environment) Customizer {
 	return nil
 }
 
-func compose(traits ...Customizer) Customizer {
-	if len(traits) == 0 {
-		return &identityTrait{}
-	} else if len(traits) == 1 {
-		return traits[0]
+func compose(traits ...customizer) customizer {
+	return &chainedCustomizer{
+		customizers: traits,
 	}
-	var composite Customizer = &identityTrait{}
-	for _, t := range traits {
-		composite = &chainedCustomizer{
-			t1: composite,
-			t2: t,
-		}
-	}
-	return composite
 }
 
 // -------------------------------------------
 
 type chainedCustomizer struct {
-	t1 Customizer
-	t2 Customizer
+	customizers []customizer
 }
 
-func (c *chainedCustomizer) ID() ID {
-	return ID("")
+func (c *chainedCustomizer) id() id {
+	return id("")
 }
 
-func (c *chainedCustomizer) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
-	atLeastOnce := false
-	var done bool
-	var err error
-	if done, err = c.t1.Customize(environment, resources); err != nil {
-		return false, err
-	} else if done && c.t1.ID() != "" {
-		environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, c.t1.ID())
+func (c *chainedCustomizer) customize(environment environment, resources *kubernetes.Collection) (bool, error) {
+	atLeastOne := false
+	for _, custom := range c.customizers {
+		if environment.isEnabled(custom.id()) {
+			if done, err := custom.customize(environment, resources); err != nil {
+				return false, err
+			} else if done && custom.id() != "" {
+				environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, custom.id())
+				atLeastOne = atLeastOne || done
+			}
+		}
 	}
-	atLeastOnce = atLeastOnce || done
-	done2, err := c.t2.Customize(environment, resources)
-	if done2 && c.t2.ID() != "" {
-		environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, c.t2.ID())
-	}
-	return atLeastOnce || done2, err
+	return atLeastOne, nil
 }

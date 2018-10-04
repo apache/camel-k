@@ -37,19 +37,32 @@ var webComponents = map[string]bool{
 type serviceTrait struct {
 }
 
-func (*serviceTrait) ID() ID {
-	return ID("service")
+const (
+	serviceTraitPortKey = "port"
+)
+
+func (*serviceTrait) id() id {
+	return id("service")
 }
 
-func (e *serviceTrait) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
+func (e *serviceTrait) customize(environment environment, resources *kubernetes.Collection) (bool, error) {
 	if !e.requiresService(environment) {
 		return false, nil
 	}
-	resources.Add(e.getServiceFor(environment))
+	svc, err := e.getServiceFor(environment)
+	if err != nil {
+		return false, err
+	}
+	resources.Add(svc)
 	return true, nil
 }
 
-func (*serviceTrait) getServiceFor(e Environment) *corev1.Service {
+func (s *serviceTrait) getServiceFor(e environment) (*corev1.Service, error) {
+	port, err := e.getIntConfigOr(s.id(), serviceTraitPortKey, 8080)
+	if err != nil {
+		return nil, err
+	}
+
 	svc := corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -65,12 +78,10 @@ func (*serviceTrait) getServiceFor(e Environment) *corev1.Service {
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
 				{
-					Name:     "http",
-					Port:     80,
-					Protocol: corev1.ProtocolTCP,
-					// TODO discovering the real port is hard - maybe we should just set 8080 as conventional port in the doc
-					// or allow users to configure it in the trait configuration section
-					TargetPort: intstr.FromInt(8080),
+					Name:       "http",
+					Port:       80,
+					Protocol:   corev1.ProtocolTCP,
+					TargetPort: intstr.FromInt(port),
 				},
 			},
 			Selector: map[string]string{
@@ -79,10 +90,10 @@ func (*serviceTrait) getServiceFor(e Environment) *corev1.Service {
 		},
 	}
 
-	return &svc
+	return &svc, nil
 }
 
-func (*serviceTrait) requiresService(environment Environment) bool {
+func (*serviceTrait) requiresService(environment environment) bool {
 	for _, dep := range environment.Integration.Spec.Dependencies {
 		if decision, present := webComponents[dep]; present {
 			return decision

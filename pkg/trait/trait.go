@@ -21,18 +21,27 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// A Environment provides the context where the trait is executed
-type Environment struct {
-	Platform            *v1alpha1.IntegrationPlatform
-	Context             *v1alpha1.IntegrationContext
-	Integration         *v1alpha1.Integration
-	ExecutedCustomizers []ID
+// ComputeDeployment generates all required resources for deploying the given integration
+func ComputeDeployment(integration *v1alpha1.Integration) ([]runtime.Object, error) {
+	environment, err := newEnvironment(integration)
+	if err != nil {
+		return nil, err
+	}
+	resources := kubernetes.NewCollection()
+	customizers := customizersFor(*environment)
+	// invoke the trait framework to determine the needed resources
+	if _, err = customizers.customize(*environment, resources); err != nil {
+		return nil, errors.Wrap(err, "error during trait customization")
+	}
+	return resources.Items(), nil
 }
 
-// NewEnvironment creates a Environment from the given data
-func NewEnvironment(integration *v1alpha1.Integration) (*Environment, error) {
+// newEnvironment creates a environment from the given data
+func newEnvironment(integration *v1alpha1.Integration) (*environment, error) {
 	pl, err := platform.GetCurrentPlatform(integration.Namespace)
 	if err != nil {
 		return nil, err
@@ -42,21 +51,10 @@ func NewEnvironment(integration *v1alpha1.Integration) (*Environment, error) {
 		return nil, err
 	}
 
-	return &Environment{
+	return &environment{
 		Platform:            pl,
 		Context:             ctx,
 		Integration:         integration,
-		ExecutedCustomizers: make([]ID, 0),
+		ExecutedCustomizers: make([]id, 0),
 	}, nil
-}
-
-// ID uniquely identifies a trait
-type ID string
-
-// A Customizer performs customization of the deployed objects
-type Customizer interface {
-	// The Name of the customizer
-	ID() ID
-	// Customize executes the trait customization on the resources and return true if the resources have been changed
-	Customize(environment Environment, resources *kubernetes.Collection) (bool, error)
 }

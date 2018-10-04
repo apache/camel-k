@@ -22,7 +22,6 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -43,18 +42,12 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
-	environment, err := trait.NewEnvironment(integration)
+	resources, err := trait.ComputeDeployment(integration)
 	if err != nil {
 		return err
 	}
-	resources := kubernetes.NewCollection()
-	customizers := trait.CustomizersFor(*environment)
-	// invoke the trait framework to determine the needed resources
-	if _, err = customizers.Customize(*environment, resources); err != nil {
-		return errors.Wrap(err, "error during trait customization")
-	}
 	// TODO we should look for objects that are no longer present in the collection and remove them
-	err = kubernetes.ReplaceResources(resources.Items())
+	err = kubernetes.ReplaceResources(resources)
 	if err != nil {
 		return err
 	}
