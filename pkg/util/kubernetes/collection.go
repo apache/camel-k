@@ -20,12 +20,20 @@ package kubernetes
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // A Collection is a container of Kubernetes resources
 type Collection struct {
 	items []runtime.Object
+}
+
+// NewCollection creates a new empty collection
+func NewCollection() *Collection {
+	return &Collection{
+		items: make([]runtime.Object, 0),
+	}
 }
 
 // Items returns all resources belonging to the collection
@@ -48,9 +56,18 @@ func (c *Collection) VisitDeployment(visitor func(*appsv1.Deployment)) {
 }
 
 // VisitConfigMap executes the visitor function on all ConfigMap resources
-func (c *Collection) VisitConfigMap(visitor func(configMap *corev1.ConfigMap)) {
+func (c *Collection) VisitConfigMap(visitor func(*corev1.ConfigMap)) {
 	c.Visit(func(res runtime.Object) {
 		if conv, ok := res.(*corev1.ConfigMap); ok {
+			visitor(conv)
+		}
+	})
+}
+
+// VisitMetaObject executes the visitor function on all meta.Object resources
+func (c *Collection) VisitMetaObject(visitor func(metav1.Object)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(metav1.Object); ok {
 			visitor(conv)
 		}
 	})
