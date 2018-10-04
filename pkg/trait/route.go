@@ -32,7 +32,7 @@ func (*routeTrait) id() id {
 	return id("route")
 }
 
-func (e *routeTrait) customize(environment environment, resources *kubernetes.Collection) (bool, error) {
+func (e *routeTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
 	var service *corev1.Service
 	resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
@@ -50,7 +50,7 @@ func (e *routeTrait) customize(environment environment, resources *kubernetes.Co
 	return false, nil
 }
 
-func (*routeTrait) getRouteFor(e environment, service *corev1.Service) *routev1.Route {
+func (*routeTrait) getRouteFor(e *environment, service *corev1.Service) *routev1.Route {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",

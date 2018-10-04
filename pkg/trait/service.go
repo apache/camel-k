@@ -45,7 +45,7 @@ func (*serviceTrait) id() id {
 	return id("service")
 }
 
-func (e *serviceTrait) customize(environment environment, resources *kubernetes.Collection) (bool, error) {
+func (e *serviceTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
 	if !e.requiresService(environment) {
 		return false, nil
 	}
@@ -57,7 +57,7 @@ func (e *serviceTrait) customize(environment environment, resources *kubernetes.
 	return true, nil
 }
 
-func (s *serviceTrait) getServiceFor(e environment) (*corev1.Service, error) {
+func (s *serviceTrait) getServiceFor(e *environment) (*corev1.Service, error) {
 	port, err := e.getIntConfigOr(s.id(), serviceTraitPortKey, 8080)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func (s *serviceTrait) getServiceFor(e environment) (*corev1.Service, error) {
 	return &svc, nil
 }
 
-func (*serviceTrait) requiresService(environment environment) bool {
+func (*serviceTrait) requiresService(environment *environment) bool {
 	for _, dep := range environment.Integration.Spec.Dependencies {
 		if decision, present := webComponents[dep]; present {
 			return decision
