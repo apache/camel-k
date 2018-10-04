@@ -59,7 +59,9 @@ func (*baseTrait) getConfigMapFor(e Environment) *corev1.ConfigMap {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      e.Integration.Name,
 			Namespace: e.Integration.Namespace,
-			Labels:    e.Integration.Labels,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
 			Annotations: map[string]string{
 				"camel.apache.org/source.language": string(e.Integration.Spec.Source.Language),
 				"camel.apache.org/source.name":     e.Integration.Spec.Source.Name,
@@ -112,9 +114,11 @@ func (*baseTrait) getDeploymentFor(e Environment) *appsv1.Deployment {
 			APIVersion: appsv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        e.Integration.Name,
-			Namespace:   e.Integration.Namespace,
-			Labels:      e.Integration.Labels,
+			Name:      e.Integration.Name,
+			Namespace: e.Integration.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
 			Annotations: e.Integration.Annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
