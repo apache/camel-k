@@ -64,6 +64,15 @@ func (c *Collection) VisitConfigMap(visitor func(*corev1.ConfigMap)) {
 	})
 }
 
+// VisitService executes the visitor function on all Service resources
+func (c *Collection) VisitService(visitor func(*corev1.Service)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*corev1.Service); ok {
+			visitor(conv)
+		}
+	})
+}
+
 // VisitMetaObject executes the visitor function on all meta.Object resources
 func (c *Collection) VisitMetaObject(visitor func(metav1.Object)) {
 	c.Visit(func(res runtime.Object) {

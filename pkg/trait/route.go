@@ -20,6 +20,9 @@ package trait
 import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	routev1 "github.com/openshift/api/route/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type routeTrait struct {
@@ -30,9 +33,42 @@ func (*routeTrait) ID() ID {
 }
 
 func (e *routeTrait) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
-	return true, nil
+	var service *corev1.Service
+	resources.VisitService(func(s *corev1.Service) {
+		if s.ObjectMeta.Labels != nil {
+			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == environment.Integration.Name {
+				service = s
+			}
+		}
+	})
+
+	if service != nil {
+		resources.Add(e.getRouteFor(environment, service))
+		return true, nil
+	}
+
+	return false, nil
 }
 
-func (*routeTrait) getRouteFor(e Environment) *routev1.Route {
-	return nil
+func (*routeTrait) getRouteFor(e Environment, service *corev1.Service) *routev1.Route {
+	route := routev1.Route{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Route",
+			APIVersion: routev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      service.Name,
+			Namespace: service.Namespace,
+		},
+		Spec: routev1.RouteSpec{
+			Port: &routev1.RoutePort{
+				TargetPort: intstr.FromString("http"),
+			},
+			To: routev1.RouteTargetReference{
+				Kind: "Service",
+				Name: service.Name,
+			},
+		},
+	}
+	return &route
 }
