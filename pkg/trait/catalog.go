@@ -15,39 +15,48 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package catalog
+package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// TraitID uniquely identifies a trait
-type TraitID string
-
-const (
-	// Expose exposes a integration to the external world
-	Expose TraitID = "expose"
+var (
+	tExpose = &exposeTrait{}
+	tBase = &baseTrait{}
+	tOwner = &ownerTrait{}
 )
 
-// A Catalog is just a DeploymentCustomizer that applies multiple traits
-type Catalog trait.DeploymentCustomizer
-
-// For returns a Catalog for the given integration details
-func For(environment trait.Environment) Catalog {
-
+// CustomizersFor returns a Catalog for the given integration details
+func CustomizersFor(environment Environment) Customizer {
+	switch environment.Platform.Spec.Cluster {
+	case v1alpha1.IntegrationPlatformClusterOpenShift:
+		return compose(
+			tBase,
+			tExpose,
+			tOwner,
+		)
+	case v1alpha1.IntegrationPlatformClusterKubernetes:
+		return compose(
+			tBase,
+			tExpose,
+			tOwner,
+		)
+		// case Knative: ...
+	}
+	return nil
 }
 
-func compose(traits ...trait.DeploymentCustomizer) trait.DeploymentCustomizer {
+func compose(traits ...Customizer) Customizer {
 	if len(traits) == 0 {
 		return &identityTrait{}
 	} else if len(traits) == 1 {
 		return traits[0]
 	}
-	var composite trait.DeploymentCustomizer = &identityTrait{}
+	var composite Customizer = &identityTrait{}
 	for _, t := range traits {
-		composite = &catalogCustomizer{
+		composite = &chainedCustomizer{
 			t1: composite,
 			t2: t,
 		}
@@ -57,29 +66,28 @@ func compose(traits ...trait.DeploymentCustomizer) trait.DeploymentCustomizer {
 
 // -------------------------------------------
 
-type catalogCustomizer struct {
-	t1 trait.DeploymentCustomizer
-	t2 trait.DeploymentCustomizer
+type chainedCustomizer struct {
+	t1 Customizer
+	t2 Customizer
 }
 
-func (c *catalogCustomizer) Name() string {
-	return ""
+func (c *chainedCustomizer) ID() ID {
+	return ID("")
 }
 
-func (c *catalogCustomizer) Customize(environment trait.Environment, resources *kubernetes.Collection) (bool, error) {
+func (c *chainedCustomizer) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
 	atLeastOnce := false
 	var done bool
 	var err error
 	if done, err = c.t1.Customize(environment, resources); err != nil {
 		return false, err
-	} else if done && c.t1.Name() != "" {
-		environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, c.t1.Name())
+	} else if done && c.t1.ID() != "" {
+		environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, c.t1.ID())
 	}
 	atLeastOnce = atLeastOnce || done
 	done2, err := c.t2.Customize(environment, resources)
-	if done2 && c.t2.Name() != "" {
-		environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, c.t2.Name())
+	if done2 && c.t2.ID() != "" {
+		environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, c.t2.ID())
 	}
-	environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, c.t1.Name())
 	return atLeastOnce || done2, err
 }
