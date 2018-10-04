@@ -34,7 +34,7 @@ func (*baseTrait) id() id {
 	return id("base")
 }
 
-func (d *baseTrait) customize(environment environment, resources *kubernetes.Collection) (bool, error) {
+func (d *baseTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
 	resources.Add(d.getConfigMapFor(environment))
 	resources.Add(d.getDeploymentFor(environment))
 	return true, nil
@@ -46,7 +46,7 @@ func (d *baseTrait) customize(environment environment, resources *kubernetes.Col
 //
 // **********************************
 
-func (*baseTrait) getConfigMapFor(e environment) *corev1.ConfigMap {
+func (*baseTrait) getConfigMapFor(e *environment) *corev1.ConfigMap {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
@@ -82,7 +82,7 @@ func (*baseTrait) getConfigMapFor(e environment) *corev1.ConfigMap {
 //
 // **********************************
 
-func (*baseTrait) getDeploymentFor(e environment) *appsv1.Deployment {
+func (*baseTrait) getDeploymentFor(e *environment) *appsv1.Deployment {
 	sourceName := strings.TrimPrefix(e.Integration.Spec.Source.Name, "/")
 
 	// combine environment of integration with context, integration

@@ -18,6 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
+	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -55,6 +56,17 @@ func (c *Collection) VisitDeployment(visitor func(*appsv1.Deployment)) {
 	})
 }
 
+// GetDeployment returns a Deployment that matches the given function
+func (c *Collection) GetDeployment(filter func(*appsv1.Deployment)bool) *appsv1.Deployment {
+	var retValue *appsv1.Deployment
+	c.VisitDeployment(func(re *appsv1.Deployment) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
 // VisitConfigMap executes the visitor function on all ConfigMap resources
 func (c *Collection) VisitConfigMap(visitor func(*corev1.ConfigMap)) {
 	c.Visit(func(res runtime.Object) {
@@ -64,6 +76,17 @@ func (c *Collection) VisitConfigMap(visitor func(*corev1.ConfigMap)) {
 	})
 }
 
+// GetConfigMap returns a ConfigMap that matches the given function
+func (c *Collection) GetConfigMap(filter func(*corev1.ConfigMap)bool) *corev1.ConfigMap {
+	var retValue *corev1.ConfigMap
+	c.VisitConfigMap(func(re *corev1.ConfigMap) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
 // VisitService executes the visitor function on all Service resources
 func (c *Collection) VisitService(visitor func(*corev1.Service)) {
 	c.Visit(func(res runtime.Object) {
@@ -71,6 +94,37 @@ func (c *Collection) VisitService(visitor func(*corev1.Service)) {
 			visitor(conv)
 		}
 	})
+}
+
+// GetService returns a Service that matches the given function
+func (c *Collection) GetService(filter func(*corev1.Service)bool) *corev1.Service {
+	var retValue *corev1.Service
+	c.VisitService(func(re *corev1.Service) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
+// VisitRoute executes the visitor function on all Route resources
+func (c *Collection) VisitRoute(visitor func(*routev1.Route)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*routev1.Route); ok {
+			visitor(conv)
+		}
+	})
+}
+
+// GetRoute returns a Route that matches the given function
+func (c *Collection) GetRoute(filter func(*routev1.Route)bool) *routev1.Route {
+	var retValue *routev1.Route
+	c.VisitRoute(func(re *routev1.Route) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
 }
 
 // VisitMetaObject executes the visitor function on all meta.Object resources

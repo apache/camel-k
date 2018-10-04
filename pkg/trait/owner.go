@@ -28,7 +28,7 @@ func (*ownerTrait) id() id {
 	return id("owner")
 }
 
-func (*ownerTrait) customize(e environment, resources *kubernetes.Collection) (bool, error) {
+func (*ownerTrait) customize(e *environment, resources *kubernetes.Collection) (bool, error) {
 	controller := true
 	blockOwnerDeletion := true
 	resources.VisitMetaObject(func(res metav1.Object) {
