@@ -19,15 +19,20 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	routev1 "github.com/openshift/api/route/v1"
 )
 
-type exposeTrait struct {
+type routeTrait struct {
 }
 
-func (*exposeTrait) ID() ID {
-	return ID("expose")
+func (*routeTrait) ID() ID {
+	return ID("route")
 }
 
-func (*exposeTrait) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
-	return false, nil
+func (e *routeTrait) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
+	return true, nil
+}
+
+func (*routeTrait) getRouteFor(e Environment) *routev1.Route {
+	return nil
 }
