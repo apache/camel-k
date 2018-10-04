@@ -64,6 +64,40 @@ func TestOpenshiftTraitsWithWeb(t *testing.T) {
 	}))
 }
 
+func TestOpenshiftTraitsWithWebAndConfig(t *testing.T) {
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core", "camel:undertow")
+	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
+	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
+		Configuration: map[string]string{
+			"port": "7071",
+		},
+	}
+	res := processTestEnv(t, env)
+	assert.Contains(t, env.ExecutedCustomizers, id("service"))
+	assert.Contains(t, env.ExecutedCustomizers, id("route"))
+	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
+		return svc.Name == "test" && svc.Spec.Ports[0].TargetPort.IntVal == int32(7071)
+	}))
+}
+
+func TestOpenshiftTraitsWithWebAndDisabledTrait(t *testing.T) {
+	falseBoolean := false
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core", "camel:undertow")
+	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
+	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
+		Configuration: map[string]string{
+			"port": "7071",
+		},
+		Enabled: &falseBoolean,
+	}
+	res := processTestEnv(t, env)
+	assert.NotContains(t, env.ExecutedCustomizers, id("service"))
+	assert.NotContains(t, env.ExecutedCustomizers, id("route")) // No route without service
+	assert.Nil(t, res.GetService(func(svc *corev1.Service) bool {
+		return true
+	}))
+}
+
 func TestKubernetesTraits(t *testing.T) {
 	env := createTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, "camel:core")
 	res := processTestEnv(t, env)
