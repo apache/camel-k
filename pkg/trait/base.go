@@ -35,17 +35,8 @@ func (*baseTrait) ID() ID {
 }
 
 func (d *baseTrait) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
-	var cm *corev1.ConfigMap
-	var err error
-	if cm, err = d.getConfigMapFor(environment); err != nil {
-		return false, err
-	}
-	resources.Add(cm)
-	var depl *appsv1.Deployment
-	if depl, err = d.getDeploymentFor(environment); err != nil {
-		return false, err
-	}
-	resources.Add(depl)
+	resources.Add(d.getConfigMapFor(environment))
+	resources.Add(d.getDeploymentFor(environment))
 	return true, nil
 }
 
@@ -55,7 +46,7 @@ func (d *baseTrait) Customize(environment Environment, resources *kubernetes.Col
 //
 // **********************************
 
-func (*baseTrait) getConfigMapFor(e Environment) (*corev1.ConfigMap, error) {
+func (*baseTrait) getConfigMapFor(e Environment) *corev1.ConfigMap {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
@@ -80,7 +71,7 @@ func (*baseTrait) getConfigMapFor(e Environment) (*corev1.ConfigMap, error) {
 		},
 	}
 
-	return &cm, nil
+	return &cm
 }
 
 // **********************************
@@ -89,7 +80,7 @@ func (*baseTrait) getConfigMapFor(e Environment) (*corev1.ConfigMap, error) {
 //
 // **********************************
 
-func (*baseTrait) getDeploymentFor(e Environment) (*appsv1.Deployment, error) {
+func (*baseTrait) getDeploymentFor(e Environment) *appsv1.Deployment {
 	sourceName := strings.TrimPrefix(e.Integration.Spec.Source.Name, "/")
 
 	// combine environment of integration with context, integration
@@ -240,5 +231,5 @@ func (*baseTrait) getDeploymentFor(e Environment) (*appsv1.Deployment, error) {
 	deployment.Spec.Template.Spec.Volumes = vols
 	deployment.Spec.Template.Spec.Containers[0].VolumeMounts = mnts
 
-	return &deployment, nil
+	return &deployment
 }

@@ -23,8 +23,9 @@ import (
 )
 
 var (
-	tExpose = &exposeTrait{}
 	tBase = &baseTrait{}
+	tService = &serviceTrait{}
+	tRoute = &routeTrait{}
 	tOwner = &ownerTrait{}
 )
 
@@ -34,13 +35,14 @@ func CustomizersFor(environment Environment) Customizer {
 	case v1alpha1.IntegrationPlatformClusterOpenShift:
 		return compose(
 			tBase,
-			tExpose,
+			tService,
+			tRoute,
 			tOwner,
 		)
 	case v1alpha1.IntegrationPlatformClusterKubernetes:
 		return compose(
 			tBase,
-			tExpose,
+			tService,
 			tOwner,
 		)
 		// case Knative: ...

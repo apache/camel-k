@@ -19,7 +19,6 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/discover"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -29,7 +28,6 @@ type Environment struct {
 	Platform            *v1alpha1.IntegrationPlatform
 	Context             *v1alpha1.IntegrationContext
 	Integration         *v1alpha1.Integration
-	Dependencies        []string
 	ExecutedCustomizers []ID
 }
 
@@ -43,13 +41,11 @@ func NewEnvironment(integration *v1alpha1.Integration) (*Environment, error) {
 	if err != nil {
 		return nil, err
 	}
-	dependencies := discover.Dependencies(integration.Spec.Source)
 
 	return &Environment{
 		Platform:            pl,
 		Context:             ctx,
 		Integration:         integration,
-		Dependencies:        dependencies,
 		ExecutedCustomizers: make([]ID, 0),
 	}, nil
 }
