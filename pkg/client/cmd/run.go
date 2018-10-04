@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -29,6 +28,7 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/apache/camel-k/pkg/util/sync"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"io"
@@ -107,9 +107,9 @@ func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	} else {
 		resp, err := http.Get(fileName)
 		if err != nil {
-			return errors.New("The URL provided is not reachable " + fileName)
+			return errors.Wrap(err, "The URL provided is not reachable")
 		} else if resp.StatusCode != 200 {
-			return errors.New("The URL provided is not reachable " + fileName)
+			return errors.New("The URL provided is not reachable " + fileName + " The error code returned is " + strconv.Itoa(resp.StatusCode))
 		}
 	}
 	return nil
