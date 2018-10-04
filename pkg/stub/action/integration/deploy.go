@@ -24,8 +24,6 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // NewDeployAction create an action that handles integration deploy
@@ -56,7 +54,7 @@ func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
 		return errors.Wrap(err, "error during trait customization")
 	}
 	// TODO we should look for objects that are no longer present in the collection and remove them
-	err = action.createOrUpdateObjects(resources.Items(), integration)
+	err = kubernetes.ReplaceResources(resources.Items())
 	if err != nil {
 		return err
 	}
@@ -66,18 +64,4 @@ func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
 	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
 
 	return sdk.Update(target)
-}
-
-func (action *deployAction) createOrUpdateObjects(objects []runtime.Object, integration *v1alpha1.Integration) error {
-	for _, object := range objects {
-		err := sdk.Create(object)
-		if err != nil && k8serrors.IsAlreadyExists(err) {
-			err = sdk.Update(object)
-		}
-		if err != nil {
-			return errors.Wrap(err, "could not create or replace resource for integration "+integration.Name)
-		}
-	}
-
-	return nil
 }
