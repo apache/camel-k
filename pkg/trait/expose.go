@@ -15,20 +15,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package catalog
+package trait
 
 import (
-	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 type exposeTrait struct {
 }
 
-func (*exposeTrait) Name() string {
-	return "expose"
+func (*exposeTrait) ID() ID {
+	return ID("expose")
 }
 
-func (*exposeTrait) Customize(environment trait.Environment, resources *kubernetes.Collection) (bool, error) {
+func (*exposeTrait) Customize(environment Environment, resources *kubernetes.Collection) (bool, error) {
 	return false, nil
 }
