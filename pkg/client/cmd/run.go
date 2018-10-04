@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -41,6 +42,10 @@ import (
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+var (
+	traitConfigRegexp = regexp.MustCompile("^([a-z-]+)((?:\\.[a-z-]+)+)=(.*)$")
 )
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -69,6 +74,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
 	cmd.Flags().BoolVar(&options.DependenciesAutoDiscovery, "auto-discovery", true, "Automatically discover Camel modules by analyzing user code")
+	cmd.Flags().StringSliceVarP(&options.Traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -91,6 +97,7 @@ type runCmdOptions struct {
 	Sync                      bool
 	Dev                       bool
 	DependenciesAutoDiscovery bool
+	Traits                    []string
 }
 
 func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -318,6 +325,10 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 		})
 	}
 
+	for _, traitConf := range o.Traits {
+		o.configureTrait(&integration, traitConf)
+	}
+
 	existed := false
 	err = sdk.Create(&integration)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
@@ -360,4 +371,36 @@ func (*runCmdOptions) loadCode(fileName string) (string, error) {
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	bodyString := string(bodyBytes)
 	return string(bodyString), err
+}
+
+func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config string) error {
+	if integration.Spec.Traits == nil {
+		integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
+	}
+
+	parts := traitConfigRegexp.FindStringSubmatch(config)
+	if len(parts) < 4 {
+		return errors.New("unrecognized config format (expected \"<trait>.<prop>=<val>\"): " + config)
+	}
+	traitID := parts[1]
+	prop := parts[2][1:]
+	val := parts[3]
+	var spec v1alpha1.IntegrationTraitSpec
+	var ok bool
+	if spec, ok = integration.Spec.Traits[traitID]; !ok {
+		spec = v1alpha1.IntegrationTraitSpec{
+			Configuration: make(map[string]string),
+		}
+	}
+	if prop == "enabled" {
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return errors.Wrap(err, "cannot parse bool value "+val)
+		}
+		spec.Enabled = &boolVal
+	} else {
+		spec.Configuration[prop] = val
+	}
+	integration.Spec.Traits[traitID] = spec
+	return nil
 }
