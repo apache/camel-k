@@ -1,7 +1,8 @@
+import org.apache.camel.component.seda.SedaComponent
 
 context {
     components {
-        'seda' {
+        seda {
             // set value as method
             queueSize 1234
 
@@ -9,10 +10,18 @@ context {
             concurrentConsumers = 12
         }
 
-        'log' {
-            exchangeFormatter = {
+        mySeda(SedaComponent) {
+            // set value as method
+            queueSize 4321
+
+            // set value as property
+            concurrentConsumers = 21
+        }
+
+        log {
+            formatter {
                 'body ==> ' + it.in.body
-            } as org.apache.camel.spi.ExchangeFormatter
+            }
         }
     }
 }

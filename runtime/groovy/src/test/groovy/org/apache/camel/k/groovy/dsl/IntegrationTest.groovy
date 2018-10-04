@@ -71,8 +71,10 @@ class IntegrationTest extends Specification {
 
     def "load integration with component configuration"()  {
         given:
-        def size = new AtomicInteger()
-        def consumers = new AtomicInteger()
+        def sedaSize = new AtomicInteger()
+        def sedaConsumers = new AtomicInteger()
+        def mySedaSize = new AtomicInteger()
+        def mySedaConsumers = new AtomicInteger()
         def format = new AtomicReference()
 
         when:
@@ -83,13 +85,17 @@ class IntegrationTest extends Specification {
             @Override
             void afterStart(MainSupport main) {
                 def seda = runtime.camelContext.getComponent('seda', SedaComponent)
+                def mySeda = runtime.camelContext.getComponent('mySeda', SedaComponent)
                 def log = runtime.camelContext.getComponent('log', LogComponent)
 
                 assert seda != null
+                assert mySeda != null
                 assert log != null
 
-                size = seda.queueSize
-                consumers = seda.concurrentConsumers
+                sedaSize = seda.queueSize
+                sedaConsumers = seda.concurrentConsumers
+                mySedaSize = mySeda.queueSize
+                mySedaConsumers = mySeda.concurrentConsumers
                 format = log.exchangeFormatter
 
                 main.stop()
@@ -99,8 +105,10 @@ class IntegrationTest extends Specification {
         runtime.run()
 
         then:
-        size == 1234
-        consumers == 12
+        sedaSize == 1234
+        sedaConsumers == 12
+        mySedaSize == 4321
+        mySedaConsumers == 21
         format != null
     }
 }
