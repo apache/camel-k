@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -97,10 +98,19 @@ func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
 	}
 	fileName := args[0]
-	if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
-		return errors.New("file " + fileName + " does not exist")
-	} else if err != nil {
-		return errors.New("error while accessing file " + fileName)
+	if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
+		if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
+			return errors.New("file " + fileName + " does not exist")
+		} else if err != nil {
+			return errors.New("error while accessing file " + fileName)
+		}
+	} else {
+		resp, err := http.Get(fileName)
+		if err != nil {
+			return errors.New("The URL provided is not reachable " + fileName)
+		} else if resp.StatusCode != 200 {
+			return errors.New("The URL provided is not reachable " + fileName)
+		}
 	}
 	return nil
 }
@@ -334,10 +344,20 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 }
 
 func (*runCmdOptions) loadCode(fileName string) (string, error) {
-	content, err := ioutil.ReadFile(fileName)
+	if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
+		content, err := ioutil.ReadFile(fileName)
+		if err != nil {
+			return "", err
+		}
+		return string(content), nil
+	}
+
+	resp, err := http.Get(fileName)
 	if err != nil {
 		return "", err
 	}
-	// TODO check encoding issues
-	return string(content), err
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyString := string(bodyBytes)
+	return string(bodyString), err
 }
