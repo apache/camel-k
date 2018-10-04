@@ -1,7 +1,7 @@
 [[traits]]
 = Traits
 
-Traits are high level named features of Camel K that can be enabled/disabled or reconfigured to customize the
+Traits are high level named features of Camel K that can be enabled/disabled or configured to customize the
 behavior of the final integration.
 
 Camel K provide sensible defaults for all such traits, taking into account the details of the target platform where
@@ -20,24 +20,26 @@ kamel run --trait service.enabled=false file.groovy
 
 The flag `--trait` can be also abbreviated with `-t`.
 
-The `enabled` property is available on all traits and can be used to enable/disable them. All traits are enabled
-by default, unless they are not applicable for the current platform (see "profiles" in the table) or other conditions.
+The `enabled` property is available on all traits and can be used to enable/disable them. All traits have their own
+internal logic to determine if they need to be enabled when the user does not activate them explicitly.
 
-Some traits have additional properties that can be configured by the end user.
+NOTE: Some traits are applicable only to specific platforms (see "profiles" in the table).
 
-E.g. the following command configure the container `port` that should be exposed by the service:
+A trait may have additional properties that can be configured by the end user.
+
+E.g. the following command configures the container `port` that should be exposed by the service:
 
 ```
 kamel run --trait service.enabled=true --trait service.port=8081 file.groovy
 ```
 
-Or the equivalent command:
+Or the equivalent command (assuming that the service trait is enabled by auto-detection):
 
 ```
 kamel run -t service.port=8081 file.groovy
 ```
 
-NOTE: Enabling a *trait* does not force the trait to be activated, especially if the trait specific preconditions do not hold.
+NOTE: Enabling a trait does not force the trait to be activated, especially if the trait specific preconditions do not hold.
 E.g. enabling the `route` trait while the `service` trait is disabled does not produce automatically a route, since a service is needed
 for the `route` trait to work.
 
@@ -45,13 +47,16 @@ for the `route` trait to work.
 
 The following is a list of common traits that can be configured by the end users:
 
-[options="header",cols="1,2,3a"]
+[options="header",cols="1m,2,3a"]
 |=======================
 | Trait      | Profiles 				| Description
 
 | service
 | Kubernetes, OpenShift
 | Exposes the integration with a Service resource so that it can be accessed by other applications (or integrations) in the same namespace.
+  +
+  +
+  It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
 
 [cols="m,"]
 !===
@@ -64,6 +69,9 @@ The following is a list of common traits that can be configured by the end users
 | route
 | OpenShift
 | Exposes the service associated with the integration to the outside world with a OpenShift Route.
+  +
+  +
+  It's enabled by default whenever a Service is added to the integration (through the `service` trait).
 
 |=======================
 
@@ -72,7 +80,7 @@ The following is a list of common traits that can be configured by the end users
 
 There are also platform traits that **normally should not be configured** by the end user. So change them **only if you know what you're doing**.
 
-[options="header"]
+[options="header",cols="m,,"]
 |=======================
 | Trait      | Profiles 				| Description
 | base		 | Kubernetes, OpenShift	| Creates the basic Kubernetes resource needed for running the integration.
