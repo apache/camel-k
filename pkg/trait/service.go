@@ -58,7 +58,9 @@ func (*serviceTrait) getServiceFor(e Environment) *corev1.Service {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      e.Integration.Name,
 			Namespace: e.Integration.Namespace,
-			Labels:    e.Integration.Labels,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -66,11 +68,9 @@ func (*serviceTrait) getServiceFor(e Environment) *corev1.Service {
 					Name:     "http",
 					Port:     80,
 					Protocol: corev1.ProtocolTCP,
-					TargetPort: intstr.IntOrString{
-						// TODO discovering the real port is hard - maybe we should just set 8080 as conventional port in the doc
-						// or allow users to configure it in the trait configuration section
-						IntVal: 8080,
-					},
+					// TODO discovering the real port is hard - maybe we should just set 8080 as conventional port in the doc
+					// or allow users to configure it in the trait configuration section
+					TargetPort: intstr.FromInt(8080),
 				},
 			},
 			Selector: map[string]string{
