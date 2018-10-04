@@ -1,0 +1,80 @@
+[[traits]]
+= Traits
+
+Traits are high level named features of Camel K that can be enabled/disabled or reconfigured to customize the
+behavior of the final integration.
+
+Camel K provide sensible defaults for all such traits, taking into account the details of the target platform where
+the integration is going to run into. However, it's possible for a **expert user** to configure them in
+order to obtain a different behavior.
+
+== Configuration
+
+Each trait has a unique ID that can be used to configure it using the command line tool.
+
+E.g. in order to disable the creation of a Service for a integration, a user can execute:
+
+```
+kamel run --trait service.enabled=false file.groovy
+```
+
+The flag `--trait` can be also abbreviated with `-t`.
+
+The `enabled` property is available on all traits and can be used to enable/disable them. All traits are enabled
+by default, unless they are not applicable for the current platform (see "profiles" in the table) or other conditions.
+
+Some traits have additional properties that can be configured by the end user.
+
+E.g. the following command configure the container `port` that should be exposed by the service:
+
+```
+kamel run --trait service.enabled=true --trait service.port=8081 file.groovy
+```
+
+Or the equivalent command:
+
+```
+kamel run -t service.port=8081 file.groovy
+```
+
+NOTE: Enabling a *trait* does not force the trait to be activated, especially if the trait specific preconditions do not hold.
+E.g. enabling the `route` trait while the `service` trait is disabled does not produce automatically a route, since a service is needed
+for the `route` trait to work.
+
+== Common Traits
+
+The following is a list of common traits that can be configured by the end users:
+
+[options="header",cols="1,2,3a"]
+|=======================
+| Trait      | Profiles 				| Description
+
+| service
+| Kubernetes, OpenShift
+| Exposes the integration with a Service resource so that it can be accessed by other applications (or integrations) in the same namespace.
+
+[cols="m,"]
+!===
+
+! service.port
+! To configure a different port exposed by the container (default `8080`).
+
+!===
+
+| route
+| OpenShift
+| Exposes the service associated with the integration to the outside world with a OpenShift Route.
+
+|=======================
+
+
+== Platform Traits (Advanced)
+
+There are also platform traits that **normally should not be configured** by the end user. So change them **only if you know what you're doing**.
+
+[options="header"]
+|=======================
+| Trait      | Profiles 				| Description
+| base		 | Kubernetes, OpenShift	| Creates the basic Kubernetes resource needed for running the integration.
+| owner      | Kubernetes, OpenShift	| Makes sure that every resource created by the traits belongs to the integration custom resource (so they are deleted when the integration is deleted).
+|=======================

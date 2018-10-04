@@ -148,7 +148,7 @@ Camel K supports multiple languages for writing integrations:
 | Kotlin			| Kotlin Script `.kts` files are supported (experimental).
 |=======================
 
-More information about supported languages is provided in the link:docs/languages.adoc[lanuguages guide]
+More information about supported languages is provided in the link:docs/languages.adoc[lanuguages guide].
 
 Integrations written in different languages are provided in the link:/runtime/examples[examples] directory.
 
@@ -170,6 +170,11 @@ To run it, you need just to execute:
 ```
 kamel run runtime/examples/dns.js
 ```
+
+=== Traits
+
+The details of how the integration is mapped into Kubernetes resources can be *customized using traits*.
+More information is provided in the link:docs/traits.adoc[traits section].
 
 === Monitoring the Status
 
