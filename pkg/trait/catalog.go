@@ -69,7 +69,7 @@ func (c *chainedCustomizer) id() id {
 func (c *chainedCustomizer) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
 	atLeastOne := false
 	for _, custom := range c.customizers {
-		if environment.isEnabled(custom.id()) {
+		if environment.isExplicitlyEnabled(custom.id()) || environment.isAutoDetectionMode(custom.id()) {
 			if done, err := custom.customize(environment, resources); err != nil {
 				return false, err
 			} else if done && custom.id() != "" {

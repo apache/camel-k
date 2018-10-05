@@ -53,9 +53,19 @@ func (e *environment) getTraitSpec(traitID id) *v1alpha1.IntegrationTraitSpec {
 	return nil
 }
 
-func (e *environment) isEnabled(traitID id) bool {
+func (e *environment) isExplicitlyEnabled(traitID id) bool {
 	conf := e.getTraitSpec(traitID)
-	return conf == nil || conf.Enabled == nil || *conf.Enabled
+	return conf != nil && conf.Enabled != nil && *conf.Enabled
+}
+
+func (e *environment) isExplicitlyDisabled(traitID id) bool {
+	conf := e.getTraitSpec(traitID)
+	return conf != nil && conf.Enabled != nil && !*conf.Enabled
+}
+
+func (e *environment) isAutoDetectionMode(traitID id) bool {
+	conf := e.getTraitSpec(traitID)
+	return conf == nil || conf.Enabled == nil
 }
 
 func (e *environment) getConfig(traitID id, key string) *string {
