@@ -19,6 +19,7 @@ package context
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/platform"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -117,5 +118,3 @@ func (action *buildAction) informIntegrations(context *v1alpha1.IntegrationConte
 	}
 	return nil
 }
-
-
