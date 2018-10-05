@@ -45,11 +45,11 @@ func (*serviceTrait) id() id {
 	return id("service")
 }
 
-func (e *serviceTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
-	if !e.requiresService(environment) {
+func (s *serviceTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
+	if environment.isAutoDetectionMode(s.id()) && !s.requiresService(environment) {
 		return false, nil
 	}
-	svc, err := e.getServiceFor(environment)
+	svc, err := s.getServiceFor(environment)
 	if err != nil {
 		return false, err
 	}
