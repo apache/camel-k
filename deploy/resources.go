@@ -2484,6 +2484,20 @@ rules:
   - builds/clone
   verbs:
   - create
+- apiGroups:
+  - ""
+  - "route.openshift.io"
+  resources:
+  - routes
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
 
 `
 	Resources["operator-service-account.yaml"] =
