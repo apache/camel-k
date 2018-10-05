@@ -36,8 +36,8 @@ func init() {
 func SanitizeName(name string) string {
 	name = strings.Split(name, ".")[0]
 	name = path.Base(name)
-	name = strings.ToLower(name)
 	name = strcase.KebabCase(name)
+	name = strings.ToLower(name)
 	name = disallowedChars.ReplaceAllString(name, "")
 	name = strings.TrimFunc(name, isDisallowedStartEndChar)
 	return name
