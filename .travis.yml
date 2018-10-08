@@ -1,5 +1,19 @@
+sudo: required
+
 language: go
 
 go:
   - "1.10.x"
 
+env:
+  global:
+    - OPENSHIFT_VERSION=3.10.0
+    - OPENSHIFT_COMMIT=dd10d17
+
+services:
+  - docker
+
+script:
+  - make
+  - ./build/prepare_integration_tests_travis.sh
+  - make test-integration
