@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [[ $# -ne 1 ]] ; then
+if [ $# -ne 1 ]; then
     echo "Error invoking embed_resources.sh: directory argument required"
     exit 1
 fi
