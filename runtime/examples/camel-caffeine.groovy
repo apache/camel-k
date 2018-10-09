@@ -1,16 +1,14 @@
 //
 // To run this integrations use:
 //
-//     kamel run -d camel:groovy runtime/examples/camel-caffeine.groovy
+//     kamel run --runtime groovy runtime/examples/camel-caffeine.groovy
 //
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
-Cache cache = Caffeine.newBuilder().recordStats().build();
+import com.github.benmanes.caffeine.cache.Caffeine
 
 context {
     registry {
-        bind 'caffeineCache', cache
+        caffeineCache = Caffeine.newBuilder().recordStats().build()
     }
 }
 

@@ -27,7 +27,7 @@ context {
     // configure registry
     //
     registry {
-        bind 'myProcessor', processor {
+        myProcessor = processor {
             it.in.headers['RandomValue'] = ThreadLocalRandom.current().nextInt()
         }
     }
