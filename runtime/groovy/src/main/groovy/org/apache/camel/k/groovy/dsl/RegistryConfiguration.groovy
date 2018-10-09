@@ -28,4 +28,8 @@ class RegistryConfiguration {
     def bind(String name, value) {
         registry.bind(name, value)
     }
+
+    def propertyMissing(String name, value) {
+        registry.bind(name, value)
+    }
 }
