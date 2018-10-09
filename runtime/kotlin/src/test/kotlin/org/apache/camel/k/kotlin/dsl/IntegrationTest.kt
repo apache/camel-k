@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicReference
 
 class IntegrationTest {
     @Test
-    @Throws(Exception::class)
     fun `load integration with rest`() {
         var runtime = org.apache.camel.k.jvm.Runtime()
         runtime.duration = 5
@@ -35,7 +34,6 @@ class IntegrationTest {
     }
 
     @Test
-    @Throws(Exception::class)
     fun `load integration with binding`() {
         var runtime = org.apache.camel.k.jvm.Runtime()
         runtime.duration = 5
@@ -48,12 +46,11 @@ class IntegrationTest {
 
         runtime.run()
 
-        assertThat(runtime.camelContext.registry.lookup("my-entry")).isEqualTo("myRegistryEntry1")
-        assertThat(runtime.camelContext.registry.lookup("my-proc")).isInstanceOf(Processor::class.java)
+        assertThat(runtime.camelContext.registry.lookupByName("my-entry")).isEqualTo("myRegistryEntry1")
+        assertThat(runtime.camelContext.registry.lookupByName("my-proc")).isInstanceOf(Processor::class.java)
     }
 
     @Test
-    @Throws(Exception::class)
     fun `load integration with component configuration`() {
         val sedaSize = AtomicInteger()
         val sedaConsumers = AtomicInteger()
@@ -71,9 +68,9 @@ class IntegrationTest {
                 val log = runtime.camelContext.getComponent("log", LogComponent::class.java)
 
                 sedaSize.set(seda!!.queueSize)
-                sedaConsumers.set(seda!!.concurrentConsumers)
+                sedaConsumers.set(seda.concurrentConsumers)
                 mySedaSize.set(mySeda!!.queueSize)
-                mySedaConsumers.set(mySeda!!.concurrentConsumers)
+                mySedaConsumers.set(mySeda.concurrentConsumers)
                 format.set(log!!.exchangeFormatter)
 
                 main.stop()
@@ -86,6 +83,6 @@ class IntegrationTest {
         assertThat(sedaConsumers.get()).isEqualTo(12)
         assertThat(mySedaSize.get()).isEqualTo(4321)
         assertThat(mySedaConsumers.get()).isEqualTo(21)
-        assertThat(format.get()).isNotNull()
+        assertThat(format.get()).isNotNull
     }
 }

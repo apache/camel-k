@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
 class LoaderTest {
 
     @Test
-    @Throws(Exception::class)
     fun `load route from classpath`() {
         val resource = "classpath:routes.kts"
         val loader = RoutesLoaders.loaderFor(resource, null)
