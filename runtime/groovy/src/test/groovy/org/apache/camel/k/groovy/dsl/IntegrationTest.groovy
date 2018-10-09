@@ -16,6 +16,7 @@
  */
 package org.apache.camel.k.groovy.dsl
 
+import org.apache.camel.Processor
 import org.apache.camel.component.log.LogComponent
 import org.apache.camel.component.seda.SedaComponent
 import org.apache.camel.k.jvm.Runtime
@@ -67,6 +68,7 @@ class IntegrationTest extends Specification {
         then:
         runtime.camelContext.registry.lookup('myEntry1') == 'myRegistryEntry1'
         runtime.camelContext.registry.lookup('myEntry2') == 'myRegistryEntry2'
+        runtime.camelContext.registry.lookup('myEntry3') instanceof Processor
     }
 
     def "load integration with component configuration"()  {

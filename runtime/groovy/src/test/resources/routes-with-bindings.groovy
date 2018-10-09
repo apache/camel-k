@@ -1,8 +1,10 @@
-
 context {
     registry {
-        bind 'myEntry1', 'myRegistryEntry1'
-        bind 'myEntry2', 'myRegistryEntry2'
+        myEntry1 = 'myRegistryEntry1'
+        myEntry2 = 'myRegistryEntry2'
+        myEntry3 = processor {
+            it.in.headers['test'] = 'value'
+        }
     }
 }
 
