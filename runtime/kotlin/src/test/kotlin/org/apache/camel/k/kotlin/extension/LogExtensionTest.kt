@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 
 class LogExtensionTest {
     @Test
-    @Throws(Exception::class)
     fun `invoke extension method - formatter`()  {
         val ctx = DefaultCamelContext()
 
