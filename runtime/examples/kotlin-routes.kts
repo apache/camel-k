@@ -15,6 +15,6 @@ from("timer:kotlin?period=1s")
     .setBody()
         .constant("Hello Camel K!")
     .process().message {
-        m -> m.headers["RandomValue"] = rnd.nextInt()
+        it.headers["RandomValue"] = rnd.nextInt()
     }
-    .to("log:info?showHeaders=true")
+    .to("log:info?showAll=true&multiline=true")

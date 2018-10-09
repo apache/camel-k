@@ -20,12 +20,25 @@ import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.k.jvm.Language
 import org.apache.camel.k.jvm.RoutesLoader
 import org.apache.camel.k.jvm.RuntimeRegistry
+import org.apache.camel.k.kotlin.dsl.IntegrationConfiguration
 import org.apache.camel.util.ResourceHelper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.InputStreamReader
-import javax.script.ScriptEngineManager
-import javax.script.SimpleBindings
+import kotlin.script.experimental.api.*
+import kotlin.script.experimental.host.toScriptSource
+import kotlin.script.experimental.jvm.dependenciesFromClassloader
+import kotlin.script.experimental.jvm.javaHome
+import kotlin.script.experimental.jvm.jvm
+import kotlin.script.experimental.jvmhost.BasicJvmScriptEvaluator
+import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
+import kotlin.script.experimental.jvmhost.JvmScriptCompiler
 
 class KotlinRoutesLoader : RoutesLoader {
+    companion object {
+        val LOGGER : Logger = LoggerFactory.getLogger(KotlinRoutesLoader::class.java)
+    }
 
     override fun getSupportedLanguages(): List<Language> {
         return listOf(Language.Kotlin)
@@ -36,49 +49,50 @@ class KotlinRoutesLoader : RoutesLoader {
         return object : RouteBuilder() {
             @Throws(Exception::class)
             override fun configure() {
-                val context = context
-                val manager = ScriptEngineManager()
-                val engine = manager.getEngineByExtension("kts")
-                val bindings = SimpleBindings()
+                val builder = this
+                val compiler = JvmScriptCompiler()
+                val evaluator = BasicJvmScriptEvaluator()
+                val host = BasicJvmScriptingHost(compiler = compiler, evaluator = evaluator)
+                val javaHome = System.getenv("KOTLIN_JDK_HOME") ?: "/usr/lib/jvm/java"
 
-                bindings["builder"] = this
-                bindings["registry"] = registry
-                bindings["context"] = context
+                LOGGER.info("JAVA_HOME is set to {}", javaHome)
 
                 ResourceHelper.resolveMandatoryResourceAsInputStream(context, resource).use { `is` ->
-                    val pre = """
-                        val builder = bindings["builder"] as org.apache.camel.builder.RouteBuilder
+                    val result = host.eval(
+                        InputStreamReader(`is`).readText().toScriptSource(),
+                        ScriptCompilationConfiguration {
+                            baseClass(IntegrationConfiguration::class)
+                            jvm {
+                                //
+                                // This is needed as workaround for:
+                                //     https://youtrack.jetbrains.com/issue/KT-27497
+                                //
+                                javaHome(File(javaHome))
 
-                        fun rest(block: org.apache.camel.k.kotlin.dsl.RestConfiguration.() -> Unit) {
-                            val delegate = org.apache.camel.k.kotlin.dsl.RestConfiguration(builder)
-                            delegate.block()
-                        }
-
-                        fun context(block: org.apache.camel.k.kotlin.dsl.ContextConfiguration.() -> Unit) {
-                            val delegate = org.apache.camel.k.kotlin.dsl.ContextConfiguration(
-                                context  = bindings["context"] as org.apache.camel.CamelContext,
-                                registry = bindings["registry"] as org.apache.camel.k.jvm.RuntimeRegistry
-                            )
-
-                            delegate.block()
-                        }
-
-                        fun from(uri: String): org.apache.camel.model.RouteDefinition = builder.from(uri)
-
-                        fun processor(fn: (org.apache.camel.Exchange) -> Unit) : org.apache.camel.Processor {
-                             return object: org.apache.camel.Processor {
-                                override fun process(exchange: org.apache.camel.Exchange) = fn(exchange)
+                                //
+                                // The Kotlin script compiler does not inherit
+                                // the classpath by default
+                                //
+                                dependenciesFromClassloader(wholeClasspath = true)
                             }
+                        },
+                        ScriptEvaluationConfiguration {
+                            //
+                            // Arguments used to initialize the script base class
+                            //
+                            constructorArgs(registry, builder)
                         }
-                        fun predicate(fn: (org.apache.camel.Exchange) -> Boolean) : org.apache.camel.Predicate {
-                            return object: org.apache.camel.Predicate {
-                                override fun matches(exchange: org.apache.camel.Exchange) : Boolean = fn(exchange)
-                            }
-                        }
-                    """.trimIndent()
+                    )
 
-                    engine.eval(pre, bindings)
-                    engine.eval(InputStreamReader(`is`), bindings)
+                    for (report in result.reports) {
+                        if (report.severity == ScriptDiagnostic.Severity.ERROR) {
+                            LOGGER.error("{}", report.message, report.exception)
+                        } else if (report.severity == ScriptDiagnostic.Severity.WARNING) {
+                            LOGGER.warn("{}", report.message, report.exception)
+                        } else {
+                            LOGGER.info("{}", report.message)
+                        }
+                    }
                 }
             }
         }
