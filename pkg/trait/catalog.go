@@ -27,11 +27,6 @@ var (
 	tService = newServiceTrait()
 	tRoute   = newRouteTrait()
 	tOwner   = newOwnerTrait()
-
-	// UserFacing is list of user facing services traits
-	UserFacing = []Identifiable{
-		&tService,
-	}
 )
 
 // customizersFor returns a Catalog for the given integration details

@@ -26,6 +26,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/trait"
+
 	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/apache/camel-k/pkg/util/sync"
@@ -100,7 +102,7 @@ type runCmdOptions struct {
 	Traits                    []string
 }
 
-func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
+func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
 	}
@@ -119,10 +121,19 @@ func (*runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 			return errors.New("The URL provided is not reachable " + fileName + " The error code returned is " + strconv.Itoa(resp.StatusCode))
 		}
 	}
+
 	return nil
 }
 
 func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
+	tp := trait.ComputeTraitsProperties()
+	for _, t := range o.Traits {
+		if !util.StringSliceExists(tp, t) {
+			fmt.Printf("Error: %s is not a valid trait property\n", t)
+			return nil
+		}
+	}
+
 	integration, err := o.createIntegration(cmd, args)
 	if err != nil {
 		return err

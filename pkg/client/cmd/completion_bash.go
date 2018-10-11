@@ -19,12 +19,11 @@ package cmd
 
 import (
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/trait"
+
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/fatih/structs"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +69,7 @@ __kamel_dependency_type() {
 }
 
 __kamel_traits() {
-    local type_list="` + computeTraits() + `"
+    local type_list="` + strings.Join(trait.ComputeTraitsProperties(), " ") + `"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
     compopt -o nospace
 }
@@ -241,35 +240,4 @@ func computeCamelDependencies() string {
 	}
 
 	return strings.Join(results, " ")
-}
-
-func computeTraits() string {
-	results := make([]string, 0)
-
-	for _, t := range trait.UserFacing {
-		processFields(structs.Fields(t), func(name string) {
-			results = append(results, string(t.ID())+"."+name)
-		})
-	}
-
-	return strings.Join(results, " ")
-}
-
-func processFields(fields []*structs.Field, processor func(string)) {
-	for _, f := range fields {
-		if f.IsEmbedded() && f.IsExported() && f.Kind() == reflect.Struct {
-			processFields(f.Fields(), processor)
-		}
-
-		if f.IsEmbedded() {
-			continue
-		}
-
-		property := f.Tag("property")
-
-		if property != "" {
-			items := strings.Split(property, ",")
-			processor(items[0])
-		}
-	}
 }
