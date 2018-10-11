@@ -1,5 +1,7 @@
 build: build-runtime build-operator build-kamel build-compile-integration-tests test
 
+build-go: build-embed-resources build-operator build-kamel
+
 build-operator: build-embed-resources
 	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
 

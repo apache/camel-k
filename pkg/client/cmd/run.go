@@ -387,22 +387,15 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 	traitID := parts[1]
 	prop := parts[2][1:]
 	val := parts[3]
-	var spec v1alpha1.IntegrationTraitSpec
-	var ok bool
-	if spec, ok = integration.Spec.Traits[traitID]; !ok {
+
+	spec, ok := integration.Spec.Traits[traitID]
+	if !ok {
 		spec = v1alpha1.IntegrationTraitSpec{
 			Configuration: make(map[string]string),
 		}
 	}
-	if prop == "enabled" {
-		boolVal, err := strconv.ParseBool(val)
-		if err != nil {
-			return errors.Wrap(err, "cannot parse bool value "+val)
-		}
-		spec.Enabled = &boolVal
-	} else {
-		spec.Configuration[prop] = val
-	}
+
+	spec.Configuration[prop] = val
 	integration.Spec.Traits[traitID] = spec
 	return nil
 }

@@ -55,6 +55,6 @@ func newEnvironment(integration *v1alpha1.Integration) (*environment, error) {
 		Platform:            pl,
 		Context:             ctx,
 		Integration:         integration,
-		ExecutedCustomizers: make([]id, 0),
+		ExecutedCustomizers: make([]ID, 0),
 	}, nil
 }

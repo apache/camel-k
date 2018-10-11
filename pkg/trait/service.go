@@ -35,18 +35,20 @@ var webComponents = map[string]bool{
 }
 
 type serviceTrait struct {
+	Trait
+
+	Port int `property:"port"`
 }
 
-const (
-	serviceTraitPortKey = "port"
-)
-
-func (*serviceTrait) id() id {
-	return id("service")
+func newServiceTrait() serviceTrait {
+	return serviceTrait{
+		Trait: NewTraitWithID("service"),
+		Port:  8080,
+	}
 }
 
 func (s *serviceTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
-	if environment.isAutoDetectionMode(s.id()) && !s.requiresService(environment) {
+	if environment.isAutoDetectionMode(s.ID()) && !s.requiresService(environment) {
 		return false, nil
 	}
 	svc, err := s.getServiceFor(environment)
@@ -58,8 +60,8 @@ func (s *serviceTrait) customize(environment *environment, resources *kubernetes
 }
 
 func (s *serviceTrait) getServiceFor(e *environment) (*corev1.Service, error) {
-	port, err := e.getIntConfigOr(s.id(), serviceTraitPortKey, 8080)
-	if err != nil {
+	t := newServiceTrait()
+	if _, err := e.getTrait(s.ID(), &t); err != nil {
 		return nil, err
 	}
 
@@ -81,7 +83,7 @@ func (s *serviceTrait) getServiceFor(e *environment) (*corev1.Service, error) {
 					Name:       "http",
 					Port:       80,
 					Protocol:   corev1.ProtocolTCP,
-					TargetPort: intstr.FromInt(port),
+					TargetPort: intstr.FromInt(t.Port),
 				},
 			},
 			Selector: map[string]string{
