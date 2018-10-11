@@ -19,8 +19,9 @@ package trait
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -28,10 +29,13 @@ import (
 )
 
 type baseTrait struct {
+	Trait
 }
 
-func (*baseTrait) id() id {
-	return id("base")
+func newBaseTrait() baseTrait {
+	return baseTrait{
+		Trait: NewTraitWithID("base"),
+	}
 }
 
 func (d *baseTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
