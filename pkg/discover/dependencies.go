@@ -32,8 +32,8 @@ var (
 )
 
 func init() {
-	singleQuotedURI = regexp.MustCompile("'([a-z-]+):[^']+'")
-	doubleQuotedURI = regexp.MustCompile("\"([a-z-]+):[^\"]+\"")
+	singleQuotedURI = regexp.MustCompile("'([a-z0-9-]+):[^']+'")
+	doubleQuotedURI = regexp.MustCompile("\"([a-z0-9-]+):[^\"]+\"")
 }
 
 // Dependencies returns a list of dependencies required by the given source code
