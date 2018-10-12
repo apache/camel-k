@@ -26,6 +26,18 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  digest = "1:69ebf3eaf09a9528d0fa78baecf58a816acd73b6b500eb714c54b9d8a01cff0c"
+  name = "github.com/arsham/blush"
+  packages = [
+    "blush",
+    "internal/reader",
+    "internal/tools",
+  ]
+  pruneopts = "NUT"
+  revision = "a87294e47998d46b608c76cecb35b712103ad45b"
+  version = "v0.5.3"
+
+[[projects]]
   branch = "master"
   digest = "1:707ebe952a8b3d00b343c01536c79c73771d100f63ec6babeaed5c79e2b8a8dd"
   name = "github.com/beorn7/perks"
@@ -739,6 +751,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/arsham/blush/blush",
     "github.com/fatih/structs",
     "github.com/mitchellh/mapstructure",
     "github.com/openshift/api/apps/v1",
