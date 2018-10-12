@@ -28,6 +28,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.apache.camel.util.IntrospectionSupport;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Level;
@@ -106,5 +107,26 @@ public final class RuntimeSupport {
                 ctx.getConfiguration().addLogger(logger, config);
             }
         );
+    }
+
+    public static void bindProperties(Object target, String prefix) {
+        // Integration properties are defined as system properties
+        final Properties properties = System.getProperties();
+
+        properties.entrySet().stream()
+            .filter(entry -> entry.getKey() instanceof String)
+            .filter(entry -> entry.getValue() != null)
+            .filter(entry -> ((String)entry.getKey()).startsWith(prefix))
+            .forEach(entry -> {
+                    final String key = ((String)entry.getKey()).substring(prefix.length());
+                    final Object val = entry.getValue();
+
+                    try {
+                        IntrospectionSupport.setProperty(target, key, val, false);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            );
     }
 }
