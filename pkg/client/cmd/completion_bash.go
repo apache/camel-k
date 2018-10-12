@@ -145,6 +145,10 @@ __custom_func() {
             __kamel_kubectl_get_integrations
             return
             ;;
+        kamel_log)
+            __kamel_kubectl_get_integrations
+            return
+            ;;
         kamel_context_delete)
             __kamel_kubectl_get_user_integrationcontexts
             return
@@ -225,7 +229,6 @@ func configureKnownBashCompletions(command *cobra.Command) {
 }
 
 func configureBashAnnotationForFlag(command *cobra.Command, flagName string, annotations map[string][]string) {
-
 	flag := command.Flag(flagName)
 	if flag != nil {
 		flag.Annotations = annotations
