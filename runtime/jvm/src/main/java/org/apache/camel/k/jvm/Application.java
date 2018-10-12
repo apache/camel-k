@@ -16,13 +16,10 @@
  */
 package org.apache.camel.k.jvm;
 
-import java.util.Properties;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.support.LifecycleStrategySupport;
-import org.apache.camel.util.IntrospectionSupport;
 import org.apache.camel.util.ObjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,39 +74,25 @@ public class Application {
     static class ComponentPropertiesBinder extends MainListenerSupport {
         @Override
         public void configure(CamelContext context) {
+            // Configure the camel context using properties in the form:
+            //
+            //     camel.context.${name} = ${value}
+            //
+            RuntimeSupport.bindProperties(context, "camel.context.");
+
             context.addLifecycleStrategy(new LifecycleStrategySupport() {
                 @SuppressWarnings("unchecked")
                 @Override
                 public void onComponentAdd(String name, Component component) {
-                    // Integration properties are defined as system properties
-                    final Properties properties = System.getProperties();
-
-                    // Set the prefix used by setProperties to filter
-                    // and apply properties to match the one used by
-                    // camel spring boot:
+                    // The prefix that identifies component properties is the
+                    // same one used by camel-spring-boot to configure components
+                    // using starters:
                     //
-                    //     camel.component.${scheme}.${value}
+                    //     camel.component.${scheme}.${name} = ${value}
                     //
-                    final String prefix = "camel.component." + name + ".";
-
-                    properties.entrySet().stream()
-                        .filter(entry -> entry.getKey() instanceof String)
-                        .filter(entry -> entry.getValue() != null)
-                        .filter(entry -> ((String)entry.getKey()).startsWith(prefix))
-                        .forEach(entry -> {
-                                final String key = ((String)entry.getKey()).substring(prefix.length());
-                                final Object val = entry.getValue();
-
-                                try {
-                                    IntrospectionSupport.setProperty(component, key, val, false);
-                                } catch (Exception ex) {
-                                    throw new RuntimeException(ex);
-                                }
-                            }
-                        );
+                    RuntimeSupport.bindProperties(component, "camel.component." + name + ".");
                 }
             });
         }
     }
-
 }
