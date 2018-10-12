@@ -47,7 +47,9 @@ func StateChanges(ctx context.Context, integration *v1alpha1.Integration) (<-cha
 	var lastObservedState *v1alpha1.IntegrationPhase
 
 	go func() {
+		defer watcher.Stop()
 		defer close(out)
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -80,4 +82,69 @@ func StateChanges(ctx context.Context, integration *v1alpha1.Integration) (<-cha
 	}()
 
 	return out, nil
+}
+
+//
+// HandleStateChanges watches a integration resource and invoke the given handler when its status changes.
+//
+//     err := watch.HandleStateChanges(ctx, integration, func(i *v1alpha1.Integration) bool {
+//         if i.Status.Phase == v1alpha1.IntegrationPhaseRunning {
+//			    return false
+//		    }
+//
+//		    return true
+//	    })
+//
+// This function blocks until the handler function returns true or either the events channel or the context is closed.
+//
+func HandleStateChanges(ctx context.Context, integration *v1alpha1.Integration, handler func(integration *v1alpha1.Integration) bool) error {
+	resourceClient, _, err := k8sclient.GetResourceClient(integration.APIVersion, integration.Kind, integration.Namespace)
+	if err != nil {
+		return err
+	}
+	watcher, err := resourceClient.Watch(metav1.ListOptions{
+		FieldSelector: "metadata.name=" + integration.Name,
+	})
+	if err != nil {
+		return err
+	}
+
+	defer watcher.Stop()
+	events := watcher.ResultChan()
+
+	var lastObservedState *v1alpha1.IntegrationPhase
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case e, ok := <-events:
+			if !ok {
+				return nil
+			}
+
+			if e.Object != nil {
+				if runtimeUnstructured, ok := e.Object.(runtime.Unstructured); ok {
+					unstr := unstructured.Unstructured{
+						Object: runtimeUnstructured.UnstructuredContent(),
+					}
+					icopy := integration.DeepCopy()
+					err := k8sutil.UnstructuredIntoRuntimeObject(&unstr, icopy)
+					if err != nil {
+						logrus.Error("Unexpected error detected when watching resource", err)
+						return nil
+					}
+
+					if lastObservedState == nil || *lastObservedState != icopy.Status.Phase {
+						lastObservedState = &icopy.Status.Phase
+						if !handler(icopy) {
+							return nil
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }

@@ -31,7 +31,11 @@ import (
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Cancel ctx as soon as main returns
+	defer cancel()
+
 	rootCmd, err := cmd.NewKamelCommand(ctx)
 	exitOnError(err)
 
@@ -42,6 +46,7 @@ func main() {
 func exitOnError(err error) {
 	if err != nil {
 		fmt.Println("Error:", err)
+
 		os.Exit(1)
 	}
 }
