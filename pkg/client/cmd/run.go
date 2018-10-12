@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/arsham/blush/blush"
 
 	"github.com/apache/camel-k/pkg/util"
 
@@ -193,15 +194,29 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integratio
 func (o *runCmdOptions) printLogs(integration *v1alpha1.Integration) error {
 	scraper := log.NewSelectorScraper(integration.Namespace, "camel.apache.org/integration="+integration.Name)
 	reader := scraper.Start(o.Context)
-	for {
-		str, err := reader.ReadString('\n')
-		if err == io.EOF || o.Context.Err() != nil {
-			break
-		} else if err != nil {
-			return err
-		}
-		fmt.Print(str)
+
+	b := &blush.Blush{
+		Finders: []blush.Finder{
+			blush.NewExact("FATAL", blush.Red),
+			blush.NewExact("ERROR", blush.Red),
+			blush.NewExact("WARN", blush.Yellow),
+			blush.NewExact("INFO", blush.Green),
+			blush.NewExact("DEBUG", blush.Colour{
+				Foreground: blush.RGB{R: 170, G: 170, B: 170},
+				Background: blush.NoRGB,
+			}),
+			blush.NewExact("TRACE", blush.Colour{
+				Foreground: blush.RGB{R: 170, G: 170, B: 170},
+				Background: blush.NoRGB,
+			}),
+		},
+		Reader: ioutil.NopCloser(reader),
 	}
+
+	if _, err := io.Copy(os.Stdout, b); err != nil {
+		fmt.Println(err.Error())
+	}
+
 	return nil
 }
 
