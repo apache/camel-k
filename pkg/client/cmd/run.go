@@ -76,6 +76,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
 	cmd.Flags().BoolVar(&options.DependenciesAutoDiscovery, "auto-discovery", true, "Automatically discover Camel modules by analyzing user code")
 	cmd.Flags().StringSliceVarP(&options.Traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
+	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. E.g. \"--logging-level org.apache.camel=DEBUG\"")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -99,6 +100,7 @@ type runCmdOptions struct {
 	Dev                       bool
 	DependenciesAutoDiscovery bool
 	Traits                    []string
+	LoggingLevels             []string
 }
 
 func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -307,6 +309,12 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
 			Type:  "property",
 			Value: item,
+		})
+	}
+	for _, item := range o.LoggingLevels {
+		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
+			Type:  "property",
+			Value: "logging.level." + item,
 		})
 	}
 	for _, item := range o.ConfigMaps {
