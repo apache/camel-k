@@ -17,6 +17,12 @@ limitations under the License.
 
 package util
 
+import (
+	"os"
+	"os/signal"
+	"syscall"
+)
+
 // StringSliceContains --
 func StringSliceContains(slice []string, items []string) bool {
 	for i := 0; i < len(items); i++ {
@@ -50,4 +56,19 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	*slice = append(*slice, item)
 
 	return true
+}
+
+// WaitForSignal --
+func WaitForSignal(sig chan os.Signal, exit func(int)) {
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGPIPE)
+	go func() {
+		s := <-sig
+		switch s {
+		case syscall.SIGINT, syscall.SIGTERM:
+			exit(130) // Ctrl+c
+		case syscall.SIGPIPE:
+			exit(0)
+		}
+		exit(1)
+	}()
 }

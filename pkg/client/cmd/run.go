@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -33,8 +34,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	"io"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -165,41 +164,28 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 }
 
 func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) error {
-	// Block this goroutine until the integration is in a final status
-	changes, err := watch.StateChanges(o.Context, integration)
-	if err != nil {
-		return err
-	}
+	handler := func(i *v1alpha1.Integration) bool {
+		//
+		// TODO when we add health checks, we should wait until they are passed
+		//
+		if i.Status.Phase != "" {
+			fmt.Println("integration \""+integration.Name+"\" in phase", i.Status.Phase)
 
-	var lastStatusSeen *v1alpha1.IntegrationStatus
-
-watcher:
-	for {
-		select {
-		case <-o.Context.Done():
-			return nil
-		case i, ok := <-changes:
-			if !ok {
-				break watcher
+			if i.Status.Phase == v1alpha1.IntegrationPhaseRunning {
+				// TODO display some error info when available in the status
+				return false
 			}
-			lastStatusSeen = &i.Status
-			phase := string(i.Status.Phase)
-			if phase != "" {
-				fmt.Println("integration \""+integration.Name+"\" in phase", phase)
-				// TODO when we add health checks, we should wait until they are passed
-				if i.Status.Phase == v1alpha1.IntegrationPhaseRunning || i.Status.Phase == v1alpha1.IntegrationPhaseError {
-					// TODO display some error info when available in the status
-					break watcher
-				}
+
+			if i.Status.Phase == v1alpha1.IntegrationPhaseError {
+				fmt.Println("integration deployment failed")
+				return false
 			}
 		}
+
+		return true
 	}
 
-	// TODO we may not be able to reach this state, since the build will be done without sources (until we add health checks)
-	if lastStatusSeen != nil && lastStatusSeen.Phase == v1alpha1.IntegrationPhaseError {
-		return errors.New("integration deployment failed")
-	}
-	return nil
+	return watch.HandleStateChanges(o.Context, integration, handler)
 }
 
 func (o *runCmdOptions) printLogs(integration *v1alpha1.Integration) error {
