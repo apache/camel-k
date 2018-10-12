@@ -26,10 +26,13 @@ import (
 )
 
 type routeTrait struct {
+	Trait
 }
 
-func (*routeTrait) id() id {
-	return id("route")
+func newRouteTrait() routeTrait {
+	return routeTrait{
+		Trait: NewTraitWithID("route"),
+	}
 }
 
 func (e *routeTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {

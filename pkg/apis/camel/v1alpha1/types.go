@@ -18,6 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/mitchellh/mapstructure"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -84,8 +85,27 @@ const (
 
 // A IntegrationTraitSpec contains the configuration of a trait
 type IntegrationTraitSpec struct {
-	Enabled       *bool             `json:"enabled,omitempty"`
 	Configuration map[string]string `json:"configuration,omitempty"`
+}
+
+// Decode the trait configuration to a type safe struct
+func (in *IntegrationTraitSpec) Decode(target interface{}) error {
+	md := mapstructure.Metadata{}
+
+	decoder, err := mapstructure.NewDecoder(
+		&mapstructure.DecoderConfig{
+			Metadata:         &md,
+			WeaklyTypedInput: true,
+			TagName:          "property",
+			Result:           &target,
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return decoder.Decode(in.Configuration)
 }
 
 // IntegrationStatus --

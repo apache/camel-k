@@ -19,9 +19,11 @@ package cmd
 
 import (
 	"os"
+	"strings"
+
+	"github.com/apache/camel-k/pkg/trait"
 
 	"github.com/apache/camel-k/pkg/util/camel"
-
 	"github.com/spf13/cobra"
 )
 
@@ -64,6 +66,12 @@ __kamel_dependency_type() {
         COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 	    compopt -o nospace
     esac
+}
+
+__kamel_traits() {
+    local type_list="` + strings.Join(trait.ComputeTraitsProperties(), " ") + `"
+    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+    compopt -o nospace
 }
 
 __kamel_languages() {
@@ -207,6 +215,13 @@ func configureKnownBashCompletions(command *cobra.Command) {
 			cobra.BashCompCustom: {"__kamel_runtimes"},
 		},
 	)
+	configureBashAnnotationForFlag(
+		command,
+		"trait",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_traits"},
+		},
+	)
 }
 
 func configureBashAnnotationForFlag(command *cobra.Command, flagName string, annotations map[string][]string) {
@@ -218,15 +233,11 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 }
 
 func computeCamelDependencies() string {
-	result := ""
+	results := make([]string, 0, len(camel.Runtime.Artifacts))
 
 	for k := range camel.Runtime.Artifacts {
-		if result != "" {
-			result = result + " " + k
-		} else {
-			result = k
-		}
+		results = append(results, k)
 	}
 
-	return result
+	return strings.Join(results, " ")
 }

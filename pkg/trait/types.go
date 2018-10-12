@@ -18,19 +18,55 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+	"reflect"
+
+	"github.com/sirupsen/logrus"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
+// Identifiable represent an identifiable type
+type Identifiable interface {
+	ID() ID
+}
+
 // ID uniquely identifies a trait
-type id string
+type ID string
+
+// Trait --
+type Trait struct {
+	Identifiable
+
+	id      ID
+	Enabled bool `property:"enabled"`
+}
+
+// ID returns the trait ID
+func (trait *Trait) ID() ID {
+	return trait.id
+}
+
+// NewTrait creates a new trait with defaults
+func NewTrait() Trait {
+	return Trait{
+		Enabled: true,
+	}
+}
+
+// NewTraitWithID creates a new trait with defaults and given ID
+func NewTraitWithID(traitID ID) Trait {
+	return Trait{
+		id:      traitID,
+		Enabled: true,
+	}
+}
 
 // A Customizer performs customization of the deployed objects
 type customizer interface {
-	// The Name of the customizer
-	id() id
+	Identifiable
 	// Customize executes the trait customization on the resources and return true if the resources have been changed
 	customize(environment *environment, resources *kubernetes.Collection) (bool, error)
 }
@@ -40,10 +76,23 @@ type environment struct {
 	Platform            *v1alpha1.IntegrationPlatform
 	Context             *v1alpha1.IntegrationContext
 	Integration         *v1alpha1.Integration
-	ExecutedCustomizers []id
+	ExecutedCustomizers []ID
 }
 
-func (e *environment) getTraitSpec(traitID id) *v1alpha1.IntegrationTraitSpec {
+func (e *environment) getTrait(traitID ID, target interface{}) (bool, error) {
+	if spec := e.getTraitSpec(traitID); spec != nil {
+		err := spec.Decode(&target)
+		if err != nil {
+			return false, errors.Wrap(err, fmt.Sprintf("unable to convert trait %s to the target struct %s", traitID, reflect.TypeOf(target).Name()))
+		}
+
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (e *environment) getTraitSpec(traitID ID) *v1alpha1.IntegrationTraitSpec {
 	if e.Integration.Spec.Traits == nil {
 		return nil
 	}
@@ -53,59 +102,24 @@ func (e *environment) getTraitSpec(traitID id) *v1alpha1.IntegrationTraitSpec {
 	return nil
 }
 
-func (e *environment) isExplicitlyEnabled(traitID id) bool {
-	conf := e.getTraitSpec(traitID)
-	return conf != nil && conf.Enabled != nil && *conf.Enabled
+func (e *environment) isEnabled(traitID ID) bool {
+	t := NewTrait()
+	if _, err := e.getTrait(traitID, &t); err != nil {
+		logrus.Panic(err)
+	}
+
+	return t.Enabled
 }
 
-func (e *environment) isExplicitlyDisabled(traitID id) bool {
-	conf := e.getTraitSpec(traitID)
-	return conf != nil && conf.Enabled != nil && !*conf.Enabled
-}
+func (e *environment) isAutoDetectionMode(traitID ID) bool {
+	spec := e.getTraitSpec(traitID)
+	if spec == nil {
+		return true
+	}
 
-func (e *environment) isAutoDetectionMode(traitID id) bool {
-	conf := e.getTraitSpec(traitID)
-	return conf == nil || conf.Enabled == nil
-}
+	if spec.Configuration == nil {
+		return true
+	}
 
-func (e *environment) getConfig(traitID id, key string) *string {
-	conf := e.getTraitSpec(traitID)
-	if conf == nil || conf.Configuration == nil {
-		return nil
-	}
-	if v, ok := conf.Configuration[key]; ok {
-		return &v
-	}
-	return nil
-}
-
-func (e *environment) getConfigOr(traitID id, key string, defaultValue string) string {
-	val := e.getConfig(traitID, key)
-	if val != nil {
-		return *val
-	}
-	return defaultValue
-}
-
-func (e *environment) getIntConfig(traitID id, key string) (*int, error) {
-	val := e.getConfig(traitID, key)
-	if val == nil {
-		return nil, nil
-	}
-	intVal, err := strconv.Atoi(*val)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot extract a integer from property "+key+" with value "+*val)
-	}
-	return &intVal, nil
-}
-
-func (e *environment) getIntConfigOr(traitID id, key string, defaultValue int) (int, error) {
-	val, err := e.getIntConfig(traitID, key)
-	if err != nil {
-		return 0, err
-	}
-	if val != nil {
-		return *val, nil
-	}
-	return defaultValue, nil
+	return spec.Configuration["enabled"] == ""
 }

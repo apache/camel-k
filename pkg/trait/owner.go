@@ -17,15 +17,20 @@ limitations under the License.
 
 package trait
 
-import "github.com/apache/camel-k/pkg/util/kubernetes"
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // ownerTrait ensures that all created resources belong to the integration being created
 type ownerTrait struct {
+	Trait
 }
 
-func (*ownerTrait) id() id {
-	return id("owner")
+func newOwnerTrait() ownerTrait {
+	return ownerTrait{
+		Trait: NewTraitWithID("owner"),
+	}
 }
 
 func (*ownerTrait) customize(e *environment, resources *kubernetes.Collection) (bool, error) {

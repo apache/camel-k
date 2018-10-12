@@ -23,10 +23,10 @@ import (
 )
 
 var (
-	tBase    = &baseTrait{}
-	tService = &serviceTrait{}
-	tRoute   = &routeTrait{}
-	tOwner   = &ownerTrait{}
+	tBase    = newBaseTrait()
+	tService = newServiceTrait()
+	tRoute   = newRouteTrait()
+	tOwner   = newOwnerTrait()
 )
 
 // customizersFor returns a Catalog for the given integration details
@@ -34,16 +34,16 @@ func customizersFor(environment *environment) customizer {
 	switch environment.Platform.Spec.Cluster {
 	case v1alpha1.IntegrationPlatformClusterOpenShift:
 		return compose(
-			tBase,
-			tService,
-			tRoute,
-			tOwner,
+			&tBase,
+			&tService,
+			&tRoute,
+			&tOwner,
 		)
 	case v1alpha1.IntegrationPlatformClusterKubernetes:
 		return compose(
-			tBase,
-			tService,
-			tOwner,
+			&tBase,
+			&tService,
+			&tOwner,
 		)
 		// case Knative: ...
 	}
@@ -62,18 +62,18 @@ type chainedCustomizer struct {
 	customizers []customizer
 }
 
-func (c *chainedCustomizer) id() id {
-	return id("")
+func (c *chainedCustomizer) ID() ID {
+	return ID("")
 }
 
 func (c *chainedCustomizer) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
 	atLeastOne := false
 	for _, custom := range c.customizers {
-		if environment.isExplicitlyEnabled(custom.id()) || environment.isAutoDetectionMode(custom.id()) {
+		if environment.isEnabled(custom.ID()) || environment.isAutoDetectionMode(custom.ID()) {
 			if done, err := custom.customize(environment, resources); err != nil {
 				return false, err
-			} else if done && custom.id() != "" {
-				environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, custom.id())
+			} else if done && custom.ID() != "" {
+				environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, custom.ID())
 				atLeastOne = atLeastOne || done
 			}
 		}
