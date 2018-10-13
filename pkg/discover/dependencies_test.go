@@ -84,3 +84,18 @@ func TestDependenciesGroovy(t *testing.T) {
 	// assert all dependencies are found and sorted (removing duplicates)
 	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, dependencies)
 }
+
+func TestDependencies(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		Name:     "Request.java",
+		Language: v1alpha1.LanguageJavaSource,
+		Content: `
+			from("http4:test").to("log:end");
+			from("https4:test").to("log:end");
+			from("twitter-timeline:test").to("mock:end");
+		`,
+	}
+	dependencies := Dependencies(code)
+	// assert all dependencies are found and sorted (removing duplicates)
+	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:twitter"}, dependencies)
+}
