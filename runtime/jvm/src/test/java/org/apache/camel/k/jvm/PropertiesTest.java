@@ -58,7 +58,6 @@ public class PropertiesTest {
         }
     }
 
-
     @Test
     public void testComponentConfiguration() throws Exception {
         int queueSize1 = ThreadLocalRandom.current().nextInt(10, 100);
@@ -91,6 +90,40 @@ public class PropertiesTest {
             runtime.run();
         } finally {
             System.getProperties().remove("camel.component.seda.queueSize");
+            System.getProperties().remove("camel.component.my-seda.queueSize");
+        }
+    }
+
+    @Test
+    public void testContextConfiguration() throws Exception {
+        System.setProperty("camel.context.messageHistory", "false");
+        System.setProperty("camel.context.loadTypeConverters", "false");
+
+        try {
+            Runtime runtime = new Runtime();
+            runtime.setDuration(5);
+            runtime.getRegistry().bind("my-seda", new SedaComponent());
+            runtime.addMainListener(new Application.ComponentPropertiesBinder());
+            runtime.addMainListener(new MainListenerSupport() {
+                @Override
+                public void afterStart(MainSupport main) {
+                    try {
+                        CamelContext context = main.getCamelContexts().get(0);
+
+                        assertThat(context.isMessageHistory()).isFalse();
+                        assertThat(context.isLoadTypeConverters()).isFalse();
+
+                        main.stop();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+
+            runtime.run();
+        } finally {
+            System.getProperties().remove("camel.context.messageHistory");
+            System.getProperties().remove("camel.context.loadTypeConverters");
         }
     }
 }
