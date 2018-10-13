@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -28,8 +27,6 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/trait"
-	"github.com/arsham/blush/blush"
-
 	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/apache/camel-k/pkg/util/sync"
@@ -153,7 +150,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev {
-		err = o.printLogs(integration)
+		err = log.Print(o.Context, integration)
 		if err != nil {
 			return err
 		}
@@ -189,35 +186,6 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integratio
 	}
 
 	return watch.HandleStateChanges(o.Context, integration, handler)
-}
-
-func (o *runCmdOptions) printLogs(integration *v1alpha1.Integration) error {
-	scraper := log.NewSelectorScraper(integration.Namespace, "camel.apache.org/integration="+integration.Name)
-	reader := scraper.Start(o.Context)
-
-	b := &blush.Blush{
-		Finders: []blush.Finder{
-			blush.NewExact("FATAL", blush.Red),
-			blush.NewExact("ERROR", blush.Red),
-			blush.NewExact("WARN", blush.Yellow),
-			blush.NewExact("INFO", blush.Green),
-			blush.NewExact("DEBUG", blush.Colour{
-				Foreground: blush.RGB{R: 170, G: 170, B: 170},
-				Background: blush.NoRGB,
-			}),
-			blush.NewExact("TRACE", blush.Colour{
-				Foreground: blush.RGB{R: 170, G: 170, B: 170},
-				Background: blush.NoRGB,
-			}),
-		},
-		Reader: ioutil.NopCloser(reader),
-	}
-
-	if _, err := io.Copy(os.Stdout, b); err != nil {
-		fmt.Println(err.Error())
-	}
-
-	return nil
 }
 
 func (o *runCmdOptions) syncIntegration(file string) error {

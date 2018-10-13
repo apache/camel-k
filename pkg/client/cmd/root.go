@@ -46,9 +46,9 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		Context: ctx,
 	}
 	var cmd = cobra.Command{
-		Use:   "kamel",
-		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
-		Long:  kamelCommandLongDescription,
+		Use:                    "kamel",
+		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
+		Long:                   kamelCommandLongDescription,
 		BashCompletionFunction: bashCompletionFunction,
 	}
 
@@ -78,6 +78,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.AddCommand(newCmdGet(&options))
 	cmd.AddCommand(newCmdDelete(&options))
 	cmd.AddCommand(newCmdInstall(&options))
+	cmd.AddCommand(newCmdLog(&options))
 	cmd.AddCommand(newCmdContext(&options))
 
 	return &cmd, nil
