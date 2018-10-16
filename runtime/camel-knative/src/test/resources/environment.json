@@ -1,0 +1,26 @@
+{
+  "services": [
+    {
+      "type": "channel",
+      "protocol": "http",
+      "name": "c1",
+      "host": "localhost",
+      "port": "8001",
+      "metadata": {
+        "service.path": "",
+        "knative.event.type": ""
+      }
+    },
+    {
+      "type": "endpoint",
+      "protocol": "http",
+      "name": "e1",
+      "host": "localhost",
+      "port": "9001",
+      "metadata": {
+        "service.path": "",
+        "knative.event.type": ""
+      }
+    }
+  ]
+}
