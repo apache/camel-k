@@ -36,7 +36,7 @@ func newContextDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
 		Use:   "delete",
 		Short: "Delete an Integration Context",
-		Long:  `Delete anIntegration Context.`,
+		Long:  `Delete an Integration Context.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := impl.validate(cmd, args); err != nil {
 				return err

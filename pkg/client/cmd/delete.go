@@ -29,7 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewCmdDelete --
+// newCmdDelete --
 func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	impl := deleteCmdOptions{
 		RootCmdOptions: rootCmdOptions,
@@ -74,26 +74,16 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	if len(args) != 0 && !command.deleteAll {
 		for _, arg := range args {
-			integration := v1alpha1.Integration{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       v1alpha1.IntegrationKind,
-					APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: command.Namespace,
-					Name:      arg,
-				},
-			}
 
-			err := sdk.Delete(&integration)
+			err := DeleteIntegration(arg, command.Namespace)
 			if err != nil {
 				if k8errors.IsNotFound(err) {
-					fmt.Println("Integration " + integration.GetName() + " not found. Skipped.")
+					fmt.Println("Integration " + arg + " not found. Skipped.")
 				} else {
 					return err
 				}
 			} else {
-				fmt.Println("Integration " + integration.GetName() + " deleted")
+				fmt.Println("Integration " + arg + " deleted")
 			}
 		}
 	} else if command.deleteAll {
