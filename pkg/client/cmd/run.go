@@ -22,9 +22,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
@@ -137,6 +139,21 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	if o.Dev {
+		c := make(chan os.Signal)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-c
+			fmt.Printf("Run integration terminating\n")
+			err := DeleteIntegration(integration.Name, integration.Namespace)
+			if err != nil {
+				fmt.Println(err)
+			}
+			os.Exit(1)
+		}()
+	}
+
 	if o.Sync || o.Dev {
 		err = o.syncIntegration(args[0])
 		if err != nil {
