@@ -20,7 +20,7 @@ Work In Progress
 
 === Java
 
-Using java to write an integration to be deployed using camel-k is not different from defining your routing rules in Camel with the only difference that you do not need to build and package it as a jar.
+Using Java to write an integration to be deployed using camel-k is not different from defining your routing rules in Camel with the only difference that you do not need to build and package it as a jar.
 
 [source,java]
 .Example
@@ -271,7 +271,7 @@ rest {
 
 === JavaScript
 
-integration written in Kotlin looks very similar to a Java one:
+The integration written in JavaScript looks very similar to a Java one:
 
 [source,js]
 ----
