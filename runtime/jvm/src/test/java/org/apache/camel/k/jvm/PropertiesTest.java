@@ -22,7 +22,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.component.seda.SedaComponent;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.main.MainSupport;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
