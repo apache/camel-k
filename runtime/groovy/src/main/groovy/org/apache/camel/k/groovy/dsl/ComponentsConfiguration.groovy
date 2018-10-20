@@ -19,8 +19,6 @@ package org.apache.camel.k.groovy.dsl
 import org.apache.camel.CamelContext
 import org.apache.camel.Component
 
-import java.lang.reflect.Array
-
 class ComponentsConfiguration {
     private final CamelContext context
 
@@ -60,18 +58,20 @@ class ComponentsConfiguration {
         throw new IllegalArgumentException("Type mismatch, expected: " + type + ", got: " + component.class)
     }
 
-    def methodMissing(String name, args) {
-        if (args != null && args.getClass().isArray()) {
-            if (Array.getLength(args) == 1) {
-                def clos = Array.get(args, 0)
+    def methodMissing(String name, arguments) {
+        final Object[] args = arguments as Object[]
+
+        if (args != null) {
+            if (args.length == 1) {
+                def clos = args[0]
 
                 if (clos instanceof Closure) {
                     return component(name, clos)
                 }
             }
-            if (Array.getLength(args) == 2) {
-                def type = Array.get(args, 0)
-                def clos = Array.get(args, 1)
+            if (args.length == 2) {
+                def type = args[0]
+                def clos = args[1]
 
                 if (type instanceof Class && Component.class.isAssignableFrom(type) && clos instanceof Closure) {
                     return component(name,type, clos)
@@ -79,6 +79,6 @@ class ComponentsConfiguration {
             }
         }
 
-        throw new MissingMethodException("Missing method: \"$name\", args: $args")
+        throw new MissingMethodException(name, this, args)
     }
 }
