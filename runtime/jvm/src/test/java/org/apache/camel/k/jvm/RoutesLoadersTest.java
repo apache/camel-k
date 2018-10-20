@@ -21,9 +21,10 @@ import java.util.List;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.ToDefinition;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class RoutesLoadersTest {
 
@@ -112,21 +113,26 @@ public class RoutesLoadersTest {
         assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testResourceWithoutScheme() {
-        RoutesLoaders.loaderFor("routes.js", null);
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
+            () -> RoutesLoaders.loaderFor("routes.js", null)
+        );
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testResourceWithIllegalScheme() {
-        RoutesLoaders.loaderFor("http:routes.js", null);
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
+            () -> RoutesLoaders.loaderFor("http:routes.js", null)
+        );
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnsupportedLanguage() {
-        RoutesLoaders.loaderFor("  test", null);
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
+            () -> RoutesLoaders.loaderFor("  test", null)
+        );
     }
-
 
     public static class MyRoutes extends RouteBuilder {
         @Override

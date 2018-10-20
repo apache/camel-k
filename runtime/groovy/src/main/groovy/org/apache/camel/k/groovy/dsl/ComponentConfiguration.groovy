@@ -16,10 +16,7 @@
  */
 package org.apache.camel.k.groovy.dsl
 
-
 import org.apache.camel.util.IntrospectionSupport
-
-import java.lang.reflect.Array
 
 class ComponentConfiguration {
     private final org.apache.camel.Component component
@@ -28,15 +25,14 @@ class ComponentConfiguration {
         this.component = component
     }
 
-    def methodMissing(String name, args) {
+    def methodMissing(String name, arguments) {
         final Object value
+        final Object[] args = arguments as Object[]
 
         if (args == null) {
             value = null
-        } else if (!args.getClass().isArray()) {
-            value = args
-        } else if (Array.getLength(args) == 1) {
-            value = Array.get(args, 0)
+        } else if (args.length == 1) {
+            value = args[0]
         } else {
             throw new IllegalArgumentException("Unable to set property \"" + name + "\" on component \"" + name + "\"")
         }
@@ -52,13 +48,13 @@ class ComponentConfiguration {
         }
 
         if (!IntrospectionSupport.setProperty(component, name, value, true)) {
-            throw new MissingMethodException("Missing method \"" + name + "\" on component: \"" + this.component.class.name + "\"")
+            throw new MissingMethodException(name, this.component.class, args as Object[])
         }
     }
 
     def propertyMissing(String name, value) {
         if (!IntrospectionSupport.setProperty(component, name, value, true)) {
-            throw new MissingMethodException("Missing method \"" + name + "\" on component: \"" + this.component.class.name + "\"")
+            throw new MissingMethodException(name, this.component.class, value)
         }
     }
 
