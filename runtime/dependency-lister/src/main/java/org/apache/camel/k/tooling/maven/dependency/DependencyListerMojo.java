@@ -16,23 +16,23 @@
  */
 package org.apache.camel.k.tooling.maven.dependency;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -45,16 +45,10 @@ import org.yaml.snakeyaml.Yaml;
 @Mojo(
     name = "generate-dependency-list",
     defaultPhase = LifecyclePhase.PREPARE_PACKAGE,
-    requiresProject = true,
     threadSafe = true,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME)
-@SuppressWarnings({ "PMD.GodClass", "PMD.TooManyFields", "PMD.TooManyMethods" })
 public class DependencyListerMojo extends AbstractMojo {
-
-    @Component
-    private ArtifactFactory artifactFactory;
-
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
@@ -63,26 +57,21 @@ public class DependencyListerMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        List<Map<String, String>> deps = new ArrayList<>();
+        final Path output = Paths.get(this.destination);
 
-        project.getArtifacts().stream().filter(this::isCompileOrRuntime).forEach(artifact -> {
-                Map<String, String> dep = new HashMap<>();
-                dep.put("id", artifact.getId());
-
-                if (artifact.getFile() != null) {
-                    dep.put("location", artifact.getFile().getAbsolutePath());
-                }
-
-                deps.add(dep);
+        try {
+            if (Files.notExists(output.getParent())) {
+                Files.createDirectories(output.getParent());
             }
-        );
-
-        File dest = new File(destination);
-        if (!dest.getParentFile().exists()) {
-            dest.getParentFile().mkdirs();
+        } catch (IOException e) {
+            throw new MojoExecutionException("Exception while generating dependencies list", e);
         }
 
-        try (Writer writer = new FileWriter(dest)) {
+        try (Writer writer = Files.newBufferedWriter(output, StandardCharsets.UTF_8)) {
+            List<Map<String, String>> deps = project.getArtifacts().stream()
+                .filter(this::isCompileOrRuntime)
+                .map(this::artifactToMap)
+                .collect(Collectors.toList());
 
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -97,5 +86,16 @@ public class DependencyListerMojo extends AbstractMojo {
     private boolean isCompileOrRuntime(Artifact artifact) {
         return StringUtils.equals(artifact.getScope(), DefaultArtifact.SCOPE_COMPILE)
             || StringUtils.equals(artifact.getScope(), DefaultArtifact.SCOPE_RUNTIME);
+    }
+
+    private Map<String, String> artifactToMap(Artifact artifact) {
+        Map<String, String> dep = new HashMap<>();
+        dep.put("id", artifact.getId());
+
+        if (artifact.getFile() != null) {
+            dep.put("location", artifact.getFile().getAbsolutePath());
+        }
+
+        return dep;
     }
 }
