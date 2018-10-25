@@ -15,10 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package discover
+package metadata
 
 import (
-	"regexp"
 	"sort"
 	"strings"
 
@@ -26,23 +25,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
-var (
-	singleQuotedURI *regexp.Regexp
-	doubleQuotedURI *regexp.Regexp
-)
-
-func init() {
-	singleQuotedURI = regexp.MustCompile("'([a-z0-9-]+):[^']+'")
-	doubleQuotedURI = regexp.MustCompile("\"([a-z0-9-]+):[^\"]+\"")
-}
-
-// Dependencies returns a list of dependencies required by the given source code
-func Dependencies(source v1alpha1.SourceSpec) []string {
+// discoverDependencies returns a list of dependencies required by the given source code
+func discoverDependencies(source v1alpha1.SourceSpec, fromURIs []string, toURIs []string) []string {
 	candidateMap := make(map[string]bool)
-	regexps := getRegexpsForLanguage(source.Language)
-	subMatches := findAllStringSubmatch(source.Content, regexps...)
-	for _, uriPrefix := range subMatches {
-		candidateComp := decodeComponent(uriPrefix)
+	uris := make([]string, 0, len(fromURIs)+len(toURIs))
+	uris = append(uris, fromURIs...)
+	uris = append(uris, toURIs...)
+	for _, uri := range uris {
+		candidateComp := decodeComponent(uri)
 		if candidateComp != "" {
 			candidateMap[candidateComp] = true
 		}
@@ -56,38 +46,12 @@ func Dependencies(source v1alpha1.SourceSpec) []string {
 	return candidateComponents
 }
 
-func getRegexpsForLanguage(language v1alpha1.Language) []*regexp.Regexp {
-	switch language {
-	case v1alpha1.LanguageJavaSource:
-		return []*regexp.Regexp{doubleQuotedURI}
-	case v1alpha1.LanguageXML:
-		return []*regexp.Regexp{doubleQuotedURI}
-	case v1alpha1.LanguageGroovy:
-		return []*regexp.Regexp{singleQuotedURI, doubleQuotedURI}
-	case v1alpha1.LanguageJavaScript:
-		return []*regexp.Regexp{singleQuotedURI, doubleQuotedURI}
-	case v1alpha1.LanguageKotlin:
-		return []*regexp.Regexp{doubleQuotedURI}
+func decodeComponent(uri string) string {
+	uriSplit := strings.SplitN(uri, ":", 2)
+	if len(uriSplit) < 2 {
+		return ""
 	}
-	return []*regexp.Regexp{}
-}
-
-func findAllStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
-	candidates := make([]string, 0)
-	for _, reg := range regexps {
-		hits := reg.FindAllStringSubmatch(data, -1)
-		for _, hit := range hits {
-			if hit != nil && len(hit) > 1 {
-				for _, match := range hit[1:] {
-					candidates = append(candidates, match)
-				}
-			}
-		}
-	}
-	return candidates
-}
-
-func decodeComponent(uriStart string) string {
+	uriStart := uriSplit[0]
 	if component := camel.Runtime.GetArtifactByScheme(uriStart); component != nil {
 		artifactID := component.ArtifactID
 		if strings.HasPrefix(artifactID, "camel-") {

@@ -15,6 +15,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package discover contains functions for extracting
-// information from user code before compilation
-package discover
+package metadata
+
+import (
+	"strings"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+)
+
+// discoverLanguage discovers the code language from file extension if not set
+func discoverLanguage(source v1alpha1.SourceSpec) v1alpha1.Language {
+	if source.Language != "" {
+		return source.Language
+	}
+	for _, l := range []v1alpha1.Language{
+		v1alpha1.LanguageJavaSource,
+		v1alpha1.LanguageJavaClass,
+		v1alpha1.LanguageJavaScript,
+		v1alpha1.LanguageGroovy,
+		v1alpha1.LanguageJavaScript,
+		v1alpha1.LanguageKotlin} {
+
+		if strings.HasSuffix(source.Name, "."+string(l)) {
+			return l
+		}
+	}
+	return ""
+}

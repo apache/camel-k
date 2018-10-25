@@ -23,6 +23,10 @@ The flag `--trait` can be also abbreviated with `-t`.
 The `enabled` property is available on all traits and can be used to enable/disable them. All traits have their own
 internal logic to determine if they need to be enabled when the user does not activate them explicitly.
 
+All traits share also a `auto` property that can be used to enable/disable auto-configuration of the trait based on the
+environment. The auto-configuration mechanism is able to enable/disable the trait when the `enabled` property is not explicitly
+set by the user and also change the trait configuration. The `auto` property is enabled by default.
+
 NOTE: Some traits are applicable only to specific platforms (see "profiles" in the table).
 
 A trait may have additional properties that can be configured by the end user.
@@ -83,6 +87,6 @@ There are also platform traits that **normally should not be configured** by the
 [options="header",cols="m,,"]
 |=======================
 | Trait      | Profiles 				| Description
-| base		 | Kubernetes, OpenShift	| Creates the basic Kubernetes resource needed for running the integration.
+| deployment | Kubernetes, OpenShift	| Creates the basic Kubernetes resource needed for running the integration.
 | owner      | Kubernetes, OpenShift	| Makes sure that every resource created by the traits belongs to the integration custom resource (so they are deleted when the integration is deleted).
 |=======================

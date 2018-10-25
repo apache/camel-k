@@ -127,7 +127,8 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 }
 
 func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
-	tp := trait.ComputeTraitsProperties()
+	catalog := trait.NewCatalog()
+	tp := catalog.ComputeTraitsProperties()
 	for _, t := range o.Traits {
 		kv := strings.SplitN(t, "=", 2)
 

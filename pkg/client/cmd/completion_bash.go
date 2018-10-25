@@ -69,7 +69,7 @@ __kamel_dependency_type() {
 }
 
 __kamel_traits() {
-    local type_list="` + strings.Join(trait.ComputeTraitsProperties(), " ") + `"
+    local type_list="` + strings.Join(trait.NewCatalog().ComputeTraitsProperties(), " ") + `"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
     compopt -o nospace
 }
