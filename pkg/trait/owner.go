@@ -24,16 +24,16 @@ import (
 
 // ownerTrait ensures that all created resources belong to the integration being created
 type ownerTrait struct {
-	Trait
+	BaseTrait `property:",squash"`
 }
 
-func newOwnerTrait() ownerTrait {
-	return ownerTrait{
-		Trait: NewTraitWithID("owner"),
+func newOwnerTrait() *ownerTrait {
+	return &ownerTrait{
+		BaseTrait: newBaseTrait("owner"),
 	}
 }
 
-func (*ownerTrait) customize(e *environment, resources *kubernetes.Collection) (bool, error) {
+func (*ownerTrait) customize(e *environment, resources *kubernetes.Collection) error {
 	controller := true
 	blockOwnerDeletion := true
 	resources.VisitMetaObject(func(res metav1.Object) {
@@ -49,5 +49,5 @@ func (*ownerTrait) customize(e *environment, resources *kubernetes.Collection) (
 		}
 		res.SetOwnerReferences(references)
 	})
-	return true, nil
+	return nil
 }

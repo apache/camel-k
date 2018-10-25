@@ -15,28 +15,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package discover
+package metadata
 
 import (
-	"testing"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestLanguageJavaSource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		Name: "Request.java",
+// Extract returns metadata information from the source code
+func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
+	language := discoverLanguage(source)
+	fromURIs := discoverFromURIs(source, language)
+	toURIs := discoverToURIs(source, language)
+	dependencies := discoverDependencies(source, fromURIs, toURIs)
+	return IntegrationMetadata{
+		Language:     language,
+		FromURIs:     fromURIs,
+		ToURIs:       toURIs,
+		Dependencies: dependencies,
 	}
-	language := Language(code)
-	assert.Equal(t, v1alpha1.LanguageJavaSource, language)
-}
-
-func TestLanguageAlreadySet(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
-		Language: v1alpha1.LanguageJavaScript,
-	}
-	language := Language(code)
-	assert.Equal(t, v1alpha1.LanguageJavaScript, language)
 }

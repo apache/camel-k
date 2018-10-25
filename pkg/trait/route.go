@@ -26,31 +26,41 @@ import (
 )
 
 type routeTrait struct {
-	Trait
+	BaseTrait `property:",squash"`
 }
 
-func newRouteTrait() routeTrait {
-	return routeTrait{
-		Trait: NewTraitWithID("route"),
+func newRouteTrait() *routeTrait {
+	return &routeTrait{
+		BaseTrait: newBaseTrait("route"),
 	}
 }
 
-func (e *routeTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
-	var service *corev1.Service
+func (e *routeTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
+	if e.Enabled == nil {
+		hasService := e.getTargetService(environment, resources) != nil
+		e.Enabled = &hasService
+	}
+	return nil
+}
+
+func (e *routeTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+	service := e.getTargetService(environment, resources)
+	if service != nil {
+		resources.Add(e.getRouteFor(environment, service))
+	}
+
+	return nil
+}
+
+func (*routeTrait) getTargetService(e *environment, resources *kubernetes.Collection) (service *corev1.Service) {
 	resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
-			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == environment.Integration.Name {
+			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
 				service = s
 			}
 		}
 	})
-
-	if service != nil {
-		resources.Add(e.getRouteFor(environment, service))
-		return true, nil
-	}
-
-	return false, nil
+	return
 }
 
 func (*routeTrait) getRouteFor(e *environment, service *corev1.Service) *routev1.Route {
