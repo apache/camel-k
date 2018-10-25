@@ -47,6 +47,10 @@ oc describe nodes
 echo "Adding maven artifacts to the image context"
 ./build/package_maven_artifacts.sh
 
+echo "Copying binary file to docker dir"
+mkdir -p ./tmp/_output/bin
+cp ./camel-k-operator ./tmp/_output/bin/
+
 echo "Building the images"
 export IMAGE=docker.io/apache/camel-k:$(./build/get_version.sh)
 ./tmp/build/docker_build.sh
