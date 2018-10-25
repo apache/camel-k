@@ -28,20 +28,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type baseTrait struct {
-	Trait
+type deploymentTrait struct {
+	BaseTrait `property:",squash"`
 }
 
-func newBaseTrait() baseTrait {
-	return baseTrait{
-		Trait: NewTraitWithID("base"),
+func newDeploymentTrait() *deploymentTrait {
+	return &deploymentTrait{
+		BaseTrait: newBaseTrait("deployment"),
 	}
 }
 
-func (d *baseTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
+func (d *deploymentTrait) customize(environment *environment, resources *kubernetes.Collection) error {
 	resources.Add(d.getConfigMapFor(environment))
 	resources.Add(d.getDeploymentFor(environment))
-	return true, nil
+	return nil
 }
 
 // **********************************
@@ -50,7 +50,7 @@ func (d *baseTrait) customize(environment *environment, resources *kubernetes.Co
 //
 // **********************************
 
-func (*baseTrait) getConfigMapFor(e *environment) *corev1.ConfigMap {
+func (*deploymentTrait) getConfigMapFor(e *environment) *corev1.ConfigMap {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
@@ -86,7 +86,7 @@ func (*baseTrait) getConfigMapFor(e *environment) *corev1.ConfigMap {
 //
 // **********************************
 
-func (*baseTrait) getDeploymentFor(e *environment) *appsv1.Deployment {
+func (*deploymentTrait) getDeploymentFor(e *environment) *appsv1.Deployment {
 	sourceName := strings.TrimPrefix(e.Integration.Spec.Source.Name, "/")
 
 	// combine environment of integration with context, integration

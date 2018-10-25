@@ -35,36 +35,36 @@ var webComponents = map[string]bool{
 }
 
 type serviceTrait struct {
-	Trait
+	BaseTrait `property:",squash"`
 
 	Port int `property:"port"`
 }
 
-func newServiceTrait() serviceTrait {
-	return serviceTrait{
-		Trait: NewTraitWithID("service"),
-		Port:  8080,
+func newServiceTrait() *serviceTrait {
+	return &serviceTrait{
+		BaseTrait: newBaseTrait("service"),
+		Port:      8080,
 	}
 }
 
-func (s *serviceTrait) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
-	if environment.isAutoDetectionMode(s.ID()) && !s.requiresService(environment) {
-		return false, nil
+func (s *serviceTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
+	if s.Enabled == nil {
+		required := s.requiresService(environment)
+		s.Enabled = &required
 	}
-	svc, err := s.getServiceFor(environment)
-	if err != nil {
-		return false, err
+	return nil
+}
+
+func (s *serviceTrait) customize(environment *environment, resources *kubernetes.Collection) (err error) {
+	var svc *corev1.Service
+	if svc, err = s.getServiceFor(environment); err != nil {
+		return err
 	}
 	resources.Add(svc)
-	return true, nil
+	return nil
 }
 
 func (s *serviceTrait) getServiceFor(e *environment) (*corev1.Service, error) {
-	t := newServiceTrait()
-	if _, err := e.getTrait(s.ID(), &t); err != nil {
-		return nil, err
-	}
-
 	svc := corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -83,7 +83,7 @@ func (s *serviceTrait) getServiceFor(e *environment) (*corev1.Service, error) {
 					Name:       "http",
 					Port:       80,
 					Protocol:   corev1.ProtocolTCP,
-					TargetPort: intstr.FromInt(t.Port),
+					TargetPort: intstr.FromInt(s.Port),
 				},
 			},
 			Selector: map[string]string{

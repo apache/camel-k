@@ -18,14 +18,8 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
-	"reflect"
-
-	"github.com/sirupsen/logrus"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/pkg/errors"
 )
 
 // Identifiable represent an identifiable type
@@ -36,90 +30,69 @@ type Identifiable interface {
 // ID uniquely identifies a trait
 type ID string
 
-// Trait --
-type Trait struct {
+// ITrait TODO rename
+type ITrait interface {
 	Identifiable
-
-	id      ID
-	Enabled bool `property:"enabled"`
+	// enabled tells if the trait is enabled
+	IsEnabled() bool
+	// auto determine if the trait should be configured automatically
+	IsAuto() bool
+	// autoconfigure is called before any customization to ensure the trait is fully configured
+	autoconfigure(environment *environment, resources *kubernetes.Collection) error
+	// customize executes the trait customization on the resources and return true if the resources have been changed
+	customize(environment *environment, resources *kubernetes.Collection) error
 }
 
-// ID returns the trait ID
-func (trait *Trait) ID() ID {
+/* Base trait */
+
+// BaseTrait is the root trait with noop implementations for hooks
+type BaseTrait struct {
+	id      ID
+	Enabled *bool `property:"enabled"`
+	Auto    *bool `property:"auto"`
+}
+
+func newBaseTrait(id string) BaseTrait {
+	return BaseTrait{
+		id: ID(id),
+	}
+}
+
+// ID returns the identifier of the trait
+func (trait *BaseTrait) ID() ID {
 	return trait.id
 }
 
-// NewTrait creates a new trait with defaults
-func NewTrait() Trait {
-	return Trait{
-		Enabled: true,
+// IsAuto determines if we should apply automatic configuration
+func (trait *BaseTrait) IsAuto() bool {
+	if trait.Auto == nil {
+		return true
 	}
+	return *trait.Auto
 }
 
-// NewTraitWithID creates a new trait with defaults and given ID
-func NewTraitWithID(traitID ID) Trait {
-	return Trait{
-		id:      traitID,
-		Enabled: true,
+// IsEnabled is used to determine if the trait needs to be executed
+func (trait *BaseTrait) IsEnabled() bool {
+	if trait.Enabled == nil {
+		return true
 	}
+	return *trait.Enabled
 }
 
-// A Customizer performs customization of the deployed objects
-type customizer interface {
-	Identifiable
-	// Customize executes the trait customization on the resources and return true if the resources have been changed
-	customize(environment *environment, resources *kubernetes.Collection) (bool, error)
-}
-
-// A environment provides the context where the trait is executed
-type environment struct {
-	Platform            *v1alpha1.IntegrationPlatform
-	Context             *v1alpha1.IntegrationContext
-	Integration         *v1alpha1.Integration
-	ExecutedCustomizers []ID
-}
-
-func (e *environment) getTrait(traitID ID, target interface{}) (bool, error) {
-	if spec := e.getTraitSpec(traitID); spec != nil {
-		err := spec.Decode(&target)
-		if err != nil {
-			return false, errors.Wrap(err, fmt.Sprintf("unable to convert trait %s to the target struct %s", traitID, reflect.TypeOf(target).Name()))
-		}
-
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func (e *environment) getTraitSpec(traitID ID) *v1alpha1.IntegrationTraitSpec {
-	if e.Integration.Spec.Traits == nil {
-		return nil
-	}
-	if conf, ok := e.Integration.Spec.Traits[string(traitID)]; ok {
-		return &conf
-	}
+func (trait *BaseTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
 	return nil
 }
 
-func (e *environment) isEnabled(traitID ID) bool {
-	t := NewTrait()
-	if _, err := e.getTrait(traitID, &t); err != nil {
-		logrus.Panic(err)
-	}
-
-	return t.Enabled
+func (trait *BaseTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+	return nil
 }
 
-func (e *environment) isAutoDetectionMode(traitID ID) bool {
-	spec := e.getTraitSpec(traitID)
-	if spec == nil {
-		return true
-	}
+/* Environment */
 
-	if spec.Configuration == nil {
-		return true
-	}
-
-	return spec.Configuration["enabled"] == ""
+// A environment provides the context where the trait is executed
+type environment struct {
+	Platform       *v1alpha1.IntegrationPlatform
+	Context        *v1alpha1.IntegrationContext
+	Integration    *v1alpha1.Integration
+	ExecutedTraits []ID
 }

@@ -19,11 +19,9 @@ package trait
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/fatih/structs"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
@@ -119,32 +117,3 @@ func CombineConfigurationAsSlice(configurationType string, context *v1alpha1.Int
 	return keys
 }
 
-// ComputeTraitsProperties --
-func ComputeTraitsProperties() []string {
-	results := make([]string, 0)
-
-	processFields(structs.Fields(tService), func(name string) {
-		results = append(results, string(tService.ID())+"."+name)
-	})
-
-	return results
-}
-
-func processFields(fields []*structs.Field, processor func(string)) {
-	for _, f := range fields {
-		if f.IsEmbedded() && f.IsExported() && f.Kind() == reflect.Struct {
-			processFields(f.Fields(), processor)
-		}
-
-		if f.IsEmbedded() {
-			continue
-		}
-
-		property := f.Tag("property")
-
-		if property != "" {
-			items := strings.Split(property, ",")
-			processor(items[0])
-		}
-	}
-}

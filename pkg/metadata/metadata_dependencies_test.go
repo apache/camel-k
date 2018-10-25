@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package discover
+package metadata
 
 import (
 	"testing"
@@ -34,9 +34,9 @@ func TestDependenciesJavaSource(t *testing.T) {
 			from("ine:xistent").to("amqp:queue");
 		`,
 	}
-	dependencies := Dependencies(code)
+	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
 }
 
 func TestDependenciesJavaClass(t *testing.T) {
@@ -49,8 +49,8 @@ func TestDependenciesJavaClass(t *testing.T) {
 			from("ine:xistent").to("amqp:queue");
 		`,
 	}
-	dependencies := Dependencies(code)
-	assert.Empty(t, dependencies)
+	meta := Extract(code)
+	assert.Empty(t, meta.Dependencies)
 }
 
 func TestDependenciesJavaScript(t *testing.T) {
@@ -64,9 +64,9 @@ func TestDependenciesJavaScript(t *testing.T) {
 			'"'
 		`,
 	}
-	dependencies := Dependencies(code)
+	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
 }
 
 func TestDependenciesGroovy(t *testing.T) {
@@ -80,9 +80,9 @@ func TestDependenciesGroovy(t *testing.T) {
 			'"'
 		`,
 	}
-	dependencies := Dependencies(code)
+	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
 }
 
 func TestDependencies(t *testing.T) {
@@ -95,7 +95,7 @@ func TestDependencies(t *testing.T) {
 			from("twitter-timeline:test").to("mock:end");
 		`,
 	}
-	dependencies := Dependencies(code)
+	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:twitter"}, dependencies)
+	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:twitter"}, meta.Dependencies)
 }

@@ -20,63 +20,126 @@ package trait
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/fatih/structs"
+	"reflect"
+	"strings"
 )
 
-var (
-	tBase    = newBaseTrait()
-	tService = newServiceTrait()
-	tRoute   = newRouteTrait()
-	tOwner   = newOwnerTrait()
-)
+// Catalog collects all information about traits in one place
+type Catalog struct {
+	tDeployment ITrait
+	tService    ITrait
+	tRoute      ITrait
+	tOwner      ITrait
+}
 
-// customizersFor returns a Catalog for the given integration details
-func customizersFor(environment *environment) customizer {
+// NewCatalog creates a new trait Catalog
+func NewCatalog() *Catalog {
+	return &Catalog{
+		tDeployment: newDeploymentTrait(),
+		tService:    newServiceTrait(),
+		tRoute:      newRouteTrait(),
+		tOwner:      newOwnerTrait(),
+	}
+}
+
+func (c *Catalog) allTraits() []ITrait {
+	return []ITrait{
+		c.tDeployment,
+		c.tService,
+		c.tRoute,
+		c.tOwner,
+	}
+}
+
+func (c *Catalog) traitsFor(environment *environment) []ITrait {
 	switch environment.Platform.Spec.Cluster {
 	case v1alpha1.IntegrationPlatformClusterOpenShift:
-		return compose(
-			&tBase,
-			&tService,
-			&tRoute,
-			&tOwner,
-		)
+		return []ITrait{
+			c.tDeployment,
+			c.tService,
+			c.tRoute,
+			c.tOwner,
+		}
 	case v1alpha1.IntegrationPlatformClusterKubernetes:
-		return compose(
-			&tBase,
-			&tService,
-			&tOwner,
-		)
+		return []ITrait{
+			c.tDeployment,
+			c.tService,
+			c.tOwner,
+		}
 		// case Knative: ...
 	}
 	return nil
 }
 
-func compose(traits ...customizer) customizer {
-	return &chainedCustomizer{
-		customizers: traits,
-	}
-}
-
-// -------------------------------------------
-
-type chainedCustomizer struct {
-	customizers []customizer
-}
-
-func (c *chainedCustomizer) ID() ID {
-	return ID("")
-}
-
-func (c *chainedCustomizer) customize(environment *environment, resources *kubernetes.Collection) (bool, error) {
-	atLeastOne := false
-	for _, custom := range c.customizers {
-		if environment.isEnabled(custom.ID()) || environment.isAutoDetectionMode(custom.ID()) {
-			if done, err := custom.customize(environment, resources); err != nil {
-				return false, err
-			} else if done && custom.ID() != "" {
-				environment.ExecutedCustomizers = append(environment.ExecutedCustomizers, custom.ID())
-				atLeastOne = atLeastOne || done
+func (c *Catalog) customize(environment *environment, resources *kubernetes.Collection) error {
+	c.configure(environment)
+	traits := c.traitsFor(environment)
+	for _, trait := range traits {
+		if trait.IsAuto() {
+			if err := trait.autoconfigure(environment, resources); err != nil {
+				return err
 			}
 		}
+		if trait.IsEnabled() {
+			if err := trait.customize(environment, resources); err != nil {
+				return err
+			}
+			environment.ExecutedTraits = append(environment.ExecutedTraits, trait.ID())
+		}
 	}
-	return atLeastOne, nil
+	return nil
+}
+
+// GetTrait returns the trait with the given ID
+func (c *Catalog) GetTrait(id string) ITrait {
+	for _, t := range c.allTraits() {
+		if t.ID() == ID(id) {
+			return t
+		}
+	}
+	return nil
+}
+
+func (c *Catalog) configure(env *environment) {
+	if env.Integration == nil || env.Integration.Spec.Traits == nil {
+		return
+	}
+	for id, traitSpec := range env.Integration.Spec.Traits {
+		catTrait := c.GetTrait(id)
+		if catTrait != nil {
+			traitSpec.Decode(catTrait)
+		}
+	}
+}
+
+// ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits
+func (c *Catalog) ComputeTraitsProperties() []string {
+	results := make([]string, 0)
+	for _, trait := range c.allTraits() {
+		c.processFields(structs.Fields(trait), func(name string) {
+			results = append(results, string(trait.ID())+"."+name)
+		})
+	}
+
+	return results
+}
+
+func (c *Catalog) processFields(fields []*structs.Field, processor func(string)) {
+	for _, f := range fields {
+		if f.IsEmbedded() && f.IsExported() && f.Kind() == reflect.Struct {
+			c.processFields(f.Fields(), processor)
+		}
+
+		if f.IsEmbedded() {
+			continue
+		}
+
+		property := f.Tag("property")
+
+		if property != "" {
+			items := strings.Split(property, ",")
+			processor(items[0])
+		}
+	}
 }

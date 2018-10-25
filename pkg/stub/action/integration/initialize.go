@@ -18,6 +18,7 @@ limitations under the License.
 package integration
 
 import (
+	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/sirupsen/logrus"
 	"sort"
@@ -25,7 +26,6 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/discover"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
@@ -62,9 +62,11 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 		var defaultReplicas int32 = 1
 		target.Spec.Replicas = &defaultReplicas
 	}
+	// extract metadata
+	meta := metadata.Extract(target.Spec.Source)
+
 	// set the correct language
-	language := discover.Language(target.Spec.Source)
-	target.Spec.Source.Language = language
+	target.Spec.Source.Language = meta.Language
 
 	if !util.StringSliceExists(target.Spec.Dependencies, "camel:core") {
 		target.Spec.Dependencies = append(target.Spec.Dependencies, "camel:core")
@@ -76,8 +78,7 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 		target.Spec.DependenciesAutoDiscovery = &autoDiscoveryDependencies
 	}
 	if *target.Spec.DependenciesAutoDiscovery {
-		discovered := discover.Dependencies(target.Spec.Source)
-		target.Spec.Dependencies = action.mergeDependencies(target.Spec.Dependencies, discovered)
+		target.Spec.Dependencies = action.mergeDependencies(target.Spec.Dependencies, meta.Dependencies)
 	}
 	// sort the dependencies to get always the same list if they don't change
 	sort.Strings(target.Spec.Dependencies)
