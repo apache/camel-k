@@ -18,9 +18,10 @@ limitations under the License.
 package cmd
 
 import (
-	"os"
-
 	"context"
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
+	"os"
+	"time"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -65,6 +66,9 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		}
 		cmd.Flag("namespace").Value.Set(current)
 	}
+
+	// Let's use a fast refresh period when running with the CLI
+	k8sclient.ResetCacheEvery(2 * time.Second)
 
 	// Initialize the Kubernetes client to allow using the operator-sdk
 	err := kubernetes.InitKubeClient(options.KubeConfig)
