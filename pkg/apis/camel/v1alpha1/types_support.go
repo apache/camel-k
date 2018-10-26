@@ -49,6 +49,20 @@ func NewIntegrationPlatformList() IntegrationPlatformList {
 	}
 }
 
+// NewIntegrationPlatform --
+func NewIntegrationPlatform(namespace string, name string) IntegrationPlatform {
+	return IntegrationPlatform{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       IntegrationPlatformKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+	}
+}
+
 // NewIntegrationList --
 func NewIntegrationList() IntegrationList {
 	return IntegrationList{
