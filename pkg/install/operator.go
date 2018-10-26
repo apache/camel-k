@@ -24,6 +24,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
 	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"strconv"
+	"time"
 )
 
 // Operator --
@@ -61,6 +64,9 @@ func installKubernetes(namespace string) error {
 
 // Platform installs the platform custom resource
 func Platform(namespace string, registry string) error {
+	if err := waitForPlatformCRDAvailable(namespace, 15*time.Second); err != nil {
+		return err
+	}
 	isOpenshift, err := openshift.IsOpenShift()
 	if err != nil {
 		return err
@@ -89,6 +95,20 @@ func Platform(namespace string, registry string) error {
 		}
 		pl.Spec.Build.Registry = registry
 		return RuntimeObject(namespace, pl)
+	}
+}
+
+func waitForPlatformCRDAvailable(namespace string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for {
+		pla := v1alpha1.NewIntegrationPlatformList()
+		if err := sdk.List(namespace, &pla); err == nil {
+			return nil
+		}
+		if time.Now().After(deadline) {
+			return errors.New("cannot list integration platforms after " + strconv.FormatInt(timeout.Nanoseconds()/1000000000, 10) + " seconds")
+		}
+		time.Sleep(2 * time.Second)
 	}
 }
 
