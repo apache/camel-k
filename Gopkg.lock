@@ -278,7 +278,8 @@
   version = "v3.9.0"
 
 [[projects]]
-  digest = "1:ce6ed8da0816d327c1d586722a13c05a3fd26cf9b8649cdcda300c16f026feca"
+  branch = "v0.0.7-custom"
+  digest = "1:8f0bbe43f11ba62deaae454383b93f9b8b58a1e4b68f9b39ee93f4a9633ec52a"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
     "pkg/k8sclient",
@@ -288,8 +289,8 @@
     "version",
   ]
   pruneopts = "NUT"
-  revision = "e5a0ab096e1a7c0e6b937d2b41707eccb82c3c77"
-  version = "v0.0.7"
+  revision = "450f0742059bb08f2f0c041154435e340a7829a2"
+  source = "https://github.com/nicolaferraro/operator-sdk.git"
 
 [[projects]]
   branch = "master"

@@ -48,9 +48,9 @@ required = [
 
 [[constraint]]
   name = "github.com/operator-framework/operator-sdk"
-  ## Using fork to customize the Kubernetes rest config
-  #source = "https://github.com/nicolaferraro/operator-sdk.git"
-  #branch = "custom-init"
-  # The version rule is used for a specific release and the master branch for in between releases.
+  # Using fork to customize the Kubernetes rest config
+  source = "https://github.com/nicolaferraro/operator-sdk.git"
+  branch = "v0.0.7-custom"
+  ## The version rule is used for a specific release and the master branch for in between releases.
   #branch = "master"
-  version = "=v0.0.7"
+  #version = "=v0.0.7"
