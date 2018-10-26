@@ -43,6 +43,7 @@ var (
 	// this stores the singleton in a package local
 	singletonFactory *resourceClientFactory
 	once             sync.Once
+	cacheResetPeriod = 1 * time.Minute
 )
 
 // Private constructor for once.Do
@@ -63,7 +64,7 @@ func newSingletonFactory() {
 		dynamicClient: dynamicClient,
 		restMapper:    restMapper,
 	}
-	singletonFactory.runBackgroundCacheReset(1 * time.Minute)
+	singletonFactory.runBackgroundCacheReset(cacheResetPeriod)
 }
 
 // GetResourceClient returns the resource client using a singleton factory
@@ -104,6 +105,11 @@ func (c *resourceClientFactory) GetResourceClient(apiVersion, kind, namespace st
 
 	resourceClient := c.dynamicClient.Resource(*gvr).Namespace(namespace)
 	return resourceClient, pluralName, nil
+}
+
+// ResetCacheEvery sets the period of refresh of the client caches
+func ResetCacheEvery(duration time.Duration) {
+	cacheResetPeriod = duration
 }
 
 // apiResource consults the REST mapper to translate an <apiVersion, kind, namespace> tuple to a GroupVersionResource
