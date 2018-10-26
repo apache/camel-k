@@ -2,6 +2,9 @@
 
 set -e
 
+# First build the whole project
+make
+
 # set docker0 to promiscuous mode
 sudo ip link set docker0 promisc on
 
@@ -59,3 +62,7 @@ echo "installing camel k cluster resources"
 ./kamel install --cluster-setup
 
 oc login -u developer
+
+
+# Then run integration tests
+make test-integration
