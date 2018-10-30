@@ -20,41 +20,48 @@ package trait
 import (
 	"errors"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	routev1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-type routeTrait struct {
+type ingressTrait struct {
 	BaseTrait `property:",squash"`
+	Host      string `property:"host"`
 }
 
-func newRouteTrait() *routeTrait {
-	return &routeTrait{
-		BaseTrait: newBaseTrait("route"),
+func newIngressTrait() *ingressTrait {
+	return &ingressTrait{
+		BaseTrait: newBaseTrait("ingress"),
+		Host:      "",
 	}
 }
 
-func (e *routeTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
+func (e *ingressTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
 	if e.Enabled == nil {
 		hasService := e.getTargetService(environment, resources) != nil
-		e.Enabled = &hasService
+		hasHost := e.Host != ""
+		enabled := hasService && hasHost
+		e.Enabled = &enabled
 	}
 	return nil
 }
 
-func (e *routeTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+func (e *ingressTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+	if e.Host == "" {
+		return errors.New("cannot apply ingress trait: no host defined")
+	}
 	service := e.getTargetService(environment, resources)
 	if service == nil {
-		return errors.New("cannot apply route trait: no target service")
+		return errors.New("cannot apply ingress trait: no target service")
 	}
 
-	resources.Add(e.getRouteFor(environment, service))
+	resources.Add(e.getIngressFor(environment, service))
 	return nil
 }
 
-func (*routeTrait) getTargetService(e *environment, resources *kubernetes.Collection) (service *corev1.Service) {
+func (*ingressTrait) getTargetService(e *environment, resources *kubernetes.Collection) (service *corev1.Service) {
 	resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
@@ -65,25 +72,27 @@ func (*routeTrait) getTargetService(e *environment, resources *kubernetes.Collec
 	return
 }
 
-func (*routeTrait) getRouteFor(e *environment, service *corev1.Service) *routev1.Route {
-	route := routev1.Route{
+func (e *ingressTrait) getIngressFor(env *environment, service *corev1.Service) *v1beta1.Ingress {
+	ingress := v1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "Route",
-			APIVersion: routev1.SchemeGroupVersion.String(),
+			Kind:       "Ingress",
+			APIVersion: v1beta1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      service.Name,
 			Namespace: service.Namespace,
 		},
-		Spec: routev1.RouteSpec{
-			Port: &routev1.RoutePort{
-				TargetPort: intstr.FromString("http"),
+		Spec: v1beta1.IngressSpec{
+			Backend: &v1beta1.IngressBackend{
+				ServiceName: service.Name,
+				ServicePort: intstr.FromString("http"),
 			},
-			To: routev1.RouteTargetReference{
-				Kind: "Service",
-				Name: service.Name,
+			Rules: []v1beta1.IngressRule{
+				{
+					Host: e.Host,
+				},
 			},
 		},
 	}
-	return &route
+	return &ingress
 }
