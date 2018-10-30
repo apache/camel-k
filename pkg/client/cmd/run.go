@@ -129,7 +129,9 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	tp := trait.ComputeTraitsProperties()
 	for _, t := range o.Traits {
-		if !util.StringSliceExists(tp, t) {
+		kv := strings.SplitN(t, "=", 2)
+
+		if !util.StringSliceExists(tp, kv[0]) {
 			fmt.Printf("Error: %s is not a valid trait property\n", t)
 			return nil
 		}
