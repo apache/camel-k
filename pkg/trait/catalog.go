@@ -30,6 +30,7 @@ type Catalog struct {
 	tDeployment ITrait
 	tService    ITrait
 	tRoute      ITrait
+	tIngress    ITrait
 	tOwner      ITrait
 }
 
@@ -39,6 +40,7 @@ func NewCatalog() *Catalog {
 		tDeployment: newDeploymentTrait(),
 		tService:    newServiceTrait(),
 		tRoute:      newRouteTrait(),
+		tIngress:    newIngressTrait(),
 		tOwner:      newOwnerTrait(),
 	}
 }
@@ -48,6 +50,7 @@ func (c *Catalog) allTraits() []ITrait {
 		c.tDeployment,
 		c.tService,
 		c.tRoute,
+		c.tIngress,
 		c.tOwner,
 	}
 }
@@ -65,6 +68,7 @@ func (c *Catalog) traitsFor(environment *environment) []ITrait {
 		return []ITrait{
 			c.tDeployment,
 			c.tService,
+			c.tIngress,
 			c.tOwner,
 		}
 		// case Knative: ...
