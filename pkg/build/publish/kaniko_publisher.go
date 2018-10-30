@@ -122,7 +122,7 @@ func (b *kanikoPublisher) publish(tarFile string, baseImageName string, source b
 			Containers: []v1.Container{
 				{
 					Name:  "kaniko",
-					Image: "gcr.io/kaniko-project/executor:latest",
+					Image: "gcr.io/kaniko-project/executor@sha256:f29393d9c8d40296e1692417089aa2023494bce9afd632acac7dd0aea763e5bc",
 					Args: []string{
 						"--dockerfile=Dockerfile",
 						"--context=" + contextDir,
