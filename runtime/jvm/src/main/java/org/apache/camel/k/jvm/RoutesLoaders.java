@@ -163,7 +163,7 @@ public final class RoutesLoaders {
                                 getContext().loadRestsDefinition(is)
                             );
                         } catch (UnmarshalException e) {
-                            LOGGER.debug("Unbale to load RestsDefinition: {}", e.getMessage());
+                            LOGGER.debug("Unable to load RestsDefinition: {}", e.getMessage());
                         }
                     }
                 }
