@@ -56,7 +56,7 @@ echo "Adding maven artifacts to the image context"
 
 echo "Copying binary file to docker dir"
 mkdir -p ./tmp/_output/bin
-cp ./camel-k-operator ./tmp/_output/bin/
+cp ./camel-k ./tmp/_output/bin/
 
 echo "Building the images"
 export IMAGE=docker.io/apache/camel-k:$(./build/get_version.sh)
