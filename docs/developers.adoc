@@ -39,7 +39,7 @@ This is a high level overview of the project structure:
 [options="header"]
 |=======================
 | Path						| Content
-| link:/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k-operator** binary and the **kamel** client tool.
+| link:/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary and the **kamel** client tool.
 | link:/build[/build]		| Contains scripts used during make operations for building the project.
 | link:/deploy[/deploy]		| Contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
 | link:/docs[/docs]			| Contains this documentation.
@@ -148,7 +148,7 @@ Sometimes it's useful to debug the code from the IDE when troubleshooting.
 
 .**Debugging the `kamel` binary**
 
-It should be straightforward: just execute the link:/cmd/kamel/kamel.go[/cmd/kamel/kamel.go] file from the IDE (e.g. Goland) in debug mode.
+It should be straightforward: just execute the link:/cmd/kamel/main.go[/cmd/kamel/main.go] file from the IDE (e.g. Goland) in debug mode.
 
 .**Debugging the operator**
 
@@ -163,13 +163,13 @@ oc scale deployment/camel-k-operator --replicas 0
 
 You can scale it back to 1 when you're done and you have updated the operator image.
 
-You can setup the IDE (e.g. Goland) to execute the link:/cmd/camel-k-operator/camel_k_operator.go[/cmd/camel-k-operator/camel_k_operator.go] file in debug mode.
+You can setup the IDE (e.g. Goland) to execute the link:/cmd/camel-k/main.go[/cmd/camel-k/main.go] file in debug mode.
 
 When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen*:
 
 * Set the `KUBERNETES_CONFIG` environment variable to point to your Kubernetes configuration file (usually `<homedir>/.kube/config`).
 * Set the `WATCH_NAMESPACE` environment variable to a Kubernetes namespace you have access to.
-* Set the `OPERATOR_NAME` environment variable to `camel-k-operator`.
+* Set the `OPERATOR_NAME` environment variable to `camel-k`.
 
 After you setup the IDE task, you can run and debug the operator process.
 

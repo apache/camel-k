@@ -3,7 +3,7 @@ build: build-runtime build-operator build-kamel build-compile-integration-tests 
 build-go: build-embed-resources build-operator build-kamel
 
 build-operator: build-embed-resources
-	go build -o camel-k-operator ./cmd/camel-k-operator/*.go
+	go build -o camel-k ./cmd/camel-k/*.go
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
@@ -42,7 +42,7 @@ generate:
 clean:
 	./mvnw clean -f ./runtime/pom.xml
 	go clean
-	rm -f camel-k-operator
+	rm -f camel-k
 	rm -f kamel
 	rm -rf tmp/_maven_output
 

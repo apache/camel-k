@@ -11,7 +11,7 @@ fi
 
 BIN_DIR="$(pwd)/tmp/_output/bin"
 mkdir -p ${BIN_DIR}
-PROJECT_NAME="camel-k-operator"
+PROJECT_NAME="camel-k"
 REPO_PATH="github.com/apache/camel-k"
 BUILD_PATH="${REPO_PATH}/cmd/${PROJECT_NAME}"
 echo "building "${PROJECT_NAME}"..."
