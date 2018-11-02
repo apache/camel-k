@@ -2234,7 +2234,7 @@ spec:
           - containerPort: 60000
             name: metrics
           command:
-          - camel-k-operator
+          - camel-k
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
@@ -2242,7 +2242,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
-              value: "camel-k-operator"
+              value: "camel-k"
           volumeMounts:
           - mountPath: /workspace
             name: camel-k-builder
@@ -2280,7 +2280,7 @@ spec:
           - containerPort: 60000
             name: metrics
           command:
-          - camel-k-operator
+          - camel-k
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
@@ -2288,7 +2288,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
-              value: "camel-k-operator"
+              value: "camel-k"
 
 `
 	Resources["operator-role-binding.yaml"] =
