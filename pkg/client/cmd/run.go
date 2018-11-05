@@ -63,7 +63,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&options.Language, "language", "l", "", "Programming Language used to write the file")
-	cmd.Flags().StringVarP(&options.Runtime, "runtime", "r", "jvm", "Runtime used by the integration")
+	cmd.Flags().StringVarP(&options.Runtime, "runtime", "r", "", "Runtime used by the integration")
 	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
@@ -74,7 +74,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
 	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
-	cmd.Flags().BoolVar(&options.DependenciesAutoDiscovery, "auto-discovery", true, "Automatically discover Camel modules by analyzing user code")
 	cmd.Flags().StringSliceVarP(&options.Traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. E.g. \"--logging-level org.apache.camel=DEBUG\"")
 
@@ -86,21 +85,20 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type runCmdOptions struct {
 	*RootCmdOptions
-	IntegrationContext        string
-	Language                  string
-	Runtime                   string
-	IntegrationName           string
-	Dependencies              []string
-	Properties                []string
-	ConfigMaps                []string
-	Secrets                   []string
-	Wait                      bool
-	Logs                      bool
-	Sync                      bool
-	Dev                       bool
-	DependenciesAutoDiscovery bool
-	Traits                    []string
-	LoggingLevels             []string
+	IntegrationContext string
+	Language           string
+	Runtime            string
+	IntegrationName    string
+	Dependencies       []string
+	Properties         []string
+	ConfigMaps         []string
+	Secrets            []string
+	Wait               bool
+	Logs               bool
+	Sync               bool
+	Dev                bool
+	Traits             []string
+	LoggingLevels      []string
 }
 
 func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -273,10 +271,9 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 				Content:  code,
 				Language: v1alpha1.Language(o.Language),
 			},
-			Dependencies:              make([]string, 0, len(o.Dependencies)),
-			DependenciesAutoDiscovery: &o.DependenciesAutoDiscovery,
-			Context:                   o.IntegrationContext,
-			Configuration:             make([]v1alpha1.ConfigurationSpec, 0),
+			Dependencies:  make([]string, 0, len(o.Dependencies)),
+			Context:       o.IntegrationContext,
+			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
 		},
 	}
 
@@ -290,22 +287,8 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 		}
 	}
 
-	if o.Language == "groovy" || strings.HasSuffix(filename, ".groovy") {
-		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:groovy")
-	}
-	if o.Language == "kotlin" || strings.HasSuffix(filename, ".kts") {
-		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:kotlin")
-	}
-
-	// jvm runtime required by default
-	util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:jvm")
-
 	if o.Runtime != "" {
 		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:"+o.Runtime)
-	}
-
-	switch o.Runtime {
-
 	}
 
 	for _, item := range o.Properties {

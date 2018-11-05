@@ -48,7 +48,7 @@ func (e *ingressTrait) autoconfigure(environment *environment, resources *kubern
 	return nil
 }
 
-func (e *ingressTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+func (e *ingressTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
 	if e.Host == "" {
 		return errors.New("cannot apply ingress trait: no host defined")
 	}

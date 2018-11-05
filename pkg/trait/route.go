@@ -45,7 +45,7 @@ func (e *routeTrait) autoconfigure(environment *environment, resources *kubernet
 	return nil
 }
 
-func (e *routeTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+func (e *routeTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
 	service := e.getTargetService(environment, resources)
 	if service == nil {
 		return errors.New("cannot apply route trait: no target service")

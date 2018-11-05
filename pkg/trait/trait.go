@@ -25,8 +25,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// ComputeDeployment generates all required resources for deploying the given integration
-func ComputeDeployment(integration *v1alpha1.Integration) ([]runtime.Object, error) {
+// BeforeDeployment generates all required resources for deploying the given integration
+func BeforeDeployment(integration *v1alpha1.Integration) ([]runtime.Object, error) {
 	environment, err := newEnvironment(integration)
 	if err != nil {
 		return nil, err
@@ -34,10 +34,24 @@ func ComputeDeployment(integration *v1alpha1.Integration) ([]runtime.Object, err
 	resources := kubernetes.NewCollection()
 	catalog := NewCatalog()
 	// invoke the trait framework to determine the needed resources
-	if err := catalog.customize(environment, resources); err != nil {
-		return nil, errors.Wrap(err, "error during trait customization")
+	if err := catalog.executeBeforeDeployment(environment, resources); err != nil {
+		return nil, errors.Wrap(err, "error during trait customization before deployment")
 	}
 	return resources.Items(), nil
+}
+
+// BeforeInit executes custom initializazion of the integration
+func BeforeInit(integration *v1alpha1.Integration) error {
+	environment, err := newEnvironment(integration)
+	if err != nil {
+		return err
+	}
+	catalog := NewCatalog()
+	// invoke the trait framework to determine the needed resources
+	if err := catalog.executeBeforeInit(environment, integration); err != nil {
+		return errors.Wrap(err, "error during trait customization before init")
+	}
+	return nil
 }
 
 // newEnvironment creates a environment from the given data
@@ -58,4 +72,3 @@ func newEnvironment(integration *v1alpha1.Integration) (*environment, error) {
 		ExecutedTraits: make([]ID, 0),
 	}, nil
 }
-
