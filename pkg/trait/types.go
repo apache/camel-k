@@ -30,8 +30,8 @@ type Identifiable interface {
 // ID uniquely identifies a trait
 type ID string
 
-// ITrait TODO rename
-type ITrait interface {
+// Trait is the interface of all traits
+type Trait interface {
 	Identifiable
 	// enabled tells if the trait is enabled
 	IsEnabled() bool
@@ -39,8 +39,10 @@ type ITrait interface {
 	IsAuto() bool
 	// autoconfigure is called before any customization to ensure the trait is fully configured
 	autoconfigure(environment *environment, resources *kubernetes.Collection) error
-	// customize executes the trait customization on the resources and return true if the resources have been changed
-	customize(environment *environment, resources *kubernetes.Collection) error
+	// beforeInit executes a customization of the integration before it's built
+	beforeInit(environment *environment, integration *v1alpha1.Integration) error
+	// beforeDeploy executes a customization of the gerenated resources before they are created
+	beforeDeploy(environment *environment, resources *kubernetes.Collection) error
 }
 
 /* Base trait */
@@ -83,7 +85,11 @@ func (trait *BaseTrait) autoconfigure(environment *environment, resources *kuber
 	return nil
 }
 
-func (trait *BaseTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+func (trait *BaseTrait) beforeInit(environment *environment, integration *v1alpha1.Integration) error {
+	return nil
+}
+
+func (trait *BaseTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
 	return nil
 }
 

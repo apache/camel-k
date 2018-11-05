@@ -55,7 +55,7 @@ func (s *serviceTrait) autoconfigure(environment *environment, resources *kubern
 	return nil
 }
 
-func (s *serviceTrait) customize(environment *environment, resources *kubernetes.Collection) (err error) {
+func (s *serviceTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) (err error) {
 	var svc *corev1.Service
 	if svc, err = s.getServiceFor(environment); err != nil {
 		return err

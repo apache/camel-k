@@ -18,16 +18,13 @@ limitations under the License.
 package integration
 
 import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
-	"github.com/sirupsen/logrus"
-	"sort"
-
-	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/sirupsen/logrus"
 )
 
 // NewInitializeAction creates a new inititialize action
@@ -64,42 +61,16 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 	}
 	// extract metadata
 	meta := metadata.Extract(target.Spec.Source)
-
-	// set the correct language
 	target.Spec.Source.Language = meta.Language
 
-	if !util.StringSliceExists(target.Spec.Dependencies, "camel:core") {
-		target.Spec.Dependencies = append(target.Spec.Dependencies, "camel:core")
+	// execute custom initialization
+	if err := trait.BeforeInit(target); err != nil {
+		return err
 	}
 
-	// discover dependencies
-	if target.Spec.DependenciesAutoDiscovery == nil {
-		var autoDiscoveryDependencies = true
-		target.Spec.DependenciesAutoDiscovery = &autoDiscoveryDependencies
-	}
-	if *target.Spec.DependenciesAutoDiscovery {
-		target.Spec.Dependencies = action.mergeDependencies(target.Spec.Dependencies, meta.Dependencies)
-	}
-	// sort the dependencies to get always the same list if they don't change
-	sort.Strings(target.Spec.Dependencies)
 	// update the status
 	logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseBuilding)
 	target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
 	target.Status.Digest = digest.ComputeForIntegration(integration)
 	return sdk.Update(target)
-}
-
-func (action *initializeAction) mergeDependencies(list1 []string, list2 []string) []string {
-	set := make(map[string]bool, 0)
-	for _, d := range list1 {
-		set[d] = true
-	}
-	for _, d := range list2 {
-		set[d] = true
-	}
-	ret := make([]string, 0, len(set))
-	for d := range set {
-		ret = append(ret, d)
-	}
-	return ret
 }

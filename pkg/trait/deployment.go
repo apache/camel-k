@@ -38,7 +38,7 @@ func newDeploymentTrait() *deploymentTrait {
 	}
 }
 
-func (d *deploymentTrait) customize(environment *environment, resources *kubernetes.Collection) error {
+func (d *deploymentTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
 	resources.Add(d.getConfigMapFor(environment))
 	resources.Add(d.getDeploymentFor(environment))
 	return nil

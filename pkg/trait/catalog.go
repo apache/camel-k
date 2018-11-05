@@ -27,26 +27,29 @@ import (
 
 // Catalog collects all information about traits in one place
 type Catalog struct {
-	tDeployment ITrait
-	tService    ITrait
-	tRoute      ITrait
-	tIngress    ITrait
-	tOwner      ITrait
+	tDependencies Trait
+	tDeployment   Trait
+	tService      Trait
+	tRoute        Trait
+	tIngress      Trait
+	tOwner        Trait
 }
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog() *Catalog {
 	return &Catalog{
-		tDeployment: newDeploymentTrait(),
-		tService:    newServiceTrait(),
-		tRoute:      newRouteTrait(),
-		tIngress:    newIngressTrait(),
-		tOwner:      newOwnerTrait(),
+		tDependencies: newDependenciesTrait(),
+		tDeployment:   newDeploymentTrait(),
+		tService:      newServiceTrait(),
+		tRoute:        newRouteTrait(),
+		tIngress:      newIngressTrait(),
+		tOwner:        newOwnerTrait(),
 	}
 }
 
-func (c *Catalog) allTraits() []ITrait {
-	return []ITrait{
+func (c *Catalog) allTraits() []Trait {
+	return []Trait{
+		c.tDependencies,
 		c.tDeployment,
 		c.tService,
 		c.tRoute,
@@ -55,17 +58,19 @@ func (c *Catalog) allTraits() []ITrait {
 	}
 }
 
-func (c *Catalog) traitsFor(environment *environment) []ITrait {
+func (c *Catalog) traitsFor(environment *environment) []Trait {
 	switch environment.Platform.Spec.Cluster {
 	case v1alpha1.IntegrationPlatformClusterOpenShift:
-		return []ITrait{
+		return []Trait{
+			c.tDependencies,
 			c.tDeployment,
 			c.tService,
 			c.tRoute,
 			c.tOwner,
 		}
 	case v1alpha1.IntegrationPlatformClusterKubernetes:
-		return []ITrait{
+		return []Trait{
+			c.tDependencies,
 			c.tDeployment,
 			c.tService,
 			c.tIngress,
@@ -76,7 +81,7 @@ func (c *Catalog) traitsFor(environment *environment) []ITrait {
 	return nil
 }
 
-func (c *Catalog) customize(environment *environment, resources *kubernetes.Collection) error {
+func (c *Catalog) executeBeforeDeployment(environment *environment, resources *kubernetes.Collection) error {
 	c.configure(environment)
 	traits := c.traitsFor(environment)
 	for _, trait := range traits {
@@ -86,7 +91,27 @@ func (c *Catalog) customize(environment *environment, resources *kubernetes.Coll
 			}
 		}
 		if trait.IsEnabled() {
-			if err := trait.customize(environment, resources); err != nil {
+			if err := trait.beforeDeploy(environment, resources); err != nil {
+				return err
+			}
+			environment.ExecutedTraits = append(environment.ExecutedTraits, trait.ID())
+		}
+	}
+	return nil
+}
+
+func (c *Catalog) executeBeforeInit(environment *environment, integration *v1alpha1.Integration) error {
+	c.configure(environment)
+	traits := c.traitsFor(environment)
+	resources := kubernetes.NewCollection()
+	for _, trait := range traits {
+		if trait.IsAuto() {
+			if err := trait.autoconfigure(environment, resources); err != nil {
+				return err
+			}
+		}
+		if trait.IsEnabled() {
+			if err := trait.beforeInit(environment, integration); err != nil {
 				return err
 			}
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait.ID())
@@ -96,7 +121,7 @@ func (c *Catalog) customize(environment *environment, resources *kubernetes.Coll
 }
 
 // GetTrait returns the trait with the given ID
-func (c *Catalog) GetTrait(id string) ITrait {
+func (c *Catalog) GetTrait(id string) Trait {
 	for _, t := range c.allTraits() {
 		if t.ID() == ID(id) {
 			return t

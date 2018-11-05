@@ -2188,8 +2188,6 @@ kind: Integration
 metadata:
   name: example
 spec:
-  dependencies:
-    - camel:groovy
   source:
     content: |-
       // This is Camel K Groovy example route

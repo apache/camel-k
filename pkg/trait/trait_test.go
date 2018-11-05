@@ -155,7 +155,7 @@ func TestTraitDecode(t *testing.T) {
 func processTestEnv(t *testing.T, env *environment) *kubernetes.Collection {
 	resources := kubernetes.NewCollection()
 	catalog := NewCatalog()
-	err := catalog.customize(env, resources)
+	err := catalog.executeBeforeDeployment(env, resources)
 	assert.Nil(t, err)
 	return resources
 }

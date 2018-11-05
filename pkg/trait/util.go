@@ -23,14 +23,13 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 )
 
 // GetIntegrationContext retrieves the context set on the integration
 func GetIntegrationContext(integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
 	if integration.Spec.Context == "" {
-		return nil, errors.New("no context set on the integration")
+		return nil, nil
 	}
 
 	name := integration.Spec.Context
