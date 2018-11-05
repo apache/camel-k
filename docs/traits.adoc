@@ -77,6 +77,14 @@ The following is a list of common traits that can be configured by the end users
   +
   It's enabled by default whenever a Service is added to the integration (through the `service` trait).
 
+[cols="m,"]
+!===
+
+! route.host
+! To configure the host exposed by the route.
+
+!===
+
 | ingress
 | Kubernetes
 | Exposes the service associated with the integration to the outside world with a Kubernetes Ingress.

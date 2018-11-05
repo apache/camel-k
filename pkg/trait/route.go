@@ -28,6 +28,7 @@ import (
 
 type routeTrait struct {
 	BaseTrait `property:",squash"`
+	Host      string `property:"host"`
 }
 
 func newRouteTrait() *routeTrait {
@@ -65,7 +66,7 @@ func (*routeTrait) getTargetService(e *environment, resources *kubernetes.Collec
 	return
 }
 
-func (*routeTrait) getRouteFor(e *environment, service *corev1.Service) *routev1.Route {
+func (e *routeTrait) getRouteFor(env *environment, service *corev1.Service) *routev1.Route {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
@@ -83,6 +84,7 @@ func (*routeTrait) getRouteFor(e *environment, service *corev1.Service) *routev1
 				Kind: "Service",
 				Name: service.Name,
 			},
+			Host: e.Host,
 		},
 	}
 	return &route
