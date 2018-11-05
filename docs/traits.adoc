@@ -55,6 +55,13 @@ The following is a list of common traits that can be configured by the end users
 |=======================
 | Trait      | Profiles 				| Description
 
+| dependencies
+| Kubernetes, OpenShift
+| Automatically adds dependencies required by the Camel routes by inspecting the user code.
+  +
+  +
+  It's enabled by default.
+
 | service
 | Kubernetes, OpenShift
 | Exposes the integration with a Service resource so that it can be accessed by other applications (or integrations) in the same namespace.
