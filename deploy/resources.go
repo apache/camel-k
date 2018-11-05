@@ -2511,6 +2511,14 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - ""
+  - route.openshift.io
+  resources:
+  - routes/custom-host
+  verbs:
+  - create
+
 
 `
 	Resources["operator-service-account.yaml"] =
