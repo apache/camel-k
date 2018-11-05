@@ -2373,6 +2373,19 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
 
 `
 	Resources["operator-role-openshift.yaml"] =
