@@ -28,8 +28,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/sirupsen/logrus"
 
-	// import openshift utilities
-	_ "github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/apache/camel-k/version"
 )
 

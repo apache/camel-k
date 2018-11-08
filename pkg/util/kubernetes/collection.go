@@ -57,7 +57,7 @@ func (c *Collection) VisitDeployment(visitor func(*appsv1.Deployment)) {
 }
 
 // GetDeployment returns a Deployment that matches the given function
-func (c *Collection) GetDeployment(filter func(*appsv1.Deployment)bool) *appsv1.Deployment {
+func (c *Collection) GetDeployment(filter func(*appsv1.Deployment) bool) *appsv1.Deployment {
 	var retValue *appsv1.Deployment
 	c.VisitDeployment(func(re *appsv1.Deployment) {
 		if filter(re) {
@@ -65,6 +65,20 @@ func (c *Collection) GetDeployment(filter func(*appsv1.Deployment)bool) *appsv1.
 		}
 	})
 	return retValue
+}
+
+// RemoveDeployment removes and returns a Deployment that matches the given function
+func (c *Collection) RemoveDeployment(filter func(*appsv1.Deployment) bool) *appsv1.Deployment {
+	res := c.Remove(func(res runtime.Object) bool {
+		if conv, ok := res.(*appsv1.Deployment); ok {
+			return filter(conv)
+		}
+		return false
+	})
+	if res == nil {
+		return nil
+	}
+	return res.(*appsv1.Deployment)
 }
 
 // VisitConfigMap executes the visitor function on all ConfigMap resources
@@ -77,7 +91,7 @@ func (c *Collection) VisitConfigMap(visitor func(*corev1.ConfigMap)) {
 }
 
 // GetConfigMap returns a ConfigMap that matches the given function
-func (c *Collection) GetConfigMap(filter func(*corev1.ConfigMap)bool) *corev1.ConfigMap {
+func (c *Collection) GetConfigMap(filter func(*corev1.ConfigMap) bool) *corev1.ConfigMap {
 	var retValue *corev1.ConfigMap
 	c.VisitConfigMap(func(re *corev1.ConfigMap) {
 		if filter(re) {
@@ -97,7 +111,7 @@ func (c *Collection) VisitService(visitor func(*corev1.Service)) {
 }
 
 // GetService returns a Service that matches the given function
-func (c *Collection) GetService(filter func(*corev1.Service)bool) *corev1.Service {
+func (c *Collection) GetService(filter func(*corev1.Service) bool) *corev1.Service {
 	var retValue *corev1.Service
 	c.VisitService(func(re *corev1.Service) {
 		if filter(re) {
@@ -117,7 +131,7 @@ func (c *Collection) VisitRoute(visitor func(*routev1.Route)) {
 }
 
 // GetRoute returns a Route that matches the given function
-func (c *Collection) GetRoute(filter func(*routev1.Route)bool) *routev1.Route {
+func (c *Collection) GetRoute(filter func(*routev1.Route) bool) *routev1.Route {
 	var retValue *routev1.Route
 	c.VisitRoute(func(re *routev1.Route) {
 		if filter(re) {
@@ -141,4 +155,15 @@ func (c *Collection) Visit(visitor func(runtime.Object)) {
 	for _, res := range c.items {
 		visitor(res)
 	}
+}
+
+// Remove removes the given element from the collection and returns it
+func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
+	for idx, res := range c.items {
+		if selector(res) {
+			c.items = append(c.items[0:idx], c.items[idx+1:]...)
+			return res
+		}
+	}
+	return nil
 }
