@@ -2289,6 +2289,23 @@ spec:
               value: "camel-k"
 
 `
+	Resources["operator-role-binding-knative.yaml"] =
+		`
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-operator-knative
+  labels:
+    app: "camel-k"
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+roleRef:
+  kind: Role
+  name: camel-k-operator-knative
+  apiGroup: rbac.authorization.k8s.io
+
+`
 	Resources["operator-role-binding.yaml"] =
 		`
 kind: RoleBinding
@@ -2304,6 +2321,30 @@ roleRef:
   kind: Role
   name: camel-k-operator
   apiGroup: rbac.authorization.k8s.io
+
+`
+	Resources["operator-role-knative.yaml"] =
+		`
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-operator-knative
+  labels:
+    app: "camel-k"
+rules:
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - "*"
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
 
 `
 	Resources["operator-role-kubernetes.yaml"] =

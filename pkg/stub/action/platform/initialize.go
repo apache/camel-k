@@ -84,6 +84,10 @@ func (action *initializeAction) Handle(platform *v1alpha1.IntegrationPlatform) e
 		return errors.New("no registry specified for publishing images")
 	}
 
+	if target.Spec.Profile == "" {
+		target.Spec.Profile = platformutils.GetProfile(target)
+	}
+
 	// next status
 	logrus.Info("Platform ", target.Name, " transitioning to state ", v1alpha1.IntegrationPlatformPhaseCreating)
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating

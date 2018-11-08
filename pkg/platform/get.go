@@ -51,3 +51,17 @@ func ListPlatforms(namespace string) (*v1alpha1.IntegrationPlatformList, error) 
 func IsActive(p *v1alpha1.IntegrationPlatform) bool {
 	return p.Status.Phase != "" && p.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate
 }
+
+// GetProfile returns the current profile of the platform (if present) or computes it
+func GetProfile(p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
+	if p.Spec.Profile != "" {
+		return p.Spec.Profile
+	}
+	switch p.Spec.Cluster {
+	case v1alpha1.IntegrationPlatformClusterKubernetes:
+		return v1alpha1.TraitProfileKubernetes
+	case v1alpha1.IntegrationPlatformClusterOpenShift:
+		return v1alpha1.TraitProfileOpenShift
+	}
+	return ""
+}

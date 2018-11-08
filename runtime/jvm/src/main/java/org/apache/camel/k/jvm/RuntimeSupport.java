@@ -36,6 +36,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
+import static org.apache.camel.k.jvm.Constants.SCHEME_INLINE;
+
 public final class RuntimeSupport {
     private RuntimeSupport() {
     }
@@ -47,10 +49,18 @@ public final class RuntimeSupport {
 
         // Main location
         if (ObjectHelper.isNotEmpty(conf)) {
-            try (Reader reader = Files.newBufferedReader(Paths.get(conf))) {
-                properties.load(reader);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            if (conf.startsWith(SCHEME_INLINE)) {
+                try (Reader reader = URIResolver.resolveInline(conf)) {
+                    properties.load(reader);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                try (Reader reader = Files.newBufferedReader(Paths.get(conf))) {
+                    properties.load(reader);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
