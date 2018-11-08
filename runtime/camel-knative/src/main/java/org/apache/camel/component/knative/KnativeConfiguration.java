@@ -17,8 +17,13 @@
 package org.apache.camel.component.knative;
 
 import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.cloud.ServiceDefinition;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriParam;
+
+import java.util.Arrays;
+
+import static org.apache.camel.util.CollectionHelper.mapOf;
 
 public class KnativeConfiguration implements Cloneable {
     @UriParam
@@ -26,6 +31,15 @@ public class KnativeConfiguration implements Cloneable {
     private KnativeEnvironment environment;
 
     public KnativeConfiguration() {
+        this.environment = new KnativeEnvironment(Arrays.asList(
+                new KnativeEnvironment.KnativeServiceDefinition(
+                        Knative.Type.endpoint,
+                        Knative.Protocol.http,
+                        "default",
+                        "0.0.0.0",
+                        8080,
+                        mapOf(ServiceDefinition.SERVICE_META_PATH, "/"))
+        ));
     }
 
     // ************************

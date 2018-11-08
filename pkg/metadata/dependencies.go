@@ -54,7 +54,7 @@ func decodeComponent(uri string) string {
 	uriStart := uriSplit[0]
 	if component := camel.Runtime.GetArtifactByScheme(uriStart); component != nil {
 		artifactID := component.ArtifactID
-		if strings.HasPrefix(artifactID, "camel-") {
+		if component.GroupID == "org.apache.camel" && strings.HasPrefix(artifactID, "camel-") {
 			return "camel:" + artifactID[6:]
 		}
 		return "mvn:" + component.GroupID + ":" + artifactID + ":" + component.Version

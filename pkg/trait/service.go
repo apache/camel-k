@@ -19,17 +19,20 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/version"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 var webComponents = map[string]bool{
-	"camel:servlet":     true,
-	"camel:undertow":    true,
-	"camel:jetty":       true,
-	"camel:netty-http":  true,
-	"camel:netty4-http": true,
+	"camel:servlet":                                           true,
+	"camel:undertow":                                          true,
+	"camel:jetty":                                             true,
+	"camel:jetty9":                                            true,
+	"camel:netty-http":                                        true,
+	"camel:netty4-http":                                       true,
+	"mvn:org.apache.camel.k:camel-knative:" + version.Version: true,
 	// TODO find a better way to discover need for exposure
 	// maybe using the resolved classpath of the context instead of the requested dependencies
 }
