@@ -228,6 +228,8 @@ const (
 	TraitProfileKnative = "Knative"
 )
 
+var allTraitProfiles = []TraitProfile{TraitProfileOpenShift, TraitProfileKubernetes, TraitProfileKnative}
+
 // IntegrationPlatformBuildSpec contains platform related build information
 type IntegrationPlatformBuildSpec struct {
 	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`

@@ -19,6 +19,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -95,4 +96,15 @@ func NewIntegrationContextList() IntegrationContextList {
 			Kind:       IntegrationContextKind,
 		},
 	}
+}
+
+
+// TraitProfileByName returns the trait profile corresponding to the given name (case insensitive)
+func TraitProfileByName(name string) TraitProfile {
+	for _, p := range allTraitProfiles {
+		if strings.EqualFold(name, string(p)) {
+			return p
+		}
+	}
+	return ""
 }
