@@ -21,6 +21,7 @@ import (
 	"errors"
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -36,9 +37,23 @@ func Operator(namespace string) error {
 		return err
 	}
 	if isOpenshift {
-		return installOpenshift(namespace)
+		if err := installOpenshift(namespace); err != nil {
+			return err
+		}
+	} else {
+		if err := installKubernetes(namespace); err != nil {
+			return err
+		}
 	}
-	return installKubernetes(namespace)
+	// Additionally, install Knative resources (roles and bindings)
+	isKnative, err := knative.IsInstalled()
+	if err != nil {
+		return err
+	}
+	if isKnative {
+		return installKnative(namespace)
+	}
+	return nil
 }
 
 func installOpenshift(namespace string) error {
@@ -62,6 +77,13 @@ func installKubernetes(namespace string) error {
 	)
 }
 
+func installKnative(namespace string) error {
+	return Resources(namespace,
+		"operator-role-knative.yaml",
+		"operator-role-binding-knative.yaml",
+	)
+}
+
 // Platform installs the platform custom resource
 func Platform(namespace string, registry string) error {
 	if err := waitForPlatformCRDAvailable(namespace, 15*time.Second); err != nil {
@@ -71,16 +93,14 @@ func Platform(namespace string, registry string) error {
 	if err != nil {
 		return err
 	}
-	if isOpenshift {
-		return Resource(namespace, "platform-cr.yaml")
-	}
-	platform, err := kubernetes.LoadResourceFromYaml(deploy.Resources["platform-cr.yaml"])
+	platformObject, err := kubernetes.LoadResourceFromYaml(deploy.Resources["platform-cr.yaml"])
 	if err != nil {
 		return err
 	}
-	if pl, ok := platform.(*v1alpha1.IntegrationPlatform); !ok {
-		panic("cannot find integration platform template")
-	} else {
+	pl := platformObject.(*v1alpha1.IntegrationPlatform)
+
+	if !isOpenshift {
+		// Kubernetes only (Minikube)
 		if registry == "" {
 			// This operation should be done here in the installer
 			// because the operator is not allowed to look into the "kube-system" namespace
@@ -94,8 +114,17 @@ func Platform(namespace string, registry string) error {
 			registry = *minishiftRegistry
 		}
 		pl.Spec.Build.Registry = registry
-		return RuntimeObject(namespace, pl)
 	}
+
+	var knativeInstalled bool
+	if knativeInstalled, err = knative.IsInstalled(); err != nil {
+		return err
+	}
+	if knativeInstalled {
+		pl.Spec.Profile = v1alpha1.TraitProfileKnative
+	}
+
+	return RuntimeObject(namespace, pl)
 }
 
 func waitForPlatformCRDAvailable(namespace string, timeout time.Duration) error {

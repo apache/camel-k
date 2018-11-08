@@ -29,6 +29,7 @@ import (
 type Catalog struct {
 	tDependencies Trait
 	tDeployment   Trait
+	tKnative      Trait
 	tService      Trait
 	tRoute        Trait
 	tIngress      Trait
@@ -40,6 +41,7 @@ func NewCatalog() *Catalog {
 	return &Catalog{
 		tDependencies: newDependenciesTrait(),
 		tDeployment:   newDeploymentTrait(),
+		tKnative:      newKnativeTrait(),
 		tService:      newServiceTrait(),
 		tRoute:        newRouteTrait(),
 		tIngress:      newIngressTrait(),
@@ -51,6 +53,7 @@ func (c *Catalog) allTraits() []Trait {
 	return []Trait{
 		c.tDependencies,
 		c.tDeployment,
+		c.tKnative,
 		c.tService,
 		c.tRoute,
 		c.tIngress,
@@ -59,8 +62,12 @@ func (c *Catalog) allTraits() []Trait {
 }
 
 func (c *Catalog) traitsFor(environment *environment) []Trait {
-	switch environment.Platform.Spec.Cluster {
-	case v1alpha1.IntegrationPlatformClusterOpenShift:
+	profile := environment.Platform.Spec.Profile
+	if environment.Integration.Spec.Profile != "" {
+		profile = environment.Integration.Spec.Profile
+	}
+	switch profile {
+	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
 			c.tDependencies,
 			c.tDeployment,
@@ -68,7 +75,7 @@ func (c *Catalog) traitsFor(environment *environment) []Trait {
 			c.tRoute,
 			c.tOwner,
 		}
-	case v1alpha1.IntegrationPlatformClusterKubernetes:
+	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
 			c.tDependencies,
 			c.tDeployment,
@@ -76,8 +83,14 @@ func (c *Catalog) traitsFor(environment *environment) []Trait {
 			c.tIngress,
 			c.tOwner,
 		}
-		// case Knative: ...
+	case v1alpha1.TraitProfileKnative:
+		return []Trait{
+			c.tDependencies,
+			c.tKnative,
+			c.tOwner,
+		}
 	}
+
 	return nil
 }
 

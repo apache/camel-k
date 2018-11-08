@@ -16,6 +16,24 @@
  */
 package org.apache.camel.k.jvm;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.k.jvm.dsl.Components;
+import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.model.rest.RestConfigurationDefinition;
+import org.apache.camel.model.rest.RestDefinition;
+import org.apache.camel.util.ObjectHelper;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joor.Reflect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.SimpleBindings;
+import javax.xml.bind.UnmarshalException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -24,28 +42,10 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.SimpleBindings;
-import javax.xml.bind.UnmarshalException;
-
-import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.k.jvm.dsl.Components;
-import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.model.rest.RestConfigurationDefinition;
-import org.apache.camel.model.rest.RestDefinition;
-import org.apache.camel.util.ObjectHelper;
-import org.apache.camel.util.ResourceHelper;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.joor.Reflect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.apache.camel.k.jvm.Constants.SCHEME_CLASSPATH;
 import static org.apache.camel.k.jvm.Constants.SCHEME_FILE;
+import static org.apache.camel.k.jvm.Constants.SCHEME_INLINE;
 
 public final class RoutesLoaders {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutesLoaders.class);
@@ -86,7 +86,7 @@ public final class RoutesLoaders {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(getContext(), resource)) {
+                    try (InputStream is = URIResolver.resolve(getContext(), resource)) {
                         String name = StringUtils.substringAfter(resource, ":");
                         name = StringUtils.removeEnd(name, ".java");
 
@@ -130,7 +130,7 @@ public final class RoutesLoaders {
                     bindings.put("rest", (Supplier<RestDefinition>) () -> rest());
                     bindings.put("restConfiguration", (Supplier<RestConfigurationDefinition>) () -> restConfiguration());
 
-                    try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(context, resource)) {
+                    try (InputStream is = URIResolver.resolve(context, resource)) {
                         engine.eval(new InputStreamReader(is), bindings);
                     }
                 }
@@ -149,7 +149,7 @@ public final class RoutesLoaders {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(getContext(), resource)) {
+                    try (InputStream is = URIResolver.resolve(getContext(), resource)) {
                         try {
                             setRouteCollection(
                                 getContext().loadRoutesDefinition(is)
@@ -173,7 +173,7 @@ public final class RoutesLoaders {
 
 
     public static RoutesLoader loaderFor(String resource, String languageName) {
-        if (!resource.startsWith(SCHEME_CLASSPATH) && !resource.startsWith(SCHEME_FILE)) {
+        if (!resource.startsWith(SCHEME_CLASSPATH) && !resource.startsWith(SCHEME_FILE) && !resource.startsWith(SCHEME_INLINE)) {
             throw new IllegalArgumentException("No valid resource format, expected scheme:path, found " + resource);
         }
 

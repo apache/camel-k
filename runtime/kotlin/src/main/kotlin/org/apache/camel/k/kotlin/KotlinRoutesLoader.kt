@@ -20,8 +20,8 @@ import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.k.jvm.Language
 import org.apache.camel.k.jvm.RoutesLoader
 import org.apache.camel.k.jvm.RuntimeRegistry
+import org.apache.camel.k.jvm.URIResolver
 import org.apache.camel.k.kotlin.dsl.IntegrationConfiguration
-import org.apache.camel.util.ResourceHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -57,7 +57,7 @@ class KotlinRoutesLoader : RoutesLoader {
 
                 LOGGER.info("JAVA_HOME is set to {}", javaHome)
 
-                ResourceHelper.resolveMandatoryResourceAsInputStream(context, resource).use { `is` ->
+                URIResolver.resolve(context, resource).use { `is` ->
                     val result = host.eval(
                         InputStreamReader(`is`).readText().toScriptSource(),
                         ScriptCompilationConfiguration {

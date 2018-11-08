@@ -52,6 +52,7 @@ type IntegrationSpec struct {
 	Replicas      *int32                          `json:"replicas,omitempty"`
 	Source        SourceSpec                      `json:"source,omitempty"`
 	Context       string                          `json:"context,omitempty"`
+	Profile       TraitProfile                    `json:"profile,omitempty"`
 	Dependencies  []string                        `json:"dependencies,omitempty"`
 	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec             `json:"configuration,omitempty"`
@@ -201,6 +202,7 @@ type IntegrationPlatform struct {
 // IntegrationPlatformSpec --
 type IntegrationPlatformSpec struct {
 	Cluster IntegrationPlatformCluster   `json:"cluster,omitempty"`
+	Profile TraitProfile                 `json:"profile,omitempty"`
 	Build   IntegrationPlatformBuildSpec `json:"build,omitempty"`
 }
 
@@ -212,6 +214,18 @@ const (
 	IntegrationPlatformClusterOpenShift = "OpenShift"
 	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster
 	IntegrationPlatformClusterKubernetes = "Kubernetes"
+)
+
+// TraitProfile represents lists of traits that are enabled for the specific installation/integration
+type TraitProfile string
+
+const (
+	// TraitProfileOpenShift is used by default on OpenShift clusters
+	TraitProfileOpenShift = "OpenShift"
+	// TraitProfileKubernetes is used by default on Kubernetes clusters
+	TraitProfileKubernetes = "Kubernetes"
+	// TraitProfileKnative is used by default on OpenShift/Kubernetes clusters powered by Knative
+	TraitProfileKnative = "Knative"
 )
 
 // IntegrationPlatformBuildSpec contains platform related build information

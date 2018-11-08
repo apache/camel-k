@@ -22,7 +22,7 @@ import org.apache.camel.k.groovy.dsl.IntegrationConfiguration
 import org.apache.camel.k.jvm.Language
 import org.apache.camel.k.jvm.RoutesLoader
 import org.apache.camel.k.jvm.RuntimeRegistry
-import org.apache.camel.util.ResourceHelper
+import org.apache.camel.k.jvm.URIResolver
 import org.codehaus.groovy.control.CompilerConfiguration
 
 class GroovyRoutesLoader implements RoutesLoader {
@@ -41,7 +41,7 @@ class GroovyRoutesLoader implements RoutesLoader {
 
                 def cl = Thread.currentThread().getContextClassLoader()
                 def sh = new GroovyShell(cl, new Binding(), cc)
-                def is = ResourceHelper.resolveMandatoryResourceAsInputStream(context, resource)
+                def is = URIResolver.resolve(context, resource)
 
                 is.withCloseable {
                     def reader = new InputStreamReader(is)
