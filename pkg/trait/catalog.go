@@ -19,6 +19,7 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/fatih/structs"
 	"reflect"
@@ -62,7 +63,7 @@ func (c *Catalog) allTraits() []Trait {
 }
 
 func (c *Catalog) traitsFor(environment *environment) []Trait {
-	profile := environment.Platform.Spec.Profile
+	profile := platform.GetProfile(environment.Platform)
 	if environment.Integration.Spec.Profile != "" {
 		profile = environment.Integration.Spec.Profile
 	}

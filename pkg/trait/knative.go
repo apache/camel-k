@@ -34,15 +34,6 @@ func newKnativeTrait() *knativeTrait {
 	}
 }
 
-func (t *knativeTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
-	if t.Enabled == nil {
-		// disable by default
-		status := false
-		t.Enabled = &status
-	}
-	return nil
-}
-
 func (t *knativeTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
 	resources.Add(t.getServiceFor(environment))
 	return nil

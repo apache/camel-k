@@ -79,6 +79,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
 	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
+	cmd.Flags().StringVar(&options.Profile, "profile", "", "Trait profile used for deployment")
 	cmd.Flags().StringSliceVarP(&options.Traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. E.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringVarP(&options.OutputFormat, "output", "o", "", "Output format. One of: json|yaml")
@@ -103,6 +104,7 @@ type runCmdOptions struct {
 	Logs               bool
 	Sync               bool
 	Dev                bool
+	Profile            string
 	Traits             []string
 	LoggingLevels      []string
 	OutputFormat       string
@@ -281,6 +283,7 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 			Dependencies:  make([]string, 0, len(o.Dependencies)),
 			Context:       o.IntegrationContext,
 			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+			Profile:       v1alpha1.TraitProfileByName(o.Profile),
 		},
 	}
 
