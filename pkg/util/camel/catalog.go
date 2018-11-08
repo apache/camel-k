@@ -44,6 +44,11 @@ func init() {
 	if err := yaml.Unmarshal([]byte(data), &Runtime); err != nil {
 		panic(err)
 	}
+	// Adding embedded artifacts
+	for k, v := range EmbeddedArtifacts() {
+		Runtime.Artifacts[k] = v
+	}
+
 	Runtime.artifactByScheme = make(map[string]string)
 	for id, artifact := range Runtime.Artifacts {
 		for _, scheme := range artifact.Schemes {
