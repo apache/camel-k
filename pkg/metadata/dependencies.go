@@ -18,11 +18,18 @@ limitations under the License.
 package metadata
 
 import (
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/camel"
+)
+
+var (
+	additionalDependencies = map[string]string {
+		".*JsonLibrary\\.Jackson.*": "camel:jackson",
+	}
 )
 
 // discoverDependencies returns a list of dependencies required by the given source code
@@ -36,6 +43,10 @@ func discoverDependencies(source v1alpha1.SourceSpec, fromURIs []string, toURIs 
 		if candidateComp != "" {
 			candidateMap[candidateComp] = true
 		}
+	}
+	additional := findAdditionalDependencies(source)
+	for _, dep := range additional {
+		candidateMap[dep] = true
 	}
 	// Remove duplicates and sort
 	candidateComponents := make([]string, 0, len(candidateMap))
@@ -60,4 +71,15 @@ func decodeComponent(uri string) string {
 		return "mvn:" + component.GroupID + ":" + artifactID + ":" + component.Version
 	}
 	return ""
+}
+
+func findAdditionalDependencies(source v1alpha1.SourceSpec) []string {
+	additional := make([]string, 0)
+	for pattern, dep := range additionalDependencies {
+		pat := regexp.MustCompile(pattern)
+		if pat.MatchString(source.Content) {
+			additional = append(additional, dep)
+		}
+	}
+	return additional
 }
