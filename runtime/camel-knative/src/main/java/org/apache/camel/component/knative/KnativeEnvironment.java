@@ -17,6 +17,8 @@
 package org.apache.camel.component.knative;
 
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -96,6 +98,12 @@ public class KnativeEnvironment {
     // Helpers
     //
     // ************************
+
+    public static KnativeEnvironment mandatoryLoadFromSerializedString(CamelContext context, String configuration) throws Exception {
+        try (Reader reader = new StringReader(configuration)) {
+            return Knative.MAPPER.readValue(reader, KnativeEnvironment.class);
+        }
+    }
 
     public static KnativeEnvironment mandatoryLoadFromResource(CamelContext context, String path) throws Exception {
         try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(context, path)) {

@@ -26,6 +26,8 @@ import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.StringHelper;
 
 public class KnativeComponent extends DefaultComponent {
+    public static final String CONFIGURATION_ENV_VARIABLE = "CAMEL_KNATIVE_CONFIGURATION";
+
     private final KnativeConfiguration configuration;
     private String environmentPath;
 
@@ -99,11 +101,18 @@ public class KnativeComponent extends DefaultComponent {
         KnativeConfiguration conf = configuration.copy();
 
         if (conf.getEnvironment() == null) {
-            ObjectHelper.notNull(environmentPath, "Environment Path");
-
-            conf.setEnvironment(
-                KnativeEnvironment.mandatoryLoadFromResource(getCamelContext(), this.environmentPath)
-            );
+            String envConfig = System.getenv(CONFIGURATION_ENV_VARIABLE);
+            if (environmentPath != null) {
+                conf.setEnvironment(
+                        KnativeEnvironment.mandatoryLoadFromResource(getCamelContext(), this.environmentPath)
+                );
+            } else if (envConfig != null) {
+                conf.setEnvironment(
+                        KnativeEnvironment.mandatoryLoadFromSerializedString(getCamelContext(), envConfig)
+                );
+            } else {
+                throw new IllegalStateException("Cannot load Knative configuration from file or env variable");
+            }
         }
 
         return conf;
