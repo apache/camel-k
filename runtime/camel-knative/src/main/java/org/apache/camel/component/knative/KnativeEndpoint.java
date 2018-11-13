@@ -79,8 +79,6 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
 
         switch (service.getProtocol()) {
         case http:
-            this.endpoint = http(component.getCamelContext(), service);
-            break;
         case https:
             this.endpoint = http(component.getCamelContext(), service);
             break;

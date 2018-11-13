@@ -18,14 +18,21 @@ limitations under the License.
 package trait
 
 import (
+	"encoding/json"
+	"github.com/apache/camel-k/pkg/metadata"
+	knativeutil "github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	knative "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type knativeTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait     `property:",squash"`
+	Subscriptions string `property:"subscriptions"`
 }
 
 func newKnativeTrait() *knativeTrait {
@@ -34,12 +41,23 @@ func newKnativeTrait() *knativeTrait {
 	}
 }
 
-func (t *knativeTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
-	resources.Add(t.getServiceFor(environment))
+func (t *knativeTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
+	if t.Subscriptions == "" {
+		channels := t.getSourceChannels(environment)
+		t.Subscriptions = strings.Join(channels, ",")
+	}
 	return nil
 }
 
-func (*knativeTrait) getServiceFor(e *environment) *knative.Service {
+func (t *knativeTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
+	resources.Add(t.getServiceFor(environment))
+	for _, sub := range t.getSubscriptionsFor(environment) {
+		resources.Add(sub)
+	}
+	return nil
+}
+
+func (t *knativeTrait) getServiceFor(e *environment) *serving.Service {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
@@ -64,14 +82,17 @@ func (*knativeTrait) getServiceFor(e *environment) *knative.Service {
 	// optimizations
 	environment["AB_JOLOKIA_OFF"] = "true"
 
+	// Knative integration
+	environment["CAMEL_KNATIVE_CONFIGURATION"] = t.getConfigurationSerialized(e)
+
 	labels := map[string]string{
 		"camel.apache.org/integration": e.Integration.Name,
 	}
 
-	svc := knative.Service{
+	svc := serving.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
-			APIVersion: knative.SchemeGroupVersion.String(),
+			APIVersion: serving.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        e.Integration.Name,
@@ -79,11 +100,11 @@ func (*knativeTrait) getServiceFor(e *environment) *knative.Service {
 			Labels:      labels,
 			Annotations: e.Integration.Annotations,
 		},
-		Spec: knative.ServiceSpec{
-			RunLatest: &knative.RunLatestType{
-				Configuration: knative.ConfigurationSpec{
-					RevisionTemplate: knative.RevisionTemplateSpec{
-						Spec: knative.RevisionSpec{
+		Spec: serving.ServiceSpec{
+			RunLatest: &serving.RunLatestType{
+				Configuration: serving.ConfigurationSpec{
+					RevisionTemplate: serving.RevisionTemplateSpec{
+						Spec: serving.RevisionSpec{
 							Container: corev1.Container{
 								Image: e.Integration.Status.Image,
 								Env:   EnvironmentAsEnvVarSlice(environment),
@@ -96,4 +117,97 @@ func (*knativeTrait) getServiceFor(e *environment) *knative.Service {
 	}
 
 	return &svc
+}
+
+func (t *knativeTrait) getSubscriptionsFor(e *environment) []*eventing.Subscription {
+	channels := t.getConfiguredSourceChannels()
+	subs := make([]*eventing.Subscription, 0)
+	for _, ch := range channels {
+		subs = append(subs, t.getSubscriptionFor(e, ch))
+	}
+	return subs
+}
+
+func (*knativeTrait) getSubscriptionFor(e *environment, channel string) *eventing.Subscription {
+	return &eventing.Subscription{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventing.SchemeGroupVersion.String(),
+			Kind:       "Subscription",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: e.Integration.Namespace,
+			Name:      channel + "-" + e.Integration.Name,
+		},
+		Spec: eventing.SubscriptionSpec{
+			Channel: corev1.ObjectReference{
+				APIVersion: eventing.SchemeGroupVersion.String(),
+				Kind:       "Channel",
+				Name:       channel,
+			},
+			Subscriber: &eventing.SubscriberSpec{
+				Ref: &corev1.ObjectReference{
+					APIVersion: serving.SchemeGroupVersion.String(),
+					Kind:       "Service",
+					Name:       e.Integration.Name,
+				},
+			},
+		},
+	}
+}
+
+func (t *knativeTrait) getConfigurationSerialized(e *environment) string {
+	env := t.getConfiguration(e)
+	res, err := json.Marshal(env)
+	if err != nil {
+		logrus.Warning("Unable to serialize Knative configuration", err)
+		return ""
+	}
+	return string(res)
+}
+
+func (t *knativeTrait) getConfiguration(e *environment) knativeutil.CamelKnativeEnvironment {
+	sourceChannels := t.getConfiguredSourceChannels()
+	env := knativeutil.NewCamelKnativeEnvironment()
+	for _, ch := range sourceChannels {
+		svc := knativeutil.CamelKnativeServiceDefinition{
+			Name:        ch,
+			Host:        "0.0.0.0",
+			Port:        8080,
+			Protocol:    knativeutil.CamelKnativeProtocolHTTP,
+			ServiceType: knativeutil.CamelKnativeServiceTypeChannel,
+			Metadata: map[string]string{
+				knativeutil.CamelKnativeMetaServicePath: "/",
+			},
+		}
+		env.Services = append(env.Services, svc)
+	}
+	// Adding default endpoint
+	defSvc := knativeutil.CamelKnativeServiceDefinition{
+		Name:        "default",
+		Host:        "0.0.0.0",
+		Port:        8080,
+		Protocol:    knativeutil.CamelKnativeProtocolHTTP,
+		ServiceType: knativeutil.CamelKnativeServiceTypeEndpoint,
+		Metadata: map[string]string{
+			knativeutil.CamelKnativeMetaServicePath: "/",
+		},
+	}
+	env.Services = append(env.Services, defSvc)
+	return env
+}
+
+func (t *knativeTrait) getConfiguredSourceChannels() []string {
+	channels := make([]string, 0)
+	for _, ch := range strings.Split(t.Subscriptions, ",") {
+		cht := strings.Trim(ch, " \t\"")
+		if cht != "" {
+			channels = append(channels, cht)
+		}
+	}
+	return channels
+}
+
+func (*knativeTrait) getSourceChannels(e *environment) []string {
+	meta := metadata.Extract(e.Integration.Spec.Source)
+	return knativeutil.ExtractChannelNames(meta.FromURIs)
 }
