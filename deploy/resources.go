@@ -2345,6 +2345,19 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - "*"
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
 
 `
 	Resources["operator-role-kubernetes.yaml"] =

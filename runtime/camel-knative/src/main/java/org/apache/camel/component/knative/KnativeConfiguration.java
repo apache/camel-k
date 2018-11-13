@@ -31,15 +31,6 @@ public class KnativeConfiguration implements Cloneable {
     private KnativeEnvironment environment;
 
     public KnativeConfiguration() {
-        this.environment = new KnativeEnvironment(Arrays.asList(
-                new KnativeEnvironment.KnativeServiceDefinition(
-                        Knative.Type.endpoint,
-                        Knative.Protocol.http,
-                        "default",
-                        "0.0.0.0",
-                        8080,
-                        mapOf(ServiceDefinition.SERVICE_META_PATH, "/"))
-        ));
     }
 
     // ************************
