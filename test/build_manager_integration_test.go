@@ -23,87 +23,87 @@ package test
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/build/assemble"
-	"github.com/apache/camel-k/pkg/build/packager"
-	"github.com/apache/camel-k/pkg/build/publish"
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/build"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/util/digest"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildManagerBuild(t *testing.T) {
 	ctx := context.TODO()
 	namespace := getTargetNamespace()
-	assembler := assemble.NewMavenAssembler(ctx)
-	pack := packager.NewJavaStandardPackager(ctx)
-	publisher := publish.NewS2IPublisher(ctx, namespace)
-	buildManager := build.NewManager(ctx, assembler, pack, publisher)
-	identifier := build.Identifier{
-		Name:      "man-test",
-		Qualifier: digest.Random(),
-	}
-	buildManager.Start(build.Request{
-		Identifier: identifier,
-		Code: build.Source{
+	b := builder.New(ctx, namespace)
+
+	r := builder.Request{
+		Identifier: builder.Identifier{
+			Name:      "man-test",
+			Qualifier: digest.Random(),
+		},
+		Code: v1alpha1.SourceSpec{
 			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-core",
 			"camel:telegram",
 		},
-	})
+		Steps: s2i.DefaultSteps,
+	}
+
+	b.Submit(r)
 
 	deadline := time.Now().Add(5 * time.Minute)
-	var result build.Result
+	var result builder.Result
+
 	for time.Now().Before(deadline) {
-		result = buildManager.Get(identifier)
-		if result.Status == build.StatusCompleted || result.Status == build.StatusError {
+		result = b.Submit(r)
+		if result.Status == builder.StatusCompleted || result.Status == builder.StatusError {
 			break
 		}
 		time.Sleep(2 * time.Second)
 	}
 
-	assert.NotEqual(t, build.StatusError, result.Status)
-	assert.Equal(t, build.StatusCompleted, result.Status)
+	assert.NotEqual(t, builder.StatusError, result.Status)
+	assert.Equal(t, builder.StatusCompleted, result.Status)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
 func TestBuildManagerFailedBuild(t *testing.T) {
-
 	ctx := context.TODO()
 	namespace := getTargetNamespace()
-	assembler := assemble.NewMavenAssembler(ctx)
-	pack := packager.NewJavaStandardPackager(ctx)
-	publisher := publish.NewS2IPublisher(ctx, namespace)
-	buildManager := build.NewManager(ctx, assembler, pack, publisher)
-	identifier := build.Identifier{
-		Name:      "man-test-2",
-		Qualifier: digest.Random(),
-	}
-	buildManager.Start(build.Request{
-		Identifier: identifier,
-		Code: build.Source{
+	b := builder.New(ctx, namespace)
+
+	r := builder.Request{
+		Identifier: builder.Identifier{
+			Name:      "man-test",
+			Qualifier: digest.Random(),
+		},
+		Code: v1alpha1.SourceSpec{
 			Content: createTimerToLogIntegrationCode(),
 		},
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-cippalippa",
 		},
-	})
+		Steps: s2i.DefaultSteps,
+	}
+
+	b.Submit(r)
 
 	deadline := time.Now().Add(5 * time.Minute)
-	var result build.Result
+	var result builder.Result
 	for time.Now().Before(deadline) {
-		result = buildManager.Get(identifier)
-		if result.Status == build.StatusCompleted || result.Status == build.StatusError {
+		result = b.Submit(r)
+		if result.Status == builder.StatusCompleted || result.Status == builder.StatusError {
 			break
 		}
 		time.Sleep(2 * time.Second)
 	}
 
-	assert.Equal(t, build.StatusError, result.Status)
-	assert.NotEqual(t, build.StatusCompleted, result.Status)
+	assert.Equal(t, builder.StatusError, result.Status)
+	assert.NotEqual(t, builder.StatusCompleted, result.Status)
 	assert.Empty(t, result.Image)
 }

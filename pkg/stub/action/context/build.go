@@ -20,15 +20,14 @@ package context
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/build"
 )
 
 // NewBuildAction creates a new build handling action for the context
@@ -51,38 +50,37 @@ func (action *buildAction) CanHandle(context *v1alpha1.IntegrationContext) bool 
 }
 
 func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
-	buildManager, err := platform.GetPlatformBuildManager(action.Context, context.Namespace)
+	b, err := platform.GetPlatformBuilder(action.Context, context.Namespace)
+	if err != nil {
+		return err
+	}
+	r, err := platform.NewBuildRequest(action.Context, context)
 	if err != nil {
 		return err
 	}
 
-	buildIdentifier := build.Identifier{
-		Name:      "context-" + context.Name,
-		Qualifier: context.ResourceVersion,
-	}
-
-	buildResult := buildManager.Get(buildIdentifier)
-	if buildResult.Status == build.StatusNotRequested {
-		buildManager.Start(build.Request{
-			Identifier:   buildIdentifier,
-			Dependencies: context.Spec.Dependencies,
-		})
+	res := b.Submit(r)
+	if res.Status == builder.StatusSubmitted {
+		logrus.Info("Build submitted")
+	} else if res.Status == builder.StatusStarted {
 		logrus.Info("Build started")
-	} else if buildResult.Status == build.StatusError {
+	} else if res.Status == builder.StatusError {
 		target := context.DeepCopy()
-		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseError)
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
-		return sdk.Update(target)
-	} else if buildResult.Status == build.StatusCompleted {
-		target := context.DeepCopy()
-		target.Status.Image = buildResult.Image
-		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseReady)
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
 
-		target.Status.Classpath = make([]string, len(buildResult.Classpath))
-		for i, entry := range buildResult.Classpath {
-			target.Status.Classpath[i] = entry.ID
-		}
+		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseError)
+
+		// remove the build from cache
+		b.Purge(r)
+
+		return sdk.Update(target)
+	} else if res.Status == builder.StatusCompleted {
+		target := context.DeepCopy()
+		target.Status.Image = res.Image
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
+		target.Status.Classpath = res.Classpath
+
+		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseReady)
 
 		if err := sdk.Update(target); err != nil {
 			return err
@@ -90,6 +88,9 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		if err := action.informIntegrations(target); err != nil {
 			return err
 		}
+
+		// remove the build from cache
+		b.Purge(r)
 	}
 
 	return nil

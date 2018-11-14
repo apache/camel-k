@@ -15,5 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package publish contains strategies for publishing integrations into a Docker registries
-package publish
+package builder
+
+import "os"
+
+// MavenExtraOptions --
+func MavenExtraOptions() string {
+	if _, err := os.Stat("/tmp/artifacts/m2"); err == nil {
+		return "-Dmaven.repo.local=/tmp/artifacts/m2"
+	}
+	return "-Dcamel.noop=true"
+}

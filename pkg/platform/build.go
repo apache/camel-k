@@ -20,78 +20,53 @@ package platform
 import (
 	"context"
 	"errors"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/build"
-	"github.com/apache/camel-k/pkg/build/assemble"
-	"github.com/apache/camel-k/pkg/build/packager"
-	"github.com/apache/camel-k/pkg/build/publish"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/kaniko"
+	"github.com/apache/camel-k/pkg/builder/s2i"
 )
 
-// buildManager is the current build manager
+// gBuilder is the current builder
 // Note: it cannot be changed at runtime, needs a operator restart
-var buildManager *build.Manager
+var gBuilder builder.Builder
 
-// GetPlatformBuildManager returns a suitable build manager for the current platform
-func GetPlatformBuildManager(ctx context.Context, namespace string) (*build.Manager, error) {
-	if buildManager != nil {
-		return buildManager, nil
+// GetPlatformBuilder --
+func GetPlatformBuilder(ctx context.Context, namespace string) (builder.Builder, error) {
+	if gBuilder != nil {
+		return gBuilder, nil
 	}
-	pl, err := GetCurrentPlatform(namespace)
+
+	gBuilder = builder.New(ctx, namespace)
+
+	return gBuilder, nil
+}
+
+// NewBuildRequest --
+func NewBuildRequest(ctx context.Context, context *v1alpha1.IntegrationContext) (builder.Request, error) {
+	req := builder.Request{
+		Identifier: builder.Identifier{
+			Name:      "context-" + context.Name,
+			Qualifier: context.ResourceVersion,
+		},
+		Dependencies: context.Spec.Dependencies,
+		Steps:        kaniko.DefaultSteps,
+	}
+
+	p, err := GetCurrentPlatform(context.Namespace)
 	if err != nil {
-		return nil, err
+		return req, err
 	}
 
-	assembler := assemble.NewMavenAssembler(ctx)
-	if pl.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyS2I {
-		packaging := packager.NewS2IIncrementalPackager(ctx, newContextLister(namespace))
-		publisher := publish.NewS2IPublisher(ctx, namespace)
-		buildManager = build.NewManager(ctx, assembler, packaging, publisher)
-	} else if pl.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && pl.Spec.Build.Registry != "" {
-		packaging := packager.NewJavaStandardPackager(ctx)
-		publisher := publish.NewKanikoPublisher(ctx, namespace, pl.Spec.Build.Registry)
-		buildManager = build.NewManager(ctx, assembler, packaging, publisher)
+	req.Platform = p.Spec
+
+	if SupportsS2iPublishStrategy(p) {
+		req.Steps = s2i.DefaultSteps
+	} else if SupportsKanikoPublishStrategy(p) {
+		req.Steps = kaniko.DefaultSteps
+	} else {
+		return req, errors.New("unsupported platform configuration")
 	}
 
-	if buildManager == nil {
-		return nil, errors.New("unsupported platform configuration")
-	}
-	return buildManager, nil
-}
-
-// =================================================================
-
-type contextLister struct {
-	namespace string
-}
-
-func newContextLister(namespace string) contextLister {
-	return contextLister{
-		namespace: namespace,
-	}
-}
-
-func (l contextLister) ListPublishedImages() ([]packager.PublishedImage, error) {
-	list := v1alpha1.NewIntegrationContextList()
-
-	err := sdk.List(l.namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
-	if err != nil {
-		return nil, err
-	}
-	images := make([]packager.PublishedImage, 0)
-	for _, ctx := range list.Items {
-		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
-			continue
-		}
-		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != "platform" {
-			continue
-		}
-
-		images = append(images, packager.PublishedImage{
-			Image:     ctx.Status.Image,
-			Classpath: ctx.Status.Classpath,
-		})
-	}
-	return images, nil
+	return req, nil
 }
