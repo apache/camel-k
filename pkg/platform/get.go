@@ -19,6 +19,7 @@ package platform
 
 import (
 	"errors"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
@@ -64,4 +65,14 @@ func GetProfile(p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
 		return v1alpha1.TraitProfileOpenShift
 	}
 	return ""
+}
+
+// SupportsS2iPublishStrategy --
+func SupportsS2iPublishStrategy(p *v1alpha1.IntegrationPlatform) bool {
+	return p.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
+}
+
+// SupportsKanikoPublishStrategy --
+func SupportsKanikoPublishStrategy(p *v1alpha1.IntegrationPlatform) bool {
+	return p.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Spec.Build.Registry != ""
 }

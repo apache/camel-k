@@ -270,3 +270,9 @@ const (
 	// IntegrationPlatformPhaseDuplicate --
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 )
+
+// Artifact --
+type Artifact struct {
+	ID       string `json:"id" yaml:"id"`
+	Location string `json:"location,omitempty" yaml:"location,omitempty"`
+}
