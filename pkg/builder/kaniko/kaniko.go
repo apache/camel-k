@@ -15,5 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package assemble contains tools that convert source files and dependencies into the integration classpath
-package assemble
+package kaniko
+
+import (
+	"github.com/apache/camel-k/pkg/builder"
+)
+
+// DefaultSteps --
+var DefaultSteps = []builder.Step{
+	builder.NewStep("generate", 10, builder.GenerateProject),
+	builder.NewStep("dependencies", 20, builder.ComputeDependencies),
+	builder.NewStep("packager", 30, builder.StandardPackager),
+	builder.NewStep("publisher", 40, Publisher),
+}

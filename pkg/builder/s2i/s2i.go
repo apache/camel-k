@@ -15,5 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package packager contains strategies for building layers of a Docker image
-package packager
+package s2i
+
+import "github.com/apache/camel-k/pkg/builder"
+
+// DefaultSteps --
+var DefaultSteps = []builder.Step{
+	builder.NewStep("generate", 10, builder.GenerateProject),
+	builder.NewStep("dependencies", 20, builder.ComputeDependencies),
+	builder.NewStep("packager", 30, builder.IncrementalPackager),
+	builder.NewStep("publisher", 40, Publisher),
+}

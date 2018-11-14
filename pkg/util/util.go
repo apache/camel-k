@@ -20,7 +20,10 @@ package util
 import (
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
+
+	"github.com/pkg/errors"
 )
 
 // StringSliceContains --
@@ -71,4 +74,27 @@ func WaitForSignal(sig chan os.Signal, exit func(int)) {
 		}
 		exit(1)
 	}()
+}
+
+// WriteFileWithContent --
+func WriteFileWithContent(buildDir string, relativePath string, content string) error {
+	filePath := path.Join(buildDir, relativePath)
+	fileDir := path.Dir(filePath)
+	// Create dir if not present
+	err := os.MkdirAll(fileDir, 0777)
+	if err != nil {
+		return errors.Wrap(err, "could not create dir for file "+relativePath)
+	}
+	// Create file
+	file, err := os.Create(filePath)
+	if err != nil {
+		return errors.Wrap(err, "could not create file "+relativePath)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(content)
+	if err != nil {
+		errors.Wrap(err, "could not write to file "+relativePath)
+	}
+	return nil
 }

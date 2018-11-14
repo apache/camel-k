@@ -15,15 +15,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package packager
+package tar
 
-// PublishedImage represent a base image that can be used as starting point
-type PublishedImage struct {
-	Image     string
-	Classpath []string
-}
+import (
+	"io"
+	"io/ioutil"
+	"os"
+	"path"
 
-// PublishedImagesLister allows to list all images already published
-type PublishedImagesLister interface {
-	ListPublishedImages() ([]PublishedImage, error)
+	tarutils "archive/tar"
+)
+
+// Extract --
+func Extract(source string, destinationBase string) error {
+	file, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	reader := tarutils.NewReader(file)
+	for {
+		header, err := reader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		targetName := path.Join(destinationBase, header.Name)
+		targetDir, _ := path.Split(targetName)
+		if err := os.MkdirAll(targetDir, 0777); err != nil {
+			return err
+		}
+		buffer, err := ioutil.ReadAll(reader)
+		if err != nil {
+			return err
+		}
+		if err := ioutil.WriteFile(targetName, buffer, os.FileMode(header.Mode)); err != nil {
+			return err
+		}
+	}
+	return nil
 }
