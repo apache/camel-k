@@ -33,7 +33,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <camel.version>2.22.1</camel.version>
+        <camel.version>2.22.2</camel.version>
         <junit.version>4.12</junit.version>
         <junit-jupiter.version>5.3.1</junit-jupiter.version>
         <joor.version>0.9.9</joor.version>
