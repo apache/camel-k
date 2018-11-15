@@ -27,8 +27,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -123,26 +121,23 @@ func (b *defaultBuilder) submit(request Request) {
 	// update the status
 	r := result.(Result)
 	r.Status = StatusStarted
-	r.ProcessStartedAt = time.Now()
+	r.Task.StartedAt = time.Now()
 
 	// create tmp path
-	tmp, err := ioutil.TempDir(os.TempDir(), "builder-")
+	builderPath, err := ioutil.TempDir(os.TempDir(), "builder-")
 	if err != nil {
 		r.Status = StatusError
 		r.Error = err
 	}
 
-	os.RemoveAll(tmp)
+	os.RemoveAll(builderPath)
 
 	// update the cache
 	b.request.Store(request.Identifier, r)
 
 	c := Context{
 		C:         b.ctx,
-		Values:    make(map[string]interface{}),
-		Path:      tmp,
-		Libraries: make([]v1alpha1.Artifact, 0),
-		StepsDone: make([]string, 0),
+		Path:      builderPath,
 		Namespace: b.namespace,
 		Request:   request,
 	}
@@ -169,12 +164,11 @@ func (b *defaultBuilder) submit(request Request) {
 
 			l.Infof("executing step")
 
-			now := time.Now()
+			start := time.Now()
 			c.Error = step.Execute(&c)
 
 			if c.Error == nil {
-				c.StepsDone = append(c.StepsDone, step.ID())
-				l.Infof("step done in %f seconds", time.Now().Sub(now).Seconds())
+				l.Infof("step done in %f seconds", time.Since(start).Seconds())
 			} else {
 				l.Infof("step failed with error: %s", c.Error)
 			}
@@ -183,20 +177,20 @@ func (b *defaultBuilder) submit(request Request) {
 
 	r.Status = StatusCompleted
 	r.Image = c.Image
-	r.ProcessCompletedAt = time.Now()
 	r.Error = c.Error
+	r.Task.CompletedAt = time.Now()
 
 	if r.Error != nil {
 		r.Status = StatusError
 	}
 
-	r.Classpath = make([]string, 0, len(c.Libraries))
-	for _, l := range c.Libraries {
+	r.Classpath = make([]string, 0, len(c.Artifacts))
+	for _, l := range c.Artifacts {
 		r.Classpath = append(r.Classpath, l.ID)
 	}
 
 	// update the cache
 	b.request.Store(request.Identifier, r)
 
-	b.log.Infof("request %s:%s executed in %f seconds", r.Request.Identifier.Name, r.Request.Identifier.Qualifier, r.ProcessCompletedAt.Sub(r.ProcessStartedAt).Seconds())
+	b.log.Infof("request %s:%s executed in %f seconds", r.Request.Identifier.Name, r.Request.Identifier.Qualifier, r.Task.Elapsed().Seconds())
 }
