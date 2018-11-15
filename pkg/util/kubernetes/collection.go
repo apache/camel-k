@@ -48,6 +48,24 @@ func (c *Collection) Items() []runtime.Object {
 	return c.items
 }
 
+// AsKubernetesList returns all resources wrapped in a Kubernetes list
+func (c *Collection) AsKubernetesList() *corev1.List {
+	lst := corev1.List{
+		TypeMeta: metav1.TypeMeta{
+			Kind: "List",
+			APIVersion: "v1",
+		},
+		Items: make([]runtime.RawExtension, 0, len(c.items)),
+	}
+	for _, res := range c.items {
+		raw := runtime.RawExtension{
+			Object: res,
+		}
+		lst.Items = append(lst.Items, raw)
+	}
+	return &lst
+}
+
 // Add adds a resource to the collection
 func (c *Collection) Add(resource runtime.Object) {
 	c.items = append(c.items, resource)

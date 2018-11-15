@@ -29,6 +29,7 @@ import (
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 
 	_ "github.com/apache/camel-k/pkg/util/knative"
+	_ "github.com/apache/camel-k/pkg/util/kubernetes"
 	_ "github.com/apache/camel-k/pkg/util/openshift"
 
 	"github.com/sirupsen/logrus"

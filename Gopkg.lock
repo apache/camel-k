@@ -739,6 +739,17 @@
   version = "kubernetes-1.11.2"
 
 [[projects]]
+  digest = "1:eec90201603e6ace18210cf0c4922180a0502726f26668b0a84769b6b63ebed7"
+  name = "k8s.io/apiextensions-apiserver"
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1beta1",
+  ]
+  pruneopts = "NUT"
+  revision = "408db4a50408e2149acbd657bceb2480c13cb0a4"
+  version = "kubernetes-1.11.2"
+
+[[projects]]
   digest = "1:a26c8e664af7122535f2b13fd4977a0d25894a545e7ce679502e49372812f6e6"
   name = "k8s.io/apimachinery"
   packages = [
@@ -953,6 +964,7 @@
     "k8s.io/api/core/v1",
     "k8s.io/api/extensions/v1beta1",
     "k8s.io/api/rbac/v1",
+    "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
