@@ -30,7 +30,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/tar"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
 
@@ -132,7 +132,7 @@ func ComputeDependencies(ctx *Context) error {
 	}
 
 	for _, e := range cp["dependencies"] {
-		ctx.Libraries = append(ctx.Libraries, v1alpha1.Artifact{
+		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
 		})
@@ -177,7 +177,7 @@ func IncrementalPackager(ctx *Context) error {
 }
 
 func packager(ctx *Context, selector ArtifactsSelector) error {
-	imageName, selectedArtifacts, err := selector(ctx.Libraries)
+	imageName, selectedArtifacts, err := selector(ctx.Artifacts)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 	}
 
 	cp := ""
-	for _, entry := range ctx.Libraries {
+	for _, entry := range ctx.Artifacts {
 		gav, err := maven.ParseGAV(entry.ID)
 		if err != nil {
 			return nil

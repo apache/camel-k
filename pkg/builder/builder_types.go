@@ -87,29 +87,37 @@ type Request struct {
 	Steps        []Step
 }
 
+// Task --
+type Task struct {
+	StartedAt   time.Time
+	CompletedAt time.Time
+}
+
+// Elapsed --
+func (t Task) Elapsed() time.Duration {
+	return t.CompletedAt.Sub(t.StartedAt)
+}
+
 // Result represents the result of a build
 type Result struct {
-	Request            Request
-	Status             Status
-	Image              string
-	Error              error
-	Classpath          []string
-	ProcessStartedAt   time.Time
-	ProcessCompletedAt time.Time
+	Request   Request
+	Image     string
+	Error     error
+	Status    Status
+	Classpath []string
+	Task      Task
 }
 
 // Context --
 type Context struct {
 	C         context.Context
-	Namespace string
-	Values    map[string]interface{}
 	Request   Request
-	Project   maven.Project
-	Path      string
-	Libraries []v1alpha1.Artifact
 	Image     string
 	Error     error
-	StepsDone []string
+	Namespace string
+	Project   maven.Project
+	Path      string
+	Artifacts []v1alpha1.Artifact
 	Archive   string
 }
 
