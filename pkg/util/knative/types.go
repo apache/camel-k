@@ -17,54 +17,54 @@ limitations under the License.
 
 package knative
 
-// CamelKnativeEnvironment is the top level configuration object expected by the Camel Knative component
-type CamelKnativeEnvironment struct {
-	Services []CamelKnativeServiceDefinition `json:"services"`
+// CamelEnvironment is the top level configuration object expected by the Camel Knative component
+type CamelEnvironment struct {
+	Services []CamelServiceDefinition `json:"services"`
 }
 
-// NewCamelKnativeEnvironment creates a new env
-func NewCamelKnativeEnvironment() CamelKnativeEnvironment {
-	return CamelKnativeEnvironment{
-		Services: make([]CamelKnativeServiceDefinition, 0),
+// NewCamelEnvironment creates a new env
+func NewCamelEnvironment() CamelEnvironment {
+	return CamelEnvironment{
+		Services: make([]CamelServiceDefinition, 0),
 	}
 }
 
-// CamelKnativeServiceDefinition defines the parameters to connect to Knative service. It's also used for exposed services
-type CamelKnativeServiceDefinition struct {
-	ServiceType CamelKnativeServiceType `json:"type"`
-	Protocol    CamelKnativeProtocol    `json:"protocol"`
-	Name        string                  `json:"name"`
-	Host        string                  `json:"host"`
-	Port        int                     `json:"port"`
-	Metadata    map[string]string       `json:"metadata"`
+// CamelServiceDefinition defines the parameters to connect to Knative service. It's also used for exposed services
+type CamelServiceDefinition struct {
+	ServiceType CamelServiceType  `json:"type"`
+	Protocol    CamelProtocol     `json:"protocol"`
+	Name        string            `json:"name"`
+	Host        string            `json:"host"`
+	Port        int               `json:"port"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
-// CamelKnativeServiceType --
-type CamelKnativeServiceType string
+// CamelServiceType --
+type CamelServiceType string
 
 const (
-	// CamelKnativeServiceTypeEndpoint is a callable endpoint
-	CamelKnativeServiceTypeEndpoint CamelKnativeServiceType = "endpoint"
-	// CamelKnativeServiceTypeChannel is a callable endpoint that will be also associated to a subscription
-	CamelKnativeServiceTypeChannel CamelKnativeServiceType = "channel"
+	// CamelServiceTypeEndpoint is a callable endpoint
+	CamelServiceTypeEndpoint CamelServiceType = "endpoint"
+	// CamelServiceTypeChannel is a callable endpoint that will be also associated to a subscription
+	CamelServiceTypeChannel CamelServiceType = "channel"
 )
 
-// CamelKnativeProtocol is the communication protocol to use for the service
-type CamelKnativeProtocol string
+// CamelProtocol is the communication protocol to use for the service
+type CamelProtocol string
 
 // Knative protocols
 const (
-	CamelKnativeProtocolHTTP  CamelKnativeProtocol = "http"
-	CamelKnativeProtocolHTTPS CamelKnativeProtocol = "https"
+	CamelProtocolHTTP  CamelProtocol = "http"
+	CamelProtocolHTTPS CamelProtocol = "https"
 )
 
 // Meta Options
 const (
-	CamelKnativeMetaServicePath     = "service.path"
-	CamelKnativeMetaServiceID       = "service.id"
-	CamelKnativeMetaServiceName     = "service.name"
-	CamelKnativeMetaServiceHost     = "service.host"
-	CamelKnativeMetaServicePort     = "service.port"
-	CamelKnativeMetaServiceZone     = "service.zone"
-	CamelKnativeMetaServiceProtocol = "service.protocol"
+	CamelMetaServicePath     = "service.path"
+	CamelMetaServiceID       = "service.id"
+	CamelMetaServiceName     = "service.name"
+	CamelMetaServiceHost     = "service.host"
+	CamelMetaServicePort     = "service.port"
+	CamelMetaServiceZone     = "service.zone"
+	CamelMetaServiceProtocol = "service.protocol"
 )
