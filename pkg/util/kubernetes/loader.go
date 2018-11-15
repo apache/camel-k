@@ -18,6 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
+	"encoding/json"
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,16 +27,32 @@ import (
 
 // LoadResourceFromYaml loads a k8s resource from a yaml definition
 func LoadResourceFromYaml(data string) (runtime.Object, error) {
-	role := []byte(data)
-	roleJSON, err := yaml.ToJSON(role)
+	source := []byte(data)
+	jsonSource, err := yaml.ToJSON(source)
 	if err != nil {
 		return nil, err
 	}
 	u := unstructured.Unstructured{}
-	err = u.UnmarshalJSON(roleJSON)
+	err = u.UnmarshalJSON(jsonSource)
 	if err != nil {
 		return nil, err
 	}
 
 	return k8sutil.RuntimeObjectFromUnstructured(&u)
+}
+
+// LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type
+func LoadRawResourceFromYaml(data string) (runtime.Object, error) {
+	source := []byte(data)
+	jsonSource, err := yaml.ToJSON(source)
+	if err != nil {
+		return nil, err
+	}
+	var objmap map[string]interface{}
+	if err = json.Unmarshal(jsonSource, &objmap); err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{
+		Object: objmap,
+	}, nil
 }
