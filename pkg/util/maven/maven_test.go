@@ -35,7 +35,7 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
       <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-bom</artifactId>
-        <version>2.22.1</version>
+        <version>2.22.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -96,7 +96,7 @@ func TestPomGeneration(t *testing.T) {
 					{
 						GroupID:    "org.apache.camel",
 						ArtifactID: "camel-bom",
-						Version:    "2.22.1",
+						Version:    "2.22.2",
 						Type:       "pom",
 						Scope:      "import",
 					},

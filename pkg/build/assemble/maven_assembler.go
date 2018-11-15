@@ -127,7 +127,7 @@ func generateProject(source *build.Request) (maven.Project, error) {
 						//TODO: camel version should be retrieved from an external request or provided as static version
 						GroupID:    "org.apache.camel",
 						ArtifactID: "camel-bom",
-						Version:    "2.22.1",
+						Version:    "2.22.2",
 						Type:       "pom",
 						Scope:      "import",
 					},
