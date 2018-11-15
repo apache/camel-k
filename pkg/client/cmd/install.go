@@ -43,6 +43,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&options.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
+	cmd.Flags().BoolVar(&options.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&options.exampleSetup, "example", false, "Install example integration")
 	cmd.Flags().StringVar(&options.registry, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().StringVarP(&options.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
@@ -56,6 +57,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 type installCmdOptions struct {
 	*RootCmdOptions
 	clusterSetupOnly bool
+	skipClusterSetup bool
 	exampleSetup     bool
 	registry         string
 	outputFormat     string
@@ -72,12 +74,14 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 		collection = kubernetes.NewCollection()
 	}
 
-	err := install.SetupClusterwideResourcesOrCollect(collection)
-	if err != nil && k8serrors.IsForbidden(err) {
-		fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
-		return errors.New("please login as cluster-admin and execute \"kamel install --cluster-setup\" to install cluster-wide resources (one-time operation)")
-	} else if err != nil {
-		return err
+	if !o.skipClusterSetup {
+		err := install.SetupClusterwideResourcesOrCollect(collection)
+		if err != nil && k8serrors.IsForbidden(err) {
+			fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
+			return errors.New("please login as cluster-admin and execute \"kamel install --cluster-setup\" to install cluster-wide resources (one-time operation)")
+		} else if err != nil {
+			return err
+		}
 	}
 
 	if o.clusterSetupOnly {
@@ -87,7 +91,7 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 	} else {
 		namespace := o.Namespace
 
-		err = install.OperatorOrCollect(namespace, collection)
+		err := install.OperatorOrCollect(namespace, collection)
 		if err != nil {
 			return err
 		}
