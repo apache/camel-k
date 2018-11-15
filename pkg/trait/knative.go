@@ -165,31 +165,31 @@ func (t *knativeTrait) getConfigurationSerialized(e *environment) string {
 	return string(res)
 }
 
-func (t *knativeTrait) getConfiguration(e *environment) knativeutil.CamelKnativeEnvironment {
+func (t *knativeTrait) getConfiguration(e *environment) knativeutil.CamelEnvironment {
 	sourceChannels := t.getConfiguredSourceChannels()
-	env := knativeutil.NewCamelKnativeEnvironment()
+	env := knativeutil.NewCamelEnvironment()
 	for _, ch := range sourceChannels {
-		svc := knativeutil.CamelKnativeServiceDefinition{
+		svc := knativeutil.CamelServiceDefinition{
 			Name:        ch,
 			Host:        "0.0.0.0",
 			Port:        8080,
-			Protocol:    knativeutil.CamelKnativeProtocolHTTP,
-			ServiceType: knativeutil.CamelKnativeServiceTypeChannel,
+			Protocol:    knativeutil.CamelProtocolHTTP,
+			ServiceType: knativeutil.CamelServiceTypeChannel,
 			Metadata: map[string]string{
-				knativeutil.CamelKnativeMetaServicePath: "/",
+				knativeutil.CamelMetaServicePath: "/",
 			},
 		}
 		env.Services = append(env.Services, svc)
 	}
 	// Adding default endpoint
-	defSvc := knativeutil.CamelKnativeServiceDefinition{
+	defSvc := knativeutil.CamelServiceDefinition{
 		Name:        "default",
 		Host:        "0.0.0.0",
 		Port:        8080,
-		Protocol:    knativeutil.CamelKnativeProtocolHTTP,
-		ServiceType: knativeutil.CamelKnativeServiceTypeEndpoint,
+		Protocol:    knativeutil.CamelProtocolHTTP,
+		ServiceType: knativeutil.CamelServiceTypeEndpoint,
 		Metadata: map[string]string{
-			knativeutil.CamelKnativeMetaServicePath: "/",
+			knativeutil.CamelMetaServicePath: "/",
 		},
 	}
 	env.Services = append(env.Services, defSvc)
