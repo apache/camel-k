@@ -50,10 +50,10 @@ func (t *knativeTrait) autoconfigure(environment *environment, resources *kubern
 }
 
 func (t *knativeTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
-	resources.Add(t.getServiceFor(environment))
 	for _, sub := range t.getSubscriptionsFor(environment) {
 		resources.Add(sub)
 	}
+	resources.Add(t.getServiceFor(environment))
 	return nil
 }
 
