@@ -29,8 +29,12 @@ import (
 
 // Resources installs named resources from the project resource directory
 func Resources(namespace string, names ...string) error {
+	return ResourcesOrCollect(namespace, nil, names...)
+}
+
+func ResourcesOrCollect(namespace string, collection *kubernetes.Collection, names ...string) error {
 	for _, name := range names {
-		if err := Resource(namespace, name); err != nil {
+		if err := ResourceOrCollect(namespace, collection, name); err != nil {
 			return err
 		}
 	}
@@ -39,16 +43,30 @@ func Resources(namespace string, names ...string) error {
 
 // Resource installs a single named resource from the project resource directory
 func Resource(namespace string, name string) error {
+	return ResourceOrCollect(namespace, nil, name)
+}
+
+func ResourceOrCollect(namespace string, collection *kubernetes.Collection, name string) error {
 	obj, err := kubernetes.LoadResourceFromYaml(deploy.Resources[name])
 	if err != nil {
 		return err
 	}
 
-	return RuntimeObject(namespace, obj)
+	return RuntimeObjectOrCollect(namespace, collection, obj)
 }
 
 // RuntimeObject installs a single runtime object
 func RuntimeObject(namespace string, obj runtime.Object) error {
+	return RuntimeObjectOrCollect(namespace, nil, obj)
+}
+
+func RuntimeObjectOrCollect(namespace string, collection *kubernetes.Collection, obj runtime.Object) error {
+	if collection != nil {
+		// Adding to the collection before setting the namespace
+		collection.Add(obj)
+		return nil
+	}
+
 	if metaObject, ok := obj.(metav1.Object); ok {
 		metaObject.SetNamespace(namespace)
 	}

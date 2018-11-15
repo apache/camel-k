@@ -15,42 +15,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package kubernetes
 
 import (
-	"context"
-	"fmt"
-	"math/rand"
-	"os"
-	"time"
-
-	"github.com/apache/camel-k/pkg/client/cmd"
-
-	_ "github.com/apache/camel-k/pkg/util/knative"
-	_ "github.com/apache/camel-k/pkg/util/kubernetes"
-	_ "github.com/apache/camel-k/pkg/util/openshift"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// Cancel ctx as soon as main returns
-	defer cancel()
-
-	rootCmd, err := cmd.NewKamelCommand(ctx)
-	exitOnError(err)
-
-	err = rootCmd.Execute()
-	exitOnError(err)
+// Register all OpenShift types that we want to manage.
+func init() {
+	k8sutil.AddToSDKScheme(addKnownTypes)
 }
 
-func exitOnError(err error) {
-	if err != nil {
-		fmt.Println("Error:", err)
+type registerFunction func(*runtime.Scheme) error
 
-		os.Exit(1)
+func addKnownTypes(scheme *runtime.Scheme) error {
+	gv := schema.GroupVersion{
+		Group:   "apiextensions.k8s.io",
+		Version: "v1beta1",
 	}
+	scheme.AddKnownTypes(gv, &apiextensions.CustomResourceDefinition{}, &apiextensions.CustomResourceDefinitionList{})
+	return nil
 }

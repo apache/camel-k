@@ -31,19 +31,24 @@ import (
 
 // SetupClusterwideResources --
 func SetupClusterwideResources() error {
+	return SetupClusterwideResourcesOrCollect(nil)
+}
+
+// SetupClusterwideResourcesOrCollect --
+func SetupClusterwideResourcesOrCollect(collection *kubernetes.Collection) error {
 
 	// Install CRD for Integration Platform (if needed)
-	if err := installCRD("IntegrationPlatform", "crd-integration-platform.yaml"); err != nil {
+	if err := installCRD("IntegrationPlatform", "crd-integration-platform.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration Context (if needed)
-	if err := installCRD("IntegrationContext", "crd-integration-context.yaml"); err != nil {
+	if err := installCRD("IntegrationContext", "crd-integration-context.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration (if needed)
-	if err := installCRD("Integration", "crd-integration.yaml"); err != nil {
+	if err := installCRD("Integration", "crd-integration.yaml", collection); err != nil {
 		return err
 	}
 
@@ -52,8 +57,8 @@ func SetupClusterwideResources() error {
 	if err != nil {
 		return err
 	}
-	if !clusterRoleInstalled {
-		err := installClusterRole()
+	if !clusterRoleInstalled || collection != nil {
+		err := installClusterRole(collection)
 		if err != nil {
 			return err
 		}
@@ -78,7 +83,17 @@ func IsCRDInstalled(kind string) (bool, error) {
 	return false, nil
 }
 
-func installCRD(kind string, resourceName string) error {
+func installCRD(kind string, resourceName string, collection *kubernetes.Collection) error {
+	crd := []byte(deploy.Resources[resourceName])
+	if collection != nil {
+		unstr, err := kubernetes.LoadResourceFromYaml(string(crd))
+		if err != nil {
+			return err
+		}
+		collection.Add(unstr)
+		return nil
+	}
+
 	// Installing Integration CRD
 	installed, err := IsCRDInstalled(kind)
 	if err != nil {
@@ -88,7 +103,6 @@ func installCRD(kind string, resourceName string) error {
 		return nil
 	}
 
-	crd := []byte(deploy.Resources[resourceName])
 	crdJSON, err := yaml.ToJSON(crd)
 	if err != nil {
 		return err
@@ -131,11 +145,15 @@ func IsClusterRoleInstalled() (bool, error) {
 	return true, nil
 }
 
-func installClusterRole() error {
+func installClusterRole(collection *kubernetes.Collection) error {
 	obj, err := kubernetes.LoadResourceFromYaml(deploy.Resources["user-cluster-role.yaml"])
 	if err != nil {
 		return err
 	}
 
+	if collection != nil {
+		collection.Add(obj)
+		return nil
+	}
 	return sdk.Create(obj)
 }
