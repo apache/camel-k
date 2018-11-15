@@ -86,7 +86,7 @@ func IsCRDInstalled(kind string) (bool, error) {
 func installCRD(kind string, resourceName string, collection *kubernetes.Collection) error {
 	crd := []byte(deploy.Resources[resourceName])
 	if collection != nil {
-		unstr, err := kubernetes.LoadResourceFromYaml(string(crd))
+		unstr, err := kubernetes.LoadRawResourceFromYaml(string(crd))
 		if err != nil {
 			return err
 		}
