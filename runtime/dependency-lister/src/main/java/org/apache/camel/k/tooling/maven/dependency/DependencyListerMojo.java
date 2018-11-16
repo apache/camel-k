@@ -52,12 +52,15 @@ public class DependencyListerMojo extends AbstractMojo {
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
-    @Parameter(readonly = true, defaultValue = "${project.build.directory}/dependencies.yaml")
-    private String destination;
+    @Parameter(defaultValue = "${project.build.directory}/dependencies.yaml")
+    private String outputFile;
+
+    @Parameter(defaultValue = "true")
+    private boolean includeLocation;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        final Path output = Paths.get(this.destination);
+        final Path output = Paths.get(this.outputFile);
 
         try {
             if (Files.notExists(output.getParent())) {
@@ -92,7 +95,7 @@ public class DependencyListerMojo extends AbstractMojo {
         Map<String, String> dep = new HashMap<>();
         dep.put("id", artifact.getId());
 
-        if (artifact.getFile() != null) {
+        if (includeLocation && artifact.getFile() != null) {
             dep.put("location", artifact.getFile().getAbsolutePath());
         }
 
