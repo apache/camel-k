@@ -28,3 +28,6 @@ var DefaultSteps = []builder.Step{
 	builder.NewStep("packager", 30, builder.StandardPackager),
 	builder.NewStep("publisher", 40, Publisher),
 }
+
+// BuildDir is the directory where to build artifacts (shared with the Kaniko pod)
+var BuildDir = "/workspace"
