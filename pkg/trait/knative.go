@@ -31,8 +31,8 @@ import (
 )
 
 type knativeTrait struct {
-	BaseTrait     `property:",squash"`
-	Subscriptions string `property:"subscriptions"`
+	BaseTrait `property:",squash"`
+	Sources   string `property:"sources"`
 }
 
 func newKnativeTrait() *knativeTrait {
@@ -42,9 +42,9 @@ func newKnativeTrait() *knativeTrait {
 }
 
 func (t *knativeTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
-	if t.Subscriptions == "" {
+	if t.Sources == "" {
 		channels := t.getSourceChannels(environment)
-		t.Subscriptions = strings.Join(channels, ",")
+		t.Sources = strings.Join(channels, ",")
 	}
 	return nil
 }
@@ -198,7 +198,7 @@ func (t *knativeTrait) getConfiguration(e *environment) knativeutil.CamelEnviron
 
 func (t *knativeTrait) getConfiguredSourceChannels() []string {
 	channels := make([]string, 0)
-	for _, ch := range strings.Split(t.Subscriptions, ",") {
+	for _, ch := range strings.Split(t.Sources, ",") {
 		cht := strings.Trim(ch, " \t\"")
 		if cht != "" {
 			channels = append(channels, cht)
