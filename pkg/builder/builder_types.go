@@ -85,6 +85,7 @@ type Request struct {
 	Code         v1alpha1.SourceSpec
 	Dependencies []string
 	Steps        []Step
+	BuildDir     string
 }
 
 // Task --

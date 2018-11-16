@@ -64,6 +64,7 @@ func NewBuildRequest(ctx context.Context, context *v1alpha1.IntegrationContext) 
 		req.Steps = s2i.DefaultSteps
 	} else if SupportsKanikoPublishStrategy(p) {
 		req.Steps = kaniko.DefaultSteps
+		req.BuildDir = kaniko.BuildDir
 	} else {
 		return req, errors.New("unsupported platform configuration")
 	}
