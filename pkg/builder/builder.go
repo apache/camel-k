@@ -124,7 +124,11 @@ func (b *defaultBuilder) submit(request Request) {
 	r.Task.StartedAt = time.Now()
 
 	// create tmp path
-	builderPath, err := ioutil.TempDir(os.TempDir(), "builder-")
+	buildDir := request.BuildDir
+	if buildDir == "" {
+		buildDir = os.TempDir()
+	}
+	builderPath, err := ioutil.TempDir(buildDir, "builder-")
 	if err != nil {
 		r.Status = StatusError
 		r.Error = err
