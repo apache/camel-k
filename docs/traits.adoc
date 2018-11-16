@@ -62,6 +62,28 @@ The following is a list of common traits that can be configured by the end users
   +
   It's enabled by default.
 
+| deployment
+| Kubernetes, OpenShift
+| Creates a standard Kubernetes deployment for running the integration.
+  +
+  +
+  It's enabled by default on vanilla Kubernetes/Openshift profiles.
+
+| knative
+| Knative (Kubernetes, Openshift)
+| Creates Knative resources to run the integration instead of the standard Kubernetes resources.
+  +
+  +
+  It's enabled by default when the Knative profile is active.
+
+[cols="m,"]
+!===
+
+! knative.sources
+! Configures a (comma-separated) list of channels to which the Knative service must be subscribed (to receive cloudevents from a channel).
+
+!===
+
 | service
 | Kubernetes, OpenShift
 | Exposes the integration with a Service resource so that it can be accessed by other applications (or integrations) in the same namespace.
@@ -117,6 +139,5 @@ There are also platform traits that **normally should not be configured** by the
 [options="header",cols="m,,"]
 |=======================
 | Trait      | Profiles 				| Description
-| deployment | Kubernetes, OpenShift	| Creates the basic Kubernetes resource needed for running the integration.
 | owner      | Kubernetes, OpenShift	| Makes sure that every resource created by the traits belongs to the integration custom resource (so they are deleted when the integration is deleted).
 |=======================
