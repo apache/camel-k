@@ -2227,7 +2227,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.0.5-SNAPSHOT
+          image: docker.io/apache/camel-k:0.0.6-SNAPSHOT
           ports:
           - containerPort: 60000
             name: metrics
@@ -2273,7 +2273,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.0.5-SNAPSHOT
+          image: docker.io/apache/camel-k:0.0.6-SNAPSHOT
           ports:
           - containerPort: 60000
             name: metrics
