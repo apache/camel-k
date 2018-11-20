@@ -33,11 +33,11 @@ func newOwnerTrait() *ownerTrait {
 	}
 }
 
-func (*ownerTrait) apply(e *Environment) error {
-	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
-		return nil
-	}
+func (t *ownerTrait) appliesTo(e *Environment) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+}
 
+func (*ownerTrait) apply(e *Environment) error {
 	controller := true
 	blockOwnerDeletion := true
 	e.Resources.VisitMetaObject(func(res metav1.Object) {

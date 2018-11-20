@@ -35,11 +35,11 @@ func newDependenciesTrait() *dependenciesTrait {
 	}
 }
 
-func (d *dependenciesTrait) apply(e *Environment) error {
-	if e.Integration == nil || e.Integration.Status.Phase != "" {
-		return nil
-	}
+func (*dependenciesTrait) appliesTo(e *Environment) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == ""
+}
 
+func (d *dependenciesTrait) apply(e *Environment) error {
 	meta := metadata.Extract(e.Integration.Spec.Source)
 
 	if meta.Language == v1alpha1.LanguageGroovy {
@@ -52,23 +52,11 @@ func (d *dependenciesTrait) apply(e *Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:jvm")
 	util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "camel:core")
 
-	e.Integration.Spec.Dependencies = d.mergeDependencies(e.Integration.Spec.Dependencies, meta.Dependencies)
+	for _, d := range meta.Dependencies {
+		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, d)
+	}
+
 	// sort the dependencies to get always the same list if they don't change
 	sort.Strings(e.Integration.Spec.Dependencies)
 	return nil
-}
-
-func (d *dependenciesTrait) mergeDependencies(list1 []string, list2 []string) []string {
-	set := make(map[string]bool, 0)
-	for _, d := range list1 {
-		set[d] = true
-	}
-	for _, d := range list2 {
-		set[d] = true
-	}
-	ret := make([]string, 0, len(set))
-	for d := range set {
-		ret = append(ret, d)
-	}
-	return ret
 }
