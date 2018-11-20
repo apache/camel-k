@@ -18,10 +18,11 @@ limitations under the License.
 package trait
 
 import (
+	"sort"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
-	"sort"
 )
 
 type dependenciesTrait struct {
@@ -34,22 +35,26 @@ func newDependenciesTrait() *dependenciesTrait {
 	}
 }
 
-func (d *dependenciesTrait) beforeInit(environment *environment, integration *v1alpha1.Integration) error {
-	meta := metadata.Extract(integration.Spec.Source)
+func (d *dependenciesTrait) apply(e *environment) error {
+	if e.Integration == nil || e.Integration.Status.Phase != "" {
+		return nil
+	}
+
+	meta := metadata.Extract(e.Integration.Spec.Source)
 
 	if meta.Language == v1alpha1.LanguageGroovy {
-		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:groovy")
+		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:groovy")
 	} else if meta.Language == v1alpha1.LanguageKotlin {
-		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:kotlin")
+		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:kotlin")
 	}
 
 	// jvm runtime and camel-core required by default
-	util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:jvm")
-	util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "camel:core")
+	util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:jvm")
+	util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "camel:core")
 
-	integration.Spec.Dependencies = d.mergeDependencies(integration.Spec.Dependencies, meta.Dependencies)
+	e.Integration.Spec.Dependencies = d.mergeDependencies(e.Integration.Spec.Dependencies, meta.Dependencies)
 	// sort the dependencies to get always the same list if they don't change
-	sort.Strings(integration.Spec.Dependencies)
+	sort.Strings(e.Integration.Spec.Dependencies)
 	return nil
 }
 

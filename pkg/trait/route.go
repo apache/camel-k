@@ -19,7 +19,9 @@ package trait
 
 import (
 	"errors"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+
 	routev1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,26 +39,30 @@ func newRouteTrait() *routeTrait {
 	}
 }
 
-func (e *routeTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
-	if e.Enabled == nil {
-		hasService := e.getTargetService(environment, resources) != nil
-		e.Enabled = &hasService
+func (r *routeTrait) autoconfigure(e *environment) error {
+	if r.Enabled == nil {
+		hasService := r.getTargetService(e) != nil
+		r.Enabled = &hasService
 	}
 	return nil
 }
 
-func (e *routeTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
-	service := e.getTargetService(environment, resources)
+func (r *routeTrait) apply(e *environment) error {
+	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
+		return nil
+	}
+
+	service := r.getTargetService(e)
 	if service == nil {
 		return errors.New("cannot apply route trait: no target service")
 	}
 
-	resources.Add(e.getRouteFor(environment, service))
+	e.Resources.Add(r.getRouteFor(e, service))
 	return nil
 }
 
-func (*routeTrait) getTargetService(e *environment, resources *kubernetes.Collection) (service *corev1.Service) {
-	resources.VisitService(func(s *corev1.Service) {
+func (*routeTrait) getTargetService(e *environment) (service *corev1.Service) {
+	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
 				service = s
@@ -66,7 +72,7 @@ func (*routeTrait) getTargetService(e *environment, resources *kubernetes.Collec
 	return
 }
 
-func (e *routeTrait) getRouteFor(env *environment, service *corev1.Service) *routev1.Route {
+func (r *routeTrait) getRouteFor(env *environment, service *corev1.Service) *routev1.Route {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
@@ -84,7 +90,7 @@ func (e *routeTrait) getRouteFor(env *environment, service *corev1.Service) *rou
 				Kind: "Service",
 				Name: service.Name,
 			},
-			Host: e.Host,
+			Host: r.Host,
 		},
 	}
 	return &route

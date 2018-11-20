@@ -25,44 +25,34 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// BeforeDeployment generates all required resources for deploying the given integration
-func BeforeDeployment(integration *v1alpha1.Integration) ([]runtime.Object, error) {
-	environment, err := newEnvironment(integration)
+// Apply --
+func Apply(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) ([]runtime.Object, error) {
+	environment, err := newEnvironment(integration, ctx)
 	if err != nil {
 		return nil, err
 	}
-	resources := kubernetes.NewCollection()
+
 	catalog := NewCatalog()
 	// invoke the trait framework to determine the needed resources
-	if err := catalog.executeBeforeDeployment(environment, resources); err != nil {
+	if err := catalog.apply(environment); err != nil {
 		return nil, errors.Wrap(err, "error during trait customization before deployment")
 	}
-	return resources.Items(), nil
-}
 
-// BeforeInit executes custom initializazion of the integration
-func BeforeInit(integration *v1alpha1.Integration) error {
-	environment, err := newEnvironment(integration)
-	if err != nil {
-		return err
-	}
-	catalog := NewCatalog()
-	// invoke the trait framework to determine the needed resources
-	if err := catalog.executeBeforeInit(environment, integration); err != nil {
-		return errors.Wrap(err, "error during trait customization before init")
-	}
-	return nil
+	return environment.Resources.Items(), nil
 }
 
 // newEnvironment creates a environment from the given data
-func newEnvironment(integration *v1alpha1.Integration) (*environment, error) {
+func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) (*environment, error) {
 	pl, err := platform.GetCurrentPlatform(integration.Namespace)
 	if err != nil {
 		return nil, err
 	}
-	ctx, err := GetIntegrationContext(integration)
-	if err != nil {
-		return nil, err
+
+	if ctx == nil {
+		ctx, err = GetIntegrationContext(integration)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &environment{
@@ -70,5 +60,6 @@ func newEnvironment(integration *v1alpha1.Integration) (*environment, error) {
 		Context:        ctx,
 		Integration:    integration,
 		ExecutedTraits: make([]ID, 0),
+		Resources:      kubernetes.NewCollection(),
 	}, nil
 }

@@ -64,7 +64,7 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 	target.Spec.Source.Language = meta.Language
 
 	// execute custom initialization
-	if err := trait.BeforeInit(target); err != nil {
+	if _, err := trait.Apply(target, nil); err != nil {
 		return err
 	}
 

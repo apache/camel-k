@@ -42,7 +42,7 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
-	resources, err := trait.BeforeDeployment(integration)
+	resources, err := trait.Apply(integration, nil)
 	if err != nil {
 		return err
 	}
