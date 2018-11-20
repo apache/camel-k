@@ -35,7 +35,7 @@ func newDependenciesTrait() *dependenciesTrait {
 	}
 }
 
-func (d *dependenciesTrait) apply(e *environment) error {
+func (d *dependenciesTrait) apply(e *Environment) error {
 	if e.Integration == nil || e.Integration.Status.Phase != "" {
 		return nil
 	}

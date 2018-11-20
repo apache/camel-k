@@ -35,6 +35,7 @@ type Catalog struct {
 	tRoute        Trait
 	tIngress      Trait
 	tOwner        Trait
+	tBuilder      Trait
 }
 
 // NewCatalog creates a new trait Catalog
@@ -47,6 +48,7 @@ func NewCatalog() *Catalog {
 		tRoute:        newRouteTrait(),
 		tIngress:      newIngressTrait(),
 		tOwner:        newOwnerTrait(),
+		tBuilder:      newBuilderTrait(),
 	}
 }
 
@@ -59,14 +61,19 @@ func (c *Catalog) allTraits() []Trait {
 		c.tRoute,
 		c.tIngress,
 		c.tOwner,
+		c.tBuilder,
 	}
 }
 
-func (c *Catalog) traitsFor(environment *environment) []Trait {
+func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	profile := platform.GetProfile(environment.Platform)
-	if environment.Integration.Spec.Profile != "" {
+	if environment.Context != nil && environment.Context.Spec.Profile != "" {
+		profile = environment.Context.Spec.Profile
+	}
+	if environment.Integration != nil && environment.Integration.Spec.Profile != "" {
 		profile = environment.Integration.Spec.Profile
 	}
+
 	switch profile {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
@@ -75,6 +82,7 @@ func (c *Catalog) traitsFor(environment *environment) []Trait {
 			c.tService,
 			c.tRoute,
 			c.tOwner,
+			c.tBuilder,
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
@@ -83,19 +91,21 @@ func (c *Catalog) traitsFor(environment *environment) []Trait {
 			c.tService,
 			c.tIngress,
 			c.tOwner,
+			c.tBuilder,
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
 			c.tDependencies,
 			c.tKnative,
 			c.tOwner,
+			c.tBuilder,
 		}
 	}
 
 	return nil
 }
 
-func (c *Catalog) apply(environment *environment) error {
+func (c *Catalog) apply(environment *Environment) error {
 	c.configure(environment)
 	traits := c.traitsFor(environment)
 	for _, trait := range traits {
@@ -124,7 +134,7 @@ func (c *Catalog) GetTrait(id string) Trait {
 	return nil
 }
 
-func (c *Catalog) configure(env *environment) {
+func (c *Catalog) configure(env *Environment) {
 	if env.Integration == nil || env.Integration.Spec.Traits == nil {
 		return
 	}

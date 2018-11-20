@@ -37,7 +37,7 @@ func newDeploymentTrait() *deploymentTrait {
 	}
 }
 
-func (d *deploymentTrait) apply(e *environment) error {
+func (d *deploymentTrait) apply(e *Environment) error {
 	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
 		return nil
 	}
@@ -53,7 +53,7 @@ func (d *deploymentTrait) apply(e *environment) error {
 //
 // **********************************
 
-func (*deploymentTrait) getConfigMapFor(e *environment) *corev1.ConfigMap {
+func (*deploymentTrait) getConfigMapFor(e *Environment) *corev1.ConfigMap {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
@@ -89,11 +89,11 @@ func (*deploymentTrait) getConfigMapFor(e *environment) *corev1.ConfigMap {
 //
 // **********************************
 
-func (*deploymentTrait) getDeploymentFor(e *environment) *appsv1.Deployment {
+func (*deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	sourceName := strings.TrimPrefix(e.Integration.Spec.Source.Name, "/")
 
-	// combine environment of integration with context, integration
-	// environment has the priority
+	// combine Environment of integration with context, integration
+	// Environment has the priority
 	environment := CombineConfigurationAsMap("env", e.Context, e.Integration)
 
 	// set env vars needed by the runtime

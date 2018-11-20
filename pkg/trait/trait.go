@@ -22,28 +22,39 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // Apply --
-func Apply(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) ([]runtime.Object, error) {
+func Apply(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) (*Environment, error) {
 	environment, err := newEnvironment(integration, ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	catalog := NewCatalog()
+
 	// invoke the trait framework to determine the needed resources
 	if err := catalog.apply(environment); err != nil {
 		return nil, errors.Wrap(err, "error during trait customization before deployment")
 	}
 
-	return environment.Resources.Items(), nil
+	return environment, nil
 }
 
-// newEnvironment creates a environment from the given data
-func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) (*environment, error) {
-	pl, err := platform.GetCurrentPlatform(integration.Namespace)
+// newEnvironment creates a Environment from the given data
+func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) (*Environment, error) {
+	if integration == nil && ctx == nil {
+		return nil, errors.New("neither integration nor context are ste")
+	}
+
+	namespace := ""
+	if integration != nil {
+		namespace = integration.Namespace
+	} else if ctx != nil {
+		namespace = ctx.Namespace
+	}
+
+	pl, err := platform.GetCurrentPlatform(namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +66,7 @@ func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.Integration
 		}
 	}
 
-	return &environment{
+	return &Environment{
 		Platform:       pl,
 		Context:        ctx,
 		Integration:    integration,

@@ -20,6 +20,8 @@ package context
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/trait"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
@@ -54,9 +56,16 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 	if err != nil {
 		return err
 	}
-	r, err := platform.NewBuildRequest(action.Context, context)
+	env, err := trait.Apply(nil, context)
 	if err != nil {
 		return err
+	}
+
+	r := builder.Request{
+		Identifier:   builder.NewIdentifierForContext(context),
+		Dependencies: context.Spec.Dependencies,
+		Steps:        env.Steps,
+		Platform:     env.Platform.Spec,
 	}
 
 	res := b.Submit(r)
