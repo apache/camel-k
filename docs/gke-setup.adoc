@@ -1,24 +1,24 @@
 [[gke-cluster]]
 Configuring a Google Kubernetes Engine (GKE) Cluster
-==============================
+====================================================
 
-This guide assumes you've already create a Kubernetes Engine cluster on https://console.cloud.google.com.
+This guide assumes you've already created a Kubernetes Engine cluster on https://console.cloud.google.com.
 
 Make sure you've selected a version of Kubernetes greater than **1.11** when creating the cluster. You can create it in any region.
 
-In the list of clusters for the current project, GKE provides a connection script that you need to execute on a shell to configure the `kubectl` command.
+In the list of clusters for the current project, GKE provides a connection string that you need to execute on a shell to configure the `kubectl` command.
 
-NOTE: the script contains a `--project` flag that indicates your **project ID**. You should keep that information for the last step.
+NOTE: the connection string contains a `--project` flag that indicates your **project ID**. You should keep that information for the last step.
 
-After executing the connection script, if everything is installed correctly, you should be able to execute:
+After executing the connection string, if everything is installed correctly, you should be able to execute:
 
 ```
 kubectl get pod
 ```
 
-When the cluster is first installed, you should find that no pods are present in the cluster. You can proceed with the installation then.
+When the cluster is first installed, you should find that "no pods are present" in the cluster. You can proceed with the installation then.
 
-Before installing Camel K on a fresh GKE cluster, you need to perform a extra step to give to your account the required cluster-admin permissions.
+Before installing Camel K on a fresh GKE cluster, you need to perform some extra steps to give to your account the required cluster-admin permissions.
 This means executing the following command (**replacing "your-address@gmail.com" with your account email address**):
 
 ```
@@ -36,25 +36,27 @@ The best way to obtain a valid key is from the web console:
 - To avoid confusion, it's suggested to use the "English" language in preferences of the Google Cloud console
 - Select "IAM & admin" from the navigation menu, then "Service accounts"
 - Create a new service account specifying the following id: **"camel-k-builder"**
-- You'll be asked to select a role. It's important to **select the **"Storage Admin" role** from the "Storage" menu
+- You'll be asked to select a role. It's important to select the **"Storage Admin" role** from the "Storage" menu
 - Finish creating the service account
 - From the action menu of the service account you've created, **create a key** using the JSON format
 
 A `.json` file with the key will be downloaded to your machine. You need to store that key in a Kubernetes secret.
 
 It's **important** to rename the file you've just downloaded to `kaniko-secret.json` (make sure you write it correctly).
-After the renaming, execute the following command:
+After the renaming, execute the following command to create the secret:
 
 ```
 kubectl create secret generic kaniko-secret --from-file=kaniko-secret.json
 ```
 
-You're ready to install Camel K. You should execute the following command to install it correctly:
+You're ready to install Camel K. You should now execute the following command to install cluster resources and the operator (in the current namespace):
 
 ```
 kamel install --registry gcr.io --organization <<your-project-id>> --push-secret kaniko-secret
 ```
 
-Use the project id that you've annotated when issuing the first connection string. Note: the project id is **NOT** the cluster id!
+Use the project id that you've annotated when executing the first connection string.
+
+NOTE: the project id is **NOT** the cluster id!
 
 You're now ready to play with Camel K!
