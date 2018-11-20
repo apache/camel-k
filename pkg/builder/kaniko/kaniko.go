@@ -23,10 +23,10 @@ import (
 
 // DefaultSteps --
 var DefaultSteps = []builder.Step{
-	builder.NewStep("generate", 10, builder.GenerateProject),
-	builder.NewStep("dependencies", 20, builder.ComputeDependencies),
-	builder.NewStep("packager", 30, builder.StandardPackager),
-	builder.NewStep("publisher", 40, Publisher),
+	builder.NewStep("generate", builder.ProjectGenerationPhase, builder.GenerateProject),
+	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
+	builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
+	builder.NewStep("publisher/kaniko", builder.ApplicationPublishPhase, Publisher),
 }
 
 // BuildDir is the directory where to build artifacts (shared with the Kaniko pod)

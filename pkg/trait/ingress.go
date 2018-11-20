@@ -19,7 +19,8 @@ package trait
 
 import (
 	"errors"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,31 +39,35 @@ func newIngressTrait() *ingressTrait {
 	}
 }
 
-func (e *ingressTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
-	if e.Enabled == nil {
-		hasService := e.getTargetService(environment, resources) != nil
-		hasHost := e.Host != ""
+func (i *ingressTrait) autoconfigure(e *environment) error {
+	if i.Enabled == nil {
+		hasService := i.getTargetService(e) != nil
+		hasHost := i.Host != ""
 		enabled := hasService && hasHost
-		e.Enabled = &enabled
+		i.Enabled = &enabled
 	}
 	return nil
 }
 
-func (e *ingressTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
-	if e.Host == "" {
+func (i *ingressTrait) apply(e *environment) error {
+	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
+		return nil
+	}
+
+	if i.Host == "" {
 		return errors.New("cannot apply ingress trait: no host defined")
 	}
-	service := e.getTargetService(environment, resources)
+	service := i.getTargetService(e)
 	if service == nil {
 		return errors.New("cannot apply ingress trait: no target service")
 	}
 
-	resources.Add(e.getIngressFor(environment, service))
+	e.Resources.Add(i.getIngressFor(e, service))
 	return nil
 }
 
-func (*ingressTrait) getTargetService(e *environment, resources *kubernetes.Collection) (service *corev1.Service) {
-	resources.VisitService(func(s *corev1.Service) {
+func (*ingressTrait) getTargetService(e *environment) (service *corev1.Service) {
+	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
 				service = s
@@ -72,7 +77,7 @@ func (*ingressTrait) getTargetService(e *environment, resources *kubernetes.Coll
 	return
 }
 
-func (e *ingressTrait) getIngressFor(env *environment, service *corev1.Service) *v1beta1.Ingress {
+func (i *ingressTrait) getIngressFor(env *environment, service *corev1.Service) *v1beta1.Ingress {
 	ingress := v1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
@@ -89,7 +94,7 @@ func (e *ingressTrait) getIngressFor(env *environment, service *corev1.Service) 
 			},
 			Rules: []v1beta1.IngressRule{
 				{
-					Host: e.Host,
+					Host: i.Host,
 				},
 			},
 		},

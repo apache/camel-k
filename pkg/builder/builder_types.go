@@ -26,6 +26,17 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
+const (
+	// ProjectGenerationPhase --
+	ProjectGenerationPhase int = 10
+	// ProjectBuildPhase --
+	ProjectBuildPhase int = 20
+	// ApplicationPackagePhase --
+	ApplicationPackagePhase int = 30
+	// ApplicationPublishPhase --
+	ApplicationPublishPhase int = 40
+)
+
 // Builder --
 type Builder interface {
 	Submit(request Request) Result

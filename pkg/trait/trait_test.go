@@ -153,11 +153,10 @@ func TestTraitDecode(t *testing.T) {
 }
 
 func processTestEnv(t *testing.T, env *environment) *kubernetes.Collection {
-	resources := kubernetes.NewCollection()
 	catalog := NewCatalog()
-	err := catalog.executeBeforeDeployment(env, resources)
+	err := catalog.apply(env)
 	assert.Nil(t, err)
-	return resources
+	return env.Resources
 }
 
 func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...string) *environment {
@@ -170,6 +169,9 @@ func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...
 			Spec: v1alpha1.IntegrationSpec{
 				Dependencies: dependencies,
 			},
+			Status: v1alpha1.IntegrationStatus{
+				Phase: v1alpha1.IntegrationPhaseDeploying,
+			},
 		},
 		Context: &v1alpha1.IntegrationContext{},
 		Platform: &v1alpha1.IntegrationPlatform{
@@ -178,5 +180,6 @@ func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...
 			},
 		},
 		ExecutedTraits: make([]ID, 0),
+		Resources:      kubernetes.NewCollection(),
 	}
 }

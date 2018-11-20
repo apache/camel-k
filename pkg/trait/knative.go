@@ -19,15 +19,17 @@ package trait
 
 import (
 	"encoding/json"
+	"strings"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/pkg/metadata"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
 )
 
 type knativeTrait struct {
@@ -41,19 +43,23 @@ func newKnativeTrait() *knativeTrait {
 	}
 }
 
-func (t *knativeTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
+func (t *knativeTrait) autoconfigure(e *environment) error {
 	if t.Sources == "" {
-		channels := t.getSourceChannels(environment)
+		channels := t.getSourceChannels(e)
 		t.Sources = strings.Join(channels, ",")
 	}
 	return nil
 }
 
-func (t *knativeTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
-	for _, sub := range t.getSubscriptionsFor(environment) {
-		resources.Add(sub)
+func (t *knativeTrait) apply(e *environment) error {
+	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
+		return nil
 	}
-	resources.Add(t.getServiceFor(environment))
+
+	for _, sub := range t.getSubscriptionsFor(e) {
+		e.Resources.Add(sub)
+	}
+	e.Resources.Add(t.getServiceFor(e))
 	return nil
 }
 

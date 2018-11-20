@@ -21,8 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,9 +37,13 @@ func newDeploymentTrait() *deploymentTrait {
 	}
 }
 
-func (d *deploymentTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
-	resources.Add(d.getConfigMapFor(environment))
-	resources.Add(d.getDeploymentFor(environment))
+func (d *deploymentTrait) apply(e *environment) error {
+	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
+		return nil
+	}
+
+	e.Resources.Add(d.getConfigMapFor(e))
+	e.Resources.Add(d.getDeploymentFor(e))
 	return nil
 }
 
