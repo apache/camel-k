@@ -51,7 +51,7 @@ func (action *initializeAction) Handle(context *v1alpha1.IntegrationContext) err
 	target := context.DeepCopy()
 
 	// execute custom initialization
-	//if err := trait.Apply(nil, context); err != nil {
+	//if err := trait.apply(nil, context); err != nil {
 	//	return err
 	//}
 

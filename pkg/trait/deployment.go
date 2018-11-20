@@ -37,13 +37,13 @@ func newDeploymentTrait() *deploymentTrait {
 	}
 }
 
-func (d *deploymentTrait) apply(e *Environment) error {
-	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
-		return nil
-	}
+func (d *deploymentTrait) appliesTo(e *Environment) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+}
 
-	e.Resources.Add(d.getConfigMapFor(e))
-	e.Resources.Add(d.getDeploymentFor(e))
+func (d *deploymentTrait) apply(e *Environment) error {
+	e.Resources.Add(getConfigMapFor(e))
+	e.Resources.Add(getDeploymentFor(e))
 	return nil
 }
 
@@ -53,7 +53,7 @@ func (d *deploymentTrait) apply(e *Environment) error {
 //
 // **********************************
 
-func (*deploymentTrait) getConfigMapFor(e *Environment) *corev1.ConfigMap {
+func getConfigMapFor(e *Environment) *corev1.ConfigMap {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
@@ -89,7 +89,7 @@ func (*deploymentTrait) getConfigMapFor(e *Environment) *corev1.ConfigMap {
 //
 // **********************************
 
-func (*deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
+func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	sourceName := strings.TrimPrefix(e.Integration.Spec.Source.Name, "/")
 
 	// combine Environment of integration with context, integration

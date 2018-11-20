@@ -50,6 +50,10 @@ func newServiceTrait() *serviceTrait {
 	}
 }
 
+func (s *serviceTrait) appliesTo(e *Environment) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+}
+
 func (s *serviceTrait) autoconfigure(e *Environment) error {
 	if s.Enabled == nil {
 		required := s.requiresService(e)
@@ -59,10 +63,6 @@ func (s *serviceTrait) autoconfigure(e *Environment) error {
 }
 
 func (s *serviceTrait) apply(e *Environment) (err error) {
-	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
-		return nil
-	}
-
 	var svc *corev1.Service
 	if svc, err = s.getServiceFor(e); err != nil {
 		return err

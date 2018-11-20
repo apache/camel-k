@@ -109,6 +109,10 @@ func (c *Catalog) apply(environment *Environment) error {
 	c.configure(environment)
 	traits := c.traitsFor(environment)
 	for _, trait := range traits {
+		if !trait.appliesTo(environment) {
+			continue
+		}
+
 		if trait.IsAuto() {
 			if err := trait.autoconfigure(environment); err != nil {
 				return err
