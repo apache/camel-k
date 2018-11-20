@@ -85,7 +85,7 @@ func installKnative(namespace string) error {
 }
 
 // Platform installs the platform custom resource
-func Platform(namespace string, registry string) error {
+func Platform(namespace string, registry string, organization string, pushSecret string) error {
 	if err := waitForPlatformCRDAvailable(namespace, 15*time.Second); err != nil {
 		return err
 	}
@@ -114,6 +114,8 @@ func Platform(namespace string, registry string) error {
 			registry = *minishiftRegistry
 		}
 		pl.Spec.Build.Registry = registry
+		pl.Spec.Build.Organization = organization
+		pl.Spec.Build.PushSecret = pushSecret
 	}
 
 	var knativeInstalled bool
