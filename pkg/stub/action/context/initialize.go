@@ -50,6 +50,11 @@ func (action *initializeAction) Handle(context *v1alpha1.IntegrationContext) err
 
 	target := context.DeepCopy()
 
+	// execute custom initialization
+	//if err := trait.Apply(nil, context); err != nil {
+	//	return err
+	//}
+
 	// update the status
 	logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseBuilding)
 	target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding

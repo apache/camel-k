@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,10 +33,14 @@ func newOwnerTrait() *ownerTrait {
 	}
 }
 
-func (*ownerTrait) beforeDeploy(e *environment, resources *kubernetes.Collection) error {
+func (*ownerTrait) apply(e *environment) error {
+	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
+		return nil
+	}
+
 	controller := true
 	blockOwnerDeletion := true
-	resources.VisitMetaObject(func(res metav1.Object) {
+	e.Resources.VisitMetaObject(func(res metav1.Object) {
 		references := []metav1.OwnerReference{
 			{
 				APIVersion:         e.Integration.APIVersion,

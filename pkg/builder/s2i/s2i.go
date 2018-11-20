@@ -21,8 +21,8 @@ import "github.com/apache/camel-k/pkg/builder"
 
 // DefaultSteps --
 var DefaultSteps = []builder.Step{
-	builder.NewStep("generate", 10, builder.GenerateProject),
-	builder.NewStep("dependencies", 20, builder.ComputeDependencies),
-	builder.NewStep("packager", 30, builder.IncrementalPackager),
-	builder.NewStep("publisher", 40, Publisher),
+	builder.NewStep("generate", builder.ProjectGenerationPhase, builder.GenerateProject),
+	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
+	builder.NewStep("packager/incremental", builder.ApplicationPackagePhase, builder.IncrementalPackager),
+	builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, Publisher),
 }

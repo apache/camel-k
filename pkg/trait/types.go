@@ -38,11 +38,9 @@ type Trait interface {
 	// auto determine if the trait should be configured automatically
 	IsAuto() bool
 	// autoconfigure is called before any customization to ensure the trait is fully configured
-	autoconfigure(environment *environment, resources *kubernetes.Collection) error
-	// beforeInit executes a customization of the integration before it's built
-	beforeInit(environment *environment, integration *v1alpha1.Integration) error
-	// beforeDeploy executes a customization of the gerenated resources before they are created
-	beforeDeploy(environment *environment, resources *kubernetes.Collection) error
+	autoconfigure(environment *environment) error
+	// apply executes a customization of the environment
+	apply(environment *environment) error
 }
 
 /* Base trait */
@@ -81,15 +79,11 @@ func (trait *BaseTrait) IsEnabled() bool {
 	return *trait.Enabled
 }
 
-func (trait *BaseTrait) autoconfigure(environment *environment, resources *kubernetes.Collection) error {
+func (trait *BaseTrait) autoconfigure(environment *environment) error {
 	return nil
 }
 
-func (trait *BaseTrait) beforeInit(environment *environment, integration *v1alpha1.Integration) error {
-	return nil
-}
-
-func (trait *BaseTrait) beforeDeploy(environment *environment, resources *kubernetes.Collection) error {
+func (trait *BaseTrait) apply(environment *environment) error {
 	return nil
 }
 
@@ -100,5 +94,6 @@ type environment struct {
 	Platform       *v1alpha1.IntegrationPlatform
 	Context        *v1alpha1.IntegrationContext
 	Integration    *v1alpha1.Integration
+	Resources      *kubernetes.Collection
 	ExecutedTraits []ID
 }

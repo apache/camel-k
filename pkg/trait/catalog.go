@@ -18,12 +18,12 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/fatih/structs"
 	"reflect"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/fatih/structs"
 )
 
 // Catalog collects all information about traits in one place
@@ -95,37 +95,17 @@ func (c *Catalog) traitsFor(environment *environment) []Trait {
 	return nil
 }
 
-func (c *Catalog) executeBeforeDeployment(environment *environment, resources *kubernetes.Collection) error {
+func (c *Catalog) apply(environment *environment) error {
 	c.configure(environment)
 	traits := c.traitsFor(environment)
 	for _, trait := range traits {
 		if trait.IsAuto() {
-			if err := trait.autoconfigure(environment, resources); err != nil {
+			if err := trait.autoconfigure(environment); err != nil {
 				return err
 			}
 		}
 		if trait.IsEnabled() {
-			if err := trait.beforeDeploy(environment, resources); err != nil {
-				return err
-			}
-			environment.ExecutedTraits = append(environment.ExecutedTraits, trait.ID())
-		}
-	}
-	return nil
-}
-
-func (c *Catalog) executeBeforeInit(environment *environment, integration *v1alpha1.Integration) error {
-	c.configure(environment)
-	traits := c.traitsFor(environment)
-	resources := kubernetes.NewCollection()
-	for _, trait := range traits {
-		if trait.IsAuto() {
-			if err := trait.autoconfigure(environment, resources); err != nil {
-				return err
-			}
-		}
-		if trait.IsEnabled() {
-			if err := trait.beforeInit(environment, integration); err != nil {
+			if err := trait.apply(environment); err != nil {
 				return err
 			}
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait.ID())
