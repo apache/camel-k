@@ -134,7 +134,7 @@ func (b *defaultBuilder) submit(request Request) {
 		r.Error = err
 	}
 
-	os.RemoveAll(builderPath)
+	defer os.RemoveAll(builderPath)
 
 	// update the cache
 	b.request.Store(request.Identifier, r)
