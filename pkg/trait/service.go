@@ -50,7 +50,7 @@ func newServiceTrait() *serviceTrait {
 	}
 }
 
-func (s *serviceTrait) autoconfigure(e *environment) error {
+func (s *serviceTrait) autoconfigure(e *Environment) error {
 	if s.Enabled == nil {
 		required := s.requiresService(e)
 		s.Enabled = &required
@@ -58,7 +58,7 @@ func (s *serviceTrait) autoconfigure(e *environment) error {
 	return nil
 }
 
-func (s *serviceTrait) apply(e *environment) (err error) {
+func (s *serviceTrait) apply(e *Environment) (err error) {
 	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
 		return nil
 	}
@@ -71,7 +71,7 @@ func (s *serviceTrait) apply(e *environment) (err error) {
 	return nil
 }
 
-func (s *serviceTrait) getServiceFor(e *environment) (*corev1.Service, error) {
+func (s *serviceTrait) getServiceFor(e *Environment) (*corev1.Service, error) {
 	svc := corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -102,11 +102,27 @@ func (s *serviceTrait) getServiceFor(e *environment) (*corev1.Service, error) {
 	return &svc, nil
 }
 
-func (*serviceTrait) requiresService(environment *environment) bool {
-	for _, dep := range environment.Integration.Spec.Dependencies {
-		if decision, present := webComponents[dep]; present {
-			return decision
+func (*serviceTrait) requiresService(environment *Environment) bool {
+	cweb := false
+	iweb := false
+
+	if environment.Context != nil {
+		for _, dep := range environment.Context.Spec.Dependencies {
+			if decision, present := webComponents[dep]; present {
+				cweb = decision
+				break
+			}
 		}
 	}
-	return false
+
+	if environment.Integration != nil {
+		for _, dep := range environment.Integration.Spec.Dependencies {
+			if decision, present := webComponents[dep]; present {
+				iweb = decision
+				break
+			}
+		}
+	}
+
+	return cweb || iweb
 }

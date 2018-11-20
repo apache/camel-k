@@ -43,7 +43,7 @@ func newKnativeTrait() *knativeTrait {
 	}
 }
 
-func (t *knativeTrait) autoconfigure(e *environment) error {
+func (t *knativeTrait) autoconfigure(e *Environment) error {
 	if t.Sources == "" {
 		channels := t.getSourceChannels(e)
 		t.Sources = strings.Join(channels, ",")
@@ -51,7 +51,7 @@ func (t *knativeTrait) autoconfigure(e *environment) error {
 	return nil
 }
 
-func (t *knativeTrait) apply(e *environment) error {
+func (t *knativeTrait) apply(e *Environment) error {
 	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
 		return nil
 	}
@@ -63,13 +63,13 @@ func (t *knativeTrait) apply(e *environment) error {
 	return nil
 }
 
-func (t *knativeTrait) getServiceFor(e *environment) *serving.Service {
+func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
 
-	// combine environment of integration with context, integration
-	// environment has the priority
+	// combine Environment of integration with context, integration
+	// Environment has the priority
 	environment := CombineConfigurationAsMap("env", e.Context, e.Integration)
 
 	// set env vars needed by the runtime
@@ -125,7 +125,7 @@ func (t *knativeTrait) getServiceFor(e *environment) *serving.Service {
 	return &svc
 }
 
-func (t *knativeTrait) getSubscriptionsFor(e *environment) []*eventing.Subscription {
+func (t *knativeTrait) getSubscriptionsFor(e *Environment) []*eventing.Subscription {
 	channels := t.getConfiguredSourceChannels()
 	subs := make([]*eventing.Subscription, 0)
 	for _, ch := range channels {
@@ -134,7 +134,7 @@ func (t *knativeTrait) getSubscriptionsFor(e *environment) []*eventing.Subscript
 	return subs
 }
 
-func (*knativeTrait) getSubscriptionFor(e *environment, channel string) *eventing.Subscription {
+func (*knativeTrait) getSubscriptionFor(e *Environment, channel string) *eventing.Subscription {
 	return &eventing.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: eventing.SchemeGroupVersion.String(),
@@ -161,7 +161,7 @@ func (*knativeTrait) getSubscriptionFor(e *environment, channel string) *eventin
 	}
 }
 
-func (t *knativeTrait) getConfigurationSerialized(e *environment) string {
+func (t *knativeTrait) getConfigurationSerialized(e *Environment) string {
 	env := t.getConfiguration(e)
 	res, err := json.Marshal(env)
 	if err != nil {
@@ -171,7 +171,7 @@ func (t *knativeTrait) getConfigurationSerialized(e *environment) string {
 	return string(res)
 }
 
-func (t *knativeTrait) getConfiguration(e *environment) knativeutil.CamelEnvironment {
+func (t *knativeTrait) getConfiguration(e *Environment) knativeutil.CamelEnvironment {
 	sourceChannels := t.getConfiguredSourceChannels()
 	env := knativeutil.NewCamelEnvironment()
 	for _, ch := range sourceChannels {
@@ -213,7 +213,7 @@ func (t *knativeTrait) getConfiguredSourceChannels() []string {
 	return channels
 }
 
-func (*knativeTrait) getSourceChannels(e *environment) []string {
+func (*knativeTrait) getSourceChannels(e *Environment) []string {
 	meta := metadata.Extract(e.Integration.Spec.Source)
 	return knativeutil.ExtractChannelNames(meta.FromURIs)
 }

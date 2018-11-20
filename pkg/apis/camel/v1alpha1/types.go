@@ -52,8 +52,8 @@ type IntegrationSpec struct {
 	Replicas      *int32                          `json:"replicas,omitempty"`
 	Source        SourceSpec                      `json:"source,omitempty"`
 	Context       string                          `json:"context,omitempty"`
-	Profile       TraitProfile                    `json:"profile,omitempty"`
 	Dependencies  []string                        `json:"dependencies,omitempty"`
+	Profile       TraitProfile                    `json:"profile,omitempty"`
 	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec             `json:"configuration,omitempty"`
 }
@@ -153,8 +153,10 @@ type IntegrationContext struct {
 
 // IntegrationContextSpec --
 type IntegrationContextSpec struct {
-	Dependencies  []string            `json:"dependencies,omitempty"`
-	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
+	Dependencies  []string                        `json:"dependencies,omitempty"`
+	Profile       TraitProfile                    `json:"profile,omitempty"`
+	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
+	Configuration []ConfigurationSpec             `json:"configuration,omitempty"`
 }
 
 // IntegrationContextStatus --

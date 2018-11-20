@@ -19,39 +19,32 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/builder/kaniko"
+	"github.com/apache/camel-k/pkg/builder/s2i"
+	"github.com/apache/camel-k/pkg/platform"
 )
 
-// ownerTrait ensures that all created resources belong to the integration being created
-type ownerTrait struct {
+// TODO: we should add a way to label a trait as platform so it cannot be disabled/removed
+type builderTrait struct {
 	BaseTrait `property:",squash"`
 }
 
-func newOwnerTrait() *ownerTrait {
-	return &ownerTrait{
-		BaseTrait: newBaseTrait("owner"),
+func newBuilderTrait() *builderTrait {
+	return &builderTrait{
+		BaseTrait: newBaseTrait("builder"),
 	}
 }
 
-func (*ownerTrait) apply(e *Environment) error {
-	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
+func (*builderTrait) apply(e *Environment) error {
+	if e.Context == nil || e.Context.Status.Phase != v1alpha1.IntegrationContextPhaseBuilding {
 		return nil
 	}
 
-	controller := true
-	blockOwnerDeletion := true
-	e.Resources.VisitMetaObject(func(res metav1.Object) {
-		references := []metav1.OwnerReference{
-			{
-				APIVersion:         e.Integration.APIVersion,
-				Kind:               e.Integration.Kind,
-				Name:               e.Integration.Name,
-				UID:                e.Integration.UID,
-				Controller:         &controller,
-				BlockOwnerDeletion: &blockOwnerDeletion,
-			},
-		}
-		res.SetOwnerReferences(references)
-	})
+	if platform.SupportsS2iPublishStrategy(e.Platform) {
+		e.Steps = s2i.DefaultSteps
+	} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
+		e.Steps = kaniko.DefaultSteps
+	}
+
 	return nil
 }

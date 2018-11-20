@@ -39,7 +39,7 @@ func newIngressTrait() *ingressTrait {
 	}
 }
 
-func (i *ingressTrait) autoconfigure(e *environment) error {
+func (i *ingressTrait) autoconfigure(e *Environment) error {
 	if i.Enabled == nil {
 		hasService := i.getTargetService(e) != nil
 		hasHost := i.Host != ""
@@ -49,7 +49,7 @@ func (i *ingressTrait) autoconfigure(e *environment) error {
 	return nil
 }
 
-func (i *ingressTrait) apply(e *environment) error {
+func (i *ingressTrait) apply(e *Environment) error {
 	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
 		return nil
 	}
@@ -66,7 +66,7 @@ func (i *ingressTrait) apply(e *environment) error {
 	return nil
 }
 
-func (*ingressTrait) getTargetService(e *environment) (service *corev1.Service) {
+func (*ingressTrait) getTargetService(e *Environment) (service *corev1.Service) {
 	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
@@ -77,7 +77,7 @@ func (*ingressTrait) getTargetService(e *environment) (service *corev1.Service) 
 	return
 }
 
-func (i *ingressTrait) getIngressFor(env *environment, service *corev1.Service) *v1beta1.Ingress {
+func (i *ingressTrait) getIngressFor(env *Environment, service *corev1.Service) *v1beta1.Ingress {
 	ingress := v1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",

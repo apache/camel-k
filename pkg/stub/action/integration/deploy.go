@@ -42,12 +42,12 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
-	resources, err := trait.Apply(integration, nil)
+	env, err := trait.Apply(integration, nil)
 	if err != nil {
 		return err
 	}
 	// TODO we should look for objects that are no longer present in the collection and remove them
-	err = kubernetes.ReplaceResources(resources)
+	err = kubernetes.ReplaceResources(env.Resources.Items())
 	if err != nil {
 		return err
 	}

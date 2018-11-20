@@ -19,6 +19,7 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -38,9 +39,9 @@ type Trait interface {
 	// auto determine if the trait should be configured automatically
 	IsAuto() bool
 	// autoconfigure is called before any customization to ensure the trait is fully configured
-	autoconfigure(environment *environment) error
-	// apply executes a customization of the environment
-	apply(environment *environment) error
+	autoconfigure(environment *Environment) error
+	// apply executes a customization of the Environment
+	apply(environment *Environment) error
 }
 
 /* Base trait */
@@ -79,21 +80,22 @@ func (trait *BaseTrait) IsEnabled() bool {
 	return *trait.Enabled
 }
 
-func (trait *BaseTrait) autoconfigure(environment *environment) error {
+func (trait *BaseTrait) autoconfigure(environment *Environment) error {
 	return nil
 }
 
-func (trait *BaseTrait) apply(environment *environment) error {
+func (trait *BaseTrait) apply(environment *Environment) error {
 	return nil
 }
 
 /* Environment */
 
-// A environment provides the context where the trait is executed
-type environment struct {
+// A Environment provides the context where the trait is executed
+type Environment struct {
 	Platform       *v1alpha1.IntegrationPlatform
 	Context        *v1alpha1.IntegrationContext
 	Integration    *v1alpha1.Integration
 	Resources      *kubernetes.Collection
+	Steps          []builder.Step
 	ExecutedTraits []ID
 }

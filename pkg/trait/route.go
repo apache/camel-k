@@ -39,7 +39,7 @@ func newRouteTrait() *routeTrait {
 	}
 }
 
-func (r *routeTrait) autoconfigure(e *environment) error {
+func (r *routeTrait) autoconfigure(e *Environment) error {
 	if r.Enabled == nil {
 		hasService := r.getTargetService(e) != nil
 		r.Enabled = &hasService
@@ -47,7 +47,7 @@ func (r *routeTrait) autoconfigure(e *environment) error {
 	return nil
 }
 
-func (r *routeTrait) apply(e *environment) error {
+func (r *routeTrait) apply(e *Environment) error {
 	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
 		return nil
 	}
@@ -61,7 +61,7 @@ func (r *routeTrait) apply(e *environment) error {
 	return nil
 }
 
-func (*routeTrait) getTargetService(e *environment) (service *corev1.Service) {
+func (*routeTrait) getTargetService(e *Environment) (service *corev1.Service) {
 	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
@@ -72,7 +72,7 @@ func (*routeTrait) getTargetService(e *environment) (service *corev1.Service) {
 	return
 }
 
-func (r *routeTrait) getRouteFor(env *environment, service *corev1.Service) *routev1.Route {
+func (r *routeTrait) getRouteFor(env *Environment, service *corev1.Service) *routev1.Route {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
