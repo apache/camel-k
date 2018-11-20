@@ -20,6 +20,14 @@ If you need help on how to create a local development environment based on *Mini
 [[installation]]
 === Installation
 
+Make sure you apply specific configuration settings for your cluster before installing Camel K. Customized instructions are needed for
+the following cluster types:
+
+- link:/docs/cluster-setup.adoc[Minishift or Minikube]
+- link:/docs/gke-setup.adoc[Google Kubernetes Engine (GKE)]
+
+Other cluster types (such as OpenShift clusters) should not need prior configuration.
+
 To start using Camel K you need the **"kamel"** binary, that can be used to both configure the cluster and run integrations.
 Look into the https://github.com/apache/camel-k/releases[release page] for latest version of the `kamel` tool.
 
