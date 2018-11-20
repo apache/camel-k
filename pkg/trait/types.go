@@ -34,10 +34,12 @@ type ID string
 // Trait is the interface of all traits
 type Trait interface {
 	Identifiable
-	// enabled tells if the trait is enabled
+	// IsEnabled tells if the trait is enabled
 	IsEnabled() bool
-	// auto determine if the trait should be configured automatically
+	// IsAuto determine if the trait should be configured automatically
 	IsAuto() bool
+	// appliesTo tells if the trait supports the given environment
+	appliesTo(environment *Environment) bool
 	// autoconfigure is called before any customization to ensure the trait is fully configured
 	autoconfigure(environment *Environment) error
 	// apply executes a customization of the Environment
@@ -98,4 +100,14 @@ type Environment struct {
 	Resources      *kubernetes.Collection
 	Steps          []builder.Step
 	ExecutedTraits []ID
+}
+
+// IntegrationInPhase --
+func (e *Environment) IntegrationInPhase(phase v1alpha1.IntegrationPhase) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == phase
+}
+
+// IntegrationContextInPhase --
+func (e *Environment) IntegrationContextInPhase(phase v1alpha1.IntegrationContextPhase) bool {
+	return e.Context != nil && e.Context.Status.Phase == phase
 }

@@ -39,6 +39,10 @@ func newIngressTrait() *ingressTrait {
 	}
 }
 
+func (*ingressTrait) appliesTo(e *Environment) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+}
+
 func (i *ingressTrait) autoconfigure(e *Environment) error {
 	if i.Enabled == nil {
 		hasService := i.getTargetService(e) != nil
@@ -50,10 +54,6 @@ func (i *ingressTrait) autoconfigure(e *Environment) error {
 }
 
 func (i *ingressTrait) apply(e *Environment) error {
-	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
-		return nil
-	}
-
 	if i.Host == "" {
 		return errors.New("cannot apply ingress trait: no host defined")
 	}

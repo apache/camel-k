@@ -19,6 +19,7 @@ package builder
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -54,6 +55,10 @@ type stepWrapper struct {
 	id    string
 	phase int
 	task  func(*Context) error
+}
+
+func (s *stepWrapper) String() string {
+	return fmt.Sprintf("%s@%d", s.id, s.phase)
 }
 
 func (s *stepWrapper) ID() string {

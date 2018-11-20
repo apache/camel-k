@@ -43,6 +43,10 @@ func newKnativeTrait() *knativeTrait {
 	}
 }
 
+func (t *knativeTrait) appliesTo(e *Environment) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+}
+
 func (t *knativeTrait) autoconfigure(e *Environment) error {
 	if t.Sources == "" {
 		channels := t.getSourceChannels(e)
@@ -52,10 +56,6 @@ func (t *knativeTrait) autoconfigure(e *Environment) error {
 }
 
 func (t *knativeTrait) apply(e *Environment) error {
-	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
-		return nil
-	}
-
 	for _, sub := range t.getSubscriptionsFor(e) {
 		e.Resources.Add(sub)
 	}

@@ -39,6 +39,10 @@ func newRouteTrait() *routeTrait {
 	}
 }
 
+func (r *routeTrait) appliesTo(e *Environment) bool {
+	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+}
+
 func (r *routeTrait) autoconfigure(e *Environment) error {
 	if r.Enabled == nil {
 		hasService := r.getTargetService(e) != nil

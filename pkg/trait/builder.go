@@ -35,11 +35,11 @@ func newBuilderTrait() *builderTrait {
 	}
 }
 
-func (*builderTrait) apply(e *Environment) error {
-	if e.Context == nil || e.Context.Status.Phase != v1alpha1.IntegrationContextPhaseBuilding {
-		return nil
-	}
+func (*builderTrait) appliesTo(e *Environment) bool {
+	return e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding
+}
 
+func (*builderTrait) apply(e *Environment) error {
 	if platform.SupportsS2iPublishStrategy(e.Platform) {
 		e.Steps = s2i.DefaultSteps
 	} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
