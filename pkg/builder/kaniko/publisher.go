@@ -34,7 +34,11 @@ import (
 
 // Publisher --
 func Publisher(ctx *builder.Context) error {
-	image := ctx.Request.Platform.Build.Registry + "/" + ctx.Namespace + "/camel-k-" + ctx.Request.Identifier.Name + ":" + ctx.Request.Identifier.Qualifier
+	organization := ctx.Request.Platform.Build.Organization
+	if organization == "" {
+		organization = ctx.Namespace
+	}
+	image := ctx.Request.Platform.Build.Registry + "/" + organization + "/camel-k-" + ctx.Request.Identifier.Name + ":" + ctx.Request.Identifier.Qualifier
 	baseDir, _ := path.Split(ctx.Archive)
 	contextDir := path.Join(baseDir, "context")
 	if err := tar.Extract(ctx.Archive, contextDir); err != nil {
@@ -51,6 +55,49 @@ func Publisher(ctx *builder.Context) error {
 		return err
 	}
 
+	volumes := []v1.Volume{
+		{
+			Name: "camel-k-builder",
+			VolumeSource: v1.VolumeSource{
+				PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+					ClaimName: "camel-k-builder",
+				},
+			},
+		},
+	}
+	volumeMounts := []v1.VolumeMount{
+		{
+			Name:      "camel-k-builder",
+			MountPath: "/workspace",
+		},
+	}
+	envs := []v1.EnvVar{}
+	baseArgs := []string{
+		"--dockerfile=Dockerfile",
+		"--context=" + contextDir,
+		"--destination=" + image}
+	args := append(baseArgs, "--insecure")
+
+	if ctx.Request.Platform.Build.PushSecret != "" {
+		volumes = append(volumes, v1.Volume{
+			Name: "kaniko-secret",
+			VolumeSource: v1.VolumeSource{
+				Secret: &v1.SecretVolumeSource{
+					SecretName: ctx.Request.Platform.Build.PushSecret,
+				},
+			},
+		})
+		volumeMounts = append(volumeMounts, v1.VolumeMount{
+			Name: "kaniko-secret",
+			MountPath: "/secret",
+		})
+		envs = append(envs, v1.EnvVar{
+			Name:  "GOOGLE_APPLICATION_CREDENTIALS",
+			Value: "/secret/kaniko-secret.json",
+		})
+		args = baseArgs
+	}
+
 	pod := v1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
@@ -65,28 +112,24 @@ func Publisher(ctx *builder.Context) error {
 				{
 					Name:  "kaniko",
 					Image: "gcr.io/kaniko-project/executor@sha256:f29393d9c8d40296e1692417089aa2023494bce9afd632acac7dd0aea763e5bc",
-					Args: []string{
-						"--dockerfile=Dockerfile",
-						"--context=" + contextDir,
-						"--destination=" + image,
-						"--insecure",
-					},
-					VolumeMounts: []v1.VolumeMount{
-						{
-							Name:      "camel-k-builder",
-							MountPath: "/workspace",
-						},
-					},
+					Args: args,
+					Env:          envs,
+					VolumeMounts: volumeMounts,
 				},
 			},
 			RestartPolicy: v1.RestartPolicyNever,
-			Volumes: []v1.Volume{
-				{
-					Name: "camel-k-builder",
-					VolumeSource: v1.VolumeSource{
-						PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
-							ClaimName: "camel-k-builder",
-							ReadOnly:  true,
+			Volumes:       volumes,
+			Affinity: &v1.Affinity{
+				// Co-locate with builder pod for sharing the volume
+				PodAffinity: &v1.PodAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+						{
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"camel.apache.org/component": "operator",
+								},
+							},
+							TopologyKey: "kubernetes.io/hostname",
 						},
 					},
 				},

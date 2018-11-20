@@ -130,6 +130,7 @@ func (b *defaultBuilder) submit(request Request) {
 	}
 	builderPath, err := ioutil.TempDir(buildDir, "builder-")
 	if err != nil {
+		logrus.Warning("Unexpected error while creating a temporary dir ", err)
 		r.Status = StatusError
 		r.Error = err
 	}

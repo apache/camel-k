@@ -234,6 +234,8 @@ var allTraitProfiles = []TraitProfile{TraitProfileOpenShift, TraitProfileKuberne
 type IntegrationPlatformBuildSpec struct {
 	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	Registry        string                                  `json:"registry,omitempty"`
+	Organization    string                                  `json:"organization,omitempty"`
+	PushSecret      string                                  `json:"pushSecret,omitempty"`
 }
 
 // IntegrationPlatformBuildPublishStrategy enumerates all implemented build strategies

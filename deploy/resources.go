@@ -34,7 +34,7 @@ metadata:
     app: "camel-k"
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
@@ -2212,6 +2212,7 @@ metadata:
   name: camel-k-operator
   labels:
     app: "camel-k"
+    camel.apache.org/component: operator
 spec:
   replicas: 1
   strategy:
@@ -2223,6 +2224,7 @@ spec:
     metadata:
       labels:
         name: camel-k-operator
+        camel.apache.org/component: operator
     spec:
       serviceAccountName: camel-k-operator
       containers:
@@ -2244,6 +2246,17 @@ spec:
           volumeMounts:
           - mountPath: /workspace
             name: camel-k-builder
+      initContainers:
+        - command:
+          - chmod
+          - "777"
+          - /workspace
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          name: build-volume-permission
+          volumeMounts:
+          - mountPath: /workspace
+            name: camel-k-builder
       volumes:
       - name: camel-k-builder
         persistentVolumeClaim:
@@ -2258,6 +2271,7 @@ metadata:
   name: camel-k-operator
   labels:
     app: "camel-k"
+    camel.apache.org/component: operator
 spec:
   replicas: 1
   strategy:
@@ -2269,6 +2283,7 @@ spec:
     metadata:
       labels:
         name: camel-k-operator
+        camel.apache.org/component: operator
     spec:
       serviceAccountName: camel-k-operator
       containers:
