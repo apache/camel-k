@@ -152,15 +152,15 @@ func TestTraitDecode(t *testing.T) {
 	assert.Equal(t, false, svc.IsEnabled())
 }
 
-func processTestEnv(t *testing.T, env *environment) *kubernetes.Collection {
+func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	catalog := NewCatalog()
 	err := catalog.apply(env)
 	assert.Nil(t, err)
 	return env.Resources
 }
 
-func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...string) *environment {
-	return &environment{
+func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...string) *Environment {
+	return &Environment{
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",

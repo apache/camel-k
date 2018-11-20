@@ -79,6 +79,14 @@ func NewStep(ID string, phase int, task func(*Context) error) Step {
 	return &s
 }
 
+// NewIdentifierForContext --
+func NewIdentifierForContext(context *v1alpha1.IntegrationContext) Identifier {
+	return Identifier{
+		Name:      "context-" + context.Name,
+		Qualifier: context.ResourceVersion,
+	}
+}
+
 // Identifier --
 type Identifier struct {
 	Name      string
