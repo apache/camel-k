@@ -52,15 +52,14 @@ public class Application {
     // *******************************
 
     public static void main(String[] args) throws Exception {
-        final String resource = System.getenv(Constants.ENV_CAMEL_K_ROUTES_URI);
-        final String language = System.getenv(Constants.ENV_CAMEL_K_ROUTES_LANGUAGE);
+        final String routes = System.getenv(Constants.ENV_CAMEL_K_ROUTES);
 
-        if (ObjectHelper.isEmpty(resource)) {
-            throw new IllegalStateException("No valid resource found in " + Constants.ENV_CAMEL_K_ROUTES_URI + " environment variable");
+        if (ObjectHelper.isEmpty(routes)) {
+            throw new IllegalStateException("No valid routes found in " + Constants.ENV_CAMEL_K_ROUTES + " environment variable");
         }
 
         Runtime runtime = new Runtime();
-        runtime.load(resource, language);
+        runtime.load(routes.split(",", -1));
         runtime.addMainListener(new ComponentPropertiesBinder());
         runtime.run();
     }

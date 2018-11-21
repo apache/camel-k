@@ -1,0 +1,4 @@
+
+from('timer:tick2')
+    .id('r2')
+    .to('log:info2')

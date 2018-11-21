@@ -36,7 +36,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
-import static org.apache.camel.k.jvm.Constants.SCHEME_INLINE;
 
 public final class RuntimeSupport {
     private RuntimeSupport() {
@@ -49,8 +48,8 @@ public final class RuntimeSupport {
 
         // Main location
         if (ObjectHelper.isNotEmpty(conf)) {
-            if (conf.startsWith(SCHEME_INLINE)) {
-                try (Reader reader = URIResolver.resolveInline(conf)) {
+            if (conf.startsWith(Constants.SCHEME_ENV)) {
+                try (Reader reader = URIResolver.resolveEnv(conf)) {
                     properties.load(reader);
                 } catch (IOException e) {
                     throw new RuntimeException(e);

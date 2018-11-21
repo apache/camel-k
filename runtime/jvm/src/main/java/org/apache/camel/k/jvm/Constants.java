@@ -17,13 +17,12 @@
 package org.apache.camel.k.jvm;
 
 public final class Constants {
-    public static final String ENV_CAMEL_K_ROUTES_URI = "CAMEL_K_ROUTES_URI";
-    public static final String ENV_CAMEL_K_ROUTES_LANGUAGE = "CAMEL_K_ROUTES_LANGUAGE";
+    public static final String ENV_CAMEL_K_ROUTES = "CAMEL_K_ROUTES";
     public static final String ENV_CAMEL_K_CONF = "CAMEL_K_CONF";
     public static final String ENV_CAMEL_K_CONF_D = "CAMEL_K_CONF_D";
     public static final String SCHEME_CLASSPATH = "classpath:";
     public static final String SCHEME_FILE = "file:";
-    public static final String SCHEME_INLINE = "inline:";
+    public static final String SCHEME_ENV = "env:";
     public static final String LOGGING_LEVEL_PREFIX = "logging.level.";
 
     private Constants() {

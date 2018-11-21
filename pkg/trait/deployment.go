@@ -25,6 +25,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type deploymentTrait struct {
@@ -42,8 +43,8 @@ func (d *deploymentTrait) appliesTo(e *Environment) bool {
 }
 
 func (d *deploymentTrait) apply(e *Environment) error {
-	e.Resources.Add(getConfigMapFor(e))
-	e.Resources.Add(getDeploymentFor(e))
+	e.Resources.AddAll(d.getConfigMapFor(e))
+	e.Resources.Add(d.getDeploymentFor(e))
 	return nil
 }
 
@@ -53,34 +54,60 @@ func (d *deploymentTrait) apply(e *Environment) error {
 //
 // **********************************
 
-func getConfigMapFor(e *Environment) *corev1.ConfigMap {
+func (*deploymentTrait) getConfigMapFor(e *Environment) []runtime.Object {
+	maps := make([]runtime.Object, 0, len(e.Integration.Spec.Sources)+1)
+
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
 
-	cm := corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name,
-			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
+	maps = append(
+		maps,
+		&corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
 			},
-			Annotations: map[string]string{
-				"camel.apache.org/source.language": string(e.Integration.Spec.Source.Language),
-				"camel.apache.org/source.name":     e.Integration.Spec.Source.Name,
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      e.Integration.Name + "-properties",
+				Namespace: e.Integration.Namespace,
+				Labels: map[string]string{
+					"camel.apache.org/integration": e.Integration.Name,
+				},
+			},
+			Data: map[string]string{
+				"properties": PropertiesString(properties),
 			},
 		},
-		Data: map[string]string{
-			"integration": e.Integration.Spec.Source.Content,
-			"properties":  PropertiesString(properties),
-		},
+	)
+
+	for i, s := range e.Integration.Spec.Sources {
+		maps = append(
+			maps,
+			&corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
+					Namespace: e.Integration.Namespace,
+					Labels: map[string]string{
+						"camel.apache.org/integration": e.Integration.Name,
+					},
+					Annotations: map[string]string{
+						"camel.apache.org/source.language": string(s.Language),
+						"camel.apache.org/source.name":     s.Name,
+					},
+				},
+				Data: map[string]string{
+					"integration": s.Content,
+				},
+			},
+		)
 	}
 
-	return &cm
+	return maps
 }
 
 // **********************************
@@ -89,8 +116,16 @@ func getConfigMapFor(e *Environment) *corev1.ConfigMap {
 //
 // **********************************
 
-func getDeploymentFor(e *Environment) *appsv1.Deployment {
-	sourceName := strings.TrimPrefix(e.Integration.Spec.Source.Name, "/")
+func (*deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
+	sources := make([]string, 0, len(e.Integration.Spec.Sources))
+	for i, s := range e.Integration.Spec.Sources {
+		src := fmt.Sprintf("file:/etc/camel/integrations/%03d/%s", i, strings.TrimPrefix(s.Name, "/"))
+		if s.Language != "" {
+			src = src + "?language=" + string(s.Language)
+		}
+
+		sources = append(sources, src)
+	}
 
 	// combine Environment of integration with context, integration
 	// Environment has the priority
@@ -100,8 +135,7 @@ func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
 
 	// camel-k runtime
-	environment["CAMEL_K_ROUTES_URI"] = "file:/etc/camel/conf/" + sourceName
-	environment["CAMEL_K_ROUTES_LANGUAGE"] = string(e.Integration.Spec.Source.Language)
+	environment["CAMEL_K_ROUTES"] = strings.Join(sources, ",")
 	environment["CAMEL_K_CONF"] = "/etc/camel/conf/application.properties"
 	environment["CAMEL_K_CONF_D"] = "/etc/camel/conf.d"
 
@@ -159,21 +193,18 @@ func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	cnt := 0
 
 	//
-	// Volumes :: Defaults
+	// Volumes :: Properties
 	//
 
 	vols = append(vols, corev1.Volume{
-		Name: "integration",
+		Name: "integration-properties",
 		VolumeSource: corev1.VolumeSource{
 			ConfigMap: &corev1.ConfigMapVolumeSource{
 				LocalObjectReference: corev1.LocalObjectReference{
-					Name: e.Integration.Name,
+					Name: e.Integration.Name + "-properties",
 				},
 				Items: []corev1.KeyToPath{
 					{
-						Key:  "integration",
-						Path: sourceName,
-					}, {
 						Key:  "properties",
 						Path: "application.properties",
 					},
@@ -183,9 +214,37 @@ func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	})
 
 	mnts = append(mnts, corev1.VolumeMount{
-		Name:      "integration",
+		Name:      "integration-properties",
 		MountPath: "/etc/camel/conf",
 	})
+
+	//
+	// Volumes :: Sources
+	//
+
+	for i, s := range e.Integration.Spec.Sources {
+		vols = append(vols, corev1.Volume{
+			Name: fmt.Sprintf("integration-source-%03d", i),
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
+					},
+					Items: []corev1.KeyToPath{
+						{
+							Key:  "integration",
+							Path: strings.TrimPrefix(s.Name, "/"),
+						},
+					},
+				},
+			},
+		})
+
+		mnts = append(mnts, corev1.VolumeMount{
+			Name:      fmt.Sprintf("integration-source-%03d", i),
+			MountPath: fmt.Sprintf("/etc/camel/integrations/%03d", i),
+		})
+	}
 
 	//
 	// Volumes :: Additional ConfigMaps

@@ -39,21 +39,23 @@ func (*dependenciesTrait) appliesTo(e *Environment) bool {
 	return e.Integration != nil && e.Integration.Status.Phase == ""
 }
 
-func (d *dependenciesTrait) apply(e *Environment) error {
-	meta := metadata.Extract(e.Integration.Spec.Source)
+func (*dependenciesTrait) apply(e *Environment) error {
+	for _, s := range e.Integration.Spec.Sources {
+		meta := metadata.Extract(s)
 
-	if meta.Language == v1alpha1.LanguageGroovy {
-		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:groovy")
-	} else if meta.Language == v1alpha1.LanguageKotlin {
-		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:kotlin")
-	}
+		if meta.Language == v1alpha1.LanguageGroovy {
+			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:groovy")
+		} else if meta.Language == v1alpha1.LanguageKotlin {
+			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:kotlin")
+		}
 
-	// jvm runtime and camel-core required by default
-	util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:jvm")
-	util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "camel:core")
+		// jvm runtime and camel-core required by default
+		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:jvm")
+		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "camel:core")
 
-	for _, d := range meta.Dependencies {
-		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, d)
+		for _, d := range meta.Dependencies {
+			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, d)
+		}
 	}
 
 	// sort the dependencies to get always the same list if they don't change
