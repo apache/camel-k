@@ -27,6 +27,8 @@ import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.CompositeRegistry;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.main.MainSupport;
+import org.apache.camel.util.URISupport;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +42,25 @@ public final class Runtime extends MainSupport {
         this.contextMap = new ConcurrentHashMap<>();
     }
 
-    public void load(String resource, String language) throws Exception {
-        final RoutesLoader loader = RoutesLoaders.loaderFor(resource, language);
-        final RouteBuilder routes = loader.load(registry, resource);
+    public void load(String[] routes) throws Exception {
+        for (String route: routes) {
+            // determine location and language
+            final String location = StringUtils.substringBefore(route, "?");
+            final String query = StringUtils.substringAfter(route, "?");
+            final String language = (String)URISupport.parseQuery(query).get("language");
 
-        if (routes == null) {
-            throw new IllegalStateException("Unable to load route from: " + resource);
+            // load routes
+            final RoutesLoader loader = RoutesLoaders.loaderFor(location, language);
+            final RouteBuilder builder = loader.load(registry, location);
+
+            if (routes == null) {
+                throw new IllegalStateException("Unable to load route from: " + route);
+            }
+
+            LOGGER.info("Routes: {}", route);
+
+            addRouteBuilder(builder);
         }
-
-        LOGGER.info("Routes: {}", resource);
-        LOGGER.info("Language: {}", language);
-
-        addRouteBuilder(routes);
     }
 
     public RuntimeRegistry getRegistry() {

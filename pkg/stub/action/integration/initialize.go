@@ -59,9 +59,13 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 		var defaultReplicas int32 = 1
 		target.Spec.Replicas = &defaultReplicas
 	}
-	// extract metadata
-	meta := metadata.Extract(target.Spec.Source)
-	target.Spec.Source.Language = meta.Language
+	for i := range target.Spec.Sources {
+		// extract metadata
+		s := &target.Spec.Sources[i]
+
+		meta := metadata.Extract(*s)
+		s.Language = meta.Language
+	}
 
 	// execute custom initialization
 	if _, err := trait.Apply(target, nil); err != nil {

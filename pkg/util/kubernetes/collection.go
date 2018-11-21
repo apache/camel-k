@@ -47,6 +47,11 @@ func (c *Collection) Add(resource runtime.Object) {
 	c.items = append(c.items, resource)
 }
 
+// AddAll adds all resources to the collection
+func (c *Collection) AddAll(resource []runtime.Object) {
+	c.items = append(c.items, resource...)
+}
+
 // VisitDeployment executes the visitor function on all Deployment resources
 func (c *Collection) VisitDeployment(visitor func(*appsv1.Deployment)) {
 	c.Visit(func(res runtime.Object) {

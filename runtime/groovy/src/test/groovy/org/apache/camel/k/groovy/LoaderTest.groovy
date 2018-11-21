@@ -29,8 +29,8 @@ class LoaderTest extends Specification {
             def resource = "classpath:routes.groovy"
 
         when:
-            def loader = RoutesLoaders.loaderFor(resource, null);
-            def builder = loader.load(new RuntimeRegistry(), resource);
+            def loader = RoutesLoaders.loaderFor(resource, null)
+            def builder = loader.load(new RuntimeRegistry(), resource)
 
         then:
             loader instanceof GroovyRoutesLoader

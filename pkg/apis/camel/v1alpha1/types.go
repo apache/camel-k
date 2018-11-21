@@ -50,12 +50,17 @@ type Integration struct {
 // IntegrationSpec --
 type IntegrationSpec struct {
 	Replicas      *int32                          `json:"replicas,omitempty"`
-	Source        SourceSpec                      `json:"source,omitempty"`
+	Sources       []SourceSpec                    `json:"sources,omitempty"`
 	Context       string                          `json:"context,omitempty"`
 	Dependencies  []string                        `json:"dependencies,omitempty"`
 	Profile       TraitProfile                    `json:"profile,omitempty"`
 	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec             `json:"configuration,omitempty"`
+}
+
+// AddSource --
+func (is *IntegrationSpec) AddSource(name string, content string, language Language) {
+	is.Sources = append(is.Sources, SourceSpec{Name: name, Content: content, Language: language})
 }
 
 // SourceSpec --

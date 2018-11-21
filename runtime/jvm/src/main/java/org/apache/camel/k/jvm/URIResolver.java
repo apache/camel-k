@@ -16,36 +16,43 @@
  */
 package org.apache.camel.k.jvm;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.util.ResourceHelper;
-
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
-import static org.apache.camel.k.jvm.Constants.SCHEME_INLINE;
+import org.apache.camel.CamelContext;
+import org.apache.camel.util.ResourceHelper;
+import org.apache.camel.util.StringHelper;
+
 
 public class URIResolver {
 
-    public static InputStream resolve(CamelContext ctx, String uri) throws IOException {
+    public static InputStream resolve(CamelContext ctx, String uri) throws Exception {
         if (uri == null) {
             throw new IllegalArgumentException("Cannot resolve null URI");
         }
-        if (uri.startsWith(SCHEME_INLINE)) {
+
+        if (uri.startsWith(Constants.SCHEME_ENV)) {
+            final String envvar = StringHelper.after(uri, ":");
+            final String content = System.getenv(envvar);
+
             // Using platform encoding on purpose
-            return new ByteArrayInputStream(uri.substring(SCHEME_INLINE.length()).getBytes());
+            return new ByteArrayInputStream(content.getBytes());
         }
 
         return ResourceHelper.resolveMandatoryResourceAsInputStream(ctx, uri);
     }
 
-    public static Reader resolveInline(String uri) {
-        if (!uri.startsWith(SCHEME_INLINE)) {
+    public static Reader resolveEnv(String uri) {
+        if (!uri.startsWith(Constants.SCHEME_ENV)) {
             throw new IllegalArgumentException("The provided content is not inline: " + uri);
         }
-        return new StringReader(uri.substring(SCHEME_INLINE.length()));
+
+        final String envvar = StringHelper.after(uri, ":");
+        final String content = System.getenv(envvar);
+
+        return new StringReader(content);
     }
 
 }
