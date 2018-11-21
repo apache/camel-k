@@ -27,7 +27,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>camel-knative</artifactId>
+    <artifactId>camel-knative-http</artifactId>
 
     <dependencies>
 
@@ -48,31 +48,8 @@
             <artifactId>camel-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-knative-http</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>${commons-collections4.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang.version}</version>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-netty4-http</artifactId>
         </dependency>
 
         <!-- ****************************** -->
@@ -90,11 +67,6 @@
                     <artifactId>junit</artifactId>
                 </exclusion>
             </exclusions>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-http4</artifactId>
             <scope>test</scope>
         </dependency>
 

@@ -121,7 +121,9 @@ public class KnativeEnvironment {
             //              "port": "",
             //              "metadata": {
             //                  "service.path": "",
-            //                  "knative.event.type": ""
+            //                  "knative.event.type": "",
+            //                  "filter.header.name": "",
+            //                  "filter.header.value": ""
             //              }
             //         },
             //     ]

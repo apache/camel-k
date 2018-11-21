@@ -102,6 +102,7 @@
         <module>kotlin</module>
         <module>catalog-builder</module>
         <module>dependency-lister</module>
+        <module>camel-knative-http</module>
         <module>camel-knative</module>
     </modules>
 
