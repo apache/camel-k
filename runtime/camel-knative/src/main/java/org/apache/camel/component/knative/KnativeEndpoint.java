@@ -37,9 +37,11 @@ import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.UriPath;
+import org.apache.camel.util.CollectionHelper;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.ServiceHelper;
 import org.apache.camel.util.StringHelper;
+import org.apache.camel.util.URISupport;
 import org.apache.commons.lang3.StringUtils;
 
 import static org.apache.camel.util.ObjectHelper.ifNotEmpty;
@@ -221,6 +223,16 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
                 }
 
                 uri += path;
+            }
+
+            final String filterKey = definition.getMetadata().get(Knative.FILTER_HEADER_NAME);
+            final String filterVal = definition.getMetadata().get(Knative.FILTER_HEADER_VALUE);
+
+            if (ObjectHelper.isNotEmpty(filterKey) && ObjectHelper.isNotEmpty(filterVal)) {
+                uri = URISupport.appendParametersToURI(
+                    uri,
+                    CollectionHelper.mapOf("filter.headerName", filterKey, "filter.headerValue", filterVal)
+                );
             }
 
             return context.getEndpoint(uri);
