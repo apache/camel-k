@@ -19,6 +19,7 @@ package trait
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -72,14 +73,26 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	// Environment has the priority
 	environment := CombineConfigurationAsMap("env", e.Context, e.Integration)
 
+	sources := make([]string, 0, len(e.Integration.Spec.Sources))
+	for i, s := range e.Integration.Spec.Sources {
+		envName := fmt.Sprintf("KAMEL_K_ROUTE_%03d", i)
+		environment[envName] = s.Content
+
+		src := fmt.Sprintf("env:%s", envName)
+		if s.Language != "" {
+			src = src + "?language=" + string(s.Language)
+		}
+
+		sources = append(sources, src)
+	}
+
 	// set env vars needed by the runtime
 	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
 
 	// camel-k runtime
-	environment["CAMEL_K_ROUTES_URI"] = "inline:" + e.Integration.Spec.Source.Content
-	environment["CAMEL_K_ROUTES_LANGUAGE"] = string(e.Integration.Spec.Source.Language)
-	environment["CAMEL_K_CONF"] = "inline:" + PropertiesString(properties)
-	environment["CAMEL_K_CONF_D"] = "/etc/camel/conf.d"
+	environment["CAMEL_K_ROUTES"] = strings.Join(sources, ",")
+	environment["CAMEL_K_CONF"] = "env:CAMEL_K_PROPERTIES"
+	environment["CAMEL_K_PROPERTIES"] = PropertiesString(properties)
 
 	// add a dummy env var to trigger deployment if everything but the code
 	// has been changed
@@ -214,6 +227,12 @@ func (t *knativeTrait) getConfiguredSourceChannels() []string {
 }
 
 func (*knativeTrait) getSourceChannels(e *Environment) []string {
-	meta := metadata.Extract(e.Integration.Spec.Source)
-	return knativeutil.ExtractChannelNames(meta.FromURIs)
+	channels := make([]string, 0)
+
+	for _, s := range e.Integration.Spec.Sources {
+		meta := metadata.Extract(s)
+		channels = append(channels, knativeutil.ExtractChannelNames(meta.FromURIs)...)
+	}
+
+	return channels
 }

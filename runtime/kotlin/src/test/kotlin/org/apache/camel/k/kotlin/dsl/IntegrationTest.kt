@@ -16,7 +16,7 @@ class IntegrationTest {
     fun `load integration with rest`() {
         var runtime = org.apache.camel.k.jvm.Runtime()
         runtime.duration = 5
-        runtime.load("classpath:routes-with-rest.kts", null)
+        runtime.load(arrayOf("classpath:routes-with-rest.kts"))
         runtime.addMainListener(object: MainListenerSupport() {
             override fun afterStart(main: MainSupport) {
                 main.stop()
@@ -37,7 +37,7 @@ class IntegrationTest {
     fun `load integration with binding`() {
         var runtime = org.apache.camel.k.jvm.Runtime()
         runtime.duration = 5
-        runtime.load("classpath:routes-with-bindings.kts", null)
+        runtime.load(arrayOf("classpath:routes-with-bindings.kts"))
         runtime.addMainListener(object: MainListenerSupport() {
             override fun afterStart(main: MainSupport) {
                 main.stop()
@@ -60,7 +60,7 @@ class IntegrationTest {
 
         var runtime = org.apache.camel.k.jvm.Runtime()
         runtime.duration = 5
-        runtime.load("classpath:routes-with-component-configuration.kts", null)
+        runtime.load(arrayOf("classpath:routes-with-component-configuration.kts"))
         runtime.addMainListener(object : MainListenerSupport() {
             override fun afterStart(main: MainSupport) {
                 val seda = runtime.camelContext.getComponent("seda", SedaComponent::class.java)

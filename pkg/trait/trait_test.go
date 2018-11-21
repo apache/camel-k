@@ -38,7 +38,7 @@ func TestOpenShiftTraits(t *testing.T) {
 	assert.NotContains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test"
+		return cm.Name == "test-properties"
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
 		return deployment.Name == "test"
@@ -53,7 +53,7 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 	assert.Contains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test"
+		return cm.Name == "test-properties"
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
 		return deployment.Name == "test"
@@ -107,7 +107,7 @@ func TestKubernetesTraits(t *testing.T) {
 	assert.NotContains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test"
+		return cm.Name == "test-properties"
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
 		return deployment.Name == "test"
@@ -122,7 +122,7 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 	assert.NotContains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test"
+		return cm.Name == "test-properties"
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
 		return deployment.Name == "test"

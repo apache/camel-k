@@ -5,10 +5,10 @@
 //
 // ****************
 
-l = components.get('log')
-l.exchangeFormatter = function(e) {
-    return "log - body=" + e.in.body + ", headers=" + e.in.headers
-}
+//l = components.get('log')
+//l.exchangeFormatter = function(e) {
+//    return "log - body=" + e.in.body + ", headers=" + e.in.headers
+//}
 
 // ****************
 //

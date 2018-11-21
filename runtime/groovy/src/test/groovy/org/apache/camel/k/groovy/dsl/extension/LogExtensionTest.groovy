@@ -30,7 +30,7 @@ class LogExtensionTest extends Specification {
         when:
         def log = new LogComponent()
         log.formatter {
-            "body: " + it.in.body
+            "body: $it.in.body"
         }
 
         def ex = new DefaultExchange(ctx)

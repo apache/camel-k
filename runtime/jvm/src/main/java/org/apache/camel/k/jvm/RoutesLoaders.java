@@ -16,6 +16,20 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.SimpleBindings;
+import javax.xml.bind.UnmarshalException;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.k.jvm.dsl.Components;
@@ -28,24 +42,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joor.Reflect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.SimpleBindings;
-import javax.xml.bind.UnmarshalException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import static org.apache.camel.k.jvm.Constants.SCHEME_CLASSPATH;
-import static org.apache.camel.k.jvm.Constants.SCHEME_FILE;
-import static org.apache.camel.k.jvm.Constants.SCHEME_INLINE;
 
 public final class RoutesLoaders {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutesLoaders.class);
@@ -62,7 +58,7 @@ public final class RoutesLoaders {
         @Override
         public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
             String path = resource;
-            path = StringUtils.removeStart(path, SCHEME_CLASSPATH);
+            path = StringUtils.removeStart(path, Constants.SCHEME_CLASSPATH);
             path = StringUtils.removeEnd(path, ".class");
 
             Class<?> type = Class.forName(path);
@@ -173,7 +169,9 @@ public final class RoutesLoaders {
 
 
     public static RoutesLoader loaderFor(String resource, String languageName) {
-        if (!resource.startsWith(SCHEME_CLASSPATH) && !resource.startsWith(SCHEME_FILE) && !resource.startsWith(SCHEME_INLINE)) {
+        if (!resource.startsWith(Constants.SCHEME_CLASSPATH) &&
+            !resource.startsWith(Constants.SCHEME_FILE) &&
+            !resource.startsWith(Constants.SCHEME_ENV)) {
             throw new IllegalArgumentException("No valid resource format, expected scheme:path, found " + resource);
         }
 

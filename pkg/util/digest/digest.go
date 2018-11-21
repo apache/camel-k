@@ -37,9 +37,12 @@ func ComputeForIntegration(integration *v1alpha1.Integration) string {
 	hash.Write([]byte(integration.Spec.Context))
 
 	// Integration code
-	if integration.Spec.Source.Content != "" {
-		hash.Write([]byte(integration.Spec.Source.Content))
+	for _, s := range integration.Spec.Sources {
+		if s.Content != "" {
+			hash.Write([]byte(s.Content))
+		}
 	}
+
 	// Integration dependencies
 	for _, item := range integration.Spec.Dependencies {
 		hash.Write([]byte(item))

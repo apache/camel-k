@@ -20,29 +20,31 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
 
+	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
+	"gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 
-	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
@@ -67,7 +69,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:  options.run,
 	}
 
-	cmd.Flags().StringVarP(&options.Language, "language", "l", "", "Programming Language used to write the file")
 	cmd.Flags().StringVarP(&options.Runtime, "runtime", "r", "", "Runtime used by the integration")
 	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
@@ -93,7 +94,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 type runCmdOptions struct {
 	*RootCmdOptions
 	IntegrationContext string
-	Language           string
 	Runtime            string
 	IntegrationName    string
 	Dependencies       []string
@@ -111,22 +111,27 @@ type runCmdOptions struct {
 }
 
 func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
-	if len(args) != 1 {
-		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
+	if len(args) < 1 {
+		return errors.New("accepts at least 1 arg, received 0")
 	}
-	fileName := args[0]
-	if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
-		if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
-			return errors.Wrap(err, "file "+fileName+" does not exist")
-		} else if err != nil {
-			return errors.Wrap(err, "error while accessing file "+fileName)
-		}
-	} else {
-		resp, err := http.Get(fileName)
-		if err != nil {
-			return errors.Wrap(err, "The URL provided is not reachable")
-		} else if resp.StatusCode != 200 {
-			return errors.New("The URL provided is not reachable " + fileName + " The error code returned is " + strconv.Itoa(resp.StatusCode))
+	if len(args) > 1 && o.IntegrationName == "" {
+		return errors.New("integration name is mandatory when loading multiple integrations")
+	}
+
+	for _, fileName := range args {
+		if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
+			if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
+				return errors.Wrap(err, "file "+fileName+" does not exist")
+			} else if err != nil {
+				return errors.Wrap(err, "error while accessing file "+fileName)
+			}
+		} else {
+			resp, err := http.Get(fileName)
+			if err != nil {
+				return errors.Wrap(err, "The URL provided is not reachable")
+			} else if resp.StatusCode != 200 {
+				return errors.New("The URL provided is not reachable " + fileName + " The error code returned is " + strconv.Itoa(resp.StatusCode))
+			}
 		}
 	}
 
@@ -165,7 +170,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Sync || o.Dev {
-		err = o.syncIntegration(args[0])
+		err = o.syncIntegration(args)
 		if err != nil {
 			return err
 		}
@@ -215,36 +220,35 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integratio
 	return watch.HandleStateChanges(o.Context, integration, handler)
 }
 
-func (o *runCmdOptions) syncIntegration(file string) error {
-	changes, err := sync.File(o.Context, file)
-	if err != nil {
-		return err
-	}
-	go func() {
-		for {
-			select {
-			case <-o.Context.Done():
-				return
-			case <-changes:
-				_, err := o.updateIntegrationCode(file)
-				if err != nil {
-					logrus.Error("Unable to sync integration: ", err)
+func (o *runCmdOptions) syncIntegration(sources []string) error {
+	for _, s := range sources {
+		changes, err := sync.File(o.Context, s)
+		if err != nil {
+			return err
+		}
+		go func() {
+			for {
+				select {
+				case <-o.Context.Done():
+					return
+				case <-changes:
+					_, err := o.updateIntegrationCode(sources)
+					if err != nil {
+						logrus.Error("Unable to sync integration: ", err)
+					}
 				}
 			}
-		}
-	}()
+		}()
+	}
+
 	return nil
 }
 
 func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v1alpha1.Integration, error) {
-	return o.updateIntegrationCode(args[0])
+	return o.updateIntegrationCode(args)
 }
 
-func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integration, error) {
-	code, err := o.loadCode(filename)
-	if err != nil {
-		return nil, err
-	}
+func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integration, error) {
 
 	namespace := o.Namespace
 
@@ -252,17 +256,13 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 	if o.IntegrationName != "" {
 		name = o.IntegrationName
 		name = kubernetes.SanitizeName(name)
-	} else {
-		name = kubernetes.SanitizeName(filename)
+	} else if len(sources) == 1 {
+		name = kubernetes.SanitizeName(sources[0])
 		if name == "" {
 			name = "integration"
 		}
-	}
-
-	codeName := filename
-
-	if idx := strings.LastIndexByte(filename, os.PathSeparator); idx > -1 {
-		codeName = codeName[idx+1:]
+	} else {
+		return nil, errors.New("invalid argument combination")
 	}
 
 	integration := v1alpha1.Integration{
@@ -275,16 +275,20 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 			Name:      name,
 		},
 		Spec: v1alpha1.IntegrationSpec{
-			Source: v1alpha1.SourceSpec{
-				Name:     codeName,
-				Content:  code,
-				Language: v1alpha1.Language(o.Language),
-			},
 			Dependencies:  make([]string, 0, len(o.Dependencies)),
 			Context:       o.IntegrationContext,
 			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
 			Profile:       v1alpha1.TraitProfileByName(o.Profile),
 		},
+	}
+
+	for _, source := range sources {
+		code, err := o.loadCode(source)
+		if err != nil {
+			return nil, err
+		}
+
+		integration.Spec.AddSource(path.Base(source), code, "")
 	}
 
 	for _, item := range o.Dependencies {
@@ -336,7 +340,7 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 	case "":
 		// continue..
 	case "yaml":
-		jsondata, err := toJson(&integration)
+		jsondata, err := toJSON(&integration)
 		if err != nil {
 			return nil, err
 		}
@@ -348,7 +352,7 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 		return nil, nil
 
 	case "json":
-		data, err := toJson(&integration)
+		data, err := toJSON(&integration)
 		if err != nil {
 			return nil, err
 		}
@@ -360,7 +364,7 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 	}
 
 	existed := false
-	err = sdk.Create(&integration)
+	err := sdk.Create(&integration)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		clone := integration.DeepCopy()
@@ -384,7 +388,7 @@ func (o *runCmdOptions) updateIntegrationCode(filename string) (*v1alpha1.Integr
 	return &integration, nil
 }
 
-func toJson(value runtime.Object) ([]byte, error) {
+func toJSON(value runtime.Object) ([]byte, error) {
 	u, err := k8sutil.UnstructuredFromRuntimeObject(value)
 	if err != nil {
 		return nil, fmt.Errorf("error creating unstructured data: %v", err)

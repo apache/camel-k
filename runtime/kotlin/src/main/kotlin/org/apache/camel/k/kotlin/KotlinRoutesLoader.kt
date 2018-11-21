@@ -85,12 +85,10 @@ class KotlinRoutesLoader : RoutesLoader {
                     )
 
                     for (report in result.reports) {
-                        if (report.severity == ScriptDiagnostic.Severity.ERROR) {
-                            LOGGER.error("{}", report.message, report.exception)
-                        } else if (report.severity == ScriptDiagnostic.Severity.WARNING) {
-                            LOGGER.warn("{}", report.message, report.exception)
-                        } else {
-                            LOGGER.info("{}", report.message)
+                        when {
+                            report.severity == ScriptDiagnostic.Severity.ERROR -> LOGGER.error("{}", report.message, report.exception)
+                            report.severity == ScriptDiagnostic.Severity.WARNING -> LOGGER.warn("{}", report.message, report.exception)
+                            else -> LOGGER.info("{}", report.message)
                         }
                     }
                 }
