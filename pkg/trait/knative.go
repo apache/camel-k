@@ -50,7 +50,7 @@ func (t *knativeTrait) appliesTo(e *Environment) bool {
 
 func (t *knativeTrait) autoconfigure(e *Environment) error {
 	if t.Sources == "" {
-		channels := t.getSourceChannels(e)
+		channels := getSourceChannels(e)
 		t.Sources = strings.Join(channels, ",")
 	}
 	return nil
@@ -139,7 +139,7 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 }
 
 func (t *knativeTrait) getSubscriptionsFor(e *Environment) []*eventing.Subscription {
-	channels := t.getConfiguredSourceChannels()
+	channels := getConfiguredSourceChannels(t.Sources)
 	subs := make([]*eventing.Subscription, 0)
 	for _, ch := range channels {
 		subs = append(subs, t.getSubscriptionFor(e, ch))
@@ -185,7 +185,7 @@ func (t *knativeTrait) getConfigurationSerialized(e *Environment) string {
 }
 
 func (t *knativeTrait) getConfiguration(e *Environment) knativeutil.CamelEnvironment {
-	sourceChannels := t.getConfiguredSourceChannels()
+	sourceChannels := getConfiguredSourceChannels(t.Sources)
 	env := knativeutil.NewCamelEnvironment()
 	for _, ch := range sourceChannels {
 		svc := knativeutil.CamelServiceDefinition{
@@ -215,9 +215,9 @@ func (t *knativeTrait) getConfiguration(e *Environment) knativeutil.CamelEnviron
 	return env
 }
 
-func (t *knativeTrait) getConfiguredSourceChannels() []string {
+func getConfiguredSourceChannels(sources string) []string {
 	channels := make([]string, 0)
-	for _, ch := range strings.Split(t.Sources, ",") {
+	for _, ch := range strings.Split(sources, ",") {
 		cht := strings.Trim(ch, " \t\"")
 		if cht != "" {
 			channels = append(channels, cht)
@@ -226,13 +226,13 @@ func (t *knativeTrait) getConfiguredSourceChannels() []string {
 	return channels
 }
 
-func (*knativeTrait) getSourceChannels(e *Environment) []string {
+func getSourceChannels(e *Environment) []string {
 	channels := make([]string, 0)
 
-	for _, s := range e.Integration.Spec.Sources {
-		meta := metadata.Extract(s)
+	metadata.Each(e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 		channels = append(channels, knativeutil.ExtractChannelNames(meta.FromURIs)...)
-	}
+		return true
+	})
 
 	return channels
 }

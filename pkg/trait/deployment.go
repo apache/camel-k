@@ -43,8 +43,8 @@ func (d *deploymentTrait) appliesTo(e *Environment) bool {
 }
 
 func (d *deploymentTrait) apply(e *Environment) error {
-	e.Resources.AddAll(d.getConfigMapFor(e))
-	e.Resources.Add(d.getDeploymentFor(e))
+	e.Resources.AddAll(getConfigMapsFor(e))
+	e.Resources.Add(getDeploymentFor(e))
 	return nil
 }
 
@@ -54,7 +54,7 @@ func (d *deploymentTrait) apply(e *Environment) error {
 //
 // **********************************
 
-func (*deploymentTrait) getConfigMapFor(e *Environment) []runtime.Object {
+func getConfigMapsFor(e *Environment) []runtime.Object {
 	maps := make([]runtime.Object, 0, len(e.Integration.Spec.Sources)+1)
 
 	// combine properties of integration with context, integration
@@ -116,7 +116,7 @@ func (*deploymentTrait) getConfigMapFor(e *Environment) []runtime.Object {
 //
 // **********************************
 
-func (*deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
+func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
 	for i, s := range e.Integration.Spec.Sources {
 		src := fmt.Sprintf("file:/etc/camel/integrations/%03d/%s", i, strings.TrimPrefix(s.Name, "/"))
