@@ -77,7 +77,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.Contains(t, env.ExecutedTraits, ID("builder"))
 	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 4)
+	assert.Len(t, env.Steps, 5)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
 			if s.ID() == "publisher/s2i" && s.Phase() == builder.ApplicationPublishPhase {
@@ -97,7 +97,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.Contains(t, env.ExecutedTraits, ID("builder"))
 	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 4)
+	assert.Len(t, env.Steps, 5)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
 			if s.ID() == "publisher/kaniko" && s.Phase() == builder.ApplicationPublishPhase {
