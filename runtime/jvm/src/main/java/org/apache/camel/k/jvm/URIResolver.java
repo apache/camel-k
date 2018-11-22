@@ -46,7 +46,7 @@ public class URIResolver {
 
     public static Reader resolveEnv(String uri) {
         if (!uri.startsWith(Constants.SCHEME_ENV)) {
-            throw new IllegalArgumentException("The provided content is not inline: " + uri);
+            throw new IllegalArgumentException("The provided content is not env: " + uri);
         }
 
         final String envvar = StringHelper.after(uri, ":");
