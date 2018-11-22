@@ -66,7 +66,7 @@ func (b *defaultBuilder) Submit(request Request) Result {
 		go b.loop()
 	}
 
-	result, present := b.request.Load(request.Identifier)
+	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
 		result = Result{
 			Request: request,
@@ -75,7 +75,7 @@ func (b *defaultBuilder) Submit(request Request) Result {
 
 		b.log.Infof("submitting request: %+v", request)
 
-		b.request.Store(request.Identifier, result)
+		b.request.Store(request.Meta.Name, result)
 		b.requests <- request
 	}
 
@@ -84,7 +84,7 @@ func (b *defaultBuilder) Submit(request Request) Result {
 
 // Purge --
 func (b *defaultBuilder) Purge(request Request) {
-	b.request.Delete(request.Identifier)
+	b.request.Delete(request.Meta.Name)
 }
 
 // ********************************
@@ -113,9 +113,9 @@ func (b *defaultBuilder) loop() {
 }
 
 func (b *defaultBuilder) submit(request Request) {
-	result, present := b.request.Load(request.Identifier)
+	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
-		b.log.Panicf("no info found for: %+v", request.Identifier)
+		b.log.Panicf("no info found for: %+v", request.Meta.Name)
 	}
 
 	// update the status
@@ -138,7 +138,7 @@ func (b *defaultBuilder) submit(request Request) {
 	defer os.RemoveAll(builderPath)
 
 	// update the cache
-	b.request.Store(request.Identifier, r)
+	b.request.Store(request.Meta.Name, r)
 
 	c := Context{
 		C:         b.ctx,
@@ -164,7 +164,7 @@ func (b *defaultBuilder) submit(request Request) {
 			l := b.log.WithFields(logrus.Fields{
 				"step":    step.ID(),
 				"phase":   step.Phase(),
-				"request": request.Identifier.String(),
+				"context": request.Meta.Name,
 			})
 
 			l.Infof("executing step")
@@ -195,7 +195,7 @@ func (b *defaultBuilder) submit(request Request) {
 	}
 
 	// update the cache
-	b.request.Store(request.Identifier, r)
+	b.request.Store(request.Meta.Name, r)
 
-	b.log.Infof("request %s:%s executed in %f seconds", r.Request.Identifier.Name, r.Request.Identifier.Qualifier, r.Task.Elapsed().Seconds())
+	b.log.Infof("request to build context %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
 }

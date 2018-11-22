@@ -27,6 +27,7 @@ var DefaultSteps = []builder.Step{
 	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
 	builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
 	builder.NewStep("publisher/kaniko", builder.ApplicationPublishPhase, Publisher),
+	builder.NewStep("notify", builder.NotifyPhase, builder.Notify),
 }
 
 // BuildDir is the directory where to build artifacts (shared with the Kaniko pod)

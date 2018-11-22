@@ -45,7 +45,7 @@ func Publisher(ctx *builder.Context) error {
 			Kind:       "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Request.Identifier.Name,
+			Name:      "camel-k-" + ctx.Request.Meta.Name,
 			Namespace: ctx.Namespace,
 		},
 		Spec: buildv1.BuildConfigSpec{
@@ -64,7 +64,7 @@ func Publisher(ctx *builder.Context) error {
 				Output: buildv1.BuildOutput{
 					To: &v1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: "camel-k-" + ctx.Request.Identifier.Name + ":" + ctx.Request.Identifier.Qualifier,
+						Name: "camel-k-" + ctx.Request.Meta.Name + ":" + ctx.Request.Meta.ResourceVersion,
 					},
 				},
 			},
@@ -83,7 +83,7 @@ func Publisher(ctx *builder.Context) error {
 			Kind:       "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Request.Identifier.Name,
+			Name:      "camel-k-" + ctx.Request.Meta.Name,
 			Namespace: ctx.Namespace,
 		},
 		Spec: imagev1.ImageStreamSpec{
@@ -113,7 +113,7 @@ func Publisher(ctx *builder.Context) error {
 		Namespace(ctx.Namespace).
 		Body(resource).
 		Resource("buildconfigs").
-		Name("camel-k-" + ctx.Request.Identifier.Name).
+		Name("camel-k-" + ctx.Request.Meta.Name).
 		SubResource("instantiatebinary").
 		Do()
 
@@ -159,7 +159,7 @@ func Publisher(ctx *builder.Context) error {
 		return errors.New("dockerImageRepository not available in ImageStream")
 	}
 
-	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Request.Identifier.Qualifier
+	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Request.Meta.ResourceVersion
 
 	return nil
 }
