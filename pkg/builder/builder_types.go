@@ -20,7 +20,10 @@ package builder
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/util/maven"
 
@@ -29,13 +32,15 @@ import (
 
 const (
 	// ProjectGenerationPhase --
-	ProjectGenerationPhase int = 10
+	ProjectGenerationPhase int32 = 10
 	// ProjectBuildPhase --
-	ProjectBuildPhase int = 20
+	ProjectBuildPhase int32 = 20
 	// ApplicationPackagePhase --
-	ApplicationPackagePhase int = 30
+	ApplicationPackagePhase int32 = 30
 	// ApplicationPublishPhase --
-	ApplicationPublishPhase int = 40
+	ApplicationPublishPhase int32 = 40
+	// NotifyPhase --
+	NotifyPhase int32 = math.MaxInt32
 )
 
 // Builder --
@@ -47,13 +52,13 @@ type Builder interface {
 // Step --
 type Step interface {
 	ID() string
-	Phase() int
+	Phase() int32
 	Execute(*Context) error
 }
 
 type stepWrapper struct {
 	id    string
-	phase int
+	phase int32
 	task  func(*Context) error
 }
 
@@ -65,7 +70,7 @@ func (s *stepWrapper) ID() string {
 	return s.id
 }
 
-func (s *stepWrapper) Phase() int {
+func (s *stepWrapper) Phase() int32 {
 	return s.phase
 }
 
@@ -74,7 +79,7 @@ func (s *stepWrapper) Execute(ctx *Context) error {
 }
 
 // NewStep --
-func NewStep(ID string, phase int, task func(*Context) error) Step {
+func NewStep(ID string, phase int32, task func(*Context) error) Step {
 	s := stepWrapper{
 		id:    ID,
 		phase: phase,
@@ -84,27 +89,9 @@ func NewStep(ID string, phase int, task func(*Context) error) Step {
 	return &s
 }
 
-// NewIdentifierForContext --
-func NewIdentifierForContext(context *v1alpha1.IntegrationContext) Identifier {
-	return Identifier{
-		Name:      "context-" + context.Name,
-		Qualifier: context.ResourceVersion,
-	}
-}
-
-// Identifier --
-type Identifier struct {
-	Name      string
-	Qualifier string
-}
-
-func (r *Identifier) String() string {
-	return r.Name + ":" + r.Qualifier
-}
-
 // Request --
 type Request struct {
-	Identifier   Identifier
+	Meta         v1.ObjectMeta
 	Platform     v1alpha1.IntegrationPlatformSpec
 	Code         v1alpha1.SourceSpec
 	Dependencies []string

@@ -38,7 +38,7 @@ func Publisher(ctx *builder.Context) error {
 	if organization == "" {
 		organization = ctx.Namespace
 	}
-	image := ctx.Request.Platform.Build.Registry + "/" + organization + "/camel-k-" + ctx.Request.Identifier.Name + ":" + ctx.Request.Identifier.Qualifier
+	image := ctx.Request.Platform.Build.Registry + "/" + organization + "/camel-k-" + ctx.Request.Meta.Name + ":" + ctx.Request.Meta.ResourceVersion
 	baseDir, _ := path.Split(ctx.Archive)
 	contextDir := path.Join(baseDir, "context")
 	if err := tar.Extract(ctx.Archive, contextDir); err != nil {
@@ -88,7 +88,7 @@ func Publisher(ctx *builder.Context) error {
 			},
 		})
 		volumeMounts = append(volumeMounts, v1.VolumeMount{
-			Name: "kaniko-secret",
+			Name:      "kaniko-secret",
 			MountPath: "/secret",
 		})
 		envs = append(envs, v1.EnvVar{
@@ -105,14 +105,14 @@ func Publisher(ctx *builder.Context) error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ctx.Namespace,
-			Name:      "camel-k-" + ctx.Request.Identifier.Name,
+			Name:      "camel-k-" + ctx.Request.Meta.Name,
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{
 				{
-					Name:  "kaniko",
-					Image: "gcr.io/kaniko-project/executor@sha256:f29393d9c8d40296e1692417089aa2023494bce9afd632acac7dd0aea763e5bc",
-					Args: args,
+					Name:         "kaniko",
+					Image:        "gcr.io/kaniko-project/executor@sha256:f29393d9c8d40296e1692417089aa2023494bce9afd632acac7dd0aea763e5bc",
+					Args:         args,
 					Env:          envs,
 					VolumeMounts: volumeMounts,
 				},

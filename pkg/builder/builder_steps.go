@@ -25,6 +25,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/rs/xid"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 
@@ -293,4 +295,36 @@ func FindBestImage(images []PublishedImage, entries []v1alpha1.Artifact) (*Publi
 	}
 
 	return &bestImage, bestImageCommonLibs
+}
+
+// Notify --
+func Notify(ctx *Context) error {
+	c := v1alpha1.IntegrationContext{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       v1alpha1.IntegrationContextKind,
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ctx.Namespace,
+			Name:      ctx.Request.Meta.Name,
+		},
+	}
+
+	if err := sdk.Get(&c); err != nil {
+		return err
+	}
+
+	t := c.DeepCopy()
+	if t.Annotations == nil {
+		t.Annotations = make(map[string]string)
+	}
+
+	// Add a random ID to trigger update
+	t.Annotations["camel.apache.org/build.id"] = xid.New().String()
+
+	if err := sdk.Update(t); err != nil {
+		return err
+	}
+
+	return nil
 }

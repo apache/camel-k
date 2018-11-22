@@ -62,7 +62,7 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 	}
 
 	r := builder.Request{
-		Identifier:   builder.NewIdentifierForContext(context),
+		Meta:         context.ObjectMeta,
 		Dependencies: context.Spec.Dependencies,
 		Steps:        env.Steps,
 		Platform:     env.Platform.Spec,
