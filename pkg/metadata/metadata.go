@@ -34,3 +34,14 @@ func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
 		Dependencies: dependencies,
 	}
 }
+
+// Each --
+func Each(sources []v1alpha1.SourceSpec, consumer func(int, IntegrationMetadata) bool) {
+	for i, s := range sources {
+		meta := Extract(s)
+
+		if !consumer(i, meta) {
+			break
+		}
+	}
+}

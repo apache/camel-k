@@ -115,7 +115,7 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 		return errors.New("accepts at least 1 arg, received 0")
 	}
 	if len(args) > 1 && o.IntegrationName == "" {
-		return errors.New("integration name is mandatory when loading multiple integrations")
+		return errors.New("integration name is mandatory when using multiple sources")
 	}
 
 	for _, fileName := range args {
@@ -258,11 +258,10 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 		name = kubernetes.SanitizeName(name)
 	} else if len(sources) == 1 {
 		name = kubernetes.SanitizeName(sources[0])
-		if name == "" {
-			name = "integration"
-		}
-	} else {
-		return nil, errors.New("invalid argument combination")
+	}
+
+	if name == "" {
+		return nil, errors.New("unable to determine integration name")
 	}
 
 	integration := v1alpha1.Integration{
