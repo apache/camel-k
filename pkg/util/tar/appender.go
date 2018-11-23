@@ -92,6 +92,38 @@ func (t *Appender) AddFile(filePath string, tarDir string) (string, error) {
 	return fileName, nil
 }
 
+// AddFileWithName adds a file content to the tarDir, using the fiven file name.
+// It returns the full path of the file inside the tar.
+func (t *Appender) AddFileWithName(fileName string, filePath string, tarDir string) (string, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return "", err
+	}
+	if tarDir != "" {
+		fileName = path.Join(tarDir, fileName)
+	}
+
+	t.writer.WriteHeader(&atar.Header{
+		Name:    fileName,
+		Size:    info.Size(),
+		Mode:    int64(info.Mode()),
+		ModTime: info.ModTime(),
+	})
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(t.writer, file)
+	if err != nil {
+		return "", errors.Wrap(err, "cannot add file to the tar archive")
+	}
+
+	return fileName, nil
+}
+
 // AppendData appends the given content to a file inside the tar, creating it if it does not exist
 func (t *Appender) AppendData(data []byte, tarPath string) error {
 	t.writer.WriteHeader(&atar.Header{

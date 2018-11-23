@@ -36,7 +36,7 @@ public final class Runtime extends MainSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(Runtime.class);
 
     private final ConcurrentMap<String, CamelContext> contextMap;
-    private final RuntimeRegistry registry = new RuntimeRegistry();
+    private final RuntimeRegistry registry = new SimpleRuntimeRegistry();
 
     public Runtime() {
         this.contextMap = new ConcurrentHashMap<>();
@@ -53,7 +53,7 @@ public final class Runtime extends MainSupport {
             final RoutesLoader loader = RoutesLoaders.loaderFor(location, language);
             final RouteBuilder builder = loader.load(registry, location);
 
-            if (routes == null) {
+            if (builder == null) {
                 throw new IllegalStateException("Unable to load route from: " + route);
             }
 

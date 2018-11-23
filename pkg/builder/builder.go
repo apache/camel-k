@@ -141,10 +141,12 @@ func (b *defaultBuilder) submit(request Request) {
 	b.request.Store(request.Meta.Name, r)
 
 	c := Context{
-		C:         b.ctx,
-		Path:      builderPath,
-		Namespace: b.namespace,
-		Request:   request,
+		C:                b.ctx,
+		Path:             builderPath,
+		Namespace:        b.namespace,
+		Request:          request,
+		ComputeClasspath: true,
+		Image:            "fabric8/s2i-java:2.3", // TODO: externalize
 	}
 
 	// Sort steps by phase
@@ -152,6 +154,7 @@ func (b *defaultBuilder) submit(request Request) {
 		return request.Steps[i].Phase() < request.Steps[j].Phase()
 	})
 
+	b.log.Infof("steps: %v", request.Steps)
 	for _, step := range request.Steps {
 		if c.Error != nil {
 			break

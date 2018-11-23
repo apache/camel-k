@@ -48,6 +48,7 @@
         <snakeyaml.version>1.23</snakeyaml.version>
         <spock.version>1.0-groovy-2.4</spock.version>
         <jackson.version>2.9.7</jackson.version>
+        <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
 
         <gmavenplus-plugin.version>1.6.1</gmavenplus-plugin.version>
         <fabric8-maven-plugin.version>3.5.40</fabric8-maven-plugin.version>
@@ -100,6 +101,7 @@
         <module>jvm</module>
         <module>groovy</module>
         <module>kotlin</module>
+        <module>spring-boot</module>
         <module>catalog-builder</module>
         <module>dependency-lister</module>
         <module>camel-knative-http</module>

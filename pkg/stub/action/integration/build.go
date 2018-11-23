@@ -119,6 +119,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 	platformCtx.Spec = v1alpha1.IntegrationContextSpec{
 		Dependencies: integration.Spec.Dependencies,
 		Repositories: integration.Spec.Repositories,
+		Traits:       integration.Spec.Traits,
 	}
 
 	if err := sdk.Create(&platformCtx); err != nil {

@@ -146,6 +146,11 @@ func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// optimizations
 	environment["AB_JOLOKIA_OFF"] = "true"
 
+	// add env vars from traits
+	for k, v := range e.EnvVars {
+		environment[k] = v
+	}
+
 	labels := map[string]string{
 		"camel.apache.org/integration": e.Integration.Name,
 	}
