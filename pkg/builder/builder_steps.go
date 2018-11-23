@@ -154,6 +154,7 @@ func ComputeDependencies(ctx *Context) error {
 		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
+			Target:   "dependencies",
 		})
 	}
 
@@ -166,7 +167,7 @@ type ArtifactsSelector func([]v1alpha1.Artifact) (string, []v1alpha1.Artifact, e
 // StandardPackager --
 func StandardPackager(ctx *Context) error {
 	return packager(ctx, func(libraries []v1alpha1.Artifact) (string, []v1alpha1.Artifact, error) {
-		return "fabric8/s2i-java:2.3", libraries, nil
+		return ctx.Image, libraries, nil
 	})
 }
 
@@ -191,14 +192,18 @@ func IncrementalPackager(ctx *Context) error {
 		}
 
 		// return default selection
-		return "fabric8/s2i-java:2.3", libraries, nil
+		return ctx.Image, libraries, nil
 	})
 }
 
+// ClassPathPackager --
 func packager(ctx *Context, selector ArtifactsSelector) error {
 	imageName, selectedArtifacts, err := selector(ctx.Artifacts)
 	if err != nil {
 		return err
+	}
+	if imageName == "" {
+		imageName = ctx.Image
 	}
 
 	tarFileName := path.Join(ctx.Path, "package", "occi.tar")
@@ -215,38 +220,43 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 	}
 	defer tarAppender.Close()
 
-	tarDir := "dependencies/"
 	for _, entry := range selectedArtifacts {
 		gav, err := maven.ParseGAV(entry.ID)
 		if err != nil {
 			return err
 		}
 
-		tarPath := path.Join(tarDir, gav.GroupID)
-		_, err = tarAppender.AddFile(entry.Location, tarPath)
+		_, fileName := path.Split(entry.Location)
+
+		_, err = tarAppender.AddFileWithName(gav.GroupID+"."+fileName, entry.Location, entry.Target)
 		if err != nil {
 			return err
 		}
 	}
 
-	cp := ""
-	for _, entry := range ctx.Artifacts {
-		gav, err := maven.ParseGAV(entry.ID)
-		if err != nil {
-			return nil
+	if ctx.ComputeClasspath {
+		cp := ""
+		for _, entry := range ctx.Artifacts {
+			gav, err := maven.ParseGAV(entry.ID)
+			if err != nil {
+				return nil
+			}
+			_, fileName := path.Split(entry.Location)
+			cp += path.Join(entry.Target, gav.GroupID+"."+fileName) + "\n"
 		}
-		tarPath := path.Join(tarDir, gav.GroupID)
-		_, fileName := path.Split(entry.Location)
-		fileName = path.Join(tarPath, fileName)
-		cp += fileName + "\n"
+
+		err = tarAppender.AppendData([]byte(cp), "classpath")
+		if err != nil {
+			return err
+		}
 	}
 
-	err = tarAppender.AppendData([]byte(cp), "classpath")
+	err = tarAppender.AppendData([]byte(""), "marker")
 	if err != nil {
 		return err
 	}
 
-	ctx.Image = imageName //"fabric8/s2i-java:2.3"
+	ctx.Image = imageName
 	ctx.Archive = tarFileName
 
 	return nil

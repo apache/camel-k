@@ -16,9 +16,8 @@
  */
 package org.apache.camel.k.groovy
 
-
 import org.apache.camel.k.jvm.RoutesLoaders
-import org.apache.camel.k.jvm.RuntimeRegistry
+import org.apache.camel.k.jvm.SimpleRuntimeRegistry
 import org.apache.camel.model.ToDefinition
 import spock.lang.Specification
 
@@ -30,7 +29,7 @@ class LoaderTest extends Specification {
 
         when:
             def loader = RoutesLoaders.loaderFor(resource, null)
-            def builder = loader.load(new RuntimeRegistry(), resource)
+            def builder = loader.load(new SimpleRuntimeRegistry(), resource)
 
         then:
             loader instanceof GroovyRoutesLoader

@@ -107,5 +107,4 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 
 	assert.Equal(t, builder.StatusError, result.Status)
 	assert.NotEqual(t, builder.StatusCompleted, result.Status)
-	assert.Empty(t, result.Image)
 }

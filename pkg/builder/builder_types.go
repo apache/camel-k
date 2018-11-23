@@ -31,6 +31,8 @@ import (
 )
 
 const (
+	// IntiPhase --
+	IntiPhase int32 = 0
 	// ProjectGenerationPhase --
 	ProjectGenerationPhase int32 = 10
 	// ProjectBuildPhase --
@@ -59,7 +61,7 @@ type Step interface {
 type stepWrapper struct {
 	id    string
 	phase int32
-	task  func(*Context) error
+	task  StepTask
 }
 
 func (s *stepWrapper) String() string {
@@ -78,8 +80,11 @@ func (s *stepWrapper) Execute(ctx *Context) error {
 	return s.task(ctx)
 }
 
+// StepTask ---
+type StepTask func(*Context) error
+
 // NewStep --
-func NewStep(ID string, phase int32, task func(*Context) error) Step {
+func NewStep(ID string, phase int32, task StepTask) Step {
 	s := stepWrapper{
 		id:    ID,
 		phase: phase,
@@ -123,15 +128,17 @@ type Result struct {
 
 // Context --
 type Context struct {
-	C         context.Context
-	Request   Request
-	Image     string
-	Error     error
-	Namespace string
-	Project   maven.Project
-	Path      string
-	Artifacts []v1alpha1.Artifact
-	Archive   string
+	C                context.Context
+	Request          Request
+	Image            string
+	Error            error
+	Namespace        string
+	Project          maven.Project
+	Path             string
+	Artifacts        []v1alpha1.Artifact
+	Archive          string
+	ComputeClasspath bool
+	MainClass        string
 }
 
 // PublishedImage --

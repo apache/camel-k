@@ -41,7 +41,7 @@ public final class RuntimeSupport {
     private RuntimeSupport() {
     }
 
-    public static void configureSystemProperties() {
+    public static Properties loadProperties() {
         final String conf = System.getenv(Constants.ENV_CAMEL_K_CONF);
         final String confd = System.getenv(Constants.ENV_CAMEL_K_CONF_D);
         final Properties properties = new Properties();
@@ -94,6 +94,13 @@ public final class RuntimeSupport {
             }
         }
 
+        return properties;
+    }
+
+    public static void configureSystemProperties() {
+        final Properties properties = loadProperties();
+
+        // TODO: sensitive info, maybe better to use properties component ...
         System.getProperties().putAll(properties);
     }
 

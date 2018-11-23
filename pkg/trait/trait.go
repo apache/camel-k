@@ -72,5 +72,6 @@ func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.Integration
 		Integration:    integration,
 		ExecutedTraits: make([]ID, 0),
 		Resources:      kubernetes.NewCollection(),
+		EnvVars:        make(map[string]string),
 	}, nil
 }

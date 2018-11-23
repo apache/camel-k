@@ -73,14 +73,26 @@ func (deps *Dependencies) AddEncodedGAV(gav string) {
 	}
 }
 
-// Dependency represent a maven's dependency
-type Dependency struct {
+// Exclusion represent a maven's dependency exlucsion
+type Exclusion struct {
 	GroupID    string `xml:"groupId"`
 	ArtifactID string `xml:"artifactId"`
-	Version    string `xml:"version,omitempty"`
-	Type       string `xml:"type,omitempty"`
-	Classifier string `xml:"classifier,omitempty"`
-	Scope      string `xml:"scope,omitempty"`
+}
+
+// Exclusions --
+type Exclusions struct {
+	Exclusions []Exclusion `xml:"exclusion"`
+}
+
+// Dependency represent a maven's dependency
+type Dependency struct {
+	GroupID    string      `xml:"groupId"`
+	ArtifactID string      `xml:"artifactId"`
+	Version    string      `xml:"version,omitempty"`
+	Type       string      `xml:"type,omitempty"`
+	Classifier string      `xml:"classifier,omitempty"`
+	Scope      string      `xml:"scope,omitempty"`
+	Exclusions *Exclusions `xml:"exclusions,omitempty"`
 }
 
 // NewDependency create an new dependency from the given gav info
