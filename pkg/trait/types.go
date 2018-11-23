@@ -100,6 +100,7 @@ type Environment struct {
 	Resources      *kubernetes.Collection
 	Steps          []builder.Step
 	ExecutedTraits []ID
+	EnvVars        map[string]string
 }
 
 // IntegrationInPhase --

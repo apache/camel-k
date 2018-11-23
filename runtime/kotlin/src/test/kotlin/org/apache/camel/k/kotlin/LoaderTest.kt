@@ -17,7 +17,7 @@
 package org.apache.camel.k.kotlin
 
 import org.apache.camel.k.jvm.RoutesLoaders
-import org.apache.camel.k.jvm.RuntimeRegistry
+import org.apache.camel.k.jvm.SimpleRuntimeRegistry
 import org.apache.camel.model.ProcessDefinition
 import org.apache.camel.model.ToDefinition
 import org.assertj.core.api.Assertions.assertThat
@@ -29,7 +29,7 @@ class LoaderTest {
     fun `load route from classpath`() {
         val resource = "classpath:routes.kts"
         val loader = RoutesLoaders.loaderFor(resource, null)
-        val builder = loader.load(RuntimeRegistry(), resource)
+        val builder = loader.load(SimpleRuntimeRegistry(), resource)
 
         assertThat(loader).isInstanceOf(KotlinRoutesLoader::class.java)
         assertThat(builder).isNotNull()

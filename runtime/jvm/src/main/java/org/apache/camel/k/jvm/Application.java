@@ -21,12 +21,8 @@ import org.apache.camel.Component;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.ObjectHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Application {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
-
     static {
         //
         // Load properties as system properties so they are accessible through

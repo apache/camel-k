@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/fatih/structs"
@@ -36,6 +38,7 @@ type Catalog struct {
 	tIngress      Trait
 	tOwner        Trait
 	tBuilder      Trait
+	tSpringBoot   Trait
 }
 
 // NewCatalog creates a new trait Catalog
@@ -49,6 +52,7 @@ func NewCatalog() *Catalog {
 		tIngress:      newIngressTrait(),
 		tOwner:        newOwnerTrait(),
 		tBuilder:      newBuilderTrait(),
+		tSpringBoot:   newSpringBootTrait(),
 	}
 }
 
@@ -62,6 +66,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tIngress,
 		c.tOwner,
 		c.tBuilder,
+		c.tSpringBoot,
 	}
 }
 
@@ -78,20 +83,22 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
 			c.tDependencies,
-			c.tDeployment,
 			c.tService,
 			c.tRoute,
 			c.tOwner,
 			c.tBuilder,
+			c.tSpringBoot,
+			c.tDeployment,
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
 			c.tDependencies,
-			c.tDeployment,
 			c.tService,
 			c.tIngress,
 			c.tOwner,
 			c.tBuilder,
+			c.tSpringBoot,
+			c.tDeployment,
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
@@ -99,6 +106,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tKnative,
 			c.tOwner,
 			c.tBuilder,
+			c.tSpringBoot,
 		}
 	}
 
@@ -108,6 +116,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 func (c *Catalog) apply(environment *Environment) error {
 	c.configure(environment)
 	traits := c.traitsFor(environment)
+
 	for _, trait := range traits {
 		if !trait.appliesTo(environment) {
 			continue
@@ -119,6 +128,7 @@ func (c *Catalog) apply(environment *Environment) error {
 			}
 		}
 		if trait.IsEnabled() {
+			logrus.Infof("apply trait: %s", trait.ID())
 			if err := trait.apply(environment); err != nil {
 				return err
 			}
@@ -139,13 +149,20 @@ func (c *Catalog) GetTrait(id string) Trait {
 }
 
 func (c *Catalog) configure(env *Environment) {
-	if env.Integration == nil || env.Integration.Spec.Traits == nil {
-		return
+	if env.Context != nil && env.Context.Spec.Traits != nil {
+		for id, traitSpec := range env.Context.Spec.Traits {
+			catTrait := c.GetTrait(id)
+			if catTrait != nil {
+				traitSpec.Decode(catTrait)
+			}
+		}
 	}
-	for id, traitSpec := range env.Integration.Spec.Traits {
-		catTrait := c.GetTrait(id)
-		if catTrait != nil {
-			traitSpec.Decode(catTrait)
+	if env.Integration != nil && env.Integration.Spec.Traits != nil {
+		for id, traitSpec := range env.Integration.Spec.Traits {
+			catTrait := c.GetTrait(id)
+			if catTrait != nil {
+				traitSpec.Decode(catTrait)
+			}
 		}
 	}
 }
