@@ -51,11 +51,9 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
   <repositories>
     <repository>
       <id>central</id>
-      <name></name>
       <url>https://repo.maven.apache.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
-        <updatePolicy>never</updatePolicy>
       </snapshots>
       <releases>
         <enabled>true</enabled>
@@ -66,11 +64,9 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
   <pluginRepositories>
     <pluginRepository>
       <id>central</id>
-      <name></name>
       <url>https://repo.maven.apache.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
-        <updatePolicy>never</updatePolicy>
       </snapshots>
       <releases>
         <enabled>true</enabled>
@@ -118,8 +114,7 @@ func TestPomGeneration(t *testing.T) {
 					ID:  "central",
 					URL: "https://repo.maven.apache.org/maven2",
 					Snapshots: Snapshots{
-						Enabled:      false,
-						UpdatePolicy: "never",
+						Enabled: false,
 					},
 					Releases: Releases{
 						Enabled:      true,
@@ -134,8 +129,7 @@ func TestPomGeneration(t *testing.T) {
 					ID:  "central",
 					URL: "https://repo.maven.apache.org/maven2",
 					Snapshots: Snapshots{
-						Enabled:      false,
-						UpdatePolicy: "never",
+						Enabled: false,
 					},
 					Releases: Releases{
 						Enabled:      true,
@@ -151,7 +145,7 @@ func TestPomGeneration(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, pom)
 
-	assert.Equal(t, pom, expectedPom)
+	assert.Equal(t, expectedPom, pom)
 }
 
 func TestParseSimpleGAV(t *testing.T) {
@@ -185,4 +179,36 @@ func TestParseGAVWithClassifierAndType(t *testing.T) {
 	assert.Equal(t, dep.Version, "2.21.1")
 	assert.Equal(t, dep.Type, "war")
 	assert.Equal(t, dep.Classifier, "test")
+}
+
+func TestNewRepository(t *testing.T) {
+	r := NewRepository("http://nexus/public")
+	assert.Equal(t, "", r.ID)
+	assert.Equal(t, "http://nexus/public", r.URL)
+	assert.True(t, r.Releases.Enabled)
+	assert.False(t, r.Snapshots.Enabled)
+}
+
+func TestNewRepositoryWithSnapshots(t *testing.T) {
+	r := NewRepository("http://nexus/public@snapshots")
+	assert.Equal(t, "", r.ID)
+	assert.Equal(t, "http://nexus/public", r.URL)
+	assert.True(t, r.Releases.Enabled)
+	assert.True(t, r.Snapshots.Enabled)
+}
+
+func TestNewRepositoryWithSnapshotsAndID(t *testing.T) {
+	r := NewRepository("http://nexus/public@snapshots@id=test")
+	assert.Equal(t, "test", r.ID)
+	assert.Equal(t, "http://nexus/public", r.URL)
+	assert.True(t, r.Releases.Enabled)
+	assert.True(t, r.Snapshots.Enabled)
+}
+
+func TestNewRepositoryWithID(t *testing.T) {
+	r := NewRepository("http://nexus/public@id=test")
+	assert.Equal(t, "test", r.ID)
+	assert.Equal(t, "http://nexus/public", r.URL)
+	assert.True(t, r.Releases.Enabled)
+	assert.False(t, r.Snapshots.Enabled)
 }

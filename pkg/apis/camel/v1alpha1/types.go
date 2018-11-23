@@ -56,6 +56,7 @@ type IntegrationSpec struct {
 	Profile       TraitProfile                    `json:"profile,omitempty"`
 	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec             `json:"configuration,omitempty"`
+	Repositories  []string                        `json:"repositories,omitempty"`
 }
 
 // AddSource --
@@ -162,6 +163,7 @@ type IntegrationContextSpec struct {
 	Profile       TraitProfile                    `json:"profile,omitempty"`
 	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec             `json:"configuration,omitempty"`
+	Repositories  []string                        `json:"repositories,omitempty"`
 }
 
 // IntegrationContextStatus --

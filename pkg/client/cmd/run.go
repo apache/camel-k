@@ -77,6 +77,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&options.Properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
+	cmd.Flags().StringSliceVar(&options.Repositories, "repository", nil, "Add a maven repository")
 	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
 	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
@@ -100,6 +101,7 @@ type runCmdOptions struct {
 	Properties         []string
 	ConfigMaps         []string
 	Secrets            []string
+	Repositories       []string
 	Wait               bool
 	Logs               bool
 	Sync               bool
@@ -277,6 +279,7 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 			Dependencies:  make([]string, 0, len(o.Dependencies)),
 			Context:       o.IntegrationContext,
 			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+			Repositories:  o.Repositories,
 			Profile:       v1alpha1.TraitProfileByName(o.Profile),
 		},
 	}
