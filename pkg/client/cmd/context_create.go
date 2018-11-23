@@ -53,6 +53,7 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&impl.configmaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&impl.secrets, "secret", nil, "Add a Secret")
+	cmd.Flags().StringSliceVar(&impl.Repositories, "repository", nil, "Add a maven repository")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -68,6 +69,7 @@ type contextCreateCommand struct {
 	properties   []string
 	configmaps   []string
 	secrets      []string
+	Repositories []string
 }
 
 func (command *contextCreateCommand) validateArgs(cmd *cobra.Command, args []string) error {
@@ -97,6 +99,7 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 	ctx.Spec = v1alpha1.IntegrationContextSpec{
 		Dependencies:  make([]string, 0, len(command.dependencies)),
 		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+		Repositories:  command.Repositories,
 	}
 
 	for _, item := range command.dependencies {

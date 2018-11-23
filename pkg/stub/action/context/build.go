@@ -64,6 +64,7 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 	r := builder.Request{
 		Meta:         context.ObjectMeta,
 		Dependencies: context.Spec.Dependencies,
+		Repositories: context.Spec.Repositories,
 		Steps:        env.Steps,
 		Platform:     env.Platform.Spec,
 	}
