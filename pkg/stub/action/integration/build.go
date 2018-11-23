@@ -19,6 +19,7 @@ package integration
 
 import (
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -117,6 +118,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 	// Set the context to have the same dependencies as the integrations
 	platformCtx.Spec = v1alpha1.IntegrationContextSpec{
 		Dependencies: integration.Spec.Dependencies,
+		Repositories: integration.Spec.Repositories,
 	}
 
 	if err := sdk.Create(&platformCtx); err != nil {

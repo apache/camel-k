@@ -95,6 +95,7 @@ type Request struct {
 	Platform     v1alpha1.IntegrationPlatformSpec
 	Code         v1alpha1.SourceSpec
 	Dependencies []string
+	Repositories []string
 	Steps        []Step
 	BuildDir     string
 }

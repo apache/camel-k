@@ -19,6 +19,7 @@ package maven
 
 import (
 	"encoding/xml"
+	"strings"
 )
 
 // Project represent a maven project
@@ -106,22 +107,58 @@ type PluginRepositories struct {
 // Repository --
 type Repository struct {
 	ID        string    `xml:"id"`
-	Name      string    `xml:"name"`
+	Name      string    `xml:"name,omitempty"`
 	URL       string    `xml:"url"`
-	Snapshots Snapshots `xml:"snapshots"`
-	Releases  Releases  `xml:"releases"`
+	Snapshots Snapshots `xml:"snapshots,omitempty"`
+	Releases  Releases  `xml:"releases,omitempty"`
+}
+
+//
+// NewRepository parse the given repo url ang generated the related struct.
+//
+// The repository can be customized by appending @instruction to the repository
+// uri, as example:
+//
+//     http://my-nexus:8081/repository/publicc@id=my-repo@snapshots
+//
+// Will enable snapshots and sets the repo it to my-repo
+//
+func NewRepository(repo string) Repository {
+	r := Repository{
+		URL: repo,
+		Releases: Releases{
+			Enabled: true,
+		},
+		Snapshots: Snapshots{
+			Enabled: false,
+		},
+	}
+
+	if idx := strings.Index(repo, "@"); idx != -1 {
+		r.URL = repo[:idx]
+
+		for _, attribute := range strings.Split(repo[idx+1:], "@") {
+			if attribute == "snapshots" {
+				r.Snapshots.Enabled = true
+			} else if strings.HasPrefix(attribute, "id=") {
+				r.ID = attribute[3:]
+			}
+		}
+	}
+
+	return r
 }
 
 // Snapshots --
 type Snapshots struct {
 	Enabled      bool   `xml:"enabled"`
-	UpdatePolicy string `xml:"updatePolicy"`
+	UpdatePolicy string `xml:"updatePolicy,omitempty"`
 }
 
 // Releases --
 type Releases struct {
 	Enabled      bool   `xml:"enabled"`
-	UpdatePolicy string `xml:"updatePolicy"`
+	UpdatePolicy string `xml:"updatePolicy,omitempty"`
 }
 
 // Build --
