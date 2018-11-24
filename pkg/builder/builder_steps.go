@@ -251,11 +251,6 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 		}
 	}
 
-	err = tarAppender.AppendData([]byte(""), "marker")
-	if err != nil {
-		return err
-	}
-
 	ctx.Image = imageName
 	ctx.Archive = tarFileName
 
@@ -309,7 +304,8 @@ func FindBestImage(images []PublishedImage, entries []v1alpha1.Artifact) (*Publi
 		}
 		numCommonLibs := len(common)
 		surplus := len(image.Classpath) - numCommonLibs
-		if surplus >= numCommonLibs/3 {
+
+		if numCommonLibs != len(image.Classpath) && surplus >= numCommonLibs/3 {
 			// Heuristic approach: if there are too many unrelated libraries, just use the base image
 			continue
 		}
