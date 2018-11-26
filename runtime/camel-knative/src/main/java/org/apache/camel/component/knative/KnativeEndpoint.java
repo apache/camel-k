@@ -52,7 +52,6 @@ import static org.apache.camel.util.ObjectHelper.ifNotEmpty;
     scheme = "knative",
     syntax = "knative:type/target",
     title = "Knative",
-    producerOnly = true,
     label = "cloud,eventing")
 public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint {
     @UriPath(description = "The Knative type")
@@ -118,6 +117,9 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
                 headers.putIfAbsent("CE-EventTime", eventTime);
                 headers.putIfAbsent("CE-Source", getEndpointUri());
                 headers.putIfAbsent(Exchange.CONTENT_TYPE, contentType);
+
+                // Always remove host so it's always computed from the URL and not inherited from the exchange
+                headers.remove("Host");
             },
             endpoint.createProducer()
         );
