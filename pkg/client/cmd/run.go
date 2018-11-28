@@ -394,12 +394,10 @@ func toJSON(value runtime.Object) ([]byte, error) {
 	u, err := k8sutil.UnstructuredFromRuntimeObject(value)
 	if err != nil {
 		return nil, fmt.Errorf("error creating unstructured data: %v", err)
-		return nil, err
 	}
 	data, err := runtime.Encode(unstructured.UnstructuredJSONScheme, u)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling to json: %v", err)
-		return nil, err
 	}
 	return data, nil
 }
