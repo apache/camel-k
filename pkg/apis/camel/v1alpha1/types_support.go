@@ -98,7 +98,6 @@ func NewIntegrationContextList() IntegrationContextList {
 	}
 }
 
-
 // TraitProfileByName returns the trait profile corresponding to the given name (case insensitive)
 func TraitProfileByName(name string) TraitProfile {
 	for _, p := range allTraitProfiles {
