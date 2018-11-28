@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	additionalDependencies = map[string]string {
+	additionalDependencies = map[string]string{
 		".*JsonLibrary\\.Jackson.*": "camel:jackson",
 	}
 )
