@@ -115,4 +115,3 @@ func CombineConfigurationAsSlice(configurationType string, context *v1alpha1.Int
 
 	return keys
 }
-

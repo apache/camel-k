@@ -24,7 +24,7 @@ type IntegrationMetadata struct {
 	// All starting URIs of defined routes
 	FromURIs []string
 	// All end URIs of defined routes
-	ToURIs   []string
+	ToURIs []string
 	// All inferred dependencies required to run the integration
 	Dependencies []string
 	// The language in which the integration is written
