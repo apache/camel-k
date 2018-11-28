@@ -145,6 +145,4 @@ func HandleStateChanges(ctx context.Context, integration *v1alpha1.Integration, 
 			}
 		}
 	}
-
-	return nil
 }
