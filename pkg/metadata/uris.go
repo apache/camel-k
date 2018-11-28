@@ -18,8 +18,9 @@ limitations under the License.
 package metadata
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"regexp"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 var (
