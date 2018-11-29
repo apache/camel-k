@@ -89,7 +89,7 @@ camel.component.seda.queueSize = 10
 
 === Running Integrations in "Dev" Mode for Fast Feedback
 
-If you want to iterate quickly on a integration to have fast feedback on the code you're writing, you can use run it in **"dev" mode**:
+If you want to iterate quickly on an integration to have fast feedback on the code you're writing, you can use by running it in **"dev" mode**:
 
 ```
 kamel run runtime/examples/Sample.java --dev
@@ -125,7 +125,7 @@ integration "sample" in phase Running
 
 === Dependencies and Component Resolution
 
-Camel components used in a integration are automatically resolved. For example, take the following integration:
+Camel components used in an integration are automatically resolved. For example, take the following integration:
 
 ```
 from("imap://admin@myserver.com")
