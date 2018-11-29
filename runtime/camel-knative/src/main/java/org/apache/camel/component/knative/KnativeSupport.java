@@ -16,11 +16,15 @@
  */
 package org.apache.camel.component.knative;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.util.CollectionHelper;
+import org.apache.camel.util.URISupport;
 
 public final class KnativeSupport {
     private KnativeSupport() {
@@ -42,5 +46,14 @@ public final class KnativeSupport {
         }
 
         return answer;
+    }
+
+    public static String appendParametersToURI(String uri, String key, Object value, Object... keyVals)
+            throws UnsupportedEncodingException, URISyntaxException {
+
+        return URISupport.appendParametersToURI(
+            uri,
+            CollectionHelper.mapOf(key, value, keyVals)
+        );
     }
 }

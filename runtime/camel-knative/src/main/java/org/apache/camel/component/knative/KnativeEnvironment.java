@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,6 +92,31 @@ public class KnativeEnvironment {
         return lookupService(type, name).orElseThrow(
             () -> new IllegalArgumentException("Unable to find the service \"" + name + "\" with type \"" + type + "\"")
         );
+    }
+
+
+    public KnativeServiceDefinition lookupServiceOrDefault(Knative.Type type, String name) {
+        return lookupService(type, name).orElseGet(() -> {
+            final String contextPath = StringHelper.after(name, "/");
+            final String serviceName = (contextPath == null) ? name : StringHelper.before(name, "/");
+            final Map<String, String> meta = new HashMap<>();
+
+            // namespace derived by default from env var
+            meta.put(ServiceDefinition.SERVICE_META_ZONE, "{{env:NAMESPACE}}");
+
+            if (contextPath != null) {
+                meta.put(ServiceDefinition.SERVICE_META_PATH, "/" + contextPath);
+            }
+
+            return new KnativeEnvironment.KnativeServiceDefinition(
+                type,
+                Knative.Protocol.http,
+                serviceName,
+                "",
+                -1,
+                meta
+            );
+        });
     }
 
     // ************************
