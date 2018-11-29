@@ -22,6 +22,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 public final class Knative {
     public static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new Jdk8Module());
 
+
     public static final String HTTP_COMPONENT = "knative-http";
     public static final String KNATIVE_PROTOCOL = "knative.protocol";
     public static final String KNATIVE_TYPE = "knative.type";

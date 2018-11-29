@@ -19,6 +19,8 @@ package org.apache.camel.component.knative;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Properties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.CamelContext;
@@ -27,6 +29,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.cloud.ServiceDefinition;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.netty4.NettyEndpoint;
+import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.test.AvailablePortFinder;
 import org.junit.jupiter.api.AfterEach;
@@ -146,6 +149,140 @@ public class KnativeComponentTest {
         assertThat(e2.getService()).hasFieldOrPropertyWithValue("path", "/another/path");
         assertThat(e2.getEndpoint()).isInstanceOf(NettyEndpoint.class);
         assertThat(e2.getEndpoint()).hasFieldOrPropertyWithValue("endpointUri", "http://my-node:9001/another/path");
+    }
+
+    @Test
+    void testCreateEndpointWithComputedHost() throws Exception {
+        KnativeEnvironment env = new KnativeEnvironment(Arrays.asList(
+            new KnativeEnvironment.KnativeServiceDefinition(
+                Knative.Type.endpoint,
+                Knative.Protocol.http,
+                "myEndpoint",
+                "",
+                -1,
+                mapOf(ServiceDefinition.SERVICE_META_PATH, "/a/path"))
+        ));
+
+        KnativeComponent component = context.getComponent("knative", KnativeComponent.class);
+        component.setEnvironment(env);
+
+        context.start();
+
+        //
+        // Endpoint with context path derived from service definition
+        //
+
+        KnativeEndpoint e1 = context.getEndpoint("knative:endpoint/myEndpoint", KnativeEndpoint.class);
+
+        assertThat(e1).isNotNull();
+        assertThat(e1.getService()).isNotNull();
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("name", "myEndpoint");
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("type", Knative.Type.endpoint);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("protocol", Knative.Protocol.http);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("path", "/a/path");
+        assertThat(e1.getEndpoint()).isInstanceOf(NettyEndpoint.class);
+        assertThat(e1.getEndpoint()).hasFieldOrPropertyWithValue("endpointUri", "http://myEndpoint/a/path");
+    }
+
+    @Test
+    void testCreateEndpointWithComputedHostAndNamespace() throws Exception {
+        KnativeEnvironment env = new KnativeEnvironment(Arrays.asList(
+            new KnativeEnvironment.KnativeServiceDefinition(
+                Knative.Type.endpoint,
+                Knative.Protocol.http,
+                "myEndpoint",
+                "",
+                -1,
+                mapOf(
+                    ServiceDefinition.SERVICE_META_PATH, "/a/path",
+                    ServiceDefinition.SERVICE_META_ZONE, "myNamespace"))
+        ));
+
+        KnativeComponent component = context.getComponent("knative", KnativeComponent.class);
+        component.setEnvironment(env);
+
+        context.start();
+
+        //
+        // Endpoint with context path derived from service definition
+        //
+
+        KnativeEndpoint e1 = context.getEndpoint("knative:endpoint/myEndpoint", KnativeEndpoint.class);
+
+        assertThat(e1).isNotNull();
+        assertThat(e1.getService()).isNotNull();
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("name", "myEndpoint");
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("type", Knative.Type.endpoint);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("protocol", Knative.Protocol.http);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("path", "/a/path");
+        assertThat(e1.getEndpoint()).isInstanceOf(NettyEndpoint.class);
+        assertThat(e1.getEndpoint()).hasFieldOrPropertyWithValue("endpointUri", "http://myEndpoint.myNamespace/a/path");
+    }
+
+    @Test
+    void testCreateEndpointWithComputedHostAndNamespaceWithProperty() throws Exception {
+        KnativeEnvironment env = new KnativeEnvironment(Arrays.asList(
+            new KnativeEnvironment.KnativeServiceDefinition(
+                Knative.Type.endpoint,
+                Knative.Protocol.http,
+                "myEndpoint",
+                "",
+                -1,
+                mapOf(
+                    ServiceDefinition.SERVICE_META_PATH, "/a/path",
+                    ServiceDefinition.SERVICE_META_ZONE, "{{myNamespaceKey}}"))
+        ));
+
+        Properties properties = new Properties();
+        properties.setProperty("myNamespaceKey", "myNamespace");
+
+        PropertiesComponent pc = context.getComponent("properties", PropertiesComponent.class);
+        pc.setInitialProperties(properties);
+
+        KnativeComponent component = context.getComponent("knative", KnativeComponent.class);
+        component.setEnvironment(env);
+
+        context.start();
+
+        //
+        // Endpoint with context path derived from service definition
+        //
+
+        KnativeEndpoint e1 = context.getEndpoint("knative:endpoint/myEndpoint", KnativeEndpoint.class);
+
+        assertThat(e1).isNotNull();
+        assertThat(e1.getService()).isNotNull();
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("name", "myEndpoint");
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("type", Knative.Type.endpoint);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("protocol", Knative.Protocol.http);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("path", "/a/path");
+        assertThat(e1.getEndpoint()).isInstanceOf(NettyEndpoint.class);
+        assertThat(e1.getEndpoint()).hasFieldOrPropertyWithValue("endpointUri", "http://myEndpoint.myNamespace/a/path");
+    }
+
+    @Test
+    void testCreateEndpointWithDefaults() throws Exception {
+        KnativeEnvironment env = new KnativeEnvironment(Collections.emptyList());
+
+        KnativeComponent component = context.getComponent("knative", KnativeComponent.class);
+        component.setEnvironment(env);
+
+        context.start();
+
+        //
+        // Endpoint with context path derived from service definition
+        //
+
+        KnativeEndpoint e1 = context.getEndpoint("knative:endpoint/myEndpoint/my/path", KnativeEndpoint.class);
+
+        assertThat(e1).isNotNull();
+        assertThat(e1.getService()).isNotNull();
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("name", "myEndpoint");
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("type", Knative.Type.endpoint);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("protocol", Knative.Protocol.http);
+        assertThat(e1.getService()).hasFieldOrPropertyWithValue("path", "/my/path");
+        assertThat(e1.getEndpoint()).isInstanceOf(NettyEndpoint.class);
+        assertThat(e1.getEndpoint()).hasFieldOrPropertyWithValue("endpointUri", "http://myEndpoint/my/path");
     }
 
     @Test
@@ -326,7 +463,7 @@ public class KnativeComponentTest {
     }
 
     @Test
-    void testConsumeContentFithFilter() throws Exception {
+    void testConsumeContentWithFilter() throws Exception {
         final int port = AvailablePortFinder.getNextAvailable();
 
         KnativeEnvironment env = new KnativeEnvironment(Arrays.asList(

@@ -17,13 +17,8 @@
 package org.apache.camel.component.knative;
 
 import org.apache.camel.RuntimeCamelException;
-import org.apache.camel.cloud.ServiceDefinition;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriParam;
-
-import java.util.Arrays;
-
-import static org.apache.camel.util.CollectionHelper.mapOf;
 
 public class KnativeConfiguration implements Cloneable {
     @UriParam
