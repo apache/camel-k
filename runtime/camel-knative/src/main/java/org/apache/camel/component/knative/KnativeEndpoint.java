@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.CamelContext;
@@ -37,7 +38,6 @@ import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.UriPath;
-import org.apache.camel.util.CollectionHelper;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.ServiceHelper;
 import org.apache.camel.util.StringHelper;
@@ -76,7 +76,7 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
         this.name = remaining.indexOf('/') != -1 ? StringHelper.before(remaining, "/") : remaining;
         this.configuration = configuration;
         this.environment =  this.configuration.getEnvironment();
-        this.service = this.environment.mandatoryLookupService(targetType, remaining);
+        this.service = this.environment.lookupServiceOrDefault(targetType, remaining);
 
         switch (service.getProtocol()) {
         case http:
@@ -205,10 +205,29 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
 
     private static Endpoint http(CamelContext context, ServiceDefinition definition) {
         try {
-            final String host = definition.getHost();
-            final int port = definition.getPort();
             final String scheme = Knative.HTTP_COMPONENT;
-            final String protocol = definition.getMetadata().get(Knative.KNATIVE_PROTOCOL);
+            final String protocol = definition.getMetadata().getOrDefault(Knative.KNATIVE_PROTOCOL, "http");
+
+            String host = definition.getHost();
+            int port = definition.getPort();
+
+            if (ObjectHelper.isEmpty(host)) {
+                String name = definition.getName();
+                String zone = definition.getMetadata().get(ServiceDefinition.SERVICE_META_ZONE);
+
+                if (ObjectHelper.isNotEmpty(zone)) {
+                    try {
+                        zone = context.resolvePropertyPlaceholders(zone);
+                    } catch (IllegalArgumentException e) {
+                        zone = null;
+                    }
+                }
+                if (ObjectHelper.isNotEmpty(zone)) {
+                    name = name + "." + zone;
+                }
+
+                host = name;
+            }
 
             ObjectHelper.notNull(host, ServiceDefinition.SERVICE_META_HOST);
             ObjectHelper.notNull(protocol, Knative.KNATIVE_PROTOCOL);
@@ -229,18 +248,18 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
 
             final String filterKey = definition.getMetadata().get(Knative.FILTER_HEADER_NAME);
             final String filterVal = definition.getMetadata().get(Knative.FILTER_HEADER_VALUE);
+            final Map<String, Object> parameters = new HashMap<>();
 
             if (ObjectHelper.isNotEmpty(filterKey) && ObjectHelper.isNotEmpty(filterVal)) {
-                uri = URISupport.appendParametersToURI(
-                    uri,
-                    CollectionHelper.mapOf("filter.headerName", filterKey, "filter.headerValue", filterVal)
-                );
+                parameters.put("filter.headerName", filterKey);
+                parameters.put("filter.headerValue", filterVal);
             }
 
-            uri = URISupport.appendParametersToURI(
-                    uri,
-                    CollectionHelper.mapOf("useRelativePath", "true")
-            );
+            // configure netty to use relative path instead of full
+            // path that is the default to make istio working
+            parameters.put("useRelativePath", "true");
+
+            uri = URISupport.appendParametersToURI(uri, parameters);
 
             return context.getEndpoint(uri);
         } catch (Exception e) {
