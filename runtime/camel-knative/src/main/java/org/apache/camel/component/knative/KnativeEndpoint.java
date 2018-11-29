@@ -237,6 +237,11 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
                 );
             }
 
+            uri = URISupport.appendParametersToURI(
+                    uri,
+                    CollectionHelper.mapOf("useRelativePath", "true")
+            );
+
             return context.getEndpoint(uri);
         } catch (Exception e) {
             throw ObjectHelper.wrapRuntimeCamelException(e);
