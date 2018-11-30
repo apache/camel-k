@@ -97,13 +97,14 @@ public class KnativeEnvironment {
 
     public KnativeServiceDefinition lookupServiceOrDefault(Knative.Type type, String name) {
         return lookupService(type, name).orElseGet(() -> {
-            final String contextPath = StringHelper.after(name, "/");
-            final String serviceName = (contextPath == null) ? name : StringHelper.before(name, "/");
-            final Map<String, String> meta = new HashMap<>();
+            String contextPath = StringHelper.after(name, "/");
+            String serviceName = (contextPath == null) ? name : StringHelper.before(name, "/");
+            Map<String, String> meta = new HashMap<>();
 
-            // namespace derived by default from env var
-            meta.put(ServiceDefinition.SERVICE_META_ZONE, "{{env:NAMESPACE}}");
+            if (type == Knative.Type.channel && !serviceName.endsWith(".channel")) {
+                serviceName += "-channel";
 
+            }
             if (contextPath != null) {
                 meta.put(ServiceDefinition.SERVICE_META_PATH, "/" + contextPath);
             }

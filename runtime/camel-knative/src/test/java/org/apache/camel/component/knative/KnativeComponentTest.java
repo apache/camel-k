@@ -283,6 +283,23 @@ public class KnativeComponentTest {
         assertThat(e1.getService()).hasFieldOrPropertyWithValue("path", "/my/path");
         assertThat(e1.getEndpoint()).isInstanceOf(NettyEndpoint.class);
         assertThat(e1.getEndpoint()).hasFieldOrPropertyWithValue("endpointUri", "http://myEndpoint/my/path");
+
+        //
+        // Endpoint with context path overridden by endpoint uri
+        //
+
+        KnativeEndpoint e2 = context.getEndpoint("knative:channel/myChannel/another/path", KnativeEndpoint.class);
+
+        assertThat(e2).isNotNull();
+        assertThat(e2.getService()).isNotNull();
+        assertThat(e2.getService()).hasFieldOrPropertyWithValue("name", "myChannel-channel");
+        assertThat(e2.getService()).hasFieldOrPropertyWithValue("type", Knative.Type.channel);
+        assertThat(e2.getService()).hasFieldOrPropertyWithValue("protocol", Knative.Protocol.http);
+        assertThat(e2.getService()).hasFieldOrPropertyWithValue("path", "/another/path");
+        assertThat(e2.getEndpoint()).isInstanceOf(NettyEndpoint.class);
+        assertThat(e2.getEndpoint()).hasFieldOrPropertyWithValue("endpointUri", "http://myChannel-channel/another/path");
+
+
     }
 
     @Test
