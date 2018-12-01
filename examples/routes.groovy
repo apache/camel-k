@@ -3,11 +3,11 @@ import java.util.concurrent.ThreadLocalRandom
 //
 // To run this integrations use:
 //
-//     kamel run --runtime groovy runtime/examples/routes.groovy
+//     kamel run --runtime groovy examples/routes.groovy
 //
 // Or leveraging runtime detection
 //
-//     kamel run runtime/examples/routes.groovy
+//     kamel run examples/routes.groovy
 //
 
 context {
