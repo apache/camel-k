@@ -1,7 +1,7 @@
 //
 // To run this integrations use:
 //
-//     kamel run --name=rest-with-restlet --dependency=camel-restlet runtime/examples/RestWithRestlet.java
+//     kamel run --name=rest-with-restlet --dependency=camel-restlet examples/RestWithRestlet.java
 //
 public class RestWithRestlet extends org.apache.camel.builder.RouteBuilder {
     @Override

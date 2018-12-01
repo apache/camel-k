@@ -1,11 +1,11 @@
 //
 // To run this integrations use:
 //
-//     kamel run --runtime kotlin runtime/examples/kotlin-routes.kts
+//     kamel run --runtime kotlin examples/kotlin-routes.kts
 //
 // Or leveraging runtime detection
 //
-//     kamel run runtime/examples/kotlin-routes.kts
+//     kamel run examples/kotlin-routes.kts
 //
 
 val rnd = java.util.Random()

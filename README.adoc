@@ -51,17 +51,17 @@ For Minishift, this means executing `oc login -u system:admin` then `kamel insta
 After the initial setup, you can run a Camel integration on the cluster by executing:
 
 ```
-kamel run runtime/examples/Sample.java
+kamel run examples/Sample.java
 ```
 
-A "Sample.java" file is included in the link:/runtime/examples[/runtime/examples] folder of this repository. You can change the content of the file and execute the command again to see the changes.
+A "Sample.java" file is included in the link:/examples[/examples] folder of this repository. You can change the content of the file and execute the command again to see the changes.
 
 ==== Configure Integration properties
 
 Properties associated to an integration can be configured either using a ConfigMap/Secret or by setting using the "--property" flag, i.e.
 
 ```
-kamel run --property my.message=test runtime/examples/props.js
+kamel run --property my.message=test examples/props.js
 ```
 
 ==== Configure Integration Logging
@@ -92,7 +92,7 @@ camel.component.seda.queueSize = 10
 If you want to iterate quickly on an integration to have fast feedback on the code you're writing, you can use by running it in **"dev" mode**:
 
 ```
-kamel run runtime/examples/Sample.java --dev
+kamel run examples/Sample.java --dev
 ```
 
 The `--dev` flag deploys immediately the integration and shows the integration logs in the console. You can then change the code and see
@@ -103,7 +103,7 @@ The console follows automatically all redeploys of the integration.
 Here's an example of the output:
 
 ```
-[nferraro@localhost camel-k]$ kamel run runtime/examples/Sample.java --dev
+[nferraro@localhost camel-k]$ kamel run examples/Sample.java --dev
 integration "sample" created
 integration "sample" in phase Building
 integration "sample" in phase Deploying
@@ -160,9 +160,9 @@ Camel K supports multiple languages for writing integrations:
 
 More information about supported languages is provided in the link:docs/languages.adoc[languages guide].
 
-Integrations written in different languages are provided in the link:/runtime/examples[examples] directory.
+Integrations written in different languages are provided in the link:/examples[examples] directory.
 
-An example of integration written in JavaScript is the link:/runtime/examples/dns.js[/runtime/examples/dns.js] integration.
+An example of integration written in JavaScript is the link:/examples/dns.js[/examples/dns.js] integration.
 Here's the content:
 
 ```
@@ -178,7 +178,7 @@ from('timer:dns?period=1s')
 To run it, you need just to execute:
 
 ```
-kamel run runtime/examples/dns.js
+kamel run examples/dns.js
 ```
 
 === Traits
