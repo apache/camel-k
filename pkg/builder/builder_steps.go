@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/tar"
 
 	"gopkg.in/yaml.v2"
@@ -60,7 +61,7 @@ func GenerateProject(ctx *Context) error {
 						//TODO: camel version should be retrieved from an external request or provided as static version
 						GroupID:    "org.apache.camel",
 						ArtifactID: "camel-bom",
-						Version:    "2.22.2",
+						Version:    camel.Version,
 						Type:       "pom",
 						Scope:      "import",
 					},

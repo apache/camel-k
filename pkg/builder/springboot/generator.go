@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/version"
 )
@@ -45,7 +46,7 @@ func GenerateProject(ctx *builder.Context) error {
 						//TODO: camel version should be retrieved from an external request or provided as static version
 						GroupID:    "org.apache.camel",
 						ArtifactID: "camel-bom",
-						Version:    "2.22.2",
+						Version:    camel.Version,
 						Type:       "pom",
 						Scope:      "import",
 					},
@@ -108,7 +109,7 @@ func GenerateProject(ctx *builder.Context) error {
 			deps.Add(maven.Dependency{
 				GroupID:    "org.apache.camel",
 				ArtifactID: artifactID + "-starter",
-				Version:    "2.22.2",
+				Version:    camel.Version,
 				Exclusions: &maven.Exclusions{
 					Exclusions: []maven.Exclusion{
 						{
