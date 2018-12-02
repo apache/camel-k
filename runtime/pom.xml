@@ -33,7 +33,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <camel.version>2.22.2</camel.version>
+        <camel.version>2.23.0</camel.version>
         <junit.version>4.12</junit.version>
         <junit-jupiter.version>5.3.1</junit-jupiter.version>
         <joor.version>0.9.9</joor.version>
@@ -48,7 +48,7 @@
         <snakeyaml.version>1.23</snakeyaml.version>
         <spock.version>1.0-groovy-2.4</spock.version>
         <jackson.version>2.9.7</jackson.version>
-        <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
 
         <gmavenplus-plugin.version>1.6.1</gmavenplus-plugin.version>
         <fabric8-maven-plugin.version>3.5.40</fabric8-maven-plugin.version>
