@@ -122,7 +122,7 @@ type Result struct {
 	Image     string
 	Error     error
 	Status    Status
-	Classpath []string
+	Artifacts []v1alpha1.Artifact
 	Task      Task
 }
 
@@ -144,7 +144,7 @@ type Context struct {
 // PublishedImage --
 type PublishedImage struct {
 	Image     string
-	Classpath []string
+	Artifacts []v1alpha1.Artifact
 }
 
 // Status --

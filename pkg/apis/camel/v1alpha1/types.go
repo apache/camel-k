@@ -171,7 +171,7 @@ type IntegrationContextStatus struct {
 	Phase     IntegrationContextPhase `json:"phase,omitempty"`
 	Image     string                  `json:"image,omitempty"`
 	Digest    string                  `json:"digest,omitempty"`
-	Classpath []string                `json:"classpath,omitempty"`
+	Artifacts []Artifact              `json:"artifacts,omitempty"`
 }
 
 // IntegrationContextPhase --

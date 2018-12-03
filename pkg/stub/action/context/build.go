@@ -88,7 +88,16 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		target := context.DeepCopy()
 		target.Status.Image = res.Image
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
-		target.Status.Classpath = res.Classpath
+		target.Status.Artifacts = make([]v1alpha1.Artifact, 0, len(res.Artifacts))
+
+		for _, a := range res.Artifacts {
+			// do not include artifact location
+			target.Status.Artifacts = append(target.Status.Artifacts, v1alpha1.Artifact{
+				ID:       a.ID,
+				Location: "",
+				Target:   a.Target,
+			})
+		}
 
 		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseReady)
 
