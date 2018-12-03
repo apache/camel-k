@@ -19,6 +19,10 @@ package trait
 
 import (
 	"sort"
+	"strings"
+
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -80,6 +84,28 @@ func (trait *springBootTrait) apply(e *Environment) error {
 		// Override env vars
 		e.EnvVars["JAVA_MAIN_CLASS"] = "org.springframework.boot.loader.PropertiesLauncher"
 		e.EnvVars["LOADER_PATH"] = "/deployments/dependencies/"
+
+		if e.Integration.Spec.Context != "" {
+			name := e.Integration.Spec.Context
+			ctx := v1alpha1.NewIntegrationContext(e.Integration.Namespace, name)
+
+			if err := sdk.Get(&ctx); err != nil {
+				return errors.Wrapf(err, "unable to find integration context %s, %s", ctx.Name, err)
+			}
+
+			deps := make([]string, 0, len(ctx.Status.Artifacts))
+			for _, artifact := range ctx.Status.Artifacts {
+				if strings.HasPrefix(artifact.ID, "org.apache.camel.k:camel-k-runtime-spring-boot:") {
+					// do not include runner jar
+					continue
+				}
+
+				deps = append(deps, artifact.Target)
+			}
+
+			e.EnvVars["LOADER_HOME"] = "/deployments"
+			e.EnvVars["LOADER_PATH"] = strings.Join(deps, ",")
+		}
 	}
 
 	//

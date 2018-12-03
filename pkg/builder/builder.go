@@ -27,6 +27,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -192,9 +194,9 @@ func (b *defaultBuilder) submit(request Request) {
 		r.Status = StatusError
 	}
 
-	r.Classpath = make([]string, 0, len(c.Artifacts))
-	for _, l := range c.Artifacts {
-		r.Classpath = append(r.Classpath, l.ID)
+	r.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
+	for _, artifact := range c.Artifacts {
+		r.Artifacts = append(r.Artifacts, artifact)
 	}
 
 	// update the cache

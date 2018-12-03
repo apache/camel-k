@@ -18,7 +18,10 @@ limitations under the License.
 package springboot
 
 import (
+	"path"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/maven"
 
 	"github.com/apache/camel-k/pkg/builder"
 )
@@ -27,9 +30,16 @@ import (
 func ComputeDependencies(ctx *builder.Context) error {
 	for i := 0; i < len(ctx.Artifacts); i++ {
 		if strings.HasPrefix(ctx.Artifacts[i].ID, "org.apache.camel.k:camel-k-runtime-spring-boot:") {
+
+			_, fileName := path.Split(ctx.Artifacts[i].Location)
+			gav, err := maven.ParseGAV(ctx.Artifacts[i].ID)
+			if err != nil {
+				return nil
+			}
+
 			// Don't set a target so the jar will be copied to the
 			// deployment root
-			ctx.Artifacts[i].Target = ""
+			ctx.Artifacts[i].Target = gav.GroupID + "." + fileName
 		}
 	}
 
