@@ -152,10 +152,17 @@ func ComputeDependencies(ctx *Context) error {
 	}
 
 	for _, e := range cp["dependencies"] {
+		_, fileName := path.Split(e.Location)
+
+		gav, err := maven.ParseGAV(e.ID)
+		if err != nil {
+			return nil
+		}
+
 		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
-			Target:   "dependencies",
+			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
 		})
 	}
 
@@ -222,14 +229,10 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 	defer tarAppender.Close()
 
 	for _, entry := range selectedArtifacts {
-		gav, err := maven.ParseGAV(entry.ID)
-		if err != nil {
-			return err
-		}
+		_, tarFileName := path.Split(entry.Target)
+		tarFilePath := path.Dir(entry.Target)
 
-		_, fileName := path.Split(entry.Location)
-
-		_, err = tarAppender.AddFileWithName(gav.GroupID+"."+fileName, entry.Location, entry.Target)
+		_, err = tarAppender.AddFileWithName(tarFileName, entry.Location, tarFilePath)
 		if err != nil {
 			return err
 		}
@@ -238,12 +241,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 	if ctx.ComputeClasspath {
 		cp := ""
 		for _, entry := range ctx.Artifacts {
-			gav, err := maven.ParseGAV(entry.ID)
-			if err != nil {
-				return nil
-			}
-			_, fileName := path.Split(entry.Location)
-			cp += path.Join(entry.Target, gav.GroupID+"."+fileName) + "\n"
+			cp += path.Join(entry.Target) + "\n"
 		}
 
 		err = tarAppender.AppendData([]byte(cp), "classpath")
@@ -277,7 +275,7 @@ func ListPublishedImages(namespace string) ([]PublishedImage, error) {
 
 		images = append(images, PublishedImage{
 			Image:     ctx.Status.Image,
-			Classpath: ctx.Status.Classpath,
+			Artifacts: ctx.Status.Artifacts,
 		})
 	}
 	return images, nil
@@ -298,15 +296,15 @@ func FindBestImage(images []PublishedImage, entries []v1alpha1.Artifact) (*Publi
 	bestImageSurplusLibs := 0
 	for _, image := range images {
 		common := make(map[string]bool)
-		for _, id := range image.Classpath {
-			if _, ok := requiredLibs[id]; ok {
-				common[id] = true
+		for _, artifact := range image.Artifacts {
+			if _, ok := requiredLibs[artifact.ID]; ok {
+				common[artifact.ID] = true
 			}
 		}
 		numCommonLibs := len(common)
-		surplus := len(image.Classpath) - numCommonLibs
+		surplus := len(image.Artifacts) - numCommonLibs
 
-		if numCommonLibs != len(image.Classpath) && surplus >= numCommonLibs/3 {
+		if numCommonLibs != len(image.Artifacts) && surplus >= numCommonLibs/3 {
 			// Heuristic approach: if there are too many unrelated libraries, just use the base image
 			continue
 		}

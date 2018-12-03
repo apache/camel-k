@@ -92,7 +92,7 @@ func (t *Appender) AddFile(filePath string, tarDir string) (string, error) {
 	return fileName, nil
 }
 
-// AddFileWithName adds a file content to the tarDir, using the fiven file name.
+// AddFileWithName adds a file content to the tarDir, using the given file name.
 // It returns the full path of the file inside the tar.
 func (t *Appender) AddFileWithName(fileName string, filePath string, tarDir string) (string, error) {
 	info, err := os.Stat(filePath)
