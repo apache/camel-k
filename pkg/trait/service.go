@@ -19,23 +19,12 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/version"
+	"github.com/apache/camel-k/pkg/metadata"
+	"k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
-
-var webComponents = map[string]bool{
-	"camel:servlet":     true,
-	"camel:undertow":    true,
-	"camel:jetty":       true,
-	"camel:jetty9":      true,
-	"camel:netty-http":  true,
-	"camel:netty4-http": true,
-	"mvn:org.apache.camel.k:camel-knative:" + version.Version: true,
-	// TODO find a better way to discover need for exposure
-	// maybe using the resolved classpath of the context instead of the requested dependencies
-}
 
 type serviceTrait struct {
 	BaseTrait `property:",squash"`
@@ -56,8 +45,18 @@ func (s *serviceTrait) appliesTo(e *Environment) bool {
 
 func (s *serviceTrait) autoconfigure(e *Environment) error {
 	if s.Enabled == nil {
-		required := s.requiresService(e)
-		s.Enabled = &required
+		hasDeployment := false
+		e.Resources.VisitDeployment(func(s *v1.Deployment) {
+			hasDeployment = true
+		})
+		if hasDeployment {
+			meta := metadata.ExtractAll(e.Integration.Spec.Sources)
+			required := meta.RequiresHTTPService
+			s.Enabled = &required
+		} else {
+			enabled := false
+			s.Enabled = &enabled
+		}
 	}
 	return nil
 }
@@ -97,29 +96,4 @@ func (s *serviceTrait) getServiceFor(e *Environment) *corev1.Service {
 	}
 
 	return &svc
-}
-
-func (*serviceTrait) requiresService(environment *Environment) bool {
-	cweb := false
-	iweb := false
-
-	if environment.Context != nil {
-		for _, dep := range environment.Context.Spec.Dependencies {
-			if decision, present := webComponents[dep]; present {
-				cweb = decision
-				break
-			}
-		}
-	}
-
-	if environment.Integration != nil {
-		for _, dep := range environment.Integration.Spec.Dependencies {
-			if decision, present := webComponents[dep]; present {
-				iweb = decision
-				break
-			}
-		}
-	}
-
-	return cweb || iweb
 }

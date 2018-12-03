@@ -51,7 +51,7 @@ func TestOpenShiftTraits(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core", "camel:undertow")
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.Contains(t, env.ExecutedTraits, ID("deployment"))
 	assert.Contains(t, env.ExecutedTraits, ID("service"))
@@ -72,7 +72,7 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core", "camel:undertow")
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
 	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
 		Configuration: map[string]string{
@@ -88,7 +88,7 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core", "camel:undertow")
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
 	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
 		Configuration: map[string]string{
@@ -105,7 +105,7 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 }
 
 func TestKubernetesTraits(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, "camel:core")
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.Contains(t, env.ExecutedTraits, ID("deployment"))
 	assert.NotContains(t, env.ExecutedTraits, ID("service"))
@@ -120,7 +120,7 @@ func TestKubernetesTraits(t *testing.T) {
 }
 
 func TestKubernetesTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, "camel:core", "camel:servlet")
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.Contains(t, env.ExecutedTraits, ID("deployment"))
 	assert.Contains(t, env.ExecutedTraits, ID("service"))
@@ -138,7 +138,7 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 }
 
 func TestTraitDecode(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift)
+	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "")
 	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
 	svcTrait := v1alpha1.IntegrationTraitSpec{
 		Configuration: map[string]string{
@@ -164,7 +164,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	return env.Resources
 }
 
-func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...string) *Environment {
+func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, script string) *Environment {
 	return &Environment{
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
@@ -172,7 +172,13 @@ func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...
 				Namespace: "ns",
 			},
 			Spec: v1alpha1.IntegrationSpec{
-				Dependencies: dependencies,
+				Sources: []v1alpha1.SourceSpec{
+					{
+						Language: v1alpha1.LanguageGroovy,
+						Name: "file.groovy",
+						Content: script,
+					},
+				},
 			},
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,

@@ -18,6 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
+	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -144,6 +145,38 @@ func (c *Collection) GetRoute(filter func(*routev1.Route) bool) *routev1.Route {
 		}
 	})
 	return retValue
+}
+
+// VisitKnativeService executes the visitor function on all Knative serving Service resources
+func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*serving.Service); ok {
+			visitor(conv)
+		}
+	})
+}
+
+// VisitContainer executes the visitor function on all Containers inside deployments or other resources
+func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
+	c.VisitDeployment(func(d *appsv1.Deployment) {
+		for _, c := range d.Spec.Template.Spec.Containers {
+			visitor(&c)
+		}
+	})
+	c.VisitKnativeService(func(s *serving.Service) {
+		if s.Spec.RunLatest != nil {
+			c := s.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container
+			visitor(&c)
+		}
+		if s.Spec.Pinned != nil {
+			c := s.Spec.Pinned.Configuration.RevisionTemplate.Spec.Container
+			visitor(&c)
+		}
+		if s.Spec.Release != nil {
+			c := s.Spec.Release.Configuration.RevisionTemplate.Spec.Container
+			visitor(&c)
+		}
+	})
 }
 
 // VisitMetaObject executes the visitor function on all meta.Object resources

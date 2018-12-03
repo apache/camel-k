@@ -24,6 +24,8 @@ import (
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
+	"k8s.io/api/apps/v1"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
@@ -35,15 +37,23 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	knativeKindDeployment = "deployment"
+	knativeKindService    = "service"
+)
+
 type knativeTrait struct {
-	BaseTrait `property:",squash"`
-	Sources   string `property:"sources"`
-	Sinks     string `property:"sinks"`
+	BaseTrait          `property:",squash"`
+	Kind               string `property:"kind"`
+	Sources            string `property:"sources"`
+	Sinks              string `property:"sinks"`
+	deploymentDelegate *deploymentTrait
 }
 
 func newKnativeTrait() *knativeTrait {
 	return &knativeTrait{
-		BaseTrait: newBaseTrait("knative"),
+		BaseTrait:          newBaseTrait("knative"),
+		deploymentDelegate: newDeploymentTrait(),
 	}
 }
 
@@ -60,18 +70,58 @@ func (t *knativeTrait) autoconfigure(e *Environment) error {
 		channels := t.getSinkChannels(e)
 		t.Sinks = strings.Join(channels, ",")
 	}
+	if t.Kind == "" {
+		meta := metadata.ExtractAll(e.Integration.Spec.Sources)
+		if meta.RequiresHTTPService && meta.PassiveEndpoints {
+			t.Kind = knativeKindService
+		} else {
+			t.Kind = knativeKindDeployment
+		}
+	}
 	return nil
 }
 
 func (t *knativeTrait) apply(e *Environment) error {
+	if err := t.prepareEnvVars(e); err != nil {
+		return err
+	}
 	for _, sub := range t.getSubscriptionsFor(e) {
 		e.Resources.Add(sub)
 	}
-	svc, err := t.getServiceFor(e)
+	switch t.Kind {
+	case knativeKindService:
+		svc, err := t.getServiceFor(e)
+		if err != nil {
+			return err
+		}
+		e.Resources.Add(svc)
+		return nil
+	case knativeKindDeployment:
+		return t.addDeployment(e)
+	}
+	return nil
+}
+
+func (t *knativeTrait) prepareEnvVars(e *Environment) error {
+	// common env var for Knative integration
+	conf, err := t.getConfigurationSerialized(e)
 	if err != nil {
 		return err
 	}
-	e.Resources.Add(svc)
+	e.EnvVars["CAMEL_KNATIVE_CONFIGURATION"] = conf
+	return nil
+}
+
+func (t *knativeTrait) addDeployment(e *Environment) error {
+	if err := t.deploymentDelegate.apply(e); err != nil {
+		return err
+	}
+	e.Resources.VisitDeployment(func(d *v1.Deployment) {
+		if d.Spec.Template.Annotations == nil {
+			d.Spec.Template.Annotations = make(map[string]string)
+		}
+		d.Spec.Template.Annotations["sidecar.istio.io/inject"] = "true"
+	})
 	return nil
 }
 
@@ -112,12 +162,10 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 	// optimizations
 	environment["AB_JOLOKIA_OFF"] = True
 
-	// Knative integration
-	conf, err := t.getConfigurationSerialized(e)
-	if err != nil {
-		return nil, err
+	// add env vars from traits
+	for k, v := range e.EnvVars {
+		environment[k] = v
 	}
-	environment["CAMEL_KNATIVE_CONFIGURATION"] = conf
 
 	labels := map[string]string{
 		"camel.apache.org/integration": e.Integration.Name,
