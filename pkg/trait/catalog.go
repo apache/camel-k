@@ -78,31 +78,31 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tDebug,
 			c.tDependencies,
-			c.tService,
-			c.tRoute,
 			c.tBuilder,
 			c.tSpringBoot,
 			c.tDeployment,
+			c.tService,
+			c.tRoute,
 			c.tOwner,
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
 			c.tDebug,
 			c.tDependencies,
-			c.tService,
-			c.tIngress,
 			c.tBuilder,
 			c.tSpringBoot,
 			c.tDeployment,
+			c.tService,
+			c.tIngress,
 			c.tOwner,
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
 			c.tDebug,
 			c.tDependencies,
-			c.tKnative,
 			c.tBuilder,
 			c.tSpringBoot,
+			c.tKnative,
 			c.tDeployment,
 			c.tOwner,
 		}
