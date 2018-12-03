@@ -29,4 +29,8 @@ type IntegrationMetadata struct {
 	Dependencies []string
 	// The language in which the integration is written
 	Language v1alpha1.Language
+	// RequiresHTTPService indicates if the integration needs to be invoked through HTTP
+	RequiresHTTPService bool
+	// PassiveEndpoints indicates that the integration contains only passive endpoints that are activated from external calls, including HTTP (useful to determine if the integration can scale to 0)
+	PassiveEndpoints bool
 }
