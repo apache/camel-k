@@ -159,22 +159,31 @@ func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
 // VisitContainer executes the visitor function on all Containers inside deployments or other resources
 func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 	c.VisitDeployment(func(d *appsv1.Deployment) {
-		for _, c := range d.Spec.Template.Spec.Containers {
-			visitor(&c)
+		for idx := range d.Spec.Template.Spec.Containers {
+			c := &d.Spec.Template.Spec.Containers[idx]
+			visitor(c)
 		}
 	})
+	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
+		c := &cs.RevisionTemplate.Spec.Container
+		visitor(c)
+	})
+}
+
+// VisitKnativeConfigurationSpec executes the visitor function on all knative ConfigurationSpec inside serving Services
+func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *serving.ConfigurationSpec)) {
 	c.VisitKnativeService(func(s *serving.Service) {
 		if s.Spec.RunLatest != nil {
-			c := s.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container
-			visitor(&c)
+			c := &s.Spec.RunLatest.Configuration
+			visitor(c)
 		}
 		if s.Spec.Pinned != nil {
-			c := s.Spec.Pinned.Configuration.RevisionTemplate.Spec.Container
-			visitor(&c)
+			c := &s.Spec.Pinned.Configuration
+			visitor(c)
 		}
 		if s.Spec.Release != nil {
-			c := s.Spec.Release.Configuration.RevisionTemplate.Spec.Container
-			visitor(&c)
+			c := &s.Spec.Release.Configuration
+			visitor(c)
 		}
 	})
 }

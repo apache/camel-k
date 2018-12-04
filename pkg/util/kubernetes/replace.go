@@ -25,6 +25,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 )
 
 // ReplaceResources allows to completely replace a list of resources on Kubernetes, taking care of immutable fields and resource versions
@@ -50,6 +51,7 @@ func ReplaceResource(res runtime.Object) error {
 		mapRequiredMeta(existing, res)
 		mapRequiredServiceData(existing, res)
 		mapRequiredRouteData(existing, res)
+		mapRequiredKnativeData(existing, res)
 		err = sdk.Update(res)
 	}
 	if err != nil {
@@ -78,6 +80,14 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*routev1.Route); ok {
 		if toC, ok := to.(*routev1.Route); ok {
 			toC.Spec.Host = fromC.Spec.Host
+		}
+	}
+}
+
+func mapRequiredKnativeData(from runtime.Object, to runtime.Object) {
+	if fromC, ok := from.(*eventing.Subscription); ok {
+		if toC, ok := to.(*eventing.Subscription); ok {
+			toC.Spec.Generation = fromC.Spec.Generation
 		}
 	}
 }
