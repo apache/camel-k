@@ -34,7 +34,8 @@ func NewHandler(ctx ctx.Context, namespace string) sdk.Handler {
 	return &handler{
 		integrationActionPool: []integration.Action{
 			integration.NewInitializeAction(),
-			integration.NewBuildAction(namespace),
+			integration.NewBuildContextAction(namespace),
+			integration.NewBuildImageAction(ctx, namespace),
 			integration.NewDeployAction(),
 			integration.NewMonitorAction(),
 		},

@@ -110,7 +110,12 @@ func (e *Environment) IntegrationContextInPhase(phase v1alpha1.IntegrationContex
 	return e.Context != nil && e.Context.Status.Phase == phase
 }
 
-// DeterimeProfile determines the TraitProfile of the environment.
+// InPhase --
+func (e *Environment) InPhase(c v1alpha1.IntegrationContextPhase, i v1alpha1.IntegrationPhase) bool {
+	return e.IntegrationContextInPhase(c) && e.IntegrationInPhase(i)
+}
+
+// DetermineProfile determines the TraitProfile of the environment.
 // First looking at the Integration.Spec for a Profile,
 // next looking at the Context.Spec
 // and lastly the Platform Profile

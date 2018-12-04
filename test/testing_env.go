@@ -56,22 +56,6 @@ func getTargetNamespace() string {
 	return ns
 }
 
-func createTimerToLogIntegrationCode() string {
-	return `
-import org.apache.camel.builder.RouteBuilder;
-
-public class Routes extends RouteBuilder {
-
-	@Override
-    public void configure() throws Exception {
-        from("timer:tick")
-		  .to("log:info");
-    }
-
-}
-`
-}
-
 func createDummyDeployment(name string, replicas *int32, labelKey string, labelValue string, command ...string) (*appsv1.Deployment, error) {
 	deployment := getDummyDeployment(name, replicas, labelKey, labelValue, command...)
 	gracePeriod := int64(0)
