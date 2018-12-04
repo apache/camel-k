@@ -24,12 +24,12 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/fatih/structs"
 )
 
 // Catalog collects all information about traits in one place
 type Catalog struct {
+	tDebug        Trait
 	tDependencies Trait
 	tDeployment   Trait
 	tKnative      Trait
@@ -44,6 +44,7 @@ type Catalog struct {
 // NewCatalog creates a new trait Catalog
 func NewCatalog() *Catalog {
 	return &Catalog{
+		tDebug:        newDebugTrait(),
 		tDependencies: newDependenciesTrait(),
 		tDeployment:   newDeploymentTrait(),
 		tKnative:      newKnativeTrait(),
@@ -58,6 +59,7 @@ func NewCatalog() *Catalog {
 
 func (c *Catalog) allTraits() []Trait {
 	return []Trait{
+		c.tDebug,
 		c.tDependencies,
 		c.tDeployment,
 		c.tKnative,
@@ -71,17 +73,12 @@ func (c *Catalog) allTraits() []Trait {
 }
 
 func (c *Catalog) traitsFor(environment *Environment) []Trait {
-	profile := platform.GetProfile(environment.Platform)
-	if environment.Context != nil && environment.Context.Spec.Profile != "" {
-		profile = environment.Context.Spec.Profile
-	}
-	if environment.Integration != nil && environment.Integration.Spec.Profile != "" {
-		profile = environment.Integration.Spec.Profile
-	}
+	profile := environment.DetermineProfile()
 
 	switch profile {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
+			c.tDebug,
 			c.tDependencies,
 			c.tService,
 			c.tRoute,
@@ -92,6 +89,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
+			c.tDebug,
 			c.tDependencies,
 			c.tService,
 			c.tIngress,
@@ -102,6 +100,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
+			c.tDebug,
 			c.tDependencies,
 			c.tKnative,
 			c.tBuilder,

@@ -20,6 +20,7 @@ package trait
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -111,4 +112,20 @@ func (e *Environment) IntegrationInPhase(phase v1alpha1.IntegrationPhase) bool {
 // IntegrationContextInPhase --
 func (e *Environment) IntegrationContextInPhase(phase v1alpha1.IntegrationContextPhase) bool {
 	return e.Context != nil && e.Context.Status.Phase == phase
+}
+
+// DeterimeProfile determines the TraitProfile of the environment.
+// First looking at the Integration.Spec for a Profile,
+// next looking at the Context.Spec
+// and lastly the Platform Profile
+func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
+	if e.Integration != nil && e.Integration.Spec.Profile != "" {
+		return e.Integration.Spec.Profile
+	}
+
+	if e.Context != nil && e.Context.Spec.Profile != "" {
+		return e.Context.Spec.Profile
+	}
+
+	return platform.GetProfile(e.Platform)
 }

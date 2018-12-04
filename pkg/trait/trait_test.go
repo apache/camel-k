@@ -179,6 +179,7 @@ func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...
 				Cluster: cluster,
 			},
 		},
+		EnvVars:        make(map[string]string),
 		ExecutedTraits: make([]ID, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
