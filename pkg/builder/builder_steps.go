@@ -25,6 +25,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/scylladb/go-set/strset"
+
 	"github.com/rs/xid"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -171,48 +173,57 @@ func ComputeDependencies(ctx *Context) error {
 }
 
 // ArtifactsSelector --
-type ArtifactsSelector func([]v1alpha1.Artifact) (string, []v1alpha1.Artifact, error)
+type ArtifactsSelector func(ctx *Context) error
 
 // StandardPackager --
 func StandardPackager(ctx *Context) error {
-	return packager(ctx, func(libraries []v1alpha1.Artifact) (string, []v1alpha1.Artifact, error) {
-		return ctx.Image, libraries, nil
+	return packager(ctx, func(ctx *Context) error {
+		ctx.SelectedArtifacts = ctx.Artifacts
+
+		return nil
 	})
 }
 
 // IncrementalPackager --
 func IncrementalPackager(ctx *Context) error {
+	if ctx.HasRequiredImage() {
+		//
+		// If the build requires a specific image, don't try to determine the
+		// base image using artifact so just use the standard packages
+		//
+		return StandardPackager(ctx)
+	}
+
 	images, err := ListPublishedImages(ctx.Namespace)
 	if err != nil {
 		return err
 	}
 
-	return packager(ctx, func(libraries []v1alpha1.Artifact) (string, []v1alpha1.Artifact, error) {
-		bestImage, commonLibs := FindBestImage(images, libraries)
-		if bestImage != nil {
-			selectedClasspath := make([]v1alpha1.Artifact, 0)
-			for _, entry := range libraries {
+	return packager(ctx, func(ctx *Context) error {
+		ctx.SelectedArtifacts = ctx.Artifacts
+
+		bestImage, commonLibs := FindBestImage(images, ctx.Request.Dependencies, ctx.Artifacts)
+		if bestImage.Image != "" {
+			selectedArtifacts := make([]v1alpha1.Artifact, 0)
+			for _, entry := range ctx.Artifacts {
 				if _, isCommon := commonLibs[entry.ID]; !isCommon {
-					selectedClasspath = append(selectedClasspath, entry)
+					selectedArtifacts = append(selectedArtifacts, entry)
 				}
 			}
 
-			return bestImage.Image, selectedClasspath, nil
+			ctx.Image = bestImage.Image
+			ctx.SelectedArtifacts = selectedArtifacts
 		}
 
-		// return default selection
-		return ctx.Image, libraries, nil
+		return nil
 	})
 }
 
 // ClassPathPackager --
 func packager(ctx *Context, selector ArtifactsSelector) error {
-	imageName, selectedArtifacts, err := selector(ctx.Artifacts)
+	err := selector(ctx)
 	if err != nil {
 		return err
-	}
-	if imageName == "" {
-		imageName = ctx.Image
 	}
 
 	tarFileName := path.Join(ctx.Path, "package", "occi.tar")
@@ -229,7 +240,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 	}
 	defer tarAppender.Close()
 
-	for _, entry := range selectedArtifacts {
+	for _, entry := range ctx.SelectedArtifacts {
 		_, tarFileName := path.Split(entry.Target)
 		tarFilePath := path.Dir(entry.Target)
 
@@ -239,19 +250,23 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 		}
 	}
 
-	if ctx.ComputeClasspath {
-		cp := ""
-		for _, entry := range ctx.Artifacts {
-			cp += path.Join(entry.Target) + "\n"
-		}
-
-		err = tarAppender.AppendData([]byte(cp), "classpath")
-		if err != nil {
+	for _, entry := range ctx.Request.Resources {
+		if err := tarAppender.AddData(entry.Content, entry.Target); err != nil {
 			return err
 		}
 	}
 
-	ctx.Image = imageName
+	if ctx.ComputeClasspath && len(ctx.Artifacts) > 0 {
+		cp := ""
+		for _, entry := range ctx.Artifacts {
+			cp += entry.Target + "\n"
+		}
+
+		if err := tarAppender.AddData([]byte(cp), "classpath"); err != nil {
+			return err
+		}
+	}
+
 	ctx.Archive = tarFileName
 
 	return nil
@@ -275,38 +290,67 @@ func ListPublishedImages(namespace string) ([]PublishedImage, error) {
 		}
 
 		images = append(images, PublishedImage{
-			Image:     ctx.Status.Image,
-			Artifacts: ctx.Status.Artifacts,
+			Image:        ctx.Status.Image,
+			Artifacts:    ctx.Status.Artifacts,
+			Dependencies: ctx.Spec.Dependencies,
 		})
 	}
 	return images, nil
 }
 
 // FindBestImage --
-func FindBestImage(images []PublishedImage, entries []v1alpha1.Artifact) (*PublishedImage, map[string]bool) {
+func FindBestImage(images []PublishedImage, dependencies []string, artifacts []v1alpha1.Artifact) (PublishedImage, map[string]bool) {
+	var bestImage PublishedImage
+
 	if len(images) == 0 {
-		return nil, nil
+		return bestImage, nil
 	}
-	requiredLibs := make(map[string]bool, len(entries))
-	for _, entry := range entries {
+
+	requiredLibs := make(map[string]bool, len(artifacts))
+	for _, entry := range artifacts {
 		requiredLibs[entry.ID] = true
 	}
 
-	var bestImage PublishedImage
+	requiredRuntimes := strset.New()
+	for _, entry := range dependencies {
+		if strings.HasPrefix(entry, "runtime:") {
+			requiredRuntimes.Add(entry)
+		}
+	}
+
 	bestImageCommonLibs := make(map[string]bool)
 	bestImageSurplusLibs := 0
+
 	for _, image := range images {
+		runtimes := strset.New()
+		for _, entry := range image.Dependencies {
+			if strings.HasPrefix(entry, "runtime:") {
+				runtimes.Add(entry)
+			}
+		}
+
+		//
+		// check if the image has the same runtime requirements to avoid the heuristic
+		// selector to include unwanted runtime bits such as spring-boot (which may have
+		// an additional artifact only thus it may match)
+		//
+		if !requiredRuntimes.IsSubset(runtimes) {
+			continue
+		}
+
 		common := make(map[string]bool)
 		for _, artifact := range image.Artifacts {
 			if _, ok := requiredLibs[artifact.ID]; ok {
 				common[artifact.ID] = true
 			}
 		}
+
 		numCommonLibs := len(common)
 		surplus := len(image.Artifacts) - numCommonLibs
 
 		if numCommonLibs != len(image.Artifacts) && surplus >= numCommonLibs/3 {
-			// Heuristic approach: if there are too many unrelated libraries, just use the base image
+			// Heuristic approach: if there are too many unrelated libraries, just use
+			// the base image
 			continue
 		}
 
@@ -317,7 +361,7 @@ func FindBestImage(images []PublishedImage, entries []v1alpha1.Artifact) (*Publi
 		}
 	}
 
-	return &bestImage, bestImageCommonLibs
+	return bestImage, bestImageCommonLibs
 }
 
 // Notify --

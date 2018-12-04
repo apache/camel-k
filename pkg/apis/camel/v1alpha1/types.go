@@ -130,8 +130,10 @@ const (
 	// IntegrationKind --
 	IntegrationKind string = "Integration"
 
-	// IntegrationPhaseBuilding --
-	IntegrationPhaseBuilding IntegrationPhase = "Building"
+	// IntegrationPhaseBuildingContext --
+	IntegrationPhaseBuildingContext IntegrationPhase = "Building Context"
+	// IntegrationPhaseBuildingImage --
+	IntegrationPhaseBuildingImage IntegrationPhase = "Building Image"
 	// IntegrationPhaseDeploying --
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --
@@ -289,4 +291,8 @@ type Artifact struct {
 	ID       string `json:"id" yaml:"id"`
 	Location string `json:"location,omitempty" yaml:"location,omitempty"`
 	Target   string `json:"target,omitempty" yaml:"target,omitempty"`
+}
+
+func (in *Artifact) String() string {
+	return in.ID
 }

@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -29,7 +30,8 @@ import (
 )
 
 type deploymentTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait      `property:",squash"`
+	ContainerImage bool `property:"container-image"`
 }
 
 func newDeploymentTrait() *deploymentTrait {
@@ -39,12 +41,40 @@ func newDeploymentTrait() *deploymentTrait {
 }
 
 func (d *deploymentTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
+		//
+		// Don't deploy on knative
+		//
+		return e.DetermineProfile() != v1alpha1.TraitProfileKnative
+	}
+
+	if d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+		return true
+	}
+
+	if !d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+		return true
+	}
+
+	return false
 }
 
 func (d *deploymentTrait) apply(e *Environment) error {
-	e.Resources.AddAll(getConfigMapsFor(e))
-	e.Resources.Add(getDeploymentFor(e))
+	if d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+		// trigger container image build
+		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingImage
+	}
+
+	if !d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+		// trigger integration deploy
+		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+	}
+
+	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
+		e.Resources.AddAll(d.getConfigMapsFor(e))
+		e.Resources.Add(d.getDeploymentFor(e))
+	}
+
 	return nil
 }
 
@@ -54,7 +84,7 @@ func (d *deploymentTrait) apply(e *Environment) error {
 //
 // **********************************
 
-func getConfigMapsFor(e *Environment) []runtime.Object {
+func (d *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 	maps := make([]runtime.Object, 0, len(e.Integration.Spec.Sources)+1)
 
 	// combine properties of integration with context, integration
@@ -81,30 +111,35 @@ func getConfigMapsFor(e *Environment) []runtime.Object {
 		},
 	)
 
-	for i, s := range e.Integration.Spec.Sources {
-		maps = append(
-			maps,
-			&corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
-					Namespace: e.Integration.Namespace,
-					Labels: map[string]string{
-						"camel.apache.org/integration": e.Integration.Name,
+	if !d.ContainerImage {
+
+		// do not create 'source' ConfigMap if a docker images for deployment
+		// is required
+		for i, s := range e.Integration.Spec.Sources {
+			maps = append(
+				maps,
+				&corev1.ConfigMap{
+					TypeMeta: metav1.TypeMeta{
+						Kind:       "ConfigMap",
+						APIVersion: "v1",
 					},
-					Annotations: map[string]string{
-						"camel.apache.org/source.language": string(s.Language),
-						"camel.apache.org/source.name":     s.Name,
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
+						Namespace: e.Integration.Namespace,
+						Labels: map[string]string{
+							"camel.apache.org/integration": e.Integration.Name,
+						},
+						Annotations: map[string]string{
+							"camel.apache.org/source.language": string(s.Language),
+							"camel.apache.org/source.name":     s.Name,
+						},
+					},
+					Data: map[string]string{
+						"integration": s.Content,
 					},
 				},
-				Data: map[string]string{
-					"integration": s.Content,
-				},
-			},
-		)
+			)
+		}
 	}
 
 	return maps
@@ -116,16 +151,33 @@ func getConfigMapsFor(e *Environment) []runtime.Object {
 //
 // **********************************
 
-func getDeploymentFor(e *Environment) *appsv1.Deployment {
+func (d *deploymentTrait) getSources(e *Environment) []string {
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
+
 	for i, s := range e.Integration.Spec.Sources {
-		src := fmt.Sprintf("file:/etc/camel/integrations/%03d/%s", i, strings.TrimPrefix(s.Name, "/"))
+		root := fmt.Sprintf("/etc/camel/integrations/%03d", i)
+
+		if d.ContainerImage {
+
+			// assume sources are copied over the standard deployments folder
+			root = "/deployments/sources"
+		}
+
+		src := path.Join(root, s.Name)
+		src = "file:" + src
+
 		if s.Language != "" {
-			src = src + "?language=" + string(s.Language)
+			src = fmt.Sprintf("%s?language=%s", src, string(s.Language))
 		}
 
 		sources = append(sources, src)
 	}
+
+	return sources
+}
+
+func (d *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
+	sources := d.getSources(e)
 
 	// combine Environment of integration with context, integration
 	// Environment has the priority
@@ -227,28 +279,35 @@ func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// Volumes :: Sources
 	//
 
-	for i, s := range e.Integration.Spec.Sources {
-		vols = append(vols, corev1.Volume{
-			Name: fmt.Sprintf("integration-source-%03d", i),
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
-					},
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "integration",
-							Path: strings.TrimPrefix(s.Name, "/"),
+	if !d.ContainerImage {
+
+		// We can configure the operator to generate a container images that include
+		// integration sources instead of mounting it at runtime and in such case we
+		// do not need to mount any 'source' ConfigMap to the pod
+
+		for i, s := range e.Integration.Spec.Sources {
+			vols = append(vols, corev1.Volume{
+				Name: fmt.Sprintf("integration-source-%03d", i),
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
+						},
+						Items: []corev1.KeyToPath{
+							{
+								Key:  "integration",
+								Path: strings.TrimPrefix(s.Name, "/"),
+							},
 						},
 					},
 				},
-			},
-		})
+			})
 
-		mnts = append(mnts, corev1.VolumeMount{
-			Name:      fmt.Sprintf("integration-source-%03d", i),
-			MountPath: fmt.Sprintf("/etc/camel/integrations/%03d", i),
-		})
+			mnts = append(mnts, corev1.VolumeMount{
+				Name:      fmt.Sprintf("integration-source-%03d", i),
+				MountPath: fmt.Sprintf("/etc/camel/integrations/%03d", i),
+			})
+		}
 	}
 
 	//

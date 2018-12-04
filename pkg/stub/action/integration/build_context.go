@@ -20,6 +20,8 @@ package integration
 import (
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/trait"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -31,26 +33,26 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
 
-// NewBuildAction create an action that handles integration build
-func NewBuildAction(namespace string) Action {
-	return &buildAction{
+// NewBuildContextAction create an action that handles integration context build
+func NewBuildContextAction(namespace string) Action {
+	return &buildContextAction{
 		namespace: namespace,
 	}
 }
 
-type buildAction struct {
+type buildContextAction struct {
 	namespace string
 }
 
-func (action *buildAction) Name() string {
-	return "build"
+func (action *buildContextAction) Name() string {
+	return "build-context"
 }
 
-func (action *buildAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuilding
+func (action *buildContextAction) CanHandle(integration *v1alpha1.Integration) bool {
+	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingContext
 }
 
-func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
+func (action *buildContextAction) Handle(integration *v1alpha1.Integration) error {
 	ctx, err := LookupContextForIntegration(integration)
 	if err != nil {
 		//TODO: we may need to add a wait strategy, i.e give up after some time
@@ -74,30 +76,40 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 			}
 		}
 
-		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
-			target := integration.DeepCopy()
-			target.Status.Image = ctx.Status.Image
-			target.Spec.Context = ctx.Name
-			logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseDeploying)
-			target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
-			dgst, err := digest.ComputeForIntegration(target)
-			if err != nil {
-				return err
-			}
-			target.Status.Digest = dgst
-			return sdk.Update(target)
-		}
-
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
 			target := integration.DeepCopy()
 			target.Status.Image = ctx.Status.Image
 			target.Spec.Context = ctx.Name
 			target.Status.Phase = v1alpha1.IntegrationPhaseError
+
+			target.Status.Digest, err = digest.ComputeForIntegration(target)
+			if err != nil {
+				return err
+			}
+
+			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+
+			return sdk.Update(target)
+		}
+
+		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+			target := integration.DeepCopy()
+			target.Status.Image = ctx.Status.Image
+			target.Spec.Context = ctx.Name
+
 			dgst, err := digest.ComputeForIntegration(target)
 			if err != nil {
 				return err
 			}
+
 			target.Status.Digest = dgst
+
+			if _, err := trait.Apply(target, ctx); err != nil {
+				return err
+			}
+
+			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+
 			return sdk.Update(target)
 		}
 
@@ -138,5 +150,6 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 	// same path as integration with a user defined context
 	target := integration.DeepCopy()
 	target.Spec.Context = platformCtxName
+
 	return sdk.Update(target)
 }

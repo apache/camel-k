@@ -151,6 +151,10 @@ func (b *defaultBuilder) submit(request Request) {
 		Image:            "fabric8/s2i-java:2.3", // TODO: externalize
 	}
 
+	if request.Image != "" {
+		c.Image = request.Image
+	}
+
 	// Sort steps by phase
 	sort.SliceStable(request.Steps, func(i, j int) bool {
 		return request.Steps[i].Phase() < request.Steps[j].Phase()
@@ -201,4 +205,9 @@ func (b *defaultBuilder) submit(request Request) {
 	b.request.Store(request.Meta.Name, r)
 
 	b.log.Infof("request to build context %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+	b.log.Infof("dependencies       : %s", request.Dependencies)
+	b.log.Infof("artifacts          : %s", ArtifactIDs(c.Artifacts))
+	b.log.Infof("artifacts selected : %s", ArtifactIDs(c.SelectedArtifacts))
+	b.log.Infof("requested image    : %s", request.Image)
+	b.log.Infof("resolved image     : %s", c.Image)
 }

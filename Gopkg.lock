@@ -493,6 +493,14 @@
   version = "v1.2.1"
 
 [[projects]]
+  digest = "1:6f3ce746342be7b14a2d1ca33a4a11fd6cb0300e5d34c766f01e19e936fb10af"
+  name = "github.com/scylladb/go-set"
+  packages = ["strset"]
+  pruneopts = "NUT"
+  revision = "e560bb8f49bb7f34d4f59b7e771f6e1307c329da"
+  version = "v1.0.2"
+
+[[projects]]
   digest = "1:ecf78eacf406c42f07f66d6b79fda24d2b92dc711bfd0760d0c931678f9621fe"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -935,6 +943,7 @@
     "github.com/pkg/errors",
     "github.com/radovskyb/watcher",
     "github.com/rs/xid",
+    "github.com/scylladb/go-set/strset",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/stoewer/go-strcase",

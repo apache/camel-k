@@ -79,10 +79,10 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		target := context.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
 
-		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseError)
+		logrus.Info("Context ", target.Name, " transitioning to state ", target.Status.Phase)
 
 		// remove the build from cache
-		b.Purge(r)
+		defer b.Purge(r)
 
 		return sdk.Update(target)
 	case builder.StatusCompleted:
@@ -100,7 +100,10 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 			})
 		}
 
-		logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseReady)
+		logrus.Info("Context ", target.Name, " transitioning to state ", target.Status.Phase)
+
+		// remove the build from cache
+		defer b.Purge(r)
 
 		if err := sdk.Update(target); err != nil {
 			return err
@@ -108,9 +111,6 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		if err := action.informIntegrations(target); err != nil {
 			return err
 		}
-
-		// remove the build from cache
-		b.Purge(r)
 	}
 
 	return nil

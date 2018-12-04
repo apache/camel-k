@@ -23,9 +23,6 @@ import (
 
 // Initialize --
 func Initialize(ctx *builder.Context) error {
-	// set the base image
-	//ctx.Image = "kamel-k/s2i-boot:" + version.Version
-
 	// no need to compute classpath as we do use spring boot own
 	// loader: PropertiesLauncher
 	ctx.ComputeClasspath = false

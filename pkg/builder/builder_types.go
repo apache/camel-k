@@ -94,15 +94,22 @@ func NewStep(ID string, phase int32, task StepTask) Step {
 	return &s
 }
 
+// Resource --
+type Resource struct {
+	Target  string
+	Content []byte
+}
+
 // Request --
 type Request struct {
 	Meta         v1.ObjectMeta
 	Platform     v1alpha1.IntegrationPlatformSpec
-	Code         v1alpha1.SourceSpec
 	Dependencies []string
 	Repositories []string
 	Steps        []Step
 	BuildDir     string
+	Image        string
+	Resources    []Resource
 }
 
 // Task --
@@ -128,23 +135,39 @@ type Result struct {
 
 // Context --
 type Context struct {
-	C                context.Context
-	Request          Request
-	Image            string
-	Error            error
-	Namespace        string
-	Project          maven.Project
-	Path             string
-	Artifacts        []v1alpha1.Artifact
-	Archive          string
-	ComputeClasspath bool
-	MainClass        string
+	C                 context.Context
+	Request           Request
+	Image             string
+	Error             error
+	Namespace         string
+	Project           maven.Project
+	Path              string
+	Artifacts         []v1alpha1.Artifact
+	SelectedArtifacts []v1alpha1.Artifact
+	Archive           string
+	ComputeClasspath  bool
+	MainClass         string
+}
+
+// HasRequiredImage --
+func (c *Context) HasRequiredImage() bool {
+	return c.Request.Image != ""
+}
+
+// GetImage --
+func (c *Context) GetImage() string {
+	if c.Request.Image != "" {
+		return c.Request.Image
+	}
+
+	return c.Image
 }
 
 // PublishedImage --
 type PublishedImage struct {
-	Image     string
-	Artifacts []v1alpha1.Artifact
+	Image        string
+	Artifacts    []v1alpha1.Artifact
+	Dependencies []string
 }
 
 // Status --

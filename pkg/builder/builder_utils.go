@@ -17,7 +17,11 @@ limitations under the License.
 
 package builder
 
-import "os"
+import (
+	"os"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+)
 
 // MavenExtraOptions --
 func MavenExtraOptions() string {
@@ -25,4 +29,15 @@ func MavenExtraOptions() string {
 		return "-Dmaven.repo.local=/tmp/artifacts/m2"
 	}
 	return "-Dcamel.noop=true"
+}
+
+// ArtifactIDs --
+func ArtifactIDs(artifacts []v1alpha1.Artifact) []string {
+	result := make([]string, 0, len(artifacts))
+
+	for _, a := range artifacts {
+		result = append(result, a.ID)
+	}
+
+	return result
 }
