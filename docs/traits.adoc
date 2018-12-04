@@ -84,8 +84,23 @@ The following is a list of common traits that can be configured by the end users
 
 !===
 
+| istio
+| Knative (Kubernetes, Openshift)
+| Allows to configure outbound traffic for Istio.
+  +
+  +
+  It's enabled by default when the Knative profile is active.
+
+[cols="m,"]
+!===
+
+! istio.allow
+! Configures a (comma-separated) list of CIDR subnets that should not be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` by default).
+
+!===
+
 | service
-| Kubernetes, OpenShift
+| All (Knative in deployment mode)
 | Exposes the integration with a Service resource so that it can be accessed by other applications (or integrations) in the same namespace.
   +
   +
