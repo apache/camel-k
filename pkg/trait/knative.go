@@ -186,6 +186,9 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 			RunLatest: &serving.RunLatestType{
 				Configuration: serving.ConfigurationSpec{
 					RevisionTemplate: serving.RevisionTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: labels,
+						},
 						Spec: serving.RevisionSpec{
 							Container: corev1.Container{
 								Image: e.Integration.Status.Image,
