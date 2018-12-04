@@ -134,6 +134,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 				},
 			},
 		},
+		EnvVars:        make(map[string]string),
 		ExecutedTraits: make([]ID, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
