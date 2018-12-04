@@ -128,19 +128,21 @@ func (t *Appender) AddFileWithName(fileName string, filePath string, tarDir stri
 	return fileName, nil
 }
 
-// AppendData appends the given content to a file inside the tar, creating it if it does not exist
-func (t *Appender) AppendData(data []byte, tarPath string) error {
-	if err := t.writer.WriteHeader(&atar.Header{
+// AddData appends the given content to a file inside the tar, creating it if it does not exist
+func (t *Appender) AddData(data []byte, tarPath string) error {
+	err := t.writer.WriteHeader(&atar.Header{
 		Name: tarPath,
 		Size: int64(len(data)),
 		Mode: 0644,
-	}); err != nil {
+	})
+
+	if err != nil {
 		return err
 	}
 
-	_, err := t.writer.Write(data)
-	if err != nil {
+	if _, err := t.writer.Write(data); err != nil {
 		return errors.Wrap(err, "cannot add data to the tar archive")
 	}
+
 	return nil
 }

@@ -19,6 +19,7 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/platform"
@@ -36,14 +37,41 @@ func newBuilderTrait() *builderTrait {
 }
 
 func (*builderTrait) appliesTo(e *Environment) bool {
-	return e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding
+	if e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding {
+		return true
+	}
+
+	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingImage &&
+		e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+		return true
+	}
+
+	return false
 }
 
 func (*builderTrait) apply(e *Environment) error {
-	if platform.SupportsS2iPublishStrategy(e.Platform) {
-		e.Steps = s2i.DefaultSteps
-	} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
-		e.Steps = kaniko.DefaultSteps
+	if e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding {
+		if platform.SupportsS2iPublishStrategy(e.Platform) {
+			e.Steps = s2i.DefaultSteps
+		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
+			e.Steps = kaniko.DefaultSteps
+		}
+	}
+
+	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingImage &&
+		e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+
+		if platform.SupportsS2iPublishStrategy(e.Platform) {
+			e.Steps = []builder.Step{
+				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
+				builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, s2i.Publisher),
+			}
+		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
+			e.Steps = []builder.Step{
+				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
+				builder.NewStep("publisher/kaniko", builder.ApplicationPublishPhase, kaniko.Publisher),
+			}
+		}
 	}
 
 	return nil

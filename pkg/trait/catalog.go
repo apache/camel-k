@@ -73,9 +73,7 @@ func (c *Catalog) allTraits() []Trait {
 }
 
 func (c *Catalog) traitsFor(environment *Environment) []Trait {
-	profile := environment.DetermineProfile()
-
-	switch profile {
+	switch environment.DetermineProfile() {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
 			c.tDebug,
@@ -105,6 +103,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tKnative,
 			c.tBuilder,
 			c.tSpringBoot,
+			c.tDeployment,
 			c.tOwner,
 		}
 	}
@@ -128,14 +127,17 @@ func (c *Catalog) apply(environment *Environment) error {
 				return err
 			}
 		}
+
 		if trait.IsEnabled() {
 			logrus.Infof("apply trait: %s", trait.ID())
 			if err := trait.apply(environment); err != nil {
 				return err
 			}
+
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait.ID())
 		}
 	}
+
 	return nil
 }
 

@@ -53,8 +53,10 @@ func (action *monitorAction) Handle(integration *v1alpha1.Integration) error {
 
 		target := integration.DeepCopy()
 		target.Status.Digest = hash
-		logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseBuilding)
-		target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
+		target.Status.Phase = v1alpha1.IntegrationPhaseBuildingContext
+
+		logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+
 		return sdk.Update(target)
 	}
 
