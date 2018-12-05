@@ -32,9 +32,9 @@ public interface RoutesLoader {
      * Creates a camel {@link RouteBuilder} from the given resource.
      *
      * @param registry the runtime registry.
-     * @param resource the location fo the resource to load.
+     * @param source the source to load.
      * @return the RouteBuilder.
      * @throws Exception
      */
-    RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception;
+    RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception;
 }

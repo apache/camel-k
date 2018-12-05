@@ -27,10 +27,10 @@ import org.apache.camel.k.jvm.RoutesLoader;
 import org.apache.camel.k.jvm.RoutesLoaders;
 import org.apache.camel.k.jvm.RuntimeRegistry;
 import org.apache.camel.k.jvm.RuntimeSupport;
+import org.apache.camel.k.jvm.Source;
 import org.apache.camel.spi.Registry;
+import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.camel.util.ObjectHelper;
-import org.apache.camel.util.URISupport;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -74,11 +74,10 @@ public class Application {
     }
 
     @Bean
-    public RouteBuilder routes(ConfigurableApplicationContext applicationContext) throws Exception {
-        return new RouteBuilder() {
+    public CamelContextConfiguration routesConfiguration(ConfigurableApplicationContext applicationContext) throws Exception {
+        return new CamelContextConfiguration() {
             @Override
-            public void configure() throws Exception {
-                final CamelContext context = getContext();
+            public void beforeApplicationStart(CamelContext context) {
                 final RuntimeRegistry registry = new RuntimeApplicationContextRegistry(applicationContext, context.getRegistry());
                 final String routes = System.getenv(Constants.ENV_CAMEL_K_ROUTES);
 
@@ -86,24 +85,27 @@ public class Application {
                     throw new IllegalStateException("No valid routes found in " + Constants.ENV_CAMEL_K_ROUTES + " environment variable");
                 }
 
-                for (String route: routes.split(",")) {
-                    // determine location and language
-                    final String location = StringUtils.substringBefore(route, "?");
-                    final String query = StringUtils.substringAfter(route, "?");
-                    final String language = (String) URISupport.parseQuery(query).get("language");
+                try {
+                    for (String route : routes.split(",")) {
+                        final Source source = Source.create(route);
+                        final RoutesLoader loader = RoutesLoaders.loaderFor(source);
+                        final RouteBuilder builder = loader.load(registry, source);
 
-                    // load routes
-                    final RoutesLoader loader = RoutesLoaders.loaderFor(location, language);
-                    final RouteBuilder builder = loader.load(registry, location);
+                        if (builder == null) {
+                            throw new IllegalStateException("Unable to load route from: " + route);
+                        }
 
-                    if (builder == null) {
-                        throw new IllegalStateException("Unable to load route from: " + route);
+                        LOGGER.info("Routes: {}", route);
+
+                        context.addRoutes(builder);
                     }
-
-                    LOGGER.info("Routes: {}", route);
-
-                    context.addRoutes(builder);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
                 }
+            }
+
+            @Override
+            public void afterApplicationStart(CamelContext camelContext) {
             }
         };
     }
@@ -142,25 +144,6 @@ public class Application {
         public <T> Set<T> findByType(Class<T> type) {
             return registry.findByType(type);
         }
-
-        @SuppressWarnings("deprecation")
-        @Override
-        public Object lookup(String name) {
-            return registry.lookup(name);
-        }
-
-        @SuppressWarnings("deprecation")
-        @Override
-        public <T> T lookup(String name, Class<T> type) {
-            return registry.lookup(name, type);
-        }
-
-        @SuppressWarnings("deprecation")
-        @Override
-        public <T> Map<String, T> lookupByType(Class<T> type) {
-            return registry.lookupByType(type);
-        }
-
         @Override
         public void bind(String name, Object bean) {
             applicationContext.getBeanFactory().registerSingleton(name, bean);
