@@ -32,6 +32,7 @@ import (
 
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pkg/errors"
@@ -71,8 +72,12 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	sdk.Delete(&bc)
-	err := sdk.Create(&bc)
+	err := sdk.Delete(&bc)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return errors.Wrap(err, "cannot delete build config")
+	}
+
+	err = sdk.Create(&bc)
 	if err != nil {
 		return errors.Wrap(err, "cannot create build config")
 	}
@@ -93,7 +98,11 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	sdk.Delete(&is)
+	err = sdk.Delete(&is)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return errors.Wrap(err, "cannot delete image stream")
+	}
+
 	err = sdk.Create(&is)
 	if err != nil {
 		return errors.Wrap(err, "cannot create image stream")
@@ -149,6 +158,9 @@ func Publisher(ctx *builder.Context) error {
 		}
 		return false, nil
 	}, 5*time.Minute)
+	if err != nil {
+		return err
+	}
 
 	err = sdk.Get(&is)
 	if err != nil {

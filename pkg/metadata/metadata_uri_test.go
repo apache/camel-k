@@ -18,9 +18,10 @@ limitations under the License.
 package metadata
 
 import (
+	"testing"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestJava1(t *testing.T) {

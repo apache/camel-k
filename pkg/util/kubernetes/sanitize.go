@@ -26,11 +26,7 @@ import (
 	"github.com/stoewer/go-strcase"
 )
 
-var disallowedChars *regexp.Regexp
-
-func init() {
-	disallowedChars = regexp.MustCompile("[^a-z0-9-]")
-}
+var disallowedChars = regexp.MustCompile(`[^a-z0-9-]`)
 
 // SanitizeName sanitizes the given name to be compatible with k8s
 func SanitizeName(name string) string {

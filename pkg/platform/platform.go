@@ -49,6 +49,7 @@ func GetCurrentPlatform(namespace string) (*v1alpha1.IntegrationPlatform, error)
 	}
 
 	for _, platform := range lst.Items {
+		platform := platform // pin
 		if IsActive(&platform) {
 			return &platform, nil
 		}

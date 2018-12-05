@@ -45,5 +45,5 @@ func TestApplicability(t *testing.T) {
 
 func TestApply(t *testing.T) {
 	assert.Nil(t, trait.apply(env))
-	assert.Equal(t, "true", env.EnvVars["JAVA_DEBUG"])
+	assert.Equal(t, True, env.EnvVars["JAVA_DEBUG"])
 }

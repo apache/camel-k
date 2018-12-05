@@ -37,7 +37,7 @@ func (r *debugTrait) appliesTo(e *Environment) bool {
 
 func (r *debugTrait) apply(e *Environment) error {
 	// this is all that's needed as long as the base image is `fabric8/s2i-java` look into builder/builder.go
-	e.EnvVars["JAVA_DEBUG"] = "true"
+	e.EnvVars["JAVA_DEBUG"] = True
 
 	return nil
 }

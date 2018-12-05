@@ -58,7 +58,11 @@ func (action *initializeAction) Handle(context *v1alpha1.IntegrationContext) err
 	// update the status
 	logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseBuilding)
 	target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
-	target.Status.Digest = digest.ComputeForIntegrationContext(context)
+	dgst, err := digest.ComputeForIntegrationContext(context)
+	if err != nil {
+		return err
+	}
+	target.Status.Digest = dgst
 
 	return sdk.Update(target)
 }

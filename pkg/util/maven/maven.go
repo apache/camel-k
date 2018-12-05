@@ -31,10 +31,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	buildDirPrefix = "maven-"
-)
-
 // BuildResult --
 type BuildResult struct {
 	Classpath []v1alpha1.Artifact
@@ -111,12 +107,13 @@ func ParseGAV(gav string) (Dependency, error) {
 	dep.Type = "jar"
 
 	cnt := strings.Count(gav, ":")
-	if cnt == 2 {
+	switch cnt {
+	case 2:
 		dep.Version = res[4]
-	} else if cnt == 3 {
+	case 3:
 		dep.Type = res[4]
 		dep.Version = res[6]
-	} else {
+	default:
 		dep.Type = res[4]
 		dep.Classifier = res[6]
 		dep.Version = res[8]

@@ -29,49 +29,67 @@ import (
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegration(integration *v1alpha1.Integration) string {
+func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
-	hash.Write([]byte(version.Version))
+	if _, err := hash.Write([]byte(version.Version)); err != nil {
+		return "", err
+	}
 	// Integration Context is relevant
-	hash.Write([]byte(integration.Spec.Context))
+	if _, err := hash.Write([]byte(integration.Spec.Context)); err != nil {
+		return "", err
+	}
 
 	// Integration code
 	for _, s := range integration.Spec.Sources {
 		if s.Content != "" {
-			hash.Write([]byte(s.Content))
+			if _, err := hash.Write([]byte(s.Content)); err != nil {
+				return "", err
+			}
 		}
 	}
 
 	// Integration dependencies
 	for _, item := range integration.Spec.Dependencies {
-		hash.Write([]byte(item))
+		if _, err := hash.Write([]byte(item)); err != nil {
+			return "", err
+		}
 	}
 	// Integration configuration
 	for _, item := range integration.Spec.Configuration {
-		hash.Write([]byte(item.String()))
+		if _, err := hash.Write([]byte(item.String())); err != nil {
+			return "", err
+		}
 	}
 
 	// Add a letter at the beginning and use URL safe encoding
-	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+	return digest, nil
 }
 
 // ComputeForIntegrationContext a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegrationContext(context *v1alpha1.IntegrationContext) string {
+func ComputeForIntegrationContext(context *v1alpha1.IntegrationContext) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
-	hash.Write([]byte(version.Version))
+	if _, err := hash.Write([]byte(version.Version)); err != nil {
+		return "", err
+	}
 
 	for _, item := range context.Spec.Dependencies {
-		hash.Write([]byte(item))
+		if _, err := hash.Write([]byte(item)); err != nil {
+			return "", err
+		}
 	}
 	for _, item := range context.Spec.Configuration {
-		hash.Write([]byte(item.String()))
+		if _, err := hash.Write([]byte(item.String())); err != nil {
+			return "", err
+		}
 	}
 
 	// Add a letter at the beginning and use URL safe encoding
-	return "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+	return digest, nil
 }
 
 // Random --

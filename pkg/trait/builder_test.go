@@ -36,6 +36,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilContext(t *testing.T) {
 	}
 
 	for _, e := range environments {
+		e := e // pin
 		e.Context = nil
 
 		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
@@ -56,6 +57,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 	}
 
 	for _, e := range environments {
+		e := e // pin
 		e.Context.Status.Phase = ""
 
 		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {

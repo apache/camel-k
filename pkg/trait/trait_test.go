@@ -29,6 +29,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	TestDeployment = "test"
+	TestProperties = "test-properties"
+)
+
 func TestOpenShiftTraits(t *testing.T) {
 	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
 	res := processTestEnv(t, env)
@@ -38,10 +43,10 @@ func TestOpenShiftTraits(t *testing.T) {
 	assert.NotContains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test-properties"
+		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == "test"
+		return deployment.Name == TestDeployment
 	}))
 }
 
@@ -53,16 +58,16 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 	assert.Contains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test-properties"
+		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == "test"
+		return deployment.Name == TestDeployment
 	}))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == "test"
+		return svc.Name == TestDeployment
 	}))
 	assert.NotNil(t, res.GetRoute(func(svc *routev1.Route) bool {
-		return svc.Name == "test"
+		return svc.Name == TestDeployment
 	}))
 }
 
@@ -78,7 +83,7 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 	assert.Contains(t, env.ExecutedTraits, ID("service"))
 	assert.Contains(t, env.ExecutedTraits, ID("route"))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == "test" && svc.Spec.Ports[0].TargetPort.IntVal == int32(7071)
+		return svc.Name == TestDeployment && svc.Spec.Ports[0].TargetPort.IntVal == int32(7071)
 	}))
 }
 
@@ -107,10 +112,10 @@ func TestKubernetesTraits(t *testing.T) {
 	assert.NotContains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test-properties"
+		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == "test"
+		return deployment.Name == TestDeployment
 	}))
 }
 
@@ -122,13 +127,13 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 	assert.NotContains(t, env.ExecutedTraits, ID("route"))
 	assert.Contains(t, env.ExecutedTraits, ID("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "test-properties"
+		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == "test"
+		return deployment.Name == TestDeployment
 	}))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == "test"
+		return svc.Name == TestDeployment
 	}))
 }
 
@@ -163,7 +168,7 @@ func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, dependencies ...
 	return &Environment{
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test",
+				Name:      TestDeployment,
 				Namespace: "ns",
 			},
 			Spec: v1alpha1.IntegrationSpec{

@@ -28,7 +28,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, error) {
 	options := installCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -44,9 +44,12 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&options.registry, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&options.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&options.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
-	cmd.ParseFlags(os.Args)
+	err := cmd.ParseFlags(os.Args)
+	if err != nil {
+		return nil, err
+	}
 
-	return &cmd
+	return &cmd, nil
 }
 
 type installCmdOptions struct {
@@ -62,7 +65,8 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 	err := install.SetupClusterwideResources()
 	if err != nil && k8serrors.IsForbidden(err) {
 		fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
-		return errors.New("please login as cluster-admin and execute \"kamel install --cluster-setup\" to install cluster-wide resources (one-time operation)")
+		return errors.New("please login as cluster-admin and execute \"kamel install --cluster-setup\" to install cluster-wide " +
+			"resources (one-time operation)")
 	}
 
 	if o.clusterSetupOnly {

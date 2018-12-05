@@ -1,0 +1,9 @@
+linters-settings:
+  lll:
+    line-length: 150
+linters:
+  enable-all: true
+  disable:
+    - dupl
+    - gochecknoinits
+    - gochecknoglobals

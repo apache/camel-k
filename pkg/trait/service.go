@@ -63,15 +63,12 @@ func (s *serviceTrait) autoconfigure(e *Environment) error {
 }
 
 func (s *serviceTrait) apply(e *Environment) (err error) {
-	var svc *corev1.Service
-	if svc, err = s.getServiceFor(e); err != nil {
-		return err
-	}
+	svc := s.getServiceFor(e)
 	e.Resources.Add(svc)
 	return nil
 }
 
-func (s *serviceTrait) getServiceFor(e *Environment) (*corev1.Service, error) {
+func (s *serviceTrait) getServiceFor(e *Environment) *corev1.Service {
 	svc := corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -99,7 +96,7 @@ func (s *serviceTrait) getServiceFor(e *Environment) (*corev1.Service, error) {
 		},
 	}
 
-	return &svc, nil
+	return &svc
 }
 
 func (*serviceTrait) requiresService(environment *Environment) bool {

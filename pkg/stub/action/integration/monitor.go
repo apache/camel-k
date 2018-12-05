@@ -43,7 +43,11 @@ func (action *monitorAction) CanHandle(integration *v1alpha1.Integration) bool {
 
 func (action *monitorAction) Handle(integration *v1alpha1.Integration) error {
 
-	hash := digest.ComputeForIntegration(integration)
+	hash, err := digest.ComputeForIntegration(integration)
+	if err != nil {
+		return err
+	}
+
 	if hash != integration.Status.Digest {
 		logrus.Info("Integration ", integration.Name, " needs a rebuild")
 

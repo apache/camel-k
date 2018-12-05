@@ -113,7 +113,9 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 }
 
 func (c *Catalog) apply(environment *Environment) error {
-	c.configure(environment)
+	if err := c.configure(environment); err != nil {
+		return err
+	}
 	traits := c.traitsFor(environment)
 
 	for _, trait := range traits {
@@ -147,12 +149,14 @@ func (c *Catalog) GetTrait(id string) Trait {
 	return nil
 }
 
-func (c *Catalog) configure(env *Environment) {
+func (c *Catalog) configure(env *Environment) error {
 	if env.Context != nil && env.Context.Spec.Traits != nil {
 		for id, traitSpec := range env.Context.Spec.Traits {
 			catTrait := c.GetTrait(id)
 			if catTrait != nil {
-				traitSpec.Decode(catTrait)
+				if err := traitSpec.Decode(catTrait); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -160,16 +164,21 @@ func (c *Catalog) configure(env *Environment) {
 		for id, traitSpec := range env.Integration.Spec.Traits {
 			catTrait := c.GetTrait(id)
 			if catTrait != nil {
-				traitSpec.Decode(catTrait)
+				if err := traitSpec.Decode(catTrait); err != nil {
+					return err
+				}
 			}
 		}
 	}
+
+	return nil
 }
 
 // ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits
 func (c *Catalog) ComputeTraitsProperties() []string {
 	results := make([]string, 0)
 	for _, trait := range c.allTraits() {
+		trait := trait // pin
 		c.processFields(structs.Fields(trait), func(name string) {
 			results = append(results, string(trait.ID())+"."+name)
 		})
