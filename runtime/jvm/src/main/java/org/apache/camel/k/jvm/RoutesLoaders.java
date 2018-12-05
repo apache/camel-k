@@ -36,7 +36,6 @@ import org.apache.camel.k.jvm.dsl.Components;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.rest.RestConfigurationDefinition;
 import org.apache.camel.model.rest.RestDefinition;
-import org.apache.camel.util.ObjectHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joor.Reflect;
@@ -56,8 +55,8 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
-            String path = resource;
+        public RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
+            String path = source.getLocation();
             path = StringUtils.removeStart(path, Constants.SCHEME_CLASSPATH);
             path = StringUtils.removeEnd(path, ".class");
 
@@ -78,12 +77,12 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
+        public RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    try (InputStream is = URIResolver.resolve(getContext(), resource)) {
-                        String name = StringUtils.substringAfter(resource, ":");
+                    try (InputStream is = URIResolver.resolve(getContext(), source.getLocation())) {
+                        String name = StringUtils.substringAfter(source.getLocation(), ":");
                         name = StringUtils.removeEnd(name, ".java");
 
                         if (name.contains("/")) {
@@ -107,7 +106,7 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
+        public RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
@@ -126,7 +125,7 @@ public final class RoutesLoaders {
                     bindings.put("rest", (Supplier<RestDefinition>) () -> rest());
                     bindings.put("restConfiguration", (Supplier<RestConfigurationDefinition>) () -> restConfiguration());
 
-                    try (InputStream is = URIResolver.resolve(context, resource)) {
+                    try (InputStream is = URIResolver.resolve(context, source.getLocation())) {
                         engine.eval(new InputStreamReader(is), bindings);
                     }
                 }
@@ -141,11 +140,11 @@ public final class RoutesLoaders {
         }
 
         @Override
-        public RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
+        public RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    try (InputStream is = URIResolver.resolve(getContext(), resource)) {
+                    try (InputStream is = URIResolver.resolve(getContext(), source.getLocation())) {
                         try {
                             setRouteCollection(
                                 getContext().loadRoutesDefinition(is)
@@ -168,23 +167,13 @@ public final class RoutesLoaders {
     }
 
 
-    public static RoutesLoader loaderFor(String resource, String languageName) {
-        if (!resource.startsWith(Constants.SCHEME_CLASSPATH) &&
-            !resource.startsWith(Constants.SCHEME_FILE) &&
-            !resource.startsWith(Constants.SCHEME_ENV)) {
-            throw new IllegalArgumentException("No valid resource format, expected scheme:path, found " + resource);
-        }
-
-        Language language = ObjectHelper.isNotEmpty(languageName)
-            ? Language.fromLanguageName(languageName)
-            : Language.fromResource(resource);
-
+    public static RoutesLoader loaderFor(Source source) {
         for (RoutesLoader loader: ServiceLoader.load(RoutesLoader.class)) {
-            if (loader.getSupportedLanguages().contains(language)) {
+            if (loader.getSupportedLanguages().contains(source.getLanguage())) {
                 return loader;
             }
         }
 
-        throw new IllegalArgumentException("Unable to find loader for: resource=" + resource + " language=" + languageName);
+        throw new IllegalArgumentException("Unable to find loader for: " + source);
     }
 }

@@ -19,10 +19,7 @@ package org.apache.camel.k.groovy
 
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.k.groovy.dsl.IntegrationConfiguration
-import org.apache.camel.k.jvm.Language
-import org.apache.camel.k.jvm.RoutesLoader
-import org.apache.camel.k.jvm.RuntimeRegistry
-import org.apache.camel.k.jvm.URIResolver
+import org.apache.camel.k.jvm.*
 import org.codehaus.groovy.control.CompilerConfiguration
 
 class GroovyRoutesLoader implements RoutesLoader {
@@ -32,7 +29,7 @@ class GroovyRoutesLoader implements RoutesLoader {
     }
 
     @Override
-    RouteBuilder load(RuntimeRegistry registry, String resource) throws Exception {
+    RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
         return new RouteBuilder() {
             @Override
             void configure() throws Exception {
@@ -41,7 +38,7 @@ class GroovyRoutesLoader implements RoutesLoader {
 
                 def cl = Thread.currentThread().getContextClassLoader()
                 def sh = new GroovyShell(cl, new Binding(), cc)
-                def is = URIResolver.resolve(context, resource)
+                def is = URIResolver.resolve(context, source.location)
 
                 is.withCloseable {
                     def reader = new InputStreamReader(is)

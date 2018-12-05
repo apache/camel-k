@@ -16,20 +16,17 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.util.Properties;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
+import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.ObjectHelper;
 
 public class Application {
     static {
-        //
-        // Load properties as system properties so they are accessible through
-        // camel's properties component as well as for runtime configuration.
-        //
-        RuntimeSupport.configureSystemProperties();
-
         //
         // Configure the logging subsystem log4j2 using a subset of spring boot
         // conventions:
@@ -55,6 +52,7 @@ public class Application {
         }
 
         Runtime runtime = new Runtime();
+        runtime.setProperties(RuntimeSupport.loadProperties());
         runtime.load(routes.split(",", -1));
         runtime.addMainListener(new ComponentPropertiesBinder());
         runtime.run();
@@ -69,11 +67,18 @@ public class Application {
     static class ComponentPropertiesBinder extends MainListenerSupport {
         @Override
         public void configure(CamelContext context) {
+            final PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
+            final Properties properties = component.getInitialProperties();
+
+            if (properties == null) {
+                throw new IllegalStateException("PropertiesComponent has no properties");
+            }
+
             // Configure the camel context using properties in the form:
             //
             //     camel.context.${name} = ${value}
             //
-            RuntimeSupport.bindProperties(context, "camel.context.");
+            RuntimeSupport.bindProperties(properties, context, "camel.context.");
 
             context.addLifecycleStrategy(new LifecycleStrategySupport() {
                 @SuppressWarnings("unchecked")
@@ -85,7 +90,7 @@ public class Application {
                     //
                     //     camel.component.${scheme}.${name} = ${value}
                     //
-                    RuntimeSupport.bindProperties(component, "camel.component." + name + ".");
+                    RuntimeSupport.bindProperties(properties, component, "camel.component." + name + ".");
                 }
             });
         }
