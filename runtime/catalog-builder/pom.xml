@@ -69,6 +69,12 @@
             <scope>runtime</scope>
           </dependency>
           <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-ant</artifactId>
+            <version>${groovy.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+          <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
             <version>${camel.version}</version>

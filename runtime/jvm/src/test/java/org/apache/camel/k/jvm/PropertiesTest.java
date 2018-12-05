@@ -16,6 +16,7 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.camel.CamelContext;
@@ -29,11 +30,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PropertiesTest {
 
     @Test
+    public void testLoadProperties() throws Exception {
+        Properties properties = RuntimeSupport.loadProperties("src/test/resources/conf.properties", "src/test/resources/conf.d");
+
+        Runtime runtime = new Runtime();
+        runtime.setProperties(properties);
+        runtime.setDuration(5);
+        runtime.addMainListener(new Application.ComponentPropertiesBinder());
+        runtime.addMainListener(new MainListenerSupport() {
+            @Override
+            public void afterStart(MainSupport main) {
+                try {
+                    CamelContext context = main.getCamelContexts().get(0);
+
+                    assertThat(context.resolvePropertyPlaceholders("{{root.key}}")).isEqualTo("root.value");
+                    assertThat(context.resolvePropertyPlaceholders("{{001.key}}")).isEqualTo("001.value");
+                    assertThat(context.resolvePropertyPlaceholders("{{002.key}}")).isEqualTo("002.value");
+                    assertThat(context.resolvePropertyPlaceholders("{{a.key}}")).isEqualTo("a.002");
+
+                    main.stop();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        runtime.run();
+    }
+
+    @Test
     public void testSystemProperties() throws Exception {
         System.setProperty("my.property", "my.value");
 
         try {
             Runtime runtime = new Runtime();
+            runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
             runtime.addMainListener(new Application.ComponentPropertiesBinder());
             runtime.addMainListener(new MainListenerSupport() {
@@ -68,6 +99,7 @@ public class PropertiesTest {
 
         try {
             Runtime runtime = new Runtime();
+            runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
             runtime.getRegistry().bind("my-seda", new SedaComponent());
             runtime.addMainListener(new Application.ComponentPropertiesBinder());
@@ -101,6 +133,7 @@ public class PropertiesTest {
 
         try {
             Runtime runtime = new Runtime();
+            runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
             runtime.getRegistry().bind("my-seda", new SedaComponent());
             runtime.addMainListener(new Application.ComponentPropertiesBinder());

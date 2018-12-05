@@ -16,10 +16,8 @@
  */
 package org.apache.camel.k.jvm;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-
 import java.util.List;
+
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ProcessDefinition;
 import org.apache.camel.model.RouteDefinition;
@@ -27,13 +25,16 @@ import org.apache.camel.model.SetBodyDefinition;
 import org.apache.camel.model.ToDefinition;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+
 public class RoutesLoadersTest {
 
     @Test
     public void testLoadClass() throws Exception {
-        String resource = "classpath:" + MyRoutes.class.getName() + ".class";
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), resource);
+        Source source = Source.create("classpath:" + MyRoutes.class.getName() + ".class");
+        RoutesLoader loader = RoutesLoaders.loaderFor(source);
+        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaClass.class);
         assertThat(builder).isNotNull();
@@ -48,9 +49,9 @@ public class RoutesLoadersTest {
 
     @Test
     public void testLoadJava() throws Exception {
-        String resource = "classpath:MyRoutes.java";
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), resource);
+        Source source = Source.create("classpath:MyRoutes.java");
+        RoutesLoader loader = RoutesLoaders.loaderFor(source);
+        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaSource.class);
         assertThat(builder).isNotNull();
@@ -66,9 +67,9 @@ public class RoutesLoadersTest {
 
     @Test
     public void testLoadJavaWithNestedClass() throws Exception {
-        String resource = "classpath:MyRoutesWithNestedClass.java";
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), resource);
+        Source source = Source.create("classpath:MyRoutesWithNestedClass.java");
+        RoutesLoader loader = RoutesLoaders.loaderFor(source);
+        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaSource.class);
         assertThat(builder).isNotNull();
@@ -86,9 +87,9 @@ public class RoutesLoadersTest {
 
     @Test
     public void testLoadJavaScript() throws Exception {
-        String resource = "classpath:routes.js";
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), resource);
+        Source source = Source.create("classpath:routes.js");
+        RoutesLoader loader = RoutesLoaders.loaderFor(source);
+        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaScript.class);
         assertThat(builder).isNotNull();
@@ -103,9 +104,9 @@ public class RoutesLoadersTest {
 
     @Test
     public void testLoadJavaScriptWithCustomExtension() throws Exception {
-        String resource = "classpath:routes.mytype";
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, "js");
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), resource);
+        Source source = Source.create("classpath:routes.mytype?language=js");
+        RoutesLoader loader = RoutesLoaders.loaderFor(source);
+        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.JavaScript.class);
         assertThat(builder).isNotNull();
@@ -120,9 +121,9 @@ public class RoutesLoadersTest {
 
     @Test
     public void testLoadXml() throws Exception {
-        String resource = "classpath:routes.xml";
-        RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), resource);
+        Source source = Source.create("classpath:routes.xml");
+        RoutesLoader loader = RoutesLoaders.loaderFor(source);
+        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
 
         assertThat(loader).isInstanceOf(RoutesLoaders.Xml.class);
         assertThat(builder).isNotNull();
@@ -138,21 +139,21 @@ public class RoutesLoadersTest {
     @Test
     public void testResourceWithoutScheme() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-            () -> RoutesLoaders.loaderFor("routes.js", null)
+            () -> Source.create("routes.js")
         );
     }
 
     @Test
     public void testResourceWithIllegalScheme() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-            () -> RoutesLoaders.loaderFor("http:routes.js", null)
+            () -> Source.create("http:routes.js")
         );
     }
 
     @Test
     public void testUnsupportedLanguage() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-            () -> RoutesLoaders.loaderFor("  test", null)
+            () -> Source.create("  test")
         );
     }
 

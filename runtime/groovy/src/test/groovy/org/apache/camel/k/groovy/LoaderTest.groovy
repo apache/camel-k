@@ -18,6 +18,7 @@ package org.apache.camel.k.groovy
 
 import org.apache.camel.k.jvm.RoutesLoaders
 import org.apache.camel.k.jvm.SimpleRuntimeRegistry
+import org.apache.camel.k.jvm.Source
 import org.apache.camel.model.ToDefinition
 import spock.lang.Specification
 
@@ -25,11 +26,11 @@ class LoaderTest extends Specification {
 
     def "load route from classpath"() {
         given:
-            def resource = "classpath:routes.groovy"
+            def source = Source.create("classpath:routes.groovy")
 
         when:
-            def loader = RoutesLoaders.loaderFor(resource, null)
-            def builder = loader.load(new SimpleRuntimeRegistry(), resource)
+            def loader = RoutesLoaders.loaderFor(source)
+            def builder = loader.load(new SimpleRuntimeRegistry(), source)
 
         then:
             loader instanceof GroovyRoutesLoader

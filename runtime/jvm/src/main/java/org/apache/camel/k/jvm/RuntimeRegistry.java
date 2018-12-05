@@ -16,6 +16,8 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.util.Map;
+
 import org.apache.camel.spi.Registry;
 
 public interface RuntimeRegistry extends Registry {
@@ -24,4 +26,22 @@ public interface RuntimeRegistry extends Registry {
      *
      */
     void bind(String name, Object bean);
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default public Object lookup(String name) {
+        return lookupByName(name);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default public <T> T lookup(String name, Class<T> type) {
+        return lookupByNameAndType(name, type);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default public <T> Map<String, T> lookupByType(Class<T> type) {
+        return findByTypeWithName(type);
+    }
 }

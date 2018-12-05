@@ -44,6 +44,11 @@ public final class RuntimeSupport {
     public static Properties loadProperties() {
         final String conf = System.getenv(Constants.ENV_CAMEL_K_CONF);
         final String confd = System.getenv(Constants.ENV_CAMEL_K_CONF_D);
+
+        return loadProperties(conf, confd);
+    }
+
+    public static Properties loadProperties(String conf, String confd) {
         final Properties properties = new Properties();
 
         // Main location
@@ -97,16 +102,9 @@ public final class RuntimeSupport {
         return properties;
     }
 
-    public static void configureSystemProperties() {
-        final Properties properties = loadProperties();
-
-        // TODO: sensitive info, maybe better to use properties component ...
-        System.getProperties().putAll(properties);
-    }
-
     public static void configureLogging() {
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        final Properties properties = System.getProperties();
+        final Properties properties = loadProperties();
 
         properties.entrySet().stream()
             .filter(entry -> entry.getKey() instanceof String)
@@ -125,10 +123,7 @@ public final class RuntimeSupport {
         );
     }
 
-    public static void bindProperties(Object target, String prefix) {
-        // Integration properties are defined as system properties
-        final Properties properties = System.getProperties();
-
+    public static void bindProperties(Properties properties, Object target, String prefix) {
         properties.entrySet().stream()
             .filter(entry -> entry.getKey() instanceof String)
             .filter(entry -> entry.getValue() != null)

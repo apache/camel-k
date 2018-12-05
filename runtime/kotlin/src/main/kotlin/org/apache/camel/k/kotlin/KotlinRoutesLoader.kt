@@ -17,10 +17,7 @@
 package org.apache.camel.k.kotlin
 
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.k.jvm.Language
-import org.apache.camel.k.jvm.RoutesLoader
-import org.apache.camel.k.jvm.RuntimeRegistry
-import org.apache.camel.k.jvm.URIResolver
+import org.apache.camel.k.jvm.*
 import org.apache.camel.k.kotlin.dsl.IntegrationConfiguration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,7 +42,7 @@ class KotlinRoutesLoader : RoutesLoader {
     }
 
     @Throws(Exception::class)
-    override fun load(registry: RuntimeRegistry, resource: String): RouteBuilder {
+    override fun load(registry: RuntimeRegistry, source: Source): RouteBuilder? {
         return object : RouteBuilder() {
             @Throws(Exception::class)
             override fun configure() {
@@ -57,7 +54,7 @@ class KotlinRoutesLoader : RoutesLoader {
 
                 LOGGER.info("JAVA_HOME is set to {}", javaHome)
 
-                URIResolver.resolve(context, resource).use { `is` ->
+                URIResolver.resolve(context, source.location).use { `is` ->
                     val result = host.eval(
                         InputStreamReader(`is`).readText().toScriptSource(),
                         ScriptCompilationConfiguration {
