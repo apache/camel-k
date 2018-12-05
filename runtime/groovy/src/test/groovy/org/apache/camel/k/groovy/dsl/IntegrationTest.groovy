@@ -32,7 +32,7 @@ class IntegrationTest extends Specification {
         when:
         def runtime = new Runtime()
         runtime.setDuration(5)
-        runtime.load(['classpath:routes-with-rest.groovy'])
+        runtime.load(['classpath:routes-with-rest.groovy'] as String[])
         runtime.addMainListener(new MainListenerSupport() {
             @Override
             void afterStart(MainSupport main) {
@@ -55,7 +55,7 @@ class IntegrationTest extends Specification {
         when:
         def runtime = new Runtime()
         runtime.setDuration(5)
-        runtime.load(['classpath:routes-with-bindings.groovy'])
+        runtime.load(['classpath:routes-with-bindings.groovy'] as String[])
         runtime.addMainListener(new MainListenerSupport() {
             @Override
             void afterStart(MainSupport main) {
@@ -82,7 +82,7 @@ class IntegrationTest extends Specification {
         when:
         def runtime = new Runtime()
         runtime.setDuration(5)
-        runtime.load(['classpath:routes-with-component-configuration.groovy'])
+        runtime.load(['classpath:routes-with-component-configuration.groovy'] as String[])
         runtime.addMainListener(new MainListenerSupport() {
             @Override
             void afterStart(MainSupport main) {
