@@ -20,15 +20,13 @@ package cmd
 import (
 	"fmt"
 
-	"os"
-
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, error) {
+func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	options := installCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -44,12 +42,8 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, error) {
 	cmd.Flags().StringVar(&options.registry, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&options.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&options.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
-	err := cmd.ParseFlags(os.Args)
-	if err != nil {
-		return nil, err
-	}
 
-	return &cmd, nil
+	return &cmd
 }
 
 type installCmdOptions struct {
