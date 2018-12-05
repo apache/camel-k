@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"context"
-	"os"
 	"time"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
@@ -52,47 +51,35 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
 		Long:                   kamelCommandLongDescription,
 		BashCompletionFunction: bashCompletionFunction,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if options.Namespace == "" {
+				current, err := kubernetes.GetClientCurrentNamespace(options.KubeConfig)
+				if err != nil {
+					return errors.Wrap(err, "cannot get current namespace")
+				}
+				err = cmd.Flag("namespace").Value.Set(current)
+				if err != nil {
+					return err
+				}
+			}
+
+			// Let's use a fast refresh period when running with the CLI
+			k8sclient.ResetCacheEvery(2 * time.Second)
+
+			// Initialize the Kubernetes client to allow using the operator-sdk
+			return kubernetes.InitKubeClient(options.KubeConfig)
+		},
 	}
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", "", "Path to the config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
-
-	// Parse the flags before setting the defaults
-	err := cmd.ParseFlags(os.Args)
-	if err != nil {
-		return nil, err
-	}
-
-	if options.Namespace == "" {
-		current, err := kubernetes.GetClientCurrentNamespace(options.KubeConfig)
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot get current namespace")
-		}
-		err = cmd.Flag("namespace").Value.Set(current)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Let's use a fast refresh period when running with the CLI
-	k8sclient.ResetCacheEvery(2 * time.Second)
-
-	// Initialize the Kubernetes client to allow using the operator-sdk
-	err = kubernetes.InitKubeClient(options.KubeConfig)
-	if err != nil {
-		return nil, err
-	}
 
 	cmd.AddCommand(newCmdCompletion(&cmd))
 	cmd.AddCommand(newCmdVersion())
 	cmd.AddCommand(newCmdRun(&options))
 	cmd.AddCommand(newCmdGet(&options))
 	cmd.AddCommand(newCmdDelete(&options))
-	install, err := newCmdInstall(&options)
-	if err != nil {
-		return nil, err
-	}
-	cmd.AddCommand(install)
+	cmd.AddCommand(newCmdInstall(&options))
 	cmd.AddCommand(newCmdLog(&options))
 	cmd.AddCommand(newCmdContext(&options))
 
