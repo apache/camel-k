@@ -16,15 +16,16 @@
  */
 package org.apache.camel.k.jvm;
 
-import java.util.List;
-
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.model.ToDefinition;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+
+import java.util.List;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.ProcessDefinition;
+import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.model.SetBodyDefinition;
+import org.apache.camel.model.ToDefinition;
+import org.junit.jupiter.api.Test;
 
 public class RoutesLoadersTest {
 
@@ -61,6 +62,27 @@ public class RoutesLoadersTest {
         assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
         assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
     }
+
+
+    @Test
+    public void testLoadJavaWithNestedClass() throws Exception {
+        String resource = "classpath:MyRoutesWithNestedClass.java";
+        RoutesLoader loader = RoutesLoaders.loaderFor(resource, null);
+        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), resource);
+
+        assertThat(loader).isInstanceOf(RoutesLoaders.JavaSource.class);
+        assertThat(builder).isNotNull();
+
+        builder.configure();
+
+        List<RouteDefinition> routes = builder.getRouteCollection().getRoutes();
+        assertThat(routes).hasSize(1);
+        assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
+        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(SetBodyDefinition.class);
+        assertThat(routes.get(0).getOutputs().get(1)).isInstanceOf(ProcessDefinition.class);
+        assertThat(routes.get(0).getOutputs().get(2)).isInstanceOf(ToDefinition.class);
+    }
+
 
     @Test
     public void testLoadJavaScript() throws Exception {
