@@ -94,7 +94,7 @@ func WriteFileWithContent(buildDir string, relativePath string, content string) 
 
 	_, err = file.WriteString(content)
 	if err != nil {
-		errors.Wrap(err, "could not write to file "+relativePath)
+		return errors.Wrap(err, "could not write to file "+relativePath)
 	}
 	return nil
 }

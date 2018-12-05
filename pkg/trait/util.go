@@ -91,7 +91,7 @@ func CombineConfigurationAsMap(configurationType string, context *v1alpha1.Integ
 
 // CombineConfigurationAsSlice --
 func CombineConfigurationAsSlice(configurationType string, context *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) []string {
-	result := make(map[string]bool, 0)
+	result := make(map[string]bool)
 	if context != nil {
 		// Add context properties first so integrations can
 		// override it

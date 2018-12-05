@@ -87,6 +87,8 @@ const (
 	LanguageXML Language = "xml"
 	// LanguageKotlin --
 	LanguageKotlin Language = "kts"
+	// KamelPlatform --
+	KamelPlatform = "platform"
 )
 
 // A IntegrationTraitSpec contains the configuration of a trait

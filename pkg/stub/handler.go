@@ -19,6 +19,7 @@ package stub
 
 import (
 	ctx "context"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/stub/action/platform"
 

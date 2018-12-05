@@ -19,6 +19,9 @@ package install
 
 import (
 	"errors"
+	"strconv"
+	"time"
+
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/knative"
@@ -26,8 +29,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/minishift"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"strconv"
-	"time"
 )
 
 // Operator --

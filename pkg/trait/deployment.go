@@ -144,7 +144,7 @@ func getDeploymentFor(e *Environment) *appsv1.Deployment {
 	environment["CAMEL_K_DIGEST"] = e.Integration.Status.Digest
 
 	// optimizations
-	environment["AB_JOLOKIA_OFF"] = "true"
+	environment["AB_JOLOKIA_OFF"] = True
 
 	// add env vars from traits
 	for k, v := range e.EnvVars {

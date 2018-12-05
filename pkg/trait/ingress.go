@@ -62,7 +62,7 @@ func (i *ingressTrait) apply(e *Environment) error {
 		return errors.New("cannot apply ingress trait: no target service")
 	}
 
-	e.Resources.Add(i.getIngressFor(e, service))
+	e.Resources.Add(i.getIngressFor(service))
 	return nil
 }
 
@@ -77,7 +77,7 @@ func (*ingressTrait) getTargetService(e *Environment) (service *corev1.Service) 
 	return
 }
 
-func (i *ingressTrait) getIngressFor(env *Environment, service *corev1.Service) *v1beta1.Ingress {
+func (i *ingressTrait) getIngressFor(service *corev1.Service) *v1beta1.Ingress {
 	ingress := v1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",

@@ -19,9 +19,10 @@ package cmd
 
 import (
 	"context"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"os"
 	"time"
+
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -57,21 +58,27 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 
 	// Parse the flags before setting the defaults
-	cmd.ParseFlags(os.Args)
+	err := cmd.ParseFlags(os.Args)
+	if err != nil {
+		return nil, err
+	}
 
 	if options.Namespace == "" {
 		current, err := kubernetes.GetClientCurrentNamespace(options.KubeConfig)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot get current namespace")
 		}
-		cmd.Flag("namespace").Value.Set(current)
+		err = cmd.Flag("namespace").Value.Set(current)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Let's use a fast refresh period when running with the CLI
 	k8sclient.ResetCacheEvery(2 * time.Second)
 
 	// Initialize the Kubernetes client to allow using the operator-sdk
-	err := kubernetes.InitKubeClient(options.KubeConfig)
+	err = kubernetes.InitKubeClient(options.KubeConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +88,11 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.AddCommand(newCmdRun(&options))
 	cmd.AddCommand(newCmdGet(&options))
 	cmd.AddCommand(newCmdDelete(&options))
-	cmd.AddCommand(newCmdInstall(&options))
+	install, err := newCmdInstall(&options)
+	if err != nil {
+		return nil, err
+	}
+	cmd.AddCommand(install)
 	cmd.AddCommand(newCmdLog(&options))
 	cmd.AddCommand(newCmdContext(&options))
 

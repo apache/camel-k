@@ -29,6 +29,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -45,6 +46,7 @@ func Publisher(ctx *builder.Context) error {
 		return err
 	}
 
+	// #nosec G202
 	dockerFileContent := []byte(`
 		FROM ` + ctx.Image + `
 		ADD . /deployments
@@ -137,7 +139,11 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	sdk.Delete(&pod)
+	err = sdk.Delete(&pod)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return errors.Wrap(err, "cannot delete kaniko builder pod")
+	}
+
 	err = sdk.Create(&pod)
 	if err != nil {
 		return errors.Wrap(err, "cannot create kaniko builder pod")

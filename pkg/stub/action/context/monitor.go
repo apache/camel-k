@@ -41,7 +41,10 @@ func (action *monitorAction) CanHandle(context *v1alpha1.IntegrationContext) boo
 }
 
 func (action *monitorAction) Handle(context *v1alpha1.IntegrationContext) error {
-	hash := digest.ComputeForIntegrationContext(context)
+	hash, err := digest.ComputeForIntegrationContext(context)
+	if err != nil {
+		return err
+	}
 	if hash != context.Status.Digest {
 		logrus.Info("IntegrationContext ", context.Name, " needs a rebuild")
 

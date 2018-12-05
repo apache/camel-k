@@ -38,10 +38,10 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:   "delete [integration1] [integration2] ...",
 		Short: "Delete integrations deployed on Kubernetes",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := impl.validate(cmd, args); err != nil {
+			if err := impl.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(cmd, args); err != nil {
+			if err := impl.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -59,7 +59,7 @@ type deleteCmdOptions struct {
 	deleteAll bool
 }
 
-func (command *deleteCmdOptions) validate(cmd *cobra.Command, args []string) error {
+func (command *deleteCmdOptions) validate(args []string) error {
 	if command.deleteAll && len(args) > 0 {
 		return errors.New("invalid combination: both all flag and named integrations are set")
 	}
@@ -70,7 +70,7 @@ func (command *deleteCmdOptions) validate(cmd *cobra.Command, args []string) err
 	return nil
 }
 
-func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (command *deleteCmdOptions) run(args []string) error {
 
 	if len(args) != 0 && !command.deleteAll {
 		for _, arg := range args {
@@ -100,6 +100,7 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		for _, integration := range integrationList.Items {
+			integration := integration // pin
 			err := sdk.Delete(&integration)
 			if err != nil {
 				return err

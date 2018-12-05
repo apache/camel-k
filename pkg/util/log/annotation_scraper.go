@@ -62,7 +62,7 @@ func (s *SelectorScraper) Start(ctx context.Context) *bufio.Reader {
 }
 
 func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Writer, clientCloser func() error) {
-	err := s.synchronize(ctx, out, clientCloser)
+	err := s.synchronize(ctx, out)
 	if err != nil {
 		logrus.Warn("Could not synchronize log by label " + s.labelSelector)
 	}
@@ -76,13 +76,15 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 
 			return true
 		})
-		clientCloser()
+		if err := clientCloser(); err != nil {
+			logrus.Warn("Unable to close the client", err)
+		}
 	case <-time.After(2 * time.Second):
 		go s.periodicSynchronize(ctx, out, clientCloser)
 	}
 }
 
-func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer, clientCloser func() error) error {
+func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) error {
 	list, err := s.listPods()
 	if err != nil {
 		return err
@@ -128,7 +130,10 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, name string, out *b
 	go func() {
 		defer podCancel()
 
-		out.WriteString(prefix + "Monitoring pod " + name)
+		if _, err := out.WriteString(prefix + "Monitoring pod " + name); err != nil {
+			logrus.Error("Cannot write to output: ", err)
+			return
+		}
 		for {
 			str, err := podReader.ReadString('\n')
 			if err == io.EOF {
@@ -137,7 +142,10 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, name string, out *b
 				logrus.Error("Cannot read from pod stream: ", err)
 				return
 			}
-			out.WriteString(prefix + str)
+			if _, err := out.WriteString(prefix + str); err != nil {
+				logrus.Error("Cannot write to output: ", err)
+				return
+			}
 			out.Flush()
 			if podCtx.Err() != nil {
 				return

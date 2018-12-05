@@ -24,6 +24,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const True = "true"
+
 // Apply --
 func Apply(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) (*Environment, error) {
 	environment, err := newEnvironment(integration, ctx)

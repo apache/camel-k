@@ -95,7 +95,8 @@ func GenerateProject(ctx *builder.Context) error {
 	//
 
 	for _, d := range ctx.Request.Dependencies {
-		if strings.HasPrefix(d, "camel:") {
+		switch {
+		case strings.HasPrefix(d, "camel:"):
 			if d == "camel:core" {
 				continue
 			}
@@ -135,12 +136,12 @@ func GenerateProject(ctx *builder.Context) error {
 					},
 				},
 			})
-		} else if strings.HasPrefix(d, "mvn:") {
+		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
 
 			deps.AddEncodedGAV(gav)
-		} else if strings.HasPrefix(d, "runtime:") {
+		case strings.HasPrefix(d, "runtime:"):
 			if d == "runtime:jvm" {
 				// common
 				continue
@@ -153,7 +154,7 @@ func GenerateProject(ctx *builder.Context) error {
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
 
 			deps.AddGAV("org.apache.camel.k", artifactID, version.Version)
-		} else {
+		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}
 	}

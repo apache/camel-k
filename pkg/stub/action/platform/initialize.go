@@ -19,6 +19,7 @@ package platform
 
 import (
 	"errors"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -63,11 +64,13 @@ func (action *initializeAction) Handle(platform *v1alpha1.IntegrationPlatform) e
 	// update missing fields in the resource
 	if target.Spec.Cluster == "" {
 		// determine the kind of cluster the platform in installed into
-		if isOpenshift, err := openshift.IsOpenShift(); err != nil {
+		isOpenshift, err := openshift.IsOpenShift()
+		switch {
+		case err != nil:
 			return err
-		} else if isOpenshift {
+		case isOpenshift:
 			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
-		} else {
+		default:
 			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
 		}
 	}
@@ -100,6 +103,7 @@ func (action *initializeAction) isDuplicate(thisPlatform *v1alpha1.IntegrationPl
 		return false, err
 	}
 	for _, platform := range platforms.Items {
+		platform := platform // pin
 		if platform.Name != thisPlatform.Name && platformutils.IsActive(&platform) {
 			return true, nil
 		}

@@ -98,7 +98,8 @@ func GenerateProject(ctx *Context) error {
 	deps.AddGAV("org.apache.camel.k", "camel-k-runtime-jvm", version.Version)
 
 	for _, d := range ctx.Request.Dependencies {
-		if strings.HasPrefix(d, "camel:") {
+		switch {
+		case strings.HasPrefix(d, "camel:"):
 			artifactID := strings.TrimPrefix(d, "camel:")
 
 			if !strings.HasPrefix(artifactID, "camel-") {
@@ -106,16 +107,16 @@ func GenerateProject(ctx *Context) error {
 			}
 
 			deps.AddGAV("org.apache.camel", artifactID, "")
-		} else if strings.HasPrefix(d, "mvn:") {
+		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
 
 			deps.AddEncodedGAV(gav)
-		} else if strings.HasPrefix(d, "runtime:") {
+		case strings.HasPrefix(d, "runtime:"):
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
 
 			deps.AddGAV("org.apache.camel.k", artifactID, version.Version)
-		} else {
+		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}
 	}
@@ -269,7 +270,7 @@ func ListPublishedImages(namespace string) ([]PublishedImage, error) {
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
 			continue
 		}
-		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != "platform" {
+		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != v1alpha1.KamelPlatform {
 			continue
 		}
 
@@ -292,7 +293,7 @@ func FindBestImage(images []PublishedImage, entries []v1alpha1.Artifact) (*Publi
 	}
 
 	var bestImage PublishedImage
-	bestImageCommonLibs := make(map[string]bool, 0)
+	bestImageCommonLibs := make(map[string]bool)
 	bestImageSurplusLibs := 0
 	for _, image := range images {
 		common := make(map[string]bool)

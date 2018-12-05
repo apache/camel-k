@@ -40,7 +40,7 @@ func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 			if err := impl.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := impl.run(cmd, args); err != nil {
+			if err := impl.run(); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -49,7 +49,7 @@ func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&impl.user, "user", true, "Includes user contexts")
-	cmd.Flags().BoolVar(&impl.platform, "platform", true, "Includes platform contexts")
+	cmd.Flags().BoolVar(&impl.platform, v1alpha1.KamelPlatform, true, "Includes platform contexts")
 
 	return &cmd
 }
@@ -65,7 +65,7 @@ func (command *contextGetCommand) validate(cmd *cobra.Command, args []string) er
 
 }
 
-func (command *contextGetCommand) run(cmd *cobra.Command, args []string) error {
+func (command *contextGetCommand) run() error {
 	ctxList := v1alpha1.NewIntegrationContextList()
 	if err := sdk.List(command.Namespace, &ctxList); err != nil {
 		return err
@@ -76,7 +76,7 @@ func (command *contextGetCommand) run(cmd *cobra.Command, args []string) error {
 	for _, ctx := range ctxList.Items {
 		t := ctx.Labels["camel.apache.org/context.type"]
 		u := command.user && t == "user"
-		p := command.platform && t == "platform"
+		p := command.platform && t == v1alpha1.KamelPlatform
 
 		if u || p {
 			fmt.Fprintf(w, "%s\t%s\t%s\n", ctx.Name, t, string(ctx.Status.Phase))

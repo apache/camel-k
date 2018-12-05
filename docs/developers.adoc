@@ -18,6 +18,14 @@ In order to build the project, you need to comply with the following requirement
 * **Operator SDK v0.0.7+**: used to build the operator and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
 * **GNU Make**: used to define composite build actions. This should be already installed or available as package if you have a good OS (https://www.gnu.org/software/make/).
 
+[[checks]]
+== Running checks
+Checks rely on `golangci-lint` being installed, to install it look at the https://github.com/golangci/golangci-lint#local-installation[Local Installation] instructions.
+
+You can run checks via `make lint` or you can install a GIT pre-commit hook and have the checks run via https://pre-commit.com[pre-commit]; then make sure to install the pre-commit hooks after installing pre-commit by running
+
+ $ pre-commit install
+
 [[checking-out]]
 == Checking Out the Sources
 

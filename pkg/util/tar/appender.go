@@ -71,12 +71,14 @@ func (t *Appender) AddFile(filePath string, tarDir string) (string, error) {
 		fileName = path.Join(tarDir, fileName)
 	}
 
-	t.writer.WriteHeader(&atar.Header{
+	if err := t.writer.WriteHeader(&atar.Header{
 		Name:    fileName,
 		Size:    info.Size(),
 		Mode:    int64(info.Mode()),
 		ModTime: info.ModTime(),
-	})
+	}); err != nil {
+		return "", err
+	}
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -103,12 +105,14 @@ func (t *Appender) AddFileWithName(fileName string, filePath string, tarDir stri
 		fileName = path.Join(tarDir, fileName)
 	}
 
-	t.writer.WriteHeader(&atar.Header{
+	if err := t.writer.WriteHeader(&atar.Header{
 		Name:    fileName,
 		Size:    info.Size(),
 		Mode:    int64(info.Mode()),
 		ModTime: info.ModTime(),
-	})
+	}); err != nil {
+		return "", err
+	}
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -126,11 +130,13 @@ func (t *Appender) AddFileWithName(fileName string, filePath string, tarDir stri
 
 // AppendData appends the given content to a file inside the tar, creating it if it does not exist
 func (t *Appender) AppendData(data []byte, tarPath string) error {
-	t.writer.WriteHeader(&atar.Header{
+	if err := t.writer.WriteHeader(&atar.Header{
 		Name: tarPath,
 		Size: int64(len(data)),
 		Mode: 0644,
-	})
+	}); err != nil {
+		return err
+	}
 
 	_, err := t.writer.Write(data)
 	if err != nil {

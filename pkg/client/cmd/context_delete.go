@@ -38,10 +38,10 @@ func newContextDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Short: "Delete an Integration Context",
 		Long:  `Delete an Integration Context.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := impl.validate(cmd, args); err != nil {
+			if err := impl.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(cmd, args); err != nil {
+			if err := impl.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -59,7 +59,7 @@ type contextDeleteCommand struct {
 	all bool
 }
 
-func (command *contextDeleteCommand) validate(cmd *cobra.Command, args []string) error {
+func (command *contextDeleteCommand) validate(args []string) error {
 	if command.all && len(args) > 0 {
 		return errors.New("invalid combination: both all flag and named contexts are set")
 	}
@@ -70,7 +70,7 @@ func (command *contextDeleteCommand) validate(cmd *cobra.Command, args []string)
 	return nil
 }
 
-func (command *contextDeleteCommand) run(cmd *cobra.Command, args []string) error {
+func (command *contextDeleteCommand) run(args []string) error {
 	names := args
 
 	if command.all {
@@ -82,7 +82,7 @@ func (command *contextDeleteCommand) run(cmd *cobra.Command, args []string) erro
 		names = make([]string, 0, len(ctxList.Items))
 		for _, item := range ctxList.Items {
 			// only include non platform contexts
-			if item.Labels["camel.apache.org/context.type"] != "platform" {
+			if item.Labels["camel.apache.org/context.type"] != v1alpha1.KamelPlatform {
 				names = append(names, item.Name)
 			}
 		}
@@ -114,7 +114,7 @@ func (command *contextDeleteCommand) delete(name string) error {
 
 	// check that it is not a platform one which is supposed to be "read only"
 	// thus not managed by the end user
-	if ctx.Labels["camel.apache.org/context.type"] == "platform" {
+	if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.KamelPlatform {
 		// skip platform contexts while deleting all contexts
 		if command.all {
 			return nil
