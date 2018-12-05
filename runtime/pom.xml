@@ -36,7 +36,7 @@
         <camel.version>2.23.0</camel.version>
         <junit.version>4.12</junit.version>
         <junit-jupiter.version>5.3.2</junit-jupiter.version>
-        <joor.version>0.9.9</joor.version>
+        <joor.version>0.9.10</joor.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang.version>3.8.1</commons-lang.version>
         <commons-collections4.version>4.2</commons-collections4.version>
