@@ -70,11 +70,12 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 	}
 
 	res := b.Submit(r)
-	if res.Status == builder.StatusSubmitted {
+	switch res.Status {
+	case builder.StatusSubmitted:
 		logrus.Info("Build submitted")
-	} else if res.Status == builder.StatusStarted {
+	case builder.StatusStarted:
 		logrus.Info("Build started")
-	} else if res.Status == builder.StatusError {
+	case builder.StatusError:
 		target := context.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
 
@@ -84,7 +85,7 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		b.Purge(r)
 
 		return sdk.Update(target)
-	} else if res.Status == builder.StatusCompleted {
+	case builder.StatusCompleted:
 		target := context.DeepCopy()
 		target.Status.Image = res.Image
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
@@ -123,6 +124,7 @@ func (action *buildAction) informIntegrations(context *v1alpha1.IntegrationConte
 		return err
 	}
 	for _, integration := range list.Items {
+		integration := integration // pin
 		if integration.Spec.Context != context.Name {
 			continue
 		}

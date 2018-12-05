@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -49,7 +50,10 @@ func newCmdCompletionZsh(root *cobra.Command) *cobra.Command {
 		Short: "Generates zsh completion scripts",
 		Long:  zshCompletionCmdLongDescription,
 		Run: func(cmd *cobra.Command, args []string) {
-			root.GenZshCompletion(os.Stdout)
+			err := root.GenZshCompletion(os.Stdout)
+			if err != nil {
+				fmt.Print(err.Error())
+			}
 		},
 	}
 }

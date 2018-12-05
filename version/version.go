@@ -19,6 +19,6 @@ limitations under the License.
 package version
 
 var (
-	// Global Camel K Version
+	// Version is the global Camel K Version
 	Version = "0.0.6-SNAPSHOT"
 )

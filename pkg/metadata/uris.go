@@ -24,17 +24,17 @@ import (
 )
 
 var (
-	singleQuotedFrom = regexp.MustCompile("from\\s*\\(\\s*'([a-z0-9-]+:[^']+)'\\s*\\)")
-	doubleQuotedFrom = regexp.MustCompile("from\\s*\\(\\s*\"([a-z0-9-]+:[^\"]+)\"\\s*\\)")
-	singleQuotedTo   = regexp.MustCompile("\\.to\\s*\\(\\s*'([a-z0-9-]+:[^']+)'\\s*\\)")
-	singleQuotedToD  = regexp.MustCompile("\\.toD\\s*\\(\\s*'([a-z0-9-]+:[^']+)'\\s*\\)")
-	singleQuotedToF  = regexp.MustCompile("\\.toF\\s*\\(\\s*'([a-z0-9-]+:[^']+)'[^)]*\\)")
-	doubleQuotedTo   = regexp.MustCompile("\\.to\\s*\\(\\s*\"([a-z0-9-]+:[^\"]+)\"\\s*\\)")
-	doubleQuotedToD  = regexp.MustCompile("\\.toD\\s*\\(\\s*\"([a-z0-9-]+:[^\"]+)\"\\s*\\)")
-	doubleQuotedToF  = regexp.MustCompile("\\.toF\\s*\\(\\s*\"([a-z0-9-]+:[^\"]+)\"[^)]*\\)")
-	xmlTagFrom       = regexp.MustCompile("<\\s*from\\s+[^>]*uri\\s*=\\s*\"([a-z0-9-]+:[^\"]+)\"[^>]*>")
-	xmlTagTo         = regexp.MustCompile("<\\s*to\\s+[^>]*uri\\s*=\\s*\"([a-z0-9-]+:[^\"]+)\"[^>]*>")
-	xmlTagToD        = regexp.MustCompile("<\\s*toD\\s+[^>]*uri\\s*=\\s*\"([a-z0-9-]+:[^\"]+)\"[^>]*>")
+	singleQuotedFrom = regexp.MustCompile(`from\s*\(\s*'([a-z0-9-]+:[^']+)'\s*\)`)
+	doubleQuotedFrom = regexp.MustCompile(`from\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
+	singleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*'([a-z0-9-]+:[^']+)'\s*\)`)
+	singleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*'([a-z0-9-]+:[^']+)'\s*\)`)
+	singleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*'([a-z0-9-]+:[^']+)'[^)]*\)`)
+	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
+	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
+	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-z0-9-]+:[^"]+)"[^)]*\)`)
+	xmlTagFrom       = regexp.MustCompile(`<\s*from\s+[^>]*uri\s*=\s*"([a-z0-9-]+:[^"]+)"[^>]*>`)
+	xmlTagTo         = regexp.MustCompile(`<\s*to\s+[^>]*uri\s*=\s*"([a-z0-9-]+:[^"]+)"[^>]*>`)
+	xmlTagToD        = regexp.MustCompile(`<\s*toD\s+[^>]*uri\s*=\s*"([a-z0-9-]+:[^"]+)"[^>]*>`)
 )
 
 // discoverFromURIs returns all uris used in a from clause
@@ -87,7 +87,7 @@ func findAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []str
 	for _, reg := range regexps {
 		hits := reg.FindAllStringSubmatch(data, -1)
 		for _, hit := range hits {
-			if hit != nil && len(hit) > 1 {
+			if len(hit) > 1 {
 				for _, match := range hit[1:] {
 					if _, ok := alreadyFound[match]; !ok {
 						alreadyFound[match] = true

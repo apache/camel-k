@@ -20,9 +20,10 @@ package trait
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
-	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
@@ -109,7 +110,7 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 	environment["CAMEL_K_DIGEST"] = e.Integration.Status.Digest
 
 	// optimizations
-	environment["AB_JOLOKIA_OFF"] = "true"
+	environment["AB_JOLOKIA_OFF"] = True
 
 	// Knative integration
 	conf, err := t.getConfigurationSerialized(e)
@@ -190,6 +191,10 @@ func (*knativeTrait) getSubscriptionFor(e *Environment, channel string) *eventin
 
 func (t *knativeTrait) getConfigurationSerialized(e *Environment) (string, error) {
 	env, err := t.getConfiguration(e)
+	if err != nil {
+		return "", errors.Wrap(err, "unable fetch environment configuration")
+	}
+
 	res, err := json.Marshal(env)
 	if err != nil {
 		return "", errors.Wrap(err, "unable to serialize Knative configuration")
@@ -308,7 +313,7 @@ func (*knativeTrait) retrieveChannel(namespace string, name string) (*eventing.C
 		},
 	}
 	if err := sdk.Get(&channel); err != nil {
-		return nil, errors.Wrap(err, "could not retrieve channel " + name + " in namespace " + namespace)
+		return nil, errors.Wrap(err, "could not retrieve channel "+name+" in namespace "+namespace)
 	}
 	return &channel, nil
 }

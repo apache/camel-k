@@ -61,7 +61,7 @@ func (r *routeTrait) apply(e *Environment) error {
 		return errors.New("cannot apply route trait: no target service")
 	}
 
-	e.Resources.Add(r.getRouteFor(e, service))
+	e.Resources.Add(r.getRouteFor(service))
 	return nil
 }
 
@@ -76,7 +76,7 @@ func (*routeTrait) getTargetService(e *Environment) (service *corev1.Service) {
 	return
 }
 
-func (r *routeTrait) getRouteFor(env *Environment, service *corev1.Service) *routev1.Route {
+func (r *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",

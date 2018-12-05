@@ -18,8 +18,9 @@ limitations under the License.
 package camel
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCatalog(t *testing.T) {

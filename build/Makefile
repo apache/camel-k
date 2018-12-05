@@ -72,6 +72,7 @@ test-integration: check-integration
 check-integration:
 	go test ./... -tags=integration
 
-
+lint:
+	golangci-lint run
 
 .PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile new-version git-tag increment-snapshot install-minishift

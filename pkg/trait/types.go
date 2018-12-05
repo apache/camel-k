@@ -87,10 +87,6 @@ func (trait *BaseTrait) autoconfigure(environment *Environment) error {
 	return nil
 }
 
-func (trait *BaseTrait) apply(environment *Environment) error {
-	return nil
-}
-
 /* Environment */
 
 // A Environment provides the context where the trait is executed

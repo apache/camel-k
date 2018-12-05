@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -171,7 +172,10 @@ func newCmdCompletionBash(root *cobra.Command) *cobra.Command {
 		Short: "Generates bash completion scripts",
 		Long:  bashCompletionCmdLongDescription,
 		Run: func(cmd *cobra.Command, args []string) {
-			root.GenBashCompletion(os.Stdout)
+			err := root.GenBashCompletion(os.Stdout)
+			if err != nil {
+				fmt.Print(err.Error())
+			}
 		},
 	}
 }

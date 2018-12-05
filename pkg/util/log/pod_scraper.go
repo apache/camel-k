@@ -101,7 +101,9 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 
 	if ctx.Err() != nil {
 		logrus.Info("Pod ", s.name, " will no longer be monitored")
-		clientCloser()
+		if err := clientCloser(); err != nil {
+			logrus.Warn("Unable to close the client", err)
+		}
 		return
 	}
 
@@ -110,7 +112,9 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 	case <-time.After(wait):
 		break
 	case <-ctx.Done():
-		clientCloser()
+		if err := clientCloser(); err != nil {
+			logrus.Warn("Unable to close the client", err)
+		}
 		return
 	}
 

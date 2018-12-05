@@ -75,6 +75,10 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 	// update the status
 	logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseBuilding)
 	target.Status.Phase = v1alpha1.IntegrationPhaseBuilding
-	target.Status.Digest = digest.ComputeForIntegration(integration)
+	dgst, err := digest.ComputeForIntegration(integration)
+	if err != nil {
+		return err
+	}
+	target.Status.Digest = dgst
 	return sdk.Update(target)
 }

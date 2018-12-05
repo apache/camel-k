@@ -18,10 +18,11 @@ limitations under the License.
 package kubernetes
 
 import (
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 )
 
 // InitKubeClient initialize the k8s client

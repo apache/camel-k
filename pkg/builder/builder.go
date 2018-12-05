@@ -195,9 +195,7 @@ func (b *defaultBuilder) submit(request Request) {
 	}
 
 	r.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
-	for _, artifact := range c.Artifacts {
-		r.Artifacts = append(r.Artifacts, artifact)
-	}
+	r.Artifacts = append(r.Artifacts, c.Artifacts...)
 
 	// update the cache
 	b.request.Store(request.Meta.Name, r)

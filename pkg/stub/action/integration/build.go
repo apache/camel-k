@@ -58,7 +58,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 	}
 
 	if ctx != nil {
-		if ctx.Labels["camel.apache.org/context.type"] == "platform" {
+		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.KamelPlatform {
 			// This is a platform context and as it is auto generated it may get
 			// out of sync if the integration that has generated it, has been
 			// amended to add/remove dependencies
@@ -80,7 +80,11 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 			target.Spec.Context = ctx.Name
 			logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseDeploying)
 			target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
-			target.Status.Digest = digest.ComputeForIntegration(target)
+			dgst, err := digest.ComputeForIntegration(target)
+			if err != nil {
+				return err
+			}
+			target.Status.Digest = dgst
 			return sdk.Update(target)
 		}
 
@@ -89,7 +93,11 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 			target.Status.Image = ctx.Status.Image
 			target.Spec.Context = ctx.Name
 			target.Status.Phase = v1alpha1.IntegrationPhaseError
-			target.Status.Digest = digest.ComputeForIntegration(target)
+			dgst, err := digest.ComputeForIntegration(target)
+			if err != nil {
+				return err
+			}
+			target.Status.Digest = dgst
 			return sdk.Update(target)
 		}
 
@@ -109,7 +117,7 @@ func (action *buildAction) Handle(integration *v1alpha1.Integration) error {
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
 	platformCtx.Labels = map[string]string{
-		"camel.apache.org/context.type":               "platform",
+		"camel.apache.org/context.type":               v1alpha1.KamelPlatform,
 		"camel.apache.org/context.created.by.kind":    v1alpha1.IntegrationKind,
 		"camel.apache.org/context.created.by.name":    integration.Name,
 		"camel.apache.org/context.created.by.version": integration.ResourceVersion,

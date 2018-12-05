@@ -86,7 +86,7 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		// the integration context already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if ctx.Labels["camel.apache.org/context.type"] == "platform" {
+		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.KamelPlatform {
 			fmt.Printf("integration context \"%s\" is not editable\n", ctx.Name)
 			return nil
 		}
@@ -103,11 +103,12 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 	}
 
 	for _, item := range command.dependencies {
-		if strings.HasPrefix(item, "mvn:") {
+		switch {
+		case strings.HasPrefix(item, "mvn:"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
-		} else if strings.HasPrefix(item, "file:") {
+		case strings.HasPrefix(item, "file:"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
-		} else if strings.HasPrefix(item, "camel-") {
+		case strings.HasPrefix(item, "camel-"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
 	}
@@ -145,7 +146,7 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		clone := ctx.DeepCopy()
 		err = sdk.Get(clone)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Print(err.Error())
 			return nil
 		}
 		ctx.ResourceVersion = clone.ResourceVersion
@@ -153,7 +154,7 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 	}
 
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Print(err.Error())
 		return nil
 	}
 

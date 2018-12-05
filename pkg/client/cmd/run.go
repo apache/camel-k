@@ -53,7 +53,7 @@ import (
 )
 
 var (
-	traitConfigRegexp = regexp.MustCompile("^([a-z-]+)((?:\\.[a-z-]+)+)=(.*)$")
+	traitConfigRegexp = regexp.MustCompile(`^([a-z-]+)((?:\.[a-z-]+)+)=(.*)$`)
 )
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -83,7 +83,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
 	cmd.Flags().StringVar(&options.Profile, "profile", "", "Trait profile used for deployment")
 	cmd.Flags().StringSliceVarP(&options.Traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
-	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. E.g. \"--logging-level org.apache.camel=DEBUG\"")
+	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. "+
+		"E.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringVarP(&options.OutputFormat, "output", "o", "", "Output format. One of: json|yaml")
 
 	// completion support
@@ -152,7 +153,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	integration, err := o.createIntegration(cmd, args)
+	integration, err := o.createIntegration(args)
 	if err != nil {
 		return err
 	}
@@ -246,7 +247,7 @@ func (o *runCmdOptions) syncIntegration(sources []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) createIntegration(cmd *cobra.Command, args []string) (*v1alpha1.Integration, error) {
+func (o *runCmdOptions) createIntegration(args []string) (*v1alpha1.Integration, error) {
 	return o.updateIntegrationCode(args)
 }
 
@@ -294,11 +295,12 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 	}
 
 	for _, item := range o.Dependencies {
-		if strings.HasPrefix(item, "mvn:") {
+		switch {
+		case strings.HasPrefix(item, "mvn:"):
 			integration.Spec.Dependencies = append(integration.Spec.Dependencies, item)
-		} else if strings.HasPrefix(item, "file:") {
+		case strings.HasPrefix(item, "file:"):
 			integration.Spec.Dependencies = append(integration.Spec.Dependencies, item)
-		} else if strings.HasPrefix(item, "camel-") {
+		case strings.HasPrefix(item, "camel-"):
 			integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
 	}
@@ -431,7 +433,7 @@ func (*runCmdOptions) loadCode(fileName string) (string, error) {
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	bodyString := string(bodyBytes)
-	return string(bodyString), err
+	return bodyString, err
 }
 
 func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config string) error {
