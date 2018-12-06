@@ -3,6 +3,8 @@ Knative Example (Apache Camel K)
 
 This example shows how Camel K can be used to connect Knative building blocks to create awesome applications.
 
+A video version of this https://youtu.be/btf_e2GniXM[demo is available on YouTube].
+
 It's assumed that both Camel K and Knative are properly installed (including Knative Build, Serving and Eventing) into the cluster.
 Refer to the specific documentation to install and configure all components.
 
@@ -98,6 +100,8 @@ If you now stop the feed integration (`kamel delete feed`) you will notice that 
 
 And if you reinstall the feed again (`kamel run feed.groovy`), the other integration will scale up again as soon as they receive messages (splitter first, then printer).
 
+== Playing harder
+
 You can also play with different kind of feeds. E.g. the following simple feed can be used to bind messages from Telegram to the system:
 
 ```
@@ -108,3 +112,25 @@ from('telegram:bots/<put-here-your-botfather-authorization>')
 ```
 
 Now just send messages to your bot with the Telegram client app to see all single words appearing in the printer service.
+
+You can also replace the printer with a Slack-based printer like:
+
+```
+from('knative:channel/words')
+  .log('Received: ${body}')
+  .to('slack:#camel-k-tests')
+
+
+context {
+  components {
+    slack {
+      webhookUrl '<put-here-your-slack-incoming-webhook-url>'
+    }
+  }
+}
+```
+
+Now the single words will be printed in the log but also forwarded to the
+slack channel named `#camel-k-tests`.
+
+You have infinite possibilities with Camel!
