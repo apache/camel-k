@@ -87,8 +87,6 @@ const (
 	LanguageXML Language = "xml"
 	// LanguageKotlin --
 	LanguageKotlin Language = "kts"
-	// KamelPlatform --
-	KamelPlatform = "platform"
 )
 
 // A IntegrationTraitSpec contains the configuration of a trait
@@ -184,6 +182,9 @@ type IntegrationContextPhase string
 const (
 	// IntegrationContextKind --
 	IntegrationContextKind string = "IntegrationContext"
+
+	// IntegrationContextTypePlatform --
+	IntegrationContextTypePlatform = "platform"
 
 	// IntegrationContextPhaseBuilding --
 	IntegrationContextPhaseBuilding IntegrationContextPhase = "Building"

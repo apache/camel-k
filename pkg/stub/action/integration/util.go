@@ -45,7 +45,7 @@ func LookupContextForIntegration(integration *v1alpha1.Integration) (*v1alpha1.I
 
 	for _, ctx := range ctxList.Items {
 		ctx := ctx // pin
-		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.KamelPlatform {
+		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
 			ideps := len(integration.Spec.Dependencies)
 			cdeps := len(ctx.Spec.Dependencies)
 

@@ -49,7 +49,7 @@ func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&impl.user, "user", true, "Includes user contexts")
-	cmd.Flags().BoolVar(&impl.platform, v1alpha1.KamelPlatform, true, "Includes platform contexts")
+	cmd.Flags().BoolVar(&impl.platform, v1alpha1.IntegrationContextTypePlatform, true, "Includes platform contexts")
 
 	return &cmd
 }
@@ -76,7 +76,7 @@ func (command *contextGetCommand) run() error {
 	for _, ctx := range ctxList.Items {
 		t := ctx.Labels["camel.apache.org/context.type"]
 		u := command.user && t == "user"
-		p := command.platform && t == v1alpha1.KamelPlatform
+		p := command.platform && t == v1alpha1.IntegrationContextTypePlatform
 
 		if u || p {
 			fmt.Fprintf(w, "%s\t%s\t%s\n", ctx.Name, t, string(ctx.Status.Phase))
