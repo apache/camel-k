@@ -35,6 +35,14 @@ func (r *debugTrait) appliesTo(e *Environment) bool {
 	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
 }
 
+func (r *debugTrait) autoconfigure(e *Environment) error {
+	if r.Enabled == nil {
+		enabled := false
+		r.Enabled = &enabled
+	}
+	return nil
+}
+
 func (r *debugTrait) apply(e *Environment) error {
 	// this is all that's needed as long as the base image is `fabric8/s2i-java` look into builder/builder.go
 	e.EnvVars["JAVA_DEBUG"] = True
