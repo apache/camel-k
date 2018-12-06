@@ -18,6 +18,8 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -29,6 +31,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/apache/camel-k/pkg/gzip"
 
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"gopkg.in/yaml.v2"
@@ -86,6 +90,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. "+
 		"E.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringVarP(&options.OutputFormat, "output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().BoolVar(&options.Compression, "compression", false, "Enable store source as a compressed binary blob")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -111,6 +116,7 @@ type runCmdOptions struct {
 	Traits             []string
 	LoggingLevels      []string
 	OutputFormat       string
+	Compression        bool
 }
 
 func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -291,7 +297,21 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 			return nil, err
 		}
 
-		integration.Spec.AddSource(path.Base(source), code, "")
+		if o.Compression {
+			var b bytes.Buffer
+
+			if err := gzip.Compress(&b, []byte(code)); err != nil {
+				return nil, err
+			}
+
+			code = base64.StdEncoding.EncodeToString(b.Bytes())
+		}
+
+		integration.Spec.AddSources(v1alpha1.SourceSpec{
+			Name:        path.Base(source),
+			Content:     code,
+			Compression: o.Compression,
+		})
 	}
 
 	for _, item := range o.Dependencies {
