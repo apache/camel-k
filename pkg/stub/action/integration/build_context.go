@@ -60,7 +60,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 	}
 
 	if ctx != nil {
-		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.KamelPlatform {
+		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
 			// This is a platform context and as it is auto generated it may get
 			// out of sync if the integration that has generated it, has been
 			// amended to add/remove dependencies
@@ -129,7 +129,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
 	platformCtx.Labels = map[string]string{
-		"camel.apache.org/context.type":               v1alpha1.KamelPlatform,
+		"camel.apache.org/context.type":               v1alpha1.IntegrationContextTypePlatform,
 		"camel.apache.org/context.created.by.kind":    v1alpha1.IntegrationKind,
 		"camel.apache.org/context.created.by.name":    integration.Name,
 		"camel.apache.org/context.created.by.version": integration.ResourceVersion,

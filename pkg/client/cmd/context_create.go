@@ -86,7 +86,7 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		// the integration context already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.KamelPlatform {
+		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
 			fmt.Printf("integration context \"%s\" is not editable\n", ctx.Name)
 			return nil
 		}

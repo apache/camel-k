@@ -82,7 +82,7 @@ func (command *contextDeleteCommand) run(args []string) error {
 		names = make([]string, 0, len(ctxList.Items))
 		for _, item := range ctxList.Items {
 			// only include non platform contexts
-			if item.Labels["camel.apache.org/context.type"] != v1alpha1.KamelPlatform {
+			if item.Labels["camel.apache.org/context.type"] != v1alpha1.IntegrationContextTypePlatform {
 				names = append(names, item.Name)
 			}
 		}
@@ -114,7 +114,7 @@ func (command *contextDeleteCommand) delete(name string) error {
 
 	// check that it is not a platform one which is supposed to be "read only"
 	// thus not managed by the end user
-	if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.KamelPlatform {
+	if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
 		// skip platform contexts while deleting all contexts
 		if command.all {
 			return nil
