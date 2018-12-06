@@ -144,6 +144,13 @@ The following is a list of common traits that can be configured by the end users
 
 !===
 
+| debug
+| All
+| Run the integration in debug mode (you can port-forward to port 5005 to connect)
+  +
+  +
+  It's disabled by default.
+
 |=======================
 
 
