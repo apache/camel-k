@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Base64;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.util.ResourceHelper;
@@ -28,20 +30,24 @@ import org.apache.camel.util.StringHelper;
 
 public class URIResolver {
 
-    public static InputStream resolve(CamelContext ctx, String uri) throws Exception {
-        if (uri == null) {
+    public static InputStream resolve(CamelContext ctx, Source source) throws Exception {
+        if (source.getLocation() == null) {
             throw new IllegalArgumentException("Cannot resolve null URI");
         }
 
-        if (uri.startsWith(Constants.SCHEME_ENV)) {
-            final String envvar = StringHelper.after(uri, ":");
+        final InputStream is;
+
+        if (source.getLocation().startsWith(Constants.SCHEME_ENV)) {
+            final String envvar = StringHelper.after(source.getLocation(), ":");
             final String content = System.getenv(envvar);
 
             // Using platform encoding on purpose
-            return new ByteArrayInputStream(content.getBytes());
+            is = new ByteArrayInputStream(content.getBytes());
+        } else {
+            is = ResourceHelper.resolveMandatoryResourceAsInputStream(ctx, source.getLocation());
         }
 
-        return ResourceHelper.resolveMandatoryResourceAsInputStream(ctx, uri);
+        return source.isCompressed() ? new GZIPInputStream(Base64.getDecoder().wrap(is)) : is;
     }
 
     public static Reader resolveEnv(String uri) {

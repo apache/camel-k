@@ -54,7 +54,7 @@ class KotlinRoutesLoader : RoutesLoader {
 
                 LOGGER.info("JAVA_HOME is set to {}", javaHome)
 
-                URIResolver.resolve(context, source.location).use { `is` ->
+                URIResolver.resolve(context, source).use { `is` ->
                     val result = host.eval(
                         InputStreamReader(`is`).readText().toScriptSource(),
                         ScriptCompilationConfiguration {

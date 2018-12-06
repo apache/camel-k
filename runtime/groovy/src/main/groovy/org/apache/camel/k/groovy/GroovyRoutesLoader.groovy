@@ -38,7 +38,7 @@ class GroovyRoutesLoader implements RoutesLoader {
 
                 def cl = Thread.currentThread().getContextClassLoader()
                 def sh = new GroovyShell(cl, new Binding(), cc)
-                def is = URIResolver.resolve(context, source.location)
+                def is = URIResolver.resolve(context, source)
 
                 is.withCloseable {
                     def reader = new InputStreamReader(is)
