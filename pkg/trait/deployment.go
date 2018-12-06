@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -116,29 +117,29 @@ func (d *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 		// do not create 'source' ConfigMap if a docker images for deployment
 		// is required
 		for i, s := range e.Integration.Spec.Sources {
-			maps = append(
-				maps,
-				&corev1.ConfigMap{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "ConfigMap",
-						APIVersion: "v1",
+			cm := corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
+					Namespace: e.Integration.Namespace,
+					Labels: map[string]string{
+						"camel.apache.org/integration": e.Integration.Name,
 					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
-						Namespace: e.Integration.Namespace,
-						Labels: map[string]string{
-							"camel.apache.org/integration": e.Integration.Name,
-						},
-						Annotations: map[string]string{
-							"camel.apache.org/source.language": string(s.Language),
-							"camel.apache.org/source.name":     s.Name,
-						},
-					},
-					Data: map[string]string{
-						"integration": s.Content,
+					Annotations: map[string]string{
+						"camel.apache.org/source.language":    string(s.Language),
+						"camel.apache.org/source.name":        s.Name,
+						"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
 					},
 				},
-			)
+				Data: map[string]string{
+					"integration": s.Content,
+				},
+			}
+
+			maps = append(maps, &cm)
 		}
 	}
 
@@ -166,8 +167,16 @@ func (d *deploymentTrait) getSources(e *Environment) []string {
 		src := path.Join(root, s.Name)
 		src = "file:" + src
 
+		params := make([]string, 0)
 		if s.Language != "" {
-			src = fmt.Sprintf("%s?language=%s", src, string(s.Language))
+			params = append(params, "language="+string(s.Language))
+		}
+		if s.Compression {
+			params = append(params, "compression=true")
+		}
+
+		if len(params) > 0 {
+			src = fmt.Sprintf("%s?%s", src, strings.Join(params, "&"))
 		}
 
 		sources = append(sources, src)

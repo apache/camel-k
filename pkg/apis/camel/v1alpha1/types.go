@@ -64,11 +64,17 @@ func (is *IntegrationSpec) AddSource(name string, content string, language Langu
 	is.Sources = append(is.Sources, SourceSpec{Name: name, Content: content, Language: language})
 }
 
+// AddSources --
+func (is *IntegrationSpec) AddSources(sources ...SourceSpec) {
+	is.Sources = append(is.Sources, sources...)
+}
+
 // SourceSpec --
 type SourceSpec struct {
-	Name     string   `json:"name,omitempty"`
-	Content  string   `json:"content,omitempty"`
-	Language Language `json:"language,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Content     string   `json:"content,omitempty"`
+	Language    Language `json:"language,omitempty"`
+	Compression bool     `json:"compression,omitempty"`
 }
 
 // Language --

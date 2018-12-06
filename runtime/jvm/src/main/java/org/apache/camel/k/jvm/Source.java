@@ -16,6 +16,8 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.util.Map;
+
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.URISupport;
 import org.apache.commons.lang3.StringUtils;
@@ -23,10 +25,12 @@ import org.apache.commons.lang3.StringUtils;
 public class Source {
     private final String location;
     private final Language language;
+    private final boolean compressed;
 
-    private Source(String location, Language language) {
+    private Source(String location, Language language, boolean compression) {
         this.location = location;
         this.language = language;
+        this.compressed = compression;
     }
 
     public String getLocation() {
@@ -37,18 +41,21 @@ public class Source {
         return language;
     }
 
+    public boolean isCompressed() {
+        return compressed;
+    }
+
     @Override
     public String toString() {
         return "Source{" +
             "location='" + location + '\'' +
             ", language=" + language +
+            ", compressed=" + compressed +
             '}';
     }
 
     public static Source create(String uri) throws Exception {
         final String location = StringUtils.substringBefore(uri, "?");
-        final String query = StringUtils.substringAfter(uri, "?");
-        final String languageName = (String) URISupport.parseQuery(query).get("language");
 
         if (!location.startsWith(Constants.SCHEME_CLASSPATH) &&
             !location.startsWith(Constants.SCHEME_FILE) &&
@@ -56,10 +63,15 @@ public class Source {
             throw new IllegalArgumentException("No valid resource format, expected scheme:path, found " + uri);
         }
 
+        final String query = StringUtils.substringAfter(uri, "?");
+        final Map<String, Object> params = URISupport.parseQuery(query);
+        final String languageName = (String) params.get("language");
+        final boolean compression = Boolean.valueOf((String) params.get("compression"));
+
         Language language = ObjectHelper.isNotEmpty(languageName)
             ? Language.fromLanguageName(languageName)
             : Language.fromResource(location);
 
-        return new Source(location, language);
+        return new Source(location, language, compression);
     }
 }

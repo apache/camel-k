@@ -81,7 +81,7 @@ public final class RoutesLoaders {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    try (InputStream is = URIResolver.resolve(getContext(), source.getLocation())) {
+                    try (InputStream is = URIResolver.resolve(getContext(), source)) {
                         String name = StringUtils.substringAfter(source.getLocation(), ":");
                         name = StringUtils.removeEnd(name, ".java");
 
@@ -125,7 +125,7 @@ public final class RoutesLoaders {
                     bindings.put("rest", (Supplier<RestDefinition>) () -> rest());
                     bindings.put("restConfiguration", (Supplier<RestConfigurationDefinition>) () -> restConfiguration());
 
-                    try (InputStream is = URIResolver.resolve(context, source.getLocation())) {
+                    try (InputStream is = URIResolver.resolve(context, source)) {
                         engine.eval(new InputStreamReader(is), bindings);
                     }
                 }
@@ -144,7 +144,7 @@ public final class RoutesLoaders {
             return new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    try (InputStream is = URIResolver.resolve(getContext(), source.getLocation())) {
+                    try (InputStream is = URIResolver.resolve(getContext(), source)) {
                         try {
                             setRouteCollection(
                                 getContext().loadRoutesDefinition(is)
