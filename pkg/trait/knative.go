@@ -20,7 +20,6 @@ package trait
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"

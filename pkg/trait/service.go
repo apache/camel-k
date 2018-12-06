@@ -20,7 +20,6 @@ package trait
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
-	"k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -45,18 +44,9 @@ func (s *serviceTrait) appliesTo(e *Environment) bool {
 
 func (s *serviceTrait) autoconfigure(e *Environment) error {
 	if s.Enabled == nil {
-		hasDeployment := false
-		e.Resources.VisitDeployment(func(s *v1.Deployment) {
-			hasDeployment = true
-		})
-		if hasDeployment {
-			meta := metadata.ExtractAll(e.Integration.Spec.Sources)
-			required := meta.RequiresHTTPService
-			s.Enabled = &required
-		} else {
-			enabled := false
-			s.Enabled = &enabled
-		}
+		meta := metadata.ExtractAll(e.Integration.Spec.Sources)
+		required := meta.RequiresHTTPService
+		s.Enabled = &required
 	}
 	return nil
 }
