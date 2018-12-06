@@ -24,7 +24,7 @@ import (
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
-	"k8s.io/api/apps/v1"
+	"strconv"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -38,22 +38,21 @@ import (
 )
 
 const (
-	knativeKindDeployment = "deployment"
-	knativeKindService    = "service"
+	knativeMinScaleAnnotation = "autoscaling.knative.dev/minScale"
+	knativeMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
 )
 
 type knativeTrait struct {
-	BaseTrait          `property:",squash"`
-	Kind               string `property:"kind"`
-	Sources            string `property:"sources"`
-	Sinks              string `property:"sinks"`
-	deploymentDelegate *deploymentTrait
+	BaseTrait `property:",squash"`
+	Sources   string `property:"sources"`
+	Sinks     string `property:"sinks"`
+	MinScale  *int   `property:"minScale"`
+	MaxScale  *int   `property:"maxScale"`
 }
 
 func newKnativeTrait() *knativeTrait {
 	return &knativeTrait{
-		BaseTrait:          newBaseTrait("knative"),
-		deploymentDelegate: newDeploymentTrait(),
+		BaseTrait: newBaseTrait("knative"),
 	}
 }
 
@@ -70,12 +69,12 @@ func (t *knativeTrait) autoconfigure(e *Environment) error {
 		channels := t.getSinkChannels(e)
 		t.Sinks = strings.Join(channels, ",")
 	}
-	if t.Kind == "" {
+	// Check the right value for minScale, as not all services are allowed to scale down to 0
+	if t.MinScale == nil {
 		meta := metadata.ExtractAll(e.Integration.Spec.Sources)
-		if meta.RequiresHTTPService && meta.PassiveEndpoints {
-			t.Kind = knativeKindService
-		} else {
-			t.Kind = knativeKindDeployment
+		if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
+			single := 1
+			t.MinScale = &single
 		}
 	}
 	return nil
@@ -88,17 +87,11 @@ func (t *knativeTrait) apply(e *Environment) error {
 	for _, sub := range t.getSubscriptionsFor(e) {
 		e.Resources.Add(sub)
 	}
-	switch t.Kind {
-	case knativeKindService:
-		svc, err := t.getServiceFor(e)
-		if err != nil {
-			return err
-		}
-		e.Resources.Add(svc)
-		return nil
-	case knativeKindDeployment:
-		return t.addDeployment(e)
+	svc, err := t.getServiceFor(e)
+	if err != nil {
+		return err
 	}
+	e.Resources.Add(svc)
 	return nil
 }
 
@@ -109,19 +102,6 @@ func (t *knativeTrait) prepareEnvVars(e *Environment) error {
 		return err
 	}
 	e.EnvVars["CAMEL_KNATIVE_CONFIGURATION"] = conf
-	return nil
-}
-
-func (t *knativeTrait) addDeployment(e *Environment) error {
-	if err := t.deploymentDelegate.apply(e); err != nil {
-		return err
-	}
-	e.Resources.VisitDeployment(func(d *v1.Deployment) {
-		if d.Spec.Template.Annotations == nil {
-			d.Spec.Template.Annotations = make(map[string]string)
-		}
-		d.Spec.Template.Annotations["sidecar.istio.io/inject"] = "true"
-	})
 	return nil
 }
 
@@ -171,6 +151,14 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 		"camel.apache.org/integration": e.Integration.Name,
 	}
 
+	annotations := make(map[string]string)
+	if t.MinScale != nil {
+		annotations[knativeMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
+	}
+	if t.MaxScale != nil {
+		annotations[knativeMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
+	}
+
 	svc := serving.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -187,7 +175,8 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 				Configuration: serving.ConfigurationSpec{
 					RevisionTemplate: serving.RevisionTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels: labels,
+							Labels:      labels,
+							Annotations: annotations,
 						},
 						Spec: serving.RevisionSpec{
 							Container: corev1.Container{
