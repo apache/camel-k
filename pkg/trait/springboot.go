@@ -36,38 +36,31 @@ type springBootTrait struct {
 
 func newSpringBootTrait() *springBootTrait {
 	return &springBootTrait{
-		BaseTrait: newBaseTrait("springboot"),
+		BaseTrait: BaseTrait{
+			id: ID("springboot"),
+		},
 	}
 }
 
-// IsAuto determines if we should apply automatic configuration
-func (trait *springBootTrait) IsAuto() bool {
-	return false
+func (t *springBootTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled == nil || !*t.Enabled {
+		return false, nil
+	}
+
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
+		return true, nil
+	}
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+		return true, nil
+	}
+	if e.IntegrationInPhase("") {
+		return true, nil
+	}
+
+	return false, nil
 }
 
-// IsEnabled is used to determine if the trait needs to be executed
-func (trait *springBootTrait) IsEnabled() bool {
-	if trait.Enabled == nil {
-		return false
-	}
-	return *trait.Enabled
-}
-
-func (trait *springBootTrait) appliesTo(e *Environment) bool {
-	if e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding {
-		return true
-	}
-	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
-		return true
-	}
-	if e.Integration != nil && e.Integration.Status.Phase == "" {
-		return true
-	}
-
-	return false
-}
-
-func (trait *springBootTrait) apply(e *Environment) error {
+func (t *springBootTrait) Apply(e *Environment) error {
 
 	//
 	// Integration

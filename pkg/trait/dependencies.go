@@ -31,15 +31,21 @@ type dependenciesTrait struct {
 
 func newDependenciesTrait() *dependenciesTrait {
 	return &dependenciesTrait{
-		BaseTrait: newBaseTrait("dependencies"),
+		BaseTrait: BaseTrait{
+			id: ID("dependencies"),
+		},
 	}
 }
 
-func (*dependenciesTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == ""
+func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
+
+	return e.IntegrationInPhase(""), nil
 }
 
-func (*dependenciesTrait) apply(e *Environment) error {
+func (t *dependenciesTrait) Apply(e *Environment) error {
 	for _, s := range e.Integration.Spec.Sources {
 		meta := metadata.Extract(s)
 

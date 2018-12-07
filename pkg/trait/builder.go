@@ -32,25 +32,30 @@ type builderTrait struct {
 
 func newBuilderTrait() *builderTrait {
 	return &builderTrait{
-		BaseTrait: newBaseTrait("builder"),
+		BaseTrait: BaseTrait{
+			id: ID("builder"),
+		},
 	}
 }
 
-func (*builderTrait) appliesTo(e *Environment) bool {
-	if e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding {
-		return true
+func (t *builderTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
 	}
 
-	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingImage &&
-		e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
-		return true
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
+		return true, nil
 	}
 
-	return false
+	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingImage) {
+		return true, nil
+	}
+
+	return false, nil
 }
 
-func (*builderTrait) apply(e *Environment) error {
-	if e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding {
+func (t *builderTrait) Apply(e *Environment) error {
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
 		if platform.SupportsS2iPublishStrategy(e.Platform) {
 			e.Steps = s2i.DefaultSteps
 		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
@@ -59,9 +64,7 @@ func (*builderTrait) apply(e *Environment) error {
 		}
 	}
 
-	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingImage &&
-		e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
-
+	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingImage) {
 		if platform.SupportsS2iPublishStrategy(e.Platform) {
 			e.Steps = []builder.Step{
 				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),

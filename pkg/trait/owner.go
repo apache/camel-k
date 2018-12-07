@@ -29,15 +29,21 @@ type ownerTrait struct {
 
 func newOwnerTrait() *ownerTrait {
 	return &ownerTrait{
-		BaseTrait: newBaseTrait("owner"),
+		BaseTrait: BaseTrait{
+			id: ID("owner"),
+		},
 	}
 }
 
-func (t *ownerTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+func (t *ownerTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
+
+	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 }
 
-func (*ownerTrait) apply(e *Environment) error {
+func (*ownerTrait) Apply(e *Environment) error {
 	controller := true
 	blockOwnerDeletion := true
 	e.Resources.VisitMetaObject(func(res metav1.Object) {

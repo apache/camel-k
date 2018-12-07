@@ -64,7 +64,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 			},
 		},
 		EnvVars:        make(map[string]string),
-		ExecutedTraits: make([]ID, 0),
+		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
 
@@ -72,7 +72,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.Contains(t, env.ExecutedTraits, ID("knative"))
+	assert.NotNil(t, env.GetTrait(ID("knative")))
 	assert.NotNil(t, env.EnvVars["KAMEL_KNATIVE_CONFIGURATION"])
 
 	services := 0

@@ -34,16 +34,22 @@ const (
 
 func newIstioTrait() *istioTrait {
 	return &istioTrait{
-		BaseTrait: newBaseTrait("istio"),
-		Allow:     "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+		BaseTrait: BaseTrait{
+			id: ID("istio"),
+		},
+		Allow: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
 	}
 }
 
-func (t *istioTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+func (t *istioTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
+
+	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 }
 
-func (t *istioTrait) apply(e *Environment) error {
+func (t *istioTrait) Apply(e *Environment) error {
 	if t.Allow != "" {
 		e.Resources.VisitDeployment(func(d *appsv1.Deployment) {
 			d.Spec.Template.Annotations = t.injectIstioAnnotation(d.Spec.Template.Annotations)
