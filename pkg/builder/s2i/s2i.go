@@ -25,5 +25,5 @@ var DefaultSteps = []builder.Step{
 	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
 	builder.NewStep("packager/incremental", builder.ApplicationPackagePhase, builder.IncrementalPackager),
 	builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, Publisher),
-	builder.NewStep("notify", builder.NotifyPhase, builder.Notify),
+	builder.NewStep("notify/context", builder.NotifyPhase, builder.NotifyIntegrationContext),
 }
