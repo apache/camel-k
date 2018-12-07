@@ -65,11 +65,13 @@ func (*builderTrait) apply(e *Environment) error {
 			e.Steps = []builder.Step{
 				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
 				builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, s2i.Publisher),
+				builder.NewStep("notify/integration", builder.NotifyPhase, builder.NotifyIntegration),
 			}
 		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
 			e.Steps = []builder.Step{
 				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
 				builder.NewStep("publisher/kaniko", builder.ApplicationPublishPhase, kaniko.Publisher),
+				builder.NewStep("notify/integration", builder.NotifyPhase, builder.NotifyIntegration),
 			}
 		}
 	}

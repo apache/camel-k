@@ -364,9 +364,9 @@ func FindBestImage(images []PublishedImage, dependencies []string, artifacts []v
 	return bestImage, bestImageCommonLibs
 }
 
-// Notify --
-func Notify(ctx *Context) error {
-	c := v1alpha1.IntegrationContext{
+// NotifyIntegrationContext --
+func NotifyIntegrationContext(ctx *Context) error {
+	target := v1alpha1.IntegrationContext{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       v1alpha1.IntegrationContextKind,
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -377,11 +377,43 @@ func Notify(ctx *Context) error {
 		},
 	}
 
-	if err := sdk.Get(&c); err != nil {
+	if err := sdk.Get(&target); err != nil {
 		return err
 	}
 
-	t := c.DeepCopy()
+	t := target.DeepCopy()
+	if t.Annotations == nil {
+		t.Annotations = make(map[string]string)
+	}
+
+	// Add a random ID to trigger update
+	t.Annotations["camel.apache.org/build.id"] = xid.New().String()
+
+	if err := sdk.Update(t); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// NotifyIntegration --
+func NotifyIntegration(ctx *Context) error {
+	target := v1alpha1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       v1alpha1.IntegrationKind,
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ctx.Namespace,
+			Name:      ctx.Request.Meta.Name,
+		},
+	}
+
+	if err := sdk.Get(&target); err != nil {
+		return err
+	}
+
+	t := target.DeepCopy()
 	if t.Annotations == nil {
 		t.Annotations = make(map[string]string)
 	}
