@@ -79,7 +79,7 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		target := context.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
 
-		logrus.Info("Context ", target.Name, " transitioning to state ", target.Status.Phase)
+		logrus.Infof("Context %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
 		// remove the build from cache
 		defer b.Purge(r)

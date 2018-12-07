@@ -112,7 +112,7 @@ func (action *buildImageAction) Handle(integration *v1alpha1.Integration) error 
 		target := integration.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseError
 
-		logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+		logrus.Infof("Integration %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
 		// remove the build from cache
 		defer b.Purge(r)
