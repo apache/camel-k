@@ -24,26 +24,57 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	env = &Environment{
+func TestDebugTraitApplicability(t *testing.T) {
+	env := Environment{
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
+			Spec: v1alpha1.IntegrationSpec{
+				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+					"debug": {
+						Configuration: map[string]string{
+							"enabled": "true",
+						},
+					},
+				},
+			},
 		},
 		EnvVars: make(map[string]string)}
 
-	trait = newDebugTrait()
-)
+	trait := newDebugTrait()
 
-func TestApplicability(t *testing.T) {
-	assert.True(t, trait.appliesTo(env))
+	enabled, err := trait.Configure(&env)
+	assert.Nil(t, err)
+	assert.False(t, enabled)
 
 	env.Integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
-	assert.False(t, trait.appliesTo(env))
+
+	enabled, err = trait.Configure(&env)
+	assert.Nil(t, err)
+	assert.False(t, enabled)
 }
 
-func TestApply(t *testing.T) {
-	assert.Nil(t, trait.apply(env))
+func TestApplyDebugTrait(t *testing.T) {
+	env := Environment{
+		Integration: &v1alpha1.Integration{
+			Status: v1alpha1.IntegrationStatus{
+				Phase: v1alpha1.IntegrationPhaseDeploying,
+			},
+			Spec: v1alpha1.IntegrationSpec{
+				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+					"debug": {
+						Configuration: map[string]string{
+							"enabled": "true",
+						},
+					},
+				},
+			},
+		},
+		EnvVars: make(map[string]string)}
+
+	trait := newDebugTrait()
+
+	assert.Nil(t, trait.Apply(&env))
 	assert.Equal(t, True, env.EnvVars["JAVA_DEBUG"])
 }

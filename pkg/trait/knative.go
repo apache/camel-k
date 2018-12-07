@@ -48,39 +48,49 @@ type knativeTrait struct {
 	Sinks     string `property:"sinks"`
 	MinScale  *int   `property:"minScale"`
 	MaxScale  *int   `property:"maxScale"`
+	Auto      *bool  `property:"auto"`
 }
 
 func newKnativeTrait() *knativeTrait {
 	return &knativeTrait{
-		BaseTrait: newBaseTrait("knative"),
+		BaseTrait: BaseTrait{
+			id: ID("knative"),
+		},
 	}
 }
 
-func (t *knativeTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
-}
+func (t *knativeTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
 
-func (t *knativeTrait) autoconfigure(e *Environment) error {
-	if t.Sources == "" {
-		channels := t.getSourceChannels(e)
-		t.Sources = strings.Join(channels, ",")
+	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+		return false, nil
 	}
-	if t.Sinks == "" {
-		channels := t.getSinkChannels(e)
-		t.Sinks = strings.Join(channels, ",")
-	}
-	// Check the right value for minScale, as not all services are allowed to scale down to 0
-	if t.MinScale == nil {
-		meta := metadata.ExtractAll(e.Integration.Spec.Sources)
-		if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
-			single := 1
-			t.MinScale = &single
+
+	if t.Auto == nil || *t.Auto {
+		if t.Sources == "" {
+			channels := t.getSourceChannels(e)
+			t.Sources = strings.Join(channels, ",")
+		}
+		if t.Sinks == "" {
+			channels := t.getSinkChannels(e)
+			t.Sinks = strings.Join(channels, ",")
+		}
+		// Check the right value for minScale, as not all services are allowed to scale down to 0
+		if t.MinScale == nil {
+			meta := metadata.ExtractAll(e.Integration.Spec.Sources)
+			if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
+				single := 1
+				t.MinScale = &single
+			}
 		}
 	}
-	return nil
+
+	return true, nil
 }
 
-func (t *knativeTrait) apply(e *Environment) error {
+func (t *knativeTrait) Apply(e *Environment) error {
 	if err := t.prepareEnvVars(e); err != nil {
 		return err
 	}

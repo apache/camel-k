@@ -35,16 +35,12 @@ type ID string
 // Trait is the interface of all traits
 type Trait interface {
 	Identifiable
-	// IsEnabled tells if the trait is enabled
-	IsEnabled() bool
-	// IsAuto determine if the trait should be configured automatically
-	IsAuto() bool
-	// appliesTo tells if the trait supports the given environment
-	appliesTo(environment *Environment) bool
-	// autoconfigure is called before any customization to ensure the trait is fully configured
-	autoconfigure(environment *Environment) error
-	// apply executes a customization of the Environment
-	apply(environment *Environment) error
+
+	// Configure the trait
+	Configure(environment *Environment) (bool, error)
+
+	// Apply executes a customization of the Environment
+	Apply(environment *Environment) error
 }
 
 /* Base trait */
@@ -53,38 +49,11 @@ type Trait interface {
 type BaseTrait struct {
 	id      ID
 	Enabled *bool `property:"enabled"`
-	Auto    *bool `property:"auto"`
-}
-
-func newBaseTrait(id string) BaseTrait {
-	return BaseTrait{
-		id: ID(id),
-	}
 }
 
 // ID returns the identifier of the trait
 func (trait *BaseTrait) ID() ID {
 	return trait.id
-}
-
-// IsAuto determines if we should apply automatic configuration
-func (trait *BaseTrait) IsAuto() bool {
-	if trait.Auto == nil {
-		return true
-	}
-	return *trait.Auto
-}
-
-// IsEnabled is used to determine if the trait needs to be executed
-func (trait *BaseTrait) IsEnabled() bool {
-	if trait.Enabled == nil {
-		return true
-	}
-	return *trait.Enabled
-}
-
-func (trait *BaseTrait) autoconfigure(environment *Environment) error {
-	return nil
 }
 
 /* Environment */
@@ -97,8 +66,19 @@ type Environment struct {
 	Resources      *kubernetes.Collection
 	Steps          []builder.Step
 	BuildDir       string
-	ExecutedTraits []ID
+	ExecutedTraits []Trait
 	EnvVars        map[string]string
+}
+
+// GetTrait --
+func (e *Environment) GetTrait(id ID) Trait {
+	for _, t := range e.ExecutedTraits {
+		if t.ID() == id {
+			return t
+		}
+	}
+
+	return nil
 }
 
 // IntegrationInPhase --

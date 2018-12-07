@@ -24,6 +24,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// True --
 const True = "true"
 
 // Apply --
@@ -72,7 +73,7 @@ func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.Integration
 		Platform:       pl,
 		Context:        ctx,
 		Integration:    integration,
-		ExecutedTraits: make([]ID, 0),
+		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 		EnvVars:        make(map[string]string),
 	}, nil

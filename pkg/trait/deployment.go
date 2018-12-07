@@ -37,43 +37,49 @@ type deploymentTrait struct {
 
 func newDeploymentTrait() *deploymentTrait {
 	return &deploymentTrait{
-		BaseTrait: newBaseTrait("deployment"),
+		BaseTrait: BaseTrait{
+			id: ID("deployment"),
+		},
 	}
 }
 
-func (d *deploymentTrait) appliesTo(e *Environment) bool {
-	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
+func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
+
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
 		//
 		// Don't deploy on knative
 		//
-		return e.DetermineProfile() != v1alpha1.TraitProfileKnative
+		return e.DetermineProfile() != v1alpha1.TraitProfileKnative, nil
 	}
 
-	if d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
-		return true
+	if t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+		return true, nil
 	}
 
-	if !d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
-		return true
+	if !t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+		return true, nil
 	}
 
-	return false
+	return false, nil
 }
 
-func (d *deploymentTrait) apply(e *Environment) error {
-	if d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+func (t *deploymentTrait) Apply(e *Environment) error {
+	if t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
 		// trigger container image build
 		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingImage
 	}
 
-	if !d.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+	if !t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
 		// trigger integration deploy
 		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 	}
 
 	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
-		e.Resources.AddAll(d.getConfigMapsFor(e))
-		e.Resources.Add(d.getDeploymentFor(e))
+		e.Resources.AddAll(t.getConfigMapsFor(e))
+		e.Resources.Add(t.getDeploymentFor(e))
 	}
 
 	return nil
@@ -85,7 +91,7 @@ func (d *deploymentTrait) apply(e *Environment) error {
 //
 // **********************************
 
-func (d *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
+func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 	maps := make([]runtime.Object, 0, len(e.Integration.Spec.Sources)+1)
 
 	// combine properties of integration with context, integration
@@ -112,7 +118,7 @@ func (d *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 		},
 	)
 
-	if !d.ContainerImage {
+	if !t.ContainerImage {
 
 		// do not create 'source' ConfigMap if a docker images for deployment
 		// is required
@@ -152,13 +158,13 @@ func (d *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 //
 // **********************************
 
-func (d *deploymentTrait) getSources(e *Environment) []string {
+func (t *deploymentTrait) getSources(e *Environment) []string {
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
 
 	for i, s := range e.Integration.Spec.Sources {
 		root := fmt.Sprintf("/etc/camel/integrations/%03d", i)
 
-		if d.ContainerImage {
+		if t.ContainerImage {
 
 			// assume sources are copied over the standard deployments folder
 			root = "/deployments/sources"
@@ -185,8 +191,8 @@ func (d *deploymentTrait) getSources(e *Environment) []string {
 	return sources
 }
 
-func (d *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
-	sources := d.getSources(e)
+func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
+	sources := t.getSources(e)
 
 	// combine Environment of integration with context, integration
 	// Environment has the priority
@@ -288,7 +294,7 @@ func (d *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// Volumes :: Sources
 	//
 
-	if !d.ContainerImage {
+	if !t.ContainerImage {
 
 		// We can configure the operator to generate a container images that include
 		// integration sources instead of mounting it at runtime and in such case we
