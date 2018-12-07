@@ -100,23 +100,23 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type runCmdOptions struct {
 	*RootCmdOptions
+	Compression        bool
+	Wait               bool
+	Logs               bool
+	Sync               bool
+	Dev                bool
 	IntegrationContext string
 	Runtime            string
 	IntegrationName    string
+	Profile            string
+	OutputFormat       string
 	Dependencies       []string
 	Properties         []string
 	ConfigMaps         []string
 	Secrets            []string
 	Repositories       []string
-	Wait               bool
-	Logs               bool
-	Sync               bool
-	Dev                bool
-	Profile            string
 	Traits             []string
 	LoggingLevels      []string
-	OutputFormat       string
-	Compression        bool
 }
 
 func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -257,8 +257,8 @@ func (o *runCmdOptions) createIntegration(args []string) (*v1alpha1.Integration,
 	return o.updateIntegrationCode(args)
 }
 
+// nolint: gocyclo
 func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integration, error) {
-
 	namespace := o.Namespace
 
 	name := ""

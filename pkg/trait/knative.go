@@ -87,11 +87,10 @@ func (t *knativeTrait) apply(e *Environment) error {
 	for _, sub := range t.getSubscriptionsFor(e) {
 		e.Resources.Add(sub)
 	}
-	svc, err := t.getServiceFor(e)
-	if err != nil {
-		return err
-	}
+
+	svc := t.getServiceFor(e)
 	e.Resources.Add(svc)
+
 	return nil
 }
 
@@ -105,7 +104,7 @@ func (t *knativeTrait) prepareEnvVars(e *Environment) error {
 	return nil
 }
 
-func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
+func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
@@ -198,7 +197,7 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 		},
 	}
 
-	return &svc, nil
+	return &svc
 }
 
 func (t *knativeTrait) getSubscriptionsFor(e *Environment) []*eventing.Subscription {

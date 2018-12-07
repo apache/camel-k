@@ -18,8 +18,9 @@ limitations under the License.
 package metadata
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"sort"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 // ExtractAll returns metadata information from all listed source codes
