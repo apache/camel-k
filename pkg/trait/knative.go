@@ -21,10 +21,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/pkg/errors"
 	"strconv"
 	"strings"
+
+	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
@@ -118,9 +119,17 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 		envName := fmt.Sprintf("KAMEL_K_ROUTE_%03d", i)
 		environment[envName] = s.Content
 
-		src := fmt.Sprintf("env:%s", envName)
+		params := make([]string, 0)
 		if s.Language != "" {
-			src = src + "?language=" + string(s.Language)
+			params = append(params, "language="+string(s.Language))
+		}
+		if s.Compression {
+			params = append(params, "compression=true")
+		}
+
+		src := fmt.Sprintf("env:%s", envName)
+		if len(params) > 0 {
+			src = fmt.Sprintf("%s?%s", src, strings.Join(params, "&"))
 		}
 
 		sources = append(sources, src)

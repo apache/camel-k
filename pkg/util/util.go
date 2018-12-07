@@ -23,6 +23,8 @@ import (
 	"path"
 	"syscall"
 
+	"k8s.io/api/core/v1"
+
 	"github.com/pkg/errors"
 )
 
@@ -96,5 +98,17 @@ func WriteFileWithContent(buildDir string, relativePath string, content string) 
 	if err != nil {
 		return errors.Wrap(err, "could not write to file "+relativePath)
 	}
+	return nil
+}
+
+// LookupEnvVar --
+func LookupEnvVar(vars []v1.EnvVar, name string) *v1.EnvVar {
+	for _, e := range vars {
+		if e.Name == name {
+			ev := e
+			return &ev
+		}
+	}
+
 	return nil
 }
