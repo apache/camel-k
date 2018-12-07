@@ -18,6 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
+	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
@@ -25,7 +26,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 )
 
 // ReplaceResources allows to completely replace a list of resources on Kubernetes, taking care of immutable fields and resource versions

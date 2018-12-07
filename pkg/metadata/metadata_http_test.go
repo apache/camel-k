@@ -82,7 +82,6 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 	assert.True(t, meta.PassiveEndpoints)
 }
 
-
 func TestNoHttpGroovySource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
 		Name:     "Request.groovy",
@@ -142,8 +141,6 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 	assert.True(t, meta.RequiresHTTPService)
 	assert.True(t, meta.PassiveEndpoints)
 }
-
-
 
 func TestMultilangHTTPOnlySource(t *testing.T) {
 	codes := []v1alpha1.SourceSpec{

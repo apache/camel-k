@@ -18,29 +18,30 @@ limitations under the License.
 package metadata
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"regexp"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 var httpURIs = map[string]bool{
 	"ahc":                  true,
 	"ahc-ws":               true,
 	"atmosphere-websocket": true,
-	"cxf":         true,
-	"cxfrs":       true,
-	"grpc":        true,
-	"jetty":       true,
-	"netty-http":  true,
-	"netty4-http": true,
-	"rest":        true,
-	"restlet":     true,
-	"servlet":     true,
-	"spark-rest":  true,
-	"spring-ws":   true,
-	"undertow":    true,
-	"websocket":   true,
-	"knative":     true,
+	"cxf":                  true,
+	"cxfrs":                true,
+	"grpc":                 true,
+	"jetty":                true,
+	"netty-http":           true,
+	"netty4-http":          true,
+	"rest":                 true,
+	"restlet":              true,
+	"servlet":              true,
+	"spark-rest":           true,
+	"spring-ws":            true,
+	"undertow":             true,
+	"websocket":            true,
+	"knative":              true,
 }
 
 var passiveURIs = map[string]bool{
@@ -65,8 +66,8 @@ var passiveURIs = map[string]bool{
 	"vm":         true,
 }
 
-var restIndicator = regexp.MustCompile(".*rest\\s*\\([^)]*\\).*")
-var xmlRestIndicator = regexp.MustCompile(".*<\\s*rest\\s+[^>]*>.*")
+var restIndicator = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
+var xmlRestIndicator = regexp.MustCompile(`.*<\s*rest\s+[^>]*>.*`)
 
 // requiresHTTPService returns true if the integration needs to expose itself through HTTP
 func requiresHTTPService(source v1alpha1.SourceSpec, fromURIs []string) bool {
@@ -77,7 +78,7 @@ func requiresHTTPService(source v1alpha1.SourceSpec, fromURIs []string) bool {
 }
 
 // hasOnlyPassiveEndpoints returns true if the integration has no endpoint that needs to remain always active
-func hasOnlyPassiveEndpoints(source v1alpha1.SourceSpec, fromURIs []string) bool {
+func hasOnlyPassiveEndpoints(_ v1alpha1.SourceSpec, fromURIs []string) bool {
 	passivePlusHTTP := make(map[string]bool)
 	for k, v := range passiveURIs {
 		passivePlusHTTP[k] = v

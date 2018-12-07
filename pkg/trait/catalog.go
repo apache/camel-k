@@ -39,7 +39,7 @@ type Catalog struct {
 	tOwner        Trait
 	tBuilder      Trait
 	tSpringBoot   Trait
-	tIstio	Trait
+	tIstio        Trait
 }
 
 // NewCatalog creates a new trait Catalog
@@ -55,7 +55,7 @@ func NewCatalog() *Catalog {
 		tOwner:        newOwnerTrait(),
 		tBuilder:      newBuilderTrait(),
 		tSpringBoot:   newSpringBootTrait(),
-		tIstio: newIstioTrait(),
+		tIstio:        newIstioTrait(),
 	}
 }
 

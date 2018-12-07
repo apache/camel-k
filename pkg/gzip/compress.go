@@ -45,6 +45,9 @@ func Compress(buffer io.Writer, data []byte) error {
 func Uncompress(buffer io.Writer, data []byte) error {
 	b := bytes.NewBuffer(data)
 	gz, err := g.NewReader(b)
+	if err != nil {
+		return err
+	}
 
 	defer gz.Close()
 
@@ -53,7 +56,10 @@ func Uncompress(buffer io.Writer, data []byte) error {
 		return err
 	}
 
-	buffer.Write(data)
+	_, err = buffer.Write(data)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
