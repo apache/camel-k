@@ -122,23 +122,20 @@ func (c *Catalog) apply(environment *Environment) error {
 	traits := c.traitsFor(environment)
 
 	for _, trait := range traits {
-		if !trait.appliesTo(environment) {
-			continue
+		enabled, err := trait.Configure(environment)
+		if err != nil {
+			return err
 		}
 
-		if trait.IsAuto() {
-			if err := trait.autoconfigure(environment); err != nil {
-				return err
-			}
-		}
+		if enabled {
+			logrus.Infof("Apply trait: %s", trait.ID())
 
-		if trait.IsEnabled() {
-			logrus.Infof("apply trait: %s", trait.ID())
-			if err := trait.apply(environment); err != nil {
+			err = trait.Apply(environment)
+			if err != nil {
 				return err
 			}
 
-			environment.ExecutedTraits = append(environment.ExecutedTraits, trait.ID())
+			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
 		}
 	}
 

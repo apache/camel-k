@@ -30,43 +30,58 @@ import (
 type ingressTrait struct {
 	BaseTrait `property:",squash"`
 	Host      string `property:"host"`
+	Auto      *bool  `property:"auto"`
 }
 
 func newIngressTrait() *ingressTrait {
 	return &ingressTrait{
-		BaseTrait: newBaseTrait("ingress"),
-		Host:      "",
+		BaseTrait: BaseTrait{
+			id: ID("ingress"),
+		},
+		Host: "",
 	}
 }
 
-func (*ingressTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
-}
+func (t *ingressTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
 
-func (i *ingressTrait) autoconfigure(e *Environment) error {
-	if i.Enabled == nil {
-		hasService := i.getTargetService(e) != nil
-		hasHost := i.Host != ""
+	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+		return false, nil
+	}
+
+	if t.Auto == nil || *t.Auto {
+		hasService := t.getTargetService(e) != nil
+		hasHost := t.Host != ""
 		enabled := hasService && hasHost
-		i.Enabled = &enabled
+
+		if !enabled {
+			return false, nil
+		}
 	}
-	return nil
+
+	if t.Host == "" {
+		return false, errors.New("cannot Apply ingress trait: no host defined")
+	}
+
+	return true, nil
 }
 
-func (i *ingressTrait) apply(e *Environment) error {
-	if i.Host == "" {
-		return errors.New("cannot apply ingress trait: no host defined")
+func (t *ingressTrait) Apply(e *Environment) error {
+	if t.Host == "" {
+		return errors.New("cannot Apply ingress trait: no host defined")
 	}
-	service := i.getTargetService(e)
+	service := t.getTargetService(e)
 	if service == nil {
-		return errors.New("cannot apply ingress trait: no target service")
+		return errors.New("cannot Apply ingress trait: no target service")
 	}
 
-	e.Resources.Add(i.getIngressFor(service))
+	e.Resources.Add(t.getIngressFor(service))
 	return nil
 }
 
-func (*ingressTrait) getTargetService(e *Environment) (service *corev1.Service) {
+func (t *ingressTrait) getTargetService(e *Environment) (service *corev1.Service) {
 	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
@@ -77,7 +92,7 @@ func (*ingressTrait) getTargetService(e *Environment) (service *corev1.Service) 
 	return
 }
 
-func (i *ingressTrait) getIngressFor(service *corev1.Service) *v1beta1.Ingress {
+func (t *ingressTrait) getIngressFor(service *corev1.Service) *v1beta1.Ingress {
 	ingress := v1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
@@ -94,7 +109,7 @@ func (i *ingressTrait) getIngressFor(service *corev1.Service) *v1beta1.Ingress {
 			},
 			Rules: []v1beta1.IngressRule{
 				{
-					Host: i.Host,
+					Host: t.Host,
 				},
 			},
 		},

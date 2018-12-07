@@ -28,36 +28,45 @@ import (
 type serviceTrait struct {
 	BaseTrait `property:",squash"`
 
-	Port int `property:"port"`
+	Auto *bool `property:"auto"`
+	Port int   `property:"port"`
 }
 
 func newServiceTrait() *serviceTrait {
 	return &serviceTrait{
-		BaseTrait: newBaseTrait("service"),
-		Port:      8080,
+		BaseTrait: BaseTrait{
+			id: ID("service"),
+		},
+		Port: 8080,
 	}
 }
 
-func (s *serviceTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
-}
+func (t *serviceTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
 
-func (s *serviceTrait) autoconfigure(e *Environment) error {
-	if s.Enabled == nil {
+	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+		return false, nil
+	}
+
+	if t.Auto == nil || *t.Auto {
 		meta := metadata.ExtractAll(e.Integration.Spec.Sources)
-		required := meta.RequiresHTTPService
-		s.Enabled = &required
+		if !meta.RequiresHTTPService {
+			return false, nil
+		}
 	}
-	return nil
+
+	return true, nil
 }
 
-func (s *serviceTrait) apply(e *Environment) (err error) {
-	svc := s.getServiceFor(e)
+func (t *serviceTrait) Apply(e *Environment) (err error) {
+	svc := t.getServiceFor(e)
 	e.Resources.Add(svc)
 	return nil
 }
 
-func (s *serviceTrait) getServiceFor(e *Environment) *corev1.Service {
+func (t *serviceTrait) getServiceFor(e *Environment) *corev1.Service {
 	svc := corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -76,7 +85,7 @@ func (s *serviceTrait) getServiceFor(e *Environment) *corev1.Service {
 					Name:       "http",
 					Port:       80,
 					Protocol:   corev1.ProtocolTCP,
-					TargetPort: intstr.FromInt(s.Port),
+					TargetPort: intstr.FromInt(t.Port),
 				},
 			},
 			Selector: map[string]string{

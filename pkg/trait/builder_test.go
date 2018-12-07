@@ -44,7 +44,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilContext(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
-			assert.NotContains(t, e.ExecutedTraits, ID("builder"))
+			assert.Nil(t, e.GetTrait(ID("builder")))
 			assert.Empty(t, e.Steps)
 		})
 	}
@@ -65,7 +65,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
-			assert.NotContains(t, e.ExecutedTraits, ID("builder"))
+			assert.Nil(t, e.GetTrait(ID("builder")))
 			assert.Empty(t, e.Steps)
 		})
 	}
@@ -77,7 +77,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.Contains(t, env.ExecutedTraits, ID("builder"))
+	assert.NotNil(t, env.GetTrait(ID("builder")))
 	assert.NotEmpty(t, env.Steps)
 	assert.Len(t, env.Steps, 5)
 	assert.Condition(t, func() bool {
@@ -97,7 +97,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.Contains(t, env.ExecutedTraits, ID("builder"))
+	assert.NotNil(t, env.GetTrait(ID("builder")))
 	assert.NotEmpty(t, env.Steps)
 	assert.Len(t, env.Steps, 5)
 	assert.Condition(t, func() bool {
@@ -137,7 +137,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 			},
 		},
 		EnvVars:        make(map[string]string),
-		ExecutedTraits: make([]ID, 0),
+		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
 }

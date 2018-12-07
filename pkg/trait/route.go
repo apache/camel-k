@@ -30,42 +30,52 @@ import (
 
 type routeTrait struct {
 	BaseTrait `property:",squash"`
+	Auto      *bool  `property:"auto"`
 	Host      string `property:"host"`
+	service   *corev1.Service
 }
 
 func newRouteTrait() *routeTrait {
 	return &routeTrait{
-		BaseTrait: newBaseTrait("route"),
+		BaseTrait: BaseTrait{
+			id: ID("route"),
+		},
 	}
 }
 
-func (r *routeTrait) appliesTo(e *Environment) bool {
-	return e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
-}
-
-func (r *routeTrait) autoconfigure(e *Environment) error {
-	if r.Enabled == nil {
-		hasService := r.getTargetService(e) != nil
-		r.Enabled = &hasService
+func (t *routeTrait) Configure(e *Environment) (bool, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
 	}
-	return nil
+
+	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+		return false, nil
+	}
+
+	if t.Auto == nil || *t.Auto {
+		t.service = t.getTargetService(e)
+		if t.service == nil {
+			return false, nil
+		}
+	}
+
+	if t.service == nil {
+		return false, errors.New("cannot apply route trait: no target service")
+	}
+
+	return true, nil
 }
 
-func (r *routeTrait) apply(e *Environment) error {
+func (t *routeTrait) Apply(e *Environment) error {
 	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
 		return nil
 	}
 
-	service := r.getTargetService(e)
-	if service == nil {
-		return errors.New("cannot apply route trait: no target service")
-	}
-
-	e.Resources.Add(r.getRouteFor(service))
+	e.Resources.Add(t.getRouteFor(t.service))
 	return nil
 }
 
-func (*routeTrait) getTargetService(e *Environment) (service *corev1.Service) {
+func (t *routeTrait) getTargetService(e *Environment) (service *corev1.Service) {
 	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
@@ -76,7 +86,7 @@ func (*routeTrait) getTargetService(e *Environment) (service *corev1.Service) {
 	return
 }
 
-func (r *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
+func (t *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
@@ -94,7 +104,7 @@ func (r *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
 				Kind: "Service",
 				Name: service.Name,
 			},
-			Host: r.Host,
+			Host: t.Host,
 		},
 	}
 	return &route
