@@ -38,6 +38,11 @@ func NewCollection() *Collection {
 	}
 }
 
+// Size returns the number of resources belonging to the collection
+func (c *Collection) Size() int {
+	return len(c.items)
+}
+
 // Items returns all resources belonging to the collection
 func (c *Collection) Items() []runtime.Object {
 	return c.items
