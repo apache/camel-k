@@ -55,6 +55,7 @@ func (*builderTrait) apply(e *Environment) error {
 			e.Steps = s2i.DefaultSteps
 		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
 			e.Steps = kaniko.DefaultSteps
+			e.BuildDir = kaniko.BuildDir
 		}
 	}
 
@@ -73,6 +74,7 @@ func (*builderTrait) apply(e *Environment) error {
 				builder.NewStep("publisher/kaniko", builder.ApplicationPublishPhase, kaniko.Publisher),
 				builder.NewStep("notify/integration", builder.NotifyPhase, builder.NotifyIntegration),
 			}
+			e.BuildDir = kaniko.BuildDir
 		}
 	}
 

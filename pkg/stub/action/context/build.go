@@ -66,6 +66,7 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		Dependencies: context.Spec.Dependencies,
 		Repositories: context.Spec.Repositories,
 		Steps:        env.Steps,
+		BuildDir:     env.BuildDir,
 		Platform:     env.Platform.Spec,
 	}
 
