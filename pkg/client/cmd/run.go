@@ -20,7 +20,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -33,11 +32,6 @@ import (
 	"syscall"
 
 	"github.com/apache/camel-k/pkg/gzip"
-
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
-	"gopkg.in/yaml.v2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
@@ -257,7 +251,6 @@ func (o *runCmdOptions) createIntegration(args []string) (*v1alpha1.Integration,
 	return o.updateIntegrationCode(args)
 }
 
-// nolint: gocyclo
 func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integration, error) {
 	namespace := o.Namespace
 
@@ -314,44 +307,24 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 		})
 	}
 
-	for _, item := range o.Dependencies {
-		switch {
-		case strings.HasPrefix(item, "mvn:"):
-			integration.Spec.Dependencies = append(integration.Spec.Dependencies, item)
-		case strings.HasPrefix(item, "file:"):
-			integration.Spec.Dependencies = append(integration.Spec.Dependencies, item)
-		case strings.HasPrefix(item, "camel-"):
-			integration.Spec.Dependencies = append(integration.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
-		}
-	}
-
 	if o.Runtime != "" {
-		util.StringSliceUniqueAdd(&integration.Spec.Dependencies, "runtime:"+o.Runtime)
+		integration.Spec.AddDependency("runtime:" + o.Runtime)
 	}
 
+	for _, item := range o.Dependencies {
+		integration.Spec.AddDependency(item)
+	}
 	for _, item := range o.Properties {
-		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
-			Type:  "property",
-			Value: item,
-		})
+		integration.Spec.AddConfiguration("property", item)
 	}
 	for _, item := range o.LoggingLevels {
-		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
-			Type:  "property",
-			Value: "logging.level." + item,
-		})
+		integration.Spec.AddConfiguration("property", "logging.level."+item)
 	}
 	for _, item := range o.ConfigMaps {
-		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
-			Type:  "configmap",
-			Value: item,
-		})
+		integration.Spec.AddConfiguration("configmap", item)
 	}
 	for _, item := range o.Secrets {
-		integration.Spec.Configuration = append(integration.Spec.Configuration, v1alpha1.ConfigurationSpec{
-			Type:  "secret",
-			Value: item,
-		})
+		integration.Spec.AddConfiguration("secret", item)
 	}
 
 	for _, traitConf := range o.Traits {
@@ -364,19 +337,16 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 	case "":
 		// continue..
 	case "yaml":
-		jsondata, err := toJSON(&integration)
+		data, err := kubernetes.ToYAML(&integration)
 		if err != nil {
 			return nil, err
 		}
-		yamldata, err := jsonToYaml(jsondata)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Print(string(yamldata))
+
+		fmt.Print(string(data))
 		return nil, nil
 
 	case "json":
-		data, err := toJSON(&integration)
+		data, err := kubernetes.ToJSON(&integration)
 		if err != nil {
 			return nil, err
 		}
@@ -410,31 +380,6 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 		fmt.Printf("integration \"%s\" updated\n", name)
 	}
 	return &integration, nil
-}
-
-func toJSON(value runtime.Object) ([]byte, error) {
-	u, err := k8sutil.UnstructuredFromRuntimeObject(value)
-	if err != nil {
-		return nil, fmt.Errorf("error creating unstructured data: %v", err)
-	}
-	data, err := runtime.Encode(unstructured.UnstructuredJSONScheme, u)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling to json: %v", err)
-	}
-	return data, nil
-}
-
-func jsonToYaml(src []byte) ([]byte, error) {
-	jsondata := map[string]interface{}{}
-	err := json.Unmarshal(src, &jsondata)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling json: %v", err)
-	}
-	yamldata, err := yaml.Marshal(&jsondata)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
-	}
-	return yamldata, nil
 }
 
 func (*runCmdOptions) loadCode(fileName string) (string, error) {
