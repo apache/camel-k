@@ -96,6 +96,7 @@ type Environment struct {
 	Integration    *v1alpha1.Integration
 	Resources      *kubernetes.Collection
 	Steps          []builder.Step
+	BuildDir       string
 	ExecutedTraits []ID
 	EnvVars        map[string]string
 }

@@ -87,6 +87,7 @@ func (action *buildImageAction) Handle(integration *v1alpha1.Integration) error 
 	r := builder.Request{
 		Meta:     integration.ObjectMeta,
 		Steps:    env.Steps,
+		BuildDir: env.BuildDir,
 		Platform: env.Platform.Spec,
 		Image:    ctx.Status.Image,
 	}
