@@ -18,6 +18,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
+
 	"github.com/mitchellh/mapstructure"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -67,6 +71,26 @@ func (is *IntegrationSpec) AddSource(name string, content string, language Langu
 // AddSources --
 func (is *IntegrationSpec) AddSources(sources ...SourceSpec) {
 	is.Sources = append(is.Sources, sources...)
+}
+
+// AddConfiguration --
+func (is *IntegrationSpec) AddConfiguration(confType string, confValue string) {
+	is.Configuration = append(is.Configuration, ConfigurationSpec{
+		Type:  confType,
+		Value: confValue,
+	})
+}
+
+// AddDependency --
+func (is *IntegrationSpec) AddDependency(dependency string) {
+	switch {
+	case strings.HasPrefix(dependency, "mvn:"):
+		util.StringSliceUniqueAdd(&is.Dependencies, dependency)
+	case strings.HasPrefix(dependency, "file:"):
+		util.StringSliceUniqueAdd(&is.Dependencies, dependency)
+	case strings.HasPrefix(dependency, "camel-"):
+		util.StringSliceUniqueAdd(&is.Dependencies, "camel:"+strings.TrimPrefix(dependency, "camel-"))
+	}
 }
 
 // SourceSpec --
