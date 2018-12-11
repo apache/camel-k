@@ -169,6 +169,8 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	}
 
 	annotations := make(map[string]string)
+	// Resolve registry host names when used
+	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
 	if t.MinScale != nil {
 		annotations[knativeMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
 	}
