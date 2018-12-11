@@ -122,7 +122,11 @@ func (action *buildImageAction) Handle(integration *v1alpha1.Integration) error 
 	case builder.StatusCompleted:
 		target := integration.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
-		target.Status.Image = res.Image
+		if res.PublicImage != "" {
+			target.Status.Image = res.PublicImage
+		} else {
+			target.Status.Image = res.Image
+		}
 
 		dgst, err := digest.ComputeForIntegration(integration)
 		if err != nil {
