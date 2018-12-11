@@ -26,7 +26,12 @@ func EmbeddedArtifacts() map[string]Artifact {
 			GroupID:    "org.apache.camel.k",
 			ArtifactID: "camel-knative",
 			Version:    version.Version,
-			Schemes:    []string{"knative"},
+			Schemes: []Scheme{
+				{
+					ID:   "knative",
+					HTTP: true,
+				},
+			},
 		},
 	}
 }
