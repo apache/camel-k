@@ -11,6 +11,56 @@ def output = new TreeMap()
 output['version'] = catalog.loadedVersion
 output['artifacts'] = [:]
 
+
+
+// *******************************
+//
+// https://github.com/apache/camel-k/issues/264
+//
+// *******************************
+
+def httpURIs = [
+	"ahc",
+	"ahc-ws",
+	"atmosphere-websocket",
+	"cxf",
+	"cxfrs",
+	"grpc",
+	"jetty",
+	"netty-http",
+	"netty4-http",
+	"rest",
+	"restlet",
+	"servlet",
+	"spark-rest",
+	"spring-ws",
+	"undertow",
+	"websocket",
+	"knative"
+]
+
+def passiveURIs = [
+	"bean",
+	"binding",
+	"browse",
+	"class",
+	"controlbus",
+	"dataformat",
+	"dataset",
+	"direct",
+	"direct-vm",
+	"language",
+	"log",
+	"mock",
+	"properties",
+	"ref",
+	"seda",
+	"stub",
+	"test",
+	"validator",
+	"vm"
+]
+
 // *******************************
 //
 // Components
@@ -31,17 +81,29 @@ catalog.findComponentNames().sort().each { name ->
         output['artifacts'][id]['dataformats'] = []
     }
 
-    if (!output['artifacts'][id]['schemes'].contains(json.component.scheme.trim())) {
-        output['artifacts'][id]['schemes'] << json.component.scheme.trim()
+    def schemes = output['artifacts'][id]['schemes']
+    def scheme = json.component.scheme.trim()
+
+    if (!schemes.any{ it['id'] == scheme}) {
+        schemes << [ id: scheme ]
     }
 
     if (json.component.alternativeSchemes) {
         json.component.alternativeSchemes.split(',').collect {
-            scheme -> scheme.trim()
+            it.trim()
         }.findAll {
-            scheme -> !output['artifacts'][id]['schemes'].contains(scheme)
+            !schemes.any{ it['id'] == scheme }
         }.each { 
-            scheme -> output['artifacts'][id]['schemes'] << scheme
+            schemes << [ id: scheme ]
+        }
+    }
+
+    schemes?.each {
+        if (httpURIs.contains(it['id'])) {
+            it['http'] = true
+        }
+        if (passiveURIs.contains(it['id'])) {
+            it['passive'] = true
         }
     }
 }
