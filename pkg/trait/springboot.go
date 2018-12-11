@@ -107,7 +107,7 @@ func (t *springBootTrait) Apply(e *Environment) error {
 
 	if e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding {
 		// add custom initialization logic
-		e.Steps = append(e.Steps, builder.NewStep("initialize/spring-boot", builder.IntiPhase, springboot.Initialize))
+		e.Steps = append(e.Steps, builder.NewStep("initialize/spring-boot", builder.InitPhase, springboot.Initialize))
 		e.Steps = append(e.Steps, builder.NewStep("build/compute-boot-dependencies", builder.ProjectBuildPhase+1, springboot.ComputeDependencies))
 
 		// replace project generator

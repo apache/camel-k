@@ -141,3 +141,13 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		Resources:      kubernetes.NewCollection(),
 	}
 }
+
+func TestIPReplacement(t *testing.T) {
+	assert.Equal(t, "docker-registry.default.svc:5000/myproject/camel-k:1234", getImageWithOpenShiftHost("172.30.1.1:5000/myproject/camel-k:1234"))
+	assert.Equal(t, "docker-registry.default.svc/myproject/camel-k:1234", getImageWithOpenShiftHost("172.30.1.1/myproject/camel-k:1234"))
+	assert.Equal(t, "docker-registry.default.svc/myproject/camel-k:1234", getImageWithOpenShiftHost("10.0.0.1/myproject/camel-k:1234"))
+	assert.Equal(t, "docker-registry.default.svc/camel-k", getImageWithOpenShiftHost("10.0.0.1/camel-k"))
+	assert.Equal(t, "10.0.2.3.4/camel-k", getImageWithOpenShiftHost("10.0.2.3.4/camel-k"))
+	assert.Equal(t, "gcr.io/camel-k/camel-k:latest", getImageWithOpenShiftHost("gcr.io/camel-k/camel-k:latest"))
+	assert.Equal(t, "docker.io/camel-k:latest", getImageWithOpenShiftHost("docker.io/camel-k:latest"))
+}
