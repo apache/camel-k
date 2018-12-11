@@ -78,7 +78,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
 			target := integration.DeepCopy()
-			target.Status.Image = ctx.Status.Image
+			target.Status.Image = ctx.ImageForIntegration()
 			target.Spec.Context = ctx.Name
 			target.Status.Phase = v1alpha1.IntegrationPhaseError
 
@@ -94,7 +94,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
 			target := integration.DeepCopy()
-			target.Status.Image = ctx.Status.Image
+			target.Status.Image = ctx.ImageForIntegration()
 			target.Spec.Context = ctx.Name
 
 			dgst, err := digest.ComputeForIntegration(target)

@@ -125,12 +125,13 @@ func (t Task) Elapsed() time.Duration {
 
 // Result represents the result of a build
 type Result struct {
-	Request   Request
-	Image     string
-	Error     error
-	Status    Status
-	Artifacts []v1alpha1.Artifact
-	Task      Task
+	Request     Request
+	Image       string
+	PublicImage string
+	Error       error
+	Status      Status
+	Artifacts   []v1alpha1.Artifact
+	Task        Task
 }
 
 // Context --
@@ -138,6 +139,7 @@ type Context struct {
 	C                 context.Context
 	Request           Request
 	Image             string
+	PublicImage       string
 	Error             error
 	Namespace         string
 	Project           maven.Project
