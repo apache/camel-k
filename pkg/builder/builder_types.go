@@ -31,8 +31,8 @@ import (
 )
 
 const (
-	// IntiPhase --
-	IntiPhase int32 = 0
+	// InitPhase --
+	InitPhase int32 = 0
 	// ProjectGenerationPhase --
 	ProjectGenerationPhase int32 = 10
 	// ProjectBuildPhase --

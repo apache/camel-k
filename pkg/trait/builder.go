@@ -23,6 +23,11 @@ import (
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/platform"
+	"regexp"
+)
+
+const (
+	openshiftDockerRegistryHost = "docker-registry.default.svc"
 )
 
 // TODO: we should add a way to label a trait as platform so it cannot be disabled/removed
@@ -58,6 +63,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
 		if platform.SupportsS2iPublishStrategy(e.Platform) {
 			e.Steps = s2i.DefaultSteps
+			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
+				e.Steps = append(e.Steps, builder.NewStep("publisher/replaceHost", builder.ApplicationPublishPhase+1, t.ReplaceHost))
+			}
 		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
 			e.Steps = kaniko.DefaultSteps
 			e.BuildDir = kaniko.BuildDir
@@ -71,6 +79,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 				builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, s2i.Publisher),
 				builder.NewStep("notify/integration", builder.NotifyPhase, builder.NotifyIntegration),
 			}
+			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
+				e.Steps = append(e.Steps, builder.NewStep("publisher/replaceHost", builder.ApplicationPublishPhase+1, t.ReplaceHost))
+			}
 		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
 			e.Steps = []builder.Step{
 				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
@@ -82,4 +93,15 @@ func (t *builderTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+func (t *builderTrait) ReplaceHost(ctx *builder.Context) error {
+	ctx.Image = getImageWithOpenShiftHost(ctx.Image)
+	return nil
+}
+
+func getImageWithOpenShiftHost(image string) string {
+	pattern := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+([:/].*)`)
+	return pattern.ReplaceAllString(image, openshiftDockerRegistryHost+"$1")
+	return image
 }
