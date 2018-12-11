@@ -89,6 +89,7 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 	case builder.StatusCompleted:
 		target := context.DeepCopy()
 		target.Status.Image = res.Image
+		target.Status.PublicImage = res.PublicImage
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
 		target.Status.Artifacts = make([]v1alpha1.Artifact, 0, len(res.Artifacts))
 

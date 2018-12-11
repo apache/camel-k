@@ -96,7 +96,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 }
 
 func (t *builderTrait) ReplaceHost(ctx *builder.Context) error {
-	ctx.Image = getImageWithOpenShiftHost(ctx.Image)
+	ctx.PublicImage = getImageWithOpenShiftHost(ctx.Image)
 	return nil
 }
 

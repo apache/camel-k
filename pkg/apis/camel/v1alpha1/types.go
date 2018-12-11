@@ -200,10 +200,19 @@ type IntegrationContextSpec struct {
 
 // IntegrationContextStatus --
 type IntegrationContextStatus struct {
-	Phase     IntegrationContextPhase `json:"phase,omitempty"`
-	Image     string                  `json:"image,omitempty"`
-	Digest    string                  `json:"digest,omitempty"`
-	Artifacts []Artifact              `json:"artifacts,omitempty"`
+	Phase       IntegrationContextPhase `json:"phase,omitempty"`
+	Image       string                  `json:"image,omitempty"`
+	PublicImage string                  `json:"publicImage,omitempty"`
+	Digest      string                  `json:"digest,omitempty"`
+	Artifacts   []Artifact              `json:"artifacts,omitempty"`
+}
+
+// ImageForIntegration returns the image to use when using it for running an integration
+func (c IntegrationContext) ImageForIntegration() string {
+	if c.Status.PublicImage != "" {
+		return c.Status.PublicImage
+	}
+	return c.Status.Image
 }
 
 // IntegrationContextPhase --
