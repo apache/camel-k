@@ -27,6 +27,7 @@ type Catalog struct {
 	Version          string              `yaml:"version"`
 	Artifacts        map[string]Artifact `yaml:"artifacts"`
 	artifactByScheme map[string]string   `yaml:"-"`
+	schemesByID      map[string]Scheme   `yaml:"-"`
 }
 
 // Artifact --
@@ -34,9 +35,16 @@ type Artifact struct {
 	GroupID     string   `yaml:"groupId"`
 	ArtifactID  string   `yaml:"artifactId"`
 	Version     string   `yaml:"version"`
-	Schemes     []string `yaml:"schemes"`
+	Schemes     []Scheme `yaml:"schemes"`
 	Languages   []string `yaml:"languages"`
 	DataFormats []string `yaml:"dataformats"`
+}
+
+// Scheme --
+type Scheme struct {
+	ID      string `yaml:"id"`
+	Passive bool   `yaml:"passive"`
+	HTTP    bool   `yaml:"http"`
 }
 
 func init() {
@@ -50,9 +58,12 @@ func init() {
 	}
 
 	Runtime.artifactByScheme = make(map[string]string)
+	Runtime.schemesByID = make(map[string]Scheme)
+
 	for id, artifact := range Runtime.Artifacts {
 		for _, scheme := range artifact.Schemes {
-			Runtime.artifactByScheme[scheme] = id
+			Runtime.artifactByScheme[scheme.ID] = id
+			Runtime.schemesByID[scheme.ID] = scheme
 		}
 	}
 }
@@ -65,6 +76,30 @@ func (c Catalog) GetArtifactByScheme(scheme string) *Artifact {
 		}
 	}
 	return nil
+}
+
+// GetScheme returns the scheme definition for the given scheme id
+func (c Catalog) GetScheme(id string) (Scheme, bool) {
+	scheme, ok := c.schemesByID[id]
+	return scheme, ok
+}
+
+// VisitArtifacts --
+func (c Catalog) VisitArtifacts(visitor func(string, Artifact) bool) {
+	for id, artifact := range c.Artifacts {
+		if !visitor(id, artifact) {
+			break
+		}
+	}
+}
+
+// VisitSchemes --
+func (c Catalog) VisitSchemes(visitor func(string, Scheme) bool) {
+	for id, scheme := range c.schemesByID {
+		if !visitor(id, scheme) {
+			break
+		}
+	}
 }
 
 // Runtime --

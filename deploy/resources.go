@@ -48,7 +48,8 @@ artifacts:
     artifactId: camel-ahc
     version: 2.23.0
     schemes:
-    - ahc
+    - id: ahc
+      http: true
     languages: []
     dataformats: []
   camel-ahc-ws:
@@ -56,8 +57,9 @@ artifacts:
     artifactId: camel-ahc-ws
     version: 2.23.0
     schemes:
-    - ahc-ws
-    - ahc-wss
+    - id: ahc-ws
+      http: true
+    - id: ahc-wss
     languages: []
     dataformats: []
   camel-amqp:
@@ -65,7 +67,7 @@ artifacts:
     artifactId: camel-amqp
     version: 2.23.0
     schemes:
-    - amqp
+    - id: amqp
     languages: []
     dataformats: []
   camel-apns:
@@ -73,7 +75,7 @@ artifacts:
     artifactId: camel-apns
     version: 2.23.0
     schemes:
-    - apns
+    - id: apns
     languages: []
     dataformats: []
   camel-as2:
@@ -81,7 +83,7 @@ artifacts:
     artifactId: camel-as2
     version: 2.23.0
     schemes:
-    - as2
+    - id: as2
     languages: []
     dataformats: []
   camel-asterisk:
@@ -89,7 +91,7 @@ artifacts:
     artifactId: camel-asterisk
     version: 2.23.0
     schemes:
-    - asterisk
+    - id: asterisk
     languages: []
     dataformats: []
   camel-atmos:
@@ -97,7 +99,7 @@ artifacts:
     artifactId: camel-atmos
     version: 2.23.0
     schemes:
-    - atmos
+    - id: atmos
     languages: []
     dataformats: []
   camel-atmosphere-websocket:
@@ -105,7 +107,8 @@ artifacts:
     artifactId: camel-atmosphere-websocket
     version: 2.23.0
     schemes:
-    - atmosphere-websocket
+    - id: atmosphere-websocket
+      http: true
     languages: []
     dataformats: []
   camel-atom:
@@ -113,7 +116,7 @@ artifacts:
     artifactId: camel-atom
     version: 2.23.0
     schemes:
-    - atom
+    - id: atom
     languages: []
     dataformats: []
   camel-atomix:
@@ -121,12 +124,12 @@ artifacts:
     artifactId: camel-atomix
     version: 2.23.0
     schemes:
-    - atomix-map
-    - atomix-messaging
-    - atomix-multimap
-    - atomix-queue
-    - atomix-set
-    - atomix-value
+    - id: atomix-map
+    - id: atomix-messaging
+    - id: atomix-multimap
+    - id: atomix-queue
+    - id: atomix-set
+    - id: atomix-value
     languages: []
     dataformats: []
   camel-avro:
@@ -134,7 +137,7 @@ artifacts:
     artifactId: camel-avro
     version: 2.23.0
     schemes:
-    - avro
+    - id: avro
     languages: []
     dataformats:
     - avro
@@ -143,22 +146,22 @@ artifacts:
     artifactId: camel-aws
     version: 2.23.0
     schemes:
-    - aws-cw
-    - aws-ddb
-    - aws-ddbstream
-    - aws-ec2
-    - aws-iam
-    - aws-kinesis
-    - aws-kinesis-firehose
-    - aws-kms
-    - aws-lambda
-    - aws-mq
-    - aws-s3
-    - aws-sdb
-    - aws-ses
-    - aws-sns
-    - aws-sqs
-    - aws-swf
+    - id: aws-cw
+    - id: aws-ddb
+    - id: aws-ddbstream
+    - id: aws-ec2
+    - id: aws-iam
+    - id: aws-kinesis
+    - id: aws-kinesis-firehose
+    - id: aws-kms
+    - id: aws-lambda
+    - id: aws-mq
+    - id: aws-s3
+    - id: aws-sdb
+    - id: aws-ses
+    - id: aws-sns
+    - id: aws-sqs
+    - id: aws-swf
     languages: []
     dataformats: []
   camel-azure:
@@ -166,8 +169,8 @@ artifacts:
     artifactId: camel-azure
     version: 2.23.0
     schemes:
-    - azure-blob
-    - azure-queue
+    - id: azure-blob
+    - id: azure-queue
     languages: []
     dataformats: []
   camel-core:
@@ -175,32 +178,52 @@ artifacts:
     artifactId: camel-core
     version: 2.23.0
     schemes:
-    - bean
-    - binding
-    - browse
-    - class
-    - controlbus
-    - dataformat
-    - dataset
-    - direct
-    - direct-vm
-    - file
-    - language
-    - log
-    - mock
-    - properties
-    - ref
-    - rest
-    - rest-api
-    - saga
-    - scheduler
-    - seda
-    - stub
-    - test
-    - timer
-    - validator
-    - vm
-    - xslt
+    - id: bean
+      passive: true
+    - id: binding
+      passive: true
+    - id: browse
+      passive: true
+    - id: class
+      passive: true
+    - id: controlbus
+      passive: true
+    - id: dataformat
+      passive: true
+    - id: dataset
+      passive: true
+    - id: direct
+      passive: true
+    - id: direct-vm
+      passive: true
+    - id: file
+    - id: language
+      passive: true
+    - id: log
+      passive: true
+    - id: mock
+      passive: true
+    - id: properties
+      passive: true
+    - id: ref
+      passive: true
+    - id: rest
+      http: true
+    - id: rest-api
+    - id: saga
+    - id: scheduler
+    - id: seda
+      passive: true
+    - id: stub
+      passive: true
+    - id: test
+      passive: true
+    - id: timer
+    - id: validator
+      passive: true
+    - id: vm
+      passive: true
+    - id: xslt
     languages:
     - bean
     - constant
@@ -222,7 +245,7 @@ artifacts:
     artifactId: camel-bean-validator
     version: 2.23.0
     schemes:
-    - bean-validator
+    - id: bean-validator
     languages: []
     dataformats: []
   camel-beanstalk:
@@ -230,7 +253,7 @@ artifacts:
     artifactId: camel-beanstalk
     version: 2.23.0
     schemes:
-    - beanstalk
+    - id: beanstalk
     languages: []
     dataformats: []
   camel-bonita:
@@ -238,7 +261,7 @@ artifacts:
     artifactId: camel-bonita
     version: 2.23.0
     schemes:
-    - bonita
+    - id: bonita
     languages: []
     dataformats: []
   camel-box:
@@ -246,7 +269,7 @@ artifacts:
     artifactId: camel-box
     version: 2.23.0
     schemes:
-    - box
+    - id: box
     languages: []
     dataformats: []
   camel-braintree:
@@ -254,7 +277,7 @@ artifacts:
     artifactId: camel-braintree
     version: 2.23.0
     schemes:
-    - braintree
+    - id: braintree
     languages: []
     dataformats: []
   camel-cache:
@@ -262,7 +285,7 @@ artifacts:
     artifactId: camel-cache
     version: 2.23.0
     schemes:
-    - cache
+    - id: cache
     languages: []
     dataformats: []
   camel-caffeine:
@@ -270,8 +293,8 @@ artifacts:
     artifactId: camel-caffeine
     version: 2.23.0
     schemes:
-    - caffeine-cache
-    - caffeine-loadcache
+    - id: caffeine-cache
+    - id: caffeine-loadcache
     languages: []
     dataformats: []
   camel-chronicle:
@@ -279,7 +302,7 @@ artifacts:
     artifactId: camel-chronicle
     version: 2.23.0
     schemes:
-    - chronicle-engine
+    - id: chronicle-engine
     languages: []
     dataformats: []
   camel-chunk:
@@ -287,7 +310,7 @@ artifacts:
     artifactId: camel-chunk
     version: 2.23.0
     schemes:
-    - chunk
+    - id: chunk
     languages: []
     dataformats: []
   camel-cm-sms:
@@ -295,7 +318,7 @@ artifacts:
     artifactId: camel-cm-sms
     version: 2.23.0
     schemes:
-    - cm-sms
+    - id: cm-sms
     languages: []
     dataformats: []
   camel-cmis:
@@ -303,7 +326,7 @@ artifacts:
     artifactId: camel-cmis
     version: 2.23.0
     schemes:
-    - cmis
+    - id: cmis
     languages: []
     dataformats: []
   camel-coap:
@@ -311,7 +334,7 @@ artifacts:
     artifactId: camel-coap
     version: 2.23.0
     schemes:
-    - coap
+    - id: coap
     languages: []
     dataformats: []
   camel-cometd:
@@ -319,8 +342,8 @@ artifacts:
     artifactId: camel-cometd
     version: 2.23.0
     schemes:
-    - cometd
-    - cometds
+    - id: cometd
+    - id: cometds
     languages: []
     dataformats: []
   camel-consul:
@@ -328,7 +351,7 @@ artifacts:
     artifactId: camel-consul
     version: 2.23.0
     schemes:
-    - consul
+    - id: consul
     languages: []
     dataformats: []
   camel-context:
@@ -336,7 +359,7 @@ artifacts:
     artifactId: camel-context
     version: 2.23.0
     schemes:
-    - context
+    - id: context
     languages: []
     dataformats: []
   camel-couchbase:
@@ -344,7 +367,7 @@ artifacts:
     artifactId: camel-couchbase
     version: 2.23.0
     schemes:
-    - couchbase
+    - id: couchbase
     languages: []
     dataformats: []
   camel-couchdb:
@@ -352,7 +375,7 @@ artifacts:
     artifactId: camel-couchdb
     version: 2.23.0
     schemes:
-    - couchdb
+    - id: couchdb
     languages: []
     dataformats: []
   camel-cassandraql:
@@ -360,7 +383,7 @@ artifacts:
     artifactId: camel-cassandraql
     version: 2.23.0
     schemes:
-    - cql
+    - id: cql
     languages: []
     dataformats: []
   camel-crypto:
@@ -368,7 +391,7 @@ artifacts:
     artifactId: camel-crypto
     version: 2.23.0
     schemes:
-    - crypto
+    - id: crypto
     languages: []
     dataformats:
     - crypto
@@ -378,7 +401,7 @@ artifacts:
     artifactId: camel-crypto-cms
     version: 2.23.0
     schemes:
-    - crypto-cms
+    - id: crypto-cms
     languages: []
     dataformats: []
   camel-cxf:
@@ -386,8 +409,10 @@ artifacts:
     artifactId: camel-cxf
     version: 2.23.0
     schemes:
-    - cxf
-    - cxfrs
+    - id: cxf
+      http: true
+    - id: cxfrs
+      http: true
     languages: []
     dataformats: []
   camel-digitalocean:
@@ -395,7 +420,7 @@ artifacts:
     artifactId: camel-digitalocean
     version: 2.23.0
     schemes:
-    - digitalocean
+    - id: digitalocean
     languages: []
     dataformats: []
   camel-disruptor:
@@ -403,8 +428,8 @@ artifacts:
     artifactId: camel-disruptor
     version: 2.23.0
     schemes:
-    - disruptor
-    - disruptor-vm
+    - id: disruptor
+    - id: disruptor-vm
     languages: []
     dataformats: []
   camel-dns:
@@ -412,7 +437,7 @@ artifacts:
     artifactId: camel-dns
     version: 2.23.0
     schemes:
-    - dns
+    - id: dns
     languages: []
     dataformats: []
   camel-docker:
@@ -420,7 +445,7 @@ artifacts:
     artifactId: camel-docker
     version: 2.23.0
     schemes:
-    - docker
+    - id: docker
     languages: []
     dataformats: []
   camel-dozer:
@@ -428,7 +453,7 @@ artifacts:
     artifactId: camel-dozer
     version: 2.23.0
     schemes:
-    - dozer
+    - id: dozer
     languages: []
     dataformats: []
   camel-drill:
@@ -436,7 +461,7 @@ artifacts:
     artifactId: camel-drill
     version: 2.23.0
     schemes:
-    - drill
+    - id: drill
     languages: []
     dataformats: []
   camel-dropbox:
@@ -444,7 +469,7 @@ artifacts:
     artifactId: camel-dropbox
     version: 2.23.0
     schemes:
-    - dropbox
+    - id: dropbox
     languages: []
     dataformats: []
   camel-ehcache:
@@ -452,7 +477,7 @@ artifacts:
     artifactId: camel-ehcache
     version: 2.23.0
     schemes:
-    - ehcache
+    - id: ehcache
     languages: []
     dataformats: []
   camel-ejb:
@@ -460,7 +485,7 @@ artifacts:
     artifactId: camel-ejb
     version: 2.23.0
     schemes:
-    - ejb
+    - id: ejb
     languages: []
     dataformats: []
   camel-elasticsearch:
@@ -468,7 +493,7 @@ artifacts:
     artifactId: camel-elasticsearch
     version: 2.23.0
     schemes:
-    - elasticsearch
+    - id: elasticsearch
     languages: []
     dataformats: []
   camel-elasticsearch-rest:
@@ -476,7 +501,7 @@ artifacts:
     artifactId: camel-elasticsearch-rest
     version: 2.23.0
     schemes:
-    - elasticsearch-rest
+    - id: elasticsearch-rest
     languages: []
     dataformats: []
   camel-elasticsearch5:
@@ -484,7 +509,7 @@ artifacts:
     artifactId: camel-elasticsearch5
     version: 2.23.0
     schemes:
-    - elasticsearch5
+    - id: elasticsearch5
     languages: []
     dataformats: []
   camel-elsql:
@@ -492,7 +517,7 @@ artifacts:
     artifactId: camel-elsql
     version: 2.23.0
     schemes:
-    - elsql
+    - id: elsql
     languages: []
     dataformats: []
   camel-etcd:
@@ -500,7 +525,7 @@ artifacts:
     artifactId: camel-etcd
     version: 2.23.0
     schemes:
-    - etcd
+    - id: etcd
     languages: []
     dataformats: []
   camel-eventadmin:
@@ -508,7 +533,7 @@ artifacts:
     artifactId: camel-eventadmin
     version: 2.23.0
     schemes:
-    - eventadmin
+    - id: eventadmin
     languages: []
     dataformats: []
   camel-exec:
@@ -516,7 +541,7 @@ artifacts:
     artifactId: camel-exec
     version: 2.23.0
     schemes:
-    - exec
+    - id: exec
     languages: []
     dataformats: []
   camel-facebook:
@@ -524,7 +549,7 @@ artifacts:
     artifactId: camel-facebook
     version: 2.23.0
     schemes:
-    - facebook
+    - id: facebook
     languages: []
     dataformats: []
   camel-fhir:
@@ -532,7 +557,7 @@ artifacts:
     artifactId: camel-fhir
     version: 2.23.0
     schemes:
-    - fhir
+    - id: fhir
     languages: []
     dataformats:
     - fhirJson
@@ -542,7 +567,7 @@ artifacts:
     artifactId: camel-flatpack
     version: 2.23.0
     schemes:
-    - flatpack
+    - id: flatpack
     languages: []
     dataformats:
     - flatpack
@@ -551,7 +576,7 @@ artifacts:
     artifactId: camel-flink
     version: 2.23.0
     schemes:
-    - flink
+    - id: flink
     languages: []
     dataformats: []
   camel-fop:
@@ -559,7 +584,7 @@ artifacts:
     artifactId: camel-fop
     version: 2.23.0
     schemes:
-    - fop
+    - id: fop
     languages: []
     dataformats: []
   camel-freemarker:
@@ -567,7 +592,7 @@ artifacts:
     artifactId: camel-freemarker
     version: 2.23.0
     schemes:
-    - freemarker
+    - id: freemarker
     languages: []
     dataformats: []
   camel-ftp:
@@ -575,9 +600,9 @@ artifacts:
     artifactId: camel-ftp
     version: 2.23.0
     schemes:
-    - ftp
-    - ftps
-    - sftp
+    - id: ftp
+    - id: ftps
+    - id: sftp
     languages: []
     dataformats: []
   camel-ganglia:
@@ -585,7 +610,7 @@ artifacts:
     artifactId: camel-ganglia
     version: 2.23.0
     schemes:
-    - ganglia
+    - id: ganglia
     languages: []
     dataformats: []
   camel-geocoder:
@@ -593,7 +618,7 @@ artifacts:
     artifactId: camel-geocoder
     version: 2.23.0
     schemes:
-    - geocoder
+    - id: geocoder
     languages: []
     dataformats: []
   camel-git:
@@ -601,7 +626,7 @@ artifacts:
     artifactId: camel-git
     version: 2.23.0
     schemes:
-    - git
+    - id: git
     languages: []
     dataformats: []
   camel-github:
@@ -609,7 +634,7 @@ artifacts:
     artifactId: camel-github
     version: 2.23.0
     schemes:
-    - github
+    - id: github
     languages: []
     dataformats: []
   camel-google-bigquery:
@@ -617,7 +642,7 @@ artifacts:
     artifactId: camel-google-bigquery
     version: 2.23.0
     schemes:
-    - google-bigquery
+    - id: google-bigquery
     languages: []
     dataformats: []
   camel-google-calendar:
@@ -625,8 +650,8 @@ artifacts:
     artifactId: camel-google-calendar
     version: 2.23.0
     schemes:
-    - google-calendar
-    - google-calendar-stream
+    - id: google-calendar
+    - id: google-calendar-stream
     languages: []
     dataformats: []
   camel-google-drive:
@@ -634,7 +659,7 @@ artifacts:
     artifactId: camel-google-drive
     version: 2.23.0
     schemes:
-    - google-drive
+    - id: google-drive
     languages: []
     dataformats: []
   camel-google-mail:
@@ -642,8 +667,8 @@ artifacts:
     artifactId: camel-google-mail
     version: 2.23.0
     schemes:
-    - google-mail
-    - google-mail-stream
+    - id: google-mail
+    - id: google-mail-stream
     languages: []
     dataformats: []
   camel-google-pubsub:
@@ -651,7 +676,7 @@ artifacts:
     artifactId: camel-google-pubsub
     version: 2.23.0
     schemes:
-    - google-pubsub
+    - id: google-pubsub
     languages: []
     dataformats: []
   camel-google-sheets:
@@ -659,8 +684,8 @@ artifacts:
     artifactId: camel-google-sheets
     version: 2.23.0
     schemes:
-    - google-sheets
-    - google-sheets-stream
+    - id: google-sheets
+    - id: google-sheets-stream
     languages: []
     dataformats: []
   camel-gora:
@@ -668,7 +693,7 @@ artifacts:
     artifactId: camel-gora
     version: 2.23.0
     schemes:
-    - gora
+    - id: gora
     languages: []
     dataformats: []
   camel-grape:
@@ -676,7 +701,7 @@ artifacts:
     artifactId: camel-grape
     version: 2.23.0
     schemes:
-    - grape
+    - id: grape
     languages: []
     dataformats: []
   camel-grpc:
@@ -684,7 +709,8 @@ artifacts:
     artifactId: camel-grpc
     version: 2.23.0
     schemes:
-    - grpc
+    - id: grpc
+      http: true
     languages: []
     dataformats: []
   camel-guava-eventbus:
@@ -692,7 +718,7 @@ artifacts:
     artifactId: camel-guava-eventbus
     version: 2.23.0
     schemes:
-    - guava-eventbus
+    - id: guava-eventbus
     languages: []
     dataformats: []
   camel-hazelcast:
@@ -700,17 +726,17 @@ artifacts:
     artifactId: camel-hazelcast
     version: 2.23.0
     schemes:
-    - hazelcast-atomicvalue
-    - hazelcast-instance
-    - hazelcast-list
-    - hazelcast-map
-    - hazelcast-multimap
-    - hazelcast-queue
-    - hazelcast-replicatedmap
-    - hazelcast-ringbuffer
-    - hazelcast-seda
-    - hazelcast-set
-    - hazelcast-topic
+    - id: hazelcast-atomicvalue
+    - id: hazelcast-instance
+    - id: hazelcast-list
+    - id: hazelcast-map
+    - id: hazelcast-multimap
+    - id: hazelcast-queue
+    - id: hazelcast-replicatedmap
+    - id: hazelcast-ringbuffer
+    - id: hazelcast-seda
+    - id: hazelcast-set
+    - id: hazelcast-topic
     languages: []
     dataformats: []
   camel-hbase:
@@ -718,7 +744,7 @@ artifacts:
     artifactId: camel-hbase
     version: 2.23.0
     schemes:
-    - hbase
+    - id: hbase
     languages: []
     dataformats: []
   camel-hdfs:
@@ -726,7 +752,7 @@ artifacts:
     artifactId: camel-hdfs
     version: 2.23.0
     schemes:
-    - hdfs
+    - id: hdfs
     languages: []
     dataformats: []
   camel-hdfs2:
@@ -734,7 +760,7 @@ artifacts:
     artifactId: camel-hdfs2
     version: 2.23.0
     schemes:
-    - hdfs2
+    - id: hdfs2
     languages: []
     dataformats: []
   camel-hipchat:
@@ -742,7 +768,7 @@ artifacts:
     artifactId: camel-hipchat
     version: 2.23.0
     schemes:
-    - hipchat
+    - id: hipchat
     languages: []
     dataformats: []
   camel-http:
@@ -750,8 +776,8 @@ artifacts:
     artifactId: camel-http
     version: 2.23.0
     schemes:
-    - http
-    - https
+    - id: http
+    - id: https
     languages: []
     dataformats: []
   camel-http4:
@@ -759,8 +785,8 @@ artifacts:
     artifactId: camel-http4
     version: 2.23.0
     schemes:
-    - http4
-    - https4
+    - id: http4
+    - id: https4
     languages: []
     dataformats: []
   camel-ibatis:
@@ -768,7 +794,7 @@ artifacts:
     artifactId: camel-ibatis
     version: 2.23.0
     schemes:
-    - ibatis
+    - id: ibatis
     languages: []
     dataformats: []
   camel-iec60870:
@@ -776,8 +802,8 @@ artifacts:
     artifactId: camel-iec60870
     version: 2.23.0
     schemes:
-    - iec60870-client
-    - iec60870-server
+    - id: iec60870-client
+    - id: iec60870-server
     languages: []
     dataformats: []
   camel-ignite:
@@ -785,13 +811,13 @@ artifacts:
     artifactId: camel-ignite
     version: 2.23.0
     schemes:
-    - ignite-cache
-    - ignite-compute
-    - ignite-events
-    - ignite-idgen
-    - ignite-messaging
-    - ignite-queue
-    - ignite-set
+    - id: ignite-cache
+    - id: ignite-compute
+    - id: ignite-events
+    - id: ignite-idgen
+    - id: ignite-messaging
+    - id: ignite-queue
+    - id: ignite-set
     languages: []
     dataformats: []
   camel-mail:
@@ -799,12 +825,12 @@ artifacts:
     artifactId: camel-mail
     version: 2.23.0
     schemes:
-    - imap
-    - imaps
-    - pop3
-    - pop3s
-    - smtp
-    - smtps
+    - id: imap
+    - id: imaps
+    - id: pop3
+    - id: pop3s
+    - id: smtp
+    - id: smtps
     languages: []
     dataformats:
     - mime-multipart
@@ -813,7 +839,7 @@ artifacts:
     artifactId: camel-infinispan
     version: 2.23.0
     schemes:
-    - infinispan
+    - id: infinispan
     languages: []
     dataformats: []
   camel-influxdb:
@@ -821,7 +847,7 @@ artifacts:
     artifactId: camel-influxdb
     version: 2.23.0
     schemes:
-    - influxdb
+    - id: influxdb
     languages: []
     dataformats: []
   camel-ipfs:
@@ -829,7 +855,7 @@ artifacts:
     artifactId: camel-ipfs
     version: 2.23.0
     schemes:
-    - ipfs
+    - id: ipfs
     languages: []
     dataformats: []
   camel-irc:
@@ -837,7 +863,7 @@ artifacts:
     artifactId: camel-irc
     version: 2.23.0
     schemes:
-    - irc
+    - id: irc
     languages: []
     dataformats: []
   camel-ironmq:
@@ -845,7 +871,7 @@ artifacts:
     artifactId: camel-ironmq
     version: 2.23.0
     schemes:
-    - ironmq
+    - id: ironmq
     languages: []
     dataformats: []
   camel-javaspace:
@@ -853,7 +879,7 @@ artifacts:
     artifactId: camel-javaspace
     version: 2.23.0
     schemes:
-    - javaspace
+    - id: javaspace
     languages: []
     dataformats: []
   camel-jbpm:
@@ -861,7 +887,7 @@ artifacts:
     artifactId: camel-jbpm
     version: 2.23.0
     schemes:
-    - jbpm
+    - id: jbpm
     languages: []
     dataformats: []
   camel-jcache:
@@ -869,7 +895,7 @@ artifacts:
     artifactId: camel-jcache
     version: 2.23.0
     schemes:
-    - jcache
+    - id: jcache
     languages: []
     dataformats: []
   camel-jclouds:
@@ -877,7 +903,7 @@ artifacts:
     artifactId: camel-jclouds
     version: 2.23.0
     schemes:
-    - jclouds
+    - id: jclouds
     languages: []
     dataformats: []
   camel-jcr:
@@ -885,7 +911,7 @@ artifacts:
     artifactId: camel-jcr
     version: 2.23.0
     schemes:
-    - jcr
+    - id: jcr
     languages: []
     dataformats: []
   camel-jdbc:
@@ -893,7 +919,7 @@ artifacts:
     artifactId: camel-jdbc
     version: 2.23.0
     schemes:
-    - jdbc
+    - id: jdbc
     languages: []
     dataformats: []
   camel-jetty9:
@@ -901,7 +927,8 @@ artifacts:
     artifactId: camel-jetty9
     version: 2.23.0
     schemes:
-    - jetty
+    - id: jetty
+      http: true
     languages: []
     dataformats: []
   camel-jgroups:
@@ -909,7 +936,7 @@ artifacts:
     artifactId: camel-jgroups
     version: 2.23.0
     schemes:
-    - jgroups
+    - id: jgroups
     languages: []
     dataformats: []
   camel-jing:
@@ -917,7 +944,7 @@ artifacts:
     artifactId: camel-jing
     version: 2.23.0
     schemes:
-    - jing
+    - id: jing
     languages: []
     dataformats: []
   camel-jira:
@@ -925,7 +952,7 @@ artifacts:
     artifactId: camel-jira
     version: 2.23.0
     schemes:
-    - jira
+    - id: jira
     languages: []
     dataformats: []
   camel-jms:
@@ -933,7 +960,7 @@ artifacts:
     artifactId: camel-jms
     version: 2.23.0
     schemes:
-    - jms
+    - id: jms
     languages: []
     dataformats: []
   camel-jmx:
@@ -941,7 +968,7 @@ artifacts:
     artifactId: camel-jmx
     version: 2.23.0
     schemes:
-    - jmx
+    - id: jmx
     languages: []
     dataformats: []
   camel-jolt:
@@ -949,7 +976,7 @@ artifacts:
     artifactId: camel-jolt
     version: 2.23.0
     schemes:
-    - jolt
+    - id: jolt
     languages: []
     dataformats: []
   camel-jpa:
@@ -957,7 +984,7 @@ artifacts:
     artifactId: camel-jpa
     version: 2.23.0
     schemes:
-    - jpa
+    - id: jpa
     languages: []
     dataformats: []
   camel-json-validator:
@@ -965,7 +992,7 @@ artifacts:
     artifactId: camel-json-validator
     version: 2.23.0
     schemes:
-    - json-validator
+    - id: json-validator
     languages: []
     dataformats: []
   camel-jt400:
@@ -973,7 +1000,7 @@ artifacts:
     artifactId: camel-jt400
     version: 2.23.0
     schemes:
-    - jt400
+    - id: jt400
     languages: []
     dataformats: []
   camel-kafka:
@@ -981,7 +1008,7 @@ artifacts:
     artifactId: camel-kafka
     version: 2.23.0
     schemes:
-    - kafka
+    - id: kafka
     languages: []
     dataformats: []
   camel-kestrel:
@@ -989,7 +1016,7 @@ artifacts:
     artifactId: camel-kestrel
     version: 2.23.0
     schemes:
-    - kestrel
+    - id: kestrel
     languages: []
     dataformats: []
   camel-krati:
@@ -997,7 +1024,7 @@ artifacts:
     artifactId: camel-krati
     version: 2.23.0
     schemes:
-    - krati
+    - id: krati
     languages: []
     dataformats: []
   camel-kubernetes:
@@ -1005,23 +1032,23 @@ artifacts:
     artifactId: camel-kubernetes
     version: 2.23.0
     schemes:
-    - kubernetes
-    - kubernetes-config-maps
-    - kubernetes-deployments
-    - kubernetes-hpa
-    - kubernetes-job
-    - kubernetes-namespaces
-    - kubernetes-nodes
-    - kubernetes-persistent-volumes
-    - kubernetes-persistent-volumes-claims
-    - kubernetes-pods
-    - kubernetes-replication-controllers
-    - kubernetes-resources-quota
-    - kubernetes-secrets
-    - kubernetes-service-accounts
-    - kubernetes-services
-    - openshift-build-configs
-    - openshift-builds
+    - id: kubernetes
+    - id: kubernetes-config-maps
+    - id: kubernetes-deployments
+    - id: kubernetes-hpa
+    - id: kubernetes-job
+    - id: kubernetes-namespaces
+    - id: kubernetes-nodes
+    - id: kubernetes-persistent-volumes
+    - id: kubernetes-persistent-volumes-claims
+    - id: kubernetes-pods
+    - id: kubernetes-replication-controllers
+    - id: kubernetes-resources-quota
+    - id: kubernetes-secrets
+    - id: kubernetes-service-accounts
+    - id: kubernetes-services
+    - id: openshift-build-configs
+    - id: openshift-builds
     languages: []
     dataformats: []
   camel-ldap:
@@ -1029,7 +1056,7 @@ artifacts:
     artifactId: camel-ldap
     version: 2.23.0
     schemes:
-    - ldap
+    - id: ldap
     languages: []
     dataformats: []
   camel-ldif:
@@ -1037,7 +1064,7 @@ artifacts:
     artifactId: camel-ldif
     version: 2.23.0
     schemes:
-    - ldif
+    - id: ldif
     languages: []
     dataformats: []
   camel-linkedin:
@@ -1045,7 +1072,7 @@ artifacts:
     artifactId: camel-linkedin
     version: 2.23.0
     schemes:
-    - linkedin
+    - id: linkedin
     languages: []
     dataformats: []
   camel-printer:
@@ -1053,7 +1080,7 @@ artifacts:
     artifactId: camel-printer
     version: 2.23.0
     schemes:
-    - lpr
+    - id: lpr
     languages: []
     dataformats: []
   camel-lucene:
@@ -1061,7 +1088,7 @@ artifacts:
     artifactId: camel-lucene
     version: 2.23.0
     schemes:
-    - lucene
+    - id: lucene
     languages: []
     dataformats: []
   camel-lumberjack:
@@ -1069,7 +1096,7 @@ artifacts:
     artifactId: camel-lumberjack
     version: 2.23.0
     schemes:
-    - lumberjack
+    - id: lumberjack
     languages: []
     dataformats: []
   camel-master:
@@ -1077,7 +1104,7 @@ artifacts:
     artifactId: camel-master
     version: 2.23.0
     schemes:
-    - master
+    - id: master
     languages: []
     dataformats: []
   camel-metrics:
@@ -1085,7 +1112,7 @@ artifacts:
     artifactId: camel-metrics
     version: 2.23.0
     schemes:
-    - metrics
+    - id: metrics
     languages: []
     dataformats: []
   camel-micrometer:
@@ -1093,7 +1120,7 @@ artifacts:
     artifactId: camel-micrometer
     version: 2.23.0
     schemes:
-    - micrometer
+    - id: micrometer
     languages: []
     dataformats: []
   camel-milo:
@@ -1101,8 +1128,8 @@ artifacts:
     artifactId: camel-milo
     version: 2.23.0
     schemes:
-    - milo-client
-    - milo-server
+    - id: milo-client
+    - id: milo-server
     languages: []
     dataformats: []
   camel-mina:
@@ -1110,7 +1137,7 @@ artifacts:
     artifactId: camel-mina
     version: 2.23.0
     schemes:
-    - mina
+    - id: mina
     languages: []
     dataformats: []
   camel-mina2:
@@ -1118,7 +1145,7 @@ artifacts:
     artifactId: camel-mina2
     version: 2.23.0
     schemes:
-    - mina2
+    - id: mina2
     languages: []
     dataformats: []
   camel-mllp:
@@ -1126,7 +1153,7 @@ artifacts:
     artifactId: camel-mllp
     version: 2.23.0
     schemes:
-    - mllp
+    - id: mllp
     languages: []
     dataformats: []
   camel-mongodb:
@@ -1134,7 +1161,7 @@ artifacts:
     artifactId: camel-mongodb
     version: 2.23.0
     schemes:
-    - mongodb
+    - id: mongodb
     languages: []
     dataformats: []
   camel-mongodb-gridfs:
@@ -1142,7 +1169,7 @@ artifacts:
     artifactId: camel-mongodb-gridfs
     version: 2.23.0
     schemes:
-    - mongodb-gridfs
+    - id: mongodb-gridfs
     languages: []
     dataformats: []
   camel-mongodb3:
@@ -1150,7 +1177,7 @@ artifacts:
     artifactId: camel-mongodb3
     version: 2.23.0
     schemes:
-    - mongodb3
+    - id: mongodb3
     languages: []
     dataformats: []
   camel-mqtt:
@@ -1158,7 +1185,7 @@ artifacts:
     artifactId: camel-mqtt
     version: 2.23.0
     schemes:
-    - mqtt
+    - id: mqtt
     languages: []
     dataformats: []
   camel-msv:
@@ -1166,7 +1193,7 @@ artifacts:
     artifactId: camel-msv
     version: 2.23.0
     schemes:
-    - msv
+    - id: msv
     languages: []
     dataformats: []
   camel-mustache:
@@ -1174,7 +1201,7 @@ artifacts:
     artifactId: camel-mustache
     version: 2.23.0
     schemes:
-    - mustache
+    - id: mustache
     languages: []
     dataformats: []
   camel-mvel:
@@ -1182,7 +1209,7 @@ artifacts:
     artifactId: camel-mvel
     version: 2.23.0
     schemes:
-    - mvel
+    - id: mvel
     languages:
     - mvel
     dataformats: []
@@ -1191,8 +1218,8 @@ artifacts:
     artifactId: camel-mybatis
     version: 2.23.0
     schemes:
-    - mybatis
-    - mybatis-bean
+    - id: mybatis
+    - id: mybatis-bean
     languages: []
     dataformats: []
   camel-nagios:
@@ -1200,7 +1227,7 @@ artifacts:
     artifactId: camel-nagios
     version: 2.23.0
     schemes:
-    - nagios
+    - id: nagios
     languages: []
     dataformats: []
   camel-nats:
@@ -1208,7 +1235,7 @@ artifacts:
     artifactId: camel-nats
     version: 2.23.0
     schemes:
-    - nats
+    - id: nats
     languages: []
     dataformats: []
   camel-netty:
@@ -1216,7 +1243,7 @@ artifacts:
     artifactId: camel-netty
     version: 2.23.0
     schemes:
-    - netty
+    - id: netty
     languages: []
     dataformats: []
   camel-netty-http:
@@ -1224,7 +1251,8 @@ artifacts:
     artifactId: camel-netty-http
     version: 2.23.0
     schemes:
-    - netty-http
+    - id: netty-http
+      http: true
     languages: []
     dataformats: []
   camel-netty4:
@@ -1232,7 +1260,7 @@ artifacts:
     artifactId: camel-netty4
     version: 2.23.0
     schemes:
-    - netty4
+    - id: netty4
     languages: []
     dataformats: []
   camel-netty4-http:
@@ -1240,7 +1268,8 @@ artifacts:
     artifactId: camel-netty4-http
     version: 2.23.0
     schemes:
-    - netty4-http
+    - id: netty4-http
+      http: true
     languages: []
     dataformats: []
   camel-nsq:
@@ -1248,7 +1277,7 @@ artifacts:
     artifactId: camel-nsq
     version: 2.23.0
     schemes:
-    - nsq
+    - id: nsq
     languages: []
     dataformats: []
   camel-olingo2:
@@ -1256,7 +1285,7 @@ artifacts:
     artifactId: camel-olingo2
     version: 2.23.0
     schemes:
-    - olingo2
+    - id: olingo2
     languages: []
     dataformats: []
   camel-olingo4:
@@ -1264,7 +1293,7 @@ artifacts:
     artifactId: camel-olingo4
     version: 2.23.0
     schemes:
-    - olingo4
+    - id: olingo4
     languages: []
     dataformats: []
   camel-openshift:
@@ -1272,7 +1301,7 @@ artifacts:
     artifactId: camel-openshift
     version: 2.23.0
     schemes:
-    - openshift
+    - id: openshift
     languages: []
     dataformats: []
   camel-openstack:
@@ -1280,12 +1309,12 @@ artifacts:
     artifactId: camel-openstack
     version: 2.23.0
     schemes:
-    - openstack-cinder
-    - openstack-glance
-    - openstack-keystone
-    - openstack-neutron
-    - openstack-nova
-    - openstack-swift
+    - id: openstack-cinder
+    - id: openstack-glance
+    - id: openstack-keystone
+    - id: openstack-neutron
+    - id: openstack-nova
+    - id: openstack-swift
     languages: []
     dataformats: []
   camel-optaplanner:
@@ -1293,7 +1322,7 @@ artifacts:
     artifactId: camel-optaplanner
     version: 2.23.0
     schemes:
-    - optaplanner
+    - id: optaplanner
     languages: []
     dataformats: []
   camel-paho:
@@ -1301,7 +1330,7 @@ artifacts:
     artifactId: camel-paho
     version: 2.23.0
     schemes:
-    - paho
+    - id: paho
     languages: []
     dataformats: []
   camel-paxlogging:
@@ -1309,7 +1338,7 @@ artifacts:
     artifactId: camel-paxlogging
     version: 2.23.0
     schemes:
-    - paxlogging
+    - id: paxlogging
     languages: []
     dataformats: []
   camel-pdf:
@@ -1317,7 +1346,7 @@ artifacts:
     artifactId: camel-pdf
     version: 2.23.0
     schemes:
-    - pdf
+    - id: pdf
     languages: []
     dataformats: []
   camel-pgevent:
@@ -1325,7 +1354,7 @@ artifacts:
     artifactId: camel-pgevent
     version: 2.23.0
     schemes:
-    - pgevent
+    - id: pgevent
     languages: []
     dataformats: []
   camel-pubnub:
@@ -1333,7 +1362,7 @@ artifacts:
     artifactId: camel-pubnub
     version: 2.23.0
     schemes:
-    - pubnub
+    - id: pubnub
     languages: []
     dataformats: []
   camel-quartz:
@@ -1341,7 +1370,7 @@ artifacts:
     artifactId: camel-quartz
     version: 2.23.0
     schemes:
-    - quartz
+    - id: quartz
     languages: []
     dataformats: []
   camel-quartz2:
@@ -1349,7 +1378,7 @@ artifacts:
     artifactId: camel-quartz2
     version: 2.23.0
     schemes:
-    - quartz2
+    - id: quartz2
     languages: []
     dataformats: []
   camel-quickfix:
@@ -1357,7 +1386,7 @@ artifacts:
     artifactId: camel-quickfix
     version: 2.23.0
     schemes:
-    - quickfix
+    - id: quickfix
     languages: []
     dataformats: []
   camel-rabbitmq:
@@ -1365,7 +1394,7 @@ artifacts:
     artifactId: camel-rabbitmq
     version: 2.23.0
     schemes:
-    - rabbitmq
+    - id: rabbitmq
     languages: []
     dataformats: []
   camel-reactive-streams:
@@ -1373,7 +1402,7 @@ artifacts:
     artifactId: camel-reactive-streams
     version: 2.23.0
     schemes:
-    - reactive-streams
+    - id: reactive-streams
     languages: []
     dataformats: []
   camel-rest-swagger:
@@ -1381,7 +1410,7 @@ artifacts:
     artifactId: camel-rest-swagger
     version: 2.23.0
     schemes:
-    - rest-swagger
+    - id: rest-swagger
     languages: []
     dataformats: []
   camel-restlet:
@@ -1389,7 +1418,8 @@ artifacts:
     artifactId: camel-restlet
     version: 2.23.0
     schemes:
-    - restlet
+    - id: restlet
+      http: true
     languages: []
     dataformats: []
   camel-rmi:
@@ -1397,7 +1427,7 @@ artifacts:
     artifactId: camel-rmi
     version: 2.23.0
     schemes:
-    - rmi
+    - id: rmi
     languages: []
     dataformats: []
   camel-routebox:
@@ -1405,7 +1435,7 @@ artifacts:
     artifactId: camel-routebox
     version: 2.23.0
     schemes:
-    - routebox
+    - id: routebox
     languages: []
     dataformats: []
   camel-rss:
@@ -1413,7 +1443,7 @@ artifacts:
     artifactId: camel-rss
     version: 2.23.0
     schemes:
-    - rss
+    - id: rss
     languages: []
     dataformats:
     - rss
@@ -1422,7 +1452,7 @@ artifacts:
     artifactId: camel-salesforce
     version: 2.23.0
     schemes:
-    - salesforce
+    - id: salesforce
     languages: []
     dataformats: []
   camel-sap-netweaver:
@@ -1430,7 +1460,7 @@ artifacts:
     artifactId: camel-sap-netweaver
     version: 2.23.0
     schemes:
-    - sap-netweaver
+    - id: sap-netweaver
     languages: []
     dataformats: []
   camel-schematron:
@@ -1438,7 +1468,7 @@ artifacts:
     artifactId: camel-schematron
     version: 2.23.0
     schemes:
-    - schematron
+    - id: schematron
     languages: []
     dataformats: []
   camel-jsch:
@@ -1446,7 +1476,7 @@ artifacts:
     artifactId: camel-jsch
     version: 2.23.0
     schemes:
-    - scp
+    - id: scp
     languages: []
     dataformats: []
   camel-service:
@@ -1454,7 +1484,7 @@ artifacts:
     artifactId: camel-service
     version: 2.23.0
     schemes:
-    - service
+    - id: service
     languages: []
     dataformats: []
   camel-servicenow:
@@ -1462,7 +1492,7 @@ artifacts:
     artifactId: camel-servicenow
     version: 2.23.0
     schemes:
-    - servicenow
+    - id: servicenow
     languages: []
     dataformats: []
   camel-servlet:
@@ -1470,7 +1500,8 @@ artifacts:
     artifactId: camel-servlet
     version: 2.23.0
     schemes:
-    - servlet
+    - id: servlet
+      http: true
     languages: []
     dataformats: []
   camel-sip:
@@ -1478,8 +1509,8 @@ artifacts:
     artifactId: camel-sip
     version: 2.23.0
     schemes:
-    - sip
-    - sips
+    - id: sip
+    - id: sips
     languages: []
     dataformats: []
   camel-sjms:
@@ -1487,8 +1518,8 @@ artifacts:
     artifactId: camel-sjms
     version: 2.23.0
     schemes:
-    - sjms
-    - sjms-batch
+    - id: sjms
+    - id: sjms-batch
     languages: []
     dataformats: []
   camel-sjms2:
@@ -1496,7 +1527,7 @@ artifacts:
     artifactId: camel-sjms2
     version: 2.23.0
     schemes:
-    - sjms2
+    - id: sjms2
     languages: []
     dataformats: []
   camel-slack:
@@ -1504,7 +1535,7 @@ artifacts:
     artifactId: camel-slack
     version: 2.23.0
     schemes:
-    - slack
+    - id: slack
     languages: []
     dataformats: []
   camel-smpp:
@@ -1512,8 +1543,8 @@ artifacts:
     artifactId: camel-smpp
     version: 2.23.0
     schemes:
-    - smpp
-    - smpps
+    - id: smpp
+    - id: smpps
     languages: []
     dataformats: []
   camel-snmp:
@@ -1521,7 +1552,7 @@ artifacts:
     artifactId: camel-snmp
     version: 2.23.0
     schemes:
-    - snmp
+    - id: snmp
     languages: []
     dataformats: []
   camel-solr:
@@ -1529,9 +1560,9 @@ artifacts:
     artifactId: camel-solr
     version: 2.23.0
     schemes:
-    - solr
-    - solrs
-    - solrCloud
+    - id: solr
+    - id: solrCloud
+    - id: solrs
     languages: []
     dataformats: []
   camel-spark:
@@ -1539,7 +1570,7 @@ artifacts:
     artifactId: camel-spark
     version: 2.23.0
     schemes:
-    - spark
+    - id: spark
     languages: []
     dataformats: []
   camel-spark-rest:
@@ -1547,7 +1578,8 @@ artifacts:
     artifactId: camel-spark-rest
     version: 2.23.0
     schemes:
-    - spark-rest
+    - id: spark-rest
+      http: true
     languages: []
     dataformats: []
   camel-splunk:
@@ -1555,7 +1587,7 @@ artifacts:
     artifactId: camel-splunk
     version: 2.23.0
     schemes:
-    - splunk
+    - id: splunk
     languages: []
     dataformats: []
   camel-spring-batch:
@@ -1563,7 +1595,7 @@ artifacts:
     artifactId: camel-spring-batch
     version: 2.23.0
     schemes:
-    - spring-batch
+    - id: spring-batch
     languages: []
     dataformats: []
   camel-spring:
@@ -1571,7 +1603,7 @@ artifacts:
     artifactId: camel-spring
     version: 2.23.0
     schemes:
-    - spring-event
+    - id: spring-event
     languages:
     - spel
     dataformats: []
@@ -1580,7 +1612,7 @@ artifacts:
     artifactId: camel-spring-integration
     version: 2.23.0
     schemes:
-    - spring-integration
+    - id: spring-integration
     languages: []
     dataformats: []
   camel-spring-ldap:
@@ -1588,7 +1620,7 @@ artifacts:
     artifactId: camel-spring-ldap
     version: 2.23.0
     schemes:
-    - spring-ldap
+    - id: spring-ldap
     languages: []
     dataformats: []
   camel-spring-redis:
@@ -1596,7 +1628,7 @@ artifacts:
     artifactId: camel-spring-redis
     version: 2.23.0
     schemes:
-    - spring-redis
+    - id: spring-redis
     languages: []
     dataformats: []
   camel-spring-ws:
@@ -1604,7 +1636,8 @@ artifacts:
     artifactId: camel-spring-ws
     version: 2.23.0
     schemes:
-    - spring-ws
+    - id: spring-ws
+      http: true
     languages: []
     dataformats: []
   camel-sql:
@@ -1612,8 +1645,8 @@ artifacts:
     artifactId: camel-sql
     version: 2.23.0
     schemes:
-    - sql
-    - sql-stored
+    - id: sql
+    - id: sql-stored
     languages: []
     dataformats: []
   camel-ssh:
@@ -1621,7 +1654,7 @@ artifacts:
     artifactId: camel-ssh
     version: 2.23.0
     schemes:
-    - ssh
+    - id: ssh
     languages: []
     dataformats: []
   camel-stax:
@@ -1629,7 +1662,7 @@ artifacts:
     artifactId: camel-stax
     version: 2.23.0
     schemes:
-    - stax
+    - id: stax
     languages: []
     dataformats: []
   camel-stomp:
@@ -1637,7 +1670,7 @@ artifacts:
     artifactId: camel-stomp
     version: 2.23.0
     schemes:
-    - stomp
+    - id: stomp
     languages: []
     dataformats: []
   camel-stream:
@@ -1645,7 +1678,7 @@ artifacts:
     artifactId: camel-stream
     version: 2.23.0
     schemes:
-    - stream
+    - id: stream
     languages: []
     dataformats: []
   camel-stringtemplate:
@@ -1653,7 +1686,7 @@ artifacts:
     artifactId: camel-stringtemplate
     version: 2.23.0
     schemes:
-    - string-template
+    - id: string-template
     languages: []
     dataformats: []
   camel-telegram:
@@ -1661,7 +1694,7 @@ artifacts:
     artifactId: camel-telegram
     version: 2.23.0
     schemes:
-    - telegram
+    - id: telegram
     languages: []
     dataformats: []
   camel-thrift:
@@ -1669,7 +1702,7 @@ artifacts:
     artifactId: camel-thrift
     version: 2.23.0
     schemes:
-    - thrift
+    - id: thrift
     languages: []
     dataformats:
     - thrift
@@ -1678,7 +1711,7 @@ artifacts:
     artifactId: camel-tika
     version: 2.23.0
     schemes:
-    - tika
+    - id: tika
     languages: []
     dataformats: []
   camel-twilio:
@@ -1686,7 +1719,7 @@ artifacts:
     artifactId: camel-twilio
     version: 2.23.0
     schemes:
-    - twilio
+    - id: twilio
     languages: []
     dataformats: []
   camel-twitter:
@@ -1694,11 +1727,11 @@ artifacts:
     artifactId: camel-twitter
     version: 2.23.0
     schemes:
-    - twitter
-    - twitter-directmessage
-    - twitter-search
-    - twitter-streaming
-    - twitter-timeline
+    - id: twitter
+    - id: twitter-directmessage
+    - id: twitter-search
+    - id: twitter-streaming
+    - id: twitter-timeline
     languages: []
     dataformats: []
   camel-undertow:
@@ -1706,7 +1739,8 @@ artifacts:
     artifactId: camel-undertow
     version: 2.23.0
     schemes:
-    - undertow
+    - id: undertow
+      http: true
     languages: []
     dataformats: []
   camel-velocity:
@@ -1714,7 +1748,7 @@ artifacts:
     artifactId: camel-velocity
     version: 2.23.0
     schemes:
-    - velocity
+    - id: velocity
     languages: []
     dataformats: []
   camel-vertx:
@@ -1722,7 +1756,7 @@ artifacts:
     artifactId: camel-vertx
     version: 2.23.0
     schemes:
-    - vertx
+    - id: vertx
     languages: []
     dataformats: []
   camel-weather:
@@ -1730,7 +1764,7 @@ artifacts:
     artifactId: camel-weather
     version: 2.23.0
     schemes:
-    - weather
+    - id: weather
     languages: []
     dataformats: []
   camel-web3j:
@@ -1738,7 +1772,7 @@ artifacts:
     artifactId: camel-web3j
     version: 2.23.0
     schemes:
-    - web3j
+    - id: web3j
     languages: []
     dataformats: []
   camel-websocket:
@@ -1746,7 +1780,8 @@ artifacts:
     artifactId: camel-websocket
     version: 2.23.0
     schemes:
-    - websocket
+    - id: websocket
+      http: true
     languages: []
     dataformats: []
   camel-wordpress:
@@ -1754,7 +1789,7 @@ artifacts:
     artifactId: camel-wordpress
     version: 2.23.0
     schemes:
-    - wordpress
+    - id: wordpress
     languages: []
     dataformats: []
   camel-xchange:
@@ -1762,7 +1797,7 @@ artifacts:
     artifactId: camel-xchange
     version: 2.23.0
     schemes:
-    - xchange
+    - id: xchange
     languages: []
     dataformats: []
   camel-xmlrpc:
@@ -1770,7 +1805,7 @@ artifacts:
     artifactId: camel-xmlrpc
     version: 2.23.0
     schemes:
-    - xmlrpc
+    - id: xmlrpc
     languages: []
     dataformats:
     - xmlrpc
@@ -1779,7 +1814,7 @@ artifacts:
     artifactId: camel-xmlsecurity
     version: 2.23.0
     schemes:
-    - xmlsecurity
+    - id: xmlsecurity
     languages: []
     dataformats:
     - secureXML
@@ -1788,7 +1823,7 @@ artifacts:
     artifactId: camel-xmpp
     version: 2.23.0
     schemes:
-    - xmpp
+    - id: xmpp
     languages: []
     dataformats: []
   camel-saxon:
@@ -1796,7 +1831,7 @@ artifacts:
     artifactId: camel-saxon
     version: 2.23.0
     schemes:
-    - xquery
+    - id: xquery
     languages:
     - xquery
     dataformats: []
@@ -1805,7 +1840,7 @@ artifacts:
     artifactId: camel-yammer
     version: 2.23.0
     schemes:
-    - yammer
+    - id: yammer
     languages: []
     dataformats: []
   camel-yql:
@@ -1813,7 +1848,7 @@ artifacts:
     artifactId: camel-yql
     version: 2.23.0
     schemes:
-    - yql
+    - id: yql
     languages: []
     dataformats: []
   camel-zendesk:
@@ -1821,7 +1856,7 @@ artifacts:
     artifactId: camel-zendesk
     version: 2.23.0
     schemes:
-    - zendesk
+    - id: zendesk
     languages: []
     dataformats: []
   camel-zookeeper:
@@ -1829,7 +1864,7 @@ artifacts:
     artifactId: camel-zookeeper
     version: 2.23.0
     schemes:
-    - zookeeper
+    - id: zookeeper
     languages: []
     dataformats: []
   camel-zookeeper-master:
@@ -1837,7 +1872,7 @@ artifacts:
     artifactId: camel-zookeeper-master
     version: 2.23.0
     schemes:
-    - zookeeper-master
+    - id: zookeeper-master
     languages: []
     dataformats: []
   camel-juel:
