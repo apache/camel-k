@@ -1,0 +1,161 @@
+[[configuration]]
+= Configure Integrations
+
+Properties associated to an integration can be configured either using a ConfigMap/Secret or by setting using the "--property" flag, i.e.
+
+```
+kamel run --property my.message=test examples/props.js
+```
+
+==== Configure Integration Logging
+
+camel-k runtime uses log4j2 as logging framework and can be configured through integration properties.
+If you need to change the logging level of various loggers, you can do so by using the `logging.level` prefix:
+
+```
+logging.level.org.apache.camel = DEBUG
+```
+
+==== Configure Integration Components
+
+camel-k component can be configured programmatically inside an integration or using properties with the following syntax.
+
+```
+camel.component.${scheme}.${property} = ${value}
+```
+
+As example if you want to change the queue size of the seda component, you can use the following property:
+
+```
+camel.component.seda.queueSize = 10
+```
+
+=== Running Integrations in "Dev" Mode for Fast Feedback
+
+If you want to iterate quickly on an integration to have fast feedback on the code you're writing, you can use by running it in **"dev" mode**:
+
+```
+kamel run examples/Sample.java --dev
+```
+
+The `--dev` flag deploys immediately the integration and shows the integration logs in the console. You can then change the code and see
+the **changes automatically applied (instantly)** to the remote integration pod.
+
+The console follows automatically all redeploys of the integration.
+
+Here's an example of the output:
+
+```
+[nferraro@localhost camel-k]$ kamel run examples/Sample.java --dev
+integration "sample" created
+integration "sample" in phase Building
+integration "sample" in phase Deploying
+integration "sample" in phase Running
+[1] Monitoring pod sample-776db787c4-zjhfr[1] Starting the Java application using /opt/run-java/run-java.sh ...
+[1] exec java -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=9779:/opt/prometheus/prometheus-config.yml -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:+ExitOnOutOfMemoryError -cp .:/deployments/* org.apache.camel.k.jvm.Application
+[1] [INFO ] 2018-09-20 21:24:35.953 [main] Application - Routes: file:/etc/camel/conf/Sample.java
+[1] [INFO ] 2018-09-20 21:24:35.955 [main] Application - Language: java
+[1] [INFO ] 2018-09-20 21:24:35.956 [main] Application - Locations: file:/etc/camel/conf/application.properties
+[1] [INFO ] 2018-09-20 21:24:36.506 [main] DefaultCamelContext - Apache Camel 2.22.1 (CamelContext: camel-1) is starting
+[1] [INFO ] 2018-09-20 21:24:36.578 [main] ManagedManagementStrategy - JMX is enabled
+[1] [INFO ] 2018-09-20 21:24:36.680 [main] DefaultTypeConverter - Type converters loaded (core: 195, classpath: 0)
+[1] [INFO ] 2018-09-20 21:24:36.777 [main] DefaultCamelContext - StreamCaching is not in use. If using streams then its recommended to enable stream caching. See more details at http://camel.apache.org/stream-caching.html
+[1] [INFO ] 2018-09-20 21:24:36.817 [main] DefaultCamelContext - Route: route1 started and consuming from: timer://tick
+[1] [INFO ] 2018-09-20 21:24:36.818 [main] DefaultCamelContext - Total 1 routes, of which 1 are started
+[1] [INFO ] 2018-09-20 21:24:36.820 [main] DefaultCamelContext - Apache Camel 2.22.1 (CamelContext: camel-1) started in 0.314 seconds
+
+```
+
+=== Dependencies and Component Resolution
+
+Camel components used in an integration are automatically resolved. For example, take the following integration:
+
+```
+from("imap://admin@myserver.com")
+  .to("seda:output")
+```
+
+Since the integration is using the **"imap:" prefix**, Camel K is able to **automatically add the "camel-mail" component** to the list of required dependencies.
+This will be transparent to the user, that will just see the integration running.
+
+Automatic resolution is also a nice feature in `--dev` mode, because you are allowed to add all components you need without exiting the dev loop.
+
+You can also use the `-d` flag to pass additional explicit dependencies to the Camel client tool:
+
+```
+kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel-mina2 Integration.java
+```
+
+=== Not Just Java
+
+Camel K supports multiple languages for writing integrations:
+
+.Languages
+[options="header"]
+|=======================
+| Language			| Description
+| Java				| Both integrations in source `.java` files or compiled `.class` file can be run.
+| XML				| Integrations written in plain XML DSL are supported (Spring XML or Blueprint not supported).
+| Groovy			| Groovy `.groovy` files are supported (experimental).
+| JavaScript        | JavaScript `.js` files are supported (experimental).
+| Kotlin			| Kotlin Script `.kts` files are supported (experimental).
+|=======================
+
+More information about supported languages is provided in the link:docs/languages.adoc[languages guide].
+
+Integrations written in different languages are provided in the link:/examples[examples] directory.
+
+An example of integration written in JavaScript is the link:/examples/dns.js[/examples/dns.js] integration.
+Here's the content:
+
+```
+// Lookup every second the 'www.google.com' domain name and log the output
+from('timer:dns?period=1s')
+    .routeId('dns')
+    .setHeader('dns.domain')
+        .constant('www.google.com')
+    .to('dns:ip')
+    .to('log:dns');
+```
+
+To run it, you need just to execute:
+
+```
+kamel run examples/dns.js
+```
+
+=== Traits
+
+The details of how the integration is mapped into Kubernetes resources can be *customized using traits*.
+More information is provided in the link:docs/traits.adoc[traits section].
+
+=== Monitoring the Status
+
+Camel K integrations follow a lifecycle composed of several steps before getting into the `Running` state.
+You can check the status of all integrations by executing the following command:
+
+```
+kamel get
+```
+
+[[contributing]]
+== Contributing
+
+We love contributions and we want to make Camel K great!
+
+Contributing is easy, just take a look at our link:/docs/developers.adoc[developer's guide].
+
+[[uninstalling]]
+== Uninstalling
+
+If you really need to, it is possible to completely uninstall Camel K from OpenShift or Kubernetes with the following command, using the "oc" or "kubectl" tool:
+
+```
+# kubectl on plain Kubernetes
+oc delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
+```
+
+[[licensing]]
+== Licensing
+
+This software is licensed under the terms you may find in the file named LICENSE in this directory.
