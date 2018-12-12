@@ -19,10 +19,6 @@ package cmd
 
 import (
 	"context"
-	"time"
-
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -62,9 +58,6 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 					return err
 				}
 			}
-
-			// Let's use a fast refresh period when running with the CLI
-			k8sclient.ResetCacheEvery(2 * time.Second)
 
 			// Initialize the Kubernetes client to allow using the operator-sdk
 			return kubernetes.InitKubeClient(options.KubeConfig)
