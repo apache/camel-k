@@ -17,22 +17,17 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.apache.camel.k</groupId>
     <artifactId>camel-k-runtime-parent</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-
         <camel.version>2.23.0</camel.version>
         <junit.version>4.12</junit.version>
         <junit-jupiter.version>5.3.2</junit-jupiter.version>
@@ -49,11 +44,12 @@
         <spock.version>1.2-groovy-2.5</spock.version>
         <jackson.version>2.9.7</jackson.version>
         <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
-
         <gmavenplus-plugin.version>1.6.1</gmavenplus-plugin.version>
         <fabric8-maven-plugin.version>3.5.40</fabric8-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+        <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
+        <directory-maven-plugin.version>0.3.1</directory-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -79,7 +75,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -96,7 +92,7 @@
             </plugins>
         </pluginManagement>
     </build>
-
+    
     <modules>
         <module>jvm</module>
         <module>groovy</module>
@@ -108,4 +104,42 @@
         <module>camel-knative</module>
     </modules>
 
+    <profiles>
+        <profile>
+            <id>deps</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <defaultGoal>initialize versions:display-dependency-updates</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.commonjava.maven.plugins</groupId>
+                        <artifactId>directory-maven-plugin</artifactId>
+                        <version>${directory-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>directories</id>
+                                <goals>
+                                    <goal>highest-basedir</goal>
+                                </goals>
+                                <phase>initialize</phase>
+                                <configuration>
+                                    <property>camel-k.project.root</property>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                        <version>${versions-maven-plugin.version}</version>
+                        <configuration>
+                            <rulesUri>file:///${camel-k.project.root}/.maven-versions-rules.xml</rulesUri>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
