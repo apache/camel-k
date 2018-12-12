@@ -87,7 +87,7 @@ func installKnative(namespace string) error {
 
 // Platform installs the platform custom resource
 func Platform(namespace string, registry string, organization string, pushSecret string) error {
-	if err := waitForPlatformCRDAvailable(namespace, 15*time.Second); err != nil {
+	if err := waitForPlatformCRDAvailable(namespace, 25*time.Second); err != nil {
 		return err
 	}
 	isOpenshift, err := openshift.IsOpenShift()
