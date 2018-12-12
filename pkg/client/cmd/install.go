@@ -19,6 +19,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
+	"time"
 
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/pkg/errors"
@@ -56,6 +58,9 @@ type installCmdOptions struct {
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
+	// Let's use a fast refresh period when running with the CLI
+	k8sclient.ResetCacheEvery(8 * time.Second)
+
 	err := install.SetupClusterwideResources()
 	if err != nil && k8serrors.IsForbidden(err) {
 		fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
