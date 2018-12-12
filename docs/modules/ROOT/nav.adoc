@@ -1,0 +1,6 @@
+* xref:installation/index.adoc[Installing Camel K]
+** xref:installation/minikube.adoc[Minikube]
+** xref:installation/minishift.adoc[Minishift]
+** xref:installation/gke.adoc[Google Kubernetes Engine (GKE)]
+* xref:running.adoc[Running Integrations]
+* xref:configuration/index.adoc[Configuration]
