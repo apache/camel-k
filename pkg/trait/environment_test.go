@@ -55,6 +55,7 @@ func TestDefaultEnvironment(t *testing.T) {
 
 	ns := false
 	name := false
+	ck := false
 
 	env.Resources.VisitDeployment(func(deployment *v1.Deployment) {
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
@@ -64,11 +65,15 @@ func TestDefaultEnvironment(t *testing.T) {
 			if e.Name == envVarPodName {
 				name = true
 			}
+			if e.Name == envVarCamelKVersion {
+				ck = true
+			}
 		}
 	})
 
 	assert.True(t, ns)
 	assert.True(t, name)
+	assert.True(t, ck)
 }
 
 func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
@@ -105,6 +110,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 
 	ns := false
 	name := false
+	ck := false
 
 	env.Resources.VisitDeployment(func(deployment *v1.Deployment) {
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
@@ -114,11 +120,15 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 			if e.Name == envVarPodName {
 				name = true
 			}
+			if e.Name == envVarCamelKVersion {
+				ck = true
+			}
 		}
 	})
 
 	assert.True(t, ns)
 	assert.True(t, name)
+	assert.True(t, ck)
 }
 
 func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
@@ -155,6 +165,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 	ns := false
 	name := false
+	ck := false
 
 	env.Resources.VisitDeployment(func(deployment *v1.Deployment) {
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
@@ -164,9 +175,13 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 			if e.Name == envVarPodName {
 				name = true
 			}
+			if e.Name == envVarCamelKVersion {
+				ck = true
+			}
 		}
 	})
 
 	assert.False(t, ns)
 	assert.False(t, name)
+	assert.True(t, ck)
 }
