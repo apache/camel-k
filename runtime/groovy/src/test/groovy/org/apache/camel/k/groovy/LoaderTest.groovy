@@ -16,7 +16,8 @@
  */
 package org.apache.camel.k.groovy
 
-import org.apache.camel.k.jvm.RoutesLoaders
+import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.k.jvm.RuntimeSupport
 import org.apache.camel.k.jvm.SimpleRuntimeRegistry
 import org.apache.camel.k.Source
 import org.apache.camel.model.ToDefinition
@@ -29,7 +30,7 @@ class LoaderTest extends Specification {
             def source = Source.create("classpath:routes.groovy")
 
         when:
-            def loader = RoutesLoaders.loaderFor(source)
+            def loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source)
             def builder = loader.load(new SimpleRuntimeRegistry(), source)
 
         then:

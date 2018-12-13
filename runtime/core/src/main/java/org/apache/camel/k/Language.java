@@ -20,37 +20,51 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.camel.util.ObjectHelper;
 import org.apache.commons.lang3.StringUtils;
 
 public enum Language {
     Unknown(
+        "unknown",
         Collections.emptyList(),
         Collections.emptyList()),
     JavaClass(
+        "java-class",
         Collections.singletonList("class"),
         Collections.singletonList("class")),
     JavaSource(
+        "java-source",
         Collections.singletonList("java"),
         Collections.singletonList("java")),
     JavaScript(
+        "js",
         Arrays.asList("js", "javascript"),
         Collections.singletonList("js")),
     Groovy(
+        "groovy",
         Collections.singletonList("groovy"),
         Collections.singletonList("groovy")),
     Xml(
+        "xml",
         Collections.singletonList("xml"),
         Collections.singletonList("xml")),
     Kotlin(
+        "kotlin",
         Arrays.asList("kotlin", "kts"),
         Collections.singletonList("kts"));
 
+    private final String id;
     private final List<String> names;
     private final List<String> extensions;
 
-    Language(List<String> names, List<String> extensions) {
+    Language(String id, List<String> names, List<String> extensions) {
+        this.id = ObjectHelper.notNull(id, "id");
         this.names = names;
         this.extensions = extensions;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public List<String> getNames() {
