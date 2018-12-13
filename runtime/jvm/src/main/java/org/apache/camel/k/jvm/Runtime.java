@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -46,7 +47,7 @@ public final class Runtime extends MainSupport {
     public void load(String[] routes) throws Exception {
         for (String route: routes) {
             final Source source = Source.create(route);
-            final RoutesLoader loader = RoutesLoaders.loaderFor(source);
+            final RoutesLoader loader = RuntimeSupport.loaderFor(getCamelContext(), source);
             final RouteBuilder builder = loader.load(registry, source);
 
             if (builder == null) {
