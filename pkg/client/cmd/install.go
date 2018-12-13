@@ -19,10 +19,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"time"
 
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"

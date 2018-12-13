@@ -20,6 +20,10 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/envvar"
+
+	"k8s.io/api/core/v1"
+
 	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -33,7 +37,7 @@ import (
 func TestKnativeTraitWithCompressedSources(t *testing.T) {
 	content := "H4sIAAAAAAAA/+JKK8rP1VAvycxNLbIqyUzOVtfkUlBQUNAryddQz8lPt8rMS8tX1+QCAAAA//8BAAD//3wZ4pUoAAAA"
 
-	env := Environment{
+	environment := Environment{
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -63,33 +67,33 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 				},
 			},
 		},
-		EnvVars:        make(map[string]string),
+		EnvVars:        make([]v1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewCatalog().apply(&env)
+	err := NewCatalog().apply(&environment)
 
 	assert.Nil(t, err)
-	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("knative")))
-	assert.NotNil(t, env.EnvVars["KAMEL_KNATIVE_CONFIGURATION"])
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait(ID("knative")))
+	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
 
 	services := 0
-	env.Resources.VisitKnativeService(func(service *serving.Service) {
+	environment.Resources.VisitKnativeService(func(service *serving.Service) {
 		services++
 
 		vars := service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
 
 		routes := util.LookupEnvVar(vars, "CAMEL_K_ROUTES")
 		assert.NotNil(t, routes)
-		assert.Equal(t, "env:KAMEL_K_ROUTE_000?language=js&compression=true", routes.Value)
+		assert.Equal(t, "env:CAMEL_K_ROUTE_000?language=js&compression=true", routes.Value)
 
-		route := util.LookupEnvVar(vars, "KAMEL_K_ROUTE_000")
+		route := util.LookupEnvVar(vars, "CAMEL_K_ROUTE_000")
 		assert.NotNil(t, route)
 		assert.Equal(t, content, route.Value)
 	})
 
 	assert.True(t, services > 0)
-	assert.True(t, env.Resources.Size() > 0)
+	assert.True(t, environment.Resources.Size() > 0)
 }

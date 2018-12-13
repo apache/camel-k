@@ -20,6 +20,8 @@ package trait
 import (
 	"testing"
 
+	"k8s.io/api/core/v1"
+
 	"github.com/apache/camel-k/pkg/builder"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -136,7 +138,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 				},
 			},
 		},
-		EnvVars:        make(map[string]string),
+		EnvVars:        make([]v1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
