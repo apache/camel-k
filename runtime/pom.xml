@@ -94,11 +94,11 @@
     </build>
 
     <modules>
-        <module>core</module>
-        <module>jvm</module>
-        <module>groovy</module>
-        <module>kotlin</module>
-        <module>spring-boot</module>
+        <module>camel-k-runtime-core</module>
+        <module>camel-k-runtime-jvm</module>
+        <module>camel-k-runtime-groovy</module>
+        <module>camel-k-runtime-kotlin</module>
+        <module>camel-k-runtime-spring-boot</module>
         <module>catalog-builder</module>
         <module>dependency-lister</module>
         <module>camel-knative-http</module>
