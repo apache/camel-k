@@ -21,7 +21,7 @@ import org.apache.camel.Exchange
 import org.apache.camel.Predicate
 import org.apache.camel.Processor
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.k.jvm.RuntimeRegistry
+import org.apache.camel.k.RuntimeRegistry
 import org.apache.camel.k.jvm.dsl.Components
 import org.apache.camel.model.RouteDefinition
 

@@ -20,13 +20,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.CompositeRegistry;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.k.RoutesLoader;
+import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.Source;
 import org.apache.camel.main.MainSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

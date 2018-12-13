@@ -14,27 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k.jvm;
+package org.apache.camel.k;
 
-import java.util.List;
+import java.util.Map;
 
-import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.spi.Registry;
 
-public interface RoutesLoader {
-    /**
-     * Provides a list of the languages supported by this loader.
-     *
-     * @return the supported languages.
-     */
-    List<Language> getSupportedLanguages();
+public interface RuntimeRegistry extends Registry {
+    void bind(String name, Object bean);
 
-    /**
-     * Creates a camel {@link RouteBuilder} from the given resource.
-     *
-     * @param registry the runtime registry.
-     * @param source the source to load.
-     * @return the RouteBuilder.
-     * @throws Exception
-     */
-    RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception;
+    @SuppressWarnings("deprecation")
+    @Override
+    default public Object lookup(String name) {
+        return lookupByName(name);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default public <T> T lookup(String name, Class<T> type) {
+        return lookupByNameAndType(name, type);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default public <T> Map<String, T> lookupByType(Class<T> type) {
+        return findByTypeWithName(type);
+    }
 }

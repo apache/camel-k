@@ -1,3 +1,7 @@
+package org.apache.camel.k;
+
+import org.apache.camel.CamelContext;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,34 +18,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k.jvm;
 
-import java.util.Map;
-
-import org.apache.camel.spi.Registry;
-
-public interface RuntimeRegistry extends Registry {
-
+@FunctionalInterface
+public interface RuntimeTrait {
     /**
-     *
+     * Perform CamelContext customization.
      */
-    void bind(String name, Object bean);
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default public Object lookup(String name) {
-        return lookupByName(name);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default public <T> T lookup(String name, Class<T> type) {
-        return lookupByNameAndType(name, type);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default public <T> Map<String, T> lookupByType(Class<T> type) {
-        return findByTypeWithName(type);
-    }
+    void apply(CamelContext camelContext);
 }
