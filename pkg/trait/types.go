@@ -22,6 +22,7 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"k8s.io/api/core/v1"
 )
 
 // Identifiable represent an identifiable type
@@ -67,7 +68,7 @@ type Environment struct {
 	Steps          []builder.Step
 	BuildDir       string
 	ExecutedTraits []Trait
-	EnvVars        map[string]string
+	EnvVars        []v1.EnvVar
 }
 
 // GetTrait --

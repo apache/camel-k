@@ -21,6 +21,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/envvar"
+
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 
@@ -75,8 +77,8 @@ func (t *springBootTrait) Apply(e *Environment) error {
 
 	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
 		// Override env vars
-		e.EnvVars["JAVA_MAIN_CLASS"] = "org.springframework.boot.loader.PropertiesLauncher"
-		e.EnvVars["LOADER_PATH"] = "/deployments/dependencies/"
+		envvar.SetVal(&e.EnvVars, "JAVA_MAIN_CLASS", "org.springframework.boot.loader.PropertiesLauncher")
+		envvar.SetVal(&e.EnvVars, "LOADER_PATH", "/deployments/dependencies/")
 
 		if e.Integration.Spec.Context != "" {
 			name := e.Integration.Spec.Context
@@ -96,8 +98,8 @@ func (t *springBootTrait) Apply(e *Environment) error {
 				deps = append(deps, artifact.Target)
 			}
 
-			e.EnvVars["LOADER_HOME"] = "/deployments"
-			e.EnvVars["LOADER_PATH"] = strings.Join(deps, ",")
+			envvar.SetVal(&e.EnvVars, "LOADER_HOME", "/deployments")
+			envvar.SetVal(&e.EnvVars, "LOADER_PATH", strings.Join(deps, ","))
 		}
 	}
 

@@ -18,12 +18,13 @@ limitations under the License.
 package trait
 
 import (
+	"regexp"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/platform"
-	"regexp"
 )
 
 const (
@@ -103,5 +104,4 @@ func (t *builderTrait) ReplaceHost(ctx *builder.Context) error {
 func getImageWithOpenShiftHost(image string) string {
 	pattern := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+([:/].*)`)
 	return pattern.ReplaceAllString(image, openshiftDockerRegistryHost+"$1")
-	return image
 }

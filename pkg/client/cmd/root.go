@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
