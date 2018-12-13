@@ -50,7 +50,7 @@ class KotlinRoutesLoader : RoutesLoader {
                 val compiler = JvmScriptCompiler()
                 val evaluator = BasicJvmScriptEvaluator()
                 val host = BasicJvmScriptingHost(compiler = compiler, evaluator = evaluator)
-                val javaHome = System.getenv("KOTLIN_JDK_HOME") ?: "/usr/lib/jvm/java"
+                val javaHome = System.getenv("KOTLIN_JDK_HOME") ?: System.getProperty("java.home")
 
                 LOGGER.info("JAVA_HOME is set to {}", javaHome)
 
