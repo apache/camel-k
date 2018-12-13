@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import org.apache.camel.NoSuchBeanException;
+import org.apache.camel.k.RuntimeRegistry;
 
 public class SimpleRuntimeRegistry implements RuntimeRegistry {
     private final ConcurrentMap<String, Object> registry;

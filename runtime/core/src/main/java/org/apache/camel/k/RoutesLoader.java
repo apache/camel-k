@@ -14,17 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k.jvm;
+package org.apache.camel.k;
 
-public final class Constants {
-    public static final String ENV_CAMEL_K_ROUTES = "CAMEL_K_ROUTES";
-    public static final String ENV_CAMEL_K_CONF = "CAMEL_K_CONF";
-    public static final String ENV_CAMEL_K_CONF_D = "CAMEL_K_CONF_D";
-    public static final String SCHEME_CLASSPATH = "classpath:";
-    public static final String SCHEME_FILE = "file:";
-    public static final String SCHEME_ENV = "env:";
-    public static final String LOGGING_LEVEL_PREFIX = "logging.level.";
+import java.util.List;
 
-    private Constants() {
-    }
+import org.apache.camel.builder.RouteBuilder;
+
+public interface RoutesLoader {
+    /**
+     * Provides a list of the languages supported by this loader.
+     *
+     * @return the supported languages.
+     */
+    List<Language> getSupportedLanguages();
+
+    /**
+     * Creates a camel {@link RouteBuilder} from the given resource.
+     *
+     * @param registry the runtime registry.
+     * @param source the source to load.
+     * @return the RouteBuilder.
+     * @throws Exception
+     */
+    RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception;
 }

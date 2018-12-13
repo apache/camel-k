@@ -28,6 +28,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.NoFactoryAvailableException;
+import org.apache.camel.component.properties.PropertiesComponent;
+import org.apache.camel.k.Constants;
+import org.apache.camel.k.RuntimeTrait;
+import org.apache.camel.spi.FactoryFinder;
 import org.apache.camel.util.IntrospectionSupport;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.commons.io.FilenameUtils;
@@ -102,6 +108,29 @@ public final class RuntimeSupport {
         return properties;
     }
 
+    public static void configureContext(CamelContext context) {
+        try {
+            FactoryFinder finder = context.getFactoryFinder(Constants.RUNTIME_TRAIT_RESOURCE_PATH);
+            String traitIDs = System.getenv().getOrDefault(Constants.ENV_CAMEL_K_TRAITS, "");
+
+            for (String traitId: traitIDs.split(",", -1)) {
+                RuntimeTrait trait = (RuntimeTrait)finder.newInstance(traitId);
+
+                bindProperties(context, trait, "trait." + traitId);
+
+                trait.apply(context);
+            }
+        } catch (NoFactoryAvailableException e) {
+            // ignored
+        }
+
+        context.getRegistry().findByType(RuntimeTrait.class).forEach(
+            customizer -> {
+                customizer.apply(context);
+            }
+        );
+    }
+
     public static void configureLogging() {
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         final Properties properties = loadProperties();
@@ -121,6 +150,17 @@ public final class RuntimeSupport {
                 ctx.getConfiguration().addLogger(logger, config);
             }
         );
+    }
+
+    public static void bindProperties(CamelContext context, Object target, String prefix) {
+        final PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
+        final Properties properties = component.getInitialProperties();
+
+        if (properties == null) {
+            throw new IllegalStateException("PropertiesComponent has no properties");
+        }
+
+        bindProperties(properties, target, prefix);
     }
 
     public static void bindProperties(Properties properties, Object target, String prefix) {

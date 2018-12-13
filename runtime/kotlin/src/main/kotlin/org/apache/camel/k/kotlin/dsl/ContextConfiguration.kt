@@ -17,7 +17,7 @@
 package org.apache.camel.k.kotlin.dsl
 
 import org.apache.camel.CamelContext
-import org.apache.camel.k.jvm.RuntimeRegistry
+import org.apache.camel.k.RuntimeRegistry
 
 class ContextConfiguration (val registry: RuntimeRegistry, val context: CamelContext) {
 
