@@ -32,7 +32,9 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.NoFactoryAvailableException;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.k.Constants;
+import org.apache.camel.k.RoutesLoader;
 import org.apache.camel.k.RuntimeTrait;
+import org.apache.camel.k.Source;
 import org.apache.camel.spi.FactoryFinder;
 import org.apache.camel.util.IntrospectionSupport;
 import org.apache.camel.util.ObjectHelper;
@@ -179,5 +181,19 @@ public final class RuntimeSupport {
                     }
                 }
             );
+    }
+
+    public static RoutesLoader loaderFor(CamelContext context, Source source) {
+        final FactoryFinder finder;
+        final RoutesLoader loader;
+
+        try {
+            finder = context.getFactoryFinder(Constants.ROUTES_LOADER_RESOURCE_PATH);
+            loader = (RoutesLoader)finder.newInstance(source.getLanguage().getId());
+        } catch (NoFactoryAvailableException e) {
+            throw new IllegalArgumentException("Unable to find loader for: " + source, e);
+        }
+
+        return loader;
     }
 }

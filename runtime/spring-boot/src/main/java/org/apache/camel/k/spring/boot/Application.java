@@ -25,7 +25,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.RoutesLoader;
-import org.apache.camel.k.jvm.RoutesLoaders;
 import org.apache.camel.k.jvm.RuntimeSupport;
 import org.apache.camel.k.Source;
 import org.apache.camel.spi.Registry;
@@ -95,7 +94,7 @@ public class Application {
                 try {
                     for (String route : routes.split(",")) {
                         final Source source = Source.create(route);
-                        final RoutesLoader loader = RoutesLoaders.loaderFor(source);
+                        final RoutesLoader loader = RuntimeSupport.loaderFor(context, source);
                         final RouteBuilder builder = loader.load(registry, source);
 
                         if (builder == null) {
