@@ -23,6 +23,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/envvar"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -96,7 +98,11 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 
 	// combine properties of integration with context, integration
 	// properties have the priority
-	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
+	properties := ""
+
+	VisitKeyValConfigurations("property", e.Context, e.Integration, func(key string, val string) {
+		properties += fmt.Sprintf("%s=%s\n", key, val)
+	})
 
 	maps = append(
 		maps,
@@ -113,7 +119,7 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 				},
 			},
 			Data: map[string]string{
-				"properties": PropertiesString(properties),
+				"properties": properties,
 			},
 		},
 	)
@@ -194,28 +200,32 @@ func (t *deploymentTrait) getSources(e *Environment) []string {
 func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	sources := t.getSources(e)
 
+	environment := make([]corev1.EnvVar, 0)
+
 	// combine Environment of integration with context, integration
 	// Environment has the priority
-	environment := CombineConfigurationAsMap("env", e.Context, e.Integration)
+	VisitKeyValConfigurations("env", e.Context, e.Integration, func(key string, value string) {
+		envvar.SetVal(&environment, key, value)
+	})
 
 	// set env vars needed by the runtime
-	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
+	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
 
 	// camel-k runtime
-	environment["CAMEL_K_ROUTES"] = strings.Join(sources, ",")
-	environment["CAMEL_K_CONF"] = "/etc/camel/conf/application.properties"
-	environment["CAMEL_K_CONF_D"] = "/etc/camel/conf.d"
+	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(sources, ","))
+	envvar.SetVal(&environment, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
+	envvar.SetVal(&environment, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 
 	// add a dummy env var to trigger deployment if everything but the code
 	// has been changed
-	environment["CAMEL_K_DIGEST"] = e.Integration.Status.Digest
+	envvar.SetVal(&environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
 
 	// optimizations
-	environment["AB_JOLOKIA_OFF"] = True
+	envvar.SetVal(&environment, "AB_JOLOKIA_OFF", True)
 
 	// add env vars from traits
-	for k, v := range e.EnvVars {
-		environment[k] = v
+	for _, envVar := range e.EnvVars {
+		envvar.SetVar(&environment, envVar)
 	}
 
 	labels := map[string]string{
@@ -248,7 +258,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 						{
 							Name:  e.Integration.Name,
 							Image: e.Integration.Status.Image,
-							Env:   EnvironmentAsEnvVarSlice(environment),
+							Env:   environment,
 						},
 					},
 				},
@@ -329,8 +339,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// Volumes :: Additional ConfigMaps
 	//
 
-	cmList := CombineConfigurationAsSlice("configmap", e.Context, e.Integration)
-	for _, cmName := range cmList {
+	VisitConfigurations("configmap", e.Context, e.Integration, func(cmName string) {
 		cnt++
 
 		vols = append(vols, corev1.Volume{
@@ -348,14 +357,13 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Name:      "integration-cm-" + cmName,
 			MountPath: fmt.Sprintf("/etc/camel/conf.d/%03d_%s", cnt, cmName),
 		})
-	}
+	})
 
 	//
 	// Volumes :: Additional Secrets
 	//
 
-	secretList := CombineConfigurationAsSlice("secret", e.Context, e.Integration)
-	for _, secretName := range secretList {
+	VisitConfigurations("secret", e.Context, e.Integration, func(secretName string) {
 		cnt++
 
 		vols = append(vols, corev1.Volume{
@@ -371,7 +379,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Name:      "integration-secret-" + secretName,
 			MountPath: fmt.Sprintf("/etc/camel/conf.d/%03d_%s", cnt, secretName),
 		})
-	}
+	})
 
 	//
 	// Volumes

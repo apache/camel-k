@@ -20,6 +20,10 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/envvar"
+
+	"k8s.io/api/core/v1"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
@@ -40,7 +44,8 @@ func TestDebugTraitApplicability(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make(map[string]string)}
+		EnvVars: make([]v1.EnvVar, 0),
+	}
 
 	trait := newDebugTrait()
 
@@ -56,7 +61,7 @@ func TestDebugTraitApplicability(t *testing.T) {
 }
 
 func TestApplyDebugTrait(t *testing.T) {
-	env := Environment{
+	environment := Environment{
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -71,10 +76,12 @@ func TestApplyDebugTrait(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make(map[string]string)}
+		EnvVars: make([]v1.EnvVar, 0),
+	}
 
 	trait := newDebugTrait()
 
-	assert.Nil(t, trait.Apply(&env))
-	assert.Equal(t, True, env.EnvVars["JAVA_DEBUG"])
+	assert.Nil(t, trait.Apply(&environment))
+	assert.NotNil(t, envvar.Get(environment.EnvVars, "JAVA_DEBUG"))
+	assert.Equal(t, True, envvar.Get(environment.EnvVars, "JAVA_DEBUG").Value)
 }
