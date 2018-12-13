@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/util/envvar"
+
 	"strconv"
 	"strings"
 
@@ -110,23 +112,33 @@ func (t *knativeTrait) prepareEnvVars(e *Environment) error {
 	if err != nil {
 		return err
 	}
-	e.EnvVars["CAMEL_KNATIVE_CONFIGURATION"] = conf
+
+	envvar.SetVal(&e.EnvVars, "CAMEL_KNATIVE_CONFIGURATION", conf)
+
 	return nil
 }
 
 func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	// combine properties of integration with context, integration
 	// properties have the priority
-	properties := CombineConfigurationAsMap("property", e.Context, e.Integration)
+	properties := ""
+
+	VisitKeyValConfigurations("property", e.Context, e.Integration, func(key string, val string) {
+		properties += fmt.Sprintf("%s=%s\n", key, val)
+	})
+
+	environment := make([]corev1.EnvVar, 0)
 
 	// combine Environment of integration with context, integration
 	// Environment has the priority
-	environment := CombineConfigurationAsMap("env", e.Context, e.Integration)
+	VisitKeyValConfigurations("env", e.Context, e.Integration, func(key string, value string) {
+		envvar.SetVal(&environment, key, value)
+	})
 
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
 	for i, s := range e.Integration.Spec.Sources {
-		envName := fmt.Sprintf("KAMEL_K_ROUTE_%03d", i)
-		environment[envName] = s.Content
+		envName := fmt.Sprintf("CAMEL_K_ROUTE_%03d", i)
+		envvar.SetVal(&environment, envName, s.Content)
 
 		params := make([]string, 0)
 		if s.Language != "" {
@@ -145,23 +157,23 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	}
 
 	// set env vars needed by the runtime
-	environment["JAVA_MAIN_CLASS"] = "org.apache.camel.k.jvm.Application"
+	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
 
 	// camel-k runtime
-	environment["CAMEL_K_ROUTES"] = strings.Join(sources, ",")
-	environment["CAMEL_K_CONF"] = "env:CAMEL_K_PROPERTIES"
-	environment["CAMEL_K_PROPERTIES"] = PropertiesString(properties)
+	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(sources, ","))
+	envvar.SetVal(&environment, "CAMEL_K_CONF", "env:CAMEL_K_PROPERTIES")
+	envvar.SetVal(&environment, "CAMEL_K_PROPERTIES", properties)
 
 	// add a dummy env var to trigger deployment if everything but the code
 	// has been changed
-	environment["CAMEL_K_DIGEST"] = e.Integration.Status.Digest
+	envvar.SetVal(&environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
 
 	// optimizations
-	environment["AB_JOLOKIA_OFF"] = True
+	envvar.SetVal(&environment, "AB_JOLOKIA_OFF", True)
 
 	// add env vars from traits
-	for k, v := range e.EnvVars {
-		environment[k] = v
+	for _, envVar := range e.EnvVars {
+		envvar.SetVar(&environment, envVar)
 	}
 
 	labels := map[string]string{
@@ -200,7 +212,7 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 						Spec: serving.RevisionSpec{
 							Container: corev1.Container{
 								Image: e.Integration.Status.Image,
-								Env:   EnvironmentAsEnvVarSlice(environment),
+								Env:   environment,
 							},
 						},
 					},

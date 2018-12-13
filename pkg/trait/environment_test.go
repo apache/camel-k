@@ -20,6 +20,8 @@ package trait
 import (
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"k8s.io/api/apps/v1"
@@ -44,7 +46,7 @@ func TestDefaultEnvironment(t *testing.T) {
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 			},
 		},
-		EnvVars:        make(map[string]string),
+		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
@@ -99,7 +101,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 			},
 		},
-		EnvVars:        make(map[string]string),
+		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
@@ -154,7 +156,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 			},
 		},
-		EnvVars:        make(map[string]string),
+		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}

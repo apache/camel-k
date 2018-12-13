@@ -19,6 +19,7 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 type debugTrait struct {
@@ -43,7 +44,7 @@ func (t *debugTrait) Configure(e *Environment) (bool, error) {
 
 func (t *debugTrait) Apply(e *Environment) error {
 	// this is all that's needed as long as the base image is `fabric8/s2i-java` look into builder/builder.go
-	e.EnvVars["JAVA_DEBUG"] = True
+	envvar.SetVal(&e.EnvVars, "JAVA_DEBUG", True)
 
 	return nil
 }

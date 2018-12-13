@@ -19,9 +19,8 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/version"
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
 )
 
 type environmentTrait struct {
@@ -53,35 +52,12 @@ func (t *environmentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *environmentTrait) Apply(e *Environment) error {
-	e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
-		for i := 0; i < len(deployment.Spec.Template.Spec.Containers); i++ {
-			c := &deployment.Spec.Template.Spec.Containers[i]
+	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, version.Version)
 
-			c.Env = append(c.Env, v1.EnvVar{
-				Name:  envVarCamelKVersion,
-				Value: version.Version,
-			})
-
-			if t.ContainerMeta {
-				c.Env = append(c.Env, v1.EnvVar{
-					Name: envVarNamespace,
-					ValueFrom: &v1.EnvVarSource{
-						FieldRef: &v1.ObjectFieldSelector{
-							FieldPath: "metadata.namespace",
-						},
-					},
-				})
-				c.Env = append(c.Env, v1.EnvVar{
-					Name: envVarPodName,
-					ValueFrom: &v1.EnvVarSource{
-						FieldRef: &v1.ObjectFieldSelector{
-							FieldPath: "metadata.name",
-						},
-					},
-				})
-			}
-		}
-	})
+	if t.ContainerMeta {
+		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
+		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
+	}
 
 	return nil
 }
