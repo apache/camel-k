@@ -98,6 +98,7 @@
     </build>
 
     <modules>
+        <module>api</module>
         <module>jvm</module>
         <module>groovy</module>
         <module>kotlin</module>

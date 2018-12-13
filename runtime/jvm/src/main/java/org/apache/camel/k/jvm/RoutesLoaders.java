@@ -32,6 +32,7 @@ import javax.xml.bind.UnmarshalException;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.jvm.dsl.Components;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.rest.RestConfigurationDefinition;

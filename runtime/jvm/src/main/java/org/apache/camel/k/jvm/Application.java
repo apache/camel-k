@@ -21,6 +21,8 @@ import java.util.Properties;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.component.properties.PropertiesComponent;
+import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.RuntimeRegistryAware;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.ObjectHelper;
@@ -64,9 +66,22 @@ public class Application {
     //
     // *******************************
 
-    static class ComponentPropertiesBinder extends MainListenerSupport {
+    static class ComponentPropertiesBinder extends MainListenerSupport implements RuntimeRegistryAware {
+        private RuntimeRegistry runtimeRegistry;
+
+        @Override
+        public RuntimeRegistry getRuntimeRegistry() {
+            return runtimeRegistry;
+        }
+
+        @Override
+        public void setRuntimeRegistry(RuntimeRegistry runtimeRegistry) {
+            this.runtimeRegistry = runtimeRegistry;
+        }
+
         @Override
         public void configure(CamelContext context) {
+
             final PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
             final Properties properties = component.getInitialProperties();
 
@@ -79,6 +94,13 @@ public class Application {
             //     camel.context.${name} = ${value}
             //
             RuntimeSupport.bindProperties(properties, context, "camel.context.");
+
+            // Programmatically customize the camel context.
+            //
+            // This is useful to configure services such as the ClusterService,
+            // RouteController, etc
+            //
+            RuntimeSupport.configureContext(runtimeRegistry, context);
 
             context.addLifecycleStrategy(new LifecycleStrategySupport() {
                 @SuppressWarnings("unchecked")

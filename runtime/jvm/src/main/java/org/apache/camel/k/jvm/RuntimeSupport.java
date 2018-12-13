@@ -27,7 +27,11 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.ServiceLoader;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.k.CamelContextCustomizer;
+import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.util.IntrospectionSupport;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.commons.io.FilenameUtils;
@@ -100,6 +104,20 @@ public final class RuntimeSupport {
         }
 
         return properties;
+    }
+
+    public static void configureContext(RuntimeRegistry registry, CamelContext context) {
+        ServiceLoader.load(CamelContextCustomizer.class, context.getApplicationContextClassLoader()).forEach(
+            customizer -> {
+                customizer.customize(context);
+            }
+        );
+
+        registry.findByType(CamelContextCustomizer.class).forEach(
+            customizer -> {
+                customizer.customize(context);
+            }
+        );
     }
 
     public static void configureLogging() {

@@ -18,6 +18,7 @@ package org.apache.camel.k.groovy
 
 
 import org.apache.camel.builder.RouteBuilder
+import org.apache.camel.k.RuntimeRegistry
 import org.apache.camel.k.groovy.dsl.IntegrationConfiguration
 import org.apache.camel.k.jvm.*
 import org.codehaus.groovy.control.CompilerConfiguration

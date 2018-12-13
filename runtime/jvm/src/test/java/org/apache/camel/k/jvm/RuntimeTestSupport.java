@@ -16,26 +16,26 @@
  */
 package org.apache.camel.k.jvm;
 
-import java.util.List;
+import org.apache.camel.CamelContext;
+import org.apache.camel.main.MainListener;
+import org.apache.camel.main.MainListenerSupport;
+import org.apache.camel.main.MainSupport;
+import org.apache.camel.util.function.ThrowingBiConsumer;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.k.RuntimeRegistry;
+public final class RuntimeTestSupport {
+    private RuntimeTestSupport() {
+    }
 
-public interface RoutesLoader {
-    /**
-     * Provides a list of the languages supported by this loader.
-     *
-     * @return the supported languages.
-     */
-    List<Language> getSupportedLanguages();
-
-    /**
-     * Creates a camel {@link RouteBuilder} from the given resource.
-     *
-     * @param registry the runtime registry.
-     * @param source the source to load.
-     * @return the RouteBuilder.
-     * @throws Exception
-     */
-    RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception;
+    public static MainListener afterStart(ThrowingBiConsumer<MainSupport, CamelContext, Exception> consumer) {
+        return new MainListenerSupport() {
+            @Override
+            public void afterStart(MainSupport main) {
+                try {
+                    consumer.accept(main, main.getCamelContexts().get(0));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
 }

@@ -27,6 +27,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.CompositeRegistry;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.RuntimeRegistryAware;
+import org.apache.camel.main.MainListener;
 import org.apache.camel.main.MainSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +58,15 @@ public final class Runtime extends MainSupport {
 
             addRouteBuilder(builder);
         }
+    }
+
+    @Override
+    public void addMainListener(MainListener listener) {
+        if (listener instanceof RuntimeRegistryAware) {
+            ((RuntimeRegistryAware) listener).setRuntimeRegistry(registry);
+        }
+
+        super.addMainListener(listener);
     }
 
     public RuntimeRegistry getRegistry() {

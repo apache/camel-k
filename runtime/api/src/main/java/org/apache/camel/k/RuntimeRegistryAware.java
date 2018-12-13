@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,22 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k.kotlin.dsl
+package org.apache.camel.k;
 
-import org.apache.camel.CamelContext
-import org.apache.camel.k.RuntimeRegistry
+public interface RuntimeRegistryAware {
+    void setRuntimeRegistry(RuntimeRegistry registry);
 
-class ContextConfiguration (val registry: RuntimeRegistry, val context: CamelContext) {
-
-    fun registry(block: RegistryConfiguration.() -> Unit): RegistryConfiguration {
-        val delegate = RegistryConfiguration(registry)
-        delegate.block()
-        return delegate
-    }
-
-    fun components(block: ComponentsConfiguration.() -> Unit): ComponentsConfiguration {
-        val delegate = ComponentsConfiguration(context)
-        delegate.block()
-        return delegate
-    }
+    RuntimeRegistry getRuntimeRegistry();
 }

@@ -22,10 +22,10 @@ import java.util.Set;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.jvm.Constants;
 import org.apache.camel.k.jvm.RoutesLoader;
 import org.apache.camel.k.jvm.RoutesLoaders;
-import org.apache.camel.k.jvm.RuntimeRegistry;
 import org.apache.camel.k.jvm.RuntimeSupport;
 import org.apache.camel.k.jvm.Source;
 import org.apache.camel.spi.Registry;
@@ -84,6 +84,13 @@ public class Application {
                 if (ObjectHelper.isEmpty(routes)) {
                     throw new IllegalStateException("No valid routes found in " + Constants.ENV_CAMEL_K_ROUTES + " environment variable");
                 }
+
+                // Programmatically customize the camel context.
+                //
+                // This is useful to configure services such as the ClusterService,
+                // RouteController, etc
+                //
+                RuntimeSupport.configureContext(registry, context);
 
                 try {
                     for (String route : routes.split(",")) {
