@@ -1,0 +1,15 @@
+site:
+  title: Camel K
+  url: https://camel.apache.org/staging
+  start_page: camel-k::index.adoc
+content:
+  sources:
+  - url: ../
+    branches: antora
+    start_path: docs
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/master/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+output:
+  dir: ./public
