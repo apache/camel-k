@@ -24,6 +24,8 @@ import java.util.Base64;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.k.Constants;
+import org.apache.camel.k.Source;
 import org.apache.camel.util.ResourceHelper;
 import org.apache.camel.util.StringHelper;
 

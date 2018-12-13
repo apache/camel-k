@@ -18,7 +18,7 @@ package org.apache.camel.k.groovy
 
 import org.apache.camel.k.jvm.RoutesLoaders
 import org.apache.camel.k.jvm.SimpleRuntimeRegistry
-import org.apache.camel.k.jvm.Source
+import org.apache.camel.k.Source
 import org.apache.camel.model.ToDefinition
 import spock.lang.Specification
 

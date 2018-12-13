@@ -17,6 +17,10 @@
 package org.apache.camel.k.kotlin
 
 import org.apache.camel.builder.RouteBuilder
+import org.apache.camel.k.Language
+import org.apache.camel.k.RoutesLoader
+import org.apache.camel.k.RuntimeRegistry
+import org.apache.camel.k.Source
 import org.apache.camel.k.jvm.*
 import org.apache.camel.k.kotlin.dsl.IntegrationConfiguration
 import org.slf4j.Logger

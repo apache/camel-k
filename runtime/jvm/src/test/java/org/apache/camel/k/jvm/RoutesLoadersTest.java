@@ -19,6 +19,8 @@ package org.apache.camel.k.jvm;
 import java.util.List;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.k.RoutesLoader;
+import org.apache.camel.k.Source;
 import org.apache.camel.model.ProcessDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.SetBodyDefinition;

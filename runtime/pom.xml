@@ -23,7 +23,7 @@
     <artifactId>camel-k-runtime-parent</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -92,8 +92,9 @@
             </plugins>
         </pluginManagement>
     </build>
-    
+
     <modules>
+        <module>core</module>
         <module>jvm</module>
         <module>groovy</module>
         <module>kotlin</module>
