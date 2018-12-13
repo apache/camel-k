@@ -16,11 +16,9 @@
  */
 package org.apache.camel.k.jvm;
 
-import java.util.Properties;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
-import org.apache.camel.component.properties.PropertiesComponent;
+import org.apache.camel.k.Constants;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.ObjectHelper;
@@ -65,20 +63,21 @@ public class Application {
     // *******************************
 
     static class ComponentPropertiesBinder extends MainListenerSupport {
+
         @Override
         public void configure(CamelContext context) {
-            final PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
-            final Properties properties = component.getInitialProperties();
-
-            if (properties == null) {
-                throw new IllegalStateException("PropertiesComponent has no properties");
-            }
-
             // Configure the camel context using properties in the form:
             //
             //     camel.context.${name} = ${value}
             //
-            RuntimeSupport.bindProperties(properties, context, "camel.context.");
+            RuntimeSupport.bindProperties(context, context, "camel.context.");
+
+            // Programmatically apply the camel context.
+            //
+            // This is useful to configure services such as the ClusterService,
+            // RouteController, etc
+            //
+            RuntimeSupport.configureContext(context);
 
             context.addLifecycleStrategy(new LifecycleStrategySupport() {
                 @SuppressWarnings("unchecked")
@@ -90,7 +89,7 @@ public class Application {
                     //
                     //     camel.component.${scheme}.${name} = ${value}
                     //
-                    RuntimeSupport.bindProperties(properties, component, "camel.component." + name + ".");
+                    RuntimeSupport.bindProperties(context, component, "camel.component." + name + ".");
                 }
             });
         }

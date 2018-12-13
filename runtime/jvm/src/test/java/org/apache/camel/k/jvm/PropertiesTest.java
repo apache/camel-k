@@ -19,12 +19,11 @@ package org.apache.camel.k.jvm;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.camel.CamelContext;
 import org.apache.camel.component.seda.SedaComponent;
-import org.apache.camel.main.MainListenerSupport;
-import org.apache.camel.main.MainSupport;
+import org.apache.camel.k.RuntimeTrait;
 import org.junit.jupiter.api.Test;
 
+import static org.apache.camel.k.jvm.RuntimeTestSupport.afterStart;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PropertiesTest {
@@ -37,23 +36,13 @@ public class PropertiesTest {
         runtime.setProperties(properties);
         runtime.setDuration(5);
         runtime.addMainListener(new Application.ComponentPropertiesBinder());
-        runtime.addMainListener(new MainListenerSupport() {
-            @Override
-            public void afterStart(MainSupport main) {
-                try {
-                    CamelContext context = main.getCamelContexts().get(0);
-
-                    assertThat(context.resolvePropertyPlaceholders("{{root.key}}")).isEqualTo("root.value");
-                    assertThat(context.resolvePropertyPlaceholders("{{001.key}}")).isEqualTo("001.value");
-                    assertThat(context.resolvePropertyPlaceholders("{{002.key}}")).isEqualTo("002.value");
-                    assertThat(context.resolvePropertyPlaceholders("{{a.key}}")).isEqualTo("a.002");
-
-                    main.stop();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        runtime.addMainListener(afterStart((main, context) -> {
+            assertThat(context.resolvePropertyPlaceholders("{{root.key}}")).isEqualTo("root.value");
+            assertThat(context.resolvePropertyPlaceholders("{{001.key}}")).isEqualTo("001.value");
+            assertThat(context.resolvePropertyPlaceholders("{{002.key}}")).isEqualTo("002.value");
+            assertThat(context.resolvePropertyPlaceholders("{{a.key}}")).isEqualTo("a.002");
+            main.stop();
+        }));
 
         runtime.run();
     }
@@ -67,21 +56,12 @@ public class PropertiesTest {
             runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
             runtime.addMainListener(new Application.ComponentPropertiesBinder());
-            runtime.addMainListener(new MainListenerSupport() {
-                @Override
-                public void afterStart(MainSupport main) {
-                    try {
-                        CamelContext context = main.getCamelContexts().get(0);
-                        String value = context.resolvePropertyPlaceholders("{{my.property}}");
+            runtime.addMainListener(afterStart((main, context) -> {
+                String value = context.resolvePropertyPlaceholders("{{my.property}}");
 
-                        assertThat(value).isEqualTo("my.value");
-
-                        main.stop();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+                assertThat(value).isEqualTo("my.value");
+                main.stop();
+            }));
 
             runtime.run();
         } finally {
@@ -103,21 +83,11 @@ public class PropertiesTest {
             runtime.setDuration(5);
             runtime.getRegistry().bind("my-seda", new SedaComponent());
             runtime.addMainListener(new Application.ComponentPropertiesBinder());
-            runtime.addMainListener(new MainListenerSupport() {
-                @Override
-                public void afterStart(MainSupport main) {
-                    try {
-                        CamelContext context = main.getCamelContexts().get(0);
-
-                        assertThat(context.getComponent("seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize1);
-                        assertThat(context.getComponent("my-seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize2);
-
-                        main.stop();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+            runtime.addMainListener(afterStart((main, context) -> {
+                assertThat(context.getComponent("seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize1);
+                assertThat(context.getComponent("my-seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize2);
+                main.stop();
+            }));
 
             runtime.run();
         } finally {
@@ -135,28 +105,36 @@ public class PropertiesTest {
             Runtime runtime = new Runtime();
             runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
-            runtime.getRegistry().bind("my-seda", new SedaComponent());
             runtime.addMainListener(new Application.ComponentPropertiesBinder());
-            runtime.addMainListener(new MainListenerSupport() {
-                @Override
-                public void afterStart(MainSupport main) {
-                    try {
-                        CamelContext context = main.getCamelContexts().get(0);
-
-                        assertThat(context.isMessageHistory()).isFalse();
-                        assertThat(context.isLoadTypeConverters()).isFalse();
-
-                        main.stop();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+            runtime.addMainListener(afterStart((main, context) -> {
+                assertThat(context.isMessageHistory()).isFalse();
+                assertThat(context.isLoadTypeConverters()).isFalse();
+                main.stop();
+            }));
 
             runtime.run();
         } finally {
             System.getProperties().remove("camel.context.messageHistory");
             System.getProperties().remove("camel.context.loadTypeConverters");
         }
+    }
+
+    @Test
+    public void testContextTrait() throws Exception {
+        Runtime runtime = new Runtime();
+        runtime.setProperties(System.getProperties());
+        runtime.setDuration(5);
+        runtime.getRegistry().bind("c1", (RuntimeTrait) context -> {
+            context.setMessageHistory(false);
+            context.setLoadTypeConverters(false);
+        });
+        runtime.addMainListener(new Application.ComponentPropertiesBinder());
+        runtime.addMainListener(afterStart((main, context) -> {
+            assertThat(context.isMessageHistory()).isFalse();
+            assertThat(context.isLoadTypeConverters()).isFalse();
+            main.stop();
+        }));
+
+        runtime.run();
     }
 }
