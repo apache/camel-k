@@ -91,22 +91,22 @@ func installKnative(namespace string, collection *kubernetes.Collection) error {
 }
 
 // Platform installs the platform custom resource
-func Platform(namespace string, registry string, organization string, pushSecret string) error {
+func Platform(namespace string, registry string, organization string, pushSecret string) (*v1alpha1.IntegrationPlatform, error) {
 	return PlatformOrCollect(namespace, registry, organization, pushSecret, nil)
 }
 
 // PlatformOrCollect --
-func PlatformOrCollect(namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) error {
+func PlatformOrCollect(namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
 	if err := waitForPlatformCRDAvailable(namespace, 25*time.Second); err != nil {
-		return err
+		return nil, err
 	}
 	isOpenshift, err := openshift.IsOpenShift()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	platformObject, err := kubernetes.LoadResourceFromYaml(deploy.Resources["platform-cr.yaml"])
 	if err != nil {
-		return err
+		return nil, err
 	}
 	pl := platformObject.(*v1alpha1.IntegrationPlatform)
 
@@ -117,10 +117,10 @@ func PlatformOrCollect(namespace string, registry string, organization string, p
 			// because the operator is not allowed to look into the "kube-system" namespace
 			minishiftRegistry, err := minishift.FindRegistry()
 			if err != nil {
-				return err
+				return nil, err
 			}
 			if minishiftRegistry == nil {
-				return errors.New("cannot find automatically a registry where to push images")
+				return nil, errors.New("cannot find automatically a registry where to push images")
 			}
 			registry = *minishiftRegistry
 		}
@@ -131,13 +131,13 @@ func PlatformOrCollect(namespace string, registry string, organization string, p
 
 	var knativeInstalled bool
 	if knativeInstalled, err = knative.IsInstalled(); err != nil {
-		return err
+		return nil, err
 	}
 	if knativeInstalled {
 		pl.Spec.Profile = v1alpha1.TraitProfileKnative
 	}
 
-	return RuntimeObjectOrCollect(namespace, collection, pl)
+	return pl, nil
 }
 
 func waitForPlatformCRDAvailable(namespace string, timeout time.Duration) error {

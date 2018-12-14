@@ -2694,6 +2694,9 @@ metadata:
   name: camel-k
   labels:
     app: "camel-k"
+spec:
+  build:
+    camelVersion: "2.23.0"
 
 `
 	Resources["platform-integration-context-groovy.yaml"] =

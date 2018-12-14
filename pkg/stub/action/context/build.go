@@ -52,6 +52,10 @@ func (action *buildAction) CanHandle(context *v1alpha1.IntegrationContext) bool 
 }
 
 func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
+	p, err := platform.GetCurrentPlatform(context.Namespace)
+	if err != nil {
+		return err
+	}
 	b, err := platform.GetPlatformBuilder(action.Context, context.Namespace)
 	if err != nil {
 		return err
@@ -61,10 +65,15 @@ func (action *buildAction) Handle(context *v1alpha1.IntegrationContext) error {
 		return err
 	}
 
+	// assume there's no duplication nor conflict for now
+	repositories := make([]string, 0, len(context.Spec.Repositories)+len(p.Spec.Build.Repositories))
+	repositories = append(repositories, context.Spec.Repositories...)
+	repositories = append(repositories, p.Spec.Build.Repositories...)
+
 	r := builder.Request{
 		Meta:         context.ObjectMeta,
 		Dependencies: context.Spec.Dependencies,
-		Repositories: context.Spec.Repositories,
+		Repositories: repositories,
 		Steps:        env.Steps,
 		BuildDir:     env.BuildDir,
 		Platform:     env.Platform.Spec,
