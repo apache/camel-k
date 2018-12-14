@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
-	"os"
 	"time"
 
 	"github.com/apache/camel-k/pkg/install"
@@ -49,7 +48,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVarP(&options.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().StringVar(&options.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&options.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
-	cmd.ParseFlags(os.Args)
 
 	return &cmd
 }
@@ -124,13 +122,13 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 	lst := collection.AsKubernetesList()
 	switch o.outputFormat {
 	case "yaml":
-		data, err := kubernetes.SerializeToYAML(lst)
+		data, err := kubernetes.ToYAML(lst)
 		if err != nil {
 			return err
 		}
 		fmt.Print(string(data))
 	case "json":
-		data, err := kubernetes.SerializeToJSON(lst)
+		data, err := kubernetes.ToJSON(lst)
 		if err != nil {
 			return err
 		}
