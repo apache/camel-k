@@ -17,7 +17,7 @@ build-compile-integration-tests:
 build-runtime:
 	./mvnw clean install -f ./runtime/pom.xml
 
-release: clean prepare-release build images-build images-push cross-compile git-tag
+release: clean prepare-release build images-build images-push cross-compile package-examples git-tag
 
 prepare-release:
 	./build/prepare_release.sh
@@ -29,6 +29,9 @@ increment-snapshot:
 
 cross-compile:
 	./build/cross_compile.sh
+
+package-examples:
+	./build/package_examples.sh
 
 git-tag:
 	./build/git_tag.sh
@@ -75,4 +78,4 @@ check-integration:
 lint:
 	golangci-lint run
 
-.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile new-version git-tag increment-snapshot install-minishift
+.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile package-examples new-version git-tag increment-snapshot install-minishift
