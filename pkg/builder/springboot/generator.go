@@ -18,44 +18,33 @@ limitations under the License.
 package springboot
 
 import (
-	"encoding/xml"
 	"fmt"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/version"
 )
 
 // GenerateProject --
 func GenerateProject(ctx *builder.Context) error {
-	ctx.Project = maven.Project{
-		XMLName:           xml.Name{Local: "project"},
-		XMLNs:             "http://maven.apache.org/POM/4.0.0",
-		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
-		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-		ModelVersion:      "4.0.0",
-		GroupID:           "org.apache.camel.k.integration",
-		ArtifactID:        "camel-k-integration",
-		Version:           version.Version,
-		DependencyManagement: maven.DependencyManagement{
-			Dependencies: maven.Dependencies{
-				Dependencies: []maven.Dependency{
-					{
-						//TODO: camel version should be retrieved from an external request or provided as static version
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-bom",
-						Version:    camel.Version,
-						Type:       "pom",
-						Scope:      "import",
-					},
-				},
-			},
-		},
-		Dependencies: maven.Dependencies{
-			Dependencies: make([]maven.Dependency, 0),
-		},
+	ctx.Project = builder.NewProject(ctx)
+
+	//
+	// Repositories
+	//
+
+	ctx.Project.Repositories = maven.Repositories{
+		Repositories: make([]maven.Repository, 0, len(ctx.Request.Repositories)),
+	}
+
+	for i, r := range ctx.Request.Repositories {
+		repo := maven.NewRepository(r)
+		if repo.ID == "" {
+			repo.ID = fmt.Sprintf("repo-%03d", i)
+		}
+
+		ctx.Project.Repositories.Repositories = append(ctx.Project.Repositories.Repositories, repo)
 	}
 
 	//
@@ -110,7 +99,7 @@ func GenerateProject(ctx *builder.Context) error {
 			deps.Add(maven.Dependency{
 				GroupID:    "org.apache.camel",
 				ArtifactID: artifactID + "-starter",
-				Version:    camel.Version,
+				Version:    ctx.Request.Platform.Build.CamelVersion,
 				Exclusions: &maven.Exclusions{
 					Exclusions: []maven.Exclusion{
 						{

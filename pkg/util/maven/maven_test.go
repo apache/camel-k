@@ -114,10 +114,10 @@ func TestPomGeneration(t *testing.T) {
 				{
 					ID:  "central",
 					URL: "https://repo.maven.apache.org/maven2",
-					Snapshots: Snapshots{
+					Snapshots: RepositoryPolicy{
 						Enabled: false,
 					},
-					Releases: Releases{
+					Releases: RepositoryPolicy{
 						Enabled:      true,
 						UpdatePolicy: "never",
 					},
@@ -129,10 +129,10 @@ func TestPomGeneration(t *testing.T) {
 				{
 					ID:  "central",
 					URL: "https://repo.maven.apache.org/maven2",
-					Snapshots: Snapshots{
+					Snapshots: RepositoryPolicy{
 						Enabled: false,
 					},
-					Releases: Releases{
+					Releases: RepositoryPolicy{
 						Enabled:      true,
 						UpdatePolicy: "never",
 					},

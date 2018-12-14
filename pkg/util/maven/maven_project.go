@@ -32,6 +32,7 @@ type Project struct {
 	GroupID              string               `xml:"groupId"`
 	ArtifactID           string               `xml:"artifactId"`
 	Version              string               `xml:"version"`
+	Properties           Properties           `xml:"properties,omitempty"`
 	DependencyManagement DependencyManagement `xml:"dependencyManagement"`
 	Dependencies         Dependencies         `xml:"dependencies"`
 	Repositories         Repositories         `xml:"repositories"`
@@ -118,11 +119,11 @@ type PluginRepositories struct {
 
 // Repository --
 type Repository struct {
-	ID        string    `xml:"id"`
-	Name      string    `xml:"name,omitempty"`
-	URL       string    `xml:"url"`
-	Snapshots Snapshots `xml:"snapshots,omitempty"`
-	Releases  Releases  `xml:"releases,omitempty"`
+	ID        string           `xml:"id"`
+	Name      string           `xml:"name,omitempty"`
+	URL       string           `xml:"url"`
+	Snapshots RepositoryPolicy `xml:"snapshots,omitempty"`
+	Releases  RepositoryPolicy `xml:"releases,omitempty"`
 }
 
 //
@@ -138,10 +139,10 @@ type Repository struct {
 func NewRepository(repo string) Repository {
 	r := Repository{
 		URL: repo,
-		Releases: Releases{
+		Releases: RepositoryPolicy{
 			Enabled: true,
 		},
-		Snapshots: Snapshots{
+		Snapshots: RepositoryPolicy{
 			Enabled: false,
 		},
 	}
@@ -152,6 +153,8 @@ func NewRepository(repo string) Repository {
 		for _, attribute := range strings.Split(repo[idx+1:], "@") {
 			if attribute == "snapshots" {
 				r.Snapshots.Enabled = true
+			} else if attribute == "noreleases" {
+				r.Releases.Enabled = false
 			} else if strings.HasPrefix(attribute, "id=") {
 				r.ID = attribute[3:]
 			}
@@ -161,14 +164,8 @@ func NewRepository(repo string) Repository {
 	return r
 }
 
-// Snapshots --
-type Snapshots struct {
-	Enabled      bool   `xml:"enabled"`
-	UpdatePolicy string `xml:"updatePolicy,omitempty"`
-}
-
-// Releases --
-type Releases struct {
+// RepositoryPolicy --
+type RepositoryPolicy struct {
 	Enabled      bool   `xml:"enabled"`
 	UpdatePolicy string `xml:"updatePolicy,omitempty"`
 }
@@ -208,19 +205,28 @@ type Goals struct {
 	Goals []string `xml:"goal"`
 }
 
-/*
- <plugin>
-        <groupId>org.apache.camel.k</groupId>
-        <artifactId>camel-k-runtime-dependency-lister</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
-        <executions>
-          <execution>
-            <id>generate-dependency-list</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>generate-dependency-list</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-*/
+// Properties --
+type Properties map[string]string
+
+type propertiesEntry struct {
+	XMLName xml.Name
+	Value   string `xml:",chardata"`
+}
+
+// MarshalXML --
+func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if len(m) == 0 {
+		return nil
+	}
+
+	err := e.EncodeToken(start)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range m {
+		e.Encode(propertiesEntry{XMLName: xml.Name{Local: k}, Value: v})
+	}
+
+	return e.EncodeToken(start.End())
+}
