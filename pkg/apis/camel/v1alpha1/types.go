@@ -289,6 +289,9 @@ type IntegrationPlatformBuildSpec struct {
 	Registry        string                                  `json:"registry,omitempty"`
 	Organization    string                                  `json:"organization,omitempty"`
 	PushSecret      string                                  `json:"pushSecret,omitempty"`
+	CamelVersion    string                                  `json:"camelVersion,omitempty"`
+	Properties      map[string]string                       `json:"properties,omitempty"`
+	Repositories    []string                                `json:"repositories,omitempty"`
 }
 
 // IntegrationPlatformBuildPublishStrategy enumerates all implemented build strategies

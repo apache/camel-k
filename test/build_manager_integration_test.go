@@ -28,6 +28,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/stretchr/testify/assert"
@@ -42,6 +43,11 @@ func TestBuildManagerBuild(t *testing.T) {
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
+		},
+		Platform: v1alpha1.IntegrationPlatformSpec{
+			Build: v1alpha1.IntegrationPlatformBuildSpec{
+				CamelVersion: "2.23.0",
+			},
 		},
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-core",
@@ -78,6 +84,11 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
+		},
+		Platform: v1alpha1.IntegrationPlatformSpec{
+			Build: v1alpha1.IntegrationPlatformBuildSpec{
+				CamelVersion: "2.23.0",
+			},
 		},
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-cippalippa",

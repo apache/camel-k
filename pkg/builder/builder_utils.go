@@ -18,7 +18,11 @@ limitations under the License.
 package builder
 
 import (
+	"encoding/xml"
 	"os"
+
+	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/version"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
@@ -40,4 +44,35 @@ func ArtifactIDs(artifacts []v1alpha1.Artifact) []string {
 	}
 
 	return result
+}
+
+// NewProject --
+func NewProject(ctx *Context) maven.Project {
+	return maven.Project{
+		XMLName:           xml.Name{Local: "project"},
+		XMLNs:             "http://maven.apache.org/POM/4.0.0",
+		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
+		ModelVersion:      "4.0.0",
+		GroupID:           "org.apache.camel.k.integration",
+		ArtifactID:        "camel-k-integration",
+		Version:           version.Version,
+		Properties:        ctx.Request.Platform.Build.Properties,
+		DependencyManagement: maven.DependencyManagement{
+			Dependencies: maven.Dependencies{
+				Dependencies: []maven.Dependency{
+					{
+						GroupID:    "org.apache.camel",
+						ArtifactID: "camel-bom",
+						Version:    ctx.Request.Platform.Build.CamelVersion,
+						Type:       "pom",
+						Scope:      "import",
+					},
+				},
+			},
+		},
+		Dependencies: maven.Dependencies{
+			Dependencies: make([]maven.Dependency, 0),
+		},
+	}
 }

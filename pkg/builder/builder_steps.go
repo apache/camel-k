@@ -18,7 +18,6 @@ limitations under the License.
 package builder
 
 import (
-	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -32,7 +31,6 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/tar"
 
 	"gopkg.in/yaml.v2"
@@ -47,33 +45,7 @@ import (
 
 // GenerateProject --
 func GenerateProject(ctx *Context) error {
-	ctx.Project = maven.Project{
-		XMLName:           xml.Name{Local: "project"},
-		XMLNs:             "http://maven.apache.org/POM/4.0.0",
-		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
-		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-		ModelVersion:      "4.0.0",
-		GroupID:           "org.apache.camel.k.integration",
-		ArtifactID:        "camel-k-integration",
-		Version:           version.Version,
-		DependencyManagement: maven.DependencyManagement{
-			Dependencies: maven.Dependencies{
-				Dependencies: []maven.Dependency{
-					{
-						//TODO: camel version should be retrieved from an external request or provided as static version
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-bom",
-						Version:    camel.Version,
-						Type:       "pom",
-						Scope:      "import",
-					},
-				},
-			},
-		},
-		Dependencies: maven.Dependencies{
-			Dependencies: make([]maven.Dependency, 0),
-		},
-	}
+	ctx.Project = NewProject(ctx)
 
 	//
 	// Repositories

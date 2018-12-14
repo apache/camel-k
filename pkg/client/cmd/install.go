@@ -19,11 +19,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 
+	"strings"
 	"time"
 
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -48,6 +49,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVarP(&options.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().StringVar(&options.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&options.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
+	cmd.Flags().StringSliceVar(&options.repositories, "repository", nil, "Add a maven repository")
+	cmd.Flags().StringSliceVarP(&options.properties, "property", "p", nil, "Add a camel property")
+	cmd.Flags().StringVar(&options.camelVersion, "camel-version", "", "Set the camel version")
 
 	return &cmd
 }
@@ -61,6 +65,9 @@ type installCmdOptions struct {
 	outputFormat     string
 	organization     string
 	pushSecret       string
+	camelVersion     string
+	repositories     []string
+	properties       []string
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
@@ -94,7 +101,30 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		err = install.PlatformOrCollect(namespace, o.registry, o.organization, o.pushSecret, collection)
+		platform, err := install.PlatformOrCollect(namespace, o.registry, o.organization, o.pushSecret, collection)
+		if err != nil {
+			return err
+		}
+
+		if len(o.properties) > 0 {
+			platform.Spec.Build.Properties = make(map[string]string)
+
+			for _, property := range o.properties {
+				kv := strings.Split(property, "=")
+
+				if len(kv) == 2 {
+					platform.Spec.Build.Properties[kv[0]] = kv[1]
+				}
+			}
+		}
+		if len(o.repositories) > 0 {
+			platform.Spec.Build.Repositories = o.repositories
+		}
+		if o.camelVersion != "" {
+			platform.Spec.Build.CamelVersion = o.camelVersion
+		}
+
+		err = install.RuntimeObjectOrCollect(namespace, collection, platform)
 		if err != nil {
 			return err
 		}
