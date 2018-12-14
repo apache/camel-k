@@ -337,7 +337,7 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 	case "":
 		// continue..
 	case "yaml":
-		data, err := kubernetes.SerializeToYAML(&integration)
+		data, err := kubernetes.ToYAML(&integration)
 		if err != nil {
 			return nil, err
 		}
@@ -345,7 +345,7 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 		return nil, nil
 
 	case "json":
-		data, err := kubernetes.SerializeToJSON(&integration)
+		data, err := kubernetes.ToJSON(&integration)
 		if err != nil {
 			return nil, err
 		}
