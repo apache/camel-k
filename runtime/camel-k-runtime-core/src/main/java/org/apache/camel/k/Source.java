@@ -70,7 +70,7 @@ public class Source {
 
         Language language = ObjectHelper.isNotEmpty(languageName)
             ? Language.fromLanguageName(languageName)
-            : Language.fromResource(location);
+            : Language.fromLocation(location);
 
         return new Source(location, language, compression);
     }

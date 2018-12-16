@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.k.RoutesLoader;
+import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Source;
 import org.apache.camel.k.jvm.loader.JavaClassLoader;
 import org.apache.camel.k.jvm.loader.JavaScriptLoader;
@@ -38,10 +39,23 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 public class RoutesLoadersTest {
 
     @Test
+    public void testLoaderFromRegistry() throws Exception {
+        RoutesLoader myLoader = new JavaClassLoader();
+        RuntimeRegistry registry = new Runtime.Registry();
+        registry.bind("my-loader", myLoader);
+
+        Source source = Source.create("classpath:" + MyRoutes.class.getName() + ".class");
+        RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(registry), source);
+
+        assertThat(loader).isInstanceOf(JavaClassLoader.class);
+        assertThat(loader).isSameAs(myLoader);
+    }
+
+    @Test
     public void testLoadClass() throws Exception {
         Source source = Source.create("classpath:" + MyRoutes.class.getName() + ".class");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
+        RouteBuilder builder = loader.load(new Runtime.Registry(), source);
 
         assertThat(loader).isInstanceOf(JavaClassLoader.class);
         assertThat(builder).isNotNull();
@@ -58,7 +72,7 @@ public class RoutesLoadersTest {
     public void testLoadJava() throws Exception {
         Source source = Source.create("classpath:MyRoutes.java");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
+        RouteBuilder builder = loader.load(new Runtime.Registry(), source);
 
         assertThat(loader).isInstanceOf(JavaSourceLoader.class);
         assertThat(builder).isNotNull();
@@ -75,7 +89,7 @@ public class RoutesLoadersTest {
     public void testLoadJavaWithNestedClass() throws Exception {
         Source source = Source.create("classpath:MyRoutesWithNestedClass.java");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
+        RouteBuilder builder = loader.load(new Runtime.Registry(), source);
 
         assertThat(loader).isInstanceOf(JavaSourceLoader.class);
         assertThat(builder).isNotNull();
@@ -94,7 +108,7 @@ public class RoutesLoadersTest {
     public void testLoadJavaScript() throws Exception {
         Source source = Source.create("classpath:routes.js");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
+        RouteBuilder builder = loader.load(new Runtime.Registry(), source);
 
         assertThat(loader).isInstanceOf(JavaScriptLoader.class);
         assertThat(builder).isNotNull();
@@ -111,7 +125,7 @@ public class RoutesLoadersTest {
     public void testLoadCompressedRoute() throws Exception {
         Source source = Source.create("classpath:routes-compressed.js.gz.b64?language=js&compression=true");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
+        RouteBuilder builder = loader.load(new Runtime.Registry(), source);
 
         assertThat(loader).isInstanceOf(JavaScriptLoader.class);
         assertThat(builder).isNotNull();
@@ -128,7 +142,7 @@ public class RoutesLoadersTest {
     public void testLoadJavaScriptWithCustomExtension() throws Exception {
         Source source = Source.create("classpath:routes.mytype?language=js");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
+        RouteBuilder builder = loader.load(new Runtime.Registry(), source);
 
         assertThat(loader).isInstanceOf(JavaScriptLoader.class);
         assertThat(builder).isNotNull();
@@ -145,7 +159,7 @@ public class RoutesLoadersTest {
     public void testLoadXml() throws Exception {
         Source source = Source.create("classpath:routes.xml");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
-        RouteBuilder builder = loader.load(new SimpleRuntimeRegistry(), source);
+        RouteBuilder builder = loader.load(new Runtime.Registry(), source);
 
         assertThat(loader).isInstanceOf(XmlLoader.class);
         assertThat(builder).isNotNull();

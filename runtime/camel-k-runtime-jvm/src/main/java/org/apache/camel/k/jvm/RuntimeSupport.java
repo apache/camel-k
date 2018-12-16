@@ -184,6 +184,13 @@ public final class RuntimeSupport {
     }
 
     public static RoutesLoader loaderFor(CamelContext context, Source source) {
+        return  context.getRegistry().findByType(RoutesLoader.class).stream()
+            .filter(rl -> rl.getSupportedLanguages().contains(source.getLanguage()))
+            .findFirst()
+            .orElseGet(() -> lookupLoaderFromResource(context, source));
+    }
+
+    public static RoutesLoader lookupLoaderFromResource(CamelContext context, Source source) {
         final FactoryFinder finder;
         final RoutesLoader loader;
 
