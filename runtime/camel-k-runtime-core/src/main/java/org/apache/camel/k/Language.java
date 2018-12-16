@@ -85,7 +85,7 @@ public enum Language {
         return Unknown;
     }
 
-    public static Language fromResource(String resource) {
+    public static Language fromLocation(String resource) {
         for (Language language: values()) {
             String path = StringUtils.substringAfter(resource, ":");
 
