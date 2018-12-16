@@ -17,8 +17,8 @@
 package org.apache.camel.k.groovy
 
 import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.k.jvm.Runtime
 import org.apache.camel.k.jvm.RuntimeSupport
-import org.apache.camel.k.jvm.SimpleRuntimeRegistry
 import org.apache.camel.k.Source
 import org.apache.camel.model.ToDefinition
 import spock.lang.Specification
@@ -31,7 +31,7 @@ class LoaderTest extends Specification {
 
         when:
             def loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source)
-            def builder = loader.load(new SimpleRuntimeRegistry(), source)
+            def builder = loader.load(new Runtime.Registry(), source)
 
         then:
             loader instanceof GroovyRoutesLoader
