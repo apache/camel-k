@@ -85,6 +85,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		"E.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringVarP(&options.OutputFormat, "output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().BoolVar(&options.Compression, "compression", false, "Enable store source as a compressed binary blob")
+	cmd.Flags().StringSliceVar(&options.Resources, "resource", nil, "Add a resource")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -104,6 +105,7 @@ type runCmdOptions struct {
 	IntegrationName    string
 	Profile            string
 	OutputFormat       string
+	Resources          []string
 	Dependencies       []string
 	Properties         []string
 	ConfigMaps         []string
@@ -247,8 +249,8 @@ func (o *runCmdOptions) syncIntegration(sources []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) createIntegration(args []string) (*v1alpha1.Integration, error) {
-	return o.updateIntegrationCode(args)
+func (o *runCmdOptions) createIntegration(sources []string) (*v1alpha1.Integration, error) {
+	return o.updateIntegrationCode(sources)
 }
 
 func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integration, error) {
@@ -285,25 +287,32 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 	}
 
 	for _, source := range sources {
-		code, err := o.loadCode(source)
+		data, err := o.loadData(source, o.Compression)
 		if err != nil {
 			return nil, err
 		}
 
-		if o.Compression {
-			var b bytes.Buffer
+		integration.Spec.AddSources(v1alpha1.SourceSpec{
+			DataSpec: v1alpha1.DataSpec{
+				Name:        path.Base(source),
+				Content:     data,
+				Compression: o.Compression,
+			},
+		})
+	}
 
-			if err := gzip.Compress(&b, []byte(code)); err != nil {
-				return nil, err
-			}
-
-			code = base64.StdEncoding.EncodeToString(b.Bytes())
+	for _, resource := range o.Resources {
+		data, err := o.loadData(resource, o.Compression)
+		if err != nil {
+			return nil, err
 		}
 
-		integration.Spec.AddSources(v1alpha1.SourceSpec{
-			Name:        path.Base(source),
-			Content:     code,
-			Compression: o.Compression,
+		integration.Spec.AddResources(v1alpha1.ResourceSpec{
+			DataSpec: v1alpha1.DataSpec{
+				Name:        path.Base(resource),
+				Content:     data,
+				Compression: o.Compression,
+			},
 		})
 	}
 
@@ -381,23 +390,39 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 	return &integration, nil
 }
 
-func (*runCmdOptions) loadCode(fileName string) (string, error) {
+func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
+	var content []byte
+	var err error
+
 	if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
-		content, err := ioutil.ReadFile(fileName)
+		content, err = ioutil.ReadFile(fileName)
 		if err != nil {
 			return "", err
 		}
-		return string(content), nil
+	} else {
+		resp, err := http.Get(fileName)
+		if err != nil {
+			return "", err
+		}
+		defer resp.Body.Close()
+
+		content, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	resp, err := http.Get(fileName)
-	if err != nil {
-		return "", err
+	if compress {
+		var b bytes.Buffer
+
+		if err := gzip.Compress(&b, content); err != nil {
+			return "", err
+		}
+
+		return base64.StdEncoding.EncodeToString(b.Bytes()), nil
 	}
-	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	bodyString := string(bodyBytes)
-	return bodyString, err
+
+	return string(content), nil
 }
 
 func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config string) error {

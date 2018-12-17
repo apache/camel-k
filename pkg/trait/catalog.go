@@ -41,6 +41,7 @@ type Catalog struct {
 	tSpringBoot   Trait
 	tIstio        Trait
 	tEnvironment  Trait
+	tClasspath    Trait
 }
 
 // NewCatalog creates a new trait Catalog
@@ -58,6 +59,7 @@ func NewCatalog() *Catalog {
 		tSpringBoot:   newSpringBootTrait(),
 		tIstio:        newIstioTrait(),
 		tEnvironment:  newEnvironmentTrait(),
+		tClasspath:    newClasspathTrait(),
 	}
 }
 
@@ -75,6 +77,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tSpringBoot,
 		c.tIstio,
 		c.tEnvironment,
+		c.tClasspath,
 	}
 }
 
@@ -85,8 +88,9 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tDebug,
 			c.tDependencies,
 			c.tBuilder,
-			c.tSpringBoot,
 			c.tEnvironment,
+			c.tClasspath,
+			c.tSpringBoot,
 			c.tDeployment,
 			c.tService,
 			c.tRoute,
@@ -97,8 +101,9 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tDebug,
 			c.tDependencies,
 			c.tBuilder,
-			c.tSpringBoot,
 			c.tEnvironment,
+			c.tClasspath,
+			c.tSpringBoot,
 			c.tDeployment,
 			c.tService,
 			c.tIngress,
@@ -109,8 +114,9 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tDebug,
 			c.tDependencies,
 			c.tBuilder,
-			c.tSpringBoot,
 			c.tEnvironment,
+			c.tClasspath,
+			c.tSpringBoot,
 			c.tKnative,
 			c.tDeployment,
 			c.tIstio,

@@ -166,7 +166,7 @@ func IncrementalPackager(ctx *Context) error {
 		return StandardPackager(ctx)
 	}
 
-	images, err := ListPublishedImages(ctx.Namespace)
+	images, err := ListPublishedImages(ctx)
 	if err != nil {
 		return err
 	}
@@ -228,33 +228,25 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 		}
 	}
 
-	if ctx.ComputeClasspath && len(ctx.Artifacts) > 0 {
-		cp := ""
-		for _, entry := range ctx.Artifacts {
-			cp += entry.Target + "\n"
-		}
-
-		if err := tarAppender.AddData([]byte(cp), "classpath"); err != nil {
-			return err
-		}
-	}
-
 	ctx.Archive = tarFileName
 
 	return nil
 }
 
 // ListPublishedImages --
-func ListPublishedImages(namespace string) ([]PublishedImage, error) {
+func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	list := v1alpha1.NewIntegrationContextList()
 
-	err := sdk.List(namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
+	err := sdk.List(context.Namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
 	if err != nil {
 		return nil, err
 	}
 	images := make([]PublishedImage, 0)
 	for _, ctx := range list.Items {
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
+			continue
+		}
+		if context.ContextFiler != nil && !context.ContextFiler(&ctx) {
 			continue
 		}
 		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != v1alpha1.IntegrationContextTypePlatform {

@@ -50,10 +50,12 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 				Profile: v1alpha1.TraitProfileKnative,
 				Sources: []v1alpha1.SourceSpec{
 					{
-						Language:    v1alpha1.LanguageJavaScript,
-						Name:        "routes.js",
-						Content:     content,
-						Compression: true,
+						DataSpec: v1alpha1.DataSpec{
+							Name:        "routes.js",
+							Content:     content,
+							Compression: true,
+						},
+						Language: v1alpha1.LanguageJavaScript,
 					},
 				},
 			},

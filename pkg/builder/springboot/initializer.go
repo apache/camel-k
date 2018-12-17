@@ -18,14 +18,24 @@ limitations under the License.
 package springboot
 
 import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 )
 
 // Initialize --
 func Initialize(ctx *builder.Context) error {
-	// no need to compute classpath as we do use spring boot own
-	// loader: PropertiesLauncher
-	ctx.ComputeClasspath = false
+	// do not take into account any image that does not have spring-boot
+	// as required dependency to avoid picking up a base image with wrong
+	// classpath or layout
+	ctx.ContextFiler = func(context *v1alpha1.IntegrationContext) bool {
+		for _, i := range context.Spec.Dependencies {
+			if i == "runtime:spring" {
+				return true
+			}
+		}
+
+		return false
+	}
 
 	return nil
 }

@@ -49,12 +49,20 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 		}
 	}
 
+	// Integration resources
+	for _, item := range integration.Spec.Resources {
+		if _, err := hash.Write([]byte(item.Content)); err != nil {
+			return "", err
+		}
+	}
+
 	// Integration dependencies
 	for _, item := range integration.Spec.Dependencies {
 		if _, err := hash.Write([]byte(item)); err != nil {
 			return "", err
 		}
 	}
+
 	// Integration configuration
 	for _, item := range integration.Spec.Configuration {
 		if _, err := hash.Write([]byte(item.String())); err != nil {

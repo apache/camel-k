@@ -126,8 +126,9 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 
 	if !t.ContainerImage {
 
-		// do not create 'source' ConfigMap if a docker images for deployment
+		// do not create 'source' or 'resource' ConfigMap if a docker images for deployment
 		// is required
+
 		for i, s := range e.Integration.Spec.Sources {
 			cm := corev1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
@@ -147,7 +148,32 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 					},
 				},
 				Data: map[string]string{
-					"integration": s.Content,
+					"content": s.Content,
+				},
+			}
+
+			maps = append(maps, &cm)
+		}
+
+		for i, s := range e.Integration.Spec.Resources {
+			cm := corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i),
+					Namespace: e.Integration.Namespace,
+					Labels: map[string]string{
+						"camel.apache.org/integration": e.Integration.Name,
+					},
+					Annotations: map[string]string{
+						"camel.apache.org/resource.name":        s.Name,
+						"camel.apache.org/resource.compression": strconv.FormatBool(s.Compression),
+					},
+				},
+				Data: map[string]string{
+					"content": s.Content,
 				},
 			}
 
@@ -167,8 +193,8 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 func (t *deploymentTrait) getSources(e *Environment) []string {
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
 
-	for i, s := range e.Integration.Spec.Sources {
-		root := fmt.Sprintf("/etc/camel/integrations/%03d", i)
+	for _, s := range e.Integration.Spec.Sources {
+		root := "/etc/camel/sources"
 
 		if t.ContainerImage {
 
@@ -176,7 +202,8 @@ func (t *deploymentTrait) getSources(e *Environment) []string {
 			root = "/deployments/sources"
 		}
 
-		src := path.Join(root, s.Name)
+		srcName := strings.TrimPrefix(s.Name, "/")
+		src := path.Join(root, srcName)
 		src = "file:" + src
 
 		params := make([]string, 0)
@@ -272,7 +299,6 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 
 	vols := make([]corev1.Volume, 0)
 	mnts := make([]corev1.VolumeMount, 0)
-	cnt := 0
 
 	//
 	// Volumes :: Properties
@@ -311,26 +337,48 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		// do not need to mount any 'source' ConfigMap to the pod
 
 		for i, s := range e.Integration.Spec.Sources {
+			cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
+			refName := fmt.Sprintf("integration-source-%03d", i)
+			resName := strings.TrimPrefix(s.Name, "/")
+
 			vols = append(vols, corev1.Volume{
-				Name: fmt.Sprintf("integration-source-%03d", i),
+				Name: refName,
 				VolumeSource: corev1.VolumeSource{
 					ConfigMap: &corev1.ConfigMapVolumeSource{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
-						},
-						Items: []corev1.KeyToPath{
-							{
-								Key:  "integration",
-								Path: strings.TrimPrefix(s.Name, "/"),
-							},
+							Name: cmName,
 						},
 					},
 				},
 			})
 
 			mnts = append(mnts, corev1.VolumeMount{
-				Name:      fmt.Sprintf("integration-source-%03d", i),
-				MountPath: fmt.Sprintf("/etc/camel/integrations/%03d", i),
+				Name:      refName,
+				MountPath: path.Join("/etc/camel/sources", resName),
+				SubPath:   "content",
+			})
+		}
+
+		for i, r := range e.Integration.Spec.Resources {
+			cmName := fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i)
+			refName := fmt.Sprintf("integration-resource-%03d", i)
+			resName := strings.TrimPrefix(r.Name, "/")
+
+			vols = append(vols, corev1.Volume{
+				Name: refName,
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: cmName,
+						},
+					},
+				},
+			})
+
+			mnts = append(mnts, corev1.VolumeMount{
+				Name:      refName,
+				MountPath: path.Join("/etc/camel/resources", resName),
+				SubPath:   "content",
 			})
 		}
 	}
@@ -340,10 +388,10 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	//
 
 	VisitConfigurations("configmap", e.Context, e.Integration, func(cmName string) {
-		cnt++
+		refName := "integration-cm-" + strings.ToLower(cmName)
 
 		vols = append(vols, corev1.Volume{
-			Name: "integration-cm-" + cmName,
+			Name: refName,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{
@@ -354,8 +402,8 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		})
 
 		mnts = append(mnts, corev1.VolumeMount{
-			Name:      "integration-cm-" + cmName,
-			MountPath: fmt.Sprintf("/etc/camel/conf.d/%03d_%s", cnt, cmName),
+			Name:      refName,
+			MountPath: path.Join("/etc/camel/conf.d", refName),
 		})
 	})
 
@@ -364,10 +412,10 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	//
 
 	VisitConfigurations("secret", e.Context, e.Integration, func(secretName string) {
-		cnt++
+		refName := "integration-secret-" + strings.ToLower(secretName)
 
 		vols = append(vols, corev1.Volume{
-			Name: "integration-secret-" + secretName,
+			Name: refName,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: secretName,
@@ -376,8 +424,8 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		})
 
 		mnts = append(mnts, corev1.VolumeMount{
-			Name:      "integration-secret-" + secretName,
-			MountPath: fmt.Sprintf("/etc/camel/conf.d/%03d_%s", cnt, secretName),
+			Name:      refName,
+			MountPath: path.Join("/etc/camel/conf.d", refName),
 		})
 	})
 
