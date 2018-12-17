@@ -26,7 +26,9 @@ import (
 
 func TestLanguageJavaSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name: "Request.java",
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+		},
 	}
 	meta := Extract(code)
 	assert.Equal(t, v1alpha1.LanguageJavaSource, meta.Language)
@@ -34,7 +36,9 @@ func TestLanguageJavaSource(t *testing.T) {
 
 func TestLanguageAlreadySet(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+		},
 		Language: v1alpha1.LanguageJavaScript,
 	}
 	meta := Extract(code)

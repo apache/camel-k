@@ -26,9 +26,9 @@ import (
 
 func TestJava1(t *testing.T) {
 	source := v1alpha1.SourceSpec{
-		Name:     "test",
-		Language: v1alpha1.LanguageJavaSource,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "test",
+			Content: `
 			import org.apache.camel.builder.RouteBuilder;
 
 			public class Sample extends RouteBuilder {
@@ -40,6 +40,8 @@ func TestJava1(t *testing.T) {
   				}
 			}
 		`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
 	}
 
 	metadata := Extract(source)
@@ -51,9 +53,9 @@ func TestJava1(t *testing.T) {
 
 func TestJava2(t *testing.T) {
 	source := v1alpha1.SourceSpec{
-		Name:     "test",
-		Language: v1alpha1.LanguageJavaSource,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "test",
+			Content: `
 			import org.apache.camel.builder.RouteBuilder;
 
 			public class Sample extends RouteBuilder {
@@ -71,6 +73,8 @@ func TestJava2(t *testing.T) {
   				}
 			}
 		`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
 	}
 
 	metadata := Extract(source)
@@ -84,9 +88,9 @@ func TestJava2(t *testing.T) {
 
 func TestGroovy1(t *testing.T) {
 	source := v1alpha1.SourceSpec{
-		Name:     "test",
-		Language: v1alpha1.LanguageGroovy,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "test",
+			Content: `
 			
 		  	from( "timer:tick")
 		    	.setBody().constant("aa")
@@ -97,6 +101,8 @@ func TestGroovy1(t *testing.T) {
 		    	.setBody().constant("aa")
 				.to('uri:3')
 		`,
+		},
+		Language: v1alpha1.LanguageGroovy,
 	}
 
 	metadata := Extract(source)
@@ -111,10 +117,9 @@ func TestGroovy1(t *testing.T) {
 
 func TestGroovy2(t *testing.T) {
 	source := v1alpha1.SourceSpec{
-		Name:     "test",
-		Language: v1alpha1.LanguageGroovy,
-		Content: `
-			
+		DataSpec: v1alpha1.DataSpec{
+			Name: "test",
+			Content: `			
 			rest().get("/")
 				.to   ('log:info?skipBodyLineSeparator=false').to( 'http://url' )
 						.toD('dyn:1')
@@ -122,6 +127,8 @@ func TestGroovy2(t *testing.T) {
 						.toD( "dyn:2")
 						.toF( "f:%s", "2")
 		`,
+		},
+		Language: v1alpha1.LanguageGroovy,
 	}
 
 	metadata := Extract(source)
@@ -136,9 +143,9 @@ func TestGroovy2(t *testing.T) {
 
 func TestXml1(t *testing.T) {
 	source := v1alpha1.SourceSpec{
-		Name:     "test",
-		Language: v1alpha1.LanguageXML,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "test",
+			Content: `
 			<routes>
 			    <route id="hello">
         			<from uri="timer:hello?period=3s"/>
@@ -151,6 +158,8 @@ func TestXml1(t *testing.T) {
     			</route>
 			</routes>
 		`,
+		},
+		Language: v1alpha1.LanguageXML,
 	}
 
 	metadata := Extract(source)
@@ -164,9 +173,9 @@ func TestXml1(t *testing.T) {
 
 func TestKotlin1(t *testing.T) {
 	source := v1alpha1.SourceSpec{
-		Name:     "test",
-		Language: v1alpha1.LanguageKotlin,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "test",
+			Content: `
 			
 		  	from( "timer:tick")
 		    	.setBody().constant("aa")
@@ -179,6 +188,8 @@ func TestKotlin1(t *testing.T) {
 				.toD("uri:4")
 				.toF("uri:%s", 5)
 		`,
+		},
+		Language: v1alpha1.LanguageKotlin,
 	}
 
 	metadata := Extract(source)
@@ -195,15 +206,17 @@ func TestKotlin1(t *testing.T) {
 
 func TestJavascript1(t *testing.T) {
 	source := v1alpha1.SourceSpec{
-		Name:     "test",
-		Language: v1alpha1.LanguageJavaScript,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "test",
+			Content: `
 			
 			rest().get("/")
 				.to   ('log:info?skipBodyLineSeparator=false').to( 'http://url' )
 				.toD("uri:2")
 				.toF("uri:%s", "3") 
 		`,
+		},
+		Language: v1alpha1.LanguageJavaScript,
 	}
 
 	metadata := Extract(source)

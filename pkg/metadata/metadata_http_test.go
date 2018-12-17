@@ -26,13 +26,15 @@ import (
 
 func TestHttpJavaSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
-		Language: v1alpha1.LanguageJavaSource,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
 			from("telegram:bots/cippa").to("log:stash");
 			from("undertow:uri").to("log:stash");
 			from("ine:xistent").to("log:stash");
 		`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
 	}
 	meta := Extract(code)
 	assert.True(t, meta.RequiresHTTPService)
@@ -41,13 +43,16 @@ func TestHttpJavaSource(t *testing.T) {
 
 func TestHttpOnlyJavaSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
-		Language: v1alpha1.LanguageJavaSource,
-		Content: `
+
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
 			from("direct:bots/cippa").to("log:stash");
 			from("undertow:uri").to("log:stash");
 			from("seda:path").to("log:stash");
 		`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
 	}
 	meta := Extract(code)
 	assert.True(t, meta.RequiresHTTPService)
@@ -56,12 +61,14 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 
 func TestHttpOnlyJavaSourceRest(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
-		Language: v1alpha1.LanguageJavaSource,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
 			from("direct:bots/cippa").to("log:stash");
 			rest().get("").to("log:stash");
 		`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
 	}
 	meta := Extract(code)
 	assert.True(t, meta.RequiresHTTPService)
@@ -70,12 +77,14 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 
 func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
-		Language: v1alpha1.LanguageJavaSource,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
 			from("vm:bots/cippa").to("log:stash");
 			rest( ).get("").to("log:stash");
 		`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
 	}
 	meta := Extract(code)
 	assert.True(t, meta.RequiresHTTPService)
@@ -84,13 +93,15 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 
 func TestNoHttpGroovySource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.groovy",
-		Language: v1alpha1.LanguageGroovy,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.groovy",
+			Content: `
 			from('direct:bots/cippa').to("log:stash");
 			from('teelgram:uri').to("log:stash");
 			from('seda:path').to("log:stash");
 		`,
+		},
+		Language: v1alpha1.LanguageGroovy,
 	}
 	meta := Extract(code)
 	assert.False(t, meta.RequiresHTTPService)
@@ -99,13 +110,15 @@ func TestNoHttpGroovySource(t *testing.T) {
 
 func TestHttpOnlyGroovySource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.groovy",
-		Language: v1alpha1.LanguageGroovy,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.groovy",
+			Content: `
 			from('direct:bots/cippa').to("log:stash");
 			from('undertow:uri').to("log:stash");
 			from('seda:path').to("log:stash");
 		`,
+		},
+		Language: v1alpha1.LanguageGroovy,
 	}
 	meta := Extract(code)
 	assert.True(t, meta.RequiresHTTPService)
@@ -114,13 +127,15 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 
 func TestHttpXMLSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "routes.xml",
-		Language: v1alpha1.LanguageXML,
-		Content: `
+		DataSpec: v1alpha1.DataSpec{
+			Name: "routes.xml",
+			Content: `
 			<from uri="telegram:ciao" />
 			<rest path="/">
 			</rest>
 		`,
+		},
+		Language: v1alpha1.LanguageXML,
 	}
 	meta := Extract(code)
 	assert.True(t, meta.RequiresHTTPService)
@@ -129,13 +144,16 @@ func TestHttpXMLSource(t *testing.T) {
 
 func TestHttpOnlyXMLSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "routes.xml",
-		Language: v1alpha1.LanguageXML,
-		Content: `
+
+		DataSpec: v1alpha1.DataSpec{
+			Name: "routes.xml",
+			Content: `
 			<from uri="direct:ciao" />
 			<rest path="/">
 			</rest>
 		`,
+		},
+		Language: v1alpha1.LanguageXML,
 	}
 	meta := Extract(code)
 	assert.True(t, meta.RequiresHTTPService)
@@ -145,20 +163,25 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 func TestMultilangHTTPOnlySource(t *testing.T) {
 	codes := []v1alpha1.SourceSpec{
 		{
-			Name:     "routes.xml",
-			Language: v1alpha1.LanguageXML,
-			Content: `
+			DataSpec: v1alpha1.DataSpec{
+				Name: "routes.xml",
+				Content: `
 				<from uri="direct:ciao" />
 				<rest path="/">
 				</rest>
 			`,
+			},
+			Language: v1alpha1.LanguageXML,
 		},
 		{
-			Name:     "routes2.groovy",
-			Language: v1alpha1.LanguageGroovy,
-			Content: `
+
+			DataSpec: v1alpha1.DataSpec{
+				Name: "routes2.groovy",
+				Content: `
 				from('seda:in').to('seda:out')
 			`,
+			},
+			Language: v1alpha1.LanguageGroovy,
 		},
 	}
 	meta := ExtractAll(codes)
@@ -169,21 +192,27 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 func TestMultilangHTTPSource(t *testing.T) {
 	codes := []v1alpha1.SourceSpec{
 		{
-			Name:     "routes.xml",
-			Language: v1alpha1.LanguageXML,
-			Content: `
+
+			DataSpec: v1alpha1.DataSpec{
+				Name: "routes.xml",
+				Content: `
 				<from uri="direct:ciao" />
 				<rest path="/">
 				</rest>
 			`,
+			},
+			Language: v1alpha1.LanguageXML,
 		},
 		{
-			Name:     "routes2.groovy",
-			Language: v1alpha1.LanguageGroovy,
-			Content: `
+
+			DataSpec: v1alpha1.DataSpec{
+				Name: "routes2.groovy",
+				Content: `
 				from('seda:in').to('seda:out')
 				from('timer:tick').to('log:info')
 			`,
+			},
+			Language: v1alpha1.LanguageGroovy,
 		},
 	}
 	meta := ExtractAll(codes)

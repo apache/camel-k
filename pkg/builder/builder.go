@@ -143,12 +143,11 @@ func (b *defaultBuilder) submit(request Request) {
 	b.request.Store(request.Meta.Name, r)
 
 	c := Context{
-		C:                b.ctx,
-		Path:             builderPath,
-		Namespace:        b.namespace,
-		Request:          request,
-		ComputeClasspath: true,
-		Image:            "fabric8/s2i-java:2.3", // TODO: externalize
+		C:         b.ctx,
+		Path:      builderPath,
+		Namespace: b.namespace,
+		Request:   request,
+		Image:     "fabric8/s2i-java:2.3", // TODO: externalize,
 	}
 
 	if request.Image != "" {
