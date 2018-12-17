@@ -40,6 +40,27 @@ func (spec ConfigurationSpec) String() string {
 //
 // **********************************
 
+// NewSourceSpec --
+func NewSourceSpec(name string, content string, language Language) SourceSpec {
+	return SourceSpec{
+		DataSpec: DataSpec{
+			Name:    name,
+			Content: content,
+		},
+		Language: language,
+	}
+}
+
+// NewResourceSpec --
+func NewResourceSpec(name string, content string, destination string) ResourceSpec {
+	return ResourceSpec{
+		DataSpec: DataSpec{
+			Name:    name,
+			Content: content,
+		},
+	}
+}
+
 // NewIntegrationPlatformList --
 func NewIntegrationPlatformList() IntegrationPlatformList {
 	return IntegrationPlatformList{

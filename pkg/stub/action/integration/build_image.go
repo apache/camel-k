@@ -101,6 +101,12 @@ func (action *buildImageAction) Handle(integration *v1alpha1.Integration) error 
 			Target:  path.Join("sources", source.Name),
 		})
 	}
+	for _, resource := range integration.Spec.Resources {
+		r.Resources = append(r.Resources, builder.Resource{
+			Content: []byte(resource.Content),
+			Target:  path.Join("resources", resource.Name),
+		})
+	}
 
 	res := b.Submit(r)
 

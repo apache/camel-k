@@ -22,6 +22,7 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,10 +43,18 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
-	env, err := trait.Apply(integration, nil)
+	ctxName := integration.Spec.Context
+	ctx := v1alpha1.NewIntegrationContext(integration.Namespace, ctxName)
+
+	if err := sdk.Get(&ctx); err != nil {
+		return errors.Wrapf(err, "unable to find integration context %s, %s", ctxName, err)
+	}
+
+	env, err := trait.Apply(integration, &ctx)
 	if err != nil {
 		return err
 	}
+
 	// TODO we should look for objects that are no longer present in the collection and remove them
 	err = kubernetes.ReplaceResources(env.Resources.Items())
 	if err != nil {
@@ -53,8 +62,8 @@ func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
 	}
 
 	target := integration.DeepCopy()
-	logrus.Info("Integration ", target.Name, " transitioning to state ", v1alpha1.IntegrationPhaseRunning)
 	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
 	return sdk.Update(target)
 }

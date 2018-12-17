@@ -26,14 +26,17 @@ import (
 
 func TestDependenciesJavaSource(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
+			    from("telegram:bots/cippa").to("log:stash");
+			    from("timer:tick").to("amqp:queue");
+			    from("ine:xistent").to("amqp:queue");
+			`,
+		},
 		Language: v1alpha1.LanguageJavaSource,
-		Content: `
-			from("telegram:bots/cippa").to("log:stash");
-			from("timer:tick").to("amqp:queue");
-			from("ine:xistent").to("amqp:queue");
-		`,
 	}
+
 	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
 	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
@@ -41,28 +44,33 @@ func TestDependenciesJavaSource(t *testing.T) {
 
 func TestDependenciesJavaClass(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.class",
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.class",
+			Content: `
+			    from("telegram:bots/cippa").to("log:stash");
+			    from("timer:tick").to("amqp:queue");
+			    from("ine:xistent").to("amqp:queue");
+		    `,
+		},
 		Language: v1alpha1.LanguageJavaClass,
-		Content: `
-			from("telegram:bots/cippa").to("log:stash");
-			from("timer:tick").to("amqp:queue");
-			from("ine:xistent").to("amqp:queue");
-		`,
 	}
+
 	meta := Extract(code)
 	assert.Empty(t, meta.Dependencies)
 }
 
 func TestDependenciesJavaScript(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "source.js",
+		DataSpec: v1alpha1.DataSpec{
+			Name: "source.js",
+			Content: `
+			    from('telegram:bots/cippa').to("log:stash");
+			    from('timer:tick').to("amqp:queue");
+			    from("ine:xistent").to("amqp:queue");
+			    '"'
+		    `,
+		},
 		Language: v1alpha1.LanguageJavaScript,
-		Content: `
-			from('telegram:bots/cippa').to("log:stash");
-			from('timer:tick').to("amqp:queue");
-			from("ine:xistent").to("amqp:queue");
-			'"'
-		`,
 	}
 	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
@@ -71,15 +79,18 @@ func TestDependenciesJavaScript(t *testing.T) {
 
 func TestDependenciesGroovy(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "source.groovy",
+		DataSpec: v1alpha1.DataSpec{
+			Name: "source.groovy",
+			Content: `
+			    from('telegram:bots/cippa').to("log:stash");
+			    from('timer:tick').to("amqp:queue");
+			    from("ine:xistent").to("amqp:queue");
+			    '"'
+		    `,
+		},
 		Language: v1alpha1.LanguageGroovy,
-		Content: `
-			from('telegram:bots/cippa').to("log:stash");
-			from('timer:tick').to("amqp:queue");
-			from("ine:xistent").to("amqp:queue");
-			'"'
-		`,
 	}
+
 	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
 	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
@@ -87,14 +98,17 @@ func TestDependenciesGroovy(t *testing.T) {
 
 func TestDependencies(t *testing.T) {
 	code := v1alpha1.SourceSpec{
-		Name:     "Request.java",
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
+			    from("http4:test").to("log:end");
+			    from("https4:test").to("log:end");
+			    from("twitter-timeline:test").to("mock:end");
+		    `,
+		},
 		Language: v1alpha1.LanguageJavaSource,
-		Content: `
-			from("http4:test").to("log:end");
-			from("https4:test").to("log:end");
-			from("twitter-timeline:test").to("mock:end");
-		`,
 	}
+
 	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
 	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:twitter"}, meta.Dependencies)

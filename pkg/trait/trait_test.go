@@ -176,9 +176,11 @@ func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, script string) *
 			Spec: v1alpha1.IntegrationSpec{
 				Sources: []v1alpha1.SourceSpec{
 					{
-						Name:     "file.groovy",
+						DataSpec: v1alpha1.DataSpec{
+							Name:    "file.groovy",
+							Content: script,
+						},
 						Language: v1alpha1.LanguageGroovy,
-						Content:  script,
 					},
 				},
 			},

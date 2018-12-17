@@ -55,6 +55,7 @@ type Integration struct {
 type IntegrationSpec struct {
 	Replicas      *int32                          `json:"replicas,omitempty"`
 	Sources       []SourceSpec                    `json:"sources,omitempty"`
+	Resources     []ResourceSpec                  `json:"resources,omitempty"`
 	Context       string                          `json:"context,omitempty"`
 	Dependencies  []string                        `json:"dependencies,omitempty"`
 	Profile       TraitProfile                    `json:"profile,omitempty"`
@@ -65,12 +66,17 @@ type IntegrationSpec struct {
 
 // AddSource --
 func (is *IntegrationSpec) AddSource(name string, content string, language Language) {
-	is.Sources = append(is.Sources, SourceSpec{Name: name, Content: content, Language: language})
+	is.Sources = append(is.Sources, NewSourceSpec(name, content, language))
 }
 
 // AddSources --
 func (is *IntegrationSpec) AddSources(sources ...SourceSpec) {
 	is.Sources = append(is.Sources, sources...)
+}
+
+// AddResources --
+func (is *IntegrationSpec) AddResources(resources ...ResourceSpec) {
+	is.Resources = append(is.Resources, resources...)
 }
 
 // AddConfiguration --
@@ -93,12 +99,22 @@ func (is *IntegrationSpec) AddDependency(dependency string) {
 	}
 }
 
+// DataSpec --
+type DataSpec struct {
+	Name        string `json:"name,omitempty"`
+	Content     string `json:"content,omitempty"`
+	Compression bool   `json:"compression,omitempty"`
+}
+
+// ResourceSpec --
+type ResourceSpec struct {
+	DataSpec
+}
+
 // SourceSpec --
 type SourceSpec struct {
-	Name        string   `json:"name,omitempty"`
-	Content     string   `json:"content,omitempty"`
-	Language    Language `json:"language,omitempty"`
-	Compression bool     `json:"compression,omitempty"`
+	DataSpec
+	Language Language `json:"language,omitempty"`
 }
 
 // Language --

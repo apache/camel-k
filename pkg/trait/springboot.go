@@ -23,9 +23,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/envvar"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/pkg/errors"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/springboot"
@@ -52,7 +49,7 @@ func (t *springBootTrait) Configure(e *Environment) (bool, error) {
 	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
 		return true, nil
 	}
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
 		return true, nil
 	}
 	if e.IntegrationInPhase("") {
@@ -68,46 +65,47 @@ func (t *springBootTrait) Apply(e *Environment) error {
 	// Integration
 	//
 
-	if e.Integration != nil && e.Integration.Status.Phase == "" {
+	if e.IntegrationInPhase("") {
 		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:spring-boot")
 
 		// sort the dependencies to get always the same list if they don't change
 		sort.Strings(e.Integration.Spec.Dependencies)
 	}
 
-	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
+	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+		// Remove classpath
+		envvar.Remove(&e.EnvVars, "JAVA_CLASSPATH")
+
 		// Override env vars
 		envvar.SetVal(&e.EnvVars, "JAVA_MAIN_CLASS", "org.springframework.boot.loader.PropertiesLauncher")
 		envvar.SetVal(&e.EnvVars, "LOADER_PATH", "/deployments/dependencies/")
 
-		if e.Integration.Spec.Context != "" {
-			name := e.Integration.Spec.Context
-			ctx := v1alpha1.NewIntegrationContext(e.Integration.Namespace, name)
+		deps := make([]string, 0, 2+len(e.Context.Status.Artifacts))
+		deps = append(deps, "/etc/camel/resources")
+		deps = append(deps, "./resources")
 
-			if err := sdk.Get(&ctx); err != nil {
-				return errors.Wrapf(err, "unable to find integration context %s, %s", ctx.Name, err)
+		for _, artifact := range e.Context.Status.Artifacts {
+			if strings.HasPrefix(artifact.ID, "org.apache.camel.k:camel-k-runtime-spring-boot:") {
+				// do not include runner jar
+				continue
+			}
+			if strings.HasPrefix(artifact.ID, "org.apache.logging.log4j:") {
+				// do not include logging, deps are embedded in runner jar
+				continue
 			}
 
-			deps := make([]string, 0, len(ctx.Status.Artifacts))
-			for _, artifact := range ctx.Status.Artifacts {
-				if strings.HasPrefix(artifact.ID, "org.apache.camel.k:camel-k-runtime-spring-boot:") {
-					// do not include runner jar
-					continue
-				}
-
-				deps = append(deps, artifact.Target)
-			}
-
-			envvar.SetVal(&e.EnvVars, "LOADER_HOME", "/deployments")
-			envvar.SetVal(&e.EnvVars, "LOADER_PATH", strings.Join(deps, ","))
+			deps = append(deps, artifact.Target)
 		}
+
+		envvar.SetVal(&e.EnvVars, "LOADER_HOME", "/deployments")
+		envvar.SetVal(&e.EnvVars, "LOADER_PATH", strings.Join(deps, ","))
 	}
 
 	//
 	// Integration Context
 	//
 
-	if e.Context != nil && e.Context.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding {
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
 		// add custom initialization logic
 		e.Steps = append(e.Steps, builder.NewStep("initialize/spring-boot", builder.InitPhase, springboot.Initialize))
 		e.Steps = append(e.Steps, builder.NewStep("build/compute-boot-dependencies", builder.ProjectBuildPhase+1, springboot.ComputeDependencies))
