@@ -1,0 +1,42 @@
+[[running]]
+= Running
+
+After completing the xref:installation/installation.adoc[installation] you should be connected to a Kubernetes/OpenShift cluster
+and have the "kamel" CLI correctly configured.
+
+Ensure you're connected to the cluster by executing a simple command using the Kubernetes CLI:
+
+```
+kubectl get pod
+```
+
+Just replace `kubectl` with `oc` if you're using OpenShift. If everything is correctly configured you should get a response from the Kuerbetes API
+server (you should see at least the `camel-k-operator` running).
+
+You are now ready to create your first integration using Camel K. Just create a new Groovy file with the following content:
+
+.hello.groovy
+```groovy
+from('timer:tick?period=3s')
+  .setBody().constant('Hello world from Camel K')
+  .to('log:info')
+```
+
+You can run it on the cluster by executing:
+
+```
+kamel run hello.groovy
+```
+
+Integrations can be written in multiple languages. We provide an archive with common examples in the https://github.com/apache/camel-k/releases[release page].
+
+You can change the content of the `hello.groovy` file and execute the command again to see the changes, or use the xref:running/dev-mode.adoc[dev mode] to have even quicker turnaround times.
+
+== Monitoring the Status
+
+Camel K integrations follow a lifecycle composed of several steps before getting into the `Running` state.
+You can check the status of all integrations by executing the following command:
+
+```
+kamel get
+```

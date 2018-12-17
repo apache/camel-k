@@ -1,0 +1,112 @@
+= Writing Integrations in Groovy
+
+An integration written in Groovy looks very similar to a Java one except it can leverages Groovy's language enhancements over Java:
+
+[source,groovy]
+----
+from('timer:tick')
+    .process { it.in.body = 'Hello Camel K!' }
+    .to('log:info')
+----
+
+Camel K extends the Camel Java DSL making it easier to configure the context in which the integration runs using the top level _context_ block
+
+[source,groovy]
+----
+context {
+  // configure the context here
+}
+----
+
+At the moment the enhanced DSL provides a way to bind items to the registry, to configure the components the context creates and some improvements over the REST DSL.
+
+== Registry Configuration
+
+The registry is accessible using the _registry_ block inside the _context_ one:
+
+[source,groovy]
+----
+context {
+    registry {
+      bind "my-cache", Caffeine.newBuilder().build() // <1>
+      bind "my-processor", processor { // <2>
+         it.in.body = 'Hello Camel K!'
+      }
+      bind "my-predicate", predicate { // <3>
+         it.in.body != null
+      }
+    }
+}
+----
+<1> bind a bean to the context
+<2> define a custom processor to be used later in the routes by ref
+<3> define a custom predicate to be used later in the routes by ref
+
+
+== Components Configuration
+
+Components can be configured within the _components_ block inside the _context_ one:
+
+[source,groovy]
+----
+context {
+    components {
+        'seda' { // <1>
+            queueSize = 1234
+            concurrentConsumers = 12
+        }
+
+        'log' { // <2>
+            exchangeFormatter = {
+                'body ==> ' + it.in.body
+            } as org.apache.camel.spi.ExchangeFormatter
+        }
+    }
+}
+----
+<1> configure the properties of the component whit name _seda_
+<2> configure the properties of the component whit name _log_
+
+Setting the property _exchangeFormatter_ looks a little ugly as you have to declare the type of your closure. For demonstration purpose we have created a Groovy extension module that simplify configuring the _exchangeFormatter_ so you can rewrite your DSL as
+
+[source,groovy]
+----
+context {
+    components {
+        ...
+
+        'log' {
+            formatter {
+                'body ==> ' + it.in.body
+            }
+        }
+    }
+}
+----
+
+which is much better.
+
+[TIP]
+====
+You can provide your custom extensions by packaging them in a dependency you declare for your integration.
+====
+
+== Rest Endpoints
+
+Integrations's REST endpoints can be configured using the top level _rest_ block:
+
+[source,groovy]
+----
+rest {
+    configuration { // <1>
+        host = 'my-host'
+        port '9192'
+    }
+
+    path('/my/path') { // <2>
+        // standard Rest DSL
+    }
+}
+----
+<1> Configure the rest engine
+<2> Configure the rest endpoint for the base path '/my/path'

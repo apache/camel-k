@@ -1,0 +1,24 @@
+= Dependencies and Component Resolution
+
+Camel K tries to resolve automatically a wide range of dependencies that are required to run your integration code.
+
+For example, take the following integration:
+
+```
+from("imap://admin@myserver.com")
+  .to("seda:output")
+```
+
+Since the integration has a endpoint starting with the **"imap:" prefix**, Camel K is able to **automatically add the "camel-mail" component** to the list of required dependencies.
+The `seda:` endpoint belongs to `camel-core` that is automatically added to all integrations, so Camel K will not add additional dependencies for it.
+This dependency resolution mechanism is transparent to the user, that will just see the integration running.
+
+Automatic resolution is also a nice feature in xref:running/dev-mode.adoc[dev mode], because you are allowed to add all components you need *without exiting the dev loop*.
+
+You can explicitly add dependency explicitly using the `-d` flag. This is useful when you need to use dependencies that are not included in the Camel catalog. For example:
+
+```
+kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel-mina2 Integration.java
+```
+
+This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).

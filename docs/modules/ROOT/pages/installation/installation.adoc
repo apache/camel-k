@@ -38,4 +38,4 @@ IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you ne
 operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
 For Minishift, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for first-time installation.
 
-You're now ready to xref:running.adoc[run some integrations].
+You're now ready to xref:running/running.adoc[run some integrations].
