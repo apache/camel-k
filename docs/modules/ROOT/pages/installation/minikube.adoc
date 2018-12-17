@@ -16,4 +16,4 @@ After the startup process is completed, you need to **enable the `registry` addo
 minikube addons enable registry
 ```
 
-You can now proceed with the xref:installation/index.adoc#procedure[standard Camel K installation procedure].
+You can now proceed with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].

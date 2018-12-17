@@ -1,0 +1,20 @@
+= Configure Integration Components
+
+Camel components can be configured programmatically (within the integration code) or using properties with the following syntax:
+
+```
+camel.component.${scheme}.${property}=${value}
+```
+
+As example if you want to change the queue size of the seda component, you can use the following property:
+
+```
+camel.component.seda.queueSize=10
+```
+
+For example, you can do it when running the integration from the command line:
+
+```
+kamel run --property camel.component.seda.queueSize=10 examples/routes.groovy
+```
+

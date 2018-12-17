@@ -1,0 +1,23 @@
+[[configuration]]
+= Configure Integrations
+
+Properties associated to an integration can be configured either using a ConfigMap/Secret or by setting using the `--property` flag when running the integration.
+
+The property value can be used inside Camel K integrations using the *property placeholder* mechanism.
+
+The syntax for properties has the form `{{my.property}}`, for example:
+
+[source,groovy]
+.props.groovy
+----
+from('timer:props?period=1s')
+    .log('{{my.message}}')
+----
+
+In order to give a value to the `my.message` property you can pass it using the command line:
+
+```
+kamel run --property my.message="Hello World" examples/props.js
+```
+
+An alternative, is to provide a value using a Kubernetes xref:configuration/configmap-secret.adoc[ConfigMap or Secret]
