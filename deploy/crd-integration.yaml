@@ -6,6 +6,8 @@ metadata:
     app: "camel-k"
 spec:
   group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
   names:
     kind: Integration
     listKind: IntegrationList
@@ -13,5 +15,8 @@ spec:
     singular: integration
     shortNames:
     - it
-  scope: Namespaced
-  version: v1alpha1
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The Integration phase
+      JSONPath: .status.phase
