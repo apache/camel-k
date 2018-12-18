@@ -47,6 +47,10 @@
         <configuration>
           <properties>
             <property>
+              <name>projectVersion</name>
+              <value>${project.version}</value>
+            </property>
+            <property>
               <name>catalogOutputFile</name>
               <value>${project.basedir}/../../deploy/camel-catalog.yaml</value>
             </property>
