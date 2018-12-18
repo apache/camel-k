@@ -108,6 +108,26 @@ catalog.findComponentNames().sort().each { name ->
     }
 }
 
+
+// *******************************
+//
+// Components :: Embedded
+//
+// *******************************
+
+output['artifacts']['camel-knative'] = [:]
+output['artifacts']['camel-knative']['groupId'] = 'org.apache.camel.k'
+output['artifacts']['camel-knative']['artifactId'] = 'camel-knative'
+output['artifacts']['camel-knative']['version'] = projectVersion
+output['artifacts']['camel-knative']['schemes'] = []
+output['artifacts']['camel-knative']['languages'] = []
+output['artifacts']['camel-knative']['dataformats'] = []
+
+output['artifacts']['camel-knative']['schemes'] << [
+    'id': 'knative',
+    'http': true,
+]
+
 // *******************************
 //
 // Languages

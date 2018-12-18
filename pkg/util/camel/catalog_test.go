@@ -20,10 +20,23 @@ package camel
 import (
 	"testing"
 
+	"github.com/apache/camel-k/version"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCatalog(t *testing.T) {
 	assert.NotNil(t, Runtime)
 	assert.NotEmpty(t, Runtime.Artifacts)
+}
+
+func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
+	artifact := Runtime.GetArtifactByScheme("knative")
+	assert.Equal(t, 1, len(artifact.Schemes))
+	assert.Equal(t, "org.apache.camel.k", artifact.GroupID)
+	assert.Equal(t, "camel-knative", artifact.ArtifactID)
+	assert.Equal(t, version.Version, artifact.Version)
+
+	scheme, found := Runtime.GetScheme("knative")
+	assert.True(t, found)
+	assert.True(t, scheme.HTTP)
 }
