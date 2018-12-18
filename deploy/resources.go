@@ -2193,6 +2193,8 @@ metadata:
     app: "camel-k"
 spec:
   group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
   names:
     kind: IntegrationContext
     listKind: IntegrationContextList
@@ -2200,8 +2202,11 @@ spec:
     singular: integrationcontext
     shortNames:
     - ictx
-  scope: Namespaced
-  version: v1alpha1
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The IntegrationContext phase
+      JSONPath: .status.phase
 
 `
 	Resources["crd-integration-platform.yaml"] =
@@ -2214,6 +2219,8 @@ metadata:
     app: "camel-k"
 spec:
   group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
   names:
     kind: IntegrationPlatform
     listKind: IntegrationPlatformList
@@ -2221,8 +2228,11 @@ spec:
     singular: integrationplatform
     shortNames:
     - ip
-  scope: Namespaced
-  version: v1alpha1
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The IntegrationPlatform phase
+      JSONPath: .status.phase
 
 `
 	Resources["crd-integration.yaml"] =
@@ -2235,6 +2245,8 @@ metadata:
     app: "camel-k"
 spec:
   group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
   names:
     kind: Integration
     listKind: IntegrationList
@@ -2242,8 +2254,11 @@ spec:
     singular: integration
     shortNames:
     - it
-  scope: Namespaced
-  version: v1alpha1
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The Integration phase
+      JSONPath: .status.phase
 
 `
 	Resources["cr-example.yaml"] =
