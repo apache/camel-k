@@ -58,6 +58,22 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 						Language: v1alpha1.LanguageJavaScript,
 					},
 				},
+				Resources: []v1alpha1.ResourceSpec{
+					{
+						DataSpec: v1alpha1.DataSpec{
+							Name:        "my-resource.txt",
+							Content:     content,
+							Compression: false,
+						},
+					},
+					{
+						DataSpec: v1alpha1.DataSpec{
+							Name:        "my-resource.gz",
+							Content:     content,
+							Compression: true,
+						},
+					},
+				},
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{
@@ -94,6 +110,22 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 		route := util.LookupEnvVar(vars, "CAMEL_K_ROUTE_000")
 		assert.NotNil(t, route)
 		assert.Equal(t, content, route.Value)
+
+		resource := util.LookupEnvVar(vars, "MY_RESOURCE_TXT")
+		assert.NotNil(t, resource)
+		assert.Equal(t, "env:CAMEL_K_RESOURCE_000", resource.Value)
+
+		resource = util.LookupEnvVar(vars, "CAMEL_K_RESOURCE_000")
+		assert.NotNil(t, resource)
+		assert.Equal(t, content, resource.Value)
+
+		resource = util.LookupEnvVar(vars, "MY_RESOURCE_GZ")
+		assert.NotNil(t, resource)
+		assert.Equal(t, "env:CAMEL_K_RESOURCE_001?compression=true", resource.Value)
+
+		resource = util.LookupEnvVar(vars, "CAMEL_K_RESOURCE_001")
+		assert.NotNil(t, resource)
+		assert.Equal(t, content, resource.Value)
 	})
 
 	assert.True(t, services > 0)

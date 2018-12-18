@@ -16,11 +16,15 @@
  */
 package org.apache.camel.k.jvm;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.camel.util.ResourceHelper;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -46,6 +50,26 @@ public class RuntimeTest {
             assertThat(routes).anyMatch(p -> ObjectHelper.equal("r2", p.getId()));
         } finally {
             runtime.stop();
+        }
+    }
+
+
+    @Test
+    void testLoadResource() throws Exception {
+        RuntimeSupport.configureStreamHandler();
+
+        CamelContext context = new Runtime().getCamelContext();
+
+        try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(context, "platform:my-resource.txt")) {
+            String content = IOUtils.toString(is, Charset.defaultCharset());
+
+            assertThat(content).isEqualTo("value from file resource");
+        }
+
+        try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(context, "platform:my-other-resource.txt")) {
+            String content = IOUtils.toString(is, Charset.defaultCharset());
+
+            assertThat(content).isEqualTo("value from env");
         }
     }
 }

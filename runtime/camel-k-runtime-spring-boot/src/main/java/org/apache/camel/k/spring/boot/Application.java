@@ -42,6 +42,15 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 public class Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
+    static {
+        //
+        // Install a custom protocol handler to support discovering resources
+        // from the platform i.e. in knative, resources are provided through
+        // env var as it is not possible to mount config maps / secrets.
+        //
+        RuntimeSupport.configureStreamHandler();
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
