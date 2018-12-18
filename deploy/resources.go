@@ -1875,6 +1875,15 @@ artifacts:
     - id: zookeeper-master
     languages: []
     dataformats: []
+  camel-knative:
+    groupId: org.apache.camel.k
+    artifactId: camel-knative
+    version: 0.1.1-SNAPSHOT
+    schemes:
+    - id: knative
+      http: true
+    languages: []
+    dataformats: []
   camel-juel:
     groupId: org.apache.camel
     artifactId: camel-juel
