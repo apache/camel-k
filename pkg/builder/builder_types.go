@@ -147,7 +147,7 @@ type Context struct {
 	Artifacts         []v1alpha1.Artifact
 	SelectedArtifacts []v1alpha1.Artifact
 	Archive           string
-	ContextFiler      func(integrationContext *v1alpha1.IntegrationContext) bool
+	ContextFilter     func(integrationContext *v1alpha1.IntegrationContext) bool
 }
 
 // HasRequiredImage --
