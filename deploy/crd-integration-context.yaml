@@ -6,6 +6,8 @@ metadata:
     app: "camel-k"
 spec:
   group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
   names:
     kind: IntegrationContext
     listKind: IntegrationContextList
@@ -13,5 +15,8 @@ spec:
     singular: integrationcontext
     shortNames:
     - ictx
-  scope: Namespaced
-  version: v1alpha1
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The IntegrationContext phase
+      JSONPath: .status.phase
