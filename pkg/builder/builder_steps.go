@@ -246,7 +246,7 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
 			continue
 		}
-		if context.ContextFiler != nil && !context.ContextFiler(&ctx) {
+		if context.ContextFilter != nil && !context.ContextFilter(&ctx) {
 			continue
 		}
 		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != v1alpha1.IntegrationContextTypePlatform {
