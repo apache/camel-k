@@ -34,6 +34,13 @@ public class Application {
         // We now support setting the logging level only
         //
         RuntimeSupport.configureLogging();
+
+        //
+        // Install a custom protocol handler to support discovering resources
+        // from the platform i.e. in knative, resources are provided through
+        // env var as it is not possible to mount config maps / secrets.
+        //
+        RuntimeSupport.configureStreamHandler();
     }
 
     // *******************************

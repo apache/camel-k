@@ -7,5 +7,5 @@
 from('timer:resources')
     .routeId('resources')
     .setBody()
-        .simple("resource:classpath:resources-data.txt")
+        .simple("resource:platform:resources-data.txt")
     .log('file content is: ${body}')
