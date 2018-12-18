@@ -156,6 +156,29 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 		sources = append(sources, src)
 	}
 
+	for i, r := range e.Integration.Spec.Resources {
+		envName := fmt.Sprintf("CAMEL_K_RESOURCE_%03d", i)
+		envvar.SetVal(&environment, envName, r.Content)
+
+		params := make([]string, 0)
+		if r.Compression {
+			params = append(params, "compression=true")
+		}
+
+		envValue := fmt.Sprintf("env:%s", envName)
+		if len(params) > 0 {
+			envValue = fmt.Sprintf("%s?%s", envValue, strings.Join(params, "&"))
+		}
+
+		envName = r.Name
+		envName = strings.ToUpper(envName)
+		envName = strings.Replace(envName, "-", "_", -1)
+		envName = strings.Replace(envName, ".", "_", -1)
+		envName = strings.Replace(envName, " ", "_", -1)
+
+		envvar.SetVal(&environment, envName, envValue)
+	}
+
 	// set env vars needed by the runtime
 	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
 

@@ -96,4 +96,19 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <CAMEL_K_RESOURCE_001>value from env</CAMEL_K_RESOURCE_001>
+                        <MY_OTHER_RESOURCE_TXT>env:CAMEL_K_RESOURCE_001</MY_OTHER_RESOURCE_TXT>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
