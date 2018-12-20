@@ -68,6 +68,9 @@ func decodeComponent(uri string) string {
 		if component.GroupID == "org.apache.camel" && strings.HasPrefix(artifactID, "camel-") {
 			return "camel:" + artifactID[6:]
 		}
+		if component.GroupID == "org.apache.camel.k" && strings.HasPrefix(artifactID, "camel-") {
+			return "camel-k:" + artifactID[6:]
+		}
 		return "mvn:" + component.GroupID + ":" + artifactID + ":" + component.Version
 	}
 	return ""

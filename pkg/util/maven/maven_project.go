@@ -225,7 +225,9 @@ func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}
 
 	for k, v := range m {
-		e.Encode(propertiesEntry{XMLName: xml.Name{Local: k}, Value: v})
+		if err := e.Encode(propertiesEntry{XMLName: xml.Name{Local: k}, Value: v}); err != nil {
+			return err
+		}
 	}
 
 	return e.EncodeToken(start.End())

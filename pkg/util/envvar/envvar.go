@@ -35,7 +35,8 @@ func Remove(vars *[]v1.EnvVar, name string) {
 	v := *vars
 	for i := 0; i < len(v); i++ {
 		if v[i].Name == name {
-			*vars = append(v[:i], v[i+1:]...)
+			v = append(v[:i], v[i+1:]...)
+			*vars = v
 			return
 		}
 	}
