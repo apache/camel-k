@@ -19,6 +19,7 @@ package kubernetes
 
 import (
 	"encoding/json"
+
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"

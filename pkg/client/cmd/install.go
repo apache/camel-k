@@ -83,7 +83,9 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 		err := install.SetupClusterwideResourcesOrCollect(collection)
 		if err != nil && k8serrors.IsForbidden(err) {
 			fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
-			return errors.New("please login as cluster-admin and execute \"kamel install --cluster-setup\" to install cluster-wide resources (one-time operation)")
+
+			meg := `please login as cluster-admin and execute "kamel install --cluster-setup" to install cluster-wide resources (one-time operation)`
+			return errors.New(meg)
 		} else if err != nil {
 			return err
 		}

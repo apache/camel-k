@@ -23,6 +23,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -52,7 +53,7 @@ func (c *Collection) Items() []runtime.Object {
 func (c *Collection) AsKubernetesList() *corev1.List {
 	lst := corev1.List{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "List",
+			Kind:       "List",
 			APIVersion: "v1",
 		},
 		Items: make([]runtime.RawExtension, 0, len(c.items)),
