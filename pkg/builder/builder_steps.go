@@ -250,7 +250,9 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 		return nil, err
 	}
 	images := make([]PublishedImage, 0)
-	for _, ctx := range list.Items {
+	for _, item := range list.Items {
+		ctx := item
+
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
 			continue
 		}

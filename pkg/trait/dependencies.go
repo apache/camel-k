@@ -49,11 +49,12 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	for _, s := range e.Integration.Spec.Sources {
 		meta := metadata.Extract(s)
 
-		if meta.Language == v1alpha1.LanguageGroovy {
+		switch meta.Language {
+		case v1alpha1.LanguageGroovy:
 			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:groovy")
-		} else if meta.Language == v1alpha1.LanguageKotlin {
+		case v1alpha1.LanguageKotlin:
 			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:kotlin")
-		} else if meta.Language == v1alpha1.LanguageYamlFlow {
+		case v1alpha1.LanguageYamlFlow:
 			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:yaml")
 		}
 

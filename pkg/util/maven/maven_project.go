@@ -151,11 +151,12 @@ func NewRepository(repo string) Repository {
 		r.URL = repo[:idx]
 
 		for _, attribute := range strings.Split(repo[idx+1:], "@") {
-			if attribute == "snapshots" {
+			switch {
+			case attribute == "snapshots":
 				r.Snapshots.Enabled = true
-			} else if attribute == "noreleases" {
+			case attribute == "noreleases":
 				r.Releases.Enabled = false
-			} else if strings.HasPrefix(attribute, "id=") {
+			case strings.HasPrefix(attribute, "id="):
 				r.ID = attribute[3:]
 			}
 		}
