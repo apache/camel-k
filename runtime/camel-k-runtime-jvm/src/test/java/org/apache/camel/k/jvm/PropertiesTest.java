@@ -30,7 +30,7 @@ public class PropertiesTest {
 
     @Test
     public void testLoadProperties() throws Exception {
-        Properties properties = RuntimeSupport.loadProperties("src/test/resources/conf.properties", "src/test/resources/conf.d");
+        Properties properties = ApplicationSupport.loadProperties("src/test/resources/conf.properties", "src/test/resources/conf.d");
 
         Runtime runtime = new Runtime();
         runtime.setProperties(properties);

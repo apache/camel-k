@@ -56,7 +56,7 @@ public class RuntimeTest {
 
     @Test
     void testLoadResource() throws Exception {
-        RuntimeSupport.configureStreamHandler();
+        ApplicationSupport.configureStreamHandler();
 
         CamelContext context = new Runtime().getCamelContext();
 

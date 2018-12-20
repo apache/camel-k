@@ -2723,6 +2723,23 @@ spec:
     camelVersion: "2.23.0"
 
 `
+	Resources["platform-integration-context-flow.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationContext
+metadata:
+  name: flow
+  labels:
+    app: "camel-k"
+    camel.apache.org/context.created.by.kind: Operator
+    camel.apache.org/context.created.by.name: camel-k-operator
+    camel.apache.org/context.type: platform
+spec:
+  dependencies:
+    - runtime:jvm
+    - runtime:yaml
+    - camel:core
+`
 	Resources["platform-integration-context-groovy.yaml"] =
 		`
 apiVersion: camel.apache.org/v1alpha1
@@ -2732,7 +2749,7 @@ metadata:
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: core
+    camel.apache.org/context.created.by.name: camel-k-operator
     camel.apache.org/context.type: platform
 spec:
   dependencies:
@@ -2749,7 +2766,7 @@ metadata:
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: jvm
+    camel.apache.org/context.created.by.name: camel-k-operator
     camel.apache.org/context.type: platform
 spec:
   dependencies:
@@ -2765,7 +2782,7 @@ metadata:
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: jvm
+    camel.apache.org/context.created.by.name: camel-k-operator
     camel.apache.org/context.type: platform
 spec:
   dependencies:
@@ -2782,7 +2799,7 @@ metadata:
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: jvm
+    camel.apache.org/context.created.by.name: camel-k-operator
     camel.apache.org/context.type: platform
 spec:
   dependencies:

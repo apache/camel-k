@@ -133,6 +133,8 @@ const (
 	LanguageXML Language = "xml"
 	// LanguageKotlin --
 	LanguageKotlin Language = "kts"
+	// LanguageYamlFlow --
+	LanguageYamlFlow Language = "flow"
 )
 
 // A IntegrationTraitSpec contains the configuration of a trait
@@ -354,4 +356,15 @@ type Artifact struct {
 
 func (in *Artifact) String() string {
 	return in.ID
+}
+
+// Flow --
+type Flow struct {
+	Steps []Step `json:"steps"`
+}
+
+// Step --
+type Step struct {
+	Kind string `json:"kind"`
+	URI  string `json:"uri"`
 }

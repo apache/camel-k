@@ -48,6 +48,10 @@ public enum Language {
         "xml",
         Collections.singletonList("xml"),
         Collections.singletonList("xml")),
+    YamlFlow(
+        "yaml-flow",
+        Arrays.asList("yaml-flow", "flow"),
+        Collections.singletonList("flow")),
     Kotlin(
         "kotlin",
         Arrays.asList("kotlin", "kts"),

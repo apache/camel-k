@@ -53,6 +53,8 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:groovy")
 		} else if meta.Language == v1alpha1.LanguageKotlin {
 			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:kotlin")
+		} else if meta.Language == v1alpha1.LanguageYamlFlow {
+			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:yaml")
 		}
 
 		// jvm runtime and camel-core required by default

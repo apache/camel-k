@@ -1,0 +1,5 @@
+- steps:
+    - kind: "endpoint"
+      uri: "timer:tick?period=5s"
+    - kind: "endpoint"
+      uri: "log:info"

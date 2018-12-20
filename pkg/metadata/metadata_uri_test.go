@@ -227,3 +227,31 @@ func TestJavascript1(t *testing.T) {
 	assert.Contains(t, metadata.ToURIs, "uri:%s") // resolution not supported yet
 	assert.Len(t, metadata.ToURIs, 4)
 }
+
+const yamlFlow = `
+- steps:
+  - kind: "endpoint"
+    uri: "timer:tick"
+  - kind: "endpoint"
+    uri: "log:info"
+`
+
+func TestJYamlFlow(t *testing.T) {
+	source := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name:    "test",
+			Content: yamlFlow,
+		},
+		Language: v1alpha1.LanguageYamlFlow,
+	}
+
+	metadata := Extract(source)
+
+	assert.NotEmpty(t, metadata.FromURIs)
+	assert.Contains(t, metadata.FromURIs, "timer:tick")
+	assert.Len(t, metadata.FromURIs, 1)
+
+	assert.NotEmpty(t, metadata.ToURIs)
+	assert.Contains(t, metadata.ToURIs, "log:info")
+	assert.Len(t, metadata.ToURIs, 1)
+}

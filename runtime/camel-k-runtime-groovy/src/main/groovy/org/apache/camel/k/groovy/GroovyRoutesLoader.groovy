@@ -22,8 +22,8 @@ import org.apache.camel.k.Language
 import org.apache.camel.k.RoutesLoader
 import org.apache.camel.k.RuntimeRegistry
 import org.apache.camel.k.Source
+import org.apache.camel.k.support.URIResolver
 import org.apache.camel.k.groovy.dsl.IntegrationConfiguration
-import org.apache.camel.k.jvm.*
 import org.codehaus.groovy.control.CompilerConfiguration
 
 class GroovyRoutesLoader implements RoutesLoader {
