@@ -28,8 +28,11 @@ var resources = []string{
 	"platform-integration-context-jvm.yaml",
 	"platform-integration-context-groovy.yaml",
 	"platform-integration-context-kotlin.yaml",
-	"platform-integration-context-yaml.yaml",
 	"platform-integration-context-spring-boot.yaml",
+}
+
+var knativeResources = []string{
+	"platform-integration-context-knative.yaml",
 }
 
 // NewCreateAction returns a action that creates resources needed by the platform
@@ -49,14 +52,23 @@ func (action *createAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bo
 }
 
 func (action *createAction) Handle(platform *v1alpha1.IntegrationPlatform) error {
+	logrus.Info("Installing platform resources")
 	err := install.Resources(platform.Namespace, resources...)
 	if err != nil {
 		return err
 	}
 
+	if platform.Spec.Profile == v1alpha1.TraitProfileKnative {
+		logrus.Info("Installing knative resources")
+		err := install.Resources(platform.Namespace, knativeResources...)
+		if err != nil {
+			return err
+		}
+	}
+
 	target := platform.DeepCopy()
-	logrus.Info("Platform ", target.Name, " transitioning to state ", v1alpha1.IntegrationPlatformPhaseStarting)
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseStarting
+	logrus.Info("Platform ", target.Name, " transitioning to state ", target.Status.Phase)
 
 	return sdk.Update(target)
 }

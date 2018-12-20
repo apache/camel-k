@@ -2723,23 +2723,6 @@ spec:
     camelVersion: "2.23.0"
 
 `
-	Resources["platform-integration-context-flow.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
-metadata:
-  name: flow
-  labels:
-    app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: camel-k-operator
-    camel.apache.org/context.type: platform
-spec:
-  dependencies:
-    - runtime:jvm
-    - runtime:yaml
-    - camel:core
-`
 	Resources["platform-integration-context-groovy.yaml"] =
 		`
 apiVersion: camel.apache.org/v1alpha1
@@ -2772,6 +2755,24 @@ spec:
   dependencies:
     - runtime:jvm
     - camel:core
+`
+	Resources["platform-integration-context-knative.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationContext
+metadata:
+  name: knative
+  labels:
+    app: "camel-k"
+    camel.apache.org/context.created.by.kind: Operator
+    camel.apache.org/context.created.by.name: camel-k-operator
+    camel.apache.org/context.type: platform
+spec:
+  dependencies:
+    - runtime:jvm
+    - runtime:yaml
+    - camel:core
+    - camel-k:knative
 `
 	Resources["platform-integration-context-kotlin.yaml"] =
 		`
