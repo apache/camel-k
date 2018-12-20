@@ -96,6 +96,7 @@ func Platform(namespace string, registry string, organization string, pushSecret
 }
 
 // PlatformOrCollect --
+// nolint: lll
 func PlatformOrCollect(namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
 	if err := waitForPlatformCRDAvailable(namespace, 25*time.Second); err != nil {
 		return nil, err
