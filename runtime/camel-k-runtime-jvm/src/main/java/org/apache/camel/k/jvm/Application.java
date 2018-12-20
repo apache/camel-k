@@ -19,6 +19,7 @@ package org.apache.camel.k.jvm;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.k.Constants;
+import org.apache.camel.k.support.RuntimeSupport;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.ObjectHelper;
@@ -33,14 +34,14 @@ public class Application {
         //
         // We now support setting the logging level only
         //
-        RuntimeSupport.configureLogging();
+        ApplicationSupport.configureLogging();
 
         //
         // Install a custom protocol handler to support discovering resources
         // from the platform i.e. in knative, resources are provided through
         // env var as it is not possible to mount config maps / secrets.
         //
-        RuntimeSupport.configureStreamHandler();
+        ApplicationSupport.configureStreamHandler();
     }
 
     // *******************************
@@ -57,7 +58,7 @@ public class Application {
         }
 
         Runtime runtime = new Runtime();
-        runtime.setProperties(RuntimeSupport.loadProperties());
+        runtime.setProperties(ApplicationSupport.loadProperties());
         runtime.load(routes.split(",", -1));
         runtime.addMainListener(new ComponentPropertiesBinder());
         runtime.run();

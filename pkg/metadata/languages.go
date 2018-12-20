@@ -34,7 +34,8 @@ func discoverLanguage(source v1alpha1.SourceSpec) v1alpha1.Language {
 		v1alpha1.LanguageJavaScript,
 		v1alpha1.LanguageGroovy,
 		v1alpha1.LanguageJavaScript,
-		v1alpha1.LanguageKotlin} {
+		v1alpha1.LanguageKotlin,
+		v1alpha1.LanguageYamlFlow} {
 
 		if strings.HasSuffix(source.Name, "."+string(l)) {
 			return l

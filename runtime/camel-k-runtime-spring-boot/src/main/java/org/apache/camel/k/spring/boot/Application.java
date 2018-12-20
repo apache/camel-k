@@ -25,8 +25,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.RoutesLoader;
-import org.apache.camel.k.jvm.RuntimeSupport;
+import org.apache.camel.k.jvm.ApplicationSupport;
 import org.apache.camel.k.Source;
+import org.apache.camel.k.support.RuntimeSupport;
 import org.apache.camel.spi.Registry;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.camel.util.ObjectHelper;
@@ -48,7 +49,7 @@ public class Application {
         // from the platform i.e. in knative, resources are provided through
         // env var as it is not possible to mount config maps / secrets.
         //
-        RuntimeSupport.configureStreamHandler();
+        ApplicationSupport.configureStreamHandler();
     }
 
     public static void main(String[] args) {
@@ -64,7 +65,7 @@ public class Application {
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         // load properties using default behaviour
-        final Properties properties = RuntimeSupport.loadProperties();
+        final Properties properties = ApplicationSupport.loadProperties();
 
         // set spring boot specific properties
         properties.put("camel.springboot.main-run-controller", "true");

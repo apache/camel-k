@@ -70,8 +70,10 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 // Extract returns metadata information from the source code
 func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
 	language := discoverLanguage(source)
-	fromURIs := discoverFromURIs(source, language)
-	toURIs := discoverToURIs(source, language)
+	// TODO: handle error
+	fromURIs, _ := GetInspectorForLanguage(language).FromURIs(source)
+	// TODO:: handle error
+	toURIs, _ := GetInspectorForLanguage(language).ToURIs(source)
 	dependencies := discoverDependencies(source, fromURIs, toURIs)
 	requiresHTTPService := requiresHTTPService(source, fromURIs)
 	passiveEndpoints := hasOnlyPassiveEndpoints(source, fromURIs)

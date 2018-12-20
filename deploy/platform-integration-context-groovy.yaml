@@ -5,7 +5,7 @@ metadata:
   labels:
     app: "camel-k"
     camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: core
+    camel.apache.org/context.created.by.name: camel-k-operator
     camel.apache.org/context.type: platform
 spec:
   dependencies:

@@ -28,6 +28,7 @@ var resources = []string{
 	"platform-integration-context-jvm.yaml",
 	"platform-integration-context-groovy.yaml",
 	"platform-integration-context-kotlin.yaml",
+	"platform-integration-context-yaml.yaml",
 	"platform-integration-context-spring-boot.yaml",
 }
 
