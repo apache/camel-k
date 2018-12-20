@@ -125,6 +125,14 @@ func GenerateProject(ctx *builder.Context) error {
 					},
 				},
 			})
+		case strings.HasPrefix(d, "camel-k:"):
+			artifactID := strings.TrimPrefix(d, "camel-k:")
+
+			if !strings.HasPrefix(artifactID, "camel-") {
+				artifactID = "camel-" + artifactID
+			}
+
+			deps.AddGAV("org.apache.camel.k", artifactID, version.Version)
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
