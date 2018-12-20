@@ -16,24 +16,22 @@
  */
 package org.apache.camel.k.jvm;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.NoSuchBeanException;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.CompositeRegistry;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.k.InMemoryRegistry;
 import org.apache.camel.k.RoutesLoader;
 import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Source;
+import org.apache.camel.k.support.RuntimeSupport;
 import org.apache.camel.main.MainSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +44,7 @@ public final class Runtime extends MainSupport {
 
     public Runtime() {
         this.contextMap = new ConcurrentHashMap<>();
-        this.registry = new Registry();
+        this.registry = new InMemoryRegistry();
     }
 
     public void load(String[] routes) throws Exception {
@@ -126,66 +124,4 @@ public final class Runtime extends MainSupport {
             getCamelContexts().get(0).stop();
         }
     }
-
-    // ********************************
-    //
-    // Registry
-    //
-    // ********************************
-
-    public static final class Registry implements RuntimeRegistry {
-        private final ConcurrentMap<String, Object> registry;
-
-        public Registry() {
-            this.registry = new ConcurrentHashMap<>();
-        }
-
-        public void bind(String name, Object bean) {
-            this.registry.put(name, bean);
-        }
-
-        @Override
-        public Object lookupByName(String name) {
-            return registry.get(name);
-        }
-
-        @Override
-        public <T> T lookupByNameAndType(String name, Class<T> type) {
-            final Object answer = lookupByName(name);
-
-            if (answer != null) {
-                try {
-                    return type.cast(answer);
-                } catch (Throwable t) {
-                    throw new NoSuchBeanException(
-                        name,
-                        "Found bean: " + name + " in RuntimeRegistry: " + this + " of type: " + answer.getClass().getName() + " expected type was: " + type,
-                        t
-                    );
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        public <T> Map<String, T> findByTypeWithName(Class<T> type) {
-            final Map<String, T> result = new HashMap<>();
-
-            registry.entrySet().stream()
-                .filter(entry -> type.isInstance(entry.getValue()))
-                .forEach(entry -> result.put(entry.getKey(), type.cast(entry.getValue())));
-
-            return result;
-        }
-
-        @Override
-        public <T> Set<T> findByType(Class<T> type) {
-            return registry.values().stream()
-                .filter(type::isInstance)
-                .map(type::cast)
-                .collect(Collectors.toSet());
-        }
-    }
-
 }

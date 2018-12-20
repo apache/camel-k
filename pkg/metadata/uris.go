@@ -21,6 +21,7 @@ import (
 	"regexp"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var (
@@ -37,48 +38,185 @@ var (
 	xmlTagToD        = regexp.MustCompile(`<\s*toD\s+[^>]*uri\s*=\s*"([a-z0-9-]+:[^"]+)"[^>]*>`)
 )
 
-// discoverFromURIs returns all uris used in a from clause
-func discoverFromURIs(source v1alpha1.SourceSpec, language v1alpha1.Language) []string {
-	fromRegexps := getFromRegexpsForLanguage(language)
-	return findAllDistinctStringSubmatch(source.Content, fromRegexps...)
+// LanguageInspector --
+type LanguageInspector interface {
+	FromURIs(v1alpha1.SourceSpec) ([]string, error)
+	ToURIs(v1alpha1.SourceSpec) ([]string, error)
 }
 
-// discoverToURIs returns all uris used in a to clause
-func discoverToURIs(source v1alpha1.SourceSpec, language v1alpha1.Language) []string {
-	toRegexps := getToRegexpsForLanguage(language)
-	return findAllDistinctStringSubmatch(source.Content, toRegexps...)
+type languageInspector struct {
+	from func(v1alpha1.SourceSpec) ([]string, error)
+	to   func(v1alpha1.SourceSpec) ([]string, error)
 }
 
-func getFromRegexpsForLanguage(language v1alpha1.Language) []*regexp.Regexp {
+func (i languageInspector) FromURIs(source v1alpha1.SourceSpec) ([]string, error) {
+	return i.from(source)
+}
+func (i languageInspector) ToURIs(source v1alpha1.SourceSpec) ([]string, error) {
+	return i.to(source)
+}
+
+// GetInspectorForLanguage --
+func GetInspectorForLanguage(language v1alpha1.Language) LanguageInspector {
 	switch language {
 	case v1alpha1.LanguageJavaSource:
-		return []*regexp.Regexp{doubleQuotedFrom}
-	case v1alpha1.LanguageXML:
-		return []*regexp.Regexp{xmlTagFrom}
-	case v1alpha1.LanguageGroovy:
-		return []*regexp.Regexp{singleQuotedFrom, doubleQuotedFrom}
-	case v1alpha1.LanguageJavaScript:
-		return []*regexp.Regexp{singleQuotedFrom, doubleQuotedFrom}
-	case v1alpha1.LanguageKotlin:
-		return []*regexp.Regexp{doubleQuotedFrom}
-	}
-	return []*regexp.Regexp{}
-}
+		return &languageInspector{
+			from: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					doubleQuotedFrom,
+				)
 
-func getToRegexpsForLanguage(language v1alpha1.Language) []*regexp.Regexp {
-	switch language {
-	case v1alpha1.LanguageJavaSource:
-		return []*regexp.Regexp{doubleQuotedTo, doubleQuotedToD, doubleQuotedToF}
+				return answer, nil
+			},
+			to: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					doubleQuotedTo,
+					doubleQuotedToD,
+					doubleQuotedToF,
+				)
+
+				return answer, nil
+			},
+		}
 	case v1alpha1.LanguageXML:
-		return []*regexp.Regexp{xmlTagTo, xmlTagToD}
+		return &languageInspector{
+			from: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					xmlTagFrom,
+				)
+
+				return answer, nil
+			},
+			to: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					xmlTagTo,
+					xmlTagToD,
+				)
+
+				return answer, nil
+			},
+		}
 	case v1alpha1.LanguageGroovy:
-		return []*regexp.Regexp{singleQuotedTo, doubleQuotedTo, singleQuotedToD, doubleQuotedToD, singleQuotedToF, doubleQuotedToF}
+		return &languageInspector{
+			from: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					singleQuotedFrom,
+					doubleQuotedFrom,
+				)
+
+				return answer, nil
+			},
+			to: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					singleQuotedTo,
+					doubleQuotedTo,
+					singleQuotedToD,
+					doubleQuotedToD,
+					singleQuotedToF,
+					doubleQuotedToF,
+				)
+
+				return answer, nil
+			},
+		}
 	case v1alpha1.LanguageJavaScript:
-		return []*regexp.Regexp{singleQuotedTo, doubleQuotedTo, singleQuotedToD, doubleQuotedToD, singleQuotedToF, doubleQuotedToF}
+		return &languageInspector{
+			from: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					singleQuotedFrom,
+					doubleQuotedFrom,
+				)
+
+				return answer, nil
+			},
+			to: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					singleQuotedTo,
+					doubleQuotedTo,
+					singleQuotedToD,
+					doubleQuotedToD,
+					singleQuotedToF,
+					doubleQuotedToF,
+				)
+
+				return answer, nil
+			},
+		}
 	case v1alpha1.LanguageKotlin:
-		return []*regexp.Regexp{doubleQuotedTo, doubleQuotedToD, doubleQuotedToF}
+		return &languageInspector{
+			from: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					doubleQuotedFrom,
+				)
+
+				return answer, nil
+			},
+			to: func(source v1alpha1.SourceSpec) ([]string, error) {
+				answer := findAllDistinctStringSubmatch(
+					source.Content,
+					doubleQuotedTo,
+					doubleQuotedToD,
+					doubleQuotedToF,
+				)
+
+				return answer, nil
+			},
+		}
+	case v1alpha1.LanguageYamlFlow:
+		var flows []v1alpha1.Flow
+
+		return &languageInspector{
+			from: func(source v1alpha1.SourceSpec) ([]string, error) {
+				if err := yaml.Unmarshal([]byte(source.Content), &flows); err != nil {
+					return []string{}, nil
+				}
+
+				uris := make([]string, 0)
+
+				for _, flow := range flows {
+					if flow.Steps[0].URI != "" {
+						uris = append(uris, flow.Steps[0].URI)
+					}
+
+				}
+				return uris, nil
+			},
+			to: func(source v1alpha1.SourceSpec) ([]string, error) {
+				if err := yaml.Unmarshal([]byte(source.Content), &flows); err != nil {
+					return []string{}, nil
+				}
+
+				uris := make([]string, 0)
+
+				for _, flow := range flows {
+					for i := 1; i < len(flow.Steps); i++ {
+						if flow.Steps[i].URI != "" {
+							uris = append(uris, flow.Steps[i].URI)
+						}
+					}
+				}
+
+				return uris, nil
+			},
+		}
 	}
-	return []*regexp.Regexp{}
+	return &languageInspector{
+		from: func(source v1alpha1.SourceSpec) ([]string, error) {
+			return []string{}, nil
+		},
+		to: func(source v1alpha1.SourceSpec) ([]string, error) {
+			return []string{}, nil
+		},
+	}
 }
 
 func findAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {

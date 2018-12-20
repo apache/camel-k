@@ -10,7 +10,7 @@ import org.apache.camel.k.Language;
 import org.apache.camel.k.RoutesLoader;
 import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Source;
-import org.apache.camel.k.jvm.URIResolver;
+import org.apache.camel.k.support.URIResolver;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joor.Reflect;

@@ -21,8 +21,8 @@ import org.apache.camel.k.Language
 import org.apache.camel.k.RoutesLoader
 import org.apache.camel.k.RuntimeRegistry
 import org.apache.camel.k.Source
-import org.apache.camel.k.jvm.URIResolver
 import org.apache.camel.k.kotlin.dsl.IntegrationConfiguration
+import org.apache.camel.k.support.URIResolver
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
