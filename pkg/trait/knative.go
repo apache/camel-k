@@ -33,6 +33,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/metadata"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
+	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -296,19 +297,19 @@ func (t *knativeTrait) getConfigurationSerialized(e *Environment) (string, error
 	return string(res), nil
 }
 
-func (t *knativeTrait) getConfiguration(e *Environment) (knativeutil.CamelEnvironment, error) {
-	env := knativeutil.NewCamelEnvironment()
+func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnvironment, error) {
+	env := knativeapi.NewCamelEnvironment()
 	// Sources
 	sourceChannels := t.getConfiguredSourceChannels()
 	for _, ch := range sourceChannels {
-		svc := knativeutil.CamelServiceDefinition{
+		svc := knativeapi.CamelServiceDefinition{
 			Name:        ch,
 			Host:        "0.0.0.0",
 			Port:        8080,
-			Protocol:    knativeutil.CamelProtocolHTTP,
-			ServiceType: knativeutil.CamelServiceTypeChannel,
+			Protocol:    knativeapi.CamelProtocolHTTP,
+			ServiceType: knativeapi.CamelServiceTypeChannel,
 			Metadata: map[string]string{
-				knativeutil.CamelMetaServicePath: "/",
+				knativeapi.CamelMetaServicePath: "/",
 			},
 		}
 		env.Services = append(env.Services, svc)
@@ -324,27 +325,27 @@ func (t *knativeTrait) getConfiguration(e *Environment) (knativeutil.CamelEnviro
 		if hostname == "" {
 			return env, errors.New("cannot find address of channel " + ch)
 		}
-		svc := knativeutil.CamelServiceDefinition{
+		svc := knativeapi.CamelServiceDefinition{
 			Name:        ch,
 			Host:        hostname,
 			Port:        80,
-			Protocol:    knativeutil.CamelProtocolHTTP,
-			ServiceType: knativeutil.CamelServiceTypeChannel,
+			Protocol:    knativeapi.CamelProtocolHTTP,
+			ServiceType: knativeapi.CamelServiceTypeChannel,
 			Metadata: map[string]string{
-				knativeutil.CamelMetaServicePath: "/",
+				knativeapi.CamelMetaServicePath: "/",
 			},
 		}
 		env.Services = append(env.Services, svc)
 	}
 	// Adding default endpoint
-	defSvc := knativeutil.CamelServiceDefinition{
+	defSvc := knativeapi.CamelServiceDefinition{
 		Name:        "default",
 		Host:        "0.0.0.0",
 		Port:        8080,
-		Protocol:    knativeutil.CamelProtocolHTTP,
-		ServiceType: knativeutil.CamelServiceTypeEndpoint,
+		Protocol:    knativeapi.CamelProtocolHTTP,
+		ServiceType: knativeapi.CamelServiceTypeEndpoint,
 		Metadata: map[string]string{
-			knativeutil.CamelMetaServicePath: "/",
+			knativeapi.CamelMetaServicePath: "/",
 		},
 	}
 	env.Services = append(env.Services, defSvc)
