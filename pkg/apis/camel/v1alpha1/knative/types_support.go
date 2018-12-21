@@ -18,6 +18,7 @@ limitations under the License.
 package knative
 
 import (
+	"encoding/json"
 	"net/url"
 	"strconv"
 )
@@ -51,4 +52,14 @@ func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, rawu
 		definition.Metadata[CamelMetaServicePath] = "/"
 	}
 	return &definition, nil
+}
+
+
+// Serialize serializes a CamelEnvironment
+func (env CamelEnvironment) Serialize() (string, error) {
+	res, err := json.Marshal(env)
+	if err != nil {
+		return "", err
+	}
+	return string(res), nil
 }

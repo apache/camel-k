@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -31,9 +30,9 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
+	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
-	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -289,12 +288,7 @@ func (t *knativeTrait) getConfigurationSerialized(e *Environment) (string, error
 	if err != nil {
 		return "", errors.Wrap(err, "unable fetch environment configuration")
 	}
-
-	res, err := json.Marshal(env)
-	if err != nil {
-		return "", errors.Wrap(err, "unable to serialize Knative configuration")
-	}
-	return string(res), nil
+	return env.Serialize()
 }
 
 func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnvironment, error) {
