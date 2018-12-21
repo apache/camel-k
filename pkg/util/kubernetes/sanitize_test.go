@@ -18,28 +18,20 @@ limitations under the License.
 package kubernetes
 
 import (
-	"path"
-	"regexp"
-	"strings"
-	"unicode"
-
-	"github.com/stoewer/go-strcase"
+	"testing"
 )
 
-var disallowedChars = regexp.MustCompile(`[^a-z0-9-]`)
+func TestSanitizeName(t *testing.T) {
+	cases := []map[string]string{
+		{"input": "./abc.java", "expect": "abc"},
+		{"input": "/path/to/abc.js", "expect": "abc"},
+		{"input": "abc.xml", "expect": "abc"},
+		{"input": "./path/to/abc.kts", "expect": "abc"},
+	}
 
-// SanitizeName sanitizes the given name to be compatible with k8s
-func SanitizeName(name string) string {
-	name = strings.TrimPrefix(name, "./")
-	name = strings.Split(name, ".")[0]
-	name = path.Base(name)
-	name = strcase.KebabCase(name)
-	name = strings.ToLower(name)
-	name = disallowedChars.ReplaceAllString(name, "")
-	name = strings.TrimFunc(name, isDisallowedStartEndChar)
-	return name
-}
-
-func isDisallowedStartEndChar(rune rune) bool {
-	return !unicode.IsLetter(rune)
+	for _, c := range cases {
+		if name := SanitizeName(c["input"]); name != c["expect"] {
+			t.Errorf("result of %s should be %s, instead of %s", c["input"], c["output"], name)
+		}
+	}
 }
