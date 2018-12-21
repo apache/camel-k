@@ -26,7 +26,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/client/cmd"
 
-	_ "github.com/apache/camel-k/pkg/util/knative"
+	_ "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	_ "github.com/apache/camel-k/pkg/util/openshift"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )

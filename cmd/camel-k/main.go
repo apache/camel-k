@@ -28,7 +28,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 
-	_ "github.com/apache/camel-k/pkg/util/knative"
+	_ "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	_ "github.com/apache/camel-k/pkg/util/openshift"
 
 	"github.com/sirupsen/logrus"
