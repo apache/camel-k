@@ -19,6 +19,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -127,4 +128,13 @@ func TraitProfileByName(name string) TraitProfile {
 		}
 	}
 	return ""
+}
+
+// Serialize serializes a Flow
+func (flows Flows) Serialize() (string, error) {
+	res, err := yaml.Marshal(flows)
+	if err != nil {
+		return "", err
+	}
+	return string(res), nil
 }

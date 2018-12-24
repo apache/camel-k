@@ -363,6 +363,9 @@ type Flow struct {
 	Steps []Step `json:"steps"`
 }
 
+// Flows are collections of Flow
+type Flows []Flow
+
 // Step --
 type Step struct {
 	Kind string `json:"kind"`
