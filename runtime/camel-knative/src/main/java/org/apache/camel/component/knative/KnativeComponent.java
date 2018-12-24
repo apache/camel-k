@@ -30,6 +30,8 @@ public class KnativeComponent extends DefaultComponent {
     private final KnativeConfiguration configuration;
     private String environmentPath;
 
+    private boolean jsonSerializationEnabled;
+
     public KnativeComponent() {
         this(null);
     }
@@ -115,5 +117,13 @@ public class KnativeComponent extends DefaultComponent {
         }
 
         return conf;
+    }
+
+    public boolean isJsonSerializationEnabled() {
+        return jsonSerializationEnabled;
+    }
+
+    public void setJsonSerializationEnabled(boolean jsonSerializationEnabled) {
+        this.jsonSerializationEnabled = jsonSerializationEnabled;
     }
 }
