@@ -45,12 +45,13 @@ const (
 )
 
 type knativeTrait struct {
-	BaseTrait `property:",squash"`
-	Sources   string `property:"sources"`
-	Sinks     string `property:"sinks"`
-	MinScale  *int   `property:"minScale"`
-	MaxScale  *int   `property:"maxScale"`
-	Auto      *bool  `property:"auto"`
+	BaseTrait     `property:",squash"`
+	Configuration string `property:"configuration"`
+	Sources       string `property:"sources"`
+	Sinks         string `property:"sinks"`
+	MinScale      *int   `property:"minScale"`
+	MaxScale      *int   `property:"maxScale"`
+	Auto          *bool  `property:"auto"`
 }
 
 func newKnativeTrait() *knativeTrait {
@@ -293,9 +294,16 @@ func (t *knativeTrait) getConfigurationSerialized(e *Environment) (string, error
 
 func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnvironment, error) {
 	env := knativeapi.NewCamelEnvironment()
+	if t.Configuration != "" {
+		env.Deserialize(t.Configuration)
+	}
+
 	// Sources
 	sourceChannels := t.getConfiguredSourceChannels()
 	for _, ch := range sourceChannels {
+		if env.ContainsService(ch, knativeapi.CamelServiceTypeChannel) {
+			continue
+		}
 		svc := knativeapi.CamelServiceDefinition{
 			Name:        ch,
 			Host:        "0.0.0.0",
@@ -311,6 +319,9 @@ func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnviron
 	// Sinks
 	sinkChannels := t.getConfiguredSinkChannels()
 	for _, ch := range sinkChannels {
+		if env.ContainsService(ch, knativeapi.CamelServiceTypeChannel) {
+			continue
+		}
 		channel, err := t.retrieveChannel(e.Integration.Namespace, ch)
 		if err != nil {
 			return env, err

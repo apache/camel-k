@@ -54,12 +54,29 @@ func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, rawu
 	return &definition, nil
 }
 
-
 // Serialize serializes a CamelEnvironment
-func (env CamelEnvironment) Serialize() (string, error) {
+func (env *CamelEnvironment) Serialize() (string, error) {
 	res, err := json.Marshal(env)
 	if err != nil {
 		return "", err
 	}
 	return string(res), nil
+}
+
+// Deserialize deserializes a camel environment into this struct
+func (env *CamelEnvironment) Deserialize(str string) error {
+	if err := json.Unmarshal([]byte(str), env); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ContainsService tells if the environment contains a service with the given name and type
+func (env *CamelEnvironment) ContainsService(name string, serviceType CamelServiceType) bool {
+	for _, svc := range env.Services {
+		if svc.Name == name && svc.ServiceType == serviceType {
+			return true
+		}
+	}
+	return false
 }
