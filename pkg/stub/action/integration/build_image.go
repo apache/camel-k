@@ -62,13 +62,13 @@ func (action *buildImageAction) Handle(integration *v1alpha1.Integration) error 
 
 	// in this phase the integration need to be associated to a context whose image
 	// will be used as base image for the integration images
-	if integration.Spec.Context == "" {
+	if integration.Status.Context == "" {
 		return fmt.Errorf("context is not set for integration: %s", integration.Name)
 	}
 
 	// look-up the integration context associated to this integration, this is needed
 	// to determine the base image
-	ctx := v1alpha1.NewIntegrationContext(integration.Namespace, integration.Spec.Context)
+	ctx := v1alpha1.NewIntegrationContext(integration.Namespace, integration.Status.Context)
 	if err := sdk.Get(&ctx); err != nil {
 		return errors.Wrapf(err, "unable to find integration context %s, %s", ctx.Name, err)
 	}

@@ -46,28 +46,35 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *dependenciesTrait) Apply(e *Environment) error {
+	dependencies := make([]string, 0)
+	if e.Integration.Spec.Dependencies != nil {
+		for _, dep := range e.Integration.Spec.Dependencies {
+			util.StringSliceUniqueAdd(&dependencies, dep)
+		}
+	}
 	for _, s := range e.Integration.Spec.Sources {
 		meta := metadata.Extract(s)
 
 		switch s.InferLanguage() {
 		case v1alpha1.LanguageGroovy:
-			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:groovy")
+			util.StringSliceUniqueAdd(&dependencies, "runtime:groovy")
 		case v1alpha1.LanguageKotlin:
-			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:kotlin")
+			util.StringSliceUniqueAdd(&dependencies, "runtime:kotlin")
 		case v1alpha1.LanguageYamlFlow:
-			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:yaml")
+			util.StringSliceUniqueAdd(&dependencies, "runtime:yaml")
 		}
 
 		// jvm runtime and camel-core required by default
-		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:jvm")
-		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "camel:core")
+		util.StringSliceUniqueAdd(&dependencies, "runtime:jvm")
+		util.StringSliceUniqueAdd(&dependencies, "camel:core")
 
 		for _, d := range meta.Dependencies {
-			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, d)
+			util.StringSliceUniqueAdd(&dependencies, d)
 		}
 	}
 
 	// sort the dependencies to get always the same list if they don't change
-	sort.Strings(e.Integration.Spec.Dependencies)
+	sort.Strings(dependencies)
+	e.Integration.Status.Dependencies = dependencies
 	return nil
 }
