@@ -16,13 +16,6 @@
  */
 package org.apache.camel.component.knative;
 
-import java.io.InputStream;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
 import org.apache.camel.DelegateEndpoint;
@@ -43,6 +36,13 @@ import org.apache.camel.util.ServiceHelper;
 import org.apache.camel.util.StringHelper;
 import org.apache.camel.util.URISupport;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.InputStream;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.camel.util.ObjectHelper.ifNotEmpty;
 
@@ -101,6 +101,11 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
     }
 
     @Override
+    public KnativeComponent getComponent() {
+        return (KnativeComponent) super.getComponent();
+    }
+
+    @Override
     public Producer createProducer() throws Exception {
         return new KnativeProducer(
             this,
@@ -121,6 +126,7 @@ public class KnativeEndpoint extends DefaultEndpoint implements DelegateEndpoint
                 // Always remove host so it's always computed from the URL and not inherited from the exchange
                 headers.remove("Host");
             },
+            new KnativeConversionProcessor(getComponent().isJsonSerializationEnabled()),
             endpoint.createProducer()
         );
     }
