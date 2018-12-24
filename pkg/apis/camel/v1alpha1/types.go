@@ -18,12 +18,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"strings"
-
 	"github.com/apache/camel-k/pkg/util"
-
 	"github.com/mitchellh/mapstructure"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 // ConfigurationSpec --
@@ -175,9 +173,11 @@ func (in *IntegrationTraitSpec) Decode(target interface{}) error {
 
 // IntegrationStatus --
 type IntegrationStatus struct {
-	Phase  IntegrationPhase `json:"phase,omitempty"`
-	Digest string           `json:"digest,omitempty"`
-	Image  string           `json:"image,omitempty"`
+	Phase        IntegrationPhase `json:"phase,omitempty"`
+	Digest       string           `json:"digest,omitempty"`
+	Image        string           `json:"image,omitempty"`
+	Dependencies []string         `json:"dependencies,omitempty"`
+	Context      string           `json:"context,omitempty"`
 }
 
 // IntegrationPhase --

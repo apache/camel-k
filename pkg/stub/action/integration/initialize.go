@@ -68,6 +68,9 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 
 	target.Status.Phase = v1alpha1.IntegrationPhaseBuildingContext
 	target.Status.Digest = dgst
+	target.Status.Context = integration.Spec.Context
+	target.Status.Dependencies = integration.Spec.Dependencies
+	target.Status.Image = ""
 
 	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 

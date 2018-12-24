@@ -66,10 +66,10 @@ func (t *springBootTrait) Apply(e *Environment) error {
 	//
 
 	if e.IntegrationInPhase("") {
-		util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:spring-boot")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "runtime:spring-boot")
 
 		// sort the dependencies to get always the same list if they don't change
-		sort.Strings(e.Integration.Spec.Dependencies)
+		sort.Strings(e.Integration.Status.Dependencies)
 	}
 
 	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {

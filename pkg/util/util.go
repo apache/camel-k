@@ -52,6 +52,10 @@ func StringSliceExists(slice []string, item string) bool {
 
 // StringSliceUniqueAdd append the given item if not already present in the slice
 func StringSliceUniqueAdd(slice *[]string, item string) bool {
+	if slice == nil {
+		newSlice := make([]string, 0)
+		slice = &newSlice
+	}
 	for _, i := range *slice {
 		if i == item {
 			return false

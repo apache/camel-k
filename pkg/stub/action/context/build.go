@@ -136,7 +136,7 @@ func (action *buildAction) informIntegrations(context *v1alpha1.IntegrationConte
 	}
 	for _, integration := range list.Items {
 		integration := integration // pin
-		if integration.Spec.Context != context.Name {
+		if integration.Status.Context != context.Name {
 			continue
 		}
 

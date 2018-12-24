@@ -27,8 +27,8 @@ import (
 
 // LookupContextForIntegration --
 func LookupContextForIntegration(integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
-	if integration.Spec.Context != "" {
-		name := integration.Spec.Context
+	if integration.Status.Context != "" {
+		name := integration.Status.Context
 		ctx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
 
 		if err := sdk.Get(&ctx); err != nil {
@@ -46,14 +46,14 @@ func LookupContextForIntegration(integration *v1alpha1.Integration) (*v1alpha1.I
 	for _, ctx := range ctxList.Items {
 		ctx := ctx // pin
 		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
-			ideps := len(integration.Spec.Dependencies)
+			ideps := len(integration.Status.Dependencies)
 			cdeps := len(ctx.Spec.Dependencies)
 
 			if ideps != cdeps {
 				continue
 			}
 
-			if util.StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
+			if util.StringSliceContains(ctx.Spec.Dependencies, integration.Status.Dependencies) {
 				return &ctx, nil
 			}
 		}
