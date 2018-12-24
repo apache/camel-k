@@ -26,11 +26,11 @@ import (
 
 // GetIntegrationContext retrieves the context set on the integration
 func GetIntegrationContext(integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
-	if integration.Spec.Context == "" {
+	if integration.Status.Context== "" {
 		return nil, nil
 	}
 
-	name := integration.Spec.Context
+	name := integration.Status.Context
 	ctx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
 	err := sdk.Get(&ctx)
 	return &ctx, err

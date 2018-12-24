@@ -43,7 +43,10 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(integration *v1alpha1.Integration) error {
-	ctxName := integration.Spec.Context
+	ctxName := integration.Status.Context
+	if ctxName == "" {
+		return errors.Errorf("no context set on integration %s", integration.Name)
+	}
 	ctx := v1alpha1.NewIntegrationContext(integration.Namespace, ctxName)
 
 	if err := sdk.Get(&ctx); err != nil {

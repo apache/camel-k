@@ -54,8 +54,8 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 func (t *classpathTrait) Apply(e *Environment) error {
 	ctx := e.Context
 
-	if ctx == nil && e.Integration.Spec.Context != "" {
-		name := e.Integration.Spec.Context
+	if ctx == nil && e.Integration.Status.Context != "" {
+		name := e.Integration.Status.Context
 		c := v1alpha1.NewIntegrationContext(e.Integration.Namespace, name)
 
 		if err := sdk.Get(&c); err != nil {
@@ -66,7 +66,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	}
 
 	if ctx == nil {
-		return fmt.Errorf("unable to find integration context %s", e.Integration.Spec.Context)
+		return fmt.Errorf("unable to find integration context %s", e.Integration.Status.Context)
 	}
 
 	deps := make([]string, 0, 2+len(ctx.Status.Artifacts))

@@ -66,12 +66,12 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 			// amended to add/remove dependencies
 
 			//TODO: this is a very simple check, we may need to provide a deps comparison strategy
-			if !util.StringSliceContains(ctx.Spec.Dependencies, integration.Spec.Dependencies) {
+			if !util.StringSliceContains(ctx.Spec.Dependencies, integration.Status.Dependencies) {
 				// We need to re-generate a context or search for a new one that
 				// satisfies integrations needs so let's remove the association
 				// with a context
 				target := integration.DeepCopy()
-				target.Spec.Context = ""
+				target.Status.Context = ""
 				return sdk.Update(target)
 			}
 		}
@@ -79,7 +79,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
 			target := integration.DeepCopy()
 			target.Status.Image = ctx.ImageForIntegration()
-			target.Spec.Context = ctx.Name
+			target.Status.Context = ctx.Name
 			target.Status.Phase = v1alpha1.IntegrationPhaseError
 
 			target.Status.Digest, err = digest.ComputeForIntegration(target)
@@ -95,7 +95,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
 			target := integration.DeepCopy()
 			target.Status.Image = ctx.ImageForIntegration()
-			target.Spec.Context = ctx.Name
+			target.Status.Context = ctx.Name
 
 			dgst, err := digest.ComputeForIntegration(target)
 			if err != nil {
@@ -113,10 +113,10 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 			return sdk.Update(target)
 		}
 
-		if integration.Spec.Context == "" {
+		if integration.Status.Context == "" {
 			// We need to set the context
 			target := integration.DeepCopy()
-			target.Spec.Context = ctx.Name
+			target.Status.Context = ctx.Name
 			return sdk.Update(target)
 		}
 
@@ -137,7 +137,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 
 	// Set the context to have the same dependencies as the integrations
 	platformCtx.Spec = v1alpha1.IntegrationContextSpec{
-		Dependencies: integration.Spec.Dependencies,
+		Dependencies: integration.Status.Dependencies,
 		Repositories: integration.Spec.Repositories,
 		Traits:       integration.Spec.Traits,
 	}
@@ -149,7 +149,7 @@ func (action *buildContextAction) Handle(integration *v1alpha1.Integration) erro
 	// Set the context name so the next handle loop, will fall through the
 	// same path as integration with a user defined context
 	target := integration.DeepCopy()
-	target.Spec.Context = platformCtxName
+	target.Status.Context = platformCtxName
 
 	return sdk.Update(target)
 }
