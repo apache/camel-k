@@ -137,6 +137,17 @@ const (
 	LanguageYamlFlow Language = "flow"
 )
 
+// Languages is the list of all supported languages
+var Languages = []Language{
+	LanguageJavaSource,
+	LanguageJavaClass,
+	LanguageJavaScript,
+	LanguageGroovy,
+	LanguageJavaScript,
+	LanguageKotlin,
+	LanguageYamlFlow,
+}
+
 // A IntegrationTraitSpec contains the configuration of a trait
 type IntegrationTraitSpec struct {
 	Configuration map[string]string `json:"configuration,omitempty"`

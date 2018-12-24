@@ -142,7 +142,7 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 						"camel.apache.org/integration": e.Integration.Name,
 					},
 					Annotations: map[string]string{
-						"camel.apache.org/source.language":    string(s.Language),
+						"camel.apache.org/source.language":    string(s.InferLanguage()),
 						"camel.apache.org/source.name":        s.Name,
 						"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
 					},
@@ -207,8 +207,8 @@ func (t *deploymentTrait) getSources(e *Environment) []string {
 		src = "file:" + src
 
 		params := make([]string, 0)
-		if s.Language != "" {
-			params = append(params, "language="+string(s.Language))
+		if s.InferLanguage() != "" {
+			params = append(params, "language="+string(s.InferLanguage()))
 		}
 		if s.Compression {
 			params = append(params, "compression=true")

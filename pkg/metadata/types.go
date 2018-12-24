@@ -17,8 +17,6 @@ limitations under the License.
 
 package metadata
 
-import "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
 // IntegrationMetadata contains aggregate metadata about all Camel routes in a integrations
 type IntegrationMetadata struct {
 	// All starting URIs of defined routes
@@ -27,8 +25,6 @@ type IntegrationMetadata struct {
 	ToURIs []string
 	// All inferred dependencies required to run the integration
 	Dependencies []string
-	// The language in which the integration is written
-	Language v1alpha1.Language
 	// RequiresHTTPService indicates if the integration needs to be invoked through HTTP
 	RequiresHTTPService bool
 	// PassiveEndpoints indicates that the integration contains only passive endpoints that are activated from
