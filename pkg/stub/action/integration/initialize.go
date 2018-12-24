@@ -19,7 +19,6 @@ package integration
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
@@ -54,18 +53,7 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 	}
 
 	target := integration.DeepCopy()
-	// set default values
-	if target.Spec.Replicas == nil {
-		var defaultReplicas int32 = 1
-		target.Spec.Replicas = &defaultReplicas
-	}
-	for i := range target.Spec.Sources {
-		// extract metadata
-		s := &target.Spec.Sources[i]
-
-		meta := metadata.Extract(*s)
-		s.Language = meta.Language
-	}
+	// better not changing the spec section of the target because it may be used for comparison by a higher level controller (e.g. Knative source controller)
 
 	// execute custom initialization
 	if _, err := trait.Apply(target, nil); err != nil {

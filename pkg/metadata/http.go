@@ -87,7 +87,7 @@ func getURIPrefix(uri string) string {
 }
 
 func hasRestIndicator(source v1alpha1.SourceSpec) bool {
-	pat := getRestIndicatorRegexpsForLanguage(source.Language)
+	pat := getRestIndicatorRegexpsForLanguage(source.InferLanguage())
 	return pat.MatchString(source.Content)
 }
 
