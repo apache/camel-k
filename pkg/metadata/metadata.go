@@ -28,7 +28,6 @@ import (
 func ExtractAll(sources []v1alpha1.SourceSpec) IntegrationMetadata {
 	// neutral metadata
 	meta := IntegrationMetadata{
-		Language:            "",
 		Dependencies:        []string{},
 		FromURIs:            []string{},
 		ToURIs:              []string{},
@@ -42,10 +41,6 @@ func ExtractAll(sources []v1alpha1.SourceSpec) IntegrationMetadata {
 }
 
 func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
-	language := m2.Language
-	if m1.Language != "" && m1.Language != language {
-		language = ""
-	}
 	deps := make(map[string]bool)
 	for _, d := range m1.Dependencies {
 		deps[d] = true
@@ -59,7 +54,6 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 	}
 	sort.Strings(allDependencies)
 	return IntegrationMetadata{
-		Language:            language,
 		FromURIs:            append(m1.FromURIs, m2.FromURIs...),
 		ToURIs:              append(m1.ToURIs, m2.ToURIs...),
 		Dependencies:        allDependencies,
@@ -70,7 +64,7 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 
 // Extract returns metadata information from the source code
 func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
-	language := discoverLanguage(source)
+	language := source.InferLanguage()
 	// TODO: handle error
 	fromURIs, _ := src.InspectorForLanguage(language).FromURIs(source)
 	// TODO:: handle error
@@ -79,7 +73,6 @@ func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
 	requiresHTTPService := requiresHTTPService(source, fromURIs)
 	passiveEndpoints := hasOnlyPassiveEndpoints(source, fromURIs)
 	return IntegrationMetadata{
-		Language:            language,
 		FromURIs:            fromURIs,
 		ToURIs:              toURIs,
 		Dependencies:        dependencies,

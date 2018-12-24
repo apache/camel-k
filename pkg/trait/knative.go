@@ -142,8 +142,8 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 		envvar.SetVal(&environment, envName, s.Content)
 
 		params := make([]string, 0)
-		if s.Language != "" {
-			params = append(params, "language="+string(s.Language))
+		if s.InferLanguage() != "" {
+			params = append(params, "language="+string(s.InferLanguage()))
 		}
 		if s.Compression {
 			params = append(params, "compression=true")

@@ -15,31 +15,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package metadata
+package v1alpha1
 
 import (
-	"strings"
+	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/stretchr/testify/assert"
 )
 
-// discoverLanguage discovers the code language from file extension if not set
-func discoverLanguage(source v1alpha1.SourceSpec) v1alpha1.Language {
-	if source.Language != "" {
-		return source.Language
+func TestLanguageJavaSource(t *testing.T) {
+	code := SourceSpec{
+		DataSpec: DataSpec{
+			Name: "Request.java",
+		},
 	}
-	for _, l := range []v1alpha1.Language{
-		v1alpha1.LanguageJavaSource,
-		v1alpha1.LanguageJavaClass,
-		v1alpha1.LanguageJavaScript,
-		v1alpha1.LanguageGroovy,
-		v1alpha1.LanguageJavaScript,
-		v1alpha1.LanguageKotlin,
-		v1alpha1.LanguageYamlFlow} {
+	assert.Equal(t, LanguageJavaSource, code.InferLanguage())
+}
 
-		if strings.HasSuffix(source.Name, "."+string(l)) {
-			return l
-		}
+func TestLanguageAlreadySet(t *testing.T) {
+	code := SourceSpec{
+		DataSpec: DataSpec{
+			Name: "Request.java",
+		},
+		Language: LanguageJavaScript,
 	}
-	return ""
+	assert.Equal(t, LanguageJavaScript, code.InferLanguage())
 }

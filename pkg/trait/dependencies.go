@@ -49,7 +49,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	for _, s := range e.Integration.Spec.Sources {
 		meta := metadata.Extract(s)
 
-		switch meta.Language {
+		switch s.InferLanguage() {
 		case v1alpha1.LanguageGroovy:
 			util.StringSliceUniqueAdd(&e.Integration.Spec.Dependencies, "runtime:groovy")
 		case v1alpha1.LanguageKotlin:

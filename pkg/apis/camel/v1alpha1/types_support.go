@@ -138,3 +138,16 @@ func (flows Flows) Serialize() (string, error) {
 	}
 	return string(res), nil
 }
+
+// InferLanguage returns the language of the source or discovers it from file extension if not set
+func (s SourceSpec) InferLanguage() Language {
+	if s.Language != "" {
+		return s.Language
+	}
+	for _, l := range Languages {
+		if strings.HasSuffix(s.Name, "."+string(l)) {
+			return l
+		}
+	}
+	return ""
+}
