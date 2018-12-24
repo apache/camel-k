@@ -29,12 +29,13 @@ func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, rawu
 	if err != nil {
 		return nil, err
 	}
+	protocol := CamelProtocol(serviceURL.Scheme)
 	definition := CamelServiceDefinition{
 		Name:        name,
 		Host:        serviceURL.Host,
-		Port:        -1,
+		Port:        defaultCamelProtocolPort(protocol),
 		ServiceType: serviceType,
-		Protocol:    CamelProtocol(serviceURL.Scheme),
+		Protocol:    protocol,
 		Metadata:    make(map[string]string),
 	}
 	portStr := serviceURL.Port()
@@ -52,6 +53,17 @@ func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, rawu
 		definition.Metadata[CamelMetaServicePath] = "/"
 	}
 	return &definition, nil
+}
+
+func defaultCamelProtocolPort(prot CamelProtocol) int {
+	switch prot {
+	case CamelProtocolHTTP:
+		return 80
+	case CamelProtocolHTTPS:
+		return 443
+	default:
+		return -1
+	}
 }
 
 // Serialize serializes a CamelEnvironment
