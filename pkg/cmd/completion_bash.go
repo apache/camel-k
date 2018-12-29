@@ -132,13 +132,14 @@ __kamel_kubectl_get_integrationcontexts() {
     fi
 }
 
-__kamel_kubectl_get_user_integrationcontexts() {
+__kamel_kubectl_get_non_platform_integrationcontexts() {
     local template
     local kubectl_out
 
     template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
+    label_condition="camel.apache.org/context.type!=platform"
 
-    if kubectl_out=$(kubectl get -l camel.apache.org/context.type=user -o template --template="${template}" integrationcontexts 2>/dev/null); then
+    if kubectl_out=$(kubectl get -l ${label_condition} -o template --template="${template}" integrationcontexts 2>/dev/null); then
         COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
     fi
 }
@@ -160,7 +161,7 @@ __custom_func() {
             return
             ;;
         kamel_context_delete)
-            __kamel_kubectl_get_user_integrationcontexts
+            __kamel_kubectl_get_non_platform_integrationcontexts
             return
             ;;
         *)
@@ -215,7 +216,7 @@ func configureKnownBashCompletions(command *cobra.Command) {
 		command,
 		"context",
 		map[string][]string{
-			cobra.BashCompCustom: {"__kamel_kubectl_get_user_integrationcontexts"},
+			cobra.BashCompCustom: {"__kamel_kubectl_get_non_platform_integrationcontexts"},
 		},
 	)
 	configureBashAnnotationForFlag(

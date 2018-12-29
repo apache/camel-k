@@ -78,7 +78,6 @@ func (t *springBootTrait) Apply(e *Environment) error {
 
 		// Override env vars
 		envvar.SetVal(&e.EnvVars, "JAVA_MAIN_CLASS", "org.springframework.boot.loader.PropertiesLauncher")
-		envvar.SetVal(&e.EnvVars, "LOADER_PATH", "/deployments/dependencies/")
 
 		deps := make([]string, 0, 2+len(e.Context.Status.Artifacts))
 		deps = append(deps, "/etc/camel/resources")
@@ -95,6 +94,15 @@ func (t *springBootTrait) Apply(e *Environment) error {
 			}
 
 			deps = append(deps, artifact.Target)
+		}
+
+		if e.Context.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
+			//
+			// In case of an external created context. we do not have any information about
+			// the classpath so we assume the all jars in /deployments/dependencies/ have
+			// to be taken into account
+			//
+			deps = append(deps, "/deployments/dependencies/")
 		}
 
 		envvar.SetVal(&e.EnvVars, "LOADER_HOME", "/deployments")
