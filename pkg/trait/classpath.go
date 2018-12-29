@@ -81,6 +81,15 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		deps = append(deps, artifact.Target)
 	}
 
+	if e.Context.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
+		//
+		// In case of an external created context. we do not have any information about
+		// the classpath so we assume the all jars in /deployments/dependencies/ have
+		// to be taken into account
+		//
+		deps = append(deps, "/deployments/dependencies/*")
+	}
+
 	envvar.SetVal(&e.EnvVars, "JAVA_CLASSPATH", strings.Join(deps, ":"))
 
 	return nil
