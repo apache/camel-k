@@ -52,15 +52,19 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 
 	target := ictx.DeepCopy()
 
-	// execute custom initialization
-	//if err := trait.apply(nil, context); err != nil {
-	//	return err
-	//}
-
-	// update the status
-	logrus.Info("Context ", target.Name, " transitioning to state ", v1alpha1.IntegrationContextPhaseBuilding)
+	// by default the context should be build
 	target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
-	dgst, err := digest.ComputeForIntegrationContext(ictx)
+
+	if target.Spec.Image != "" {
+		// but in case it has been created from an image, mark the
+		// context as ready
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
+
+		// and set the image to be used
+		target.Status.Image = target.Spec.Image
+	}
+
+	dgst, err := digest.ComputeForIntegrationContext(target)
 	if err != nil {
 		return err
 	}

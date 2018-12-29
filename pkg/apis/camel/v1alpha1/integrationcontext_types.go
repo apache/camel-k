@@ -8,6 +8,7 @@ import (
 
 // IntegrationContextSpec defines the desired state of IntegrationContext
 type IntegrationContextSpec struct {
+	Image         string                          `json:"image,omitempty"`
 	Dependencies  []string                        `json:"dependencies,omitempty"`
 	Profile       TraitProfile                    `json:"profile,omitempty"`
 	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
@@ -54,6 +55,12 @@ const (
 
 	// IntegrationContextTypePlatform --
 	IntegrationContextTypePlatform = "platform"
+
+	// IntegrationContextTypeUser --
+	IntegrationContextTypeUser = "user"
+
+	// IntegrationContextTypeExternal --
+	IntegrationContextTypeExternal = "external"
 
 	// IntegrationContextPhaseBuilding --
 	IntegrationContextPhaseBuilding IntegrationContextPhase = "Building"

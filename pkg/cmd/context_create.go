@@ -23,6 +23,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/trait"
+
 	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -48,11 +50,13 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&impl.runtime, "runtime", "r", "jvm", "Runtime provided by the context")
+	cmd.Flags().StringVar(&impl.image, "image", "", "Image used to create the context")
 	cmd.Flags().StringSliceVarP(&impl.dependencies, "dependency", "d", nil, "Add a dependency")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&impl.configmaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&impl.secrets, "secret", nil, "Add a Secret")
-	cmd.Flags().StringSliceVar(&impl.Repositories, "repository", nil, "Add a maven repository")
+	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
+	cmd.Flags().StringSliceVarP(&impl.traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -64,11 +68,13 @@ type contextCreateCommand struct {
 	*RootCmdOptions
 
 	runtime      string
+	image        string
 	dependencies []string
 	properties   []string
 	configmaps   []string
 	secrets      []string
-	Repositories []string
+	repositories []string
+	traits       []string
 }
 
 func (command *contextCreateCommand) validateArgs(cmd *cobra.Command, args []string) error {
@@ -84,6 +90,18 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 	if err != nil {
 		return err
 	}
+
+	catalog := trait.NewCatalog(command.Context, c)
+	tp := catalog.ComputeTraitsProperties()
+	for _, t := range command.traits {
+		kv := strings.SplitN(t, "=", 2)
+
+		if !util.StringSliceExists(tp, kv[0]) {
+			fmt.Printf("Error: %s is not a valid trait property\n", t)
+			return nil
+		}
+	}
+
 	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
@@ -101,14 +119,27 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 
 	ctx = v1alpha1.NewIntegrationContext(command.Namespace, kubernetes.SanitizeName(args[0]))
 	ctx.Labels = map[string]string{
-		"camel.apache.org/context.type": "user",
+		"camel.apache.org/context.type": v1alpha1.IntegrationContextTypeUser,
 	}
 	ctx.Spec = v1alpha1.IntegrationContextSpec{
 		Dependencies:  make([]string, 0, len(command.dependencies)),
 		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
-		Repositories:  command.Repositories,
+		Repositories:  command.repositories,
 	}
 
+	if command.image != "" {
+		//
+		// if the image is set, the context do not require any build but
+		// is be marked as external as the information about the classpath
+		// is missing so it cannot be used as base for other contexts
+		//
+		ctx.Labels["camel.apache.org/context.type"] = v1alpha1.IntegrationContextTypeExternal
+
+		//
+		// Set the image to be used by the context
+		//
+		ctx.Spec.Image = command.image
+	}
 	for _, item := range command.dependencies {
 		switch {
 		case strings.HasPrefix(item, "mvn:"):
@@ -145,6 +176,11 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 			Value: item,
 		})
 	}
+	for _, item := range command.traits {
+		if err := command.configureTrait(&ctx, item); err != nil {
+			return nil
+		}
+	}
 
 	existed := false
 	err = c.Create(command.Context, &ctx)
@@ -171,5 +207,30 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		fmt.Printf("integration context \"%s\" updated\n", ctx.Name)
 	}
 
+	return nil
+}
+
+func (*contextCreateCommand) configureTrait(ctx *v1alpha1.IntegrationContext, config string) error {
+	if ctx.Spec.Traits == nil {
+		ctx.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
+	}
+
+	parts := traitConfigRegexp.FindStringSubmatch(config)
+	if len(parts) < 4 {
+		return errors.New("unrecognized config format (expected \"<trait>.<prop>=<val>\"): " + config)
+	}
+	traitID := parts[1]
+	prop := parts[2][1:]
+	val := parts[3]
+
+	spec, ok := ctx.Spec.Traits[traitID]
+	if !ok {
+		spec = v1alpha1.IntegrationTraitSpec{
+			Configuration: make(map[string]string),
+		}
+	}
+
+	spec.Configuration[prop] = val
+	ctx.Spec.Traits[traitID] = spec
 	return nil
 }
