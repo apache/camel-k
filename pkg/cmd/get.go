@@ -20,8 +20,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"text/tabwriter"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
@@ -61,7 +62,7 @@ func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	namespace := o.Namespace
 
-	err = c.List(o.Context, &client.ListOptions{Namespace: namespace}, &integrationList)
+	err = c.List(o.Context, &k8sclient.ListOptions{Namespace: namespace}, &integrationList)
 	if err != nil {
 		return err
 	}

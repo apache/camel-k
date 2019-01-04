@@ -20,10 +20,11 @@ package platform
 import (
 	"context"
 	"errors"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // gBuilder is the current builder
@@ -60,7 +61,7 @@ func GetCurrentPlatform(ctx context.Context, c client.Client, namespace string) 
 // ListPlatforms returns all platforms installed in a given namespace (only one will be active)
 func ListPlatforms(ctx context.Context, c client.Client, namespace string) (*v1alpha1.IntegrationPlatformList, error) {
 	lst := v1alpha1.NewIntegrationPlatformList()
-	if err := c.List(ctx, &client.ListOptions{Namespace: namespace}, &lst); err != nil {
+	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &lst); err != nil {
 		return nil, err
 	}
 	return &lst, nil

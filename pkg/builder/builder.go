@@ -22,7 +22,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/client"
 	"sort"
 	"sync"
 	"sync/atomic"

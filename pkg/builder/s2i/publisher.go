@@ -19,9 +19,10 @@ package s2i
 
 import (
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/util/json"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
+
+	"k8s.io/apimachinery/pkg/util/json"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/builder"
 
@@ -111,11 +112,7 @@ func Publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "cannot fully read tar file "+ctx.Archive)
 	}
 
-	kc, err := kubernetes.AsKubernetesClient(ctx.Client)
-	if err != nil {
-		return err
-	}
-	restClient, err := customclient.GetClientFor(kc,"build.openshift.io", "v1")
+	restClient, err := customclient.GetClientFor(ctx.Client, "build.openshift.io", "v1")
 	if err != nil {
 		return err
 	}
@@ -159,7 +156,7 @@ func Publisher(ctx *builder.Context) error {
 		return err
 	}
 
-	key, err := client.ObjectKeyFromObject(&is)
+	key, err := k8sclient.ObjectKeyFromObject(&is)
 	if err != nil {
 		return err
 	}

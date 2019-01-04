@@ -20,13 +20,12 @@ package integrationcontext
 import (
 	"context"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
+	"github.com/apache/camel-k/pkg/client"
 )
 
 // Action --
 type Action interface {
-	inject.Client
+	client.Injectable
 
 	// a user friendly name for the action
 	Name() string
@@ -42,7 +41,6 @@ type baseAction struct {
 	client client.Client
 }
 
-func (action *baseAction) InjectClient(client client.Client) error {
+func (action *baseAction) InjectClient(client client.Client) {
 	action.client = client
-	return nil
 }

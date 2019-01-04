@@ -20,13 +20,14 @@ package install
 import (
 	"context"
 	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // SetupClusterwideResources --
@@ -69,11 +70,7 @@ func SetupClusterwideResourcesOrCollect(ctx context.Context, c client.Client, co
 
 // IsCRDInstalled check if the given CRT kind is installed
 func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, error) {
-	kc, err := kubernetes.AsKubernetesClient(c)
-	if err != nil {
-		return false, err
-	}
-	lst, err := kc.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
+	lst, err := c.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -88,10 +85,6 @@ func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, er
 }
 
 func installCRD(ctx context.Context, c client.Client, kind string, resourceName string, collection *kubernetes.Collection) error {
-	kc, err := kubernetes.AsKubernetesClient(c)
-	if err != nil {
-		return err
-	}
 	crd := []byte(deploy.Resources[resourceName])
 	if collection != nil {
 		unstr, err := kubernetes.LoadRawResourceFromYaml(string(crd))
@@ -115,7 +108,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, resourceName 
 	if err != nil {
 		return err
 	}
-	restClient, err := customclient.GetClientFor(kc, "apiextensions.k8s.io", "v1beta1")
+	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1beta1")
 	if err != nil {
 		return err
 	}
@@ -144,7 +137,7 @@ func IsClusterRoleInstalled(ctx context.Context, c client.Client, ) (bool, error
 			Name: "camel-k:edit",
 		},
 	}
-	key, err := client.ObjectKeyFromObject(&clusterRole)
+	key, err := k8sclient.ObjectKeyFromObject(&clusterRole)
 	if err != nil {
 		return false, err
 	}

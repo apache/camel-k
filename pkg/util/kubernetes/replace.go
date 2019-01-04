@@ -19,6 +19,7 @@ package kubernetes
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/client"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
 	"github.com/pkg/errors"
@@ -26,7 +27,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ReplaceResources allows to completely replace a list of resources on Kubernetes, taking care of immutable fields and resource versions
@@ -45,7 +46,7 @@ func ReplaceResource(ctx context.Context, c client.Client, res runtime.Object) e
 	err := c.Create(ctx, res)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existing := res.DeepCopyObject()
-		key, err := client.ObjectKeyFromObject(existing)
+		key, err := k8sclient.ObjectKeyFromObject(existing)
 		if err != nil {
 			return err
 		}

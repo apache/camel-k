@@ -21,13 +21,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/apache/camel-k/pkg/client"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"path"
 	"regexp"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 	"strings"
 	"syscall"
@@ -48,6 +48,7 @@ import (
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var (
@@ -148,10 +149,6 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	kc, err := kubernetes.AsKubernetesClient(c)
-	if err != nil {
-		return err
-	}
 
 	catalog := trait.NewCatalog(o.Context, c)
 	tp := catalog.ComputeTraitsProperties()
@@ -196,7 +193,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev {
-		err = log.Print(o.Context, kc, integration)
+		err = log.Print(o.Context, c, integration)
 		if err != nil {
 			return err
 		}
@@ -379,7 +376,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		clone := integration.DeepCopy()
-		key, err := client.ObjectKeyFromObject(clone)
+		key, err := k8sclient.ObjectKeyFromObject(clone)
 		if err != nil {
 			return nil, err
 		}

@@ -25,11 +25,12 @@ import (
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Operator installs the operator resources in the given namespace
@@ -39,11 +40,7 @@ func Operator(ctx context.Context, c client.Client, namespace string) error {
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
 func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	kc, err := kubernetes.AsKubernetesClient(c)
-	if err != nil {
-		return err
-	}
-	isOpenshift, err := openshift.IsOpenShift(kc)
+	isOpenshift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return err
 	}
@@ -57,7 +54,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, c
 		}
 	}
 	// Additionally, install Knative resources (roles and bindings)
-	isKnative, err := knative.IsInstalled(ctx, kc)
+	isKnative, err := knative.IsInstalled(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -103,14 +100,10 @@ func Platform(ctx context.Context, c client.Client, namespace string, registry s
 // PlatformOrCollect --
 // nolint: lll
 func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
-	kc, err := kubernetes.AsKubernetesClient(c)
-	if err != nil {
-		return nil, err
-	}
 	if err := waitForPlatformCRDAvailable(ctx, c, namespace, 25*time.Second); err != nil {
 		return nil, err
 	}
-	isOpenshift, err := openshift.IsOpenShift(kc)
+	isOpenshift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +133,7 @@ func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, r
 	}
 
 	var knativeInstalled bool
-	if knativeInstalled, err = knative.IsInstalled(ctx, kc); err != nil {
+	if knativeInstalled, err = knative.IsInstalled(ctx, c); err != nil {
 		return nil, err
 	}
 	if knativeInstalled {
@@ -154,7 +147,7 @@ func waitForPlatformCRDAvailable(ctx context.Context, c client.Client, namespace
 	deadline := time.Now().Add(timeout)
 	for {
 		pla := v1alpha1.NewIntegrationPlatformList()
-		if err := c.List(ctx, &client.ListOptions{Namespace: namespace}, &pla); err == nil {
+		if err := c.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &pla); err == nil {
 			return nil
 		}
 		if time.Now().After(deadline) {

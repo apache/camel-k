@@ -24,7 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewDeployAction create an action that handles integration deploy
@@ -49,7 +49,7 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 	if ictxName == "" {
 		return errors.Errorf("no context set on integration %s", integration.Name)
 	}
-	ictxKey := client.ObjectKey{
+	ictxKey := k8sclient.ObjectKey{
 		Namespace: integration.Namespace,
 		Name:      integration.Name,
 	}

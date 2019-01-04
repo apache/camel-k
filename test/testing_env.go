@@ -23,29 +23,25 @@ package test
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/client/cmd"
 	"k8s.io/apimachinery/pkg/labels"
 	"time"
 
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var testContext context.Context
 var testClient client.Client
 
 func init() {
-	// Initializes the kubernetes client to auto-detect the context
-	kubernetes.InitKubeClient("")
-
 	testContext = context.TODO()
 	var err error
-	testClient, err = cmd.NewCmdClient(getTargetNamespace())
+	testClient, err = client.NewOutOfClusterClient("", getTargetNamespace())
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +58,7 @@ func init() {
 }
 
 func getTargetNamespace() string {
-	ns, err := kubernetes.GetClientCurrentNamespace("")
+	ns, err := client.GetCurrentNamespace("")
 	if err != nil {
 		panic(err)
 	}
@@ -71,7 +67,7 @@ func getTargetNamespace() string {
 
 func createDummyDeployment(name string, replicas *int32, labelKey string, labelValue string, command ...string) (*appsv1.Deployment, error) {
 	deployment := getDummyDeployment(name, replicas, labelKey, labelValue, command...)
-	err := testClient.Delete(testContext, &deployment, client.GracePeriodSeconds(0))
+	err := testClient.Delete(testContext, &deployment, k8sclient.GracePeriodSeconds(0))
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}
@@ -82,7 +78,7 @@ func createDummyDeployment(name string, replicas *int32, labelKey string, labelV
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		options := client.ListOptions{
+		options := k8sclient.ListOptions{
 			Namespace: getTargetNamespace(),
 			LabelSelector: labels.SelectorFromSet(labels.Set{
 				labelKey: labelValue,
@@ -134,7 +130,7 @@ func getDummyDeployment(name string, replicas *int32, labelKey string, labelValu
 
 func createDummyPod(name string, command ...string) (*v1.Pod, error) {
 	pod := getDummyPod(name, command...)
-	err := testClient.Delete(testContext, &pod, client.GracePeriodSeconds(0))
+	err := testClient.Delete(testContext, &pod, k8sclient.GracePeriodSeconds(0))
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}
