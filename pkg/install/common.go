@@ -18,23 +18,25 @@ limitations under the License.
 package install
 
 import (
+	"context"
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Resources installs named resources from the project resource directory
-func Resources(namespace string, names ...string) error {
-	return ResourcesOrCollect(namespace, nil, names...)
+func Resources(ctx context.Context, c client.Client, namespace string, names ...string) error {
+	return ResourcesOrCollect(ctx, c, namespace, nil, names...)
 }
 
-func ResourcesOrCollect(namespace string, collection *kubernetes.Collection, names ...string) error {
+// ResourcesOrCollect --
+func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, names ...string) error {
 	for _, name := range names {
-		if err := ResourceOrCollect(namespace, collection, name); err != nil {
+		if err := ResourceOrCollect(ctx, c, namespace, collection, name); err != nil {
 			return err
 		}
 	}
@@ -42,25 +44,27 @@ func ResourcesOrCollect(namespace string, collection *kubernetes.Collection, nam
 }
 
 // Resource installs a single named resource from the project resource directory
-func Resource(namespace string, name string) error {
-	return ResourceOrCollect(namespace, nil, name)
+func Resource(ctx context.Context, c client.Client, namespace string, name string) error {
+	return ResourceOrCollect(ctx, c, namespace, nil, name)
 }
 
-func ResourceOrCollect(namespace string, collection *kubernetes.Collection, name string) error {
-	obj, err := kubernetes.LoadResourceFromYaml(deploy.Resources[name])
+// ResourceOrCollect --
+func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, name string) error {
+	obj, err := kubernetes.LoadRawResourceFromYaml(deploy.Resources[name])
 	if err != nil {
 		return err
 	}
 
-	return RuntimeObjectOrCollect(namespace, collection, obj)
+	return RuntimeObjectOrCollect(ctx, c, namespace, collection, obj)
 }
 
 // RuntimeObject installs a single runtime object
-func RuntimeObject(namespace string, obj runtime.Object) error {
-	return RuntimeObjectOrCollect(namespace, nil, obj)
+func RuntimeObject(ctx context.Context, c client.Client, namespace string, obj runtime.Object) error {
+	return RuntimeObjectOrCollect(ctx, c, namespace, nil, obj)
 }
 
-func RuntimeObjectOrCollect(namespace string, collection *kubernetes.Collection, obj runtime.Object) error {
+// RuntimeObjectOrCollect --
+func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, obj runtime.Object) error {
 	if collection != nil {
 		// Adding to the collection before setting the namespace
 		collection.Add(obj)
@@ -71,7 +75,7 @@ func RuntimeObjectOrCollect(namespace string, collection *kubernetes.Collection,
 		metaObject.SetNamespace(namespace)
 	}
 
-	err := sdk.Create(obj)
+	err := c.Create(ctx, obj)
 	if err != nil && errors.IsAlreadyExists(err) {
 		// Don't recreate Service object
 		if obj.GetObjectKind().GroupVersionKind().Kind == "Service" {
@@ -87,7 +91,7 @@ func RuntimeObjectOrCollect(namespace string, collection *kubernetes.Collection,
 		if obj.GetObjectKind().GroupVersionKind().Kind == "PersistentVolumeClaim" {
 			return nil
 		}
-		return sdk.Update(obj)
+		return c.Update(ctx, obj)
 	}
 	return err
 }

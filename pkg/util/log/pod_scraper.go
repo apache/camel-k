@@ -21,10 +21,10 @@ import (
 	"bufio"
 	"context"
 	"io"
+	"k8s.io/apimachinery/pkg/util/json"
+	"k8s.io/client-go/kubernetes"
 	"time"
 
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
@@ -43,13 +43,15 @@ var commonUserContainerNames = map[string]bool{
 type PodScraper struct {
 	namespace string
 	name      string
+	client    kubernetes.Interface
 }
 
 // NewPodScraper creates a new pod scraper
-func NewPodScraper(namespace string, name string) *PodScraper {
+func NewPodScraper(c kubernetes.Interface, namespace string, name string) *PodScraper {
 	return &PodScraper{
 		namespace: namespace,
 		name:      name,
+		client:    c,
 	}
 }
 
@@ -76,7 +78,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 		Follow:    true,
 		Container: containerName,
 	}
-	byteReader, err := k8sclient.GetKubeClient().CoreV1().Pods(s.namespace).GetLogs(s.name, &logOptions).Context(ctx).Stream()
+	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.name, &logOptions).Context(ctx).Stream()
 	if err != nil {
 		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
 		return
@@ -142,11 +144,8 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, na
 			Namespace: namespace,
 		},
 	}
-	resourceClient, _, err := k8sclient.GetResourceClient(pod.APIVersion, pod.Kind, pod.Namespace)
-	if err != nil {
-		return "", err
-	}
-	watcher, err := resourceClient.Watch(metav1.ListOptions{
+	podClient := s.client.CoreV1().Pods(pod.Namespace)
+	watcher, err := podClient.Watch(metav1.ListOptions{
 		FieldSelector: "metadata.name=" + pod.Name,
 	})
 	if err != nil {
@@ -167,9 +166,12 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, na
 					unstr := unstructured.Unstructured{
 						Object: runtimeUnstructured.UnstructuredContent(),
 					}
-					pcopy := pod.DeepCopy()
-					err := k8sutil.UnstructuredIntoRuntimeObject(&unstr, pcopy)
+					jsondata, err := unstr.MarshalJSON()
 					if err != nil {
+						return "", err
+					}
+					pcopy := pod.DeepCopy()
+					if err := json.Unmarshal(jsondata, pcopy); err != nil {
 						return "", err
 					}
 

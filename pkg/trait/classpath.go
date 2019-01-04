@@ -19,9 +19,9 @@ package trait
 
 import (
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -57,8 +57,12 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	if ctx == nil && e.Integration.Status.Context != "" {
 		name := e.Integration.Status.Context
 		c := v1alpha1.NewIntegrationContext(e.Integration.Namespace, name)
+		key := client.ObjectKey{
+			Namespace: e.Integration.Namespace,
+			Name: name,
+		}
 
-		if err := sdk.Get(&c); err != nil {
+		if err := t.client.Get(t.ctx, key, &c); err != nil {
 			return errors.Wrapf(err, "unable to find integration context %s, %s", name, err)
 		}
 

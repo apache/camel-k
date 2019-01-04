@@ -19,19 +19,17 @@ package s2i
 
 import (
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/util/json"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 
 	"github.com/apache/camel-k/pkg/builder"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
-	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
+	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -72,12 +70,12 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err := sdk.Delete(&bc)
+	err := ctx.Client.Delete(ctx.C, &bc)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete build config")
 	}
 
-	err = sdk.Create(&bc)
+	err = ctx.Client.Create(ctx.C, &bc)
 	if err != nil {
 		return errors.Wrap(err, "cannot create build config")
 	}
@@ -98,12 +96,12 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err = sdk.Delete(&is)
+	err = ctx.Client.Delete(ctx.C, &is)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete image stream")
 	}
 
-	err = sdk.Create(&is)
+	err = ctx.Client.Create(ctx.C, &is)
 	if err != nil {
 		return errors.Wrap(err, "cannot create image stream")
 	}
@@ -113,7 +111,11 @@ func Publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "cannot fully read tar file "+ctx.Archive)
 	}
 
-	restClient, err := customclient.GetClientFor("build.openshift.io", "v1")
+	kc, err := kubernetes.AsKubernetesClient(ctx.Client)
+	if err != nil {
+		return err
+	}
+	restClient, err := customclient.GetClientFor(kc,"build.openshift.io", "v1")
 	if err != nil {
 		return err
 	}
@@ -135,18 +137,13 @@ func Publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "no raw data retrieved")
 	}
 
-	u := unstructured.Unstructured{}
-	err = u.UnmarshalJSON(data)
+	ocbuild := buildv1.Build{}
+	json.Unmarshal(data, &ocbuild)
 	if err != nil {
-		return errors.Wrap(err, "cannot unmarshal instantiate binary response")
+		return errors.Wrap(err, "cannot unmarshal instantiated binary response")
 	}
 
-	ocbuild, err := k8sutil.RuntimeObjectFromUnstructured(&u)
-	if err != nil {
-		return err
-	}
-
-	err = kubernetes.WaitCondition(ocbuild, func(obj interface{}) (bool, error) {
+	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &ocbuild, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*buildv1.Build); ok {
 			if val.Status.Phase == buildv1.BuildPhaseComplete {
 				return true, nil
@@ -162,7 +159,11 @@ func Publisher(ctx *builder.Context) error {
 		return err
 	}
 
-	err = sdk.Get(&is)
+	key, err := client.ObjectKeyFromObject(&is)
+	if err != nil {
+		return err
+	}
+	err = ctx.Client.Get(ctx.C, key, &is)
 	if err != nil {
 		return err
 	}

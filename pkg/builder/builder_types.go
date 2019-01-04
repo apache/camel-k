@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -137,6 +138,7 @@ type Result struct {
 // Context --
 type Context struct {
 	C                 context.Context
+	client.Client
 	Request           Request
 	Image             string
 	PublicImage       string

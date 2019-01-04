@@ -18,28 +18,50 @@ limitations under the License.
 package customclient
 
 import (
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 // GetClientFor returns a RESTClient for the given group and version
-func GetClientFor(group string, version string) (*rest.RESTClient, error) {
-	inConfig := k8sclient.GetKubeConfig()
-	config := rest.CopyConfig(inConfig)
-	config.GroupVersion = &schema.GroupVersion{
+func GetClientFor(c kubernetes.Interface, group string, version string) (*rest.RESTClient, error) {
+	inConfig, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	conf := rest.CopyConfig(inConfig)
+	conf.GroupVersion = &schema.GroupVersion{
 		Group:   group,
 		Version: version,
 	}
-	config.APIPath = "/apis"
-	config.AcceptContentTypes = "application/json"
-	config.ContentType = "application/json"
+	conf.APIPath = "/apis"
+	conf.AcceptContentTypes = "application/json"
+	conf.ContentType = "application/json"
 
 	// this gets used for discovery and error handling types
-	config.NegotiatedSerializer = basicNegotiatedSerializer{}
-	if config.UserAgent == "" {
-		config.UserAgent = rest.DefaultKubernetesUserAgent()
+	conf.NegotiatedSerializer = basicNegotiatedSerializer{}
+	if conf.UserAgent == "" {
+		conf.UserAgent = rest.DefaultKubernetesUserAgent()
 	}
 
-	return rest.RESTClientFor(config)
+	return rest.RESTClientFor(conf)
+}
+
+// GetDynamicClientFor returns a dynamic client for a given kind
+func GetDynamicClientFor(group string, version string, kind string, namespace string) (dynamic.ResourceInterface, error) {
+	conf, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	dynamicClient, err := dynamic.NewForConfig(conf)
+	if err != nil {
+		return nil, err
+	}
+	return dynamicClient.Resource(schema.GroupVersionResource{
+		Group: group,
+		Version: version,
+		Resource: kind,
+	}).Namespace(namespace), nil
 }

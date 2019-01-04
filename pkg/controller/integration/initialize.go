@@ -1,0 +1,80 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package integration
+
+import (
+	"context"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/sirupsen/logrus"
+)
+
+// NewInitializeAction creates a new inititialize action
+func NewInitializeAction() Action {
+	return &initializeAction{}
+}
+
+type initializeAction struct {
+	baseAction
+}
+
+// Name returns a common name of the action
+func (action *initializeAction) Name() string {
+	return "initialize"
+}
+
+// CanHandle tells whether this action can handle the integration
+func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) bool {
+	return integration.Status.Phase == ""
+}
+
+// Handle handles the integrations
+func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+	// The integration platform needs to be ready before starting to create integrations
+	if pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace); err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
+		logrus.Info("Waiting for a integration platform to be ready")
+		return nil
+	}
+
+	target := integration.DeepCopy()
+	// better not changing the spec section of the target because it may be used for comparison by a
+	// higher level controller (e.g. Knative source controller)
+
+	// execute custom initialization
+	if _, err := trait.Apply(ctx, action.client, target, nil); err != nil {
+		return err
+	}
+
+	// update the status
+	dgst, err := digest.ComputeForIntegration(integration)
+	if err != nil {
+		return err
+	}
+
+	target.Status.Phase = v1alpha1.IntegrationPhaseBuildingContext
+	target.Status.Digest = dgst
+	target.Status.Context = integration.Spec.Context
+	target.Status.Dependencies = integration.Spec.Dependencies
+	target.Status.Image = ""
+
+	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+
+	return action.client.Update(ctx, target)
+}

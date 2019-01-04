@@ -20,10 +20,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"text/tabwriter"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -47,6 +47,11 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 }
 
 func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
+	c, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
+
 	integrationList := v1alpha1.IntegrationList{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -56,7 +61,7 @@ func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	namespace := o.Namespace
 
-	err := sdk.List(namespace, &integrationList)
+	err = c.List(o.Context, &client.ListOptions{Namespace: namespace}, &integrationList)
 	if err != nil {
 		return err
 	}

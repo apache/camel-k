@@ -18,11 +18,14 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 )
 
 // Identifiable represent an identifiable type
@@ -36,6 +39,10 @@ type ID string
 // Trait is the interface of all traits
 type Trait interface {
 	Identifiable
+	inject.Client
+
+	// InjectContext to inject a context
+	InjectContext(context.Context)
 
 	// Configure the trait
 	Configure(environment *Environment) (bool, error)
@@ -50,11 +57,24 @@ type Trait interface {
 type BaseTrait struct {
 	id      ID
 	Enabled *bool `property:"enabled"`
+	client  client.Client
+	ctx     context.Context
 }
 
 // ID returns the identifier of the trait
 func (trait *BaseTrait) ID() ID {
 	return trait.id
+}
+
+// InjectClient implements client.ClientInject and allows to inject a client into the trait
+func (trait *BaseTrait) InjectClient(c client.Client) error {
+	trait.client = c
+	return nil
+}
+
+// InjectContext allows to inject a context into the trait
+func (trait *BaseTrait) InjectContext(ctx context.Context) {
+	trait.ctx = ctx
 }
 
 /* Environment */

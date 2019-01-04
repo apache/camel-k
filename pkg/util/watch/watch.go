@@ -19,70 +19,15 @@ package watch
 
 import (
 	"context"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
+	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/json"
 )
-
-// StateChanges watches a integration resource and send it through a channel when its status changes
-func StateChanges(ctx context.Context, integration *v1alpha1.Integration) (<-chan *v1alpha1.Integration, error) {
-	resourceClient, _, err := k8sclient.GetResourceClient(integration.APIVersion, integration.Kind, integration.Namespace)
-	if err != nil {
-		return nil, err
-	}
-	watcher, err := resourceClient.Watch(metav1.ListOptions{
-		FieldSelector: "metadata.name=" + integration.Name,
-	})
-	if err != nil {
-		return nil, err
-	}
-	events := watcher.ResultChan()
-
-	out := make(chan *v1alpha1.Integration)
-	var lastObservedState *v1alpha1.IntegrationPhase
-
-	go func() {
-		defer watcher.Stop()
-		defer close(out)
-
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case e, ok := <-events:
-				if !ok {
-					return
-				}
-
-				if e.Object != nil {
-					if runtimeUnstructured, ok := e.Object.(runtime.Unstructured); ok {
-						unstr := unstructured.Unstructured{
-							Object: runtimeUnstructured.UnstructuredContent(),
-						}
-						icopy := integration.DeepCopy()
-						err := k8sutil.UnstructuredIntoRuntimeObject(&unstr, icopy)
-						if err != nil {
-							logrus.Error("Unexpected error detected when watching resource", err)
-							return // closes the channel
-						}
-
-						if lastObservedState == nil || *lastObservedState != icopy.Status.Phase {
-							lastObservedState = &icopy.Status.Phase
-							out <- icopy
-						}
-					}
-				}
-			}
-		}
-	}()
-
-	return out, nil
-}
 
 //
 // HandleStateChanges watches a integration resource and invoke the given handler when its status changes.
@@ -98,11 +43,15 @@ func StateChanges(ctx context.Context, integration *v1alpha1.Integration) (<-cha
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
 //
 func HandleStateChanges(ctx context.Context, integration *v1alpha1.Integration, handler func(integration *v1alpha1.Integration) bool) error {
-	resourceClient, _, err := k8sclient.GetResourceClient(integration.APIVersion, integration.Kind, integration.Namespace)
+	gv, err := schema.ParseGroupVersion(integration.APIVersion)
 	if err != nil {
 		return err
 	}
-	watcher, err := resourceClient.Watch(metav1.ListOptions{
+	dynamicClient, err := customclient.GetDynamicClientFor(gv.Group, gv.Version, integration.Kind, integration.Namespace)
+	if err != nil {
+		return err
+	}
+	watcher, err := dynamicClient.Watch(metav1.ListOptions{
 		FieldSelector: "metadata.name=" + integration.Name,
 	})
 	if err != nil {
@@ -128,8 +77,12 @@ func HandleStateChanges(ctx context.Context, integration *v1alpha1.Integration, 
 					unstr := unstructured.Unstructured{
 						Object: runtimeUnstructured.UnstructuredContent(),
 					}
+					jsondata, err := unstr.MarshalJSON()
+					if err != nil {
+						return err
+					}
 					icopy := integration.DeepCopy()
-					err := k8sutil.UnstructuredIntoRuntimeObject(&unstr, icopy)
+					err = json.Unmarshal(jsondata, icopy)
 					if err != nil {
 						logrus.Error("Unexpected error detected when watching resource", err)
 						return nil

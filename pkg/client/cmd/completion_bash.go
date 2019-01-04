@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -70,7 +71,7 @@ __kamel_dependency_type() {
 }
 
 __kamel_traits() {
-    local type_list="` + strings.Join(trait.NewCatalog().ComputeTraitsProperties(), " ") + `"
+    local type_list="` + strings.Join(trait.NewCatalog(context.TODO(), nil).ComputeTraitsProperties(), " ") + `"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
     compopt -o nospace
 }

@@ -20,10 +20,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"text/tabwriter"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 )
 
@@ -67,7 +67,11 @@ func (command *contextGetCommand) validate(cmd *cobra.Command, args []string) er
 
 func (command *contextGetCommand) run() error {
 	ctxList := v1alpha1.NewIntegrationContextList()
-	if err := sdk.List(command.Namespace, &ctxList); err != nil {
+	c, err := command.GetCmdClient()
+	if err != nil {
+		return err
+	}
+	if err := c.List(command.Context, &client.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
 		return err
 	}
 

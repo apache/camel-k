@@ -22,7 +22,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 )
 
 // InitKubeClient initialize the k8s client

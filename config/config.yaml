@@ -1,3 +1,0 @@
-apiVersion: camel.apache.org/v1alpha1
-kind: Integration
-projectName: camel-k

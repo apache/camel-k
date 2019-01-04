@@ -21,12 +21,12 @@ import (
 	"bufio"
 	"context"
 	"io"
+	"k8s.io/client-go/kubernetes"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,6 +34,7 @@ import (
 
 // SelectorScraper scrapes all pods with a given selector
 type SelectorScraper struct {
+	client        kubernetes.Interface
 	namespace     string
 	labelSelector string
 	podScrapers   sync.Map
@@ -41,8 +42,9 @@ type SelectorScraper struct {
 }
 
 // NewSelectorScraper creates a new SelectorScraper
-func NewSelectorScraper(namespace string, labelSelector string) *SelectorScraper {
+func NewSelectorScraper(client kubernetes.Interface, namespace string, labelSelector string) *SelectorScraper {
 	return &SelectorScraper{
+		client:        client,
 		namespace:     namespace,
 		labelSelector: labelSelector,
 	}
@@ -121,7 +123,7 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 }
 
 func (s *SelectorScraper) addPodScraper(ctx context.Context, name string, out *bufio.Writer) {
-	podScraper := NewPodScraper(s.namespace, name)
+	podScraper := NewPodScraper(s.client, s.namespace, name)
 	podCtx, podCancel := context.WithCancel(ctx)
 	id := atomic.AddUint64(&s.counter, 1)
 	prefix := "[" + strconv.FormatUint(id, 10) + "] "
@@ -156,20 +158,12 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, name string, out *b
 }
 
 func (s *SelectorScraper) listPods() (*v1.PodList, error) {
-	list := v1.PodList{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-	}
-
-	err := sdk.List(s.namespace, &list, sdk.WithListOptions(&metav1.ListOptions{
+	list, err := s.client.CoreV1().Pods(s.namespace).List(metav1.ListOptions{
 		LabelSelector: s.labelSelector,
-	}))
-
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &list, nil
+	return list, nil
 }

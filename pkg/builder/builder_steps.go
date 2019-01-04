@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 
 	"github.com/scylladb/go-set/strset"
@@ -29,8 +30,6 @@ import (
 	"github.com/rs/xid"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-
 	"github.com/apache/camel-k/pkg/util/tar"
 
 	"gopkg.in/yaml.v2"
@@ -245,7 +244,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	list := v1alpha1.NewIntegrationContextList()
 
-	err := sdk.List(context.Namespace, &list, sdk.WithListOptions(&metav1.ListOptions{}))
+	err := context.Client.List(context.C, &client.ListOptions{Namespace: context.Namespace}, &list)
 	if err != nil {
 		return nil, err
 	}
@@ -350,8 +349,12 @@ func NotifyIntegrationContext(ctx *Context) error {
 			Name:      ctx.Request.Meta.Name,
 		},
 	}
+	key := client.ObjectKey{
+		Namespace: ctx.Namespace,
+		Name: ctx.Request.Meta.Name,
+	}
 
-	if err := sdk.Get(&target); err != nil {
+	if err := ctx.Client.Get(ctx.C, key, &target); err != nil {
 		return err
 	}
 
@@ -363,7 +366,7 @@ func NotifyIntegrationContext(ctx *Context) error {
 	// Add a random ID to trigger update
 	t.Annotations["camel.apache.org/build.id"] = xid.New().String()
 
-	if err := sdk.Update(t); err != nil {
+	if err := ctx.Client.Update(ctx.C, t); err != nil {
 		return err
 	}
 
@@ -382,8 +385,12 @@ func NotifyIntegration(ctx *Context) error {
 			Name:      ctx.Request.Meta.Name,
 		},
 	}
+	key := client.ObjectKey{
+		Namespace: ctx.Namespace,
+		Name: ctx.Request.Meta.Name,
+	}
 
-	if err := sdk.Get(&target); err != nil {
+	if err := ctx.Client.Get(ctx.C, key, &target); err != nil {
 		return err
 	}
 
@@ -395,7 +402,7 @@ func NotifyIntegration(ctx *Context) error {
 	// Add a random ID to trigger update
 	t.Annotations["camel.apache.org/build.id"] = xid.New().String()
 
-	if err := sdk.Update(t); err != nil {
+	if err := ctx.Client.Update(ctx.C, t); err != nil {
 		return err
 	}
 

@@ -18,13 +18,14 @@ limitations under the License.
 package knative
 
 import (
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
+	"context"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 )
 
 // IsInstalled returns true if we are connected to a cluster with Knative installed
-func IsInstalled() (bool, error) {
-	_, err := k8sclient.GetKubeClient().Discovery().ServerResourcesForGroupVersion("serving.knative.dev/v1alpha1")
+func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
+	_, err := c.Discovery().ServerResourcesForGroupVersion("serving.knative.dev/v1alpha1")
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
