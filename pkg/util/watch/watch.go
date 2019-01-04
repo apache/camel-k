@@ -25,7 +25,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
@@ -43,11 +42,7 @@ import (
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
 //
 func HandleStateChanges(ctx context.Context, integration *v1alpha1.Integration, handler func(integration *v1alpha1.Integration) bool) error {
-	gv, err := schema.ParseGroupVersion(integration.APIVersion)
-	if err != nil {
-		return err
-	}
-	dynamicClient, err := customclient.GetDynamicClientFor(gv.Group, gv.Version, integration.Kind, integration.Namespace)
+	dynamicClient, err := customclient.GetDynamicClientFor(v1alpha1.SchemeGroupVersion.Group, v1alpha1.SchemeGroupVersion.Version, "integrations", integration.Namespace)
 	if err != nil {
 		return err
 	}
