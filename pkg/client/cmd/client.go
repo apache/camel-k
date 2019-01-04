@@ -1,7 +1,3 @@
-// +build integration
-
-// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
-
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -19,25 +15,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package test
+package cmd
 
 import (
-	"testing"
-
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/apis"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-func TestInstallation(t *testing.T) {
-	installedCtxCRD, err := install.IsCRDInstalled(testContext, testClient, "IntegrationContext")
-	assert.Nil(t, err)
-	assert.True(t, installedCtxCRD)
+// NewCmdClient returns a new client that can be used from command line tools
+func NewCmdClient(namespace string) (client.Client, error) {
+	// Get a config to talk to the apiserver
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	// Create a new Cmd to provide shared dependencies and start components
+	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
 
-	installedCRD, err := install.IsCRDInstalled(testContext, testClient, "Integration")
-	assert.Nil(t, err)
-	assert.True(t, installedCRD)
-
-	installedClusterRole, err := install.IsClusterRoleInstalled(testContext, testClient)
-	assert.Nil(t, err)
-	assert.True(t, installedClusterRole)
+	// Setup Scheme for all resources
+	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
+		return nil, err
+	}
+	return mgr.GetClient(), nil
 }

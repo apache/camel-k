@@ -19,14 +19,10 @@ package cmd
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/apis"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const kamelCommandLongDescription = `
@@ -92,18 +88,7 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	if command._client != nil {
 		return command._client, nil
 	}
-	// Get a config to talk to the apiserver
-	cfg, err := config.GetConfig()
-	if err != nil {
-		return nil, err
-	}
-	// Create a new Cmd to provide shared dependencies and start components
-	mgr, err := manager.New(cfg, manager.Options{Namespace: command.Namespace})
-
-	// Setup Scheme for all resources
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		return nil, err
-	}
-	command._client = mgr.GetClient()
-	return command._client, nil
+	var err error
+	command._client, err = NewCmdClient(command.Namespace)
+	return command._client, err
 }
