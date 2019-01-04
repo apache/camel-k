@@ -24,7 +24,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/apache/camel-k/pkg/client/cmd"
+	"github.com/apache/camel-k/pkg/cmd"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )

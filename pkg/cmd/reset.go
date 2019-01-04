@@ -19,7 +19,9 @@ package cmd
 
 import (
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/client"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/pkg/errors"
@@ -69,7 +71,7 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, args []string) (err error) {
 
 func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 	list := v1alpha1.NewIntegrationList()
-	if err := c.List(o.Context, &client.ListOptions{Namespace: o.Namespace}, &list); err != nil {
+	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
@@ -83,7 +85,7 @@ func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 
 func (o *resetCmdOptions) deleteAllIntegrationContexts(c client.Client) (int, error) {
 	list := v1alpha1.NewIntegrationContextList()
-	if err := c.List(o.Context, &client.ListOptions{Namespace: o.Namespace}, &list); err != nil {
+	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration contexts from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
@@ -97,7 +99,7 @@ func (o *resetCmdOptions) deleteAllIntegrationContexts(c client.Client) (int, er
 
 func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 	list := v1alpha1.NewIntegrationPlatformList()
-	if err := c.List(o.Context, &client.ListOptions{Namespace: o.Namespace}, &list); err != nil {
+	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", o.Namespace))
 	}
 	if len(list.Items) > 1 {

@@ -22,20 +22,21 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // GetIntegrationContext retrieves the context set on the integration
 func GetIntegrationContext(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
-	if integration.Status.Context== "" {
+	if integration.Status.Context == "" {
 		return nil, nil
 	}
 
 	name := integration.Status.Context
 	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
-	key := client.ObjectKey{
+	key := k8sclient.ObjectKey{
 		Namespace: integration.Namespace,
-		Name: name,
+		Name:      name,
 	}
 	err := c.Get(ctx, key, &ictx)
 	return &ictx, err

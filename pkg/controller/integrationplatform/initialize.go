@@ -20,8 +20,6 @@ package integrationplatform
 import (
 	"context"
 	"errors"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -65,12 +63,8 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 
 	// update missing fields in the resource
 	if target.Spec.Cluster == "" {
-		kc, err := kubernetes.AsKubernetesClient(action.client)
-		if err != nil {
-			return err
-		}
 		// determine the kind of cluster the platform in installed into
-		isOpenshift, err := openshift.IsOpenShift(kc)
+		isOpenshift, err := openshift.IsOpenShift(action.client)
 		switch {
 		case err != nil:
 			return err

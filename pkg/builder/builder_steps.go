@@ -22,8 +22,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/scylladb/go-set/strset"
 
@@ -244,7 +245,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	list := v1alpha1.NewIntegrationContextList()
 
-	err := context.Client.List(context.C, &client.ListOptions{Namespace: context.Namespace}, &list)
+	err := context.Client.List(context.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
 	if err != nil {
 		return nil, err
 	}
@@ -349,9 +350,9 @@ func NotifyIntegrationContext(ctx *Context) error {
 			Name:      ctx.Request.Meta.Name,
 		},
 	}
-	key := client.ObjectKey{
+	key := k8sclient.ObjectKey{
 		Namespace: ctx.Namespace,
-		Name: ctx.Request.Meta.Name,
+		Name:      ctx.Request.Meta.Name,
 	}
 
 	if err := ctx.Client.Get(ctx.C, key, &target); err != nil {
@@ -385,9 +386,9 @@ func NotifyIntegration(ctx *Context) error {
 			Name:      ctx.Request.Meta.Name,
 		},
 	}
-	key := client.ObjectKey{
+	key := k8sclient.ObjectKey{
 		Namespace: ctx.Namespace,
-		Name: ctx.Request.Meta.Name,
+		Name:      ctx.Request.Meta.Name,
 	}
 
 	if err := ctx.Client.Get(ctx.C, key, &target); err != nil {

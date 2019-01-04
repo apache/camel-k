@@ -16,9 +16,9 @@
 .gopath
 
 # Temporary Build Files
-tmp/_output
-tmp/_test
-tmp/_maven_output
+build/_output
+build/_test
+build/_maven_output
 
 # eclipse / vscode
 .settings

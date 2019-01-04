@@ -29,12 +29,11 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/sirupsen/logrus"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewBuildImageAction create an action that handles integration image build
@@ -69,7 +68,7 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 	// look-up the integration context associated to this integration, this is needed
 	// to determine the base image
 	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, integration.Status.Context)
-	ikey := client.ObjectKey{
+	ikey := k8sclient.ObjectKey{
 		Namespace: integration.Namespace,
 		Name:      integration.Status.Context,
 	}

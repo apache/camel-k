@@ -20,7 +20,7 @@ package trait
 import (
 	"context"
 	"reflect"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/client"
 	"strings"
 
 	"github.com/sirupsen/logrus"

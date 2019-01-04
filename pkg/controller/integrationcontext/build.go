@@ -27,7 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 
 	"github.com/sirupsen/logrus"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewBuildAction creates a new build handling action for the context
@@ -129,7 +129,7 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 // informIntegrations triggers the processing of all integrations waiting for this context to be built
 func (action *buildAction) informIntegrations(ictx *v1alpha1.IntegrationContext) error {
 	list := v1alpha1.NewIntegrationList()
-	err := action.client.List(action.Context, &client.ListOptions{Namespace: ictx.Namespace}, &list)
+	err := action.client.List(action.Context, &k8sclient.ListOptions{Namespace: ictx.Namespace}, &list)
 	if err != nil {
 		return err
 	}

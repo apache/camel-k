@@ -6,10 +6,10 @@ import (
 	"time"
 
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -28,12 +28,16 @@ var log = logf.Log.WithName("controller_integration")
 // Add creates a new Integration Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+	c, err := client.FromManager(mgr)
+	if err != nil {
+		return err
+	}
+	return add(mgr, newReconciler(mgr, c))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileIntegration{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
+	return &ReconcileIntegration{client: c, scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -106,9 +110,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	for _, a := range integrationActionPool {
-		if err := a.InjectClient(r.client); err != nil {
-			return reconcile.Result{}, err
-		}
+		a.InjectClient(r.client)
 		if a.CanHandle(instance) {
 			logrus.Debug("Invoking action ", a.Name(), " on integration ", instance.Name)
 			if err := a.Handle(ctx, instance); err != nil {
