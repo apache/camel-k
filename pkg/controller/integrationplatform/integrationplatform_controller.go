@@ -2,6 +2,8 @@ package integrationplatform
 
 import (
 	"context"
+	"time"
+
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/sirupsen/logrus"
@@ -13,7 +15,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"time"
 )
 
 var log = logf.Log.WithName("controller_integrationplatform")

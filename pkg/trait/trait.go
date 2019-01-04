@@ -19,12 +19,13 @@ package trait
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
-	"github.com/apache/camel-k/pkg/client"
 )
 
 // True --

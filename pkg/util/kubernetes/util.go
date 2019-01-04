@@ -19,10 +19,10 @@ package kubernetes
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/util/json"
 
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/json"
 )
 
 // ToJSON --

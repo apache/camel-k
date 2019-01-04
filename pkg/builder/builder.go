@@ -22,14 +22,13 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"github.com/apache/camel-k/pkg/client"
 	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/sirupsen/logrus"
 )
 

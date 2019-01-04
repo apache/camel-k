@@ -75,7 +75,7 @@ func main() {
 	}
 
 	// Become the leader before proceeding
-	leader.Become(context.TODO(), "camel-k-lock")
+	leader.Become(context.TODO(), "camel-k-lock") // nolint: errcheck
 
 	r := ready.NewFileReady()
 	err = r.Set()
@@ -83,7 +83,7 @@ func main() {
 		log.Error(err, "")
 		os.Exit(1)
 	}
-	defer r.Unset()
+	defer r.Unset() // nolint: errcheck
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})

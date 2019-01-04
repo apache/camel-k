@@ -60,8 +60,8 @@ func GetDynamicClientFor(group string, version string, kind string, namespace st
 		return nil, err
 	}
 	return dynamicClient.Resource(schema.GroupVersionResource{
-		Group: group,
-		Version: version,
+		Group:    group,
+		Version:  version,
 		Resource: kind,
 	}).Namespace(namespace), nil
 }
