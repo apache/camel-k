@@ -86,6 +86,6 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 		return command._client, nil
 	}
 	var err error
-	command._client, err = client.NewOutOfClusterClient(command.KubeConfig, command.Namespace)
+	command._client, err = client.NewOutOfClusterClient(command.KubeConfig)
 	return command._client, err
 }
