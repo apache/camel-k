@@ -71,7 +71,6 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	target.Status.Phase = v1alpha1.IntegrationPhaseBuildingContext
 	target.Status.Digest = dgst
 	target.Status.Context = integration.Spec.Context
-	target.Status.Dependencies = integration.Spec.Dependencies
 	target.Status.Image = ""
 
 	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
