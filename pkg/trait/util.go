@@ -26,7 +26,7 @@ import (
 
 // GetIntegrationContext retrieves the context set on the integration
 func GetIntegrationContext(integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
-	if integration.Status.Context== "" {
+	if integration.Status.Context == "" {
 		return nil, nil
 	}
 
