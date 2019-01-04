@@ -26,17 +26,22 @@ import (
 
 	"k8s.io/kube-openapi/pkg/generators/rules"
 
-	"github.com/golang/glog"
 	"k8s.io/gengo/generator"
 	"k8s.io/gengo/types"
+	"k8s.io/klog"
 )
 
 const apiViolationFileType = "api-violation"
 
-type apiViolationFile struct{}
+type apiViolationFile struct {
+	// Since our file actually is unrelated to the package structure, use a
+	// path that hasn't been mangled by the framework.
+	unmangledPath string
+}
 
-func (apiViolationFile) AssembleFile(f *generator.File, path string) error {
-	glog.V(2).Infof("Assembling file %q", path)
+func (a apiViolationFile) AssembleFile(f *generator.File, path string) error {
+	path = a.unmangledPath
+	klog.V(2).Infof("Assembling file %q", path)
 	if path == "-" {
 		_, err := io.Copy(os.Stdout, &f.Body)
 		return err
@@ -51,11 +56,12 @@ func (apiViolationFile) AssembleFile(f *generator.File, path string) error {
 	return err
 }
 
-func (apiViolationFile) VerifyFile(f *generator.File, path string) error {
+func (a apiViolationFile) VerifyFile(f *generator.File, path string) error {
 	if path == "-" {
 		// Nothing to verify against.
 		return nil
 	}
+	path = a.unmangledPath
 
 	formatted := f.Body.Bytes()
 	existing, err := ioutil.ReadFile(path)
@@ -82,27 +88,25 @@ func (apiViolationFile) VerifyFile(f *generator.File, path string) error {
 	return fmt.Errorf("output for %q differs; first existing/expected diff: \n  %q\n  %q", path, string(eDiff), string(fDiff))
 }
 
-func newAPIViolationGen(reportFilename string) *apiViolationGen {
+func newAPIViolationGen() *apiViolationGen {
 	return &apiViolationGen{
-		reportFilename: reportFilename,
-		linter:         newAPILinter(),
+		linter: newAPILinter(),
 	}
 }
 
 type apiViolationGen struct {
 	generator.DefaultGen
 
-	linter         *apiLinter
-	reportFilename string
+	linter *apiLinter
 }
 
 func (v *apiViolationGen) FileType() string { return apiViolationFileType }
 func (v *apiViolationGen) Filename() string {
-	return v.reportFilename
+	return "this file is ignored by the file assembler"
 }
 
 func (v *apiViolationGen) GenerateType(c *generator.Context, t *types.Type, w io.Writer) error {
-	glog.V(5).Infof("validating API rules for type %v", t)
+	klog.V(5).Infof("validating API rules for type %v", t)
 	if err := v.linter.validate(t); err != nil {
 		return err
 	}
@@ -185,7 +189,7 @@ type APIRule interface {
 // validate runs all API rules on type t and records any API rule violation
 func (l *apiLinter) validate(t *types.Type) error {
 	for _, r := range l.rules {
-		glog.V(5).Infof("validating API rule %v for type %v", r.Name(), t)
+		klog.V(5).Infof("validating API rule %v for type %v", r.Name(), t)
 		fields, err := r.Validate(t)
 		if err != nil {
 			return err

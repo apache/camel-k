@@ -18,7 +18,9 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"reflect"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -45,8 +47,8 @@ type Catalog struct {
 }
 
 // NewCatalog creates a new trait Catalog
-func NewCatalog() *Catalog {
-	return &Catalog{
+func NewCatalog(ctx context.Context, c client.Client) *Catalog {
+	catalog := Catalog{
 		tDebug:        newDebugTrait(),
 		tDependencies: newDependenciesTrait(),
 		tDeployment:   newDeploymentTrait(),
@@ -61,6 +63,16 @@ func NewCatalog() *Catalog {
 		tEnvironment:  newEnvironmentTrait(),
 		tClasspath:    newClasspathTrait(),
 	}
+
+	for _, t := range catalog.allTraits() {
+		if ctx != nil {
+			t.InjectContext(ctx)
+		}
+		if c != nil {
+			t.InjectClient(c)
+		}
+	}
+	return &catalog
 }
 
 func (c *Catalog) allTraits() []Trait {

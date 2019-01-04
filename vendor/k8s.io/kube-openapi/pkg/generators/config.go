@@ -19,13 +19,12 @@ package generators
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
-	"github.com/golang/glog"
 	"k8s.io/gengo/args"
 	"k8s.io/gengo/generator"
 	"k8s.io/gengo/namer"
 	"k8s.io/gengo/types"
+	"k8s.io/klog"
 
 	generatorargs "k8s.io/kube-openapi/cmd/openapi-gen/args"
 )
@@ -55,7 +54,7 @@ func DefaultNameSystem() string {
 func Packages(context *generator.Context, arguments *args.GeneratorArgs) generator.Packages {
 	boilerplate, err := arguments.LoadGoBoilerplate()
 	if err != nil {
-		glog.Fatalf("Failed loading boilerplate: %v", err)
+		klog.Fatalf("Failed loading boilerplate: %v", err)
 	}
 	header := append([]byte(fmt.Sprintf("// +build !%s\n\n", arguments.GeneratedBuildTag)), boilerplate...)
 	header = append(header, []byte(
@@ -64,20 +63,12 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) generat
 
 `)...)
 
-	reportFilename := "-"
+	reportPath := "-"
 	if customArgs, ok := arguments.CustomArgs.(*generatorargs.CustomArgs); ok {
-		reportFilename = customArgs.ReportFilename
+		reportPath = customArgs.ReportFilename
 	}
-	context.FileTypes[apiViolationFileType] = apiViolationFile{}
-	// The report file shouldn't be inside any package, but the framework
-	// doesn't understand packageless files. So we construct a path that
-	// fixes this.
-	siblingPath := ""
-	if len(arguments.OutputBase) > 0 {
-		siblingPath = strings.Repeat(
-			".."+string([]rune{filepath.Separator}),
-			len(filepath.SplitList(arguments.OutputBase)),
-		)
+	context.FileTypes[apiViolationFileType] = apiViolationFile{
+		unmangledPath: reportPath,
 	}
 
 	return generator.Packages{
@@ -91,14 +82,8 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) generat
 						arguments.OutputFileBaseName,
 						arguments.OutputPackagePath,
 					),
+					newAPIViolationGen(),
 				}
-			},
-			FilterFunc: apiTypeFilterFunc,
-		},
-		&generator.DefaultPackage{
-			PackagePath: siblingPath,
-			GeneratorFunc: func(c *generator.Context) (generators []generator.Generator) {
-				return []generator.Generator{newAPIViolationGen(reportFilename)}
 			},
 			FilterFunc: apiTypeFilterFunc,
 		},

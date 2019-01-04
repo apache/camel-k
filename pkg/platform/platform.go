@@ -20,10 +20,10 @@ package platform
 import (
 	"context"
 	"errors"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )
 
 // gBuilder is the current builder
@@ -31,19 +31,19 @@ import (
 var gBuilder builder.Builder
 
 // GetPlatformBuilder --
-func GetPlatformBuilder(ctx context.Context, namespace string) (builder.Builder, error) {
+func GetPlatformBuilder(ctx context.Context, c client.Client, namespace string) (builder.Builder, error) {
 	if gBuilder != nil {
 		return gBuilder, nil
 	}
 
-	gBuilder = builder.New(ctx, namespace)
+	gBuilder = builder.New(ctx, c, namespace)
 
 	return gBuilder, nil
 }
 
 // GetCurrentPlatform returns the currently installed platform
-func GetCurrentPlatform(namespace string) (*v1alpha1.IntegrationPlatform, error) {
-	lst, err := ListPlatforms(namespace)
+func GetCurrentPlatform(ctx context.Context, c client.Client, namespace string) (*v1alpha1.IntegrationPlatform, error) {
+	lst, err := ListPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +58,9 @@ func GetCurrentPlatform(namespace string) (*v1alpha1.IntegrationPlatform, error)
 }
 
 // ListPlatforms returns all platforms installed in a given namespace (only one will be active)
-func ListPlatforms(namespace string) (*v1alpha1.IntegrationPlatformList, error) {
+func ListPlatforms(ctx context.Context, c client.Client, namespace string) (*v1alpha1.IntegrationPlatformList, error) {
 	lst := v1alpha1.NewIntegrationPlatformList()
-	if err := sdk.List(namespace, &lst); err != nil {
+	if err := c.List(ctx, &client.ListOptions{Namespace: namespace}, &lst); err != nil {
 		return nil, err
 	}
 	return &lst, nil

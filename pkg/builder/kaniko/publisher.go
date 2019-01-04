@@ -26,7 +26,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/tar"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -139,17 +138,17 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err = sdk.Delete(&pod)
+	err = ctx.Client.Delete(ctx.C, &pod)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete kaniko builder pod")
 	}
 
-	err = sdk.Create(&pod)
+	err = ctx.Client.Create(ctx.C, &pod)
 	if err != nil {
 		return errors.Wrap(err, "cannot create kaniko builder pod")
 	}
 
-	err = kubernetes.WaitCondition(&pod, func(obj interface{}) (bool, error) {
+	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &pod, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*v1.Pod); ok {
 			if val.Status.Phase == v1.PodSucceeded {
 				return true, nil

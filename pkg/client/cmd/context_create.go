@@ -20,12 +20,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -81,8 +80,16 @@ func (command *contextCreateCommand) validateArgs(cmd *cobra.Command, args []str
 }
 
 func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) error {
+	c, err := command.GetCmdClient()
+	if err != nil {
+		return err
+	}
 	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
-	if err := sdk.Get(&ctx); err == nil {
+	key := client.ObjectKey{
+		Namespace: command.Namespace,
+		Name: args[0],
+	}
+	if err := c.Get(command.Context, key, &ctx); err == nil {
 		// the integration context already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
@@ -140,17 +147,17 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 	}
 
 	existed := false
-	err := sdk.Create(&ctx)
+	err = c.Create(command.Context, &ctx)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		clone := ctx.DeepCopy()
-		err = sdk.Get(clone)
+		err = c.Get(command.Context, key, clone)
 		if err != nil {
 			fmt.Print(err.Error())
 			return nil
 		}
 		ctx.ResourceVersion = clone.ResourceVersion
-		err = sdk.Update(&ctx)
+		err = c.Update(command.Context, &ctx)
 	}
 
 	if err != nil {

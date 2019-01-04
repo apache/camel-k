@@ -18,6 +18,7 @@ limitations under the License.
 package install
 
 import (
+	"context"
 	"errors"
 	"strconv"
 	"time"
@@ -28,42 +29,46 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Operator installs the operator resources in the given namespace
-func Operator(namespace string) error {
-	return OperatorOrCollect(namespace, nil)
+func Operator(ctx context.Context, c client.Client, namespace string) error {
+	return OperatorOrCollect(ctx, c, namespace, nil)
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
-func OperatorOrCollect(namespace string, collection *kubernetes.Collection) error {
-	isOpenshift, err := openshift.IsOpenShift()
+func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
+	kc, err := kubernetes.AsKubernetesClient(c)
+	if err != nil {
+		return err
+	}
+	isOpenshift, err := openshift.IsOpenShift(kc)
 	if err != nil {
 		return err
 	}
 	if isOpenshift {
-		if err := installOpenshift(namespace, collection); err != nil {
+		if err := installOpenshift(ctx, c, namespace, collection); err != nil {
 			return err
 		}
 	} else {
-		if err := installKubernetes(namespace, collection); err != nil {
+		if err := installKubernetes(ctx, c, namespace, collection); err != nil {
 			return err
 		}
 	}
 	// Additionally, install Knative resources (roles and bindings)
-	isKnative, err := knative.IsInstalled()
+	isKnative, err := knative.IsInstalled(ctx, kc)
 	if err != nil {
 		return err
 	}
 	if isKnative {
-		return installKnative(namespace, collection)
+		return installKnative(ctx, c, namespace, collection)
 	}
 	return nil
 }
 
-func installOpenshift(namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(namespace, collection,
+func installOpenshift(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection,
 		"operator-service-account.yaml",
 		"operator-role-openshift.yaml",
 		"operator-role-binding.yaml",
@@ -72,8 +77,8 @@ func installOpenshift(namespace string, collection *kubernetes.Collection) error
 	)
 }
 
-func installKubernetes(namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(namespace, collection,
+func installKubernetes(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection,
 		"operator-service-account.yaml",
 		"operator-role-kubernetes.yaml",
 		"operator-role-binding.yaml",
@@ -83,29 +88,33 @@ func installKubernetes(namespace string, collection *kubernetes.Collection) erro
 	)
 }
 
-func installKnative(namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(namespace, collection,
+func installKnative(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection,
 		"operator-role-knative.yaml",
 		"operator-role-binding-knative.yaml",
 	)
 }
 
 // Platform installs the platform custom resource
-func Platform(namespace string, registry string, organization string, pushSecret string) (*v1alpha1.IntegrationPlatform, error) {
-	return PlatformOrCollect(namespace, registry, organization, pushSecret, nil)
+func Platform(ctx context.Context, c client.Client, namespace string, registry string, organization string, pushSecret string) (*v1alpha1.IntegrationPlatform, error) {
+	return PlatformOrCollect(ctx, c, namespace, registry, organization, pushSecret, nil)
 }
 
 // PlatformOrCollect --
 // nolint: lll
-func PlatformOrCollect(namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
-	if err := waitForPlatformCRDAvailable(namespace, 25*time.Second); err != nil {
-		return nil, err
-	}
-	isOpenshift, err := openshift.IsOpenShift()
+func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
+	kc, err := kubernetes.AsKubernetesClient(c)
 	if err != nil {
 		return nil, err
 	}
-	platformObject, err := kubernetes.LoadResourceFromYaml(deploy.Resources["platform-cr.yaml"])
+	if err := waitForPlatformCRDAvailable(ctx, c, namespace, 25*time.Second); err != nil {
+		return nil, err
+	}
+	isOpenshift, err := openshift.IsOpenShift(kc)
+	if err != nil {
+		return nil, err
+	}
+	platformObject, err := kubernetes.LoadRawResourceFromYaml(deploy.Resources["platform-cr.yaml"])
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +125,7 @@ func PlatformOrCollect(namespace string, registry string, organization string, p
 		if registry == "" {
 			// This operation should be done here in the installer
 			// because the operator is not allowed to look into the "kube-system" namespace
-			minishiftRegistry, err := minishift.FindRegistry()
+			minishiftRegistry, err := minishift.FindRegistry(ctx, c)
 			if err != nil {
 				return nil, err
 			}
@@ -131,7 +140,7 @@ func PlatformOrCollect(namespace string, registry string, organization string, p
 	}
 
 	var knativeInstalled bool
-	if knativeInstalled, err = knative.IsInstalled(); err != nil {
+	if knativeInstalled, err = knative.IsInstalled(ctx, kc); err != nil {
 		return nil, err
 	}
 	if knativeInstalled {
@@ -141,11 +150,11 @@ func PlatformOrCollect(namespace string, registry string, organization string, p
 	return pl, nil
 }
 
-func waitForPlatformCRDAvailable(namespace string, timeout time.Duration) error {
+func waitForPlatformCRDAvailable(ctx context.Context, c client.Client, namespace string, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
 	for {
 		pla := v1alpha1.NewIntegrationPlatformList()
-		if err := sdk.List(namespace, &pla); err == nil {
+		if err := c.List(ctx, &client.ListOptions{Namespace: namespace}, &pla); err == nil {
 			return nil
 		}
 		if time.Now().After(deadline) {
@@ -156,13 +165,13 @@ func waitForPlatformCRDAvailable(namespace string, timeout time.Duration) error 
 }
 
 // Example --
-func Example(namespace string) error {
-	return ExampleOrCollect(namespace, nil)
+func Example(ctx context.Context, c client.Client, namespace string) error {
+	return ExampleOrCollect(ctx, c, namespace, nil)
 }
 
 // ExampleOrCollect --
-func ExampleOrCollect(namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(namespace, collection,
+func ExampleOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection,
 		"cr-example.yaml",
 	)
 }

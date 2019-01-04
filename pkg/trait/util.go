@@ -18,22 +18,27 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // GetIntegrationContext retrieves the context set on the integration
-func GetIntegrationContext(integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
-	if integration.Status.Context == "" {
+func GetIntegrationContext(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
+	if integration.Status.Context== "" {
 		return nil, nil
 	}
 
 	name := integration.Status.Context
-	ctx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
-	err := sdk.Get(&ctx)
-	return &ctx, err
+	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
+	key := client.ObjectKey{
+		Namespace: integration.Namespace,
+		Name: name,
+	}
+	err := c.Get(ctx, key, &ictx)
+	return &ictx, err
 }
 
 // VisitConfigurations --

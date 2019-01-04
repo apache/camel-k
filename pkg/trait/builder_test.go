@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"k8s.io/api/core/v1"
@@ -42,7 +43,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilContext(t *testing.T) {
 		e.Context = nil
 
 		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
-			err := NewCatalog().apply(e)
+			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
@@ -63,7 +64,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 		e.Context.Status.Phase = ""
 
 		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
-			err := NewCatalog().apply(e)
+			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
@@ -75,7 +76,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 
 func TestS2IBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, v1alpha1.IntegrationPlatformBuildPublishStrategyS2I)
-	err := NewCatalog().apply(env)
+	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
@@ -95,7 +96,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 
 func TestKanikoBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko)
-	err := NewCatalog().apply(env)
+	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
@@ -152,4 +153,8 @@ func TestIPReplacement(t *testing.T) {
 	assert.Equal(t, "10.0.2.3.4/camel-k", getImageWithOpenShiftHost("10.0.2.3.4/camel-k"))
 	assert.Equal(t, "gcr.io/camel-k/camel-k:latest", getImageWithOpenShiftHost("gcr.io/camel-k/camel-k:latest"))
 	assert.Equal(t, "docker.io/camel-k:latest", getImageWithOpenShiftHost("docker.io/camel-k:latest"))
+}
+
+func NewBuilderTestCatalog() *Catalog {
+	return NewCatalog(context.TODO(), nil)
 }

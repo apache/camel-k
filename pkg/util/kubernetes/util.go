@@ -18,26 +18,16 @@ limitations under the License.
 package kubernetes
 
 import (
-	"encoding/json"
 	"fmt"
+	"k8s.io/apimachinery/pkg/util/json"
 
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
-	yaml "gopkg.in/yaml.v2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // ToJSON --
 func ToJSON(value runtime.Object) ([]byte, error) {
-	u, err := k8sutil.UnstructuredFromRuntimeObject(value)
-	if err != nil {
-		return nil, fmt.Errorf("error creating unstructured data: %v", err)
-	}
-	data, err := runtime.Encode(unstructured.UnstructuredJSONScheme, u)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling to json: %v", err)
-	}
-	return data, nil
+	return json.Marshal(value)
 }
 
 // ToYAML --

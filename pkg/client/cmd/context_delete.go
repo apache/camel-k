@@ -20,9 +20,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
@@ -73,9 +73,14 @@ func (command *contextDeleteCommand) validate(args []string) error {
 func (command *contextDeleteCommand) run(args []string) error {
 	names := args
 
+	c, err := command.GetCmdClient()
+	if err != nil {
+		return err
+	}
+
 	if command.all {
 		ctxList := v1alpha1.NewIntegrationContextList()
-		if err := sdk.List(command.Namespace, &ctxList); err != nil {
+		if err := c.List(command.Context, &client.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
 			return err
 		}
 
@@ -99,8 +104,16 @@ func (command *contextDeleteCommand) run(args []string) error {
 
 func (command *contextDeleteCommand) delete(name string) error {
 	ctx := v1alpha1.NewIntegrationContext(command.Namespace, name)
+	key := client.ObjectKey{
+		Namespace: command.Namespace,
+		Name: name,
+	}
+	c, err := command.GetCmdClient()
+	if err != nil {
+		return err
+	}
 
-	err := sdk.Get(&ctx)
+	err = c.Get(command.Context, key, &ctx)
 
 	// pass through if the context is not found
 	if err != nil && k8errors.IsNotFound(err) {
@@ -123,7 +136,7 @@ func (command *contextDeleteCommand) delete(name string) error {
 		return fmt.Errorf("integration context \"%s\" is not editable", ctx.Name)
 	}
 
-	err = sdk.Delete(&ctx)
+	err = c.Delete(command.Context, &ctx)
 
 	if err != nil && !k8errors.IsNotFound(err) {
 		return fmt.Errorf("error deleting integration context \"%s\", %s", ctx.Name, err)

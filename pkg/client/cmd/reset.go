@@ -19,9 +19,9 @@ package cmd
 
 import (
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -45,55 +45,59 @@ type resetCmdOptions struct {
 }
 
 func (o *resetCmdOptions) reset(cmd *cobra.Command, args []string) (err error) {
+	c, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
 	var n int
-	if n, err = o.deleteAllIntegrations(); err != nil {
+	if n, err = o.deleteAllIntegrations(c); err != nil {
 		return err
 	}
 	fmt.Printf("%d integrations deleted from namespace %s\n", n, o.Namespace)
 
-	if n, err = o.deleteAllIntegrationContexts(); err != nil {
+	if n, err = o.deleteAllIntegrationContexts(c); err != nil {
 		return err
 	}
 	fmt.Printf("%d integration contexts deleted from namespace %s\n", n, o.Namespace)
 
-	if err = o.resetIntegrationPlatform(); err != nil {
+	if err = o.resetIntegrationPlatform(c); err != nil {
 		return err
 	}
 	fmt.Println("Camel K platform has been reset successfully!")
 	return err
 }
 
-func (o *resetCmdOptions) deleteAllIntegrations() (int, error) {
+func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 	list := v1alpha1.NewIntegrationList()
-	if err := sdk.List(o.Namespace, &list); err != nil {
+	if err := c.List(o.Context, &client.ListOptions{Namespace: o.Namespace}, &list); err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		it := i
-		if err := sdk.Delete(&it); err != nil {
+		if err := c.Delete(o.Context, &it); err != nil {
 			return 0, errors.Wrap(err, fmt.Sprintf("could not delete integration %s from namespace %s", it.Name, it.Namespace))
 		}
 	}
 	return len(list.Items), nil
 }
 
-func (o *resetCmdOptions) deleteAllIntegrationContexts() (int, error) {
+func (o *resetCmdOptions) deleteAllIntegrationContexts(c client.Client) (int, error) {
 	list := v1alpha1.NewIntegrationContextList()
-	if err := sdk.List(o.Namespace, &list); err != nil {
+	if err := c.List(o.Context, &client.ListOptions{Namespace: o.Namespace}, &list); err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration contexts from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		ictx := i
-		if err := sdk.Delete(&ictx); err != nil {
+		if err := c.Delete(o.Context, &ictx); err != nil {
 			return 0, errors.Wrap(err, fmt.Sprintf("could not delete integration context %s from namespace %s", ictx.Name, ictx.Namespace))
 		}
 	}
 	return len(list.Items), nil
 }
 
-func (o *resetCmdOptions) resetIntegrationPlatform() error {
+func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 	list := v1alpha1.NewIntegrationPlatformList()
-	if err := sdk.List(o.Namespace, &list); err != nil {
+	if err := c.List(o.Context, &client.ListOptions{Namespace: o.Namespace}, &list); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", o.Namespace))
 	}
 	if len(list.Items) > 1 {
@@ -104,5 +108,5 @@ func (o *resetCmdOptions) resetIntegrationPlatform() error {
 	platform := list.Items[0]
 	// Let's reset the status
 	platform.Status = v1alpha1.IntegrationPlatformStatus{}
-	return sdk.Update(&platform)
+	return c.Update(o.Context, &platform)
 }

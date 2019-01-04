@@ -18,13 +18,14 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // DeleteIntegration --
-func DeleteIntegration(name string, namespace string) error {
+func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
 	integration := v1alpha1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       v1alpha1.IntegrationKind,
@@ -35,5 +36,7 @@ func DeleteIntegration(name string, namespace string) error {
 			Name:      name,
 		},
 	}
-	return sdk.Delete(&integration)
+	return c.Delete(ctx, &integration)
 }
+
+

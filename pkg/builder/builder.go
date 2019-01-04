@@ -22,6 +22,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -41,6 +42,7 @@ import (
 type defaultBuilder struct {
 	log       *logrus.Entry
 	ctx       context.Context
+	client    client.Client
 	requests  chan Request
 	interrupt chan bool
 	request   sync.Map
@@ -49,10 +51,11 @@ type defaultBuilder struct {
 }
 
 // New --
-func New(ctx context.Context, namespace string) Builder {
+func New(ctx context.Context, c client.Client, namespace string) Builder {
 	m := defaultBuilder{
 		log:       logrus.WithField("logger", "builder"),
 		ctx:       ctx,
+		client:    c,
 		requests:  make(chan Request),
 		interrupt: make(chan bool, 1),
 		running:   0,
@@ -144,6 +147,7 @@ func (b *defaultBuilder) submit(request Request) {
 
 	c := Context{
 		C:         b.ctx,
+		Client:    b.client,
 		Path:      builderPath,
 		Namespace: b.namespace,
 		Request:   request,

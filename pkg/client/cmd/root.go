@@ -19,6 +19,10 @@ package cmd
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/apis"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -34,6 +38,7 @@ specifically designed for serverless and microservice architectures.",,
 // RootCmdOptions --
 type RootCmdOptions struct {
 	Context    context.Context
+	_client    client.Client
 	KubeConfig string
 	Namespace  string
 }
@@ -44,9 +49,9 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		Context: ctx,
 	}
 	var cmd = cobra.Command{
-		Use:                    "kamel",
-		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
-		Long:                   kamelCommandLongDescription,
+		Use:   "kamel",
+		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
+		Long:  kamelCommandLongDescription,
 		BashCompletionFunction: bashCompletionFunction,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if options.Namespace == "" {
@@ -79,4 +84,26 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.AddCommand(newCmdReset(&options))
 
 	return &cmd, nil
+}
+
+// GetCmdClient returns a client that can be used from command line tools
+func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
+	// Get the pre-computed client
+	if command._client != nil {
+		return command._client, nil
+	}
+	// Get a config to talk to the apiserver
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	// Create a new Cmd to provide shared dependencies and start components
+	mgr, err := manager.New(cfg, manager.Options{Namespace: command.Namespace})
+
+	// Setup Scheme for all resources
+	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
+		return nil, err
+	}
+	command._client = mgr.GetClient()
+	return command._client, nil
 }
