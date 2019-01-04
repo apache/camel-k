@@ -19,20 +19,17 @@ package trait
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/envvar"
-
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"

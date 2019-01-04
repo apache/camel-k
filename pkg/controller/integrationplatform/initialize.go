@@ -20,6 +20,7 @@ package integrationplatform
 import (
 	"context"
 	"errors"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"

@@ -19,15 +19,15 @@ package cmd
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
-const kamelCommandLongDescription = `
-Long:  "Apache Camel K (a.k.a. Kamel) is a lightweight integration framework
+const kamelCommandLongDescription = `Apache Camel K is a lightweight integration framework
 built from Apache Camel that runs natively on Kubernetes and is
-specifically designed for serverless and microservice architectures.",,	
+specifically designed for serverless and microservice architectures.
 `
 
 // RootCmdOptions --
@@ -44,23 +44,11 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		Context: ctx,
 	}
 	var cmd = cobra.Command{
-		Use:   "kamel",
-		Short: "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
-		Long:  kamelCommandLongDescription,
 		BashCompletionFunction: bashCompletionFunction,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if options.Namespace == "" {
-				current, err := client.GetCurrentNamespace(options.KubeConfig)
-				if err != nil {
-					return errors.Wrap(err, "cannot get current namespace")
-				}
-				err = cmd.Flag("namespace").Value.Set(current)
-				if err != nil {
-					return err
-				}
-			}
-			return nil
-		},
+		PersistentPreRunE:      options.preRun,
+		Use:                    "kamel",
+		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
+		Long:                   kamelCommandLongDescription,
 	}
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", "", "Path to the config file to use for CLI requests")
@@ -77,6 +65,20 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.AddCommand(newCmdReset(&options))
 
 	return &cmd, nil
+}
+
+func (command *RootCmdOptions) preRun(cmd *cobra.Command, args []string) error {
+	if command.Namespace == "" {
+		current, err := client.GetCurrentNamespace(command.KubeConfig)
+		if err != nil {
+			return errors.Wrap(err, "cannot get current namespace")
+		}
+		err = cmd.Flag("namespace").Value.Set(current)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // GetCmdClient returns a client that can be used from command line tools

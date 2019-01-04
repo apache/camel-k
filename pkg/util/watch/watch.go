@@ -19,6 +19,7 @@ package watch
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/sirupsen/logrus"

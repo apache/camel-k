@@ -21,14 +21,12 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"github.com/apache/camel-k/pkg/client"
 	"time"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/apache/camel-k/pkg/util/maven"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/maven"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -137,7 +135,7 @@ type Result struct {
 
 // Context --
 type Context struct {
-	C                 context.Context
+	C context.Context
 	client.Client
 	Request           Request
 	Image             string

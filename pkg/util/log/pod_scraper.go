@@ -21,8 +21,6 @@ import (
 	"bufio"
 	"context"
 	"io"
-	"k8s.io/apimachinery/pkg/util/json"
-	"k8s.io/client-go/kubernetes"
 	"time"
 
 	"github.com/pkg/errors"
@@ -31,7 +29,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/kubernetes"
 )
 
 var commonUserContainerNames = map[string]bool{
@@ -175,7 +175,6 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, na
 					if err := json.Unmarshal(jsondata, recvPod); err != nil {
 						return "", err
 					}
-
 
 				} else if gotPod, ok := e.Object.(*v1.Pod); ok {
 					recvPod = gotPod

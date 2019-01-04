@@ -19,6 +19,7 @@ package kubernetes
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/client"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"

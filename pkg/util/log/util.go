@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"k8s.io/client-go/kubernetes"
 	"os"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // Print prints integrations logs to the stdout
