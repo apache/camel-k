@@ -41,7 +41,7 @@ var testClient client.Client
 func init() {
 	testContext = context.TODO()
 	var err error
-	testClient, err = client.NewOutOfClusterClient("", getTargetNamespace())
+	testClient, err = client.NewOutOfClusterClient("")
 	if err != nil {
 		panic(err)
 	}

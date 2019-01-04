@@ -151,7 +151,7 @@ func IsClusterRoleInstalled(ctx context.Context, c client.Client, ) (bool, error
 }
 
 func installClusterRole(ctx context.Context, c client.Client, collection *kubernetes.Collection) error {
-	obj, err := kubernetes.LoadRawResourceFromYaml(deploy.Resources["user-cluster-role.yaml"])
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.Resources["user-cluster-role.yaml"])
 	if err != nil {
 		return err
 	}
