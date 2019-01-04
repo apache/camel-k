@@ -53,7 +53,8 @@ func (action *initializeAction) Handle(integration *v1alpha1.Integration) error 
 	}
 
 	target := integration.DeepCopy()
-	// better not changing the spec section of the target because it may be used for comparison by a higher level controller (e.g. Knative source controller)
+	// better not changing the spec section of the target because it may be used for comparison by a
+	// higher level controller (e.g. Knative source controller)
 
 	// execute custom initialization
 	if _, err := trait.Apply(target, nil); err != nil {
