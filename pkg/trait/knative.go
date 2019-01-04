@@ -295,7 +295,9 @@ func (t *knativeTrait) getConfigurationSerialized(e *Environment) (string, error
 func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnvironment, error) {
 	env := knativeapi.NewCamelEnvironment()
 	if t.Configuration != "" {
-		env.Deserialize(t.Configuration)
+		if err := env.Deserialize(t.Configuration); err != nil {
+			return knativeapi.CamelEnvironment{}, err
+		}
 	}
 
 	// Sources

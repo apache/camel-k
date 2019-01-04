@@ -42,8 +42,7 @@ func (i XMLInspector) FromURIs(source v1alpha1.SourceSpec) ([]string, error) {
 			break
 		}
 
-		switch se := t.(type) {
-		case xml.StartElement:
+		if se, ok := t.(xml.StartElement); ok {
 			switch se.Name.Local {
 			case "from", "fromF":
 				for _, a := range se.Attr {
@@ -72,8 +71,7 @@ func (i XMLInspector) ToURIs(source v1alpha1.SourceSpec) ([]string, error) {
 			break
 		}
 
-		switch se := t.(type) {
-		case xml.StartElement:
+		if se, ok := t.(xml.StartElement); ok {
 			switch se.Name.Local {
 			case "to", "toD", "toF":
 				for _, a := range se.Attr {

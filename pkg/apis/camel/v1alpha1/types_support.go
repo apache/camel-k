@@ -19,9 +19,9 @@ package v1alpha1
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"strings"
 
+	"gopkg.in/yaml.v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

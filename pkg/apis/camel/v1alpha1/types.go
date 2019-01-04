@@ -21,6 +21,7 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/mitchellh/mapstructure"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"strings"
 )
 
