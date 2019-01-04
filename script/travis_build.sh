@@ -55,7 +55,7 @@ echo "Adding maven artifacts to the image context"
 ./script/package_maven_artifacts.sh
 
 echo "Copying binary file to docker dir"
-mkdir -p ./tmp/_output/bin
+mkdir -p ./build/_output/bin
 cp ./camel-k ./build/_output/bin/
 
 echo "Building the images"

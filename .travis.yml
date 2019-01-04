@@ -14,4 +14,4 @@ services:
   - docker
 
 script:
-  - ./build/travis_build.sh
+  - ./script/travis_build.sh
