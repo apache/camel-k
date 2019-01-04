@@ -19,6 +19,7 @@ package integrationplatform
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/labels"

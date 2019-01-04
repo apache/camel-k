@@ -19,6 +19,7 @@ package install
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -31,7 +32,7 @@ import (
 )
 
 // SetupClusterwideResources --
-func SetupClusterwideResources(ctx context.Context, c client.Client, ) error {
+func SetupClusterwideResources(ctx context.Context, c client.Client) error {
 	return SetupClusterwideResourcesOrCollect(ctx, c, nil)
 }
 
@@ -127,7 +128,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, resourceName 
 }
 
 // IsClusterRoleInstalled check if cluster role camel-k:edit is installed
-func IsClusterRoleInstalled(ctx context.Context, c client.Client, ) (bool, error) {
+func IsClusterRoleInstalled(ctx context.Context, c client.Client) (bool, error) {
 	clusterRole := v1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRole",

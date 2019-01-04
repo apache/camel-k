@@ -18,7 +18,6 @@ type IntegrationPlatformStatus struct {
 	Phase IntegrationPlatformPhase `json:"phase,omitempty"`
 }
 
-
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // IntegrationPlatform is the Schema for the integrationplatforms API
@@ -85,7 +84,6 @@ const (
 	// IntegrationPlatformBuildPublishStrategyKaniko performs
 	IntegrationPlatformBuildPublishStrategyKaniko = "Kaniko"
 )
-
 
 // IntegrationPlatformPhase --
 type IntegrationPlatformPhase string

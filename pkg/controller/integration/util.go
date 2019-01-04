@@ -20,7 +20,6 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -29,7 +28,7 @@ import (
 )
 
 // LookupContextForIntegration --
-func LookupContextForIntegration(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
+func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
 	if integration.Status.Context != "" {
 		name := integration.Status.Context
 		ictx := v1alpha1.NewIntegrationContext(integration.Namespace, name)

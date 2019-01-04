@@ -18,19 +18,20 @@ limitations under the License.
 package client
 
 import (
+	"io/ioutil"
+	"os"
+	"os/user"
+	"path/filepath"
+
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
-	"os"
-	"os/user"
-	"path/filepath"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -73,6 +74,9 @@ func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, options)
+	if err != nil {
+		return nil, err
+	}
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
@@ -116,12 +120,11 @@ func FromManager(manager manager.Manager) (Client, error) {
 }
 
 // init initialize the k8s client for usage outside the cluster
-func initialize(kubeconfig string) error {
+func initialize(kubeconfig string) {
 	if kubeconfig == "" {
 		kubeconfig = getDefaultKubeConfigFile()
 	}
 	os.Setenv(k8sutil.KubeConfigEnvVar, kubeconfig)
-	return nil
 }
 
 func getDefaultKubeConfigFile() string {

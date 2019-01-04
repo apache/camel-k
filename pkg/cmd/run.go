@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/apache/camel-k/pkg/client"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -32,19 +31,17 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/gzip"
-
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"

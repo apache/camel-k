@@ -20,12 +20,12 @@ package minishift
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/client"
-	"k8s.io/apimachinery/pkg/labels"
 	"strconv"
 
+	"github.com/apache/camel-k/pkg/client"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 

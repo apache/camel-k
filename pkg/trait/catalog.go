@@ -20,13 +20,12 @@ package trait
 import (
 	"context"
 	"reflect"
-	"github.com/apache/camel-k/pkg/client"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/fatih/structs"
+	"github.com/sirupsen/logrus"
 )
 
 // Catalog collects all information about traits in one place

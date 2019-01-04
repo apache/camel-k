@@ -19,13 +19,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/client"
-
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func newCmdReset(rootCmdOptions *RootCmdOptions) *cobra.Command {

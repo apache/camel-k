@@ -135,7 +135,7 @@ func Publisher(ctx *builder.Context) error {
 	}
 
 	ocbuild := buildv1.Build{}
-	json.Unmarshal(data, &ocbuild)
+	err = json.Unmarshal(data, &ocbuild)
 	if err != nil {
 		return errors.Wrap(err, "cannot unmarshal instantiated binary response")
 	}

@@ -22,11 +22,11 @@ import (
 	"fmt"
 	"strconv"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // newCmdDelete --
