@@ -49,11 +49,11 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 	if ictxName == "" {
 		return errors.Errorf("no context set on integration %s", integration.Name)
 	}
+	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, ictxName)
 	ictxKey := k8sclient.ObjectKey{
 		Namespace: integration.Namespace,
-		Name:      integration.Name,
+		Name:      ictxName,
 	}
-	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, ictxName)
 
 	if err := action.client.Get(ctx, ictxKey, &ictx); err != nil {
 		return errors.Wrapf(err, "unable to find integration context %s, %s", ictxName, err)
