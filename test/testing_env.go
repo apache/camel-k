@@ -22,27 +22,40 @@ limitations under the License.
 package test
 
 import (
+	"context"
+	"github.com/apache/camel-k/pkg/client/cmd"
+	"k8s.io/apimachinery/pkg/labels"
 	"time"
 
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var testContext context.Context
+var testClient client.Client
 
 func init() {
 	// Initializes the kubernetes client to auto-detect the context
 	kubernetes.InitKubeClient("")
 
-	err := install.SetupClusterwideResources()
+	testContext = context.TODO()
+	var err error
+	testClient, err = cmd.NewCmdClient(getTargetNamespace())
 	if err != nil {
 		panic(err)
 	}
 
-	err = install.Operator(getTargetNamespace())
+	err = install.SetupClusterwideResources(testContext, testClient)
+	if err != nil {
+		panic(err)
+	}
+
+	err = install.Operator(testContext, testClient, getTargetNamespace())
 	if err != nil {
 		panic(err)
 	}
@@ -58,8 +71,7 @@ func getTargetNamespace() string {
 
 func createDummyDeployment(name string, replicas *int32, labelKey string, labelValue string, command ...string) (*appsv1.Deployment, error) {
 	deployment := getDummyDeployment(name, replicas, labelKey, labelValue, command...)
-	gracePeriod := int64(0)
-	err := sdk.Delete(&deployment, sdk.WithDeleteOptions(&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod}))
+	err := testClient.Delete(testContext, &deployment, client.GracePeriodSeconds(0))
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}
@@ -70,10 +82,13 @@ func createDummyDeployment(name string, replicas *int32, labelKey string, labelV
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-
-		err := sdk.List(getTargetNamespace(), &list, sdk.WithListOptions(&metav1.ListOptions{
-			LabelSelector: labelKey + "=" + labelValue,
-		}))
+		options := client.ListOptions{
+			Namespace: getTargetNamespace(),
+			LabelSelector: labels.SelectorFromSet(labels.Set{
+				labelKey: labelValue,
+			}),
+		}
+		err := testClient.List(testContext, &options, &list)
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +99,7 @@ func createDummyDeployment(name string, replicas *int32, labelKey string, labelV
 			break
 		}
 	}
-	err = sdk.Create(&deployment)
+	err = testClient.Create(testContext, &deployment)
 	return &deployment, err
 }
 
@@ -119,13 +134,12 @@ func getDummyDeployment(name string, replicas *int32, labelKey string, labelValu
 
 func createDummyPod(name string, command ...string) (*v1.Pod, error) {
 	pod := getDummyPod(name, command...)
-	gracePeriod := int64(0)
-	err := sdk.Delete(&pod, sdk.WithDeleteOptions(&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod}))
+	err := testClient.Delete(testContext, &pod, client.GracePeriodSeconds(0))
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}
 	for {
-		err := sdk.Create(&pod)
+		err := testClient.Create(testContext, &pod)
 		if err != nil && k8serrors.IsAlreadyExists(err) {
 			time.Sleep(1 * time.Second)
 		} else if err != nil {

@@ -23,24 +23,26 @@ package test
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/apache/camel-k/pkg/util/log"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPodLogScrape(t *testing.T) {
 	token := "Hello Camel K!"
 	pod, err := createDummyPod("scraped", "/bin/sh", "-c", "for i in `seq 1 50`; do echo \""+token+"\" && sleep 2; done")
-	defer sdk.Delete(pod)
+	defer testClient.Delete(testContext, pod)
 	assert.Nil(t, err)
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
 	defer cancel()
-	scraper := log.NewPodScraper(pod.Namespace, pod.Name)
+	kc, err := kubernetes.AsKubernetesClient(testClient)
+	assert.Nil(t, err)
+	scraper := log.NewPodScraper(kc, pod.Namespace, pod.Name)
 	in := scraper.Start(ctx)
 
 	res := make(chan bool)
@@ -70,12 +72,14 @@ func TestSelectorLogScrape(t *testing.T) {
 	token := "Hello Camel K!"
 	replicas := int32(3)
 	deployment, err := createDummyDeployment("scraped-deployment", &replicas, "scrape", "me", "/bin/sh", "-c", "for i in `seq 1 50`; do echo \""+token+"\" && sleep 2; done")
-	defer sdk.Delete(deployment)
+	defer testClient.Delete(testContext, deployment)
 	assert.Nil(t, err)
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
 	defer cancel()
-	scraper := log.NewSelectorScraper(deployment.Namespace, "scrape=me")
+	kc, err := kubernetes.AsKubernetesClient(testClient)
+	assert.Nil(t, err)
+	scraper := log.NewSelectorScraper(kc, deployment.Namespace, "scrape=me")
 	in := scraper.Start(ctx)
 
 	res := make(chan string)
