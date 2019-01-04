@@ -22,7 +22,6 @@ limitations under the License.
 package test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -35,9 +34,8 @@ import (
 )
 
 func TestBuildManagerBuild(t *testing.T) {
-	ctx := context.TODO()
 	namespace := getTargetNamespace()
-	b := builder.New(ctx, namespace)
+	b := builder.New(testContext, testClient, namespace)
 
 	r := builder.Request{
 		Meta: v1.ObjectMeta{
@@ -76,9 +74,8 @@ func TestBuildManagerBuild(t *testing.T) {
 }
 
 func TestBuildManagerFailedBuild(t *testing.T) {
-	ctx := context.TODO()
 	namespace := getTargetNamespace()
-	b := builder.New(ctx, namespace)
+	b := builder.New(testContext, testClient, namespace)
 
 	r := builder.Request{
 		Meta: v1.ObjectMeta{

@@ -2813,58 +2813,6 @@ spec:
         enabled: "true"
 
 `
-	Resources["role.yaml"] =
-		`
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  creationTimestamp: null
-  name: camel-k
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
-  - events
-  - configmaps
-  - secrets
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  - daemonsets
-  - replicasets
-  - statefulsets
-  verbs:
-  - '*'
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - camel.apache.org
-  resources:
-  - '*'
-  - integrationcontexts
-  - integrationplatforms
-  verbs:
-  - '*'
-
-`
 	Resources["user-cluster-role.yaml"] =
 		`
 kind: ClusterRole
