@@ -18,20 +18,21 @@ limitations under the License.
 package kubernetes
 
 import (
+	"context"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ReplaceResources allows to completely replace a list of resources on Kubernetes, taking care of immutable fields and resource versions
-func ReplaceResources(objects []runtime.Object) error {
+func ReplaceResources(ctx context.Context, c client.Client, objects []runtime.Object) error {
 	for _, object := range objects {
-		err := ReplaceResource(object)
+		err := ReplaceResource(ctx, c, object)
 		if err != nil {
 			return err
 		}
@@ -40,11 +41,15 @@ func ReplaceResources(objects []runtime.Object) error {
 }
 
 // ReplaceResource allows to completely replace a resource on Kubernetes, taking care of immutable fields and resource versions
-func ReplaceResource(res runtime.Object) error {
-	err := sdk.Create(res)
+func ReplaceResource(ctx context.Context, c client.Client, res runtime.Object) error {
+	err := c.Create(ctx, res)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existing := res.DeepCopyObject()
-		err = sdk.Get(existing)
+		key, err := client.ObjectKeyFromObject(existing)
+		if err != nil {
+			return err
+		}
+		err = c.Get(ctx, key, existing)
 		if err != nil {
 			return err
 		}
@@ -52,7 +57,7 @@ func ReplaceResource(res runtime.Object) error {
 		mapRequiredServiceData(existing, res)
 		mapRequiredRouteData(existing, res)
 		mapRequiredKnativeData(existing, res)
-		err = sdk.Update(res)
+		err = c.Update(ctx, res)
 	}
 	if err != nil {
 		return errors.Wrap(err, "could not create or replace "+findResourceDetails(res))

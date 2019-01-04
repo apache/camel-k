@@ -19,13 +19,13 @@ package trait
 
 import (
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/util/envvar"
 
 	"strconv"
 	"strings"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -403,7 +403,7 @@ func (*knativeTrait) getSinkChannels(e *Environment) []string {
 	return channels
 }
 
-func (*knativeTrait) retrieveChannel(namespace string, name string) (*eventing.Channel, error) {
+func (t *knativeTrait) retrieveChannel(namespace string, name string) (*eventing.Channel, error) {
 	channel := eventing.Channel{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Channel",
@@ -414,7 +414,11 @@ func (*knativeTrait) retrieveChannel(namespace string, name string) (*eventing.C
 			Name:      name,
 		},
 	}
-	if err := sdk.Get(&channel); err != nil {
+	key := client.ObjectKey{
+		Namespace: namespace,
+		Name:      name,
+	}
+	if err := t.client.Get(t.ctx, key, &channel); err != nil {
 		return nil, errors.Wrap(err, "could not retrieve channel "+name+" in namespace "+namespace)
 	}
 	return &channel, nil

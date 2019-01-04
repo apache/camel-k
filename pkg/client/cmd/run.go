@@ -27,6 +27,7 @@ import (
 	"os/signal"
 	"path"
 	"regexp"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 	"strings"
 	"syscall"
@@ -44,7 +45,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -144,7 +144,16 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 }
 
 func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
-	catalog := trait.NewCatalog()
+	c, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
+	kc, err := kubernetes.AsKubernetesClient(c)
+	if err != nil {
+		return err
+	}
+
+	catalog := trait.NewCatalog(o.Context, c)
 	tp := catalog.ComputeTraitsProperties()
 	for _, t := range o.Traits {
 		kv := strings.SplitN(t, "=", 2)
@@ -155,18 +164,18 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	integration, err := o.createIntegration(args)
+	integration, err := o.createIntegration(c, args)
 	if err != nil {
 		return err
 	}
 
 	if o.Dev {
-		c := make(chan os.Signal)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		cs := make(chan os.Signal)
+		signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
 		go func() {
-			<-c
+			<-cs
 			fmt.Printf("Run integration terminating\n")
-			err := DeleteIntegration(integration.Name, integration.Namespace)
+			err := DeleteIntegration(o.Context, c, integration.Name, integration.Namespace)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -175,7 +184,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Sync || o.Dev {
-		err = o.syncIntegration(args)
+		err = o.syncIntegration(c, args)
 		if err != nil {
 			return err
 		}
@@ -187,7 +196,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev {
-		err = log.Print(o.Context, integration)
+		err = log.Print(o.Context, kc, integration)
 		if err != nil {
 			return err
 		}
@@ -225,7 +234,7 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integratio
 	return watch.HandleStateChanges(o.Context, integration, handler)
 }
 
-func (o *runCmdOptions) syncIntegration(sources []string) error {
+func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error {
 	for _, s := range sources {
 		changes, err := sync.File(o.Context, s)
 		if err != nil {
@@ -237,7 +246,7 @@ func (o *runCmdOptions) syncIntegration(sources []string) error {
 				case <-o.Context.Done():
 					return
 				case <-changes:
-					_, err := o.updateIntegrationCode(sources)
+					_, err := o.updateIntegrationCode(c, sources)
 					if err != nil {
 						logrus.Error("Unable to sync integration: ", err)
 					}
@@ -249,11 +258,11 @@ func (o *runCmdOptions) syncIntegration(sources []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) createIntegration(sources []string) (*v1alpha1.Integration, error) {
-	return o.updateIntegrationCode(sources)
+func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v1alpha1.Integration, error) {
+	return o.updateIntegrationCode(c, sources)
 }
 
-func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integration, error) {
+func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1alpha1.Integration, error) {
 	namespace := o.Namespace
 
 	name := ""
@@ -366,16 +375,20 @@ func (o *runCmdOptions) updateIntegrationCode(sources []string) (*v1alpha1.Integ
 	}
 
 	existed := false
-	err := sdk.Create(&integration)
+	err := c.Create(o.Context, &integration)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		clone := integration.DeepCopy()
-		err = sdk.Get(clone)
+		key, err := client.ObjectKeyFromObject(clone)
+		if err != nil {
+			return nil, err
+		}
+		err = c.Get(o.Context, key, clone)
 		if err != nil {
 			return nil, err
 		}
 		integration.ResourceVersion = clone.ResourceVersion
-		err = sdk.Update(&integration)
+		err = c.Update(o.Context, &integration)
 	}
 
 	if err != nil {

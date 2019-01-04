@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -160,7 +161,7 @@ func TestTraitDecode(t *testing.T) {
 }
 
 func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
-	catalog := NewCatalog()
+	catalog := NewTraitTestCatalog()
 	err := catalog.apply(env)
 	assert.Nil(t, err)
 	return env.Resources
@@ -198,4 +199,8 @@ func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, script string) *
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
+}
+
+func NewTraitTestCatalog() *Catalog {
+	return NewCatalog(context.TODO(), nil)
 }

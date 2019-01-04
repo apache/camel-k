@@ -18,47 +18,47 @@ limitations under the License.
 package install
 
 import (
+	"context"
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // SetupClusterwideResources --
-func SetupClusterwideResources() error {
-	return SetupClusterwideResourcesOrCollect(nil)
+func SetupClusterwideResources(ctx context.Context, c client.Client, ) error {
+	return SetupClusterwideResourcesOrCollect(ctx, c, nil)
 }
 
 // SetupClusterwideResourcesOrCollect --
-func SetupClusterwideResourcesOrCollect(collection *kubernetes.Collection) error {
+func SetupClusterwideResourcesOrCollect(ctx context.Context, c client.Client, collection *kubernetes.Collection) error {
 
 	// Install CRD for Integration Platform (if needed)
-	if err := installCRD("IntegrationPlatform", "crd-integration-platform.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationPlatform", "crd-integration-platform.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration Context (if needed)
-	if err := installCRD("IntegrationContext", "crd-integration-context.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationContext", "crd-integration-context.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration (if needed)
-	if err := installCRD("Integration", "crd-integration.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "Integration", "crd-integration.yaml", collection); err != nil {
 		return err
 	}
 
 	// Installing ClusterRole
-	clusterRoleInstalled, err := IsClusterRoleInstalled()
+	clusterRoleInstalled, err := IsClusterRoleInstalled(ctx, c)
 	if err != nil {
 		return err
 	}
 	if !clusterRoleInstalled || collection != nil {
-		err := installClusterRole(collection)
+		err := installClusterRole(ctx, c, collection)
 		if err != nil {
 			return err
 		}
@@ -68,8 +68,12 @@ func SetupClusterwideResourcesOrCollect(collection *kubernetes.Collection) error
 }
 
 // IsCRDInstalled check if the given CRT kind is installed
-func IsCRDInstalled(kind string) (bool, error) {
-	lst, err := k8sclient.GetKubeClient().Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
+func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, error) {
+	kc, err := kubernetes.AsKubernetesClient(c)
+	if err != nil {
+		return false, err
+	}
+	lst, err := kc.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -83,7 +87,11 @@ func IsCRDInstalled(kind string) (bool, error) {
 	return false, nil
 }
 
-func installCRD(kind string, resourceName string, collection *kubernetes.Collection) error {
+func installCRD(ctx context.Context, c client.Client, kind string, resourceName string, collection *kubernetes.Collection) error {
+	kc, err := kubernetes.AsKubernetesClient(c)
+	if err != nil {
+		return err
+	}
 	crd := []byte(deploy.Resources[resourceName])
 	if collection != nil {
 		unstr, err := kubernetes.LoadRawResourceFromYaml(string(crd))
@@ -95,7 +103,7 @@ func installCRD(kind string, resourceName string, collection *kubernetes.Collect
 	}
 
 	// Installing Integration CRD
-	installed, err := IsCRDInstalled(kind)
+	installed, err := IsCRDInstalled(ctx, c, kind)
 	if err != nil {
 		return err
 	}
@@ -107,7 +115,7 @@ func installCRD(kind string, resourceName string, collection *kubernetes.Collect
 	if err != nil {
 		return err
 	}
-	restClient, err := customclient.GetClientFor("apiextensions.k8s.io", "v1beta1")
+	restClient, err := customclient.GetClientFor(kc, "apiextensions.k8s.io", "v1beta1")
 	if err != nil {
 		return err
 	}
@@ -126,7 +134,7 @@ func installCRD(kind string, resourceName string, collection *kubernetes.Collect
 }
 
 // IsClusterRoleInstalled check if cluster role camel-k:edit is installed
-func IsClusterRoleInstalled() (bool, error) {
+func IsClusterRoleInstalled(ctx context.Context, c client.Client, ) (bool, error) {
 	clusterRole := v1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRole",
@@ -136,7 +144,11 @@ func IsClusterRoleInstalled() (bool, error) {
 			Name: "camel-k:edit",
 		},
 	}
-	err := sdk.Get(&clusterRole)
+	key, err := client.ObjectKeyFromObject(&clusterRole)
+	if err != nil {
+		return false, err
+	}
+	err = c.Get(ctx, key, &clusterRole)
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -145,8 +157,8 @@ func IsClusterRoleInstalled() (bool, error) {
 	return true, nil
 }
 
-func installClusterRole(collection *kubernetes.Collection) error {
-	obj, err := kubernetes.LoadResourceFromYaml(deploy.Resources["user-cluster-role.yaml"])
+func installClusterRole(ctx context.Context, c client.Client, collection *kubernetes.Collection) error {
+	obj, err := kubernetes.LoadRawResourceFromYaml(deploy.Resources["user-cluster-role.yaml"])
 	if err != nil {
 		return err
 	}
@@ -155,5 +167,5 @@ func installClusterRole(collection *kubernetes.Collection) error {
 		collection.Add(obj)
 		return nil
 	}
-	return sdk.Create(obj)
+	return c.Create(ctx, obj)
 }

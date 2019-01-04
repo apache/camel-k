@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -90,7 +91,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewCatalog().apply(&environment)
+	err := NewKnativeTestCatalog().apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -130,4 +131,8 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 
 	assert.True(t, services > 0)
 	assert.True(t, environment.Resources.Size() > 0)
+}
+
+func NewKnativeTestCatalog() *Catalog {
+	return NewCatalog(context.TODO(), nil)
 }

@@ -19,10 +19,12 @@ limitations under the License.
 package minishift
 
 import (
+	"context"
+	"k8s.io/apimachinery/pkg/labels"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -31,17 +33,20 @@ const (
 )
 
 // FindRegistry returns the Minishift registry location if any
-func FindRegistry() (*string, error) {
+func FindRegistry(ctx context.Context, c client.Client) (*string, error) {
 	svcs := v1.ServiceList{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       "Service",
 		},
 	}
-	options := metav1.ListOptions{
-		LabelSelector: "kubernetes.io/minikube-addons=registry",
+	options := client.ListOptions{
+		LabelSelector: labels.SelectorFromSet(labels.Set{
+			"kubernetes.io/minikube-addons": "registry",
+		}),
+		Namespace: registryNamespace,
 	}
-	if err := sdk.List(registryNamespace, &svcs, sdk.WithListOptions(&options)); err != nil {
+	if err := c.List(ctx, &options, &svcs); err != nil {
 		return nil, err
 	}
 	if len(svcs.Items) == 0 {

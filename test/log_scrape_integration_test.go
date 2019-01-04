@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/stretchr/testify/assert"
 )
 

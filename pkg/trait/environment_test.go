@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -51,7 +52,7 @@ func TestDefaultEnvironment(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewCatalog().apply(&env)
+	err := NewEnvironmentTestCatalog().apply(&env)
 
 	assert.Nil(t, err)
 
@@ -106,7 +107,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewCatalog().apply(&env)
+	err := NewEnvironmentTestCatalog().apply(&env)
 
 	assert.Nil(t, err)
 
@@ -161,7 +162,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewCatalog().apply(&env)
+	err := NewEnvironmentTestCatalog().apply(&env)
 
 	assert.Nil(t, err)
 
@@ -186,4 +187,8 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	assert.False(t, ns)
 	assert.False(t, name)
 	assert.True(t, ck)
+}
+
+func NewEnvironmentTestCatalog() *Catalog {
+	return NewCatalog(context.TODO(), nil)
 }

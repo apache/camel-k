@@ -18,24 +18,26 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // True --
 const True = "true"
 
 // Apply --
-func Apply(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) (*Environment, error) {
-	environment, err := newEnvironment(integration, ctx)
+func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integration, ictx *v1alpha1.IntegrationContext) (*Environment, error) {
+	environment, err := newEnvironment(ctx, c, integration, ictx)
 	if err != nil {
 		return nil, err
 	}
 
-	catalog := NewCatalog()
+	catalog := NewCatalog(ctx, c)
 
 	// invoke the trait framework to determine the needed resources
 	if err := catalog.apply(environment); err != nil {
@@ -46,7 +48,7 @@ func Apply(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) 
 }
 
 // newEnvironment creates a Environment from the given data
-func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.IntegrationContext) (*Environment, error) {
+func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.Integration, ictx *v1alpha1.IntegrationContext) (*Environment, error) {
 	if integration == nil && ctx == nil {
 		return nil, errors.New("neither integration nor context are ste")
 	}
@@ -54,17 +56,17 @@ func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.Integration
 	namespace := ""
 	if integration != nil {
 		namespace = integration.Namespace
-	} else if ctx != nil {
-		namespace = ctx.Namespace
+	} else if ictx != nil {
+		namespace = ictx.Namespace
 	}
 
-	pl, err := platform.GetCurrentPlatform(namespace)
+	pl, err := platform.GetCurrentPlatform(ctx, c, namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	if ctx == nil {
-		ctx, err = GetIntegrationContext(integration)
+	if ictx == nil {
+		ictx, err = GetIntegrationContext(ctx, c, integration)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +74,7 @@ func newEnvironment(integration *v1alpha1.Integration, ctx *v1alpha1.Integration
 
 	return &Environment{
 		Platform:       pl,
-		Context:        ctx,
+		Context:        ictx,
 		Integration:    integration,
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),

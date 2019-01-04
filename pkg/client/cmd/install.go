@@ -20,15 +20,12 @@ package cmd
 import (
 	"fmt"
 
-	"strings"
-	"time"
-
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/operator-framework/operator-sdk/pkg/k8sclient"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"strings"
 )
 
 func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -71,8 +68,14 @@ type installCmdOptions struct {
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
+	// TODO verify if this is needed by running a installation from scratch
 	// Let's use a fast refresh period when running with the CLI
-	k8sclient.ResetCacheEvery(8 * time.Second)
+	// k8sclient.ResetCacheEvery(8 * time.Second)
+
+	c, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
 
 	var collection *kubernetes.Collection
 	if o.outputFormat != "" {
@@ -80,7 +83,7 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 	}
 
 	if !o.skipClusterSetup {
-		err := install.SetupClusterwideResourcesOrCollect(collection)
+		err := install.SetupClusterwideResourcesOrCollect(o.Context, c, collection)
 		if err != nil && k8serrors.IsForbidden(err) {
 			fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
 
@@ -98,12 +101,12 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 	} else {
 		namespace := o.Namespace
 
-		err := install.OperatorOrCollect(namespace, collection)
+		err := install.OperatorOrCollect(o.Context, c, namespace, collection)
 		if err != nil {
 			return err
 		}
 
-		platform, err := install.PlatformOrCollect(namespace, o.registry, o.organization, o.pushSecret, collection)
+		platform, err := install.PlatformOrCollect(o.Context, c, namespace, o.registry, o.organization, o.pushSecret, collection)
 		if err != nil {
 			return err
 		}
@@ -126,13 +129,13 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 			platform.Spec.Build.CamelVersion = o.camelVersion
 		}
 
-		err = install.RuntimeObjectOrCollect(namespace, collection, platform)
+		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
 		if err != nil {
 			return err
 		}
 
 		if o.exampleSetup {
-			err = install.ExampleOrCollect(namespace, collection)
+			err = install.ExampleOrCollect(o.Context, c, namespace, collection)
 			if err != nil {
 				return err
 			}

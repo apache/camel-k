@@ -20,10 +20,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,11 +71,14 @@ func (command *deleteCmdOptions) validate(args []string) error {
 }
 
 func (command *deleteCmdOptions) run(args []string) error {
-
+	c, err := command.GetCmdClient()
+	if err != nil {
+		return err
+	}
 	if len(args) != 0 && !command.deleteAll {
 		for _, arg := range args {
 
-			err := DeleteIntegration(arg, command.Namespace)
+			err := DeleteIntegration(command.Context, c, arg, command.Namespace)
 			if err != nil {
 				if k8errors.IsNotFound(err) {
 					fmt.Println("Integration " + arg + " not found. Skipped.")
@@ -95,13 +98,13 @@ func (command *deleteCmdOptions) run(args []string) error {
 		}
 
 		//Looks like Operator SDK doesn't support deletion of all objects with one command
-		err := sdk.List(command.Namespace, &integrationList)
+		err := c.List(command.Context, &client.ListOptions{Namespace: command.Namespace}, &integrationList)
 		if err != nil {
 			return err
 		}
 		for _, integration := range integrationList.Items {
 			integration := integration // pin
-			err := sdk.Delete(&integration)
+			err := c.Delete(command.Context, &integration)
 			if err != nil {
 				return err
 			}

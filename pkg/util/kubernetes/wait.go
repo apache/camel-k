@@ -18,9 +18,10 @@ limitations under the License.
 package kubernetes
 
 import (
+	"context"
 	"time"
 
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -36,11 +37,14 @@ const (
 )
 
 // WaitCondition --
-func WaitCondition(obj runtime.Object, condition ResourceCheckFunction, maxDuration time.Duration) error {
+func WaitCondition(ctx context.Context, c client.Client, obj runtime.Object, condition ResourceCheckFunction, maxDuration time.Duration) error {
 	start := time.Now()
-
+	key, err := client.ObjectKeyFromObject(obj)
+	if err != nil {
+		return err
+	}
 	for start.Add(maxDuration).After(time.Now()) {
-		err := sdk.Get(obj)
+		err := c.Get(ctx, key, obj)
 		if err != nil {
 			time.Sleep(sleepTime)
 			continue

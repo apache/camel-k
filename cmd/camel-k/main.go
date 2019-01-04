@@ -19,54 +19,97 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"math/rand"
+	"os"
 	"runtime"
 	"time"
 
-	"github.com/apache/camel-k/pkg/stub"
-	"github.com/operator-framework/operator-sdk/pkg/sdk"
-	"github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
+	"github.com/apache/camel-k/pkg/apis"
+	"github.com/apache/camel-k/pkg/controller"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
+	"github.com/operator-framework/operator-sdk/pkg/leader"
+	"github.com/operator-framework/operator-sdk/pkg/ready"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
-
-	_ "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
-	_ "github.com/apache/camel-k/pkg/util/openshift"
-
-	"github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
-const resyncPeriod = time.Duration(5) * time.Second
+var log = logf.Log.WithName("cmd")
 
 func printVersion() {
-	logrus.Infof("Go Version: %s", runtime.Version())
-	logrus.Infof("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH)
-	logrus.Infof("operator-sdk Version: %v", sdkVersion.Version)
-}
-
-func watch(resource string, kind string, namespace string, resyncPeriod time.Duration) {
-	logrus.Infof("Watching %s, %s, %s, %d", resource, kind, namespace, resyncPeriod)
-	sdk.Watch(resource, kind, namespace, resyncPeriod)
+	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
+	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
+	log.Info(fmt.Sprintf("operator-sdk Version: %v", sdkVersion.Version))
 }
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
+	flag.Parse()
+
+	// The logger instantiated here can be changed to any logger
+	// implementing the logr.Logger interface. This logger will
+	// be propagated through the whole operator, generating
+	// uniform and structured logs.
+	logf.SetLogger(logf.ZapLogger(false))
+
 	printVersion()
 
-	sdk.ExposeMetricsPort()
-
-	resource := "camel.apache.org/v1alpha1"
 	namespace, err := k8sutil.GetWatchNamespace()
 	if err != nil {
-		logrus.Fatalf("failed to get watch namespace: %v", err)
+		log.Error(err, "failed to get watch namespace")
+		os.Exit(1)
 	}
 
-	ctx := context.TODO()
+	// Get a config to talk to the apiserver
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
 
-	watch(resource, "Integration", namespace, resyncPeriod)
-	watch(resource, "IntegrationContext", namespace, resyncPeriod)
-	watch(resource, "IntegrationPlatform", namespace, resyncPeriod)
+	// Become the leader before proceeding
+	leader.Become(context.TODO(), "camel-k-lock")
 
-	sdk.Handle(stub.NewHandler(ctx, namespace))
-	sdk.Run(ctx)
+	r := ready.NewFileReady()
+	err = r.Set()
+	if err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+	defer r.Unset()
+
+	// Create a new Cmd to provide shared dependencies and start components
+	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
+	if err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	log.Info("Registering Components.")
+
+	// Setup Scheme for all resources
+	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	// Setup all Controllers
+	if err := controller.AddToManager(mgr); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	log.Info("Starting the Cmd.")
+
+	// Start the Cmd
+	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+		log.Error(err, "manager exited non-zero")
+		os.Exit(1)
+	}
 }
