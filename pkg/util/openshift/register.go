@@ -43,14 +43,6 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	err = doAdd(build.AddToScheme, scheme, err)
 	err = doAdd(authorization.AddToScheme, scheme, err)
 
-	// Legacy "oapi" resources
-	err = doAdd(apps.AddToSchemeInCoreGroup, scheme, err)
-	err = doAdd(template.AddToSchemeInCoreGroup, scheme, err)
-	err = doAdd(image.AddToSchemeInCoreGroup, scheme, err)
-	err = doAdd(route.AddToSchemeInCoreGroup, scheme, err)
-	err = doAdd(build.AddToSchemeInCoreGroup, scheme, err)
-	err = doAdd(authorization.AddToSchemeInCoreGroup, scheme, err)
-
 	return err
 }
 
