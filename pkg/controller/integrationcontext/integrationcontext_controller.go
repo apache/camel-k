@@ -2,13 +2,13 @@ package integrationcontext
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"time"
 
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/apache/camel-k/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -102,8 +102,16 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
+	// Fetch the IntegrationContext again and check the state
+	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if instance.Status.Phase == camelv1alpha1.IntegrationContextPhaseReady {
+		return reconcile.Result{}, nil
+	}
+	// Requeue
 	return reconcile.Result{
 		RequeueAfter: 5 * time.Second,
 	}, nil
-
 }

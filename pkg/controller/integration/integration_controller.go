@@ -119,6 +119,15 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		}
 	}
 
+	// Fetch the Integration again and check the state
+	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if instance.Status.Phase == camelv1alpha1.IntegrationPhaseRunning {
+		return reconcile.Result{}, nil
+	}
+	// Requeue
 	return reconcile.Result{
 		RequeueAfter: 5 * time.Second,
 	}, nil
