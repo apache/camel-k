@@ -21,11 +21,10 @@ import (
 	"context"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 )
 
 // Identifiable represent an identifiable type
@@ -39,7 +38,7 @@ type ID string
 // Trait is the interface of all traits
 type Trait interface {
 	Identifiable
-	inject.Client
+	client.Injectable
 
 	// InjectContext to inject a context
 	InjectContext(context.Context)
@@ -67,9 +66,8 @@ func (trait *BaseTrait) ID() ID {
 }
 
 // InjectClient implements client.ClientInject and allows to inject a client into the trait
-func (trait *BaseTrait) InjectClient(c client.Client) error {
+func (trait *BaseTrait) InjectClient(c client.Client) {
 	trait.client = c
-	return nil
 }
 
 // InjectContext allows to inject a context into the trait

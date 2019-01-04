@@ -19,8 +19,6 @@ package trait
 
 import (
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/apache/camel-k/pkg/util/envvar"
 
 	"strconv"
@@ -37,6 +35,7 @@ import (
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -414,7 +413,7 @@ func (t *knativeTrait) retrieveChannel(namespace string, name string) (*eventing
 			Name:      name,
 		},
 	}
-	key := client.ObjectKey{
+	key := k8sclient.ObjectKey{
 		Namespace: namespace,
 		Name:      name,
 	}

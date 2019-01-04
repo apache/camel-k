@@ -20,8 +20,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"text/tabwriter"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
@@ -71,7 +72,7 @@ func (command *contextGetCommand) run() error {
 	if err != nil {
 		return err
 	}
-	if err := c.List(command.Context, &client.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
+	if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
 		return err
 	}
 

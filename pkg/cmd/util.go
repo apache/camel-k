@@ -15,18 +15,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kubernetes
+package cmd
 
 import (
-	"errors"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"context"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
-// AsKubernetesClient converts a controller-runtime Client into a Kubernetes client
-func AsKubernetesClient(c client.Client) (kubernetes.Interface, error) {
-	if k, ok := c.(kubernetes.Interface); ok {
-		return k, nil
+// DeleteIntegration --
+func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
+	integration := v1alpha1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       v1alpha1.IntegrationKind,
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
 	}
-	return nil, errors.New("client is not a kubernetes client")
+	return c.Delete(ctx, &integration)
 }
+
+

@@ -19,8 +19,10 @@ package integration
 
 import (
 	"context"
+
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/pkg/errors"
@@ -31,7 +33,7 @@ func LookupContextForIntegration(ctx context.Context, c client.Client, integrati
 	if integration.Status.Context != "" {
 		name := integration.Status.Context
 		ictx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
-		key := client.ObjectKey{
+		key := k8sclient.ObjectKey{
 			Namespace: integration.Namespace,
 			Name:      name,
 		}
@@ -43,7 +45,7 @@ func LookupContextForIntegration(ctx context.Context, c client.Client, integrati
 	}
 
 	ctxList := v1alpha1.NewIntegrationContextList()
-	if err := c.List(ctx, &client.ListOptions{Namespace: integration.Namespace}, &ctxList); err != nil {
+	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: integration.Namespace}, &ctxList); err != nil {
 		return nil, err
 	}
 

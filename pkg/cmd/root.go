@@ -19,10 +19,9 @@ package cmd
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const kamelCommandLongDescription = `
@@ -51,7 +50,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		BashCompletionFunction: bashCompletionFunction,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if options.Namespace == "" {
-				current, err := kubernetes.GetClientCurrentNamespace(options.KubeConfig)
+				current, err := client.GetCurrentNamespace(options.KubeConfig)
 				if err != nil {
 					return errors.Wrap(err, "cannot get current namespace")
 				}
@@ -60,9 +59,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 					return err
 				}
 			}
-
-			// Initialize the Kubernetes client to allow using the operator-sdk
-			return kubernetes.InitKubeClient(options.KubeConfig)
+			return nil
 		},
 	}
 
@@ -89,6 +86,6 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 		return command._client, nil
 	}
 	var err error
-	command._client, err = NewCmdClient(command.Namespace)
+	command._client, err = client.NewOutOfClusterClient(command.KubeConfig, command.Namespace)
 	return command._client, err
 }

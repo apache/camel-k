@@ -19,13 +19,13 @@ package trait
 
 import (
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type classpathTrait struct {
@@ -57,9 +57,9 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	if ctx == nil && e.Integration.Status.Context != "" {
 		name := e.Integration.Status.Context
 		c := v1alpha1.NewIntegrationContext(e.Integration.Namespace, name)
-		key := client.ObjectKey{
+		key := k8sclient.ObjectKey{
 			Namespace: e.Integration.Namespace,
-			Name: name,
+			Name:      name,
 		}
 
 		if err := t.client.Get(t.ctx, key, &c); err != nil {

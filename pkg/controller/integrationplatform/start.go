@@ -22,7 +22,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/labels"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewStartAction returns a action that waits for all required platform resources to start
@@ -59,7 +59,7 @@ func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.Integr
 
 func (action *startAction) aggregatePlatformPhaseFromContexts(ctx context.Context, namespace string) (v1alpha1.IntegrationPlatformPhase, error) {
 	ctxs := v1alpha1.NewIntegrationContextList()
-	options := client.ListOptions{
+	options := k8sclient.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labels.Set{
 			"camel.apache.org/context.type": "platform",
 		}),

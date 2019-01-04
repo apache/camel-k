@@ -20,9 +20,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
@@ -98,7 +98,7 @@ func (command *deleteCmdOptions) run(args []string) error {
 		}
 
 		//Looks like Operator SDK doesn't support deletion of all objects with one command
-		err := c.List(command.Context, &client.ListOptions{Namespace: command.Namespace}, &integrationList)
+		err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &integrationList)
 		if err != nil {
 			return err
 		}

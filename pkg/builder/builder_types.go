@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/client"
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -20,12 +20,13 @@ package minishift
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/client"
 	"k8s.io/apimachinery/pkg/labels"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -40,7 +41,7 @@ func FindRegistry(ctx context.Context, c client.Client) (*string, error) {
 			Kind:       "Service",
 		},
 	}
-	options := client.ListOptions{
+	options := k8sclient.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labels.Set{
 			"kubernetes.io/minikube-addons": "registry",
 		}),

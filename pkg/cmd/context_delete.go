@@ -20,7 +20,8 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
@@ -80,7 +81,7 @@ func (command *contextDeleteCommand) run(args []string) error {
 
 	if command.all {
 		ctxList := v1alpha1.NewIntegrationContextList()
-		if err := c.List(command.Context, &client.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
+		if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
 			return err
 		}
 
@@ -104,9 +105,9 @@ func (command *contextDeleteCommand) run(args []string) error {
 
 func (command *contextDeleteCommand) delete(name string) error {
 	ctx := v1alpha1.NewIntegrationContext(command.Namespace, name)
-	key := client.ObjectKey{
+	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
-		Name: name,
+		Name:      name,
 	}
 	c, err := command.GetCmdClient()
 	if err != nil {

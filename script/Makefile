@@ -3,7 +3,7 @@ build: build-runtime build-operator build-kamel build-compile-integration-tests 
 build-go: build-embed-resources build-operator build-kamel
 
 build-operator: build-embed-resources
-	go build -o camel-k ./cmd/camel-k/*.go
+	go build -o camel-k ./cmd/manager/*.go
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
@@ -47,10 +47,8 @@ clean:
 	go clean
 	rm -f camel-k
 	rm -f kamel
-	rm -rf tmp/_maven_output
-
-codegen:
-	./tmp/codegen/update-generated.sh
+	rm -rf build/_maven_output
+	rm -rf build/_output
 
 images: images-build
 

@@ -19,14 +19,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/spf13/cobra"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func newCmdLog(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -65,10 +63,6 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	kc, err := kubernetes.AsKubernetesClient(c)
-	if err != nil {
-		return err
-	}
 	integration := v1alpha1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       v1alpha1.IntegrationKind,
@@ -79,15 +73,15 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			Name:      args[0],
 		},
 	}
-	key := client.ObjectKey{
+	key := k8sclient.ObjectKey{
 		Namespace: o.Namespace,
-		Name: args[0],
+		Name:      args[0],
 	}
 
 	if err := c.Get(o.Context, key, &integration); err != nil {
 		return err
 	}
-	if err := log.Print(o.Context, kc, &integration); err != nil {
+	if err := log.Print(o.Context, c, &integration); err != nil {
 		return err
 	}
 

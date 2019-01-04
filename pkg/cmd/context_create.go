@@ -20,7 +20,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 	"strings"
 
@@ -31,6 +30,7 @@ import (
 
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewCmdContext --
@@ -85,9 +85,9 @@ func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) erro
 		return err
 	}
 	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
-	key := client.ObjectKey{
+	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
-		Name: args[0],
+		Name:      args[0],
 	}
 	if err := c.Get(command.Context, key, &ctx); err == nil {
 		// the integration context already exists, let's check that it is

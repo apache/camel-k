@@ -21,9 +21,10 @@ import (
 	"context"
 	"time"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ResourceRetrieveFunction --
@@ -39,7 +40,7 @@ const (
 // WaitCondition --
 func WaitCondition(ctx context.Context, c client.Client, obj runtime.Object, condition ResourceCheckFunction, maxDuration time.Duration) error {
 	start := time.Now()
-	key, err := client.ObjectKeyFromObject(obj)
+	key, err := k8sclient.ObjectKeyFromObject(obj)
 	if err != nil {
 		return err
 	}

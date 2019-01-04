@@ -23,7 +23,6 @@ package test
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"strings"
 	"testing"
 	"time"
@@ -40,9 +39,7 @@ func TestPodLogScrape(t *testing.T) {
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
 	defer cancel()
-	kc, err := kubernetes.AsKubernetesClient(testClient)
-	assert.Nil(t, err)
-	scraper := log.NewPodScraper(kc, pod.Namespace, pod.Name)
+	scraper := log.NewPodScraper(testClient, pod.Namespace, pod.Name)
 	in := scraper.Start(ctx)
 
 	res := make(chan bool)
@@ -77,9 +74,7 @@ func TestSelectorLogScrape(t *testing.T) {
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
 	defer cancel()
-	kc, err := kubernetes.AsKubernetesClient(testClient)
-	assert.Nil(t, err)
-	scraper := log.NewSelectorScraper(kc, deployment.Namespace, "scrape=me")
+	scraper := log.NewSelectorScraper(testClient, deployment.Namespace, "scrape=me")
 	in := scraper.Start(ctx)
 
 	res := make(chan string)
