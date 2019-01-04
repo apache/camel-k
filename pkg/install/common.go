@@ -50,7 +50,7 @@ func Resource(ctx context.Context, c client.Client, namespace string, name strin
 
 // ResourceOrCollect --
 func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, name string) error {
-	obj, err := kubernetes.LoadRawResourceFromYaml(deploy.Resources[name])
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.Resources[name])
 	if err != nil {
 		return err
 	}

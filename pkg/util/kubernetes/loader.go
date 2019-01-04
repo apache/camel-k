@@ -19,12 +19,14 @@ package kubernetes
 
 import (
 	"encoding/json"
+	"fmt"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-/*// LoadResourceFromYaml loads a k8s resource from a yaml definition
+// LoadResourceFromYaml loads a k8s resource from a yaml definition
 func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (runtime.Object, error) {
 	source := []byte(data)
 	jsonSource, err := yaml.ToJSON(source)
@@ -37,7 +39,7 @@ func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (runtime.Object, 
 		return nil, err
 	}
 	return RuntimeObjectFromUnstructured(scheme, &u)
-}*/
+}
 
 // LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type
 func LoadRawResourceFromYaml(data string) (runtime.Object, error) {
@@ -55,10 +57,10 @@ func LoadRawResourceFromYaml(data string) (runtime.Object, error) {
 	}, nil
 }
 
-/*// RuntimeObjectFromUnstructured converts an unstructured to a runtime object
+// RuntimeObjectFromUnstructured converts an unstructured to a runtime object
 func RuntimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstructured) (runtime.Object, error) {
 	gvk := u.GroupVersionKind()
-	codecs      := serializer.NewCodecFactory(scheme)
+	codecs := serializer.NewCodecFactory(scheme)
 	decoder := codecs.UniversalDecoder(gvk.GroupVersion())
 
 	b, err := u.MarshalJSON()
@@ -70,4 +72,4 @@ func RuntimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstr
 		return nil, fmt.Errorf("failed to decode json data with gvk(%v): %v", gvk.String(), err)
 	}
 	return ro, nil
-}*/
+}

@@ -19,20 +19,20 @@ package client
 
 import (
 	"github.com/apache/camel-k/pkg/apis"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
+	"github.com/pkg/errors"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	"os"
 	"os/user"
 	"path/filepath"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
-	"github.com/pkg/errors"
-	"k8s.io/client-go/kubernetes"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -40,6 +40,7 @@ import (
 type Client interface {
 	controller.Client
 	kubernetes.Interface
+	GetScheme() *runtime.Scheme
 }
 
 // Injectable identifies objects that can receive a Client
@@ -50,24 +51,54 @@ type Injectable interface {
 type defaultClient struct {
 	controller.Client
 	kubernetes.Interface
+	scheme *runtime.Scheme
+}
+
+func (c *defaultClient) GetScheme() *runtime.Scheme {
+	return c.scheme
 }
 
 // NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster
-func NewOutOfClusterClient(kubeconfig string, namespace string) (Client, error) {
+func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 	initialize(kubeconfig)
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
+
+	options := manager.Options{
+		LeaderElection: false,
+	}
+
 	// Create a new Cmd to provide shared dependencies and start components
-	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
+	mgr, err := manager.New(cfg, options)
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
 		return nil, err
 	}
-	return FromManager(mgr)
+
+	var clientset kubernetes.Interface
+	if clientset, err = kubernetes.NewForConfig(mgr.GetConfig()); err != nil {
+		return nil, err
+	}
+
+	// Create a new client to avoid using cache (enabled by default on operator-sdk client)
+	clientOptions := controller.Options{
+		Scheme: mgr.GetScheme(),
+		Mapper: mgr.GetRESTMapper(),
+	}
+	dynClient, err := controller.New(cfg, clientOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return &defaultClient{
+		Client:    dynClient,
+		Interface: clientset,
+		scheme:    clientOptions.Scheme,
+	}, nil
 }
 
 // FromManager creates a new k8s client from a manager object
@@ -80,6 +111,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 	return &defaultClient{
 		Client:    manager.GetClient(),
 		Interface: clientset,
+		scheme:    manager.GetScheme(),
 	}, nil
 }
 
