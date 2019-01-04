@@ -376,7 +376,8 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		clone := integration.DeepCopy()
-		key, err := k8sclient.ObjectKeyFromObject(clone)
+		var key k8sclient.ObjectKey
+		key, err = k8sclient.ObjectKeyFromObject(clone)
 		if err != nil {
 			return nil, err
 		}

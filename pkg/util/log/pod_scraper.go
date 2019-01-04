@@ -162,6 +162,7 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, na
 			}
 
 			if e.Object != nil {
+				var recvPod *v1.Pod
 				if runtimeUnstructured, ok := e.Object.(runtime.Unstructured); ok {
 					unstr := unstructured.Unstructured{
 						Object: runtimeUnstructured.UnstructuredContent(),
@@ -170,14 +171,18 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, na
 					if err != nil {
 						return "", err
 					}
-					pcopy := pod.DeepCopy()
-					if err := json.Unmarshal(jsondata, pcopy); err != nil {
+					recvPod := pod.DeepCopy()
+					if err := json.Unmarshal(jsondata, recvPod); err != nil {
 						return "", err
 					}
 
-					if pcopy.Status.Phase == v1.PodRunning {
-						return s.chooseContainer(pcopy), nil
-					}
+
+				} else if gotPod, ok := e.Object.(*v1.Pod); ok {
+					recvPod = gotPod
+				}
+
+				if recvPod != nil && recvPod.Status.Phase == v1.PodRunning {
+					return s.chooseContainer(recvPod), nil
 				}
 			} else if e.Type == watch.Deleted || e.Type == watch.Error {
 				return "", errors.New("unable to watch pod " + s.name)

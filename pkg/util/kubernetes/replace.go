@@ -46,7 +46,8 @@ func ReplaceResource(ctx context.Context, c client.Client, res runtime.Object) e
 	err := c.Create(ctx, res)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existing := res.DeepCopyObject()
-		key, err := k8sclient.ObjectKeyFromObject(existing)
+		var key k8sclient.ObjectKey
+		key, err = k8sclient.ObjectKeyFromObject(existing)
 		if err != nil {
 			return err
 		}
