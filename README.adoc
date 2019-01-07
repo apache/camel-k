@@ -31,7 +31,7 @@ Other cluster types (such as OpenShift clusters) should not need prior configura
 To start using Camel K you need the **"kamel"** binary, that can be used to both configure the cluster and run integrations.
 Look into the https://github.com/apache/camel-k/releases[release page] for latest version of the `kamel` tool.
 
-If you want to contribute, you can also **build it from source!** Refer to the link:/docs/developers.adoc[developer's guide]
+If you want to contribute, you can also **build it from source!** Refer to the link:/contributing.adoc[contributing guide]
 for information on how to do it.
 
 Once you have the "kamel" binary, log into your cluster using the standard "oc" (OpenShift) or "kubectl" (Kubernetes) client tool and execute the following command to install Camel K:
@@ -244,7 +244,7 @@ kamel get
 
 We love contributions and we want to make Camel K great!
 
-Contributing is easy, just take a look at our link:/docs/developers.adoc[developer's guide].
+Contributing is easy, just take a look at our link:/contributing.adoc[developer's guide].
 
 [[uninstalling]]
 == Uninstalling
