@@ -81,13 +81,18 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// GetCmdClient returns a client that can be used from command line tools
+// GetCmdClient returns the client that can be used from command line tools
 func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	// Get the pre-computed client
 	if command._client != nil {
 		return command._client, nil
 	}
 	var err error
-	command._client, err = client.NewOutOfClusterClient(command.KubeConfig)
+	command._client, err = command.NewCmdClient()
 	return command._client, err
+}
+
+// NewCmdClient returns a new client that can be used from command line tools
+func (command *RootCmdOptions) NewCmdClient() (client.Client, error) {
+	return client.NewOutOfClusterClient(command.KubeConfig)
 }

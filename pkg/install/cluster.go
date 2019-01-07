@@ -19,25 +19,33 @@ package install
 
 import (
 	"context"
+	"errors"
+	"strconv"
+	"time"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // SetupClusterwideResources --
-func SetupClusterwideResources(ctx context.Context, c client.Client) error {
-	return SetupClusterwideResourcesOrCollect(ctx, c, nil)
+func SetupClusterwideResources(ctx context.Context, clientProvider client.Provider) error {
+	return SetupClusterwideResourcesOrCollect(ctx, clientProvider, nil)
 }
 
 // SetupClusterwideResourcesOrCollect --
-func SetupClusterwideResourcesOrCollect(ctx context.Context, c client.Client, collection *kubernetes.Collection) error {
+func SetupClusterwideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection) error {
+	// Get a client to install the CRD
+	c, err := clientProvider.Get()
+	if err != nil {
+		return err
+	}
 
 	// Install CRD for Integration Platform (if needed)
 	if err := installCRD(ctx, c, "IntegrationPlatform", "crd-integration-platform.yaml", collection); err != nil {
@@ -66,13 +74,56 @@ func SetupClusterwideResourcesOrCollect(ctx context.Context, c client.Client, co
 		}
 	}
 
+	// Wait for all CRDs to be installed before proceeding
+	if err := WaitForAllCRDInstallation(ctx, clientProvider, 25*time.Second); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// IsCRDInstalled check if the given CRT kind is installed
+// WaitForAllCRDInstallation waits until all CRDs are installed
+func WaitForAllCRDInstallation(ctx context.Context, clientProvider client.Provider, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for {
+		var c client.Client
+		var err error
+		if c, err = clientProvider.Get(); err != nil {
+			return err
+		}
+		var inst bool
+		if inst, err = AreAllCRDInstalled(ctx, c); err != nil {
+			return err
+		} else if inst {
+			return nil
+		}
+		// Check after 2 seconds if not expired
+		if time.Now().After(deadline) {
+			return errors.New("cannot check CRD installation after " + strconv.FormatInt(timeout.Nanoseconds()/1000000000, 10) + " seconds")
+		}
+		time.Sleep(2 * time.Second)
+	}
+}
+
+// AreAllCRDInstalled check if all the required CRDs are installed
+func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
+	if ok, err := IsCRDInstalled(ctx, c, "IntegrationPlatform"); err != nil {
+		return ok, err
+	} else if !ok {
+		return false, nil
+	}
+	if ok, err := IsCRDInstalled(ctx, c, "IntegrationContext"); err != nil {
+		return ok, err
+	} else if !ok {
+		return false, nil
+	}
+	return IsCRDInstalled(ctx, c, "Integration")
+}
+
+// IsCRDInstalled check if the given CRD kind is installed
 func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, error) {
 	lst, err := c.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
-	if err != nil && errors.IsNotFound(err) {
+	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
 		return false, err
@@ -120,7 +171,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, resourceName 
 		Resource("customresourcedefinitions").
 		Do()
 	// Check result
-	if result.Error() != nil && !errors.IsAlreadyExists(result.Error()) {
+	if result.Error() != nil && !k8serrors.IsAlreadyExists(result.Error()) {
 		return result.Error()
 	}
 
@@ -143,7 +194,7 @@ func IsClusterRoleInstalled(ctx context.Context, c client.Client) (bool, error) 
 		return false, err
 	}
 	err = c.Get(ctx, key, &clusterRole)
-	if err != nil && errors.IsNotFound(err) {
+	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
 		return false, err
