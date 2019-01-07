@@ -1,6 +1,5 @@
-[[developers]]
-Developer's Guide
-=================
+[[contributing]]
+= Contributing to Camel K
 
 We love contributions!
 
@@ -15,7 +14,7 @@ In order to build the project, you need to comply with the following requirement
 
 * **Go version 1.10+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
 * **Dep version 0.5.0**: for managing dependencies. You can find installation instructions in the https://github.com/golang/dep[dep GitHub repository].
-* **Operator SDK v0.0.7+**: used to build the operator and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
+* **Operator SDK v0.3.0+**: used to build the operator and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
 * **GNU Make**: used to define composite build actions. This should be already installed or available as package if you have a good OS (https://www.gnu.org/software/make/).
 
 [[checks]]
@@ -50,7 +49,7 @@ This is a high level overview of the project structure:
 | link:/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary and the **kamel** client tool.
 | link:/build[/build]		| Contains scripts used during make operations for building the project.
 | link:/deploy[/deploy]		| Contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
-| link:/docs[/docs]			| Contains this documentation.
+| link:/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
 | link:/pkg[/pkg]			| This is where the code resides. The code is divided in multiple subpackages.
 | link:/runtime[/runtime]	| The Java runtime code that is used inside the integration Docker containers.
 | link:/test[/test]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
