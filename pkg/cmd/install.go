@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -68,22 +69,16 @@ type installCmdOptions struct {
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
-	// TODO verify if this is needed by running a installation from scratch
-	// Let's use a fast refresh period when running with the CLI
-	// k8sclient.ResetCacheEvery(8 * time.Second)
-
-	c, err := o.GetCmdClient()
-	if err != nil {
-		return err
-	}
-
 	var collection *kubernetes.Collection
 	if o.outputFormat != "" {
 		collection = kubernetes.NewCollection()
 	}
 
 	if !o.skipClusterSetup {
-		err := install.SetupClusterwideResourcesOrCollect(o.Context, c, collection)
+		// Let's use a client provider during cluster installation, to eliminate the problem of CRD object caching
+		clientProvider := client.Provider{Get: o.NewCmdClient}
+
+		err := install.SetupClusterwideResourcesOrCollect(o.Context, clientProvider, collection)
 		if err != nil && k8serrors.IsForbidden(err) {
 			fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
 
@@ -99,9 +94,14 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 			fmt.Println("Camel K cluster setup completed successfully")
 		}
 	} else {
+		c, err := o.GetCmdClient()
+		if err != nil {
+			return err
+		}
+
 		namespace := o.Namespace
 
-		err := install.OperatorOrCollect(o.Context, c, namespace, collection)
+		err = install.OperatorOrCollect(o.Context, c, namespace, collection)
 		if err != nil {
 			return err
 		}

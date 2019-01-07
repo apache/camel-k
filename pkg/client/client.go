@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
+	clientscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
@@ -47,6 +48,11 @@ type Client interface {
 // Injectable identifies objects that can receive a Client
 type Injectable interface {
 	InjectClient(Client)
+}
+
+// Provider is used to provide a new instance of the Client each time it's required
+type Provider struct {
+	Get func() (Client, error)
 }
 
 type defaultClient struct {
@@ -68,30 +74,21 @@ func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 		return nil, err
 	}
 
-	options := manager.Options{
-		LeaderElection: false,
-	}
-
-	// Create a new Cmd to provide shared dependencies and start components
-	mgr, err := manager.New(cfg, options)
-	if err != nil {
-		return nil, err
-	}
+	scheme := clientscheme.Scheme
 
 	// Setup Scheme for all resources
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := apis.AddToScheme(scheme); err != nil {
 		return nil, err
 	}
 
 	var clientset kubernetes.Interface
-	if clientset, err = kubernetes.NewForConfig(mgr.GetConfig()); err != nil {
+	if clientset, err = kubernetes.NewForConfig(cfg); err != nil {
 		return nil, err
 	}
 
 	// Create a new client to avoid using cache (enabled by default on operator-sdk client)
 	clientOptions := controller.Options{
-		Scheme: mgr.GetScheme(),
-		Mapper: mgr.GetRESTMapper(),
+		Scheme: scheme,
 	}
 	dynClient, err := controller.New(cfg, clientOptions)
 	if err != nil {

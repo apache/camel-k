@@ -20,8 +20,6 @@ package install
 import (
 	"context"
 	"errors"
-	"strconv"
-	"time"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -30,7 +28,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Operator installs the operator resources in the given namespace
@@ -100,9 +97,6 @@ func Platform(ctx context.Context, c client.Client, namespace string, registry s
 // PlatformOrCollect --
 // nolint: lll
 func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
-	if err := waitForPlatformCRDAvailable(ctx, c, namespace, 25*time.Second); err != nil {
-		return nil, err
-	}
 	isOpenshift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return nil, err
@@ -141,20 +135,6 @@ func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, r
 	}
 
 	return pl, nil
-}
-
-func waitForPlatformCRDAvailable(ctx context.Context, c client.Client, namespace string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	for {
-		pla := v1alpha1.NewIntegrationPlatformList()
-		if err := c.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &pla); err == nil {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errors.New("cannot list integration platforms after " + strconv.FormatInt(timeout.Nanoseconds()/1000000000, 10) + " seconds")
-		}
-		time.Sleep(2 * time.Second)
-	}
 }
 
 // Example --

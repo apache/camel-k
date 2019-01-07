@@ -38,15 +38,19 @@ import (
 var testContext context.Context
 var testClient client.Client
 
+func newTestClient() (client.Client, error) {
+	return client.NewOutOfClusterClient("")
+}
+
 func init() {
-	testContext = context.TODO()
 	var err error
-	testClient, err = client.NewOutOfClusterClient("")
+	err = install.SetupClusterwideResources(testContext, client.Provider{Get: newTestClient})
 	if err != nil {
 		panic(err)
 	}
 
-	err = install.SetupClusterwideResources(testContext, testClient)
+	testContext = context.TODO()
+	testClient, err = newTestClient()
 	if err != nil {
 		panic(err)
 	}
