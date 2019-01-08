@@ -30,26 +30,36 @@ import (
 )
 
 func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	options := installCmdOptions{
+	impl := installCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
 		Use:   "install",
 		Short: "Install Camel K on a Kubernetes cluster",
 		Long:  `Installs Camel K on a Kubernetes or OpenShift cluster.`,
-		RunE:  options.install,
+		RunE:  impl.install,
 	}
 
-	cmd.Flags().BoolVar(&options.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
-	cmd.Flags().BoolVar(&options.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
-	cmd.Flags().BoolVar(&options.exampleSetup, "example", false, "Install example integration")
-	cmd.Flags().StringVar(&options.registry, "registry", "", "A Docker registry that can be used to publish images")
-	cmd.Flags().StringVarP(&options.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().StringVar(&options.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
-	cmd.Flags().StringVar(&options.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
-	cmd.Flags().StringSliceVar(&options.repositories, "repository", nil, "Add a maven repository")
-	cmd.Flags().StringSliceVarP(&options.properties, "property", "p", nil, "Add a camel property")
-	cmd.Flags().StringVar(&options.camelVersion, "camel-version", "", "Set the camel version")
+	cmd.Flags().BoolVar(&impl.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
+	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
+	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
+	cmd.Flags().StringVar(&impl.registry, "registry", "", "A Docker registry that can be used to publish images")
+	cmd.Flags().StringVarP(&impl.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().StringVar(&impl.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
+	cmd.Flags().StringVar(&impl.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
+	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
+	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
+	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
+	cmd.Flags().StringSliceVar(&impl.contexts, "context", nil, "Add a camel context to build at startup, by default all known contexts are built")
+
+	// completion support
+	configureBashAnnotationForFlag(
+		&cmd,
+		"context",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_kubectl_get_known_integrationcontexts"},
+		},
+	)
 
 	return &cmd
 }
@@ -66,6 +76,7 @@ type installCmdOptions struct {
 	camelVersion     string
 	repositories     []string
 	properties       []string
+	contexts         []string
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
@@ -128,6 +139,8 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 		if o.camelVersion != "" {
 			platform.Spec.Build.CamelVersion = o.camelVersion
 		}
+
+		platform.Spec.Resources.Contexts = o.contexts
 
 		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
 		if err != nil {

@@ -8,9 +8,15 @@ import (
 
 // IntegrationPlatformSpec defines the desired state of IntegrationPlatform
 type IntegrationPlatformSpec struct {
-	Cluster IntegrationPlatformCluster   `json:"cluster,omitempty"`
-	Profile TraitProfile                 `json:"profile,omitempty"`
-	Build   IntegrationPlatformBuildSpec `json:"build,omitempty"`
+	Cluster   IntegrationPlatformCluster       `json:"cluster,omitempty"`
+	Profile   TraitProfile                     `json:"profile,omitempty"`
+	Build     IntegrationPlatformBuildSpec     `json:"build,omitempty"`
+	Resources IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
+}
+
+// IntegrationPlatformResourcesSpec contains platform related resources
+type IntegrationPlatformResourcesSpec struct {
+	Contexts []string `json:"contexts,omitempty"`
 }
 
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform
