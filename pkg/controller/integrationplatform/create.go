@@ -19,22 +19,15 @@ package integrationplatform
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/install"
+	p "github.com/apache/camel-k/pkg/platform"
+
 	"github.com/sirupsen/logrus"
 )
-
-var resources = []string{
-	"platform-integration-context-jvm.yaml",
-	"platform-integration-context-groovy.yaml",
-	"platform-integration-context-kotlin.yaml",
-	"platform-integration-context-spring-boot.yaml",
-}
-
-var knativeResources = []string{
-	"platform-integration-context-knative.yaml",
-}
 
 // NewCreateAction returns a action that creates resources needed by the platform
 func NewCreateAction() Action {
@@ -54,17 +47,39 @@ func (action *createAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bo
 }
 
 func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
-	logrus.Info("Installing platform resources")
-	err := install.Resources(ctx, action.client, platform.Namespace, resources...)
-	if err != nil {
-		return err
-	}
+	if l := len(platform.Spec.Resources.Contexts); l > 0 {
+		res := make([]string, 0, l)
 
-	if platform.Spec.Profile == v1alpha1.TraitProfileKnative {
-		logrus.Info("Installing knative resources")
-		err := install.Resources(ctx, action.client, platform.Namespace, knativeResources...)
+		for _, c := range platform.Spec.Resources.Contexts {
+			//
+			// Assuming that if the resource ends with a yaml extension, the full
+			// resource name is provided
+			//
+			if !strings.HasSuffix(c, ".yaml") && !strings.HasSuffix(c, ".yml") {
+				c = fmt.Sprintf("platform-integration-context-%s.yaml", c)
+			}
+
+			res = append(res, c)
+		}
+
+		logrus.Info("Installing custom platform resources")
+		err := install.Resources(ctx, action.client, platform.Namespace, res...)
 		if err != nil {
 			return err
+		}
+	} else {
+		logrus.Info("Installing default platform resources")
+		err := install.Resources(ctx, action.client, platform.Namespace, p.DefaultContexts...)
+		if err != nil {
+			return err
+		}
+
+		if platform.Spec.Profile == v1alpha1.TraitProfileKnative {
+			logrus.Info("Installing knative resources")
+			err := install.Resources(ctx, action.client, platform.Namespace, p.KnativeContexts...)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

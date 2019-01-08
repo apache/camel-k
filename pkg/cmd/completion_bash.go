@@ -23,6 +23,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/platform"
+
 	"github.com/apache/camel-k/pkg/trait"
 
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -139,6 +141,12 @@ __kamel_kubectl_get_user_integrationcontexts() {
     if kubectl_out=$(kubectl get -l camel.apache.org/context.type=user -o template --template="${template}" integrationcontexts 2>/dev/null); then
         COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
     fi
+}
+
+__kamel_kubectl_get_known_integrationcontexts() {
+    local type_list="` + strings.Join(platform.GetContextsNames(), " ") + `"
+    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+    compopt -o nospace
 }
 
 __custom_func() {
