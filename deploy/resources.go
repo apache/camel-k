@@ -2216,6 +2216,14 @@ spec:
       type: string
       description: The IntegrationContext phase
       JSONPath: .status.phase
+    - name: Type
+      type: string
+      description: The IntegrationContext type
+      JSONPath: .metadata.labels.camel\.apache\.org\/context\.type
+    - name: Image
+      type: string
+      description: The IntegrationContext image
+      JSONPath: .status.image
 
 `
 	Resources["crd-integration-platform.yaml"] =
@@ -2268,6 +2276,10 @@ spec:
       type: string
       description: The Integration phase
       JSONPath: .status.phase
+    - name: Context
+      type: string
+      description: The IntegrationContext to use
+      JSONPath: .status.context
 
 `
 	Resources["cr-example.yaml"] =

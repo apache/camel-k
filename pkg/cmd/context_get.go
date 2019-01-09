@@ -77,14 +77,14 @@ func (command *contextGetCommand) run() error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
-	fmt.Fprintln(w, "NAME\tTYPE\tSTATUS")
+	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
 	for _, ctx := range ctxList.Items {
 		t := ctx.Labels["camel.apache.org/context.type"]
 		u := command.user && t == "user"
 		p := command.platform && t == v1alpha1.IntegrationContextTypePlatform
 
 		if u || p {
-			fmt.Fprintf(w, "%s\t%s\t%s\n", ctx.Name, t, string(ctx.Status.Phase))
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, string(ctx.Status.Phase), t, ctx.Status.Image)
 		}
 	}
 	w.Flush()
