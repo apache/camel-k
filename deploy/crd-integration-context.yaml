@@ -20,3 +20,11 @@ spec:
       type: string
       description: The IntegrationContext phase
       JSONPath: .status.phase
+    - name: Type
+      type: string
+      description: The IntegrationContext type
+      JSONPath: .metadata.labels.camel\.apache\.org\/context\.type
+    - name: Image
+      type: string
+      description: The IntegrationContext image
+      JSONPath: .status.image

@@ -20,3 +20,7 @@ spec:
       type: string
       description: The Integration phase
       JSONPath: .status.phase
+    - name: Context
+      type: string
+      description: The IntegrationContext to use
+      JSONPath: .status.context
