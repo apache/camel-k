@@ -154,9 +154,14 @@ func ComputeDependencies(ctx *Context) error {
 
 // LookupPredefinedImage is used to find a suitable predefined image if available
 func LookupPredefinedImage(ctx *Context) error {
-	standardDependencies := map[string]bool {
-		"camel:core": true,
-		"runtime:jvm": true,
+	if !ctx.Request.Platform.Build.PredefinedImages {
+		// Usage of predefined images not enabled
+		return nil
+	}
+
+	standardDependencies := map[string]bool{
+		"camel:core":   true,
+		"runtime:jvm":  true,
 		"runtime:yaml": true,
 	}
 
