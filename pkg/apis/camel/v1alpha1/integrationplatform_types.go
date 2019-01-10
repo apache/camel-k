@@ -71,13 +71,14 @@ var allTraitProfiles = []TraitProfile{TraitProfileOpenShift, TraitProfileKuberne
 
 // IntegrationPlatformBuildSpec contains platform related build information
 type IntegrationPlatformBuildSpec struct {
-	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
-	Registry        string                                  `json:"registry,omitempty"`
-	Organization    string                                  `json:"organization,omitempty"`
-	PushSecret      string                                  `json:"pushSecret,omitempty"`
-	CamelVersion    string                                  `json:"camelVersion,omitempty"`
-	Properties      map[string]string                       `json:"properties,omitempty"`
-	Repositories    []string                                `json:"repositories,omitempty"`
+	PublishStrategy  IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	Registry         string                                  `json:"registry,omitempty"`
+	Organization     string                                  `json:"organization,omitempty"`
+	PushSecret       string                                  `json:"pushSecret,omitempty"`
+	CamelVersion     string                                  `json:"camelVersion,omitempty"`
+	PredefinedImages bool                                    `json:"predefinedImages,omitempty"`
+	Properties       map[string]string                       `json:"properties,omitempty"`
+	Repositories     []string                                `json:"repositories,omitempty"`
 }
 
 // IntegrationPlatformBuildPublishStrategy enumerates all implemented build strategies
