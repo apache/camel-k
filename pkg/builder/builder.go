@@ -168,6 +168,11 @@ func (b *defaultBuilder) submit(request Request) {
 			break
 		}
 
+		if c.Image != "" && c.PublicImage != "" {
+			logrus.Info("image already computed: skipping following steps")
+			break
+		}
+
 		select {
 		case <-b.interrupt:
 			c.Error = errors.New("build canceled")
