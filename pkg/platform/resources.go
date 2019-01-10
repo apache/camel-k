@@ -32,6 +32,9 @@ var KnativeContexts = []string{
 	"platform-integration-context-knative.yaml",
 }
 
+// NoContext is a placeholder for a not-present context
+const NoContext = "none"
+
 // GetContexts --
 func GetContexts() []string {
 	return append(DefaultContexts, KnativeContexts...)

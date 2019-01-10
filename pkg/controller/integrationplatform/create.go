@@ -51,6 +51,11 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		res := make([]string, 0, l)
 
 		for _, c := range platform.Spec.Resources.Contexts {
+			if c == p.NoContext {
+				// Signals nothing to install
+				continue
+			}
+
 			//
 			// Assuming that if the resource ends with a yaml extension, the full
 			// resource name is provided
@@ -62,10 +67,12 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 			res = append(res, c)
 		}
 
-		logrus.Info("Installing custom platform resources")
-		err := install.Resources(ctx, action.client, platform.Namespace, res...)
-		if err != nil {
-			return err
+		if len(res) > 0 {
+			logrus.Info("Installing custom platform resources")
+			err := install.Resources(ctx, action.client, platform.Namespace, res...)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		logrus.Info("Installing default platform resources")
