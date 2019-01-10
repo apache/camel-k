@@ -25,7 +25,7 @@ import (
 var DefaultSteps = []builder.Step{
 	builder.NewStep("generate", builder.ProjectGenerationPhase, builder.GenerateProject),
 	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
-	builder.NewStep("build/lookup-predefined-dependencies", builder.ProjectBuildPhase + 1, builder.LookupPredefinedImage),
+	builder.NewStep("lookup/predefined-image", builder.ProjectBuildPhase + 1, builder.LookupPredefinedImage),
 	builder.NewStep("packager/incremental", builder.ApplicationPackagePhase, builder.IncrementalPackager),
 	builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, Publisher),
 	builder.NewStep("notify/context", builder.NotifyPhase, builder.NotifyIntegrationContext),

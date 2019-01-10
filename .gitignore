@@ -1,6 +1,7 @@
 # Binary files
 /camel-k
 /kamel
+/publisher
 
 # Released Packages
 *.tar.gz
