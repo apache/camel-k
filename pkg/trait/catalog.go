@@ -38,6 +38,7 @@ type Catalog struct {
 	tRoute        Trait
 	tIngress      Trait
 	tOwner        Trait
+	tImages       Trait
 	tBuilder      Trait
 	tSpringBoot   Trait
 	tIstio        Trait
@@ -56,6 +57,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tRoute:        newRouteTrait(),
 		tIngress:      newIngressTrait(),
 		tOwner:        newOwnerTrait(),
+		tImages:       newImagesTrait(),
 		tBuilder:      newBuilderTrait(),
 		tSpringBoot:   newSpringBootTrait(),
 		tIstio:        newIstioTrait(),
@@ -84,6 +86,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tRoute,
 		c.tIngress,
 		c.tOwner,
+		c.tImages,
 		c.tBuilder,
 		c.tSpringBoot,
 		c.tIstio,
@@ -98,6 +101,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tDebug,
 			c.tDependencies,
+			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
 			c.tClasspath,
@@ -111,6 +115,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tDebug,
 			c.tDependencies,
+			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
 			c.tClasspath,
@@ -124,6 +129,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tDebug,
 			c.tDependencies,
+			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
 			c.tClasspath,

@@ -43,7 +43,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&impl.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
 	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
-	cmd.Flags().BoolVar(&impl.predefinedImages, "predefined-images", false, "Enable usage of predefined images")
 	cmd.Flags().StringVar(&impl.registry, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().StringVarP(&impl.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().StringVar(&impl.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
@@ -70,7 +69,6 @@ type installCmdOptions struct {
 	clusterSetupOnly bool
 	skipClusterSetup bool
 	exampleSetup     bool
-	predefinedImages bool
 	registry         string
 	outputFormat     string
 	organization     string
@@ -142,7 +140,6 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 			platform.Spec.Build.CamelVersion = o.camelVersion
 		}
 
-		platform.Spec.Build.PredefinedImages = o.predefinedImages
 		platform.Spec.Resources.Contexts = o.contexts
 
 		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)

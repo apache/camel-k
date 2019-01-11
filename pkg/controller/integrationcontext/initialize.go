@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/sirupsen/logrus"
 )
@@ -52,10 +53,15 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 
 	target := ictx.DeepCopy()
 
-	// by default the context should be build
-	target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
+	_, err := trait.Apply(ctx, action.client, nil, target)
+	if err != nil {
+		return err
+	}
 
-	if target.Spec.Image != "" {
+	if target.Spec.Image == "" {
+		// by default the context should be build
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
+	} else {
 		// but in case it has been created from an image, mark the
 		// context as ready
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
