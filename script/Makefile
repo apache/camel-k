@@ -12,6 +12,7 @@ build-publisher:
 	go build -o publisher ./cmd/util/publisher/*.go
 
 build-embed-resources:
+	./script/build_catalog.sh
 	./script/embed_resources.sh deploy
 
 build-compile-integration-tests:

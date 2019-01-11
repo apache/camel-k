@@ -48,7 +48,7 @@ import org.yaml.snakeyaml.Yaml;
     threadSafe = true,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class DependencyListerMojo extends AbstractMojo {
+public class GenerateDependencyListMojo extends AbstractMojo {
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
