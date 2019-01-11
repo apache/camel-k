@@ -65,6 +65,9 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 		}
 		if pl.Spec.Build.PredefinedImages {
 			ictx, err = ImportPredefinedContextIfPresent(ctx, action.client, integration)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
