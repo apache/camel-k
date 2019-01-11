@@ -19,6 +19,7 @@ package images
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"strings"
 
 	"github.com/apache/camel-k/version"
@@ -71,12 +72,21 @@ func LookupPredefinedImage(dependencies []string) string {
 	if !strings.HasPrefix(otherDep, camelPrefix) {
 		return ""
 	}
-
 	comp := strings.TrimPrefix(otherDep, camelPrefix)
+	if !isInCamelCatalog(comp) {
+		return ""
+	}
 	return PredefinedImageNameFor(comp)
 }
 
 // PredefinedImageNameFor --
 func PredefinedImageNameFor(comp string) string {
 	return fmt.Sprintf("%s/%s%s:%s", BaseRepository, ImagePrefix, comp, version.Version)
+}
+
+func isInCamelCatalog(comp string) bool {
+	if _, ok := camel.Runtime.Artifacts["camel-" + comp]; ok {
+		return true
+	}
+	return false
 }
