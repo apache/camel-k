@@ -19,13 +19,21 @@ package integration
 
 import (
 	"context"
-
-	"github.com/apache/camel-k/pkg/util"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform/images"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/pkg/errors"
+	"github.com/rs/xid"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var allowedLookupLabels = map[string]bool{
+	v1alpha1.IntegrationContextTypePlatform: true,
+	v1alpha1.IntegrationContextTypeExternal: true,
+}
 
 // LookupContextForIntegration --
 func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
@@ -50,7 +58,7 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 
 	for _, ctx := range ctxList.Items {
 		ctx := ctx // pin
-		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
+		if allowed, ok := allowedLookupLabels[ctx.Labels["camel.apache.org/context.type"]]; ok && allowed {
 			ideps := len(integration.Status.Dependencies)
 			cdeps := len(ctx.Spec.Dependencies)
 
@@ -65,4 +73,32 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 	}
 
 	return nil, nil
+}
+
+// ImportPredefinedContextIfPresent tries to create an external context from a predefined image
+func ImportPredefinedContextIfPresent(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
+	image := images.LookupPredefinedImage(integration.Status.Dependencies)
+	if image == "" {
+		return nil, nil
+	}
+
+	externalCtxName := fmt.Sprintf("ctx-base-%s", xid.New())
+	externalCtx := v1alpha1.NewIntegrationContext(integration.Namespace, externalCtxName)
+
+	externalCtx.Labels = map[string]string{
+		"camel.apache.org/context.type":               v1alpha1.IntegrationContextTypeExternal,
+		"camel.apache.org/context.created.by.kind":    v1alpha1.IntegrationKind,
+		"camel.apache.org/context.created.by.name":    integration.Name,
+		"camel.apache.org/context.created.by.version": integration.ResourceVersion,
+	}
+
+	externalCtx.Spec = v1alpha1.IntegrationContextSpec{
+		Dependencies: integration.Status.Dependencies,
+		Image:        image,
+	}
+
+	if err := c.Create(ctx, &externalCtx); err != nil {
+		return nil, err
+	}
+	return &externalCtx, nil
 }
