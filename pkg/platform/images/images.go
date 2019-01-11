@@ -19,9 +19,9 @@ package images
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/version"
 )
 
@@ -85,7 +85,7 @@ func PredefinedImageNameFor(comp string) string {
 }
 
 func isInCamelCatalog(comp string) bool {
-	if _, ok := camel.Runtime.Artifacts["camel-" + comp]; ok {
+	if _, ok := camel.Runtime.Artifacts["camel-"+comp]; ok {
 		return true
 	}
 	return false
