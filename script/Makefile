@@ -1,12 +1,15 @@
 build: build-runtime build-operator build-kamel build-compile-integration-tests test
 
-build-go: build-embed-resources build-operator build-kamel
+build-go: build-embed-resources build-operator build-kamel build-publisher
 
 build-operator: build-embed-resources
 	go build -o camel-k ./cmd/manager/*.go
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
+
+build-publisher:
+	go build -o publisher ./cmd/util/publisher/*.go
 
 build-embed-resources:
 	./script/embed_resources.sh deploy
@@ -17,7 +20,7 @@ build-compile-integration-tests:
 build-runtime:
 	./mvnw clean install -f ./runtime/pom.xml
 
-release: clean prepare-release build images-build images-push cross-compile package-examples git-tag
+release: clean prepare-release build images-build images-push cross-compile package-examples git-tag publish-base-images
 
 prepare-release:
 	./script/prepare_release.sh
@@ -35,6 +38,9 @@ package-examples:
 
 git-tag:
 	./script/git_tag.sh
+
+publish-base-images:
+	./script/publish_base_images.sh
 
 dep:
 	dep ensure -v
@@ -76,4 +82,4 @@ check-integration:
 lint:
 	golangci-lint run
 
-.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile package-examples new-version git-tag increment-snapshot install-minishift
+.PHONY: build build-operator build-kamel build-embed-resources build-runtime dep codegen images images-build images-push test check test-integration check-integration clean release prepare-release cross-compile package-examples new-version git-tag publish-base-images increment-snapshot install-minishift
