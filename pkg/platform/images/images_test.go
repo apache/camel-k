@@ -41,6 +41,13 @@ func TestImageLookup(t *testing.T) {
 			image:        BaseRepository + "/" + ImagePrefix + "telegram:" + version.Version,
 		},
 		{
+			dependencies: []string{"camel:telegram", "camel-k:knative"},
+			image:        BaseRepository + "/" + ImagePrefix + "telegram:" + version.Version,
+		},
+		{
+			dependencies: []string{"camel:telegram", "camel:core", "camel-k:knative", "camel:dropbox"},
+		},
+		{
 			dependencies: []string{"camel:core", "camel-k:knative"},
 			image:        BaseRepository + "/" + ImagePrefix + "core:" + version.Version,
 		},
@@ -57,6 +64,9 @@ func TestImageLookup(t *testing.T) {
 		},
 		{
 			dependencies: []string{"camel:dropbox", "camel:core", "camel-k:knative", "runtime:jvm", "runtime:groovy"},
+		},
+		{
+			dependencies: []string{"camel:cippalippa", "camel:core", "camel-k:knative"},
 		},
 	}
 
