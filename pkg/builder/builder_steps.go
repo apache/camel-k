@@ -115,7 +115,7 @@ func ComputeDependencies(ctx *Context) error {
 		return err
 	}
 
-	goal := fmt.Sprintf("org.apache.camel.k:camel-k-runtime-dependency-lister:%s:generate-dependency-list", version.Version)
+	goal := fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", version.Version)
 
 	err = maven.Run(p, MavenExtraOptions(), goal)
 	if err != nil {

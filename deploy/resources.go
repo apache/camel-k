@@ -42,188 +42,437 @@ spec:
 `
 	Resources["camel-catalog.yaml"] =
 		`
+version: 2.23.0
 artifacts:
   camel-ahc:
-    groupId: org.apache.camel
     artifactId: camel-ahc
-    version: 2.23.0
-    schemes:
-    - id: ahc
-      http: true
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: ahc
+      passive: false
+    version: 2.23.0
   camel-ahc-ws:
-    groupId: org.apache.camel
     artifactId: camel-ahc-ws
-    version: 2.23.0
-    schemes:
-    - id: ahc-ws
-      http: true
-    - id: ahc-wss
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: ahc-ws
+      passive: false
+    - http: false
+      id: ahc-wss
+      passive: false
+    version: 2.23.0
   camel-amqp:
-    groupId: org.apache.camel
     artifactId: camel-amqp
-    version: 2.23.0
-    schemes:
-    - id: amqp
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: amqp
+      passive: false
+    version: 2.23.0
   camel-apns:
-    groupId: org.apache.camel
     artifactId: camel-apns
-    version: 2.23.0
-    schemes:
-    - id: apns
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: apns
+      passive: false
+    version: 2.23.0
   camel-as2:
-    groupId: org.apache.camel
     artifactId: camel-as2
-    version: 2.23.0
-    schemes:
-    - id: as2
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: as2
+      passive: false
+    version: 2.23.0
+  camel-asn1:
+    artifactId: camel-asn1
+    dataformats:
+    - asn1
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
   camel-asterisk:
-    groupId: org.apache.camel
     artifactId: camel-asterisk
-    version: 2.23.0
-    schemes:
-    - id: asterisk
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: asterisk
+      passive: false
+    version: 2.23.0
   camel-atmos:
-    groupId: org.apache.camel
     artifactId: camel-atmos
-    version: 2.23.0
-    schemes:
-    - id: atmos
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: atmos
+      passive: false
+    version: 2.23.0
   camel-atmosphere-websocket:
-    groupId: org.apache.camel
     artifactId: camel-atmosphere-websocket
-    version: 2.23.0
-    schemes:
-    - id: atmosphere-websocket
-      http: true
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: atmosphere-websocket
+      passive: false
+    version: 2.23.0
   camel-atom:
-    groupId: org.apache.camel
     artifactId: camel-atom
-    version: 2.23.0
-    schemes:
-    - id: atom
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: atom
+      passive: false
+    version: 2.23.0
   camel-atomix:
-    groupId: org.apache.camel
     artifactId: camel-atomix
-    version: 2.23.0
-    schemes:
-    - id: atomix-map
-    - id: atomix-messaging
-    - id: atomix-multimap
-    - id: atomix-queue
-    - id: atomix-set
-    - id: atomix-value
-    languages: []
     dataformats: []
-  camel-avro:
     groupId: org.apache.camel
-    artifactId: camel-avro
-    version: 2.23.0
-    schemes:
-    - id: avro
     languages: []
+    schemes:
+    - http: false
+      id: atomix-map
+      passive: false
+    - http: false
+      id: atomix-messaging
+      passive: false
+    - http: false
+      id: atomix-multimap
+      passive: false
+    - http: false
+      id: atomix-queue
+      passive: false
+    - http: false
+      id: atomix-set
+      passive: false
+    - http: false
+      id: atomix-value
+      passive: false
+    version: 2.23.0
+  camel-avro:
+    artifactId: camel-avro
     dataformats:
     - avro
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: avro
+      passive: false
+    version: 2.23.0
   camel-aws:
-    groupId: org.apache.camel
     artifactId: camel-aws
-    version: 2.23.0
-    schemes:
-    - id: aws-cw
-    - id: aws-ddb
-    - id: aws-ddbstream
-    - id: aws-ec2
-    - id: aws-iam
-    - id: aws-kinesis
-    - id: aws-kinesis-firehose
-    - id: aws-kms
-    - id: aws-lambda
-    - id: aws-mq
-    - id: aws-s3
-    - id: aws-sdb
-    - id: aws-ses
-    - id: aws-sns
-    - id: aws-sqs
-    - id: aws-swf
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: aws-cw
+      passive: false
+    - http: false
+      id: aws-ddb
+      passive: false
+    - http: false
+      id: aws-ddbstream
+      passive: false
+    - http: false
+      id: aws-ec2
+      passive: false
+    - http: false
+      id: aws-iam
+      passive: false
+    - http: false
+      id: aws-kinesis
+      passive: false
+    - http: false
+      id: aws-kinesis-firehose
+      passive: false
+    - http: false
+      id: aws-kms
+      passive: false
+    - http: false
+      id: aws-lambda
+      passive: false
+    - http: false
+      id: aws-mq
+      passive: false
+    - http: false
+      id: aws-s3
+      passive: false
+    - http: false
+      id: aws-sdb
+      passive: false
+    - http: false
+      id: aws-ses
+      passive: false
+    - http: false
+      id: aws-sns
+      passive: false
+    - http: false
+      id: aws-sqs
+      passive: false
+    - http: false
+      id: aws-swf
+      passive: false
+    version: 2.23.0
   camel-azure:
-    groupId: org.apache.camel
     artifactId: camel-azure
-    version: 2.23.0
-    schemes:
-    - id: azure-blob
-    - id: azure-queue
-    languages: []
     dataformats: []
-  camel-core:
     groupId: org.apache.camel
-    artifactId: camel-core
-    version: 2.23.0
+    languages: []
     schemes:
-    - id: bean
-      passive: true
-    - id: binding
-      passive: true
-    - id: browse
-      passive: true
-    - id: class
-      passive: true
-    - id: controlbus
-      passive: true
-    - id: dataformat
-      passive: true
-    - id: dataset
-      passive: true
-    - id: direct
-      passive: true
-    - id: direct-vm
-      passive: true
-    - id: file
-    - id: language
-      passive: true
-    - id: log
-      passive: true
-    - id: mock
-      passive: true
-    - id: properties
-      passive: true
-    - id: ref
-      passive: true
-    - id: rest
-      http: true
-    - id: rest-api
-    - id: saga
-    - id: scheduler
-    - id: seda
-      passive: true
-    - id: stub
-      passive: true
-    - id: test
-      passive: true
-    - id: timer
-    - id: validator
-      passive: true
-    - id: vm
-      passive: true
-    - id: xslt
+    - http: false
+      id: azure-blob
+      passive: false
+    - http: false
+      id: azure-queue
+      passive: false
+    version: 2.23.0
+  camel-barcode:
+    artifactId: camel-barcode
+    dataformats:
+    - barcode
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-base64:
+    artifactId: camel-base64
+    dataformats:
+    - base64
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-bean-validator:
+    artifactId: camel-bean-validator
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: bean-validator
+      passive: false
+    version: 2.23.0
+  camel-beanio:
+    artifactId: camel-beanio
+    dataformats:
+    - beanio
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-beanstalk:
+    artifactId: camel-beanstalk
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: beanstalk
+      passive: false
+    version: 2.23.0
+  camel-bindy:
+    artifactId: camel-bindy
+    dataformats:
+    - bindy-csv
+    - bindy-fixed
+    - bindy-kvp
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-bonita:
+    artifactId: camel-bonita
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: bonita
+      passive: false
+    version: 2.23.0
+  camel-boon:
+    artifactId: camel-boon
+    dataformats:
+    - boon
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-box:
+    artifactId: camel-box
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: box
+      passive: false
+    version: 2.23.0
+  camel-braintree:
+    artifactId: camel-braintree
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: braintree
+      passive: false
+    version: 2.23.0
+  camel-cache:
+    artifactId: camel-cache
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: cache
+      passive: false
+    version: 2.23.0
+  camel-caffeine:
+    artifactId: camel-caffeine
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: caffeine-cache
+      passive: false
+    - http: false
+      id: caffeine-loadcache
+      passive: false
+    version: 2.23.0
+  camel-cassandraql:
+    artifactId: camel-cassandraql
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: cql
+      passive: false
+    version: 2.23.0
+  camel-castor:
+    artifactId: camel-castor
+    dataformats:
+    - castor
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-chronicle:
+    artifactId: camel-chronicle
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: chronicle-engine
+      passive: false
+    version: 2.23.0
+  camel-chunk:
+    artifactId: camel-chunk
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: chunk
+      passive: false
+    version: 2.23.0
+  camel-cm-sms:
+    artifactId: camel-cm-sms
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: cm-sms
+      passive: false
+    version: 2.23.0
+  camel-cmis:
+    artifactId: camel-cmis
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: cmis
+      passive: false
+    version: 2.23.0
+  camel-coap:
+    artifactId: camel-coap
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: coap
+      passive: false
+    version: 2.23.0
+  camel-cometd:
+    artifactId: camel-cometd
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: cometd
+      passive: false
+    - http: false
+      id: cometds
+      passive: false
+    version: 2.23.0
+  camel-consul:
+    artifactId: camel-consul
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: consul
+      passive: false
+    version: 2.23.0
+  camel-context:
+    artifactId: camel-context
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: context
+      passive: false
+    version: 2.23.0
+  camel-core:
+    artifactId: camel-core
+    dataformats:
+    - gzip
+    - serialization
+    - string
+    - zip
+    groupId: org.apache.camel
     languages:
     - bean
     - constant
@@ -235,1961 +484,2318 @@ artifacts:
     - tokenize
     - xpath
     - xtokenize
-    dataformats:
-    - gzip
-    - serialization
-    - string
-    - zip
-  camel-bean-validator:
-    groupId: org.apache.camel
-    artifactId: camel-bean-validator
-    version: 2.23.0
     schemes:
-    - id: bean-validator
-    languages: []
-    dataformats: []
-  camel-beanstalk:
-    groupId: org.apache.camel
-    artifactId: camel-beanstalk
+    - http: false
+      id: bean
+      passive: true
+    - http: false
+      id: binding
+      passive: true
+    - http: false
+      id: browse
+      passive: true
+    - http: false
+      id: class
+      passive: true
+    - http: false
+      id: controlbus
+      passive: true
+    - http: false
+      id: dataformat
+      passive: true
+    - http: false
+      id: dataset
+      passive: true
+    - http: false
+      id: direct
+      passive: true
+    - http: false
+      id: direct-vm
+      passive: true
+    - http: false
+      id: file
+      passive: false
+    - http: false
+      id: language
+      passive: true
+    - http: false
+      id: log
+      passive: true
+    - http: false
+      id: mock
+      passive: true
+    - http: false
+      id: properties
+      passive: true
+    - http: false
+      id: ref
+      passive: true
+    - http: true
+      id: rest
+      passive: false
+    - http: false
+      id: rest-api
+      passive: false
+    - http: false
+      id: saga
+      passive: false
+    - http: false
+      id: scheduler
+      passive: false
+    - http: false
+      id: seda
+      passive: true
+    - http: false
+      id: stub
+      passive: true
+    - http: false
+      id: test
+      passive: true
+    - http: false
+      id: timer
+      passive: false
+    - http: false
+      id: validator
+      passive: true
+    - http: false
+      id: vm
+      passive: true
+    - http: false
+      id: xslt
+      passive: false
     version: 2.23.0
-    schemes:
-    - id: beanstalk
-    languages: []
-    dataformats: []
-  camel-bonita:
-    groupId: org.apache.camel
-    artifactId: camel-bonita
-    version: 2.23.0
-    schemes:
-    - id: bonita
-    languages: []
-    dataformats: []
-  camel-box:
-    groupId: org.apache.camel
-    artifactId: camel-box
-    version: 2.23.0
-    schemes:
-    - id: box
-    languages: []
-    dataformats: []
-  camel-braintree:
-    groupId: org.apache.camel
-    artifactId: camel-braintree
-    version: 2.23.0
-    schemes:
-    - id: braintree
-    languages: []
-    dataformats: []
-  camel-cache:
-    groupId: org.apache.camel
-    artifactId: camel-cache
-    version: 2.23.0
-    schemes:
-    - id: cache
-    languages: []
-    dataformats: []
-  camel-caffeine:
-    groupId: org.apache.camel
-    artifactId: camel-caffeine
-    version: 2.23.0
-    schemes:
-    - id: caffeine-cache
-    - id: caffeine-loadcache
-    languages: []
-    dataformats: []
-  camel-chronicle:
-    groupId: org.apache.camel
-    artifactId: camel-chronicle
-    version: 2.23.0
-    schemes:
-    - id: chronicle-engine
-    languages: []
-    dataformats: []
-  camel-chunk:
-    groupId: org.apache.camel
-    artifactId: camel-chunk
-    version: 2.23.0
-    schemes:
-    - id: chunk
-    languages: []
-    dataformats: []
-  camel-cm-sms:
-    groupId: org.apache.camel
-    artifactId: camel-cm-sms
-    version: 2.23.0
-    schemes:
-    - id: cm-sms
-    languages: []
-    dataformats: []
-  camel-cmis:
-    groupId: org.apache.camel
-    artifactId: camel-cmis
-    version: 2.23.0
-    schemes:
-    - id: cmis
-    languages: []
-    dataformats: []
-  camel-coap:
-    groupId: org.apache.camel
-    artifactId: camel-coap
-    version: 2.23.0
-    schemes:
-    - id: coap
-    languages: []
-    dataformats: []
-  camel-cometd:
-    groupId: org.apache.camel
-    artifactId: camel-cometd
-    version: 2.23.0
-    schemes:
-    - id: cometd
-    - id: cometds
-    languages: []
-    dataformats: []
-  camel-consul:
-    groupId: org.apache.camel
-    artifactId: camel-consul
-    version: 2.23.0
-    schemes:
-    - id: consul
-    languages: []
-    dataformats: []
-  camel-context:
-    groupId: org.apache.camel
-    artifactId: camel-context
-    version: 2.23.0
-    schemes:
-    - id: context
-    languages: []
-    dataformats: []
   camel-couchbase:
-    groupId: org.apache.camel
     artifactId: camel-couchbase
-    version: 2.23.0
-    schemes:
-    - id: couchbase
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: couchbase
+      passive: false
+    version: 2.23.0
   camel-couchdb:
-    groupId: org.apache.camel
     artifactId: camel-couchdb
-    version: 2.23.0
-    schemes:
-    - id: couchdb
-    languages: []
     dataformats: []
-  camel-cassandraql:
     groupId: org.apache.camel
-    artifactId: camel-cassandraql
-    version: 2.23.0
-    schemes:
-    - id: cql
     languages: []
-    dataformats: []
+    schemes:
+    - http: false
+      id: couchdb
+      passive: false
+    version: 2.23.0
   camel-crypto:
-    groupId: org.apache.camel
     artifactId: camel-crypto
-    version: 2.23.0
-    schemes:
-    - id: crypto
-    languages: []
     dataformats:
     - crypto
     - pgp
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: crypto
+      passive: false
+    version: 2.23.0
   camel-crypto-cms:
-    groupId: org.apache.camel
     artifactId: camel-crypto-cms
-    version: 2.23.0
-    schemes:
-    - id: crypto-cms
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: crypto-cms
+      passive: false
+    version: 2.23.0
+  camel-csv:
+    artifactId: camel-csv
+    dataformats:
+    - csv
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
   camel-cxf:
-    groupId: org.apache.camel
     artifactId: camel-cxf
-    version: 2.23.0
-    schemes:
-    - id: cxf
-      http: true
-    - id: cxfrs
-      http: true
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: cxf
+      passive: false
+    - http: true
+      id: cxfrs
+      passive: false
+    version: 2.23.0
   camel-digitalocean:
-    groupId: org.apache.camel
     artifactId: camel-digitalocean
-    version: 2.23.0
-    schemes:
-    - id: digitalocean
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: digitalocean
+      passive: false
+    version: 2.23.0
   camel-disruptor:
-    groupId: org.apache.camel
     artifactId: camel-disruptor
-    version: 2.23.0
-    schemes:
-    - id: disruptor
-    - id: disruptor-vm
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: disruptor
+      passive: false
+    - http: false
+      id: disruptor-vm
+      passive: false
+    version: 2.23.0
   camel-dns:
-    groupId: org.apache.camel
     artifactId: camel-dns
-    version: 2.23.0
-    schemes:
-    - id: dns
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: dns
+      passive: false
+    version: 2.23.0
   camel-docker:
-    groupId: org.apache.camel
     artifactId: camel-docker
-    version: 2.23.0
-    schemes:
-    - id: docker
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: docker
+      passive: false
+    version: 2.23.0
   camel-dozer:
-    groupId: org.apache.camel
     artifactId: camel-dozer
-    version: 2.23.0
-    schemes:
-    - id: dozer
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: dozer
+      passive: false
+    version: 2.23.0
   camel-drill:
-    groupId: org.apache.camel
     artifactId: camel-drill
-    version: 2.23.0
-    schemes:
-    - id: drill
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: drill
+      passive: false
+    version: 2.23.0
   camel-dropbox:
-    groupId: org.apache.camel
     artifactId: camel-dropbox
-    version: 2.23.0
-    schemes:
-    - id: dropbox
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: dropbox
+      passive: false
+    version: 2.23.0
   camel-ehcache:
-    groupId: org.apache.camel
     artifactId: camel-ehcache
-    version: 2.23.0
-    schemes:
-    - id: ehcache
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ehcache
+      passive: false
+    version: 2.23.0
   camel-ejb:
-    groupId: org.apache.camel
     artifactId: camel-ejb
-    version: 2.23.0
-    schemes:
-    - id: ejb
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ejb
+      passive: false
+    version: 2.23.0
   camel-elasticsearch:
-    groupId: org.apache.camel
     artifactId: camel-elasticsearch
-    version: 2.23.0
-    schemes:
-    - id: elasticsearch
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: elasticsearch
+      passive: false
+    version: 2.23.0
   camel-elasticsearch-rest:
-    groupId: org.apache.camel
     artifactId: camel-elasticsearch-rest
-    version: 2.23.0
-    schemes:
-    - id: elasticsearch-rest
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: elasticsearch-rest
+      passive: false
+    version: 2.23.0
   camel-elasticsearch5:
-    groupId: org.apache.camel
     artifactId: camel-elasticsearch5
-    version: 2.23.0
-    schemes:
-    - id: elasticsearch5
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: elasticsearch5
+      passive: false
+    version: 2.23.0
   camel-elsql:
-    groupId: org.apache.camel
     artifactId: camel-elsql
-    version: 2.23.0
-    schemes:
-    - id: elsql
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: elsql
+      passive: false
+    version: 2.23.0
   camel-etcd:
-    groupId: org.apache.camel
     artifactId: camel-etcd
-    version: 2.23.0
-    schemes:
-    - id: etcd
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: etcd
+      passive: false
+    version: 2.23.0
   camel-eventadmin:
-    groupId: org.apache.camel
     artifactId: camel-eventadmin
-    version: 2.23.0
-    schemes:
-    - id: eventadmin
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: eventadmin
+      passive: false
+    version: 2.23.0
   camel-exec:
-    groupId: org.apache.camel
     artifactId: camel-exec
-    version: 2.23.0
-    schemes:
-    - id: exec
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: exec
+      passive: false
+    version: 2.23.0
   camel-facebook:
-    groupId: org.apache.camel
     artifactId: camel-facebook
-    version: 2.23.0
-    schemes:
-    - id: facebook
-    languages: []
     dataformats: []
-  camel-fhir:
     groupId: org.apache.camel
-    artifactId: camel-fhir
-    version: 2.23.0
-    schemes:
-    - id: fhir
     languages: []
+    schemes:
+    - http: false
+      id: facebook
+      passive: false
+    version: 2.23.0
+  camel-fastjson:
+    artifactId: camel-fastjson
+    dataformats:
+    - json-fastjson
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-fhir:
+    artifactId: camel-fhir
     dataformats:
     - fhirJson
     - fhirXml
-  camel-flatpack:
     groupId: org.apache.camel
-    artifactId: camel-flatpack
-    version: 2.23.0
-    schemes:
-    - id: flatpack
     languages: []
+    schemes:
+    - http: false
+      id: fhir
+      passive: false
+    version: 2.23.0
+  camel-flatpack:
+    artifactId: camel-flatpack
     dataformats:
     - flatpack
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: flatpack
+      passive: false
+    version: 2.23.0
   camel-flink:
-    groupId: org.apache.camel
     artifactId: camel-flink
-    version: 2.23.0
-    schemes:
-    - id: flink
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: flink
+      passive: false
+    version: 2.23.0
   camel-fop:
-    groupId: org.apache.camel
     artifactId: camel-fop
-    version: 2.23.0
-    schemes:
-    - id: fop
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: fop
+      passive: false
+    version: 2.23.0
   camel-freemarker:
-    groupId: org.apache.camel
     artifactId: camel-freemarker
-    version: 2.23.0
-    schemes:
-    - id: freemarker
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: freemarker
+      passive: false
+    version: 2.23.0
   camel-ftp:
-    groupId: org.apache.camel
     artifactId: camel-ftp
-    version: 2.23.0
-    schemes:
-    - id: ftp
-    - id: ftps
-    - id: sftp
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ftp
+      passive: false
+    - http: false
+      id: ftps
+      passive: false
+    - http: false
+      id: sftp
+      passive: false
+    version: 2.23.0
   camel-ganglia:
-    groupId: org.apache.camel
     artifactId: camel-ganglia
-    version: 2.23.0
-    schemes:
-    - id: ganglia
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ganglia
+      passive: false
+    version: 2.23.0
   camel-geocoder:
-    groupId: org.apache.camel
     artifactId: camel-geocoder
-    version: 2.23.0
-    schemes:
-    - id: geocoder
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: geocoder
+      passive: false
+    version: 2.23.0
   camel-git:
-    groupId: org.apache.camel
     artifactId: camel-git
-    version: 2.23.0
-    schemes:
-    - id: git
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: git
+      passive: false
+    version: 2.23.0
   camel-github:
-    groupId: org.apache.camel
     artifactId: camel-github
-    version: 2.23.0
-    schemes:
-    - id: github
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: github
+      passive: false
+    version: 2.23.0
   camel-google-bigquery:
-    groupId: org.apache.camel
     artifactId: camel-google-bigquery
-    version: 2.23.0
-    schemes:
-    - id: google-bigquery
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: google-bigquery
+      passive: false
+    version: 2.23.0
   camel-google-calendar:
-    groupId: org.apache.camel
     artifactId: camel-google-calendar
-    version: 2.23.0
-    schemes:
-    - id: google-calendar
-    - id: google-calendar-stream
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: google-calendar
+      passive: false
+    - http: false
+      id: google-calendar-stream
+      passive: false
+    version: 2.23.0
   camel-google-drive:
-    groupId: org.apache.camel
     artifactId: camel-google-drive
-    version: 2.23.0
-    schemes:
-    - id: google-drive
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: google-drive
+      passive: false
+    version: 2.23.0
   camel-google-mail:
-    groupId: org.apache.camel
     artifactId: camel-google-mail
-    version: 2.23.0
-    schemes:
-    - id: google-mail
-    - id: google-mail-stream
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: google-mail
+      passive: false
+    - http: false
+      id: google-mail-stream
+      passive: false
+    version: 2.23.0
   camel-google-pubsub:
-    groupId: org.apache.camel
     artifactId: camel-google-pubsub
-    version: 2.23.0
-    schemes:
-    - id: google-pubsub
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: google-pubsub
+      passive: false
+    version: 2.23.0
   camel-google-sheets:
-    groupId: org.apache.camel
     artifactId: camel-google-sheets
-    version: 2.23.0
-    schemes:
-    - id: google-sheets
-    - id: google-sheets-stream
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: google-sheets
+      passive: false
+    - http: false
+      id: google-sheets-stream
+      passive: false
+    version: 2.23.0
   camel-gora:
-    groupId: org.apache.camel
     artifactId: camel-gora
-    version: 2.23.0
-    schemes:
-    - id: gora
-    languages: []
     dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: gora
+      passive: false
+    version: 2.23.0
   camel-grape:
-    groupId: org.apache.camel
     artifactId: camel-grape
-    version: 2.23.0
-    schemes:
-    - id: grape
-    languages: []
-    dataformats: []
-  camel-grpc:
-    groupId: org.apache.camel
-    artifactId: camel-grpc
-    version: 2.23.0
-    schemes:
-    - id: grpc
-      http: true
-    languages: []
-    dataformats: []
-  camel-guava-eventbus:
-    groupId: org.apache.camel
-    artifactId: camel-guava-eventbus
-    version: 2.23.0
-    schemes:
-    - id: guava-eventbus
-    languages: []
-    dataformats: []
-  camel-hazelcast:
-    groupId: org.apache.camel
-    artifactId: camel-hazelcast
-    version: 2.23.0
-    schemes:
-    - id: hazelcast-atomicvalue
-    - id: hazelcast-instance
-    - id: hazelcast-list
-    - id: hazelcast-map
-    - id: hazelcast-multimap
-    - id: hazelcast-queue
-    - id: hazelcast-replicatedmap
-    - id: hazelcast-ringbuffer
-    - id: hazelcast-seda
-    - id: hazelcast-set
-    - id: hazelcast-topic
-    languages: []
-    dataformats: []
-  camel-hbase:
-    groupId: org.apache.camel
-    artifactId: camel-hbase
-    version: 2.23.0
-    schemes:
-    - id: hbase
-    languages: []
-    dataformats: []
-  camel-hdfs:
-    groupId: org.apache.camel
-    artifactId: camel-hdfs
-    version: 2.23.0
-    schemes:
-    - id: hdfs
-    languages: []
-    dataformats: []
-  camel-hdfs2:
-    groupId: org.apache.camel
-    artifactId: camel-hdfs2
-    version: 2.23.0
-    schemes:
-    - id: hdfs2
-    languages: []
-    dataformats: []
-  camel-hipchat:
-    groupId: org.apache.camel
-    artifactId: camel-hipchat
-    version: 2.23.0
-    schemes:
-    - id: hipchat
-    languages: []
-    dataformats: []
-  camel-http:
-    groupId: org.apache.camel
-    artifactId: camel-http
-    version: 2.23.0
-    schemes:
-    - id: http
-    - id: https
-    languages: []
-    dataformats: []
-  camel-http4:
-    groupId: org.apache.camel
-    artifactId: camel-http4
-    version: 2.23.0
-    schemes:
-    - id: http4
-    - id: https4
-    languages: []
-    dataformats: []
-  camel-ibatis:
-    groupId: org.apache.camel
-    artifactId: camel-ibatis
-    version: 2.23.0
-    schemes:
-    - id: ibatis
-    languages: []
-    dataformats: []
-  camel-iec60870:
-    groupId: org.apache.camel
-    artifactId: camel-iec60870
-    version: 2.23.0
-    schemes:
-    - id: iec60870-client
-    - id: iec60870-server
-    languages: []
-    dataformats: []
-  camel-ignite:
-    groupId: org.apache.camel
-    artifactId: camel-ignite
-    version: 2.23.0
-    schemes:
-    - id: ignite-cache
-    - id: ignite-compute
-    - id: ignite-events
-    - id: ignite-idgen
-    - id: ignite-messaging
-    - id: ignite-queue
-    - id: ignite-set
-    languages: []
-    dataformats: []
-  camel-mail:
-    groupId: org.apache.camel
-    artifactId: camel-mail
-    version: 2.23.0
-    schemes:
-    - id: imap
-    - id: imaps
-    - id: pop3
-    - id: pop3s
-    - id: smtp
-    - id: smtps
-    languages: []
-    dataformats:
-    - mime-multipart
-  camel-infinispan:
-    groupId: org.apache.camel
-    artifactId: camel-infinispan
-    version: 2.23.0
-    schemes:
-    - id: infinispan
-    languages: []
-    dataformats: []
-  camel-influxdb:
-    groupId: org.apache.camel
-    artifactId: camel-influxdb
-    version: 2.23.0
-    schemes:
-    - id: influxdb
-    languages: []
-    dataformats: []
-  camel-ipfs:
-    groupId: org.apache.camel
-    artifactId: camel-ipfs
-    version: 2.23.0
-    schemes:
-    - id: ipfs
-    languages: []
-    dataformats: []
-  camel-irc:
-    groupId: org.apache.camel
-    artifactId: camel-irc
-    version: 2.23.0
-    schemes:
-    - id: irc
-    languages: []
-    dataformats: []
-  camel-ironmq:
-    groupId: org.apache.camel
-    artifactId: camel-ironmq
-    version: 2.23.0
-    schemes:
-    - id: ironmq
-    languages: []
-    dataformats: []
-  camel-javaspace:
-    groupId: org.apache.camel
-    artifactId: camel-javaspace
-    version: 2.23.0
-    schemes:
-    - id: javaspace
-    languages: []
-    dataformats: []
-  camel-jbpm:
-    groupId: org.apache.camel
-    artifactId: camel-jbpm
-    version: 2.23.0
-    schemes:
-    - id: jbpm
-    languages: []
-    dataformats: []
-  camel-jcache:
-    groupId: org.apache.camel
-    artifactId: camel-jcache
-    version: 2.23.0
-    schemes:
-    - id: jcache
-    languages: []
-    dataformats: []
-  camel-jclouds:
-    groupId: org.apache.camel
-    artifactId: camel-jclouds
-    version: 2.23.0
-    schemes:
-    - id: jclouds
-    languages: []
-    dataformats: []
-  camel-jcr:
-    groupId: org.apache.camel
-    artifactId: camel-jcr
-    version: 2.23.0
-    schemes:
-    - id: jcr
-    languages: []
-    dataformats: []
-  camel-jdbc:
-    groupId: org.apache.camel
-    artifactId: camel-jdbc
-    version: 2.23.0
-    schemes:
-    - id: jdbc
-    languages: []
-    dataformats: []
-  camel-jetty9:
-    groupId: org.apache.camel
-    artifactId: camel-jetty9
-    version: 2.23.0
-    schemes:
-    - id: jetty
-      http: true
-    languages: []
-    dataformats: []
-  camel-jgroups:
-    groupId: org.apache.camel
-    artifactId: camel-jgroups
-    version: 2.23.0
-    schemes:
-    - id: jgroups
-    languages: []
-    dataformats: []
-  camel-jing:
-    groupId: org.apache.camel
-    artifactId: camel-jing
-    version: 2.23.0
-    schemes:
-    - id: jing
-    languages: []
-    dataformats: []
-  camel-jira:
-    groupId: org.apache.camel
-    artifactId: camel-jira
-    version: 2.23.0
-    schemes:
-    - id: jira
-    languages: []
-    dataformats: []
-  camel-jms:
-    groupId: org.apache.camel
-    artifactId: camel-jms
-    version: 2.23.0
-    schemes:
-    - id: jms
-    languages: []
-    dataformats: []
-  camel-jmx:
-    groupId: org.apache.camel
-    artifactId: camel-jmx
-    version: 2.23.0
-    schemes:
-    - id: jmx
-    languages: []
-    dataformats: []
-  camel-jolt:
-    groupId: org.apache.camel
-    artifactId: camel-jolt
-    version: 2.23.0
-    schemes:
-    - id: jolt
-    languages: []
-    dataformats: []
-  camel-jpa:
-    groupId: org.apache.camel
-    artifactId: camel-jpa
-    version: 2.23.0
-    schemes:
-    - id: jpa
-    languages: []
-    dataformats: []
-  camel-json-validator:
-    groupId: org.apache.camel
-    artifactId: camel-json-validator
-    version: 2.23.0
-    schemes:
-    - id: json-validator
-    languages: []
-    dataformats: []
-  camel-jt400:
-    groupId: org.apache.camel
-    artifactId: camel-jt400
-    version: 2.23.0
-    schemes:
-    - id: jt400
-    languages: []
-    dataformats: []
-  camel-kafka:
-    groupId: org.apache.camel
-    artifactId: camel-kafka
-    version: 2.23.0
-    schemes:
-    - id: kafka
-    languages: []
-    dataformats: []
-  camel-kestrel:
-    groupId: org.apache.camel
-    artifactId: camel-kestrel
-    version: 2.23.0
-    schemes:
-    - id: kestrel
-    languages: []
-    dataformats: []
-  camel-krati:
-    groupId: org.apache.camel
-    artifactId: camel-krati
-    version: 2.23.0
-    schemes:
-    - id: krati
-    languages: []
-    dataformats: []
-  camel-kubernetes:
-    groupId: org.apache.camel
-    artifactId: camel-kubernetes
-    version: 2.23.0
-    schemes:
-    - id: kubernetes
-    - id: kubernetes-config-maps
-    - id: kubernetes-deployments
-    - id: kubernetes-hpa
-    - id: kubernetes-job
-    - id: kubernetes-namespaces
-    - id: kubernetes-nodes
-    - id: kubernetes-persistent-volumes
-    - id: kubernetes-persistent-volumes-claims
-    - id: kubernetes-pods
-    - id: kubernetes-replication-controllers
-    - id: kubernetes-resources-quota
-    - id: kubernetes-secrets
-    - id: kubernetes-service-accounts
-    - id: kubernetes-services
-    - id: openshift-build-configs
-    - id: openshift-builds
-    languages: []
-    dataformats: []
-  camel-ldap:
-    groupId: org.apache.camel
-    artifactId: camel-ldap
-    version: 2.23.0
-    schemes:
-    - id: ldap
-    languages: []
-    dataformats: []
-  camel-ldif:
-    groupId: org.apache.camel
-    artifactId: camel-ldif
-    version: 2.23.0
-    schemes:
-    - id: ldif
-    languages: []
-    dataformats: []
-  camel-linkedin:
-    groupId: org.apache.camel
-    artifactId: camel-linkedin
-    version: 2.23.0
-    schemes:
-    - id: linkedin
-    languages: []
-    dataformats: []
-  camel-printer:
-    groupId: org.apache.camel
-    artifactId: camel-printer
-    version: 2.23.0
-    schemes:
-    - id: lpr
-    languages: []
-    dataformats: []
-  camel-lucene:
-    groupId: org.apache.camel
-    artifactId: camel-lucene
-    version: 2.23.0
-    schemes:
-    - id: lucene
-    languages: []
-    dataformats: []
-  camel-lumberjack:
-    groupId: org.apache.camel
-    artifactId: camel-lumberjack
-    version: 2.23.0
-    schemes:
-    - id: lumberjack
-    languages: []
-    dataformats: []
-  camel-master:
-    groupId: org.apache.camel
-    artifactId: camel-master
-    version: 2.23.0
-    schemes:
-    - id: master
-    languages: []
-    dataformats: []
-  camel-metrics:
-    groupId: org.apache.camel
-    artifactId: camel-metrics
-    version: 2.23.0
-    schemes:
-    - id: metrics
-    languages: []
-    dataformats: []
-  camel-micrometer:
-    groupId: org.apache.camel
-    artifactId: camel-micrometer
-    version: 2.23.0
-    schemes:
-    - id: micrometer
-    languages: []
-    dataformats: []
-  camel-milo:
-    groupId: org.apache.camel
-    artifactId: camel-milo
-    version: 2.23.0
-    schemes:
-    - id: milo-client
-    - id: milo-server
-    languages: []
-    dataformats: []
-  camel-mina:
-    groupId: org.apache.camel
-    artifactId: camel-mina
-    version: 2.23.0
-    schemes:
-    - id: mina
-    languages: []
-    dataformats: []
-  camel-mina2:
-    groupId: org.apache.camel
-    artifactId: camel-mina2
-    version: 2.23.0
-    schemes:
-    - id: mina2
-    languages: []
-    dataformats: []
-  camel-mllp:
-    groupId: org.apache.camel
-    artifactId: camel-mllp
-    version: 2.23.0
-    schemes:
-    - id: mllp
-    languages: []
-    dataformats: []
-  camel-mongodb:
-    groupId: org.apache.camel
-    artifactId: camel-mongodb
-    version: 2.23.0
-    schemes:
-    - id: mongodb
-    languages: []
-    dataformats: []
-  camel-mongodb-gridfs:
-    groupId: org.apache.camel
-    artifactId: camel-mongodb-gridfs
-    version: 2.23.0
-    schemes:
-    - id: mongodb-gridfs
-    languages: []
-    dataformats: []
-  camel-mongodb3:
-    groupId: org.apache.camel
-    artifactId: camel-mongodb3
-    version: 2.23.0
-    schemes:
-    - id: mongodb3
-    languages: []
-    dataformats: []
-  camel-mqtt:
-    groupId: org.apache.camel
-    artifactId: camel-mqtt
-    version: 2.23.0
-    schemes:
-    - id: mqtt
-    languages: []
-    dataformats: []
-  camel-msv:
-    groupId: org.apache.camel
-    artifactId: camel-msv
-    version: 2.23.0
-    schemes:
-    - id: msv
-    languages: []
-    dataformats: []
-  camel-mustache:
-    groupId: org.apache.camel
-    artifactId: camel-mustache
-    version: 2.23.0
-    schemes:
-    - id: mustache
-    languages: []
-    dataformats: []
-  camel-mvel:
-    groupId: org.apache.camel
-    artifactId: camel-mvel
-    version: 2.23.0
-    schemes:
-    - id: mvel
-    languages:
-    - mvel
-    dataformats: []
-  camel-mybatis:
-    groupId: org.apache.camel
-    artifactId: camel-mybatis
-    version: 2.23.0
-    schemes:
-    - id: mybatis
-    - id: mybatis-bean
-    languages: []
-    dataformats: []
-  camel-nagios:
-    groupId: org.apache.camel
-    artifactId: camel-nagios
-    version: 2.23.0
-    schemes:
-    - id: nagios
-    languages: []
-    dataformats: []
-  camel-nats:
-    groupId: org.apache.camel
-    artifactId: camel-nats
-    version: 2.23.0
-    schemes:
-    - id: nats
-    languages: []
-    dataformats: []
-  camel-netty:
-    groupId: org.apache.camel
-    artifactId: camel-netty
-    version: 2.23.0
-    schemes:
-    - id: netty
-    languages: []
-    dataformats: []
-  camel-netty-http:
-    groupId: org.apache.camel
-    artifactId: camel-netty-http
-    version: 2.23.0
-    schemes:
-    - id: netty-http
-      http: true
-    languages: []
-    dataformats: []
-  camel-netty4:
-    groupId: org.apache.camel
-    artifactId: camel-netty4
-    version: 2.23.0
-    schemes:
-    - id: netty4
-    languages: []
-    dataformats: []
-  camel-netty4-http:
-    groupId: org.apache.camel
-    artifactId: camel-netty4-http
-    version: 2.23.0
-    schemes:
-    - id: netty4-http
-      http: true
-    languages: []
-    dataformats: []
-  camel-nsq:
-    groupId: org.apache.camel
-    artifactId: camel-nsq
-    version: 2.23.0
-    schemes:
-    - id: nsq
-    languages: []
-    dataformats: []
-  camel-olingo2:
-    groupId: org.apache.camel
-    artifactId: camel-olingo2
-    version: 2.23.0
-    schemes:
-    - id: olingo2
-    languages: []
-    dataformats: []
-  camel-olingo4:
-    groupId: org.apache.camel
-    artifactId: camel-olingo4
-    version: 2.23.0
-    schemes:
-    - id: olingo4
-    languages: []
-    dataformats: []
-  camel-openshift:
-    groupId: org.apache.camel
-    artifactId: camel-openshift
-    version: 2.23.0
-    schemes:
-    - id: openshift
-    languages: []
-    dataformats: []
-  camel-openstack:
-    groupId: org.apache.camel
-    artifactId: camel-openstack
-    version: 2.23.0
-    schemes:
-    - id: openstack-cinder
-    - id: openstack-glance
-    - id: openstack-keystone
-    - id: openstack-neutron
-    - id: openstack-nova
-    - id: openstack-swift
-    languages: []
-    dataformats: []
-  camel-optaplanner:
-    groupId: org.apache.camel
-    artifactId: camel-optaplanner
-    version: 2.23.0
-    schemes:
-    - id: optaplanner
-    languages: []
-    dataformats: []
-  camel-paho:
-    groupId: org.apache.camel
-    artifactId: camel-paho
-    version: 2.23.0
-    schemes:
-    - id: paho
-    languages: []
-    dataformats: []
-  camel-paxlogging:
-    groupId: org.apache.camel
-    artifactId: camel-paxlogging
-    version: 2.23.0
-    schemes:
-    - id: paxlogging
-    languages: []
-    dataformats: []
-  camel-pdf:
-    groupId: org.apache.camel
-    artifactId: camel-pdf
-    version: 2.23.0
-    schemes:
-    - id: pdf
-    languages: []
-    dataformats: []
-  camel-pgevent:
-    groupId: org.apache.camel
-    artifactId: camel-pgevent
-    version: 2.23.0
-    schemes:
-    - id: pgevent
-    languages: []
-    dataformats: []
-  camel-pubnub:
-    groupId: org.apache.camel
-    artifactId: camel-pubnub
-    version: 2.23.0
-    schemes:
-    - id: pubnub
-    languages: []
-    dataformats: []
-  camel-quartz:
-    groupId: org.apache.camel
-    artifactId: camel-quartz
-    version: 2.23.0
-    schemes:
-    - id: quartz
-    languages: []
-    dataformats: []
-  camel-quartz2:
-    groupId: org.apache.camel
-    artifactId: camel-quartz2
-    version: 2.23.0
-    schemes:
-    - id: quartz2
-    languages: []
-    dataformats: []
-  camel-quickfix:
-    groupId: org.apache.camel
-    artifactId: camel-quickfix
-    version: 2.23.0
-    schemes:
-    - id: quickfix
-    languages: []
-    dataformats: []
-  camel-rabbitmq:
-    groupId: org.apache.camel
-    artifactId: camel-rabbitmq
-    version: 2.23.0
-    schemes:
-    - id: rabbitmq
-    languages: []
-    dataformats: []
-  camel-reactive-streams:
-    groupId: org.apache.camel
-    artifactId: camel-reactive-streams
-    version: 2.23.0
-    schemes:
-    - id: reactive-streams
-    languages: []
-    dataformats: []
-  camel-rest-swagger:
-    groupId: org.apache.camel
-    artifactId: camel-rest-swagger
-    version: 2.23.0
-    schemes:
-    - id: rest-swagger
-    languages: []
-    dataformats: []
-  camel-restlet:
-    groupId: org.apache.camel
-    artifactId: camel-restlet
-    version: 2.23.0
-    schemes:
-    - id: restlet
-      http: true
-    languages: []
-    dataformats: []
-  camel-rmi:
-    groupId: org.apache.camel
-    artifactId: camel-rmi
-    version: 2.23.0
-    schemes:
-    - id: rmi
-    languages: []
-    dataformats: []
-  camel-routebox:
-    groupId: org.apache.camel
-    artifactId: camel-routebox
-    version: 2.23.0
-    schemes:
-    - id: routebox
-    languages: []
-    dataformats: []
-  camel-rss:
-    groupId: org.apache.camel
-    artifactId: camel-rss
-    version: 2.23.0
-    schemes:
-    - id: rss
-    languages: []
-    dataformats:
-    - rss
-  camel-salesforce:
-    groupId: org.apache.camel
-    artifactId: camel-salesforce
-    version: 2.23.0
-    schemes:
-    - id: salesforce
-    languages: []
-    dataformats: []
-  camel-sap-netweaver:
-    groupId: org.apache.camel
-    artifactId: camel-sap-netweaver
-    version: 2.23.0
-    schemes:
-    - id: sap-netweaver
-    languages: []
-    dataformats: []
-  camel-schematron:
-    groupId: org.apache.camel
-    artifactId: camel-schematron
-    version: 2.23.0
-    schemes:
-    - id: schematron
-    languages: []
-    dataformats: []
-  camel-jsch:
-    groupId: org.apache.camel
-    artifactId: camel-jsch
-    version: 2.23.0
-    schemes:
-    - id: scp
-    languages: []
-    dataformats: []
-  camel-service:
-    groupId: org.apache.camel
-    artifactId: camel-service
-    version: 2.23.0
-    schemes:
-    - id: service
-    languages: []
-    dataformats: []
-  camel-servicenow:
-    groupId: org.apache.camel
-    artifactId: camel-servicenow
-    version: 2.23.0
-    schemes:
-    - id: servicenow
-    languages: []
-    dataformats: []
-  camel-servlet:
-    groupId: org.apache.camel
-    artifactId: camel-servlet
-    version: 2.23.0
-    schemes:
-    - id: servlet
-      http: true
-    languages: []
-    dataformats: []
-  camel-sip:
-    groupId: org.apache.camel
-    artifactId: camel-sip
-    version: 2.23.0
-    schemes:
-    - id: sip
-    - id: sips
-    languages: []
-    dataformats: []
-  camel-sjms:
-    groupId: org.apache.camel
-    artifactId: camel-sjms
-    version: 2.23.0
-    schemes:
-    - id: sjms
-    - id: sjms-batch
-    languages: []
-    dataformats: []
-  camel-sjms2:
-    groupId: org.apache.camel
-    artifactId: camel-sjms2
-    version: 2.23.0
-    schemes:
-    - id: sjms2
-    languages: []
-    dataformats: []
-  camel-slack:
-    groupId: org.apache.camel
-    artifactId: camel-slack
-    version: 2.23.0
-    schemes:
-    - id: slack
-    languages: []
-    dataformats: []
-  camel-smpp:
-    groupId: org.apache.camel
-    artifactId: camel-smpp
-    version: 2.23.0
-    schemes:
-    - id: smpp
-    - id: smpps
-    languages: []
-    dataformats: []
-  camel-snmp:
-    groupId: org.apache.camel
-    artifactId: camel-snmp
-    version: 2.23.0
-    schemes:
-    - id: snmp
-    languages: []
-    dataformats: []
-  camel-solr:
-    groupId: org.apache.camel
-    artifactId: camel-solr
-    version: 2.23.0
-    schemes:
-    - id: solr
-    - id: solrCloud
-    - id: solrs
-    languages: []
-    dataformats: []
-  camel-spark:
-    groupId: org.apache.camel
-    artifactId: camel-spark
-    version: 2.23.0
-    schemes:
-    - id: spark
-    languages: []
-    dataformats: []
-  camel-spark-rest:
-    groupId: org.apache.camel
-    artifactId: camel-spark-rest
-    version: 2.23.0
-    schemes:
-    - id: spark-rest
-      http: true
-    languages: []
-    dataformats: []
-  camel-splunk:
-    groupId: org.apache.camel
-    artifactId: camel-splunk
-    version: 2.23.0
-    schemes:
-    - id: splunk
-    languages: []
-    dataformats: []
-  camel-spring-batch:
-    groupId: org.apache.camel
-    artifactId: camel-spring-batch
-    version: 2.23.0
-    schemes:
-    - id: spring-batch
-    languages: []
-    dataformats: []
-  camel-spring:
-    groupId: org.apache.camel
-    artifactId: camel-spring
-    version: 2.23.0
-    schemes:
-    - id: spring-event
-    languages:
-    - spel
-    dataformats: []
-  camel-spring-integration:
-    groupId: org.apache.camel
-    artifactId: camel-spring-integration
-    version: 2.23.0
-    schemes:
-    - id: spring-integration
-    languages: []
-    dataformats: []
-  camel-spring-ldap:
-    groupId: org.apache.camel
-    artifactId: camel-spring-ldap
-    version: 2.23.0
-    schemes:
-    - id: spring-ldap
-    languages: []
-    dataformats: []
-  camel-spring-redis:
-    groupId: org.apache.camel
-    artifactId: camel-spring-redis
-    version: 2.23.0
-    schemes:
-    - id: spring-redis
-    languages: []
-    dataformats: []
-  camel-spring-ws:
-    groupId: org.apache.camel
-    artifactId: camel-spring-ws
-    version: 2.23.0
-    schemes:
-    - id: spring-ws
-      http: true
-    languages: []
-    dataformats: []
-  camel-sql:
-    groupId: org.apache.camel
-    artifactId: camel-sql
-    version: 2.23.0
-    schemes:
-    - id: sql
-    - id: sql-stored
-    languages: []
-    dataformats: []
-  camel-ssh:
-    groupId: org.apache.camel
-    artifactId: camel-ssh
-    version: 2.23.0
-    schemes:
-    - id: ssh
-    languages: []
-    dataformats: []
-  camel-stax:
-    groupId: org.apache.camel
-    artifactId: camel-stax
-    version: 2.23.0
-    schemes:
-    - id: stax
-    languages: []
-    dataformats: []
-  camel-stomp:
-    groupId: org.apache.camel
-    artifactId: camel-stomp
-    version: 2.23.0
-    schemes:
-    - id: stomp
-    languages: []
-    dataformats: []
-  camel-stream:
-    groupId: org.apache.camel
-    artifactId: camel-stream
-    version: 2.23.0
-    schemes:
-    - id: stream
-    languages: []
-    dataformats: []
-  camel-stringtemplate:
-    groupId: org.apache.camel
-    artifactId: camel-stringtemplate
-    version: 2.23.0
-    schemes:
-    - id: string-template
-    languages: []
-    dataformats: []
-  camel-telegram:
-    groupId: org.apache.camel
-    artifactId: camel-telegram
-    version: 2.23.0
-    schemes:
-    - id: telegram
-    languages: []
-    dataformats: []
-  camel-thrift:
-    groupId: org.apache.camel
-    artifactId: camel-thrift
-    version: 2.23.0
-    schemes:
-    - id: thrift
-    languages: []
-    dataformats:
-    - thrift
-  camel-tika:
-    groupId: org.apache.camel
-    artifactId: camel-tika
-    version: 2.23.0
-    schemes:
-    - id: tika
-    languages: []
-    dataformats: []
-  camel-twilio:
-    groupId: org.apache.camel
-    artifactId: camel-twilio
-    version: 2.23.0
-    schemes:
-    - id: twilio
-    languages: []
-    dataformats: []
-  camel-twitter:
-    groupId: org.apache.camel
-    artifactId: camel-twitter
-    version: 2.23.0
-    schemes:
-    - id: twitter
-    - id: twitter-directmessage
-    - id: twitter-search
-    - id: twitter-streaming
-    - id: twitter-timeline
-    languages: []
-    dataformats: []
-  camel-undertow:
-    groupId: org.apache.camel
-    artifactId: camel-undertow
-    version: 2.23.0
-    schemes:
-    - id: undertow
-      http: true
-    languages: []
-    dataformats: []
-  camel-velocity:
-    groupId: org.apache.camel
-    artifactId: camel-velocity
-    version: 2.23.0
-    schemes:
-    - id: velocity
-    languages: []
-    dataformats: []
-  camel-vertx:
-    groupId: org.apache.camel
-    artifactId: camel-vertx
-    version: 2.23.0
-    schemes:
-    - id: vertx
-    languages: []
-    dataformats: []
-  camel-weather:
-    groupId: org.apache.camel
-    artifactId: camel-weather
-    version: 2.23.0
-    schemes:
-    - id: weather
-    languages: []
-    dataformats: []
-  camel-web3j:
-    groupId: org.apache.camel
-    artifactId: camel-web3j
-    version: 2.23.0
-    schemes:
-    - id: web3j
-    languages: []
-    dataformats: []
-  camel-websocket:
-    groupId: org.apache.camel
-    artifactId: camel-websocket
-    version: 2.23.0
-    schemes:
-    - id: websocket
-      http: true
-    languages: []
-    dataformats: []
-  camel-wordpress:
-    groupId: org.apache.camel
-    artifactId: camel-wordpress
-    version: 2.23.0
-    schemes:
-    - id: wordpress
-    languages: []
-    dataformats: []
-  camel-xchange:
-    groupId: org.apache.camel
-    artifactId: camel-xchange
-    version: 2.23.0
-    schemes:
-    - id: xchange
-    languages: []
-    dataformats: []
-  camel-xmlrpc:
-    groupId: org.apache.camel
-    artifactId: camel-xmlrpc
-    version: 2.23.0
-    schemes:
-    - id: xmlrpc
-    languages: []
-    dataformats:
-    - xmlrpc
-  camel-xmlsecurity:
-    groupId: org.apache.camel
-    artifactId: camel-xmlsecurity
-    version: 2.23.0
-    schemes:
-    - id: xmlsecurity
-    languages: []
-    dataformats:
-    - secureXML
-  camel-xmpp:
-    groupId: org.apache.camel
-    artifactId: camel-xmpp
-    version: 2.23.0
-    schemes:
-    - id: xmpp
-    languages: []
-    dataformats: []
-  camel-saxon:
-    groupId: org.apache.camel
-    artifactId: camel-saxon
-    version: 2.23.0
-    schemes:
-    - id: xquery
-    languages:
-    - xquery
-    dataformats: []
-  camel-yammer:
-    groupId: org.apache.camel
-    artifactId: camel-yammer
-    version: 2.23.0
-    schemes:
-    - id: yammer
-    languages: []
-    dataformats: []
-  camel-yql:
-    groupId: org.apache.camel
-    artifactId: camel-yql
-    version: 2.23.0
-    schemes:
-    - id: yql
-    languages: []
     dataformats: []
-  camel-zendesk:
     groupId: org.apache.camel
-    artifactId: camel-zendesk
-    version: 2.23.0
-    schemes:
-    - id: zendesk
-    languages: []
-    dataformats: []
-  camel-zookeeper:
-    groupId: org.apache.camel
-    artifactId: camel-zookeeper
-    version: 2.23.0
-    schemes:
-    - id: zookeeper
-    languages: []
-    dataformats: []
-  camel-zookeeper-master:
-    groupId: org.apache.camel
-    artifactId: camel-zookeeper-master
-    version: 2.23.0
-    schemes:
-    - id: zookeeper-master
     languages: []
-    dataformats: []
-  camel-knative:
-    groupId: org.apache.camel.k
-    artifactId: camel-knative
-    version: 0.1.1-SNAPSHOT
     schemes:
-    - id: knative
-      http: true
-    languages: []
-    dataformats: []
-  camel-juel:
-    groupId: org.apache.camel
-    artifactId: camel-juel
+    - http: false
+      id: grape
+      passive: false
     version: 2.23.0
-    components: []
-    languages:
-    - el
-    dataformats: []
   camel-groovy:
-    groupId: org.apache.camel
     artifactId: camel-groovy
-    version: 2.23.0
-    components: []
+    dataformats: []
+    groupId: org.apache.camel
     languages:
     - groovy
-    dataformats: []
-  camel-script:
-    groupId: org.apache.camel
-    artifactId: camel-script
+    schemes: []
     version: 2.23.0
-    components: []
+  camel-grpc:
+    artifactId: camel-grpc
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: grpc
+      passive: false
+    version: 2.23.0
+  camel-gson:
+    artifactId: camel-gson
+    dataformats:
+    - json-gson
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-guava-eventbus:
+    artifactId: camel-guava-eventbus
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: guava-eventbus
+      passive: false
+    version: 2.23.0
+  camel-hazelcast:
+    artifactId: camel-hazelcast
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: hazelcast-atomicvalue
+      passive: false
+    - http: false
+      id: hazelcast-instance
+      passive: false
+    - http: false
+      id: hazelcast-list
+      passive: false
+    - http: false
+      id: hazelcast-map
+      passive: false
+    - http: false
+      id: hazelcast-multimap
+      passive: false
+    - http: false
+      id: hazelcast-queue
+      passive: false
+    - http: false
+      id: hazelcast-replicatedmap
+      passive: false
+    - http: false
+      id: hazelcast-ringbuffer
+      passive: false
+    - http: false
+      id: hazelcast-seda
+      passive: false
+    - http: false
+      id: hazelcast-set
+      passive: false
+    - http: false
+      id: hazelcast-topic
+      passive: false
+    version: 2.23.0
+  camel-hbase:
+    artifactId: camel-hbase
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: hbase
+      passive: false
+    version: 2.23.0
+  camel-hdfs:
+    artifactId: camel-hdfs
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: hdfs
+      passive: false
+    version: 2.23.0
+  camel-hdfs2:
+    artifactId: camel-hdfs2
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: hdfs2
+      passive: false
+    version: 2.23.0
+  camel-hessian:
+    artifactId: camel-hessian
+    dataformats:
+    - hessian
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-hipchat:
+    artifactId: camel-hipchat
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: hipchat
+      passive: false
+    version: 2.23.0
+  camel-hl7:
+    artifactId: camel-hl7
+    dataformats:
+    - hl7
+    groupId: org.apache.camel
+    languages:
+    - terser
+    schemes: []
+    version: 2.23.0
+  camel-http:
+    artifactId: camel-http
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: http
+      passive: false
+    - http: false
+      id: https
+      passive: false
+    version: 2.23.0
+  camel-http4:
+    artifactId: camel-http4
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: http4
+      passive: false
+    - http: false
+      id: https4
+      passive: false
+    version: 2.23.0
+  camel-ibatis:
+    artifactId: camel-ibatis
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ibatis
+      passive: false
+    version: 2.23.0
+  camel-ical:
+    artifactId: camel-ical
+    dataformats:
+    - ical
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-iec60870:
+    artifactId: camel-iec60870
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: iec60870-client
+      passive: false
+    - http: false
+      id: iec60870-server
+      passive: false
+    version: 2.23.0
+  camel-ignite:
+    artifactId: camel-ignite
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ignite-cache
+      passive: false
+    - http: false
+      id: ignite-compute
+      passive: false
+    - http: false
+      id: ignite-events
+      passive: false
+    - http: false
+      id: ignite-idgen
+      passive: false
+    - http: false
+      id: ignite-messaging
+      passive: false
+    - http: false
+      id: ignite-queue
+      passive: false
+    - http: false
+      id: ignite-set
+      passive: false
+    version: 2.23.0
+  camel-infinispan:
+    artifactId: camel-infinispan
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: infinispan
+      passive: false
+    version: 2.23.0
+  camel-influxdb:
+    artifactId: camel-influxdb
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: influxdb
+      passive: false
+    version: 2.23.0
+  camel-ipfs:
+    artifactId: camel-ipfs
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ipfs
+      passive: false
+    version: 2.23.0
+  camel-irc:
+    artifactId: camel-irc
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: irc
+      passive: false
+    version: 2.23.0
+  camel-ironmq:
+    artifactId: camel-ironmq
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ironmq
+      passive: false
+    version: 2.23.0
+  camel-jackson:
+    artifactId: camel-jackson
+    dataformats:
+    - json-jackson
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-jacksonxml:
+    artifactId: camel-jacksonxml
+    dataformats:
+    - jacksonxml
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-javaspace:
+    artifactId: camel-javaspace
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: javaspace
+      passive: false
+    version: 2.23.0
+  camel-jaxb:
+    artifactId: camel-jaxb
+    dataformats:
+    - jaxb
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-jbpm:
+    artifactId: camel-jbpm
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jbpm
+      passive: false
+    version: 2.23.0
+  camel-jcache:
+    artifactId: camel-jcache
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jcache
+      passive: false
+    version: 2.23.0
+  camel-jclouds:
+    artifactId: camel-jclouds
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jclouds
+      passive: false
+    version: 2.23.0
+  camel-jcr:
+    artifactId: camel-jcr
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jcr
+      passive: false
+    version: 2.23.0
+  camel-jdbc:
+    artifactId: camel-jdbc
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jdbc
+      passive: false
+    version: 2.23.0
+  camel-jetty9:
+    artifactId: camel-jetty9
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: jetty
+      passive: false
+    version: 2.23.0
+  camel-jgroups:
+    artifactId: camel-jgroups
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jgroups
+      passive: false
+    version: 2.23.0
+  camel-jibx:
+    artifactId: camel-jibx
+    dataformats:
+    - jibx
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-jing:
+    artifactId: camel-jing
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jing
+      passive: false
+    version: 2.23.0
+  camel-jira:
+    artifactId: camel-jira
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jira
+      passive: false
+    version: 2.23.0
+  camel-jms:
+    artifactId: camel-jms
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jms
+      passive: false
+    version: 2.23.0
+  camel-jmx:
+    artifactId: camel-jmx
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jmx
+      passive: false
+    version: 2.23.0
+  camel-johnzon:
+    artifactId: camel-johnzon
+    dataformats:
+    - json-johnzon
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-jolt:
+    artifactId: camel-jolt
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jolt
+      passive: false
+    version: 2.23.0
+  camel-josql:
+    artifactId: camel-josql
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - sql
+    schemes: []
+    version: 2.23.0
+  camel-jpa:
+    artifactId: camel-jpa
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jpa
+      passive: false
+    version: 2.23.0
+  camel-jsch:
+    artifactId: camel-jsch
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: scp
+      passive: false
+    version: 2.23.0
+  camel-json-validator:
+    artifactId: camel-json-validator
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: json-validator
+      passive: false
+    version: 2.23.0
+  camel-jsonpath:
+    artifactId: camel-jsonpath
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - jsonpath
+    schemes: []
+    version: 2.23.0
+  camel-jt400:
+    artifactId: camel-jt400
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: jt400
+      passive: false
+    version: 2.23.0
+  camel-juel:
+    artifactId: camel-juel
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - el
+    schemes: []
+    version: 2.23.0
+  camel-jxpath:
+    artifactId: camel-jxpath
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - jxpath
+    schemes: []
+    version: 2.23.0
+  camel-kafka:
+    artifactId: camel-kafka
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: kafka
+      passive: false
+    version: 2.23.0
+  camel-kestrel:
+    artifactId: camel-kestrel
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: kestrel
+      passive: false
+    version: 2.23.0
+  camel-knative:
+    artifactId: camel-knative
+    dataformats: []
+    groupId: org.apache.camel.k
+    languages: []
+    schemes:
+    - http: true
+      id: knative
+      passive: false
+    version: 0.1.1-SNAPSHOT
+  camel-krati:
+    artifactId: camel-krati
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: krati
+      passive: false
+    version: 2.23.0
+  camel-kubernetes:
+    artifactId: camel-kubernetes
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: kubernetes
+      passive: false
+    - http: false
+      id: kubernetes-config-maps
+      passive: false
+    - http: false
+      id: kubernetes-deployments
+      passive: false
+    - http: false
+      id: kubernetes-hpa
+      passive: false
+    - http: false
+      id: kubernetes-job
+      passive: false
+    - http: false
+      id: kubernetes-namespaces
+      passive: false
+    - http: false
+      id: kubernetes-nodes
+      passive: false
+    - http: false
+      id: kubernetes-persistent-volumes
+      passive: false
+    - http: false
+      id: kubernetes-persistent-volumes-claims
+      passive: false
+    - http: false
+      id: kubernetes-pods
+      passive: false
+    - http: false
+      id: kubernetes-replication-controllers
+      passive: false
+    - http: false
+      id: kubernetes-resources-quota
+      passive: false
+    - http: false
+      id: kubernetes-secrets
+      passive: false
+    - http: false
+      id: kubernetes-service-accounts
+      passive: false
+    - http: false
+      id: kubernetes-services
+      passive: false
+    - http: false
+      id: openshift-build-configs
+      passive: false
+    - http: false
+      id: openshift-builds
+      passive: false
+    version: 2.23.0
+  camel-ldap:
+    artifactId: camel-ldap
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ldap
+      passive: false
+    version: 2.23.0
+  camel-ldif:
+    artifactId: camel-ldif
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ldif
+      passive: false
+    version: 2.23.0
+  camel-linkedin:
+    artifactId: camel-linkedin
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: linkedin
+      passive: false
+    version: 2.23.0
+  camel-lucene:
+    artifactId: camel-lucene
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: lucene
+      passive: false
+    version: 2.23.0
+  camel-lumberjack:
+    artifactId: camel-lumberjack
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: lumberjack
+      passive: false
+    version: 2.23.0
+  camel-lzf:
+    artifactId: camel-lzf
+    dataformats:
+    - lzf
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-mail:
+    artifactId: camel-mail
+    dataformats:
+    - mime-multipart
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: imap
+      passive: false
+    - http: false
+      id: imaps
+      passive: false
+    - http: false
+      id: pop3
+      passive: false
+    - http: false
+      id: pop3s
+      passive: false
+    - http: false
+      id: smtp
+      passive: false
+    - http: false
+      id: smtps
+      passive: false
+    version: 2.23.0
+  camel-master:
+    artifactId: camel-master
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: master
+      passive: false
+    version: 2.23.0
+  camel-metrics:
+    artifactId: camel-metrics
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: metrics
+      passive: false
+    version: 2.23.0
+  camel-micrometer:
+    artifactId: camel-micrometer
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: micrometer
+      passive: false
+    version: 2.23.0
+  camel-milo:
+    artifactId: camel-milo
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: milo-client
+      passive: false
+    - http: false
+      id: milo-server
+      passive: false
+    version: 2.23.0
+  camel-mina:
+    artifactId: camel-mina
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mina
+      passive: false
+    version: 2.23.0
+  camel-mina2:
+    artifactId: camel-mina2
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mina2
+      passive: false
+    version: 2.23.0
+  camel-mllp:
+    artifactId: camel-mllp
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mllp
+      passive: false
+    version: 2.23.0
+  camel-mongodb:
+    artifactId: camel-mongodb
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mongodb
+      passive: false
+    version: 2.23.0
+  camel-mongodb-gridfs:
+    artifactId: camel-mongodb-gridfs
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mongodb-gridfs
+      passive: false
+    version: 2.23.0
+  camel-mongodb3:
+    artifactId: camel-mongodb3
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mongodb3
+      passive: false
+    version: 2.23.0
+  camel-mqtt:
+    artifactId: camel-mqtt
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mqtt
+      passive: false
+    version: 2.23.0
+  camel-msv:
+    artifactId: camel-msv
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: msv
+      passive: false
+    version: 2.23.0
+  camel-mustache:
+    artifactId: camel-mustache
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mustache
+      passive: false
+    version: 2.23.0
+  camel-mvel:
+    artifactId: camel-mvel
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - mvel
+    schemes:
+    - http: false
+      id: mvel
+      passive: false
+    version: 2.23.0
+  camel-mybatis:
+    artifactId: camel-mybatis
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: mybatis
+      passive: false
+    - http: false
+      id: mybatis-bean
+      passive: false
+    version: 2.23.0
+  camel-nagios:
+    artifactId: camel-nagios
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: nagios
+      passive: false
+    version: 2.23.0
+  camel-nats:
+    artifactId: camel-nats
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: nats
+      passive: false
+    version: 2.23.0
+  camel-netty:
+    artifactId: camel-netty
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: netty
+      passive: false
+    version: 2.23.0
+  camel-netty-http:
+    artifactId: camel-netty-http
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: netty-http
+      passive: false
+    version: 2.23.0
+  camel-netty4:
+    artifactId: camel-netty4
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: netty4
+      passive: false
+    version: 2.23.0
+  camel-netty4-http:
+    artifactId: camel-netty4-http
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: netty4-http
+      passive: false
+    version: 2.23.0
+  camel-nsq:
+    artifactId: camel-nsq
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: nsq
+      passive: false
+    version: 2.23.0
+  camel-ognl:
+    artifactId: camel-ognl
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - ognl
+    schemes: []
+    version: 2.23.0
+  camel-olingo2:
+    artifactId: camel-olingo2
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: olingo2
+      passive: false
+    version: 2.23.0
+  camel-olingo4:
+    artifactId: camel-olingo4
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: olingo4
+      passive: false
+    version: 2.23.0
+  camel-openshift:
+    artifactId: camel-openshift
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: openshift
+      passive: false
+    version: 2.23.0
+  camel-openstack:
+    artifactId: camel-openstack
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: openstack-cinder
+      passive: false
+    - http: false
+      id: openstack-glance
+      passive: false
+    - http: false
+      id: openstack-keystone
+      passive: false
+    - http: false
+      id: openstack-neutron
+      passive: false
+    - http: false
+      id: openstack-nova
+      passive: false
+    - http: false
+      id: openstack-swift
+      passive: false
+    version: 2.23.0
+  camel-optaplanner:
+    artifactId: camel-optaplanner
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: optaplanner
+      passive: false
+    version: 2.23.0
+  camel-paho:
+    artifactId: camel-paho
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: paho
+      passive: false
+    version: 2.23.0
+  camel-paxlogging:
+    artifactId: camel-paxlogging
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: paxlogging
+      passive: false
+    version: 2.23.0
+  camel-pdf:
+    artifactId: camel-pdf
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: pdf
+      passive: false
+    version: 2.23.0
+  camel-pgevent:
+    artifactId: camel-pgevent
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: pgevent
+      passive: false
+    version: 2.23.0
+  camel-printer:
+    artifactId: camel-printer
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: lpr
+      passive: false
+    version: 2.23.0
+  camel-protobuf:
+    artifactId: camel-protobuf
+    dataformats:
+    - protobuf
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-pubnub:
+    artifactId: camel-pubnub
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: pubnub
+      passive: false
+    version: 2.23.0
+  camel-quartz:
+    artifactId: camel-quartz
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: quartz
+      passive: false
+    version: 2.23.0
+  camel-quartz2:
+    artifactId: camel-quartz2
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: quartz2
+      passive: false
+    version: 2.23.0
+  camel-quickfix:
+    artifactId: camel-quickfix
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: quickfix
+      passive: false
+    version: 2.23.0
+  camel-rabbitmq:
+    artifactId: camel-rabbitmq
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: rabbitmq
+      passive: false
+    version: 2.23.0
+  camel-reactive-streams:
+    artifactId: camel-reactive-streams
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: reactive-streams
+      passive: false
+    version: 2.23.0
+  camel-rest-swagger:
+    artifactId: camel-rest-swagger
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: rest-swagger
+      passive: false
+    version: 2.23.0
+  camel-restlet:
+    artifactId: camel-restlet
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: restlet
+      passive: false
+    version: 2.23.0
+  camel-rmi:
+    artifactId: camel-rmi
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: rmi
+      passive: false
+    version: 2.23.0
+  camel-routebox:
+    artifactId: camel-routebox
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: routebox
+      passive: false
+    version: 2.23.0
+  camel-rss:
+    artifactId: camel-rss
+    dataformats:
+    - rss
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: rss
+      passive: false
+    version: 2.23.0
+  camel-salesforce:
+    artifactId: camel-salesforce
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: salesforce
+      passive: false
+    version: 2.23.0
+  camel-sap-netweaver:
+    artifactId: camel-sap-netweaver
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: sap-netweaver
+      passive: false
+    version: 2.23.0
+  camel-saxon:
+    artifactId: camel-saxon
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - xquery
+    schemes:
+    - http: false
+      id: xquery
+      passive: false
+    version: 2.23.0
+  camel-schematron:
+    artifactId: camel-schematron
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: schematron
+      passive: false
+    version: 2.23.0
+  camel-script:
+    artifactId: camel-script
+    dataformats: []
+    groupId: org.apache.camel
     languages:
     - javaScript
     - php
     - python
     - ruby
+    schemes: []
+    version: 2.23.0
+  camel-service:
+    artifactId: camel-service
     dataformats: []
-  camel-jsonpath:
     groupId: org.apache.camel
-    artifactId: camel-jsonpath
+    languages: []
+    schemes:
+    - http: false
+      id: service
+      passive: false
     version: 2.23.0
-    components: []
-    languages:
-    - jsonpath
+  camel-servicenow:
+    artifactId: camel-servicenow
     dataformats: []
-  camel-jxpath:
     groupId: org.apache.camel
-    artifactId: camel-jxpath
+    languages: []
+    schemes:
+    - http: false
+      id: servicenow
+      passive: false
     version: 2.23.0
-    components: []
-    languages:
-    - jxpath
+  camel-servlet:
+    artifactId: camel-servlet
     dataformats: []
-  camel-ognl:
     groupId: org.apache.camel
-    artifactId: camel-ognl
+    languages: []
+    schemes:
+    - http: true
+      id: servlet
+      passive: false
     version: 2.23.0
-    components: []
-    languages:
-    - ognl
+  camel-sip:
+    artifactId: camel-sip
     dataformats: []
-  camel-josql:
     groupId: org.apache.camel
-    artifactId: camel-josql
+    languages: []
+    schemes:
+    - http: false
+      id: sip
+      passive: false
+    - http: false
+      id: sips
+      passive: false
     version: 2.23.0
-    components: []
-    languages:
-    - sql
+  camel-sjms:
+    artifactId: camel-sjms
     dataformats: []
-  camel-hl7:
     groupId: org.apache.camel
-    artifactId: camel-hl7
-    version: 2.23.0
-    components: []
-    languages:
-    - terser
-    dataformats:
-    - hl7
-  camel-asn1:
-    groupId: org.apache.camel
-    artifactId: camel-asn1
-    version: 2.23.0
-    components: []
     languages: []
-    dataformats:
-    - asn1
-  camel-barcode:
-    groupId: org.apache.camel
-    artifactId: camel-barcode
+    schemes:
+    - http: false
+      id: sjms
+      passive: false
+    - http: false
+      id: sjms-batch
+      passive: false
     version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - barcode
-  camel-base64:
+  camel-sjms2:
+    artifactId: camel-sjms2
+    dataformats: []
     groupId: org.apache.camel
-    artifactId: camel-base64
-    version: 2.23.0
-    components: []
     languages: []
-    dataformats:
-    - base64
-  camel-beanio:
+    schemes:
+    - http: false
+      id: sjms2
+      passive: false
+    version: 2.23.0
+  camel-slack:
+    artifactId: camel-slack
+    dataformats: []
     groupId: org.apache.camel
-    artifactId: camel-beanio
-    version: 2.23.0
-    components: []
     languages: []
-    dataformats:
-    - beanio
-  camel-bindy:
+    schemes:
+    - http: false
+      id: slack
+      passive: false
+    version: 2.23.0
+  camel-smpp:
+    artifactId: camel-smpp
+    dataformats: []
     groupId: org.apache.camel
-    artifactId: camel-bindy
-    version: 2.23.0
-    components: []
     languages: []
+    schemes:
+    - http: false
+      id: smpp
+      passive: false
+    - http: false
+      id: smpps
+      passive: false
+    version: 2.23.0
+  camel-snakeyaml:
+    artifactId: camel-snakeyaml
     dataformats:
-    - bindy-csv
-    - bindy-fixed
-    - bindy-kvp
-  camel-boon:
+    - yaml-snakeyaml
     groupId: org.apache.camel
-    artifactId: camel-boon
-    version: 2.23.0
-    components: []
     languages: []
-    dataformats:
-    - boon
-  camel-castor:
+    schemes: []
+    version: 2.23.0
+  camel-snmp:
+    artifactId: camel-snmp
+    dataformats: []
     groupId: org.apache.camel
-    artifactId: camel-castor
-    version: 2.23.0
-    components: []
     languages: []
-    dataformats:
-    - castor
-  camel-csv:
-    groupId: org.apache.camel
-    artifactId: camel-csv
+    schemes:
+    - http: false
+      id: snmp
+      passive: false
     version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - csv
-  camel-hessian:
-    groupId: org.apache.camel
-    artifactId: camel-hessian
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - hessian
-  camel-ical:
-    groupId: org.apache.camel
-    artifactId: camel-ical
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - ical
-  camel-jacksonxml:
-    groupId: org.apache.camel
-    artifactId: camel-jacksonxml
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - jacksonxml
-  camel-jaxb:
-    groupId: org.apache.camel
-    artifactId: camel-jaxb
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - jaxb
-  camel-jibx:
-    groupId: org.apache.camel
-    artifactId: camel-jibx
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - jibx
-  camel-fastjson:
-    groupId: org.apache.camel
-    artifactId: camel-fastjson
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - json-fastjson
-  camel-gson:
-    groupId: org.apache.camel
-    artifactId: camel-gson
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - json-gson
-  camel-jackson:
-    groupId: org.apache.camel
-    artifactId: camel-jackson
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - json-jackson
-  camel-johnzon:
-    groupId: org.apache.camel
-    artifactId: camel-johnzon
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - json-johnzon
-  camel-xstream:
-    groupId: org.apache.camel
-    artifactId: camel-xstream
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - json-xstream
-    - xstream
-  camel-lzf:
-    groupId: org.apache.camel
-    artifactId: camel-lzf
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - lzf
-  camel-protobuf:
-    groupId: org.apache.camel
-    artifactId: camel-protobuf
-    version: 2.23.0
-    components: []
-    languages: []
-    dataformats:
-    - protobuf
   camel-soap:
-    groupId: org.apache.camel
     artifactId: camel-soap
-    version: 2.23.0
-    components: []
-    languages: []
     dataformats:
     - soapjaxb
-  camel-syslog:
     groupId: org.apache.camel
-    artifactId: camel-syslog
-    version: 2.23.0
-    components: []
     languages: []
+    schemes: []
+    version: 2.23.0
+  camel-solr:
+    artifactId: camel-solr
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: solr
+      passive: false
+    - http: false
+      id: solrs
+      passive: false
+    - http: false
+      id: solrCloud
+      passive: false
+    version: 2.23.0
+  camel-spark:
+    artifactId: camel-spark
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: spark
+      passive: false
+    version: 2.23.0
+  camel-spark-rest:
+    artifactId: camel-spark-rest
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: spark-rest
+      passive: false
+    version: 2.23.0
+  camel-splunk:
+    artifactId: camel-splunk
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: splunk
+      passive: false
+    version: 2.23.0
+  camel-spring:
+    artifactId: camel-spring
+    dataformats: []
+    groupId: org.apache.camel
+    languages:
+    - spel
+    schemes:
+    - http: false
+      id: spring-event
+      passive: false
+    version: 2.23.0
+  camel-spring-batch:
+    artifactId: camel-spring-batch
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: spring-batch
+      passive: false
+    version: 2.23.0
+  camel-spring-integration:
+    artifactId: camel-spring-integration
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: spring-integration
+      passive: false
+    version: 2.23.0
+  camel-spring-ldap:
+    artifactId: camel-spring-ldap
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: spring-ldap
+      passive: false
+    version: 2.23.0
+  camel-spring-redis:
+    artifactId: camel-spring-redis
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: spring-redis
+      passive: false
+    version: 2.23.0
+  camel-spring-ws:
+    artifactId: camel-spring-ws
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: spring-ws
+      passive: false
+    version: 2.23.0
+  camel-sql:
+    artifactId: camel-sql
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: sql
+      passive: false
+    - http: false
+      id: sql-stored
+      passive: false
+    version: 2.23.0
+  camel-ssh:
+    artifactId: camel-ssh
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: ssh
+      passive: false
+    version: 2.23.0
+  camel-stax:
+    artifactId: camel-stax
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: stax
+      passive: false
+    version: 2.23.0
+  camel-stomp:
+    artifactId: camel-stomp
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: stomp
+      passive: false
+    version: 2.23.0
+  camel-stream:
+    artifactId: camel-stream
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: stream
+      passive: false
+    version: 2.23.0
+  camel-stringtemplate:
+    artifactId: camel-stringtemplate
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: string-template
+      passive: false
+    version: 2.23.0
+  camel-syslog:
+    artifactId: camel-syslog
     dataformats:
     - syslog
-  camel-tarfile:
     groupId: org.apache.camel
-    artifactId: camel-tarfile
-    version: 2.23.0
-    components: []
     languages: []
-    dataformats:
-    - tarfile
+    schemes: []
+    version: 2.23.0
   camel-tagsoup:
-    groupId: org.apache.camel
     artifactId: camel-tagsoup
-    version: 2.23.0
-    components: []
-    languages: []
     dataformats:
     - tidyMarkup
-  camel-univocity-parsers:
     groupId: org.apache.camel
-    artifactId: camel-univocity-parsers
-    version: 2.23.0
-    components: []
     languages: []
+    schemes: []
+    version: 2.23.0
+  camel-tarfile:
+    artifactId: camel-tarfile
+    dataformats:
+    - tarfile
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-telegram:
+    artifactId: camel-telegram
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: telegram
+      passive: false
+    version: 2.23.0
+  camel-thrift:
+    artifactId: camel-thrift
+    dataformats:
+    - thrift
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: thrift
+      passive: false
+    version: 2.23.0
+  camel-tika:
+    artifactId: camel-tika
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: tika
+      passive: false
+    version: 2.23.0
+  camel-twilio:
+    artifactId: camel-twilio
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: twilio
+      passive: false
+    version: 2.23.0
+  camel-twitter:
+    artifactId: camel-twitter
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: twitter
+      passive: false
+    - http: false
+      id: twitter-directmessage
+      passive: false
+    - http: false
+      id: twitter-search
+      passive: false
+    - http: false
+      id: twitter-streaming
+      passive: false
+    - http: false
+      id: twitter-timeline
+      passive: false
+    version: 2.23.0
+  camel-undertow:
+    artifactId: camel-undertow
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: undertow
+      passive: false
+    version: 2.23.0
+  camel-univocity-parsers:
+    artifactId: camel-univocity-parsers
     dataformats:
     - univocity-csv
     - univocity-fixed
     - univocity-tsv
-  camel-xmlbeans:
     groupId: org.apache.camel
-    artifactId: camel-xmlbeans
-    version: 2.23.0
-    components: []
     languages: []
+    schemes: []
+    version: 2.23.0
+  camel-velocity:
+    artifactId: camel-velocity
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: velocity
+      passive: false
+    version: 2.23.0
+  camel-vertx:
+    artifactId: camel-vertx
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: vertx
+      passive: false
+    version: 2.23.0
+  camel-weather:
+    artifactId: camel-weather
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: weather
+      passive: false
+    version: 2.23.0
+  camel-web3j:
+    artifactId: camel-web3j
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: web3j
+      passive: false
+    version: 2.23.0
+  camel-websocket:
+    artifactId: camel-websocket
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: true
+      id: websocket
+      passive: false
+    version: 2.23.0
+  camel-wordpress:
+    artifactId: camel-wordpress
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: wordpress
+      passive: false
+    version: 2.23.0
+  camel-xchange:
+    artifactId: camel-xchange
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: xchange
+      passive: false
+    version: 2.23.0
+  camel-xmlbeans:
+    artifactId: camel-xmlbeans
     dataformats:
     - xmlBeans
-  camel-xmljson:
     groupId: org.apache.camel
-    artifactId: camel-xmljson
-    version: 2.23.0
-    components: []
     languages: []
+    schemes: []
+    version: 2.23.0
+  camel-xmljson:
+    artifactId: camel-xmljson
     dataformats:
     - xmljson
-  camel-snakeyaml:
     groupId: org.apache.camel
-    artifactId: camel-snakeyaml
-    version: 2.23.0
-    components: []
     languages: []
+    schemes: []
+    version: 2.23.0
+  camel-xmlrpc:
+    artifactId: camel-xmlrpc
     dataformats:
-    - yaml-snakeyaml
-  camel-zipfile:
+    - xmlrpc
     groupId: org.apache.camel
-    artifactId: camel-zipfile
-    version: 2.23.0
-    components: []
     languages: []
+    schemes:
+    - http: false
+      id: xmlrpc
+      passive: false
+    version: 2.23.0
+  camel-xmlsecurity:
+    artifactId: camel-xmlsecurity
+    dataformats:
+    - secureXML
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: xmlsecurity
+      passive: false
+    version: 2.23.0
+  camel-xmpp:
+    artifactId: camel-xmpp
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: xmpp
+      passive: false
+    version: 2.23.0
+  camel-xstream:
+    artifactId: camel-xstream
+    dataformats:
+    - json-xstream
+    - xstream
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-yammer:
+    artifactId: camel-yammer
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: yammer
+      passive: false
+    version: 2.23.0
+  camel-yql:
+    artifactId: camel-yql
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: yql
+      passive: false
+    version: 2.23.0
+  camel-zendesk:
+    artifactId: camel-zendesk
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: zendesk
+      passive: false
+    version: 2.23.0
+  camel-zipfile:
+    artifactId: camel-zipfile
     dataformats:
     - zipfile
-version: 2.23.0
+    groupId: org.apache.camel
+    languages: []
+    schemes: []
+    version: 2.23.0
+  camel-zookeeper:
+    artifactId: camel-zookeeper
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: zookeeper
+      passive: false
+    version: 2.23.0
+  camel-zookeeper-master:
+    artifactId: camel-zookeeper-master
+    dataformats: []
+    groupId: org.apache.camel
+    languages: []
+    schemes:
+    - http: false
+      id: zookeeper-master
+      passive: false
+    version: 2.23.0
 
 `
 	Resources["crd-integration-context.yaml"] =
