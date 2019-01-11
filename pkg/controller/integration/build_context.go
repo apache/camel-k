@@ -21,16 +21,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
-
-	"github.com/sirupsen/logrus"
-
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
-
 	"github.com/rs/xid"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/sirupsen/logrus"
 )
 
 // NewBuildContextAction create an action that handles integration context build
@@ -58,6 +55,17 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 	if err != nil {
 		//TODO: we may need to add a wait strategy, i.e give up after some time
 		return err
+	}
+
+	if ictx == nil {
+		// Try to create an external context if possible
+		pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace)
+		if err != nil {
+			return nil
+		}
+		if pl.Spec.Build.PredefinedImages {
+			ictx, err = ImportPredefinedContextIfPresent(ctx, action.client, integration)
+		}
 	}
 
 	if ictx != nil {

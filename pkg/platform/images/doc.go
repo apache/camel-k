@@ -15,20 +15,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kaniko
-
-import (
-	"github.com/apache/camel-k/pkg/builder"
-)
-
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.NewStep("generate", builder.ProjectGenerationPhase, builder.GenerateProject),
-	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
-	builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
-	builder.NewStep("publisher/kaniko", builder.ApplicationPublishPhase, Publisher),
-	builder.NewStep("notify/context", builder.NotifyPhase, builder.NotifyIntegrationContext),
-}
-
-// BuildDir is the directory where to build artifacts (shared with the Kaniko pod)
-var BuildDir = "/workspace"
+// Package images contains information for retrieval of platform predefined images
+package images
