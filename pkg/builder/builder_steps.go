@@ -152,55 +152,6 @@ func ComputeDependencies(ctx *Context) error {
 	return nil
 }
 
-// LookupPredefinedImage is used to find a suitable predefined image if available
-func LookupPredefinedImage(ctx *Context) error {
-	if !ctx.Request.Platform.Build.PredefinedImages {
-		// Usage of predefined images not enabled
-		return nil
-	}
-
-	standardDependencies := map[string]bool{
-		"camel:core":   true,
-		"runtime:jvm":  true,
-		"runtime:yaml": true,
-	}
-
-	realDependencies := make(map[string]bool)
-	for _, d := range ctx.Request.Dependencies {
-		if _, std := standardDependencies[d]; !std {
-			realDependencies[d] = true
-		}
-	}
-
-	knativeDep := "camel-k:knative"
-	if len(realDependencies) != 2 || !realDependencies[knativeDep] {
-		return nil
-	}
-
-	var otherDep string
-	for d := range realDependencies {
-		if d != knativeDep {
-			otherDep = d
-			break
-		}
-	}
-
-	camelPrefix := "camel:"
-	if !strings.HasPrefix(otherDep, camelPrefix) {
-		return nil
-	}
-
-	comp := strings.TrimPrefix(otherDep, camelPrefix)
-	ctx.Image = PredefinedImageNameFor(comp)
-	ctx.PublicImage = ctx.Image
-	return nil
-}
-
-// PredefinedImageNameFor --
-func PredefinedImageNameFor(comp string) string {
-	return fmt.Sprintf("camelk/camel-base-knative-%s:%s", comp, version.Version)
-}
-
 // ArtifactsSelector --
 type ArtifactsSelector func(ctx *Context) error
 

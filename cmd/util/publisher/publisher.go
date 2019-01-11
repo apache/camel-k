@@ -33,6 +33,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/platform/images"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -60,7 +61,7 @@ func main() {
 
 	cmd.Flags().StringVar(&options.StartWith, "start-with", "", "The component to start with")
 	cmd.Flags().StringVar(&options.EndWith, "end-with", "", "The component to end with")
-	cmd.Flags().IntVar(&options.BuildAttempts, "attempts", 5, "The maximum number of build attempts")
+	cmd.Flags().IntVar(&options.BuildAttempts, "attempts", 5, "The maximum number of build attempts for each image")
 
 	panicIfErr(cmd.Execute())
 }
@@ -127,6 +128,13 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 	}
 	defer os.RemoveAll(dir)
 
+	dependencies := make([]string, 0)
+	for d := range images.StandardDependencies {
+		dependencies = append(dependencies, d)
+	}
+	dependencies = append(dependencies, images.BaseDependency)
+	dependencies = append(dependencies, "camel:"+component)
+
 	ctx := builder.Context{
 		C:    context.TODO(),
 		Path: dir,
@@ -136,13 +144,7 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 					CamelVersion: camelVersion,
 				},
 			},
-			Dependencies: []string{
-				"camel-k:knative",
-				"camel:core",
-				"runtime:jvm",
-				"runtime:yaml",
-				"camel:" + component,
-			},
+			Dependencies: dependencies,
 		},
 	}
 
@@ -170,7 +172,7 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 		return err
 	}
 
-	image := builder.PredefinedImageNameFor(component)
+	image := images.PredefinedImageNameFor(component)
 	buildCmd := exec.Command("docker", "build", "-t", image, archiveDir)
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
