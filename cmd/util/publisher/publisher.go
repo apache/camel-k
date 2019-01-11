@@ -50,9 +50,8 @@ type PublisherOptions struct {
 
 // Publishes predefined images for all Camel components
 func main() {
+	options := PublisherOptions{}
 
-	options := PublisherOptions{
-	}
 	var cmd = cobra.Command{
 		Use:   "publisher",
 		Short: "Publisher allows to publish base images before a release",
@@ -162,6 +161,7 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 	}
 
 	archiveDir, archiveName := filepath.Split(ctx.Archive)
+	// nolint: gosec
 	dockerfile := `
 		FROM fabric8/s2i-java:2.3
 		ADD ` + archiveName + ` /deployments/

@@ -18,10 +18,11 @@ limitations under the License.
 package images
 
 import (
-	"github.com/apache/camel-k/version"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+
+	"github.com/apache/camel-k/version"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestImageLookup(t *testing.T) {
@@ -60,8 +61,9 @@ func TestImageLookup(t *testing.T) {
 	}
 
 	for i, tc := range cases {
+		testcase := tc
 		t.Run("case-"+strconv.Itoa(i), func(t *testing.T) {
-			assert.Equal(t, tc.image, LookupPredefinedImage(tc.dependencies))
+			assert.Equal(t, testcase.image, LookupPredefinedImage(testcase.dependencies))
 		})
 	}
 
