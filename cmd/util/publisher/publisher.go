@@ -19,12 +19,15 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
@@ -32,11 +35,37 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
 )
 
+// PublisherOptions --
+type PublisherOptions struct {
+	StartWith     string
+	EndWith       string
+	BuildAttempts int
+}
+
 // Publishes predefined images for all Camel components
 func main() {
+
+	options := PublisherOptions{
+	}
+	var cmd = cobra.Command{
+		Use:   "publisher",
+		Short: "Publisher allows to publish base images before a release",
+		Run:   options.run,
+	}
+
+	cmd.Flags().StringVar(&options.StartWith, "start-with", "", "The component to start with")
+	cmd.Flags().StringVar(&options.EndWith, "end-with", "", "The component to end with")
+	cmd.Flags().IntVar(&options.BuildAttempts, "attempts", 5, "The maximum number of build attempts")
+
+	panicIfErr(cmd.Execute())
+}
+
+func (options *PublisherOptions) run(cmd *cobra.Command, args []string) {
 	scheme := clientscheme.Scheme
 	panicIfErr(apis.AddToScheme(scheme))
 
@@ -45,18 +74,58 @@ func main() {
 
 	p := platRun.(*v1alpha1.IntegrationPlatform)
 
-	for _, a := range camel.Runtime.Artifacts {
+	started := options.StartWith == ""
+
+	keys := make([]string, 0, len(camel.Runtime.Artifacts))
+	for k := range camel.Runtime.Artifacts {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		a := camel.Runtime.Artifacts[k]
 		if a.GroupID == "org.apache.camel" {
 			component := strings.TrimPrefix(a.ArtifactID, "camel-")
-			build(component, p.Spec.Build.CamelVersion)
+			if options.StartWith == component {
+				started = true
+			}
+
+			if started {
+				fmt.Printf("building component %s\n", component)
+				options.buildWithAttempts(component, p.Spec.Build.CamelVersion)
+			} else {
+				fmt.Printf("skipping component %s\n", component)
+			}
+
+			if options.EndWith == component {
+				fmt.Println("reached final component")
+				break
+			}
 		}
 	}
 }
 
-func build(component string, camelVersion string) {
+func (options *PublisherOptions) buildWithAttempts(component string, camelVersion string) {
+	var err error
+	for i := 0; i < options.BuildAttempts; i++ {
+		err = options.build(component, camelVersion)
+		if err != nil {
+			sleepTime := 5 * (i + 1)
+			fmt.Printf("waiting %d seconds to recover from error %v\n", sleepTime, err)
+			time.Sleep(time.Duration(sleepTime) * time.Second)
+		} else {
+			return
+		}
+	}
+	panicIfErr(errors.Wrap(err, "build failed after maximum number of attempts"))
+}
+
+func (options *PublisherOptions) build(component string, camelVersion string) error {
 	dir, err := ioutil.TempDir(os.TempDir(), "camel-k-build-")
-	panicIfErr(err)
-	defer panicIfErr(os.RemoveAll(dir))
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
 
 	ctx := builder.Context{
 		C:    context.TODO(),
@@ -77,26 +146,48 @@ func build(component string, camelVersion string) {
 		},
 	}
 
-	panicIfErr(builder.GenerateProject(&ctx))
-	panicIfErr(builder.ComputeDependencies(&ctx))
-	panicIfErr(builder.StandardPackager(&ctx))
+	err = builder.GenerateProject(&ctx)
+	if err != nil {
+		return err
+	}
+	err = builder.ComputeDependencies(&ctx)
+	if err != nil {
+		return err
+	}
+	err = builder.StandardPackager(&ctx)
+	if err != nil {
+		return err
+	}
 
 	archiveDir, archiveName := filepath.Split(ctx.Archive)
 	dockerfile := `
 		FROM fabric8/s2i-java:2.3
 		ADD ` + archiveName + ` /deployments/
 	`
-	panicIfErr(ioutil.WriteFile(path.Join(archiveDir, "Dockerfile"), []byte(dockerfile), 0777))
+
+	err = ioutil.WriteFile(path.Join(archiveDir, "Dockerfile"), []byte(dockerfile), 0777)
+	if err != nil {
+		return err
+	}
+
 	image := builder.PredefinedImageNameFor(component)
 	buildCmd := exec.Command("docker", "build", "-t", image, archiveDir)
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
-	panicIfErr(buildCmd.Run())
+	err = buildCmd.Run()
+	if err != nil {
+		return err
+	}
 
 	pushCmd := exec.Command("docker", "push", image)
 	pushCmd.Stdout = os.Stdout
 	pushCmd.Stderr = os.Stderr
-	panicIfErr(pushCmd.Run())
+	err = pushCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func panicIfErr(err error) {
