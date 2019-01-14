@@ -55,6 +55,28 @@ public class RuntimeTest {
 
 
     @Test
+    void testLoadRouteAndrest() throws Exception {
+        Runtime runtime = new Runtime();
+        runtime.addMainListener(new Application.RoutesDumper());
+        runtime.load(new String[]{
+            "classpath:routes.xml",
+            "classpath:rests.xml",
+        });
+
+        try {
+            runtime.start();
+
+            CamelContext context = runtime.getCamelContext();
+
+            assertThat(context.getRouteDefinitions()).isNotEmpty();
+            assertThat(context.getRestDefinitions()).isNotEmpty();
+        } finally {
+            runtime.stop();
+        }
+    }
+
+
+    @Test
     void testLoadResource() throws Exception {
         ApplicationSupport.configureStreamHandler();
 

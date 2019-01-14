@@ -84,6 +84,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVarP(&options.OutputFormat, "output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().BoolVar(&options.Compression, "compression", false, "Enable store source as a compressed binary blob")
 	cmd.Flags().StringSliceVar(&options.Resources, "resource", nil, "Add a resource")
+	cmd.Flags().StringSliceVar(&options.OpenAPIs, "open-api", nil, "Add an OpenAPI v2 spec")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -104,6 +105,7 @@ type runCmdOptions struct {
 	Profile            string
 	OutputFormat       string
 	Resources          []string
+	OpenAPIs           []string
 	Dependencies       []string
 	Properties         []string
 	ConfigMaps         []string
@@ -316,6 +318,23 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 				Content:     data,
 				Compression: o.Compression,
 			},
+			Type: v1alpha1.ResourceTypeData,
+		})
+	}
+
+	for _, resource := range o.OpenAPIs {
+		data, err := o.loadData(resource, o.Compression)
+		if err != nil {
+			return nil, err
+		}
+
+		integration.Spec.AddResources(v1alpha1.ResourceSpec{
+			DataSpec: v1alpha1.DataSpec{
+				Name:        path.Base(resource),
+				Content:     data,
+				Compression: o.Compression,
+			},
+			Type: v1alpha1.ResourceTypeOpenAPI,
 		})
 	}
 

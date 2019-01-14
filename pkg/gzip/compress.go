@@ -20,6 +20,7 @@ package gzip
 import (
 	"bytes"
 	g "compress/gzip"
+	"encoding/base64"
 	"io"
 	"io/ioutil"
 )
@@ -39,6 +40,17 @@ func Compress(buffer io.Writer, data []byte) error {
 	}
 
 	return nil
+}
+
+// CompressBase64 --
+func CompressBase64(data []byte) ([]byte, error) {
+	var b bytes.Buffer
+
+	if err := Compress(&b, data); err != nil {
+		return []byte{}, err
+	}
+
+	return []byte(base64.StdEncoding.EncodeToString(b.Bytes())), nil
 }
 
 // Uncompress --
@@ -62,4 +74,21 @@ func Uncompress(buffer io.Writer, data []byte) error {
 	}
 
 	return nil
+}
+
+// UncompressBase64 --
+func UncompressBase64(data []byte) ([]byte, error) {
+	var b bytes.Buffer
+
+	err := Uncompress(&b, data)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	d, err := base64.StdEncoding.DecodeString(b.String())
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return d, nil
 }

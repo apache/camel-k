@@ -21,11 +21,12 @@ type IntegrationSpec struct {
 
 // IntegrationStatus defines the observed state of Integration
 type IntegrationStatus struct {
-	Phase        IntegrationPhase `json:"phase,omitempty"`
-	Digest       string           `json:"digest,omitempty"`
-	Image        string           `json:"image,omitempty"`
-	Dependencies []string         `json:"dependencies,omitempty"`
-	Context      string           `json:"context,omitempty"`
+	Phase            IntegrationPhase `json:"phase,omitempty"`
+	Digest           string           `json:"digest,omitempty"`
+	Image            string           `json:"image,omitempty"`
+	Dependencies     []string         `json:"dependencies,omitempty"`
+	Context          string           `json:"context,omitempty"`
+	GeneratedSources []SourceSpec     `json:"generatedSources,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -53,13 +54,25 @@ type IntegrationList struct {
 type DataSpec struct {
 	Name        string `json:"name,omitempty"`
 	Content     string `json:"content,omitempty"`
+	ContentRef  string `json:"contentRef,omitempty"`
 	Compression bool   `json:"compression,omitempty"`
 }
+
+// ResourceType --
+type ResourceType string
 
 // ResourceSpec --
 type ResourceSpec struct {
 	DataSpec
+	Type ResourceType `json:"type,omitempty"`
 }
+
+const (
+	// ResourceTypeData --
+	ResourceTypeData ResourceType = "data"
+	// ResourceTypeOpenAPI --
+	ResourceTypeOpenAPI ResourceType = "openapi"
+)
 
 // SourceSpec --
 type SourceSpec struct {

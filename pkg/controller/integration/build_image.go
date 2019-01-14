@@ -105,6 +105,9 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 		})
 	}
 	for _, resource := range integration.Spec.Resources {
+		if resource.Type != v1alpha1.ResourceTypeData {
+			continue
+		}
 		r.Resources = append(r.Resources, builder.Resource{
 			Content: []byte(resource.Content),
 			Target:  path.Join("resources", resource.Name),

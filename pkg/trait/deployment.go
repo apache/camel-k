@@ -94,7 +94,8 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 // **********************************
 
 func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
-	maps := make([]runtime.Object, 0, len(e.Integration.Spec.Sources)+1)
+	sources := e.Integration.Sources()
+	maps := make([]runtime.Object, 0, len(sources)+1)
 
 	// combine properties of integration with context, integration
 	// properties have the priority
@@ -129,7 +130,11 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 		// do not create 'source' or 'resource' ConfigMap if a docker images for deployment
 		// is required
 
-		for i, s := range e.Integration.Spec.Sources {
+		for i, s := range sources {
+			if s.ContentRef != "" {
+				continue
+			}
+
 			cm := corev1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "ConfigMap",
@@ -156,6 +161,10 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 		}
 
 		for i, s := range e.Integration.Spec.Resources {
+			if s.Type != v1alpha1.ResourceTypeData {
+				continue
+			}
+
 			cm := corev1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "ConfigMap",
@@ -191,9 +200,10 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 // **********************************
 
 func (t *deploymentTrait) getSources(e *Environment) []string {
-	sources := make([]string, 0, len(e.Integration.Spec.Sources))
+	sources := e.Integration.Sources()
+	paths := make([]string, 0, len(sources))
 
-	for _, s := range e.Integration.Spec.Sources {
+	for _, s := range sources {
 		root := "/etc/camel/sources"
 
 		if t.ContainerImage {
@@ -218,15 +228,14 @@ func (t *deploymentTrait) getSources(e *Environment) []string {
 			src = fmt.Sprintf("%s?%s", src, strings.Join(params, "&"))
 		}
 
-		sources = append(sources, src)
+		paths = append(paths, src)
 	}
 
-	return sources
+	return paths
 }
 
 func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
-	sources := t.getSources(e)
-
+	paths := t.getSources(e)
 	environment := make([]corev1.EnvVar, 0)
 
 	// combine Environment of integration with context, integration
@@ -239,7 +248,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
 
 	// camel-k runtime
-	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(sources, ","))
+	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(paths, ","))
 	envvar.SetVal(&environment, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	envvar.SetVal(&environment, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 
@@ -331,15 +340,18 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	//
 
 	if !t.ContainerImage {
-
 		// We can configure the operator to generate a container images that include
 		// integration sources instead of mounting it at runtime and in such case we
 		// do not need to mount any 'source' ConfigMap to the pod
 
-		for i, s := range e.Integration.Spec.Sources {
+		for i, s := range e.Integration.Sources() {
 			cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
 			refName := fmt.Sprintf("integration-source-%03d", i)
 			resName := strings.TrimPrefix(s.Name, "/")
+
+			if s.ContentRef != "" {
+				cmName = s.ContentRef
+			}
 
 			vols = append(vols, corev1.Volume{
 				Name: refName,
@@ -360,6 +372,10 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		}
 
 		for i, r := range e.Integration.Spec.Resources {
+			if r.Type != v1alpha1.ResourceTypeData {
+				continue
+			}
+
 			cmName := fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i)
 			refName := fmt.Sprintf("integration-resource-%03d", i)
 			resName := strings.TrimPrefix(r.Name, "/")
