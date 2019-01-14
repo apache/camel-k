@@ -66,6 +66,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 							Content:     content,
 							Compression: false,
 						},
+						Type: v1alpha1.ResourceTypeData,
 					},
 					{
 						DataSpec: v1alpha1.DataSpec{
@@ -73,6 +74,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 							Content:     content,
 							Compression: true,
 						},
+						Type: v1alpha1.ResourceTypeData,
 					},
 				},
 			},

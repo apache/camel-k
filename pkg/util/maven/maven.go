@@ -121,3 +121,11 @@ func ParseGAV(gav string) (Dependency, error) {
 
 	return dep, nil
 }
+
+// ExtraOptions --
+func ExtraOptions() string {
+	if _, err := os.Stat("/tmp/artifacts/m2"); err == nil {
+		return "-Dmaven.repo.local=/tmp/artifacts/m2"
+	}
+	return "-Dcamel.noop=true"
+}
