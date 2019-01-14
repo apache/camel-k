@@ -17,6 +17,7 @@
 package org.apache.camel.k.support;
 
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.NoFactoryAvailableException;
@@ -26,6 +27,7 @@ import org.apache.camel.k.RoutesLoader;
 import org.apache.camel.k.RuntimeTrait;
 import org.apache.camel.k.Source;
 import org.apache.camel.spi.FactoryFinder;
+import org.apache.camel.spi.RestConfiguration;
 import org.apache.camel.util.IntrospectionSupport;
 
 
@@ -56,7 +58,19 @@ public final class RuntimeSupport {
         );
     }
 
-    public static void bindProperties(CamelContext context, Object target, String prefix) {
+    public static void configureRest(CamelContext context) {
+        RestConfiguration configuration = new RestConfiguration();
+
+        if (RuntimeSupport.bindProperties(context, configuration, "camel.rest.") > 0) {
+            //
+            // Set the rest configuration if only if at least one
+            // rest parameter has been set.
+            //
+            context.setRestConfiguration(configuration);
+        }
+    }
+
+    public static int bindProperties(CamelContext context, Object target, String prefix) {
         final PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
         final Properties properties = component.getInitialProperties();
 
@@ -64,10 +78,12 @@ public final class RuntimeSupport {
             throw new IllegalStateException("PropertiesComponent has no properties");
         }
 
-        bindProperties(properties, target, prefix);
+        return bindProperties(properties, target, prefix);
     }
 
-    public static void bindProperties(Properties properties, Object target, String prefix) {
+    public static int bindProperties(Properties properties, Object target, String prefix) {
+        final AtomicInteger count = new AtomicInteger();
+
         properties.entrySet().stream()
             .filter(entry -> entry.getKey() instanceof String)
             .filter(entry -> entry.getValue() != null)
@@ -77,12 +93,16 @@ public final class RuntimeSupport {
                     final Object val = entry.getValue();
 
                     try {
-                        IntrospectionSupport.setProperty(target, key, val, false);
+                        if (IntrospectionSupport.setProperty(target, key, val, false)) {
+                            count.incrementAndGet();
+                        }
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
                 }
             );
+
+        return count.get();
     }
 
     public static RoutesLoader loaderFor(CamelContext context, Source source) {

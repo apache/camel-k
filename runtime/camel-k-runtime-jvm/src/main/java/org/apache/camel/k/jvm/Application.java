@@ -16,13 +16,21 @@
  */
 package org.apache.camel.k.jvm;
 
+import javax.xml.bind.JAXBException;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.support.RuntimeSupport;
 import org.apache.camel.main.MainListenerSupport;
+import org.apache.camel.main.MainSupport;
+import org.apache.camel.model.ModelHelper;
+import org.apache.camel.model.RoutesDefinition;
+import org.apache.camel.model.rest.RestsDefinition;
 import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.ObjectHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Application {
     static {
@@ -61,6 +69,7 @@ public class Application {
         runtime.setProperties(ApplicationSupport.loadProperties());
         runtime.load(routes.split(",", -1));
         runtime.addMainListener(new ComponentPropertiesBinder());
+        runtime.addMainListener(new RoutesDumper());
         runtime.run();
     }
 
@@ -74,19 +83,31 @@ public class Application {
 
         @Override
         public void configure(CamelContext context) {
+            //
             // Configure the camel context using properties in the form:
             //
             //     camel.context.${name} = ${value}
             //
             RuntimeSupport.bindProperties(context, context, "camel.context.");
 
-            // Programmatically apply the camel context.
+            //
+            // Configure the camel rest definition using properties in the form:
+            //
+            //     camel.rest.${name} = ${value}
+            //
+            RuntimeSupport.configureRest(context);
+
+            //
+            // Programmatically configure the camel context.
             //
             // This is useful to configure services such as the ClusterService,
             // RouteController, etc
             //
             RuntimeSupport.configureContext(context);
 
+            //
+            // Configure components upon creation
+            //
             context.addLifecycleStrategy(new LifecycleStrategySupport() {
                 @SuppressWarnings("unchecked")
                 @Override
@@ -100,6 +121,32 @@ public class Application {
                     RuntimeSupport.bindProperties(context, component, "camel.component." + name + ".");
                 }
             });
+        }
+    }
+
+    static class RoutesDumper extends MainListenerSupport {
+        static final Logger LOGGER = LoggerFactory.getLogger(RoutesDumper.class);
+
+        @Override
+        public void afterStart(MainSupport main) {
+            CamelContext context = main.getCamelContexts().get(0);
+
+            RoutesDefinition routes = new RoutesDefinition();
+            routes.setRoutes(context.getRouteDefinitions());
+
+            RestsDefinition rests = new RestsDefinition();
+            rests.setRests(context.getRestDefinitions());
+
+            try {
+                if (LOGGER.isDebugEnabled() && !routes.getRoutes().isEmpty()) {
+                    LOGGER.debug("Routes: \n{}", ModelHelper.dumpModelAsXml(context, routes));
+                }
+                if (LOGGER.isDebugEnabled() && !rests.getRests().isEmpty()) {
+                    LOGGER.debug("Rests: \n{}", ModelHelper.dumpModelAsXml(context, rests));
+                }
+            } catch (JAXBException e) {
+                throw new IllegalArgumentException(e);
+            }
         }
     }
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rests xmlns="http://camel.apache.org/schema/spring">
+  <rest path="/camel/">
+    <get id="greeting-api" uri="/greetings/{name}">
+      <param dataType="string" name="name" required="true" type="path"/>
+      <to uri="direct:greeting-api"/>
+    </get>
+  </rest>
+</rests>

@@ -44,12 +44,14 @@ type Catalog struct {
 	tIstio        Trait
 	tEnvironment  Trait
 	tClasspath    Trait
+	tRest         Trait
 }
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
 		tDebug:        newDebugTrait(),
+		tRest:         newRestTrait(),
 		tDependencies: newDependenciesTrait(),
 		tDeployment:   newDeploymentTrait(),
 		tKnative:      newKnativeTrait(),
@@ -79,6 +81,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 func (c *Catalog) allTraits() []Trait {
 	return []Trait{
 		c.tDebug,
+		c.tRest,
 		c.tDependencies,
 		c.tDeployment,
 		c.tKnative,
@@ -100,6 +103,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
 			c.tDebug,
+			c.tRest,
 			c.tDependencies,
 			c.tImages,
 			c.tBuilder,
@@ -114,6 +118,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
 			c.tDebug,
+			c.tRest,
 			c.tDependencies,
 			c.tImages,
 			c.tBuilder,
@@ -128,6 +133,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
 			c.tDebug,
+			c.tRest,
 			c.tDependencies,
 			c.tImages,
 			c.tBuilder,

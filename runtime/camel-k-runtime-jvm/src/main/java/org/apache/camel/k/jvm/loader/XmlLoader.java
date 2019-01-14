@@ -11,6 +11,8 @@ import org.apache.camel.k.RoutesLoader;
 import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Source;
 import org.apache.camel.k.support.URIResolver;
+import org.apache.camel.model.RoutesDefinition;
+import org.apache.camel.model.rest.RestsDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,17 +31,25 @@ public class XmlLoader implements RoutesLoader {
             public void configure() throws Exception {
                 try (InputStream is = URIResolver.resolve(getContext(), source)) {
                     try {
-                        setRouteCollection(
-                            getContext().loadRoutesDefinition(is)
-                        );
+                        RoutesDefinition definition = getContext().loadRoutesDefinition(is);
+                        LOGGER.debug("Loaded {} routes from {}", definition.getRoutes().size(), source);
+
+                        setRouteCollection(definition);
+                    } catch (IllegalArgumentException e) {
+                        // ignore
                     } catch (UnmarshalException e) {
                         LOGGER.debug("Unable to load RoutesDefinition: {}", e.getMessage());
                     }
+                }
 
+                try (InputStream is = URIResolver.resolve(getContext(), source)) {
                     try {
-                        setRestCollection(
-                            getContext().loadRestsDefinition(is)
-                        );
+                        RestsDefinition definition = getContext().loadRestsDefinition(is);
+                        LOGGER.debug("Loaded {} rests from {}", definition.getRests().size(), source);
+
+                        setRestCollection(definition);
+                    } catch(IllegalArgumentException e) {
+                        // ignore
                     } catch (UnmarshalException e) {
                         LOGGER.debug("Unable to load RestsDefinition: {}", e.getMessage());
                     }

@@ -35,6 +35,15 @@ func NewIntegrationList() IntegrationList {
 	}
 }
 
+// Sources ---
+func (i *Integration) Sources() []SourceSpec {
+	allSources := make([]SourceSpec, 0, len(i.Spec.Sources)+len(i.Status.GeneratedSources))
+	allSources = append(allSources, i.Spec.Sources...)
+	allSources = append(allSources, i.Status.GeneratedSources...)
+
+	return allSources
+}
+
 // AddSource --
 func (is *IntegrationSpec) AddSource(name string, content string, language Language) {
 	is.Sources = append(is.Sources, NewSourceSpec(name, content, language))
@@ -102,12 +111,13 @@ func NewSourceSpec(name string, content string, language Language) SourceSpec {
 }
 
 // NewResourceSpec --
-func NewResourceSpec(name string, content string, destination string) ResourceSpec {
+func NewResourceSpec(name string, content string, destination string, resourceType ResourceType) ResourceSpec {
 	return ResourceSpec{
 		DataSpec: DataSpec{
 			Name:    name,
 			Content: content,
 		},
+		Type: resourceType,
 	}
 }
 

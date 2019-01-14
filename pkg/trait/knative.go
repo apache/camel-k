@@ -133,7 +133,7 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	})
 
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
-	for i, s := range e.Integration.Spec.Sources {
+	for i, s := range e.Integration.Sources() {
 		envName := fmt.Sprintf("CAMEL_K_ROUTE_%03d", i)
 		envvar.SetVal(&environment, envName, s.Content)
 
@@ -154,6 +154,10 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 	}
 
 	for i, r := range e.Integration.Spec.Resources {
+		if r.Type != v1alpha1.ResourceTypeData {
+			continue
+		}
+
 		envName := fmt.Sprintf("CAMEL_K_RESOURCE_%03d", i)
 		envvar.SetVal(&environment, envName, r.Content)
 

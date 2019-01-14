@@ -19,21 +19,12 @@ package builder
 
 import (
 	"encoding/xml"
-	"os"
 
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/version"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
-
-// MavenExtraOptions --
-func MavenExtraOptions() string {
-	if _, err := os.Stat("/tmp/artifacts/m2"); err == nil {
-		return "-Dmaven.repo.local=/tmp/artifacts/m2"
-	}
-	return "-Dcamel.noop=true"
-}
 
 // ArtifactIDs --
 func ArtifactIDs(artifacts []v1alpha1.Artifact) []string {
