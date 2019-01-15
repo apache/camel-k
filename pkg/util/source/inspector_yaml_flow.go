@@ -19,49 +19,35 @@ package source
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 // YAMLFlowInspector --
 type YAMLFlowInspector struct {
+	baseInspector
 }
 
-// FromURIs --
-func (i YAMLFlowInspector) FromURIs(source v1alpha1.SourceSpec) ([]string, error) {
+// Extract --
+func (i YAMLFlowInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
 	var flows []v1alpha1.Flow
 
 	if err := yaml.Unmarshal([]byte(source.Content), &flows); err != nil {
-		return []string{}, nil
+		return nil
 	}
-
-	uris := make([]string, 0)
 
 	for _, flow := range flows {
 		if flow.Steps[0].URI != "" {
-			uris = append(uris, flow.Steps[0].URI)
+			meta.FromURIs = append(meta.FromURIs, flow.Steps[0].URI)
 		}
 
-	}
-	return uris, nil
-}
-
-// ToURIs --
-func (i YAMLFlowInspector) ToURIs(source v1alpha1.SourceSpec) ([]string, error) {
-	var flows []v1alpha1.Flow
-
-	if err := yaml.Unmarshal([]byte(source.Content), &flows); err != nil {
-		return []string{}, nil
-	}
-
-	uris := make([]string, 0)
-
-	for _, flow := range flows {
 		for i := 1; i < len(flow.Steps); i++ {
 			if flow.Steps[i].URI != "" {
-				uris = append(uris, flow.Steps[i].URI)
+				meta.ToURIs = append(meta.ToURIs, flow.Steps[i].URI)
 			}
 		}
 	}
 
-	return uris, nil
+	meta.Dependencies = i.discoverDependencies(source, meta)
+
+	return nil
 }

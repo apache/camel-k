@@ -21,12 +21,32 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"regexp"
 	"syscall"
+
+	"github.com/scylladb/go-set/strset"
 
 	"k8s.io/api/core/v1"
 
 	"github.com/pkg/errors"
 )
+
+// StringSliceJoin --
+func StringSliceJoin(slices ...[]string) []string {
+	size := 0
+
+	for _, s := range slices {
+		size += len(s)
+	}
+
+	result := make([]string, 0, size)
+
+	for _, s := range slices {
+		result = append(result, s...)
+	}
+
+	return result
+}
 
 // StringSliceContains --
 func StringSliceContains(slice []string, items []string) bool {
@@ -115,4 +135,21 @@ func LookupEnvVar(vars []v1.EnvVar, name string) *v1.EnvVar {
 	}
 
 	return nil
+}
+
+// FindAllDistinctStringSubmatch ..
+func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
+	submatchs := strset.New()
+
+	for _, reg := range regexps {
+		hits := reg.FindAllStringSubmatch(data, -1)
+		for _, hit := range hits {
+			if len(hit) > 1 {
+				for _, match := range hit[1:] {
+					submatchs.Add(match)
+				}
+			}
+		}
+	}
+	return submatchs.List()
 }

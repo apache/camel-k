@@ -15,16 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package metadata
+package source
 
-import "github.com/apache/camel-k/pkg/util/source"
-
-// IntegrationMetadata contains aggregate metadata about all Camel routes in a integrations
-type IntegrationMetadata struct {
-	source.Metadata
-	// RequiresHTTPService indicates if the integration needs to be invoked through HTTP
-	RequiresHTTPService bool
-	// PassiveEndpoints indicates that the integration contains only passive endpoints that are activated from
-	// external calls, including HTTP (useful to determine if the integration can scale to 0)
-	PassiveEndpoints bool
+// Metadata --
+type Metadata struct {
+	// All starting URIs of defined routes
+	FromURIs []string
+	// All end URIs of defined routes
+	ToURIs []string
+	// All inferred dependencies required to run the integration
+	Dependencies []string
 }

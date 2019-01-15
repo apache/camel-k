@@ -19,8 +19,13 @@ package source
 
 import (
 	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/scylladb/go-set/strset"
 )
 
 var (
@@ -32,12 +37,15 @@ var (
 	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
 	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
 	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-z0-9-]+:[^"]+)"[^)]*\)`)
+
+	additionalDependencies = map[string]string{
+		".*JsonLibrary\\.Jackson.*": "camel:jackson",
+	}
 )
 
 // Inspector --
 type Inspector interface {
-	FromURIs(v1alpha1.SourceSpec) ([]string, error)
-	ToURIs(v1alpha1.SourceSpec) ([]string, error)
+	Extract(v1alpha1.SourceSpec, *Metadata) error
 }
 
 // InspectorForLanguage --
@@ -56,34 +64,57 @@ func InspectorForLanguage(language v1alpha1.Language) Inspector {
 	case v1alpha1.LanguageYamlFlow:
 		return &YAMLFlowInspector{}
 	}
-	return &noInspector{}
+	return &baseInspector{}
 }
 
-func findAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
-	candidates := make([]string, 0)
-	alreadyFound := make(map[string]bool)
-	for _, reg := range regexps {
-		hits := reg.FindAllStringSubmatch(data, -1)
-		for _, hit := range hits {
-			if len(hit) > 1 {
-				for _, match := range hit[1:] {
-					if _, ok := alreadyFound[match]; !ok {
-						alreadyFound[match] = true
-						candidates = append(candidates, match)
-					}
-				}
-			}
+type baseInspector struct {
+}
+
+func (i baseInspector) Extract(v1alpha1.SourceSpec, *Metadata) error {
+	return nil
+}
+
+// discoverDependencies returns a list of dependencies required by the given source code
+func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *Metadata) []string {
+	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
+	candidates := strset.New()
+
+	for _, uri := range uris {
+		candidateComp := i.decodeComponent(uri)
+		if candidateComp != "" {
+			candidates.Add(candidateComp)
 		}
 	}
-	return candidates
+
+	for pattern, dep := range additionalDependencies {
+		pat := regexp.MustCompile(pattern)
+		if pat.MatchString(source.Content) {
+			candidates.Add(dep)
+		}
+	}
+
+	components := candidates.List()
+
+	sort.Strings(components)
+
+	return components
 }
 
-type noInspector struct {
-}
-
-func (i noInspector) FromURIs(source v1alpha1.SourceSpec) ([]string, error) {
-	return []string{}, nil
-}
-func (i noInspector) ToURIs(source v1alpha1.SourceSpec) ([]string, error) {
-	return []string{}, nil
+func (i *baseInspector) decodeComponent(uri string) string {
+	uriSplit := strings.SplitN(uri, ":", 2)
+	if len(uriSplit) < 2 {
+		return ""
+	}
+	uriStart := uriSplit[0]
+	if component := camel.Runtime.GetArtifactByScheme(uriStart); component != nil {
+		artifactID := component.ArtifactID
+		if component.GroupID == "org.apache.camel" && strings.HasPrefix(artifactID, "camel-") {
+			return "camel:" + artifactID[6:]
+		}
+		if component.GroupID == "org.apache.camel.k" && strings.HasPrefix(artifactID, "camel-") {
+			return "camel-k:" + artifactID[6:]
+		}
+		return "mvn:" + component.GroupID + ":" + artifactID + ":" + component.Version
+	}
+	return ""
 }
