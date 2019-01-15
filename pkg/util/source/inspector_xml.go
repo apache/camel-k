@@ -26,14 +26,13 @@ import (
 
 // XMLInspector --
 type XMLInspector struct {
+	baseInspector
 }
 
-// FromURIs --
-func (i XMLInspector) FromURIs(source v1alpha1.SourceSpec) ([]string, error) {
+// Extract --
+func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)
-
-	uris := make([]string, 0)
 
 	for {
 		// Read tokens from the XML document in a stream.
@@ -47,41 +46,20 @@ func (i XMLInspector) FromURIs(source v1alpha1.SourceSpec) ([]string, error) {
 			case "from", "fromF":
 				for _, a := range se.Attr {
 					if a.Name.Local == "uri" {
-						uris = append(uris, a.Value)
+						meta.FromURIs = append(meta.FromURIs, a.Value)
 					}
 				}
-			}
-		}
-	}
-
-	return uris, nil
-}
-
-// ToURIs --
-func (i XMLInspector) ToURIs(source v1alpha1.SourceSpec) ([]string, error) {
-	content := strings.NewReader(source.Content)
-	decoder := xml.NewDecoder(content)
-
-	uris := make([]string, 0)
-
-	for {
-		// Read tokens from the XML document in a stream.
-		t, _ := decoder.Token()
-		if t == nil {
-			break
-		}
-
-		if se, ok := t.(xml.StartElement); ok {
-			switch se.Name.Local {
 			case "to", "toD", "toF":
 				for _, a := range se.Attr {
 					if a.Name.Local == "uri" {
-						uris = append(uris, a.Value)
+						meta.ToURIs = append(meta.ToURIs, a.Value)
 					}
 				}
 			}
 		}
 	}
 
-	return uris, nil
+	meta.Dependencies = i.discoverDependencies(source, meta)
+
+	return nil
 }

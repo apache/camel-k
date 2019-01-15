@@ -17,30 +17,32 @@ limitations under the License.
 
 package source
 
-import "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util"
+)
 
 // KotlinInspector --
 type KotlinInspector struct {
+	baseInspector
 }
 
-// FromURIs --
-func (i KotlinInspector) FromURIs(source v1alpha1.SourceSpec) ([]string, error) {
-	answer := findAllDistinctStringSubmatch(
+// Extract --
+func (i KotlinInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
+	from := util.FindAllDistinctStringSubmatch(
 		source.Content,
 		doubleQuotedFrom,
 	)
-
-	return answer, nil
-}
-
-// ToURIs --
-func (i KotlinInspector) ToURIs(source v1alpha1.SourceSpec) ([]string, error) {
-	answer := findAllDistinctStringSubmatch(
+	to := util.FindAllDistinctStringSubmatch(
 		source.Content,
 		doubleQuotedTo,
 		doubleQuotedToD,
 		doubleQuotedToF,
 	)
 
-	return answer, nil
+	meta.FromURIs = append(meta.FromURIs, from...)
+	meta.ToURIs = append(meta.ToURIs, to...)
+	meta.Dependencies = i.discoverDependencies(source, meta)
+
+	return nil
 }
