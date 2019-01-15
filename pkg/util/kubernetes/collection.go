@@ -33,10 +33,14 @@ type Collection struct {
 }
 
 // NewCollection creates a new empty collection
-func NewCollection() *Collection {
-	return &Collection{
-		items: make([]runtime.Object, 0),
+func NewCollection(objcts ...runtime.Object) *Collection {
+	collection := Collection{
+		items: make([]runtime.Object, 0, len(objcts)),
 	}
+
+	collection.items = append(collection.items, objcts...)
+
+	return &collection
 }
 
 // Size returns the number of resources belonging to the collection
@@ -129,6 +133,20 @@ func (c *Collection) GetConfigMap(filter func(*corev1.ConfigMap) bool) *corev1.C
 		}
 	})
 	return retValue
+}
+
+// RemoveConfigMap removes and returns a ConfigMap that matches the given function
+func (c *Collection) RemoveConfigMap(filter func(*corev1.ConfigMap) bool) *corev1.ConfigMap {
+	res := c.Remove(func(res runtime.Object) bool {
+		if conv, ok := res.(*corev1.ConfigMap); ok {
+			return filter(conv)
+		}
+		return false
+	})
+	if res == nil {
+		return nil
+	}
+	return res.(*corev1.ConfigMap)
 }
 
 // VisitService executes the visitor function on all Service resources

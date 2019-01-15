@@ -29,6 +29,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -129,6 +130,84 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 		resource = util.LookupEnvVar(vars, "CAMEL_K_RESOURCE_001")
 		assert.NotNil(t, resource)
 		assert.Equal(t, content, resource.Value)
+	})
+
+	assert.True(t, services > 0)
+	assert.True(t, environment.Resources.Size() > 0)
+}
+
+func TestKnativeTraitWithConfigMapSources(t *testing.T) {
+	content := "H4sIAAAAAAAA/+JKK8rP1VAvycxNLbIqyUzOVtfkUlBQUNAryddQz8lPt8rMS8tX1+QCAAAA//8BAAD//3wZ4pUoAAAA"
+
+	environment := Environment{
+		Integration: &v1alpha1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1alpha1.IntegrationStatus{
+				Phase: v1alpha1.IntegrationPhaseDeploying,
+			},
+			Spec: v1alpha1.IntegrationSpec{
+				Profile: v1alpha1.TraitProfileKnative,
+				Sources: []v1alpha1.SourceSpec{
+					{
+						DataSpec: v1alpha1.DataSpec{
+							Name:        "routes.js",
+							ContentRef:  "my-cm",
+							Compression: true,
+						},
+						Language: v1alpha1.LanguageJavaScript,
+					},
+				},
+			},
+		},
+		Platform: &v1alpha1.IntegrationPlatform{
+			Spec: v1alpha1.IntegrationPlatformSpec{
+				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        "registry",
+				},
+			},
+		},
+		EnvVars:        make([]v1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources: kubernetes.NewCollection(&corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-cm",
+				Namespace: "ns",
+			},
+			Data: map[string]string{
+				"content": content,
+			},
+		}),
+	}
+
+	err := NewKnativeTestCatalog().apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait(ID("knative")))
+	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
+
+	services := 0
+	environment.Resources.VisitKnativeService(func(service *serving.Service) {
+		services++
+
+		vars := service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
+
+		routes := util.LookupEnvVar(vars, "CAMEL_K_ROUTES")
+		assert.NotNil(t, routes)
+		assert.Equal(t, "env:CAMEL_K_ROUTE_000?language=js&compression=true", routes.Value)
+
+		route := util.LookupEnvVar(vars, "CAMEL_K_ROUTE_000")
+		assert.NotNil(t, route)
+		assert.Equal(t, content, route.Value)
 	})
 
 	assert.True(t, services > 0)
