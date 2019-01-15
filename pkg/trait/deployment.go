@@ -290,6 +290,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					ServiceAccountName: e.Integration.Spec.ServiceAccountName,
 					Containers: []corev1.Container{
 						{
 							Name:  e.Integration.Name,
