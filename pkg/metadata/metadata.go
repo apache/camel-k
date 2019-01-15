@@ -28,9 +28,11 @@ import (
 func ExtractAll(sources []v1alpha1.SourceSpec) IntegrationMetadata {
 	// neutral metadata
 	meta := IntegrationMetadata{
-		Dependencies:        []string{},
-		FromURIs:            []string{},
-		ToURIs:              []string{},
+		Metadata: src.Metadata{
+			FromURIs:     []string{},
+			ToURIs:       []string{},
+			Dependencies: []string{},
+		},
 		PassiveEndpoints:    true,
 		RequiresHTTPService: false,
 	}
@@ -54,9 +56,11 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 	}
 	sort.Strings(allDependencies)
 	return IntegrationMetadata{
-		FromURIs:            append(m1.FromURIs, m2.FromURIs...),
-		ToURIs:              append(m1.ToURIs, m2.ToURIs...),
-		Dependencies:        allDependencies,
+		Metadata: src.Metadata{
+			FromURIs:     append(m1.FromURIs, m2.FromURIs...),
+			ToURIs:       append(m1.ToURIs, m2.ToURIs...),
+			Dependencies: allDependencies,
+		},
 		RequiresHTTPService: m1.RequiresHTTPService || m2.RequiresHTTPService,
 		PassiveEndpoints:    m1.PassiveEndpoints && m2.PassiveEndpoints,
 	}
@@ -65,20 +69,16 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 // Extract returns metadata information from the source code
 func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
 	language := source.InferLanguage()
+
+	m := IntegrationMetadata{}
+
 	// TODO: handle error
-	fromURIs, _ := src.InspectorForLanguage(language).FromURIs(source)
-	// TODO:: handle error
-	toURIs, _ := src.InspectorForLanguage(language).ToURIs(source)
-	dependencies := discoverDependencies(source, fromURIs, toURIs)
-	requiresHTTPService := requiresHTTPService(source, fromURIs)
-	passiveEndpoints := hasOnlyPassiveEndpoints(source, fromURIs)
-	return IntegrationMetadata{
-		FromURIs:            fromURIs,
-		ToURIs:              toURIs,
-		Dependencies:        dependencies,
-		RequiresHTTPService: requiresHTTPService,
-		PassiveEndpoints:    passiveEndpoints,
-	}
+	_ = src.InspectorForLanguage(language).Extract(source, &m.Metadata)
+
+	m.RequiresHTTPService = requiresHTTPService(source, m.FromURIs)
+	m.PassiveEndpoints = hasOnlyPassiveEndpoints(source, m.FromURIs)
+
+	return m
 }
 
 // Each --
