@@ -253,6 +253,7 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 							Annotations: annotations,
 						},
 						Spec: serving.RevisionSpec{
+							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
 							Container: corev1.Container{
 								Image: e.Integration.Status.Image,
 								Env:   environment,
