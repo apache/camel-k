@@ -22,6 +22,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -97,7 +99,11 @@ func (t *knativeTrait) Apply(e *Environment) error {
 		e.Resources.Add(sub)
 	}
 
-	svc := t.getServiceFor(e)
+	svc, err := t.getServiceFor(e)
+	if err != nil {
+		return err
+	}
+
 	e.Resources.Add(svc)
 
 	return nil
@@ -115,7 +121,7 @@ func (t *knativeTrait) prepareEnvVars(e *Environment) error {
 	return nil
 }
 
-func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
+func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 	// combine properties of integration with context, integration
 	// properties have the priority
 	properties := ""
@@ -134,8 +140,55 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
 	for i, s := range e.Integration.Sources() {
+
+		content := s.Content
+		if s.ContentRef != "" {
+			//
+			// Try to check if the config map is among the one
+			// creates for the deployment
+			//
+			cm := e.Resources.RemoveConfigMap(func(m *corev1.ConfigMap) bool {
+				return m.Name == s.ContentRef
+			})
+
+			//
+			// if not, try to get it from the kubernetes cluster
+			//
+			if cm == nil {
+				key := k8sclient.ObjectKey{
+					Name:      s.ContentRef,
+					Namespace: e.Integration.Namespace,
+				}
+
+				cm = &corev1.ConfigMap{
+					TypeMeta: metav1.TypeMeta{
+						Kind:       "ConfigMap",
+						APIVersion: "v1",
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      s.ContentRef,
+						Namespace: e.Integration.Namespace,
+					},
+				}
+
+				if err := t.client.Get(t.ctx, key, cm); err != nil {
+					return nil, err
+				}
+			}
+
+			if cm == nil {
+				return nil, fmt.Errorf("unable to find a COnfigMap with name: %s in the namespace: %s", s.ContentRef, e.Integration.Namespace)
+			}
+
+			content = cm.Data["content"]
+		}
+
+		if content == "" {
+			logrus.Warnf("Source %s has empty content", s.Name)
+		}
+
 		envName := fmt.Sprintf("CAMEL_K_ROUTE_%03d", i)
-		envvar.SetVal(&environment, envName, s.Content)
+		envvar.SetVal(&environment, envName, content)
 
 		params := make([]string, 0)
 		if s.InferLanguage() != "" {
@@ -245,7 +298,7 @@ func (t *knativeTrait) getServiceFor(e *Environment) *serving.Service {
 		},
 	}
 
-	return &svc
+	return &svc, nil
 }
 
 func (t *knativeTrait) getSubscriptionsFor(e *Environment) []*eventing.Subscription {
