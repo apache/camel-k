@@ -19,8 +19,6 @@ package integrationplatform
 
 import (
 	"context"
-	"errors"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -85,7 +83,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	}
 
 	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && target.Spec.Build.Registry == "" {
-		return errors.New("no registry specified for publishing images")
+		logrus.Warning("No registry specified for publishing images")
 	}
 
 	if target.Spec.Profile == "" {
