@@ -93,7 +93,7 @@ func (t *restTrait) Apply(e *Environment) error {
 		iArg := "-Dopenapi.spec=" + in
 		oArg := "-Ddsl.out=" + out
 
-		if err := maven.Run(tmpDir, maven.ExtraOptions(), goal, iArg, oArg); err != nil {
+		if err := maven.Run(tmpDir, goal, iArg, oArg); err != nil {
 			return err
 		}
 

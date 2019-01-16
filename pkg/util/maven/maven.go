@@ -80,7 +80,11 @@ func Run(buildDir string, args ...string) error {
 		"logger": "maven",
 	})
 
-	cmd := exec.Command(mvnCmd, args...)
+	cmdArgs := make([]string, 0, 1+len(args))
+	cmdArgs = append(cmdArgs, extraOptions())
+	cmdArgs = append(cmdArgs, args...)
+
+	cmd := exec.Command(mvnCmd, cmdArgs...)
 	cmd.Dir = buildDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -122,8 +126,7 @@ func ParseGAV(gav string) (Dependency, error) {
 	return dep, nil
 }
 
-// ExtraOptions --
-func ExtraOptions() string {
+func extraOptions() string {
 	if _, err := os.Stat("/tmp/artifacts/m2"); err == nil {
 		return "-Dmaven.repo.local=/tmp/artifacts/m2"
 	}
