@@ -35,7 +35,7 @@ func NewIntegrationList() IntegrationList {
 	}
 }
 
-// Sources ---
+// Sources return a new slice containing all the sources associated to the integration
 func (i *Integration) Sources() []SourceSpec {
 	allSources := make([]SourceSpec, 0, len(i.Spec.Sources)+len(i.Status.GeneratedSources))
 	allSources = append(allSources, i.Spec.Sources...)
