@@ -117,7 +117,7 @@ func ComputeDependencies(ctx *Context) error {
 
 	goal := fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", version.Version)
 
-	err = maven.Run(p, maven.ExtraOptions(), goal)
+	err = maven.Run(p, goal)
 	if err != nil {
 		return errors.Wrap(err, "failure while determining classpath")
 	}
