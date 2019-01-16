@@ -19,6 +19,7 @@ package trait
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -26,6 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // Identifiable represent an identifiable type
@@ -130,4 +132,50 @@ func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
 	}
 
 	return platform.GetProfile(e.Platform)
+}
+
+// ResolveSources --
+func (e *Environment) ResolveSources(context context.Context, client client.Client) ([]v1alpha1.SourceSpec, error) {
+	sources := e.Integration.Sources()
+
+	for i := 0; i < len(sources); i++ {
+		// copy the source to avoid modifications to the
+		// original source
+		s := sources[i].DeepCopy()
+
+		// if it is a reference, get the content from the
+		// referenced ConfigMap
+		if s.ContentRef != "" {
+
+			// the config map coud be part of the resources created
+			// by traits so first look there
+			cm := e.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+				return m.Name == s.ContentRef
+			})
+
+			if cm == nil {
+				// if not, try to look it up from the kubernetes cluster
+				r, err := kubernetes.GetConfigMap(context, client, s.ContentRef, e.Integration.Namespace)
+				if err != nil {
+					return []v1alpha1.SourceSpec{}, nil
+				}
+
+				cm = r
+			}
+
+			if cm == nil {
+				return []v1alpha1.SourceSpec{}, fmt.Errorf("unable to find a ConfigMap with name: %s in the namespace: %s", s.ContentRef, e.Integration.Namespace)
+			}
+
+			//
+			// Replace ref source content with real content
+			//
+			s.Content = cm.Data["content"]
+			s.ContentRef = ""
+		}
+
+		sources[i] = *s
+	}
+
+	return sources, nil
 }
