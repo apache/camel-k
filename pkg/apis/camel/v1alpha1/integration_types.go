@@ -123,6 +123,10 @@ const (
 	// IntegrationKind --
 	IntegrationKind string = "Integration"
 
+	// IntegrationPhaseInitial --
+	IntegrationPhaseInitial IntegrationPhase = ""
+	// IntegrationPhaseWaitingForPlatform --
+	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
 	// IntegrationPhaseBuildingContext --
 	IntegrationPhaseBuildingContext IntegrationPhase = "Building Context"
 	// IntegrationPhaseBuildingImage --

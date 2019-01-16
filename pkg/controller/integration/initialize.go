@@ -43,29 +43,53 @@ func (action *initializeAction) Name() string {
 
 // CanHandle tells whether this action can handle the integration
 func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == ""
+	return integration.Status.Phase == v1alpha1.IntegrationPhaseInitial || integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform
 }
 
 // Handle handles the integrations
 func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+	pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace)
+
 	// The integration platform needs to be ready before starting to create integrations
-	if pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace); err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
+	if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
 		logrus.Info("Waiting for a integration platform to be ready")
+
+		if integration.Status.Phase != v1alpha1.IntegrationPhaseWaitingForPlatform {
+			target := integration.DeepCopy()
+			target.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
+
+			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+
+			return action.client.Update(ctx, target)
+		}
+
 		return nil
 	}
 
-	target := integration.DeepCopy()
-	// better not changing the spec section of the target because it may be used for comparison by a
-	// higher level controller (e.g. Knative source controller)
-
-	// execute custom initialization
-	if _, err := trait.Apply(ctx, action.client, target, nil); err != nil {
+	dgst, err := digest.ComputeForIntegration(integration)
+	if err != nil {
 		return err
 	}
 
-	// update the status
-	dgst, err := digest.ComputeForIntegration(integration)
-	if err != nil {
+	//
+	// restore phase to initial phase ase traits are not aware of
+	// WaitingForPlatform phase
+	//
+	if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
+		target := integration.DeepCopy()
+		target.Status.Phase = v1alpha1.IntegrationPhaseInitial
+		target.Status.Digest = dgst
+
+		return action.client.Update(ctx, target)
+	}
+
+	// better not changing the spec section of the target because it may be used for comparison by a
+	// higher level controller (e.g. Knative source controller)
+
+	target := integration.DeepCopy()
+
+	// execute custom initialization
+	if _, err := trait.Apply(ctx, action.client, target, nil); err != nil {
 		return err
 	}
 
