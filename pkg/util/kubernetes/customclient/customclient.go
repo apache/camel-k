@@ -18,6 +18,7 @@ limitations under the License.
 package customclient
 
 import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -62,6 +63,23 @@ func GetDynamicClientFor(group string, version string, kind string, namespace st
 	return dynamicClient.Resource(schema.GroupVersionResource{
 		Group:    group,
 		Version:  version,
+		Resource: kind,
+	}).Namespace(namespace), nil
+}
+
+// GetDefaultDynamicClientFor returns a dynamic client for a given kind
+func GetDefaultDynamicClientFor(kind string, namespace string) (dynamic.ResourceInterface, error) {
+	conf, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	dynamicClient, err := dynamic.NewForConfig(conf)
+	if err != nil {
+		return nil, err
+	}
+	return dynamicClient.Resource(schema.GroupVersionResource{
+		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Resource: kind,
 	}).Namespace(namespace), nil
 }
