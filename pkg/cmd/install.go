@@ -21,6 +21,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/watch"
+
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -40,6 +43,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:  impl.install,
 	}
 
+	cmd.Flags().BoolVarP(&impl.wait, "wait", "w", false, "Waits for the platform to be running")
 	cmd.Flags().BoolVar(&impl.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
 	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
@@ -66,6 +70,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type installCmdOptions struct {
 	*RootCmdOptions
+	wait             bool
 	clusterSetupOnly bool
 	skipClusterSetup bool
 	exampleSetup     bool
@@ -155,6 +160,13 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 		}
 
 		if collection == nil {
+			if o.wait {
+				err = o.waitForPlatformReady(platform)
+				if err != nil {
+					return err
+				}
+			}
+
 			fmt.Println("Camel K installed in namespace", namespace)
 		}
 	}
@@ -185,4 +197,26 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 		return errors.New("unknown output format: " + o.outputFormat)
 	}
 	return nil
+}
+
+func (o *installCmdOptions) waitForPlatformReady(platform *v1alpha1.IntegrationPlatform) error {
+	handler := func(i *v1alpha1.IntegrationPlatform) bool {
+		if i.Status.Phase != "" {
+			fmt.Println("platform \""+platform.Name+"\" in phase", i.Status.Phase)
+
+			if i.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+				// TODO display some error info when available in the status
+				return false
+			}
+
+			if i.Status.Phase == v1alpha1.IntegrationPlatformPhaseError {
+				fmt.Println("platform installation failed")
+				return false
+			}
+		}
+
+		return true
+	}
+
+	return watch.HandlePlatformStateChanges(o.Context, platform, handler)
 }
