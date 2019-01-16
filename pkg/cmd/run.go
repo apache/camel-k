@@ -227,7 +227,7 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integratio
 		return true
 	}
 
-	return watch.HandleStateChanges(o.Context, integration, handler)
+	return watch.HandleIntegrationStateChanges(o.Context, integration, handler)
 }
 
 func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error {

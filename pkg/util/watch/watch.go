@@ -20,19 +20,20 @@ package watch
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
 //
-// HandleStateChanges watches a integration resource and invoke the given handler when its status changes.
+// HandleIntegrationStateChanges watches a integration resource and invoke the given handler when its status changes.
 //
-//     err := watch.HandleStateChanges(ctx, integration, func(i *v1alpha1.Integration) bool {
+//     err := watch.HandleIntegrationStateChanges(ctx, integration, func(i *v1alpha1.Integration) bool {
 //         if i.Status.Phase == v1alpha1.IntegrationPhaseRunning {
 //			    return false
 //		    }
@@ -42,8 +43,8 @@ import (
 //
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
 //
-func HandleStateChanges(ctx context.Context, integration *v1alpha1.Integration, handler func(integration *v1alpha1.Integration) bool) error {
-	dynamicClient, err := customclient.GetDynamicClientFor(v1alpha1.SchemeGroupVersion.Group, v1alpha1.SchemeGroupVersion.Version, "integrations", integration.Namespace)
+func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.Integration, handler func(integration *v1alpha1.Integration) bool) error {
+	dynamicClient, err := customclient.GetDefaultDynamicClientFor("integrations", integration.Namespace)
 	if err != nil {
 		return err
 	}
@@ -70,23 +71,84 @@ func HandleStateChanges(ctx context.Context, integration *v1alpha1.Integration, 
 
 			if e.Object != nil {
 				if runtimeUnstructured, ok := e.Object.(runtime.Unstructured); ok {
-					unstr := unstructured.Unstructured{
-						Object: runtimeUnstructured.UnstructuredContent(),
-					}
-					jsondata, err := unstr.MarshalJSON()
+					jsondata, err := kubernetes.ToJSON(runtimeUnstructured)
 					if err != nil {
 						return err
 					}
-					icopy := integration.DeepCopy()
-					err = json.Unmarshal(jsondata, icopy)
+					copy := integration.DeepCopy()
+					err = json.Unmarshal(jsondata, copy)
 					if err != nil {
 						logrus.Error("Unexpected error detected when watching resource", err)
 						return nil
 					}
 
-					if lastObservedState == nil || *lastObservedState != icopy.Status.Phase {
-						lastObservedState = &icopy.Status.Phase
-						if !handler(icopy) {
+					if lastObservedState == nil || *lastObservedState != copy.Status.Phase {
+						lastObservedState = &copy.Status.Phase
+						if !handler(copy) {
+							return nil
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+//
+// HandlePlatformStateChanges watches a platform resource and invoke the given handler when its status changes.
+//
+//     err := watch.HandlePlatformStateChanges(ctx, platform, func(i *v1alpha1.IntegrationPlatform) bool {
+//         if i.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+//			    return false
+//		    }
+//
+//		    return true
+//	    })
+//
+// This function blocks until the handler function returns true or either the events channel or the context is closed.
+//
+func HandlePlatformStateChanges(ctx context.Context, platform *v1alpha1.IntegrationPlatform, handler func(platform *v1alpha1.IntegrationPlatform) bool) error {
+	dynamicClient, err := customclient.GetDefaultDynamicClientFor("integrationplatforms", platform.Namespace)
+	if err != nil {
+		return err
+	}
+	watcher, err := dynamicClient.Watch(metav1.ListOptions{
+		FieldSelector: "metadata.name=" + platform.Name,
+	})
+	if err != nil {
+		return err
+	}
+
+	defer watcher.Stop()
+	events := watcher.ResultChan()
+
+	var lastObservedState *v1alpha1.IntegrationPlatformPhase
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case e, ok := <-events:
+			if !ok {
+				return nil
+			}
+
+			if e.Object != nil {
+				if runtimeUnstructured, ok := e.Object.(runtime.Unstructured); ok {
+					jsondata, err := kubernetes.ToJSON(runtimeUnstructured)
+					if err != nil {
+						return err
+					}
+					copy := platform.DeepCopy()
+					err = json.Unmarshal(jsondata, copy)
+					if err != nil {
+						logrus.Error("Unexpected error detected when watching resource", err)
+						return nil
+					}
+
+					if lastObservedState == nil || *lastObservedState != copy.Status.Phase {
+						lastObservedState = &copy.Status.Phase
+						if !handler(copy) {
 							return nil
 						}
 					}
