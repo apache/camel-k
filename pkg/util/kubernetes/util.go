@@ -18,11 +18,17 @@ limitations under the License.
 package kubernetes
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/client"
+
 	"gopkg.in/yaml.v2"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ToJSON --
@@ -53,4 +59,29 @@ func JSONToYAML(src []byte) ([]byte, error) {
 	}
 
 	return yamldata, nil
+}
+
+// GetConfigMap --
+func GetConfigMap(context context.Context, client client.Client, name string, namespace string) (*corev1.ConfigMap, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+
+	if err := client.Get(context, key, &cm); err != nil {
+		return nil, err
+	}
+
+	return &cm, nil
 }

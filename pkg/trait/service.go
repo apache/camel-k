@@ -51,7 +51,11 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.Auto == nil || *t.Auto {
-		meta := metadata.ExtractAll(e.Integration.Spec.Sources)
+		sources, err := e.ResolveSources(t.ctx, t.client)
+		if err != nil {
+			return false, err
+		}
+		meta := metadata.ExtractAll(sources)
 		if !meta.RequiresHTTPService {
 			return false, nil
 		}

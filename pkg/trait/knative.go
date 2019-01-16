@@ -80,7 +80,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		// Check the right value for minScale, as not all services are allowed to scale down to 0
 		if t.MinScale == nil {
-			meta := metadata.ExtractAll(e.Integration.Spec.Sources)
+			sources, err := e.ResolveSources(t.ctx, t.client)
+			if err != nil {
+				return false, err
+			}
+			meta := metadata.ExtractAll(sources)
 			if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
 				single := 1
 				t.MinScale = &single
@@ -138,57 +142,19 @@ func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 		envvar.SetVal(&environment, key, value)
 	})
 
+	sourcesSpecs, err := e.ResolveSources(t.ctx, t.client)
+	if err != nil {
+		return nil, err
+	}
+
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
-	for i, s := range e.Integration.Sources() {
-
-		content := s.Content
-		if s.ContentRef != "" {
-			//
-			// Try to check if the config map is among the one
-			// creates for the deployment
-			//
-			cm := e.Resources.RemoveConfigMap(func(m *corev1.ConfigMap) bool {
-				return m.Name == s.ContentRef
-			})
-
-			//
-			// if not, try to get it from the kubernetes cluster
-			//
-			if cm == nil {
-				key := k8sclient.ObjectKey{
-					Name:      s.ContentRef,
-					Namespace: e.Integration.Namespace,
-				}
-
-				cm = &corev1.ConfigMap{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "ConfigMap",
-						APIVersion: "v1",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      s.ContentRef,
-						Namespace: e.Integration.Namespace,
-					},
-				}
-
-				if err := t.client.Get(t.ctx, key, cm); err != nil {
-					return nil, err
-				}
-			}
-
-			if cm == nil {
-				return nil, fmt.Errorf("unable to find a COnfigMap with name: %s in the namespace: %s", s.ContentRef, e.Integration.Namespace)
-			}
-
-			content = cm.Data["content"]
-		}
-
-		if content == "" {
+	for i, s := range sourcesSpecs {
+		if s.Content == "" {
 			logrus.Warnf("Source %s has empty content", s.Name)
 		}
 
 		envName := fmt.Sprintf("CAMEL_K_ROUTE_%03d", i)
-		envvar.SetVal(&environment, envName, content)
+		envvar.SetVal(&environment, envName, s.Content)
 
 		params := make([]string, 0)
 		if s.InferLanguage() != "" {
