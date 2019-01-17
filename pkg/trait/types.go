@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"k8s.io/api/core/v1"
@@ -91,6 +92,15 @@ type Environment struct {
 	ExecutedTraits []Trait
 	EnvVars        []v1.EnvVar
 }
+
+// ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
+type ControllerStrategy string
+
+// List of controller strategies
+const (
+	ControllerStrategyDeployment     = "deployment"
+	ControllerStrategyKnativeService = "knative-service"
+)
 
 // GetTrait --
 func (e *Environment) GetTrait(id ID) Trait {
@@ -178,4 +188,25 @@ func (e *Environment) ResolveSources(context context.Context, client client.Clie
 	}
 
 	return sources, nil
+}
+
+// DetermineControllerStrategy determines the type of controller that should be used for the integration
+func (e *Environment) DetermineControllerStrategy(ctx context.Context, c client.Client) (ControllerStrategy, error) {
+	if e.DetermineProfile() != v1alpha1.TraitProfileKnative {
+		return ControllerStrategyDeployment, nil
+	}
+
+	var sources []v1alpha1.SourceSpec
+	var err error
+	if sources, err = e.ResolveSources(ctx, c); err != nil {
+		return "", err
+	}
+
+	// In Knative profile: use knative service only if needed
+	meta := metadata.ExtractAll(sources)
+	if !meta.RequiresHTTPService {
+		return ControllerStrategyDeployment, nil
+	}
+
+	return ControllerStrategyKnativeService, nil
 }
