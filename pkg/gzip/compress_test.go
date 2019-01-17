@@ -18,8 +18,9 @@ limitations under the License.
 package gzip
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCompression(t *testing.T) {

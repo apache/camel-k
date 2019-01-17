@@ -63,7 +63,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 
 	var strategy ControllerStrategy
 	var err error
-	if strategy, err = DetermineControllerStrategy(t.ctx, t.client, e); err != nil {
+	if strategy, err = e.DetermineControllerStrategy(t.ctx, t.client); err != nil {
 		return false, err
 	}
 	if strategy != ControllerStrategyKnativeService {
@@ -84,12 +84,12 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	if t.Auto == nil || *t.Auto {
 		// Check the right value for minScale, as not all services are allowed to scale down to 0
 		if t.MinScale == nil {
-			sources := e.Integration.Sources()
-			var err error
-			if sources, err = GetEnrichedSources(t.ctx, t.client, e, sources); err != nil {
+			var sources []v1alpha1.SourceSpec
+			if sources, err = e.ResolveSources(t.ctx, t.client); err != nil {
 				return false, err
 			}
 			meta := metadata.ExtractAll(sources)
+
 			if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
 				single := 1
 				t.MinScale = &single
@@ -128,20 +128,13 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		envvar.SetVal(&environment, key, value)
 	})
 
-	sourceSpecs, err := GetEnrichedSources(t.ctx, t.client, e, e.Integration.Sources())
+	sourcesSpecs, err := e.ResolveSources(t.ctx, t.client)
 	if err != nil {
 		return nil, err
 	}
-	sources := make([]string, 0, len(sourceSpecs))
-	for i, s := range sourceSpecs {
-		if s.ContentRef != "" {
-			// Remove the configmap if present among the ones created for the deployment
-			sourceSpec := s
-			e.Resources.RemoveConfigMap(func(m *corev1.ConfigMap) bool {
-				return m.Name == sourceSpec.ContentRef
-			})
-		}
 
+	sources := make([]string, 0, len(e.Integration.Spec.Sources))
+	for i, s := range sourcesSpecs {
 		if s.Content == "" {
 			logrus.Warnf("Source %s has empty content", s.Name)
 		}
