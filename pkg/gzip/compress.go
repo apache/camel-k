@@ -78,17 +78,16 @@ func Uncompress(buffer io.Writer, data []byte) error {
 
 // UncompressBase64 --
 func UncompressBase64(data []byte) ([]byte, error) {
+	d, err := base64.StdEncoding.DecodeString(string(data))
+	if err != nil {
+		return []byte{}, err
+	}
+
 	var b bytes.Buffer
-
-	err := Uncompress(&b, data)
+	err = Uncompress(&b, d)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	d, err := base64.StdEncoding.DecodeString(b.String())
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return d, nil
+	return b.Bytes(), nil
 }
