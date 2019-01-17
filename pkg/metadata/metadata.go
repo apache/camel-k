@@ -21,7 +21,9 @@ import (
 	"sort"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/gzip"
 	src "github.com/apache/camel-k/pkg/util/source"
+	"github.com/sirupsen/logrus"
 )
 
 // ExtractAll returns metadata information from all listed source codes
@@ -68,6 +70,12 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 
 // Extract returns metadata information from the source code
 func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
+	var err error
+	source, err = uncompress(source)
+	if err != nil {
+		logrus.Errorf("unable to uncompress source %s: %v", source.Name, err)
+	}
+
 	language := source.InferLanguage()
 
 	m := IntegrationMetadata{}
@@ -90,4 +98,20 @@ func Each(sources []v1alpha1.SourceSpec, consumer func(int, IntegrationMetadata)
 			break
 		}
 	}
+}
+
+func uncompress(spec v1alpha1.SourceSpec) (v1alpha1.SourceSpec, error) {
+	if spec.Compression {
+		data := []byte(spec.Content)
+		var uncompressed []byte
+		var err error
+		if uncompressed, err = gzip.UncompressBase64(data); err != nil {
+			return spec, err
+		}
+		newSpec := spec
+		newSpec.Compression = false
+		newSpec.Content = string(uncompressed)
+		return newSpec, nil
+	}
+	return spec, nil
 }
