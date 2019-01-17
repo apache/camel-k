@@ -30,41 +30,43 @@ import (
 
 // Catalog collects all information about traits in one place
 type Catalog struct {
-	tDebug        Trait
-	tDependencies Trait
-	tDeployment   Trait
-	tKnative      Trait
-	tService      Trait
-	tRoute        Trait
-	tIngress      Trait
-	tOwner        Trait
-	tImages       Trait
-	tBuilder      Trait
-	tSpringBoot   Trait
-	tIstio        Trait
-	tEnvironment  Trait
-	tClasspath    Trait
-	tRest         Trait
+	tDebug          Trait
+	tDependencies   Trait
+	tDeployment     Trait
+	tKnativeService Trait
+	tKnative        Trait
+	tService        Trait
+	tRoute          Trait
+	tIngress        Trait
+	tOwner          Trait
+	tImages         Trait
+	tBuilder        Trait
+	tSpringBoot     Trait
+	tIstio          Trait
+	tEnvironment    Trait
+	tClasspath      Trait
+	tRest           Trait
 }
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
-		tDebug:        newDebugTrait(),
-		tRest:         newRestTrait(),
-		tDependencies: newDependenciesTrait(),
-		tDeployment:   newDeploymentTrait(),
-		tKnative:      newKnativeTrait(),
-		tService:      newServiceTrait(),
-		tRoute:        newRouteTrait(),
-		tIngress:      newIngressTrait(),
-		tOwner:        newOwnerTrait(),
-		tImages:       newImagesTrait(),
-		tBuilder:      newBuilderTrait(),
-		tSpringBoot:   newSpringBootTrait(),
-		tIstio:        newIstioTrait(),
-		tEnvironment:  newEnvironmentTrait(),
-		tClasspath:    newClasspathTrait(),
+		tDebug:          newDebugTrait(),
+		tRest:           newRestTrait(),
+		tKnative:        newKnativeTrait(),
+		tDependencies:   newDependenciesTrait(),
+		tDeployment:     newDeploymentTrait(),
+		tKnativeService: newKnativeServiceTrait(),
+		tService:        newServiceTrait(),
+		tRoute:          newRouteTrait(),
+		tIngress:        newIngressTrait(),
+		tOwner:          newOwnerTrait(),
+		tImages:         newImagesTrait(),
+		tBuilder:        newBuilderTrait(),
+		tSpringBoot:     newSpringBootTrait(),
+		tIstio:          newIstioTrait(),
+		tEnvironment:    newEnvironmentTrait(),
+		tClasspath:      newClasspathTrait(),
 	}
 
 	for _, t := range catalog.allTraits() {
@@ -82,9 +84,10 @@ func (c *Catalog) allTraits() []Trait {
 	return []Trait{
 		c.tDebug,
 		c.tRest,
+		c.tKnative,
 		c.tDependencies,
 		c.tDeployment,
-		c.tKnative,
+		c.tKnativeService,
 		c.tService,
 		c.tRoute,
 		c.tIngress,
@@ -134,14 +137,15 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tDebug,
 			c.tRest,
+			c.tKnative,
 			c.tDependencies,
 			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
 			c.tClasspath,
 			c.tSpringBoot,
-			c.tKnative,
 			c.tDeployment,
+			c.tKnativeService,
 			c.tIstio,
 			c.tOwner,
 		}

@@ -52,9 +52,14 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 
 	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
 		//
-		// Don't deploy on knative
+		// Don't deploy when a different strategy is needed (e.g. Knative)
 		//
-		return e.DetermineProfile() != v1alpha1.TraitProfileKnative, nil
+		var strategy ControllerStrategy
+		var err error
+		if strategy, err = DetermineControllerStrategy(t.ctx, t.client, e); err != nil {
+			return false, err
+		}
+		return strategy == ControllerStrategyDeployment, nil
 	}
 
 	if t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {

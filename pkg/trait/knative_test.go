@@ -37,7 +37,7 @@ import (
 )
 
 func TestKnativeTraitWithCompressedSources(t *testing.T) {
-	content := "H4sIAAAAAAAA/+JKK8rP1VAvycxNLbIqyUzOVtfkUlBQUNAryddQz8lPt8rMS8tX1+QCAAAA//8BAAD//3wZ4pUoAAAA"
+	content := "H4sIAOJoQFwAA+NKK8rP1VAqzUtJLSrJL7fKKCkpsNLXN9ADQysLAwsD/YLEkgwlTS4FINAryddQz8lPt8rMS8tX1+TiAgAya2XzQAAAAA=="
 
 	environment := Environment{
 		Integration: &v1alpha1.Integration{
@@ -137,7 +137,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 }
 
 func TestKnativeTraitWithConfigMapSources(t *testing.T) {
-	content := "H4sIAAAAAAAA/+JKK8rP1VAvycxNLbIqyUzOVtfkUlBQUNAryddQz8lPt8rMS8tX1+QCAAAA//8BAAD//3wZ4pUoAAAA"
+	content := "H4sIAOJoQFwAA+NKK8rP1VAqzUtJLSrJL7fKKCkpsNLXN9ADQysLAwsD/YLEkgwlTS4FINAryddQz8lPt8rMS8tX1+TiAgAya2XzQAAAAA=="
 
 	environment := Environment{
 		Integration: &v1alpha1.Integration{

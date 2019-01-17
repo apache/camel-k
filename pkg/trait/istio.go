@@ -29,7 +29,8 @@ type istioTrait struct {
 }
 
 const (
-	istioIncludeAnnotation = "traffic.sidecar.istio.io/includeOutboundIPRanges"
+	istioSidecarInjectAnnotation    = "sidecar.istio.io/inject"
+	istioOutboundIPRangesAnnotation = "traffic.sidecar.istio.io/includeOutboundIPRanges"
 )
 
 func newIstioTrait() *istioTrait {
@@ -52,19 +53,22 @@ func (t *istioTrait) Configure(e *Environment) (bool, error) {
 func (t *istioTrait) Apply(e *Environment) error {
 	if t.Allow != "" {
 		e.Resources.VisitDeployment(func(d *appsv1.Deployment) {
-			d.Spec.Template.Annotations = t.injectIstioAnnotation(d.Spec.Template.Annotations)
+			d.Spec.Template.Annotations = t.injectIstioAnnotation(d.Spec.Template.Annotations, true)
 		})
 		e.Resources.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
-			cs.RevisionTemplate.Annotations = t.injectIstioAnnotation(cs.RevisionTemplate.Annotations)
+			cs.RevisionTemplate.Annotations = t.injectIstioAnnotation(cs.RevisionTemplate.Annotations, false)
 		})
 	}
 	return nil
 }
 
-func (t *istioTrait) injectIstioAnnotation(annotations map[string]string) map[string]string {
+func (t *istioTrait) injectIstioAnnotation(annotations map[string]string, includeInject bool) map[string]string {
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
-	annotations[istioIncludeAnnotation] = t.Allow
+	annotations[istioOutboundIPRangesAnnotation] = t.Allow
+	if includeInject {
+		annotations[istioSidecarInjectAnnotation] = "true"
+	}
 	return annotations
 }
