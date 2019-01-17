@@ -57,7 +57,8 @@ func containsHTTPURIs(fromURI []string) bool {
 		scheme, ok := camel.Runtime.GetScheme(prefix)
 
 		if !ok {
-			return false
+			// scheme dees not exists
+			continue
 		}
 
 		if scheme.HTTP {
