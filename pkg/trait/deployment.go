@@ -56,7 +56,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		//
 		var strategy ControllerStrategy
 		var err error
-		if strategy, err = DetermineControllerStrategy(t.ctx, t.client, e); err != nil {
+		if strategy, err = e.DetermineControllerStrategy(t.ctx, t.client); err != nil {
 			return false, err
 		}
 		return strategy == ControllerStrategyDeployment, nil
