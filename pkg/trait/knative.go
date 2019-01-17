@@ -18,11 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
-
-	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
@@ -37,18 +33,11 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	knativeMinScaleAnnotation = "autoscaling.knative.dev/minScale"
-	knativeMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
-)
-
 type knativeTrait struct {
 	BaseTrait     `property:",squash"`
 	Configuration string `property:"configuration"`
 	Sources       string `property:"sources"`
 	Sinks         string `property:"sinks"`
-	MinScale      *int   `property:"minScale"`
-	MaxScale      *int   `property:"maxScale"`
 	Auto          *bool  `property:"auto"`
 }
 
@@ -78,18 +67,6 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			channels := t.getSinkChannels(e)
 			t.Sinks = strings.Join(channels, ",")
 		}
-		// Check the right value for minScale, as not all services are allowed to scale down to 0
-		if t.MinScale == nil {
-			sources, err := e.ResolveSources(t.ctx, t.client)
-			if err != nil {
-				return false, err
-			}
-			meta := metadata.ExtractAll(sources)
-			if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
-				single := 1
-				t.MinScale = &single
-			}
-		}
 	}
 
 	return true, nil
@@ -102,13 +79,6 @@ func (t *knativeTrait) Apply(e *Environment) error {
 	for _, sub := range t.getSubscriptionsFor(e) {
 		e.Resources.Add(sub)
 	}
-
-	svc, err := t.getServiceFor(e)
-	if err != nil {
-		return err
-	}
-
-	e.Resources.Add(svc)
 
 	return nil
 }
@@ -123,149 +93,6 @@ func (t *knativeTrait) prepareEnvVars(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, "CAMEL_KNATIVE_CONFIGURATION", conf)
 
 	return nil
-}
-
-func (t *knativeTrait) getServiceFor(e *Environment) (*serving.Service, error) {
-	// combine properties of integration with context, integration
-	// properties have the priority
-	properties := ""
-
-	VisitKeyValConfigurations("property", e.Context, e.Integration, func(key string, val string) {
-		properties += fmt.Sprintf("%s=%s\n", key, val)
-	})
-
-	environment := make([]corev1.EnvVar, 0)
-
-	// combine Environment of integration with context, integration
-	// Environment has the priority
-	VisitKeyValConfigurations("env", e.Context, e.Integration, func(key string, value string) {
-		envvar.SetVal(&environment, key, value)
-	})
-
-	sourcesSpecs, err := e.ResolveSources(t.ctx, t.client)
-	if err != nil {
-		return nil, err
-	}
-
-	sources := make([]string, 0, len(e.Integration.Spec.Sources))
-	for i, s := range sourcesSpecs {
-		if s.Content == "" {
-			logrus.Warnf("Source %s has empty content", s.Name)
-		}
-
-		envName := fmt.Sprintf("CAMEL_K_ROUTE_%03d", i)
-		envvar.SetVal(&environment, envName, s.Content)
-
-		params := make([]string, 0)
-		if s.InferLanguage() != "" {
-			params = append(params, "language="+string(s.InferLanguage()))
-		}
-		if s.Compression {
-			params = append(params, "compression=true")
-		}
-
-		src := fmt.Sprintf("env:%s", envName)
-		if len(params) > 0 {
-			src = fmt.Sprintf("%s?%s", src, strings.Join(params, "&"))
-		}
-
-		sources = append(sources, src)
-	}
-
-	for i, r := range e.Integration.Spec.Resources {
-		if r.Type != v1alpha1.ResourceTypeData {
-			continue
-		}
-
-		envName := fmt.Sprintf("CAMEL_K_RESOURCE_%03d", i)
-		envvar.SetVal(&environment, envName, r.Content)
-
-		params := make([]string, 0)
-		if r.Compression {
-			params = append(params, "compression=true")
-		}
-
-		envValue := fmt.Sprintf("env:%s", envName)
-		if len(params) > 0 {
-			envValue = fmt.Sprintf("%s?%s", envValue, strings.Join(params, "&"))
-		}
-
-		envName = r.Name
-		envName = strings.ToUpper(envName)
-		envName = strings.Replace(envName, "-", "_", -1)
-		envName = strings.Replace(envName, ".", "_", -1)
-		envName = strings.Replace(envName, " ", "_", -1)
-
-		envvar.SetVal(&environment, envName, envValue)
-	}
-
-	// set env vars needed by the runtime
-	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
-
-	// camel-k runtime
-	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(sources, ","))
-	envvar.SetVal(&environment, "CAMEL_K_CONF", "env:CAMEL_K_PROPERTIES")
-	envvar.SetVal(&environment, "CAMEL_K_PROPERTIES", properties)
-
-	// add a dummy env var to trigger deployment if everything but the code
-	// has been changed
-	envvar.SetVal(&environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-
-	// optimizations
-	envvar.SetVal(&environment, "AB_JOLOKIA_OFF", True)
-
-	// add env vars from traits
-	for _, envVar := range e.EnvVars {
-		envvar.SetVar(&environment, envVar)
-	}
-
-	labels := map[string]string{
-		"camel.apache.org/integration": e.Integration.Name,
-	}
-
-	annotations := make(map[string]string)
-	// Resolve registry host names when used
-	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
-	if t.MinScale != nil {
-		annotations[knativeMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
-	}
-	if t.MaxScale != nil {
-		annotations[knativeMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
-	}
-
-	svc := serving.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: serving.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        e.Integration.Name,
-			Namespace:   e.Integration.Namespace,
-			Labels:      labels,
-			Annotations: e.Integration.Annotations,
-		},
-		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{
-						ObjectMeta: metav1.ObjectMeta{
-							Labels:      labels,
-							Annotations: annotations,
-						},
-						Spec: serving.RevisionSpec{
-							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
-							Container: corev1.Container{
-								Image: e.Integration.Status.Image,
-								Env:   environment,
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	return &svc, nil
 }
 
 func (t *knativeTrait) getSubscriptionsFor(e *Environment) []*eventing.Subscription {
