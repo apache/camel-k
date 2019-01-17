@@ -58,6 +58,7 @@ func init() {
 
 	for id, artifact := range Runtime.Artifacts {
 		for _, scheme := range artifact.Schemes {
+			scheme := scheme
 			Runtime.artifactByScheme[scheme.ID] = id
 			Runtime.schemesByID[scheme.ID] = scheme
 		}
