@@ -24,6 +24,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+
 	"github.com/apache/camel-k/pkg/util/digest"
 
 	"github.com/apache/camel-k/pkg/trait"
@@ -33,7 +35,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewBuildImageAction create an action that handles integration image build
@@ -67,54 +68,74 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 
 	// look-up the integration context associated to this integration, this is needed
 	// to determine the base image
-	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, integration.Status.Context)
-	ikey := k8sclient.ObjectKey{
-		Namespace: integration.Namespace,
-		Name:      integration.Status.Context,
-	}
-	if err := action.client.Get(ctx, ikey, &ictx); err != nil {
-		return errors.Wrapf(err, "unable to find integration context %s, %s", ikey.Name, err)
+	ictx, err := kubernetes.GetIntegrationContext(action.Context, action.client, integration.Status.Context, integration.Namespace)
+	if err != nil || ictx == nil {
+		return errors.Wrapf(err, "unable to find integration context %s, %s", integration.Status.Context, err)
 	}
 
 	b, err := platform.GetPlatformBuilder(action.Context, action.client, action.namespace)
 	if err != nil {
 		return err
 	}
-	env, err := trait.Apply(ctx, action.client, integration, &ictx)
-	if err != nil {
+
+	if !b.IsBuilding(ictx.ObjectMeta) {
+		env, err := trait.Apply(ctx, action.client, integration, ictx)
+		if err != nil {
+			return err
+		}
+
+		// This build do not require to determine dependencies nor a project, the builder
+		// step do remove them
+		r := builder.Request{
+			Meta:     integration.ObjectMeta,
+			Steps:    env.Steps,
+			BuildDir: env.BuildDir,
+			Platform: env.Platform.Spec,
+			Image:    ictx.Status.Image,
+			// Sources are added as part of the standard deployment bits
+			Resources: make([]builder.Resource, 0, len(integration.Spec.Sources)),
+		}
+
+		// TODO: handle generated sources
+		// TODO: handle compressed sources
+		for _, source := range integration.Spec.Sources {
+			r.Resources = append(r.Resources, builder.Resource{
+				Content: []byte(source.Content),
+				Target:  path.Join("sources", source.Name),
+			})
+		}
+		// TODO: handle compressed resources
+		for _, resource := range integration.Spec.Resources {
+			if resource.Type != v1alpha1.ResourceTypeData {
+				continue
+			}
+			r.Resources = append(r.Resources, builder.Resource{
+				Content: []byte(resource.Content),
+				Target:  path.Join("resources", resource.Name),
+			})
+		}
+
+		b.Submit(r, func(result builder.Result) {
+			//
+			// this function is invoked synchronously for every state change
+			//
+			if err := action.handleBuildStateChange(result); err != nil {
+				logrus.Warnf("Error while building integration image %s, reason: %s", ictx.Name, err.Error())
+			}
+		})
+	}
+
+	return nil
+}
+
+func (action *buildImageAction) handleBuildStateChange(res builder.Result) error {
+	//
+	// Get the latest status of the integration
+	//
+	target, err := kubernetes.GetIntegration(action.Context, action.client, res.Request.Meta.Name, res.Request.Meta.Namespace)
+	if err != nil || target == nil {
 		return err
 	}
-
-	// This build do not require to determine dependencies nor a project, the builder
-	// step do remove them
-	r := builder.Request{
-		Meta:     integration.ObjectMeta,
-		Steps:    env.Steps,
-		BuildDir: env.BuildDir,
-		Platform: env.Platform.Spec,
-		Image:    ictx.Status.Image,
-	}
-
-	// Sources are added as part of the standard deployment bits
-	r.Resources = make([]builder.Resource, 0, len(integration.Spec.Sources))
-
-	for _, source := range integration.Spec.Sources {
-		r.Resources = append(r.Resources, builder.Resource{
-			Content: []byte(source.Content),
-			Target:  path.Join("sources", source.Name),
-		})
-	}
-	for _, resource := range integration.Spec.Resources {
-		if resource.Type != v1alpha1.ResourceTypeData {
-			continue
-		}
-		r.Resources = append(r.Resources, builder.Resource{
-			Content: []byte(resource.Content),
-			Target:  path.Join("resources", resource.Name),
-		})
-	}
-
-	res := b.Submit(r)
 
 	switch res.Status {
 	case builder.StatusSubmitted:
@@ -122,17 +143,14 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 	case builder.StatusStarted:
 		logrus.Info("Build started")
 	case builder.StatusError:
-		target := integration.DeepCopy()
+		target := target.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseError
 
 		logrus.Infof("Integration %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
-		// remove the build from cache
-		defer b.Purge(r)
-
-		return action.client.Update(ctx, target)
+		return action.client.Update(action.Context, target)
 	case builder.StatusCompleted:
-		target := integration.DeepCopy()
+		target := target.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 		if res.PublicImage != "" {
 			target.Status.Image = res.PublicImage
@@ -140,7 +158,7 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 			target.Status.Image = res.Image
 		}
 
-		dgst, err := digest.ComputeForIntegration(integration)
+		dgst, err := digest.ComputeForIntegration(target)
 		if err != nil {
 			return err
 		}
@@ -149,10 +167,7 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 
 		logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-		// remove the build from cache
-		defer b.Purge(r)
-
-		if err := action.client.Update(ctx, target); err != nil {
+		if err := action.client.Update(action.Context, target); err != nil {
 			return err
 		}
 	}
