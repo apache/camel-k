@@ -42,7 +42,7 @@ spec:
 `
 	Resources["camel-catalog.yaml"] =
 		`
-version: 2.23.0
+version: 2.23.1
 artifacts:
   camel-ahc:
     artifactId: camel-ahc
@@ -53,7 +53,7 @@ artifacts:
     - http: true
       id: ahc
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ahc-ws:
     artifactId: camel-ahc-ws
     dataformats: []
@@ -66,7 +66,7 @@ artifacts:
     - http: false
       id: ahc-wss
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-amqp:
     artifactId: camel-amqp
     dataformats: []
@@ -76,7 +76,7 @@ artifacts:
     - http: false
       id: amqp
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-apns:
     artifactId: camel-apns
     dataformats: []
@@ -86,7 +86,7 @@ artifacts:
     - http: false
       id: apns
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-as2:
     artifactId: camel-as2
     dataformats: []
@@ -96,7 +96,7 @@ artifacts:
     - http: false
       id: as2
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-asn1:
     artifactId: camel-asn1
     dataformats:
@@ -104,7 +104,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-asterisk:
     artifactId: camel-asterisk
     dataformats: []
@@ -114,7 +114,7 @@ artifacts:
     - http: false
       id: asterisk
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-atmos:
     artifactId: camel-atmos
     dataformats: []
@@ -124,7 +124,7 @@ artifacts:
     - http: false
       id: atmos
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-atmosphere-websocket:
     artifactId: camel-atmosphere-websocket
     dataformats: []
@@ -134,7 +134,7 @@ artifacts:
     - http: true
       id: atmosphere-websocket
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-atom:
     artifactId: camel-atom
     dataformats: []
@@ -144,7 +144,7 @@ artifacts:
     - http: false
       id: atom
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-atomix:
     artifactId: camel-atomix
     dataformats: []
@@ -169,7 +169,7 @@ artifacts:
     - http: false
       id: atomix-value
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-avro:
     artifactId: camel-avro
     dataformats:
@@ -180,7 +180,7 @@ artifacts:
     - http: false
       id: avro
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-aws:
     artifactId: camel-aws
     dataformats: []
@@ -235,7 +235,7 @@ artifacts:
     - http: false
       id: aws-swf
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-azure:
     artifactId: camel-azure
     dataformats: []
@@ -248,7 +248,7 @@ artifacts:
     - http: false
       id: azure-queue
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-barcode:
     artifactId: camel-barcode
     dataformats:
@@ -256,7 +256,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-base64:
     artifactId: camel-base64
     dataformats:
@@ -264,7 +264,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-bean-validator:
     artifactId: camel-bean-validator
     dataformats: []
@@ -274,7 +274,7 @@ artifacts:
     - http: false
       id: bean-validator
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-beanio:
     artifactId: camel-beanio
     dataformats:
@@ -282,7 +282,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-beanstalk:
     artifactId: camel-beanstalk
     dataformats: []
@@ -292,7 +292,7 @@ artifacts:
     - http: false
       id: beanstalk
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-bindy:
     artifactId: camel-bindy
     dataformats:
@@ -302,7 +302,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-bonita:
     artifactId: camel-bonita
     dataformats: []
@@ -312,7 +312,7 @@ artifacts:
     - http: false
       id: bonita
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-boon:
     artifactId: camel-boon
     dataformats:
@@ -320,7 +320,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-box:
     artifactId: camel-box
     dataformats: []
@@ -330,7 +330,7 @@ artifacts:
     - http: false
       id: box
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-braintree:
     artifactId: camel-braintree
     dataformats: []
@@ -340,7 +340,7 @@ artifacts:
     - http: false
       id: braintree
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-cache:
     artifactId: camel-cache
     dataformats: []
@@ -350,7 +350,7 @@ artifacts:
     - http: false
       id: cache
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-caffeine:
     artifactId: camel-caffeine
     dataformats: []
@@ -363,7 +363,7 @@ artifacts:
     - http: false
       id: caffeine-loadcache
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-cassandraql:
     artifactId: camel-cassandraql
     dataformats: []
@@ -373,7 +373,7 @@ artifacts:
     - http: false
       id: cql
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-castor:
     artifactId: camel-castor
     dataformats:
@@ -381,7 +381,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-chronicle:
     artifactId: camel-chronicle
     dataformats: []
@@ -391,7 +391,7 @@ artifacts:
     - http: false
       id: chronicle-engine
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-chunk:
     artifactId: camel-chunk
     dataformats: []
@@ -401,7 +401,7 @@ artifacts:
     - http: false
       id: chunk
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-cm-sms:
     artifactId: camel-cm-sms
     dataformats: []
@@ -411,7 +411,7 @@ artifacts:
     - http: false
       id: cm-sms
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-cmis:
     artifactId: camel-cmis
     dataformats: []
@@ -421,7 +421,7 @@ artifacts:
     - http: false
       id: cmis
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-coap:
     artifactId: camel-coap
     dataformats: []
@@ -431,7 +431,7 @@ artifacts:
     - http: false
       id: coap
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-cometd:
     artifactId: camel-cometd
     dataformats: []
@@ -444,7 +444,7 @@ artifacts:
     - http: false
       id: cometds
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-consul:
     artifactId: camel-consul
     dataformats: []
@@ -454,7 +454,7 @@ artifacts:
     - http: false
       id: consul
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-context:
     artifactId: camel-context
     dataformats: []
@@ -464,7 +464,7 @@ artifacts:
     - http: false
       id: context
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-core:
     artifactId: camel-core
     dataformats:
@@ -563,7 +563,7 @@ artifacts:
     - http: false
       id: xslt
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-couchbase:
     artifactId: camel-couchbase
     dataformats: []
@@ -573,7 +573,7 @@ artifacts:
     - http: false
       id: couchbase
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-couchdb:
     artifactId: camel-couchdb
     dataformats: []
@@ -583,7 +583,7 @@ artifacts:
     - http: false
       id: couchdb
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-crypto:
     artifactId: camel-crypto
     dataformats:
@@ -595,7 +595,7 @@ artifacts:
     - http: false
       id: crypto
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-crypto-cms:
     artifactId: camel-crypto-cms
     dataformats: []
@@ -605,7 +605,7 @@ artifacts:
     - http: false
       id: crypto-cms
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-csv:
     artifactId: camel-csv
     dataformats:
@@ -613,7 +613,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-cxf:
     artifactId: camel-cxf
     dataformats: []
@@ -626,7 +626,7 @@ artifacts:
     - http: true
       id: cxfrs
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-digitalocean:
     artifactId: camel-digitalocean
     dataformats: []
@@ -636,7 +636,7 @@ artifacts:
     - http: false
       id: digitalocean
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-disruptor:
     artifactId: camel-disruptor
     dataformats: []
@@ -649,7 +649,7 @@ artifacts:
     - http: false
       id: disruptor-vm
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-dns:
     artifactId: camel-dns
     dataformats: []
@@ -659,7 +659,7 @@ artifacts:
     - http: false
       id: dns
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-docker:
     artifactId: camel-docker
     dataformats: []
@@ -669,7 +669,7 @@ artifacts:
     - http: false
       id: docker
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-dozer:
     artifactId: camel-dozer
     dataformats: []
@@ -679,7 +679,7 @@ artifacts:
     - http: false
       id: dozer
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-drill:
     artifactId: camel-drill
     dataformats: []
@@ -689,7 +689,7 @@ artifacts:
     - http: false
       id: drill
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-dropbox:
     artifactId: camel-dropbox
     dataformats: []
@@ -699,7 +699,7 @@ artifacts:
     - http: false
       id: dropbox
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ehcache:
     artifactId: camel-ehcache
     dataformats: []
@@ -709,7 +709,7 @@ artifacts:
     - http: false
       id: ehcache
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ejb:
     artifactId: camel-ejb
     dataformats: []
@@ -719,7 +719,7 @@ artifacts:
     - http: false
       id: ejb
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-elasticsearch:
     artifactId: camel-elasticsearch
     dataformats: []
@@ -729,7 +729,7 @@ artifacts:
     - http: false
       id: elasticsearch
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-elasticsearch-rest:
     artifactId: camel-elasticsearch-rest
     dataformats: []
@@ -739,7 +739,7 @@ artifacts:
     - http: false
       id: elasticsearch-rest
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-elasticsearch5:
     artifactId: camel-elasticsearch5
     dataformats: []
@@ -749,7 +749,7 @@ artifacts:
     - http: false
       id: elasticsearch5
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-elsql:
     artifactId: camel-elsql
     dataformats: []
@@ -759,7 +759,7 @@ artifacts:
     - http: false
       id: elsql
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-etcd:
     artifactId: camel-etcd
     dataformats: []
@@ -769,7 +769,7 @@ artifacts:
     - http: false
       id: etcd
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-eventadmin:
     artifactId: camel-eventadmin
     dataformats: []
@@ -779,7 +779,7 @@ artifacts:
     - http: false
       id: eventadmin
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-exec:
     artifactId: camel-exec
     dataformats: []
@@ -789,7 +789,7 @@ artifacts:
     - http: false
       id: exec
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-facebook:
     artifactId: camel-facebook
     dataformats: []
@@ -799,7 +799,7 @@ artifacts:
     - http: false
       id: facebook
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-fastjson:
     artifactId: camel-fastjson
     dataformats:
@@ -807,7 +807,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-fhir:
     artifactId: camel-fhir
     dataformats:
@@ -819,7 +819,7 @@ artifacts:
     - http: false
       id: fhir
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-flatpack:
     artifactId: camel-flatpack
     dataformats:
@@ -830,7 +830,7 @@ artifacts:
     - http: false
       id: flatpack
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-flink:
     artifactId: camel-flink
     dataformats: []
@@ -840,7 +840,7 @@ artifacts:
     - http: false
       id: flink
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-fop:
     artifactId: camel-fop
     dataformats: []
@@ -850,7 +850,7 @@ artifacts:
     - http: false
       id: fop
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-freemarker:
     artifactId: camel-freemarker
     dataformats: []
@@ -860,7 +860,7 @@ artifacts:
     - http: false
       id: freemarker
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ftp:
     artifactId: camel-ftp
     dataformats: []
@@ -876,7 +876,7 @@ artifacts:
     - http: false
       id: sftp
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ganglia:
     artifactId: camel-ganglia
     dataformats: []
@@ -886,7 +886,7 @@ artifacts:
     - http: false
       id: ganglia
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-geocoder:
     artifactId: camel-geocoder
     dataformats: []
@@ -896,7 +896,7 @@ artifacts:
     - http: false
       id: geocoder
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-git:
     artifactId: camel-git
     dataformats: []
@@ -906,7 +906,7 @@ artifacts:
     - http: false
       id: git
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-github:
     artifactId: camel-github
     dataformats: []
@@ -916,7 +916,7 @@ artifacts:
     - http: false
       id: github
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-google-bigquery:
     artifactId: camel-google-bigquery
     dataformats: []
@@ -926,7 +926,7 @@ artifacts:
     - http: false
       id: google-bigquery
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-google-calendar:
     artifactId: camel-google-calendar
     dataformats: []
@@ -939,7 +939,7 @@ artifacts:
     - http: false
       id: google-calendar-stream
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-google-drive:
     artifactId: camel-google-drive
     dataformats: []
@@ -949,7 +949,7 @@ artifacts:
     - http: false
       id: google-drive
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-google-mail:
     artifactId: camel-google-mail
     dataformats: []
@@ -962,7 +962,7 @@ artifacts:
     - http: false
       id: google-mail-stream
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-google-pubsub:
     artifactId: camel-google-pubsub
     dataformats: []
@@ -972,7 +972,7 @@ artifacts:
     - http: false
       id: google-pubsub
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-google-sheets:
     artifactId: camel-google-sheets
     dataformats: []
@@ -985,7 +985,7 @@ artifacts:
     - http: false
       id: google-sheets-stream
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-gora:
     artifactId: camel-gora
     dataformats: []
@@ -995,7 +995,7 @@ artifacts:
     - http: false
       id: gora
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-grape:
     artifactId: camel-grape
     dataformats: []
@@ -1005,7 +1005,7 @@ artifacts:
     - http: false
       id: grape
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-groovy:
     artifactId: camel-groovy
     dataformats: []
@@ -1013,7 +1013,7 @@ artifacts:
     languages:
     - groovy
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-grpc:
     artifactId: camel-grpc
     dataformats: []
@@ -1023,7 +1023,7 @@ artifacts:
     - http: true
       id: grpc
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-gson:
     artifactId: camel-gson
     dataformats:
@@ -1031,7 +1031,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-guava-eventbus:
     artifactId: camel-guava-eventbus
     dataformats: []
@@ -1041,7 +1041,7 @@ artifacts:
     - http: false
       id: guava-eventbus
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-hazelcast:
     artifactId: camel-hazelcast
     dataformats: []
@@ -1081,7 +1081,7 @@ artifacts:
     - http: false
       id: hazelcast-topic
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-hbase:
     artifactId: camel-hbase
     dataformats: []
@@ -1091,7 +1091,7 @@ artifacts:
     - http: false
       id: hbase
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-hdfs:
     artifactId: camel-hdfs
     dataformats: []
@@ -1101,7 +1101,7 @@ artifacts:
     - http: false
       id: hdfs
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-hdfs2:
     artifactId: camel-hdfs2
     dataformats: []
@@ -1111,7 +1111,7 @@ artifacts:
     - http: false
       id: hdfs2
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-hessian:
     artifactId: camel-hessian
     dataformats:
@@ -1119,7 +1119,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-hipchat:
     artifactId: camel-hipchat
     dataformats: []
@@ -1129,7 +1129,7 @@ artifacts:
     - http: false
       id: hipchat
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-hl7:
     artifactId: camel-hl7
     dataformats:
@@ -1138,7 +1138,7 @@ artifacts:
     languages:
     - terser
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-http:
     artifactId: camel-http
     dataformats: []
@@ -1151,7 +1151,7 @@ artifacts:
     - http: false
       id: https
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-http4:
     artifactId: camel-http4
     dataformats: []
@@ -1164,7 +1164,7 @@ artifacts:
     - http: false
       id: https4
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ibatis:
     artifactId: camel-ibatis
     dataformats: []
@@ -1174,7 +1174,7 @@ artifacts:
     - http: false
       id: ibatis
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ical:
     artifactId: camel-ical
     dataformats:
@@ -1182,7 +1182,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-iec60870:
     artifactId: camel-iec60870
     dataformats: []
@@ -1195,7 +1195,7 @@ artifacts:
     - http: false
       id: iec60870-server
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ignite:
     artifactId: camel-ignite
     dataformats: []
@@ -1223,7 +1223,7 @@ artifacts:
     - http: false
       id: ignite-set
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-infinispan:
     artifactId: camel-infinispan
     dataformats: []
@@ -1233,7 +1233,7 @@ artifacts:
     - http: false
       id: infinispan
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-influxdb:
     artifactId: camel-influxdb
     dataformats: []
@@ -1243,7 +1243,7 @@ artifacts:
     - http: false
       id: influxdb
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ipfs:
     artifactId: camel-ipfs
     dataformats: []
@@ -1253,7 +1253,7 @@ artifacts:
     - http: false
       id: ipfs
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-irc:
     artifactId: camel-irc
     dataformats: []
@@ -1263,7 +1263,7 @@ artifacts:
     - http: false
       id: irc
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ironmq:
     artifactId: camel-ironmq
     dataformats: []
@@ -1273,7 +1273,7 @@ artifacts:
     - http: false
       id: ironmq
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jackson:
     artifactId: camel-jackson
     dataformats:
@@ -1281,7 +1281,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-jacksonxml:
     artifactId: camel-jacksonxml
     dataformats:
@@ -1289,7 +1289,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-javaspace:
     artifactId: camel-javaspace
     dataformats: []
@@ -1299,7 +1299,7 @@ artifacts:
     - http: false
       id: javaspace
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jaxb:
     artifactId: camel-jaxb
     dataformats:
@@ -1307,7 +1307,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-jbpm:
     artifactId: camel-jbpm
     dataformats: []
@@ -1317,7 +1317,7 @@ artifacts:
     - http: false
       id: jbpm
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jcache:
     artifactId: camel-jcache
     dataformats: []
@@ -1327,7 +1327,7 @@ artifacts:
     - http: false
       id: jcache
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jclouds:
     artifactId: camel-jclouds
     dataformats: []
@@ -1337,7 +1337,7 @@ artifacts:
     - http: false
       id: jclouds
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jcr:
     artifactId: camel-jcr
     dataformats: []
@@ -1347,7 +1347,7 @@ artifacts:
     - http: false
       id: jcr
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jdbc:
     artifactId: camel-jdbc
     dataformats: []
@@ -1357,7 +1357,7 @@ artifacts:
     - http: false
       id: jdbc
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jetty9:
     artifactId: camel-jetty9
     dataformats: []
@@ -1367,7 +1367,7 @@ artifacts:
     - http: true
       id: jetty
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jgroups:
     artifactId: camel-jgroups
     dataformats: []
@@ -1377,7 +1377,7 @@ artifacts:
     - http: false
       id: jgroups
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jibx:
     artifactId: camel-jibx
     dataformats:
@@ -1385,7 +1385,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-jing:
     artifactId: camel-jing
     dataformats: []
@@ -1395,7 +1395,7 @@ artifacts:
     - http: false
       id: jing
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jira:
     artifactId: camel-jira
     dataformats: []
@@ -1405,7 +1405,7 @@ artifacts:
     - http: false
       id: jira
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jms:
     artifactId: camel-jms
     dataformats: []
@@ -1415,7 +1415,7 @@ artifacts:
     - http: false
       id: jms
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jmx:
     artifactId: camel-jmx
     dataformats: []
@@ -1425,7 +1425,7 @@ artifacts:
     - http: false
       id: jmx
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-johnzon:
     artifactId: camel-johnzon
     dataformats:
@@ -1433,7 +1433,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-jolt:
     artifactId: camel-jolt
     dataformats: []
@@ -1443,7 +1443,7 @@ artifacts:
     - http: false
       id: jolt
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-josql:
     artifactId: camel-josql
     dataformats: []
@@ -1451,7 +1451,7 @@ artifacts:
     languages:
     - sql
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-jpa:
     artifactId: camel-jpa
     dataformats: []
@@ -1461,7 +1461,7 @@ artifacts:
     - http: false
       id: jpa
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jsch:
     artifactId: camel-jsch
     dataformats: []
@@ -1471,7 +1471,7 @@ artifacts:
     - http: false
       id: scp
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-json-validator:
     artifactId: camel-json-validator
     dataformats: []
@@ -1481,7 +1481,7 @@ artifacts:
     - http: false
       id: json-validator
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-jsonpath:
     artifactId: camel-jsonpath
     dataformats: []
@@ -1489,7 +1489,7 @@ artifacts:
     languages:
     - jsonpath
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-jt400:
     artifactId: camel-jt400
     dataformats: []
@@ -1499,7 +1499,7 @@ artifacts:
     - http: false
       id: jt400
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-juel:
     artifactId: camel-juel
     dataformats: []
@@ -1507,7 +1507,7 @@ artifacts:
     languages:
     - el
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-jxpath:
     artifactId: camel-jxpath
     dataformats: []
@@ -1515,7 +1515,7 @@ artifacts:
     languages:
     - jxpath
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-kafka:
     artifactId: camel-kafka
     dataformats: []
@@ -1525,7 +1525,7 @@ artifacts:
     - http: false
       id: kafka
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-kestrel:
     artifactId: camel-kestrel
     dataformats: []
@@ -1535,7 +1535,7 @@ artifacts:
     - http: false
       id: kestrel
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-knative:
     artifactId: camel-knative
     dataformats: []
@@ -1555,7 +1555,7 @@ artifacts:
     - http: false
       id: krati
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-kubernetes:
     artifactId: camel-kubernetes
     dataformats: []
@@ -1613,7 +1613,7 @@ artifacts:
     - http: false
       id: openshift-builds
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ldap:
     artifactId: camel-ldap
     dataformats: []
@@ -1623,7 +1623,7 @@ artifacts:
     - http: false
       id: ldap
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ldif:
     artifactId: camel-ldif
     dataformats: []
@@ -1633,7 +1633,7 @@ artifacts:
     - http: false
       id: ldif
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-linkedin:
     artifactId: camel-linkedin
     dataformats: []
@@ -1643,7 +1643,7 @@ artifacts:
     - http: false
       id: linkedin
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-lucene:
     artifactId: camel-lucene
     dataformats: []
@@ -1653,7 +1653,7 @@ artifacts:
     - http: false
       id: lucene
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-lumberjack:
     artifactId: camel-lumberjack
     dataformats: []
@@ -1663,7 +1663,7 @@ artifacts:
     - http: false
       id: lumberjack
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-lzf:
     artifactId: camel-lzf
     dataformats:
@@ -1671,7 +1671,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-mail:
     artifactId: camel-mail
     dataformats:
@@ -1697,7 +1697,7 @@ artifacts:
     - http: false
       id: smtps
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-master:
     artifactId: camel-master
     dataformats: []
@@ -1707,7 +1707,7 @@ artifacts:
     - http: false
       id: master
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-metrics:
     artifactId: camel-metrics
     dataformats: []
@@ -1717,7 +1717,7 @@ artifacts:
     - http: false
       id: metrics
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-micrometer:
     artifactId: camel-micrometer
     dataformats: []
@@ -1727,7 +1727,7 @@ artifacts:
     - http: false
       id: micrometer
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-milo:
     artifactId: camel-milo
     dataformats: []
@@ -1740,7 +1740,7 @@ artifacts:
     - http: false
       id: milo-server
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mina:
     artifactId: camel-mina
     dataformats: []
@@ -1750,7 +1750,7 @@ artifacts:
     - http: false
       id: mina
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mina2:
     artifactId: camel-mina2
     dataformats: []
@@ -1760,7 +1760,7 @@ artifacts:
     - http: false
       id: mina2
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mllp:
     artifactId: camel-mllp
     dataformats: []
@@ -1770,7 +1770,7 @@ artifacts:
     - http: false
       id: mllp
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mongodb:
     artifactId: camel-mongodb
     dataformats: []
@@ -1780,7 +1780,7 @@ artifacts:
     - http: false
       id: mongodb
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mongodb-gridfs:
     artifactId: camel-mongodb-gridfs
     dataformats: []
@@ -1790,7 +1790,7 @@ artifacts:
     - http: false
       id: mongodb-gridfs
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mongodb3:
     artifactId: camel-mongodb3
     dataformats: []
@@ -1800,7 +1800,7 @@ artifacts:
     - http: false
       id: mongodb3
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mqtt:
     artifactId: camel-mqtt
     dataformats: []
@@ -1810,7 +1810,7 @@ artifacts:
     - http: false
       id: mqtt
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-msv:
     artifactId: camel-msv
     dataformats: []
@@ -1820,7 +1820,7 @@ artifacts:
     - http: false
       id: msv
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mustache:
     artifactId: camel-mustache
     dataformats: []
@@ -1830,7 +1830,7 @@ artifacts:
     - http: false
       id: mustache
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mvel:
     artifactId: camel-mvel
     dataformats: []
@@ -1841,7 +1841,7 @@ artifacts:
     - http: false
       id: mvel
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-mybatis:
     artifactId: camel-mybatis
     dataformats: []
@@ -1854,7 +1854,7 @@ artifacts:
     - http: false
       id: mybatis-bean
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-nagios:
     artifactId: camel-nagios
     dataformats: []
@@ -1864,7 +1864,7 @@ artifacts:
     - http: false
       id: nagios
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-nats:
     artifactId: camel-nats
     dataformats: []
@@ -1874,7 +1874,7 @@ artifacts:
     - http: false
       id: nats
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-netty:
     artifactId: camel-netty
     dataformats: []
@@ -1884,7 +1884,7 @@ artifacts:
     - http: false
       id: netty
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-netty-http:
     artifactId: camel-netty-http
     dataformats: []
@@ -1894,7 +1894,7 @@ artifacts:
     - http: true
       id: netty-http
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-netty4:
     artifactId: camel-netty4
     dataformats: []
@@ -1904,7 +1904,7 @@ artifacts:
     - http: false
       id: netty4
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-netty4-http:
     artifactId: camel-netty4-http
     dataformats: []
@@ -1914,7 +1914,7 @@ artifacts:
     - http: true
       id: netty4-http
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-nsq:
     artifactId: camel-nsq
     dataformats: []
@@ -1924,7 +1924,7 @@ artifacts:
     - http: false
       id: nsq
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ognl:
     artifactId: camel-ognl
     dataformats: []
@@ -1932,7 +1932,7 @@ artifacts:
     languages:
     - ognl
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-olingo2:
     artifactId: camel-olingo2
     dataformats: []
@@ -1942,7 +1942,7 @@ artifacts:
     - http: false
       id: olingo2
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-olingo4:
     artifactId: camel-olingo4
     dataformats: []
@@ -1952,7 +1952,7 @@ artifacts:
     - http: false
       id: olingo4
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-openshift:
     artifactId: camel-openshift
     dataformats: []
@@ -1962,7 +1962,7 @@ artifacts:
     - http: false
       id: openshift
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-openstack:
     artifactId: camel-openstack
     dataformats: []
@@ -1987,7 +1987,7 @@ artifacts:
     - http: false
       id: openstack-swift
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-optaplanner:
     artifactId: camel-optaplanner
     dataformats: []
@@ -1997,7 +1997,7 @@ artifacts:
     - http: false
       id: optaplanner
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-paho:
     artifactId: camel-paho
     dataformats: []
@@ -2007,7 +2007,7 @@ artifacts:
     - http: false
       id: paho
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-paxlogging:
     artifactId: camel-paxlogging
     dataformats: []
@@ -2017,7 +2017,7 @@ artifacts:
     - http: false
       id: paxlogging
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-pdf:
     artifactId: camel-pdf
     dataformats: []
@@ -2027,7 +2027,7 @@ artifacts:
     - http: false
       id: pdf
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-pgevent:
     artifactId: camel-pgevent
     dataformats: []
@@ -2037,7 +2037,7 @@ artifacts:
     - http: false
       id: pgevent
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-printer:
     artifactId: camel-printer
     dataformats: []
@@ -2047,7 +2047,7 @@ artifacts:
     - http: false
       id: lpr
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-protobuf:
     artifactId: camel-protobuf
     dataformats:
@@ -2055,7 +2055,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-pubnub:
     artifactId: camel-pubnub
     dataformats: []
@@ -2065,7 +2065,7 @@ artifacts:
     - http: false
       id: pubnub
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-quartz:
     artifactId: camel-quartz
     dataformats: []
@@ -2075,7 +2075,7 @@ artifacts:
     - http: false
       id: quartz
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-quartz2:
     artifactId: camel-quartz2
     dataformats: []
@@ -2085,7 +2085,7 @@ artifacts:
     - http: false
       id: quartz2
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-quickfix:
     artifactId: camel-quickfix
     dataformats: []
@@ -2095,7 +2095,7 @@ artifacts:
     - http: false
       id: quickfix
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-rabbitmq:
     artifactId: camel-rabbitmq
     dataformats: []
@@ -2105,7 +2105,7 @@ artifacts:
     - http: false
       id: rabbitmq
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-reactive-streams:
     artifactId: camel-reactive-streams
     dataformats: []
@@ -2115,7 +2115,7 @@ artifacts:
     - http: false
       id: reactive-streams
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-rest-swagger:
     artifactId: camel-rest-swagger
     dataformats: []
@@ -2125,7 +2125,7 @@ artifacts:
     - http: false
       id: rest-swagger
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-restlet:
     artifactId: camel-restlet
     dataformats: []
@@ -2135,7 +2135,7 @@ artifacts:
     - http: true
       id: restlet
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-rmi:
     artifactId: camel-rmi
     dataformats: []
@@ -2145,7 +2145,7 @@ artifacts:
     - http: false
       id: rmi
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-routebox:
     artifactId: camel-routebox
     dataformats: []
@@ -2155,7 +2155,7 @@ artifacts:
     - http: false
       id: routebox
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-rss:
     artifactId: camel-rss
     dataformats:
@@ -2166,7 +2166,7 @@ artifacts:
     - http: false
       id: rss
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-salesforce:
     artifactId: camel-salesforce
     dataformats: []
@@ -2176,7 +2176,7 @@ artifacts:
     - http: false
       id: salesforce
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-sap-netweaver:
     artifactId: camel-sap-netweaver
     dataformats: []
@@ -2186,7 +2186,7 @@ artifacts:
     - http: false
       id: sap-netweaver
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-saxon:
     artifactId: camel-saxon
     dataformats: []
@@ -2197,7 +2197,7 @@ artifacts:
     - http: false
       id: xquery
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-schematron:
     artifactId: camel-schematron
     dataformats: []
@@ -2207,7 +2207,7 @@ artifacts:
     - http: false
       id: schematron
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-script:
     artifactId: camel-script
     dataformats: []
@@ -2218,7 +2218,7 @@ artifacts:
     - python
     - ruby
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-service:
     artifactId: camel-service
     dataformats: []
@@ -2228,7 +2228,7 @@ artifacts:
     - http: false
       id: service
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-servicenow:
     artifactId: camel-servicenow
     dataformats: []
@@ -2238,7 +2238,7 @@ artifacts:
     - http: false
       id: servicenow
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-servlet:
     artifactId: camel-servlet
     dataformats: []
@@ -2248,7 +2248,7 @@ artifacts:
     - http: true
       id: servlet
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-sip:
     artifactId: camel-sip
     dataformats: []
@@ -2261,7 +2261,7 @@ artifacts:
     - http: false
       id: sips
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-sjms:
     artifactId: camel-sjms
     dataformats: []
@@ -2274,7 +2274,7 @@ artifacts:
     - http: false
       id: sjms-batch
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-sjms2:
     artifactId: camel-sjms2
     dataformats: []
@@ -2284,7 +2284,7 @@ artifacts:
     - http: false
       id: sjms2
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-slack:
     artifactId: camel-slack
     dataformats: []
@@ -2294,7 +2294,7 @@ artifacts:
     - http: false
       id: slack
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-smpp:
     artifactId: camel-smpp
     dataformats: []
@@ -2307,7 +2307,7 @@ artifacts:
     - http: false
       id: smpps
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-snakeyaml:
     artifactId: camel-snakeyaml
     dataformats:
@@ -2315,7 +2315,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-snmp:
     artifactId: camel-snmp
     dataformats: []
@@ -2325,7 +2325,7 @@ artifacts:
     - http: false
       id: snmp
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-soap:
     artifactId: camel-soap
     dataformats:
@@ -2333,7 +2333,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-solr:
     artifactId: camel-solr
     dataformats: []
@@ -2349,7 +2349,7 @@ artifacts:
     - http: false
       id: solrCloud
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spark:
     artifactId: camel-spark
     dataformats: []
@@ -2359,7 +2359,7 @@ artifacts:
     - http: false
       id: spark
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spark-rest:
     artifactId: camel-spark-rest
     dataformats: []
@@ -2369,7 +2369,7 @@ artifacts:
     - http: true
       id: spark-rest
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-splunk:
     artifactId: camel-splunk
     dataformats: []
@@ -2379,7 +2379,7 @@ artifacts:
     - http: false
       id: splunk
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spring:
     artifactId: camel-spring
     dataformats: []
@@ -2390,7 +2390,7 @@ artifacts:
     - http: false
       id: spring-event
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spring-batch:
     artifactId: camel-spring-batch
     dataformats: []
@@ -2400,7 +2400,7 @@ artifacts:
     - http: false
       id: spring-batch
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spring-integration:
     artifactId: camel-spring-integration
     dataformats: []
@@ -2410,7 +2410,7 @@ artifacts:
     - http: false
       id: spring-integration
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spring-ldap:
     artifactId: camel-spring-ldap
     dataformats: []
@@ -2420,7 +2420,7 @@ artifacts:
     - http: false
       id: spring-ldap
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spring-redis:
     artifactId: camel-spring-redis
     dataformats: []
@@ -2430,7 +2430,7 @@ artifacts:
     - http: false
       id: spring-redis
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-spring-ws:
     artifactId: camel-spring-ws
     dataformats: []
@@ -2440,7 +2440,7 @@ artifacts:
     - http: true
       id: spring-ws
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-sql:
     artifactId: camel-sql
     dataformats: []
@@ -2453,7 +2453,7 @@ artifacts:
     - http: false
       id: sql-stored
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-ssh:
     artifactId: camel-ssh
     dataformats: []
@@ -2463,7 +2463,7 @@ artifacts:
     - http: false
       id: ssh
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-stax:
     artifactId: camel-stax
     dataformats: []
@@ -2473,7 +2473,7 @@ artifacts:
     - http: false
       id: stax
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-stomp:
     artifactId: camel-stomp
     dataformats: []
@@ -2483,7 +2483,7 @@ artifacts:
     - http: false
       id: stomp
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-stream:
     artifactId: camel-stream
     dataformats: []
@@ -2493,7 +2493,7 @@ artifacts:
     - http: false
       id: stream
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-stringtemplate:
     artifactId: camel-stringtemplate
     dataformats: []
@@ -2503,7 +2503,7 @@ artifacts:
     - http: false
       id: string-template
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-syslog:
     artifactId: camel-syslog
     dataformats:
@@ -2511,7 +2511,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-tagsoup:
     artifactId: camel-tagsoup
     dataformats:
@@ -2519,7 +2519,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-tarfile:
     artifactId: camel-tarfile
     dataformats:
@@ -2527,7 +2527,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-telegram:
     artifactId: camel-telegram
     dataformats: []
@@ -2537,7 +2537,7 @@ artifacts:
     - http: false
       id: telegram
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-thrift:
     artifactId: camel-thrift
     dataformats:
@@ -2548,7 +2548,7 @@ artifacts:
     - http: false
       id: thrift
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-tika:
     artifactId: camel-tika
     dataformats: []
@@ -2558,7 +2558,7 @@ artifacts:
     - http: false
       id: tika
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-twilio:
     artifactId: camel-twilio
     dataformats: []
@@ -2568,7 +2568,7 @@ artifacts:
     - http: false
       id: twilio
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-twitter:
     artifactId: camel-twitter
     dataformats: []
@@ -2590,7 +2590,7 @@ artifacts:
     - http: false
       id: twitter-timeline
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-undertow:
     artifactId: camel-undertow
     dataformats: []
@@ -2600,7 +2600,7 @@ artifacts:
     - http: true
       id: undertow
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-univocity-parsers:
     artifactId: camel-univocity-parsers
     dataformats:
@@ -2610,7 +2610,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-velocity:
     artifactId: camel-velocity
     dataformats: []
@@ -2620,7 +2620,7 @@ artifacts:
     - http: false
       id: velocity
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-vertx:
     artifactId: camel-vertx
     dataformats: []
@@ -2630,7 +2630,7 @@ artifacts:
     - http: false
       id: vertx
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-weather:
     artifactId: camel-weather
     dataformats: []
@@ -2640,7 +2640,7 @@ artifacts:
     - http: false
       id: weather
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-web3j:
     artifactId: camel-web3j
     dataformats: []
@@ -2650,7 +2650,7 @@ artifacts:
     - http: false
       id: web3j
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-websocket:
     artifactId: camel-websocket
     dataformats: []
@@ -2660,7 +2660,7 @@ artifacts:
     - http: true
       id: websocket
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-wordpress:
     artifactId: camel-wordpress
     dataformats: []
@@ -2670,7 +2670,7 @@ artifacts:
     - http: false
       id: wordpress
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-xchange:
     artifactId: camel-xchange
     dataformats: []
@@ -2680,7 +2680,7 @@ artifacts:
     - http: false
       id: xchange
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-xmlbeans:
     artifactId: camel-xmlbeans
     dataformats:
@@ -2688,7 +2688,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-xmljson:
     artifactId: camel-xmljson
     dataformats:
@@ -2696,7 +2696,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-xmlrpc:
     artifactId: camel-xmlrpc
     dataformats:
@@ -2707,7 +2707,7 @@ artifacts:
     - http: false
       id: xmlrpc
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-xmlsecurity:
     artifactId: camel-xmlsecurity
     dataformats:
@@ -2718,7 +2718,7 @@ artifacts:
     - http: false
       id: xmlsecurity
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-xmpp:
     artifactId: camel-xmpp
     dataformats: []
@@ -2728,7 +2728,7 @@ artifacts:
     - http: false
       id: xmpp
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-xstream:
     artifactId: camel-xstream
     dataformats:
@@ -2737,7 +2737,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-yammer:
     artifactId: camel-yammer
     dataformats: []
@@ -2747,7 +2747,7 @@ artifacts:
     - http: false
       id: yammer
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-yql:
     artifactId: camel-yql
     dataformats: []
@@ -2757,7 +2757,7 @@ artifacts:
     - http: false
       id: yql
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-zendesk:
     artifactId: camel-zendesk
     dataformats: []
@@ -2767,7 +2767,7 @@ artifacts:
     - http: false
       id: zendesk
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-zipfile:
     artifactId: camel-zipfile
     dataformats:
@@ -2775,7 +2775,7 @@ artifacts:
     groupId: org.apache.camel
     languages: []
     schemes: []
-    version: 2.23.0
+    version: 2.23.1
   camel-zookeeper:
     artifactId: camel-zookeeper
     dataformats: []
@@ -2785,7 +2785,7 @@ artifacts:
     - http: false
       id: zookeeper
       passive: false
-    version: 2.23.0
+    version: 2.23.1
   camel-zookeeper-master:
     artifactId: camel-zookeeper-master
     dataformats: []
@@ -2795,7 +2795,7 @@ artifacts:
     - http: false
       id: zookeeper-master
       passive: false
-    version: 2.23.0
+    version: 2.23.1
 
 `
 	Resources["crd-integration-context.yaml"] =
@@ -3338,7 +3338,7 @@ metadata:
     app: "camel-k"
 spec:
   build:
-    camelVersion: "2.23.0"
+    camelVersion: "2.23.1"
 
 `
 	Resources["platform-integration-context-groovy.yaml"] =
