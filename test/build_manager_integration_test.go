@@ -44,7 +44,8 @@ func TestBuildManagerBuild(t *testing.T) {
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: "2.23.0",
+				CamelVersion: "2.23.1",
+				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},
 		Dependencies: []string{
@@ -84,7 +85,8 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: "2.23.0",
+				CamelVersion: "2.23.1",
+				BaseImage:    "fabric8/s2i-java:3.0-java8",
 			},
 		},
 		Dependencies: []string{

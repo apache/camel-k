@@ -54,6 +54,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
+	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
 	cmd.Flags().StringSliceVar(&impl.contexts, "context", nil, "Add a camel context to build at startup, by default all known contexts are built")
 
 	// completion support
@@ -79,6 +80,7 @@ type installCmdOptions struct {
 	organization     string
 	pushSecret       string
 	camelVersion     string
+	baseImage        string
 	repositories     []string
 	properties       []string
 	contexts         []string
@@ -143,6 +145,9 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 		}
 		if o.camelVersion != "" {
 			platform.Spec.Build.CamelVersion = o.camelVersion
+		}
+		if o.baseImage != "" {
+			platform.Spec.Build.BaseImage = o.baseImage
 		}
 
 		platform.Spec.Resources.Contexts = o.contexts
