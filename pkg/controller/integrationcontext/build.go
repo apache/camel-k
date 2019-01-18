@@ -96,6 +96,7 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 		return action.client.Update(ctx, target)
 	case builder.StatusCompleted:
 		target := ictx.DeepCopy()
+		target.Status.BaseImage = res.BaseImage
 		target.Status.Image = res.Image
 		target.Status.PublicImage = res.PublicImage
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
