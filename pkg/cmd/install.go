@@ -152,7 +152,7 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 
 		platform.Spec.Resources.Contexts = o.contexts
 
-		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
+		_, err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
 		if err != nil {
 			return err
 		}
