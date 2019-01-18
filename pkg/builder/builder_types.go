@@ -125,6 +125,7 @@ func (t Task) Elapsed() time.Duration {
 // Result represents the result of a build
 type Result struct {
 	Request     Request
+	BaseImage   string
 	Image       string
 	PublicImage string
 	Error       error
@@ -138,6 +139,7 @@ type Context struct {
 	C context.Context
 	client.Client
 	Request           Request
+	BaseImage         string
 	Image             string
 	PublicImage       string
 	Error             error

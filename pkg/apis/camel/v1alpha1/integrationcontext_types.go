@@ -19,6 +19,7 @@ type IntegrationContextSpec struct {
 // IntegrationContextStatus defines the observed state of IntegrationContext
 type IntegrationContextStatus struct {
 	Phase       IntegrationContextPhase `json:"phase,omitempty"`
+	BaseImage   string                  `json:"baseImage,omitempty"`
 	Image       string                  `json:"image,omitempty"`
 	PublicImage string                  `json:"publicImage,omitempty"`
 	Digest      string                  `json:"digest,omitempty"`

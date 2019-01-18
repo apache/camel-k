@@ -141,21 +141,37 @@ func (b *defaultBuilder) submit(request Request) {
 
 	defer os.RemoveAll(builderPath)
 
-	// update the cache
-	b.request.Store(request.Meta.Name, r)
-
 	c := Context{
 		C:         b.ctx,
 		Client:    b.client,
 		Path:      builderPath,
 		Namespace: b.namespace,
 		Request:   request,
-		Image:     "fabric8/s2i-java:2.3", // TODO: externalize,
+		Image:     request.Platform.Build.BaseImage,
 	}
 
 	if request.Image != "" {
 		c.Image = request.Image
 	}
+
+	// base image is mandatory
+	if c.Image == "" {
+		r.Status = StatusError
+		r.Image = ""
+		r.PublicImage = ""
+		r.Error = errors.New("no base image defined")
+		r.Task.CompletedAt = time.Now()
+
+		// update the cache
+		b.request.Store(request.Meta.Name, r)
+
+		return
+	}
+
+	c.BaseImage = c.Image
+
+	// update the cache
+	b.request.Store(request.Meta.Name, r)
 
 	// Sort steps by phase
 	sort.SliceStable(request.Steps, func(i, j int) bool {
@@ -192,6 +208,7 @@ func (b *defaultBuilder) submit(request Request) {
 	}
 
 	r.Status = StatusCompleted
+	r.BaseImage = c.BaseImage
 	r.Image = c.Image
 	r.PublicImage = c.PublicImage
 	r.Error = c.Error
@@ -208,10 +225,11 @@ func (b *defaultBuilder) submit(request Request) {
 	b.request.Store(request.Meta.Name, r)
 
 	b.log.Infof("request to build context %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
-	b.log.Infof("dependencies          : %s", request.Dependencies)
-	b.log.Infof("artifacts             : %s", ArtifactIDs(c.Artifacts))
-	b.log.Infof("artifacts selected    : %s", ArtifactIDs(c.SelectedArtifacts))
-	b.log.Infof("requested image       : %s", request.Image)
-	b.log.Infof("resolved image        : %s", c.Image)
-	b.log.Infof("resolved public image : %s", c.PublicImage)
+	b.log.Infof("dependencies: %s", request.Dependencies)
+	b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
+	b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
+	b.log.Infof("requested image: %s", request.Image)
+	b.log.Infof("base image: %s", c.BaseImage)
+	b.log.Infof("resolved image: %s", c.Image)
+	b.log.Infof("resolved public image: %s", c.PublicImage)
 }
