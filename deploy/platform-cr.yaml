@@ -6,4 +6,4 @@ metadata:
     app: "camel-k"
 spec:
   build:
-    camelVersion: "2.23.0"
+    camelVersion: "2.23.1"

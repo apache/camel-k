@@ -28,7 +28,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <camel.version>2.23.0</camel.version>
+        <camel.version>2.23.1</camel.version>
         <junit.version>4.12</junit.version>
         <junit-jupiter.version>5.3.2</junit-jupiter.version>
         <joor.version>0.9.10</joor.version>
