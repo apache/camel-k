@@ -35,7 +35,7 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:   "reset",
 		Short: "Reset the Camel K installation",
 		Long:  `Reset the Camel K installation by deleting everything except current platform configuration.`,
-		RunE:  options.reset,
+		Run:   options.reset,
 	}
 
 	return &cmd
@@ -45,27 +45,31 @@ type resetCmdOptions struct {
 	*RootCmdOptions
 }
 
-func (o *resetCmdOptions) reset(cmd *cobra.Command, args []string) (err error) {
+func (o *resetCmdOptions) reset(cmd *cobra.Command, args []string) {
 	c, err := o.GetCmdClient()
 	if err != nil {
-		return err
+		fmt.Print(err)
+		return
 	}
 	var n int
 	if n, err = o.deleteAllIntegrations(c); err != nil {
-		return err
+		fmt.Print(err)
+		return
 	}
 	fmt.Printf("%d integrations deleted from namespace %s\n", n, o.Namespace)
 
 	if n, err = o.deleteAllIntegrationContexts(c); err != nil {
-		return err
+		fmt.Print(err)
+		return
 	}
 	fmt.Printf("%d integration contexts deleted from namespace %s\n", n, o.Namespace)
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
-		return err
+		fmt.Print(err)
+		return
 	}
+
 	fmt.Println("Camel K platform has been reset successfully!")
-	return err
 }
 
 func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
