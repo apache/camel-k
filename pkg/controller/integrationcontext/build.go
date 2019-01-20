@@ -19,6 +19,7 @@ package integrationcontext
 
 import (
 	"context"
+	"time"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
@@ -113,14 +114,23 @@ func (action *buildAction) handleBuildStateChange(res builder.Result) error {
 	case builder.StatusStarted:
 		logrus.Infof("Build started for IntegrationContext %s", target.Name)
 	case builder.StatusError:
-		target = target.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildFailureRecovery
+
+		if target.Status.Failure == nil {
+			target.Status.Failure = &v1alpha1.Failure{
+				Reason: res.Error.Error(),
+				Time:   time.Now(),
+				Recovery: v1alpha1.FailureRecovery{
+					Attempt:    0,
+					AttemptMax: 5,
+				},
+			}
+		}
 
 		logrus.Infof("Context %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
 		return action.client.Update(action.Context, target)
 	case builder.StatusCompleted:
-		target = target.DeepCopy()
 		target.Status.BaseImage = res.BaseImage
 		target.Status.Image = res.Image
 		target.Status.PublicImage = res.PublicImage
