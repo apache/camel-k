@@ -106,6 +106,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		NewBuildContextAction(request.Namespace),
 		NewBuildImageAction(request.Namespace),
 		NewDeployAction(),
+		NewErrorRecoveryAction(),
 		NewMonitorAction(),
 	}
 

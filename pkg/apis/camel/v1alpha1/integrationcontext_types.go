@@ -24,6 +24,7 @@ type IntegrationContextStatus struct {
 	PublicImage string                  `json:"publicImage,omitempty"`
 	Digest      string                  `json:"digest,omitempty"`
 	Artifacts   []Artifact              `json:"artifacts,omitempty"`
+	Failure     *Failure                `json:"failure,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -69,6 +70,8 @@ const (
 	IntegrationContextPhaseReady IntegrationContextPhase = "Ready"
 	// IntegrationContextPhaseError --
 	IntegrationContextPhaseError IntegrationContextPhase = "Error"
+	// IntegrationContextPhaseBuildFailureRecovery --
+	IntegrationContextPhaseBuildFailureRecovery IntegrationContextPhase = "Build Failure Recovery"
 )
 
 func init() {

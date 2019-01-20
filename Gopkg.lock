@@ -270,6 +270,14 @@
   version = "v1.3.0"
 
 [[projects]]
+  digest = "1:ebd0081aed1cd0af2f65a362c0ceea985eae9fe72efb28cefb84eca3b98dd3a3"
+  name = "github.com/jpillora/backoff"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "8eab2debe79d12b7bd3d10653910df25fa9552ba"
+  version = "1.0.0"
+
+[[projects]]
   digest = "1:1d39c063244ad17c4b18e8da1551163b6ffb52bd1640a49a8ec5c3b7bf4dbd5d"
   name = "github.com/json-iterator/go"
   packages = ["."]
@@ -1037,6 +1045,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/fatih/structs",
+    "github.com/jpillora/backoff",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
     "github.com/knative/serving/pkg/apis/serving/v1alpha1",
     "github.com/mitchellh/mapstructure",
