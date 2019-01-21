@@ -17,6 +17,8 @@ limitations under the License.
 
 package v1alpha1
 
+import "time"
+
 // ConfigurationSpec --
 type ConfigurationSpec struct {
 	Type  string `json:"type"`
@@ -42,4 +44,18 @@ type Flows []Flow
 type Step struct {
 	Kind string `json:"kind"`
 	URI  string `json:"uri"`
+}
+
+// Failure --
+type Failure struct {
+	Reason   string          `json:"reason"`
+	Time     time.Time       `json:"time"`
+	Recovery FailureRecovery `json:"recovery"`
+}
+
+// FailureRecovery --
+type FailureRecovery struct {
+	Attempt     int       `json:"attempt"`
+	AttemptMax  int       `json:"attemptMax"`
+	AttemptTime time.Time `json:"attemptTime"`
 }

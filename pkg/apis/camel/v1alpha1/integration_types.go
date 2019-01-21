@@ -28,6 +28,7 @@ type IntegrationStatus struct {
 	Dependencies     []string         `json:"dependencies,omitempty"`
 	Context          string           `json:"context,omitempty"`
 	GeneratedSources []SourceSpec     `json:"generatedSources,omitempty"`
+	Failure          *Failure         `json:"failure,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -138,6 +139,8 @@ const (
 	IntegrationPhaseRunning IntegrationPhase = "Running"
 	// IntegrationPhaseError --
 	IntegrationPhaseError IntegrationPhase = "Error"
+	// IntegrationPhaseBuildFailureRecovery --
+	IntegrationPhaseBuildFailureRecovery IntegrationPhase = "Building Failure Recovery"
 )
 
 func init() {

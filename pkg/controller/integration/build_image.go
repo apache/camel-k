@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -143,14 +144,23 @@ func (action *buildImageAction) handleBuildStateChange(res builder.Result) error
 	case builder.StatusStarted:
 		logrus.Info("Build started")
 	case builder.StatusError:
-		target := target.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationPhaseError
+		target.Status.Phase = v1alpha1.IntegrationPhaseBuildFailureRecovery
+
+		if target.Status.Failure == nil {
+			target.Status.Failure = &v1alpha1.Failure{
+				Reason: res.Error.Error(),
+				Time:   time.Now(),
+				Recovery: v1alpha1.FailureRecovery{
+					Attempt:    0,
+					AttemptMax: 5,
+				},
+			}
+		}
 
 		logrus.Infof("Integration %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
 		return action.client.Update(action.Context, target)
 	case builder.StatusCompleted:
-		target := target.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 		if res.PublicImage != "" {
 			target.Status.Image = res.PublicImage
