@@ -41,17 +41,19 @@ var commonUserContainerNames = map[string]bool{
 
 // PodScraper scrapes logs of a specific pod
 type PodScraper struct {
-	namespace string
-	name      string
-	client    kubernetes.Interface
+	namespace            string
+	podName              string
+	defaultContainerName string
+	client               kubernetes.Interface
 }
 
 // NewPodScraper creates a new pod scraper
-func NewPodScraper(c kubernetes.Interface, namespace string, name string) *PodScraper {
+func NewPodScraper(c kubernetes.Interface, namespace string, podName string, defaultContainerName string) *PodScraper {
 	return &PodScraper{
-		namespace: namespace,
-		name:      name,
-		client:    c,
+		namespace:            namespace,
+		podName:              podName,
+		defaultContainerName: defaultContainerName,
+		client:               c,
 	}
 }
 
@@ -69,7 +71,7 @@ func (s *PodScraper) Start(ctx context.Context) *bufio.Reader {
 }
 
 func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientCloser func() error) {
-	containerName, err := s.waitForPodRunning(ctx, s.namespace, s.name)
+	containerName, err := s.waitForPodRunning(ctx, s.namespace, s.podName, s.defaultContainerName)
 	if err != nil {
 		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
 		return
@@ -78,7 +80,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 		Follow:    true,
 		Container: containerName,
 	}
-	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.name, &logOptions).Context(ctx).Stream()
+	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.podName, &logOptions).Context(ctx).Stream()
 	if err != nil {
 		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
 		return
@@ -106,18 +108,18 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 
 func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.Duration, out *bufio.Writer, clientCloser func() error) {
 	if err != nil {
-		logrus.Warn(errors.Wrap(err, "error caught during log scraping for pod "+s.name))
+		logrus.Warn(errors.Wrap(err, "error caught during log scraping for pod "+s.podName))
 	}
 
 	if ctx.Err() != nil {
-		logrus.Debug("Pod ", s.name, " will no longer be monitored")
+		logrus.Debug("Pod ", s.podName, " will no longer be monitored")
 		if err := clientCloser(); err != nil {
 			logrus.Warn("Unable to close the client", err)
 		}
 		return
 	}
 
-	logrus.Debug("Retrying to scrape pod ", s.name, " logs in ", wait.Seconds(), " seconds...")
+	logrus.Debug("Retrying to scrape pod ", s.podName, " logs in ", wait.Seconds(), " seconds...")
 	select {
 	case <-time.After(wait):
 		break
@@ -133,14 +135,14 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 
 // waitForPodRunning waits for a given pod to reach the running state.
 // It may return the internal container to watch if present
-func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, name string) (string, error) {
+func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, podName string, defaultContainerName string) (string, error) {
 	pod := v1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
 			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
+			Name:      podName,
 			Namespace: namespace,
 		},
 	}
@@ -181,29 +183,34 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, na
 				}
 
 				if recvPod != nil && recvPod.Status.Phase == v1.PodRunning {
-					return s.chooseContainer(recvPod), nil
+					return s.chooseContainer(recvPod, defaultContainerName), nil
 				}
 			} else if e.Type == watch.Deleted || e.Type == watch.Error {
-				return "", errors.New("unable to watch pod " + s.name)
+				return "", errors.New("unable to watch pod " + s.podName)
 			}
 		case <-time.After(30 * time.Second):
-			return "", errors.New("no state change after 30 seconds for pod " + s.name)
+			return "", errors.New("no state change after 30 seconds for pod " + s.podName)
 		}
 	}
 
 }
 
-func (s *PodScraper) chooseContainer(p *v1.Pod) string {
+func (s *PodScraper) chooseContainer(p *v1.Pod, defaultContainerName string) string {
 	if p != nil {
 		if len(p.Spec.Containers) == 1 {
 			// Let Kubernetes auto-detect
 			return ""
 		}
+		// Fallback to first container name
+		containerNameFound := p.Spec.Containers[0].Name
 		for _, c := range p.Spec.Containers {
 			if _, ok := commonUserContainerNames[c.Name]; ok {
 				return c.Name
+			} else if c.Name == defaultContainerName {
+				containerNameFound = defaultContainerName
 			}
 		}
+		return containerNameFound
 	}
 	return ""
 }
