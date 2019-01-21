@@ -39,16 +39,12 @@ import (
 )
 
 // NewBuildImageAction create an action that handles integration image build
-func NewBuildImageAction(namespace string) Action {
-	return &buildImageAction{
-		namespace: namespace,
-	}
+func NewBuildImageAction() Action {
+	return &buildImageAction{}
 }
 
 type buildImageAction struct {
 	baseAction
-	context.Context
-	namespace string
 }
 
 func (action *buildImageAction) Name() string {
@@ -74,7 +70,7 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 		return errors.Wrapf(err, "unable to find integration context %s, %s", integration.Status.Context, err)
 	}
 
-	b, err := platform.GetPlatformBuilder(action.client, action.namespace)
+	b, err := platform.GetPlatformBuilder(action.client, integration.Namespace)
 	if err != nil {
 		return err
 	}
@@ -99,15 +95,19 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 
 		// inline resources so they are copied over the generated
 		// container image
-		if err := action.inlineResources(integration, &r, env); err != nil {
+		if err := action.inlineResources(ctx, integration, &r, env); err != nil {
 			return err
 		}
 
 		b.Submit(r, func(result builder.Result) {
+			// we can't use the handler ctx as this happen asynchronously so we
+			// need a new context
+			ctx := context.TODO()
+
 			//
 			// this function is invoked synchronously for every state change
 			//
-			if err := action.handleBuildStateChange(result); err != nil {
+			if err := action.handleBuildStateChange(ctx, result); err != nil {
 				logrus.Warnf("Error while building integration image %s, reason: %s", ictx.Name, err.Error())
 			}
 		})
@@ -116,11 +116,11 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 	return nil
 }
 
-func (action *buildImageAction) handleBuildStateChange(res builder.Result) error {
+func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res builder.Result) error {
 	//
 	// Get the latest status of the integration
 	//
-	target, err := kubernetes.GetIntegration(action.Context, action.client, res.Request.Meta.Name, res.Request.Meta.Namespace)
+	target, err := kubernetes.GetIntegration(ctx, action.client, res.Request.Meta.Name, res.Request.Meta.Namespace)
 	if err != nil || target == nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (action *buildImageAction) handleBuildStateChange(res builder.Result) error
 
 		logrus.Infof("Integration %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
-		return action.client.Update(action.Context, target)
+		return action.client.Update(ctx, target)
 	case builder.StatusCompleted:
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 		if res.PublicImage != "" {
@@ -164,7 +164,7 @@ func (action *buildImageAction) handleBuildStateChange(res builder.Result) error
 
 		logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-		if err := action.client.Update(action.Context, target); err != nil {
+		if err := action.client.Update(ctx, target); err != nil {
 			return err
 		}
 	}
@@ -172,7 +172,7 @@ func (action *buildImageAction) handleBuildStateChange(res builder.Result) error
 	return nil
 }
 
-func (action *buildImageAction) inlineResources(integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
+func (action *buildImageAction) inlineResources(ctx context.Context, integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
 	sources, err := source.Resolve(integration.Sources(), func(name string) (*corev1.ConfigMap, error) {
 		cm := e.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 			return cm.Name == name
@@ -182,7 +182,7 @@ func (action *buildImageAction) inlineResources(integration *v1alpha1.Integratio
 			return cm, nil
 		}
 
-		return kubernetes.GetConfigMap(action.Context, action.client, name, integration.Namespace)
+		return kubernetes.GetConfigMap(ctx, action.client, name, integration.Namespace)
 	})
 
 	if err != nil {

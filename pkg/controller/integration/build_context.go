@@ -30,15 +30,12 @@ import (
 )
 
 // NewBuildContextAction create an action that handles integration context build
-func NewBuildContextAction(namespace string) Action {
-	return &buildContextAction{
-		namespace: namespace,
-	}
+func NewBuildContextAction() Action {
+	return &buildContextAction{}
 }
 
 type buildContextAction struct {
 	baseAction
-	namespace string
 }
 
 func (action *buildContextAction) Name() string {
@@ -121,7 +118,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 	}
 
 	platformCtxName := fmt.Sprintf("ctx-%s", xid.New())
-	platformCtx := v1alpha1.NewIntegrationContext(action.namespace, platformCtxName)
+	platformCtx := v1alpha1.NewIntegrationContext(integration.Namespace, platformCtxName)
 
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure

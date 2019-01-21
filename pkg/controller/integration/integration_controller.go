@@ -103,8 +103,8 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 	integrationActionPool := []Action{
 		NewInitializeAction(),
-		NewBuildContextAction(request.Namespace),
-		NewBuildImageAction(request.Namespace),
+		NewBuildContextAction(),
+		NewBuildImageAction(),
 		NewDeployAction(),
 		NewErrorRecoveryAction(),
 		NewMonitorAction(),

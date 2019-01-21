@@ -36,14 +36,11 @@ import (
 
 // NewBuildAction creates a new build handling action for the context
 func NewBuildAction(ctx context.Context) Action {
-	return &buildAction{
-		Context: ctx,
-	}
+	return &buildAction{}
 }
 
 type buildAction struct {
 	baseAction
-	context.Context
 }
 
 func (action *buildAction) Name() string {
@@ -85,12 +82,16 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 		}
 
 		b.Submit(r, func(result builder.Result) {
+			// we can't use the handler ctx as this happen asynchronously so we
+			// need a new context
+			ctx := context.TODO()
+
 			//
 			// this function is invoked synchronously for every state change to avoid
 			// leaving one context not fully updated when the incremental builder search
 			// for a compatible/base image
 			//
-			if err := action.handleBuildStateChange(result); err != nil {
+			if err := action.handleBuildStateChange(ctx, result); err != nil {
 				logrus.Warnf("Error while building context %s, reason: %s", ictx.Name, err.Error())
 			}
 		})
@@ -99,11 +100,11 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 	return nil
 }
 
-func (action *buildAction) handleBuildStateChange(res builder.Result) error {
+func (action *buildAction) handleBuildStateChange(ctx context.Context, res builder.Result) error {
 	//
 	// Get the latest status of the context
 	//
-	target, err := kubernetes.GetIntegrationContext(action.Context, action.client, res.Request.Meta.Name, res.Request.Meta.Namespace)
+	target, err := kubernetes.GetIntegrationContext(ctx, action.client, res.Request.Meta.Name, res.Request.Meta.Namespace)
 	if err != nil || target == nil {
 		return err
 	}
@@ -129,7 +130,7 @@ func (action *buildAction) handleBuildStateChange(res builder.Result) error {
 
 		logrus.Infof("Context %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
-		return action.client.Update(action.Context, target)
+		return action.client.Update(ctx, target)
 	case builder.StatusCompleted:
 		target.Status.BaseImage = res.BaseImage
 		target.Status.Image = res.Image
@@ -147,12 +148,12 @@ func (action *buildAction) handleBuildStateChange(res builder.Result) error {
 		}
 
 		logrus.Info("Context ", target.Name, " transitioning to state ", target.Status.Phase)
-		if err := action.client.Update(action.Context, target); err != nil {
+		if err := action.client.Update(ctx, target); err != nil {
 			return err
 		}
 
 		logrus.Infof("Inform integrations about context %s state change", target.Name)
-		if err := action.informIntegrations(target); err != nil {
+		if err := action.informIntegrations(ctx, target); err != nil {
 			return err
 		}
 	}
@@ -161,9 +162,9 @@ func (action *buildAction) handleBuildStateChange(res builder.Result) error {
 }
 
 // informIntegrations triggers the processing of all integrations waiting for this context to be built
-func (action *buildAction) informIntegrations(ictx *v1alpha1.IntegrationContext) error {
+func (action *buildAction) informIntegrations(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
 	list := v1alpha1.NewIntegrationList()
-	err := action.client.List(action.Context, &k8sclient.ListOptions{Namespace: ictx.Namespace}, &list)
+	err := action.client.List(ctx, &k8sclient.ListOptions{Namespace: ictx.Namespace}, &list)
 	if err != nil {
 		return err
 	}
@@ -177,7 +178,7 @@ func (action *buildAction) informIntegrations(ictx *v1alpha1.IntegrationContext)
 			integration.Annotations = make(map[string]string)
 		}
 		integration.Annotations["camel.apache.org/context.digest"] = ictx.Status.Digest
-		err = action.client.Update(action.Context, &integration)
+		err = action.client.Update(ctx, &integration)
 		if err != nil {
 			return err
 		}
