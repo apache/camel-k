@@ -47,7 +47,7 @@ const (
 // Builder --
 type Builder interface {
 	IsBuilding(object v1.ObjectMeta) bool
-	Submit(request Request, handler func(Result))
+	Submit(request Request, handler func(*Result))
 	Close()
 }
 
@@ -102,6 +102,7 @@ type Resource struct {
 
 // Request --
 type Request struct {
+	C            context.Context
 	Meta         v1.ObjectMeta
 	Platform     v1alpha1.IntegrationPlatformSpec
 	Dependencies []string
@@ -190,4 +191,7 @@ const (
 
 	// StatusError --
 	StatusError
+
+	// StatusInterrupted --
+	StatusInterrupted
 )

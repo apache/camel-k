@@ -52,11 +52,41 @@ func (action *buildImageAction) Name() string {
 }
 
 func (action *buildImageAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingImage
+	if integration.Status.Phase == v1alpha1.IntegrationPhaseBuildImageSubmitted {
+		return true
+	}
+	if integration.Status.Phase == v1alpha1.IntegrationPhaseBuildImageRunning {
+		return true
+	}
+
+	return false
 }
 
 func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+	if integration.Status.Phase == v1alpha1.IntegrationPhaseBuildImageSubmitted {
+		return action.handleBuildImageSubmitted(ctx, integration)
+	}
+	if integration.Status.Phase == v1alpha1.IntegrationPhaseBuildImageRunning {
+		return action.handleBuildImageRunning(ctx, integration)
+	}
 
+	return nil
+}
+
+func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, integration *v1alpha1.Integration) error {
+	b, err := platform.GetPlatformBuilder(action.client, integration.Namespace)
+	if err != nil {
+		return err
+	}
+
+	if b.IsBuilding(integration.ObjectMeta) {
+		logrus.Infof("Build for integration %s is running", integration.Name)
+	}
+
+	return nil
+}
+
+func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, integration *v1alpha1.Integration) error {
 	// in this phase the integration need to be associated to a context whose image
 	// will be used as base image for the integration images
 	if integration.Status.Context == "" {
@@ -81,9 +111,14 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 			return err
 		}
 
-		// This build do not require to determine dependencies nor a project, the builder
-		// step do remove them
+		// This build do not require to determine dependencies nor a project, the
+		// builder step do remove them
+		//
+		// the context given to the handler is per reconcile loop and as the build
+		// happens asynchronously, a new context has to be created. the new context
+		// can be used also to stop the build.
 		r := builder.Request{
+			C:        context.TODO(),
 			Meta:     integration.ObjectMeta,
 			Steps:    env.Steps,
 			BuildDir: env.BuildDir,
@@ -99,15 +134,11 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 			return err
 		}
 
-		b.Submit(r, func(result builder.Result) {
-			// we can't use the handler ctx as this happen asynchronously so we
-			// need a new context
-			ctx := context.TODO()
-
+		b.Submit(r, func(result *builder.Result) {
 			//
 			// this function is invoked synchronously for every state change
 			//
-			if err := action.handleBuildStateChange(ctx, result); err != nil {
+			if err := action.handleBuildStateChange(result.Request.C, result); err != nil {
 				logrus.Warnf("Error while building integration image %s, reason: %s", ictx.Name, err.Error())
 			}
 		})
@@ -116,7 +147,7 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 	return nil
 }
 
-func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res builder.Result) error {
+func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res *builder.Result) error {
 	//
 	// Get the latest status of the integration
 	//
@@ -129,7 +160,11 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 	case builder.StatusSubmitted:
 		logrus.Info("Build submitted")
 	case builder.StatusStarted:
-		logrus.Info("Build started")
+		target.Status.Phase = v1alpha1.IntegrationPhaseBuildImageRunning
+
+		logrus.Infof("Integration %s transitioning to state %s", target.Name, target.Status.Phase)
+
+		return action.client.Status().Update(ctx, target)
 	case builder.StatusError:
 		target.Status.Phase = v1alpha1.IntegrationPhaseBuildFailureRecovery
 

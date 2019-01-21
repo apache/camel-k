@@ -49,11 +49,11 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
 		return true, nil
 	}
 
-	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingImage) {
+	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildImageSubmitted) {
 		return true, nil
 	}
 
@@ -61,7 +61,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
-	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
 		if platform.SupportsS2iPublishStrategy(e.Platform) {
 			e.Steps = s2i.DefaultSteps
 			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
@@ -73,7 +73,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}
 	}
 
-	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingImage) {
+	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildImageSubmitted) {
 		if platform.SupportsS2iPublishStrategy(e.Platform) {
 			e.Steps = []builder.Step{
 				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
