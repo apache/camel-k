@@ -23,19 +23,19 @@ import (
 	"path"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/source"
+
 	"github.com/pkg/errors"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
-	"github.com/apache/camel-k/pkg/util/digest"
-
-	"github.com/apache/camel-k/pkg/trait"
-
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/sirupsen/logrus"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // NewBuildImageAction create an action that handles integration image build
@@ -69,12 +69,12 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 
 	// look-up the integration context associated to this integration, this is needed
 	// to determine the base image
-	ictx, err := kubernetes.GetIntegrationContext(action.Context, action.client, integration.Status.Context, integration.Namespace)
+	ictx, err := kubernetes.GetIntegrationContext(ctx, action.client, integration.Status.Context, integration.Namespace)
 	if err != nil || ictx == nil {
 		return errors.Wrapf(err, "unable to find integration context %s, %s", integration.Status.Context, err)
 	}
 
-	b, err := platform.GetPlatformBuilder(action.Context, action.client, action.namespace)
+	b, err := platform.GetPlatformBuilder(action.client, action.namespace)
 	if err != nil {
 		return err
 	}
@@ -97,23 +97,10 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 			Resources: make([]builder.Resource, 0, len(integration.Spec.Sources)),
 		}
 
-		// TODO: handle generated sources
-		// TODO: handle compressed sources
-		for _, source := range integration.Spec.Sources {
-			r.Resources = append(r.Resources, builder.Resource{
-				Content: []byte(source.Content),
-				Target:  path.Join("sources", source.Name),
-			})
-		}
-		// TODO: handle compressed resources
-		for _, resource := range integration.Spec.Resources {
-			if resource.Type != v1alpha1.ResourceTypeData {
-				continue
-			}
-			r.Resources = append(r.Resources, builder.Resource{
-				Content: []byte(resource.Content),
-				Target:  path.Join("resources", resource.Name),
-			})
+		// inline resources so they are copied over the generated
+		// container image
+		if err := action.inlineResources(integration, &r, env); err != nil {
+			return err
 		}
 
 		b.Submit(r, func(result builder.Result) {
@@ -180,6 +167,33 @@ func (action *buildImageAction) handleBuildStateChange(res builder.Result) error
 		if err := action.client.Update(action.Context, target); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (action *buildImageAction) inlineResources(integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
+	sources, err := source.Resolve(integration.Sources(), func(name string) (*corev1.ConfigMap, error) {
+		cm := e.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+			return cm.Name == name
+		})
+
+		if cm != nil {
+			return cm, nil
+		}
+
+		return kubernetes.GetConfigMap(action.Context, action.client, name, integration.Namespace)
+	})
+
+	if err != nil {
+		return err
+	}
+
+	for _, data := range sources {
+		r.Resources = append(r.Resources, builder.Resource{
+			Content: []byte(data.Content),
+			Target:  path.Join("sources", data.Name),
+		})
 	}
 
 	return nil

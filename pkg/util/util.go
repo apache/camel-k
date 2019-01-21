@@ -26,7 +26,7 @@ import (
 
 	"github.com/scylladb/go-set/strset"
 
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pkg/errors"
 )
@@ -126,7 +126,7 @@ func WriteFileWithContent(buildDir string, relativePath string, content string) 
 }
 
 // LookupEnvVar --
-func LookupEnvVar(vars []v1.EnvVar, name string) *v1.EnvVar {
+func LookupEnvVar(vars []corev1.EnvVar, name string) *corev1.EnvVar {
 	for _, e := range vars {
 		if e.Name == name {
 			ev := e

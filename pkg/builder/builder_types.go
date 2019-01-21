@@ -48,6 +48,7 @@ const (
 type Builder interface {
 	IsBuilding(object v1.ObjectMeta) bool
 	Submit(request Request, handler func(Result))
+	Close()
 }
 
 // Step --

@@ -19,7 +19,8 @@ package trait
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/apache/camel-k/pkg/util/source"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -83,6 +84,7 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 
 // A Environment provides the context where the trait is executed
 type Environment struct {
+	Catalog        *Catalog
 	Platform       *v1alpha1.IntegrationPlatform
 	Context        *v1alpha1.IntegrationContext
 	Integration    *v1alpha1.Integration
@@ -146,48 +148,19 @@ func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
 
 // ResolveSources --
 func (e *Environment) ResolveSources(context context.Context, client client.Client) ([]v1alpha1.SourceSpec, error) {
-	sources := e.Integration.Sources()
+	return source.Resolve(e.Integration.Sources(), func(name string) (*corev1.ConfigMap, error) {
+		// the config map could be part of the resources created
+		// by traits
+		cm := e.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+			return m.Name == name
+		})
 
-	for i := 0; i < len(sources); i++ {
-		// copy the source to avoid modifications to the
-		// original source
-		s := sources[i].DeepCopy()
-
-		// if it is a reference, get the content from the
-		// referenced ConfigMap
-		if s.ContentRef != "" {
-
-			// the config map coud be part of the resources created
-			// by traits so first look there
-			cm := e.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
-				return m.Name == s.ContentRef
-			})
-
-			if cm == nil {
-				// if not, try to look it up from the kubernetes cluster
-				r, err := kubernetes.GetConfigMap(context, client, s.ContentRef, e.Integration.Namespace)
-				if err != nil {
-					return []v1alpha1.SourceSpec{}, nil
-				}
-
-				cm = r
-			}
-
-			if cm == nil {
-				return []v1alpha1.SourceSpec{}, fmt.Errorf("unable to find a ConfigMap with name: %s in the namespace: %s", s.ContentRef, e.Integration.Namespace)
-			}
-
-			//
-			// Replace ref source content with real content
-			//
-			s.Content = cm.Data["content"]
-			s.ContentRef = ""
+		if cm != nil {
+			return cm, nil
 		}
 
-		sources[i] = *s
-	}
-
-	return sources, nil
+		return kubernetes.GetConfigMap(context, client, name, e.Integration.Namespace)
+	})
 }
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration
