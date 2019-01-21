@@ -53,6 +53,10 @@ func (t *restTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	if e.Integration == nil {
+		return false, nil
+	}
+
 	for _, resource := range e.Integration.Spec.Resources {
 		if resource.Type == v1alpha1.ResourceTypeOpenAPI {
 			return e.IntegrationInPhase(""), nil
