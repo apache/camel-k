@@ -1545,7 +1545,7 @@ artifacts:
     - http: true
       id: knative
       passive: false
-    version: 0.1.1-SNAPSHOT
+    version: 0.2.0-SNAPSHOT
   camel-krati:
     artifactId: camel-krati
     dataformats: []
@@ -2936,7 +2936,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.1.1-SNAPSHOT
+          image: docker.io/apache/camel-k:0.2.0-SNAPSHOT
           ports:
           - containerPort: 60000
             name: metrics
@@ -2995,7 +2995,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.1.1-SNAPSHOT
+          image: docker.io/apache/camel-k:0.2.0-SNAPSHOT
           ports:
           - containerPort: 60000
             name: metrics
