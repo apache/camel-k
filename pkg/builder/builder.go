@@ -98,6 +98,10 @@ func (b *defaultBuilder) Submit(request Request, handler func(Result)) {
 	}
 }
 
+func (b *defaultBuilder) Close() {
+	b.ctx.Done()
+}
+
 // ********************************
 //
 // Helpers
