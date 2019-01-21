@@ -22,6 +22,7 @@ limitations under the License.
 package test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -52,21 +53,29 @@ func TestBuildManagerBuild(t *testing.T) {
 			"mvn:org.apache.camel/camel-core",
 			"camel:telegram",
 		},
-		// to not include notify step
-		Steps: s2i.DefaultSteps[:len(s2i.DefaultSteps)-1],
+		Steps: s2i.DefaultSteps,
 	}
 
-	b.Submit(r)
+	c := make(chan builder.Result)
 
-	deadline := time.Now().Add(5 * time.Minute)
+	b.Submit(r, func(res builder.Result) {
+		c <- res
+	})
+
 	var result builder.Result
 
-	for time.Now().Before(deadline) {
-		result = b.Submit(r)
-		if result.Status == builder.StatusCompleted || result.Status == builder.StatusError {
-			break
+loop:
+	for {
+		select {
+		case res := <-c:
+			if res.Status == builder.StatusCompleted || res.Status == builder.StatusError {
+				result = res
+				break loop
+			}
+		case <-time.After(5 * time.Minute):
+			fmt.Println("timeout 1")
+			break loop
 		}
-		time.Sleep(2 * time.Second)
 	}
 
 	assert.NotEqual(t, builder.StatusError, result.Status)
@@ -86,26 +95,34 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
 				CamelVersion: "2.23.1",
-				BaseImage:    "fabric8/s2i-java:3.0-java8",
+				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-cippalippa",
 		},
-		// to not include notify step
-		Steps: s2i.DefaultSteps[:len(s2i.DefaultSteps)-1],
+		Steps: s2i.DefaultSteps,
 	}
 
-	b.Submit(r)
+	c := make(chan builder.Result)
 
-	deadline := time.Now().Add(5 * time.Minute)
+	b.Submit(r, func(res builder.Result) {
+		c <- res
+	})
+
 	var result builder.Result
-	for time.Now().Before(deadline) {
-		result = b.Submit(r)
-		if result.Status == builder.StatusCompleted || result.Status == builder.StatusError {
-			break
+loop:
+	for {
+		select {
+		case res := <-c:
+			if res.Status == builder.StatusCompleted || res.Status == builder.StatusError {
+				result = res
+				break loop
+			}
+		case <-time.After(5 * time.Minute):
+			fmt.Println("timeout 1")
+			break loop
 		}
-		time.Sleep(2 * time.Second)
 	}
 
 	assert.Equal(t, builder.StatusError, result.Status)

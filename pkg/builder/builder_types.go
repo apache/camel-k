@@ -46,8 +46,8 @@ const (
 
 // Builder --
 type Builder interface {
-	Submit(request Request) Result
-	Purge(request Request)
+	IsBuilding(object v1.ObjectMeta) bool
+	Submit(request Request, handler func(Result))
 }
 
 // Step --
@@ -124,6 +124,7 @@ func (t Task) Elapsed() time.Duration {
 
 // Result represents the result of a build
 type Result struct {
+	Builder     Builder
 	Request     Request
 	BaseImage   string
 	Image       string

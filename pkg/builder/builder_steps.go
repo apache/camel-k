@@ -28,8 +28,6 @@ import (
 
 	"github.com/scylladb/go-set/strset"
 
-	"github.com/rs/xid"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/tar"
 
@@ -39,8 +37,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/version"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GenerateProject --
@@ -337,76 +333,4 @@ func FindBestImage(images []PublishedImage, dependencies []string, artifacts []v
 	}
 
 	return bestImage, bestImageCommonLibs
-}
-
-// NotifyIntegrationContext --
-func NotifyIntegrationContext(ctx *Context) error {
-	target := v1alpha1.IntegrationContext{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       v1alpha1.IntegrationContextKind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ctx.Namespace,
-			Name:      ctx.Request.Meta.Name,
-		},
-	}
-	key := k8sclient.ObjectKey{
-		Namespace: ctx.Namespace,
-		Name:      ctx.Request.Meta.Name,
-	}
-
-	if err := ctx.Client.Get(ctx.C, key, &target); err != nil {
-		return err
-	}
-
-	t := target.DeepCopy()
-	if t.Annotations == nil {
-		t.Annotations = make(map[string]string)
-	}
-
-	// Add a random ID to trigger update
-	t.Annotations["camel.apache.org/build.id"] = xid.New().String()
-
-	if err := ctx.Client.Update(ctx.C, t); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// NotifyIntegration --
-func NotifyIntegration(ctx *Context) error {
-	target := v1alpha1.Integration{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       v1alpha1.IntegrationKind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ctx.Namespace,
-			Name:      ctx.Request.Meta.Name,
-		},
-	}
-	key := k8sclient.ObjectKey{
-		Namespace: ctx.Namespace,
-		Name:      ctx.Request.Meta.Name,
-	}
-
-	if err := ctx.Client.Get(ctx.C, key, &target); err != nil {
-		return err
-	}
-
-	t := target.DeepCopy()
-	if t.Annotations == nil {
-		t.Annotations = make(map[string]string)
-	}
-
-	// Add a random ID to trigger update
-	t.Annotations["camel.apache.org/build.id"] = xid.New().String()
-
-	if err := ctx.Client.Update(ctx.C, t); err != nil {
-		return err
-	}
-
-	return nil
 }

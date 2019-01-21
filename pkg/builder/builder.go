@@ -27,6 +27,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/sirupsen/logrus"
@@ -38,11 +40,16 @@ import (
 //
 // ********************************
 
+type buildTask struct {
+	handler func(Result)
+	request Request
+}
+
 type defaultBuilder struct {
 	log       *logrus.Entry
 	ctx       context.Context
 	client    client.Client
-	requests  chan Request
+	tasks     chan buildTask
 	interrupt chan bool
 	request   sync.Map
 	running   int32
@@ -55,7 +62,7 @@ func New(ctx context.Context, c client.Client, namespace string) Builder {
 		log:       logrus.WithField("logger", "builder"),
 		ctx:       ctx,
 		client:    c,
-		requests:  make(chan Request),
+		tasks:     make(chan buildTask),
 		interrupt: make(chan bool, 1),
 		running:   0,
 		namespace: namespace,
@@ -64,8 +71,14 @@ func New(ctx context.Context, c client.Client, namespace string) Builder {
 	return &m
 }
 
+func (b *defaultBuilder) IsBuilding(object v1.ObjectMeta) bool {
+	_, ok := b.request.Load(object.Name)
+
+	return ok
+}
+
 // Submit --
-func (b *defaultBuilder) Submit(request Request) Result {
+func (b *defaultBuilder) Submit(request Request, handler func(Result)) {
 	if atomic.CompareAndSwapInt32(&b.running, 0, 1) {
 		go b.loop()
 	}
@@ -73,6 +86,7 @@ func (b *defaultBuilder) Submit(request Request) Result {
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
 		result = Result{
+			Builder: b,
 			Request: request,
 			Status:  StatusSubmitted,
 		}
@@ -80,15 +94,8 @@ func (b *defaultBuilder) Submit(request Request) Result {
 		b.log.Infof("submitting request: %+v", request)
 
 		b.request.Store(request.Meta.Name, result)
-		b.requests <- request
+		b.tasks <- buildTask{handler: handler, request: request}
 	}
-
-	return result.(Result)
-}
-
-// Purge --
-func (b *defaultBuilder) Purge(request Request) {
-	b.request.Delete(request.Meta.Name)
 }
 
 // ********************************
@@ -104,19 +111,19 @@ func (b *defaultBuilder) loop() {
 			b.interrupt <- true
 
 			close(b.interrupt)
-			close(b.requests)
+			close(b.tasks)
 
 			atomic.StoreInt32(&b.running, 0)
-		case r, ok := <-b.requests:
+		case t, ok := <-b.tasks:
 			if ok {
-				b.log.Infof("executing request: %+v", r)
-				b.submit(r)
+				b.log.Infof("executing request: %+v", t.request)
+				b.process(t.request, t.handler)
 			}
 		}
 	}
 }
 
-func (b *defaultBuilder) submit(request Request) {
+func (b *defaultBuilder) process(request Request, handler func(Result)) {
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
 		b.log.Panicf("no info found for: %+v", request.Meta.Name)
@@ -126,6 +133,10 @@ func (b *defaultBuilder) submit(request Request) {
 	r := result.(Result)
 	r.Status = StatusStarted
 	r.Task.StartedAt = time.Now()
+
+	if handler != nil {
+		handler(r)
+	}
 
 	// create tmp path
 	buildDir := request.BuildDir
@@ -140,6 +151,7 @@ func (b *defaultBuilder) submit(request Request) {
 	}
 
 	defer os.RemoveAll(builderPath)
+	defer b.request.Delete(request.Meta.Name)
 
 	c := Context{
 		C:         b.ctx,
@@ -164,14 +176,20 @@ func (b *defaultBuilder) submit(request Request) {
 
 		// update the cache
 		b.request.Store(request.Meta.Name, r)
-
-		return
 	}
 
 	c.BaseImage = c.Image
 
 	// update the cache
 	b.request.Store(request.Meta.Name, r)
+
+	if r.Status == StatusError {
+		if handler != nil {
+			handler(r)
+		}
+
+		return
+	}
 
 	// Sort steps by phase
 	sort.SliceStable(request.Steps, func(i, j int) bool {
@@ -224,7 +242,7 @@ func (b *defaultBuilder) submit(request Request) {
 	// update the cache
 	b.request.Store(request.Meta.Name, r)
 
-	b.log.Infof("request to build context %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+	b.log.Infof("build request %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
 	b.log.Infof("dependencies: %s", request.Dependencies)
 	b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
 	b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
@@ -232,4 +250,8 @@ func (b *defaultBuilder) submit(request Request) {
 	b.log.Infof("base image: %s", c.BaseImage)
 	b.log.Infof("resolved image: %s", c.Image)
 	b.log.Infof("resolved public image: %s", c.PublicImage)
+
+	if handler != nil {
+		handler(r)
+	}
 }

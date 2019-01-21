@@ -21,6 +21,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/pkg/client"
 
 	"gopkg.in/yaml.v2"
@@ -68,7 +70,7 @@ func GetConfigMap(context context.Context, client client.Client, name string, na
 		Namespace: namespace,
 	}
 
-	cm := corev1.ConfigMap{
+	answer := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
 			APIVersion: "v1",
@@ -79,9 +81,41 @@ func GetConfigMap(context context.Context, client client.Client, name string, na
 		},
 	}
 
-	if err := client.Get(context, key, &cm); err != nil {
+	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
 	}
 
-	return &cm, nil
+	return &answer, nil
+}
+
+// GetIntegrationContext --
+func GetIntegrationContext(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationContext, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	answer := v1alpha1.NewIntegrationContext(namespace, name)
+
+	if err := client.Get(context, key, &answer); err != nil {
+		return nil, err
+	}
+
+	return &answer, nil
+}
+
+// GetIntegration --
+func GetIntegration(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.Integration, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	answer := v1alpha1.NewIntegration(namespace, name)
+
+	if err := client.Get(context, key, &answer); err != nil {
+		return nil, err
+	}
+
+	return &answer, nil
 }
