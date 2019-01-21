@@ -78,7 +78,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 			e.Steps = []builder.Step{
 				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
 				builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, s2i.Publisher),
-				builder.NewStep("notify/integration", builder.NotifyPhase, builder.NotifyIntegration),
 			}
 			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
 				e.Steps = append(e.Steps, builder.NewStep("publisher/replaceHost", builder.ApplicationPublishPhase+1, t.ReplaceHost))
@@ -87,7 +86,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 			e.Steps = []builder.Step{
 				builder.NewStep("packager", builder.ApplicationPackagePhase, builder.StandardPackager),
 				builder.NewStep("publisher/kaniko", builder.ApplicationPublishPhase, kaniko.Publisher),
-				builder.NewStep("notify/integration", builder.NotifyPhase, builder.NotifyIntegration),
 			}
 			e.BuildDir = kaniko.BuildDir
 		}

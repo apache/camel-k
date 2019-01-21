@@ -25,6 +25,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// NewIntegration --
+func NewIntegration(namespace string, name string) Integration {
+	return Integration{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       IntegrationKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+	}
+}
+
 // NewIntegrationList --
 func NewIntegrationList() IntegrationList {
 	return IntegrationList{
