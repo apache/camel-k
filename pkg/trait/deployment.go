@@ -76,7 +76,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 func (t *deploymentTrait) Apply(e *Environment) error {
 	if t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
 		// trigger container image build
-		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingImage
+		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildImageSubmitted
 	}
 
 	if !t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {

@@ -52,7 +52,7 @@ func (action *monitorAction) Handle(ctx context.Context, ictx *v1alpha1.Integrat
 
 		target := ictx.DeepCopy()
 		target.Status.Digest = hash
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuilding
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildSubmitted
 
 		logrus.Info("Context ", target.Name, " transitioning to state ", target.Status.Phase)
 

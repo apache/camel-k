@@ -22,6 +22,7 @@ limitations under the License.
 package test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -34,11 +35,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func handler(in chan builder.Result, out chan builder.Result) {
+	for {
+		select {
+		case res := <-in:
+			if res.Status == builder.StatusCompleted || res.Status == builder.StatusError {
+				out <- res
+				return
+			}
+		case <-time.After(5 * time.Minute):
+			fmt.Println("timeout 1")
+			close(out)
+			return
+		}
+	}
+}
+
 func TestBuildManagerBuild(t *testing.T) {
 	namespace := getTargetNamespace()
 	b := builder.New(testContext, testClient, namespace)
 
 	r := builder.Request{
+		C: context.TODO(),
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
@@ -56,28 +74,20 @@ func TestBuildManagerBuild(t *testing.T) {
 		Steps: s2i.DefaultSteps,
 	}
 
-	c := make(chan builder.Result)
+	hc := make(chan builder.Result)
+	rc := make(chan builder.Result)
 
-	b.Submit(r, func(res builder.Result) {
-		c <- res
-	})
+	go func() {
+		handler(hc, rc)
+	}()
+	go func() {
+		b.Submit(r, func(res *builder.Result) {
+			hc <- *res
+		})
+	}()
 
-	var result builder.Result
-
-loop:
-	for {
-		select {
-		case res := <-c:
-			if res.Status == builder.StatusCompleted || res.Status == builder.StatusError {
-				result = res
-				break loop
-			}
-		case <-time.After(5 * time.Minute):
-			fmt.Println("timeout 1")
-			break loop
-		}
-	}
-
+	result, ok := <-rc
+	assert.True(t, ok)
 	assert.NotEqual(t, builder.StatusError, result.Status)
 	assert.Equal(t, builder.StatusCompleted, result.Status)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
@@ -88,6 +98,7 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	b := builder.New(testContext, testClient, namespace)
 
 	r := builder.Request{
+		C: context.TODO(),
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
@@ -104,27 +115,20 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		Steps: s2i.DefaultSteps,
 	}
 
-	c := make(chan builder.Result)
+	hc := make(chan builder.Result)
+	rc := make(chan builder.Result)
 
-	b.Submit(r, func(res builder.Result) {
-		c <- res
-	})
+	go func() {
+		handler(hc, rc)
+	}()
+	go func() {
+		b.Submit(r, func(res *builder.Result) {
+			hc <- *res
+		})
+	}()
 
-	var result builder.Result
-loop:
-	for {
-		select {
-		case res := <-c:
-			if res.Status == builder.StatusCompleted || res.Status == builder.StatusError {
-				result = res
-				break loop
-			}
-		case <-time.After(5 * time.Minute):
-			fmt.Println("timeout 1")
-			break loop
-		}
-	}
-
+	result, ok := <-rc
+	assert.True(t, ok)
 	assert.Equal(t, builder.StatusError, result.Status)
 	assert.NotEqual(t, builder.StatusCompleted, result.Status)
 }

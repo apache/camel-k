@@ -41,7 +41,7 @@ import (
 // ********************************
 
 type buildTask struct {
-	handler func(Result)
+	handler func(*Result)
 	request Request
 }
 
@@ -78,14 +78,14 @@ func (b *defaultBuilder) IsBuilding(object v1.ObjectMeta) bool {
 }
 
 // Submit --
-func (b *defaultBuilder) Submit(request Request, handler func(Result)) {
+func (b *defaultBuilder) Submit(request Request, handler func(*Result)) {
 	if atomic.CompareAndSwapInt32(&b.running, 0, 1) {
 		go b.loop()
 	}
 
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
-		result = Result{
+		r := Result{
 			Builder: b,
 			Request: request,
 			Status:  StatusSubmitted,
@@ -93,7 +93,11 @@ func (b *defaultBuilder) Submit(request Request, handler func(Result)) {
 
 		b.log.Infof("submitting request: %+v", request)
 
-		b.request.Store(request.Meta.Name, result)
+		if handler != nil {
+			handler(&r)
+		}
+
+		b.request.Store(request.Meta.Name, r)
 		b.tasks <- buildTask{handler: handler, request: request}
 	}
 }
@@ -127,7 +131,7 @@ func (b *defaultBuilder) loop() {
 	}
 }
 
-func (b *defaultBuilder) process(request Request, handler func(Result)) {
+func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
 		b.log.Panicf("no info found for: %+v", request.Meta.Name)
@@ -139,7 +143,7 @@ func (b *defaultBuilder) process(request Request, handler func(Result)) {
 	r.Task.StartedAt = time.Now()
 
 	if handler != nil {
-		handler(r)
+		handler(&r)
 	}
 
 	// create tmp path
@@ -189,7 +193,7 @@ func (b *defaultBuilder) process(request Request, handler func(Result)) {
 
 	if r.Status == StatusError {
 		if handler != nil {
-			handler(r)
+			handler(&r)
 		}
 
 		return
@@ -202,13 +206,15 @@ func (b *defaultBuilder) process(request Request, handler func(Result)) {
 
 	b.log.Infof("steps: %v", request.Steps)
 	for _, step := range request.Steps {
-		if c.Error != nil {
+		if c.Error != nil || r.Status == StatusInterrupted {
 			break
 		}
 
 		select {
 		case <-b.interrupt:
 			c.Error = errors.New("build canceled")
+		case <-request.C.Done():
+			r.Status = StatusInterrupted
 		default:
 			l := b.log.WithFields(logrus.Fields{
 				"step":    step.ID(),
@@ -229,33 +235,38 @@ func (b *defaultBuilder) process(request Request, handler func(Result)) {
 		}
 	}
 
-	r.Status = StatusCompleted
-	r.BaseImage = c.BaseImage
-	r.Image = c.Image
-	r.PublicImage = c.PublicImage
-	r.Error = c.Error
 	r.Task.CompletedAt = time.Now()
 
-	if r.Error != nil {
-		r.Status = StatusError
-	}
+	if r.Status != StatusInterrupted {
+		r.Status = StatusCompleted
+		r.BaseImage = c.BaseImage
+		r.Image = c.Image
+		r.PublicImage = c.PublicImage
+		r.Error = c.Error
 
-	r.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
-	r.Artifacts = append(r.Artifacts, c.Artifacts...)
+		if r.Error != nil {
+			r.Status = StatusError
+		}
+
+		r.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
+		r.Artifacts = append(r.Artifacts, c.Artifacts...)
+
+		b.log.Infof("build request %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+		b.log.Infof("dependencies: %s", request.Dependencies)
+		b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
+		b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
+		b.log.Infof("requested image: %s", request.Image)
+		b.log.Infof("base image: %s", c.BaseImage)
+		b.log.Infof("resolved image: %s", c.Image)
+		b.log.Infof("resolved public image: %s", c.PublicImage)
+	} else {
+		b.log.Infof("build request %s interrupted after %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+	}
 
 	// update the cache
 	b.request.Store(request.Meta.Name, r)
 
-	b.log.Infof("build request %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
-	b.log.Infof("dependencies: %s", request.Dependencies)
-	b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
-	b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
-	b.log.Infof("requested image: %s", request.Image)
-	b.log.Infof("base image: %s", c.BaseImage)
-	b.log.Infof("resolved image: %s", c.Image)
-	b.log.Infof("resolved public image: %s", c.PublicImage)
-
 	if handler != nil {
-		handler(r)
+		handler(&r)
 	}
 }

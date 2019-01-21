@@ -19,6 +19,7 @@ package integrationcontext
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -34,8 +35,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewBuildAction creates a new build handling action for the context
-func NewBuildAction(ctx context.Context) Action {
+// NewBuildAction creates a new build request handling action for the context
+func NewBuildAction() Action {
 	return &buildAction{}
 }
 
@@ -44,14 +45,45 @@ type buildAction struct {
 }
 
 func (action *buildAction) Name() string {
-	return "build"
+	return "build-submitted"
 }
 
 func (action *buildAction) CanHandle(ictx *v1alpha1.IntegrationContext) bool {
-	return ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuilding
+	if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildSubmitted {
+		return true
+	}
+	if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildRunning {
+		return true
+	}
+
+	return false
 }
 
 func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
+	if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildSubmitted {
+		return action.handleBuildSubmitted(ctx, ictx)
+	}
+	if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildRunning {
+		return action.handleBuildRunning(ctx, ictx)
+	}
+
+	return nil
+}
+
+func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
+	b, err := platform.GetPlatformBuilder(action.client, ictx.Namespace)
+	if err != nil {
+		return err
+	}
+
+	if b.IsBuilding(ictx.ObjectMeta) {
+		logrus.Infof("Build for context %s is running", ictx.Name)
+	}
+
+	return nil
+}
+
+func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
 	b, err := platform.GetPlatformBuilder(action.client, ictx.Namespace)
 	if err != nil {
 		return err
@@ -72,7 +104,11 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 		repositories = append(repositories, ictx.Spec.Repositories...)
 		repositories = append(repositories, p.Spec.Build.Repositories...)
 
+		// the context given to the handler is per reconcile loop and as the build
+		// happens asynchronously, a new context has to be created. the new context
+		// can be used also to stop the build.
 		r := builder.Request{
+			C:            context.TODO(),
 			Meta:         ictx.ObjectMeta,
 			Dependencies: ictx.Spec.Dependencies,
 			Repositories: repositories,
@@ -81,17 +117,13 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 			Platform:     env.Platform.Spec,
 		}
 
-		b.Submit(r, func(result builder.Result) {
-			// we can't use the handler ctx as this happen asynchronously so we
-			// need a new context
-			ctx := context.TODO()
-
+		b.Submit(r, func(result *builder.Result) {
 			//
 			// this function is invoked synchronously for every state change to avoid
 			// leaving one context not fully updated when the incremental builder search
 			// for a compatible/base image
 			//
-			if err := action.handleBuildStateChange(ctx, result); err != nil {
+			if err := action.handleBuildStateChange(result.Request.C, result); err != nil {
 				logrus.Warnf("Error while building context %s, reason: %s", ictx.Name, err.Error())
 			}
 		})
@@ -100,7 +132,7 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 	return nil
 }
 
-func (action *buildAction) handleBuildStateChange(ctx context.Context, res builder.Result) error {
+func (action *buildAction) handleBuildStateChange(ctx context.Context, res *builder.Result) error {
 	//
 	// Get the latest status of the context
 	//
@@ -113,8 +145,27 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res build
 	case builder.StatusSubmitted:
 		logrus.Infof("Build submitted for IntegrationContext %s", target.Name)
 	case builder.StatusStarted:
-		logrus.Infof("Build started for IntegrationContext %s", target.Name)
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildRunning
+
+		logrus.Infof("Context %s transitioning to state %s", target.Name, target.Status.Phase)
+
+		return action.client.Update(ctx, target)
 	case builder.StatusError:
+		// we should ensure that the integration context is still in the right
+		// phase, if not there is a chance that the context has been modified
+		// by the user
+		if target.Status.Phase != v1alpha1.IntegrationContextPhaseBuildRunning {
+
+			// terminate the build
+			res.Request.C.Done()
+
+			return fmt.Errorf("found context %s not the an expected phase (expectd=%s, found=%s)",
+				res.Request.Meta.Name,
+				string(v1alpha1.IntegrationContextPhaseBuildRunning),
+				string(target.Status.Phase),
+			)
+		}
+
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildFailureRecovery
 
 		if target.Status.Failure == nil {
@@ -132,6 +183,20 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res build
 
 		return action.client.Update(ctx, target)
 	case builder.StatusCompleted:
+		// we should ensure that the integration context is still in the right
+		// phase, if not there is a chance that the context has been modified
+		// by the user
+		if target.Status.Phase != v1alpha1.IntegrationContextPhaseBuildRunning {
+			// terminate the build
+			res.Request.C.Done()
+
+			return fmt.Errorf("found context %s not in the expected phase (expectd=%s, found=%s)",
+				res.Request.Meta.Name,
+				string(v1alpha1.IntegrationContextPhaseBuildRunning),
+				string(target.Status.Phase),
+			)
+		}
+
 		target.Status.BaseImage = res.BaseImage
 		target.Status.Image = res.Image
 		target.Status.PublicImage = res.PublicImage
