@@ -39,7 +39,7 @@ func TestPodLogScrape(t *testing.T) {
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
 	defer cancel()
-	scraper := log.NewPodScraper(testClient, pod.Namespace, pod.Name)
+	scraper := log.NewPodScraper(testClient, pod.Namespace, pod.Name, "scraped")
 	in := scraper.Start(ctx)
 
 	res := make(chan bool)
@@ -74,7 +74,7 @@ func TestSelectorLogScrape(t *testing.T) {
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
 	defer cancel()
-	scraper := log.NewSelectorScraper(testClient, deployment.Namespace, "scrape=me")
+	scraper := log.NewSelectorScraper(testClient, deployment.Namespace, "main", "scrape=me")
 	in := scraper.Start(ctx)
 
 	res := make(chan string)

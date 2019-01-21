@@ -34,19 +34,21 @@ import (
 
 // SelectorScraper scrapes all pods with a given selector
 type SelectorScraper struct {
-	client        kubernetes.Interface
-	namespace     string
-	labelSelector string
-	podScrapers   sync.Map
-	counter       uint64
+	client               kubernetes.Interface
+	namespace            string
+	defaultContainerName string
+	labelSelector        string
+	podScrapers          sync.Map
+	counter              uint64
 }
 
 // NewSelectorScraper creates a new SelectorScraper
-func NewSelectorScraper(client kubernetes.Interface, namespace string, labelSelector string) *SelectorScraper {
+func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string) *SelectorScraper {
 	return &SelectorScraper{
-		client:        client,
-		namespace:     namespace,
-		labelSelector: labelSelector,
+		client:               client,
+		namespace:            namespace,
+		defaultContainerName: defaultContainerName,
+		labelSelector:        labelSelector,
 	}
 }
 
@@ -122,17 +124,17 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 	return nil
 }
 
-func (s *SelectorScraper) addPodScraper(ctx context.Context, name string, out *bufio.Writer) {
-	podScraper := NewPodScraper(s.client, s.namespace, name)
+func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string,  out *bufio.Writer) {
+	podScraper := NewPodScraper(s.client, s.namespace, podName, s.defaultContainerName)
 	podCtx, podCancel := context.WithCancel(ctx)
 	id := atomic.AddUint64(&s.counter, 1)
 	prefix := "[" + strconv.FormatUint(id, 10) + "] "
 	podReader := podScraper.Start(podCtx)
-	s.podScrapers.Store(name, podCancel)
+	s.podScrapers.Store(podName, podCancel)
 	go func() {
 		defer podCancel()
 
-		if _, err := out.WriteString(prefix + "Monitoring pod " + name); err != nil {
+		if _, err := out.WriteString(prefix + "Monitoring pod " + podName); err != nil {
 			logrus.Error("Cannot write to output: ", err)
 			return
 		}
