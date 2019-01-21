@@ -53,7 +53,13 @@ func (t *restTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	for _, resource := range e.Integration.Spec.Resources {
+		if resource.Type == v1alpha1.ResourceTypeOpenAPI {
+			return e.IntegrationInPhase(""), nil
+		}
+	}
+
+	return false, nil
 }
 
 func (t *restTrait) Apply(e *Environment) error {
@@ -114,6 +120,19 @@ func (t *restTrait) Apply(e *Environment) error {
 		name := fmt.Sprintf("%s-openapi-%03d", e.Integration.Name, i)
 
 		//
+		// Add an additional source that references the previously
+		// created config map
+		//
+		e.Integration.Status.GeneratedSources = append(e.Integration.Status.GeneratedSources, v1alpha1.SourceSpec{
+			DataSpec: v1alpha1.DataSpec{
+				Name:        strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml",
+				ContentRef:  name,
+				Compression: resource.Compression,
+			},
+			Language: v1alpha1.LanguageXML,
+		})
+
+		//
 		// Store the generated rest xml in a separate config map in order
 		// not to pollute the integration with generated data
 		//
@@ -133,25 +152,13 @@ func (t *restTrait) Apply(e *Environment) error {
 					"camel.apache.org/source.name":        resource.Name,
 					"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
 					"camel.apache.org/source.generated":   "true",
+					"camel.apache.org/source.type":        string(v1alpha1.ResourceTypeOpenAPI),
 				},
 			},
 			Data: map[string]string{
 				"content": string(content),
 			},
 		}
-
-		//
-		// Add an additional source that references the previously
-		// created config map
-		//
-		e.Integration.Status.GeneratedSources = append(e.Integration.Status.GeneratedSources, v1alpha1.SourceSpec{
-			DataSpec: v1alpha1.DataSpec{
-				Name:        strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml",
-				ContentRef:  name,
-				Compression: resource.Compression,
-			},
-			Language: v1alpha1.LanguageXML,
-		})
 
 		e.Resources.Add(&cm)
 	}

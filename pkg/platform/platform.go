@@ -32,12 +32,12 @@ import (
 var gBuilder builder.Builder
 
 // GetPlatformBuilder --
-func GetPlatformBuilder(ctx context.Context, c client.Client, namespace string) (builder.Builder, error) {
+func GetPlatformBuilder(c client.Client, namespace string) (builder.Builder, error) {
 	if gBuilder != nil {
 		return gBuilder, nil
 	}
 
-	gBuilder = builder.New(ctx, c, namespace)
+	gBuilder = builder.New(context.TODO(), c, namespace)
 
 	return gBuilder, nil
 }

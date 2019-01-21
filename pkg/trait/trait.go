@@ -40,6 +40,9 @@ func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integrati
 
 	catalog := NewCatalog(ctx, c)
 
+	// set the catalog
+	environment.Catalog = catalog
+
 	// invoke the trait framework to determine the needed resources
 	if err := catalog.apply(environment); err != nil {
 		return nil, errors.Wrap(err, "error during trait customization before deployment")

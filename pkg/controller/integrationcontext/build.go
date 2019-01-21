@@ -55,7 +55,7 @@ func (action *buildAction) CanHandle(ictx *v1alpha1.IntegrationContext) bool {
 }
 
 func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
-	b, err := platform.GetPlatformBuilder(action.Context, action.client, ictx.Namespace)
+	b, err := platform.GetPlatformBuilder(action.client, ictx.Namespace)
 	if err != nil {
 		return err
 	}
