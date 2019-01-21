@@ -127,7 +127,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		},
 		Context: &v1alpha1.IntegrationContext{
 			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseBuilding,
+				Phase: v1alpha1.IntegrationContextPhaseBuildSubmitted,
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{

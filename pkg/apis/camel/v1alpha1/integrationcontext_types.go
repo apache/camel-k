@@ -64,8 +64,10 @@ const (
 	// IntegrationContextTypeExternal --
 	IntegrationContextTypeExternal = "external"
 
-	// IntegrationContextPhaseBuilding --
-	IntegrationContextPhaseBuilding IntegrationContextPhase = "Building"
+	// IntegrationContextPhaseBuildSubmitted --
+	IntegrationContextPhaseBuildSubmitted IntegrationContextPhase = "Build Submitted"
+	// IntegrationContextPhaseBuildRunning --
+	IntegrationContextPhaseBuildRunning IntegrationContextPhase = "Build Running"
 	// IntegrationContextPhaseReady --
 	IntegrationContextPhaseReady IntegrationContextPhase = "Ready"
 	// IntegrationContextPhaseError --

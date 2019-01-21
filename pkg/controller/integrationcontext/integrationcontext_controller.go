@@ -88,7 +88,7 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 
 	integrationContextActionPool := []Action{
 		NewInitializeAction(),
-		NewBuildAction(ctx),
+		NewBuildAction(),
 		NewErrorRecoveryAction(),
 		NewMonitorAction(),
 	}

@@ -46,7 +46,7 @@ func (t *springBootTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
 		return true, nil
 	}
 	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
@@ -113,7 +113,7 @@ func (t *springBootTrait) Apply(e *Environment) error {
 	// Integration Context
 	//
 
-	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuilding) {
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
 		// add custom initialization logic
 		e.Steps = append(e.Steps, builder.NewStep("initialize/spring-boot", builder.InitPhase, springboot.Initialize))
 		e.Steps = append(e.Steps, builder.NewStep("build/compute-boot-dependencies", builder.ProjectBuildPhase+1, springboot.ComputeDependencies))
