@@ -68,7 +68,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, integration *v1al
 
 		logrus.Infof("Max recovery attempt reached for integration %s, transition to phase %s", integration.Name, string(target.Status.Phase))
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	}
 
 	if integration.Status.Failure != nil {
@@ -97,7 +97,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, integration *v1al
 			target.Status.Failure.Recovery.AttemptMax,
 		)
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	}
 
 	return nil

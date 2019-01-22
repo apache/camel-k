@@ -146,7 +146,7 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 
 		logrus.Infof("Integration %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	case builder.StatusCompleted:
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 		if res.PublicImage != "" {
@@ -164,7 +164,7 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 
 		logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-		if err := action.client.Update(ctx, target); err != nil {
+		if err := action.client.Status().Update(ctx, target); err != nil {
 			return err
 		}
 	}

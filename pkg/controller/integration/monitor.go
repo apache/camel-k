@@ -59,7 +59,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 
 		logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	}
 
 	// TODO check also if deployment matches (e.g. replicas)
