@@ -66,7 +66,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 				// with a context
 				target := integration.DeepCopy()
 				target.Status.Context = ""
-				return action.client.Update(ctx, target)
+				return action.client.Status().Update(ctx, target)
 			}
 		}
 
@@ -83,7 +83,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 
 			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-			return action.client.Update(ctx, target)
+			return action.client.Status().Update(ctx, target)
 		}
 
 		if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
@@ -104,14 +104,14 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 
 			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-			return action.client.Update(ctx, target)
+			return action.client.Status().Update(ctx, target)
 		}
 
 		if integration.Status.Context == "" {
 			// We need to set the context
 			target := integration.DeepCopy()
 			target.Status.Context = ictx.Name
-			return action.client.Update(ctx, target)
+			return action.client.Status().Update(ctx, target)
 		}
 
 		return nil
@@ -145,5 +145,5 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 	target := integration.DeepCopy()
 	target.Status.Context = platformCtxName
 
-	return action.client.Update(ctx, target)
+	return action.client.Status().Update(ctx, target)
 }

@@ -75,5 +75,5 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
 	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-	return action.client.Update(ctx, target)
+	return action.client.Status().Update(ctx, target)
 }
