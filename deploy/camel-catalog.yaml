@@ -1501,7 +1501,7 @@ artifacts:
     - http: true
       id: knative
       passive: false
-    version: 0.2.0-SNAPSHOT
+    version: 0.2.0
   camel-krati:
     artifactId: camel-krati
     dataformats: []
