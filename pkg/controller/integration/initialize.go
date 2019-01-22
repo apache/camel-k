@@ -62,7 +62,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 
 			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-			return action.client.Update(ctx, target)
+			return action.client.Status().Update(ctx, target)
 		}
 
 		return nil
@@ -74,7 +74,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	}
 
 	//
-	// restore phase to initial phase ase traits are not aware of
+	// restore phase to initial phase as traits are not aware of
 	// WaitingForPlatform phase
 	//
 	if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
@@ -82,7 +82,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 		target.Status.Phase = v1alpha1.IntegrationPhaseInitial
 		target.Status.Digest = dgst
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	}
 
 	// better not changing the spec section of the target because it may be used for comparison by a
@@ -109,5 +109,5 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 
 	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
 
-	return action.client.Update(ctx, target)
+	return action.client.Status().Update(ctx, target)
 }
