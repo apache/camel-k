@@ -23,6 +23,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+
 	"github.com/apache/camel-k/pkg/util/envvar"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -415,7 +417,8 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	//
 
 	VisitConfigurations("configmap", e.Context, e.Integration, func(cmName string) {
-		refName := "integration-cm-" + strings.ToLower(cmName)
+		refName := kubernetes.SanitizeLabel(cmName)
+		fileName := "integration-cm-" + strings.ToLower(cmName)
 
 		vols = append(vols, corev1.Volume{
 			Name: refName,
@@ -430,7 +433,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 
 		mnts = append(mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join("/etc/camel/conf.d", refName),
+			MountPath: path.Join("/etc/camel/conf.d", fileName),
 		})
 	})
 
@@ -439,7 +442,8 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	//
 
 	VisitConfigurations("secret", e.Context, e.Integration, func(secretName string) {
-		refName := "integration-secret-" + strings.ToLower(secretName)
+		refName := kubernetes.SanitizeLabel(secretName)
+		fileName := "integration-secret-" + strings.ToLower(secretName)
 
 		vols = append(vols, corev1.Volume{
 			Name: refName,
@@ -452,7 +456,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 
 		mnts = append(mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join("/etc/camel/conf.d", refName),
+			MountPath: path.Join("/etc/camel/conf.d", fileName),
 		})
 	})
 

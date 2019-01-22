@@ -40,6 +40,14 @@ func SanitizeName(name string) string {
 	return name
 }
 
+// SanitizeLabel sanitizes the given name to be compatible with k8s
+func SanitizeLabel(name string) string {
+	name = strings.ToLower(name)
+	name = disallowedChars.ReplaceAllString(name, "")
+	name = strings.TrimFunc(name, isDisallowedStartEndChar)
+	return name
+}
+
 func isDisallowedStartEndChar(rune rune) bool {
 	return !unicode.IsLetter(rune)
 }
