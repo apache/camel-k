@@ -3342,6 +3342,7 @@ spec:
   build:
     camelVersion: "2.23.1"
     baseImage: "fabric8/s2i-java:3.0-java8"
+    localRepository: "/tmp/artifacts/m2"
 
 `
 	Resources["platform-integration-context-groovy.yaml"] =

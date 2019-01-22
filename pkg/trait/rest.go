@@ -99,11 +99,13 @@ func (t *restTrait) Apply(e *Environment) error {
 			return err
 		}
 
-		goal := fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-rest-xml", version.Version)
-		iArg := "-Dopenapi.spec=" + in
-		oArg := "-Ddsl.out=" + out
+		opts := make([]string, 0, 4)
+		opts = append(opts, maven.ExtraOptions(e.Platform.Spec.Build)...)
+		opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-rest-xml", version.Version))
+		opts = append(opts, "-Dopenapi.spec="+in)
+		opts = append(opts, "-Ddsl.out="+out)
 
-		if err := maven.Run(tmpDir, goal, iArg, oArg); err != nil {
+		if err := maven.Run(tmpDir, opts...); err != nil {
 			return err
 		}
 
