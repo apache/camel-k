@@ -1,4 +1,4 @@
-build: build-runtime build-operator build-kamel build-compile-integration-tests test
+build: build-runtime build-operator build-kamel build-publisher build-compile-integration-tests test
 
 build-go: build-embed-resources build-operator build-kamel build-publisher
 
