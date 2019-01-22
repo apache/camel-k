@@ -272,6 +272,14 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	labels := map[string]string{
 		"camel.apache.org/integration": e.Integration.Name,
 	}
+
+	annotations := e.Integration.Annotations
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+	// Resolve registry host names when used
+	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
+
 	deployment := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -283,7 +291,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Labels: map[string]string{
 				"camel.apache.org/integration": e.Integration.Name,
 			},
-			Annotations: e.Integration.Annotations,
+			Annotations: annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: e.Integration.Spec.Replicas,
