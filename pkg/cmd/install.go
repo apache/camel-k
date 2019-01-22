@@ -52,6 +52,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&impl.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
 	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
+	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
 	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
@@ -81,6 +82,7 @@ type installCmdOptions struct {
 	pushSecret       string
 	camelVersion     string
 	baseImage        string
+	localRepository  string
 	repositories     []string
 	properties       []string
 	contexts         []string
@@ -139,6 +141,9 @@ func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
 					platform.Spec.Build.Properties[kv[0]] = kv[1]
 				}
 			}
+		}
+		if o.localRepository != "" {
+			platform.Spec.Build.LocalRepository = o.localRepository
 		}
 		if len(o.repositories) > 0 {
 			platform.Spec.Build.Repositories = o.repositories
