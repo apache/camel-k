@@ -151,6 +151,21 @@ The following is a list of common traits that can be configured by the end users
   +
   It's disabled by default.
 
+| prometheus
+| Kubernetes, OpenShift
+| Exposes the integration with a Service and a ServiceMonitor resources so that the Prometheus endpoint can be scraped.
+  +
+  +
+  It's disabled by default.
+
+[cols="m,"]
+!===
+
+! prometheus.port
+! To configure a different Prometheus endpoint port (default `9778`).
+
+!===
+
 |=======================
 
 
