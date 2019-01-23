@@ -24,7 +24,6 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -73,7 +72,8 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 
 	target := integration.DeepCopy()
 	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
-	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+
+	action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 	return action.client.Status().Update(ctx, target)
 }

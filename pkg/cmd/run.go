@@ -37,11 +37,10 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/log"
+	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -192,7 +191,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev {
-		err = log.Print(o.Context, c, integration)
+		err = k8slog.Print(o.Context, c, integration)
 		if err != nil {
 			return err
 		}
@@ -244,7 +243,7 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error
 				case <-changes:
 					_, err := o.updateIntegrationCode(c, sources)
 					if err != nil {
-						logrus.Error("Unable to sync integration: ", err)
+						fmt.Println("Unable to sync integration: ", err.Error())
 					}
 				}
 			}

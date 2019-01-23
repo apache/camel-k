@@ -26,7 +26,6 @@ import (
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -136,7 +135,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	sources := make([]string, 0, len(e.Integration.Spec.Sources))
 	for i, s := range sourcesSpecs {
 		if s.Content == "" {
-			logrus.Warnf("Source %s has empty content", s.Name)
+			t.L.Debug("Source %s has and empty content", s.Name)
 		}
 
 		envName := fmt.Sprintf("CAMEL_K_ROUTE_%03d", i)

@@ -25,7 +25,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
-	"github.com/sirupsen/logrus"
 )
 
 // NewErrorRecoveryAction creates a new error recovering handling action for the integration
@@ -58,7 +57,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, integration *v1al
 	// The integration platform needs to be initialized before starting handle
 	// context in status error
 	if _, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace); err != nil {
-		logrus.Info("Waiting for a integration platform to be initialized")
+		action.L.Info("Waiting for a integration platform to be initialized")
 		return nil
 	}
 
@@ -66,7 +65,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, integration *v1al
 		target := integration.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseError
 
-		logrus.Infof("Max recovery attempt reached for integration %s, transition to phase %s", integration.Name, string(target.Status.Phase))
+		action.L.Info("Max recovery attempt reached, transition to error phase")
 
 		return action.client.Status().Update(ctx, target)
 	}
@@ -91,7 +90,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, integration *v1al
 		target.Status.Failure.Recovery.Attempt = integration.Status.Failure.Recovery.Attempt + 1
 		target.Status.Failure.Recovery.AttemptTime = time.Now()
 
-		logrus.Infof("Recovery attempt for integration %s (%d/%d)",
+		action.L.Info("Recovery attempt (%d/%d)",
 			integration.Name,
 			target.Status.Failure.Recovery.Attempt,
 			target.Status.Failure.Recovery.AttemptMax,

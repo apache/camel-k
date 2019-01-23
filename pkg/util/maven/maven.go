@@ -27,9 +27,11 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/sirupsen/logrus"
+	"github.com/apache/camel-k/pkg/util/log"
 )
+
+// Log --
+var Log = log.WithName("maven")
 
 // BuildResult --
 type BuildResult struct {
@@ -54,7 +56,7 @@ func GeneratePomContent(project Project) (string, error) {
 
 // CreateStructure --
 func CreateStructure(buildDir string, project Project) error {
-	logrus.Infof("write project: %+v", project)
+	Log.Infof("write project: %+v", project)
 
 	pom, err := GeneratePomContent(project)
 	if err != nil {
@@ -76,16 +78,12 @@ func Run(buildDir string, args ...string) error {
 		mvnCmd = c
 	}
 
-	l := logrus.WithFields(logrus.Fields{
-		"logger": "maven",
-	})
-
 	cmd := exec.Command(mvnCmd, args...)
 	cmd.Dir = buildDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	l.Infof("execute: %s", strings.Join(cmd.Args, " "))
+	Log.Infof("execute: %s", strings.Join(cmd.Args, " "))
 
 	return cmd.Run()
 }

@@ -33,8 +33,6 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/sirupsen/logrus"
-
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -80,7 +78,7 @@ func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, int
 	}
 
 	if b.IsBuilding(integration.ObjectMeta) {
-		logrus.Infof("Build for integration %s is running", integration.Name)
+		action.L.Info("Build running")
 	}
 
 	return nil
@@ -139,7 +137,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 			// this function is invoked synchronously for every state change
 			//
 			if err := action.handleBuildStateChange(result.Request.C, result); err != nil {
-				logrus.Warnf("Error while building integration image %s, reason: %s", ictx.Name, err.Error())
+				action.L.Error(err, "Error while building integration image")
 			}
 		})
 	}
@@ -158,11 +156,11 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 
 	switch res.Status {
 	case builder.StatusSubmitted:
-		logrus.Info("Build submitted")
+		action.L.Info("Build submitted")
 	case builder.StatusStarted:
 		target.Status.Phase = v1alpha1.IntegrationPhaseBuildImageRunning
 
-		logrus.Infof("Integration %s transitioning to state %s", target.Name, target.Status.Phase)
+		action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
 	case builder.StatusError:
@@ -179,7 +177,7 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 			}
 		}
 
-		logrus.Infof("Integration %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
+		action.L.Error(res.Error, "Integration state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
 	case builder.StatusCompleted:
@@ -197,7 +195,7 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 
 		target.Status.Digest = dgst
 
-		logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+		action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 		if err := action.client.Status().Update(ctx, target); err != nil {
 			return err
