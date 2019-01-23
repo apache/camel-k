@@ -72,16 +72,6 @@ make dep
 
 The `make dep` command runs `dep ensure -v` under the hood, so make sure that `dep` is properly installed.
 
-For now, you have to set environment variable `KOTLIN_JDK_HOME` pointing to your JDK (not JRE) home directory.
-Also ensure, that you are using a Java version 8.
-
-For Mac you can just do a
-
-[source, bash]
-----
-export KOTLIN_JDK_HOME=$(/usr/libexec/java_home -v 1.8)
-----
-
 To build the whole project you now need to run:
 
 ```

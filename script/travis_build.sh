@@ -2,9 +2,8 @@
 
 set -e
 
-# Find the JAVA_HOME and set the KOTLIN_JDK_HOME
+# Print JAVA_HOME
 echo "Java home: $JAVA_HOME"
-export KOTLIN_JDK_HOME=$JAVA_HOME
 
 # First build the whole project
 make
