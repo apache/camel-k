@@ -52,3 +52,7 @@ required = [
   [[prune.project]]
     name = "k8s.io/code-generator"
     non-go = false
+
+[[constraint]]
+  name = "github.com/coreos/prometheus-operator"
+  version = "0.27.0"

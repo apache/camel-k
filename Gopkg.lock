@@ -34,6 +34,17 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
+  digest = "1:c76b0c1220b358995e3b5e340ff0ebae2ed9170e4ec56e1f2f896ed93da767f8"
+  name = "github.com/coreos/prometheus-operator"
+  packages = [
+    "pkg/apis/monitoring",
+    "pkg/apis/monitoring/v1",
+  ]
+  pruneopts = "NT"
+  revision = "174c9bf17bec78b055e8e63c6ae3a3dc9bb0a3a8"
+  version = "v0.27.0"
+
+[[projects]]
   digest = "1:4b8b5811da6970495e04d1f4e98bb89518cc3cfc3b3f456bdb876ed7b6c74049"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -109,12 +120,12 @@
   version = "v0.18.0"
 
 [[projects]]
+  branch = "master"
   digest = "1:4da4ea0a664ba528965683d350f602d0f11464e6bb2e17aad0914723bc25d163"
   name = "github.com/go-openapi/spec"
   packages = ["."]
   pruneopts = "NT"
   revision = "5b6cdde3200976e3ecceb2868706ee39b6aff3e4"
-  version = "v0.18.0"
 
 [[projects]]
   digest = "1:dc0f590770e5a6c70ea086232324f7b7dc4857c60eca63ab8ff78e0a5cfcdbf3"
@@ -990,8 +1001,7 @@
   version = "v0.1.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9ac2fdede4a8304e3b00ea3b36526536339f306d0306e320fc74f6cefeead18e"
+  digest = "1:c48a795cd7048bb1888273bc604b6e69b22f9b8089c3df65f77cc527757b515c"
   name = "k8s.io/kube-openapi"
   packages = [
     "cmd/openapi-gen/args",
@@ -1002,7 +1012,7 @@
     "pkg/util/sets",
   ]
   pruneopts = "NT"
-  revision = "0317810137be915b9cf888946c6e115c1bfac693"
+  revision = "0cf8f7e6ed1d2e3d47d02e3b6e559369af24d803"
 
 [[projects]]
   digest = "1:e03ddaf9f31bccbbb8c33eabad2c85025a95ca98905649fd744e0a54c630a064"
@@ -1044,6 +1054,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1",
     "github.com/fatih/structs",
     "github.com/jpillora/backoff",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
