@@ -39,7 +39,7 @@
         <log4j2.version>2.11.1</log4j2.version>
         <slf4j.version>1.7.25</slf4j.version>
         <groovy.version>2.5.5</groovy.version>
-        <kotlin.version>1.3.11</kotlin.version>
+        <kotlin.version>1.3.20</kotlin.version>
         <snakeyaml.version>1.23</snakeyaml.version>
         <spock.version>1.2-groovy-2.5</spock.version>
         <jackson.version>2.9.8</jackson.version>

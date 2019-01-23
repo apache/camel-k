@@ -54,9 +54,6 @@ class KotlinRoutesLoader : RoutesLoader {
                 val compiler = JvmScriptCompiler()
                 val evaluator = BasicJvmScriptEvaluator()
                 val host = BasicJvmScriptingHost(compiler = compiler, evaluator = evaluator)
-                val javaHome = System.getenv("KOTLIN_JDK_HOME") ?: "/usr/lib/jvm/java"
-
-                LOGGER.info("JAVA_HOME is set to {}", javaHome)
 
                 URIResolver.resolve(context, source).use { `is` ->
                     val result = host.eval(
@@ -64,12 +61,6 @@ class KotlinRoutesLoader : RoutesLoader {
                         ScriptCompilationConfiguration {
                             baseClass(IntegrationConfiguration::class)
                             jvm {
-                                //
-                                // This is needed as workaround for:
-                                //     https://youtrack.jetbrains.com/issue/KT-27497
-                                //
-                                javaHome(File(javaHome))
-
                                 //
                                 // The Kotlin script compiler does not inherit
                                 // the classpath by default
