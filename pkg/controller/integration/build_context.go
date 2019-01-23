@@ -26,7 +26,6 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/rs/xid"
-	"github.com/sirupsen/logrus"
 )
 
 // NewBuildContextAction create an action that handles integration context build
@@ -81,7 +80,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 				return err
 			}
 
-			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+			action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 			return action.client.Status().Update(ctx, target)
 		}
@@ -102,7 +101,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 				return err
 			}
 
-			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+			action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 			return action.client.Status().Update(ctx, target)
 		}

@@ -24,12 +24,13 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/fatih/structs"
-	"github.com/sirupsen/logrus"
 )
 
 // Catalog collects all information about traits in one place
 type Catalog struct {
+	L               log.Logger
 	tDebug          Trait
 	tDependencies   Trait
 	tDeployment     Trait
@@ -53,6 +54,7 @@ type Catalog struct {
 // NewCatalog creates a new trait Catalog
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
+		L:               log.Log.WithName("trait"),
 		tDebug:          newDebugTrait(),
 		tRest:           newRestTrait(),
 		tKnative:        newKnativeTrait(),
@@ -179,7 +181,7 @@ func (c *Catalog) apply(environment *Environment) error {
 		}
 
 		if enabled {
-			logrus.Infof("Apply trait: %s", trait.ID())
+			c.L.Infof("Apply trait: %s", trait.ID())
 
 			err = trait.Apply(environment)
 			if err != nil {

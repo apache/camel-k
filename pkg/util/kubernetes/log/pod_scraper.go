@@ -23,8 +23,8 @@ import (
 	"io"
 	"time"
 
+	klog "github.com/apache/camel-k/pkg/util/log"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -45,6 +45,7 @@ type PodScraper struct {
 	podName              string
 	defaultContainerName string
 	client               kubernetes.Interface
+	L                    klog.Logger
 }
 
 // NewPodScraper creates a new pod scraper
@@ -54,6 +55,7 @@ func NewPodScraper(c kubernetes.Interface, namespace string, podName string, def
 		podName:              podName,
 		defaultContainerName: defaultContainerName,
 		client:               c,
+		L:                    klog.WithName("scraper").WithName("pod").WithValues("name", podName),
 	}
 }
 
@@ -108,24 +110,24 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 
 func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.Duration, out *bufio.Writer, clientCloser func() error) {
 	if err != nil {
-		logrus.Warn(errors.Wrap(err, "error caught during log scraping for pod "+s.podName))
+		s.L.Error(err, "error caught during log scraping")
 	}
 
 	if ctx.Err() != nil {
-		logrus.Debug("Pod ", s.podName, " will no longer be monitored")
+		s.L.Debug("Pod will no longer be monitored")
 		if err := clientCloser(); err != nil {
-			logrus.Warn("Unable to close the client", err)
+			s.L.Error(err, "Unable to close the client")
 		}
 		return
 	}
 
-	logrus.Debug("Retrying to scrape pod ", s.podName, " logs in ", wait.Seconds(), " seconds...")
+	s.L.Debugf("Retrying to scrape pod logs in %f seconds...", wait.Seconds())
 	select {
 	case <-time.After(wait):
 		break
 	case <-ctx.Done():
 		if err := clientCloser(); err != nil {
-			logrus.Warn("Unable to close the client", err)
+			s.L.Error(err, "Unable to close the client")
 		}
 		return
 	}

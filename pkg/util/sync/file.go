@@ -22,8 +22,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/radovskyb/watcher"
-	"github.com/sirupsen/logrus"
 )
 
 // File returns a channel that signals each time the content of the file changes
@@ -48,7 +48,7 @@ func File(ctx context.Context, path string) (<-chan bool, error) {
 
 	go func() {
 		if err := w.Start(200 * time.Millisecond); err != nil {
-			logrus.Error("Error while starting watcher: ", err)
+			log.Error(err, "Error while starting watcher")
 			close(out)
 		}
 	}()

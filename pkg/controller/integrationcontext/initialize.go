@@ -24,7 +24,6 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/sirupsen/logrus"
 )
 
 // NewInitializeAction creates a new initialization handling action for the context
@@ -47,7 +46,7 @@ func (action *initializeAction) CanHandle(ictx *v1alpha1.IntegrationContext) boo
 func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
 	// The integration platform needs to be initialized before starting to create contexts
 	if _, err := platform.GetCurrentPlatform(ctx, action.client, ictx.Namespace); err != nil {
-		logrus.Info("Waiting for a integration platform to be initialized")
+		action.L.Info("Waiting for the integration platform to be initialized")
 		return nil
 	}
 
@@ -75,6 +74,8 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 		return err
 	}
 	target.Status.Digest = dgst
+
+	action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
 
 	return action.client.Update(ctx, target)
 }

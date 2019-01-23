@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/log"
+	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -81,7 +81,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err := c.Get(o.Context, key, &integration); err != nil {
 		return err
 	}
-	if err := log.Print(o.Context, c, &integration); err != nil {
+	if err := k8slog.Print(o.Context, c, &integration); err != nil {
 		return err
 	}
 

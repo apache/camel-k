@@ -18,13 +18,13 @@ limitations under the License.
 package openshift
 
 import (
+	"github.com/apache/camel-k/pkg/util/log"
 	apps "github.com/openshift/api/apps/v1"
 	authorization "github.com/openshift/api/authorization/v1"
 	build "github.com/openshift/api/build/v1"
 	image "github.com/openshift/api/image/v1"
 	route "github.com/openshift/api/route/v1"
 	template "github.com/openshift/api/template/v1"
-	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -49,7 +49,7 @@ func AddToScheme(scheme *runtime.Scheme) error {
 func doAdd(addToScheme registerFunction, scheme *runtime.Scheme, err error) error {
 	callErr := addToScheme(scheme)
 	if callErr != nil {
-		logrus.Error("Error while registering Openshift types", callErr)
+		log.Error(callErr, "Error while registering OpenShift types")
 	}
 
 	if err == nil {

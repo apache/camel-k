@@ -23,7 +23,6 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	"github.com/sirupsen/logrus"
 )
 
 // NewInitializeAction returns a action that initializes the platform configuration when not provided by the user
@@ -54,8 +53,10 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 		// another platform already present in the namespace
 		if platform.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate {
 			target := platform.DeepCopy()
-			logrus.Info("Platform ", target.Name, " transitioning to state ", v1alpha1.IntegrationPlatformPhaseDuplicate)
 			target.Status.Phase = v1alpha1.IntegrationPlatformPhaseDuplicate
+
+			action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
+
 			return action.client.Update(ctx, target)
 		}
 		return nil
@@ -84,7 +85,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	}
 
 	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && target.Spec.Build.Registry == "" {
-		logrus.Warning("No registry specified for publishing images")
+		action.L.Info("No registry specified for publishing images")
 	}
 
 	if target.Spec.Profile == "" {
@@ -92,8 +93,9 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	}
 
 	// next status
-	logrus.Info("Platform ", target.Name, " transitioning to state ", v1alpha1.IntegrationPlatformPhaseCreating)
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+
+	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 	return action.client.Update(ctx, target)
 }
 

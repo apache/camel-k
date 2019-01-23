@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/stretchr/testify/assert"
 )
 

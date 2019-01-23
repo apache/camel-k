@@ -30,8 +30,6 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 
-	"github.com/sirupsen/logrus"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -77,7 +75,7 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 	}
 
 	if b.IsBuilding(ictx.ObjectMeta) {
-		logrus.Infof("Build for context %s is running", ictx.Name)
+		action.L.Info("Build running")
 	}
 
 	return nil
@@ -124,7 +122,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 			// for a compatible/base image
 			//
 			if err := action.handleBuildStateChange(result.Request.C, result); err != nil {
-				logrus.Warnf("Error while building context %s, reason: %s", ictx.Name, err.Error())
+				action.L.Error(err, "Error while building integration context")
 			}
 		})
 	}
@@ -143,11 +141,11 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 
 	switch res.Status {
 	case builder.StatusSubmitted:
-		logrus.Infof("Build submitted for IntegrationContext %s", target.Name)
+		action.L.Info("Build submitted")
 	case builder.StatusStarted:
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildRunning
 
-		logrus.Infof("Context %s transitioning to state %s", target.Name, target.Status.Phase)
+		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
 
 		return action.client.Update(ctx, target)
 	case builder.StatusError:
@@ -179,7 +177,7 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 			}
 		}
 
-		logrus.Infof("Context %s transitioning to state %s, reason: %s", target.Name, target.Status.Phase, res.Error.Error())
+		action.L.Error(res.Error, "Context state transition", "phase", target.Status.Phase)
 
 		return action.client.Update(ctx, target)
 	case builder.StatusCompleted:
@@ -212,12 +210,12 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 			})
 		}
 
-		logrus.Info("Context ", target.Name, " transitioning to state ", target.Status.Phase)
+		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
 		if err := action.client.Update(ctx, target); err != nil {
 			return err
 		}
 
-		logrus.Infof("Inform integrations about context %s state change", target.Name)
+		action.L.Info("Inform integrations about context state change")
 		if err := action.informIntegrations(ctx, target); err != nil {
 			return err
 		}
