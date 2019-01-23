@@ -22,8 +22,8 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/gzip"
+	"github.com/apache/camel-k/pkg/util/log"
 	src "github.com/apache/camel-k/pkg/util/source"
-	"github.com/sirupsen/logrus"
 )
 
 // ExtractAll returns metadata information from all listed source codes
@@ -73,7 +73,7 @@ func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
 	var err error
 	source, err = uncompress(source)
 	if err != nil {
-		logrus.Errorf("unable to uncompress source %s: %v", source.Name, err)
+		log.Errorf(err, "unable to uncompress source %s: %v", source.Name, err)
 	}
 
 	language := source.InferLanguage()

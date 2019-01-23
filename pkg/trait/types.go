@@ -20,6 +20,8 @@ package trait
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/util/log"
+
 	"github.com/apache/camel-k/pkg/util/source"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -57,12 +59,20 @@ type Trait interface {
 
 /* Base trait */
 
+func newBaseTrait(id string) BaseTrait {
+	return BaseTrait{
+		id: ID(id),
+		L:  log.Log.WithName("traits").WithValues("trait", id),
+	}
+}
+
 // BaseTrait is the root trait with noop implementations for hooks
 type BaseTrait struct {
 	id      ID
 	Enabled *bool `property:"enabled"`
 	client  client.Client
 	ctx     context.Context
+	L       log.Logger
 }
 
 // ID returns the identifier of the trait

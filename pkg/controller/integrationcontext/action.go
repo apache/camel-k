@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
 // Action --
@@ -36,12 +37,20 @@ type Action interface {
 
 	// executes the handling function
 	Handle(ctx context.Context, integration *v1alpha1.IntegrationContext) error
+
+	// Inject integration logger
+	InjectLogger(log.Logger)
 }
 
 type baseAction struct {
 	client client.Client
+	L      log.Logger
 }
 
 func (action *baseAction) InjectClient(client client.Client) {
 	action.client = client
+}
+
+func (action *baseAction) InjectLogger(log log.Logger) {
+	action.L = log
 }

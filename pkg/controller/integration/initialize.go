@@ -26,10 +26,9 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/sirupsen/logrus"
 )
 
-// NewInitializeAction creates a new inititialize action
+// NewInitializeAction creates a new initialize action
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -54,13 +53,13 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 
 	// The integration platform needs to be ready before starting to create integrations
 	if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-		logrus.Info("Waiting for a integration platform to be ready")
+		action.L.Info("Waiting for the integration platform to be initialized")
 
 		if integration.Status.Phase != v1alpha1.IntegrationPhaseWaitingForPlatform {
 			target := integration.DeepCopy()
 			target.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
 
-			logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+			action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 			return action.client.Status().Update(ctx, target)
 		}
@@ -107,7 +106,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	target.Status.Context = integration.Spec.Context
 	target.Status.Image = ""
 
-	logrus.Info("Integration ", target.Name, " transitioning to state ", target.Status.Phase)
+	action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 	return action.client.Status().Update(ctx, target)
 }

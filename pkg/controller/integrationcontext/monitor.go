@@ -22,7 +22,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/sirupsen/logrus"
 )
 
 // NewMonitorAction creates a new monitoring handling action for the context
@@ -48,13 +47,13 @@ func (action *monitorAction) Handle(ctx context.Context, ictx *v1alpha1.Integrat
 		return err
 	}
 	if hash != ictx.Status.Digest {
-		logrus.Info("IntegrationContext ", ictx.Name, " needs a rebuild")
+		action.L.Info("IntegrationContext needs a rebuild")
 
 		target := ictx.DeepCopy()
 		target.Status.Digest = hash
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildSubmitted
 
-		logrus.Info("Context ", target.Name, " transitioning to state ", target.Status.Phase)
+		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
 
 		return action.client.Update(ctx, target)
 	}

@@ -21,10 +21,10 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/log"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -78,7 +78,7 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.In
 					copy := integration.DeepCopy()
 					err = json.Unmarshal(jsondata, copy)
 					if err != nil {
-						logrus.Error("Unexpected error detected when watching resource", err)
+						log.Error(err, "Unexpected error detected when watching resource")
 						return nil
 					}
 
@@ -142,7 +142,7 @@ func HandlePlatformStateChanges(ctx context.Context, platform *v1alpha1.Integrat
 					copy := platform.DeepCopy()
 					err = json.Unmarshal(jsondata, copy)
 					if err != nil {
-						logrus.Error("Unexpected error detected when watching resource", err)
+						log.Error(err, "Unexpected error detected when watching resource")
 						return nil
 					}
 

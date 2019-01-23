@@ -20,6 +20,7 @@ package builder
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"sort"
@@ -31,7 +32,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/sirupsen/logrus"
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
 // ********************************
@@ -46,7 +47,7 @@ type buildTask struct {
 }
 
 type defaultBuilder struct {
-	log       *logrus.Entry
+	log       log.Logger
 	ctx       context.Context
 	client    client.Client
 	tasks     chan buildTask
@@ -59,7 +60,7 @@ type defaultBuilder struct {
 // New --
 func New(ctx context.Context, c client.Client, namespace string) Builder {
 	m := defaultBuilder{
-		log:       logrus.WithField("logger", "builder"),
+		log:       log.WithName("builder"),
 		ctx:       ctx,
 		client:    c,
 		tasks:     make(chan buildTask),
@@ -134,7 +135,18 @@ func (b *defaultBuilder) loop() {
 func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
-		b.log.Panicf("no info found for: %+v", request.Meta.Name)
+
+		r := result.(Result)
+		r.Status = StatusError
+		r.Error = fmt.Errorf("no info found for: %s/%s", request.Meta.Namespace, request.Meta.Name)
+
+		b.log.Error(r.Error, "error processing request")
+
+		if handler != nil {
+			handler(&r)
+		}
+
+		return
 	}
 
 	// update the status
@@ -153,7 +165,8 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 	}
 	builderPath, err := ioutil.TempDir(buildDir, "builder-")
 	if err != nil {
-		logrus.Warning("Unexpected error while creating a temporary dir ", err)
+		log.Error(err, "Unexpected error while creating a temporary dir")
+
 		r.Status = StatusError
 		r.Error = err
 	}
@@ -216,11 +229,11 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 		case <-request.C.Done():
 			r.Status = StatusInterrupted
 		default:
-			l := b.log.WithFields(logrus.Fields{
-				"step":    step.ID(),
-				"phase":   step.Phase(),
-				"context": request.Meta.Name,
-			})
+			l := b.log.WithValues(
+				"step", step.ID(),
+				"phase", step.Phase(),
+				"context", request.Meta.Name,
+			)
 
 			l.Infof("executing step")
 

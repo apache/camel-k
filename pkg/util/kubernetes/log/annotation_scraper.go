@@ -26,7 +26,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	klog "github.com/apache/camel-k/pkg/util/log"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -40,6 +40,7 @@ type SelectorScraper struct {
 	labelSelector        string
 	podScrapers          sync.Map
 	counter              uint64
+	L                    klog.Logger
 }
 
 // NewSelectorScraper creates a new SelectorScraper
@@ -49,6 +50,7 @@ func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultCo
 		namespace:            namespace,
 		defaultContainerName: defaultContainerName,
 		labelSelector:        labelSelector,
+		L:                    klog.WithName("scraper").WithName("label").WithValues("selector", labelSelector),
 	}
 }
 
@@ -68,7 +70,7 @@ func (s *SelectorScraper) Start(ctx context.Context) *bufio.Reader {
 func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Writer, clientCloser func() error) {
 	err := s.synchronize(ctx, out)
 	if err != nil {
-		logrus.Warn("Could not synchronize log by label " + s.labelSelector)
+		s.L.Info("Could not synchronize log")
 	}
 	select {
 	case <-ctx.Done():
@@ -81,7 +83,7 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 			return true
 		})
 		if err := clientCloser(); err != nil {
-			logrus.Warn("Unable to close the client", err)
+			s.L.Error(err, "Unable to close the client")
 		}
 	case <-time.After(2 * time.Second):
 		go s.periodicSynchronize(ctx, out, clientCloser)
@@ -124,7 +126,7 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 	return nil
 }
 
-func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string,  out *bufio.Writer) {
+func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out *bufio.Writer) {
 	podScraper := NewPodScraper(s.client, s.namespace, podName, s.defaultContainerName)
 	podCtx, podCancel := context.WithCancel(ctx)
 	id := atomic.AddUint64(&s.counter, 1)
@@ -135,7 +137,7 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string,  ou
 		defer podCancel()
 
 		if _, err := out.WriteString(prefix + "Monitoring pod " + podName); err != nil {
-			logrus.Error("Cannot write to output: ", err)
+			s.L.Error(err, "Cannot write to output")
 			return
 		}
 		for {
@@ -143,11 +145,11 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string,  ou
 			if err == io.EOF {
 				return
 			} else if err != nil {
-				logrus.Error("Cannot read from pod stream: ", err)
+				s.L.Error(err, "Cannot read from pod stream")
 				return
 			}
 			if _, err := out.WriteString(prefix + str); err != nil {
-				logrus.Error("Cannot write to output: ", err)
+				s.L.Error(err, "Cannot write to output")
 				return
 			}
 			out.Flush()

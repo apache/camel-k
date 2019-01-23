@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/labels"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -50,8 +49,10 @@ func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.Integr
 	}
 	if platform.Status.Phase != aggregatePhase {
 		target := platform.DeepCopy()
-		logrus.Info("Platform ", target.Name, " transitioning to state ", aggregatePhase)
 		target.Status.Phase = aggregatePhase
+
+		action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
+
 		return action.client.Update(ctx, target)
 	}
 	// wait

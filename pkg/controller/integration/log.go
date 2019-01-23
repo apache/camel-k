@@ -17,40 +17,7 @@ limitations under the License.
 
 package integration
 
-import (
-	"context"
+import "github.com/apache/camel-k/pkg/util/log"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/log"
-)
-
-// Action --
-type Action interface {
-	client.Injectable
-
-	// a user friendly name for the action
-	Name() string
-
-	// returns true if the action can handle the integration
-	CanHandle(integration *v1alpha1.Integration) bool
-
-	// executes the handling function
-	Handle(ctx context.Context, integration *v1alpha1.Integration) error
-
-	// Inject integration logger
-	InjectLogger(log.Logger)
-}
-
-type baseAction struct {
-	client client.Client
-	L      log.Logger
-}
-
-func (action *baseAction) InjectClient(client client.Client) {
-	action.client = client
-}
-
-func (action *baseAction) InjectLogger(log log.Logger) {
-	action.L = log
-}
+// Log --
+var Log = log.Log.WithName("controller").WithName("integration")

@@ -25,8 +25,6 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/install"
 	p "github.com/apache/camel-k/pkg/platform"
-
-	"github.com/sirupsen/logrus"
 )
 
 // NewCreateAction returns a action that creates resources needed by the platform
@@ -68,21 +66,21 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		}
 
 		if len(res) > 0 {
-			logrus.Info("Installing custom platform resources")
+			action.L.Info("Installing custom platform resources")
 			err := install.Resources(ctx, action.client, platform.Namespace, res...)
 			if err != nil {
 				return err
 			}
 		}
 	} else {
-		logrus.Info("Installing default platform resources")
+		action.L.Info("Installing default platform resources")
 		err := install.Resources(ctx, action.client, platform.Namespace, p.DefaultContexts...)
 		if err != nil {
 			return err
 		}
 
 		if platform.Spec.Profile == v1alpha1.TraitProfileKnative {
-			logrus.Info("Installing knative resources")
+			action.L.Info("Installing knative resources")
 			err := install.Resources(ctx, action.client, platform.Namespace, p.KnativeContexts...)
 			if err != nil {
 				return err
@@ -92,7 +90,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 
 	target := platform.DeepCopy()
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseStarting
-	logrus.Info("Platform ", target.Name, " transitioning to state ", target.Status.Phase)
+	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 
 	return action.client.Update(ctx, target)
 }
