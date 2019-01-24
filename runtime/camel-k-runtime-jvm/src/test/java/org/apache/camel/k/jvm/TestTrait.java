@@ -17,26 +17,22 @@
 package org.apache.camel.k.jvm;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.main.MainListener;
-import org.apache.camel.main.MainListenerSupport;
-import org.apache.camel.main.MainSupport;
-import org.apache.camel.util.function.ThrowingBiConsumer;
+import org.apache.camel.k.RuntimeTrait;
 
-public final class RuntimeTestSupport {
-    private RuntimeTestSupport() {
+public class TestTrait implements RuntimeTrait {
+    private boolean messageHistory = true;
+
+    public boolean isMessageHistory() {
+        return messageHistory;
     }
 
-    public static MainListener afterStart(ThrowingBiConsumer<MainSupport, CamelContext, Exception> consumer) {
-        return new MainListenerSupport() {
-            @Override
-            public void afterStart(MainSupport main) {
-                try {
-                    consumer.accept(main, main.getCamelContexts().get(0));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
+    public void setMessageHistory(boolean messageHistory) {
+        this.messageHistory = messageHistory;
     }
 
+    @Override
+    public void apply(CamelContext camelContext) {
+        camelContext.setMessageHistory(messageHistory);
+        camelContext.setLoadTypeConverters(false);
+    }
 }

@@ -29,6 +29,7 @@ import org.apache.camel.k.Source;
 import org.apache.camel.spi.FactoryFinder;
 import org.apache.camel.spi.RestConfiguration;
 import org.apache.camel.util.IntrospectionSupport;
+import org.apache.camel.util.ObjectHelper;
 
 
 public final class RuntimeSupport {
@@ -40,22 +41,28 @@ public final class RuntimeSupport {
             FactoryFinder finder = context.getFactoryFinder(Constants.RUNTIME_TRAIT_RESOURCE_PATH);
             String traitIDs = System.getenv().getOrDefault(Constants.ENV_CAMEL_K_TRAITS, "");
 
+            if (ObjectHelper.isEmpty(traitIDs)) {
+                PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
+                Properties properties = component.getInitialProperties();
+
+                traitIDs = properties.getProperty("camel.k.traits", "");
+            }
+
             for (String traitId: traitIDs.split(",", -1)) {
-                RuntimeTrait trait = (RuntimeTrait)finder.newInstance(traitId);
-
-                bindProperties(context, trait, "trait." + traitId);
-
-                trait.apply(context);
+                configureContext(context, traitId, (RuntimeTrait)finder.newInstance(traitId));
             }
         } catch (NoFactoryAvailableException e) {
             // ignored
         }
 
-        context.getRegistry().findByType(RuntimeTrait.class).forEach(
-            customizer -> {
-                customizer.apply(context);
-            }
+        context.getRegistry().findByTypeWithName(RuntimeTrait.class).forEach(
+            (traitId, trait) -> configureContext(context, traitId, trait)
         );
+    }
+
+    public static void configureContext(CamelContext context, String traitId, RuntimeTrait trait) {
+        bindProperties(context, trait, "trait." + traitId + ".");
+        trait.apply(context);
     }
 
     public static void configureRest(CamelContext context) {
