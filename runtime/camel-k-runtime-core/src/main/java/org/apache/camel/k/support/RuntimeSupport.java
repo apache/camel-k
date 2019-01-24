@@ -55,6 +55,7 @@ public final class RuntimeSupport {
             // ignored
         }
 
+        //this is to initialize all traits that might be already present in the context injected by other means.
         context.getRegistry().findByTypeWithName(RuntimeTrait.class).forEach(
             (traitId, trait) -> configureContext(context, traitId, trait)
         );
