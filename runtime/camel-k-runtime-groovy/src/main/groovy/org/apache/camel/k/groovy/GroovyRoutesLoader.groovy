@@ -16,20 +16,18 @@
  */
 package org.apache.camel.k.groovy
 
-
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.k.Language
 import org.apache.camel.k.RoutesLoader
 import org.apache.camel.k.RuntimeRegistry
 import org.apache.camel.k.Source
-import org.apache.camel.k.support.URIResolver
 import org.apache.camel.k.groovy.dsl.IntegrationConfiguration
+import org.apache.camel.k.support.URIResolver
 import org.codehaus.groovy.control.CompilerConfiguration
 
 class GroovyRoutesLoader implements RoutesLoader {
     @Override
-    List<Language> getSupportedLanguages() {
-        return Collections.singletonList(Language.Groovy)
+    List<String> getSupportedLanguages() {
+        return Collections.singletonList("groovy")
     }
 
     @Override

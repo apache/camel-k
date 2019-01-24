@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.k.Language;
 import org.apache.camel.k.RoutesLoader;
 import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Source;
@@ -56,8 +55,8 @@ public class YamlFlowLoader implements RoutesLoader {
     }
 
     @Override
-    public List<Language> getSupportedLanguages() {
-        return Collections.singletonList(Language.YamlFlow);
+    public List<String> getSupportedLanguages() {
+        return Collections.singletonList("flow");
     }
 
     @SuppressWarnings("uncheked")

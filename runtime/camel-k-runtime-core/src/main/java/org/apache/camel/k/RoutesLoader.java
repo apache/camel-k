@@ -26,7 +26,7 @@ public interface RoutesLoader {
      *
      * @return the supported languages.
      */
-    List<Language> getSupportedLanguages();
+    List<String> getSupportedLanguages();
 
     /**
      * Creates a camel {@link RouteBuilder} from the given resource.

@@ -24,10 +24,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Source {
     private final String location;
-    private final Language language;
+    private final String language;
     private final boolean compressed;
 
-    private Source(String location, Language language, boolean compression) {
+    private Source(String location, String language, boolean compression) {
         this.location = location;
         this.language = language;
         this.compressed = compression;
@@ -37,7 +37,7 @@ public class Source {
         return location;
     }
 
-    public Language getLanguage() {
+    public String getLanguage() {
         return language;
     }
 
@@ -68,9 +68,15 @@ public class Source {
         final String languageName = (String) params.get("language");
         final boolean compression = Boolean.valueOf((String) params.get("compression"));
 
-        Language language = ObjectHelper.isNotEmpty(languageName)
-            ? Language.fromLanguageName(languageName)
-            : Language.fromLocation(location);
+        String language = languageName;
+        if (ObjectHelper.isEmpty(language)) {
+            language = StringUtils.substringAfterLast(location, ":");
+            language = StringUtils.substringAfterLast(language, ".");
+        }
+        if (ObjectHelper.isEmpty(language)) {
+            throw new IllegalArgumentException("Unknown language " + language);
+        }
+
 
         return new Source(location, language, compression);
     }
