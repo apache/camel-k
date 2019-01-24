@@ -17,7 +17,6 @@
 package org.apache.camel.k.kotlin
 
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.k.Language
 import org.apache.camel.k.RoutesLoader
 import org.apache.camel.k.RuntimeRegistry
 import org.apache.camel.k.Source
@@ -41,8 +40,8 @@ class KotlinRoutesLoader : RoutesLoader {
         val LOGGER : Logger = LoggerFactory.getLogger(KotlinRoutesLoader::class.java)
     }
 
-    override fun getSupportedLanguages(): List<Language> {
-        return listOf(Language.Kotlin)
+    override fun getSupportedLanguages(): List<String> {
+        return listOf("kts")
     }
 
     @Throws(Exception::class)

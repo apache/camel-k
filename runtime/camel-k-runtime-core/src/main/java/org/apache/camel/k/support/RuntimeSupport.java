@@ -126,7 +126,7 @@ public final class RuntimeSupport {
 
         try {
             finder = context.getFactoryFinder(Constants.ROUTES_LOADER_RESOURCE_PATH);
-            loader = (RoutesLoader)finder.newInstance(source.getLanguage().getId());
+            loader = (RoutesLoader)finder.newInstance(source.getLanguage());
         } catch (NoFactoryAvailableException e) {
             throw new IllegalArgumentException("Unable to find loader for: " + source, e);
         }
