@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"strconv"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 
@@ -61,6 +63,9 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
+	// Configure the Prometheus Java agent
+	envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_PORT", strconv.Itoa(t.Port))
+
 	// TODO: update the existing integration service instead of
 	// creating an extra service dedicated to Prometheus
 	svc := t.getServiceFor(e)
