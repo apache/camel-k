@@ -104,6 +104,8 @@ func (c *Catalog) allTraits() []Trait {
 	}
 }
 
+// Traits may depend on the result of previously executed ones,
+// so care must be taken while changing the lists order.
 func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	switch environment.DetermineProfile() {
 	case v1alpha1.TraitProfileOpenShift:
@@ -116,10 +118,10 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tEnvironment,
 			c.tClasspath,
 			c.tSpringBoot,
+			c.tPrometheus,
 			c.tDeployment,
 			c.tService,
 			c.tRoute,
-			c.tPrometheus,
 			c.tOwner,
 		}
 	case v1alpha1.TraitProfileKubernetes:
@@ -132,10 +134,10 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tEnvironment,
 			c.tClasspath,
 			c.tSpringBoot,
+			c.tPrometheus,
 			c.tDeployment,
 			c.tService,
 			c.tIngress,
-			c.tPrometheus,
 			c.tOwner,
 		}
 	case v1alpha1.TraitProfileKnative:

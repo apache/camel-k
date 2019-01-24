@@ -19,9 +19,12 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
+	"github.com/apache/camel-k/pkg/util/envvar"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 )
 
 type prometheusTrait struct {
@@ -30,6 +33,8 @@ type prometheusTrait struct {
 	Port int `property:"port"`
 }
 
+// The Prometheus trait must be executed prior to the deployment trait
+// as it mutates environment variables
 func newPrometheusTrait() *prometheusTrait {
 	return &prometheusTrait{
 		BaseTrait: BaseTrait{
@@ -40,15 +45,19 @@ func newPrometheusTrait() *prometheusTrait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled == nil || !*t.Enabled {
-		return false, nil
+	enabled := false
+
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) && t.Enabled != nil && *t.Enabled {
+		enabled = true
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
-		return false, nil
+	// Deactivate the Prometheus Java agent accordingly
+	// Note: the AB_PROMETHEUS_OFF environment variable acts as an option flag
+	if !enabled {
+		envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_OFF", "true")
 	}
 
-	return true, nil
+	return enabled, nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
