@@ -38,6 +38,7 @@ type Catalog struct {
 	tService        Trait
 	tRoute          Trait
 	tIngress        Trait
+	tJolokia        Trait
 	tPrometheus     Trait
 	tOwner          Trait
 	tImages         Trait
@@ -61,6 +62,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tService:        newServiceTrait(),
 		tRoute:          newRouteTrait(),
 		tIngress:        newIngressTrait(),
+		tJolokia:        newJolokiaTrait(),
 		tPrometheus:     newPrometheusTrait(),
 		tOwner:          newOwnerTrait(),
 		tImages:         newImagesTrait(),
@@ -93,6 +95,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tService,
 		c.tRoute,
 		c.tIngress,
+		c.tJolokia,
 		c.tPrometheus,
 		c.tOwner,
 		c.tImages,
@@ -118,6 +121,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tEnvironment,
 			c.tClasspath,
 			c.tSpringBoot,
+			c.tJolokia,
 			c.tPrometheus,
 			c.tDeployment,
 			c.tService,
@@ -134,6 +138,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tEnvironment,
 			c.tClasspath,
 			c.tSpringBoot,
+			c.tJolokia,
 			c.tPrometheus,
 			c.tDeployment,
 			c.tService,

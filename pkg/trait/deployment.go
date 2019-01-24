@@ -261,9 +261,6 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// has been changed
 	envvar.SetVal(&environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
 
-	// optimizations
-	envvar.SetVal(&environment, "AB_JOLOKIA_OFF", True)
-
 	// add env vars from traits
 	for _, envVar := range e.EnvVars {
 		envvar.SetVar(&environment, envVar)
