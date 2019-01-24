@@ -55,7 +55,7 @@ public class RuntimeTest {
 
 
     @Test
-    void testLoadRouteAndrest() throws Exception {
+    void testLoadRouteAndRest() throws Exception {
         Runtime runtime = new Runtime();
         runtime.addMainListener(new Application.RoutesDumper());
         runtime.load(new String[]{

@@ -120,7 +120,25 @@ public class PropertiesTest {
     }
 
     @Test
-    public void testContextTrait() throws Exception {
+    public void testContextTraitFromProperty() throws Exception {
+        System.setProperty("camel.k.traits", "test");
+        System.setProperty("trait.test.messageHistory", "false");
+
+        Runtime runtime = new Runtime();
+        runtime.setProperties(System.getProperties());
+        runtime.setDuration(5);
+        runtime.addMainListener(new Application.ComponentPropertiesBinder());
+        runtime.addMainListener(afterStart((main, context) -> {
+            assertThat(context.isMessageHistory()).isFalse();
+            assertThat(context.isLoadTypeConverters()).isFalse();
+            main.stop();
+        }));
+
+        runtime.run();
+    }
+
+    @Test
+    public void testContextTraitFromRegistry() throws Exception {
         Runtime runtime = new Runtime();
         runtime.setProperties(System.getProperties());
         runtime.setDuration(5);
