@@ -32,6 +32,8 @@ func TestDependenciesJavaSource(t *testing.T) {
 			    from("telegram:bots/cippa").to("log:stash");
 			    from("timer:tick").to("amqp:queue");
 			    from("ine:xistent").to("amqp:queue");
+				from("twitter-search:{{twitterKeywords}}"
+					+ "?delay={{twitterDelayMs}}");
 			`,
 		},
 		Language: v1alpha1.LanguageJavaSource,
@@ -39,24 +41,7 @@ func TestDependenciesJavaSource(t *testing.T) {
 
 	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
-}
-
-func TestDependenciesJavaClass(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
-			Name: "Request.class",
-			Content: `
-			    from("telegram:bots/cippa").to("log:stash");
-			    from("timer:tick").to("amqp:queue");
-			    from("ine:xistent").to("amqp:queue");
-		    `,
-		},
-		Language: v1alpha1.LanguageJavaClass,
-	}
-
-	meta := Extract(code)
-	assert.Empty(t, meta.Dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram", "camel:twitter"}, meta.Dependencies)
 }
 
 func TestDependenciesJavaScript(t *testing.T) {
@@ -85,6 +70,8 @@ func TestDependenciesGroovy(t *testing.T) {
 			    from('telegram:bots/cippa').to("log:stash");
 			    from('timer:tick').to("amqp:queue");
 			    from("ine:xistent").to("amqp:queue");
+				from('twitter-search:{{twitterKeywords}}''
+					+ ''?delay={{twitterDelayMs}}'');
 			    '"'
 		    `,
 		},
@@ -93,7 +80,7 @@ func TestDependenciesGroovy(t *testing.T) {
 
 	meta := Extract(code)
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram", "camel:twitter"}, meta.Dependencies)
 }
 
 func TestDependencies(t *testing.T) {

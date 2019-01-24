@@ -29,14 +29,14 @@ import (
 )
 
 var (
-	singleQuotedFrom = regexp.MustCompile(`from\s*\(\s*'([a-z0-9-]+:[^']+)'\s*\)`)
-	doubleQuotedFrom = regexp.MustCompile(`from\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
-	singleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*'([a-z0-9-]+:[^']+)'\s*\)`)
-	singleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*'([a-z0-9-]+:[^']+)'\s*\)`)
-	singleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*'([a-z0-9-]+:[^']+)'[^)]*\)`)
-	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
-	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-z0-9-]+:[^"]+)"\s*\)`)
-	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-z0-9-]+:[^"]+)"[^)]*\)`)
+	singleQuotedFrom = regexp.MustCompile(`from\s*\(\s*'([a-z0-9-]+):.*`)
+	doubleQuotedFrom = regexp.MustCompile(`from\s*\(\s*"([a-z0-9-]+):.*`)
+	singleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*'([a-z0-9-]+):.*`)
+	singleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*'([a-z0-9-]+):.*`)
+	singleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*'([a-z0-9-]+):.*`)
+	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-z0-9-]+):.*`)
+	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-z0-9-]+):.*`)
+	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-z0-9-]+):.*`)
 
 	additionalDependencies = map[string]string{
 		".*JsonLibrary\\.Jackson.*": "camel:jackson",
@@ -102,10 +102,16 @@ func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *M
 
 func (i *baseInspector) decodeComponent(uri string) string {
 	uriSplit := strings.SplitN(uri, ":", 2)
-	if len(uriSplit) < 2 {
+	uriStart := ""
+
+	if len(uriSplit) == 1 {
+		uriStart = uriSplit[0]
+	} else if len(uriSplit) >= 2 {
+		uriStart = uriSplit[0]
+	} else {
 		return ""
 	}
-	uriStart := uriSplit[0]
+
 	if component := camel.Runtime.GetArtifactByScheme(uriStart); component != nil {
 		artifactID := component.ArtifactID
 		if component.GroupID == "org.apache.camel" && strings.HasPrefix(artifactID, "camel-") {
