@@ -151,6 +151,30 @@ The following is a list of common traits that can be configured by the end users
   +
   It's disabled by default.
 
+| jolokia
+| Kubernetes, OpenShift
+| Activate and configures the Jolokia Java agent.
+  +
+  +
+  It's disabled by default.
+
+[cols="m,"]
+!===
+
+! jolokia.port
+! The Jolokia endpoint port (default `8778`).
+
+! jolokia.openshiftSSLAuth
+! Configures OpenShift proxy SSL client authentication (only applicable for the OpenShift profile, default `true`)
+
+! jolokia.options
+! A comma-separared list of Jolokia options as defined in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration options], e.g.: `protocol=https,extendedClientCheck=false`
+
+! jolokia.randomPassword
+! Generates a random password for basic authentication
+
+!===
+
 | prometheus
 | Kubernetes, OpenShift
 | Exposes the integration with a Service and a ServiceMonitor resources so that the Prometheus endpoint can be scraped.
