@@ -95,7 +95,22 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	// next status
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 
+	if target.Spec.Build.CamelVersion == "" {
+		target.Spec.Build.CamelVersion = platformutils.DefaultCamelVersion
+	}
+	if target.Spec.Build.BaseImage == "" {
+		target.Spec.Build.BaseImage = platformutils.DefaultBaseImage
+	}
+	if target.Spec.Build.LocalRepository == "" {
+		target.Spec.Build.LocalRepository = platformutils.DefaultLocalRepository
+	}
+
+	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
+	action.L.Infof("BaseImage set to %s", target.Spec.Build.BaseImage)
+	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
+
 	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
+
 	return action.client.Update(ctx, target)
 }
 
