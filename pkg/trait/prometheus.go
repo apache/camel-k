@@ -61,43 +61,28 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	// Configure the Prometheus Java agent
 	envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_PORT", strconv.Itoa(t.Port))
 
-	// TODO: update the existing integration service instead of
-	// creating an extra service dedicated to Prometheus
-	svc := t.getServiceFor(e)
-	e.Resources.Add(svc)
+	// Expose the Prometheus endpoint
+	// Either update the existing service added by previously executed traits
+	// (e.g. the service trait) or add a new service resource
+	svc := e.Resources.GetService(func (svc *corev1.Service) bool {
+		return svc.Name == e.Integration.Name
+	})
+	if svc == nil {
+		svc = getServiceFor(e)
+		e.Resources.Add(svc)
+	}
+	port := corev1.ServicePort{
+		Name:     "prometheus",
+		Port:     int32(t.Port),
+		Protocol: corev1.ProtocolTCP,
+	}
+	svc.Spec.Ports = append(svc.Spec.Ports, port)
+
+	// Add the ServiceMonitor resource
 	smt := t.getServiceMonitorFor(e)
 	e.Resources.Add(smt)
+
 	return nil
-}
-
-func (t *prometheusTrait) getServiceFor(e *Environment) *corev1.Service {
-	svc := corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name + "-prometheus",
-			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name:     "prometheus",
-					Port:     int32(t.Port),
-					Protocol: corev1.ProtocolTCP,
-				},
-			},
-			Selector: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
-			},
-		},
-	}
-
-	return &svc
 }
 
 func (t *prometheusTrait) getServiceMonitorFor(e *Environment) *monitoringv1.ServiceMonitor {
@@ -107,11 +92,12 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) *monitoringv1.Ser
 			APIVersion: "monitoring.coreos.com/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name + "-prometheus",
+			Name:      e.Integration.Name,
 			Namespace: e.Integration.Namespace,
 			Labels: map[string]string{
 				// TODO: add the ability to configure additional labels
 				"camel.apache.org/integration": e.Integration.Name,
+				"team": "fuse",
 			},
 		},
 		Spec: monitoringv1.ServiceMonitorSpec{
