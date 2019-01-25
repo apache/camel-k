@@ -19,6 +19,17 @@ package platform
 
 import "strings"
 
+const (
+	// DefaultCamelVersion --
+	DefaultCamelVersion = "2.23.1"
+
+	// DefaultBaseImage --
+	DefaultBaseImage = "fabric8/s2i-java:3.0-java8"
+
+	// DefaultLocalRepository --
+	DefaultLocalRepository = "/tmp/artifacts/m2"
+)
+
 // DefaultContexts --
 var DefaultContexts = []string{
 	"platform-integration-context-jvm.yaml",
