@@ -65,12 +65,27 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *serviceTrait) Apply(e *Environment) (err error) {
-	svc := t.getServiceFor(e)
-	e.Resources.Add(svc)
+	// Either update the existing service added by previously executed traits
+	// (e.g. the prometheus trait) or add a new service resource
+	svc := e.Resources.GetService(func(svc *corev1.Service) bool {
+		return svc.Name == e.Integration.Name
+	})
+	if svc == nil {
+		svc = getServiceFor(e)
+		e.Resources.Add(svc)
+	}
+	port := corev1.ServicePort{
+		Name:       "http",
+		Port:       80,
+		Protocol:   corev1.ProtocolTCP,
+		TargetPort: intstr.FromInt(t.Port),
+	}
+	svc.Spec.Ports = append(svc.Spec.Ports, port)
+
 	return nil
 }
 
-func (t *serviceTrait) getServiceFor(e *Environment) *corev1.Service {
+func getServiceFor(e *Environment) *corev1.Service {
 	svc := corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -84,14 +99,7 @@ func (t *serviceTrait) getServiceFor(e *Environment) *corev1.Service {
 			},
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name:       "http",
-					Port:       80,
-					Protocol:   corev1.ProtocolTCP,
-					TargetPort: intstr.FromInt(t.Port),
-				},
-			},
+			Ports: []corev1.ServicePort{},
 			Selector: map[string]string{
 				"camel.apache.org/integration": e.Integration.Name,
 			},
