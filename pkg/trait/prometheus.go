@@ -47,22 +47,17 @@ func newPrometheusTrait() *prometheusTrait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	enabled := false
-
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) && t.Enabled != nil && *t.Enabled {
-		enabled = true
-	}
-
-	// Deactivate the Prometheus Java agent accordingly
-	// Note: the AB_PROMETHEUS_OFF environment variable acts as an option flag
-	if !enabled {
-		envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_OFF", "true")
-	}
-
-	return enabled, nil
+	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
+	if t.Enabled == nil || !*t.Enabled {
+		// Deactivate the Prometheus Java agent
+		// Note: the AB_PROMETHEUS_OFF environment variable acts as an option flag
+		envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_OFF", "true")
+		return nil
+	}
+
 	// Configure the Prometheus Java agent
 	envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_PORT", strconv.Itoa(t.Port))
 
