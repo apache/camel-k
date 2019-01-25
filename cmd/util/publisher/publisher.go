@@ -163,7 +163,7 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 	archiveDir, archiveName := filepath.Split(ctx.Archive)
 	// nolint: gosec
 	dockerfile := `
-		FROM fabric8/s2i-java:2.3
+		FROM fabric8/s2i-java:3.0-java8
 		ADD ` + archiveName + ` /deployments/
 	`
 
