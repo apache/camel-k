@@ -39,8 +39,8 @@ const (
 
 type knativeServiceTrait struct {
 	BaseTrait `property:",squash"`
-	MinScale  *int  `property:"minScale"`
-	MaxScale  *int  `property:"maxScale"`
+	MinScale  *int  `property:"min-scale"`
+	MaxScale  *int  `property:"max-scale"`
 	Auto      *bool `property:"auto"`
 }
 

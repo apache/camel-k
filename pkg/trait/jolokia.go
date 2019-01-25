@@ -28,10 +28,10 @@ import (
 type jolokiaTrait struct {
 	BaseTrait `property:",squash"`
 
-	OpenShiftSSLAuth *bool   `property:"openshiftSSLAuth"`
+	OpenShiftSSLAuth *bool   `property:"openshift-ssl-auth"`
 	Options          *string `property:"options"`
 	Port             int     `property:"port"`
-	RandomPassword   *bool   `property:"randomPassword"`
+	RandomPassword   *bool   `property:"random-password"`
 }
 
 // The Jolokia trait must be executed prior to the deployment trait
