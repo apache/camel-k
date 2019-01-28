@@ -41,3 +41,21 @@ func TestLanguageAlreadySet(t *testing.T) {
 	}
 	assert.Equal(t, LanguageJavaScript, code.InferLanguage())
 }
+
+func TestAddDependency(t *testing.T) {
+	integration := IntegrationSpec{}
+	integration.AddDependency("camel-ciaone")
+	assert.Equal(t, integration.Dependencies, []string{"camel:ciaone"})
+
+	integration = IntegrationSpec{}
+	integration.AddDependency("runtime:ciaone")
+	assert.Equal(t, integration.Dependencies, []string{"runtime:ciaone"})
+
+	integration = IntegrationSpec{}
+	integration.AddDependency("mvn:ciaone")
+	assert.Equal(t, integration.Dependencies, []string{"mvn:ciaone"})
+
+	integration = IntegrationSpec{}
+	integration.AddDependency("file:ciaone")
+	assert.Equal(t, integration.Dependencies, []string{"file:ciaone"})
+}
