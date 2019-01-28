@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,7 +65,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	// Expose the Prometheus endpoint
 	// Either update the existing service added by previously executed traits
 	// (e.g. the service trait) or add a new service resource
-	svc := e.Resources.GetService(func (svc *corev1.Service) bool {
+	svc := e.Resources.GetService(func(svc *corev1.Service) bool {
 		return svc.Name == e.Integration.Name
 	})
 	if svc == nil {
@@ -77,6 +78,26 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		Protocol: corev1.ProtocolTCP,
 	}
 	svc.Spec.Ports = append(svc.Spec.Ports, port)
+
+	// Register a post processor to add a container port to the integration deployment
+	e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
+		var container *corev1.Container
+		environment.Resources.VisitContainer(func(c *corev1.Container) {
+			if c.Name == environment.Integration.Name {
+				container = c
+			}
+		})
+		if container != nil {
+			container.Ports = append(container.Ports, corev1.ContainerPort{
+				Name:          "prometheus",
+				ContainerPort: int32(t.Port),
+				Protocol:      corev1.ProtocolTCP,
+			})
+		} else {
+			return errors.New("Cannot add Prometheus container port: no integration container")
+		}
+		return nil
+	})
 
 	// Add the ServiceMonitor resource
 	smt := t.getServiceMonitorFor(e)
