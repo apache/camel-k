@@ -30,8 +30,8 @@ import (
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 // Identifiable represent an identifiable type
@@ -99,6 +99,7 @@ type Environment struct {
 	Context        *v1alpha1.IntegrationContext
 	Integration    *v1alpha1.Integration
 	Resources      *kubernetes.Collection
+	PostProcessors []func(*Environment) error
 	Steps          []builder.Step
 	BuildDir       string
 	ExecutedTraits []Trait
