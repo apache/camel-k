@@ -84,12 +84,10 @@ func (is *IntegrationSpec) AddConfiguration(confType string, confValue string) {
 // AddDependency --
 func (is *IntegrationSpec) AddDependency(dependency string) {
 	switch {
-	case strings.HasPrefix(dependency, "mvn:"):
-		util.StringSliceUniqueAdd(&is.Dependencies, dependency)
-	case strings.HasPrefix(dependency, "file:"):
-		util.StringSliceUniqueAdd(&is.Dependencies, dependency)
 	case strings.HasPrefix(dependency, "camel-"):
 		util.StringSliceUniqueAdd(&is.Dependencies, "camel:"+strings.TrimPrefix(dependency, "camel-"))
+	default:
+		util.StringSliceUniqueAdd(&is.Dependencies, dependency)
 	}
 }
 
