@@ -192,6 +192,13 @@ func (c *Catalog) apply(environment *Environment) error {
 		}
 	}
 
+	for _, processor := range environment.PostProcessors {
+		err := processor(environment)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

@@ -18,10 +18,13 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -81,6 +84,26 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	if t.RandomPassword != nil {
 		envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_PASSWORD_RANDOM", strconv.FormatBool(*t.RandomPassword))
 	}
+
+	// Register a post processor to add a container port to the integration deployment
+	e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
+		var container *corev1.Container
+		environment.Resources.VisitContainer(func(c *corev1.Container) {
+			if c.Name == environment.Integration.Name {
+				container = c
+			}
+		})
+		if container != nil {
+			container.Ports = append(container.Ports, corev1.ContainerPort{
+				Name:          "jolokia",
+				ContainerPort: int32(t.Port),
+				Protocol:      corev1.ProtocolTCP,
+			})
+		} else {
+			return errors.New("Cannot add Jolokia container port: no integration container")
+		}
+		return nil
+	})
 
 	return nil
 }
