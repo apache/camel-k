@@ -33,6 +33,8 @@ type serviceTrait struct {
 	Port int   `property:"port"`
 }
 
+const httpPortName = "http"
+
 func newServiceTrait() *serviceTrait {
 	return &serviceTrait{
 		BaseTrait: BaseTrait{
@@ -76,10 +78,10 @@ func (t *serviceTrait) Apply(e *Environment) (err error) {
 		e.Resources.Add(svc)
 	}
 	port := corev1.ServicePort{
-		Name:       "http",
+		Name:       httpPortName,
 		Port:       80,
 		Protocol:   corev1.ProtocolTCP,
-		TargetPort: intstr.FromInt(t.Port),
+		TargetPort: intstr.FromString(httpPortName),
 	}
 	svc.Spec.Ports = append(svc.Spec.Ports, port)
 
@@ -93,7 +95,7 @@ func (t *serviceTrait) Apply(e *Environment) (err error) {
 		})
 		if container != nil {
 			container.Ports = append(container.Ports, corev1.ContainerPort{
-				Name:          "http",
+				Name:          httpPortName,
 				ContainerPort: int32(t.Port),
 				Protocol:      corev1.ProtocolTCP,
 			})
