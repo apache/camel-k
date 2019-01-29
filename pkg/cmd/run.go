@@ -477,7 +477,7 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 		// This enables to execute:
 		// $ kamel run -t <trait>.<property>=<value_1> ... -t <trait>.<property>=<value_N>
 		// Or:
-		// $ kamel run --trait <trait>.<property>=<value_1>,...,<value_N>
+		// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
 		spec.Configuration[prop] = spec.Configuration[prop] + "," + val
 	} else {
 		spec.Configuration[prop] = val
