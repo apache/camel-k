@@ -85,7 +85,7 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 	assert.NotNil(t, env.GetTrait(ID("service")))
 	assert.NotNil(t, env.GetTrait(ID("route")))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == TestDeployment && svc.Spec.Ports[0].TargetPort.IntVal == int32(7071)
+		return svc.Name == TestDeployment && svc.Spec.Ports[0].TargetPort.StrVal == "http"
 	}))
 }
 

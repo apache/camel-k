@@ -27,6 +27,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 )
@@ -37,6 +38,8 @@ type prometheusTrait struct {
 	Labels string `property:"labels"`
 	Port int `property:"port"`
 }
+
+const prometheusPortName = "prometheus"
 
 // The Prometheus trait must be executed prior to the deployment trait
 // as it mutates environment variables
@@ -75,9 +78,10 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		e.Resources.Add(svc)
 	}
 	port := corev1.ServicePort{
-		Name:     "prometheus",
-		Port:     int32(t.Port),
-		Protocol: corev1.ProtocolTCP,
+		Name:       prometheusPortName,
+		Port:       int32(t.Port),
+		Protocol:   corev1.ProtocolTCP,
+		TargetPort: intstr.FromString(prometheusPortName),
 	}
 	svc.Spec.Ports = append(svc.Spec.Ports, port)
 
@@ -91,7 +95,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		})
 		if container != nil {
 			container.Ports = append(container.Ports, corev1.ContainerPort{
-				Name:          "prometheus",
+				Name:          prometheusPortName,
 				ContainerPort: int32(t.Port),
 				Protocol:      corev1.ProtocolTCP,
 			})
