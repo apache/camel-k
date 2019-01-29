@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"strings"
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -33,6 +34,7 @@ import (
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
 
+	Labels string `property:"labels"`
 	Port int `property:"port"`
 }
 
@@ -107,6 +109,9 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 }
 
 func (t *prometheusTrait) getServiceMonitorFor(e *Environment) *monitoringv1.ServiceMonitor {
+	labels := parseLabels(t.Labels)
+	labels["camel.apache.org/integration"] = e.Integration.Name
+
 	smt := monitoringv1.ServiceMonitor{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceMonitor",
@@ -115,11 +120,7 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) *monitoringv1.Ser
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      e.Integration.Name,
 			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				// TODO: add the ability to configure additional labels
-				"camel.apache.org/integration": e.Integration.Name,
-				"team": "fuse",
-			},
+			Labels:    labels,
 		},
 		Spec: monitoringv1.ServiceMonitorSpec{
 			Selector: metav1.LabelSelector{
@@ -135,4 +136,13 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) *monitoringv1.Ser
 		},
 	}
 	return &smt
+}
+
+func parseLabels(labels string) map[string]string {
+	m := make(map[string]string)
+	for _, label := range strings.Split(labels, ",") {
+		kv := strings.Split(label, "=")
+		m[kv[0]] = kv[1]
+	}
+	return m
 }

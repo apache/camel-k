@@ -177,16 +177,20 @@ The following is a list of common traits that can be configured by the end users
 
 | prometheus
 | Kubernetes, OpenShift
-| Exposes the integration with a Service and a ServiceMonitor resources so that the Prometheus endpoint can be scraped.
-  +
-  +
-  It's disabled by default.
+| Exposes the integration with a `Service` and a `ServiceMonitor` resources so that the Prometheus endpoint can be scraped.
+
+WARNING: It requires the https://github.com/coreos/prometheus-operator[Prometheus Operator] custom resource definitions to be installed.
+
+It's disabled by default.
 
 [cols="m,"]
 !===
 
+! prometheus.labels
+! The `ServiceMonitor` resource labels.
+
 ! prometheus.port
-! To configure a different Prometheus endpoint port (default `9778`).
+! The Prometheus endpoint port (default `9778`).
 
 !===
 
