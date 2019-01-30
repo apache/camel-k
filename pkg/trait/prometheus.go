@@ -18,12 +18,13 @@ limitations under the License.
 package trait
 
 import (
-	"strings"
+	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
-	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,7 +37,7 @@ type prometheusTrait struct {
 	BaseTrait `property:",squash"`
 
 	Labels string `property:"labels"`
-	Port int `property:"port"`
+	Port   int    `property:"port"`
 }
 
 const prometheusPortName = "prometheus"
@@ -106,14 +107,20 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	})
 
 	// Add the ServiceMonitor resource
-	smt := t.getServiceMonitorFor(e)
+	smt, err := t.getServiceMonitorFor(e)
+	if err != nil {
+		return err
+	}
 	e.Resources.Add(smt)
 
 	return nil
 }
 
-func (t *prometheusTrait) getServiceMonitorFor(e *Environment) *monitoringv1.ServiceMonitor {
-	labels := parseLabels(t.Labels)
+func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.ServiceMonitor, error) {
+	labels, err := parseLabels(t.Labels)
+	if err != nil {
+		return nil, err
+	}
 	labels["camel.apache.org/integration"] = e.Integration.Name
 
 	smt := monitoringv1.ServiceMonitor{
@@ -139,14 +146,23 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) *monitoringv1.Ser
 			},
 		},
 	}
-	return &smt
+	return &smt, nil
 }
 
-func parseLabels(labels string) map[string]string {
+func parseLabels(labels string) (map[string]string, error) {
 	m := make(map[string]string)
+
+	if len(labels) == 0 {
+		return m, nil
+	}
+
 	for _, label := range strings.Split(labels, ",") {
 		kv := strings.Split(label, "=")
+		if len(kv) != 2 {
+			return nil, fmt.Errorf("invalid label [%s] in labels [%s]", label, labels)
+		}
 		m[kv[0]] = kv[1]
 	}
-	return m
+
+	return m, nil
 }
