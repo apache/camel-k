@@ -50,20 +50,16 @@ func NewProject(ctx *Context) maven.Project {
 		Version:           version.Version,
 		Properties:        ctx.Request.Platform.Build.Properties,
 		DependencyManagement: maven.DependencyManagement{
-			Dependencies: maven.Dependencies{
-				Dependencies: []maven.Dependency{
-					{
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-bom",
-						Version:    ctx.Request.Platform.Build.CamelVersion,
-						Type:       "pom",
-						Scope:      "import",
-					},
+			Dependencies: []maven.Dependency{
+				{
+					GroupID:    "org.apache.camel",
+					ArtifactID: "camel-bom",
+					Version:    ctx.Request.Platform.Build.CamelVersion,
+					Type:       "pom",
+					Scope:      "import",
 				},
 			},
 		},
-		Dependencies: maven.Dependencies{
-			Dependencies: make([]maven.Dependency, 0),
-		},
+		Dependencies: make([]maven.Dependency, 0),
 	}
 }
