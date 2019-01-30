@@ -20,6 +20,8 @@ package maven
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
+	"github.com/pkg/errors"
 	"os"
 	"os/exec"
 	"regexp"
@@ -99,6 +101,12 @@ func ParseGAV(gav string) (Dependency, error) {
 	dep := Dependency{}
 	rex := regexp.MustCompile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?(:([^: ]+))?")
 	res := rex.FindStringSubmatch(gav)
+
+	fmt.Println(res, len(res))
+
+	if res == nil || len(res) < 9 {
+		return Dependency{}, errors.New("GAV must match <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')")
+	}
 
 	dep.GroupID = res[1]
 	dep.ArtifactID = res[2]
