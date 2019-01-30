@@ -88,54 +88,46 @@ func TestPomGeneration(t *testing.T) {
 		ArtifactID:        "camel-k-integration",
 		Version:           "1.0.0",
 		DependencyManagement: DependencyManagement{
-			Dependencies: Dependencies{
-				Dependencies: []Dependency{
-					{
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-bom",
-						Version:    "2.22.1",
-						Type:       "pom",
-						Scope:      "import",
-					},
-				},
-			},
-		},
-		Dependencies: Dependencies{
 			Dependencies: []Dependency{
 				{
-					GroupID:    "org.apache.camel.k",
-					ArtifactID: "camel-k-runtime-jvm",
-					Version:    "1.0.0",
+					GroupID:    "org.apache.camel",
+					ArtifactID: "camel-bom",
+					Version:    "2.22.1",
+					Type:       "pom",
+					Scope:      "import",
 				},
 			},
 		},
-		Repositories: Repositories{
-			Repositories: []Repository{
-				{
-					ID:  "central",
-					URL: "https://repo.maven.apache.org/maven2",
-					Snapshots: RepositoryPolicy{
-						Enabled: false,
-					},
-					Releases: RepositoryPolicy{
-						Enabled:      true,
-						UpdatePolicy: "never",
-					},
+		Dependencies: []Dependency{
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-jvm",
+				Version:    "1.0.0",
+			},
+		},
+		Repositories: []Repository{
+			{
+				ID:  "central",
+				URL: "https://repo.maven.apache.org/maven2",
+				Snapshots: RepositoryPolicy{
+					Enabled: false,
+				},
+				Releases: RepositoryPolicy{
+					Enabled:      true,
+					UpdatePolicy: "never",
 				},
 			},
 		},
-		PluginRepositories: PluginRepositories{
-			Repositories: []Repository{
-				{
-					ID:  "central",
-					URL: "https://repo.maven.apache.org/maven2",
-					Snapshots: RepositoryPolicy{
-						Enabled: false,
-					},
-					Releases: RepositoryPolicy{
-						Enabled:      true,
-						UpdatePolicy: "never",
-					},
+		PluginRepositories: []Repository{
+			{
+				ID:  "central",
+				URL: "https://repo.maven.apache.org/maven2",
+				Snapshots: RepositoryPolicy{
+					Enabled: false,
+				},
+				Releases: RepositoryPolicy{
+					Enabled:      true,
+					UpdatePolicy: "never",
 				},
 			},
 		},
