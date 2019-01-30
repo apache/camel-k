@@ -182,6 +182,21 @@ func TestParseGAVWithClassifierAndType(t *testing.T) {
 	assert.Equal(t, dep.Classifier, "test")
 }
 
+func TestParseGAVMvnNoVersion(t *testing.T) {
+	dep, err := ParseGAV("mvn:org.apache.camel/camel-core")
+
+	assert.Nil(t, err)
+	assert.Equal(t, dep.GroupID, "mvn")
+	assert.Equal(t, dep.ArtifactID, "org.apache.camel/camel-core")
+}
+
+func TestParseGAVErrorNoColumn(t *testing.T) {
+	dep, err := ParseGAV("org.apache.camel.k.camel-k-runtime-noop-0.2.1-SNAPSHOT.jar")
+
+	assert.EqualError(t, err, "GAV must match <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')")
+	assert.Equal(t, Dependency{}, dep)
+}
+
 func TestNewRepository(t *testing.T) {
 	r := NewRepository("http://nexus/public")
 	assert.Equal(t, "", r.ID)
