@@ -19,22 +19,34 @@ package trait
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
-	corev1 "k8s.io/api/core/v1"
 
-	"github.com/sirupsen/logrus"
+	corev1 "k8s.io/api/core/v1"
 )
 
 type jolokiaTrait struct {
 	BaseTrait `property:",squash"`
 
-	OpenShiftSSLAuth *bool   `property:"openshift-ssl-auth"`
-	Options          *string `property:"options"`
-	Port             int     `property:"port"`
-	RandomPassword   *bool   `property:"random-password"`
+	// Jolokia JVM agent configuration
+	// See https://jolokia.org/reference/html/agents.html
+	CaCert                     *string `property:"ca-cert"`
+	ClientPrincipal            *string `property:"client-principal"`
+	DiscoveryEnabled           *bool   `property:"discovery-enabled"`
+	ExtendedClientCheck        *bool   `property:"extended-client-check"`
+	Host                       *string `property:"host"`
+	Password                   *string `property:"password"`
+	Port                       int     `property:"port"`
+	Protocol                   *string `property:"protocol"`
+	User                       *string `property:"user"`
+	UseSslClientAuthentication *bool   `property:"use-ssl-client-authentication"`
+
+	// Extra configuration options
+	Options *string `property:"options"`
 }
 
 // The Jolokia trait must be executed prior to the deployment trait
@@ -49,10 +61,25 @@ func newJolokiaTrait() *jolokiaTrait {
 }
 
 func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
+	options, err := parseJolokiaOptions(t.Options)
+	if err != nil {
+		return false, err
+	}
+
+	setDefaultJolokiaOption(options, &t.Host, "host", "*")
+	setDefaultJolokiaOption(options, &t.DiscoveryEnabled, "discoveryEnabled", false)
+
+	// Configure HTTPS by default for OpenShift
+	if e.DetermineProfile() == v1alpha1.TraitProfileOpenShift {
+		setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
+		setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+		setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
+		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
+	}
+
 	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 }
 
-// Configure the Jolokia Java agent
 func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	if t.Enabled == nil || !*t.Enabled {
 		// Deactivate the Jolokia Java agent
@@ -61,29 +88,34 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	// OpenShift proxy SSL client authentication
-	if e.DetermineProfile() == v1alpha1.TraitProfileOpenShift {
-		if t.OpenShiftSSLAuth != nil && !*t.OpenShiftSSLAuth {
-			envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
-		} else {
-			envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_AUTH_OPENSHIFT", "true")
-		}
-	} else {
-		if t.OpenShiftSSLAuth != nil {
-			logrus.Warn("Jolokia trait property [openshiftSSLAuth] is only applicable for the OpenShift profile!")
-		}
-		envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
+	// Need to set it explicitely as it default to true
+	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
+
+	// Configure the Jolokia Java agent
+	// Populate first with the extra options
+	options, err := parseJolokiaOptions(t.Options)
+	if err != nil {
+		return err
 	}
-	// Jolokia options
-	if t.Options != nil {
-		envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_OPTS", *t.Options)
+
+	// Then add explicitely set trait configuration properties
+	addToJolokiaOptions(options, "caCert", t.CaCert)
+	addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
+	addToJolokiaOptions(options, "discoveryEnabled", t.DiscoveryEnabled)
+	addToJolokiaOptions(options, "extendedClientCheck", t.ExtendedClientCheck)
+	addToJolokiaOptions(options, "host", t.Host)
+	addToJolokiaOptions(options, "password", t.Password)
+	addToJolokiaOptions(options, "port", t.Port)
+	addToJolokiaOptions(options, "protocol", t.Protocol)
+	addToJolokiaOptions(options, "user", t.User)
+	addToJolokiaOptions(options, "useSslClientAuthentication", t.UseSslClientAuthentication)
+
+	// Lastly set the AB_JOLOKIA_OPTS environment variable from the fabric8/s2i-java base image
+	optionValues := make([]string, 0, len(options))
+	for k, v := range options {
+		optionValues = append(optionValues, k+"="+v)
 	}
-	// Agent port
-	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_PORT", strconv.Itoa(t.Port))
-	// Random password
-	if t.RandomPassword != nil {
-		envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_PASSWORD_RANDOM", strconv.FormatBool(*t.RandomPassword))
-	}
+	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_OPTS", strings.Join(optionValues, ","))
 
 	// Register a post processor to add a container port to the integration deployment
 	e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
@@ -106,4 +138,65 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	})
 
 	return nil
+}
+
+func setDefaultJolokiaOption(options map[string]string, option interface{}, key string, value interface{}) {
+	// Do not override existing option
+	if _, ok := options[key]; ok {
+		return
+	}
+	switch option.(type) {
+	case **bool:
+		if o := option.(**bool); *o == nil {
+			v := value.(bool)
+			*o = &v
+		}
+	case **int:
+		if o := option.(**int); *o == nil {
+			v := value.(int)
+			*o = &v
+		}
+	case **string:
+		if o := option.(**string); *o == nil {
+			v := value.(string)
+			*o = &v
+		}
+	}
+}
+
+func addToJolokiaOptions(options map[string]string, key string, value interface{}) {
+	switch value.(type) {
+	case *bool:
+		if v := value.(*bool); v != nil {
+			options[key] = strconv.FormatBool(*v)
+		}
+	case *int:
+		if v := value.(*int); v != nil {
+			options[key] = strconv.Itoa(*v)
+		}
+	case int:
+		options[key] = strconv.Itoa(value.(int))
+	case *string:
+		if v := value.(*string); v != nil {
+			options[key] = *v
+		}
+	}
+}
+
+func parseJolokiaOptions(options *string) (map[string]string, error) {
+	m := make(map[string]string)
+
+	if options == nil || len(*options) == 0 {
+		return m, nil
+	}
+
+	for _, option := range strings.Split(*options, ",") {
+		kv := strings.Split(option, "=")
+		if len(kv) != 2 {
+			return nil, fmt.Errorf("invalid option [%s] in options [%s]", option, *options)
+		}
+		m[kv[0]] = kv[1]
+	}
+
+	return m, nil
 }
