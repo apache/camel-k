@@ -34,9 +34,7 @@ func GenerateProject(ctx *builder.Context) error {
 	// Repositories
 	//
 
-	ctx.Project.Repositories = maven.Repositories{
-		Repositories: make([]maven.Repository, 0, len(ctx.Request.Repositories)),
-	}
+	ctx.Project.Repositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
 
 	for i, r := range ctx.Request.Repositories {
 		repo := maven.NewRepository(r)
@@ -44,20 +42,14 @@ func GenerateProject(ctx *builder.Context) error {
 			repo.ID = fmt.Sprintf("repo-%03d", i)
 		}
 
-		ctx.Project.Repositories.Repositories = append(ctx.Project.Repositories.Repositories, repo)
+		ctx.Project.Repositories = append(ctx.Project.Repositories, repo)
 	}
 
 	//
 	// set-up dependencies
 	//
 
-	deps := &ctx.Project.Dependencies
-
-	//
-	// common
-	//
-
-	deps.Add(maven.Dependency{
+	ctx.Project.AddDependency(maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-spring-boot",
 		Version:    version.Version,
@@ -96,7 +88,7 @@ func GenerateProject(ctx *builder.Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			deps.Add(maven.Dependency{
+			ctx.Project.AddDependency(maven.Dependency{
 				GroupID:    "org.apache.camel",
 				ArtifactID: artifactID + "-starter",
 				Version:    ctx.Request.Platform.Build.CamelVersion,
@@ -132,12 +124,12 @@ func GenerateProject(ctx *builder.Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			deps.AddGAV("org.apache.camel.k", artifactID, version.Version)
+			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, version.Version)
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
 
-			deps.AddEncodedGAV(gav)
+			ctx.Project.AddEncodedDependencyGAV(gav)
 		case strings.HasPrefix(d, "runtime:"):
 			if d == "runtime:jvm" {
 				// common
@@ -149,8 +141,9 @@ func GenerateProject(ctx *builder.Context) error {
 			}
 
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
+			dependency := maven.NewDependency("org.apache.camel.k", artifactID, version.Version)
 
-			deps.AddGAV("org.apache.camel.k", artifactID, version.Version)
+			ctx.Project.AddDependency(dependency)
 		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}
