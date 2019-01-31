@@ -73,6 +73,7 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
 		setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
 		setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
+		setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", "cn=system:master-proxy")
 		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
 	}
 
