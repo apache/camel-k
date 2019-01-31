@@ -19,6 +19,8 @@ package trait
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -98,4 +100,27 @@ func VisitKeyValConfigurations(
 			}
 		}
 	}
+}
+
+var (
+	csvMapRegexp = regexp.MustCompile(`^(\w+)=([^,]+)(?:,(\w+)=([^,]+))*$`)
+)
+
+func parseCsvMap(csvMap *string) (map[string]string, error) {
+	m := make(map[string]string)
+
+	if csvMap == nil || len(*csvMap) == 0 {
+		return m, nil
+	}
+
+	if !csvMapRegexp.MatchString(*csvMap) {
+		return nil, fmt.Errorf("cannot parse [%s] as CSV map", *csvMap)
+	}
+
+	matches := csvMapRegexp.FindStringSubmatch(*csvMap)[2:]
+	for i := range matches[:len(matches)-1] {
+		m[matches[i]] = matches[i+1]
+	}
+
+	return m, nil
 }
