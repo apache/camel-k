@@ -8,7 +8,7 @@ public class RestWithRestlet extends org.apache.camel.builder.RouteBuilder {
     public void configure() throws Exception {
         restConfiguration()
             .component("restlet")
-            .host("localhost")
+            .host("0.0.0.0")
             .port("8080");
 
         rest()
