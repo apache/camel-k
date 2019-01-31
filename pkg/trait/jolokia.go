@@ -19,7 +19,6 @@ package trait
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -61,7 +60,7 @@ func newJolokiaTrait() *jolokiaTrait {
 }
 
 func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
-	options, err := parseJolokiaOptions(t.Options)
+	options, err := parseCsvMap(t.Options)
 	if err != nil {
 		return false, err
 	}
@@ -93,7 +92,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 
 	// Configure the Jolokia Java agent
 	// Populate first with the extra options
-	options, err := parseJolokiaOptions(t.Options)
+	options, err := parseCsvMap(t.Options)
 	if err != nil {
 		return err
 	}
@@ -181,22 +180,4 @@ func addToJolokiaOptions(options map[string]string, key string, value interface{
 			options[key] = *v
 		}
 	}
-}
-
-func parseJolokiaOptions(options *string) (map[string]string, error) {
-	m := make(map[string]string)
-
-	if options == nil || len(*options) == 0 {
-		return m, nil
-	}
-
-	for _, option := range strings.Split(*options, ",") {
-		kv := strings.Split(option, "=")
-		if len(kv) != 2 {
-			return nil, fmt.Errorf("invalid option [%s] in options [%s]", option, *options)
-		}
-		m[kv[0]] = kv[1]
-	}
-
-	return m, nil
 }
