@@ -19,9 +19,7 @@ package trait
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -117,7 +115,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 }
 
 func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.ServiceMonitor, error) {
-	labels, err := parseLabels(t.Labels)
+	labels, err := parseCsvMap(&t.Labels)
 	if err != nil {
 		return nil, err
 	}
@@ -147,22 +145,4 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 		},
 	}
 	return &smt, nil
-}
-
-func parseLabels(labels string) (map[string]string, error) {
-	m := make(map[string]string)
-
-	if len(labels) == 0 {
-		return m, nil
-	}
-
-	for _, label := range strings.Split(labels, ",") {
-		kv := strings.Split(label, "=")
-		if len(kv) != 2 {
-			return nil, fmt.Errorf("invalid label [%s] in labels [%s]", label, labels)
-		}
-		m[kv[0]] = kv[1]
-	}
-
-	return m, nil
 }
