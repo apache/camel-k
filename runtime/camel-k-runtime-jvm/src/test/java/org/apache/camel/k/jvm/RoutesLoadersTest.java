@@ -18,6 +18,7 @@ package org.apache.camel.k.jvm;
 
 import java.util.List;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.k.InMemoryRegistry;
@@ -104,6 +105,23 @@ public class RoutesLoadersTest {
         assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(SetBodyDefinition.class);
         assertThat(routes.get(0).getOutputs().get(1)).isInstanceOf(ProcessDefinition.class);
         assertThat(routes.get(0).getOutputs().get(2)).isInstanceOf(ToDefinition.class);
+    }
+
+    @Test
+    public void testLoadJavaWithRestConfiguration() throws Exception {
+        CamelContext context = new DefaultCamelContext();
+        Source source = Source.create("classpath:MyRoutesWithRestConfiguration.java");
+        RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
+        RouteBuilder builder = loader.load(new InMemoryRegistry(), source);
+
+        assertThat(loader).isInstanceOf(JavaSourceLoader.class);
+        assertThat(builder).isNotNull();
+
+        builder.setContext(context);
+        builder.configure();
+
+        assertThat(context.getRestConfigurations()).hasSize(1);
+        assertThat(context.getRestConfigurations().iterator().next()).hasFieldOrPropertyWithValue("component", "restlet");
     }
 
     @Test
