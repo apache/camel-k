@@ -30,8 +30,6 @@ public class KnativeComponent extends DefaultComponent {
     private final KnativeConfiguration configuration;
     private String environmentPath;
 
-    private boolean jsonSerializationEnabled;
-
     public KnativeComponent() {
         this(null);
     }
@@ -74,6 +72,22 @@ public class KnativeComponent extends DefaultComponent {
         configuration.setEnvironment(environment);
     }
 
+    public boolean isJsonSerializationEnabled() {
+        return configuration.isJsonSerializationEnabled();
+    }
+
+    public void setJsonSerializationEnabled(boolean jsonSerializationEnabled) {
+        configuration.setJsonSerializationEnabled(jsonSerializationEnabled);
+    }
+
+    public String getCloudEventsSpecVersion() {
+        return configuration.getCloudEventsSpecVersion();
+    }
+
+    public void setCloudEventsSpecVersion(String cloudEventSpecVersion) {
+        configuration.setCloudEventsSpecVersion(cloudEventSpecVersion);
+    }
+
     // ************************
     //
     //
@@ -105,11 +119,11 @@ public class KnativeComponent extends DefaultComponent {
             String envConfig = System.getenv(CONFIGURATION_ENV_VARIABLE);
             if (environmentPath != null) {
                 conf.setEnvironment(
-                        KnativeEnvironment.mandatoryLoadFromResource(getCamelContext(), this.environmentPath)
+                    KnativeEnvironment.mandatoryLoadFromResource(getCamelContext(), this.environmentPath)
                 );
             } else if (envConfig != null) {
                 conf.setEnvironment(
-                        KnativeEnvironment.mandatoryLoadFromSerializedString(getCamelContext(), envConfig)
+                    KnativeEnvironment.mandatoryLoadFromSerializedString(getCamelContext(), envConfig)
                 );
             } else {
                 throw new IllegalStateException("Cannot load Knative configuration from file or env variable");
@@ -117,13 +131,5 @@ public class KnativeComponent extends DefaultComponent {
         }
 
         return conf;
-    }
-
-    public boolean isJsonSerializationEnabled() {
-        return jsonSerializationEnabled;
-    }
-
-    public void setJsonSerializationEnabled(boolean jsonSerializationEnabled) {
-        this.jsonSerializationEnabled = jsonSerializationEnabled;
     }
 }

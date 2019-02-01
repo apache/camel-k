@@ -25,6 +25,12 @@ public class KnativeConfiguration implements Cloneable {
     @Metadata(required = "true")
     private KnativeEnvironment environment;
 
+    @UriParam(defaultValue = "false")
+    private boolean jsonSerializationEnabled;
+
+    @UriParam(defaultValue = "0.1", enums = "0.1,0.2")
+    private String cloudEventsSpecVersion = "0.1";
+
     public KnativeConfiguration() {
     }
 
@@ -43,6 +49,22 @@ public class KnativeConfiguration implements Cloneable {
      */
     public void setEnvironment(KnativeEnvironment environment) {
         this.environment = environment;
+    }
+
+    public boolean isJsonSerializationEnabled() {
+        return jsonSerializationEnabled;
+    }
+
+    public void setJsonSerializationEnabled(boolean jsonSerializationEnabled) {
+        this.jsonSerializationEnabled = jsonSerializationEnabled;
+    }
+
+    public String getCloudEventsSpecVersion() {
+        return cloudEventsSpecVersion;
+    }
+
+    public void setCloudEventsSpecVersion(String cloudEventsSpecVersion) {
+        this.cloudEventsSpecVersion = cloudEventsSpecVersion;
     }
 
     // ************************
