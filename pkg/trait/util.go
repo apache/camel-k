@@ -103,7 +103,8 @@ func VisitKeyValConfigurations(
 }
 
 var (
-	csvMapRegexp = regexp.MustCompile(`^(\w+)=([^,]+)(?:,(\w+)=([^,]+))*$`)
+	csvMapValidatingRegexp = regexp.MustCompile(`^(\w+)=([^,]+)(?:,(\w+)=([^,]+))*$`)
+	csvMapParsingRegexp    = regexp.MustCompile(`(\w+)=([^,]+)`)
 )
 
 func parseCsvMap(csvMap *string) (map[string]string, error) {
@@ -113,13 +114,13 @@ func parseCsvMap(csvMap *string) (map[string]string, error) {
 		return m, nil
 	}
 
-	if !csvMapRegexp.MatchString(*csvMap) {
+	if !csvMapValidatingRegexp.MatchString(*csvMap) {
 		return nil, fmt.Errorf("cannot parse [%s] as CSV map", *csvMap)
 	}
 
-	matches := csvMapRegexp.FindStringSubmatch(*csvMap)[2:]
-	for i := range matches[:len(matches)-1] {
-		m[matches[i]] = matches[i+1]
+	matches := csvMapParsingRegexp.FindAllStringSubmatch(*csvMap, -1)
+	for i := range matches {
+		m[matches[i][1]] = matches[i][2]
 	}
 
 	return m, nil
