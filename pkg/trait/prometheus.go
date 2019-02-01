@@ -34,8 +34,9 @@ import (
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
 
-	Labels string `property:"labels"`
-	Port   int    `property:"port"`
+	Port                 int    `property:"port"`
+	ServiceMonitor       bool   `property:"service-monitor"`
+	ServiceMonitorLabels string `property:"service-monitor-labels"`
 }
 
 const prometheusPortName = "prometheus"
@@ -47,7 +48,8 @@ func newPrometheusTrait() *prometheusTrait {
 		BaseTrait: BaseTrait{
 			id: ID("prometheus"),
 		},
-		Port: 9779,
+		Port:           9779,
+		ServiceMonitor: true,
 	}
 }
 
@@ -99,23 +101,25 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 				Protocol:      corev1.ProtocolTCP,
 			})
 		} else {
-			return errors.New("Cannot add Prometheus container port: no integration container")
+			return errors.New("cannot add Prometheus container port: no integration container")
 		}
 		return nil
 	})
 
-	// Add the ServiceMonitor resource
-	smt, err := t.getServiceMonitorFor(e)
-	if err != nil {
-		return err
+	if t.ServiceMonitor {
+		// Add the ServiceMonitor resource
+		smt, err := t.getServiceMonitorFor(e)
+		if err != nil {
+			return err
+		}
+		e.Resources.Add(smt)
 	}
-	e.Resources.Add(smt)
 
 	return nil
 }
 
 func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.ServiceMonitor, error) {
-	labels, err := parseCsvMap(&t.Labels)
+	labels, err := parseCsvMap(&t.ServiceMonitorLabels)
 	if err != nil {
 		return nil, err
 	}
