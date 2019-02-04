@@ -18,7 +18,6 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -28,6 +27,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
@@ -135,9 +136,9 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 	dependencies = append(dependencies, "camel:"+component)
 
 	ctx := builder.Context{
-		C:    context.TODO(),
 		Path: dir,
 		Request: builder.Request{
+			C: cancellable.NewContext(),
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: camelVersion,

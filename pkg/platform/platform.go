@@ -37,7 +37,7 @@ func GetPlatformBuilder(c client.Client, namespace string) (builder.Builder, err
 		return gBuilder, nil
 	}
 
-	gBuilder = builder.New(context.TODO(), c, namespace)
+	gBuilder = builder.New(c, namespace)
 
 	return gBuilder, nil
 }

@@ -71,12 +71,12 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err := ctx.Client.Delete(ctx.C, &bc)
+	err := ctx.Client.Delete(ctx.Request.C, &bc)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete build config")
 	}
 
-	err = ctx.Client.Create(ctx.C, &bc)
+	err = ctx.Client.Create(ctx.Request.C, &bc)
 	if err != nil {
 		return errors.Wrap(err, "cannot create build config")
 	}
@@ -97,12 +97,12 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err = ctx.Client.Delete(ctx.C, &is)
+	err = ctx.Client.Delete(ctx.Request.C, &is)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete image stream")
 	}
 
-	err = ctx.Client.Create(ctx.C, &is)
+	err = ctx.Client.Create(ctx.Request.C, &is)
 	if err != nil {
 		return errors.Wrap(err, "cannot create image stream")
 	}
@@ -140,7 +140,7 @@ func Publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "cannot unmarshal instantiated binary response")
 	}
 
-	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &ocbuild, func(obj interface{}) (bool, error) {
+	err = kubernetes.WaitCondition(ctx.Request.C, ctx.Client, &ocbuild, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*buildv1.Build); ok {
 			if val.Status.Phase == buildv1.BuildPhaseComplete {
 				return true, nil
@@ -160,7 +160,7 @@ func Publisher(ctx *builder.Context) error {
 	if err != nil {
 		return err
 	}
-	err = ctx.Client.Get(ctx.C, key, &is)
+	err = ctx.Client.Get(ctx.Request.C, key, &is)
 	if err != nil {
 		return err
 	}
