@@ -241,7 +241,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	list := v1alpha1.NewIntegrationContextList()
 
-	err := context.Client.List(context.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
+	err := context.Client.List(context.Request.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
 	if err != nil {
 		return nil, err
 	}

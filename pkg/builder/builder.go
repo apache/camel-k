@@ -18,7 +18,6 @@ limitations under the License.
 package builder
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -27,6 +26,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -48,7 +49,7 @@ type buildTask struct {
 
 type defaultBuilder struct {
 	log       log.Logger
-	ctx       context.Context
+	ctx       cancellable.Context
 	client    client.Client
 	tasks     chan buildTask
 	interrupt chan bool
@@ -58,10 +59,10 @@ type defaultBuilder struct {
 }
 
 // New --
-func New(ctx context.Context, c client.Client, namespace string) Builder {
+func New(c client.Client, namespace string) Builder {
 	m := defaultBuilder{
 		log:       log.WithName("builder"),
-		ctx:       ctx,
+		ctx:       cancellable.NewContext(),
 		client:    c,
 		tasks:     make(chan buildTask),
 		interrupt: make(chan bool, 1),
@@ -104,7 +105,7 @@ func (b *defaultBuilder) Submit(request Request, handler func(*Result)) {
 }
 
 func (b *defaultBuilder) Close() {
-	b.ctx.Done()
+	b.ctx.Cancel()
 }
 
 // ********************************
@@ -175,7 +176,6 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 	defer b.request.Delete(request.Meta.Name)
 
 	c := Context{
-		C:         b.ctx,
 		Client:    b.client,
 		Path:      builderPath,
 		Namespace: b.namespace,

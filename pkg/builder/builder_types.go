@@ -18,10 +18,11 @@ limitations under the License.
 package builder
 
 import (
-	"context"
 	"fmt"
 	"math"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -102,7 +103,7 @@ type Resource struct {
 
 // Request --
 type Request struct {
-	C            context.Context
+	C            cancellable.Context
 	Meta         v1.ObjectMeta
 	Platform     v1alpha1.IntegrationPlatformSpec
 	Dependencies []string
@@ -139,7 +140,6 @@ type Result struct {
 
 // Context --
 type Context struct {
-	C context.Context
 	client.Client
 	Request           Request
 	BaseImage         string
