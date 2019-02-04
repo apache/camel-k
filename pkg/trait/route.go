@@ -37,9 +37,7 @@ type routeTrait struct {
 
 func newRouteTrait() *routeTrait {
 	return &routeTrait{
-		BaseTrait: BaseTrait{
-			id: ID("route"),
-		},
+		BaseTrait: newBaseTrait("route"),
 	}
 }
 

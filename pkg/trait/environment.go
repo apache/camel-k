@@ -36,9 +36,7 @@ const (
 
 func newEnvironmentTrait() *environmentTrait {
 	return &environmentTrait{
-		BaseTrait: BaseTrait{
-			id: ID("environment"),
-		},
+		BaseTrait:     newBaseTrait("environment"),
 		ContainerMeta: true,
 	}
 }

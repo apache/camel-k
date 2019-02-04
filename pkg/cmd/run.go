@@ -472,7 +472,7 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 	}
 
 	if len(spec.Configuration[prop]) > 0 {
-		// Aggregate multiple occurences of the same option into a comma-separated string,
+		// Aggregate multiple occurrences of the same option into a comma-separated string,
 		// attempting to follow POSIX conventions.
 		// This enables to execute:
 		// $ kamel run -t <trait>.<property>=<value_1> ... -t <trait>.<property>=<value_N>

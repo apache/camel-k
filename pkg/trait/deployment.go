@@ -41,9 +41,7 @@ type deploymentTrait struct {
 
 func newDeploymentTrait() *deploymentTrait {
 	return &deploymentTrait{
-		BaseTrait: BaseTrait{
-			id: ID("deployment"),
-		},
+		BaseTrait: newBaseTrait("deployment"),
 	}
 }
 

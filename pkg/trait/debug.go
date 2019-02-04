@@ -28,9 +28,7 @@ type debugTrait struct {
 
 func newDebugTrait() *debugTrait {
 	return &debugTrait{
-		BaseTrait: BaseTrait{
-			id: ID("debug"),
-		},
+		BaseTrait: newBaseTrait("debug"),
 	}
 }
 
