@@ -138,17 +138,17 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err = ctx.Client.Delete(ctx.C, &pod)
+	err = ctx.Client.Delete(ctx.Request.C, &pod)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete kaniko builder pod")
 	}
 
-	err = ctx.Client.Create(ctx.C, &pod)
+	err = ctx.Client.Create(ctx.Request.C, &pod)
 	if err != nil {
 		return errors.Wrap(err, "cannot create kaniko builder pod")
 	}
 
-	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &pod, func(obj interface{}) (bool, error) {
+	err = kubernetes.WaitCondition(ctx.Request.C, ctx.Client, &pod, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*v1.Pod); ok {
 			if val.Status.Phase == v1.PodSucceeded {
 				return true, nil

@@ -23,6 +23,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/cancellable"
+
 	"github.com/apache/camel-k/pkg/util/source"
 
 	"github.com/pkg/errors"
@@ -116,7 +118,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		// happens asynchronously, a new context has to be created. the new context
 		// can be used also to stop the build.
 		r := builder.Request{
-			C:        context.TODO(),
+			C:        cancellable.NewContext(),
 			Meta:     integration.ObjectMeta,
 			Steps:    env.Steps,
 			BuildDir: env.BuildDir,

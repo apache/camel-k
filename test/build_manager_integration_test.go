@@ -22,10 +22,11 @@ limitations under the License.
 package test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -53,10 +54,10 @@ func handler(in chan builder.Result, out chan builder.Result) {
 
 func TestBuildManagerBuild(t *testing.T) {
 	namespace := getTargetNamespace()
-	b := builder.New(testContext, testClient, namespace)
+	b := builder.New(testClient, namespace)
 
 	r := builder.Request{
-		C: context.TODO(),
+		C: cancellable.NewContext(),
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
@@ -95,10 +96,10 @@ func TestBuildManagerBuild(t *testing.T) {
 
 func TestBuildManagerFailedBuild(t *testing.T) {
 	namespace := getTargetNamespace()
-	b := builder.New(testContext, testClient, namespace)
+	b := builder.New(testClient, namespace)
 
 	r := builder.Request{
-		C: context.TODO(),
+		C: cancellable.NewContext(),
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
