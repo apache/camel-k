@@ -45,9 +45,7 @@ const prometheusPortName = "prometheus"
 // as it mutates environment variables
 func newPrometheusTrait() *prometheusTrait {
 	return &prometheusTrait{
-		BaseTrait: BaseTrait{
-			id: ID("prometheus"),
-		},
+		BaseTrait:      newBaseTrait("prometheus"),
 		Port:           9779,
 		ServiceMonitor: true,
 	}
@@ -142,7 +140,7 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 				},
 			},
 			Endpoints: []monitoringv1.Endpoint{
-				monitoringv1.Endpoint{
+				{
 					Port: "prometheus",
 				},
 			},

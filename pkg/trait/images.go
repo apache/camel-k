@@ -28,9 +28,7 @@ type imagesTrait struct {
 
 func newImagesTrait() *imagesTrait {
 	return &imagesTrait{
-		BaseTrait: BaseTrait{
-			id: ID("images"),
-		},
+		BaseTrait: newBaseTrait("images"),
 	}
 }
 

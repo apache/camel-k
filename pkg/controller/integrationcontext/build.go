@@ -68,7 +68,7 @@ func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.Integratio
 	return nil
 }
 
-func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
+func (action *buildAction) handleBuildRunning(_ context.Context, ictx *v1alpha1.IntegrationContext) error {
 	b, err := platform.GetPlatformBuilder(action.client, ictx.Namespace)
 	if err != nil {
 		return err

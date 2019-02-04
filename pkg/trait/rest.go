@@ -42,9 +42,7 @@ type restTrait struct {
 
 func newRestTrait() *restTrait {
 	return &restTrait{
-		BaseTrait: BaseTrait{
-			id: ID("rest"),
-		},
+		BaseTrait: newBaseTrait("rest"),
 	}
 }
 

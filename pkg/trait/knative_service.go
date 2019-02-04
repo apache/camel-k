@@ -45,9 +45,7 @@ type knativeServiceTrait struct {
 
 func newKnativeServiceTrait() *knativeServiceTrait {
 	return &knativeServiceTrait{
-		BaseTrait: BaseTrait{
-			id: ID("knative-service"),
-		},
+		BaseTrait: newBaseTrait("knative-service"),
 	}
 }
 
