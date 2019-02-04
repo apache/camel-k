@@ -37,10 +37,8 @@ const httpPortName = "http"
 
 func newServiceTrait() *serviceTrait {
 	return &serviceTrait{
-		BaseTrait: BaseTrait{
-			id: ID("service"),
-		},
-		Port: 8080,
+		BaseTrait: newBaseTrait("service"),
+		Port:      8080,
 	}
 }
 

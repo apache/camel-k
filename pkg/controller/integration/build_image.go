@@ -71,7 +71,7 @@ func (action *buildImageAction) Handle(ctx context.Context, integration *v1alpha
 	return nil
 }
 
-func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, integration *v1alpha1.Integration) error {
+func (action *buildImageAction) handleBuildImageRunning(_ context.Context, integration *v1alpha1.Integration) error {
 	b, err := platform.GetPlatformBuilder(action.client, integration.Namespace)
 	if err != nil {
 		return err

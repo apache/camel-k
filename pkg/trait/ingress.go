@@ -35,10 +35,8 @@ type ingressTrait struct {
 
 func newIngressTrait() *ingressTrait {
 	return &ingressTrait{
-		BaseTrait: BaseTrait{
-			id: ID("ingress"),
-		},
-		Host: "",
+		BaseTrait: newBaseTrait("ingress"),
+		Host:      "",
 	}
 }
 

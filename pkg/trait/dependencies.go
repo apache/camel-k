@@ -31,9 +31,7 @@ type dependenciesTrait struct {
 
 func newDependenciesTrait() *dependenciesTrait {
 	return &dependenciesTrait{
-		BaseTrait: BaseTrait{
-			id: ID("dependencies"),
-		},
+		BaseTrait: newBaseTrait("dependencies"),
 	}
 }
 

@@ -52,10 +52,8 @@ type jolokiaTrait struct {
 // as it mutates environment variables
 func newJolokiaTrait() *jolokiaTrait {
 	return &jolokiaTrait{
-		BaseTrait: BaseTrait{
-			id: ID("jolokia"),
-		},
-		Port: 8778,
+		BaseTrait: newBaseTrait("jolokia"),
+		Port:      8778,
 	}
 }
 
@@ -88,7 +86,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	// Need to set it explicitely as it default to true
+	// Need to set it explicitly as it default to true
 	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
 
 	// Configure the Jolokia Java agent
@@ -98,7 +96,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		return err
 	}
 
-	// Then add explicitely set trait configuration properties
+	// Then add explicitly set trait configuration properties
 	addToJolokiaOptions(options, "caCert", t.CaCert)
 	addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
 	addToJolokiaOptions(options, "discoveryEnabled", t.DiscoveryEnabled)
@@ -145,19 +143,19 @@ func setDefaultJolokiaOption(options map[string]string, option interface{}, key 
 	if _, ok := options[key]; ok {
 		return
 	}
-	switch option.(type) {
+	switch o := option.(type) {
 	case **bool:
-		if o := option.(**bool); *o == nil {
+		if *o == nil {
 			v := value.(bool)
 			*o = &v
 		}
 	case **int:
-		if o := option.(**int); *o == nil {
+		if *o == nil {
 			v := value.(int)
 			*o = &v
 		}
 	case **string:
-		if o := option.(**string); *o == nil {
+		if *o == nil {
 			v := value.(string)
 			*o = &v
 		}
@@ -165,19 +163,19 @@ func setDefaultJolokiaOption(options map[string]string, option interface{}, key 
 }
 
 func addToJolokiaOptions(options map[string]string, key string, value interface{}) {
-	switch value.(type) {
+	switch v := value.(type) {
 	case *bool:
-		if v := value.(*bool); v != nil {
+		if v != nil {
 			options[key] = strconv.FormatBool(*v)
 		}
 	case *int:
-		if v := value.(*int); v != nil {
+		if v != nil {
 			options[key] = strconv.Itoa(*v)
 		}
 	case int:
-		options[key] = strconv.Itoa(value.(int))
+		options[key] = strconv.Itoa(v)
 	case *string:
-		if v := value.(*string); v != nil {
+		if v != nil {
 			options[key] = *v
 		}
 	}

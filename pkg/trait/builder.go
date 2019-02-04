@@ -38,9 +38,7 @@ type builderTrait struct {
 
 func newBuilderTrait() *builderTrait {
 	return &builderTrait{
-		BaseTrait: BaseTrait{
-			id: ID("builder"),
-		},
+		BaseTrait: newBaseTrait("builder"),
 	}
 }
 

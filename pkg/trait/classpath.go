@@ -34,9 +34,7 @@ type classpathTrait struct {
 
 func newClasspathTrait() *classpathTrait {
 	return &classpathTrait{
-		BaseTrait: BaseTrait{
-			id: ID("classpath"),
-		},
+		BaseTrait: newBaseTrait("classpath"),
 	}
 }
 

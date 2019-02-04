@@ -35,9 +35,7 @@ type springBootTrait struct {
 
 func newSpringBootTrait() *springBootTrait {
 	return &springBootTrait{
-		BaseTrait: BaseTrait{
-			id: ID("springboot"),
-		},
+		BaseTrait: newBaseTrait("springboot"),
 	}
 }
 

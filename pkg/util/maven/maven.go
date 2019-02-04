@@ -21,11 +21,12 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"github.com/pkg/errors"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"

@@ -35,10 +35,8 @@ const (
 
 func newIstioTrait() *istioTrait {
 	return &istioTrait{
-		BaseTrait: BaseTrait{
-			id: ID("istio"),
-		},
-		Allow: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+		BaseTrait: newBaseTrait("istio"),
+		Allow:     "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
 	}
 }
 
