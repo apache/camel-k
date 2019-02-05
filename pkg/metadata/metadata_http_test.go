@@ -20,6 +20,9 @@ package metadata
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,7 +39,10 @@ func TestHttpJavaSource(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageJavaSource,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.False(t, meta.PassiveEndpoints)
 }
@@ -54,7 +60,10 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageJavaSource,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.True(t, meta.PassiveEndpoints)
 }
@@ -70,7 +79,10 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageJavaSource,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.True(t, meta.PassiveEndpoints)
 }
@@ -86,7 +98,10 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageJavaSource,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.True(t, meta.PassiveEndpoints)
 }
@@ -103,7 +118,10 @@ func TestNoHttpGroovySource(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageGroovy,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.False(t, meta.RequiresHTTPService)
 	assert.False(t, meta.PassiveEndpoints)
 }
@@ -120,7 +138,10 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageGroovy,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.True(t, meta.PassiveEndpoints)
 }
@@ -137,7 +158,10 @@ func TestHttpXMLSource(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageXML,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.False(t, meta.PassiveEndpoints)
 }
@@ -155,7 +179,10 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 		},
 		Language: v1alpha1.LanguageXML,
 	}
-	meta := Extract(code)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := Extract(catalog, code)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.True(t, meta.PassiveEndpoints)
 }
@@ -184,7 +211,10 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 			Language: v1alpha1.LanguageGroovy,
 		},
 	}
-	meta := ExtractAll(codes)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := ExtractAll(catalog, codes)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.True(t, meta.PassiveEndpoints)
 }
@@ -215,7 +245,10 @@ func TestMultilangHTTPSource(t *testing.T) {
 			Language: v1alpha1.LanguageGroovy,
 		},
 	}
-	meta := ExtractAll(codes)
+
+	catalog := camel.Catalog(defaults.CamelVersion)
+	meta := ExtractAll(catalog, codes)
+
 	assert.True(t, meta.RequiresHTTPService)
 	assert.False(t, meta.PassiveEndpoints)
 }

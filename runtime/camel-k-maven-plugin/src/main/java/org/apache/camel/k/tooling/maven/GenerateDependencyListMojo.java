@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k.tooling.maven.dependency;
+package org.apache.camel.k.tooling.maven;
 
 import java.io.IOException;
 import java.io.Writer;

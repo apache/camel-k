@@ -20,6 +20,8 @@ package trait
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	"github.com/apache/camel-k/pkg/util/log"
 
 	"github.com/apache/camel-k/pkg/util/source"
@@ -94,6 +96,7 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 
 // A Environment provides the context where the trait is executed
 type Environment struct {
+	CamelCatalog   *camel.RuntimeCatalog
 	Catalog        *Catalog
 	Platform       *v1alpha1.IntegrationPlatform
 	Context        *v1alpha1.IntegrationContext
@@ -187,7 +190,7 @@ func (e *Environment) DetermineControllerStrategy(ctx context.Context, c client.
 	}
 
 	// In Knative profile: use knative service only if needed
-	meta := metadata.ExtractAll(sources)
+	meta := metadata.ExtractAll(e.CamelCatalog, sources)
 	if !meta.RequiresHTTPService {
 		return ControllerStrategyDeployment, nil
 	}

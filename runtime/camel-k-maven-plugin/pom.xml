@@ -84,10 +84,12 @@
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-swagger-rest-dsl-generator</artifactId>
       <version>${camel.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-catalog</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
@@ -115,6 +117,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${commons-lang.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vdurmont</groupId>
+      <artifactId>semver4j</artifactId>
+      <version>2.2.0</version>
     </dependency>
   </dependencies>
 

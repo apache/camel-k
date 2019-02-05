@@ -22,6 +22,8 @@ import (
 	"math"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -104,6 +106,7 @@ type Resource struct {
 // Request --
 type Request struct {
 	C            cancellable.Context
+	Catalog      *camel.RuntimeCatalog
 	Meta         v1.ObjectMeta
 	Platform     v1alpha1.IntegrationPlatformSpec
 	Dependencies []string

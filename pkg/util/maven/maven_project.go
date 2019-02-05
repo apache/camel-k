@@ -19,18 +19,51 @@ package maven
 
 import (
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// AddDependency a dependency to maven's dependencies
+// LookupDependency --
+func (p *Project) LookupDependency(dep Dependency) *Dependency {
+	for i := range p.Dependencies {
+		// Check if the given dependency is already included in the dependency list
+		if p.Dependencies[i].GroupID == dep.GroupID && p.Dependencies[i].ArtifactID == dep.ArtifactID {
+			return &p.Dependencies[i]
+		}
+	}
+
+	return nil
+}
+
+// ReplaceDependency --
+func (p *Project) ReplaceDependency(dep Dependency) {
+	for i, d := range p.Dependencies {
+		// Check if the given dependency is already included in the dependency list
+		if d.GroupID == dep.GroupID && d.ArtifactID == dep.ArtifactID {
+			p.Dependencies[i] = dep
+
+			return
+		}
+	}
+}
+
+// AddDependency adds a dependency to maven's dependencies
 func (p *Project) AddDependency(dep Dependency) {
 	for _, d := range p.Dependencies {
 		// Check if the given dependency is already included in the dependency list
-		if d == dep {
+		if d.GroupID == dep.GroupID && d.ArtifactID == dep.ArtifactID {
 			return
 		}
 	}
 
 	p.Dependencies = append(p.Dependencies, dep)
+}
+
+// AddDependencies adds dependencies to maven's dependencies
+func (p *Project) AddDependencies(deps ...Dependency) {
+	for _, d := range deps {
+		p.AddDependency(d)
+	}
 }
 
 // AddDependencyGAV a dependency to maven's dependencies
@@ -43,6 +76,31 @@ func (p *Project) AddEncodedDependencyGAV(gav string) {
 	if d, err := ParseGAV(gav); err == nil {
 		// TODO: error handling
 		p.AddDependency(d)
+	}
+}
+
+// AddDependencyExclusion --
+func (p *Project) AddDependencyExclusion(dep Dependency, exclusion Exclusion) {
+	if t := p.LookupDependency(dep); t != nil {
+		if t.Exclusions == nil {
+			exclusions := make([]maven.Exclusion, 0)
+			t.Exclusions = &exclusions
+		}
+
+		for _, e := range *t.Exclusions {
+			if e.ArtifactID == exclusion.ArtifactID && e.GroupID == exclusion.GroupID {
+				return
+			}
+		}
+
+		*t.Exclusions = append(*t.Exclusions, exclusion)
+	}
+}
+
+// AddDependencyExclusions --
+func (p *Project) AddDependencyExclusions(dep Dependency, exclusions ...Exclusion) {
+	for _, e := range exclusions {
+		p.AddDependencyExclusion(dep, e)
 	}
 }
 

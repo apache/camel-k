@@ -218,7 +218,7 @@ func (t *knativeTrait) getConfiguredSourceChannels() []string {
 func (*knativeTrait) getSourceChannels(e *Environment) []string {
 	channels := make([]string, 0)
 
-	metadata.Each(e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+	metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 		channels = append(channels, knativeutil.ExtractChannelNames(meta.FromURIs)...)
 		return true
 	})
@@ -240,7 +240,7 @@ func (t *knativeTrait) getConfiguredSinkChannels() []string {
 func (*knativeTrait) getSinkChannels(e *Environment) []string {
 	channels := make([]string, 0)
 
-	metadata.Each(e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+	metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 		channels = append(channels, knativeutil.ExtractChannelNames(meta.ToURIs)...)
 		return true
 	})

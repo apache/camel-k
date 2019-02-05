@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -109,6 +110,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		// can be used also to stop the build.
 		r := builder.Request{
 			C:            cancellable.NewContext(),
+			Catalog:      camel.Catalog(env.Platform.Spec.Build.CamelVersion),
 			Meta:         ictx.ObjectMeta,
 			Dependencies: ictx.Spec.Dependencies,
 			Repositories: repositories,

@@ -47,7 +47,7 @@ func (t *imagesTrait) Configure(e *Environment) (bool, error) {
 
 func (t *imagesTrait) Apply(e *Environment) error {
 	// Try to lookup a image from predefined images
-	image := images.LookupPredefinedImage(e.Context.Spec.Dependencies)
+	image := images.LookupPredefinedImage(e.CamelCatalog, e.Context.Spec.Dependencies)
 	if image == "" {
 		return nil
 	}

@@ -30,17 +30,17 @@ var restIndicator = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
 var xmlRestIndicator = regexp.MustCompile(`.*<\s*rest\s+[^>]*>.*`)
 
 // requiresHTTPService returns true if the integration needs to expose itself through HTTP
-func requiresHTTPService(source v1alpha1.SourceSpec, fromURIs []string) bool {
+func requiresHTTPService(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSpec, fromURIs []string) bool {
 	if hasRestIndicator(source) {
 		return true
 	}
-	return containsHTTPURIs(fromURIs)
+	return containsHTTPURIs(catalog, fromURIs)
 }
 
 // hasOnlyPassiveEndpoints returns true if the integration has no endpoint that needs to remain always active
-func hasOnlyPassiveEndpoints(_ v1alpha1.SourceSpec, fromURIs []string) bool {
+func hasOnlyPassiveEndpoints(catalog *camel.RuntimeCatalog, _ v1alpha1.SourceSpec, fromURIs []string) bool {
 	passivePlusHTTP := make(map[string]bool)
-	camel.Runtime.VisitSchemes(func(id string, scheme camel.Scheme) bool {
+	catalog.VisitSchemes(func(id string, scheme camel.Scheme) bool {
 		if scheme.HTTP || scheme.Passive {
 			passivePlusHTTP[id] = true
 		}
@@ -51,10 +51,10 @@ func hasOnlyPassiveEndpoints(_ v1alpha1.SourceSpec, fromURIs []string) bool {
 	return containsOnlyURIsIn(fromURIs, passivePlusHTTP)
 }
 
-func containsHTTPURIs(fromURI []string) bool {
+func containsHTTPURIs(catalog *camel.RuntimeCatalog, fromURI []string) bool {
 	for _, uri := range fromURI {
 		prefix := getURIPrefix(uri)
-		scheme, ok := camel.Runtime.GetScheme(prefix)
+		scheme, ok := catalog.GetScheme(prefix)
 
 		if !ok {
 			// scheme dees not exists

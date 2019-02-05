@@ -20,6 +20,8 @@ package integrationplatform
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -96,13 +98,13 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 
 	if target.Spec.Build.CamelVersion == "" {
-		target.Spec.Build.CamelVersion = platformutils.DefaultCamelVersion
+		target.Spec.Build.CamelVersion = defaults.CamelVersion
 	}
 	if target.Spec.Build.BaseImage == "" {
-		target.Spec.Build.BaseImage = platformutils.DefaultBaseImage
+		target.Spec.Build.BaseImage = defaults.BaseImage
 	}
 	if target.Spec.Build.LocalRepository == "" {
-		target.Spec.Build.LocalRepository = platformutils.DefaultLocalRepository
+		target.Spec.Build.LocalRepository = defaults.LocalRepository
 	}
 
 	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)

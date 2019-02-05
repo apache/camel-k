@@ -1,4 +1,4 @@
-package org.apache.camel.k.tooling.maven.dependency;
+package org.apache.camel.k.tooling.maven;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -41,7 +41,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     requiresDependencyResolution = ResolutionScope.COMPILE,
     threadSafe = true,
     requiresProject = false)
-public class GenerateResdXML extends AbstractMojo {
+public class GenerateRestXML extends AbstractMojo {
     @Parameter(property = "openapi.spec")
     private String inputFile;
     @Parameter(property = "dsl.out")

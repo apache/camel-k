@@ -53,20 +53,18 @@ func GenerateProject(ctx *builder.Context) error {
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-spring-boot",
 		Version:    version.Version,
-		Exclusions: &maven.Exclusions{
-			Exclusions: []maven.Exclusion{
-				{
-					GroupID:    "org.apache.camel",
-					ArtifactID: "*",
-				},
-				{
-					GroupID:    "org.apache.camel.k",
-					ArtifactID: "*",
-				},
-				{
-					GroupID:    "org.springframework.boot",
-					ArtifactID: "*",
-				},
+		Exclusions: &[]maven.Exclusion{
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "*",
+			},
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "*",
+			},
+			{
+				GroupID:    "org.springframework.boot",
+				ArtifactID: "*",
 			},
 		},
 	})
@@ -92,28 +90,26 @@ func GenerateProject(ctx *builder.Context) error {
 				GroupID:    "org.apache.camel",
 				ArtifactID: artifactID + "-starter",
 				Version:    ctx.Request.Platform.Build.CamelVersion,
-				Exclusions: &maven.Exclusions{
-					Exclusions: []maven.Exclusion{
-						{
-							GroupID:    "com.sun.xml.bind",
-							ArtifactID: "*",
-						},
-						{
-							GroupID:    "org.apache.camel",
-							ArtifactID: "camel-core",
-						},
-						{
-							GroupID:    "org.apache.camel",
-							ArtifactID: "camel-core-starter",
-						},
-						{
-							GroupID:    "org.apache.camel",
-							ArtifactID: "camel-spring-boot-starter",
-						},
-						{
-							GroupID:    "org.springframework.boot",
-							ArtifactID: "spring-boot-starter",
-						},
+				Exclusions: &[]maven.Exclusion{
+					{
+						GroupID:    "com.sun.xml.bind",
+						ArtifactID: "*",
+					},
+					{
+						GroupID:    "org.apache.camel",
+						ArtifactID: "camel-core",
+					},
+					{
+						GroupID:    "org.apache.camel",
+						ArtifactID: "camel-core-starter",
+					},
+					{
+						GroupID:    "org.apache.camel",
+						ArtifactID: "camel-spring-boot-starter",
+					},
+					{
+						GroupID:    "org.springframework.boot",
+						ArtifactID: "spring-boot-starter",
 					},
 				},
 			})

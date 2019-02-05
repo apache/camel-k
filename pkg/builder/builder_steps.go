@@ -99,6 +99,43 @@ func GenerateProject(ctx *Context) error {
 	return nil
 }
 
+// InjectDependencies --
+func InjectDependencies(ctx *Context) error {
+	var deps []maven.Dependency
+
+	//
+	// Add dependencies from catalog
+	//
+
+	deps = make([]maven.Dependency, len(ctx.Project.Dependencies))
+	copy(deps, ctx.Project.Dependencies)
+
+	for _, d := range deps {
+		if a, ok := ctx.Request.Catalog.Artifacts[d.ArtifactID]; ok {
+			ctx.Project.AddDependencies(a.Dependencies...)
+		}
+	}
+
+	//
+	// post process dependencies
+	//
+
+	deps = make([]maven.Dependency, len(ctx.Project.Dependencies))
+	copy(deps, ctx.Project.Dependencies)
+
+	for _, d := range deps {
+		if a, ok := ctx.Request.Catalog.Artifacts[d.ArtifactID]; ok {
+			if a.Exclusions == nil {
+				continue
+			}
+
+			ctx.Project.AddDependencyExclusions(d, *a.Exclusions...)
+		}
+	}
+
+	return nil
+}
+
 // ComputeDependencies --
 func ComputeDependencies(ctx *Context) error {
 	p := path.Join(ctx.Path, "maven")
