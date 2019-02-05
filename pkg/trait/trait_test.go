@@ -21,6 +21,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	routev1 "github.com/openshift/api/route/v1"
@@ -169,6 +172,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 
 func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, script string) *Environment {
 	return &Environment{
+		CamelCatalog: camel.Catalog(defaults.CamelVersion),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeployment,

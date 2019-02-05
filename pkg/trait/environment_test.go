@@ -21,6 +21,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -33,6 +36,7 @@ import (
 
 func TestDefaultEnvironment(t *testing.T) {
 	env := Environment{
+		CamelCatalog: camel.Catalog(defaults.CamelVersion),
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,

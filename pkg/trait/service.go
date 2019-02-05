@@ -56,7 +56,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		meta := metadata.ExtractAll(sources)
+		meta := metadata.ExtractAll(e.CamelCatalog, sources)
 		if !meta.RequiresHTTPService {
 			return false, nil
 		}

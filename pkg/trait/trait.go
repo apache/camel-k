@@ -20,6 +20,8 @@ package trait
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
@@ -78,6 +80,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.
 
 	return &Environment{
 		Platform:       pl,
+		CamelCatalog:   camel.Catalog(pl.Spec.Build.CamelVersion),
 		Context:        ictx,
 		Integration:    integration,
 		ExecutedTraits: make([]Trait, 0),

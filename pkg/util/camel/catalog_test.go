@@ -25,18 +25,18 @@ import (
 )
 
 func TestCatalog(t *testing.T) {
-	assert.NotNil(t, Runtime)
-	assert.NotEmpty(t, Runtime.Artifacts)
+	assert.NotNil(t, defaultCatalog)
+	assert.NotEmpty(t, defaultCatalog.Artifacts)
 }
 
 func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
-	artifact := Runtime.GetArtifactByScheme("knative")
+	artifact := defaultCatalog.GetArtifactByScheme("knative")
 	assert.Equal(t, 1, len(artifact.Schemes))
 	assert.Equal(t, "org.apache.camel.k", artifact.GroupID)
 	assert.Equal(t, "camel-knative", artifact.ArtifactID)
 	assert.Equal(t, version.Version, artifact.Version)
 
-	scheme, found := Runtime.GetScheme("knative")
+	scheme, found := defaultCatalog.GetScheme("knative")
 	assert.True(t, found)
 	assert.True(t, scheme.HTTP)
 }

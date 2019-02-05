@@ -20,6 +20,9 @@ package metadata
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
@@ -44,7 +47,9 @@ func TestJava1(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
+
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
 	assert.Len(t, metadata.FromURIs, 1)
 	assert.Contains(t, metadata.ToURIs, "log:info?skipBodyLineSeparator=false")
@@ -77,7 +82,9 @@ func TestJava2(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
+
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
 	assert.Len(t, metadata.FromURIs, 1)
 	assert.Contains(t, metadata.ToURIs, "log:info?skipBodyLineSeparator=false")
@@ -105,7 +112,9 @@ func TestGroovy1(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
+
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
 	assert.Contains(t, metadata.FromURIs, "uri:2")
 	assert.Len(t, metadata.FromURIs, 2)
@@ -131,7 +140,9 @@ func TestGroovy2(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
+
 	assert.Empty(t, metadata.FromURIs)
 	assert.Contains(t, metadata.ToURIs, "log:info?skipBodyLineSeparator=false")
 	assert.Contains(t, metadata.ToURIs, "http://url")
@@ -162,7 +173,9 @@ func TestXml1(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
+
 	assert.Contains(t, metadata.FromURIs, "timer:hello?period=3s")
 	assert.Len(t, metadata.FromURIs, 1)
 	assert.Contains(t, metadata.ToURIs, "log:info")
@@ -192,7 +205,9 @@ func TestKotlin1(t *testing.T) {
 		Language: v1alpha1.LanguageKotlin,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
+
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
 	assert.Contains(t, metadata.FromURIs, "uri:2")
 	assert.Len(t, metadata.FromURIs, 2)
@@ -219,7 +234,9 @@ func TestJavascript1(t *testing.T) {
 		Language: v1alpha1.LanguageJavaScript,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
+
 	assert.Empty(t, metadata.FromURIs)
 	assert.Contains(t, metadata.ToURIs, "log:info?skipBodyLineSeparator=false")
 	assert.Contains(t, metadata.ToURIs, "http://url")
@@ -245,7 +262,8 @@ func TestJYamlFlow(t *testing.T) {
 		Language: v1alpha1.LanguageYamlFlow,
 	}
 
-	metadata := Extract(source)
+	catalog := camel.Catalog(defaults.CamelVersion)
+	metadata := Extract(catalog, source)
 
 	assert.NotEmpty(t, metadata.FromURIs)
 	assert.Contains(t, metadata.FromURIs, "timer:tick")

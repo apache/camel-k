@@ -21,6 +21,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/util/envvar"
 
 	"k8s.io/api/core/v1"
@@ -40,6 +43,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 	content := "H4sIAOJoQFwAA+NKK8rP1VAqzUtJLSrJL7fKKCkpsNLXN9ADQysLAwsD/YLEkgwlTS4FINAryddQz8lPt8rMS8tX1+TiAgAya2XzQAAAAA=="
 
 	environment := Environment{
+		CamelCatalog: camel.Catalog(defaults.CamelVersion),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -140,6 +144,7 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 	content := "H4sIAOJoQFwAA+NKK8rP1VAqzUtJLSrJL7fKKCkpsNLXN9ADQysLAwsD/YLEkgwlTS4FINAryddQz8lPt8rMS8tX1+TiAgAya2XzQAAAAA=="
 
 	environment := Environment{
+		CamelCatalog: camel.Catalog(defaults.CamelVersion),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",

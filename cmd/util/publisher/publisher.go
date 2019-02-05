@@ -28,14 +28,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/cancellable"
-
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform/images"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -77,14 +76,15 @@ func (options *PublisherOptions) run(cmd *cobra.Command, args []string) {
 
 	started := options.StartWith == ""
 
-	keys := make([]string, 0, len(camel.Runtime.Artifacts))
-	for k := range camel.Runtime.Artifacts {
+	catalog := camel.Catalog(p.Spec.Build.CamelVersion)
+	keys := make([]string, 0, len(catalog.Artifacts))
+	for k := range catalog.Artifacts {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
 	for _, k := range keys {
-		a := camel.Runtime.Artifacts[k]
+		a := catalog.Artifacts[k]
 		if a.GroupID == "org.apache.camel" {
 			component := strings.TrimPrefix(a.ArtifactID, "camel-")
 			if options.StartWith == component {
@@ -138,7 +138,8 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 	ctx := builder.Context{
 		Path: dir,
 		Request: builder.Request{
-			C: cancellable.NewContext(),
+			C:       cancellable.NewContext(),
+			Catalog: camel.Catalog(camelVersion),
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: camelVersion,
