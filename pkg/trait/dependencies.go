@@ -51,7 +51,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		}
 	}
 	for _, s := range e.Integration.Spec.Sources {
-		meta := metadata.Extract(s)
+		meta := metadata.Extract(e.CamelCatalog, s)
 
 		switch s.InferLanguage() {
 		case v1alpha1.LanguageGroovy:

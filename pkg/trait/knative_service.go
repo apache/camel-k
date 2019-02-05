@@ -85,7 +85,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			if sources, err = e.ResolveSources(t.ctx, t.client); err != nil {
 				return false, err
 			}
-			meta := metadata.ExtractAll(sources)
+			meta := metadata.ExtractAll(e.CamelCatalog, sources)
 
 			if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
 				single := 1

@@ -20,6 +20,9 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/util/envvar"
 
 	"k8s.io/api/core/v1"
@@ -30,6 +33,7 @@ import (
 
 func TestDebugTraitApplicability(t *testing.T) {
 	env := Environment{
+		CamelCatalog: camel.Catalog(defaults.CamelVersion),
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,

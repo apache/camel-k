@@ -49,25 +49,50 @@ type Inspector interface {
 }
 
 // InspectorForLanguage --
-func InspectorForLanguage(language v1alpha1.Language) Inspector {
+func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1alpha1.Language) Inspector {
 	switch language {
 	case v1alpha1.LanguageJavaSource:
-		return &JavaSourceInspector{}
+		return &JavaSourceInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
 	case v1alpha1.LanguageXML:
-		return &XMLInspector{}
+		return &XMLInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
 	case v1alpha1.LanguageGroovy:
-		return &GroovyInspector{}
+		return &GroovyInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
 	case v1alpha1.LanguageJavaScript:
-		return &JavaScriptInspector{}
+		return &JavaScriptInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
 	case v1alpha1.LanguageKotlin:
-		return &KotlinInspector{}
+		return &KotlinInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
 	case v1alpha1.LanguageYamlFlow:
-		return &YAMLFlowInspector{}
+		return &YAMLFlowInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
 	}
 	return &baseInspector{}
 }
 
 type baseInspector struct {
+	catalog *camel.RuntimeCatalog
 }
 
 func (i baseInspector) Extract(v1alpha1.SourceSpec, *Metadata) error {
@@ -106,7 +131,7 @@ func (i *baseInspector) decodeComponent(uri string) string {
 		return ""
 	}
 	uriStart := uriSplit[0]
-	if component := camel.Runtime.GetArtifactByScheme(uriStart); component != nil {
+	if component := i.catalog.GetArtifactByScheme(uriStart); component != nil {
 		artifactID := component.ArtifactID
 		if component.GroupID == "org.apache.camel" && strings.HasPrefix(artifactID, "camel-") {
 			return "camel:" + artifactID[6:]

@@ -18,26 +18,22 @@ limitations under the License.
 package camel
 
 import (
+	"fmt"
+	"sync"
+
 	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/coreos/go-semver/semver"
 	"gopkg.in/yaml.v2"
 )
 
-// Catalog --
-type Catalog struct {
-	Version          string              `yaml:"version"`
-	Artifacts        map[string]Artifact `yaml:"artifacts"`
-	artifactByScheme map[string]string   `yaml:"-"`
-	schemesByID      map[string]Scheme   `yaml:"-"`
-}
-
 // Artifact --
 type Artifact struct {
-	GroupID     string   `yaml:"groupId"`
-	ArtifactID  string   `yaml:"artifactId"`
-	Version     string   `yaml:"version"`
-	Schemes     []Scheme `yaml:"schemes"`
-	Languages   []string `yaml:"languages"`
-	DataFormats []string `yaml:"dataformats"`
+	maven.Dependency `yaml:",inline"`
+	Schemes          []Scheme           `yaml:"schemes"`
+	Languages        []string           `yaml:"languages"`
+	DataFormats      []string           `yaml:"dataformats"`
+	Dependencies     []maven.Dependency `yaml:"dependencies"`
 }
 
 // Scheme --
@@ -47,26 +43,27 @@ type Scheme struct {
 	HTTP    bool   `yaml:"http"`
 }
 
-func init() {
-	data := deploy.Resources["camel-catalog.yaml"]
-	if err := yaml.Unmarshal([]byte(data), &Runtime); err != nil {
-		panic(err)
+// RuntimeCatalog --
+type RuntimeCatalog struct {
+	Version   string              `yaml:"version"`
+	Artifacts map[string]Artifact `yaml:"artifacts"`
+
+	artifactByScheme map[string]string
+	schemesByID      map[string]Scheme
+}
+
+// HasArtifact --
+func (c RuntimeCatalog) HasArtifact(artifact string) bool {
+	_, ok := c.Artifacts[artifact]
+	if !ok {
+		_, ok = c.Artifacts["camel-"+artifact]
 	}
 
-	Runtime.artifactByScheme = make(map[string]string)
-	Runtime.schemesByID = make(map[string]Scheme)
-
-	for id, artifact := range Runtime.Artifacts {
-		for _, scheme := range artifact.Schemes {
-			scheme := scheme
-			Runtime.artifactByScheme[scheme.ID] = id
-			Runtime.schemesByID[scheme.ID] = scheme
-		}
-	}
+	return ok
 }
 
 // GetArtifactByScheme returns the artifact corresponding to the given component scheme
-func (c Catalog) GetArtifactByScheme(scheme string) *Artifact {
+func (c RuntimeCatalog) GetArtifactByScheme(scheme string) *Artifact {
 	if id, ok := c.artifactByScheme[scheme]; ok {
 		if artifact, present := c.Artifacts[id]; present {
 			return &artifact
@@ -76,13 +73,13 @@ func (c Catalog) GetArtifactByScheme(scheme string) *Artifact {
 }
 
 // GetScheme returns the scheme definition for the given scheme id
-func (c Catalog) GetScheme(id string) (Scheme, bool) {
+func (c RuntimeCatalog) GetScheme(id string) (Scheme, bool) {
 	scheme, ok := c.schemesByID[id]
 	return scheme, ok
 }
 
 // VisitArtifacts --
-func (c Catalog) VisitArtifacts(visitor func(string, Artifact) bool) {
+func (c RuntimeCatalog) VisitArtifacts(visitor func(string, Artifact) bool) {
 	for id, artifact := range c.Artifacts {
 		if !visitor(id, artifact) {
 			break
@@ -91,7 +88,7 @@ func (c Catalog) VisitArtifacts(visitor func(string, Artifact) bool) {
 }
 
 // VisitSchemes --
-func (c Catalog) VisitSchemes(visitor func(string, Scheme) bool) {
+func (c RuntimeCatalog) VisitSchemes(visitor func(string, Scheme) bool) {
 	for id, scheme := range c.schemesByID {
 		if !visitor(id, scheme) {
 			break
@@ -99,5 +96,100 @@ func (c Catalog) VisitSchemes(visitor func(string, Scheme) bool) {
 	}
 }
 
-// Runtime --
-var Runtime Catalog
+// ******************************
+//
+//
+//
+// ******************************
+
+var defaultCatalog RuntimeCatalog
+var catalogs map[string]RuntimeCatalog
+var catalogsLock sync.Mutex
+
+func init() {
+	c, err := loadCatalog("camel-catalog.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	defaultCatalog = *c
+
+	catalogs = make(map[string]RuntimeCatalog)
+}
+
+func loadCatalog(resourceName string) (*RuntimeCatalog, error) {
+	var catalog RuntimeCatalog
+
+	data, ok := deploy.Resources[resourceName]
+	if !ok {
+		return nil, nil
+	}
+
+	if err := yaml.Unmarshal([]byte(data), &catalog); err != nil {
+		return nil, err
+	}
+
+	catalog.artifactByScheme = make(map[string]string)
+	catalog.schemesByID = make(map[string]Scheme)
+
+	for id, artifact := range catalog.Artifacts {
+		for _, scheme := range artifact.Schemes {
+			scheme := scheme
+			catalog.artifactByScheme[scheme.ID] = id
+			catalog.schemesByID[scheme.ID] = scheme
+		}
+	}
+
+	return &catalog, nil
+}
+
+// Catalog --
+func Catalog(camelVersion string) *RuntimeCatalog {
+	catalogsLock.Lock()
+	defer catalogsLock.Unlock()
+
+	if c, ok := catalogs[camelVersion]; ok {
+		return &c
+	}
+
+	var c *RuntimeCatalog
+	var r string
+	var err error
+
+	// try with the exact match
+	r = fmt.Sprintf("camel-catalog-%s.yaml", camelVersion)
+	c, err = loadCatalog(r)
+	if err != nil {
+		panic(err)
+	}
+	if c != nil {
+		catalogs[camelVersion] = *c
+		return c
+	}
+
+	// try with ${major}.${minor}
+	sv := semver.New(camelVersion)
+	r = fmt.Sprintf("camel-catalog-%d.%d.yaml", sv.Major, sv.Minor)
+	c, err = loadCatalog(r)
+	if err != nil {
+		panic(err)
+	}
+	if c != nil {
+		catalogs[camelVersion] = *c
+		return c
+	}
+
+	// try with ${major}
+	r = fmt.Sprintf("camel-catalog-%d.yaml", sv.Major)
+	c, err = loadCatalog(r)
+	if err != nil {
+		panic(err)
+	}
+	if c != nil {
+		catalogs[camelVersion] = *c
+		return c
+	}
+
+	// return default
+	return &defaultCatalog
+}

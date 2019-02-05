@@ -20,6 +20,8 @@ package metadata
 import (
 	"sort"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/gzip"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -27,7 +29,7 @@ import (
 )
 
 // ExtractAll returns metadata information from all listed source codes
-func ExtractAll(sources []v1alpha1.SourceSpec) IntegrationMetadata {
+func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1alpha1.SourceSpec) IntegrationMetadata {
 	// neutral metadata
 	meta := IntegrationMetadata{
 		Metadata: src.Metadata{
@@ -39,7 +41,7 @@ func ExtractAll(sources []v1alpha1.SourceSpec) IntegrationMetadata {
 		RequiresHTTPService: false,
 	}
 	for _, source := range sources {
-		meta = merge(meta, Extract(source))
+		meta = merge(meta, Extract(catalog, source))
 	}
 	return meta
 }
@@ -69,7 +71,7 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 }
 
 // Extract returns metadata information from the source code
-func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
+func Extract(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSpec) IntegrationMetadata {
 	var err error
 	source, err = uncompress(source)
 	if err != nil {
@@ -81,18 +83,18 @@ func Extract(source v1alpha1.SourceSpec) IntegrationMetadata {
 	m := IntegrationMetadata{}
 
 	// TODO: handle error
-	_ = src.InspectorForLanguage(language).Extract(source, &m.Metadata)
+	_ = src.InspectorForLanguage(catalog, language).Extract(source, &m.Metadata)
 
-	m.RequiresHTTPService = requiresHTTPService(source, m.FromURIs)
-	m.PassiveEndpoints = hasOnlyPassiveEndpoints(source, m.FromURIs)
+	m.RequiresHTTPService = requiresHTTPService(catalog, source, m.FromURIs)
+	m.PassiveEndpoints = hasOnlyPassiveEndpoints(catalog, source, m.FromURIs)
 
 	return m
 }
 
 // Each --
-func Each(sources []v1alpha1.SourceSpec, consumer func(int, IntegrationMetadata) bool) {
+func Each(catalog *camel.RuntimeCatalog, sources []v1alpha1.SourceSpec, consumer func(int, IntegrationMetadata) bool) {
 	for i, s := range sources {
-		meta := Extract(s)
+		meta := Extract(catalog, s)
 
 		if !consumer(i, meta) {
 			break

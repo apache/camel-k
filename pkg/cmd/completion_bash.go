@@ -23,6 +23,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/platform"
 
 	"github.com/apache/camel-k/pkg/trait"
@@ -250,9 +252,10 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 }
 
 func computeCamelDependencies() string {
-	results := make([]string, 0, len(camel.Runtime.Artifacts))
+	catalog := camel.Catalog(defaults.CamelVersion)
+	results := make([]string, 0, len(catalog.Artifacts))
 
-	for k := range camel.Runtime.Artifacts {
+	for k := range catalog.Artifacts {
 		results = append(results, k)
 	}
 

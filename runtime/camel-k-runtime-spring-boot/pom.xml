@@ -73,6 +73,12 @@
             <artifactId>spring-boot-starter-log4j2</artifactId>
             <version>${spring-boot.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-loader-tools</artifactId>
+            <version>${spring-boot.version}</version>
+            <optional>true</optional>
+        </dependency>
 
         <!-- ****************************** -->
         <!--                                -->
@@ -116,7 +122,17 @@
                 </executions>
                 <configuration>
                     <mainClass>org.apache.camel.k.spring.boot.Application</mainClass>
+                    <!--
+                    <layoutFactory implementation="org.apache.camel.k.spring.boot.layout.Factory"/>
+                    -->
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.camel.k</groupId>
+                        <artifactId>camel-k-runtime-spring-boot-layout</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

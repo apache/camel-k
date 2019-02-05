@@ -23,6 +23,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	"github.com/apache/camel-k/pkg/util/source"
@@ -119,6 +121,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		// can be used also to stop the build.
 		r := builder.Request{
 			C:        cancellable.NewContext(),
+			Catalog:  camel.Catalog(env.Platform.Spec.Build.CamelVersion),
 			Meta:     integration.ObjectMeta,
 			Steps:    env.Steps,
 			BuildDir: env.BuildDir,

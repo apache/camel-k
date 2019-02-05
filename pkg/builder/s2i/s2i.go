@@ -23,7 +23,8 @@ import (
 
 // DefaultSteps --
 var DefaultSteps = []builder.Step{
-	builder.NewStep("generate", builder.ProjectGenerationPhase, builder.GenerateProject),
+	builder.NewStep("project/generate", builder.ProjectGenerationPhase, builder.GenerateProject),
+	builder.NewStep("project/inject-dependencies", builder.ProjectGenerationPhase+1, builder.InjectDependencies),
 	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
 	builder.NewStep("packager/incremental", builder.ApplicationPackagePhase, builder.IncrementalPackager),
 	builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, Publisher),

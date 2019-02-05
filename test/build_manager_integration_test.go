@@ -26,7 +26,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
+	"github.com/apache/camel-k/pkg/util/defaults"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -57,14 +59,15 @@ func TestBuildManagerBuild(t *testing.T) {
 	b := builder.New(testClient, namespace)
 
 	r := builder.Request{
-		C: cancellable.NewContext(),
+		C:       cancellable.NewContext(),
+		Catalog: camel.Catalog(defaults.CamelVersion),
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: "2.23.1",
+				CamelVersion: defaults.CamelVersion,
 				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},
@@ -99,14 +102,15 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	b := builder.New(testClient, namespace)
 
 	r := builder.Request{
-		C: cancellable.NewContext(),
+		C:       cancellable.NewContext(),
+		Catalog: camel.Catalog(defaults.CamelVersion),
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: "2.23.1",
+				CamelVersion: defaults.CamelVersion,
 				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},

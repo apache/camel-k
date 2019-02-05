@@ -40,13 +40,8 @@ type Project struct {
 
 // Exclusion represent a maven's dependency exlucsion
 type Exclusion struct {
-	GroupID    string `xml:"groupId"`
-	ArtifactID string `xml:"artifactId"`
-}
-
-// Exclusions --
-type Exclusions struct {
-	Exclusions []Exclusion `xml:"exclusion"`
+	GroupID    string `xml:"groupId" yaml:"groupId"`
+	ArtifactID string `xml:"artifactId" yaml:"artifactId"`
 }
 
 // DependencyManagement represent maven's dependency management block
@@ -56,13 +51,13 @@ type DependencyManagement struct {
 
 // Dependency represent a maven's dependency
 type Dependency struct {
-	GroupID    string      `xml:"groupId"`
-	ArtifactID string      `xml:"artifactId"`
-	Version    string      `xml:"version,omitempty"`
-	Type       string      `xml:"type,omitempty"`
-	Classifier string      `xml:"classifier,omitempty"`
-	Scope      string      `xml:"scope,omitempty"`
-	Exclusions *Exclusions `xml:"exclusions,omitempty"`
+	GroupID    string       `xml:"groupId" yaml:"groupId"`
+	ArtifactID string       `xml:"artifactId" yaml:"artifactId"`
+	Version    string       `xml:"version,omitempty" yaml:"version,omitempty"`
+	Type       string       `xml:"type,omitempty" yaml:"type,omitempty"`
+	Classifier string       `xml:"classifier,omitempty" yaml:"classifier,omitempty"`
+	Scope      string       `xml:"scope,omitempty" yaml:"scope,omitempty"`
+	Exclusions *[]Exclusion `xml:"exclusions>exclusion,omitempty" yaml:"exclusions,omitempty"`
 }
 
 // Repository --

@@ -20,17 +20,115 @@ package builder
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
+	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/version"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateProject(t *testing.T) {
+func TestGenerateJvmProject(t *testing.T) {
 	ctx := Context{
 		Request: Request{
+			Catalog: camel.Catalog(defaults.CamelVersion),
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: "2.22.1",
+					CamelVersion: defaults.CamelVersion,
+				},
+			},
+			Dependencies: []string{
+				"runtime:jvm",
+			},
+		},
+	}
+
+	err := GenerateProject(&ctx)
+	assert.Nil(t, err)
+	err = InjectDependencies(&ctx)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
+	assert.Equal(t, "org.apache.camel", ctx.Project.DependencyManagement.Dependencies[0].GroupID)
+	assert.Equal(t, "camel-bom", ctx.Project.DependencyManagement.Dependencies[0].ArtifactID)
+	assert.Equal(t, defaults.CamelVersion, ctx.Project.DependencyManagement.Dependencies[0].Version)
+	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
+	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
+
+	assert.Equal(t, 2, len(ctx.Project.Dependencies))
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel.k",
+		ArtifactID: "camel-k-runtime-jvm",
+		Version:    version.Version,
+		Type:       "jar",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel",
+		ArtifactID: "camel-core",
+	})
+}
+
+func TestGenerateGroovyProject(t *testing.T) {
+	ctx := Context{
+		Request: Request{
+			Catalog: camel.Catalog(defaults.CamelVersion),
+			Platform: v1alpha1.IntegrationPlatformSpec{
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					CamelVersion: defaults.CamelVersion,
+				},
+			},
+			Dependencies: []string{
+				"runtime:groovy",
+			},
+		},
+	}
+
+	err := GenerateProject(&ctx)
+	assert.Nil(t, err)
+	err = InjectDependencies(&ctx)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
+	assert.Equal(t, "org.apache.camel", ctx.Project.DependencyManagement.Dependencies[0].GroupID)
+	assert.Equal(t, "camel-bom", ctx.Project.DependencyManagement.Dependencies[0].ArtifactID)
+	assert.Equal(t, defaults.CamelVersion, ctx.Project.DependencyManagement.Dependencies[0].Version)
+	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
+	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
+
+	assert.Equal(t, 4, len(ctx.Project.Dependencies))
+
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel.k",
+		ArtifactID: "camel-k-runtime-jvm",
+		Version:    version.Version,
+		Type:       "jar",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel.k",
+		ArtifactID: "camel-k-runtime-groovy",
+		Version:    version.Version,
+		Type:       "jar",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel",
+		ArtifactID: "camel-core",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel",
+		ArtifactID: "camel-groovy",
+	})
+}
+
+func TestGenerateProjectWithRepositories(t *testing.T) {
+	ctx := Context{
+		Request: Request{
+			Catalog: camel.Catalog(defaults.CamelVersion),
+			Platform: v1alpha1.IntegrationPlatformSpec{
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					CamelVersion: defaults.CamelVersion,
 				},
 			},
 			Repositories: []string{
@@ -41,13 +139,14 @@ func TestGenerateProject(t *testing.T) {
 	}
 
 	err := GenerateProject(&ctx)
-
+	assert.Nil(t, err)
+	err = InjectDependencies(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
 	assert.Equal(t, "org.apache.camel", ctx.Project.DependencyManagement.Dependencies[0].GroupID)
 	assert.Equal(t, "camel-bom", ctx.Project.DependencyManagement.Dependencies[0].ArtifactID)
-	assert.Equal(t, "2.22.1", ctx.Project.DependencyManagement.Dependencies[0].Version)
+	assert.Equal(t, defaults.CamelVersion, ctx.Project.DependencyManagement.Dependencies[0].Version)
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
