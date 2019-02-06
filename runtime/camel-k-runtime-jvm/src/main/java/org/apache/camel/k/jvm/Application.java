@@ -21,6 +21,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.k.Constants;
+import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.support.RuntimeSupport;
 import org.apache.camel.main.MainListenerSupport;
 import org.apache.camel.main.MainSupport;
@@ -68,7 +69,7 @@ public class Application {
         Runtime runtime = new Runtime();
         runtime.setProperties(ApplicationSupport.loadProperties());
         runtime.load(routes.split(",", -1));
-        runtime.addMainListener(new ComponentPropertiesBinder());
+        runtime.addMainListener(new ComponentPropertiesBinder(runtime.getRegistry()));
         runtime.addMainListener(new RoutesDumper());
         runtime.run();
     }
@@ -80,6 +81,12 @@ public class Application {
     // *******************************
 
     static class ComponentPropertiesBinder extends MainListenerSupport {
+
+        private RuntimeRegistry registry;
+
+        public ComponentPropertiesBinder(RuntimeRegistry registry){
+            this.registry = registry;
+        }
 
         @Override
         public void configure(CamelContext context) {
@@ -103,7 +110,7 @@ public class Application {
             // This is useful to configure services such as the ClusterService,
             // RouteController, etc
             //
-            RuntimeSupport.configureContext(context);
+            RuntimeSupport.configureContext(context, registry);
 
             //
             // Configure components upon creation

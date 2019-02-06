@@ -20,13 +20,14 @@ public final class Constants {
     public static final String ENV_CAMEL_K_ROUTES = "CAMEL_K_ROUTES";
     public static final String ENV_CAMEL_K_CONF = "CAMEL_K_CONF";
     public static final String ENV_CAMEL_K_CONF_D = "CAMEL_K_CONF_D";
-    public static final String ENV_CAMEL_K_TRAITS = "CAMEL_K_TRAITS";
+    public static final String ENV_CAMEL_K_CUSTOMIZERS = "CAMEL_K_CUSTOMIZERS";
     public static final String SCHEME_CLASSPATH = "classpath:";
     public static final String SCHEME_FILE = "file:";
     public static final String SCHEME_ENV = "env:";
     public static final String LOGGING_LEVEL_PREFIX = "logging.level.";
     public static final String ROUTES_LOADER_RESOURCE_PATH = "META-INF/services/org/apache/camel/k/loader/";
-    public static final String RUNTIME_TRAIT_RESOURCE_PATH = "META-INF/services/org/apache/camel/k/trait/";
+    public static final String CONTEXT_CUSTOMIZER_RESOURCE_PATH = "META-INF/services/org/apache/camel/k/customizer/";
+    public static final String PROPERTY_CAMEL_K_CUSTOMIZER = "camel.k.customizer";
 
     private Constants() {
     }
