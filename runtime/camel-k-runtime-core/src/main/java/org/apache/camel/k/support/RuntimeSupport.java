@@ -24,7 +24,8 @@ import org.apache.camel.NoFactoryAvailableException;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.RoutesLoader;
-import org.apache.camel.k.RuntimeTrait;
+import org.apache.camel.k.ContextCustomizer;
+import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.Source;
 import org.apache.camel.spi.FactoryFinder;
 import org.apache.camel.spi.RestConfiguration;
@@ -33,37 +34,38 @@ import org.apache.camel.util.ObjectHelper;
 
 
 public final class RuntimeSupport {
+
     private RuntimeSupport() {
     }
 
-    public static void configureContext(CamelContext context) {
+    public static void configureContext(CamelContext context, RuntimeRegistry registry) {
         try {
-            FactoryFinder finder = context.getFactoryFinder(Constants.RUNTIME_TRAIT_RESOURCE_PATH);
-            String traitIDs = System.getenv().getOrDefault(Constants.ENV_CAMEL_K_TRAITS, "");
+            FactoryFinder finder = context.getFactoryFinder(Constants.CONTEXT_CUSTOMIZER_RESOURCE_PATH);
+            String customizerIDs = System.getenv().getOrDefault(Constants.ENV_CAMEL_K_CUSTOMIZERS, "");
 
-            if (ObjectHelper.isEmpty(traitIDs)) {
+            if (ObjectHelper.isEmpty(customizerIDs)) {
                 PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
                 Properties properties = component.getInitialProperties();
 
-                traitIDs = properties.getProperty("camel.k.traits", "");
+                customizerIDs = properties.getProperty(Constants.PROPERTY_CAMEL_K_CUSTOMIZER, "");
             }
 
-            for (String traitId: traitIDs.split(",", -1)) {
-                configureContext(context, traitId, (RuntimeTrait)finder.newInstance(traitId));
+            for (String customizerId: customizerIDs.split(",", -1)) {
+                configureContext(context, customizerId, (ContextCustomizer)finder.newInstance(customizerId), registry);
             }
         } catch (NoFactoryAvailableException e) {
             // ignored
         }
 
-        //this is to initialize all traits that might be already present in the context injected by other means.
-        context.getRegistry().findByTypeWithName(RuntimeTrait.class).forEach(
-            (traitId, trait) -> configureContext(context, traitId, trait)
+        //this is to initialize all customizers that might be already present in the context injected by other means.
+        context.getRegistry().findByTypeWithName(ContextCustomizer.class).forEach(
+            (customizerId, customizer) -> configureContext(context, customizerId, customizer, registry)
         );
     }
 
-    public static void configureContext(CamelContext context, String traitId, RuntimeTrait trait) {
-        bindProperties(context, trait, "trait." + traitId + ".");
-        trait.apply(context);
+    public static void configureContext(CamelContext context, String customizerId, ContextCustomizer customizer, RuntimeRegistry registry) {
+        bindProperties(context, customizer, "customizer." + customizerId + ".");
+        customizer.apply(context, registry);
     }
 
     public static void configureRest(CamelContext context) {

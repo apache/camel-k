@@ -99,7 +99,7 @@ public class Application {
                 // This is useful to configure services such as the ClusterService,
                 // RouteController, etc
                 //
-                RuntimeSupport.configureContext( context);
+                RuntimeSupport.configureContext(context, registry);
 
                 try {
                     for (String route : routes.split(",")) {

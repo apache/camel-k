@@ -14,14 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k;
+package org.apache.camel.k.jvm;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.k.ContextCustomizer;
+import org.apache.camel.k.RuntimeRegistry;
 
-@FunctionalInterface
-public interface RuntimeTrait {
-    /**
-     * Perform CamelContext customization.
-     */
-    void apply(CamelContext camelContext);
+public class TestCustomizer implements ContextCustomizer {
+    private boolean messageHistory = true;
+
+    public boolean isMessageHistory() {
+        return messageHistory;
+    }
+
+    public void setMessageHistory(boolean messageHistory) {
+        this.messageHistory = messageHistory;
+    }
+
+    @Override
+    public void apply(CamelContext camelContext, RuntimeRegistry registry) {
+        camelContext.setMessageHistory(messageHistory);
+        camelContext.setLoadTypeConverters(false);
+    }
 }
