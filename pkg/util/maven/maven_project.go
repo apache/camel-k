@@ -19,8 +19,6 @@ package maven
 
 import (
 	"strings"
-
-	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 // LookupDependency --
@@ -83,7 +81,7 @@ func (p *Project) AddEncodedDependencyGAV(gav string) {
 func (p *Project) AddDependencyExclusion(dep Dependency, exclusion Exclusion) {
 	if t := p.LookupDependency(dep); t != nil {
 		if t.Exclusions == nil {
-			exclusions := make([]maven.Exclusion, 0)
+			exclusions := make([]Exclusion, 0)
 			t.Exclusions = &exclusions
 		}
 

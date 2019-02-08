@@ -98,7 +98,7 @@ func (t *restTrait) Apply(e *Environment) error {
 		}
 
 		opts := make([]string, 0, 4)
-		opts = append(opts, maven.ExtraOptions(e.Platform.Spec.Build)...)
+		opts = append(opts, maven.ExtraOptions(e.Platform.Spec.Build.LocalRepository)...)
 		opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-rest-xml", version.Version))
 		opts = append(opts, "-Dopenapi.spec="+in)
 		opts = append(opts, "-Ddsl.out="+out)
