@@ -17,7 +17,9 @@ limitations under the License.
 
 package v1alpha1
 
-import "time"
+import (
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // ConfigurationSpec --
 type ConfigurationSpec struct {
@@ -49,13 +51,13 @@ type Step struct {
 // Failure --
 type Failure struct {
 	Reason   string          `json:"reason"`
-	Time     time.Time       `json:"time"`
+	Time     v1.Time         `json:"time"`
 	Recovery FailureRecovery `json:"recovery"`
 }
 
 // FailureRecovery --
 type FailureRecovery struct {
-	Attempt     int       `json:"attempt"`
-	AttemptMax  int       `json:"attemptMax"`
-	AttemptTime time.Time `json:"attemptTime"`
+	Attempt     int     `json:"attempt"`
+	AttemptMax  int     `json:"attemptMax"`
+	AttemptTime v1.Time `json:"attemptTime"`
 }

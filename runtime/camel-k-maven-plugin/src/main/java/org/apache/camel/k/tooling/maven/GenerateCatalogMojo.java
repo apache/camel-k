@@ -23,7 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -67,7 +67,10 @@ public class GenerateCatalogMojo extends AbstractMojo {
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
-    @Parameter(property = "catalog.path", defaultValue = "${project.build.directory}/camel-catalog.yaml")
+    @Parameter(property = "catalog.path", defaultValue = "${project.build.directory}")
+    private String outputPath;
+
+    @Parameter(property = "catalog.file", defaultValue = "camel-catalog-${catalog.version}.yaml")
     private String outputFile;
 
     // ********************
@@ -76,7 +79,7 @@ public class GenerateCatalogMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        final Path output = Paths.get(this.outputFile);
+        final Path output = Paths.get(this.outputPath, this.outputFile);
 
         try {
             if (Files.notExists(output.getParent())) {
@@ -117,12 +120,41 @@ public class GenerateCatalogMojo extends AbstractMojo {
             Representer representer = new CamelRepresenter();
             representer.addClassTag(CamelArtifact.class, Tag.MAP);
 
+            //
+            // apiVersion: camel.apache.org/v1alpha1
+            // kind: CamelCatalog
+            // metadata:
+            //   name: catalog-x.y.z
+            //   labels:
+            //     app: "camel-k"
+            //     camel.apache.org/catalog.version: x.y.x
+            //     camel.apache.org/catalog.loader.version: x.y.z
+            // spec:
+            //   version:
+            //   artifacts:
+            //
             try (Writer writer = Files.newBufferedWriter(output, StandardCharsets.UTF_8)) {
-                Map<String, Object> answer = new HashMap<>();
-                answer.put("artifacts", artifacts);
-                answer.put("version", catalog.getCatalogVersion());
+                Map<String, Object> cr = new LinkedHashMap<>();
+                cr.put("apiVersion", "camel.apache.org/v1alpha1");
+                cr.put("kind", "CamelCatalog");
 
-                new Yaml(representer, options).dump(answer, writer);
+                Map<String, Object> labels = new LinkedHashMap<>();
+                labels.put("app", "camel-k");
+                labels.put("camel.apache.org/catalog.version", catalog.getCatalogVersion());
+                labels.put("camel.apache.org/catalog.loader.version", catalog.getLoadedVersion());
+
+                Map<String, Object> meta = new LinkedHashMap<>();
+                meta.put("name", "camel-catalog-" + catalog.getCatalogVersion());
+                meta.put("labels", labels);
+
+                Map<String, Object> spec = new LinkedHashMap<>();
+                spec.put("artifacts", artifacts);
+                spec.put("version", catalog.getCatalogVersion());
+
+                cr.put("metadata", meta);
+                cr.put("spec", spec);
+
+                new Yaml(representer, options).dump(cr, writer);
             }
         } catch (IOException e) {
             throw new MojoExecutionException("Exception while generating catalog", e);

@@ -21,8 +21,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -39,7 +38,7 @@ const (
 )
 
 func TestOpenShiftTraits(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
 	res := processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
@@ -56,7 +55,7 @@ func TestOpenShiftTraits(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait(ID("deployment")))
 	assert.NotNil(t, env.GetTrait(ID("service")))
@@ -77,7 +76,7 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
 	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
 		Configuration: map[string]string{
@@ -93,7 +92,7 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
 	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
 		Configuration: map[string]string{
@@ -110,7 +109,7 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 }
 
 func TestKubernetesTraits(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait(ID("deployment")))
 	assert.Nil(t, env.GetTrait(ID("service")))
@@ -125,7 +124,7 @@ func TestKubernetesTraits(t *testing.T) {
 }
 
 func TestKubernetesTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait(ID("deployment")))
 	assert.NotNil(t, env.GetTrait(ID("service")))
@@ -143,7 +142,7 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 }
 
 func TestTraitDecode(t *testing.T) {
-	env := createTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, "")
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "")
 	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
 	svcTrait := v1alpha1.IntegrationTraitSpec{
 		Configuration: map[string]string{
@@ -170,9 +169,12 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	return env.Resources
 }
 
-func createTestEnv(cluster v1alpha1.IntegrationPlatformCluster, script string) *Environment {
+func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, script string) *Environment {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	return &Environment{
-		CamelCatalog: camel.Catalog(defaults.CamelVersion),
+		CamelCatalog: catalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeployment,

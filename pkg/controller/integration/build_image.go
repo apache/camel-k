@@ -113,6 +113,11 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 			return err
 		}
 
+		catalog, err := camel.Catalog(ctx, action.client, integration.Namespace, env.Platform.Spec.Build.CamelVersion)
+		if err != nil {
+			return err
+		}
+
 		// This build do not require to determine dependencies nor a project, the
 		// builder step do remove them
 		//
@@ -121,7 +126,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		// can be used also to stop the build.
 		r := builder.Request{
 			C:        cancellable.NewContext(),
-			Catalog:  camel.Catalog(env.Platform.Spec.Build.CamelVersion),
+			Catalog:  catalog,
 			Meta:     integration.ObjectMeta,
 			Steps:    env.Steps,
 			BuildDir: env.BuildDir,

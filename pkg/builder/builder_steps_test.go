@@ -20,7 +20,8 @@ package builder
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/apache/camel-k/pkg/util/defaults"
 
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -32,9 +33,12 @@ import (
 )
 
 func TestGenerateJvmProject(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	ctx := Context{
 		Request: Request{
-			Catalog: camel.Catalog(defaults.CamelVersion),
+			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: defaults.CamelVersion,
@@ -46,7 +50,7 @@ func TestGenerateJvmProject(t *testing.T) {
 		},
 	}
 
-	err := GenerateProject(&ctx)
+	err = GenerateProject(&ctx)
 	assert.Nil(t, err)
 	err = InjectDependencies(&ctx)
 	assert.Nil(t, err)
@@ -72,9 +76,12 @@ func TestGenerateJvmProject(t *testing.T) {
 }
 
 func TestGenerateGroovyProject(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	ctx := Context{
 		Request: Request{
-			Catalog: camel.Catalog(defaults.CamelVersion),
+			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: defaults.CamelVersion,
@@ -86,7 +93,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 		},
 	}
 
-	err := GenerateProject(&ctx)
+	err = GenerateProject(&ctx)
 	assert.Nil(t, err)
 	err = InjectDependencies(&ctx)
 	assert.Nil(t, err)
@@ -123,9 +130,12 @@ func TestGenerateGroovyProject(t *testing.T) {
 }
 
 func TestGenerateProjectWithRepositories(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	ctx := Context{
 		Request: Request{
-			Catalog: camel.Catalog(defaults.CamelVersion),
+			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: defaults.CamelVersion,
@@ -138,7 +148,7 @@ func TestGenerateProjectWithRepositories(t *testing.T) {
 		},
 	}
 
-	err := GenerateProject(&ctx)
+	err = GenerateProject(&ctx)
 	assert.Nil(t, err)
 	err = InjectDependencies(&ctx)
 	assert.Nil(t, err)

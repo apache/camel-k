@@ -28,12 +28,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform/images"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -76,7 +77,12 @@ func (options *PublisherOptions) run(cmd *cobra.Command, args []string) {
 
 	started := options.StartWith == ""
 
-	catalog := camel.Catalog(p.Spec.Build.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	if err != nil {
+		fmt.Printf("Error retrieveing default catalog: %s", err.Error())
+		return
+	}
+
 	keys := make([]string, 0, len(catalog.Artifacts))
 	for k := range catalog.Artifacts {
 		keys = append(keys, k)
@@ -135,11 +141,16 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 	dependencies = append(dependencies, images.BaseDependency)
 	dependencies = append(dependencies, "camel:"+component)
 
+	catalog, err := test.DefaultCatalog()
+	if err != nil {
+		return err
+	}
+
 	ctx := builder.Context{
 		Path: dir,
 		Request: builder.Request{
 			C:       cancellable.NewContext(),
-			Catalog: camel.Catalog(camelVersion),
+			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: camelVersion,

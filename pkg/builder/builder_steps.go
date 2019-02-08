@@ -101,18 +101,32 @@ func GenerateProject(ctx *Context) error {
 
 // InjectDependencies --
 func InjectDependencies(ctx *Context) error {
-	var deps []maven.Dependency
-
 	//
 	// Add dependencies from catalog
 	//
 
-	deps = make([]maven.Dependency, len(ctx.Project.Dependencies))
+	deps := make([]maven.Dependency, len(ctx.Project.Dependencies))
 	copy(deps, ctx.Project.Dependencies)
 
 	for _, d := range deps {
 		if a, ok := ctx.Request.Catalog.Artifacts[d.ArtifactID]; ok {
-			ctx.Project.AddDependencies(a.Dependencies...)
+			for _, dep := range a.Dependencies {
+				md := maven.Dependency{
+					GroupID:    dep.GroupID,
+					ArtifactID: dep.ArtifactID,
+				}
+
+				ctx.Project.AddDependency(md)
+
+				for _, e := range dep.Exclusions {
+					me := maven.Exclusion{
+						GroupID:    e.GroupID,
+						ArtifactID: e.ArtifactID,
+					}
+
+					ctx.Project.AddDependencyExclusion(md, me)
+				}
+			}
 		}
 	}
 
@@ -125,11 +139,19 @@ func InjectDependencies(ctx *Context) error {
 
 	for _, d := range deps {
 		if a, ok := ctx.Request.Catalog.Artifacts[d.ArtifactID]; ok {
-			if a.Exclusions == nil {
-				continue
+			md := maven.Dependency{
+				GroupID:    a.GroupID,
+				ArtifactID: a.ArtifactID,
 			}
 
-			ctx.Project.AddDependencyExclusions(d, *a.Exclusions...)
+			for _, e := range a.Exclusions {
+				me := maven.Exclusion{
+					GroupID:    e.GroupID,
+					ArtifactID: e.ArtifactID,
+				}
+
+				ctx.Project.AddDependencyExclusion(md, me)
+			}
 		}
 	}
 

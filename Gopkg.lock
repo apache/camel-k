@@ -34,14 +34,6 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
-  digest = "1:ef796be125d656ea1556ea57c6b1911092c9c763085644ef9035c63ac3f2b573"
-  name = "github.com/coreos/go-semver"
-  packages = ["semver"]
-  pruneopts = "NT"
-  revision = "8ab6407b697782a06568d4b7f1db25550ec2e4c6"
-  version = "v0.2.0"
-
-[[projects]]
   digest = "1:c76b0c1220b358995e3b5e340ff0ebae2ed9170e4ec56e1f2f896ed93da767f8"
   name = "github.com/coreos/prometheus-operator"
   packages = [
@@ -1062,7 +1054,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/coreos/go-semver/semver",
     "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1",
     "github.com/fatih/structs",
     "github.com/go-logr/logr",

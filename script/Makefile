@@ -13,6 +13,7 @@ build-publisher:
 
 build-embed-resources:
 	./script/build_catalog.sh
+	./script/build_catalog.sh 2.23.0
 	./script/embed_resources.sh deploy
 
 build-compile-integration-tests:
