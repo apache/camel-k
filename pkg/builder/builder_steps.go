@@ -146,7 +146,7 @@ func ComputeDependencies(ctx *Context) error {
 	}
 
 	opts := make([]string, 0, 2)
-	opts = append(opts, maven.ExtraOptions(ctx.Request.Platform.Build)...)
+	opts = append(opts, maven.ExtraOptions(ctx.Request.Platform.Build.LocalRepository)...)
 	opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", version.Version))
 
 	err = maven.Run(p, opts...)

@@ -28,18 +28,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
 // Log --
 var Log = log.WithName("maven")
-
-// BuildResult --
-type BuildResult struct {
-	Classpath []v1alpha1.Artifact
-}
 
 // GeneratePomContent generate a pom.xml file from the given project definition
 func GeneratePomContent(project Project) (string, error) {
@@ -130,9 +124,9 @@ func ParseGAV(gav string) (Dependency, error) {
 }
 
 // ExtraOptions --
-func ExtraOptions(spec v1alpha1.IntegrationPlatformBuildSpec) []string {
-	if _, err := os.Stat(spec.LocalRepository); err == nil {
-		return []string{"-Dmaven.repo.local=" + spec.LocalRepository}
+func ExtraOptions(localRepo string) []string {
+	if _, err := os.Stat(localRepo); err == nil {
+		return []string{"-Dmaven.repo.local=" + localRepo}
 	}
 	return []string{"-Dcamel.noop=true"}
 }
