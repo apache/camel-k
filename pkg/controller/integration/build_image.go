@@ -21,9 +21,9 @@ import (
 	"context"
 	"fmt"
 	"path"
-	"time"
 
 	"github.com/apache/camel-k/pkg/util/camel"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/util/cancellable"
 
@@ -174,7 +174,7 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 		if target.Status.Failure == nil {
 			target.Status.Failure = &v1alpha1.Failure{
 				Reason: res.Error.Error(),
-				Time:   time.Now(),
+				Time:   v1.Now(),
 				Recovery: v1alpha1.FailureRecovery{
 					Attempt:    0,
 					AttemptMax: 5,
