@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/jpillora/backoff"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
@@ -71,9 +72,9 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, integration *v1al
 	}
 
 	if integration.Status.Failure != nil {
-		lastAttempt := integration.Status.Failure.Recovery.AttemptTime
+		lastAttempt := integration.Status.Failure.Recovery.AttemptTime.Time
 		if lastAttempt.IsZero() {
-			lastAttempt = integration.Status.Failure.Time
+			lastAttempt = integration.Status.Failure.Time.Time
 		}
 
 		elapsed := time.Since(lastAttempt).Seconds()
@@ -88,7 +89,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, integration *v1al
 		target.Status.Phase = ""
 		target.Status.Failure = integration.Status.Failure
 		target.Status.Failure.Recovery.Attempt = integration.Status.Failure.Recovery.Attempt + 1
-		target.Status.Failure.Recovery.AttemptTime = time.Now()
+		target.Status.Failure.Recovery.AttemptTime = v1.Now()
 
 		action.L.Info("Recovery attempt (%d/%d)",
 			integration.Name,
