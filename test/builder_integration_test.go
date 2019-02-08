@@ -26,7 +26,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 
@@ -58,9 +59,12 @@ func TestBuildManagerBuild(t *testing.T) {
 	namespace := getTargetNamespace()
 	b := builder.New(testClient, namespace)
 
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	r := builder.Request{
 		C:       cancellable.NewContext(),
-		Catalog: camel.Catalog(defaults.CamelVersion),
+		Catalog: catalog,
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
@@ -101,9 +105,12 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	namespace := getTargetNamespace()
 	b := builder.New(testClient, namespace)
 
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	r := builder.Request{
 		C:       cancellable.NewContext(),
-		Catalog: camel.Catalog(defaults.CamelVersion),
+		Catalog: catalog,
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",

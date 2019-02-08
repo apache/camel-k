@@ -40,7 +40,7 @@ func requiresHTTPService(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSp
 // hasOnlyPassiveEndpoints returns true if the integration has no endpoint that needs to remain always active
 func hasOnlyPassiveEndpoints(catalog *camel.RuntimeCatalog, _ v1alpha1.SourceSpec, fromURIs []string) bool {
 	passivePlusHTTP := make(map[string]bool)
-	catalog.VisitSchemes(func(id string, scheme camel.Scheme) bool {
+	catalog.VisitSchemes(func(id string, scheme v1alpha1.CamelScheme) bool {
 		if scheme.HTTP || scheme.Passive {
 			passivePlusHTTP[id] = true
 		}

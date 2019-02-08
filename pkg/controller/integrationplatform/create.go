@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/apache/camel-k/deploy"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/install"
 	p "github.com/apache/camel-k/pkg/platform"
@@ -45,6 +47,16 @@ func (action *createAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bo
 }
 
 func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
+	for k := range deploy.Resources {
+		if strings.HasPrefix(k, "camel-catalog-") {
+			action.L.Infof("Installing camel catalog: %s", k)
+			err := install.Resources(ctx, action.client, platform.Namespace, k)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	if l := len(platform.Spec.Resources.Contexts); l > 0 {
 		res := make([]string, 0, l)
 

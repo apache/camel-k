@@ -21,22 +21,23 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	"k8s.io/api/apps/v1"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	env := Environment{
-		CamelCatalog: camel.Catalog(defaults.CamelVersion),
+		CamelCatalog: catalog,
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -56,7 +57,7 @@ func TestDefaultEnvironment(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewEnvironmentTestCatalog().apply(&env)
+	err = NewEnvironmentTestCatalog().apply(&env)
 
 	assert.Nil(t, err)
 

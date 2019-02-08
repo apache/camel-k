@@ -18,25 +18,19 @@ limitations under the License.
 package camel
 
 import (
-	"testing"
+	"context"
 
-	"github.com/apache/camel-k/version"
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/client"
 )
 
-func TestCatalog(t *testing.T) {
-	assert.NotNil(t, defaultCatalog)
-	assert.NotEmpty(t, defaultCatalog.Artifacts)
+// R --
+var R Runtime
+
+func init() {
+	R = NewRuntime()
 }
 
-func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
-	artifact := defaultCatalog.GetArtifactByScheme("knative")
-	assert.Equal(t, 1, len(artifact.Schemes))
-	assert.Equal(t, "org.apache.camel.k", artifact.GroupID)
-	assert.Equal(t, "camel-knative", artifact.ArtifactID)
-	assert.Equal(t, version.Version, artifact.Version)
-
-	scheme, found := defaultCatalog.GetScheme("knative")
-	assert.True(t, found)
-	assert.True(t, scheme.HTTP)
+// Catalog --
+func Catalog(ctx context.Context, client client.Client, namespace string, version string) (*RuntimeCatalog, error) {
+	return R.LoadCatalog(ctx, client, namespace, version)
 }

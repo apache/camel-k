@@ -21,8 +21,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/util/envvar"
 
@@ -42,8 +41,11 @@ import (
 func TestKnativeTraitWithCompressedSources(t *testing.T) {
 	content := "H4sIAOJoQFwAA+NKK8rP1VAqzUtJLSrJL7fKKCkpsNLXN9ADQysLAwsD/YLEkgwlTS4FINAryddQz8lPt8rMS8tX1+TiAgAya2XzQAAAAA=="
 
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	environment := Environment{
-		CamelCatalog: camel.Catalog(defaults.CamelVersion),
+		CamelCatalog: catalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -98,7 +100,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewKnativeTestCatalog().apply(&environment)
+	err = NewKnativeTestCatalog().apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -143,8 +145,11 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 	content := "H4sIAOJoQFwAA+NKK8rP1VAqzUtJLSrJL7fKKCkpsNLXN9ADQysLAwsD/YLEkgwlTS4FINAryddQz8lPt8rMS8tX1+TiAgAya2XzQAAAAA=="
 
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	environment := Environment{
-		CamelCatalog: camel.Catalog(defaults.CamelVersion),
+		CamelCatalog: catalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -193,7 +198,7 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 		}),
 	}
 
-	err := NewKnativeTestCatalog().apply(&environment)
+	err = NewKnativeTestCatalog().apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
