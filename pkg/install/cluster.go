@@ -62,6 +62,11 @@ func SetupClusterwideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
+	// Install CRD for Camel Catalog (if needed)
+	if err := installCRD(ctx, c, "Integration", "crd-camel-catalog.yaml", collection); err != nil {
+		return err
+	}
+
 	// Installing ClusterRole
 	clusterRoleInstalled, err := IsClusterRoleInstalled(ctx, c)
 	if err != nil {

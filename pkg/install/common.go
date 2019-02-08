@@ -82,11 +82,14 @@ func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace stri
 		if obj.GetObjectKind().GroupVersionKind().Kind == "Service" {
 			return nil
 		}
-		// Don't recreate integration contexts or platforms
+		// Don't recreate integration contexts, platforms, etc
 		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationContextKind {
 			return nil
 		}
 		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationPlatformKind {
+			return nil
+		}
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.CamelCatalogKind {
 			return nil
 		}
 		if obj.GetObjectKind().GroupVersionKind().Kind == "PersistentVolumeClaim" {

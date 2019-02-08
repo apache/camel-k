@@ -20,8 +20,7 @@ package metadata
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -42,7 +41,9 @@ func TestDependenciesJavaSource(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	meta := Extract(catalog, code)
 	// assert all dependencies are found and sorted (removing duplicates)
 	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram", "camel:twitter"}, meta.Dependencies)
@@ -62,7 +63,9 @@ func TestDependenciesJavaScript(t *testing.T) {
 		Language: v1alpha1.LanguageJavaScript,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
@@ -85,7 +88,9 @@ func TestDependenciesGroovy(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
@@ -105,7 +110,9 @@ func TestDependencies(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)

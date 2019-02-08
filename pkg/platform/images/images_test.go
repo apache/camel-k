@@ -21,8 +21,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/version"
 	"github.com/stretchr/testify/assert"
@@ -75,7 +74,9 @@ func TestImageLookup(t *testing.T) {
 
 	for i, tc := range cases {
 		testcase := tc
-		catalog := camel.Catalog(defaults.CamelVersion)
+
+		catalog, err := test.DefaultCatalog()
+		assert.Nil(t, err)
 
 		t.Run("case-"+strconv.Itoa(i), func(t *testing.T) {
 			assert.Equal(t, testcase.image, LookupPredefinedImage(catalog, testcase.dependencies))

@@ -20,8 +20,7 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/util/envvar"
 
@@ -32,8 +31,11 @@ import (
 )
 
 func TestDebugTraitApplicability(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	env := Environment{
-		CamelCatalog: camel.Catalog(defaults.CamelVersion),
+		CamelCatalog: catalog,
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,

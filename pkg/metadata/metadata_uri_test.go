@@ -20,8 +20,7 @@ package metadata
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +46,9 @@ func TestJava1(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
@@ -82,7 +83,9 @@ func TestJava2(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
@@ -112,7 +115,9 @@ func TestGroovy1(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
@@ -140,7 +145,9 @@ func TestGroovy2(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.Empty(t, metadata.FromURIs)
@@ -173,7 +180,9 @@ func TestXml1(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.Contains(t, metadata.FromURIs, "timer:hello?period=3s")
@@ -205,7 +214,9 @@ func TestKotlin1(t *testing.T) {
 		Language: v1alpha1.LanguageKotlin,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.Contains(t, metadata.FromURIs, "timer:tick")
@@ -234,7 +245,9 @@ func TestJavascript1(t *testing.T) {
 		Language: v1alpha1.LanguageJavaScript,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.Empty(t, metadata.FromURIs)
@@ -262,7 +275,9 @@ func TestJYamlFlow(t *testing.T) {
 		Language: v1alpha1.LanguageYamlFlow,
 	}
 
-	catalog := camel.Catalog(defaults.CamelVersion)
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	metadata := Extract(catalog, source)
 
 	assert.NotEmpty(t, metadata.FromURIs)

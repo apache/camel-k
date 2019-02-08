@@ -5,7 +5,18 @@ rootdir=$location/../
 
 version=$($location/get_version.sh)
 
-./mvnw -f runtime/pom.xml \
-    -N \
-    -Pcatalog \
-    -Dcatalog.path=${rootdir}/deploy/camel-catalog.yaml
+if [[ "$#" -eq 0 ]]; then
+    ./mvnw -f runtime/pom.xml \
+        -N \
+        -Pcatalog \
+        -Dcatalog.path=${rootdir}/deploy
+else
+    for ver in "$@"
+    do
+        ./mvnw -f runtime/pom.xml \
+            -N \
+            -Pcatalog \
+            -Dcatalog.version=$ver \
+            -Dcatalog.path=${rootdir}/deploy
+    done
+fi

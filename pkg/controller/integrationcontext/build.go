@@ -105,12 +105,17 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		repositories = append(repositories, ictx.Spec.Repositories...)
 		repositories = append(repositories, p.Spec.Build.Repositories...)
 
+		catalog, err := camel.Catalog(ctx, action.client, ictx.Namespace, env.Platform.Spec.Build.CamelVersion)
+		if err != nil {
+			return err
+		}
+
 		// the context given to the handler is per reconcile loop and as the build
 		// happens asynchronously, a new context has to be created. the new context
 		// can be used also to stop the build.
 		r := builder.Request{
 			C:            cancellable.NewContext(),
-			Catalog:      camel.Catalog(env.Platform.Spec.Build.CamelVersion),
+			Catalog:      catalog,
 			Meta:         ictx.ObjectMeta,
 			Dependencies: ictx.Spec.Dependencies,
 			Repositories: repositories,

@@ -78,9 +78,14 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.
 		}
 	}
 
+	catalog, err := camel.Catalog(ctx, c, namespace, pl.Spec.Build.CamelVersion)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Environment{
 		Platform:       pl,
-		CamelCatalog:   camel.Catalog(pl.Spec.Build.CamelVersion),
+		CamelCatalog:   catalog,
 		Context:        ictx,
 		Integration:    integration,
 		ExecutedTraits: make([]Trait, 0),

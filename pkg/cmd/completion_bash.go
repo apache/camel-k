@@ -23,7 +23,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/platform"
 
@@ -252,9 +254,12 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 }
 
 func computeCamelDependencies() string {
-	catalog := camel.Catalog(defaults.CamelVersion)
-	results := make([]string, 0, len(catalog.Artifacts))
+	catalog, err := test.DefaultCatalog()
+	if err != nil {
+		catalog = camel.NewRuntimeCatalog(v1alpha1.CamelCatalog{}.Spec)
+	}
 
+	results := make([]string, 0, len(catalog.Artifacts))
 	for k := range catalog.Artifacts {
 		results = append(results, k)
 	}
