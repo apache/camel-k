@@ -29,7 +29,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/util/cancellable"
-	"github.com/apache/camel-k/pkg/util/defaults"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -71,7 +70,7 @@ func TestBuildManagerBuild(t *testing.T) {
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: defaults.CamelVersion,
+				CamelVersion: catalog.Version,
 				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},
@@ -117,7 +116,7 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: defaults.CamelVersion,
+				CamelVersion: catalog.Version,
 				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},
