@@ -28,6 +28,8 @@ func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
 	catalog, err := DefaultCatalog()
 	assert.Nil(t, err)
 
+	assert.Equal(t, "2.23.1", catalog.Version)
+
 	artifact := catalog.GetArtifactByScheme("knative")
 	assert.Equal(t, 1, len(artifact.Schemes))
 	assert.Equal(t, "org.apache.camel.k", artifact.GroupID)

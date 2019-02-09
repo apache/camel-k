@@ -19,7 +19,6 @@ package camel
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -50,34 +49,19 @@ func (r *Runtime) LoadCatalog(ctx context.Context, client client.Client, namespa
 		return &c, nil
 	}
 
-	var c *RuntimeCatalog
+	var catalog *RuntimeCatalog
 	var err error
 
-	// try with the exact match
-	c, err = r.doLoadCatalog(ctx, client, namespace, version)
-	if err != nil {
-		return nil, err
-	}
-	if c != nil {
-		r.catalogs[version] = *c
-		return c, nil
-	}
-
-	return nil, fmt.Errorf("unable to find a camel catalog for version: %s", version)
-}
-
-func (r *Runtime) doLoadCatalog(ctx context.Context, client client.Client, namespace string, version string) (*RuntimeCatalog, error) {
 	list := v1alpha1.NewCamelCatalogList()
-	err := client.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &list)
+	err = client.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &list)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, c := range list.Items {
-		if c.Spec.Version == version {
-			return NewRuntimeCatalog(c.Spec), nil
-		}
+	catalog, err = FindBestMatch(version, list.Items)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	return catalog, nil
 }
