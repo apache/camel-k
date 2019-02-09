@@ -18,26 +18,29 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 // DefaultCatalog --
 func DefaultCatalog() (*camel.RuntimeCatalog, error) {
-	data, ok := deploy.Resources["camel-catalog-"+defaults.CamelVersion+".yaml"]
-	if !ok {
-		return nil, fmt.Errorf("unable to find default catalog from embedded resources")
+	catalogs := make([]v1alpha1.CamelCatalog, 0)
+
+	for name, content := range deploy.Resources {
+		if strings.HasPrefix(name, "camel-catalog-") {
+			var c v1alpha1.CamelCatalog
+			if err := yaml.Unmarshal([]byte(content), &c); err != nil {
+				return nil, err
+			}
+
+			catalogs = append(catalogs, c)
+		}
 	}
 
-	var c v1alpha1.CamelCatalog
-	if err := yaml.Unmarshal([]byte(data), &c); err != nil {
-		return nil, err
-	}
-
-	return camel.NewRuntimeCatalog(c.Spec), nil
+	return camel.FindBestMatch(defaults.CamelVersion, catalogs)
 }

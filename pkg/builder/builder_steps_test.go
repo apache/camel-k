@@ -22,8 +22,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/test"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/version"
 
@@ -41,7 +39,7 @@ func TestGenerateJvmProject(t *testing.T) {
 			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: defaults.CamelVersion,
+					CamelVersion: catalog.Version,
 				},
 			},
 			Dependencies: []string{
@@ -58,7 +56,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
 	assert.Equal(t, "org.apache.camel", ctx.Project.DependencyManagement.Dependencies[0].GroupID)
 	assert.Equal(t, "camel-bom", ctx.Project.DependencyManagement.Dependencies[0].ArtifactID)
-	assert.Equal(t, defaults.CamelVersion, ctx.Project.DependencyManagement.Dependencies[0].Version)
+	assert.Equal(t, catalog.Version, ctx.Project.DependencyManagement.Dependencies[0].Version)
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
@@ -84,7 +82,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: defaults.CamelVersion,
+					CamelVersion: catalog.Version,
 				},
 			},
 			Dependencies: []string{
@@ -101,7 +99,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
 	assert.Equal(t, "org.apache.camel", ctx.Project.DependencyManagement.Dependencies[0].GroupID)
 	assert.Equal(t, "camel-bom", ctx.Project.DependencyManagement.Dependencies[0].ArtifactID)
-	assert.Equal(t, defaults.CamelVersion, ctx.Project.DependencyManagement.Dependencies[0].Version)
+	assert.Equal(t, catalog.Version, ctx.Project.DependencyManagement.Dependencies[0].Version)
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
@@ -138,7 +136,7 @@ func TestGenerateProjectWithRepositories(t *testing.T) {
 			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: defaults.CamelVersion,
+					CamelVersion: catalog.Version,
 				},
 			},
 			Repositories: []string{
@@ -156,7 +154,7 @@ func TestGenerateProjectWithRepositories(t *testing.T) {
 	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
 	assert.Equal(t, "org.apache.camel", ctx.Project.DependencyManagement.Dependencies[0].GroupID)
 	assert.Equal(t, "camel-bom", ctx.Project.DependencyManagement.Dependencies[0].ArtifactID)
-	assert.Equal(t, defaults.CamelVersion, ctx.Project.DependencyManagement.Dependencies[0].Version)
+	assert.Equal(t, catalog.Version, ctx.Project.DependencyManagement.Dependencies[0].Version)
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
