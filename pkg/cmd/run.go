@@ -69,7 +69,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
 	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The contex used to run the integration")
-	cmd.Flags().StringSliceVarP(&options.Properties, "property", "p", nil, "Add a camel property")
+	cmd.Flags().StringArrayVarP(&options.Properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
 	cmd.Flags().StringSliceVar(&options.Repositories, "repository", nil, "Add a maven repository")
