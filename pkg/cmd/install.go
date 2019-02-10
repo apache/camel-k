@@ -88,7 +88,7 @@ type installCmdOptions struct {
 	contexts         []string
 }
 
-func (o *installCmdOptions) install(cmd *cobra.Command, args []string) error {
+func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 	var collection *kubernetes.Collection
 	if o.outputFormat != "" {
 		collection = kubernetes.NewCollection()

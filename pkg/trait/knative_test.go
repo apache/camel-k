@@ -21,20 +21,16 @@ import (
 	"context"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
-	"k8s.io/api/core/v1"
-
-	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -95,7 +91,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 				},
 			},
 		},
-		EnvVars:        make([]v1.EnvVar, 0),
+		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
@@ -181,7 +177,7 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 				},
 			},
 		},
-		EnvVars:        make([]v1.EnvVar, 0),
+		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources: kubernetes.NewCollection(&corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{

@@ -47,7 +47,7 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	return &cmd
 }
 
-func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (o *getCmdOptions) run(_ *cobra.Command, _ []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err

@@ -27,7 +27,8 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+
+	corev1 "k8s.io/api/core/v1"
 )
 
 // True --
@@ -90,6 +91,6 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.
 		Integration:    integration,
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		EnvVars:        make([]v1.EnvVar, 0),
+		EnvVars:        make([]corev1.EnvVar, 0),
 	}, nil
 }

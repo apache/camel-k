@@ -22,14 +22,13 @@ import (
 	"math"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-
-	"github.com/apache/camel-k/pkg/util/cancellable"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/maven"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -49,7 +48,7 @@ const (
 
 // Builder --
 type Builder interface {
-	IsBuilding(object v1.ObjectMeta) bool
+	IsBuilding(object metav1.ObjectMeta) bool
 	Submit(request Request, handler func(*Result))
 	Close()
 }
@@ -87,9 +86,9 @@ func (s *stepWrapper) Execute(ctx *Context) error {
 type StepTask func(*Context) error
 
 // NewStep --
-func NewStep(ID string, phase int32, task StepTask) Step {
+func NewStep(id string, phase int32, task StepTask) Step {
 	s := stepWrapper{
-		id:    ID,
+		id:    id,
 		phase: phase,
 		task:  task,
 	}
@@ -107,7 +106,7 @@ type Resource struct {
 type Request struct {
 	C            cancellable.Context
 	Catalog      *camel.RuntimeCatalog
-	Meta         v1.ObjectMeta
+	Meta         metav1.ObjectMeta
 	Platform     v1alpha1.IntegrationPlatformSpec
 	Dependencies []string
 	Repositories []string

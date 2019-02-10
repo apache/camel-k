@@ -43,7 +43,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -114,7 +114,7 @@ type runCmdOptions struct {
 	LoggingLevels      []string
 }
 
-func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
+func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		return errors.New("accepts at least 1 arg, received 0")
 	}
@@ -142,7 +142,7 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -273,11 +273,11 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	}
 
 	integration := v1alpha1.Integration{
-		TypeMeta: v1.TypeMeta{
+		TypeMeta: metav1.TypeMeta{
 			Kind:       v1alpha1.IntegrationKind,
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 		},

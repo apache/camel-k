@@ -24,7 +24,8 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	"gopkg.in/yaml.v2"
+
+	yaml2 "gopkg.in/yaml.v2"
 )
 
 // DefaultCatalog --
@@ -34,7 +35,7 @@ func DefaultCatalog() (*camel.RuntimeCatalog, error) {
 	for name, content := range deploy.Resources {
 		if strings.HasPrefix(name, "camel-catalog-") {
 			var c v1alpha1.CamelCatalog
-			if err := yaml.Unmarshal([]byte(content), &c); err != nil {
+			if err := yaml2.Unmarshal([]byte(content), &c); err != nil {
 				return nil, err
 			}
 

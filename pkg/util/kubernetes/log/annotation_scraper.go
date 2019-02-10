@@ -27,8 +27,9 @@ import (
 	"time"
 
 	klog "github.com/apache/camel-k/pkg/util/log"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -75,7 +76,7 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 	select {
 	case <-ctx.Done():
 		// cleanup
-		s.podScrapers.Range(func(k, v interface{}) bool {
+		s.podScrapers.Range(func(_, v interface{}) bool {
 			if canc, isCanc := v.(context.CancelFunc); isCanc {
 				canc()
 			}
@@ -105,7 +106,7 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 	}
 
 	toBeRemoved := make(map[string]bool)
-	s.podScrapers.Range(func(k, v interface{}) bool {
+	s.podScrapers.Range(func(k, _ interface{}) bool {
 		if str, isStr := k.(string); isStr {
 			if _, ok := present[str]; !ok {
 				toBeRemoved[str] = true
@@ -161,7 +162,7 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 
 }
 
-func (s *SelectorScraper) listPods() (*v1.PodList, error) {
+func (s *SelectorScraper) listPods() (*corev1.PodList, error) {
 	list, err := s.client.CoreV1().Pods(s.namespace).List(metav1.ListOptions{
 		LabelSelector: s.labelSelector,
 	})

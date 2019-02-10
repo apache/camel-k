@@ -23,7 +23,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/stoewer/go-strcase"
+	scase "github.com/stoewer/go-strcase"
 )
 
 var disallowedChars = regexp.MustCompile(`[^a-z0-9-]`)
@@ -33,7 +33,7 @@ func SanitizeName(name string) string {
 	name = strings.TrimPrefix(name, "./")
 	name = strings.Split(name, ".")[0]
 	name = path.Base(name)
-	name = strcase.KebabCase(name)
+	name = scase.KebabCase(name)
 	name = strings.ToLower(name)
 	name = disallowedChars.ReplaceAllString(name, "")
 	name = strings.TrimFunc(name, isDisallowedStartEndChar)
