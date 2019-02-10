@@ -19,11 +19,9 @@ package org.apache.camel.k.jvm;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.camel.CamelContext;
 import org.apache.camel.component.seda.SedaComponent;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.ContextCustomizer;
-import org.apache.camel.k.RuntimeRegistry;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.camel.k.jvm.RuntimeTestSupport.afterStart;
@@ -38,7 +36,7 @@ public class PropertiesTest {
         Runtime runtime = new Runtime();
         runtime.setProperties(properties);
         runtime.setDuration(5);
-        runtime.addMainListener(new Application.ComponentPropertiesBinder(runtime.getRegistry()));
+        runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
         runtime.addMainListener(afterStart((main, context) -> {
             assertThat(context.resolvePropertyPlaceholders("{{root.key}}")).isEqualTo("root.value");
             assertThat(context.resolvePropertyPlaceholders("{{001.key}}")).isEqualTo("001.value");
@@ -58,7 +56,7 @@ public class PropertiesTest {
             Runtime runtime = new Runtime();
             runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
-            runtime.addMainListener(new Application.ComponentPropertiesBinder(runtime.getRegistry()));
+            runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
             runtime.addMainListener(afterStart((main, context) -> {
                 String value = context.resolvePropertyPlaceholders("{{my.property}}");
 
@@ -85,7 +83,7 @@ public class PropertiesTest {
             runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
             runtime.getRegistry().bind("my-seda", new SedaComponent());
-            runtime.addMainListener(new Application.ComponentPropertiesBinder(runtime.getRegistry()));
+            runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
             runtime.addMainListener(afterStart((main, context) -> {
                 assertThat(context.getComponent("seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize1);
                 assertThat(context.getComponent("my-seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize2);
@@ -108,7 +106,7 @@ public class PropertiesTest {
             Runtime runtime = new Runtime();
             runtime.setProperties(System.getProperties());
             runtime.setDuration(5);
-            runtime.addMainListener(new Application.ComponentPropertiesBinder(runtime.getRegistry()));
+            runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
             runtime.addMainListener(afterStart((main, context) -> {
                 assertThat(context.isMessageHistory()).isFalse();
                 assertThat(context.isLoadTypeConverters()).isFalse();
@@ -130,7 +128,7 @@ public class PropertiesTest {
         Runtime runtime = new Runtime();
         runtime.setProperties(System.getProperties());
         runtime.setDuration(5);
-        runtime.addMainListener(new Application.ComponentPropertiesBinder(runtime.getRegistry()));
+        runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
         runtime.addMainListener(afterStart((main, context) -> {
             assertThat(context.isMessageHistory()).isFalse();
             assertThat(context.isLoadTypeConverters()).isFalse();
@@ -149,7 +147,7 @@ public class PropertiesTest {
             camelContext.setMessageHistory(false);
             camelContext.setLoadTypeConverters(false);
         });
-        runtime.addMainListener(new Application.ComponentPropertiesBinder(runtime.getRegistry()));
+        runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
         runtime.addMainListener(afterStart((main, context) -> {
             assertThat(context.isMessageHistory()).isFalse();
             assertThat(context.isLoadTypeConverters()).isFalse();

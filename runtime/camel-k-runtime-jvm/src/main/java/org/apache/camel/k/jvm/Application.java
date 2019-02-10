@@ -16,10 +16,9 @@
  */
 package org.apache.camel.k.jvm;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.RuntimeRegistry;
 import org.apache.camel.k.support.RuntimeSupport;
@@ -32,6 +31,8 @@ import org.apache.camel.support.LifecycleStrategySupport;
 import org.apache.camel.util.ObjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.JAXBException;
 
 public class Application {
     static {
@@ -68,9 +69,9 @@ public class Application {
 
         Runtime runtime = new Runtime();
         runtime.setProperties(ApplicationSupport.loadProperties());
-        runtime.load(routes.split(",", -1));
-        runtime.addMainListener(new ComponentPropertiesBinder(runtime.getRegistry()));
+        runtime.addMainListener(new CamelkJvmRuntimeConfigurer(runtime, routes.split(",", -1)));
         runtime.addMainListener(new RoutesDumper());
+
         runtime.run();
     }
 
@@ -80,12 +81,16 @@ public class Application {
     //
     // *******************************
 
-    static class ComponentPropertiesBinder extends MainListenerSupport {
+    static class CamelkJvmRuntimeConfigurer extends MainListenerSupport {
 
         private RuntimeRegistry registry;
+        private Runtime runtime;
+        private String[] routes;
 
-        public ComponentPropertiesBinder(RuntimeRegistry registry){
-            this.registry = registry;
+        public CamelkJvmRuntimeConfigurer(Runtime runtime, String[] routes){
+            this.runtime = runtime;
+            this.registry = runtime.getRegistry();
+            this.routes = routes;
         }
 
         @Override
@@ -128,6 +133,15 @@ public class Application {
                     RuntimeSupport.bindProperties(context, component, "camel.component." + name + ".");
                 }
             });
+
+            //
+            // Load routes
+            //
+            try {
+                runtime.load(routes);
+            } catch (Exception e) {
+                throw new RuntimeCamelException("CamelkJvmRuntimeConfigurer has failed to load routes: "+routes);
+            }
         }
     }
 
