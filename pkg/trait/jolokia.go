@@ -130,7 +130,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 				Protocol:      corev1.ProtocolTCP,
 			})
 		} else {
-			return errors.New("Cannot add Jolokia container port: no integration container")
+			return errors.New("cannot add Jolokia container port: no integration container")
 		}
 		return nil
 	})

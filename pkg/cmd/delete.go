@@ -37,7 +37,7 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
 		Use:   "delete [integration1] [integration2] ...",
 		Short: "Delete integrations deployed on Kubernetes",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err
 			}

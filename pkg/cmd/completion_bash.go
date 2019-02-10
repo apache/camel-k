@@ -185,7 +185,7 @@ func newCmdCompletionBash(root *cobra.Command) *cobra.Command {
 		Use:   "bash",
 		Short: "Generates bash completion scripts",
 		Long:  bashCompletionCmdLongDescription,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			err := root.GenBashCompletion(os.Stdout)
 			if err != nil {
 				fmt.Print(err.Error())

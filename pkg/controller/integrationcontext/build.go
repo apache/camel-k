@@ -23,7 +23,8 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
@@ -178,7 +179,7 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 		if target.Status.Failure == nil {
 			target.Status.Failure = &v1alpha1.Failure{
 				Reason: res.Error.Error(),
-				Time:   v1.Now(),
+				Time:   metav1.Now(),
 				Recovery: v1alpha1.FailureRecovery{
 					Attempt:    0,
 					AttemptMax: 5,

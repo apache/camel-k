@@ -31,7 +31,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/tar"
 
-	"gopkg.in/yaml.v2"
+	yaml2 "gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
 
@@ -183,7 +183,7 @@ func ComputeDependencies(ctx *Context) error {
 	}
 
 	cp := make(map[string][]v1alpha1.Artifact)
-	err = yaml.Unmarshal(content, &cp)
+	err = yaml2.Unmarshal(content, &cp)
 	if err != nil {
 		return err
 	}

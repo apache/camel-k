@@ -20,14 +20,13 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/test"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
-	"k8s.io/api/core/v1"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
+
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestDebugTraitApplicability(t *testing.T) {
@@ -50,7 +49,7 @@ func TestDebugTraitApplicability(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make([]v1.EnvVar, 0),
+		EnvVars: make([]corev1.EnvVar, 0),
 	}
 
 	trait := newDebugTrait()
@@ -82,7 +81,7 @@ func TestApplyDebugTrait(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make([]v1.EnvVar, 0),
+		EnvVars: make([]corev1.EnvVar, 0),
 	}
 
 	trait := newDebugTrait()

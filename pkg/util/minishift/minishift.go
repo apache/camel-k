@@ -23,9 +23,11 @@ import (
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/client"
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/apimachinery/pkg/labels"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -35,9 +37,9 @@ const (
 
 // FindRegistry returns the Minishift registry location if any
 func FindRegistry(ctx context.Context, c client.Client) (*string, error) {
-	svcs := v1.ServiceList{
+	svcs := corev1.ServiceList{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
+			APIVersion: corev1.SchemeGroupVersion.String(),
 			Kind:       "Service",
 		},
 	}

@@ -66,7 +66,7 @@ func main() {
 	panicIfErr(cmd.Execute())
 }
 
-func (options *PublisherOptions) run(cmd *cobra.Command, args []string) {
+func (options *PublisherOptions) run(_ *cobra.Command, _ []string) {
 	scheme := clientscheme.Scheme
 	panicIfErr(apis.AddToScheme(scheme))
 

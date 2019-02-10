@@ -45,7 +45,7 @@ type resetCmdOptions struct {
 	*RootCmdOptions
 }
 
-func (o *resetCmdOptions) reset(cmd *cobra.Command, args []string) {
+func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		fmt.Print(err)

@@ -29,7 +29,7 @@ func newCmdVersion() *cobra.Command {
 		Use:   "version",
 		Short: "Display client version",
 		Long:  `Display Camel K client version.`,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			fmt.Println("Camel K Client " + rootVersion.Version)
 		},
 	}

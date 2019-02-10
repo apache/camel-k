@@ -77,7 +77,7 @@ type contextCreateCommand struct {
 	traits       []string
 }
 
-func (command *contextCreateCommand) validateArgs(cmd *cobra.Command, args []string) error {
+func (command *contextCreateCommand) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
 	}
@@ -85,7 +85,7 @@ func (command *contextCreateCommand) validateArgs(cmd *cobra.Command, args []str
 	return nil
 }
 
-func (command *contextCreateCommand) run(cmd *cobra.Command, args []string) error {
+func (command *contextCreateCommand) run(_ *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err

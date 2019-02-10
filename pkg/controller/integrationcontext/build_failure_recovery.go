@@ -22,7 +22,8 @@ import (
 	"time"
 
 	"github.com/jpillora/backoff"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
@@ -89,7 +90,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, ictx *v1alpha1.In
 		target.Status.Phase = ""
 		target.Status.Failure = ictx.Status.Failure
 		target.Status.Failure.Recovery.Attempt = ictx.Status.Failure.Recovery.Attempt + 1
-		target.Status.Failure.Recovery.AttemptTime = v1.Now()
+		target.Status.Failure.Recovery.AttemptTime = metav1.Now()
 
 		action.L.Info("Recovery attempt (%d/%d)",
 			ictx.Name,
