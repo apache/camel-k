@@ -27,7 +27,8 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -56,23 +57,23 @@ func Publisher(ctx *builder.Context) error {
 		return err
 	}
 
-	volumes := []v1.Volume{
+	volumes := []corev1.Volume{
 		{
 			Name: "camel-k-builder",
-			VolumeSource: v1.VolumeSource{
-				PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
 					ClaimName: "camel-k-builder",
 				},
 			},
 		},
 	}
-	volumeMounts := []v1.VolumeMount{
+	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      "camel-k-builder",
 			MountPath: "/workspace",
 		},
 	}
-	envs := []v1.EnvVar{}
+	envs := []corev1.EnvVar{}
 	baseArgs := []string{
 		"--dockerfile=Dockerfile",
 		"--context=" + contextDir,
@@ -80,36 +81,36 @@ func Publisher(ctx *builder.Context) error {
 	args := append(baseArgs, "--insecure")
 
 	if ctx.Request.Platform.Build.PushSecret != "" {
-		volumes = append(volumes, v1.Volume{
+		volumes = append(volumes, corev1.Volume{
 			Name: "kaniko-secret",
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
 					SecretName: ctx.Request.Platform.Build.PushSecret,
 				},
 			},
 		})
-		volumeMounts = append(volumeMounts, v1.VolumeMount{
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "kaniko-secret",
 			MountPath: "/secret",
 		})
-		envs = append(envs, v1.EnvVar{
+		envs = append(envs, corev1.EnvVar{
 			Name:  "GOOGLE_APPLICATION_CREDENTIALS",
 			Value: "/secret/kaniko-secret.json",
 		})
 		args = baseArgs
 	}
 
-	pod := v1.Pod{
+	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
+			APIVersion: corev1.SchemeGroupVersion.String(),
 			Kind:       "Pod",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ctx.Namespace,
 			Name:      "camel-k-" + ctx.Request.Meta.Name,
 		},
-		Spec: v1.PodSpec{
-			Containers: []v1.Container{
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
 				{
 					Name:         "kaniko",
 					Image:        "gcr.io/kaniko-project/executor@sha256:f29393d9c8d40296e1692417089aa2023494bce9afd632acac7dd0aea763e5bc",
@@ -118,12 +119,12 @@ func Publisher(ctx *builder.Context) error {
 					VolumeMounts: volumeMounts,
 				},
 			},
-			RestartPolicy: v1.RestartPolicyNever,
+			RestartPolicy: corev1.RestartPolicyNever,
 			Volumes:       volumes,
-			Affinity: &v1.Affinity{
+			Affinity: &corev1.Affinity{
 				// Co-locate with builder pod for sharing the volume
-				PodAffinity: &v1.PodAffinity{
-					RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+				PodAffinity: &corev1.PodAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
 						{
 							LabelSelector: &metav1.LabelSelector{
 								MatchLabels: map[string]string{
@@ -149,10 +150,10 @@ func Publisher(ctx *builder.Context) error {
 	}
 
 	err = kubernetes.WaitCondition(ctx.Request.C, ctx.Client, &pod, func(obj interface{}) (bool, error) {
-		if val, ok := obj.(*v1.Pod); ok {
-			if val.Status.Phase == v1.PodSucceeded {
+		if val, ok := obj.(*corev1.Pod); ok {
+			if val.Status.Phase == corev1.PodSucceeded {
 				return true, nil
-			} else if val.Status.Phase == v1.PodFailed {
+			} else if val.Status.Phase == corev1.PodFailed {
 				return false, errors.New("build failed")
 			}
 		}

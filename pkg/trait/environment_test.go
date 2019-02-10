@@ -27,9 +27,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-
-	"k8s.io/api/apps/v1"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
@@ -65,7 +64,7 @@ func TestDefaultEnvironment(t *testing.T) {
 	name := false
 	ck := false
 
-	env.Resources.VisitDeployment(func(deployment *v1.Deployment) {
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
 			if e.Name == envVarNamespace {
 				ns = true
@@ -120,7 +119,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	name := false
 	ck := false
 
-	env.Resources.VisitDeployment(func(deployment *v1.Deployment) {
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
 			if e.Name == envVarNamespace {
 				ns = true
@@ -175,7 +174,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	name := false
 	ck := false
 
-	env.Resources.VisitDeployment(func(deployment *v1.Deployment) {
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
 			if e.Name == envVarNamespace {
 				ns = true

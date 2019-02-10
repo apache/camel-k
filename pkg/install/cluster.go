@@ -27,10 +27,12 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-	"k8s.io/api/rbac/v1"
+
+	"k8s.io/apimachinery/pkg/util/yaml"
+
+	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/yaml"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -185,7 +187,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, resourceName 
 
 // IsClusterRoleInstalled check if cluster role camel-k:edit is installed
 func IsClusterRoleInstalled(ctx context.Context, c client.Client) (bool, error) {
-	clusterRole := v1.ClusterRole{
+	clusterRole := rbacv1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRole",
 			APIVersion: "rbac.authorization.k8s.io/v1",

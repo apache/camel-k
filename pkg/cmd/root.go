@@ -67,7 +67,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	return &cmd, nil
 }
 
-func (command *RootCmdOptions) preRun(cmd *cobra.Command, args []string) error {
+func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 	if command.Namespace == "" {
 		current, err := client.GetCurrentNamespace(command.KubeConfig)
 		if err != nil {

@@ -25,7 +25,7 @@ import (
 
 	klog "github.com/apache/camel-k/pkg/util/log"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -78,7 +78,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
 		return
 	}
-	logOptions := v1.PodLogOptions{
+	logOptions := corev1.PodLogOptions{
 		Follow:    true,
 		Container: containerName,
 	}
@@ -138,10 +138,10 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 // waitForPodRunning waits for a given pod to reach the running state.
 // It may return the internal container to watch if present
 func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, podName string, defaultContainerName string) (string, error) {
-	pod := v1.Pod{
+	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
-			APIVersion: v1.SchemeGroupVersion.String(),
+			APIVersion: corev1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName,
@@ -166,7 +166,7 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, po
 			}
 
 			if e.Object != nil {
-				var recvPod *v1.Pod
+				var recvPod *corev1.Pod
 				if runtimeUnstructured, ok := e.Object.(runtime.Unstructured); ok {
 					unstr := unstructured.Unstructured{
 						Object: runtimeUnstructured.UnstructuredContent(),
@@ -180,11 +180,11 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, po
 						return "", err
 					}
 
-				} else if gotPod, ok := e.Object.(*v1.Pod); ok {
+				} else if gotPod, ok := e.Object.(*corev1.Pod); ok {
 					recvPod = gotPod
 				}
 
-				if recvPod != nil && recvPod.Status.Phase == v1.PodRunning {
+				if recvPod != nil && recvPod.Status.Phase == corev1.PodRunning {
 					return s.chooseContainer(recvPod, defaultContainerName), nil
 				}
 			} else if e.Type == watch.Deleted || e.Type == watch.Error {
@@ -197,7 +197,7 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, po
 
 }
 
-func (s *PodScraper) chooseContainer(p *v1.Pod, defaultContainerName string) string {
+func (s *PodScraper) chooseContainer(p *corev1.Pod, defaultContainerName string) string {
 	if p != nil {
 		if len(p.Spec.Containers) == 1 {
 			// Let Kubernetes auto-detect

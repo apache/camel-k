@@ -17,10 +17,10 @@ limitations under the License.
 
 package envvar
 
-import "k8s.io/api/core/v1"
+import corev1 "k8s.io/api/core/v1"
 
 // Get --
-func Get(vars []v1.EnvVar, name string) *v1.EnvVar {
+func Get(vars []corev1.EnvVar, name string) *corev1.EnvVar {
 	for i := 0; i < len(vars); i++ {
 		if vars[i].Name == name {
 			return &vars[i]
@@ -31,7 +31,7 @@ func Get(vars []v1.EnvVar, name string) *v1.EnvVar {
 }
 
 // Remove --
-func Remove(vars *[]v1.EnvVar, name string) {
+func Remove(vars *[]corev1.EnvVar, name string) {
 	v := *vars
 	for i := 0; i < len(v); i++ {
 		if v[i].Name == name {
@@ -43,14 +43,14 @@ func Remove(vars *[]v1.EnvVar, name string) {
 }
 
 // SetVal --
-func SetVal(vars *[]v1.EnvVar, name string, value string) {
+func SetVal(vars *[]corev1.EnvVar, name string, value string) {
 	envVar := Get(*vars, name)
 
 	if envVar != nil {
 		envVar.Value = value
 		envVar.ValueFrom = nil
 	} else {
-		*vars = append(*vars, v1.EnvVar{
+		*vars = append(*vars, corev1.EnvVar{
 			Name:  name,
 			Value: value,
 		})
@@ -58,7 +58,7 @@ func SetVal(vars *[]v1.EnvVar, name string, value string) {
 }
 
 // SetVar --
-func SetVar(vars *[]v1.EnvVar, newEnvVar v1.EnvVar) {
+func SetVar(vars *[]corev1.EnvVar, newEnvVar corev1.EnvVar) {
 	envVar := Get(*vars, newEnvVar.Name)
 
 	if envVar != nil {
@@ -76,21 +76,21 @@ func SetVar(vars *[]v1.EnvVar, newEnvVar v1.EnvVar) {
 }
 
 // SetValFrom --
-func SetValFrom(vars *[]v1.EnvVar, name string, path string) {
+func SetValFrom(vars *[]corev1.EnvVar, name string, path string) {
 	envVar := Get(*vars, name)
 
 	if envVar != nil {
 		envVar.Value = ""
-		envVar.ValueFrom = &v1.EnvVarSource{
-			FieldRef: &v1.ObjectFieldSelector{
+		envVar.ValueFrom = &corev1.EnvVarSource{
+			FieldRef: &corev1.ObjectFieldSelector{
 				FieldPath: path,
 			},
 		}
 	} else {
-		*vars = append(*vars, v1.EnvVar{
+		*vars = append(*vars, corev1.EnvVar{
 			Name: name,
-			ValueFrom: &v1.EnvVarSource{
-				FieldRef: &v1.ObjectFieldSelector{
+			ValueFrom: &corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
 					FieldPath: path,
 				},
 			},

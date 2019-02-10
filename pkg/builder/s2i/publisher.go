@@ -25,12 +25,12 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/builder"
-
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
+
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -55,14 +55,14 @@ func Publisher(ctx *builder.Context) error {
 				},
 				Strategy: buildv1.BuildStrategy{
 					SourceStrategy: &buildv1.SourceBuildStrategy{
-						From: v1.ObjectReference{
+						From: corev1.ObjectReference{
 							Kind: "DockerImage",
 							Name: ctx.Image,
 						},
 					},
 				},
 				Output: buildv1.BuildOutput{
-					To: &v1.ObjectReference{
+					To: &corev1.ObjectReference{
 						Kind: "ImageStreamTag",
 						Name: "camel-k-" + ctx.Request.Meta.Name + ":" + ctx.Request.Meta.ResourceVersion,
 					},

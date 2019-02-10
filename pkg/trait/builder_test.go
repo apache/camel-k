@@ -21,15 +21,14 @@ import (
 	"context"
 	"testing"
 
-	"k8s.io/api/core/v1"
-
-	"github.com/apache/camel-k/pkg/builder"
-
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+
 	"github.com/stretchr/testify/assert"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestBuilderTraitNotAppliedBecauseOfNilContext(t *testing.T) {
@@ -139,7 +138,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 				},
 			},
 		},
-		EnvVars:        make([]v1.EnvVar, 0),
+		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}

@@ -50,7 +50,7 @@ type logCmdOptions struct {
 	*RootCmdOptions
 }
 
-func (o *logCmdOptions) validate(cmd *cobra.Command, args []string) error {
+func (o *logCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("accepts 1 arg, received %d", len(args))
 	}
@@ -58,7 +58,7 @@ func (o *logCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (o *logCmdOptions) run(_ *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err

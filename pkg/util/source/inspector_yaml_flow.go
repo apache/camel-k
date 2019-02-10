@@ -19,7 +19,7 @@ package source
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"gopkg.in/yaml.v2"
+	yaml2 "gopkg.in/yaml.v2"
 )
 
 // YAMLFlowInspector --
@@ -31,7 +31,7 @@ type YAMLFlowInspector struct {
 func (i YAMLFlowInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
 	var flows []v1alpha1.Flow
 
-	if err := yaml.Unmarshal([]byte(source.Content), &flows); err != nil {
+	if err := yaml2.Unmarshal([]byte(source.Content), &flows); err != nil {
 		return nil
 	}
 

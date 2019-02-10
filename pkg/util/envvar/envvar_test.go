@@ -22,11 +22,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestGetEnvVar(t *testing.T) {
-	vars := []v1.EnvVar{
+	vars := []corev1.EnvVar{
 		{
 			Name:  "MyEnv",
 			Value: "MyValue",
@@ -43,7 +43,7 @@ func TestGetEnvVar(t *testing.T) {
 }
 
 func TestModifyEnvVar(t *testing.T) {
-	vars := []v1.EnvVar{
+	vars := []corev1.EnvVar{
 		{
 			Name:  "MyEnv",
 			Value: "MyValue",
@@ -62,7 +62,7 @@ func TestModifyEnvVar(t *testing.T) {
 }
 
 func TestSetEnvVar(t *testing.T) {
-	vars := []v1.EnvVar{
+	vars := []corev1.EnvVar{
 		{
 			Name:  "MyEnv",
 			Value: "MyValue",

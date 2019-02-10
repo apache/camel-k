@@ -29,7 +29,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/cancellable"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -73,7 +73,7 @@ func New(c client.Client, namespace string) Builder {
 	return &m
 }
 
-func (b *defaultBuilder) IsBuilding(object v1.ObjectMeta) bool {
+func (b *defaultBuilder) IsBuilding(object metav1.ObjectMeta) bool {
 	_, ok := b.request.Load(object.Name)
 
 	return ok

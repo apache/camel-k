@@ -22,10 +22,9 @@ import (
 	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
 	"github.com/apache/camel-k/pkg/client"
 
-	"gopkg.in/yaml.v2"
+	yaml2 "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -55,7 +54,7 @@ func JSONToYAML(src []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %v", err)
 	}
-	yamldata, err := yaml.Marshal(&jsondata)
+	yamldata, err := yaml2.Marshal(&jsondata)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
 	}
