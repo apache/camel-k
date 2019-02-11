@@ -19,6 +19,7 @@ package camel
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/apache/camel-k/pkg/client"
 )
@@ -32,5 +33,10 @@ func init() {
 
 // Catalog --
 func Catalog(ctx context.Context, client client.Client, namespace string, version string) (*RuntimeCatalog, error) {
-	return R.LoadCatalog(ctx, client, namespace, version)
+	c, err := R.LoadCatalog(ctx, client, namespace, version)
+	if c == nil && err != nil {
+		return nil, fmt.Errorf("unable to find catalog matching version requirement: %s", version)
+	}
+
+	return c, err
 }
