@@ -16,9 +16,9 @@
  */
 package org.apache.camel.k.kotlin.dsl
 
-import org.apache.camel.k.RuntimeRegistry
+import org.apache.camel.k.Runtime.Registry
 
-class RegistryConfiguration(val registry: RuntimeRegistry) {
+class RegistryConfiguration(val registry: Registry) {
     fun bind(name: String, value: Any) {
         registry.bind(name, value)
     }

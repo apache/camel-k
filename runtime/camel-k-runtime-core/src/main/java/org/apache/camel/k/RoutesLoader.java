@@ -36,5 +36,5 @@ public interface RoutesLoader {
      * @return the RouteBuilder.
      * @throws Exception
      */
-    RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception;
+    RouteBuilder load(Runtime.Registry registry, Source source) throws Exception;
 }

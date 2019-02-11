@@ -21,18 +21,19 @@ import org.apache.camel.Exchange
 import org.apache.camel.Predicate
 import org.apache.camel.Processor
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.k.RuntimeRegistry
+import org.apache.camel.k.Runtime
+
 import org.apache.camel.k.jvm.dsl.Components
 import org.apache.camel.model.RouteDefinition
 
 class IntegrationConfiguration {
-    private final RuntimeRegistry registry
+    private final Runtime.Registry registry
 
     final CamelContext context
     final Components components
     final RouteBuilder builder
 
-    IntegrationConfiguration(RuntimeRegistry registry, RouteBuilder builder) {
+    IntegrationConfiguration(Runtime.Registry registry, RouteBuilder builder) {
         this.registry = registry
         this.context = builder.getContext()
         this.components = new Components(this.context)

@@ -16,6 +16,16 @@
  */
 package org.apache.camel.k.support;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,14 +33,15 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.NoFactoryAvailableException;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.k.Constants;
-import org.apache.camel.k.RoutesLoader;
 import org.apache.camel.k.ContextCustomizer;
-import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.RoutesLoader;
+import org.apache.camel.k.Runtime;
 import org.apache.camel.k.Source;
 import org.apache.camel.spi.FactoryFinder;
 import org.apache.camel.spi.RestConfiguration;
 import org.apache.camel.util.IntrospectionSupport;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.commons.io.FilenameUtils;
 
 
 public final class RuntimeSupport {
@@ -38,7 +49,7 @@ public final class RuntimeSupport {
     private RuntimeSupport() {
     }
 
-    public static void configureContext(CamelContext context, RuntimeRegistry registry) {
+    public static void configureContext(CamelContext context, Runtime.Registry registry) {
         try {
             FactoryFinder finder = context.getFactoryFinder(Constants.CONTEXT_CUSTOMIZER_RESOURCE_PATH);
             String customizerIDs = System.getenv().getOrDefault(Constants.ENV_CAMEL_K_CUSTOMIZERS, "");
@@ -47,11 +58,15 @@ public final class RuntimeSupport {
                 PropertiesComponent component = context.getComponent("properties", PropertiesComponent.class);
                 Properties properties = component.getInitialProperties();
 
-                customizerIDs = properties.getProperty(Constants.PROPERTY_CAMEL_K_CUSTOMIZER, "");
+                if (properties != null) {
+                    customizerIDs = properties.getProperty(Constants.PROPERTY_CAMEL_K_CUSTOMIZER, "");
+                }
             }
 
-            for (String customizerId: customizerIDs.split(",", -1)) {
-                configureContext(context, customizerId, (ContextCustomizer)finder.newInstance(customizerId), registry);
+            if  (ObjectHelper.isNotEmpty(customizerIDs)) {
+                for (String customizerId : customizerIDs.split(",", -1)) {
+                    configureContext(context, customizerId, (ContextCustomizer) finder.newInstance(customizerId), registry);
+                }
             }
         } catch (NoFactoryAvailableException e) {
             // ignored
@@ -63,7 +78,7 @@ public final class RuntimeSupport {
         );
     }
 
-    public static void configureContext(CamelContext context, String customizerId, ContextCustomizer customizer, RuntimeRegistry registry) {
+    public static void configureContext(CamelContext context, String customizerId, ContextCustomizer customizer, Runtime.Registry registry) {
         bindProperties(context, customizer, "customizer." + customizerId + ".");
         customizer.apply(context, registry);
     }
@@ -85,7 +100,7 @@ public final class RuntimeSupport {
         final Properties properties = component.getInitialProperties();
 
         if (properties == null) {
-            throw new IllegalStateException("PropertiesComponent has no properties");
+            return 0;
         }
 
         return bindProperties(properties, target, prefix);
@@ -134,5 +149,66 @@ public final class RuntimeSupport {
         }
 
         return loader;
+    }
+
+    public static Properties loadProperties() {
+        final String conf = System.getenv(Constants.ENV_CAMEL_K_CONF);
+        final String confd = System.getenv(Constants.ENV_CAMEL_K_CONF_D);
+
+        return loadProperties(conf, confd);
+    }
+
+    public static Properties loadProperties(String conf, String confd) {
+        final Properties properties = new Properties();
+
+        // Main location
+        if (ObjectHelper.isNotEmpty(conf)) {
+            if (conf.startsWith(Constants.SCHEME_ENV)) {
+                try (Reader reader = URIResolver.resolveEnv(conf)) {
+                    properties.load(reader);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                try (Reader reader = Files.newBufferedReader(Paths.get(conf))) {
+                    properties.load(reader);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        // Additional locations
+        if (ObjectHelper.isNotEmpty(confd)) {
+            Path root = Paths.get(confd);
+            FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Objects.requireNonNull(file);
+                    Objects.requireNonNull(attrs);
+
+                    String path = file.toFile().getAbsolutePath();
+                    String ext = FilenameUtils.getExtension(path);
+
+                    if (Objects.equals("properties", ext)) {
+                        try (Reader reader = Files.newBufferedReader(Paths.get(path))) {
+                            properties.load(reader);
+                        }
+                    }
+
+                    return FileVisitResult.CONTINUE;
+                }
+            };
+
+            if (Files.exists(root)) {
+                try {
+                    Files.walkFileTree(root, visitor);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        return properties;
     }
 }

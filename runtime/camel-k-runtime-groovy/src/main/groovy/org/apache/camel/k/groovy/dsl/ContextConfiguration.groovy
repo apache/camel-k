@@ -17,13 +17,13 @@
 package org.apache.camel.k.groovy.dsl
 
 import org.apache.camel.CamelContext
-import org.apache.camel.k.RuntimeRegistry
+import org.apache.camel.k.Runtime
 
 class ContextConfiguration {
     private final CamelContext context
-    private final RuntimeRegistry registry
+    private final Runtime.Registry registry
 
-    ContextConfiguration(CamelContext context, RuntimeRegistry registry) {
+    ContextConfiguration(CamelContext context, Runtime.Registry registry) {
         this.context = context
         this.registry = registry
     }

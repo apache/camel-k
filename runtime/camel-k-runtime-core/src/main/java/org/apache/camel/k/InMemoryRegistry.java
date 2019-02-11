@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import org.apache.camel.NoSuchBeanException;
 
-public final class InMemoryRegistry implements RuntimeRegistry {
+public final class InMemoryRegistry implements Runtime.Registry {
     private final ConcurrentMap<String, Object> registry;
 
     public InMemoryRegistry() {
