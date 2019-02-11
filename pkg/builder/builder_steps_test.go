@@ -35,6 +35,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	assert.Nil(t, err)
 
 	ctx := Context{
+		Catalog: catalog,
 		Request: Request{
 			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
@@ -78,6 +79,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 	assert.Nil(t, err)
 
 	ctx := Context{
+		Catalog: catalog,
 		Request: Request{
 			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
@@ -132,6 +134,7 @@ func TestGenerateProjectWithRepositories(t *testing.T) {
 	assert.Nil(t, err)
 
 	ctx := Context{
+		Catalog: catalog,
 		Request: Request{
 			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{

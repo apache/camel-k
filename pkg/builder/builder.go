@@ -177,6 +177,7 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 
 	c := Context{
 		Client:    b.client,
+		Catalog:   request.Catalog,
 		Path:      builderPath,
 		Namespace: b.namespace,
 		Request:   request,
