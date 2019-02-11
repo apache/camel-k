@@ -143,6 +143,7 @@ type Result struct {
 // Context --
 type Context struct {
 	client.Client
+	Catalog           *camel.RuntimeCatalog
 	Request           Request
 	BaseImage         string
 	Image             string

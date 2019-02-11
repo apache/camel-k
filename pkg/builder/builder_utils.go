@@ -20,6 +20,7 @@ package builder
 import (
 	"encoding/xml"
 
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/version"
 
@@ -38,8 +39,17 @@ func ArtifactIDs(artifacts []v1alpha1.Artifact) []string {
 }
 
 // NewProject --
-func NewProject(ctx *Context) maven.Project {
-	return maven.Project{
+func NewProject(ctx *Context) (maven.Project, error) {
+	if ctx.Catalog == nil {
+		c, err := camel.Catalog(ctx.Request.C, ctx.Client, ctx.Namespace, ctx.Request.Platform.Build.CamelVersion)
+		if err != nil {
+			return maven.Project{}, err
+		}
+
+		ctx.Catalog = c
+	}
+
+	p := maven.Project{
 		XMLName:           xml.Name{Local: "project"},
 		XMLNs:             "http://maven.apache.org/POM/4.0.0",
 		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
@@ -54,7 +64,7 @@ func NewProject(ctx *Context) maven.Project {
 				{
 					GroupID:    "org.apache.camel",
 					ArtifactID: "camel-bom",
-					Version:    ctx.Request.Platform.Build.CamelVersion,
+					Version:    ctx.Catalog.Version,
 					Type:       "pom",
 					Scope:      "import",
 				},
@@ -62,4 +72,6 @@ func NewProject(ctx *Context) maven.Project {
 		},
 		Dependencies: make([]maven.Dependency, 0),
 	}
+
+	return p, nil
 }

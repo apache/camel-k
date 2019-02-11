@@ -41,7 +41,12 @@ import (
 
 // GenerateProject --
 func GenerateProject(ctx *Context) error {
-	ctx.Project = NewProject(ctx)
+	p, err := NewProject(ctx)
+	if err != nil {
+		return err
+	}
+
+	ctx.Project = p
 
 	//
 	// Repositories
