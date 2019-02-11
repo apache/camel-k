@@ -26,5 +26,5 @@ public interface ContextCustomizer {
      * @param camelContext the camel context to customize.
      * @param registry the runtime registry.
      */
-    void apply(CamelContext camelContext, RuntimeRegistry registry);
+    void apply(CamelContext camelContext, Runtime.Registry registry);
 }

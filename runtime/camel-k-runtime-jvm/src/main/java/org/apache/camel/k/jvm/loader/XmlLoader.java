@@ -23,7 +23,7 @@ import javax.xml.bind.UnmarshalException;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.k.RoutesLoader;
-import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.Runtime;
 import org.apache.camel.k.Source;
 import org.apache.camel.k.support.URIResolver;
 import org.apache.camel.model.RoutesDefinition;
@@ -40,7 +40,7 @@ public class XmlLoader implements RoutesLoader {
     }
 
     @Override
-    public RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
+    public RouteBuilder load(Runtime.Registry registry, Source source) throws Exception {
         return new RouteBuilder() {
             @Override
             public void configure() throws Exception {

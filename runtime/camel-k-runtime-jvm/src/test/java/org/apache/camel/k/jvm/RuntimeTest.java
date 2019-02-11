@@ -22,6 +22,11 @@ import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
+import org.apache.camel.k.Runtime;
+import org.apache.camel.k.listener.ContextConfigurer;
+import org.apache.camel.k.listener.ContextLifecycleConfigurer;
+import org.apache.camel.k.listener.RoutesConfigurer;
+import org.apache.camel.k.support.PlatformStreamHandler;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.ResourceHelper;
 import org.apache.commons.io.IOUtils;
@@ -33,21 +38,24 @@ public class RuntimeTest {
 
     @Test
     void testLoadMultipleRoutes() throws Exception {
-        Runtime runtime = new Runtime();
-        runtime.load(new String[]{
-            "classpath:r1.js",
-            "classpath:r2.mytype?language=js",
-        });
+        ApplicationRuntime runtime = new ApplicationRuntime();
 
         try {
-            runtime.start();
+            runtime.addListener(new ContextConfigurer());
+            runtime.addListener(new ContextLifecycleConfigurer());
+            runtime.addListener(RoutesConfigurer.forRoutes("classpath:r1.js", "classpath:r2.mytype?language=js"));
+            runtime.addListener(Runtime.Phase.Started, r -> {
+                CamelContext context = r.getContext();
+                List<Route> routes = context.getRoutes();
 
-            CamelContext context = runtime.getCamelContext();
-            List<Route> routes = context.getRoutes();
+                assertThat(routes).hasSize(2);
+                assertThat(routes).anyMatch(p -> ObjectHelper.equal("r1", p.getId()));
+                assertThat(routes).anyMatch(p -> ObjectHelper.equal("r2", p.getId()));
 
-            assertThat(routes).hasSize(2);
-            assertThat(routes).anyMatch(p -> ObjectHelper.equal("r1", p.getId()));
-            assertThat(routes).anyMatch(p -> ObjectHelper.equal("r2", p.getId()));
+                runtime.stop();
+            });
+
+            runtime.run();
         } finally {
             runtime.stop();
         }
@@ -56,20 +64,21 @@ public class RuntimeTest {
 
     @Test
     void testLoadRouteAndRest() throws Exception {
-        Runtime runtime = new Runtime();
-        runtime.addMainListener(new Application.RoutesDumper());
-        runtime.load(new String[]{
-            "classpath:routes.xml",
-            "classpath:rests.xml",
-        });
-
+        ApplicationRuntime runtime = new ApplicationRuntime();
         try {
-            runtime.start();
+            runtime.addListener(new ContextConfigurer());
+            runtime.addListener(new ContextLifecycleConfigurer());
+            runtime.addListener(RoutesConfigurer.forRoutes("classpath:routes.xml", "classpath:rests.xml"));
+            runtime.addListener(Runtime.Phase.Started, r -> {
+                CamelContext context = r.getContext();
 
-            CamelContext context = runtime.getCamelContext();
+                assertThat(context.getRouteDefinitions()).isNotEmpty();
+                assertThat(context.getRestDefinitions()).isNotEmpty();
 
-            assertThat(context.getRouteDefinitions()).isNotEmpty();
-            assertThat(context.getRestDefinitions()).isNotEmpty();
+                runtime.stop();
+            });
+
+            runtime.run();
         } finally {
             runtime.stop();
         }
@@ -78,9 +87,9 @@ public class RuntimeTest {
 
     @Test
     void testLoadResource() throws Exception {
-        ApplicationSupport.configureStreamHandler();
+        PlatformStreamHandler.configure();
 
-        CamelContext context = new Runtime().getCamelContext();
+        CamelContext context = new ApplicationRuntime().getContext();
 
         try (InputStream is = ResourceHelper.resolveMandatoryResourceAsInputStream(context, "platform:my-resource.txt")) {
             String content = IOUtils.toString(is, Charset.defaultCharset());

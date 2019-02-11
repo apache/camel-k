@@ -16,23 +16,12 @@
  */
 package org.apache.camel.k.jvm;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.Component;
-import org.apache.camel.RuntimeCamelException;
-import org.apache.camel.k.Constants;
-import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.listener.ContextConfigurer;
+import org.apache.camel.k.listener.ContextLifecycleConfigurer;
+import org.apache.camel.k.listener.RoutesConfigurer;
+import org.apache.camel.k.listener.RoutesDumper;
+import org.apache.camel.k.support.PlatformStreamHandler;
 import org.apache.camel.k.support.RuntimeSupport;
-import org.apache.camel.main.MainListenerSupport;
-import org.apache.camel.main.MainSupport;
-import org.apache.camel.model.ModelHelper;
-import org.apache.camel.model.RoutesDefinition;
-import org.apache.camel.model.rest.RestsDefinition;
-import org.apache.camel.support.LifecycleStrategySupport;
-import org.apache.camel.util.ObjectHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.JAXBException;
 
 public class Application {
     static {
@@ -51,123 +40,19 @@ public class Application {
         // from the platform i.e. in knative, resources are provided through
         // env var as it is not possible to mount config maps / secrets.
         //
-        ApplicationSupport.configureStreamHandler();
+        // TODO: we should remove as soon as we get a knative version that
+        //       includes https://github.com/knative/serving/pull/3061
+        //
+        PlatformStreamHandler.configure();
     }
-
-    // *******************************
-    //
-    // Main
-    //
-    // *******************************
 
     public static void main(String[] args) throws Exception {
-        final String routes = System.getenv(Constants.ENV_CAMEL_K_ROUTES);
-
-        if (ObjectHelper.isEmpty(routes)) {
-            throw new IllegalStateException("No valid routes found in " + Constants.ENV_CAMEL_K_ROUTES + " environment variable");
-        }
-
-        Runtime runtime = new Runtime();
-        runtime.setProperties(ApplicationSupport.loadProperties());
-        runtime.addMainListener(new CamelkJvmRuntimeConfigurer(runtime, routes.split(",", -1)));
-        runtime.addMainListener(new RoutesDumper());
-
+        ApplicationRuntime runtime = new ApplicationRuntime();
+        runtime.setProperties(RuntimeSupport.loadProperties());
+        runtime.addListener(new ContextConfigurer());
+        runtime.addListener(new ContextLifecycleConfigurer());
+        runtime.addListener(new RoutesConfigurer());
+        runtime.addListener(new RoutesDumper());
         runtime.run();
-    }
-
-    // *******************************
-    //
-    // Listeners
-    //
-    // *******************************
-
-    static class CamelkJvmRuntimeConfigurer extends MainListenerSupport {
-
-        private RuntimeRegistry registry;
-        private Runtime runtime;
-        private String[] routes;
-
-        public CamelkJvmRuntimeConfigurer(Runtime runtime, String[] routes){
-            this.runtime = runtime;
-            this.registry = runtime.getRegistry();
-            this.routes = routes;
-        }
-
-        @Override
-        public void configure(CamelContext context) {
-            //
-            // Configure the camel context using properties in the form:
-            //
-            //     camel.context.${name} = ${value}
-            //
-            RuntimeSupport.bindProperties(context, context, "camel.context.");
-
-            //
-            // Configure the camel rest definition using properties in the form:
-            //
-            //     camel.rest.${name} = ${value}
-            //
-            RuntimeSupport.configureRest(context);
-
-            //
-            // Programmatically configure the camel context.
-            //
-            // This is useful to configure services such as the ClusterService,
-            // RouteController, etc
-            //
-            RuntimeSupport.configureContext(context, registry);
-
-            //
-            // Configure components upon creation
-            //
-            context.addLifecycleStrategy(new LifecycleStrategySupport() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public void onComponentAdd(String name, Component component) {
-                    // The prefix that identifies component properties is the
-                    // same one used by camel-spring-boot to configure components
-                    // using starters:
-                    //
-                    //     camel.component.${scheme}.${name} = ${value}
-                    //
-                    RuntimeSupport.bindProperties(context, component, "camel.component." + name + ".");
-                }
-            });
-
-            //
-            // Load routes
-            //
-            try {
-                runtime.load(routes);
-            } catch (Exception e) {
-                throw new RuntimeCamelException("CamelkJvmRuntimeConfigurer has failed to load routes: "+routes);
-            }
-        }
-    }
-
-    static class RoutesDumper extends MainListenerSupport {
-        static final Logger LOGGER = LoggerFactory.getLogger(RoutesDumper.class);
-
-        @Override
-        public void afterStart(MainSupport main) {
-            CamelContext context = main.getCamelContexts().get(0);
-
-            RoutesDefinition routes = new RoutesDefinition();
-            routes.setRoutes(context.getRouteDefinitions());
-
-            RestsDefinition rests = new RestsDefinition();
-            rests.setRests(context.getRestDefinitions());
-
-            try {
-                if (LOGGER.isDebugEnabled() && !routes.getRoutes().isEmpty()) {
-                    LOGGER.debug("Routes: \n{}", ModelHelper.dumpModelAsXml(context, routes));
-                }
-                if (LOGGER.isDebugEnabled() && !rests.getRests().isEmpty()) {
-                    LOGGER.debug("Rests: \n{}", ModelHelper.dumpModelAsXml(context, rests));
-                }
-            } catch (JAXBException e) {
-                throw new IllegalArgumentException(e);
-            }
-        }
     }
 }

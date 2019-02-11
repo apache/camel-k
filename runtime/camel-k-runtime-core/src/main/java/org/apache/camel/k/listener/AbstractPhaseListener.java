@@ -14,29 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.k.jvm;
+package org.apache.camel.k.listener;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.main.MainListener;
-import org.apache.camel.main.MainListenerSupport;
-import org.apache.camel.main.MainSupport;
-import org.apache.camel.util.function.ThrowingBiConsumer;
+import org.apache.camel.k.Runtime;
 
-public final class RuntimeTestSupport {
-    private RuntimeTestSupport() {
+public abstract class AbstractPhaseListener implements Runtime.Listener {
+    private final Runtime.Phase phase;
+
+    protected AbstractPhaseListener(Runtime.Phase phase) {
+        this.phase = phase;
     }
 
-    public static MainListener afterStart(ThrowingBiConsumer<MainSupport, CamelContext, Exception> consumer) {
-        return new MainListenerSupport() {
-            @Override
-            public void afterStart(MainSupport main) {
-                try {
-                    consumer.accept(main, main.getCamelContexts().get(0));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
+    @Override
+    public void accept(Runtime.Phase phase, Runtime runtime) {
+        if (this.phase == phase) {
+            accept(runtime);
+        }
     }
 
+    protected abstract void accept(Runtime runtime);
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.RoutesLoader;
-import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.Runtime;
 import org.apache.camel.k.Source;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,7 +33,7 @@ public class JavaClassLoader implements RoutesLoader {
     }
 
     @Override
-    public RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
+    public RouteBuilder load(Runtime.Registry registry, Source source) throws Exception {
         String path = source.getLocation();
         path = StringUtils.removeStart(path, Constants.SCHEME_CLASSPATH);
         path = StringUtils.removeEnd(path, ".class");

@@ -17,9 +17,9 @@
 package org.apache.camel.k.kotlin.dsl
 
 import org.apache.camel.CamelContext
-import org.apache.camel.k.RuntimeRegistry
+import org.apache.camel.k.Runtime.Registry
 
-class ContextConfiguration (val registry: RuntimeRegistry, val context: CamelContext) {
+class ContextConfiguration (val registry: Registry, val context: CamelContext) {
 
     fun registry(block: RegistryConfiguration.() -> Unit): RegistryConfiguration {
         val delegate = RegistryConfiguration(registry)

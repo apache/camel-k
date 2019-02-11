@@ -18,18 +18,16 @@ package org.apache.camel.k.kotlin
 
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.k.RoutesLoader
-import org.apache.camel.k.RuntimeRegistry
+import org.apache.camel.k.Runtime.Registry
 import org.apache.camel.k.Source
 import org.apache.camel.k.kotlin.dsl.IntegrationConfiguration
 import org.apache.camel.k.support.URIResolver
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.io.InputStreamReader
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.toScriptSource
 import kotlin.script.experimental.jvm.dependenciesFromClassloader
-import kotlin.script.experimental.jvm.javaHome
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptEvaluator
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
@@ -45,7 +43,7 @@ class KotlinRoutesLoader : RoutesLoader {
     }
 
     @Throws(Exception::class)
-    override fun load(registry: RuntimeRegistry, source: Source): RouteBuilder? {
+    override fun load(registry: Registry, source: Source): RouteBuilder? {
         return object : RouteBuilder() {
             @Throws(Exception::class)
             override fun configure() {

@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    org.apache.camel.k.spring.boot.ApplicationAutoConfiguration

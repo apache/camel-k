@@ -19,31 +19,36 @@ package org.apache.camel.k.jvm;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.component.seda.SedaComponent;
 import org.apache.camel.k.Constants;
 import org.apache.camel.k.ContextCustomizer;
+import org.apache.camel.k.Runtime;
+import org.apache.camel.k.listener.ContextConfigurer;
+import org.apache.camel.k.listener.ContextLifecycleConfigurer;
+import org.apache.camel.k.support.RuntimeSupport;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.camel.k.jvm.RuntimeTestSupport.afterStart;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PropertiesTest {
 
     @Test
     public void testLoadProperties() throws Exception {
-        Properties properties = ApplicationSupport.loadProperties("src/test/resources/conf.properties", "src/test/resources/conf.d");
+        Properties properties = RuntimeSupport.loadProperties("src/test/resources/conf.properties", "src/test/resources/conf.d");
 
-        Runtime runtime = new Runtime();
+        ApplicationRuntime runtime = new ApplicationRuntime();
         runtime.setProperties(properties);
-        runtime.setDuration(5);
-        runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
-        runtime.addMainListener(afterStart((main, context) -> {
+        runtime.addListener(new ContextConfigurer());
+        runtime.addListener(new ContextLifecycleConfigurer());
+        runtime.addListener(Runtime.Phase.Started, r -> {
+            CamelContext context = r.getContext();
             assertThat(context.resolvePropertyPlaceholders("{{root.key}}")).isEqualTo("root.value");
             assertThat(context.resolvePropertyPlaceholders("{{001.key}}")).isEqualTo("001.value");
             assertThat(context.resolvePropertyPlaceholders("{{002.key}}")).isEqualTo("002.value");
             assertThat(context.resolvePropertyPlaceholders("{{a.key}}")).isEqualTo("a.002");
-            main.stop();
-        }));
+            runtime.stop();
+        });
 
         runtime.run();
     }
@@ -53,16 +58,17 @@ public class PropertiesTest {
         System.setProperty("my.property", "my.value");
 
         try {
-            Runtime runtime = new Runtime();
+            ApplicationRuntime runtime = new ApplicationRuntime();
             runtime.setProperties(System.getProperties());
-            runtime.setDuration(5);
-            runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
-            runtime.addMainListener(afterStart((main, context) -> {
+            runtime.addListener(new ContextConfigurer());
+            runtime.addListener(new ContextLifecycleConfigurer());
+            runtime.addListener(Runtime.Phase.Started, r -> {
+                CamelContext context = r.getContext();
                 String value = context.resolvePropertyPlaceholders("{{my.property}}");
 
                 assertThat(value).isEqualTo("my.value");
-                main.stop();
-            }));
+                runtime.stop();
+            });
 
             runtime.run();
         } finally {
@@ -79,16 +85,17 @@ public class PropertiesTest {
         System.setProperty("camel.component.my-seda.queueSize", Integer.toString(queueSize2));
 
         try {
-            Runtime runtime = new Runtime();
+            ApplicationRuntime runtime = new ApplicationRuntime();
             runtime.setProperties(System.getProperties());
-            runtime.setDuration(5);
             runtime.getRegistry().bind("my-seda", new SedaComponent());
-            runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
-            runtime.addMainListener(afterStart((main, context) -> {
+            runtime.addListener(new ContextConfigurer());
+            runtime.addListener(new ContextLifecycleConfigurer());
+            runtime.addListener(Runtime.Phase.Started, r -> {
+                CamelContext context = r.getContext();
                 assertThat(context.getComponent("seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize1);
                 assertThat(context.getComponent("my-seda", true)).hasFieldOrPropertyWithValue("queueSize", queueSize2);
-                main.stop();
-            }));
+                runtime.stop();
+            });
 
             runtime.run();
         } finally {
@@ -103,15 +110,16 @@ public class PropertiesTest {
         System.setProperty("camel.context.loadTypeConverters", "false");
 
         try {
-            Runtime runtime = new Runtime();
+            ApplicationRuntime runtime = new ApplicationRuntime();
             runtime.setProperties(System.getProperties());
-            runtime.setDuration(5);
-            runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
-            runtime.addMainListener(afterStart((main, context) -> {
+            runtime.addListener(new ContextConfigurer());
+            runtime.addListener(new ContextLifecycleConfigurer());
+            runtime.addListener(Runtime.Phase.Started, r -> {
+                CamelContext context = r.getContext();
                 assertThat(context.isMessageHistory()).isFalse();
                 assertThat(context.isLoadTypeConverters()).isFalse();
-                main.stop();
-            }));
+                runtime.stop();
+            });
 
             runtime.run();
         } finally {
@@ -125,34 +133,36 @@ public class PropertiesTest {
         System.setProperty(Constants.PROPERTY_CAMEL_K_CUSTOMIZER, "test");
         System.setProperty("customizer.test.messageHistory", "false");
 
-        Runtime runtime = new Runtime();
+        ApplicationRuntime runtime = new ApplicationRuntime();
         runtime.setProperties(System.getProperties());
-        runtime.setDuration(5);
-        runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
-        runtime.addMainListener(afterStart((main, context) -> {
+        runtime.addListener(new ContextConfigurer());
+        runtime.addListener(new ContextLifecycleConfigurer());
+        runtime.addListener(Runtime.Phase.Started, r -> {
+            CamelContext context = r.getContext();
             assertThat(context.isMessageHistory()).isFalse();
             assertThat(context.isLoadTypeConverters()).isFalse();
-            main.stop();
-        }));
+            runtime.stop();
+        });
 
         runtime.run();
     }
 
     @Test
     public void testContextCustomizerFromRegistry() throws Exception {
-        Runtime runtime = new Runtime();
+        ApplicationRuntime runtime = new ApplicationRuntime();
         runtime.setProperties(System.getProperties());
-        runtime.setDuration(5);
+        runtime.addListener(new ContextConfigurer());
+        runtime.addListener(new ContextLifecycleConfigurer());
         runtime.getRegistry().bind("c1", (ContextCustomizer) (camelContext, registry) -> {
             camelContext.setMessageHistory(false);
             camelContext.setLoadTypeConverters(false);
         });
-        runtime.addMainListener(new Application.CamelkJvmRuntimeConfigurer(runtime, new String[0]));
-        runtime.addMainListener(afterStart((main, context) -> {
+        runtime.addListener(Runtime.Phase.Started, r -> {
+            CamelContext context = r.getContext();
             assertThat(context.isMessageHistory()).isFalse();
             assertThat(context.isLoadTypeConverters()).isFalse();
-            main.stop();
-        }));
+            runtime.stop();
+        });
 
         runtime.run();
     }
