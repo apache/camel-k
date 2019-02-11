@@ -60,6 +60,6 @@ func FindBestMatch(constraint string, catalogs []v1alpha1.CamelCatalog) (*Runtim
 		}
 	}
 
-	return nil, fmt.Errorf("unable to find default catalog from embedded resources")
+	return nil, nil
 
 }
