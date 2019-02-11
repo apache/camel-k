@@ -18,7 +18,8 @@ package org.apache.camel.k.groovy
 
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.k.RoutesLoader
-import org.apache.camel.k.RuntimeRegistry
+import org.apache.camel.k.Runtime
+
 import org.apache.camel.k.Source
 import org.apache.camel.k.groovy.dsl.IntegrationConfiguration
 import org.apache.camel.k.support.URIResolver
@@ -31,7 +32,7 @@ class GroovyRoutesLoader implements RoutesLoader {
     }
 
     @Override
-    RouteBuilder load(RuntimeRegistry registry, Source source) throws Exception {
+    RouteBuilder load(Runtime.Registry registry, Source source) throws Exception {
         return new RouteBuilder() {
             @Override
             void configure() throws Exception {

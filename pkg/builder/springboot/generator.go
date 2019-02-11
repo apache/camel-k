@@ -94,7 +94,7 @@ func GenerateProject(ctx *builder.Context) error {
 			ctx.Project.AddDependency(maven.Dependency{
 				GroupID:    "org.apache.camel",
 				ArtifactID: artifactID + "-starter",
-				Version:    ctx.Request.Platform.Build.CamelVersion,
+				Version:    ctx.Catalog.Version,
 				Exclusions: &[]maven.Exclusion{
 					{
 						GroupID:    "com.sun.xml.bind",

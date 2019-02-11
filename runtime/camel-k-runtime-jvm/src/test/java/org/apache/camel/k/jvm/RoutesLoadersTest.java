@@ -23,7 +23,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.k.InMemoryRegistry;
 import org.apache.camel.k.RoutesLoader;
-import org.apache.camel.k.RuntimeRegistry;
+import org.apache.camel.k.Runtime;
 import org.apache.camel.k.Source;
 import org.apache.camel.k.jvm.loader.JavaClassLoader;
 import org.apache.camel.k.jvm.loader.JavaScriptLoader;
@@ -44,7 +44,7 @@ public class RoutesLoadersTest {
     @Test
     public void testLoaderFromRegistry() throws Exception {
         RoutesLoader myLoader = new JavaClassLoader();
-        RuntimeRegistry registry = new InMemoryRegistry();
+        Runtime.Registry registry = new InMemoryRegistry();
         registry.bind("my-loader", myLoader);
 
         Source source = Source.create("classpath:" + MyRoutes.class.getName() + ".class");
