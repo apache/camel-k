@@ -51,7 +51,7 @@ for the `route` trait to work.
 
 The following is a list of common traits that can be configured by the end users:
 
-[options="header",cols="1m,2,3a"]
+[options="header",cols="1m,,3a"]
 |=======================
 | Trait      | Profiles 				| Description
 
@@ -226,8 +226,25 @@ It's disabled by default.
 
 There are also platform traits that **normally should not be configured** by the end user. So change them **only if you know what you're doing**.
 
-[options="header",cols="m,,"]
+[options="header",cols="1m,2,3a"]
 |=======================
 | Trait      | Profiles 				| Description
-| owner      | Kubernetes, OpenShift	| Makes sure that every resource created by the traits belongs to the integration custom resource (so they are deleted when the integration is deleted).
+| owner
+| All
+| Ensures that all created resources belong to the integration being created (so they are deleted when the integration is deleted) and transfers annotations and labels on the integration onto these owned resources.
+  +
+  +
+  It's enabled by default.
+
+[cols="m,"]
+!===
+
+! owner.target-annotations
+! The annotations to be transfered (A comma-separared list of label keys)
+
+! owner.target-labels
+! The labels to be transfered (A comma-separared list of label keys)
+
+!===
+
 |=======================

@@ -18,13 +18,19 @@ limitations under the License.
 package trait
 
 import (
+	"strings"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ownerTrait ensures that all created resources belong to the integration being created
+// and transfers annotations and labels on the integration onto these owned resources being created
 type ownerTrait struct {
 	BaseTrait `property:",squash"`
+
+	TargetAnnotations string `property:"target-annotations"`
+	TargetLabels      string `property:"target-labels"`
 }
 
 func newOwnerTrait() *ownerTrait {
@@ -41,10 +47,26 @@ func (t *ownerTrait) Configure(e *Environment) (bool, error) {
 	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 }
 
-func (*ownerTrait) Apply(e *Environment) error {
+func (t *ownerTrait) Apply(e *Environment) error {
 	controller := true
 	blockOwnerDeletion := true
+
+	targetLabels := map[string]string{}
+	for _, k := range strings.Split(t.TargetLabels, ",") {
+		if v, ok := e.Integration.Labels[k]; ok {
+			targetLabels[k] = v
+		}
+	}
+
+	targetAnnotations := map[string]string{}
+	for _, k := range strings.Split(t.TargetAnnotations, ",") {
+		if v, ok := e.Integration.Annotations[k]; ok {
+			targetAnnotations[k] = v
+		}
+	}
+
 	e.Resources.VisitMetaObject(func(res metav1.Object) {
+		// Add owner reference
 		references := []metav1.OwnerReference{
 			{
 				APIVersion:         e.Integration.APIVersion,
@@ -56,6 +78,24 @@ func (*ownerTrait) Apply(e *Environment) error {
 			},
 		}
 		res.SetOwnerReferences(references)
+
+		// Transfer annotations
+		annotations := res.GetAnnotations()
+		for k, v := range targetAnnotations {
+			if _, ok := annotations[k]; !ok {
+				annotations[k] = v
+			}
+		}
+		res.SetAnnotations(annotations)
+
+		// Transfer labels
+		labels := res.GetLabels()
+		for k, v := range targetLabels {
+			if _, ok := labels[k]; !ok {
+				labels[k] = v
+			}
+		}
+		res.SetLabels(labels)
 	})
 	return nil
 }
