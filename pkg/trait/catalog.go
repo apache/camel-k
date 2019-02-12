@@ -40,6 +40,7 @@ type Catalog struct {
 	tRoute          Trait
 	tIngress        Trait
 	tJolokia        Trait
+	tLabels         Trait
 	tPrometheus     Trait
 	tOwner          Trait
 	tImages         Trait
@@ -65,6 +66,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tRoute:          newRouteTrait(),
 		tIngress:        newIngressTrait(),
 		tJolokia:        newJolokiaTrait(),
+		tLabels:         newLabelsTrait(),
 		tPrometheus:     newPrometheusTrait(),
 		tOwner:          newOwnerTrait(),
 		tImages:         newImagesTrait(),
@@ -98,6 +100,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tRoute,
 		c.tIngress,
 		c.tJolokia,
+		c.tLabels,
 		c.tPrometheus,
 		c.tOwner,
 		c.tImages,
@@ -129,6 +132,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tService,
 			c.tRoute,
 			c.tOwner,
+			c.tLabels,
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
@@ -146,6 +150,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tService,
 			c.tIngress,
 			c.tOwner,
+			c.tLabels,
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
@@ -162,6 +167,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tKnativeService,
 			c.tIstio,
 			c.tOwner,
+			c.tLabels,
 		}
 	}
 

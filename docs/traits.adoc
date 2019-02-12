@@ -196,6 +196,21 @@ The following is a list of common traits that can be configured by the end users
 
 !===
 
+| labels
+| All
+| Transfers labels on the integration onto the owned resources being created.
+  +
+  +
+  It's enabled by default.
+
+[cols="m,"]
+!===
+
+! labels.target-labels
+! The labels to be transfered (A comma-separared list of label keys)
+
+!===
+
 | prometheus
 | Kubernetes, OpenShift
 | Exposes the integration with a `Service` and a `ServiceMonitor` resources so that the Prometheus endpoint can be scraped.
