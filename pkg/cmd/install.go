@@ -19,6 +19,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/apis"
+	"github.com/apache/camel-k/pkg/platform"
+	"go.uber.org/multierr"
+	"k8s.io/apimachinery/pkg/runtime"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -40,6 +45,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:   "install",
 		Short: "Install Camel K on a Kubernetes cluster",
 		Long:  `Installs Camel K on a Kubernetes or OpenShift cluster.`,
+		PreRunE: impl.validate,
 		RunE:  impl.install,
 	}
 
@@ -230,3 +236,53 @@ func (o *installCmdOptions) waitForPlatformReady(platform *v1alpha1.IntegrationP
 
 	return watch.HandlePlatformStateChanges(o.Context, platform, handler)
 }
+
+func (o *installCmdOptions) validate(cmd *cobra.Command, args []string) error {
+	var result error
+
+	// Let's register only our own APIs
+	schema := runtime.NewScheme()
+	if err := apis.AddToScheme(schema); err != nil {
+		return err
+	}
+
+	if o.contexts == nil {
+		return nil
+	}
+	for _, context := range o.contexts {
+		err := errorIfContextIsNotAvailable(schema, context, len(o.contexts))
+		result = multierr.Append(result, err)
+	}
+	return result
+}
+
+func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string, nrContexts int) error {
+
+	if context == platform.NoContext {
+		if nrContexts > 1 {
+			return errors.New("You can only use one --context argument when selecting 'none'")
+		}
+
+		// Indicates that nothing should be installed
+		return nil
+	}
+
+	for _, resource := range deploy.Resources {
+		resource, err := kubernetes.LoadResourceFromYaml(schema, resource)
+		if err != nil {
+			// Not one of our registered schemas
+			continue
+		}
+		kind := resource.GetObjectKind().GroupVersionKind()
+		if kind.Kind != "IntegrationContext" {
+			continue
+		}
+		integrationContext := resource.(*v1alpha1.IntegrationContext)
+		if integrationContext.Name == context {
+			return nil
+		}
+	}
+	return errors.Errorf("Unknown context '%s'", context)
+}
+
+

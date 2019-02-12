@@ -4178,6 +4178,29 @@ spec:
   version: 2.23.1
 
 `
+	Resources["cr-example.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: Integration
+metadata:
+  name: example
+spec:
+  source:
+    content: |-
+      // This is Camel K Groovy example route
+
+      rnd = new Random()
+
+      from('timer:groovy?period=1s')
+          .routeId('groovy')
+          .setBody()
+              .constant('Hello Camel K!')
+          .process {
+              it.in.headers['RandomValue'] = rnd.nextInt()
+          }
+          .to('log:info?showHeaders=true')
+    name: routes.groovy
+`
 	Resources["crd-camel-catalog.yaml"] =
 		`
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -4296,29 +4319,6 @@ spec:
       description: The IntegrationContext to use
       JSONPath: .status.context
 
-`
-	Resources["cr-example.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: Integration
-metadata:
-  name: example
-spec:
-  source:
-    content: |-
-      // This is Camel K Groovy example route
-
-      rnd = new Random()
-
-      from('timer:groovy?period=1s')
-          .routeId('groovy')
-          .setBody()
-              .constant('Hello Camel K!')
-          .process {
-              it.in.headers['RandomValue'] = rnd.nextInt()
-          }
-          .to('log:info?showHeaders=true')
-    name: routes.groovy
 `
 	Resources["operator-deployment-kubernetes.yaml"] =
 		`
