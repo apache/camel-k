@@ -75,7 +75,7 @@ func (s *Scaffold) configure(cfg *input.Config) {
 // Execute executes scaffolding the Files
 func (s *Scaffold) Execute(cfg *input.Config, files ...input.File) error {
 	if s.GetWriter == nil {
-		s.GetWriter = (&fileutil.FileWriter{}).WriteCloser
+		s.GetWriter = fileutil.NewFileWriter().WriteCloser
 	}
 
 	// Configure s using common fields from cfg.
@@ -117,18 +117,12 @@ func (s *Scaffold) doFile(e input.File) error {
 		}
 	}
 
-	return s.doTemplate(i, e, absFilePath)
+	return s.doRender(i, e, absFilePath)
 }
 
 const goFileExt = ".go"
 
-// doTemplate executes the template at absPath for a file using the input
-func (s *Scaffold) doTemplate(i input.Input, e input.File, absPath string) error {
-	temp, err := newTemplate(e).Parse(i.TemplateBody)
-	if err != nil {
-		return err
-	}
-
+func (s *Scaffold) doRender(i input.Input, e input.File, absPath string) error {
 	var mode os.FileMode = fileutil.DefaultFileMode
 	if i.IsExec {
 		mode = fileutil.DefaultExecFileMode
@@ -145,31 +139,54 @@ func (s *Scaffold) doTemplate(i input.Input, e input.File, absPath string) error
 		}()
 	}
 
-	out := &bytes.Buffer{}
-	err = temp.Execute(out, e)
-	if err != nil {
-		return err
+	var b []byte
+	if c, ok := e.(CustomRenderer); ok {
+		// CustomRenderers have a non-template method of file rendering.
+		if b, err = c.CustomRender(); err != nil {
+			return err
+		}
+	} else {
+		// All other files are rendered via their templates.
+		temp, err := newTemplate(i)
+		if err != nil {
+			return err
+		}
+
+		out := &bytes.Buffer{}
+		if err = temp.Execute(out, e); err != nil {
+			return err
+		}
+		b = out.Bytes()
 	}
-	b := out.Bytes()
 
 	// gofmt the imports
 	if filepath.Ext(absPath) == goFileExt {
 		b, err = imports.Process(absPath, b, nil)
 		if err != nil {
-			fmt.Printf("%s\n", out.Bytes())
 			return err
 		}
 	}
 
+	// Files being overwritten must be trucated to len 0 so no old bytes remain.
+	if _, err = os.Stat(absPath); err == nil && i.IfExistsAction == input.Overwrite {
+		if err = os.Truncate(absPath, 0); err != nil {
+			return err
+		}
+	}
 	_, err = f.Write(b)
 	log.Infoln("Create", i.Path)
 	return err
 }
 
-// newTemplate a new template with common functions
-func newTemplate(t input.File) *template.Template {
-	return template.New(fmt.Sprintf("%T", t)).Funcs(template.FuncMap{
+// newTemplate returns a new template named by i.Path with common functions and
+// the input's TemplateFuncs.
+func newTemplate(i input.Input) (*template.Template, error) {
+	t := template.New(i.Path).Funcs(template.FuncMap{
 		"title": strings.Title,
 		"lower": strings.ToLower,
 	})
+	if len(i.TemplateFuncs) > 0 {
+		t.Funcs(i.TemplateFuncs)
+	}
+	return t.Parse(i.TemplateBody)
 }
