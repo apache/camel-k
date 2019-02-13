@@ -30,7 +30,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/ansible/runner"
 	"github.com/operator-framework/operator-sdk/pkg/ansible/runner/eventapi"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -107,7 +107,7 @@ func (r *AnsibleOperatorReconciler) Reconcile(request reconcile.Request) (reconc
 	spec := u.Object["spec"]
 	_, ok := spec.(map[string]interface{})
 	if !ok {
-		logger.V(1).Info("spec was not found")
+		logger.V(1).Info("Spec was not found")
 		u.Object["spec"] = map[string]interface{}{}
 		err = r.Client.Update(context.TODO(), u)
 		if err != nil {
@@ -133,7 +133,11 @@ func (r *AnsibleOperatorReconciler) Reconcile(request reconcile.Request) (reconc
 	if err != nil {
 		return reconcileResult, err
 	}
-	defer os.Remove(kc.Name())
+	defer func() {
+		if err := os.Remove(kc.Name()); err != nil {
+			logger.Error(err, "Failed to remove generated kubeconfig file")
+		}
+	}()
 	result, err := r.Runner.Run(ident, u, kc.Name())
 	if err != nil {
 		return reconcileResult, err
@@ -165,7 +169,7 @@ func (r *AnsibleOperatorReconciler) Reconcile(request reconcile.Request) (reconc
 		eventErr := errors.New("did not receive playbook_on_stats event")
 		stdout, err := result.Stdout()
 		if err != nil {
-			logger.Error(err, "failed to get ansible-runner stdout")
+			logger.Error(err, "Failed to get ansible-runner stdout")
 			return reconcileResult, err
 		}
 		logger.Error(eventErr, stdout)
@@ -187,12 +191,11 @@ func (r *AnsibleOperatorReconciler) Reconcile(request reconcile.Request) (reconc
 		if err != nil {
 			return reconcileResult, err
 		}
-		return reconcileResult, nil
 	}
 	if r.ManageStatus {
 		err = r.markDone(u, request.NamespacedName, statusEvent, failureMessages)
 		if err != nil {
-			logger.Error(err, "failed to mark status done")
+			logger.Error(err, "Failed to mark status done")
 		}
 	}
 	return reconcileResult, err
@@ -210,25 +213,26 @@ func (r *AnsibleOperatorReconciler) markRunning(u *unstructured.Unstructured, na
 
 	// If there is no current status add that we are working on this resource.
 	errCond := ansiblestatus.GetCondition(crStatus, ansiblestatus.FailureConditionType)
-	succCond := ansiblestatus.GetCondition(crStatus, ansiblestatus.RunningConditionType)
 
+	if errCond != nil {
+		errCond.Status = v1.ConditionFalse
+		ansiblestatus.SetCondition(&crStatus, *errCond)
+	}
 	// If the condition is currently running, making sure that the values are correct.
 	// If they are the same a no-op, if they are different then it is a good thing we
 	// are updating it.
-	if (errCond == nil && succCond == nil) || (succCond != nil && succCond.Reason != ansiblestatus.SuccessfulReason) {
-		c := ansiblestatus.NewCondition(
-			ansiblestatus.RunningConditionType,
-			v1.ConditionTrue,
-			nil,
-			ansiblestatus.RunningReason,
-			ansiblestatus.RunningMessage,
-		)
-		ansiblestatus.SetCondition(&crStatus, *c)
-		u.Object["status"] = crStatus.GetJSONMap()
-		err := r.Client.Status().Update(context.TODO(), u)
-		if err != nil {
-			return err
-		}
+	c := ansiblestatus.NewCondition(
+		ansiblestatus.RunningConditionType,
+		v1.ConditionTrue,
+		nil,
+		ansiblestatus.RunningReason,
+		ansiblestatus.RunningMessage,
+	)
+	ansiblestatus.SetCondition(&crStatus, *c)
+	u.Object["status"] = crStatus.GetJSONMap()
+	err = r.Client.Status().Update(context.TODO(), u)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -238,7 +242,7 @@ func (r *AnsibleOperatorReconciler) markDone(u *unstructured.Unstructured, names
 	// Get the latest resource to prevent updating a stale status
 	err := r.Client.Get(context.TODO(), namespacedName, u)
 	if apierrors.IsNotFound(err) {
-		logger.Info("resource not found, assuming it was deleted", err)
+		logger.Info("Resource not found, assuming it was deleted", err)
 		return nil
 	}
 	if err != nil {
