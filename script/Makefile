@@ -20,7 +20,7 @@ build-compile-integration-tests:
 	go test -c -tags=integration ./test/*.go
 
 build-runtime:
-	./mvnw clean install -f ./runtime/pom.xml
+	./mvnw clean install -B -f ./runtime/pom.xml
 
 release: clean prepare-release build images-build images-push cross-compile package-examples git-tag publish-base-images
 
