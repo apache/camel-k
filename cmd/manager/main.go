@@ -75,7 +75,11 @@ func main() {
 	}
 
 	// Become the leader before proceeding
-	leader.Become(context.TODO(), "camel-k-lock") // nolint: errcheck
+	err = leader.Become(context.TODO(), "camel-k-lock")
+	if err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
 
 	r := ready.NewFileReady()
 	err = r.Set()
