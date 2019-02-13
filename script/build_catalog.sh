@@ -5,15 +5,17 @@ rootdir=$location/../
 
 version=$($location/get_version.sh)
 
-if [[ "$#" -eq 0 ]]; then
-    ./mvnw -f runtime/pom.xml \
+if [ "$#" -eq 0 ]; then
+    echo "build default catalog"
+    ./mvnw -q -f runtime/pom.xml \
         -N \
         -Pcatalog \
         -Dcatalog.path=${rootdir}/deploy
 else
     for ver in "$@"
     do
-        ./mvnw -f runtime/pom.xml \
+        echo "build catalog for version $ver"
+        ./mvnw -q -f runtime/pom.xml \
             -N \
             -Pcatalog \
             -Dcatalog.version=$ver \
