@@ -64,10 +64,10 @@ clean:
 images: images-build
 
 images-build:
-	./script/images_build.sh
+	./script/images_build.sh $(imgDestination)
 
 images-push:
-	./script/images_push.sh
+	./script/images_push.sh $(imgDestination)
 
 install: install-minishift
 install-minishift:
