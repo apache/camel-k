@@ -20,20 +20,18 @@ package trait
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-
-	"github.com/apache/camel-k/pkg/util/log"
-
-	"github.com/apache/camel-k/pkg/util/source"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
+	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/source"
 )
 
 // Identifiable represent an identifiable type
@@ -98,10 +96,12 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 type Environment struct {
 	CamelCatalog   *camel.RuntimeCatalog
 	Catalog        *Catalog
+	Client         client.Client
 	Platform       *v1alpha1.IntegrationPlatform
 	Context        *v1alpha1.IntegrationContext
 	Integration    *v1alpha1.Integration
 	Resources      *kubernetes.Collection
+	PostActions	   []func(*Environment) error
 	PostProcessors []func(*Environment) error
 	Steps          []builder.Step
 	BuildDir       string
