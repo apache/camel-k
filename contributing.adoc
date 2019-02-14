@@ -114,6 +114,12 @@ In your settings.xml you'll need to have the correct ASF credentials to push.
 
 Don't forget to first run a `make build-runtime` before pushing the snapshot
 
+The above command produces a `camel-k` image with name `docker.io/apache/camel-k`.  Sometimes you might need to produce camel-k images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `imgDestination` to the make as shown below:
+
+```
+make imgDestination='docker.io/myrepo' images
+```
+
 [[testing]]
 == Testing
 
