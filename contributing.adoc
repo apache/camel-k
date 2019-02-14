@@ -90,6 +90,30 @@ After a successful build, if you're connected to a Docker daemon, you can build 
 make images
 ```
 
+[[push-snapshot]]
+== Push runtime snapshot
+
+For the Java bits in runtime you can push to the snapshost to the Apache Snapshot repository with:
+
+* `make push-runtime-snapshot`: to push the Java-based runtime snapshot JARs.
+
+In your settings.xml you'll need to have the correct ASF credentials to push.
+
+```
+    <server>
+      <id>apache.snapshots.https</id>
+      <username>username</username>
+      <password>password</password>
+    </server>
+    <server>
+      <id>apache.releases.https</id>
+      <username>username</username>
+      <password>password</password>
+    </server>
+```
+
+Don't forget to first run a `make build-runtime` before pushing the snapshot
+
 [[testing]]
 == Testing
 
