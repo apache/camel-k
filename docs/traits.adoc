@@ -247,4 +247,11 @@ There are also platform traits that **normally should not be configured** by the
 
 !===
 
+| gc
+| All
+| Garbage collect resources that are no longer necessary upon integration updates.
+  +
+  +
+  It's enabled by default.
+
 |=======================

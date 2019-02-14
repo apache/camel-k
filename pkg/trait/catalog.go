@@ -30,49 +30,51 @@ import (
 
 // Catalog collects all information about traits in one place
 type Catalog struct {
-	L               log.Logger
-	tDebug          Trait
-	tDependencies   Trait
-	tDeployment     Trait
-	tKnativeService Trait
-	tKnative        Trait
-	tService        Trait
-	tRoute          Trait
-	tIngress        Trait
-	tJolokia        Trait
-	tPrometheus     Trait
-	tOwner          Trait
-	tImages         Trait
-	tBuilder        Trait
-	tSpringBoot     Trait
-	tIstio          Trait
-	tEnvironment    Trait
-	tClasspath      Trait
-	tRest           Trait
+	L                 log.Logger
+	tDebug            Trait
+	tDependencies     Trait
+	tDeployment       Trait
+	tGarbageCollector Trait
+	tKnativeService   Trait
+	tKnative          Trait
+	tService          Trait
+	tRoute            Trait
+	tIngress          Trait
+	tJolokia          Trait
+	tPrometheus       Trait
+	tOwner            Trait
+	tImages           Trait
+	tBuilder          Trait
+	tSpringBoot       Trait
+	tIstio            Trait
+	tEnvironment      Trait
+	tClasspath        Trait
+	tRest             Trait
 }
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
-		L:               log.Log.WithName("trait"),
-		tDebug:          newDebugTrait(),
-		tRest:           newRestTrait(),
-		tKnative:        newKnativeTrait(),
-		tDependencies:   newDependenciesTrait(),
-		tDeployment:     newDeploymentTrait(),
-		tKnativeService: newKnativeServiceTrait(),
-		tService:        newServiceTrait(),
-		tRoute:          newRouteTrait(),
-		tIngress:        newIngressTrait(),
-		tJolokia:        newJolokiaTrait(),
-		tPrometheus:     newPrometheusTrait(),
-		tOwner:          newOwnerTrait(),
-		tImages:         newImagesTrait(),
-		tBuilder:        newBuilderTrait(),
-		tSpringBoot:     newSpringBootTrait(),
-		tIstio:          newIstioTrait(),
-		tEnvironment:    newEnvironmentTrait(),
-		tClasspath:      newClasspathTrait(),
+		L:                 log.Log.WithName("trait"),
+		tDebug:            newDebugTrait(),
+		tRest:             newRestTrait(),
+		tKnative:          newKnativeTrait(),
+		tDependencies:     newDependenciesTrait(),
+		tDeployment:       newDeploymentTrait(),
+		tGarbageCollector: newGarbageCollectorTrait(),
+		tKnativeService:   newKnativeServiceTrait(),
+		tService:          newServiceTrait(),
+		tRoute:            newRouteTrait(),
+		tIngress:          newIngressTrait(),
+		tJolokia:          newJolokiaTrait(),
+		tPrometheus:       newPrometheusTrait(),
+		tOwner:            newOwnerTrait(),
+		tImages:           newImagesTrait(),
+		tBuilder:          newBuilderTrait(),
+		tSpringBoot:       newSpringBootTrait(),
+		tIstio:            newIstioTrait(),
+		tEnvironment:      newEnvironmentTrait(),
+		tClasspath:        newClasspathTrait(),
 	}
 
 	for _, t := range catalog.allTraits() {
@@ -93,6 +95,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tKnative,
 		c.tDependencies,
 		c.tDeployment,
+		c.tGarbageCollector,
 		c.tKnativeService,
 		c.tService,
 		c.tRoute,
@@ -115,6 +118,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	switch environment.DetermineProfile() {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
+			c.tGarbageCollector,
 			c.tDebug,
 			c.tRest,
 			c.tDependencies,
@@ -132,6 +136,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
+			c.tGarbageCollector,
 			c.tDebug,
 			c.tRest,
 			c.tDependencies,
@@ -149,6 +154,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
+			c.tGarbageCollector,
 			c.tDebug,
 			c.tRest,
 			c.tKnative,

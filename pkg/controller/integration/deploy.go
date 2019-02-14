@@ -64,10 +64,16 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 		return err
 	}
 
-	// TODO we should look for objects that are no longer present in the collection and remove them
 	err = kubernetes.ReplaceResources(ctx, action.client, env.Resources.Items())
 	if err != nil {
 		return err
+	}
+
+	for _, postAction := range env.PostActions {
+		err := postAction(env)
+		if err != nil {
+			action.L.Errorf(err, "error executing deployment post action")
+		}
 	}
 
 	target := integration.DeepCopy()

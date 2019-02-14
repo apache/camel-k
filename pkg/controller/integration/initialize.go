@@ -95,7 +95,6 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 		return err
 	}
 
-	// TODO we should look for objects that are no longer present in the collection and remove them
 	err = kubernetes.ReplaceResources(ctx, action.client, env.Resources.Items())
 	if err != nil {
 		return err
