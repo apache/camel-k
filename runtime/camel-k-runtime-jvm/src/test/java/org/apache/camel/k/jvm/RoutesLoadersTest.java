@@ -89,6 +89,23 @@ public class RoutesLoadersTest {
     }
 
     @Test
+    public void testLoadJavaWithNameOverride() throws Exception {
+        Source source = Source.create("classpath:MyRoutesWithNameOverride.java?name=MyRoutes.java");
+        RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
+        RouteBuilder builder = loader.load(new InMemoryRegistry(), source);
+
+        assertThat(loader).isInstanceOf(JavaSourceLoader.class);
+        assertThat(builder).isNotNull();
+
+        builder.configure();
+
+        List<RouteDefinition> routes = builder.getRouteCollection().getRoutes();
+        assertThat(routes).hasSize(1);
+        assertThat(routes.get(0).getInputs().get(0).getEndpointUri()).isEqualTo("timer:tick");
+        assertThat(routes.get(0).getOutputs().get(0)).isInstanceOf(ToDefinition.class);
+    }
+
+    @Test
     public void testLoadJavaWithNestedClass() throws Exception {
         Source source = Source.create("classpath:MyRoutesWithNestedClass.java");
         RoutesLoader loader = RuntimeSupport.loaderFor(new DefaultCamelContext(), source);
