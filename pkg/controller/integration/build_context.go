@@ -128,7 +128,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 		"camel.apache.org/context.created.by.version": integration.ResourceVersion,
 	}
 
-	// Set the context to have the same dependencies as the integrations
+	// Set the context to have the same characteristics as the integrations
 	platformCtx.Spec = v1alpha1.IntegrationContextSpec{
 		Dependencies: integration.Status.Dependencies,
 		Repositories: integration.Spec.Repositories,

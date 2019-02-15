@@ -106,7 +106,7 @@ func (t *deploymentTrait) getConfigMapsFor(e *Environment) []runtime.Object {
 	// properties have the priority
 	properties := ""
 
-	VisitKeyValConfigurations("property", e.Context, e.Integration, func(key string, val string) {
+	VisitKeyValConfigurations("property", e.IntegrationContext, e.Integration, func(key string, val string) {
 		properties += fmt.Sprintf("%s=%s\n", key, val)
 	})
 
@@ -245,7 +245,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 
 	// combine Environment of integration with context, integration
 	// Environment has the priority
-	VisitKeyValConfigurations("env", e.Context, e.Integration, func(key string, value string) {
+	VisitKeyValConfigurations("env", e.IntegrationContext, e.Integration, func(key string, value string) {
 		envvar.SetVal(&environment, key, value)
 	})
 
@@ -414,7 +414,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// Volumes :: Additional ConfigMaps
 	//
 
-	VisitConfigurations("configmap", e.Context, e.Integration, func(cmName string) {
+	VisitConfigurations("configmap", e.IntegrationContext, e.Integration, func(cmName string) {
 		refName := kubernetes.SanitizeLabel(cmName)
 		fileName := "integration-cm-" + strings.ToLower(cmName)
 
@@ -439,7 +439,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// Volumes :: Additional Secrets
 	//
 
-	VisitConfigurations("secret", e.Context, e.Integration, func(secretName string) {
+	VisitConfigurations("secret", e.IntegrationContext, e.Integration, func(secretName string) {
 		refName := kubernetes.SanitizeLabel(secretName)
 		fileName := "integration-secret-" + strings.ToLower(secretName)
 

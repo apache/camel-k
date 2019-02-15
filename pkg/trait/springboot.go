@@ -77,11 +77,11 @@ func (t *springBootTrait) Apply(e *Environment) error {
 		// Override env vars
 		envvar.SetVal(&e.EnvVars, "JAVA_MAIN_CLASS", "org.springframework.boot.loader.PropertiesLauncher")
 
-		deps := make([]string, 0, 2+len(e.Context.Status.Artifacts))
+		deps := make([]string, 0, 2+len(e.IntegrationContext.Status.Artifacts))
 		deps = append(deps, "/etc/camel/resources")
 		deps = append(deps, "./resources")
 
-		for _, artifact := range e.Context.Status.Artifacts {
+		for _, artifact := range e.IntegrationContext.Status.Artifacts {
 			if strings.HasPrefix(artifact.ID, "org.apache.camel.k:camel-k-runtime-spring-boot:") {
 				// do not include runner jar
 				continue
@@ -94,7 +94,7 @@ func (t *springBootTrait) Apply(e *Environment) error {
 			deps = append(deps, artifact.Target)
 		}
 
-		if e.Context.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
+		if e.IntegrationContext.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
 			//
 			// In case of an external created context. we do not have any information about
 			// the classpath so we assume the all jars in /deployments/dependencies/ have
@@ -108,7 +108,7 @@ func (t *springBootTrait) Apply(e *Environment) error {
 	}
 
 	//
-	// Integration Context
+	// Integration IntegrationContext
 	//
 
 	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {

@@ -309,10 +309,15 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	images := make([]PublishedImage, 0)
 	for _, item := range list.Items {
 		ctx := item
 
+		// TODO: add support for semver lookup
+		if ctx.Status.CamelVersion != context.Catalog.Version {
+			continue
+		}
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
 			continue
 		}
