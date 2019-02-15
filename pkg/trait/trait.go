@@ -25,7 +25,6 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/pkg/errors"
@@ -79,19 +78,16 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.
 		}
 	}
 
-	catalog, err := camel.Catalog(ctx, c, namespace, pl.Spec.Build.CamelVersion)
-	if err != nil {
-		return nil, err
+	env := Environment{
+		C:                  ctx,
+		Platform:           pl,
+		Client:             c,
+		IntegrationContext: ictx,
+		Integration:        integration,
+		ExecutedTraits:     make([]Trait, 0),
+		Resources:          kubernetes.NewCollection(),
+		EnvVars:            make([]corev1.EnvVar, 0),
 	}
 
-	return &Environment{
-		Platform:       pl,
-		CamelCatalog:   catalog,
-		Client:         c,
-		Context:        ictx,
-		Integration:    integration,
-		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(),
-		EnvVars:        make([]corev1.EnvVar, 0),
-	}, nil
+	return &env, nil
 }

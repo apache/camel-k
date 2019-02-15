@@ -50,7 +50,7 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *classpathTrait) Apply(e *Environment) error {
-	ctx := e.Context
+	ctx := e.IntegrationContext
 
 	if ctx == nil && e.Integration.Status.Context != "" {
 		name := e.Integration.Status.Context
@@ -79,7 +79,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		deps = append(deps, artifact.Target)
 	}
 
-	if e.Context.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
+	if e.IntegrationContext.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
 		//
 		// In case of an external created context. we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have

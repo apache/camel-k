@@ -19,9 +19,9 @@ package integrationcontext
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,9 +106,8 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		repositories = append(repositories, ictx.Spec.Repositories...)
 		repositories = append(repositories, p.Spec.Build.Repositories...)
 
-		catalog, err := camel.Catalog(ctx, action.client, ictx.Namespace, env.Platform.Spec.Build.CamelVersion)
-		if err != nil {
-			return err
+		if env.CamelCatalog == nil {
+			return errors.New("undefined camel catalog")
 		}
 
 		// the context given to the handler is per reconcile loop and as the build
@@ -116,7 +115,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		// can be used also to stop the build.
 		r := builder.Request{
 			C:            cancellable.NewContext(),
-			Catalog:      catalog,
+			Catalog:      env.CamelCatalog,
 			Meta:         ictx.ObjectMeta,
 			Dependencies: ictx.Spec.Dependencies,
 			Repositories: repositories,
@@ -187,7 +186,7 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 			}
 		}
 
-		action.L.Error(res.Error, "Context state transition", "phase", target.Status.Phase)
+		action.L.Error(res.Error, "IntegrationContext state transition", "phase", target.Status.Phase)
 
 		return action.client.Update(ctx, target)
 	case builder.StatusCompleted:

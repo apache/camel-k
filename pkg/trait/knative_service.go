@@ -113,7 +113,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	// properties have the priority
 	properties := ""
 
-	VisitKeyValConfigurations("property", e.Context, e.Integration, func(key string, val string) {
+	VisitKeyValConfigurations("property", e.IntegrationContext, e.Integration, func(key string, val string) {
 		properties += fmt.Sprintf("%s=%s\n", key, val)
 	})
 
@@ -121,7 +121,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 
 	// combine Environment of integration with context, integration
 	// Environment has the priority
-	VisitKeyValConfigurations("env", e.Context, e.Integration, func(key string, value string) {
+	VisitKeyValConfigurations("env", e.IntegrationContext, e.Integration, func(key string, value string) {
 		envvar.SetVal(&environment, key, value)
 	})
 

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/apache/camel-k/pkg/util/camel"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/util/cancellable"
@@ -112,10 +111,8 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		if err != nil {
 			return err
 		}
-
-		catalog, err := camel.Catalog(ctx, action.client, integration.Namespace, env.Platform.Spec.Build.CamelVersion)
-		if err != nil {
-			return err
+		if env.CamelCatalog == nil {
+			return errors.New("undefined camel catalog")
 		}
 
 		// This build do not require to determine dependencies nor a project, the
@@ -126,7 +123,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		// can be used also to stop the build.
 		r := builder.Request{
 			C:        cancellable.NewContext(),
-			Catalog:  catalog,
+			Catalog:  env.CamelCatalog,
 			Meta:     integration.ObjectMeta,
 			Steps:    env.Steps,
 			BuildDir: env.BuildDir,

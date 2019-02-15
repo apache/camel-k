@@ -195,7 +195,7 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
 		},
-		Context: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: cluster,

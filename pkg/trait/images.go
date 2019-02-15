@@ -47,17 +47,17 @@ func (t *imagesTrait) Configure(e *Environment) (bool, error) {
 
 func (t *imagesTrait) Apply(e *Environment) error {
 	// Try to lookup a image from predefined images
-	image := images.LookupPredefinedImage(e.CamelCatalog, e.Context.Spec.Dependencies)
+	image := images.LookupPredefinedImage(e.CamelCatalog, e.IntegrationContext.Spec.Dependencies)
 	if image == "" {
 		return nil
 	}
 
 	// Change the context type to external
-	if e.Context.Labels == nil {
-		e.Context.Labels = make(map[string]string)
+	if e.IntegrationContext.Labels == nil {
+		e.IntegrationContext.Labels = make(map[string]string)
 	}
-	e.Context.Labels["camel.apache.org/context.type"] = v1alpha1.IntegrationContextTypeExternal
+	e.IntegrationContext.Labels["camel.apache.org/context.type"] = v1alpha1.IntegrationContextTypeExternal
 
-	e.Context.Spec.Image = image
+	e.IntegrationContext.Spec.Image = image
 	return nil
 }
