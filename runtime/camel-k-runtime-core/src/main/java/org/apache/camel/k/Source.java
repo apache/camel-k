@@ -23,14 +23,20 @@ import org.apache.camel.util.URISupport;
 import org.apache.commons.lang3.StringUtils;
 
 public class Source {
+    private final String name;
     private final String location;
     private final String language;
     private final boolean compressed;
 
-    private Source(String location, String language, boolean compression) {
+    private Source(String name, String location, String language, boolean compression) {
+        this.name = name;
         this.location = location;
         this.language = language;
         this.compressed = compression;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getLocation() {
@@ -66,7 +72,8 @@ public class Source {
         final String query = StringUtils.substringAfter(uri, "?");
         final Map<String, Object> params = URISupport.parseQuery(query);
         final String languageName = (String) params.get("language");
-        final boolean compression = Boolean.valueOf((String) params.get("compression"));
+        final String compression = (String) params.get("compression");
+
 
         String language = languageName;
         if (ObjectHelper.isEmpty(language)) {
@@ -77,7 +84,16 @@ public class Source {
             throw new IllegalArgumentException("Unknown language " + language);
         }
 
+        String name = (String) params.get("name");
+        if (name == null) {
+            name = StringUtils.substringAfter(location, ":");
+            name = StringUtils.substringBeforeLast(name, ".");
 
-        return new Source(location, language, compression);
+            if (name.contains("/")) {
+                name = StringUtils.substringAfterLast(name, "/");
+            }
+        }
+
+        return new Source(name, location, language, Boolean.valueOf(compression));
     }
 }

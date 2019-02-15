@@ -49,15 +49,15 @@ public class JavaSourceLoader implements RoutesLoader {
                 final CamelContext context = getContext();
 
                 try (InputStream is = URIResolver.resolve(context, source)) {
-                    String name = source.getLocation();
-                    name = StringUtils.substringAfter(name, ":");
+                    String name = source.getName();
                     name = StringUtils.removeEnd(name, ".java");
 
-                    if (name.contains("/")) {
-                        name = StringUtils.substringAfterLast(name, "/");
-                    }
+                    // compile the source in memory
+                    String content = IOUtils.toString(is, StandardCharsets.UTF_8);
+                    Reflect compiled = Reflect.compile(name, content);
 
-                    RoutesBuilder builder = Reflect.compile(name, IOUtils.toString(is, StandardCharsets.UTF_8)).create().get();
+                    // create the builder
+                    RoutesBuilder builder = compiled.create().get();
 
                     // Wrap routes builder
                     includeRoutes(builder);
