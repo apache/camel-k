@@ -111,7 +111,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 
 		routes := util.LookupEnvVar(vars, "CAMEL_K_ROUTES")
 		assert.NotNil(t, routes)
-		assert.Equal(t, "env:CAMEL_K_ROUTE_000?language=js&compression=true", routes.Value)
+		assert.Equal(t, "env:CAMEL_K_ROUTE_000?name=routes.js&language=js&compression=true", routes.Value)
 
 		route := util.LookupEnvVar(vars, "CAMEL_K_ROUTE_000")
 		assert.NotNil(t, route)
@@ -209,7 +209,7 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 
 		routes := util.LookupEnvVar(vars, "CAMEL_K_ROUTES")
 		assert.NotNil(t, routes)
-		assert.Equal(t, "env:CAMEL_K_ROUTE_000?language=js&compression=true", routes.Value)
+		assert.Equal(t, "env:CAMEL_K_ROUTE_000?name=routes.js&language=js&compression=true", routes.Value)
 
 		route := util.LookupEnvVar(vars, "CAMEL_K_ROUTE_000")
 		assert.NotNil(t, route)

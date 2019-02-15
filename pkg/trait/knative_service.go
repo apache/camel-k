@@ -140,6 +140,8 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		envvar.SetVal(&environment, envName, s.Content)
 
 		params := make([]string, 0)
+		params = append(params, "name="+s.Name)
+
 		if s.InferLanguage() != "" {
 			params = append(params, "language="+string(s.InferLanguage()))
 		}
