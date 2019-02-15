@@ -49,7 +49,7 @@ type Catalog struct {
 	tIstio            Trait
 	tEnvironment      Trait
 	tClasspath        Trait
-	tRest             Trait
+	tRestDsl          Trait
 }
 
 // NewCatalog creates a new trait Catalog
@@ -57,7 +57,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
 		L:                 log.Log.WithName("trait"),
 		tDebug:            newDebugTrait(),
-		tRest:             newRestTrait(),
+		tRestDsl:          newRestDslTrait(),
 		tKnative:          newKnativeTrait(),
 		tDependencies:     newDependenciesTrait(),
 		tDeployment:       newDeploymentTrait(),
@@ -91,7 +91,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 func (c *Catalog) allTraits() []Trait {
 	return []Trait{
 		c.tDebug,
-		c.tRest,
+		c.tRestDsl,
 		c.tKnative,
 		c.tDependencies,
 		c.tDeployment,
@@ -120,7 +120,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tGarbageCollector,
 			c.tDebug,
-			c.tRest,
+			c.tRestDsl,
 			c.tDependencies,
 			c.tImages,
 			c.tBuilder,
@@ -138,7 +138,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tGarbageCollector,
 			c.tDebug,
-			c.tRest,
+			c.tRestDsl,
 			c.tDependencies,
 			c.tImages,
 			c.tBuilder,
@@ -156,7 +156,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		return []Trait{
 			c.tGarbageCollector,
 			c.tDebug,
-			c.tRest,
+			c.tRestDsl,
 			c.tKnative,
 			c.tDependencies,
 			c.tImages,

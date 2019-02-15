@@ -36,6 +36,7 @@ type Project struct {
 	Dependencies         []Dependency         `xml:"dependencies>dependency,omitempty"`
 	Repositories         []Repository         `xml:"repositories>repository,omitempty"`
 	PluginRepositories   []Repository         `xml:"pluginRepositories>pluginRepository,omitempty"`
+	Build                Build                `xml:"build,omitempty"`
 }
 
 // Exclusion represent a maven's dependency exlucsion
@@ -77,15 +78,17 @@ type RepositoryPolicy struct {
 
 // Build --
 type Build struct {
-	Plugins []Plugin `xml:"plugins>plugin,omitempty"`
+	DefaultGoal string   `xml:"defaultGoal,omitempty"`
+	Plugins     []Plugin `xml:"plugins>plugin,omitempty"`
 }
 
 // Plugin --
 type Plugin struct {
-	GroupID    string      `xml:"groupId"`
-	ArtifactID string      `xml:"artifactId"`
-	Version    string      `xml:"version,omitempty"`
-	Executions []Execution `xml:"executions>execution,omitempty"`
+	GroupID      string       `xml:"groupId"`
+	ArtifactID   string       `xml:"artifactId"`
+	Version      string       `xml:"version,omitempty"`
+	Executions   []Execution  `xml:"executions>execution,omitempty"`
+	Dependencies []Dependency `xml:"dependencies>dependency,omitempty"`
 }
 
 // Execution --
