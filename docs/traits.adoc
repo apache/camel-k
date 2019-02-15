@@ -219,6 +219,21 @@ It's disabled by default.
 
 !===
 
+| camel
+| All
+| Resolve Camel version
+  +
+  +
+  It's enabled by default.
+
+[cols="m,"]
+!===
+
+! camel.version
+! The camel version to use for the integration, it overrides the default version set in the Integration Platform
+
+!===
+
 |=======================
 
 

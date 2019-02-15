@@ -21,6 +21,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
+
+	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -39,7 +43,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilContext(t *testing.T) {
 
 	for _, e := range environments {
 		e := e // pin
-		e.Context = nil
+		e.IntegrationContext = nil
 
 		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
@@ -60,7 +64,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 
 	for _, e := range environments {
 		e := e // pin
-		e.Context.Status.Phase = ""
+		e.IntegrationContext.Status.Phase = ""
 
 		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
@@ -114,7 +118,14 @@ func TestKanikoBuilderTrait(t *testing.T) {
 }
 
 func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy v1alpha1.IntegrationPlatformBuildPublishStrategy) *Environment {
+	c, err := test.DefaultCatalog()
+	if err != nil {
+		panic(err)
+	}
+
 	return &Environment{
+		C:            context.TODO(),
+		CamelCatalog: c,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -124,7 +135,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
 		},
-		Context: &v1alpha1.IntegrationContext{
+		IntegrationContext: &v1alpha1.IntegrationContext{
 			Status: v1alpha1.IntegrationContextStatus{
 				Phase: v1alpha1.IntegrationContextPhaseBuildSubmitted,
 			},
@@ -135,6 +146,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					PublishStrategy: strategy,
 					Registry:        "registry",
+					CamelVersion:    defaults.CamelVersion,
 				},
 			},
 		},

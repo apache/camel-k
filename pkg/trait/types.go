@@ -20,8 +20,8 @@ package trait
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -94,19 +94,20 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 
 // A Environment provides the context where the trait is executed
 type Environment struct {
-	CamelCatalog   *camel.RuntimeCatalog
-	Catalog        *Catalog
-	Client         client.Client
-	Platform       *v1alpha1.IntegrationPlatform
-	Context        *v1alpha1.IntegrationContext
-	Integration    *v1alpha1.Integration
-	Resources      *kubernetes.Collection
-	PostActions	   []func(*Environment) error
-	PostProcessors []func(*Environment) error
-	Steps          []builder.Step
-	BuildDir       string
-	ExecutedTraits []Trait
-	EnvVars        []v1.EnvVar
+	CamelCatalog       *camel.RuntimeCatalog
+	Catalog            *Catalog
+	C                  context.Context
+	Client             client.Client
+	Platform           *v1alpha1.IntegrationPlatform
+	IntegrationContext *v1alpha1.IntegrationContext
+	Integration        *v1alpha1.Integration
+	Resources          *kubernetes.Collection
+	PostActions        []func(*Environment) error
+	PostProcessors     []func(*Environment) error
+	Steps              []builder.Step
+	BuildDir           string
+	ExecutedTraits     []Trait
+	EnvVars            []v1.EnvVar
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -136,7 +137,7 @@ func (e *Environment) IntegrationInPhase(phase v1alpha1.IntegrationPhase) bool {
 
 // IntegrationContextInPhase --
 func (e *Environment) IntegrationContextInPhase(phase v1alpha1.IntegrationContextPhase) bool {
-	return e.Context != nil && e.Context.Status.Phase == phase
+	return e.IntegrationContext != nil && e.IntegrationContext.Status.Phase == phase
 }
 
 // InPhase --
@@ -146,15 +147,15 @@ func (e *Environment) InPhase(c v1alpha1.IntegrationContextPhase, i v1alpha1.Int
 
 // DetermineProfile determines the TraitProfile of the environment.
 // First looking at the Integration.Spec for a Profile,
-// next looking at the Context.Spec
+// next looking at the IntegrationContext.Spec
 // and lastly the Platform Profile
 func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
 	if e.Integration != nil && e.Integration.Spec.Profile != "" {
 		return e.Integration.Spec.Profile
 	}
 
-	if e.Context != nil && e.Context.Spec.Profile != "" {
-		return e.Context.Spec.Profile
+	if e.IntegrationContext != nil && e.IntegrationContext.Spec.Profile != "" {
+		return e.IntegrationContext.Spec.Profile
 	}
 
 	return platform.GetProfile(e.Platform)
@@ -196,4 +197,21 @@ func (e *Environment) DetermineControllerStrategy(ctx context.Context, c client.
 	}
 
 	return ControllerStrategyKnativeService, nil
+}
+
+// DetermineCamelVersion --
+func (e *Environment) DetermineCamelVersion() string {
+	var version string
+
+	if e.Integration != nil {
+		version = e.Integration.Status.CamelVersion
+	}
+	if e.IntegrationContext != nil && version == "" {
+		version = e.IntegrationContext.Status.CamelVersion
+	}
+	if version == "" {
+		version = e.Platform.Spec.Build.CamelVersion
+	}
+
+	return version
 }

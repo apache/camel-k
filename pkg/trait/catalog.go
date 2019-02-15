@@ -31,6 +31,7 @@ import (
 // Catalog collects all information about traits in one place
 type Catalog struct {
 	L                 log.Logger
+	tCamel            Trait
 	tDebug            Trait
 	tDependencies     Trait
 	tDeployment       Trait
@@ -56,6 +57,7 @@ type Catalog struct {
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
 		L:                 log.Log.WithName("trait"),
+		tCamel:            newCamelTrait(),
 		tDebug:            newDebugTrait(),
 		tRestDsl:          newRestDslTrait(),
 		tKnative:          newKnativeTrait(),
@@ -90,6 +92,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 
 func (c *Catalog) allTraits() []Trait {
 	return []Trait{
+		c.tCamel,
 		c.tDebug,
 		c.tRestDsl,
 		c.tKnative,
@@ -118,6 +121,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 	switch environment.DetermineProfile() {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
+			c.tCamel,
 			c.tGarbageCollector,
 			c.tDebug,
 			c.tRestDsl,
@@ -136,6 +140,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
+			c.tCamel,
 			c.tGarbageCollector,
 			c.tDebug,
 			c.tRestDsl,
@@ -154,6 +159,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
+			c.tCamel,
 			c.tGarbageCollector,
 			c.tDebug,
 			c.tRestDsl,
@@ -219,8 +225,8 @@ func (c *Catalog) GetTrait(id string) Trait {
 }
 
 func (c *Catalog) configure(env *Environment) error {
-	if env.Context != nil && env.Context.Spec.Traits != nil {
-		for id, traitSpec := range env.Context.Spec.Traits {
+	if env.IntegrationContext != nil && env.IntegrationContext.Spec.Traits != nil {
+		for id, traitSpec := range env.IntegrationContext.Spec.Traits {
 			catTrait := c.GetTrait(id)
 			if catTrait != nil {
 				if err := traitSpec.Decode(catTrait); err != nil {

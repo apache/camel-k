@@ -54,6 +54,12 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 
 	for _, ctx := range ctxList.Items {
 		ctx := ctx // pin
+
+		// TODO: we should add support for semver lookup
+		if ctx.Status.CamelVersion != integration.Status.CamelVersion {
+			continue
+		}
+
 		if allowed, ok := allowedLookupLabels[ctx.Labels["camel.apache.org/context.type"]]; ok && allowed {
 			ideps := len(integration.Status.Dependencies)
 			cdeps := len(ctx.Spec.Dependencies)

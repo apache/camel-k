@@ -45,7 +45,7 @@ func TestDefaultEnvironment(t *testing.T) {
 				Profile: v1alpha1.TraitProfileOpenShift,
 			},
 		},
-		Context: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -84,7 +84,11 @@ func TestDefaultEnvironment(t *testing.T) {
 }
 
 func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
+	c, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	env := Environment{
+		CamelCatalog: c,
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -100,7 +104,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 				},
 			},
 		},
-		Context: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -111,7 +115,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewEnvironmentTestCatalog().apply(&env)
+	err = NewEnvironmentTestCatalog().apply(&env)
 
 	assert.Nil(t, err)
 
@@ -139,7 +143,11 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 }
 
 func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
+	c, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
 	env := Environment{
+		CamelCatalog: c,
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -155,7 +163,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 				},
 			},
 		},
-		Context: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -166,7 +174,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err := NewEnvironmentTestCatalog().apply(&env)
+	err = NewEnvironmentTestCatalog().apply(&env)
 
 	assert.Nil(t, err)
 
