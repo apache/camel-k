@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -82,6 +83,9 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 		}
 		// And delete them
 		for _, resource := range resources {
+			// pind the resource
+			resource := resource
+
 			err = e.Client.Delete(context.TODO(), &resource)
 			if err != nil {
 				// The resource may have already been deleted
@@ -109,7 +113,13 @@ func getOldGenerationResources(e *Environment) ([]unstructured.Unstructured, err
 		return nil, err
 	}
 
-	selector, err := labels.Parse(fmt.Sprintf("camel.apache.org/integration=%s,camel.apache.org/generation,camel.apache.org/generation notin (%d)", e.Integration.Name, e.Integration.GetGeneration()))
+	selectors := []string{
+		fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
+		"camel.apache.org/generation",
+		fmt.Sprintf("camel.apache.org/generation notin (%d)", e.Integration.GetGeneration()),
+	}
+
+	selector, err := labels.Parse(strings.Join(selectors, ","))
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +148,8 @@ func getOldGenerationResources(e *Environment) ([]unstructured.Unstructured, err
 			}
 			return nil, err
 		}
-		for _, item := range list.Items {
-			res = append(res, item)
-		}
+
+		res = append(res, list.Items...)
 	}
 	return res, nil
 }

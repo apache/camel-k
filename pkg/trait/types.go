@@ -20,7 +20,6 @@ package trait
 import (
 	"context"
 
-	"k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -107,7 +106,7 @@ type Environment struct {
 	Steps              []builder.Step
 	BuildDir           string
 	ExecutedTraits     []Trait
-	EnvVars            []v1.EnvVar
+	EnvVars            []corev1.EnvVar
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
