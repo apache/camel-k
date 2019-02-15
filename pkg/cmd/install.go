@@ -19,12 +19,13 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/platform"
 	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/runtime"
-	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/watch"
@@ -42,11 +43,11 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "install",
-		Short: "Install Camel K on a Kubernetes cluster",
-		Long:  `Installs Camel K on a Kubernetes or OpenShift cluster.`,
+		Use:     "install",
+		Short:   "Install Camel K on a Kubernetes cluster",
+		Long:    `Installs Camel K on a Kubernetes or OpenShift cluster.`,
 		PreRunE: impl.validate,
-		RunE:  impl.install,
+		RunE:    impl.install,
 	}
 
 	cmd.Flags().BoolVarP(&impl.wait, "wait", "w", false, "Waits for the platform to be running")
@@ -284,5 +285,3 @@ func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string, nrCont
 	}
 	return errors.Errorf("Unknown context '%s'", context)
 }
-
-
