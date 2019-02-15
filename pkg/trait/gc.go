@@ -82,7 +82,7 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 		}
 		// And delete them
 		for _, resource := range resources {
-			err = e.Client.Delete(context.TODO(), resource)
+			err = e.Client.Delete(context.TODO(), &resource)
 			if err != nil {
 				// The resource may have already been deleted
 				if !k8serrors.IsNotFound(err) {
@@ -99,7 +99,7 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func getOldGenerationResources(e *Environment) ([]*unstructured.Unstructured, error) {
+func getOldGenerationResources(e *Environment) ([]unstructured.Unstructured, error) {
 	// We rely on the discovery API to retrieve all the resources group and kind.
 	// That results in an unbounded collection that can be a bit slow (a couple of seconds).
 	// We may want to refine that step by white-listing or enlisting types to speed-up
@@ -114,7 +114,7 @@ func getOldGenerationResources(e *Environment) ([]*unstructured.Unstructured, er
 		return nil, err
 	}
 
-	res := make([]*unstructured.Unstructured, 0)
+	res := make([]unstructured.Unstructured, 0)
 
 	for _, t := range types {
 		options := k8sclient.ListOptions{
@@ -139,7 +139,7 @@ func getOldGenerationResources(e *Environment) ([]*unstructured.Unstructured, er
 			return nil, err
 		}
 		for _, item := range list.Items {
-			res = append(res, &item)
+			res = append(res, item)
 		}
 	}
 	return res, nil
