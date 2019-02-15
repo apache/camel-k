@@ -75,6 +75,9 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
       </releases>
     </pluginRepository>
   </pluginRepositories>
+  <build>
+    <plugins></plugins>
+  </build>
 </project>`
 
 func TestPomGeneration(t *testing.T) {
