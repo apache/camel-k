@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.RoutesBuilder;
@@ -49,11 +51,9 @@ public class JavaSourceLoader implements RoutesLoader {
                 final CamelContext context = getContext();
 
                 try (InputStream is = URIResolver.resolve(context, source)) {
-                    String name = source.getName();
-                    name = StringUtils.removeEnd(name, ".java");
-
                     // compile the source in memory
                     String content = IOUtils.toString(is, StandardCharsets.UTF_8);
+                    String name = determineQualifiedName(source, content);
                     Reflect compiled = Reflect.compile(name, content);
 
                     // create the builder
@@ -87,5 +87,19 @@ public class JavaSourceLoader implements RoutesLoader {
                 }
             }
         };
+    }
+
+    private static String determineQualifiedName(Source source, String content) throws Exception {
+        String name = source.getName();
+        name = StringUtils.removeEnd(name, ".java");
+
+        Pattern pattern = Pattern.compile("^\\s*package\\s+([a-zA_Z_][\\.\\w]*)\\s*;.*");
+        Matcher matcher = pattern.matcher(content);
+
+        if (matcher.find()) {
+            name = matcher.group(1) + "." + name;
+        }
+
+        return name;
     }
 }
