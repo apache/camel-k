@@ -44,7 +44,7 @@ pipeline {
 
         stage('Test & Install') {
             steps {
-                sh "./mvnw $MAVEN_PARAMS clean install deploy -f ./runtime/pom.xml"
+                sh "./mvnw $MAVEN_PARAMS clean install -f ./runtime/pom.xml"
             }
         }
 
