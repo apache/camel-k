@@ -54,6 +54,8 @@
         <spock.version>1.2-groovy-2.5</spock.version>
         <jackson.version>2.9.8</jackson.version>
         <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
+        <immutables.version>2.7.4</immutables.version>
+        <semver4j.version>2.2.0</semver4j.version>
         <gmavenplus-plugin.version>1.6.1</gmavenplus-plugin.version>
         <fabric8-maven-plugin.version>3.5.40</fabric8-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
