@@ -43,18 +43,12 @@ pipeline {
     stages {
 
         stage('Test & Install') {
-            when {
-                branch 'master'
-            }
             steps {
                 sh "./mvnw $MAVEN_PARAMS clean install deploy -f ./runtime/pom.xml"
             }
         }
 
         stage('Deploy') {
-            when {
-                branch 'master'
-            }
             steps {
                 sh "./mvnw $MAVEN_PARAMS deploy -f ./runtime/pom.xml"
             }
