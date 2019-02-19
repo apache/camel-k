@@ -104,5 +104,5 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseStarting
 	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 
-	return action.client.Update(ctx, target)
+	return action.client.Status().Update(ctx, target)
 }
