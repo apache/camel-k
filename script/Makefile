@@ -15,6 +15,8 @@ build-embed-resources:
 	./script/build_catalog.sh
 	./script/build_catalog.sh 2.23.0
 	./script/embed_resources.sh deploy
+	mkdir -p ./assets/json-schema
+	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
 build-compile-integration-tests:
 	go test -c -tags=integration ./test/*.go
