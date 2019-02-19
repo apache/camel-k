@@ -6,12 +6,15 @@ import (
 
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	appsv1 "k8s.io/api/apps/v1"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -48,15 +51,20 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Integration
-	err = c.Watch(&source.Kind{Type: &camelv1alpha1.Integration{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource Pods and requeue the owner Integration
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &camelv1alpha1.Integration{},
+	err = c.Watch(&source.Kind{Type: &camelv1alpha1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldIntegration := e.ObjectOld.(*camelv1alpha1.Integration)
+			newIntegration := e.ObjectNew.(*camelv1alpha1.Integration)
+			// Ignore updates to the integration status in which case metadata.Generation does not change,
+			// or except when the integration phase changes as it's used to transition from one phase
+			// to another
+			return oldIntegration.Generation != newIntegration.Generation ||
+				oldIntegration.Status.Phase != newIntegration.Status.Phase
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			// Evaluates to false if the object has been confirmed deleted
+			return !e.DeleteStateUnknown
+		},
 	})
 	if err != nil {
 		return err

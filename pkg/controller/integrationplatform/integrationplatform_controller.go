@@ -6,11 +6,15 @@ import (
 
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -42,7 +46,21 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(&source.Kind{Type: &camelv1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &camelv1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldIntegrationPlatform := e.ObjectOld.(*camelv1alpha1.IntegrationPlatform)
+			newIntegrationPlatform := e.ObjectNew.(*camelv1alpha1.IntegrationPlatform)
+			// Ignore updates to the integration platform status in which case metadata.Generation
+			// does not change, or except when the integration platform phase changes as it's used
+			// to transition from one phase to another
+			return oldIntegrationPlatform.Generation != newIntegrationPlatform.Generation ||
+				oldIntegrationPlatform.Status.Phase != newIntegrationPlatform.Status.Phase
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			// Evaluates to false if the object has been confirmed deleted
+			return !e.DeleteStateUnknown
+		},
+	})
 	if err != nil {
 		return err
 	}
