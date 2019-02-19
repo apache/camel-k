@@ -19,6 +19,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -30,13 +31,11 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/test"
 
-	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform/images"
 	"github.com/apache/camel-k/pkg/util/cancellable"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
@@ -70,11 +69,6 @@ func (options *PublisherOptions) run(_ *cobra.Command, _ []string) {
 	scheme := clientscheme.Scheme
 	panicIfErr(apis.AddToScheme(scheme))
 
-	platRun, err := kubernetes.LoadResourceFromYaml(scheme, deploy.Resources["platform-cr.yaml"])
-	panicIfErr(err)
-
-	p := platRun.(*v1alpha1.IntegrationPlatform)
-
 	started := options.StartWith == ""
 
 	catalog, err := test.DefaultCatalog()
@@ -99,7 +93,7 @@ func (options *PublisherOptions) run(_ *cobra.Command, _ []string) {
 
 			if started {
 				fmt.Printf("building component %s\n", component)
-				options.buildWithAttempts(component, p.Spec.Build.CamelVersion)
+				options.buildWithAttempts(component, catalog)
 			} else {
 				fmt.Printf("skipping component %s\n", component)
 			}
@@ -112,10 +106,10 @@ func (options *PublisherOptions) run(_ *cobra.Command, _ []string) {
 	}
 }
 
-func (options *PublisherOptions) buildWithAttempts(component string, camelVersion string) {
+func (options *PublisherOptions) buildWithAttempts(component string, catalog *camel.RuntimeCatalog) {
 	var err error
 	for i := 0; i < options.BuildAttempts; i++ {
-		err = options.build(component, camelVersion)
+		err = options.build(component, catalog)
 		if err != nil {
 			sleepTime := 5 * (i + 1)
 			fmt.Printf("waiting %d seconds to recover from error %v\n", sleepTime, err)
@@ -127,7 +121,7 @@ func (options *PublisherOptions) buildWithAttempts(component string, camelVersio
 	panicIfErr(errors.Wrap(err, "build failed after maximum number of attempts"))
 }
 
-func (options *PublisherOptions) build(component string, camelVersion string) error {
+func (options *PublisherOptions) build(component string, catalog *camel.RuntimeCatalog) error {
 	dir, err := ioutil.TempDir(os.TempDir(), "camel-k-build-")
 	if err != nil {
 		return err
@@ -141,19 +135,16 @@ func (options *PublisherOptions) build(component string, camelVersion string) er
 	dependencies = append(dependencies, images.BaseDependency)
 	dependencies = append(dependencies, "camel:"+component)
 
-	catalog, err := test.DefaultCatalog()
-	if err != nil {
-		return err
-	}
 
 	ctx := builder.Context{
+		Catalog: catalog,
 		Path: dir,
 		Request: builder.Request{
 			C:       cancellable.NewContext(),
 			Catalog: catalog,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: camelVersion,
+					CamelVersion: catalog.Version,
 				},
 			},
 			Dependencies: dependencies,
