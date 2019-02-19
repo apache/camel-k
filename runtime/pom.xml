@@ -17,9 +17,7 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>org.apache</groupId>
@@ -30,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.camel.k</groupId>
     <artifactId>camel-k-runtime-parent</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.1</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -86,7 +84,7 @@
         <connection>scm:git:http://gitbox.apache.org/repos/asf/camel-k.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/camel-k.git</developerConnection>
         <url>https://gitbox.apache.org/repos/asf?p=camel-k.git;a=summary</url>
-        <tag>HEAD</tag>
+        <tag>camel-k-runtime-parent-0.2.1</tag>
     </scm>
 
     <dependencyManagement>
