@@ -69,7 +69,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, ictx *v1alpha1.In
 
 		action.L.Info("Max recovery attempt reached, transition to error phase")
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	}
 
 	if ictx.Status.Failure != nil {
@@ -98,7 +98,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, ictx *v1alpha1.In
 			target.Status.Failure.Recovery.AttemptMax,
 		)
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	}
 
 	return nil

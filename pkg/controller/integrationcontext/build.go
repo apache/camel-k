@@ -156,7 +156,7 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 
 		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	case builder.StatusError:
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
@@ -188,7 +188,7 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 
 		action.L.Error(res.Error, "IntegrationContext state transition", "phase", target.Status.Phase)
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	case builder.StatusCompleted:
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
@@ -220,7 +220,7 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 		}
 
 		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
-		if err := action.client.Update(ctx, target); err != nil {
+		if err := action.client.Status().Update(ctx, target); err != nil {
 			return err
 		}
 

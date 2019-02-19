@@ -77,5 +77,5 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 
 	action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
 
-	return action.client.Update(ctx, target)
+	return action.client.Status().Update(ctx, target)
 }
