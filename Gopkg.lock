@@ -34,6 +34,14 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  branch = "master"
+  digest = "1:2caa05ca997989079689d13beb3c2f0540809f0696add8e5a1cbd1d9d9b8875b"
+  name = "github.com/alecthomas/jsonschema"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "a6952de1bbe6e1c7ef118614925fe4b02847383a"
+
+[[projects]]
   digest = "1:680b63a131506e668818d630d3ca36123ff290afa0afc9f4be21940adca3f27d"
   name = "github.com/appscode/jsonpatch"
   packages = ["."]
@@ -1077,6 +1085,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/Masterminds/semver",
+    "github.com/alecthomas/jsonschema",
     "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1",
     "github.com/fatih/structs",
     "github.com/go-logr/logr",
