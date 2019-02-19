@@ -53,7 +53,7 @@ func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.Integr
 
 		action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 
-		return action.client.Update(ctx, target)
+		return action.client.Status().Update(ctx, target)
 	}
 	// wait
 	return nil

@@ -4251,6 +4251,8 @@ spec:
   group: camel.apache.org
   scope: Namespaced
   version: v1alpha1
+  subresources:
+    status: {}
   names:
     kind: IntegrationPlatform
     listKind: IntegrationPlatformList
