@@ -59,7 +59,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 
 			action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 
-			return action.client.Update(ctx, target)
+			return action.client.Status().Update(ctx, target)
 		}
 		return nil
 	}
@@ -94,9 +94,6 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 		target.Spec.Profile = platformutils.GetProfile(target)
 	}
 
-	// next status
-	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
-
 	if target.Spec.Build.CamelVersion == "" {
 		target.Spec.Build.CamelVersion = defaults.CamelVersion
 	}
@@ -113,7 +110,14 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 
 	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 
-	return action.client.Update(ctx, target)
+	err = action.client.Update(ctx, target)
+	if err != nil {
+		return err
+	}
+
+	// next status
+	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+	return action.client.Status().Update(ctx, target)
 }
 
 func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v1alpha1.IntegrationPlatform) (bool, error) {
