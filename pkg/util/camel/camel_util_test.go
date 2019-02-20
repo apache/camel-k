@@ -41,7 +41,7 @@ func TestFindBestMatch(t *testing.T) {
 	assert.Equal(t, "2.23.1", c.Version)
 }
 
-func TestFindExactMatch(t *testing.T) {
+func TestFindExactSemVerMatch(t *testing.T) {
 	catalogs := []v1alpha1.CamelCatalog{
 		{
 			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.0"},
@@ -55,6 +55,25 @@ func TestFindExactMatch(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "2.23.0", c.Version)
+}
+
+func TestFindExactMatch(t *testing.T) {
+	catalogs := []v1alpha1.CamelCatalog{
+		{
+			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1"},
+		},
+		{
+			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1-tag-00001"},
+		},
+		{
+			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1-tag-00002"},
+		},
+	}
+
+	c, err := FindBestMatch("2.23.1-tag-00001", catalogs)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	assert.Equal(t, "2.23.1-tag-00001", c.Version)
 }
 
 func TestFindRangeMatch(t *testing.T) {
