@@ -17,7 +17,11 @@ limitations under the License.
 
 package trait
 
-import "github.com/apache/camel-k/pkg/util/camel"
+import (
+	"fmt"
+
+	"github.com/apache/camel-k/pkg/util/camel"
+)
 
 type camelTrait struct {
 	BaseTrait `property:",squash"`
@@ -51,6 +55,9 @@ func (t *camelTrait) Apply(e *Environment) error {
 			if err != nil {
 				return err
 			}
+			if c == nil {
+				return fmt.Errorf("unable to find catalog for: %s", version)
+			}
 
 			e.CamelCatalog = c
 		}
@@ -69,6 +76,9 @@ func (t *camelTrait) Apply(e *Environment) error {
 			c, err := camel.Catalog(e.C, e.Client, e.IntegrationContext.Namespace, version)
 			if err != nil {
 				return err
+			}
+			if c == nil {
+				return fmt.Errorf("unable to find catalog for: %s", version)
 			}
 
 			e.CamelCatalog = c
