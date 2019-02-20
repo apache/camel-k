@@ -22,19 +22,16 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/util/cancellable"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
-	"github.com/apache/camel-k/pkg/trait"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
-
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/cancellable"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // NewBuildAction creates a new build request handling action for the context
@@ -245,12 +242,8 @@ func (action *buildAction) informIntegrations(ctx context.Context, ictx *v1alpha
 		if integration.Status.Context != ictx.Name {
 			continue
 		}
-
-		if integration.Annotations == nil {
-			integration.Annotations = make(map[string]string)
-		}
-		integration.Annotations["camel.apache.org/context.digest"] = ictx.Status.Digest
-		err = action.client.Update(ctx, &integration)
+		integration.Status.Phase = v1alpha1.IntegrationPhaseResolvingContext
+		err = action.client.Status().Update(ctx, &integration)
 		if err != nil {
 			return err
 		}

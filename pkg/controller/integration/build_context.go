@@ -42,7 +42,8 @@ func (action *buildContextAction) Name() string {
 }
 
 func (action *buildContextAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingContext
+	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingContext ||
+		integration.Status.Phase == v1alpha1.IntegrationPhaseResolvingContext
 }
 
 func (action *buildContextAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
