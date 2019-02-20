@@ -23,11 +23,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,11 +61,9 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		return strategy == ControllerStrategyDeployment, nil
 	}
 
-	if t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
-		return true, nil
-	}
-
-	if !t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseReady) &&
+		(e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingContext) ||
+			e.IntegrationInPhase(v1alpha1.IntegrationPhaseResolvingContext)) {
 		return true, nil
 	}
 
@@ -74,14 +71,16 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
-	if t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
-		// trigger container image build
-		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildImageSubmitted
-	}
-
-	if !t.ContainerImage && e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildingContext) {
-		// trigger integration deploy
-		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseReady) &&
+		(e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingContext) ||
+			e.IntegrationInPhase(v1alpha1.IntegrationPhaseResolvingContext)) {
+		if t.ContainerImage {
+			// trigger container image build
+			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildImageSubmitted
+		} else {
+			// trigger integration deploy
+			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+		}
 	}
 
 	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
