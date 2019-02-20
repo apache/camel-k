@@ -132,6 +132,8 @@ const (
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
 	// IntegrationPhaseBuildingContext --
 	IntegrationPhaseBuildingContext IntegrationPhase = "Building Context"
+	// IntegrationPhaseResolvingContext --
+	IntegrationPhaseResolvingContext IntegrationPhase = "Resolving Context"
 	// IntegrationPhaseBuildImageSubmitted --
 	IntegrationPhaseBuildImageSubmitted IntegrationPhase = "Build Image Submitted"
 	// IntegrationPhaseBuildImageRunning --
