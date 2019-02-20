@@ -19,7 +19,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -29,13 +28,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform/images"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
+	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
@@ -135,10 +134,9 @@ func (options *PublisherOptions) build(component string, catalog *camel.RuntimeC
 	dependencies = append(dependencies, images.BaseDependency)
 	dependencies = append(dependencies, "camel:"+component)
 
-
 	ctx := builder.Context{
 		Catalog: catalog,
-		Path: dir,
+		Path:    dir,
 		Request: builder.Request{
 			C:       cancellable.NewContext(),
 			Catalog: catalog,
