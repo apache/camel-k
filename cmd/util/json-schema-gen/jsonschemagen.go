@@ -59,7 +59,11 @@ func main() {
 				o := path.Join(out, t+".json")
 
 				fmt.Println("Write", t, "json-schema to:", o)
-				ioutil.WriteFile(o, b, 0644)
+
+				if err := ioutil.WriteFile(o, b, 0644); err != nil {
+					fmt.Println("error:", err)
+					os.Exit(-1)
+				}
 			}
 		},
 	}
