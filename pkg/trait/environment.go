@@ -29,9 +29,11 @@ type environmentTrait struct {
 }
 
 const (
-	envVarNamespace     = "NAMESPACE"
-	envVarPodName       = "POD_NAME"
-	envVarCamelKVersion = "CAMEL_K_VERSION"
+	envVarNamespace            = "NAMESPACE"
+	envVarPodName              = "POD_NAME"
+	envVarCamelKVersion        = "CAMEL_K_VERSION"
+	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
+	envVarCamelVersion         = "CAMEL_VERSION"
 )
 
 func newEnvironmentTrait() *environmentTrait {
@@ -51,6 +53,8 @@ func (t *environmentTrait) Configure(e *Environment) (bool, error) {
 
 func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, version.Version)
+	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
+	envvar.SetVal(&e.EnvVars, envVarCamelVersion, e.CamelCatalog.Version)
 
 	if t.ContainerMeta {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")

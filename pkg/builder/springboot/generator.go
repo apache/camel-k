@@ -23,7 +23,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/version"
 )
 
 // GenerateProject --
@@ -57,7 +56,7 @@ func GenerateProject(ctx *builder.Context) error {
 	ctx.Project.AddDependency(maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-spring-boot",
-		Version:    version.Version,
+		Version:    ctx.Request.RuntimeVersion,
 		Exclusions: &[]maven.Exclusion{
 			{
 				GroupID:    "org.apache.camel",
@@ -125,7 +124,7 @@ func GenerateProject(ctx *builder.Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, version.Version)
+			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
@@ -142,7 +141,7 @@ func GenerateProject(ctx *builder.Context) error {
 			}
 
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
-			dependency := maven.NewDependency("org.apache.camel.k", artifactID, version.Version)
+			dependency := maven.NewDependency("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
 
 			ctx.Project.AddDependency(dependency)
 		default:

@@ -122,13 +122,14 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		// happens asynchronously, a new context has to be created. the new context
 		// can be used also to stop the build.
 		r := builder.Request{
-			C:        cancellable.NewContext(),
-			Catalog:  env.CamelCatalog,
-			Meta:     integration.ObjectMeta,
-			Steps:    env.Steps,
-			BuildDir: env.BuildDir,
-			Platform: env.Platform.Spec,
-			Image:    ictx.Status.Image,
+			C:              cancellable.NewContext(),
+			Catalog:        env.CamelCatalog,
+			RuntimeVersion: env.RuntimeVersion,
+			Meta:           integration.ObjectMeta,
+			Steps:          env.Steps,
+			BuildDir:       env.BuildDir,
+			Platform:       env.Platform.Spec,
+			Image:          ictx.Status.Image,
 			// Sources are added as part of the standard deployment bits
 			Resources: make([]builder.Resource, 0, len(integration.Spec.Sources)),
 		}

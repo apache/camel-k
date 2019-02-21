@@ -104,16 +104,17 @@ type Resource struct {
 
 // Request --
 type Request struct {
-	C            cancellable.Context
-	Catalog      *camel.RuntimeCatalog
-	Meta         metav1.ObjectMeta
-	Platform     v1alpha1.IntegrationPlatformSpec
-	Dependencies []string
-	Repositories []string
-	Steps        []Step
-	BuildDir     string
-	Image        string
-	Resources    []Resource
+	C              cancellable.Context
+	Catalog        *camel.RuntimeCatalog
+	RuntimeVersion string
+	Meta           metav1.ObjectMeta
+	Platform       v1alpha1.IntegrationPlatformSpec
+	Dependencies   []string
+	Repositories   []string
+	Steps          []Step
+	BuildDir       string
+	Image          string
+	Resources      []Resource
 }
 
 // Task --

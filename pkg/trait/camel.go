@@ -24,8 +24,9 @@ import (
 )
 
 type camelTrait struct {
-	BaseTrait `property:",squash"`
-	Version   string `property:"version"`
+	BaseTrait      `property:",squash"`
+	Version        string `property:"version"`
+	RuntimeVersion string `property:"runtime-version"`
 }
 
 func newCamelTrait() *camelTrait {
@@ -43,6 +44,11 @@ func (t *camelTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
+	e.RuntimeVersion = e.DetermineRuntimeVersion()
+	if t.RuntimeVersion != "" {
+		e.RuntimeVersion = t.RuntimeVersion
+	}
+
 	if e.Integration != nil {
 		if e.CamelCatalog == nil {
 			version := e.DetermineCamelVersion()
@@ -63,6 +69,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 		}
 
 		e.Integration.Status.CamelVersion = e.CamelCatalog.Version
+		e.Integration.Status.RuntimeVersion = e.RuntimeVersion
 	}
 
 	if e.IntegrationContext != nil {
@@ -85,6 +92,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 		}
 
 		e.IntegrationContext.Status.CamelVersion = e.CamelCatalog.Version
+		e.IntegrationContext.Status.RuntimeVersion = e.RuntimeVersion
 	}
 
 	return nil

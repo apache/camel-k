@@ -93,9 +93,11 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	if target.Spec.Profile == "" {
 		target.Spec.Profile = platformutils.GetProfile(target)
 	}
-
 	if target.Spec.Build.CamelVersion == "" {
 		target.Spec.Build.CamelVersion = defaults.CamelVersion
+	}
+	if target.Spec.Build.RuntimeVersion == "" {
+		target.Spec.Build.RuntimeVersion = defaults.RuntimeVersion
 	}
 	if target.Spec.Build.BaseImage == "" {
 		target.Spec.Build.BaseImage = defaults.BaseImage
@@ -105,8 +107,17 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	}
 
 	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
+	action.L.Infof("RuntimeVersion set to %s", target.Spec.Build.RuntimeVersion)
 	action.L.Infof("BaseImage set to %s", target.Spec.Build.BaseImage)
 	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
+
+	for i, r := range target.Spec.Build.Repositories {
+		if i == 0 {
+			action.L.Info("Repositories:")
+		}
+
+		action.L.Infof("    %d - %s", i, r)
+	}
 
 	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 

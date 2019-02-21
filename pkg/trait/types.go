@@ -94,6 +94,7 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 // A Environment provides the context where the trait is executed
 type Environment struct {
 	CamelCatalog       *camel.RuntimeCatalog
+	RuntimeVersion     string
 	Catalog            *Catalog
 	C                  context.Context
 	Client             client.Client
@@ -210,6 +211,23 @@ func (e *Environment) DetermineCamelVersion() string {
 	}
 	if version == "" {
 		version = e.Platform.Spec.Build.CamelVersion
+	}
+
+	return version
+}
+
+// DetermineRuntimeVersion --
+func (e *Environment) DetermineRuntimeVersion() string {
+	var version string
+
+	if e.Integration != nil {
+		version = e.Integration.Status.RuntimeVersion
+	}
+	if e.IntegrationContext != nil && version == "" {
+		version = e.IntegrationContext.Status.RuntimeVersion
+	}
+	if version == "" {
+		version = e.Platform.Spec.Build.RuntimeVersion
 	}
 
 	return version
