@@ -1,4 +1,0 @@
-moduleName=camel-k-runtime-groovy
-moduleVersion=0.0.3-SNAPSHOT
-extensionClasses=org.apache.camel.k.groovy.extension.LogComponentExtension
-#staticExtensionClasses=support.StaticStringExtension
