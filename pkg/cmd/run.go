@@ -262,6 +262,7 @@ func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v
 	return o.updateIntegrationCode(c, sources)
 }
 
+//nolint: gocyclo
 func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1alpha1.Integration, error) {
 	namespace := o.Namespace
 
