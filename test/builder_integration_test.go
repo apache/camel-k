@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/util/cancellable"
@@ -62,16 +64,18 @@ func TestBuildManagerBuild(t *testing.T) {
 	assert.Nil(t, err)
 
 	r := builder.Request{
-		C:       cancellable.NewContext(),
-		Catalog: catalog,
+		C:              cancellable.NewContext(),
+		Catalog:        catalog,
+		RuntimeVersion: defaults.RuntimeVersion,
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: catalog.Version,
-				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
+				CamelVersion:   catalog.Version,
+				RuntimeVersion: defaults.RuntimeVersion,
+				BaseImage:      "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},
 		Dependencies: []string{
@@ -108,16 +112,18 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 	assert.Nil(t, err)
 
 	r := builder.Request{
-		C:       cancellable.NewContext(),
-		Catalog: catalog,
+		C:              cancellable.NewContext(),
+		Catalog:        catalog,
+		RuntimeVersion: defaults.RuntimeVersion,
 		Meta: v1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: catalog.Version,
-				BaseImage:    "docker.io/fabric8/s2i-java:3.0-java8",
+				CamelVersion:   catalog.Version,
+				RuntimeVersion: defaults.RuntimeVersion,
+				BaseImage:      "docker.io/fabric8/s2i-java:3.0-java8",
 			},
 		},
 		Dependencies: []string{

@@ -59,6 +59,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&impl.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
 	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
+	cmd.Flags().BoolVar(&impl.snapshotRepositories, "snapshot-repositories", false, "Automatically include known snapshot repositories")
 	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
@@ -79,20 +80,21 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	wait             bool
-	clusterSetupOnly bool
-	skipClusterSetup bool
-	exampleSetup     bool
-	registry         string
-	outputFormat     string
-	organization     string
-	pushSecret       string
-	camelVersion     string
-	baseImage        string
-	localRepository  string
-	repositories     []string
-	properties       []string
-	contexts         []string
+	wait                 bool
+	clusterSetupOnly     bool
+	skipClusterSetup     bool
+	exampleSetup         bool
+	snapshotRepositories bool
+	registry             string
+	outputFormat         string
+	organization         string
+	pushSecret           string
+	camelVersion         string
+	baseImage            string
+	localRepository      string
+	repositories         []string
+	properties           []string
+	contexts             []string
 }
 
 func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
@@ -154,6 +156,20 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 		}
 		if len(o.repositories) > 0 {
 			platform.Spec.Build.Repositories = o.repositories
+		}
+		if o.snapshotRepositories {
+			if platform.Spec.Build.Repositories == nil {
+				platform.Spec.Build.Repositories = make([]string, 0)
+			}
+
+			platform.Spec.Build.Repositories = append(
+				platform.Spec.Build.Repositories,
+				"https://repository.apache.org/content/repositories/snapshots@id=apache.snapshots@snapshots",
+			)
+			platform.Spec.Build.Repositories = append(
+				platform.Spec.Build.Repositories,
+				"https://oss.sonatype.org/content/repositories/snapshots/@id=sonatype.snapshots@snapshots",
+			)
 		}
 		if o.camelVersion != "" {
 			platform.Spec.Build.CamelVersion = o.camelVersion

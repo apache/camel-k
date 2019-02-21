@@ -157,6 +157,9 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "runtimeVersion": {
+          "type": "string"
         }
       },
       "additionalProperties": false,

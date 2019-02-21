@@ -20,12 +20,12 @@ package builder
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/apache/camel-k/pkg/util/test"
 
-	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/version"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/maven"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +37,8 @@ func TestGenerateJvmProject(t *testing.T) {
 	ctx := Context{
 		Catalog: catalog,
 		Request: Request{
-			Catalog: catalog,
+			Catalog:        catalog,
+			RuntimeVersion: defaults.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -65,7 +66,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-jvm",
-		Version:    version.Version,
+		Version:    defaults.RuntimeVersion,
 		Type:       "jar",
 	})
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
@@ -81,7 +82,8 @@ func TestGenerateGroovyProject(t *testing.T) {
 	ctx := Context{
 		Catalog: catalog,
 		Request: Request{
-			Catalog: catalog,
+			Catalog:        catalog,
+			RuntimeVersion: defaults.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -110,13 +112,13 @@ func TestGenerateGroovyProject(t *testing.T) {
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-jvm",
-		Version:    version.Version,
+		Version:    defaults.RuntimeVersion,
 		Type:       "jar",
 	})
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-groovy",
-		Version:    version.Version,
+		Version:    defaults.RuntimeVersion,
 		Type:       "jar",
 	})
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
