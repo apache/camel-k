@@ -111,14 +111,15 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		// happens asynchronously, a new context has to be created. the new context
 		// can be used also to stop the build.
 		r := builder.Request{
-			C:            cancellable.NewContext(),
-			Catalog:      env.CamelCatalog,
-			Meta:         ictx.ObjectMeta,
-			Dependencies: ictx.Spec.Dependencies,
-			Repositories: repositories,
-			Steps:        env.Steps,
-			BuildDir:     env.BuildDir,
-			Platform:     env.Platform.Spec,
+			C:              cancellable.NewContext(),
+			Catalog:        env.CamelCatalog,
+			RuntimeVersion: env.RuntimeVersion,
+			Meta:           ictx.ObjectMeta,
+			Dependencies:   ictx.Spec.Dependencies,
+			Repositories:   repositories,
+			Steps:          env.Steps,
+			BuildDir:       env.BuildDir,
+			Platform:       env.Platform.Spec,
 		}
 
 		b.Submit(r, func(result *builder.Result) {

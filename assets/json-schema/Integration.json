@@ -270,6 +270,9 @@
         },
         "phase": {
           "type": "string"
+        },
+        "runtimeVersion": {
+          "type": "string"
         }
       },
       "additionalProperties": false,

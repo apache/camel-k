@@ -36,7 +36,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/version"
 )
 
 // GenerateProject --
@@ -53,6 +52,7 @@ func GenerateProject(ctx *Context) error {
 	//
 
 	ctx.Project.Repositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
+	ctx.Project.PluginRepositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
 
 	for i, r := range ctx.Request.Repositories {
 		repo := maven.NewRepository(r)
@@ -61,13 +61,14 @@ func GenerateProject(ctx *Context) error {
 		}
 
 		ctx.Project.Repositories = append(ctx.Project.Repositories, repo)
+		ctx.Project.PluginRepositories = append(ctx.Project.PluginRepositories, repo)
 	}
 
 	//
 	// set-up dependencies
 	//
 
-	ctx.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", version.Version)
+	ctx.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", ctx.Request.RuntimeVersion)
 
 	for _, d := range ctx.Request.Dependencies {
 		switch {
@@ -86,7 +87,7 @@ func GenerateProject(ctx *Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, version.Version)
+			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
@@ -95,7 +96,7 @@ func GenerateProject(ctx *Context) error {
 		case strings.HasPrefix(d, "runtime:"):
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, version.Version)
+			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
 		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}
@@ -174,7 +175,7 @@ func ComputeDependencies(ctx *Context) error {
 
 	opts := make([]string, 0, 2)
 	opts = append(opts, maven.ExtraOptions(ctx.Request.Platform.Build.LocalRepository)...)
-	opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", version.Version))
+	opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Request.RuntimeVersion))
 
 	err = maven.Run(p, opts...)
 	if err != nil {
@@ -314,8 +315,10 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	for _, item := range list.Items {
 		ctx := item
 
-		// TODO: add support for semver lookup
 		if ctx.Status.CamelVersion != context.Catalog.Version {
+			continue
+		}
+		if ctx.Status.RuntimeVersion != context.Request.RuntimeVersion {
 			continue
 		}
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {

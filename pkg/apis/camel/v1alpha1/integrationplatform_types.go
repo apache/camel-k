@@ -76,6 +76,7 @@ type IntegrationPlatformBuildSpec struct {
 	Organization    string                                  `json:"organization,omitempty"`
 	PushSecret      string                                  `json:"pushSecret,omitempty"`
 	CamelVersion    string                                  `json:"camelVersion,omitempty"`
+	RuntimeVersion  string                                  `json:"runtimeVersion,omitempty"`
 	BaseImage       string                                  `json:"baseImage,omitempty"`
 	Properties      map[string]string                       `json:"properties,omitempty"`
 	LocalRepository string                                  `json:"localRepository,omitempty"`

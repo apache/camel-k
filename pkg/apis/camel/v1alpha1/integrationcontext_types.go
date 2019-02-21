@@ -18,14 +18,15 @@ type IntegrationContextSpec struct {
 
 // IntegrationContextStatus defines the observed state of IntegrationContext
 type IntegrationContextStatus struct {
-	Phase        IntegrationContextPhase `json:"phase,omitempty"`
-	BaseImage    string                  `json:"baseImage,omitempty"`
-	Image        string                  `json:"image,omitempty"`
-	PublicImage  string                  `json:"publicImage,omitempty"`
-	Digest       string                  `json:"digest,omitempty"`
-	Artifacts    []Artifact              `json:"artifacts,omitempty"`
-	Failure      *Failure                `json:"failure,omitempty"`
-	CamelVersion string                  `json:"camelVersion,omitempty"`
+	Phase          IntegrationContextPhase `json:"phase,omitempty"`
+	BaseImage      string                  `json:"baseImage,omitempty"`
+	Image          string                  `json:"image,omitempty"`
+	PublicImage    string                  `json:"publicImage,omitempty"`
+	Digest         string                  `json:"digest,omitempty"`
+	Artifacts      []Artifact              `json:"artifacts,omitempty"`
+	Failure        *Failure                `json:"failure,omitempty"`
+	CamelVersion   string                  `json:"camelVersion,omitempty"`
+	RuntimeVersion string                  `json:"runtimeVersion,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

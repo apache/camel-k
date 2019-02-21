@@ -30,6 +30,7 @@ type IntegrationStatus struct {
 	GeneratedSources []SourceSpec     `json:"generatedSources,omitempty"`
 	Failure          *Failure         `json:"failure,omitempty"`
 	CamelVersion     string           `json:"camelVersion,omitempty"`
+	RuntimeVersion   string           `json:"runtimeVersion,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
