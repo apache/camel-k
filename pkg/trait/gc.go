@@ -21,16 +21,13 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
+
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/labels"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
 )
 
 type garbageCollectorTrait struct {
@@ -76,8 +73,14 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 	// Register a post action that deletes the existing resources that are labelled
 	// with the previous integration generations.
 	e.PostActions = append(e.PostActions, func(environment *Environment) error {
+		selectors := []string{
+			fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
+			"camel.apache.org/generation",
+			fmt.Sprintf("camel.apache.org/generation notin (%d)", e.Integration.GetGeneration()),
+		}
+
 		// Retrieve older generation resources that may can enlisted for garbage collection
-		resources, err := getOldGenerationResources(e)
+		resources, err := kubernetes.LookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
 		if err != nil {
 			return err
 		}
@@ -101,74 +104,4 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 	})
 
 	return nil
-}
-
-func getOldGenerationResources(e *Environment) ([]unstructured.Unstructured, error) {
-	// We rely on the discovery API to retrieve all the resources group and kind.
-	// That results in an unbounded collection that can be a bit slow (a couple of seconds).
-	// We may want to refine that step by white-listing or enlisting types to speed-up
-	// the collection duration.
-	types, err := getDiscoveryTypes(e.Client)
-	if err != nil {
-		return nil, err
-	}
-
-	selectors := []string{
-		fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
-		"camel.apache.org/generation",
-		fmt.Sprintf("camel.apache.org/generation notin (%d)", e.Integration.GetGeneration()),
-	}
-
-	selector, err := labels.Parse(strings.Join(selectors, ","))
-	if err != nil {
-		return nil, err
-	}
-
-	res := make([]unstructured.Unstructured, 0)
-
-	for _, t := range types {
-		options := k8sclient.ListOptions{
-			Namespace:     e.Integration.Namespace,
-			LabelSelector: selector,
-			Raw: &metav1.ListOptions{
-				TypeMeta: t,
-			},
-		}
-		list := unstructured.UnstructuredList{
-			Object: map[string]interface{}{
-				"apiVersion": t.APIVersion,
-				"kind":       t.Kind,
-			},
-		}
-		if err := e.Client.List(context.TODO(), &options, &list); err != nil {
-			if k8serrors.IsNotFound(err) ||
-				k8serrors.IsForbidden(err) ||
-				k8serrors.IsMethodNotSupported(err) {
-				continue
-			}
-			return nil, err
-		}
-
-		res = append(res, list.Items...)
-	}
-	return res, nil
-}
-
-func getDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
-	resources, err := client.Discovery().ServerPreferredNamespacedResources()
-	if err != nil {
-		return nil, err
-	}
-
-	types := make([]metav1.TypeMeta, 0)
-	for _, resource := range resources {
-		for _, r := range resource.APIResources {
-			types = append(types, metav1.TypeMeta{
-				Kind:       r.Kind,
-				APIVersion: resource.GroupVersion,
-			})
-		}
-	}
-
-	return types, nil
 }

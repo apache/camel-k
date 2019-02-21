@@ -8,6 +8,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 
 	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -115,6 +116,12 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		NewDeployAction(),
 		NewErrorRecoveryAction(),
 		NewMonitorAction(),
+		NewDeleteAction(),
+	}
+
+	// Delete phase
+	if instance.GetDeletionTimestamp() != nil {
+		instance.Status.Phase = camelv1alpha1.IntegrationPhaseDeleting
 	}
 
 	ilog := rlog.ForIntegration(instance)
@@ -131,12 +138,17 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 	// Fetch the Integration again and check the state
 	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
+		if k8serrors.IsNotFound(err) && instance.Status.Phase == camelv1alpha1.IntegrationPhaseDeleting {
+			return reconcile.Result{}, nil
+		}
+
 		return reconcile.Result{}, err
 	}
 
 	if instance.Status.Phase == camelv1alpha1.IntegrationPhaseRunning {
 		return reconcile.Result{}, nil
 	}
+
 	// Requeue
 	return reconcile.Result{
 		RequeueAfter: 5 * time.Second,
