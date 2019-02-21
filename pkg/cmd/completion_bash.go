@@ -92,6 +92,11 @@ __kamel_runtimes() {
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 }
 
+__kamel_deletion_policy() {
+    local type_list="owner label"
+    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
+}
+
 __kamel_kubectl_get_configmap() {
     local template
     local kubectl_out
@@ -242,6 +247,13 @@ func configureKnownBashCompletions(command *cobra.Command) {
 		"trait",
 		map[string][]string{
 			cobra.BashCompCustom: {"__kamel_traits"},
+		},
+	)
+	configureBashAnnotationForFlag(
+		command,
+		"deletion-policy",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_deletion_policy"},
 		},
 	)
 }

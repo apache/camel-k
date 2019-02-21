@@ -20,6 +20,9 @@ package trait
 import (
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/finalizer"
+	"github.com/pkg/errors"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -41,6 +44,23 @@ func newOwnerTrait() *ownerTrait {
 
 func (t *ownerTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
+
+	if e.Integration == nil {
+		return false, nil
+	}
+
+	ok, err := finalizer.Exists(e.Integration, finalizer.CamelIntegrationFinalizer)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to read finalizer"+finalizer.CamelIntegrationFinalizer)
+	}
+
+	if ok {
+		//
+		// do not enable this trait if the integration has
+		// a finalizer
+		//
 		return false, nil
 	}
 

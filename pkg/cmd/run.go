@@ -31,6 +31,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/apache/camel-k/pkg/util/finalizer"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/gzip"
@@ -68,7 +70,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
-	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The contex used to run the integration")
+	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The context used to run the integration")
 	cmd.Flags().StringArrayVarP(&options.Properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
@@ -84,6 +86,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Compression, "compression", false, "Enable store source as a compressed binary blob")
 	cmd.Flags().StringSliceVar(&options.Resources, "resource", nil, "Add a resource")
 	cmd.Flags().StringSliceVar(&options.OpenAPIs, "open-api", nil, "Add an OpenAPI v2 spec")
+	cmd.Flags().StringVar(&options.DeletionPolicy, "deletion-policy", "owner", "Policy used to cleanup child resources, default owner")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -98,6 +101,7 @@ type runCmdOptions struct {
 	Logs               bool
 	Sync               bool
 	Dev                bool
+	DeletionPolicy     string
 	IntegrationContext string
 	Runtime            string
 	IntegrationName    string
@@ -336,6 +340,12 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			},
 			Type: v1alpha1.ResourceTypeOpenAPI,
 		})
+	}
+
+	if o.DeletionPolicy == "label" {
+		integration.Finalizers = []string{
+			finalizer.CamelIntegrationFinalizer,
+		}
 	}
 
 	if o.Runtime != "" {
