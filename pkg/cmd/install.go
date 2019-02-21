@@ -254,7 +254,7 @@ func (o *installCmdOptions) waitForPlatformReady(platform *v1alpha1.IntegrationP
 	return watch.HandlePlatformStateChanges(o.Context, platform, handler)
 }
 
-func (o *installCmdOptions) validate(cmd *cobra.Command, args []string) error {
+func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	var result error
 
 	// Let's register only our own APIs
