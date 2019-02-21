@@ -147,6 +147,8 @@ const (
 	IntegrationPhaseError IntegrationPhase = "Error"
 	// IntegrationPhaseBuildFailureRecovery --
 	IntegrationPhaseBuildFailureRecovery IntegrationPhase = "Building Failure Recovery"
+	// IntegrationPhaseDeleting --
+	IntegrationPhaseDeleting IntegrationPhase = "Deleting"
 )
 
 func init() {

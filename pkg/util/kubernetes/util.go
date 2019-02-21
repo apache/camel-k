@@ -20,6 +20,10 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"strings"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -27,8 +31,11 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -117,4 +124,70 @@ func GetIntegration(context context.Context, client client.Client, name string, 
 	}
 
 	return &answer, nil
+}
+
+// GetDiscoveryTypes --
+func GetDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
+	resources, err := client.Discovery().ServerPreferredNamespacedResources()
+	if err != nil {
+		return nil, err
+	}
+
+	types := make([]metav1.TypeMeta, 0)
+	for _, resource := range resources {
+		for _, r := range resource.APIResources {
+			types = append(types, metav1.TypeMeta{
+				Kind:       r.Kind,
+				APIVersion: resource.GroupVersion,
+			})
+		}
+	}
+
+	return types, nil
+}
+
+// LookUpResources --
+func LookUpResources(ctx context.Context, client client.Client, namespace string, selectors []string) ([]unstructured.Unstructured, error) {
+	// We rely on the discovery API to retrieve all the resources group and kind.
+	// That results in an unbounded collection that can be a bit slow (a couple of seconds).
+	// We may want to refine that step by white-listing or enlisting types to speed-up
+	// the collection duration.
+	types, err := GetDiscoveryTypes(client)
+	if err != nil {
+		return nil, err
+	}
+
+	selector, err := labels.Parse(strings.Join(selectors, ","))
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]unstructured.Unstructured, 0)
+
+	for _, t := range types {
+		options := k8sclient.ListOptions{
+			Namespace:     namespace,
+			LabelSelector: selector,
+			Raw: &metav1.ListOptions{
+				TypeMeta: t,
+			},
+		}
+		list := unstructured.UnstructuredList{
+			Object: map[string]interface{}{
+				"apiVersion": t.APIVersion,
+				"kind":       t.Kind,
+			},
+		}
+		if err := client.List(ctx, &options, &list); err != nil {
+			if k8serrors.IsNotFound(err) ||
+				k8serrors.IsForbidden(err) ||
+				k8serrors.IsMethodNotSupported(err) {
+				continue
+			}
+			return nil, err
+		}
+
+		res = append(res, list.Items...)
+	}
+	return res, nil
 }
