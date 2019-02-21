@@ -23,7 +23,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	platformutils "github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
@@ -44,17 +44,17 @@ func (action *initializeAction) CanHandle(platform *v1alpha1.IntegrationPlatform
 	return platform.Status.Phase == "" || platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseDuplicate
 }
 
-func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
-	target := platform.DeepCopy()
+func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.IntegrationPlatform) error {
+	target := ip.DeepCopy()
 
-	duplicate, err := action.isDuplicate(ctx, platform)
+	duplicate, err := action.isDuplicate(ctx, ip)
 	if err != nil {
 		return err
 	}
 	if duplicate {
 		// another platform already present in the namespace
-		if platform.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate {
-			target := platform.DeepCopy()
+		if ip.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate {
+			target := ip.DeepCopy()
 			target.Status.Phase = v1alpha1.IntegrationPlatformPhaseDuplicate
 
 			action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
@@ -66,12 +66,12 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 
 	// update missing fields in the resource
 	if target.Spec.Cluster == "" {
-		// determine the kind of cluster the platform in installed into
-		isOpenshift, err := openshift.IsOpenShift(action.client)
+		// determine the kind of cluster the platform is installed into
+		isOpenShift, err := openshift.IsOpenShift(action.client)
 		switch {
 		case err != nil:
 			return err
-		case isOpenshift:
+		case isOpenShift:
 			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 		default:
 			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
@@ -91,7 +91,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	}
 
 	if target.Spec.Profile == "" {
-		target.Spec.Profile = platformutils.GetProfile(target)
+		target.Spec.Profile = platform.GetProfile(target)
 	}
 	if target.Spec.Build.CamelVersion == "" {
 		target.Spec.Build.CamelVersion = defaults.CamelVersion
@@ -126,19 +126,29 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 		return err
 	}
 
+	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+		// create and warm the Kaniko cache into the Camel K builder volume
+		action.L.Info("Warming Kaniko cache...")
+		err = warmKanikoCache(ctx, action.client, target)
+		if err != nil {
+			return err
+		}
+		action.L.Info("Kaniko cache successfully warmed")
+	}
+
 	// next status
 	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 	return action.client.Status().Update(ctx, target)
 }
 
 func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v1alpha1.IntegrationPlatform) (bool, error) {
-	platforms, err := platformutils.ListPlatforms(ctx, action.client, thisPlatform.Namespace)
+	platforms, err := platform.ListPlatforms(ctx, action.client, thisPlatform.Namespace)
 	if err != nil {
 		return false, err
 	}
-	for _, platform := range platforms.Items {
-		platform := platform // pin
-		if platform.Name != thisPlatform.Name && platformutils.IsActive(&platform) {
+	for _, p := range platforms.Items {
+		p := p // pin
+		if p.Name != thisPlatform.Name && platform.IsActive(&p) {
 			return true, nil
 		}
 	}
