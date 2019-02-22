@@ -20,10 +20,9 @@ package integrationplatform
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
@@ -119,25 +118,25 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 		action.L.Infof("    %d - %s", i, r)
 	}
 
-	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
-
 	err = action.client.Update(ctx, target)
 	if err != nil {
 		return err
 	}
 
 	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
-		// create and warm the Kaniko cache into the Camel K builder volume
-		action.L.Info("Warming Kaniko cache...")
-		err = warmKanikoCache(ctx, action.client, target)
+		// create the Kaniko warmer pod that caches the base image into the Camel K builder volume
+		action.L.Info("Create Kaniko cache warmer pod")
+		err := createKanikoCacheWarmerPod(ctx, action.client, target)
 		if err != nil {
 			return err
 		}
-		action.L.Info("Kaniko cache successfully warmed")
+		target.Status.Phase = v1alpha1.IntegrationPlatformPhaseWarming
+	} else {
+		target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 	}
 
-	// next status
-	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+	// next phase
+	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
 	return action.client.Status().Update(ctx, target)
 }
 
