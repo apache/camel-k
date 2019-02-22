@@ -77,7 +77,10 @@ func Publisher(ctx *builder.Context) error {
 	baseArgs := []string{
 		"--dockerfile=Dockerfile",
 		"--context=" + contextDir,
-		"--destination=" + image}
+		"--destination=" + image,
+		"--cache",
+		"--cache-dir=/workspace/cache",
+	}
 	args := append(baseArgs, "--insecure")
 
 	if ctx.Request.Platform.Build.PushSecret != "" {
@@ -113,7 +116,7 @@ func Publisher(ctx *builder.Context) error {
 			Containers: []corev1.Container{
 				{
 					Name:         "kaniko",
-					Image:        "gcr.io/kaniko-project/executor@sha256:f29393d9c8d40296e1692417089aa2023494bce9afd632acac7dd0aea763e5bc",
+					Image:        "gcr.io/kaniko-project/executor:v0.9.0",
 					Args:         args,
 					Env:          envs,
 					VolumeMounts: volumeMounts,

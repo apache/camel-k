@@ -105,6 +105,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 	integrationPlatformActionPool := []Action{
 		NewInitializeAction(),
+		NewWarmAction(),
 		NewCreateAction(),
 		NewStartAction(),
 	}
