@@ -20,8 +20,6 @@ package test
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,7 +33,6 @@ func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
 	assert.Equal(t, 1, len(artifact.Schemes))
 	assert.Equal(t, "org.apache.camel.k", artifact.GroupID)
 	assert.Equal(t, "camel-knative", artifact.ArtifactID)
-	assert.Equal(t, defaults.RuntimeVersion, artifact.Version)
 
 	scheme, found := catalog.GetScheme("knative")
 	assert.True(t, found)

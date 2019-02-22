@@ -3,8 +3,6 @@
 # Exit on error
 set -e
 
-# Compile and build images
-make
 eval $(minikube docker-env)
 make images
 

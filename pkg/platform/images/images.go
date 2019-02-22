@@ -22,8 +22,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util/camel"
-
-	"github.com/apache/camel-k/version"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // BaseRepository is the docker repository that contains images
@@ -84,5 +83,5 @@ func LookupPredefinedImage(catalog *camel.RuntimeCatalog, dependencies []string)
 
 // PredefinedImageNameFor --
 func PredefinedImageNameFor(comp string) string {
-	return fmt.Sprintf("%s/%s%s:%s", BaseRepository, ImagePrefix, comp, version.Version)
+	return fmt.Sprintf("%s/%s%s:%s", BaseRepository, ImagePrefix, comp, defaults.Version)
 }

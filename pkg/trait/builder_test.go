@@ -146,7 +146,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					PublishStrategy: strategy,
 					Registry:        "registry",
-					CamelVersion:    defaults.CamelVersion,
+					CamelVersion:    defaults.CamelVersionConstraint,
 				},
 			},
 		},

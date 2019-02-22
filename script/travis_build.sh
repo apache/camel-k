@@ -51,21 +51,20 @@ echo "openshift is deployed and reachable"
 oc describe nodes
 
 echo "Adding maven artifacts to the image context"
-./script/package_maven_artifacts.sh
+make package-artifacts
 
 echo "Copying binary file to docker dir"
 mkdir -p ./build/_output/bin
 cp ./camel-k ./build/_output/bin/
 
 echo "Building the images"
-export IMAGE=docker.io/apache/camel-k:$(./script/get_version.sh)
+export IMAGE=docker.io/apache/camel-k:$(make version)
 docker build -t "${IMAGE}" -f build/Dockerfile .
 
 echo "installing camel k cluster resources"
 ./kamel install --cluster-setup
 
 oc login -u developer
-
 
 # Then run integration tests
 make test-integration

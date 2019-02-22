@@ -28,13 +28,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/version"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/gzip"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
@@ -215,7 +215,7 @@ func (t *restDslTrait) generateProject(e *Environment) (maven.Project, error) {
 		ModelVersion:      "4.0.0",
 		GroupID:           "org.apache.camel.k.integration",
 		ArtifactID:        "camel-k-red-dsl-generator",
-		Version:           version.Version,
+		Version:           defaults.Version,
 		Build: maven.Build{
 			DefaultGoal: "generate-resources",
 			Plugins: []maven.Plugin{
