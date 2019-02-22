@@ -9,8 +9,6 @@ else
   oc new-project $project 2>/dev/null || true
 fi
 
-# Compile and build images
-make
 eval $(minishift docker-env)
 make images
 

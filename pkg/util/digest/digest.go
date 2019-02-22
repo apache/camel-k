@@ -24,7 +24,7 @@ import (
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/version"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
@@ -32,7 +32,7 @@ import (
 func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
-	if _, err := hash.Write([]byte(version.Version)); err != nil {
+	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
 		return "", err
 	}
 	// Integration Context is relevant
@@ -80,7 +80,7 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 func ComputeForIntegrationContext(context *v1alpha1.IntegrationContext) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
-	if _, err := hash.Write([]byte(version.Version)); err != nil {
+	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
 		return "", err
 	}
 

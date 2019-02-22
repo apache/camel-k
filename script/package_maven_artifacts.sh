@@ -1,5 +1,16 @@
 #!/bin/sh
 
 location=$(dirname $0)
-cd $location/../
-./mvnw clean install --batch-mode -DskipTests -f runtime/pom.xml -s build/maven/settings.xml
+
+if [ "$#" -ne 1 ]; then
+    echo "usage: $0 version"
+    exit 1
+fi
+
+cd ${location}/..
+
+./mvnw \
+    -f build/maven/pom-runtime.xml \
+    -DoutputDirectory=$PWD/build/_maven_output \
+    -Druntime.version=$1 \
+    dependency:copy-dependencies

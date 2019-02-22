@@ -20,7 +20,8 @@ package cmd
 import (
 	"fmt"
 
-	rootVersion "github.com/apache/camel-k/version"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +31,7 @@ func newCmdVersion() *cobra.Command {
 		Short: "Display client version",
 		Long:  `Display Camel K client version.`,
 		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println("Camel K Client " + rootVersion.Version)
+			fmt.Println("Camel K Client " + defaults.Version)
 		},
 	}
 }

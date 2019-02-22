@@ -3,22 +3,13 @@
 location=$(dirname $0)
 rootdir=$location/../
 
-version=$($location/get_version.sh)
-
-if [ "$#" -eq 0 ]; then
-    echo "build default catalog"
-    ./mvnw -q -f runtime/pom.xml \
-        -N \
-        -Pcatalog \
-        -Dcatalog.path=${rootdir}/deploy
-else
-    for ver in "$@"
-    do
-        echo "build catalog for version $ver"
-        ./mvnw -q -f runtime/pom.xml \
-            -N \
-            -Pcatalog \
-            -Dcatalog.version=$ver \
-            -Dcatalog.path=${rootdir}/deploy
-    done
+if [ "$#" -ne 2 ]; then
+    echo "usage: $0 catalog.version runtime.version"
+    exit 1
 fi
+
+$rootdir/mvnw -q \
+    -f ${rootdir}/build/maven/pom-catalog.xml \
+    -Dcatalog.path=${rootdir}/deploy \
+    -Dcatalog.version=$1 \
+    -Druntime.version=$2
