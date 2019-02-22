@@ -21,16 +21,17 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/finalizer"
-
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewDeleteAction creates a new monitoring action for an integration
@@ -73,24 +74,23 @@ func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.In
 		return err
 	}
 
-	// If the ForegroundDeletion deletion is set remove the finalizer and
+	// If the ForegroundDeletion deletion is not set remove the finalizer and
 	// delete child resources from a dedicated goroutine
-	ok, err = finalizer.Exists(integration, finalizer.ForegroundDeletion)
+	foreground, err := finalizer.Exists(integration, finalizer.ForegroundDeletion)
 	if err != nil {
 		return err
 	}
 
-	if ok {
+	if !foreground {
 		//
 		// Async
 		//
-
 		if err := action.removeFinalizer(ctx, target); err != nil {
 			return err
 		}
 
 		go func() {
-			if err := action.deleteResources(context.TODO(), target, resources); err != nil {
+			if err := action.deleteChildResources(context.TODO(), target, resources); err != nil {
 				l.Error(err, "error deleting child resources")
 			}
 		}()
@@ -98,7 +98,7 @@ func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.In
 		//
 		// Sync
 		//
-		if err := action.deleteResources(ctx, target, resources); err != nil {
+		if err := action.deleteChildResources(ctx, target, resources); err != nil {
 			return err
 		}
 		if err = action.removeFinalizer(ctx, target); err != nil {
@@ -118,7 +118,7 @@ func (action *deleteAction) removeFinalizer(ctx context.Context, integration *v1
 	return action.client.Update(ctx, integration)
 }
 
-func (action *deleteAction) deleteResources(ctx context.Context, integration *v1alpha1.Integration, resources []unstructured.Unstructured) error {
+func (action *deleteAction) deleteChildResources(ctx context.Context, integration *v1alpha1.Integration, resources []unstructured.Unstructured) error {
 	l := log.Log.ForIntegration(integration)
 
 	// And delete them
@@ -126,18 +126,9 @@ func (action *deleteAction) deleteResources(ctx context.Context, integration *v1
 		// pin the resource
 		resource := resource
 
-		// Pods are automatically deleted by the removal of Deployment
-		if resource.GetKind() == "Pod" {
-			continue
-		}
-		// ReplicaSet are automatically deleted by the removal of Deployment
-		if resource.GetKind() == "ReplicaSet" {
-			continue
-		}
-
 		l.Infof("Deleting child resource: %s/%s", resource.GetKind(), resource.GetName())
 
-		err := action.client.Delete(ctx, &resource)
+		err := action.client.Delete(ctx, &resource, k8sclient.PropagationPolicy(metav1.DeletePropagationOrphan))
 		if err != nil {
 			// The resource may have already been deleted
 			if !k8serrors.IsNotFound(err) {
