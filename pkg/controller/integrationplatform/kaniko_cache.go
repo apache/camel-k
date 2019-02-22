@@ -20,7 +20,6 @@ package integrationplatform
 import (
 	"context"
 	"os"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,12 +27,11 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/pkg/errors"
 )
 
-func warmKanikoCache(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
+func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -60,7 +58,7 @@ func warmKanikoCache(ctx context.Context, client client.Client, platform *v1alph
 					},
 				},
 			},
-			// Create the cache directory otherwise Kaniko warmer skips caching
+			// Create the cache directory otherwise Kaniko warmer skips caching silently
 			InitContainers: []corev1.Container{
 				{
 					Name:            "create-kaniko-cache",
@@ -124,21 +122,6 @@ func warmKanikoCache(ctx context.Context, client client.Client, platform *v1alph
 	err = client.Create(ctx, &pod)
 	if err != nil {
 		return errors.Wrap(err, "cannot create Kaniko warmer pod")
-	}
-
-	err = kubernetes.WaitCondition(ctx, client, &pod, func(obj interface{}) (bool, error) {
-		if val, ok := obj.(*corev1.Pod); ok {
-			if val.Status.Phase == corev1.PodSucceeded {
-				return true, nil
-			} else if val.Status.Phase == corev1.PodFailed {
-				return false, errors.New("Kaniko cache warming failed")
-			}
-		}
-		return false, nil
-	}, 10*time.Minute)
-
-	if err != nil {
-		return err
 	}
 
 	return nil
