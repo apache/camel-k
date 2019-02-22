@@ -1154,21 +1154,21 @@ spec:
     camel-k-runtime-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-groovy
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-runtime-jvm:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-jvm
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-core
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -1186,7 +1186,7 @@ spec:
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
       schemes:
       - id: knative
         http: true
@@ -3223,21 +3223,21 @@ spec:
     camel-k-runtime-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-groovy
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-runtime-jvm:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-jvm
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-core
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -3255,7 +3255,7 @@ spec:
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
-      version: 0.3.0-SNAPSHOT
+      version: 1.0.0
       schemes:
       - id: knative
         http: true

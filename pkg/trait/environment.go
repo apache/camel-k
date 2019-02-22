@@ -19,8 +19,8 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
-	"github.com/apache/camel-k/version"
 )
 
 type environmentTrait struct {
@@ -52,7 +52,7 @@ func (t *environmentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *environmentTrait) Apply(e *Environment) error {
-	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, version.Version)
+	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, defaults.Version)
 	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
 	envvar.SetVal(&e.EnvVars, envVarCamelVersion, e.CamelCatalog.Version)
 

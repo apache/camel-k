@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Publishes predefined images for all Camel components
 func main() {
 	sources := []interface{}{
 		v1alpha1.Integration{},
@@ -52,6 +51,15 @@ func main() {
 				b, err := json.MarshalIndent(schema, "", "  ")
 				if err != nil {
 					fmt.Println("error:", err)
+				}
+
+				if _, err := os.Stat(out); err != nil {
+					if os.IsNotExist(err) {
+						if err := os.MkdirAll(out, os.ModePerm); err != nil {
+							fmt.Println("error:", err)
+							return
+						}
+					}
 				}
 
 				v := reflect.ValueOf(source)

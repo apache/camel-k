@@ -21,9 +21,9 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
 
-	"github.com/apache/camel-k/version"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,26 +40,26 @@ func TestImageLookup(t *testing.T) {
 		},
 		{
 			dependencies: []string{"camel:telegram", "camel:core", "camel-k:knative"},
-			image:        BaseRepository + "/" + ImagePrefix + "telegram:" + version.Version,
+			image:        BaseRepository + "/" + ImagePrefix + "telegram:" + defaults.Version,
 		},
 		{
 			dependencies: []string{"camel:telegram", "camel-k:knative"},
-			image:        BaseRepository + "/" + ImagePrefix + "telegram:" + version.Version,
+			image:        BaseRepository + "/" + ImagePrefix + "telegram:" + defaults.Version,
 		},
 		{
 			dependencies: []string{"camel:telegram", "camel:core", "camel-k:knative", "camel:dropbox"},
 		},
 		{
 			dependencies: []string{"camel:core", "camel-k:knative"},
-			image:        BaseRepository + "/" + ImagePrefix + "core:" + version.Version,
+			image:        BaseRepository + "/" + ImagePrefix + "core:" + defaults.Version,
 		},
 		{
 			dependencies: []string{"camel:dropbox", "camel:core", "camel-k:knative", "runtime:jvm"},
-			image:        BaseRepository + "/" + ImagePrefix + "dropbox:" + version.Version,
+			image:        BaseRepository + "/" + ImagePrefix + "dropbox:" + defaults.Version,
 		},
 		{
 			dependencies: []string{"camel:dropbox", "camel:core", "camel-k:knative", "runtime:jvm", "runtime:yaml"},
-			image:        BaseRepository + "/" + ImagePrefix + "dropbox:" + version.Version,
+			image:        BaseRepository + "/" + ImagePrefix + "dropbox:" + defaults.Version,
 		},
 		{
 			dependencies: []string{"camel:dropbox", "camel:core", "runtime:jvm", "runtime:yaml"},

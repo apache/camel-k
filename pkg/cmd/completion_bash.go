@@ -267,7 +267,7 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 
 func computeCamelDependencies() string {
 	catalog, err := test.DefaultCatalog()
-	if err != nil {
+	if err != nil || catalog == nil {
 		catalog = camel.NewRuntimeCatalog(v1alpha1.CamelCatalog{}.Spec)
 	}
 

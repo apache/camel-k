@@ -2,18 +2,17 @@
 
 set -e
 
+if [ "$#" -ne 1 ]; then
+    echo "usage: $0 version"
+    exit 1
+fi
+
 location=$(dirname $0)
-new_version=$1
+version=$1
 
-global_version_file=$location/../version/version.go
-version=$($location/get_version.sh)
+for f in $(find $location/../deploy -type f -name "*.yaml"); 
+do
+    sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/docker.io\/apache\/camel-k:${version}/" $f
+done
 
-# Set the new global version
-sed -i "s/$version/$new_version/g" $global_version_file
-find $location/../deploy -type f -exec sed -i "s/$version/$new_version/g" {} \;
-
-# Updating the Java modules
-./mvnw versions:set -DgenerateBackupPoms=false -DnewVersion=$new_version -f $location/../runtime
-
-echo "Camel K version set to: $new_version"
-
+echo "Camel K version set to: $version"

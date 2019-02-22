@@ -93,7 +93,7 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 		target.Spec.Profile = platform.GetProfile(target)
 	}
 	if target.Spec.Build.CamelVersion == "" {
-		target.Spec.Build.CamelVersion = defaults.CamelVersion
+		target.Spec.Build.CamelVersion = defaults.CamelVersionConstraint
 	}
 	if target.Spec.Build.RuntimeVersion == "" {
 		target.Spec.Build.RuntimeVersion = defaults.RuntimeVersion

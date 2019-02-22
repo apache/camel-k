@@ -6,7 +6,13 @@ builddir=$(realpath $location/../xtmp)
 rm -rf $builddir
 
 basename=camel-k-client
-version=$($location/get_version.sh)
+
+if [ "$#" -ne 1 ]; then
+    echo "usage: $0 version"
+    exit 1
+fi
+
+version=$1
 
 cross_compile () {
 	label=$1
