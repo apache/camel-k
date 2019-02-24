@@ -20,12 +20,10 @@ package builder
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -170,4 +168,58 @@ func TestGenerateProjectWithRepositories(t *testing.T) {
 	assert.Equal(t, "ops4j-snapshots", ctx.Project.Repositories[1].ID)
 	assert.False(t, ctx.Project.Repositories[1].Releases.Enabled)
 	assert.True(t, ctx.Project.Repositories[1].Snapshots.Enabled)
+}
+
+func TestSanitizeDependencies(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	ctx := Context{
+		Catalog: catalog,
+		Request: Request{
+			Catalog:        catalog,
+			RuntimeVersion: defaults.RuntimeVersion,
+			Platform: v1alpha1.IntegrationPlatformSpec{
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					CamelVersion: catalog.Version,
+				},
+			},
+			Dependencies: []string{
+				"camel:undertow",
+				"mvn:org.apache.camel/camel-core/2.18.0",
+				"mvn:org.apache.camel.k/camel-k-runtime-jvm/1.0.0",
+				"mvn:com.mycompany/my-dep/1.2.3",
+			},
+		},
+	}
+
+	err = GenerateProject(&ctx)
+	assert.Nil(t, err)
+	err = InjectDependencies(&ctx)
+	assert.Nil(t, err)
+	err = SanitizeDependencies(&ctx)
+	assert.Nil(t, err)
+
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel.k",
+		ArtifactID: "camel-k-runtime-jvm",
+		Version:    defaults.RuntimeVersion,
+		Type:       "jar",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel",
+		ArtifactID: "camel-core",
+		Type:       "jar",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel",
+		ArtifactID: "camel-undertow",
+		Type:       "jar",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "com.mycompany",
+		ArtifactID: "my-dep",
+		Version:    "1.2.3",
+		Type:       "jar",
+	})
 }
