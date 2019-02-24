@@ -164,6 +164,29 @@ func InjectDependencies(ctx *Context) error {
 	return nil
 }
 
+// SanitizeDependencies --
+func SanitizeDependencies(ctx *Context) error {
+	for i := 0; i < len(ctx.Project.Dependencies); i++ {
+		dep := ctx.Project.Dependencies[i]
+
+		switch dep.GroupID {
+		case "org.apache.camel":
+			//
+			// Remove the version so we force using the one configured by the bom
+			//
+			ctx.Project.Dependencies[i].Version = ""
+		case "org.apache.camel.k":
+			//
+			// Force every runtime dependency to have the required version discardin
+			// any version eventually set on the catalog
+			//
+			ctx.Project.Dependencies[i].Version = ctx.Request.RuntimeVersion
+		}
+	}
+
+	return nil
+}
+
 // ComputeDependencies --
 func ComputeDependencies(ctx *Context) error {
 	p := path.Join(ctx.Path, "maven")
