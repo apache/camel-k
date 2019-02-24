@@ -8,8 +8,9 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -131,7 +132,14 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		if a.CanHandle(instance) {
 			ilog.Infof("Invoking action %s", a.Name())
 			if err := a.Handle(ctx, instance); err != nil {
-				return reconcile.Result{}, err
+				if k8serrors.IsConflict(err) {
+					ilog.Error(err, "conflict")
+					return reconcile.Result{
+						Requeue: true,
+					}, nil
+				}
+
+				return reconcile.Result{}, nil
 			}
 		}
 	}
