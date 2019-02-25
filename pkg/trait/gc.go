@@ -27,6 +27,8 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
@@ -72,36 +74,47 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 	}
 	// Register a post action that deletes the existing resources that are labelled
 	// with the previous integration generations.
+	// The collection and deletion are performed asynchronously to avoid blocking
+	// the reconcile loop.
 	e.PostActions = append(e.PostActions, func(environment *Environment) error {
-		selectors := []string{
-			fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
-			"camel.apache.org/generation",
-			fmt.Sprintf("camel.apache.org/generation notin (%d)", e.Integration.GetGeneration()),
-		}
-
-		// Retrieve older generation resources that may can enlisted for garbage collection
-		resources, err := kubernetes.LookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
-		if err != nil {
-			return err
-		}
-		// And delete them
-		for _, resource := range resources {
-			// pind the resource
-			resource := resource
-
-			err = e.Client.Delete(context.TODO(), &resource)
-			if err != nil {
-				// The resource may have already been deleted
-				if !k8serrors.IsNotFound(err) {
-					t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resource: %s/%s", resource.GetKind(), resource.GetName())
-				}
-			} else {
-				t.L.ForIntegration(e.Integration).Debugf("child resource deleted: %s/%s", resource.GetKind(), resource.GetName())
-			}
-		}
-
+		go t.garbageCollectResources(e)
 		return nil
 	})
 
 	return nil
+}
+
+func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
+	// Retrieve older generation resources that may can enlisted for garbage collection
+	// We rely on the discovery API to retrieve all the resources group and kind.
+	// That results in an unbounded collection that can be a bit slow.
+	// We may want to refine that step by white-listing or enlisting types to speed-up
+	// the collection duration.
+
+	selectors := []string{
+		fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
+		"camel.apache.org/generation",
+		fmt.Sprintf("camel.apache.org/generation notin (%d)", e.Integration.GetGeneration()),
+	}
+	resources, err := kubernetes.LookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
+	if err != nil {
+		t.L.ForIntegration(e.Integration).Errorf(err, "cannot collect older generation resources")
+		return
+	}
+
+	// And delete them
+	for _, resource := range resources {
+		// pin the resource
+		resource := resource
+
+		err = e.Client.Delete(context.TODO(), &resource, client.PropagationPolicy(metav1.DeletePropagationBackground))
+		if err != nil {
+			// The resource may have already been deleted
+			if !k8serrors.IsNotFound(err) {
+				t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resource: %s/%s", resource.GetKind(), resource.GetName())
+			}
+		} else {
+			t.L.ForIntegration(e.Integration).Debugf("child resource deleted: %s/%s", resource.GetKind(), resource.GetName())
+		}
+	}
 }
