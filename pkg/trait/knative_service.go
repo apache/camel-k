@@ -18,9 +18,9 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
 	"strconv"
-	"strings"
+
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -40,13 +40,15 @@ const (
 )
 
 type knativeServiceTrait struct {
-	BaseTrait `property:",squash"`
-	Class     string `property:"autoscaling-class"`
-	Metric    string `property:"autoscaling-metric"`
-	Target    *int   `property:"autoscaling-target"`
-	MinScale  *int   `property:"min-scale"`
-	MaxScale  *int   `property:"max-scale"`
-	Auto      *bool  `property:"auto"`
+	BaseTrait         `property:",squash"`
+	Class             string `property:"autoscaling-class"`
+	Metric            string `property:"autoscaling-metric"`
+	Target            *int   `property:"autoscaling-target"`
+	MinScale          *int   `property:"min-scale"`
+	MaxScale          *int   `property:"max-scale"`
+	Auto              *bool  `property:"auto"`
+	ConfigurationType string `property:"configuration-type"`
+	deployer          deployerTrait
 }
 
 func newKnativeServiceTrait() *knativeServiceTrait {
@@ -64,9 +66,8 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	var strategy ControllerStrategy
-	var err error
-	if strategy, err = e.DetermineControllerStrategy(t.ctx, t.client); err != nil {
+	strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
+	if err != nil {
 		return false, err
 	}
 	if strategy != ControllerStrategyKnativeService {
@@ -87,17 +88,22 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	if t.Auto == nil || *t.Auto {
 		// Check the right value for minScale, as not all services are allowed to scale down to 0
 		if t.MinScale == nil {
-			var sources []v1alpha1.SourceSpec
-			if sources, err = e.ResolveSources(t.ctx, t.client); err != nil {
+			sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
+			if err != nil {
 				return false, err
 			}
-			meta := metadata.ExtractAll(e.CamelCatalog, sources)
 
+			meta := metadata.ExtractAll(e.CamelCatalog, sources)
 			if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
 				single := 1
 				t.MinScale = &single
 			}
 		}
+	}
+
+	dt := e.Catalog.GetTrait("deployer")
+	if dt != nil {
+		t.deployer = *dt.(*deployerTrait)
 	}
 
 	return true, nil
@@ -109,107 +115,15 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 		return err
 	}
 
+	maps := e.ComputeConfigMaps(t.deployer.ContainerImage)
+
 	e.Resources.Add(svc)
+	e.Resources.AddAll(maps)
 
 	return nil
 }
 
 func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, error) {
-	// combine properties of integration with context, integration
-	// properties have the priority
-	properties := ""
-
-	VisitKeyValConfigurations("property", e.IntegrationContext, e.Integration, func(key string, val string) {
-		properties += fmt.Sprintf("%s=%s\n", key, val)
-	})
-
-	environment := make([]corev1.EnvVar, 0)
-
-	// combine Environment of integration with context, integration
-	// Environment has the priority
-	VisitKeyValConfigurations("env", e.IntegrationContext, e.Integration, func(key string, value string) {
-		envvar.SetVal(&environment, key, value)
-	})
-
-	sourcesSpecs, err := e.ResolveSources(t.ctx, t.client)
-	if err != nil {
-		return nil, err
-	}
-
-	sources := make([]string, 0, len(e.Integration.Spec.Sources))
-	for i, s := range sourcesSpecs {
-		if s.Content == "" {
-			t.L.Debug("Source %s has and empty content", s.Name)
-		}
-
-		envName := fmt.Sprintf("CAMEL_K_ROUTE_%03d", i)
-		envvar.SetVal(&environment, envName, s.Content)
-
-		params := make([]string, 0)
-		params = append(params, "name="+s.Name)
-
-		if s.InferLanguage() != "" {
-			params = append(params, "language="+string(s.InferLanguage()))
-		}
-		if s.Compression {
-			params = append(params, "compression=true")
-		}
-
-		src := fmt.Sprintf("env:%s", envName)
-		if len(params) > 0 {
-			src = fmt.Sprintf("%s?%s", src, strings.Join(params, "&"))
-		}
-
-		sources = append(sources, src)
-	}
-
-	for i, r := range e.Integration.Spec.Resources {
-		if r.Type != v1alpha1.ResourceTypeData {
-			continue
-		}
-
-		envName := fmt.Sprintf("CAMEL_K_RESOURCE_%03d", i)
-		envvar.SetVal(&environment, envName, r.Content)
-
-		params := make([]string, 0)
-		if r.Compression {
-			params = append(params, "compression=true")
-		}
-
-		envValue := fmt.Sprintf("env:%s", envName)
-		if len(params) > 0 {
-			envValue = fmt.Sprintf("%s?%s", envValue, strings.Join(params, "&"))
-		}
-
-		envName = r.Name
-		envName = strings.ToUpper(envName)
-		envName = strings.Replace(envName, "-", "_", -1)
-		envName = strings.Replace(envName, ".", "_", -1)
-		envName = strings.Replace(envName, " ", "_", -1)
-
-		envvar.SetVal(&environment, envName, envValue)
-	}
-
-	// set env vars needed by the runtime
-	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
-
-	// camel-k runtime
-	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(sources, ","))
-	envvar.SetVal(&environment, "CAMEL_K_CONF", "env:CAMEL_K_PROPERTIES")
-	envvar.SetVal(&environment, "CAMEL_K_PROPERTIES", properties)
-
-	// add a dummy env var to trigger deployment if everything but the code
-	// has been changed
-	envvar.SetVal(&environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-
-	// optimizations
-	envvar.SetVal(&environment, "AB_JOLOKIA_OFF", True)
-
-	// add env vars from traits
-	for _, envVar := range e.EnvVars {
-		envvar.SetVar(&environment, envVar)
-	}
-
 	labels := map[string]string{
 		"camel.apache.org/integration": e.Integration.Name,
 	}
@@ -260,13 +174,46 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
 							Container: corev1.Container{
 								Image: e.Integration.Status.Image,
-								Env:   environment,
+								Env:   make([]corev1.EnvVar, 0),
 							},
 						},
 					},
 				},
 			},
 		},
+	}
+
+	environment := &svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
+
+	// combine Environment of integration with context, integration
+	// Environment has the priority
+	VisitKeyValConfigurations("env", e.IntegrationContext, e.Integration, func(key string, value string) {
+		envvar.SetVal(environment, key, value)
+	})
+
+	// set env vars needed by the runtime
+	envvar.SetVal(environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
+
+	// add a dummy env var to trigger deployment if everything but the code
+	// has been changed
+	envvar.SetVal(environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
+
+	// optimizations
+	envvar.SetVal(environment, "AB_JOLOKIA_OFF", True)
+
+	if t.ConfigurationType == "volume" {
+		if err := t.bindToVolumes(e, &svc); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := t.bindToEnvVar(e, &svc); err != nil {
+			return nil, err
+		}
+	}
+
+	// add env vars from traits
+	for _, envVar := range e.EnvVars {
+		envvar.SetVar(&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVar)
 	}
 
 	return &svc, nil

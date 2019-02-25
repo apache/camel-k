@@ -94,6 +94,31 @@ func GetConfigMap(context context.Context, client client.Client, name string, na
 	return &answer, nil
 }
 
+// GetSecret --
+func GetSecret(context context.Context, client client.Client, name string, namespace string) (*corev1.Secret, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	answer := corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+
+	if err := client.Get(context, key, &answer); err != nil {
+		return nil, err
+	}
+
+	return &answer, nil
+}
+
 // GetIntegrationContext --
 func GetIntegrationContext(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationContext, error) {
 	key := k8sclient.ObjectKey{

@@ -101,6 +101,11 @@ func (c *Collection) GetDeployment(filter func(*appsv1.Deployment) bool) *appsv1
 	return retValue
 }
 
+// HasDeployment returns true if a deployment matching the given condition is present
+func (c *Collection) HasDeployment(filter func(*appsv1.Deployment) bool) bool {
+	return c.GetDeployment(filter) != nil
+}
+
 // RemoveDeployment removes and returns a Deployment that matches the given function
 func (c *Collection) RemoveDeployment(filter func(*appsv1.Deployment) bool) *appsv1.Deployment {
 	res := c.Remove(func(res runtime.Object) bool {
@@ -162,6 +167,17 @@ func (c *Collection) VisitService(visitor func(*corev1.Service)) {
 func (c *Collection) GetService(filter func(*corev1.Service) bool) *corev1.Service {
 	var retValue *corev1.Service
 	c.VisitService(func(re *corev1.Service) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
+// GetKnativeService returns a knative Service that matches the given function
+func (c *Collection) GetKnativeService(filter func(*serving.Service) bool) *serving.Service {
+	var retValue *serving.Service
+	c.VisitKnativeService(func(re *serving.Service) {
 		if filter(re) {
 			retValue = re
 		}

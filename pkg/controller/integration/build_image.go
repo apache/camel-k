@@ -26,8 +26,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/cancellable"
 
-	"github.com/apache/camel-k/pkg/util/source"
-
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -36,7 +34,6 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // NewBuildImageAction create an action that handles integration image build
@@ -130,12 +127,14 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 			BuildDir:       env.BuildDir,
 			Platform:       env.Platform.Spec,
 			Image:          ictx.Status.Image,
-			// Sources are added as part of the standard deployment bits
-			Resources: make([]builder.Resource, 0, len(integration.Spec.Sources)),
+			Resources:      make([]builder.Resource, 0, len(integration.Spec.Sources)),
 		}
 
-		// inline resources so they are copied over the generated
+		// inline source and resources so they are copied over the generated
 		// container image
+		if err := action.inlineSources(ctx, integration, &r, env); err != nil {
+			return err
+		}
 		if err := action.inlineResources(ctx, integration, &r, env); err != nil {
 			return err
 		}
@@ -213,19 +212,8 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 	return nil
 }
 
-func (action *buildImageAction) inlineResources(ctx context.Context, integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
-	sources, err := source.Resolve(integration.Sources(), func(name string) (*corev1.ConfigMap, error) {
-		cm := e.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-			return cm.Name == name
-		})
-
-		if cm != nil {
-			return cm, nil
-		}
-
-		return kubernetes.GetConfigMap(ctx, action.client, name, integration.Namespace)
-	})
-
+func (action *buildImageAction) inlineSources(ctx context.Context, integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
+	sources, err := kubernetes.ResolveIntegrationSources(ctx, action.client, integration, e.Resources)
 	if err != nil {
 		return err
 	}
@@ -234,6 +222,22 @@ func (action *buildImageAction) inlineResources(ctx context.Context, integration
 		r.Resources = append(r.Resources, builder.Resource{
 			Content: []byte(data.Content),
 			Target:  path.Join("sources", data.Name),
+		})
+	}
+
+	return nil
+}
+
+func (action *buildImageAction) inlineResources(ctx context.Context, integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
+	resources, err := kubernetes.ResolveIntegrationResources(ctx, action.client, integration, e.Resources)
+	if err != nil {
+		return err
+	}
+
+	for _, data := range resources {
+		r.Resources = append(r.Resources, builder.Resource{
+			Content: []byte(data.Content),
+			Target:  path.Join("resources", data.Name),
 		})
 	}
 

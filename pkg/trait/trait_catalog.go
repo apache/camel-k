@@ -34,6 +34,7 @@ type Catalog struct {
 	tCamel            Trait
 	tDebug            Trait
 	tDependencies     Trait
+	tDeployer         Trait
 	tDeployment       Trait
 	tGarbageCollector Trait
 	tKnativeService   Trait
@@ -62,6 +63,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tRestDsl:          newRestDslTrait(),
 		tKnative:          newKnativeTrait(),
 		tDependencies:     newDependenciesTrait(),
+		tDeployer:         newDeployerTrait(),
 		tDeployment:       newDeploymentTrait(),
 		tGarbageCollector: newGarbageCollectorTrait(),
 		tKnativeService:   newKnativeServiceTrait(),
@@ -97,6 +99,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tRestDsl,
 		c.tKnative,
 		c.tDependencies,
+		c.tDeployer,
 		c.tDeployment,
 		c.tGarbageCollector,
 		c.tKnativeService,
@@ -133,6 +136,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tSpringBoot,
 			c.tJolokia,
 			c.tPrometheus,
+			c.tDeployer,
 			c.tDeployment,
 			c.tService,
 			c.tRoute,
@@ -152,6 +156,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tSpringBoot,
 			c.tJolokia,
 			c.tPrometheus,
+			c.tDeployer,
 			c.tDeployment,
 			c.tService,
 			c.tIngress,
@@ -170,6 +175,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tEnvironment,
 			c.tClasspath,
 			c.tSpringBoot,
+			c.tDeployer,
 			c.tDeployment,
 			c.tKnativeService,
 			c.tIstio,

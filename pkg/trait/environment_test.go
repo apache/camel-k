@@ -37,6 +37,7 @@ func TestDefaultEnvironment(t *testing.T) {
 
 	env := Environment{
 		CamelCatalog: catalog,
+		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -89,6 +90,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env := Environment{
 		CamelCatalog: c,
+		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -148,6 +150,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env := Environment{
 		CamelCatalog: c,
+		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
