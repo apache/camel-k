@@ -148,10 +148,6 @@ func GetDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
 
 // LookUpResources --
 func LookUpResources(ctx context.Context, client client.Client, namespace string, selectors []string) ([]unstructured.Unstructured, error) {
-	// We rely on the discovery API to retrieve all the resources group and kind.
-	// That results in an unbounded collection that can be a bit slow (a couple of seconds).
-	// We may want to refine that step by white-listing or enlisting types to speed-up
-	// the collection duration.
 	types, err := GetDiscoveryTypes(client)
 	if err != nil {
 		return nil, err
