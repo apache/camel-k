@@ -139,7 +139,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 					}, nil
 				}
 
-				return reconcile.Result{}, nil
+				return reconcile.Result{}, err
 			}
 		}
 	}
