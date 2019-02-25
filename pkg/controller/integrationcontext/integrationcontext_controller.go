@@ -126,7 +126,7 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 					}, nil
 				}
 
-				return reconcile.Result{}, nil
+				return reconcile.Result{}, err
 			}
 		}
 	}
