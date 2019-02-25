@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 type garbageCollectorTrait struct {
@@ -94,7 +94,6 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 	selectors := []string{
 		fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
 		"camel.apache.org/generation",
-		fmt.Sprintf("camel.apache.org/generation notin (%d)", e.Integration.GetGeneration()),
 	}
 	resources, err := kubernetes.LookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
 	if err != nil {
@@ -106,6 +105,18 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 	for _, resource := range resources {
 		// pin the resource
 		resource := resource
+
+		labels := resource.GetLabels()
+		generation, err := strconv.ParseInt(labels["camel.apache.org/generation"], 10, 64)
+		if err != nil {
+			t.L.ForIntegration(e.Integration).Errorf(err, "cannot parse generation label: %s", labels["camel.apache.org/generation"])
+		}
+
+		// Garbage collect older generation resource only.
+		// By the time async garbage collecting is executed, newer generations may exist.
+		if generation >= e.Integration.GetGeneration() {
+			continue
+		}
 
 		err = e.Client.Delete(context.TODO(), &resource, client.PropagationPolicy(metav1.DeletePropagationBackground))
 		if err != nil {
