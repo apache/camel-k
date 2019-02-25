@@ -15,4 +15,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package source
+package trait
+
+type deployerTrait struct {
+	BaseTrait      `property:",squash"`
+	ContainerImage bool `property:"container-image"`
+}
+
+func newDeployerTrait() *deployerTrait {
+	return &deployerTrait{
+		BaseTrait: newBaseTrait("deployer"),
+	}
+}
+
+func (t *deployerTrait) Configure(e *Environment) (bool, error) {
+	return true, nil
+}
+
+func (t *deployerTrait) Apply(e *Environment) error {
+	return nil
+}

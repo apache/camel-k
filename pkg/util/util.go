@@ -18,11 +18,14 @@ limitations under the License.
 package util
 
 import (
+	"encoding/base64"
 	"os"
 	"os/signal"
 	"path"
 	"regexp"
 	"syscall"
+
+	"github.com/magiconair/properties"
 
 	"github.com/scylladb/go-set/strset"
 
@@ -152,4 +155,46 @@ func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []str
 		}
 	}
 	return submatchs.List()
+}
+
+// ExtractApplicationProperties --
+func ExtractApplicationProperties(data map[string]string, consumer func(string, string)) error {
+	pstr, ok := data["application.properties"]
+	if !ok {
+		return nil
+	}
+
+	p, err := properties.LoadString(pstr)
+	if err != nil {
+		return err
+	}
+
+	for _, k := range p.Keys() {
+		consumer(k, p.MustGet(k))
+	}
+
+	return nil
+}
+
+// ExtractEncodedApplicationProperties --
+func ExtractEncodedApplicationProperties(data map[string][]byte, consumer func(string, string)) error {
+	encoded, ok := data["application.properties"]
+	if !ok {
+		return nil
+	}
+	decoded, err := base64.StdEncoding.DecodeString(string(encoded))
+	if err != nil {
+		return err
+	}
+
+	p, err := properties.Load(decoded, properties.UTF8)
+	if err != nil {
+		return err
+	}
+
+	for _, k := range p.Keys() {
+		consumer(k, p.MustGet(k))
+	}
+
+	return nil
 }

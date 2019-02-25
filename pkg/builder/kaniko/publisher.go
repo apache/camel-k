@@ -18,14 +18,15 @@ limitations under the License.
 package kaniko
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path"
 	"time"
 
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/tar"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -81,7 +82,9 @@ func Publisher(ctx *builder.Context) error {
 		"--cache",
 		"--cache-dir=/workspace/cache",
 	}
+
 	args := append(baseArgs, "--insecure")
+	args = append(args, "--insecure-pull")
 
 	if ctx.Request.Platform.Build.PushSecret != "" {
 		volumes = append(volumes, corev1.Volume{
@@ -156,8 +159,9 @@ func Publisher(ctx *builder.Context) error {
 		if val, ok := obj.(*corev1.Pod); ok {
 			if val.Status.Phase == corev1.PodSucceeded {
 				return true, nil
-			} else if val.Status.Phase == corev1.PodFailed {
-				return false, errors.New("build failed")
+			}
+			if val.Status.Phase == corev1.PodFailed {
+				return false, fmt.Errorf("build failed: %s", val.Status.Message)
 			}
 		}
 		return false, nil
