@@ -383,6 +383,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:4244266b65ea535b8ebd109a327720821707b59f9a37bda738946d52ec69442d"
+  name = "github.com/magiconair/properties"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "c2353362d570a7bfa228149c62842019201cfb71"
+  version = "v1.8.0"
+
+[[projects]]
   branch = "master"
   digest = "1:4925ec3736ef6c299cfcf61597782e3d66ec13114f7476019d04c742a7be55d0"
   name = "github.com/mailru/easyjson"
@@ -1104,6 +1112,7 @@
     "github.com/jpillora/backoff",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
     "github.com/knative/serving/pkg/apis/serving/v1alpha1",
+    "github.com/magiconair/properties",
     "github.com/mitchellh/mapstructure",
     "github.com/openshift/api/apps/v1",
     "github.com/openshift/api/authorization/v1",

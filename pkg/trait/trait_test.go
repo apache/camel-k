@@ -175,6 +175,7 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 
 	return &Environment{
 		CamelCatalog: catalog,
+		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeployment,

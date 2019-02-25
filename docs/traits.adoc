@@ -62,6 +62,22 @@ The following is a list of common traits that can be configured by the end users
   +
   It's enabled by default.
 
+| deployer
+| Kubernetes, OpenShift
+| Configure deployer behavior.
+  +
+  +
+  It's enabled by default.
+
+
+[cols="m,"]
+!===
+
+! deployer.container-image
+! Generates a container image for the Integration that includes the sources and resources in the generated images instead of mounting them to the pod.
+
+!===
+
 | deployment
 | Kubernetes, OpenShift
 | Creates a standard Kubernetes deployment for running the integration.

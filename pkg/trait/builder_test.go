@@ -126,6 +126,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 	return &Environment{
 		C:            context.TODO(),
 		CamelCatalog: c,
+		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",

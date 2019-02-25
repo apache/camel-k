@@ -40,8 +40,11 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
 	environment := Environment{
 		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -96,7 +99,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	err = NewKnativeTestCatalog().apply(&environment)
+	err = traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -144,8 +147,11 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
 	environment := Environment{
 		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -194,7 +200,7 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 		}),
 	}
 
-	err = NewKnativeTestCatalog().apply(&environment)
+	err = traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -218,8 +224,4 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 
 	assert.True(t, services > 0)
 	assert.True(t, environment.Resources.Size() > 0)
-}
-
-func NewKnativeTestCatalog() *Catalog {
-	return NewCatalog(context.TODO(), nil)
 }

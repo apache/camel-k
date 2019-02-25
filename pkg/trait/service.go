@@ -20,6 +20,7 @@ package trait
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,7 +53,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.Auto == nil || *t.Auto {
-		sources, err := e.ResolveSources(t.ctx, t.client)
+		sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
 		if err != nil {
 			return false, err
 		}

@@ -15,4 +15,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package source
+package test
+
+import (
+	"testing"
+
+	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/stretchr/testify/assert"
+
+	corev1 "k8s.io/api/core/v1"
+)
+
+// EnvVarHasValue --
+func EnvVarHasValue(t *testing.T, env []corev1.EnvVar, name string, val string) {
+	ev := envvar.Get(env, name)
+	assert.NotNil(t, ev)
+	assert.Equal(t, val, ev.Value)
+}
+
+// HasVolume --
+func HasVolume(t *testing.T, volumes []corev1.Volume, name string) {
+	assert.Condition(t, func() bool {
+		for _, v := range volumes {
+			if v.Name == name {
+				return true
+			}
+		}
+		return false
+	})
+}
