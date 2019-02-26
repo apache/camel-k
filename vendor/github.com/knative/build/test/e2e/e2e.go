@@ -20,20 +20,20 @@ package e2e
 
 import (
 	"errors"
+	"flag"
 	"fmt"
-
-	"github.com/knative/pkg/test"
-	"github.com/knative/pkg/test/logging"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/watch"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/knative/build/pkg/apis/build/v1alpha1"
 	buildversioned "github.com/knative/build/pkg/client/clientset/versioned"
 	buildtyped "github.com/knative/build/pkg/client/clientset/versioned/typed/build/v1alpha1"
+	"github.com/knative/pkg/test"
+	"github.com/knative/pkg/test/logging"
+	corev1 "k8s.io/api/core/v1"
 	kuberrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/watch"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 type clients struct {
@@ -41,9 +41,15 @@ type clients struct {
 	buildClient *buildClient
 }
 
-const buildTestNamespace = "build-tests"
+var (
+	// Sentinel error from watchBuild when the build failed.
+	errBuildFailed = errors.New("build failed")
 
-func teardownNamespace(clients *clients, logger *logging.BaseLogger) {
+	// Sentinal error from watchBuild when watch timed out before build finished
+	errWatchTimeout = errors.New("watch ended before build finished")
+)
+
+func teardownNamespace(clients *clients, buildTestNamespace string, logger *logging.BaseLogger) {
 	if clients != nil && clients.kubeClient != nil {
 		logger.Infof("Deleting namespace %q", buildTestNamespace)
 
@@ -53,7 +59,7 @@ func teardownNamespace(clients *clients, logger *logging.BaseLogger) {
 	}
 }
 
-func teardownBuild(clients *clients, logger *logging.BaseLogger, name string) {
+func teardownBuild(clients *clients, logger *logging.BaseLogger, buildTestNamespace, name string) {
 	if clients != nil && clients.buildClient != nil {
 		logger.Infof("Deleting build %q in namespace %q", name, buildTestNamespace)
 
@@ -73,7 +79,7 @@ func teardownClusterTemplate(clients *clients, logger *logging.BaseLogger, name 
 	}
 }
 
-func buildClients(logger *logging.BaseLogger) *clients {
+func buildClients(buildTestNamespace string, logger *logging.BaseLogger) *clients {
 	clients, err := newClients(test.Flags.Kubeconfig, test.Flags.Cluster, buildTestNamespace)
 	if err != nil {
 		logger.Fatalf("Error creating newClients: %v", err)
@@ -81,8 +87,9 @@ func buildClients(logger *logging.BaseLogger) *clients {
 	return clients
 }
 
-func setup(logger *logging.BaseLogger) *clients {
-	clients := buildClients(logger)
+func createTestNamespace(logger *logging.BaseLogger) (string, *clients) {
+	buildTestNamespace := AppendRandomString("build-tests")
+	clients := buildClients(buildTestNamespace, logger)
 
 	// Ensure the test namespace exists, by trying to create it and ignoring
 	// already-exists errors.
@@ -97,7 +104,7 @@ func setup(logger *logging.BaseLogger) *clients {
 	} else {
 		logger.Fatalf("Error creating namespace %q: %v", buildTestNamespace, err)
 	}
-	return clients
+	return buildTestNamespace, clients
 }
 
 func newClients(configPath string, clusterName string, namespace string) (*clients, error) {
@@ -144,7 +151,9 @@ type buildClient struct {
 func (c *buildClient) watchBuild(name string) (*v1alpha1.Build, error) {
 	ls := metav1.SingleObject(metav1.ObjectMeta{Name: name})
 	// TODO: Update watchBuild function to take this as parameter depending on test requirements
-	// Set build timeout to 120 seconds. This will trigger watch timeout error
+
+	// Any build that takes longer than this timeout will result in
+	// errWatchTimeout.
 	var timeout int64 = 120
 	ls.TimeoutSeconds = &timeout
 
@@ -152,6 +161,7 @@ func (c *buildClient) watchBuild(name string) (*v1alpha1.Build, error) {
 	if err != nil {
 		return nil, err
 	}
+	var latest *v1alpha1.Build
 	for evt := range w.ResultChan() {
 		switch evt.Type {
 		case watch.Deleted:
@@ -164,6 +174,7 @@ func (c *buildClient) watchBuild(name string) (*v1alpha1.Build, error) {
 		if !ok {
 			return nil, fmt.Errorf("object was not a Build: %v", err)
 		}
+		latest = b
 
 		for _, cond := range b.Status.Conditions {
 			if cond.Type == v1alpha1.BuildSucceeded {
@@ -171,12 +182,32 @@ func (c *buildClient) watchBuild(name string) (*v1alpha1.Build, error) {
 				case corev1.ConditionTrue:
 					return b, nil
 				case corev1.ConditionFalse:
-					return b, errors.New("build failed")
+					return b, errBuildFailed
 				case corev1.ConditionUnknown:
 					continue
 				}
 			}
 		}
 	}
-	return nil, errors.New("watch ended before build completion")
+	return latest, errWatchTimeout
+}
+
+// initialize is responsible for setting up and tearing down the testing environment,
+// namely the test namespace.
+func initialize(contextName string) (string, *logging.BaseLogger, *clients) {
+	flag.Parse()
+	logging.InitializeLogger(test.Flags.LogVerbose)
+	logger := logging.GetContextLogger("initialize")
+	flag.Set("alsologtostderr", "true")
+	if test.Flags.EmitMetrics {
+		logging.InitializeMetricExporter()
+	}
+
+	buildTestNamespace, clients := createTestNamespace(logger)
+
+	// Cleanup namespace
+	test.CleanupOnInterrupt(func() { teardownNamespace(clients, buildTestNamespace, logger) }, logger)
+
+	testLogger := logging.GetContextLogger(contextName)
+	return buildTestNamespace, testLogger, buildClients(buildTestNamespace, testLogger)
 }

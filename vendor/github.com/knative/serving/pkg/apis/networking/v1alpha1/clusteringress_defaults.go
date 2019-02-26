@@ -24,7 +24,7 @@ import (
 
 const (
 	// DefaultTimeout will be set if timeout not specified.
-	DefaultTimeout = 60 * time.Second
+	DefaultTimeout = 10 * time.Minute
 	// DefaultRetryCount will be set if Attempts not specified.
 	DefaultRetryCount = 3
 )
@@ -40,12 +40,15 @@ func (c *IngressSpec) SetDefaults() {
 	for i := range c.Rules {
 		c.Rules[i].SetDefaults()
 	}
+	if c.Visibility == "" {
+		c.Visibility = IngressVisibilityExternalIP
+	}
 }
 
 func (t *ClusterIngressTLS) SetDefaults() {
-	// Default Secret key for ServerCertificate is `tls.cert`.
+	// Default Secret key for ServerCertificate is `tls.crt`.
 	if t.ServerCertificate == "" {
-		t.ServerCertificate = "tls.cert"
+		t.ServerCertificate = "tls.crt"
 	}
 	// Default Secret key for PrivateKey is `tls.key`.
 	if t.PrivateKey == "" {

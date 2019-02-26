@@ -24,10 +24,10 @@ import (
 
 	"github.com/knative/pkg/logging"
 	"github.com/knative/pkg/logging/logkey"
+	kpa "github.com/knative/serving/pkg/apis/autoscaling/v1alpha1"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
-
-	kpa "github.com/knative/serving/pkg/apis/autoscaling/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -37,11 +37,26 @@ const (
 	scaleBufferSize = 10
 )
 
+// Metric is a resource which observes the request load of a Revision and
+// recommends a number of replicas to run.
+// +k8s:deepcopy-gen=true
 type Metric struct {
+	metav1.ObjectMeta
+	Spec   MetricSpec
+	Status MetricStatus
+}
+
+// MetricSpec is the parameters in which the Revision should scaled.
+type MetricSpec struct {
+	TargetConcurrency float64
+}
+
+// MetricStatus is the current scale recommendation.
+type MetricStatus struct {
 	DesiredScale int32
 }
 
-// UniScaler records statistics for a particular KPA and proposes the scale for the KPA's target based on those statistics.
+// UniScaler records statistics for a particular Metric and proposes the scale for the Metric's target based on those statistics.
 type UniScaler interface {
 	// Record records the given statistics.
 	Record(context.Context, Stat)
@@ -49,44 +64,48 @@ type UniScaler interface {
 	// Scale either proposes a number of replicas or skips proposing. The proposal is requested at the given time.
 	// The returned boolean is true if and only if a proposal was returned.
 	Scale(context.Context, time.Time) (int32, bool)
+
+	// Update reconfigures the UniScaler according to the MetricSpec.
+	Update(MetricSpec) error
 }
 
-// UniScalerFactory creates a UniScaler for a given KPA using the given dynamic configuration.
-type UniScalerFactory func(*kpa.PodAutoscaler, *DynamicConfig) (UniScaler, error)
+// UniScalerFactory creates a UniScaler for a given PA using the given dynamic configuration.
+type UniScalerFactory func(*Metric, *DynamicConfig) (UniScaler, error)
 
 // scalerRunner wraps a UniScaler and a channel for implementing shutdown behavior.
 type scalerRunner struct {
 	scaler UniScaler
 	stopCh chan struct{}
+	pokeCh chan struct{}
 
-	// lsm guards access to latestScale
-	lsm         sync.RWMutex
-	latestScale int32
+	// mux guards access to metric
+	mux    sync.RWMutex
+	metric Metric
 }
 
 func (sr *scalerRunner) getLatestScale() int32 {
-	sr.lsm.RLock()
-	defer sr.lsm.RUnlock()
-	return sr.latestScale
+	sr.mux.RLock()
+	defer sr.mux.RUnlock()
+	return sr.metric.Status.DesiredScale
 }
 
 func (sr *scalerRunner) updateLatestScale(new int32) bool {
-	sr.lsm.Lock()
-	defer sr.lsm.Unlock()
-	if sr.latestScale != new {
-		sr.latestScale = new
+	sr.mux.Lock()
+	defer sr.mux.Unlock()
+	if sr.metric.Status.DesiredScale != new {
+		sr.metric.Status.DesiredScale = new
 		return true
 	}
 	return false
 }
 
-// NewKpaKey identifies a KPA in the multiscaler. Stats send in
+// NewMetricKey identifies a UniScaler in the multiscaler. Stats send in
 // are identified and routed via this key.
-func NewKpaKey(namespace string, name string) string {
+func NewMetricKey(namespace string, name string) string {
 	return fmt.Sprintf("%s/%s", namespace, name)
 }
 
-// MultiScaler maintains a collection of UniScalers.
+// MultiScaler maintains a collection of Uniscalers.
 type MultiScaler struct {
 	scalers       map[string]*scalerRunner
 	scalersMutex  sync.RWMutex
@@ -98,7 +117,8 @@ type MultiScaler struct {
 
 	logger *zap.SugaredLogger
 
-	watcher func(string)
+	watcher      func(string)
+	watcherMutex sync.RWMutex
 }
 
 // NewMultiScaler constructs a MultiScaler.
@@ -113,7 +133,9 @@ func NewMultiScaler(dynConfig *DynamicConfig, stopCh <-chan struct{}, uniScalerF
 	}
 }
 
-func (m *MultiScaler) Get(ctx context.Context, key string) (*Metric, error) {
+// Get return the current Metric.
+func (m *MultiScaler) Get(ctx context.Context, namespace, name string) (*Metric, error) {
+	key := NewMetricKey(namespace, name)
 	m.scalersMutex.RLock()
 	defer m.scalersMutex.RUnlock()
 	scaler, exists := m.scalers[key]
@@ -121,30 +143,49 @@ func (m *MultiScaler) Get(ctx context.Context, key string) (*Metric, error) {
 		// This GroupResource is a lie, but unfortunately this interface requires one.
 		return nil, errors.NewNotFound(kpa.Resource("Metrics"), key)
 	}
-	return &Metric{
-		DesiredScale: scaler.getLatestScale(),
-	}, nil
+	scaler.mux.RLock()
+	defer scaler.mux.RUnlock()
+	return (&scaler.metric).DeepCopy(), nil
 }
 
-func (m *MultiScaler) Create(ctx context.Context, kpa *kpa.PodAutoscaler) (*Metric, error) {
+// Create instantiates the desired Metric.
+func (m *MultiScaler) Create(ctx context.Context, metric *Metric) (*Metric, error) {
 	m.scalersMutex.Lock()
 	defer m.scalersMutex.Unlock()
-	key := NewKpaKey(kpa.Namespace, kpa.Name)
+	key := NewMetricKey(metric.Namespace, metric.Name)
 	scaler, exists := m.scalers[key]
 	if !exists {
 		var err error
-		scaler, err = m.createScaler(ctx, kpa)
+		scaler, err = m.createScaler(ctx, metric)
 		if err != nil {
 			return nil, err
 		}
 		m.scalers[key] = scaler
 	}
-	return &Metric{
-		DesiredScale: scaler.getLatestScale(),
-	}, nil
+	scaler.mux.RLock()
+	defer scaler.mux.RUnlock()
+	return (&scaler.metric).DeepCopy(), nil
 }
 
-func (m *MultiScaler) Delete(ctx context.Context, key string) error {
+// Update applied the desired MetricSpec to a currently running Metric.
+func (m *MultiScaler) Update(ctx context.Context, metric *Metric) (*Metric, error) {
+	key := NewMetricKey(metric.Namespace, metric.Name)
+	m.scalersMutex.Lock()
+	defer m.scalersMutex.Unlock()
+	if scaler, exists := m.scalers[key]; exists {
+		scaler.mux.Lock()
+		defer scaler.mux.Unlock()
+		scaler.metric = *metric
+		scaler.scaler.Update(metric.Spec)
+		return metric, nil
+	}
+	// This GroupResource is a lie, but unfortunately this interface requires one.
+	return nil, errors.NewNotFound(kpa.Resource("Metrics"), key)
+}
+
+// Delete stops and removes a Metric.
+func (m *MultiScaler) Delete(ctx context.Context, namespace, name string) error {
+	key := NewMetricKey(namespace, name)
 	m.scalersMutex.Lock()
 	defer m.scalersMutex.Unlock()
 	if scaler, exists := m.scalers[key]; exists {
@@ -154,21 +195,55 @@ func (m *MultiScaler) Delete(ctx context.Context, key string) error {
 	return nil
 }
 
+// Watch registers a singleton function to call when MetricStatus is updated.
 func (m *MultiScaler) Watch(fn func(string)) {
+	m.watcherMutex.Lock()
+	defer m.watcherMutex.Unlock()
+
 	if m.watcher != nil {
 		m.logger.Fatal("Multiple calls to Watch() not supported")
 	}
 	m.watcher = fn
 }
 
-func (m *MultiScaler) createScaler(ctx context.Context, kpa *kpa.PodAutoscaler) (*scalerRunner, error) {
-	scaler, err := m.uniScalerFactory(kpa, m.dynConfig)
+// Inform sends an update to the registered watcher function, if it is set.
+func (m *MultiScaler) Inform(event string) bool {
+	m.watcherMutex.RLock()
+	defer m.watcherMutex.RUnlock()
+
+	if m.watcher != nil {
+		m.watcher(event)
+		return true
+	}
+	return false
+}
+
+// setScale directly sets the scale for a given metric key. This does not perform any ticking
+// or updating of other scaler components.
+func (m *MultiScaler) setScale(metricKey string, scale int32) bool {
+	scaler, exists := m.scalers[metricKey]
+	if !exists {
+		return false
+	}
+	scaler.updateLatestScale(scale)
+	return true
+}
+
+func (m *MultiScaler) createScaler(ctx context.Context, metric *Metric) (*scalerRunner, error) {
+
+	scaler, err := m.uniScalerFactory(metric, m.dynConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	stopCh := make(chan struct{})
-	runner := &scalerRunner{scaler: scaler, latestScale: -1, stopCh: stopCh}
+	runner := &scalerRunner{
+		scaler: scaler,
+		stopCh: stopCh,
+		metric: *metric,
+		pokeCh: make(chan struct{}),
+	}
+	runner.metric.Status.DesiredScale = -1
 
 	ticker := time.NewTicker(m.dynConfig.Current().TickInterval)
 
@@ -185,11 +260,13 @@ func (m *MultiScaler) createScaler(ctx context.Context, kpa *kpa.PodAutoscaler) 
 				return
 			case <-ticker.C:
 				m.tickScaler(ctx, scaler, scaleChan)
+			case <-runner.pokeCh:
+				m.tickScaler(ctx, scaler, scaleChan)
 			}
 		}
 	}()
 
-	kpaKey := NewKpaKey(kpa.Namespace, kpa.Name)
+	metricKey := NewMetricKey(metric.Namespace, metric.Name)
 	go func() {
 		for {
 			select {
@@ -199,7 +276,7 @@ func (m *MultiScaler) createScaler(ctx context.Context, kpa *kpa.PodAutoscaler) 
 				return
 			case desiredScale := <-scaleChan:
 				if runner.updateLatestScale(desiredScale) {
-					m.watcher(kpaKey)
+					m.Inform(metricKey)
 				}
 			}
 		}
@@ -229,8 +306,7 @@ func (m *MultiScaler) tickScaler(ctx context.Context, scaler UniScaler, scaleCha
 	}
 }
 
-// RecordStat records some statistics for the given KPA. kpaKey should have the
-// form namespace/name.
+// RecordStat records some statistics for the given Metric.
 func (m *MultiScaler) RecordStat(key string, stat Stat) {
 	m.scalersMutex.RLock()
 	defer m.scalersMutex.RUnlock()
@@ -239,6 +315,10 @@ func (m *MultiScaler) RecordStat(key string, stat Stat) {
 	if exists {
 		logger := m.logger.With(zap.String(logkey.Key, key))
 		ctx := logging.WithLogger(context.TODO(), logger)
+
 		scaler.scaler.Record(ctx, stat)
+		if scaler.getLatestScale() == 0 && stat.AverageConcurrentRequests != 0 {
+			scaler.pokeCh <- struct{}{}
+		}
 	}
 }

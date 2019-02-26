@@ -95,7 +95,7 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 func mapRequiredKnativeData(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*eventing.Subscription); ok {
 		if toC, ok := to.(*eventing.Subscription); ok {
-			toC.Spec.Generation = fromC.Spec.Generation
+			toC.Spec.DeprecatedGeneration = fromC.Spec.DeprecatedGeneration
 		}
 	}
 }

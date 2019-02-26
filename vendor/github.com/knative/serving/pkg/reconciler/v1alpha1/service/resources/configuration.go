@@ -41,12 +41,12 @@ func MakeConfiguration(service *v1alpha1.Service) (*v1alpha1.Configuration, erro
 
 	if service.Spec.RunLatest != nil {
 		c.Spec = service.Spec.RunLatest.Configuration
-	} else if service.Spec.Pinned != nil {
-		c.Spec = service.Spec.Pinned.Configuration
+	} else if service.Spec.DeprecatedPinned != nil {
+		c.Spec = service.Spec.DeprecatedPinned.Configuration
 	} else if service.Spec.Release != nil {
 		c.Spec = service.Spec.Release.Configuration
 	} else {
-		// manual does not have a configuration and should not reach this path
+		// Manual does not have a configuration and should not reach this path.
 		return nil, errors.New("malformed Service: MakeConfiguration requires one of runLatest, pinned, or release must be present")
 	}
 	return c, nil

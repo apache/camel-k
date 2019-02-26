@@ -19,11 +19,13 @@ limitations under the License.
 package test
 
 import (
+	pipelineversioned "github.com/knative/build-pipeline/pkg/client/clientset/versioned"
+	pipelinev1alpha1 "github.com/knative/build-pipeline/pkg/client/clientset/versioned/typed/pipeline/v1alpha1"
 	"github.com/knative/pkg/test"
 	"github.com/knative/serving/pkg/client/clientset/versioned"
 	servingtyped "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 	testbuildtyped "github.com/knative/serving/test/client/clientset/versioned/typed/testing/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/client-go/rest"
@@ -32,15 +34,25 @@ import (
 
 // Clients holds instances of interfaces for making requests to Knative Serving.
 type Clients struct {
-	KubeClient    *test.KubeClient
-	ServingClient *ServingClients
-	BuildClient   *BuildClient
-	Dynamic       dynamic.Interface
+	KubeClient     *test.KubeClient
+	ServingClient  *ServingClients
+	BuildClient    *BuildClient
+	PipelineClient *PipelineClient
+	Dynamic        dynamic.Interface
 }
 
 // BuildClient holds instances of interfaces for making requests to build client.
 type BuildClient struct {
 	TestBuilds testbuildtyped.BuildInterface
+}
+
+// PipelineClient holds instances of interfaces for making requests to pipeline client.
+type PipelineClient struct {
+	Pipeline         pipelinev1alpha1.PipelineInterface
+	Task             pipelinev1alpha1.TaskInterface
+	TaskRun          pipelinev1alpha1.TaskRunInterface
+	PipelineRun      pipelinev1alpha1.PipelineRunInterface
+	PipelineResource pipelinev1alpha1.PipelineResourceInterface
 }
 
 // ServingClients holds instances of interfaces for making requests to knative serving clients
@@ -61,12 +73,21 @@ func NewClients(configPath string, clusterName string, namespace string) (*Clien
 		return nil, err
 	}
 
+	// We poll, so set our limits high.
+	cfg.QPS = 100
+	cfg.Burst = 200
+
 	clients.KubeClient, err = test.NewKubeClient(configPath, clusterName)
 	if err != nil {
 		return nil, err
 	}
 
 	clients.BuildClient, err = newBuildClient(cfg, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	clients.PipelineClient, err = newPipelineClients(cfg, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +118,22 @@ func newBuildClient(cfg *rest.Config, namespace string) (*BuildClient, error) {
 	}, nil
 }
 
+// NewPipelineClients instantiates and returns several clientsets required for making request to the
+// pipeline client.
+func newPipelineClients(cfg *rest.Config, namespace string) (*PipelineClient, error) {
+	pcs, err := pipelineversioned.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &PipelineClient{
+		Pipeline:         pcs.PipelineV1alpha1().Pipelines(namespace),
+		PipelineResource: pcs.PipelineV1alpha1().PipelineResources(namespace),
+		PipelineRun:      pcs.PipelineV1alpha1().PipelineRuns(namespace),
+		Task:             pcs.PipelineV1alpha1().Tasks(namespace),
+		TaskRun:          pcs.PipelineV1alpha1().TaskRuns(namespace),
+	}, nil
+}
+
 // NewServingClients instantiates and returns the serving clientset required to make requests to the
 // knative serving cluster.
 func newServingClients(cfg *rest.Config, namespace string) (*ServingClients, error) {
@@ -105,13 +142,12 @@ func newServingClients(cfg *rest.Config, namespace string) (*ServingClients, err
 		return nil, err
 	}
 
-	var clients = &ServingClients{}
-	clients.Routes = cs.ServingV1alpha1().Routes(namespace)
-	clients.Configs = cs.ServingV1alpha1().Configurations(namespace)
-	clients.Revisions = cs.ServingV1alpha1().Revisions(namespace)
-	clients.Services = cs.ServingV1alpha1().Services(namespace)
-
-	return clients, nil
+	return &ServingClients{
+		Configs:   cs.ServingV1alpha1().Configurations(namespace),
+		Revisions: cs.ServingV1alpha1().Revisions(namespace),
+		Routes:    cs.ServingV1alpha1().Routes(namespace),
+		Services:  cs.ServingV1alpha1().Services(namespace),
+	}, nil
 }
 
 // Delete will delete all Routes and Configs with the names routes and configs, if clients
@@ -128,6 +164,11 @@ func (clients *ServingClients) Delete(routes []string, configs []string, service
 		{clients.Services, services},
 	}
 
+	propPolicy := v1.DeletePropagationForeground
+	dopt := &v1.DeleteOptions{
+		PropagationPolicy: &propPolicy,
+	}
+
 	for _, deletion := range deletions {
 		if deletion.client == nil {
 			continue
@@ -138,7 +179,7 @@ func (clients *ServingClients) Delete(routes []string, configs []string, service
 				continue
 			}
 
-			if err := deletion.client.Delete(item, nil); err != nil {
+			if err := deletion.client.Delete(item, dopt); err != nil {
 				return err
 			}
 		}

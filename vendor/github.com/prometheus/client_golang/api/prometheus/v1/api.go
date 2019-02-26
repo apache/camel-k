@@ -56,12 +56,10 @@ type HealthStatus string
 const (
 	// Possible values for ErrorType.
 	ErrBadData     ErrorType = "bad_data"
-	ErrTimeout     ErrorType = "timeout"
-	ErrCanceled    ErrorType = "canceled"
-	ErrExec        ErrorType = "execution"
-	ErrBadResponse ErrorType = "bad_response"
-	ErrServer      ErrorType = "server_error"
-	ErrClient      ErrorType = "client_error"
+	ErrTimeout               = "timeout"
+	ErrCanceled              = "canceled"
+	ErrExec                  = "execution"
+	ErrBadResponse           = "bad_response"
 
 	// Possible values for HealthStatus.
 	HealthGood    HealthStatus = "up"
@@ -71,9 +69,8 @@ const (
 
 // Error is an error returned by the API.
 type Error struct {
-	Type   ErrorType
-	Msg    string
-	Detail string
+	Type ErrorType
+	Msg  string
 }
 
 func (e *Error) Error() string {
@@ -463,16 +460,6 @@ func apiError(code int) bool {
 	return code == statusAPIError || code == http.StatusBadRequest
 }
 
-func errorTypeAndMsgFor(resp *http.Response) (ErrorType, string) {
-	switch resp.StatusCode / 100 {
-	case 4:
-		return ErrClient, fmt.Sprintf("client error: %d", resp.StatusCode)
-	case 5:
-		return ErrServer, fmt.Sprintf("server error: %d", resp.StatusCode)
-	}
-	return ErrBadResponse, fmt.Sprintf("bad response code %d", resp.StatusCode)
-}
-
 func (c apiClient) Do(ctx context.Context, req *http.Request) (*http.Response, []byte, error) {
 	resp, body, err := c.Client.Do(ctx, req)
 	if err != nil {
@@ -482,11 +469,9 @@ func (c apiClient) Do(ctx context.Context, req *http.Request) (*http.Response, [
 	code := resp.StatusCode
 
 	if code/100 != 2 && !apiError(code) {
-		errorType, errorMsg := errorTypeAndMsgFor(resp)
 		return resp, body, &Error{
-			Type:   errorType,
-			Msg:    errorMsg,
-			Detail: string(body),
+			Type: ErrBadResponse,
+			Msg:  fmt.Sprintf("bad response code %d", resp.StatusCode),
 		}
 	}
 

@@ -219,10 +219,6 @@ func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *servi
 			c := &s.Spec.RunLatest.Configuration
 			visitor(c)
 		}
-		if s.Spec.Pinned != nil {
-			c := &s.Spec.Pinned.Configuration
-			visitor(c)
-		}
 		if s.Spec.Release != nil {
 			c := &s.Spec.Release.Configuration
 			visitor(c)

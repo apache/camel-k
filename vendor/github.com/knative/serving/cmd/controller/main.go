@@ -21,19 +21,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/knative/pkg/configmap"
-
-	"github.com/knative/pkg/controller"
-	"github.com/knative/serving/pkg/logging"
-	"github.com/knative/serving/pkg/reconciler"
-
-	"github.com/knative/serving/pkg/system"
-
 	"k8s.io/client-go/dynamic"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+
 	// Uncomment the following line to load the gcp plugin (only required to authenticate against GKE clusters).
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
@@ -41,20 +35,28 @@ import (
 	cachinginformers "github.com/knative/caching/pkg/client/informers/externalversions"
 	sharedclientset "github.com/knative/pkg/client/clientset/versioned"
 	sharedinformers "github.com/knative/pkg/client/informers/externalversions"
+	"github.com/knative/pkg/configmap"
+	"github.com/knative/pkg/controller"
 	"github.com/knative/pkg/signals"
+	"github.com/knative/pkg/system"
+	"github.com/knative/pkg/version"
 	clientset "github.com/knative/serving/pkg/client/clientset/versioned"
 	informers "github.com/knative/serving/pkg/client/informers/externalversions"
+	"github.com/knative/serving/pkg/logging"
+	"github.com/knative/serving/pkg/metrics"
+	"github.com/knative/serving/pkg/reconciler"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/clusteringress"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/configuration"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/labeler"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/revision"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/route"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/service"
+	"go.uber.org/zap"
 )
 
 const (
 	threadsPerController = 2
-	logLevelKey          = "controller"
+	component            = "controller"
 )
 
 var (
@@ -72,7 +74,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error parsing logging configuration: %v", err)
 	}
-	logger, atomicLevel := logging.NewLoggerFromConfig(loggingConfig, logLevelKey)
+	logger, atomicLevel := logging.NewLoggerFromConfig(loggingConfig, component)
 	defer logger.Sync()
 
 	// set up signals so we handle the first shutdown signal gracefully
@@ -80,35 +82,43 @@ func main() {
 
 	cfg, err := clientcmd.BuildConfigFromFlags(*masterURL, *kubeconfig)
 	if err != nil {
-		logger.Fatalf("Error building kubeconfig: %v", err)
+		logger.Fatalw("Error building kubeconfig", zap.Error(err))
 	}
+
+	// We run 6 controllers, so bump the defaults.
+	cfg.QPS = 6 * rest.DefaultQPS
+	cfg.Burst = 6 * rest.DefaultBurst
 
 	kubeClient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		logger.Fatalf("Error building kubernetes clientset: %v", err)
+		logger.Fatalw("Error building kubernetes clientset", zap.Error(err))
 	}
 
 	sharedClient, err := sharedclientset.NewForConfig(cfg)
 	if err != nil {
-		logger.Fatalf("Error building shared clientset: %v", err)
+		logger.Fatalw("Error building shared clientset", zap.Error(err))
 	}
 
 	servingClient, err := clientset.NewForConfig(cfg)
 	if err != nil {
-		logger.Fatalf("Error building serving clientset: %v", err)
+		logger.Fatalw("Error building serving clientset", zap.Error(err))
 	}
 
 	dynamicClient, err := dynamic.NewForConfig(cfg)
 	if err != nil {
-		logger.Fatalf("Error building build clientset: %v", err)
+		logger.Fatalw("Error building build clientset", zap.Error(err))
 	}
 
 	cachingClient, err := cachingclientset.NewForConfig(cfg)
 	if err != nil {
-		logger.Fatalf("Error building caching clientset: %v", err)
+		logger.Fatalw("Error building caching clientset", zap.Error(err))
 	}
 
-	configMapWatcher := configmap.NewInformedWatcher(kubeClient, system.Namespace)
+	if err := version.CheckMinimumVersion(kubeClient.Discovery()); err != nil {
+		logger.Fatalf("Version check failed: %v", err)
+	}
+
+	configMapWatcher := configmap.NewInformedWatcher(kubeClient, system.Namespace())
 
 	opt := reconciler.Options{
 		KubeClientSet:    kubeClient,
@@ -188,7 +198,9 @@ func main() {
 	}
 
 	// Watch the logging config map and dynamically update logging levels.
-	configMapWatcher.Watch(logging.ConfigName, logging.UpdateLevelFromConfigMap(logger, atomicLevel, logLevelKey))
+	configMapWatcher.Watch(logging.ConfigName, logging.UpdateLevelFromConfigMap(logger, atomicLevel, component))
+	// Watch the observability config map and dynamically update metrics exporter.
+	configMapWatcher.Watch(metrics.ObservabilityConfigName, metrics.UpdateExporterFromConfigMap(component, logger))
 
 	// These are non-blocking.
 	kubeInformerFactory.Start(stopCh)
@@ -196,7 +208,7 @@ func main() {
 	servingInformerFactory.Start(stopCh)
 	cachingInformerFactory.Start(stopCh)
 	if err := configMapWatcher.Start(stopCh); err != nil {
-		logger.Fatalf("failed to start configuration manager: %v", err)
+		logger.Fatalw("failed to start configuration manager", zap.Error(err))
 	}
 
 	// Wait for the caches to be synced before starting controllers.
@@ -216,7 +228,7 @@ func main() {
 		virtualServiceInformer.Informer().HasSynced,
 	} {
 		if ok := cache.WaitForCacheSync(stopCh, synced); !ok {
-			logger.Fatalf("failed to wait for cache at index %v to sync", i)
+			logger.Fatalf("Failed to wait for cache at index %d to sync", i)
 		}
 	}
 
@@ -226,7 +238,7 @@ func main() {
 			// We don't expect this to return until stop is called,
 			// but if it does, propagate it back.
 			if runErr := ctrlr.Run(threadsPerController, stopCh); runErr != nil {
-				logger.Fatalf("Error running controller: %v", runErr)
+				logger.Fatalw("Error running controller", zap.Error(runErr))
 			}
 		}(ctrlr)
 	}
