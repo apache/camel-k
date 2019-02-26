@@ -82,19 +82,19 @@ func TODO_ServiceTrafficToRevisionWithInClusterDNS(s *v1alpha1.Service) (bool, e
 // ready to serve traffic. It will return false if the status indicates a state other than deploying
 // or being ready. It will also return false if the type of the condition is unexpected.
 func IsRevisionReady(r *v1alpha1.Revision) (bool, error) {
-	return r.Status.IsReady(), nil
+	return r.Generation == r.Status.ObservedGeneration && r.Status.IsReady(), nil
 }
 
 // IsServiceReady will check the status conditions of the service and return true if the service is
 // ready. This means that its configurations and routes have all reported ready.
 func IsServiceReady(s *v1alpha1.Service) (bool, error) {
-	return s.Status.IsReady(), nil
+	return s.Generation == s.Status.ObservedGeneration && s.Status.IsReady(), nil
 }
 
 // IsRouteReady will check the status conditions of the route and return true if the route is
 // ready.
 func IsRouteReady(r *v1alpha1.Route) (bool, error) {
-	return r.Status.IsReady(), nil
+	return r.Generation == r.Status.ObservedGeneration && r.Status.IsReady(), nil
 }
 
 // ConfigurationHasCreatedRevision returns whether the Configuration has created a Revision.
@@ -126,12 +126,12 @@ func IsConfigRevisionCreationFailed(c *v1alpha1.Configuration) (bool, error) {
 // set to the expected value.
 func IsRevisionAtExpectedGeneration(expectedGeneration string) func(r *v1alpha1.Revision) (bool, error) {
 	return func(r *v1alpha1.Revision) (bool, error) {
-		if a, ok := r.Annotations[serving.ConfigurationGenerationAnnotationKey]; ok {
+		if a, ok := r.Labels[serving.ConfigurationGenerationLabelKey]; ok {
 			if a != expectedGeneration {
-				return true, fmt.Errorf("Expected Revision %s to be annotated with generation %s but was %s instead", r.Name, expectedGeneration, a)
+				return true, fmt.Errorf("Expected Revision %s to be labeled with generation %s but was %s instead", r.Name, expectedGeneration, a)
 			}
 			return true, nil
 		}
-		return true, fmt.Errorf("Expected Revision %s to be annotated with generation %s but there was no annotation", r.Name, expectedGeneration)
+		return true, fmt.Errorf("Expected Revision %s to be labeled with generation %s but there was no label", r.Name, expectedGeneration)
 	}
 }

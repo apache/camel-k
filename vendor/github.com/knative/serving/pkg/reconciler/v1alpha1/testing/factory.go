@@ -19,20 +19,30 @@ package testing
 import (
 	"testing"
 
+	"k8s.io/apimachinery/pkg/runtime"
+	fakedynamicclientset "k8s.io/client-go/dynamic/fake"
+	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/tools/record"
+
 	fakecachingclientset "github.com/knative/caching/pkg/client/clientset/versioned/fake"
 	fakesharedclientset "github.com/knative/pkg/client/clientset/versioned/fake"
 	"github.com/knative/pkg/controller"
 	fakeclientset "github.com/knative/serving/pkg/client/clientset/versioned/fake"
 	"github.com/knative/serving/pkg/reconciler"
-	"k8s.io/apimachinery/pkg/runtime"
-	fakedynamicclientset "k8s.io/client-go/dynamic/fake"
-	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
 )
 
+const (
+	// maxEventBufferSize is the estimated max number of event notifications that
+	// can be buffered during reconciliation.
+	maxEventBufferSize = 10
+)
+
+// Ctor functions create a k8s controller with given params.
 type Ctor func(*Listers, reconciler.Options) controller.Reconciler
 
+// MakeFactory creates a reconciler factory with fake clients and controller created by `ctor`.
 func MakeFactory(ctor Ctor) Factory {
-	return func(t *testing.T, r *TableRow) (controller.Reconciler, ActionRecorderList) {
+	return func(t *testing.T, r *TableRow) (controller.Reconciler, ActionRecorderList, EventList, *FakeStatsReporter) {
 		ls := NewListers(r.Objects)
 
 		kubeClient := fakekubeclientset.NewSimpleClientset(ls.GetKubeObjects()...)
@@ -40,6 +50,11 @@ func MakeFactory(ctor Ctor) Factory {
 		client := fakeclientset.NewSimpleClientset(ls.GetServingObjects()...)
 		dynamicClient := fakedynamicclientset.NewSimpleDynamicClient(runtime.NewScheme(), ls.GetBuildObjects()...)
 		cachingClient := fakecachingclientset.NewSimpleClientset(ls.GetCachingObjects()...)
+		eventRecorder := record.NewFakeRecorder(maxEventBufferSize)
+		statsReporter := &FakeStatsReporter{}
+
+		PrependGenerateNameReactor(&client.Fake)
+		PrependGenerateNameReactor(&dynamicClient.Fake)
 
 		// Set up our Controller from the fakes.
 		c := ctor(&ls, reconciler.Options{
@@ -48,6 +63,8 @@ func MakeFactory(ctor Ctor) Factory {
 			DynamicClientSet: dynamicClient,
 			CachingClientSet: cachingClient,
 			ServingClientSet: client,
+			Recorder:         eventRecorder,
+			StatsReporter:    statsReporter,
 			Logger:           TestLogger(t),
 		})
 
@@ -63,6 +80,9 @@ func MakeFactory(ctor Ctor) Factory {
 		client.PrependReactor("create", "*", ValidateCreates)
 		client.PrependReactor("update", "*", ValidateUpdates)
 
-		return c, ActionRecorderList{sharedClient, dynamicClient, client, kubeClient, cachingClient}
+		actionRecorderList := ActionRecorderList{sharedClient, dynamicClient, client, kubeClient, cachingClient}
+		eventList := EventList{Recorder: eventRecorder}
+
+		return c, actionRecorderList, eventList, statsReporter
 	}
 }

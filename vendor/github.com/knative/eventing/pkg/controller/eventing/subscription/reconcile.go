@@ -160,36 +160,43 @@ func isNilOrEmptyReply(reply *v1alpha1.ReplyStrategy) bool {
 	return reply == nil || equality.Semantic.DeepEqual(reply, &v1alpha1.ReplyStrategy{})
 }
 
+// updateStatus may in fact update the subscription's finalizers in addition to the status
 func (r *reconciler) updateStatus(subscription *v1alpha1.Subscription) (*v1alpha1.Subscription, error) {
-	newSubscription := &v1alpha1.Subscription{}
-	err := r.client.Get(context.TODO(), client.ObjectKey{Namespace: subscription.Namespace, Name: subscription.Name}, newSubscription)
+	objectKey := client.ObjectKey{Namespace: subscription.Namespace, Name: subscription.Name}
+	latestSubscription := &v1alpha1.Subscription{}
 
-	if err != nil {
+	if err := r.client.Get(context.TODO(), objectKey, latestSubscription); err != nil {
 		return nil, err
 	}
 
-	updated := false
-	if !equality.Semantic.DeepEqual(newSubscription.Finalizers, subscription.Finalizers) {
-		newSubscription.SetFinalizers(subscription.ObjectMeta.Finalizers)
-		updated = true
+	subscriptionChanged := false
+
+	if !equality.Semantic.DeepEqual(latestSubscription.Finalizers, subscription.Finalizers) {
+		latestSubscription.SetFinalizers(subscription.ObjectMeta.Finalizers)
+		if err := r.client.Update(context.TODO(), latestSubscription); err != nil {
+			return nil, err
+		}
+		subscriptionChanged = true
 	}
 
-	if !equality.Semantic.DeepEqual(newSubscription.Status, subscription.Status) {
-		newSubscription.Status = subscription.Status
-		updated = true
+	if equality.Semantic.DeepEqual(latestSubscription.Status, subscription.Status) {
+		return latestSubscription, nil
 	}
 
-	if updated {
-		// Until #38113 is merged, we must use Update instead of UpdateStatus to
-		// update the Status block of the Subscription resource. UpdateStatus will not
-		// allow changes to the Spec of the resource, which is ideal for ensuring
-		// nothing other than resource status has been updated.
-		if err = r.client.Update(context.TODO(), newSubscription); err != nil {
+	if subscriptionChanged {
+		// Refetch
+		latestSubscription = &v1alpha1.Subscription{}
+		if err := r.client.Get(context.TODO(), objectKey, latestSubscription); err != nil {
 			return nil, err
 		}
 	}
 
-	return newSubscription, nil
+	latestSubscription.Status = subscription.Status
+	if err := r.client.Status().Update(context.TODO(), latestSubscription); err != nil {
+		return nil, err
+	}
+
+	return latestSubscription, nil
 }
 
 // resolveSubscriberSpec resolves the Spec.Call object. If it's an
@@ -224,15 +231,19 @@ func (r *reconciler) resolveSubscriberSpec(namespace string, s v1alpha1.Subscrib
 		return "", err
 	}
 	t := duckv1alpha1.AddressableType{}
-	err = duck.FromUnstructured(obj, &t)
-	if err != nil {
-		glog.Warningf("Failed to deserialize legacy target: %s", err)
-		return "", err
+	if err := duck.FromUnstructured(obj, &t); err == nil {
+		if t.Status.Address != nil {
+			return domainToURL(t.Status.Address.Hostname), nil
+		}
 	}
 
-	if t.Status.Address != nil {
-		return domainToURL(t.Status.Address.Hostname), nil
+	legacy := duckv1alpha1.LegacyTarget{}
+	if err := duck.FromUnstructured(obj, &legacy); err == nil {
+		if legacy.Status.DomainInternal != "" {
+			return domainToURL(legacy.Status.DomainInternal), nil
+		}
 	}
+
 	return "", fmt.Errorf("status does not contain address")
 }
 

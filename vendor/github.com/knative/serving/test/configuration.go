@@ -19,22 +19,62 @@ limitations under the License.
 package test
 
 import (
-	"github.com/knative/pkg/test/logging"
+	"testing"
+
+	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+
+	rtesting "github.com/knative/serving/pkg/reconciler/v1alpha1/testing"
 )
 
 // Options are test setup parameters.
 type Options struct {
-	EnvVars              []corev1.EnvVar
-	ContainerConcurrency int
+	EnvVars                []corev1.EnvVar
+	ContainerPorts         []corev1.ContainerPort
+	ContainerConcurrency   int
+	RevisionTimeoutSeconds int64
+	ContainerResources     corev1.ResourceRequirements
+	ReadinessProbe         *corev1.Probe
 }
 
 // CreateConfiguration create a configuration resource in namespace with the name names.Config
-// that uses the image specified by imagePath.
-func CreateConfiguration(logger *logging.BaseLogger, clients *Clients, names ResourceNames, imagePath string, options *Options) error {
-	config := Configuration(ServingNamespace, names, imagePath, options)
+// that uses the image specified by names.Image.
+func CreateConfiguration(t *testing.T, clients *Clients, names ResourceNames, options *Options, fopt ...rtesting.ConfigOption) (*v1alpha1.Configuration, error) {
+	config := Configuration(ServingNamespace, names, options, fopt...)
+	LogResourceObject(t, ResourceObjects{Config: config})
+	return clients.ServingClient.Configs.Create(config)
+}
 
-	LogResourceObject(logger, ResourceObjects{Configuration: config})
-	_, err := clients.ServingClient.Configs.Create(config)
-	return err
+// PatchConfigImage patches the existing config passed in with a new imagePath. Returns the latest Configuration object
+func PatchConfigImage(clients *Clients, cfg *v1alpha1.Configuration, imagePath string) (*v1alpha1.Configuration, error) {
+	newCfg := cfg.DeepCopy()
+	newCfg.Spec.RevisionTemplate.Spec.Container.Image = imagePath
+	patchBytes, err := createPatch(cfg, newCfg)
+	if err != nil {
+		return nil, err
+	}
+	return clients.ServingClient.Configs.Patch(cfg.ObjectMeta.Name, types.JSONPatchType, patchBytes, "")
+}
+
+// WaitForConfigLatestRevision takes a revision in through names and compares it to the current state of LatestCreatedRevisionName in Configuration.
+// Once an update is detected in the LatestCreatedRevisionName, the function waits for the created revision to be set in LatestReadyRevisionName
+// before returning the name of the revision.
+func WaitForConfigLatestRevision(clients *Clients, names ResourceNames) (string, error) {
+	var revisionName string
+	err := WaitForConfigurationState(clients.ServingClient, names.Config, func(c *v1alpha1.Configuration) (bool, error) {
+		if c.Status.LatestCreatedRevisionName != names.Revision {
+			revisionName = c.Status.LatestCreatedRevisionName
+			return true, nil
+		}
+		return false, nil
+	}, "ConfigurationUpdatedWithRevision")
+	if err != nil {
+		return "", err
+	}
+	err = WaitForConfigurationState(clients.ServingClient, names.Config, func(c *v1alpha1.Configuration) (bool, error) {
+		return (c.Status.LatestReadyRevisionName == revisionName), nil
+	}, "ConfigurationReadyWithRevision")
+
+	return revisionName, err
 }

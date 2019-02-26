@@ -20,12 +20,12 @@ import (
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/knative/pkg/kmeta"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/build/pkg/reconciler/buildtemplate/resources/names"
 	caching "github.com/knative/caching/pkg/apis/caching/v1alpha1"
+	"github.com/knative/pkg/kmeta"
 )
 
 // Note: namespace is passed separately because this may be used for
@@ -37,7 +37,7 @@ func MakeImageCachesFromSpec(
 	var caches []caching.Image
 
 	// Avoid duplicates.
-	images := make(map[string]struct{})
+	images := sets.NewString()
 
 	for index, container := range bt.TemplateSpec().Steps {
 		// TODO(mattmoor): Consider substituting default values to
@@ -46,10 +46,10 @@ func MakeImageCachesFromSpec(
 			// Skip image names containing substitutions.
 			continue
 		}
-		if _, ok := images[container.Image]; ok {
+		if images.Has(container.Image) {
 			continue
 		}
-		images[container.Image] = struct{}{}
+		images.Insert(container.Image)
 
 		caches = append(caches, caching.Image{
 			ObjectMeta: metav1.ObjectMeta{

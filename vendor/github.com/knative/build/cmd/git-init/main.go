@@ -20,6 +20,7 @@ import (
 	"flag"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/knative/pkg/logging"
 	"go.uber.org/zap"
@@ -28,6 +29,7 @@ import (
 var (
 	url      = flag.String("url", "", "The url of the Git repository to initialize.")
 	revision = flag.String("revision", "", "The Git revision to make the repository HEAD")
+	path     = flag.String("path", "", "Path of directory under which git repository will be copied")
 )
 
 func run(logger *zap.SugaredLogger, cmd string, args ...string) {
@@ -66,10 +68,26 @@ func main() {
 		logger.Fatalf("Unexpected error creating symlink: %v", err)
 	}
 
-	run(logger, "git", "init")
+	dir, err := os.Getwd()
+	if err != nil {
+		logger.Errorf("Failed to get current dir", err)
+	}
+
+	if *path != "" {
+		runOrFail(logger, "git", "init", *path)
+		path := filepath.Join(dir, *path)
+		if err := os.Chdir(path); err != nil {
+			logger.Fatalf("Failed to change directory with path %s; err %v", path, err)
+		}
+		// update dir variable with new path
+		dir = path
+	} else {
+		run(logger, "git", "init")
+	}
+
 	run(logger, "git", "remote", "add", "origin", *url)
 	runOrFail(logger, "git", "fetch", "--depth=1", "--recurse-submodules=yes", "origin", *revision)
 	runOrFail(logger, "git", "reset", "--hard", "FETCH_HEAD")
 
-	logger.Infof("Successfully cloned %q @ %q", *url, *revision)
+	logger.Infof("Successfully cloned %q @ %q in path %q", *url, *revision, dir)
 }
