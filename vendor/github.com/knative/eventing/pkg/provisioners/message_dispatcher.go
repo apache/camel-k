@@ -26,6 +26,9 @@ import (
 	"strings"
 
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/util/sets"
+
+	"github.com/knative/eventing/pkg/utils"
 )
 
 const correlationIDHeaderName = "Knative-Correlation-Id"
@@ -45,9 +48,9 @@ var _ Dispatcher = &MessageDispatcher{}
 // MessageDispatcher dispatches messages to a destination over HTTP.
 type MessageDispatcher struct {
 	httpClient       *http.Client
-	forwardHeaders   map[string]bool
+	forwardHeaders   sets.String
 	forwardPrefixes  []string
-	supportedSchemes map[string]bool
+	supportedSchemes sets.String
 
 	logger *zap.SugaredLogger
 }
@@ -61,15 +64,11 @@ type DispatchDefaults struct {
 // messages to HTTP destinations.
 func NewMessageDispatcher(logger *zap.SugaredLogger) *MessageDispatcher {
 	return &MessageDispatcher{
-		httpClient:      &http.Client{},
-		forwardHeaders:  headerSet(forwardHeaders),
-		forwardPrefixes: forwardPrefixes,
-		supportedSchemes: map[string]bool{
-			"http":  true,
-			"https": true,
-		},
-
-		logger: logger,
+		httpClient:       &http.Client{},
+		forwardHeaders:   sets.NewString(forwardHeaders...),
+		forwardPrefixes:  forwardPrefixes,
+		supportedSchemes: sets.NewString("http", "https"),
+		logger:           logger,
 	}
 }
 
@@ -154,7 +153,7 @@ func (d *MessageDispatcher) toHTTPHeaders(headers map[string]string) http.Header
 		// Header names are case insensitive. Be sure to compare against a lower-cased version
 		// (all our oracles are lower-case as well).
 		name = strings.ToLower(name)
-		if _, ok := d.forwardHeaders[name]; ok {
+		if d.forwardHeaders.Has(name) {
 			safe.Add(name, value)
 			continue
 		}
@@ -180,7 +179,7 @@ func (d *MessageDispatcher) fromHTTPHeaders(headers http.Header) map[string]stri
 	for h, v := range headers {
 		// Headers are case-insensitive but test case are all lower-case
 		comparable := strings.ToLower(h)
-		if _, ok := d.forwardHeaders[comparable]; ok {
+		if d.forwardHeaders.Has(comparable) {
 			safe[h] = v[0]
 			continue
 		}
@@ -196,12 +195,12 @@ func (d *MessageDispatcher) fromHTTPHeaders(headers http.Header) map[string]stri
 }
 
 func (d *MessageDispatcher) resolveURL(destination string, defaultNamespace string) *url.URL {
-	if url, err := url.Parse(destination); err == nil && d.supportedSchemes[url.Scheme] {
-		// already a URL with a known scheme
+	if url, err := url.Parse(destination); err == nil && d.supportedSchemes.Has(url.Scheme) {
+		// Already a URL with a known scheme.
 		return url
 	}
 	if strings.Index(destination, ".") == -1 {
-		destination = fmt.Sprintf("%s.%s.svc.cluster.local", destination, defaultNamespace)
+		destination = fmt.Sprintf("%s.%s.svc.%s", destination, defaultNamespace, utils.GetClusterDomainName())
 	}
 	return &url.URL{
 		Scheme: "http",
