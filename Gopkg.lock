@@ -331,7 +331,7 @@
   version = "v0.4.0"
 
 [[projects]]
-  digest = "1:052c63e3bf853e8c4fb70aad4bb01e5ca85edbcc253d52466aef3e72a83eb45c"
+  digest = "1:85393dd3f527b2a8823fda0e75f9b9ae721ee85b8a0bd642fed8bd9577d0c6e7"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/duck/v1alpha1",
@@ -339,8 +339,8 @@
     "pkg/apis/eventing/v1alpha1",
   ]
   pruneopts = "NT"
-  revision = "4712e3a42fccad12a37f3ee07fc407fa5b0c4506"
-  version = "v0.3.0"
+  revision = "c3b25ccd61935d64c5c9ceb57dd57389d3296216"
+  version = "v0.4.0"
 
 [[projects]]
   branch = "master"
