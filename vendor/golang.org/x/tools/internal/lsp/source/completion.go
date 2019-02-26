@@ -47,18 +47,13 @@ type finder func(types.Object, float64, []CompletionItem) []CompletionItem
 // completion. For instance, some clients may tolerate imperfect matches as
 // valid completion results, since users may make typos.
 func Completion(ctx context.Context, f File, pos token.Pos) (items []CompletionItem, prefix string, err error) {
-	file, err := f.GetAST()
-	if err != nil {
-		return nil, "", err
-	}
-	pkg, err := f.GetPackage()
-	if err != nil {
-		return nil, "", err
-	}
+	file := f.GetAST()
+	pkg := f.GetPackage()
 	path, _ := astutil.PathEnclosingInterval(file, pos, pos)
 	if path == nil {
 		return nil, "", fmt.Errorf("cannot find node enclosing position")
 	}
+
 	// If the position is not an identifier but immediately follows
 	// an identifier or selector period (as is common when
 	// requesting a completion), use the path to the preceding node.
@@ -71,25 +66,37 @@ func Completion(ctx context.Context, f File, pos token.Pos) (items []CompletionI
 		}
 	}
 
+	// Skip completion inside comment blocks.
+	switch path[0].(type) {
+	case *ast.File, *ast.BlockStmt:
+		if inComment(pos, file.Comments) {
+			return items, prefix, nil
+		}
+	}
+
 	// Save certain facts about the query position, including the expected type
 	// of the completion result, the signature of the function enclosing the
 	// position.
 	typ := expectedType(path, pos, pkg.TypesInfo)
 	sig := enclosingFunction(path, pos, pkg.TypesInfo)
 	pkgStringer := qualifier(file, pkg.Types, pkg.TypesInfo)
+	preferTypeNames := wantTypeNames(pos, path)
 
 	seen := make(map[types.Object]bool)
-
 	// found adds a candidate completion.
 	// Only the first candidate of a given name is considered.
 	found := func(obj types.Object, weight float64, items []CompletionItem) []CompletionItem {
 		if obj.Pkg() != nil && obj.Pkg() != pkg.Types && !obj.Exported() {
 			return items // inaccessible
 		}
+
 		if !seen[obj] {
 			seen[obj] = true
 			if typ != nil && matchingTypes(typ, obj.Type()) {
 				weight *= 10.0
+			}
+			if _, ok := obj.(*types.TypeName); !ok && preferTypeNames {
+				weight *= 0.01
 			}
 			item := formatCompletion(obj, pkgStringer, weight, func(v *types.Var) bool {
 				return isParameter(sig, v)
@@ -144,7 +151,6 @@ func Completion(ctx context.Context, f File, pos token.Pos) (items []CompletionI
 		// fallback to lexical completions
 		return lexical(path, pos, pkg.Types, pkg.TypesInfo, found), "", nil
 	}
-
 	return items, prefix, nil
 }
 
@@ -192,6 +198,34 @@ func selector(sel *ast.SelectorExpr, pos token.Pos, info *types.Info, found find
 	}
 
 	return items, nil
+}
+
+// wantTypeNames checks if given token position is inside func receiver, type params
+// or type results (e.g func (<>) foo(<>) (<>) {} ).
+func wantTypeNames(pos token.Pos, path []ast.Node) bool {
+	for _, p := range path {
+		switch n := p.(type) {
+		case *ast.FuncDecl:
+			recv := n.Recv
+			if recv != nil && recv.Pos() <= pos && pos <= recv.End() {
+				return true
+			}
+
+			if n.Type != nil {
+				params := n.Type.Params
+				if params != nil && params.Pos() <= pos && pos <= params.End() {
+					return true
+				}
+
+				results := n.Type.Results
+				if results != nil && results.Pos() <= pos && pos <= results.End() {
+					return true
+				}
+			}
+			return false
+		}
+	}
+	return false
 }
 
 // lexical finds completions in the lexical environment.
@@ -245,6 +279,18 @@ func lexical(path []ast.Node, pos token.Pos, pkg *types.Package, info *types.Inf
 		}
 	}
 	return items
+}
+
+// inComment checks if given token position is inside ast.Comment node.
+func inComment(pos token.Pos, commentGroups []*ast.CommentGroup) bool {
+	for _, g := range commentGroups {
+		for _, c := range g.List {
+			if c.Pos() <= pos && pos <= c.End() {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // complit finds completions for field names inside a composite literal.
@@ -691,11 +737,11 @@ var builtinDetails = map[string]itemDetails{
 		label: "close(c chan<- T)",
 	},
 	"complex": { // complex(r, i float64) complex128
-		label:  "complex(real, imag float64)",
+		label:  "complex(real float64, imag float64)",
 		detail: "complex128",
 	},
 	"copy": { // copy(dst, src []T) int
-		label:  "copy(dst, src []T)",
+		label:  "copy(dst []T, src []T)",
 		detail: "int",
 	},
 	"delete": { // delete(m map[T]T1, key T)

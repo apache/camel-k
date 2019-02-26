@@ -22,9 +22,9 @@ import (
 	"github.com/knative/pkg/controller"
 	"github.com/knative/pkg/logging"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/knative/pkg/tracker"
 	servinginformers "github.com/knative/serving/pkg/client/informers/externalversions/serving/v1alpha1"
 	listers "github.com/knative/serving/pkg/client/listers/serving/v1alpha1"
 	"github.com/knative/serving/pkg/reconciler"
@@ -42,7 +42,6 @@ type Reconciler struct {
 	routeLister         listers.RouteLister
 	configurationLister listers.ConfigurationLister
 	revisionLister      listers.RevisionLister
-	tracker             tracker.Interface
 }
 
 // Check that our Reconciler implements controller.Reconciler
@@ -72,16 +71,6 @@ func NewRouteToConfigurationController(
 		DeleteFunc: impl.Enqueue,
 	})
 
-	c.tracker = tracker.New(impl.EnqueueKey, opt.GetTrackerLease())
-	configInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc:    c.tracker.OnChanged,
-		UpdateFunc: controller.PassNew(c.tracker.OnChanged),
-	})
-	revisionInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc:    c.tracker.OnChanged,
-		UpdateFunc: controller.PassNew(c.tracker.OnChanged),
-	})
-
 	return impl
 }
 
@@ -102,7 +91,7 @@ func (c *Reconciler) Reconcile(ctx context.Context, key string) error {
 	if apierrs.IsNotFound(err) {
 		logger.Infof("Clearing labels for deleted Route: %q", key)
 		return c.deleteLabelForOutsideOfGivenConfigurations(
-			ctx, namespace, name, map[string]struct{}{},
+			ctx, namespace, name, sets.NewString(),
 		)
 	} else if err != nil {
 		return err

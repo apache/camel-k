@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	// ignore atomic level because we are not watching this config for any updates
-	logger, _ := logging.NewLogger("", "git-init")
+	logger, _ := logging.NewLogger("", "creds-init")
 	defer logger.Sync()
 
 	builders := []credentials.Builder{dockercreds.NewBuilder(), gitcreds.NewBuilder()}

@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
+
 	"github.com/knative/pkg/apis"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -74,12 +76,16 @@ type ClusterIngressList struct {
 // - Timeout & Retry can be configured.
 // - Headers can be appended.
 type IngressSpec struct {
-	// TODO: Generation does not work correctly with CRD. They are scrubbed
-	// by the APIserver (https://github.com/kubernetes/kubernetes/issues/58778)
-	// So, we add Generation here. Once that gets fixed, remove this and use
-	// ObjectMeta.Generation instead.
+	// DeprecatedGeneration was used prior in Kubernetes versions <1.11
+	// when metadata.generation was not being incremented by the api server
+	//
+	// This property will be dropped in future Knative releases and should
+	// not be used - use metadata.generation
+	//
+	// Tracking issue: https://github.com/knative/serving/issues/643
+	//
 	// +optional
-	Generation int64 `json:"generation,omitempty"`
+	DeprecatedGeneration int64 `json:"generation,omitempty"`
 
 	// TLS configuration. Currently the ClusterIngress only supports a single TLS
 	// port, 443. If multiple members of this list specify different hosts, they
@@ -93,11 +99,23 @@ type IngressSpec struct {
 	// +optional
 	Rules []ClusterIngressRule `json:"rules,omitempty"`
 
-	// TODO: We need to consider a way to specify if the ClusterIngress address
-	// should be exposed to the Internet, or only exposed privately (cluster local,
-	// VPC, RFC1918).  An example use case is for
-	//   https://github.com/knative/serving/issues/2127.
+	// Visibility setting.
+	Visibility IngressVisibility `json:"visibility,omitempty"`
 }
+
+// IngressVisibility describes whether the Ingress should be exposed to
+// public gateways or not.
+type IngressVisibility string
+
+const (
+	// IngressVisibilityExternalIP is used to denote that the Ingress
+	// should be exposed to an external IP, for example a LoadBalancer
+	// Service.  This is the default value for IngressVisibility.
+	IngressVisibilityExternalIP IngressVisibility = "ExternalIP"
+	// IngressVisibilityClusterLocal is used to denote that the Ingress
+	// should be only be exposed locally to the cluster.
+	IngressVisibilityClusterLocal IngressVisibility = "ClusterLocal"
+)
 
 // ClusterIngressTLS describes the transport layer security associated with an ClusterIngress.
 type ClusterIngressTLS struct {
@@ -243,6 +261,12 @@ type IngressStatus struct {
 	// LoadBalancer contains the current status of the load-balancer.
 	// +optional
 	LoadBalancer *LoadBalancerStatus `json:"loadBalancer,omitempty"`
+
+	// ObservedGeneration is the 'Generation' of the ClusterIngress that
+	// was last processed by the controller. The observed generation is updated
+	// even if the controller failed to process the spec.
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 // LoadBalancerStatus represents the status of a load-balancer.
@@ -273,6 +297,10 @@ type LoadBalancerIngressStatus struct {
 	//
 	// +optional
 	DomainInternal string `json:"domainInternal,omitempty"`
+
+	// MeshOnly is set if the ClusterIngress is only load-balanced through a Service mesh.
+	// +optional
+	MeshOnly bool `json:"meshOnly,omitempty"`
 }
 
 // ConditionType represents a ClusterIngress condition value
@@ -303,6 +331,11 @@ func (ci *ClusterIngress) GetGroupVersionKind() schema.GroupVersionKind {
 	return SchemeGroupVersion.WithKind("ClusterIngress")
 }
 
+// IsPublic returns whether the ClusterIngress should be exposed publicly.
+func (ci *ClusterIngress) IsPublic() bool {
+	return ci.Spec.Visibility == "" || ci.Spec.Visibility == IngressVisibilityExternalIP
+}
+
 // GetConditions returns the Conditions array. This enables generic handling of
 // conditions by implementing the duckv1alpha1.Conditions interface.
 func (cis *IngressStatus) GetConditions() duckv1alpha1.Conditions {
@@ -325,6 +358,13 @@ func (cis *IngressStatus) InitializeConditions() {
 
 func (cis *IngressStatus) MarkNetworkConfigured() {
 	clusterIngressCondSet.Manage(cis).MarkTrue(ClusterIngressConditionNetworkConfigured)
+}
+
+// MarkResourceNotOwned changes the "NetworkConfigured" condition to false to reflect that the
+// resource of the given kind and name has already been created, and we do not own it.
+func (cis *IngressStatus) MarkResourceNotOwned(kind, name string) {
+	clusterIngressCondSet.Manage(cis).MarkFalse(ClusterIngressConditionNetworkConfigured, "NotOwned",
+		fmt.Sprintf("There is an existing %s %q that we do not own.", kind, name))
 }
 
 // MarkLoadBalancerReady marks the Ingress with ClusterIngressConditionLoadBalancerReady,

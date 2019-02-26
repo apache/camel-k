@@ -18,12 +18,12 @@ package revision
 
 import (
 	"context"
-
-	"github.com/google/go-cmp/cmp"
+	"fmt"
 
 	caching "github.com/knative/caching/pkg/apis/caching/v1alpha1"
+	"github.com/knative/pkg/kmp"
 	"github.com/knative/pkg/logging"
-	kpa "github.com/knative/serving/pkg/apis/autoscaling/v1alpha1"
+	kpav1alpha1 "github.com/knative/serving/pkg/apis/autoscaling/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/revision/config"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/revision/resources"
@@ -47,6 +47,60 @@ func (c *Reconciler) createDeployment(ctx context.Context, rev *v1alpha1.Revisio
 	return c.KubeClientSet.AppsV1().Deployments(deployment.Namespace).Create(deployment)
 }
 
+func (c *Reconciler) checkAndUpdateDeployment(ctx context.Context, rev *v1alpha1.Revision, have *appsv1.Deployment) (*appsv1.Deployment, Changed, error) {
+	logger := logging.FromContext(ctx)
+	cfgs := config.FromContext(ctx)
+
+	deployment := resources.MakeDeployment(
+		rev,
+		cfgs.Logging,
+		cfgs.Network,
+		cfgs.Observability,
+		cfgs.Autoscaler,
+		cfgs.Controller,
+	)
+
+	// Preserve the current scale of the Deployment.
+	deployment.Spec.Replicas = have.Spec.Replicas
+
+	// Preserve the label selector since it's immutable
+	// TODO(dprotaso) Determine other immutable properties
+	deployment.Spec.Selector = have.Spec.Selector
+
+	// If the spec we want is the spec we have, then we're good.
+	if equality.Semantic.DeepEqual(have.Spec, deployment.Spec) {
+		return have, Unchanged, nil
+	}
+
+	// Otherwise attempt an update (with ONLY the spec changes).
+	desiredDeployment := have.DeepCopy()
+	desiredDeployment.Spec = deployment.Spec
+
+	// carry over new labels
+	for k, v := range deployment.Labels {
+		desiredDeployment.Labels[k] = v
+	}
+
+	d, err := c.KubeClientSet.AppsV1().Deployments(deployment.Namespace).Update(desiredDeployment)
+	if err != nil {
+		return nil, Unchanged, err
+	}
+
+	// If what comes back from the update (with defaults applied by the API server) is the same
+	// as what we have then nothing changed.
+	if equality.Semantic.DeepEqual(have.Spec, d.Spec) {
+		return d, Unchanged, nil
+	}
+	diff, err := kmp.SafeDiff(have.Spec, d.Spec)
+	if err != nil {
+		return nil, Unchanged, err
+	}
+
+	// If what comes back has a different spec, then signal the change.
+	logger.Infof("Reconciled deployment diff (-desired, +observed): %v", diff)
+	return d, WasChanged, nil
+}
+
 func (c *Reconciler) createImageCache(ctx context.Context, rev *v1alpha1.Revision, deploy *appsv1.Deployment) (*caching.Image, error) {
 	image, err := resources.MakeImageCache(rev, deploy)
 	if err != nil {
@@ -56,7 +110,7 @@ func (c *Reconciler) createImageCache(ctx context.Context, rev *v1alpha1.Revisio
 	return c.CachingClientSet.CachingV1alpha1().Images(image.Namespace).Create(image)
 }
 
-func (c *Reconciler) createKPA(ctx context.Context, rev *v1alpha1.Revision) (*kpa.PodAutoscaler, error) {
+func (c *Reconciler) createKPA(ctx context.Context, rev *v1alpha1.Revision) (*kpav1alpha1.PodAutoscaler, error) {
 	kpa := resources.MakeKPA(rev)
 
 	return c.ServingClientSet.AutoscalingV1alpha1().PodAutoscalers(kpa.Namespace).Create(kpa)
@@ -83,8 +137,11 @@ func (c *Reconciler) checkAndUpdateService(ctx context.Context, rev *v1alpha1.Re
 	if equality.Semantic.DeepEqual(desiredService.Spec, service.Spec) {
 		return service, Unchanged, nil
 	}
-	logger.Infof("Reconciling service diff (-desired, +observed): %v",
-		cmp.Diff(desiredService.Spec, service.Spec))
+	diff, err := kmp.SafeDiff(desiredService.Spec, service.Spec)
+	if err != nil {
+		return nil, Unchanged, fmt.Errorf("failed to diff Service: %v", err)
+	}
+	logger.Infof("Reconciling service diff (-desired, +observed): %v", diff)
 
 	d, err := c.KubeClientSet.CoreV1().Services(service.Namespace).Update(desiredService)
 	return d, WasChanged, err

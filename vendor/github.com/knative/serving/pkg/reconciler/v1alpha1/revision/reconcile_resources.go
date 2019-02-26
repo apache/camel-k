@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/knative/pkg/kmp"
 	"github.com/knative/pkg/logging"
 	"github.com/knative/pkg/logging/logkey"
 	kpav1alpha1 "github.com/knative/serving/pkg/apis/autoscaling/v1alpha1"
@@ -33,6 +33,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -44,27 +45,55 @@ func (c *Reconciler) reconcileDeployment(ctx context.Context, rev *v1alpha1.Revi
 	deploymentName := resourcenames.Deployment(rev)
 	logger := logging.FromContext(ctx).With(zap.String(logkey.Deployment, deploymentName))
 
-	deployment, getDepErr := c.deploymentLister.Deployments(ns).Get(deploymentName)
-	if apierrs.IsNotFound(getDepErr) {
+	deployment, err := c.deploymentLister.Deployments(ns).Get(deploymentName)
+	if apierrs.IsNotFound(err) {
 		// Deployment does not exist. Create it.
 		rev.Status.MarkDeploying("Deploying")
-		var err error
 		deployment, err = c.createDeployment(ctx, rev)
 		if err != nil {
 			logger.Errorf("Error creating deployment %q: %v", deploymentName, err)
 			return err
 		}
 		logger.Infof("Created deployment %q", deploymentName)
-	} else if getDepErr != nil {
-		logger.Errorf("Error reconciling deployment %q: %v", deploymentName, getDepErr)
-		return getDepErr
+	} else if err != nil {
+		logger.Errorf("Error reconciling deployment %q: %v", deploymentName, err)
+		return err
+	} else if !metav1.IsControlledBy(deployment, rev) {
+		// Surface an error in the revision's status, and return an error.
+		rev.Status.MarkResourceNotOwned("Deployment", deploymentName)
+		return fmt.Errorf("Revision: %q does not own Deployment: %q", rev.Name, deploymentName)
+	} else {
+		// The deployment exists, but make sure that it has the shape that we expect.
+		deployment, _, err = c.checkAndUpdateDeployment(ctx, rev, deployment)
+		if err != nil {
+			logger.Errorf("Error updating deployment %q: %v", deploymentName, err)
+			return err
+		}
 	}
-	// TODO(mattmoor): Consider reconciling the deployment spec to make sure it matches
-	// what we expect.
+
+	// If a container keeps crashing (no active pods in the deployment although we want some)
+	if *deployment.Spec.Replicas > 0 && deployment.Status.AvailableReplicas == 0 {
+		pods, err := c.KubeClientSet.CoreV1().Pods(ns).List(metav1.ListOptions{LabelSelector: metav1.FormatLabelSelector(deployment.Spec.Selector)})
+		if err != nil {
+			logger.Errorf("Error getting pods: %v", err)
+		} else if len(pods.Items) > 0 {
+			// Arbitrarily grab the very first pod, as they all should be crashing
+			pod := pods.Items[0]
+
+			for _, status := range pod.Status.ContainerStatuses {
+				if status.Name == resources.UserContainerName {
+					if t := status.LastTerminationState.Terminated; t != nil {
+						rev.Status.MarkContainerExiting(t.ExitCode, t.Message)
+					}
+					break
+				}
+			}
+		}
+	}
 
 	// Now that we have a Deployment, determine whether there is any relevant
 	// status to surface in the Revision.
-	if hasDeploymentTimedOut(deployment) {
+	if hasDeploymentTimedOut(deployment) && !rev.Status.IsActivationRequired() {
 		rev.Status.MarkProgressDeadlineExceeded(fmt.Sprintf(
 			"Unable to create pods for more than %d seconds.", resources.ProgressDeadlineSeconds))
 		c.Recorder.Eventf(rev, corev1.EventTypeNormal, "ProgressDeadlineExceeded",
@@ -95,7 +124,7 @@ func (c *Reconciler) reconcileKPA(ctx context.Context, rev *v1alpha1.Revision) e
 	kpaName := resourcenames.KPA(rev)
 	logger := logging.FromContext(ctx)
 
-	kpa, getKPAErr := c.kpaLister.PodAutoscalers(ns).Get(kpaName)
+	kpa, getKPAErr := c.podAutoscalerLister.PodAutoscalers(ns).Get(kpaName)
 	if apierrs.IsNotFound(getKPAErr) {
 		// KPA does not exist. Create it.
 		var err error
@@ -108,6 +137,10 @@ func (c *Reconciler) reconcileKPA(ctx context.Context, rev *v1alpha1.Revision) e
 	} else if getKPAErr != nil {
 		logger.Errorf("Error reconciling kpa %q: %v", kpaName, getKPAErr)
 		return getKPAErr
+	} else if !metav1.IsControlledBy(kpa, rev) {
+		// Surface an error in the revision's status, and return an error.
+		rev.Status.MarkResourceNotOwned("PodAutoscaler", kpaName)
+		return fmt.Errorf("Revision: %q does not own PodAutoscaler: %q", rev.Name, kpaName)
 	}
 
 	// Reflect the KPA status in our own.
@@ -146,6 +179,10 @@ func (c *Reconciler) reconcileService(ctx context.Context, rev *v1alpha1.Revisio
 	} else if err != nil {
 		logger.Errorf("Error reconciling Active Service %q: %v", serviceName, err)
 		return err
+	} else if !metav1.IsControlledBy(service, rev) {
+		// Surface an error in the revision's status, and return an error.
+		rev.Status.MarkResourceNotOwned("Service", serviceName)
+		return fmt.Errorf("Revision: %q does not own Service: %q", rev.Name, serviceName)
 	} else {
 		// If it exists, then make sure if looks as we expect.
 		// It may change if a user edits things around our controller, which we
@@ -184,10 +221,7 @@ func (c *Reconciler) reconcileService(ctx context.Context, rev *v1alpha1.Revisio
 	if getIsServiceReady(endpoints) {
 		rev.Status.MarkResourcesAvailable()
 		rev.Status.MarkContainerHealthy()
-		// TODO(mattmoor): How to ensure this only fires once?
-		c.Recorder.Eventf(rev, corev1.EventTypeNormal, "RevisionReady",
-			"Revision becomes ready upon endpoint %q becoming ready", serviceName)
-	} else {
+	} else if !rev.Status.IsActivationRequired() {
 		// If the endpoints is NOT ready, then check whether it is taking unreasonably
 		// long to become ready and if so mark our revision as having timed out waiting
 		// for the Service to become ready.
@@ -229,8 +263,11 @@ func (c *Reconciler) reconcileFluentdConfigMap(ctx context.Context, rev *v1alpha
 	} else {
 		desiredConfigMap := resources.MakeFluentdConfigMap(rev, cfgs.Observability)
 		if !equality.Semantic.DeepEqual(configMap.Data, desiredConfigMap.Data) {
-			logger.Infof("Reconciling fluentd configmap diff (-desired, +observed): %v",
-				cmp.Diff(desiredConfigMap.Data, configMap.Data))
+			diff, err := kmp.SafeDiff(desiredConfigMap.Data, configMap.Data)
+			if err != nil {
+				return fmt.Errorf("failed to diff ConfigMap: %v", err)
+			}
+			logger.Infof("Reconciling fluentd configmap diff (-desired, +observed): %v", diff)
 
 			// Don't modify the informers copy
 			existing := configMap.DeepCopy()

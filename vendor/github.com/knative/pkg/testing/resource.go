@@ -19,10 +19,12 @@ package testing
 import (
 	"fmt"
 
+	"github.com/knative/pkg/apis"
+	"github.com/knative/pkg/kmp"
+
+	authenticationv1 "k8s.io/api/authentication/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-
-	"github.com/knative/pkg/apis"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -35,26 +37,34 @@ type Resource struct {
 	Spec ResourceSpec `json:"spec,omitempty"`
 }
 
+const (
+	// CreatorAnnotation is the annotation that denotes the user that created the resource.
+	CreatorAnnotation = "testing.knative.dev/creator"
+	// UpdaterAnnotation is the annotation that denotes the user that last updated the resource.
+	UpdaterAnnotation = "testing.knative.dev/updater"
+)
+
 // Check that Resource may be validated and defaulted.
 var _ apis.Validatable = (*Resource)(nil)
 var _ apis.Defaultable = (*Resource)(nil)
 var _ apis.Immutable = (*Resource)(nil)
+var _ apis.Annotatable = (*Resource)(nil)
 var _ apis.Listable = (*Resource)(nil)
 
-// Check that we implement the Generation duck type.
+// ResourceSpec represents test resource spec.
 type ResourceSpec struct {
-	Generation int64 `json:"generation,omitempty"`
-
 	FieldWithDefault               string `json:"fieldWithDefault,omitempty"`
 	FieldWithValidation            string `json:"fieldWithValidation,omitempty"`
 	FieldThatsImmutable            string `json:"fieldThatsImmutable,omitempty"`
 	FieldThatsImmutableWithDefault string `json:"fieldThatsImmutableWithDefault,omitempty"`
 }
 
+// SetDefaults sets the defaults on the object.
 func (c *Resource) SetDefaults() {
 	c.Spec.SetDefaults()
 }
 
+// SetDefaults sets the defaults on the spec.
 func (cs *ResourceSpec) SetDefaults() {
 	if cs.FieldWithDefault == "" {
 		cs.FieldWithDefault = "I'm a default."
@@ -62,6 +72,34 @@ func (cs *ResourceSpec) SetDefaults() {
 	if cs.FieldThatsImmutableWithDefault == "" {
 		cs.FieldThatsImmutableWithDefault = "this is another default value"
 	}
+}
+
+// AnnotateUserInfo satisfies the Annotatable interface.
+func (c *Resource) AnnotateUserInfo(prev apis.Annotatable, ui *authenticationv1.UserInfo) {
+	a := c.ObjectMeta.GetAnnotations()
+	if a == nil {
+		a = map[string]string{}
+	}
+	userName := ui.Username
+
+	// If previous is nil (i.e. this is `Create` operation),
+	// then we set both fields.
+	// Otherwise copy creator from the previous state.
+	if prev == nil {
+		a[CreatorAnnotation] = userName
+	} else {
+		up := prev.(*Resource)
+		// No spec update ==> bail out.
+		if ok, _ := kmp.SafeEqual(up.Spec, c.Spec); ok {
+			return
+		}
+		if up.ObjectMeta.GetAnnotations() != nil {
+			a[CreatorAnnotation] = up.ObjectMeta.GetAnnotations()[CreatorAnnotation]
+		}
+	}
+	// Regardless of `old` set the updater.
+	a[UpdaterAnnotation] = userName
+	c.ObjectMeta.SetAnnotations(a)
 }
 
 func (c *Resource) Validate() *apis.FieldError {

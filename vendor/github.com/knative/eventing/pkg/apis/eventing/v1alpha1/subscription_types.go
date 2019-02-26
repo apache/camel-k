@@ -60,12 +60,14 @@ var _ webhook.GenericCRD = (*Subscription)(nil)
 // no-op function (identity transformation):
 // channel --> reply
 type SubscriptionSpec struct {
-	// TODO: Generation used to not work correctly with CRD. They were scrubbed
-	// by the APIserver (https://github.com/kubernetes/kubernetes/issues/58778)
-	// So, we add Generation here. Once the above bug gets rolled out to production
-	// clusters, remove this and use ObjectMeta.Generation instead.
+	// TODO By enabling the status subresource metadata.generation should increment
+	// thus making this property obsolete.
+	//
+	// We should be able to drop this property with a CRD conversion webhook
+	// in the future
+	//
 	// +optional
-	Generation int64 `json:"generation,omitempty"`
+	DeprecatedGeneration int64 `json:"generation,omitempty"`
 
 	// Reference to a channel that will be used to create the subscription
 	// for receiving events. The channel must have spec.subscriptions
@@ -170,17 +172,17 @@ type SubscriptionStatus struct {
 	Conditions duckv1alpha1.Conditions `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 
 	// PhysicalSubscription is the fully resolved values that this Subscription represents.
-	PhysicalSubscription SubscriptionStatusPhysicalSubscription `json:"physicalSubscription,omitEmpty"`
+	PhysicalSubscription SubscriptionStatusPhysicalSubscription `json:"physicalSubscription,omitempty"`
 }
 
 // SubscriptionStatusPhysicalSubscription represents the fully resolved values for this
 // Subscription.
 type SubscriptionStatusPhysicalSubscription struct {
 	// SubscriberURI is the fully resolved URI for spec.subscriber.
-	SubscriberURI string `json:"subscriberURI,omitEmpty"`
+	SubscriberURI string `json:"subscriberURI,omitempty"`
 
 	// ReplyURI is the fully resolved URI for the spec.reply.
-	ReplyURI string `json:"replyURI,omitEmpty"`
+	ReplyURI string `json:"replyURI,omitempty"`
 }
 
 const (

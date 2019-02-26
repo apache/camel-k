@@ -24,16 +24,17 @@ import (
 	"fmt"
 	"time"
 
-	"go.opencensus.io/trace"
+	"github.com/knative/pkg/test/logging"
 	corev1 "k8s.io/api/core/v1"
 	apiv1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
+	k8styped "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
 	interval   = 1 * time.Second
-	podTimeout = 5 * time.Minute
+	podTimeout = 8 * time.Minute
 )
 
 // WaitForDeploymentState polls the status of the Deployment called name
@@ -42,8 +43,7 @@ const (
 // that is emitted to track how long it took for name to get into the state checked by inState.
 func WaitForDeploymentState(client *KubeClient, name string, inState func(d *apiv1beta1.Deployment) (bool, error), desc string, namespace string, timeout time.Duration) error {
 	d := client.Kube.ExtensionsV1beta1().Deployments(namespace)
-	metricName := fmt.Sprintf("WaitForDeploymentState/%s/%s", name, desc)
-	_, span := trace.StartSpan(context.Background(), metricName)
+	span := logging.GetEmitableSpan(context.Background(), fmt.Sprintf("WaitForDeploymentState/%s/%s", name, desc))
 	defer span.End()
 
 	return wait.PollImmediate(interval, timeout, func() (bool, error) {
@@ -61,8 +61,7 @@ func WaitForDeploymentState(client *KubeClient, name string, inState func(d *api
 // that is emitted to track how long it took to get into the state checked by inState.
 func WaitForPodListState(client *KubeClient, inState func(p *corev1.PodList) (bool, error), desc string, namespace string) error {
 	p := client.Kube.CoreV1().Pods(namespace)
-	metricName := fmt.Sprintf("WaitForPodListState/%s", desc)
-	_, span := trace.StartSpan(context.Background(), metricName)
+	span := logging.GetEmitableSpan(context.Background(), fmt.Sprintf("WaitForPodListState/%s", desc))
 	defer span.End()
 
 	return wait.PollImmediate(interval, podTimeout, func() (bool, error) {
@@ -72,4 +71,16 @@ func WaitForPodListState(client *KubeClient, inState func(p *corev1.PodList) (bo
 		}
 		return inState(p)
 	})
+}
+
+// GetConfigMap gets the configmaps for a given namespace
+func GetConfigMap(client *KubeClient, namespace string) k8styped.ConfigMapInterface {
+	return client.Kube.CoreV1().ConfigMaps(namespace)
+}
+
+// Returns a func that evaluates if a deployment has scaled to 0 pods
+func DeploymentScaledToZeroFunc() func(d *apiv1beta1.Deployment) (bool, error) {
+	return func(d *apiv1beta1.Deployment) (bool, error) {
+		return d.Status.ReadyReplicas == 0, nil
+	}
 }

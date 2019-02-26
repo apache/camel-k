@@ -21,14 +21,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"go.uber.org/zap"
-	"golang.org/x/sync/errgroup"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
-	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/knative/pkg/apis/duck"
 	"github.com/knative/pkg/logging"
 	netv1alpha1 "github.com/knative/serving/pkg/apis/networking/v1alpha1"
@@ -38,19 +30,33 @@ import (
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/route/resources"
 	resourcenames "github.com/knative/serving/pkg/reconciler/v1alpha1/route/resources/names"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/route/traffic"
+	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func (c *Reconciler) getClusterIngressForRoute(route *v1alpha1.Route) (*netv1alpha1.ClusterIngress, error) {
-	selector := labels.Set(map[string]string{
-		serving.RouteLabelKey:          route.Name,
-		serving.RouteNamespaceLabelKey: route.Namespace,
-	}).AsSelector()
+	// First, look up the fixed name.
+	ciName := resourcenames.ClusterIngress(route)
+	ci, err := c.clusterIngressLister.Get(ciName)
+	if err == nil {
+		return ci, nil
+	}
+
+	// If that isn't found, then fallback on the legacy selector-based approach.
+	selector := routeOwnerLabelSelector(route)
 	ingresses, err := c.clusterIngressLister.List(selector)
 	if err != nil {
 		return nil, err
 	}
 	if len(ingresses) == 0 {
-		return nil, apierrs.NewNotFound(v1alpha1.Resource("clusteringress"), resourcenames.ClusterIngressPrefix(route) /* prefix of GenerateName here */)
+		return nil, apierrs.NewNotFound(
+			v1alpha1.Resource("clusteringress"), resourcenames.ClusterIngress(route))
 	}
 
 	if len(ingresses) > 1 {
@@ -59,6 +65,22 @@ func (c *Reconciler) getClusterIngressForRoute(route *v1alpha1.Route) (*netv1alp
 	}
 
 	return ingresses[0], nil
+}
+
+func routeOwnerLabelSelector(route *v1alpha1.Route) labels.Selector {
+	return labels.Set(map[string]string{
+		serving.RouteLabelKey:          route.Name,
+		serving.RouteNamespaceLabelKey: route.Namespace,
+	}).AsSelector()
+}
+
+func (c *Reconciler) deleteClusterIngressesForRoute(route *v1alpha1.Route) error {
+	selector := routeOwnerLabelSelector(route).String()
+
+	// We always use DeleteCollection because even with a fixed name, we apply the labels.
+	return c.ServingClientSet.NetworkingV1alpha1().ClusterIngresses().DeleteCollection(
+		nil, metav1.ListOptions{LabelSelector: selector},
+	)
 }
 
 func (c *Reconciler) reconcileClusterIngress(
@@ -76,9 +98,11 @@ func (c *Reconciler) reconcileClusterIngress(
 		c.Recorder.Eventf(r, corev1.EventTypeNormal, "Created",
 			"Created ClusterIngress %q", clusterIngress.Name)
 		return clusterIngress, nil
-	} else if err == nil {
+	} else if err != nil {
+		return nil, err
+	} else {
 		// TODO(#642): Remove this (needed to avoid continuous updates)
-		desired.Spec.Generation = clusterIngress.Spec.Generation
+		desired.Spec.DeprecatedGeneration = clusterIngress.Spec.DeprecatedGeneration
 		if !equality.Semantic.DeepEqual(clusterIngress.Spec, desired.Spec) {
 			// Don't modify the informers copy
 			origin := clusterIngress.DeepCopy()
@@ -96,21 +120,10 @@ func (c *Reconciler) reconcileClusterIngress(
 	return clusterIngress, err
 }
 
-func (c *Reconciler) reconcilePlaceholderService(ctx context.Context, route *v1alpha1.Route) error {
+func (c *Reconciler) reconcilePlaceholderService(ctx context.Context, route *v1alpha1.Route, ingress *netv1alpha1.ClusterIngress) error {
 	logger := logging.FromContext(ctx)
 	ns := route.Namespace
 	name := resourcenames.K8sService(route)
-
-	ingress, err := c.getClusterIngressForRoute(route)
-	if apierrs.IsNotFound(err) {
-		// Ingress not exist, skip creating.
-		logger.Infof("Ingress for route %s/%s not exist, skip creating placeholder k8s service", ns, name)
-		return nil
-	}
-	if err != nil {
-		// Return errors other than not found error.
-		return err
-	}
 
 	desiredService, err := resources.MakeK8sService(route, ingress)
 	if err != nil {
@@ -133,10 +146,12 @@ func (c *Reconciler) reconcilePlaceholderService(ctx context.Context, route *v1a
 		c.Recorder.Eventf(route, corev1.EventTypeNormal, "Created", "Created service %q", name)
 	} else if err != nil {
 		return err
+	} else if !metav1.IsControlledBy(service, route) {
+		// Surface an error in the route's status, and return an error.
+		route.Status.MarkServiceNotOwned(name)
+		return fmt.Errorf("Route: %q does not own Service: %q", route.Name, name)
 	} else {
-		// Make sure that the service has the proper specification
-		// Preserve the ClusterIP field in the Service's Spec, if it has been set.
-		desiredService.Spec.ClusterIP = service.Spec.ClusterIP
+		// Make sure that the service has the proper specification.
 		if !equality.Semantic.DeepEqual(service.Spec, desiredService.Spec) {
 			// Don't modify the informers copy
 			existing := service.DeepCopy()
@@ -155,33 +170,27 @@ func (c *Reconciler) reconcilePlaceholderService(ctx context.Context, route *v1a
 
 // Update the Status of the route.  Caller is responsible for checking
 // for semantic differences before calling.
-func (c *Reconciler) updateStatus(ctx context.Context, route *v1alpha1.Route) (*v1alpha1.Route, error) {
-	existing, err := c.routeLister.Routes(route.Namespace).Get(route.Name)
+func (c *Reconciler) updateStatus(desired *v1alpha1.Route) (*v1alpha1.Route, error) {
+	route, err := c.routeLister.Routes(desired.Namespace).Get(desired.Name)
 	if err != nil {
 		return nil, err
 	}
-	existing = existing.DeepCopy()
 	// If there's nothing to update, just return.
-	if reflect.DeepEqual(existing.Status, route.Status) {
-		return existing, nil
+	if reflect.DeepEqual(route.Status, desired.Status) {
+		return route, nil
 	}
-	existing.Status = route.Status
-	// TODO: for CRD there's no updatestatus, so use normal update.
-	updated, err := c.ServingClientSet.ServingV1alpha1().Routes(route.Namespace).Update(existing)
-	if err != nil {
-		return nil, err
-	}
-
-	c.Recorder.Eventf(route, corev1.EventTypeNormal, "Updated", "Updated status for route %q", route.Name)
-	return updated, nil
+	// Don't modify the informers copy
+	existing := route.DeepCopy()
+	existing.Status = desired.Status
+	return c.ServingClientSet.ServingV1alpha1().Routes(desired.Namespace).UpdateStatus(existing)
 }
 
 // Update the lastPinned annotation on revisions we target so they don't get GC'd.
-func (c *Reconciler) reconcileTargetRevisions(ctx context.Context, t *traffic.TrafficConfig, route *v1alpha1.Route) error {
+func (c *Reconciler) reconcileTargetRevisions(ctx context.Context, t *traffic.Config, route *v1alpha1.Route) error {
 	gcConfig := config.FromContext(ctx).GC
 	lpDebounce := gcConfig.StaleRevisionLastpinnedDebounce
 
-	eg, ctx := errgroup.WithContext(ctx)
+	eg, _ := errgroup.WithContext(ctx)
 	for _, target := range t.Targets {
 		for _, rt := range target {
 			tt := rt.TrafficTarget
@@ -197,12 +206,12 @@ func (c *Reconciler) reconcileTargetRevisions(ctx context.Context, t *traffic.Tr
 				newRev := rev.DeepCopy()
 				lastPin, err := newRev.GetLastPinned()
 				if err != nil {
-					// Missing is an expected error case for a not yet pinned revision
+					// Missing is an expected error case for a not yet pinned revision.
 					if err.(v1alpha1.LastPinnedParseError).Type != v1alpha1.AnnotationParseErrorTypeMissing {
 						return err
 					}
 				} else {
-					// Enforce a delay before performing an update on lastPinned to avoid excess churn
+					// Enforce a delay before performing an update on lastPinned to avoid excess churn.
 					if lastPin.Add(lpDebounce).After(c.clock.Now()) {
 						return nil
 					}

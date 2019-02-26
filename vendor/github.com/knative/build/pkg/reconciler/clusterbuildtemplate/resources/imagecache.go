@@ -19,10 +19,10 @@ package resources
 import (
 	"github.com/knative/build/pkg/apis/build/v1alpha1"
 	buildtemplateresources "github.com/knative/build/pkg/reconciler/buildtemplate/resources"
-	"github.com/knative/build/pkg/system"
 	caching "github.com/knative/caching/pkg/apis/caching/v1alpha1"
+	"github.com/knative/pkg/system"
 )
 
 func MakeImageCaches(bt *v1alpha1.ClusterBuildTemplate) []caching.Image {
-	return buildtemplateresources.MakeImageCachesFromSpec(system.Namespace, bt)
+	return buildtemplateresources.MakeImageCachesFromSpec(system.Namespace(), bt)
 }
