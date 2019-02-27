@@ -97,7 +97,7 @@ Additional maven repositories can be defined at platform installation time or at
 kamel cmd --repository http://repo1.my-company.com --repository http://repo2.my-company.com
 ----
 
-A repository url follow conventions used to configuire additional repositories in https://karaf.apache.org[_Apache Karaf_] so it can be appended with zero or more of the following flags:
+A repository url follow conventions used to configure additional repositories in https://karaf.apache.org[_Apache Karaf_] so it can be appended with zero or more of the following flags:
 
 * **@snapshots**: the repository contains snapshots
 * **@noreleases**: the repository does not contain any released artifacts
