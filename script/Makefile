@@ -95,7 +95,7 @@ images-dev: test package-artifacts
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
 images-push:
- 	docker push $(IMAGE_NAME):$(VERSION)
+	docker push $(IMAGE_NAME):$(VERSION)
 
 set-version:
 	./script/set_version.sh $(VERSION)
