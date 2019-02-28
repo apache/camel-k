@@ -1,10 +1,95 @@
-[[creating-cluster]]
-Creating a Development Cluster
-==============================
+[#creating-cluster]
+= Creating a Development Cluster
 
 There are various options for creating a development cluster:
 
-[[minishift]]
+[#minikube]
+== Minikube
+
+You can run Camel K integrations on plain Kubernetes using the Minikube cluster creation tool.
+Follow the instructions in the https://github.com/kubernetes/minikube#installation[official doc] for the installation.
+
+Start a new instance of Minikube using the command:
+
+[source,bash,linenums,subs="+macros,+attributes"]
+----
+KUBERNETES_VERSION=v1.12.0
+MEMORY=8192
+CPUS=4
+DISK_SIZE=50g
+# blow away everything in the camelk profile for a clean install
+minikube delete --profile camelk
+
+# configure camelk profile
+minikube profile camelk
+minikube config set kubernetes-version ${KUBERNETES_VERSION}
+minikube config set memory ${MEMORY}
+minikube config set cpus ${CPUS}
+minikube config set disk-size ${DISK_SIZE}
+
+# Start minikube
+minikube start -p camelk --extra-config=apiserver.enable-admission-plugins="LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook"
+----
+
+The following section is option and needed if and only if you are going to use Knative with camel-k then you may need to install Knative components,
+run the following commands to install Knative components:
+
+[#install-knative]
+== Install Knative
+
+[source,bash,linenums,subs="+macros,+attributes"]
+----
+KNATIVE_SERVING_VERSION=v0.4.0
+KNATIVE_BUILD_VERSION=v0.4.0
+KNATIVE_EVENTING_VERSION=v0.4.0
+
+# Istio 
+
+kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/istio-crds.yaml && \
+kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/istio.yaml
+
+# Wait for the applications to be installed and running
+timeout 300 "kubectl get pods -n istio-system 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
+
+# knative build
+kubectl apply --filename https://github.com/knative/build/releases/download/${KNATIVE_SERVING_VERSION}/build.yaml
+
+# Wait for the applications to be installed and running
+timeout 300 "kubectl get pods -n knative-build 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
+
+# knative serving
+kubectl apply --filename https://github.com/knative/serving/releases/${KNATIVE_SERVING_VERSION}/v0.4.0/serving.yaml
+
+# Wait for the applications to be installed and running
+timeout 300 "kubectl get pods -n knative-serving 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
+
+# knative eventing
+kubectl apply --filename https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/in-memory-channel.yaml  && \
+kubectl apply  --filename https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/release.yaml
+
+# Wait for the applications to be installed and running
+timeout 300 "kubectl get pods -n knative-eventing 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
+
+# knative sources
+kubectl apply --filename https://github.com/knative/eventing-sources/releases/download/${KNATIVE_EVENTING_VERSION}/release.yaml
+# Wait for the applications to be installed and running
+timeout 300 "kubectl get pods -n knative-sources 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
+----
+
+[TIP]
+====
+You can avoid all the above steps to install knative by running the following command:
+[source,bash]
+----
+git clone https://github.com/openshift-cloud-functions/knative-operators
+cd knative-operators
+./etc/scripts/install-on-minikube.sh
+----
+====
+
+You can now proceed to link:/README.adoc[install Camel K].
+
+[#minishift]
 == Minishift
 
 You can run Camel K integrations on OpenShift using the Minishift cluster creation tool.
@@ -26,22 +111,3 @@ minishift start
 
 You can now proceed to link:/README.adoc[install Camel K].
 
-[[minikube]]
-== Minikube
-
-You can run Camel K integrations on plain Kubernetes using the Minikube cluster creation tool.
-Follow the instructions in the https://github.com/kubernetes/minikube#installation[official doc] for the installation.
-
-Start a new instance of Minikube using the command:
-
-```
-minikube start
-```
-
-After the startup process is completed, you need to **enable the `registry` addon**:
-
-```
-minikube addons enable registry
-```
-
-You can now proceed to link:/README.adoc[install Camel K].
