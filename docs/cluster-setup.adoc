@@ -52,20 +52,21 @@ kubectl apply --filename https://github.com/knative/serving/releases/download/${
 timeout 300 "kubectl get pods -n istio-system 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
 
 # knative build
-kubectl apply --filename https://github.com/knative/build/releases/download/${KNATIVE_SERVING_VERSION}/build.yaml
+kubectl apply --filename https://github.com/knative/build/releases/download/${KNATIVE_BUILD_VERSION}/build.yaml
 
 # Wait for the applications to be installed and running
 timeout 300 "kubectl get pods -n knative-build 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
 
 # knative serving
-kubectl apply --filename https://github.com/knative/serving/releases/${KNATIVE_SERVING_VERSION}/v0.4.0/serving.yaml
+kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_SERVING_VERSION}/serving.yaml
 
 # Wait for the applications to be installed and running
 timeout 300 "kubectl get pods -n knative-serving 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
 
 # knative eventing
-kubectl apply --filename https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/in-memory-channel.yaml  && \
-kubectl apply  --filename https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/release.yaml
+kubectl apply  --filename https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/release.yaml && \
+kubectl apply --filename https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/in-memory-channel.yaml
+
 
 # Wait for the applications to be installed and running
 timeout 300 "kubectl get pods -n knative-eventing 2>&1 | grep -v -E '(Running|Completed|STATUS)'"
