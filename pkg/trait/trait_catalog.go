@@ -52,6 +52,7 @@ type Catalog struct {
 	tEnvironment      Trait
 	tClasspath        Trait
 	tRestDsl          Trait
+	tProbes           Trait
 }
 
 // NewCatalog creates a new trait Catalog
@@ -79,6 +80,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tIstio:            newIstioTrait(),
 		tEnvironment:      newEnvironmentTrait(),
 		tClasspath:        newClasspathTrait(),
+		tProbes:           newProbesTrait(),
 	}
 
 	for _, t := range catalog.allTraits() {
@@ -115,6 +117,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tIstio,
 		c.tEnvironment,
 		c.tClasspath,
+		c.tProbes,
 	}
 }
 
@@ -138,6 +141,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tPrometheus,
 			c.tDeployer,
 			c.tDeployment,
+			c.tProbes,
 			c.tService,
 			c.tRoute,
 			c.tOwner,
@@ -158,6 +162,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tPrometheus,
 			c.tDeployer,
 			c.tDeployment,
+			c.tProbes,
 			c.tService,
 			c.tIngress,
 			c.tOwner,
@@ -178,6 +183,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tDeployer,
 			c.tDeployment,
 			c.tKnativeService,
+			c.tProbes,
 			c.tIstio,
 			c.tOwner,
 		}
