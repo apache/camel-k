@@ -32,15 +32,21 @@ import (
 )
 
 const (
-	knativeMinScaleAnnotation = "autoscaling.knative.dev/minScale"
-	knativeMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
+	knativeServingClassAnnotation    = "autoscaling.knative.dev/class"
+	knativeServingMetricAnnotation   = "autoscaling.knative.dev/metric"
+	knativeServingTargetAnnotation   = "autoscaling.knative.dev/target"
+	knativeServingMinScaleAnnotation = "autoscaling.knative.dev/minScale"
+	knativeServingMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
 )
 
 type knativeServiceTrait struct {
 	BaseTrait `property:",squash"`
-	MinScale  *int  `property:"min-scale"`
-	MaxScale  *int  `property:"max-scale"`
-	Auto      *bool `property:"auto"`
+	Class     string `property:"autoscaling-class"`
+	Metric    string `property:"autoscaling-metric"`
+	Target    *int   `property:"autoscaling-target"`
+	MinScale  *int   `property:"min-scale"`
+	MaxScale  *int   `property:"max-scale"`
+	Auto      *bool  `property:"auto"`
 }
 
 func newKnativeServiceTrait() *knativeServiceTrait {
@@ -211,11 +217,24 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	annotations := make(map[string]string)
 	// Resolve registry host names when used
 	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
+
+	//
+	// Set Knative Scaling behavior
+	//
+	if t.Class != "" {
+		annotations[knativeServingClassAnnotation] = t.Class
+	}
+	if t.Metric != "" {
+		annotations[knativeServingMetricAnnotation] = t.Metric
+	}
+	if t.Target != nil {
+		annotations[knativeServingTargetAnnotation] = strconv.Itoa(*t.Target)
+	}
 	if t.MinScale != nil {
-		annotations[knativeMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
+		annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
 	}
 	if t.MaxScale != nil {
-		annotations[knativeMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
+		annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
 	}
 
 	svc := serving.Service{
