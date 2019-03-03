@@ -60,7 +60,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
-	assert.Equal(t, 2, len(ctx.Project.Dependencies))
+	assert.Equal(t, 3, len(ctx.Project.Dependencies))
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-jvm",
@@ -105,7 +105,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
-	assert.Equal(t, 4, len(ctx.Project.Dependencies))
+	assert.Equal(t, 5, len(ctx.Project.Dependencies))
 
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
