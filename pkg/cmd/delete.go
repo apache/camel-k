@@ -23,6 +23,7 @@ import (
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -77,16 +78,16 @@ func (command *deleteCmdOptions) run(args []string) error {
 	}
 	if len(args) != 0 && !command.deleteAll {
 		for _, arg := range args {
-
-			err := DeleteIntegration(command.Context, c, arg, command.Namespace)
+			name := kubernetes.SanitizeName(arg)
+			err := DeleteIntegration(command.Context, c, name, command.Namespace)
 			if err != nil {
 				if k8errors.IsNotFound(err) {
-					fmt.Println("Integration " + arg + " not found. Skipped.")
+					fmt.Println("Integration " + name + " not found. Skipped.")
 				} else {
 					return err
 				}
 			} else {
-				fmt.Println("Integration " + arg + " deleted")
+				fmt.Println("Integration " + name + " deleted")
 			}
 		}
 	} else if command.deleteAll {
