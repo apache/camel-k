@@ -1154,21 +1154,23 @@ spec:
     camel-k-runtime-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-groovy
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-runtime-jvm:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-jvm
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-core
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-adapter-camel-2
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
-      version: 1.0.0
+    camel-k-runtime-yaml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-yaml
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -1186,7 +1188,6 @@ spec:
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
-      version: 1.0.0
       schemes:
       - id: knative
         http: true
@@ -3223,21 +3224,23 @@ spec:
     camel-k-runtime-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-groovy
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-runtime-jvm:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-jvm
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-core
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-adapter-camel-2
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
-      version: 1.0.0
+    camel-k-runtime-yaml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-yaml
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -3255,7 +3258,6 @@ spec:
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
-      version: 1.0.0
       schemes:
       - id: knative
         http: true

@@ -12,7 +12,7 @@ const (
   CamelVersionConstraint = "~2.23.x"
 
   // RuntimeVersion -- 
-  RuntimeVersion = "0.2.1"
+  RuntimeVersion = "0.3.0"
 
   // BaseImage -- 
   BaseImage = "fabric8/s2i-java:3.0-java8"
