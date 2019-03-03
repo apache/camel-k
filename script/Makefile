@@ -1,6 +1,6 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 0.3.0-SNAPSHOT
-RUNTIME_VERSION := 0.2.1
+RUNTIME_VERSION := 0.3.0
 CAMEL_VERSION := 2.23.1
 CAMEL_VERSION_CONSTRAINT := ~2.23.x
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
