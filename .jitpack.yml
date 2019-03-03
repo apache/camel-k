@@ -1,5 +1,0 @@
-jdk:
-  - openjdk8
-install:
-   - echo "Build Camel K "
-   - ./mvnw clean install -f ./runtime/pom.xml
