@@ -11,8 +11,8 @@ location=$(dirname $0)
 target_version=$1
 target_branch=$2
 
-git branch -D staging-${target_version} || true
-git checkout -b staging-${target_version}
+#git branch -D staging-${target_version} || true
+#git checkout -b staging-${target_version}
 git add * || true
 git commit -a -m "Release ${target_version}"
 git tag --force ${target_version} staging-${target_version}
