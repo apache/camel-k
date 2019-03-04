@@ -31,8 +31,14 @@ minikube config set disk-size ${DISK_SIZE}
 minikube start -p camelk --extra-config=apiserver.enable-admission-plugins="LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook"
 ----
 
-The following section is option and needed if and only if you are going to use Knative with camel-k then you may need to install Knative components,
-run the following commands to install Knative components:
+After the startup process is completed, you need to **enable the `registry` addon**:
+
+[source,bash,linenums,subs="+macros,+attributes"]
+----
+minikube addons enable registry
+----
+
+The following section is optional and needed if and only if you are going to use Knative with Camel K. Run the following commands to install the Knative components:
 
 [#install-knative]
 == Install Knative
