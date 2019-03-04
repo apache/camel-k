@@ -115,7 +115,7 @@ package-artifacts:
 publish-base-images:
 	go run cmd/util/publisher/publisher.go --runtime-version=$(RUNTIME_VERSION)
 
-release: clean build images images-push cross-compile package-examples git-tag
+release: clean codegen set-version build-resources build images images-push cross-compile package-examples git-tag
 
 install-minishift:
 	./script/install_minishift.sh
