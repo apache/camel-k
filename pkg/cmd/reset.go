@@ -113,5 +113,5 @@ func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 	platform := list.Items[0]
 	// Let's reset the status
 	platform.Status = v1alpha1.IntegrationPlatformStatus{}
-	return c.Update(o.Context, &platform)
+	return c.Status().Update(o.Context, &platform)
 }
