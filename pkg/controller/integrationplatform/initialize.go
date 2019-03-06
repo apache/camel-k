@@ -85,7 +85,7 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 		}
 	}
 
-	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && target.Spec.Build.Registry == "" {
+	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && target.Spec.Build.Registry.Address == "" {
 		action.L.Info("No registry specified for publishing images")
 	}
 
