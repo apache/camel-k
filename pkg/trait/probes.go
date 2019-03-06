@@ -24,7 +24,6 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -80,11 +79,6 @@ func (t *probesTrait) Apply(e *Environment) error {
 
 			deployment.Spec.Template.Spec.Containers[0].LivenessProbe = t.newLivenessProbe()
 			deployment.Spec.Template.Spec.Containers[0].ReadinessProbe = t.newReadinessProbe()
-		})
-
-		e.Resources.VisitKnativeService(func(service *serving.Service) {
-			service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.LivenessProbe = t.newLivenessProbe()
-			service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe = t.newReadinessProbe()
 		})
 	}
 

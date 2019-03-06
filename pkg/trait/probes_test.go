@@ -127,11 +127,6 @@ func TestProbesOnKnativeService(t *testing.T) {
 
 	err = tr.Apply(&e)
 	assert.Nil(t, err)
-	assert.Equal(t, "", target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.LivenessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(9191), target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.LivenessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, "/health", target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.LivenessProbe.HTTPGet.Path)
-	assert.Equal(t, "", target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(9191), target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, "/health", target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.HTTPGet.Path)
-	assert.Equal(t, int32(4321), target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.TimeoutSeconds)
+	assert.Nil(t, target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.LivenessProbe)
+	assert.Nil(t, target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe)
 }
