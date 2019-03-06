@@ -20,6 +20,7 @@ package integration
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/finalizer"
@@ -69,14 +70,15 @@ func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.In
 		fmt.Sprintf("camel.apache.org/integration=%s", integration.Name),
 	}
 
-	resources, err := kubernetes.LookUpResources(ctx, action.client, integration.Namespace, selectors)
+	l.Info("Collecting resources to delete")
+	resources, err := kubernetes.LookUpResources(ctx, action.client, target.Namespace, selectors)
 	if err != nil {
 		return err
 	}
 
 	// If the ForegroundDeletion deletion is not set remove the finalizer and
 	// delete child resources from a dedicated goroutine
-	foreground, err := finalizer.Exists(integration, finalizer.ForegroundDeletion)
+	foreground, err := finalizer.Exists(target, finalizer.ForegroundDeletion)
 	if err != nil {
 		return err
 	}
@@ -90,7 +92,7 @@ func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.In
 		}
 
 		go func() {
-			if err := action.deleteChildResources(context.TODO(), target, resources); err != nil {
+			if err := action.deleteChildResources(context.TODO(), &l, resources); err != nil {
 				l.Error(err, "error deleting child resources")
 			}
 		}()
@@ -98,7 +100,7 @@ func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.In
 		//
 		// Sync
 		//
-		if err := action.deleteChildResources(ctx, target, resources); err != nil {
+		if err := action.deleteChildResources(ctx, &l, resources); err != nil {
 			return err
 		}
 		if err = action.removeFinalizer(ctx, target); err != nil {
@@ -118,25 +120,85 @@ func (action *deleteAction) removeFinalizer(ctx context.Context, integration *v1
 	return action.client.Update(ctx, integration)
 }
 
-func (action *deleteAction) deleteChildResources(ctx context.Context, integration *v1alpha1.Integration, resources []unstructured.Unstructured) error {
-	l := log.Log.ForIntegration(integration)
+func (action *deleteAction) deleteChildResources(ctx context.Context, l *log.Logger, resources []unstructured.Unstructured) error {
+	l.Infof("Resources to delete: %d", len(resources))
 
-	// And delete them
+	var err error
+
+	resources, err = action.deleteChildResourceWithCondition(ctx, l, resources, func(u unstructured.Unstructured) bool {
+		return u.GetKind() == "Service" && strings.HasPrefix(u.GetAPIVersion(), "serving.knative.dev/")
+	})
+	if err != nil {
+		return err
+	}
+
+	resources, err = action.deleteChildResourceWithCondition(ctx, l, resources, func(u unstructured.Unstructured) bool {
+		return u.GetKind() == "Deployment"
+	})
+	if err != nil {
+		return err
+	}
+
+	resources, err = action.deleteChildResourceWithCondition(ctx, l, resources, func(u unstructured.Unstructured) bool {
+		return u.GetKind() == "ReplicaSet"
+	})
+	if err != nil {
+		return err
+	}
+
+	resources, err = action.deleteChildResourceWithCondition(ctx, l, resources, func(u unstructured.Unstructured) bool {
+		return u.GetKind() == "Pod"
+	})
+	if err != nil {
+		return err
+	}
+
+	// Delete remaining resources
 	for _, resource := range resources {
 		// pin the resource
 		resource := resource
 
-		l.Infof("Deleting child resource: %s/%s", resource.GetKind(), resource.GetName())
-
-		err := action.client.Delete(ctx, &resource, k8sclient.PropagationPolicy(metav1.DeletePropagationOrphan))
-		if err != nil {
-			// The resource may have already been deleted
-			if !k8serrors.IsNotFound(err) {
-				l.Errorf(err, "cannot delete child resource: %s/%s", resource.GetKind(), resource.GetName())
-			}
-		} else {
-			l.Infof("Child resource deleted: %s/%s", resource.GetKind(), resource.GetName())
+		if err := action.deleteChildResource(ctx, l, resource); err != nil {
+			return err
 		}
+	}
+
+	return nil
+}
+
+func (action *deleteAction) deleteChildResourceWithCondition(
+	ctx context.Context, l *log.Logger, resources []unstructured.Unstructured, condition func(unstructured.Unstructured) bool) ([]unstructured.Unstructured, error) {
+
+	remaining := resources[:0]
+	for _, resource := range resources {
+		// pin the resource
+		resource := resource
+
+		if condition(resource) {
+			if err := action.deleteChildResource(ctx, l, resource); err != nil {
+				return resources, err
+			}
+
+			continue
+		}
+
+		remaining = append(remaining, resource)
+	}
+
+	return remaining, nil
+}
+
+func (action *deleteAction) deleteChildResource(ctx context.Context, l *log.Logger, resource unstructured.Unstructured) error {
+	l.Infof("Deleting child resource: %s:%s/%s", resource.GetAPIVersion(), resource.GetKind(), resource.GetName())
+
+	err := action.client.Delete(ctx, &resource, k8sclient.PropagationPolicy(metav1.DeletePropagationOrphan))
+	if err != nil {
+		// The resource may have already been deleted
+		if !k8serrors.IsNotFound(err) {
+			l.Errorf(err, "cannot delete child resource: %s:%s/%s", resource.GetAPIVersion(), resource.GetKind(), resource.GetName())
+		}
+	} else {
+		l.Infof("Child resource deleted: %s:%s/%s", resource.GetAPIVersion(), resource.GetKind(), resource.GetName())
 	}
 
 	return nil

@@ -87,7 +87,8 @@ func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
 // ForIntegration --
 func (l Logger) ForIntegration(target *v1alpha1.Integration) Logger {
 	return l.WithValues(
-		"type", target.TypeMeta.Kind,
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
 		"ns", target.Namespace,
 		"name", target.Name,
 	)
@@ -96,7 +97,8 @@ func (l Logger) ForIntegration(target *v1alpha1.Integration) Logger {
 // ForIntegrationContext --
 func (l Logger) ForIntegrationContext(target *v1alpha1.IntegrationContext) Logger {
 	return l.WithValues(
-		"type", target.TypeMeta.Kind,
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
 		"ns", target.Namespace,
 		"name", target.Name,
 	)
@@ -105,7 +107,8 @@ func (l Logger) ForIntegrationContext(target *v1alpha1.IntegrationContext) Logge
 // ForIntegrationPlatform --
 func (l Logger) ForIntegrationPlatform(target *v1alpha1.IntegrationPlatform) Logger {
 	return l.WithValues(
-		"type", target.TypeMeta.Kind,
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
 		"ns", target.Namespace,
 		"name", target.Name,
 	)
