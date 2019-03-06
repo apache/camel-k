@@ -24,7 +24,7 @@ import (
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 )
 
-func (t *knativeServiceTrait) bindToVolumes(e *Environment, service *serving.Service) error {
+func (t *knativeServiceTrait) bindToVolumes(e *Environment, service *serving.Service) {
 	e.ConfigureVolumesAndMounts(
 		t.deployer.ContainerImage,
 		&service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Volumes,
@@ -38,6 +38,4 @@ func (t *knativeServiceTrait) bindToVolumes(e *Environment, service *serving.Ser
 	envvar.SetVal(environment, "CAMEL_K_ROUTES", strings.Join(paths, ","))
 	envvar.SetVal(environment, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	envvar.SetVal(environment, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
-
-	return nil
 }

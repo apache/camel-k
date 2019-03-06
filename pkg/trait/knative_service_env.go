@@ -49,9 +49,12 @@ func (t *knativeServiceTrait) bindToEnvVar(e *Environment, service *serving.Serv
 			t.L.Errorf(err, "failed to lookup ConfigMap %s", cmName)
 		}
 		if cm != nil {
-			util.ExtractApplicationProperties(cm.Data, func(key string, val string) {
+			err = util.ExtractApplicationProperties(cm.Data, func(key string, val string) {
 				properties[key] = val
 			})
+			if err != nil {
+				t.L.Errorf(err, "failed to extract properties from ConfigMap %s", cmName)
+			}
 		}
 	})
 
@@ -61,9 +64,12 @@ func (t *knativeServiceTrait) bindToEnvVar(e *Environment, service *serving.Serv
 			t.L.Errorf(err, "failed to lookup Secret %s", secretName)
 		}
 		if cm != nil {
-			util.ExtractEncodedApplicationProperties(cm.Data, func(key string, val string) {
+			err = util.ExtractEncodedApplicationProperties(cm.Data, func(key string, val string) {
 				properties[key] = val
 			})
+			if err != nil {
+				t.L.Errorf(err, "failed to extract properties from Secret %s", secretName)
+			}
 		}
 	})
 

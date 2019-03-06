@@ -202,9 +202,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	envvar.SetVal(environment, "AB_JOLOKIA_OFF", True)
 
 	if t.ConfigurationType == "volume" {
-		if err := t.bindToVolumes(e, &svc); err != nil {
-			return nil, err
-		}
+		t.bindToVolumes(e, &svc)
 	} else {
 		if err := t.bindToEnvVar(e, &svc); err != nil {
 			return nil, err
