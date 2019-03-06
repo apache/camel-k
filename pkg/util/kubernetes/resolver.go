@@ -99,6 +99,7 @@ func ResolveIntegrationSources(context context.Context, client client.Client, in
 }
 
 // ResolveIntegrationResources --
+// nolint: lll
 func ResolveIntegrationResources(context context.Context, client client.Client, integration *v1alpha1.Integration, resources *Collection) ([]v1alpha1.ResourceSpec, error) {
 	if integration == nil {
 		return nil, nil
