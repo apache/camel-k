@@ -54,10 +54,12 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&impl.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
 	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
-	cmd.Flags().StringVar(&impl.registry, "registry", "", "A Docker registry that can be used to publish images")
+
 	cmd.Flags().StringVarP(&impl.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().StringVar(&impl.organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
-	cmd.Flags().StringVar(&impl.pushSecret, "push-secret", "", "A secret used to push images to the Docker registry")
+	cmd.Flags().StringVar(&impl.registry.Organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
+	cmd.Flags().StringVar(&impl.registry.Address, "registry", "", "A Docker registry that can be used to publish images")
+	cmd.Flags().StringVar(&impl.registry.Secret, "registry-secret", "", "A secret used to push/pull images to the Docker registry")
+	cmd.Flags().BoolVar(&impl.registry.Insecure, "registry-insecure", false, "Configure to configure registry access in insecure mode or not")
 	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
 	cmd.Flags().BoolVar(&impl.snapshotRepositories, "snapshot-repositories", false, "Automatically include known snapshot repositories")
 	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
@@ -86,10 +88,7 @@ type installCmdOptions struct {
 	skipClusterSetup     bool
 	exampleSetup         bool
 	snapshotRepositories bool
-	registry             string
 	outputFormat         string
-	organization         string
-	pushSecret           string
 	camelVersion         string
 	runtimeVersion       string
 	baseImage            string
@@ -97,6 +96,7 @@ type installCmdOptions struct {
 	repositories         []string
 	properties           []string
 	contexts             []string
+	registry             v1alpha1.IntegrationPlatformRegistrySpec
 }
 
 func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
@@ -137,7 +137,7 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			return err
 		}
 
-		platform, err := install.PlatformOrCollect(o.Context, c, namespace, o.registry, o.organization, o.pushSecret, collection)
+		platform, err := install.PlatformOrCollect(o.Context, c, namespace, o.registry, collection)
 		if err != nil {
 			return err
 		}
