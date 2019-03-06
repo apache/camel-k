@@ -90,13 +90,13 @@ func installKnative(ctx context.Context, c client.Client, namespace string, coll
 }
 
 // Platform installs the platform custom resource
-func Platform(ctx context.Context, c client.Client, namespace string, registry string, organization string, pushSecret string) (*v1alpha1.IntegrationPlatform, error) {
-	return PlatformOrCollect(ctx, c, namespace, registry, organization, pushSecret, nil)
+func Platform(ctx context.Context, c client.Client, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec) (*v1alpha1.IntegrationPlatform, error) {
+	return PlatformOrCollect(ctx, c, namespace, registry, nil)
 }
 
 // PlatformOrCollect --
 // nolint: lll
-func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, registry string, organization string, pushSecret string, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
+func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
 	isOpenshift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return nil, err
@@ -108,22 +108,24 @@ func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, r
 	pl := platformObject.(*v1alpha1.IntegrationPlatform)
 
 	if !isOpenshift {
+
+		pl.Spec.Build.Registry = registry
+
 		// Kubernetes only (Minikube)
-		if registry == "" {
+		if registry.Address == "" {
 			// This operation should be done here in the installer
 			// because the operator is not allowed to look into the "kube-system" namespace
-			minishiftRegistry, err := minishift.FindRegistry(ctx, c)
+			minikubeRegistry, err := minishift.FindRegistry(ctx, c)
 			if err != nil {
 				return nil, err
 			}
-			if minishiftRegistry == nil {
+			if minikubeRegistry == nil {
 				return nil, errors.New("cannot find automatically a registry where to push images")
 			}
-			registry = *minishiftRegistry
+
+			pl.Spec.Build.Registry.Address = *minikubeRegistry
+			pl.Spec.Build.Registry.Insecure = true
 		}
-		pl.Spec.Build.Registry = registry
-		pl.Spec.Build.Organization = organization
-		pl.Spec.Build.PushSecret = pushSecret
 	}
 
 	var knativeInstalled bool

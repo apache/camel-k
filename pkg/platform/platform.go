@@ -93,5 +93,5 @@ func SupportsS2iPublishStrategy(p *v1alpha1.IntegrationPlatform) bool {
 
 // SupportsKanikoPublishStrategy --
 func SupportsKanikoPublishStrategy(p *v1alpha1.IntegrationPlatform) bool {
-	return p.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Spec.Build.Registry != ""
+	return p.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Spec.Build.Registry.Address != ""
 }

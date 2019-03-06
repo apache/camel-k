@@ -91,7 +91,7 @@ func TestKnativeWithVolumeBinding(t *testing.T) {
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        "registry",
+					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
@@ -227,7 +227,7 @@ func TestKnativeWithVolumeBindingAndContainerImage(t *testing.T) {
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        "registry",
+					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},

@@ -36,11 +36,11 @@ import (
 
 // Publisher --
 func Publisher(ctx *builder.Context) error {
-	organization := ctx.Request.Platform.Build.Organization
+	organization := ctx.Request.Platform.Build.Registry.Organization
 	if organization == "" {
 		organization = ctx.Namespace
 	}
-	image := ctx.Request.Platform.Build.Registry + "/" + organization + "/camel-k-" + ctx.Request.Meta.Name + ":" + ctx.Request.Meta.ResourceVersion
+	image := ctx.Request.Platform.Build.Registry.Address + "/" + organization + "/camel-k-" + ctx.Request.Meta.Name + ":" + ctx.Request.Meta.ResourceVersion
 	baseDir, _ := path.Split(ctx.Archive)
 	contextDir := path.Join(baseDir, "context")
 	if err := tar.Extract(ctx.Archive, contextDir); err != nil {
@@ -74,7 +74,7 @@ func Publisher(ctx *builder.Context) error {
 			MountPath: "/workspace",
 		},
 	}
-	envs := []corev1.EnvVar{}
+	envs := make([]corev1.EnvVar, 0)
 	baseArgs := []string{
 		"--dockerfile=Dockerfile",
 		"--context=" + contextDir,
@@ -83,15 +83,20 @@ func Publisher(ctx *builder.Context) error {
 		"--cache-dir=/workspace/cache",
 	}
 
-	args := append(baseArgs, "--insecure")
-	args = append(args, "--insecure-pull")
+	args := make([]string, 0, len(baseArgs))
+	args = append(args, baseArgs...)
 
-	if ctx.Request.Platform.Build.PushSecret != "" {
+	if ctx.Request.Platform.Build.Registry.Insecure {
+		args = append(args, "--insecure")
+		args = append(args, "--insecure-pull")
+	}
+
+	if ctx.Request.Platform.Build.Registry.Secret != "" {
 		volumes = append(volumes, corev1.Volume{
 			Name: "kaniko-secret",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: ctx.Request.Platform.Build.PushSecret,
+					SecretName: ctx.Request.Platform.Build.Registry.Secret,
 				},
 			},
 		})
