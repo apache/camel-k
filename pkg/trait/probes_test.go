@@ -81,6 +81,7 @@ func TestProbesOnDeployment(t *testing.T) {
 	tr := newProbesTrait()
 	tr.Enabled = &enabled
 	tr.BindPort = 9191
+	tr.LivenessTimeout = 1234
 
 	ok, err := tr.Configure(&e)
 	assert.Nil(t, err)
@@ -88,13 +89,13 @@ func TestProbesOnDeployment(t *testing.T) {
 
 	err = tr.Apply(&e)
 	assert.Nil(t, err)
-	//assert.Contains(t, e.Integration.Status.Dependencies, "runtime:health")
 	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(9191), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, "/health", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
 	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(9191), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, "/health", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, int32(1234), target.Spec.Template.Spec.Containers[0].LivenessProbe.TimeoutSeconds)
 }
 
 func TestProbesOnKnativeService(t *testing.T) {
@@ -118,6 +119,7 @@ func TestProbesOnKnativeService(t *testing.T) {
 	tr := newProbesTrait()
 	tr.Enabled = &enabled
 	tr.BindPort = 9191
+	tr.ReadinessTimeout = 4321
 
 	ok, err := tr.Configure(&e)
 	assert.Nil(t, err)
@@ -131,4 +133,5 @@ func TestProbesOnKnativeService(t *testing.T) {
 	assert.Equal(t, "", target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(9191), target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, "/health", target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, int32(4321), target.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe.TimeoutSeconds)
 }
