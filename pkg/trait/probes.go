@@ -32,9 +32,19 @@ import (
 type probesTrait struct {
 	BaseTrait `property:",squash"`
 
-	BindHost string `property:"bind-host"`
-	BindPort int    `property:"bind-port"`
-	Path     string `property:"path"`
+	BindHost                  string `property:"bind-host"`
+	BindPort                  int    `property:"bind-port"`
+	Path                      string `property:"path"`
+	LivenessInitialDelay      int32  `property:"liveness-initial-delay"`
+	LivenessTimeout           int32  `property:"liveness-timeout"`
+	LivenessPeriod            int32  `property:"liveness-period"`
+	LivenessSuccessThreshold  int32  `property:"liveness-success-threshold"`
+	LivenessFailureThreshold  int32  `property:"liveness-failure-threshold"`
+	ReadinessInitialDelay     int32  `property:"readiness-initial-delay"`
+	ReadinessTimeout          int32  `property:"readiness-timeout"`
+	ReadinessPeriod           int32  `property:"readiness-period"`
+	ReadinessSuccessThreshold int32  `property:"readiness-success-threshold"`
+	ReadinessFailureThreshold int32  `property:"readiness-failure-threshold"`
 }
 
 func newProbesTrait() *probesTrait {
@@ -68,21 +78,21 @@ func (t *probesTrait) Apply(e *Environment) error {
 				return
 			}
 
-			deployment.Spec.Template.Spec.Containers[0].LivenessProbe = t.newProbe()
-			deployment.Spec.Template.Spec.Containers[0].ReadinessProbe = t.newProbe()
+			deployment.Spec.Template.Spec.Containers[0].LivenessProbe = t.newLivenessProbe()
+			deployment.Spec.Template.Spec.Containers[0].ReadinessProbe = t.newReadinessProbe()
 		})
 
 		e.Resources.VisitKnativeService(func(service *serving.Service) {
-			service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.LivenessProbe = t.newProbe()
-			service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe = t.newProbe()
+			service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.LivenessProbe = t.newLivenessProbe()
+			service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.ReadinessProbe = t.newReadinessProbe()
 		})
 	}
 
 	return nil
 }
 
-func (t *probesTrait) newProbe() *corev1.Probe {
-	return &corev1.Probe{
+func (t *probesTrait) newLivenessProbe() *corev1.Probe {
+	p := corev1.Probe{
 		Handler: corev1.Handler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Port: intstr.FromInt(t.BindPort),
@@ -90,4 +100,31 @@ func (t *probesTrait) newProbe() *corev1.Probe {
 			},
 		},
 	}
+
+	p.InitialDelaySeconds = t.LivenessInitialDelay
+	p.TimeoutSeconds = t.LivenessTimeout
+	p.PeriodSeconds = t.LivenessPeriod
+	p.SuccessThreshold = t.LivenessSuccessThreshold
+	p.FailureThreshold = t.LivenessFailureThreshold
+
+	return &p
+}
+
+func (t *probesTrait) newReadinessProbe() *corev1.Probe {
+	p := corev1.Probe{
+		Handler: corev1.Handler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Port: intstr.FromInt(t.BindPort),
+				Path: t.Path,
+			},
+		},
+	}
+
+	p.InitialDelaySeconds = t.ReadinessInitialDelay
+	p.TimeoutSeconds = t.ReadinessTimeout
+	p.PeriodSeconds = t.ReadinessPeriod
+	p.SuccessThreshold = t.ReadinessSuccessThreshold
+	p.FailureThreshold = t.ReadinessFailureThreshold
+
+	return &p
 }
