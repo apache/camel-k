@@ -20,10 +20,13 @@ package trait
 import (
 	"strings"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/finalizer"
+
 	"github.com/pkg/errors"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -51,19 +54,6 @@ func (t *ownerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	ok, err := finalizer.Exists(e.Integration, finalizer.CamelIntegrationFinalizer)
-	if err != nil {
-		return false, errors.Wrap(err, "failed to read finalizer"+finalizer.CamelIntegrationFinalizer)
-	}
-
-	if ok {
-		//
-		// do not enable this trait if the integration has
-		// a finalizer
-		//
-		return false, nil
-	}
-
 	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 }
 
@@ -71,51 +61,88 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	controller := true
 	blockOwnerDeletion := true
 
-	targetLabels := map[string]string{}
-	for _, k := range strings.Split(t.TargetLabels, ",") {
-		if v, ok := e.Integration.Labels[k]; ok {
-			targetLabels[k] = v
+	targetLabels := make(map[string]string)
+	if e.Integration.Labels != nil {
+		for _, k := range strings.Split(t.TargetLabels, ",") {
+			if v, ok := e.Integration.Labels[k]; ok {
+				targetLabels[k] = v
+			}
 		}
 	}
 
-	targetAnnotations := map[string]string{}
-	for _, k := range strings.Split(t.TargetAnnotations, ",") {
-		if v, ok := e.Integration.Annotations[k]; ok {
-			targetAnnotations[k] = v
+	targetAnnotations := make(map[string]string)
+	if e.Integration.Annotations != nil {
+		for _, k := range strings.Split(t.TargetAnnotations, ",") {
+			if v, ok := e.Integration.Annotations[k]; ok {
+				targetAnnotations[k] = v
+			}
 		}
+	}
+
+	ok, err := finalizer.Exists(e.Integration, finalizer.CamelIntegrationFinalizer)
+	if err != nil {
+		return errors.Wrap(err, "failed to read finalizer"+finalizer.CamelIntegrationFinalizer)
 	}
 
 	e.Resources.VisitMetaObject(func(res metav1.Object) {
-		// Add owner reference
-		references := []metav1.OwnerReference{
-			{
-				APIVersion:         e.Integration.APIVersion,
-				Kind:               e.Integration.Kind,
-				Name:               e.Integration.Name,
-				UID:                e.Integration.UID,
-				Controller:         &controller,
-				BlockOwnerDeletion: &blockOwnerDeletion,
-			},
+		//
+		// do not add owner reference if the finalizer is set
+		// so resources are not automatically deleted by k8s
+		// when owner is deleted
+		//
+		if !ok {
+			references := []metav1.OwnerReference{
+				{
+					APIVersion:         e.Integration.APIVersion,
+					Kind:               e.Integration.Kind,
+					Name:               e.Integration.Name,
+					UID:                e.Integration.UID,
+					Controller:         &controller,
+					BlockOwnerDeletion: &blockOwnerDeletion,
+				},
+			}
+			res.SetOwnerReferences(references)
 		}
-		res.SetOwnerReferences(references)
 
 		// Transfer annotations
-		annotations := res.GetAnnotations()
-		for k, v := range targetAnnotations {
-			if _, ok := annotations[k]; !ok {
-				annotations[k] = v
-			}
-		}
-		res.SetAnnotations(annotations)
-
-		// Transfer labels
-		labels := res.GetLabels()
-		for k, v := range targetLabels {
-			if _, ok := labels[k]; !ok {
-				labels[k] = v
-			}
-		}
-		res.SetLabels(labels)
+		t.propagateLabelAndAnnotations(res, targetLabels, targetAnnotations)
 	})
+
+	e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		t.propagateLabelAndAnnotations(&deployment.Spec.Template, targetLabels, targetAnnotations)
+	})
+
+	e.Resources.VisitKnativeService(func(service *serving.Service) {
+		t.propagateLabelAndAnnotations(&service.Spec.RunLatest.Configuration.RevisionTemplate, targetLabels, targetAnnotations)
+	})
+
 	return nil
+}
+
+func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabels map[string]string, targetAnnotations map[string]string) {
+	// Transfer annotations
+	annotations := res.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	for k, v := range targetAnnotations {
+		if _, ok := annotations[k]; !ok {
+			annotations[k] = v
+		}
+	}
+	res.SetAnnotations(annotations)
+
+	// Transfer labels
+	labels := res.GetLabels()
+	if labels == nil {
+		labels = make(map[string]string)
+	}
+
+	for k, v := range targetLabels {
+		if _, ok := labels[k]; !ok {
+			labels[k] = v
+		}
+	}
+	res.SetLabels(labels)
 }
