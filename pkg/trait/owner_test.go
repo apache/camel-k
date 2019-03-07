@@ -20,18 +20,90 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/finalizer"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
+
+	appsv1 "k8s.io/api/apps/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestOwnerWithFinalizer(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env := SetUpOwnerEnvironment(t)
 	env.Integration.Finalizers = []string{finalizer.CamelIntegrationFinalizer}
 
 	processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.Nil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait(ID("owner")))
+
+	ValidateOwnerResources(t, env, false)
+}
+
+func TestOwnerWithoutFinalizer(t *testing.T) {
+	env := SetUpOwnerEnvironment(t)
+
+	processTestEnv(t, env)
+
+	assert.NotEmpty(t, env.ExecutedTraits)
+	assert.NotNil(t, env.GetTrait(ID("owner")))
+
+	ValidateOwnerResources(t, env, true)
+}
+
+func SetUpOwnerEnvironment(t *testing.T) *Environment {
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env.Integration.Spec.Traits = map[string]v1alpha1.IntegrationTraitSpec{
+		"owner": {
+			Configuration: map[string]string{
+				"target-labels":      "com.mycompany/mylabel1",
+				"target-annotations": "com.mycompany/myannotation2",
+			},
+		},
+	}
+
+	env.Integration.SetLabels(map[string]string{
+		"com.mycompany/mylabel1": "myvalue1",
+		"com.mycompany/mylabel2": "myvalue2",
+		"org.apache.camel/l1":    "l1",
+	})
+	env.Integration.SetAnnotations(map[string]string{
+		"com.mycompany/myannotation1": "myannotation1",
+		"com.mycompany/myannotation2": "myannotation2",
+	})
+
+	return env
+}
+
+func ValidateOwnerResources(t *testing.T, env *Environment, withOwnerRef bool) {
+	assert.NotEmpty(t, env.Resources.Items())
+
+	env.Resources.VisitMetaObject(func(res metav1.Object) {
+		if withOwnerRef {
+			assert.NotEmpty(t, res.GetOwnerReferences())
+		} else {
+			assert.Empty(t, res.GetOwnerReferences())
+		}
+
+		ValidateLabelsAndAnnotations(t, res)
+	})
+
+	deployments := make([]*appsv1.Deployment, 0)
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		deployments = append(deployments, deployment)
+	})
+
+	assert.Len(t, deployments, 1)
+	ValidateLabelsAndAnnotations(t, &deployments[0].Spec.Template)
+}
+
+func ValidateLabelsAndAnnotations(t *testing.T, res metav1.Object) {
+	assert.Contains(t, res.GetLabels(), "com.mycompany/mylabel1")
+	assert.Equal(t, "myvalue1", res.GetLabels()["com.mycompany/mylabel1"])
+
+	assert.NotContains(t, res.GetLabels(), "com.mycompany/mylabel2")
+
+	assert.Contains(t, res.GetAnnotations(), "com.mycompany/myannotation2")
+	assert.Equal(t, "myannotation2", res.GetAnnotations()["com.mycompany/myannotation2"])
 }
