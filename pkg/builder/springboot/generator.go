@@ -35,21 +35,6 @@ func GenerateProject(ctx *builder.Context) error {
 	ctx.Project = p
 
 	//
-	// Repositories
-	//
-
-	ctx.Project.Repositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
-
-	for i, r := range ctx.Request.Repositories {
-		repo := maven.NewRepository(r)
-		if repo.ID == "" {
-			repo.ID = fmt.Sprintf("repo-%03d", i)
-		}
-
-		ctx.Project.Repositories = append(ctx.Project.Repositories, repo)
-	}
-
-	//
 	// set-up dependencies
 	//
 

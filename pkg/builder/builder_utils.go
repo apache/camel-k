@@ -19,6 +19,7 @@ package builder
 
 import (
 	"encoding/xml"
+	"fmt"
 
 	"github.com/apache/camel-k/pkg/util/defaults"
 
@@ -40,6 +41,9 @@ func ArtifactIDs(artifacts []v1alpha1.Artifact) []string {
 
 // NewProject --
 func NewProject(ctx *Context) (maven.Project, error) {
+	//
+	// Catalog
+	//
 	if ctx.Catalog == nil {
 		c, err := camel.Catalog(ctx.Request.C, ctx.Client, ctx.Namespace, ctx.Request.Platform.Build.CamelVersion)
 		if err != nil {
@@ -71,6 +75,23 @@ func NewProject(ctx *Context) (maven.Project, error) {
 			},
 		},
 		Dependencies: make([]maven.Dependency, 0),
+	}
+
+	//
+	// Repositories
+	//
+
+	p.Repositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
+	p.PluginRepositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
+
+	for i, r := range ctx.Request.Repositories {
+		repo := maven.NewRepository(r)
+		if repo.ID == "" {
+			repo.ID = fmt.Sprintf("repo-%03d", i)
+		}
+
+		p.Repositories = append(p.Repositories, repo)
+		p.PluginRepositories = append(p.PluginRepositories, repo)
 	}
 
 	return p, nil
