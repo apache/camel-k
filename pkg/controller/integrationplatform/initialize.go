@@ -115,7 +115,7 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 			action.L.Info("Repositories:")
 		}
 
-		action.L.Infof("    %d - %s", i, r)
+		action.L.Infof("%d - %s", i, r)
 	}
 
 	err = action.client.Update(ctx, target)
