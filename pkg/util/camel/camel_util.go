@@ -65,6 +65,7 @@ func FindBestSemVerMatch(constraint *semver.Constraints, catalogs []v1alpha1.Cam
 		v, err := semver.NewVersion(catalog.Spec.Version)
 		if err != nil {
 			log.Debugf("Invalid semver version %s, skip it", catalog.Spec.Version)
+			continue
 		}
 
 		versions = append(versions, v)
