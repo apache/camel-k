@@ -67,7 +67,6 @@ func installOpenshift(ctx context.Context, c client.Client, namespace string, co
 		"operator-role-openshift.yaml",
 		"operator-role-binding.yaml",
 		"operator-deployment-openshift.yaml",
-		"operator-service.yaml",
 	)
 }
 
@@ -78,7 +77,6 @@ func installKubernetes(ctx context.Context, c client.Client, namespace string, c
 		"operator-role-binding.yaml",
 		"builder-pvc.yaml",
 		"operator-deployment-kubernetes.yaml",
-		"operator-service.yaml",
 	)
 }
 

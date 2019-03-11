@@ -4366,9 +4366,6 @@ spec:
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:0.3.1-SNAPSHOT
-          ports:
-          - containerPort: 60000
-            name: metrics
           command:
           - camel-k
           imagePullPolicy: IfNotPresent
@@ -4429,9 +4426,6 @@ spec:
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:0.3.1-SNAPSHOT
-          ports:
-          - containerPort: 60000
-            name: metrics
           command:
           - camel-k
           imagePullPolicy: IfNotPresent
@@ -4740,29 +4734,6 @@ metadata:
   name: camel-k-operator
   labels:
     app: "camel-k"
-
-`
-	Resources["operator-service.yaml"] =
-		`
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: camel-k-operator
-    app: "camel-k"
-  name: camel-k-operator
-spec:
-  ports:
-    - name: metrics
-      port: 60000
-      protocol: TCP
-      targetPort: metrics
-  selector:
-    name: camel-k-operator
-  sessionAffinity: None
-  type: ClusterIP
-status:
-  loadBalancer: {}
 
 `
 	Resources["platform-cr.yaml"] =
