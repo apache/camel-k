@@ -1157,6 +1157,12 @@ spec:
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-groovy
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-netty4-http
     camel-k-runtime-jvm:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-jvm
@@ -3227,6 +3233,12 @@ spec:
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-groovy
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-netty4-http
     camel-k-runtime-jvm:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-jvm
