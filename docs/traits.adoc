@@ -76,6 +76,9 @@ The following is a list of common traits that can be configured by the end users
 ! deployer.container-image
 ! Generates a container image for the Integration that includes the sources and resources in the generated images instead of mounting them to the pod.
 
+! deployer.kind
+! Allows to explicitly select the desired deployment kind between `deployment` or `knative-service` when creating the resources for running the integration.
+
 !===
 
 | deployment
