@@ -19,7 +19,8 @@ package trait
 
 type deployerTrait struct {
 	BaseTrait      `property:",squash"`
-	ContainerImage bool `property:"container-image"`
+	ContainerImage bool   `property:"container-image"`
+	Kind           string `property:"kind"`
 }
 
 func newDeployerTrait() *deployerTrait {

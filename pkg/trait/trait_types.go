@@ -193,6 +193,16 @@ func (e *Environment) DetermineControllerStrategy(ctx context.Context, c client.
 		return ControllerStrategyDeployment, nil
 	}
 
+	trait := e.GetTrait("deployer")
+	if trait != nil {
+		deployerTrait := trait.(*deployerTrait)
+		if deployerTrait.Kind == ControllerStrategyDeployment {
+			return ControllerStrategyDeployment, nil
+		} else if deployerTrait.Kind == ControllerStrategyKnativeService {
+			return ControllerStrategyKnativeService, nil
+		}
+	}
+
 	var sources []v1alpha1.SourceSpec
 	var err error
 	if sources, err = kubernetes.ResolveIntegrationSources(ctx, c, e.Integration, e.Resources); err != nil {
