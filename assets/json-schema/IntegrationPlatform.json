@@ -132,9 +132,6 @@
         "localRepository": {
           "type": "string"
         },
-        "organization": {
-          "type": "string"
-        },
         "properties": {
           "patternProperties": {
             ".*": {
@@ -146,11 +143,9 @@
         "publishStrategy": {
           "type": "string"
         },
-        "pushSecret": {
-          "type": "string"
-        },
         "registry": {
-          "type": "string"
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/IntegrationPlatformRegistrySpec"
         },
         "repositories": {
           "items": {
@@ -159,6 +154,24 @@
           "type": "array"
         },
         "runtimeVersion": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "IntegrationPlatformRegistrySpec": {
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "insecure": {
+          "type": "boolean"
+        },
+        "organization": {
+          "type": "string"
+        },
+        "secret": {
           "type": "string"
         }
       },
