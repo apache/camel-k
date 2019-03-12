@@ -26,6 +26,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+// EnvVarExists --
+func EnvVarExists(t *testing.T, env []corev1.EnvVar, name string) {
+	ev := envvar.Get(env, name)
+	assert.NotNil(t, ev)
+}
+
 // EnvVarHasValue --
 func EnvVarHasValue(t *testing.T, env []corev1.EnvVar, name string, val string) {
 	ev := envvar.Get(env, name)

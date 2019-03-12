@@ -21,12 +21,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/scylladb/go-set/strset"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
+
 	routev1 "github.com/openshift/api/route/v1"
 	"github.com/stretchr/testify/assert"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -196,7 +199,11 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: cluster,
@@ -205,6 +212,7 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 }
 

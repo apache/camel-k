@@ -21,6 +21,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/scylladb/go-set/strset"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -85,6 +87,11 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 				},
 			},
 		},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -97,6 +104,7 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 
 	err = traitCatalog.apply(&environment)
@@ -135,6 +143,9 @@ func TestKnativeTraitWithCompressedSources(t *testing.T) {
 		resource = util.LookupEnvVar(vars, "CAMEL_K_RESOURCE_001")
 		assert.NotNil(t, resource)
 		assert.Equal(t, content, resource.Value)
+
+		resource = util.LookupEnvVar(vars, "JAVA_CLASSPATH")
+		assert.NotNil(t, resource)
 	})
 
 	assert.True(t, services > 0)
@@ -174,6 +185,11 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 				},
 			},
 		},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -198,6 +214,7 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 				"content": content,
 			},
 		}),
+		Classpath: strset.New(),
 	}
 
 	err = traitCatalog.apply(&environment)
@@ -220,6 +237,9 @@ func TestKnativeTraitWithConfigMapSources(t *testing.T) {
 		route := util.LookupEnvVar(vars, "CAMEL_K_ROUTE_000")
 		assert.NotNil(t, route)
 		assert.Equal(t, content, route.Value)
+
+		resource := util.LookupEnvVar(vars, "JAVA_CLASSPATH")
+		assert.NotNil(t, resource)
 	})
 
 	assert.True(t, services > 0)

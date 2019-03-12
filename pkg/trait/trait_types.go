@@ -24,6 +24,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/scylladb/go-set/strset"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -114,6 +116,7 @@ type Environment struct {
 	BuildDir           string
 	ExecutedTraits     []Trait
 	EnvVars            []corev1.EnvVar
+	Classpath          *strset.Set
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
