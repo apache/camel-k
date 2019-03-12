@@ -144,10 +144,10 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	if t.Target != nil {
 		annotations[knativeServingTargetAnnotation] = strconv.Itoa(*t.Target)
 	}
-	if t.MinScale != nil {
+	if t.MinScale != nil && *t.MinScale > 0 {
 		annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
 	}
-	if t.MaxScale != nil {
+	if t.MaxScale != nil && *t.MaxScale > 0 {
 		annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
 	}
 
