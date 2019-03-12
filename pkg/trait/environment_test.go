@@ -21,6 +21,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/scylladb/go-set/strset"
+
 	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -46,7 +48,11 @@ func TestDefaultEnvironment(t *testing.T) {
 				Profile: v1alpha1.TraitProfileOpenShift,
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -55,6 +61,7 @@ func TestDefaultEnvironment(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 
 	err = NewEnvironmentTestCatalog().apply(&env)
@@ -106,7 +113,11 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 				},
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -115,6 +126,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 
 	err = NewEnvironmentTestCatalog().apply(&env)
@@ -166,7 +178,11 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 				},
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -175,6 +191,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 
 	err = NewEnvironmentTestCatalog().apply(&env)

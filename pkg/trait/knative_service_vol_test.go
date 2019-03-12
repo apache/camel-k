@@ -21,6 +21,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/scylladb/go-set/strset"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -86,6 +88,11 @@ func TestKnativeWithVolumeBinding(t *testing.T) {
 				},
 			},
 		},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -98,6 +105,7 @@ func TestKnativeWithVolumeBinding(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 
 	err = traitCatalog.apply(&environment)
@@ -160,6 +168,7 @@ func TestKnativeWithVolumeBinding(t *testing.T) {
 		}
 	})
 
+	test.EnvVarExists(t, spec.Container.Env, "JAVA_CLASSPATH")
 	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_ROUTES", "file:/etc/camel/sources/i-source-000/routes.js?language=js&compression=true")
 	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
@@ -222,6 +231,11 @@ func TestKnativeWithVolumeBindingAndContainerImage(t *testing.T) {
 				},
 			},
 		},
+		IntegrationContext: &v1alpha1.IntegrationContext{
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase: v1alpha1.IntegrationContextPhaseReady,
+			},
+		},
 		Platform: &v1alpha1.IntegrationPlatform{
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
@@ -234,6 +248,7 @@ func TestKnativeWithVolumeBindingAndContainerImage(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 
 	err = traitCatalog.apply(&environment)
@@ -266,6 +281,7 @@ func TestKnativeWithVolumeBindingAndContainerImage(t *testing.T) {
 	test.HasVolume(t, spec.Volumes, "my-secret")
 	test.HasVolume(t, spec.Volumes, "integration-properties")
 
+	test.EnvVarExists(t, spec.Container.Env, "JAVA_CLASSPATH")
 	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_ROUTES", "file:/deployments/sources/routes.js?language=js&compression=true")
 	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")

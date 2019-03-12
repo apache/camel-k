@@ -19,12 +19,13 @@ package trait
 
 import (
 	"fmt"
-	"strings"
+
+	"github.com/scylladb/go-set/strset"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
 	"github.com/pkg/errors"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -42,11 +43,8 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
 	}
-	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
-		return true, nil
-	}
 
-	return false, nil
+	return e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying), nil
 }
 
 func (t *classpathTrait) Apply(e *Environment) error {
@@ -71,12 +69,15 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		return fmt.Errorf("unable to find integration context %s", e.Integration.Status.Context)
 	}
 
-	deps := make([]string, 0, 2+len(ctx.Status.Artifacts))
-	deps = append(deps, "/etc/camel/resources")
-	deps = append(deps, "./resources")
+	if e.Classpath == nil {
+		e.Classpath = strset.New()
+	}
+
+	e.Classpath.Add("/etc/camel/resources")
+	e.Classpath.Add("./resources")
 
 	for _, artifact := range ctx.Status.Artifacts {
-		deps = append(deps, artifact.Target)
+		e.Classpath.Add(artifact.Target)
 	}
 
 	if e.IntegrationContext.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
@@ -85,10 +86,8 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account
 		//
-		deps = append(deps, "/deployments/dependencies/*")
+		e.Classpath.Add("/deployments/dependencies/*")
 	}
-
-	envvar.SetVal(&e.EnvVars, "JAVA_CLASSPATH", strings.Join(deps, ":"))
 
 	return nil
 }
