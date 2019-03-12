@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"sort"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -179,22 +178,6 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		&deployment.Spec.Template.Spec.Volumes,
 		&deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
 	)
-
-	//
-	// Add mounted volumes as resources
-	//
-	for _, c := range deployment.Spec.Template.Spec.Containers {
-		for _, m := range c.VolumeMounts {
-			e.Classpath.Add(m.MountPath)
-		}
-	}
-
-	cp := e.Classpath.List()
-
-	// keep classpath sorted
-	sort.Strings(cp)
-
-	envvar.SetVal(&deployment.Spec.Template.Spec.Containers[0].Env, "JAVA_CLASSPATH", strings.Join(cp, ":"))
 
 	return &deployment
 }

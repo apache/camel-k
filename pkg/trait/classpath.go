@@ -20,12 +20,19 @@ package trait
 import (
 	"fmt"
 
-	"github.com/scylladb/go-set/strset"
+	"sort"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/envvar"
+
+	"github.com/scylladb/go-set/strset"
 
 	"github.com/pkg/errors"
 
+	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -89,5 +96,38 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		e.Classpath.Add("/deployments/dependencies/*")
 	}
 
+	if e.Resources != nil {
+		//
+		// Add mounted volumes as resources
+		//
+		e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+			for i := 0; i < len(deployment.Spec.Template.Spec.Containers); i++ {
+				cp := e.Classpath.Copy()
+
+				for _, m := range deployment.Spec.Template.Spec.Containers[i].VolumeMounts {
+					cp.Add(m.MountPath)
+				}
+
+				t.setJavaClasspath(cp, &deployment.Spec.Template.Spec.Containers[i].Env)
+			}
+		})
+		e.Resources.VisitKnativeService(func(service *serving.Service) {
+			for _, m := range service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts {
+				e.Classpath.Add(m.MountPath)
+			}
+
+			t.setJavaClasspath(e.Classpath, &service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env)
+		})
+	}
+
 	return nil
+}
+
+func (t *classpathTrait) setJavaClasspath(cp *strset.Set, env *[]corev1.EnvVar) {
+	items := cp.List()
+
+	// keep classpath sorted
+	sort.Strings(items)
+
+	envvar.SetVal(env, "JAVA_CLASSPATH", strings.Join(items, ":"))
 }
