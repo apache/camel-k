@@ -18,11 +18,11 @@ limitations under the License.
 package trait
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -82,9 +82,11 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 			// trigger integration deploy
 			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 		}
+
+		return nil
 	}
 
-	if e.Integration != nil && e.Integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying {
+	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
 		e.Resources.AddAll(e.ComputeConfigMaps(t.deployer.ContainerImage))
 		e.Resources.Add(t.getDeploymentFor(e))
 	}
@@ -177,6 +179,22 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		&deployment.Spec.Template.Spec.Volumes,
 		&deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
 	)
+
+	//
+	// Add mounted volumes as resources
+	//
+	for _, c := range deployment.Spec.Template.Spec.Containers {
+		for _, m := range c.VolumeMounts {
+			e.Classpath.Add(m.MountPath)
+		}
+	}
+
+	cp := e.Classpath.List()
+
+	// keep classpath sorted
+	sort.Strings(cp)
+
+	envvar.SetVal(&deployment.Spec.Template.Spec.Containers[0].Env, "JAVA_CLASSPATH", strings.Join(cp, ":"))
 
 	return &deployment
 }

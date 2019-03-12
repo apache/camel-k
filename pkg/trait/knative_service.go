@@ -18,7 +18,9 @@ limitations under the License.
 package trait
 
 import (
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
@@ -62,7 +64,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if !e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
 		return false, nil
 	}
 
@@ -203,16 +205,27 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 
 	if t.ConfigurationType == "volume" {
 		t.bindToVolumes(e, &svc)
-	} else {
-		if err := t.bindToEnvVar(e, &svc); err != nil {
-			return nil, err
-		}
+	} else if err := t.bindToEnvVar(e, &svc); err != nil {
+		return nil, err
 	}
 
 	// add env vars from traits
 	for _, envVar := range e.EnvVars {
 		envvar.SetVar(&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVar)
 	}
+
+	// Add mounted volumes as resources
+	for _, m := range svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts {
+		e.Classpath.Add(m.MountPath)
+	}
+
+	cp := e.Classpath.List()
+
+	// keep classpath sorted
+	sort.Strings(cp)
+
+	// set the classpath
+	envvar.SetVal(environment, "JAVA_CLASSPATH", strings.Join(cp, ":"))
 
 	return &svc, nil
 }

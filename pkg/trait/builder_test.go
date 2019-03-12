@@ -21,6 +21,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/scylladb/go-set/strset"
+
 	"github.com/apache/camel-k/pkg/util/defaults"
 
 	"github.com/apache/camel-k/pkg/util/test"
@@ -154,6 +156,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
 	}
 }
 
