@@ -18,9 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
@@ -213,19 +211,6 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	for _, envVar := range e.EnvVars {
 		envvar.SetVar(&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVar)
 	}
-
-	// Add mounted volumes as resources
-	for _, m := range svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts {
-		e.Classpath.Add(m.MountPath)
-	}
-
-	cp := e.Classpath.List()
-
-	// keep classpath sorted
-	sort.Strings(cp)
-
-	// set the classpath
-	envvar.SetVal(environment, "JAVA_CLASSPATH", strings.Join(cp, ":"))
 
 	return &svc, nil
 }
