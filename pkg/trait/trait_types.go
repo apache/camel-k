@@ -319,9 +319,17 @@ func (e *Environment) ComputeConfigMaps(container bool) []runtime.Object {
 			maps = append(maps, &cm)
 		}
 
-		for i, s := range e.Integration.Spec.Resources {
-			if s.Type != v1alpha1.ResourceTypeData {
+		for i, r := range e.Integration.Spec.Resources {
+			if r.Type != v1alpha1.ResourceTypeData {
 				continue
+			}
+			if r.ContentRef != "" {
+				continue
+			}
+
+			cmKey := "content"
+			if r.ContentKey != "" {
+				cmKey = r.ContentKey
 			}
 
 			cm := corev1.ConfigMap{
@@ -336,12 +344,12 @@ func (e *Environment) ComputeConfigMaps(container bool) []runtime.Object {
 						"camel.apache.org/integration": e.Integration.Name,
 					},
 					Annotations: map[string]string{
-						"camel.apache.org/resource.name":        s.Name,
-						"camel.apache.org/resource.compression": strconv.FormatBool(s.Compression),
+						"camel.apache.org/resource.name":        r.Name,
+						"camel.apache.org/resource.compression": strconv.FormatBool(r.Compression),
 					},
 				},
 				Data: map[string]string{
-					"content": s.Content,
+					cmKey: r.Content,
 				},
 			}
 
@@ -402,6 +410,7 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 			cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
 			refName := fmt.Sprintf("i-source-%03d", i)
 			resName := strings.TrimPrefix(s.Name, "/")
+			resPath := path.Join("/etc/camel/sources", refName)
 
 			if s.ContentRef != "" {
 				cmName = s.ContentRef
@@ -426,7 +435,7 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 
 			*mnts = append(*mnts, corev1.VolumeMount{
 				Name:      refName,
-				MountPath: path.Join("/etc/camel/sources", refName),
+				MountPath: resPath,
 			})
 		}
 
@@ -438,6 +447,18 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 			cmName := fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i)
 			refName := fmt.Sprintf("i-resource-%03d", i)
 			resName := strings.TrimPrefix(r.Name, "/")
+			cmKey := "content"
+			resPath := path.Join("/etc/camel/resources", refName)
+
+			if r.ContentRef != "" {
+				cmName = r.ContentRef
+			}
+			if r.ContentKey != "" {
+				cmKey = r.ContentKey
+			}
+			if r.MountPath != "" {
+				resPath = r.MountPath
+			}
 
 			*vols = append(*vols, corev1.Volume{
 				Name: refName,
@@ -448,7 +469,7 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 						},
 						Items: []corev1.KeyToPath{
 							{
-								Key:  "content",
+								Key:  cmKey,
 								Path: resName,
 							},
 						},
@@ -458,7 +479,7 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 
 			*mnts = append(*mnts, corev1.VolumeMount{
 				Name:      refName,
-				MountPath: path.Join("/etc/camel/resources", refName),
+				MountPath: resPath,
 			})
 		}
 	}

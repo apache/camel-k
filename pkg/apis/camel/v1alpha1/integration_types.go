@@ -59,6 +59,7 @@ type DataSpec struct {
 	Name        string `json:"name,omitempty"`
 	Content     string `json:"content,omitempty"`
 	ContentRef  string `json:"contentRef,omitempty"`
+	ContentKey  string `json:"contentKey,omitempty"`
 	Compression bool   `json:"compression,omitempty"`
 }
 
@@ -68,7 +69,8 @@ type ResourceType string
 // ResourceSpec --
 type ResourceSpec struct {
 	DataSpec
-	Type ResourceType `json:"type,omitempty"`
+	Type      ResourceType `json:"type,omitempty"`
+	MountPath string       `json:"mountPath,omitempty"`
 }
 
 const (
