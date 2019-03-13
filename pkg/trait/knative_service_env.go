@@ -21,12 +21,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
-
+	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 )
 
@@ -44,12 +43,12 @@ func (t *knativeServiceTrait) bindToEnvVar(e *Environment, service *serving.Serv
 	})
 
 	VisitConfigurations("configmap", e.IntegrationContext, e.Integration, func(cmName string) {
-		cm, err := kubernetes.GetConfigMap(e.C, e.Client, e.Integration.Namespace, cmName)
+		cm, err := kubernetes.GetConfigMap(e.C, e.Client, cmName, e.Integration.Namespace)
 		if err != nil {
 			t.L.Errorf(err, "failed to lookup ConfigMap %s", cmName)
 		}
 		if cm != nil {
-			err = util.ExtractApplicationProperties(cm.Data, func(key string, val string) {
+			err = util.ExtractApplicationPropertiesString(cm.Data, func(key string, val string) {
 				properties[key] = val
 			})
 			if err != nil {
@@ -59,12 +58,12 @@ func (t *knativeServiceTrait) bindToEnvVar(e *Environment, service *serving.Serv
 	})
 
 	VisitConfigurations("secret", e.IntegrationContext, e.Integration, func(secretName string) {
-		cm, err := kubernetes.GetSecret(e.C, e.Client, e.Integration.Namespace, secretName)
+		cm, err := kubernetes.GetSecret(e.C, e.Client, secretName, e.Integration.Namespace)
 		if err != nil {
 			t.L.Errorf(err, "failed to lookup Secret %s", secretName)
 		}
 		if cm != nil {
-			err = util.ExtractEncodedApplicationProperties(cm.Data, func(key string, val string) {
+			err = util.ExtractApplicationPropertiesBytes(cm.Data, func(key string, val string) {
 				properties[key] = val
 			})
 			if err != nil {
