@@ -19,7 +19,6 @@ package s2i
 
 import (
 	"io/ioutil"
-	"time"
 
 	"k8s.io/apimachinery/pkg/util/json"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -151,7 +150,8 @@ func Publisher(ctx *builder.Context) error {
 			}
 		}
 		return false, nil
-	}, 5*time.Minute)
+	}, ctx.Request.Platform.Build.Timeout.Duration)
+
 	if err != nil {
 		return err
 	}
