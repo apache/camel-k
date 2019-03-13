@@ -75,11 +75,17 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingContext, v1alpha1.IntegrationPhaseResolvingContext) {
 
 		if t.deployer.ContainerImage {
-			// trigger container image build
-			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildImageSubmitted
+			e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
+				// trigger container image build
+				e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildImageSubmitted
+				return nil
+			})
 		} else {
-			// trigger integration deploy
-			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+			e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
+				// trigger integration deploy
+				e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+				return nil
+			})
 		}
 
 		return nil
