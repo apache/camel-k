@@ -235,9 +235,15 @@ func (action *buildImageAction) inlineResources(ctx context.Context, integration
 	}
 
 	for _, data := range resources {
+		t := path.Join("resources", data.Name)
+
+		if data.MountPath != "" {
+			t = path.Join(data.MountPath, data.Name)
+		}
+
 		r.Resources = append(r.Resources, builder.Resource{
 			Content: []byte(data.Content),
-			Target:  path.Join("resources", data.Name),
+			Target:  t,
 		})
 	}
 
