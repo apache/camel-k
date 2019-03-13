@@ -19,6 +19,7 @@ package integrationplatform
 
 import (
 	"context"
+	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
@@ -104,11 +105,15 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 	if target.Spec.Build.LocalRepository == "" {
 		target.Spec.Build.LocalRepository = defaults.LocalRepository
 	}
+	if target.Spec.Build.Timeout.Duration == 0 {
+		target.Spec.Build.Timeout.Duration = 5 * time.Minute
+	}
 
 	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
 	action.L.Infof("RuntimeVersion set to %s", target.Spec.Build.RuntimeVersion)
 	action.L.Infof("BaseImage set to %s", target.Spec.Build.BaseImage)
 	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
+	action.L.Infof("Timeout set to %s", target.Spec.Build.Timeout)
 
 	for i, r := range target.Spec.Build.Repositories {
 		if i == 0 {

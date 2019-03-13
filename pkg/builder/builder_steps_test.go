@@ -18,9 +18,12 @@ limitations under the License.
 package builder
 
 import (
+	"errors"
+	"sync"
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -291,4 +294,55 @@ func TestSanitizeDependencies(t *testing.T) {
 		Version:    "1.2.3",
 		Type:       "jar",
 	})
+}
+
+func TestFailure(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	b := New(nil, "ns")
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	r := Request{
+		C:              cancellable.NewContext(),
+		Catalog:        catalog,
+		RuntimeVersion: defaults.RuntimeVersion,
+		Steps: []Step{
+			NewStep("step1", InitPhase, func(i *Context) error {
+				return nil
+			}),
+			NewStep("step2", ApplicationPublishPhase, func(i *Context) error {
+				return errors.New("an error")
+			}),
+		},
+		Platform: v1alpha1.IntegrationPlatformSpec{
+			Build: v1alpha1.IntegrationPlatformBuildSpec{
+				CamelVersion: catalog.Version,
+			},
+		},
+	}
+
+	var res *Result
+
+	b.Submit(r, func(result *Result) {
+		switch result.Status {
+		case StatusError:
+			res = result
+			wg.Done()
+		case StatusCompleted:
+			res = result
+			wg.Done()
+		case StatusInterrupted:
+			res = result
+			wg.Done()
+		}
+
+	})
+
+	wg.Wait()
+
+	assert.NotNil(t, res)
+	assert.Equal(t, StatusError, res.Status)
 }

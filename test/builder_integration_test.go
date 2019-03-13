@@ -26,17 +26,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/apache/camel-k/pkg/util/cancellable"
-
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/s2i"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,7 +66,7 @@ func TestBuildManagerBuild(t *testing.T) {
 		C:              cancellable.NewContext(),
 		Catalog:        catalog,
 		RuntimeVersion: defaults.RuntimeVersion,
-		Meta: v1.ObjectMeta{
+		Meta: metav1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
 		},
@@ -76,6 +75,9 @@ func TestBuildManagerBuild(t *testing.T) {
 				CamelVersion:   catalog.Version,
 				RuntimeVersion: defaults.RuntimeVersion,
 				BaseImage:      "docker.io/fabric8/s2i-java:3.0-java8",
+				Timeout: metav1.Duration{
+					Duration: 5 * time.Minute,
+				},
 			},
 		},
 		Dependencies: []string{
@@ -115,7 +117,7 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		C:              cancellable.NewContext(),
 		Catalog:        catalog,
 		RuntimeVersion: defaults.RuntimeVersion,
-		Meta: v1.ObjectMeta{
+		Meta: metav1.ObjectMeta{
 			Name:            "man-test",
 			ResourceVersion: "1",
 		},
@@ -124,6 +126,9 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 				CamelVersion:   catalog.Version,
 				RuntimeVersion: defaults.RuntimeVersion,
 				BaseImage:      "docker.io/fabric8/s2i-java:3.0-java8",
+				Timeout: metav1.Duration{
+					Duration: 5 * time.Minute,
+				},
 			},
 		},
 		Dependencies: []string{

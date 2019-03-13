@@ -79,6 +79,7 @@ type IntegrationPlatformBuildSpec struct {
 	LocalRepository string                                  `json:"localRepository,omitempty"`
 	Repositories    []string                                `json:"repositories,omitempty"`
 	Registry        IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`
+	Timeout         metav1.Duration                         `json:"timeout,omitempty"`
 }
 
 // IntegrationPlatformRegistrySpec --
