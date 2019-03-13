@@ -20,6 +20,7 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
@@ -35,6 +36,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -68,6 +70,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.runtimeVersion, "runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
 	cmd.Flags().StringSliceVar(&impl.contexts, "context", nil, "Add a camel context to build at startup, by default all known contexts are built")
+	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -93,6 +96,7 @@ type installCmdOptions struct {
 	runtimeVersion       string
 	baseImage            string
 	localRepository      string
+	buildTimeout         string
 	repositories         []string
 	properties           []string
 	contexts             []string
@@ -181,6 +185,14 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 		}
 		if o.baseImage != "" {
 			platform.Spec.Build.BaseImage = o.baseImage
+		}
+		if o.buildTimeout != "" {
+			d, err := time.ParseDuration(o.buildTimeout)
+			if err != nil {
+				return err
+			}
+
+			platform.Spec.Build.Timeout.Duration = d
 		}
 
 		platform.Spec.Resources.Contexts = o.contexts

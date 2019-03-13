@@ -24,6 +24,8 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -47,14 +49,19 @@ func WaitCondition(ctx context.Context, c client.Client, obj runtime.Object, con
 	for start.Add(maxDuration).After(time.Now()) {
 		err := c.Get(ctx, key, obj)
 		if err != nil {
-			time.Sleep(sleepTime)
-			continue
+			if k8serrors.IsNotFound(err) {
+				time.Sleep(sleepTime)
+				continue
+			}
+
+			return err
 		}
 
 		satisfied, err := condition(obj)
 		if err != nil {
 			return errors.Wrap(err, "error while evaluating condition")
-		} else if !satisfied {
+		}
+		if !satisfied {
 			time.Sleep(sleepTime)
 			continue
 		}
