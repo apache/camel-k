@@ -24,16 +24,20 @@ import (
 func TestSanitizeName(t *testing.T) {
 	cases := []map[string]string{
 		{"input": "./abc.java", "expect": "abc"},
+		{"input": "../../abc.java", "expect": "abc"},
 		{"input": "/path/to/abc.js", "expect": "abc"},
 		{"input": "abc.xml", "expect": "abc"},
 		{"input": "./path/to/abc.kts", "expect": "abc"},
 		{"input": "fooToBar.groovy", "expect": "foo-to-bar"},
 		{"input": "foo-to-bar", "expect": "foo-to-bar"},
+		{"input": "http://foo.bar.com/cheese/wine/beer/abc.java", "expect": "abc"},
+		{"input": "http://foo.bar.com/cheese", "expect": "cheese"},
+		{"input": "http://foo.bar.com", "expect": "foo"},
 	}
 
 	for _, c := range cases {
 		if name := SanitizeName(c["input"]); name != c["expect"] {
-			t.Errorf("result of %s should be %s, instead of %s", c["input"], c["output"], name)
+			t.Errorf("result of %s should be %s, instead of %s", c["input"], c["expect"], name)
 		}
 	}
 }
