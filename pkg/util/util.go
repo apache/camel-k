@@ -18,7 +18,6 @@ limitations under the License.
 package util
 
 import (
-	"encoding/base64"
 	"os"
 	"os/signal"
 	"path"
@@ -157,8 +156,8 @@ func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []str
 	return submatchs.List()
 }
 
-// ExtractApplicationProperties --
-func ExtractApplicationProperties(data map[string]string, consumer func(string, string)) error {
+// ExtractApplicationPropertiesString --
+func ExtractApplicationPropertiesString(data map[string]string, consumer func(string, string)) error {
 	pstr, ok := data["application.properties"]
 	if !ok {
 		return nil
@@ -176,18 +175,14 @@ func ExtractApplicationProperties(data map[string]string, consumer func(string, 
 	return nil
 }
 
-// ExtractEncodedApplicationProperties --
-func ExtractEncodedApplicationProperties(data map[string][]byte, consumer func(string, string)) error {
-	encoded, ok := data["application.properties"]
+// ExtractApplicationPropertiesBytes --
+func ExtractApplicationPropertiesBytes(data map[string][]byte, consumer func(string, string)) error {
+	pstr, ok := data["application.properties"]
 	if !ok {
 		return nil
 	}
-	decoded, err := base64.StdEncoding.DecodeString(string(encoded))
-	if err != nil {
-		return err
-	}
 
-	p, err := properties.Load(decoded, properties.UTF8)
+	p, err := properties.Load(pstr, properties.UTF8)
 	if err != nil {
 		return err
 	}
