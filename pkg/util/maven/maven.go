@@ -75,6 +75,8 @@ func Run(buildDir string, args ...string) error {
 		mvnCmd = c
 	}
 
+	args = append(args, "--batch-mode")
+
 	cmd := exec.Command(mvnCmd, args...)
 	cmd.Dir = buildDir
 	cmd.Stdout = os.Stdout
