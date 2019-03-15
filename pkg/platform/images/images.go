@@ -39,6 +39,8 @@ var StandardDependencies = map[string]bool{
 	"camel:core":   true,
 	"runtime:jvm":  true,
 	"runtime:yaml": true,
+	"mvn:org.apache.camel.k:camel-k-adapter-camel-2:" + defaults.RuntimeVersion: true,
+	"camel:camel-netty4-http": true,
 }
 
 // LookupPredefinedImage is used to find a suitable predefined image if available
