@@ -85,10 +85,16 @@ func (env *CamelEnvironment) Deserialize(str string) error {
 
 // ContainsService tells if the environment contains a service with the given name and type
 func (env *CamelEnvironment) ContainsService(name string, serviceType CamelServiceType) bool {
+	return env.FindService(name, serviceType) != nil
+}
+
+// FindService --
+func (env *CamelEnvironment) FindService(name string, serviceType CamelServiceType) *CamelServiceDefinition {
 	for _, svc := range env.Services {
+		svc := svc
 		if svc.Name == name && svc.ServiceType == serviceType {
-			return true
+			return &svc
 		}
 	}
-	return false
+	return nil
 }
