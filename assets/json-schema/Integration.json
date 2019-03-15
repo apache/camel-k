@@ -330,7 +330,13 @@
         "content": {
           "type": "string"
         },
+        "contentKey": {
+          "type": "string"
+        },
         "contentRef": {
+          "type": "string"
+        },
+        "mountPath": {
           "type": "string"
         },
         "name": {
@@ -349,6 +355,9 @@
           "type": "boolean"
         },
         "content": {
+          "type": "string"
+        },
+        "contentKey": {
           "type": "string"
         },
         "contentRef": {

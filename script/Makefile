@@ -1,5 +1,5 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 0.3.1-SNAPSHOT
+VERSION := 0.3.1
 RUNTIME_VERSION := 0.3.1
 CAMEL_VERSION := 2.23.1
 CAMEL_VERSION_CONSTRAINT := ~2.23.x
@@ -62,7 +62,7 @@ build-resources:
 	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION)
 	./script/build_catalog.sh 2.23.0 $(RUNTIME_VERSION)
 	./script/embed_resources.sh deploy
-	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
+	#go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
 build-compile-integration-tests:
 	go test -c -tags=integration ./test/*.go
