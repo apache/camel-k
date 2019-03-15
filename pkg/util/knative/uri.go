@@ -17,9 +17,13 @@ limitations under the License.
 
 package knative
 
-import "regexp"
+import (
+	"regexp"
 
-var channelRegexp = regexp.MustCompile("^knative:[/]*channel/([a-z0-9.-]+)(?:[/?].*|$)")
+	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+)
+
+var uriRegexp = regexp.MustCompile("^knative:[/]*(channel|endpoint)/([a-z0-9.-]+)(?:[/?].*|$)")
 
 // ExtractChannelNames extracts all Knative named channels from the given URIs
 func ExtractChannelNames(uris []string) []string {
@@ -35,9 +39,31 @@ func ExtractChannelNames(uris []string) []string {
 
 // ExtractChannelName returns a channel name from the Knative URI if present
 func ExtractChannelName(uri string) string {
-	match := channelRegexp.FindStringSubmatch(uri)
-	if len(match) == 2 {
-		return match[1]
+	return ExtractName(knativev1.CamelServiceTypeChannel, uri)
+}
+
+// ExtractEndpointNames extracts all Knative named endpoints from the given URIs
+func ExtractEndpointNames(uris []string) []string {
+	channels := make([]string, 0)
+	for _, uri := range uris {
+		channel := ExtractEndpointlName(uri)
+		if channel != "" {
+			channels = append(channels, channel)
+		}
+	}
+	return channels
+}
+
+// ExtractEndpointlName returns an endpoint name from the Knative URI if present
+func ExtractEndpointlName(uri string) string {
+	return ExtractName(knativev1.CamelServiceTypeEndpoint, uri)
+}
+
+// ExtractName returns a channel name from the Knative URI if present
+func ExtractName(kind knativev1.CamelServiceType, uri string) string {
+	match := uriRegexp.FindStringSubmatch(uri)
+	if len(match) == 3 && match[1] == string(kind) {
+		return match[2]
 	}
 	return ""
 }

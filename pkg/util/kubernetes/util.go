@@ -151,6 +151,31 @@ func GetIntegration(context context.Context, client client.Client, name string, 
 	return &answer, nil
 }
 
+// GetService --
+func GetService(context context.Context, client client.Client, name string, namespace string) (*corev1.Service, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	answer := corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+
+	if err := client.Get(context, key, &answer); err != nil {
+		return nil, err
+	}
+
+	return &answer, nil
+}
+
 // GetDiscoveryTypes --
 func GetDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
 	resources, err := client.Discovery().ServerPreferredNamespacedResources()
