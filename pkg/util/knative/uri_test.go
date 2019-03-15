@@ -34,3 +34,15 @@ func TestChannelUri(t *testing.T) {
 	assert.Empty(t, ExtractChannelName("a:knative:channel/chan"))
 	assert.Empty(t, ExtractChannelName("knative:channel/pippa$"))
 }
+
+func TestEndpointUri(t *testing.T) {
+	assert.Equal(t, "pippo", ExtractEndpointlName("knative:endpoint/pippo"))
+	assert.Equal(t, "pippo1", ExtractEndpointlName("knative://endpoint/pippo1"))
+	assert.Equal(t, "pippo-2", ExtractEndpointlName("knative://endpoint/pippo-2?pluto=12"))
+	assert.Equal(t, "pip-p-o", ExtractEndpointlName("knative:/endpoint/pip-p-o?pluto=12"))
+	assert.Equal(t, "pip.po", ExtractEndpointlName("knative:endpoint/pip.po?pluto=12"))
+	assert.Equal(t, "pip.po-1", ExtractEndpointlName("knative:endpoint/pip.po-1/hello"))
+	assert.Empty(t, ExtractEndpointlName("http://wikipedia.org"))
+	assert.Empty(t, ExtractEndpointlName("a:knative:endpoint/chan"))
+	assert.Empty(t, ExtractEndpointlName("knative:endpoint/pippa$"))
+}

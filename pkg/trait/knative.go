@@ -18,33 +18,37 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
+
+	"github.com/scylladb/go-set/strset"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/envvar"
+
+	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type knativeTrait struct {
-	BaseTrait     `property:",squash"`
-	Configuration string `property:"configuration"`
-	Sources       string `property:"sources"`
-	Sinks         string `property:"sinks"`
-	Auto          *bool  `property:"auto"`
+	BaseTrait       `property:",squash"`
+	Configuration   string `property:"configuration"`
+	ChannelSources  string `property:"channel-sources"`
+	ChannelSinks    string `property:"channel-sinks"`
+	EndpointSources string `property:"endpoint-sources"`
+	EndpointSinks   string `property:"endpoint-sinks"`
+	Auto            *bool  `property:"auto"`
 }
 
 func newKnativeTrait() *knativeTrait {
-	return &knativeTrait{
+	t := &knativeTrait{
 		BaseTrait: newBaseTrait("knative"),
 	}
+
+	return t
 }
 
 func (t *knativeTrait) Configure(e *Environment) (bool, error) {
@@ -57,13 +61,45 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.Auto == nil || *t.Auto {
-		if t.Sources == "" {
-			channels := t.getSourceChannels(e)
-			t.Sources = strings.Join(channels, ",")
+		if t.ChannelSources == "" {
+			items := make([]string, 0)
+
+			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+				items = append(items, knativeutil.ExtractChannelNames(meta.FromURIs)...)
+				return true
+			})
+
+			t.ChannelSources = strings.Join(items, ",")
 		}
-		if t.Sinks == "" {
-			channels := t.getSinkChannels(e)
-			t.Sinks = strings.Join(channels, ",")
+		if t.EndpointSinks == "" {
+			items := make([]string, 0)
+
+			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+				items = append(items, knativeutil.ExtractChannelNames(meta.ToURIs)...)
+				return true
+			})
+
+			t.EndpointSinks = strings.Join(items, ",")
+		}
+		if t.EndpointSources == "" {
+			items := make([]string, 0)
+
+			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+				items = append(items, knativeutil.ExtractEndpointNames(meta.FromURIs)...)
+				return true
+			})
+
+			t.EndpointSources = strings.Join(items, ",")
+		}
+		if t.EndpointSinks == "" {
+			items := make([]string, 0)
+
+			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+				items = append(items, knativeutil.ExtractEndpointNames(meta.ToURIs)...)
+				return true
+			})
+
+			t.EndpointSinks = strings.Join(items, ",")
 		}
 	}
 
@@ -71,21 +107,34 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {
-	if err := t.prepareEnvVars(e); err != nil {
+	if err := t.createConfiguration(e); err != nil {
 		return err
 	}
-	for _, sub := range t.getSubscriptionsFor(e) {
-		e.Resources.Add(sub)
+	if err := t.createSubscriptions(e); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (t *knativeTrait) prepareEnvVars(e *Environment) error {
-	// common env var for Knative integration
-	conf, err := t.getConfigurationSerialized(e)
-	if err != nil {
+func (t *knativeTrait) createConfiguration(e *Environment) error {
+	env := knativeapi.NewCamelEnvironment()
+	if t.Configuration != "" {
+		if err := env.Deserialize(t.Configuration); err != nil {
+			return err
+		}
+	}
+
+	if err := t.configureChannels(e, &env); err != nil {
 		return err
+	}
+	if err := t.configureEndpoints(e, &env); err != nil {
+		return err
+	}
+
+	conf, err := env.Serialize()
+	if err != nil {
+		return errors.Wrap(err, "unable to fetch environment configuration")
 	}
 
 	envvar.SetVal(&e.EnvVars, "CAMEL_KNATIVE_CONFIGURATION", conf)
@@ -93,61 +142,30 @@ func (t *knativeTrait) prepareEnvVars(e *Environment) error {
 	return nil
 }
 
-func (t *knativeTrait) getSubscriptionsFor(e *Environment) []*eventing.Subscription {
-	channels := t.getConfiguredSourceChannels()
-	subs := make([]*eventing.Subscription, 0)
+func (t *knativeTrait) createSubscriptions(e *Environment) error {
+	channels := t.extractNames(t.ChannelSources)
 	for _, ch := range channels {
-		subs = append(subs, t.getSubscriptionFor(e, ch))
+		sub := knativeutil.CreateSubscription(ch, e.Integration.Name)
+		e.Resources.Add(&sub)
 	}
-	return subs
+
+	return nil
 }
 
-func (*knativeTrait) getSubscriptionFor(e *Environment, channel string) *eventing.Subscription {
-	return &eventing.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: eventing.SchemeGroupVersion.String(),
-			Kind:       "Subscription",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: e.Integration.Namespace,
-			Name:      channel + "-" + e.Integration.Name,
-		},
-		Spec: eventing.SubscriptionSpec{
-			Channel: corev1.ObjectReference{
-				APIVersion: eventing.SchemeGroupVersion.String(),
-				Kind:       "Channel",
-				Name:       channel,
-			},
-			Subscriber: &eventing.SubscriberSpec{
-				Ref: &corev1.ObjectReference{
-					APIVersion: serving.SchemeGroupVersion.String(),
-					Kind:       "Service",
-					Name:       e.Integration.Name,
-				},
-			},
-		},
-	}
-}
+func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEnvironment) error {
+	sources := t.extractNames(t.ChannelSources)
+	sinks := t.extractNames(t.ChannelSinks)
 
-func (t *knativeTrait) getConfigurationSerialized(e *Environment) (string, error) {
-	env, err := t.getConfiguration(e)
-	if err != nil {
-		return "", errors.Wrap(err, "unable fetch environment configuration")
-	}
-	return env.Serialize()
-}
+	sr := strset.New(sources...)
+	sk := strset.New(sinks...)
+	is := strset.Intersection(sr, sk)
 
-func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnvironment, error) {
-	env := knativeapi.NewCamelEnvironment()
-	if t.Configuration != "" {
-		if err := env.Deserialize(t.Configuration); err != nil {
-			return knativeapi.CamelEnvironment{}, err
-		}
+	if is.Size() > 0 {
+		return fmt.Errorf("cannot use the same channels as source and synk (%s)", is.List())
 	}
 
 	// Sources
-	sourceChannels := t.getConfiguredSourceChannels()
-	for _, ch := range sourceChannels {
+	for _, ch := range sources {
 		if env.ContainsService(ch, knativeapi.CamelServiceTypeChannel) {
 			continue
 		}
@@ -163,23 +181,24 @@ func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnviron
 		}
 		env.Services = append(env.Services, svc)
 	}
+
 	// Sinks
-	sinkChannels := t.getConfiguredSinkChannels()
-	for _, ch := range sinkChannels {
+	for _, ch := range sinks {
 		if env.ContainsService(ch, knativeapi.CamelServiceTypeChannel) {
 			continue
 		}
-		channel, err := t.retrieveChannel(e.Integration.Namespace, ch)
+
+		c, err := knativeutil.GetChannel(t.ctx, t.client, e.Integration.Namespace, ch)
 		if err != nil {
-			return env, err
+			return err
 		}
-		hostname := channel.Status.Address.Hostname
-		if hostname == "" {
-			return env, errors.New("cannot find address of channel " + ch)
+		if c == nil || c.Status.Address.Hostname == "" {
+			return errors.New("cannot find address of channel " + ch)
 		}
+
 		svc := knativeapi.CamelServiceDefinition{
 			Name:        ch,
-			Host:        hostname,
+			Host:        c.Status.Address.Hostname,
 			Port:        80,
 			Protocol:    knativeapi.CamelProtocolHTTP,
 			ServiceType: knativeapi.CamelServiceTypeChannel,
@@ -189,82 +208,78 @@ func (t *knativeTrait) getConfiguration(e *Environment) (knativeapi.CamelEnviron
 		}
 		env.Services = append(env.Services, svc)
 	}
-	// Adding default endpoint
-	defSvc := knativeapi.CamelServiceDefinition{
-		Name:        "default",
-		Host:        "0.0.0.0",
-		Port:        8080,
-		Protocol:    knativeapi.CamelProtocolHTTP,
-		ServiceType: knativeapi.CamelServiceTypeEndpoint,
-		Metadata: map[string]string{
-			knativeapi.CamelMetaServicePath: "/",
-		},
-	}
-	env.Services = append(env.Services, defSvc)
-	return env, nil
+
+	return nil
 }
 
-func (t *knativeTrait) getConfiguredSourceChannels() []string {
-	channels := make([]string, 0)
-	for _, ch := range strings.Split(t.Sources, ",") {
-		cht := strings.Trim(ch, " \t\"")
-		if cht != "" {
-			channels = append(channels, cht)
+func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelEnvironment) error {
+	sources := t.extractNames(t.EndpointSources)
+	sinks := t.extractNames(t.EndpointSinks)
+
+	sr := strset.New(sources...)
+	sk := strset.New(sinks...)
+	is := strset.Intersection(sr, sk)
+
+	if is.Size() > 0 {
+		return fmt.Errorf("cannot use the same enadpoints as source and synk (%s)", is.List())
+	}
+
+	// Sources
+	for _, endpoint := range sources {
+		if env.ContainsService(endpoint, knativeapi.CamelServiceTypeEndpoint) {
+			continue
+		}
+		svc := knativeapi.CamelServiceDefinition{
+			Name:        endpoint,
+			Host:        "0.0.0.0",
+			Port:        8080,
+			Protocol:    knativeapi.CamelProtocolHTTP,
+			ServiceType: knativeapi.CamelServiceTypeEndpoint,
+			Metadata: map[string]string{
+				knativeapi.CamelMetaServicePath: "/",
+			},
+		}
+		env.Services = append(env.Services, svc)
+	}
+
+	// Sinks
+	for _, endpoint := range sinks {
+		if env.ContainsService(endpoint, knativeapi.CamelServiceTypeEndpoint) {
+			continue
+		}
+
+		s, err := knativeutil.GetService(t.ctx, t.client, e.Integration.Namespace, endpoint)
+		if err != nil {
+			return err
+		}
+		if s == nil || s.Status.Address == nil || s.Status.Address.Hostname == "" {
+			return errors.New("cannot find address of endpoint " + endpoint)
+		}
+
+		svc := knativeapi.CamelServiceDefinition{
+			Name:        endpoint,
+			Host:        s.Status.Address.Hostname,
+			Port:        80,
+			Protocol:    knativeapi.CamelProtocolHTTP,
+			ServiceType: knativeapi.CamelServiceTypeEndpoint,
+			Metadata: map[string]string{
+				knativeapi.CamelMetaServicePath: "/",
+			},
+		}
+		env.Services = append(env.Services, svc)
+	}
+
+	return nil
+}
+
+func (t *knativeTrait) extractNames(names string) []string {
+	answer := make([]string, 0)
+	for _, item := range strings.Split(names, ",") {
+		i := strings.Trim(item, " \t\"")
+		if i != "" {
+			answer = append(answer, i)
 		}
 	}
-	return channels
-}
 
-func (*knativeTrait) getSourceChannels(e *Environment) []string {
-	channels := make([]string, 0)
-
-	metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
-		channels = append(channels, knativeutil.ExtractChannelNames(meta.FromURIs)...)
-		return true
-	})
-
-	return channels
-}
-
-func (t *knativeTrait) getConfiguredSinkChannels() []string {
-	channels := make([]string, 0)
-	for _, ch := range strings.Split(t.Sinks, ",") {
-		cht := strings.Trim(ch, " \t\"")
-		if cht != "" {
-			channels = append(channels, cht)
-		}
-	}
-	return channels
-}
-
-func (*knativeTrait) getSinkChannels(e *Environment) []string {
-	channels := make([]string, 0)
-
-	metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
-		channels = append(channels, knativeutil.ExtractChannelNames(meta.ToURIs)...)
-		return true
-	})
-
-	return channels
-}
-
-func (t *knativeTrait) retrieveChannel(namespace string, name string) (*eventing.Channel, error) {
-	channel := eventing.Channel{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Channel",
-			APIVersion: eventing.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
-	}
-	key := k8sclient.ObjectKey{
-		Namespace: namespace,
-		Name:      name,
-	}
-	if err := t.client.Get(t.ctx, key, &channel); err != nil {
-		return nil, errors.Wrap(err, "could not retrieve channel "+name+" in namespace "+namespace)
-	}
-	return &channel, nil
+	return answer
 }
