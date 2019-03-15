@@ -57,6 +57,12 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 		return err
 	}
 
+	// Updating the whole integration context as it may have changed
+	action.L.Info("Updating IntegrationContext")
+	if err := action.client.Update(ctx, target); err != nil {
+		return err
+	}
+
 	if target.Spec.Image == "" {
 		// by default the context should be build
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildSubmitted
@@ -76,6 +82,5 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 	target.Status.Digest = dgst
 
 	action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
-
 	return action.client.Status().Update(ctx, target)
 }
