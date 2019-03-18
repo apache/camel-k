@@ -80,6 +80,8 @@ func GenerateProject(ctx *Context) error {
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
 
 			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
+		case strings.HasPrefix(d, "bom:"):
+			// no-op
 		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}
