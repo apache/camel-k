@@ -129,6 +129,8 @@ func GenerateProject(ctx *builder.Context) error {
 			dependency := maven.NewDependency("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
 
 			ctx.Project.AddDependency(dependency)
+		case strings.HasPrefix(d, "bom:"):
+			// no-op
 		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}

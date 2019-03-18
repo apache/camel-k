@@ -20,6 +20,7 @@ package builder
 import (
 	"encoding/xml"
 	"fmt"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/util/defaults"
 
@@ -54,28 +55,52 @@ func NewProject(ctx *Context) (maven.Project, error) {
 	}
 
 	p := maven.Project{
-		XMLName:           xml.Name{Local: "project"},
-		XMLNs:             "http://maven.apache.org/POM/4.0.0",
-		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
-		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-		ModelVersion:      "4.0.0",
-		GroupID:           "org.apache.camel.k.integration",
-		ArtifactID:        "camel-k-integration",
-		Version:           defaults.Version,
-		Properties:        ctx.Request.Platform.Build.Properties,
-		DependencyManagement: maven.DependencyManagement{
-			Dependencies: []maven.Dependency{
-				{
-					GroupID:    "org.apache.camel",
-					ArtifactID: "camel-bom",
-					Version:    ctx.Catalog.Version,
-					Type:       "pom",
-					Scope:      "import",
-				},
-			},
-		},
-		Dependencies: make([]maven.Dependency, 0),
+		XMLName:              xml.Name{Local: "project"},
+		XMLNs:                "http://maven.apache.org/POM/4.0.0",
+		XMLNsXsi:             "http://www.w3.org/2001/XMLSchema-instance",
+		XsiSchemaLocation:    "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
+		ModelVersion:         "4.0.0",
+		GroupID:              "org.apache.camel.k.integration",
+		ArtifactID:           "camel-k-integration",
+		Version:              defaults.Version,
+		Properties:           ctx.Request.Platform.Build.Properties,
+		DependencyManagement: maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)},
+		Dependencies:         make([]maven.Dependency, 0),
 	}
+
+	//
+	// DependencyManagement
+	//
+
+	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel",
+		ArtifactID: "camel-bom",
+		Version:    ctx.Catalog.Version,
+		Type:       "pom",
+		Scope:      "import",
+	})
+
+	for _, d := range ctx.Request.Dependencies {
+		if strings.HasPrefix(d, "bom:") {
+			mid := strings.TrimPrefix(d, "bom:")
+			gav := strings.Replace(mid, "/", ":", -1)
+
+			d, err := maven.ParseGAV(gav)
+			if err != nil {
+				return maven.Project{}, err
+			}
+
+			p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
+				GroupID:    d.GroupID,
+				ArtifactID: d.ArtifactID,
+				Version:    d.Version,
+				Type:       "pom",
+				Scope:      "import",
+			})
+		}
+	}
+
+	//p.DependencyManagement.Dependencies = dm
 
 	//
 	// Repositories
