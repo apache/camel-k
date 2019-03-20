@@ -80,8 +80,8 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 
 func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
-	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
+	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+	env.Integration.Spec.Traits["service"] = v1alpha1.TraitSpec{
 		Configuration: map[string]string{
 			"port": "7071",
 		},
@@ -96,8 +96,8 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 
 func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
-	env.Integration.Spec.Traits["service"] = v1alpha1.IntegrationTraitSpec{
+	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+	env.Integration.Spec.Traits["service"] = v1alpha1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled": "false",
 			"port":    "7071",
@@ -146,8 +146,8 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 
 func TestTraitDecode(t *testing.T) {
 	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
-	svcTrait := v1alpha1.IntegrationTraitSpec{
+	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+	svcTrait := v1alpha1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled": "false",
 			"port":    "7071",
@@ -163,6 +163,59 @@ func TestTraitDecode(t *testing.T) {
 	assert.Equal(t, 7071, svc.Port)
 	assert.NotNil(t, svc.Enabled)
 	assert.Equal(t, false, *svc.Enabled)
+}
+
+func TestTraitHierarchyDecode(t *testing.T) {
+	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "")
+
+	env.Platform.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+	env.Platform.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+		Configuration: map[string]string{
+			"enabled":            "false",
+			"min-scale":          "1",
+			"max-scale":          "10",
+			"autoscaling-target": "15",
+		},
+	}
+
+	env.IntegrationContext.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+	env.IntegrationContext.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+		Configuration: map[string]string{
+			"enabled":   "true",
+			"min-scale": "5",
+		},
+	}
+
+	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+	env.Integration.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+		Configuration: map[string]string{
+			"max-scale": "20",
+		},
+	}
+
+	c := NewTraitTestCatalog()
+	err := c.configure(env)
+
+	assert.Nil(t, err)
+
+	knt := c.GetTrait("knative-service")
+	assert.NotNil(t, knt)
+
+	kns, ok := knt.(*knativeServiceTrait)
+	assert.True(t, ok)
+	assert.NotNil(t, kns)
+
+	assert.NotNil(t, kns.Enabled)
+	assert.True(t, *kns.Enabled)
+
+	assert.NotNil(t, kns.MinScale)
+	assert.Equal(t, 5, *kns.MinScale)
+
+	assert.NotNil(t, kns.MaxScale)
+	assert.Equal(t, 20, *kns.MaxScale)
+
+	assert.NotNil(t, kns.Target)
+	assert.Equal(t, 15, *kns.Target)
 }
 
 func TestConfigureVolumesAndMounts(t *testing.T) {

@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/mitchellh/mapstructure"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -89,26 +88,6 @@ func (is *IntegrationSpec) AddDependency(dependency string) {
 	default:
 		util.StringSliceUniqueAdd(&is.Dependencies, dependency)
 	}
-}
-
-// Decode the trait configuration to a type safe struct
-func (in *IntegrationTraitSpec) Decode(target interface{}) error {
-	md := mapstructure.Metadata{}
-
-	decoder, err := mapstructure.NewDecoder(
-		&mapstructure.DecoderConfig{
-			Metadata:         &md,
-			WeaklyTypedInput: true,
-			TagName:          "property",
-			Result:           &target,
-		},
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return decoder.Decode(in.Configuration)
 }
 
 // NewSourceSpec --

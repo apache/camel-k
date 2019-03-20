@@ -212,7 +212,7 @@ func (command *contextCreateCommand) run(_ *cobra.Command, args []string) error 
 
 func (*contextCreateCommand) configureTrait(ctx *v1alpha1.IntegrationContext, config string) error {
 	if ctx.Spec.Traits == nil {
-		ctx.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
+		ctx.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
 	}
 
 	parts := traitConfigRegexp.FindStringSubmatch(config)
@@ -225,7 +225,7 @@ func (*contextCreateCommand) configureTrait(ctx *v1alpha1.IntegrationContext, co
 
 	spec, ok := ctx.Spec.Traits[traitID]
 	if !ok {
-		spec = v1alpha1.IntegrationTraitSpec{
+		spec = v1alpha1.TraitSpec{
 			Configuration: make(map[string]string),
 		}
 	}
