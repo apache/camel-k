@@ -237,23 +237,31 @@ func (c *Catalog) GetTrait(id string) Trait {
 }
 
 func (c *Catalog) configure(env *Environment) error {
+	if env.Platform != nil && env.Platform.Spec.Traits != nil {
+		if err := c.configureTraits(env.Platform.Spec.Traits); err != nil {
+			return err
+		}
+	}
 	if env.IntegrationContext != nil && env.IntegrationContext.Spec.Traits != nil {
-		for id, traitSpec := range env.IntegrationContext.Spec.Traits {
-			catTrait := c.GetTrait(id)
-			if catTrait != nil {
-				if err := traitSpec.Decode(catTrait); err != nil {
-					return err
-				}
-			}
+		if err := c.configureTraits(env.IntegrationContext.Spec.Traits); err != nil {
+			return err
 		}
 	}
 	if env.Integration != nil && env.Integration.Spec.Traits != nil {
-		for id, traitSpec := range env.Integration.Spec.Traits {
-			catTrait := c.GetTrait(id)
-			if catTrait != nil {
-				if err := traitSpec.Decode(catTrait); err != nil {
-					return err
-				}
+		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Catalog) configureTraits(traits map[string]v1alpha1.TraitSpec) error {
+	for id, traitSpec := range traits {
+		catTrait := c.GetTrait(id)
+		if catTrait != nil {
+			if err := traitSpec.Decode(catTrait); err != nil {
+				return err
 			}
 		}
 	}

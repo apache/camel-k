@@ -61,3 +61,8 @@ type FailureRecovery struct {
 	AttemptMax  int         `json:"attemptMax"`
 	AttemptTime metav1.Time `json:"attemptTime"`
 }
+
+// A TraitSpec contains the configuration of a trait
+type TraitSpec struct {
+	Configuration map[string]string `json:"configuration,omitempty"`
+}

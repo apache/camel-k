@@ -8,12 +8,12 @@ import (
 
 // IntegrationContextSpec defines the desired state of IntegrationContext
 type IntegrationContextSpec struct {
-	Image         string                          `json:"image,omitempty"`
-	Dependencies  []string                        `json:"dependencies,omitempty"`
-	Profile       TraitProfile                    `json:"profile,omitempty"`
-	Traits        map[string]IntegrationTraitSpec `json:"traits,omitempty"`
-	Configuration []ConfigurationSpec             `json:"configuration,omitempty"`
-	Repositories  []string                        `json:"repositories,omitempty"`
+	Image         string               `json:"image,omitempty"`
+	Dependencies  []string             `json:"dependencies,omitempty"`
+	Profile       TraitProfile         `json:"profile,omitempty"`
+	Traits        map[string]TraitSpec `json:"traits,omitempty"`
+	Configuration []ConfigurationSpec  `json:"configuration,omitempty"`
+	Repositories  []string             `json:"repositories,omitempty"`
 }
 
 // IntegrationContextStatus defines the observed state of IntegrationContext

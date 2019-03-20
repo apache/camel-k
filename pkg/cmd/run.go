@@ -466,7 +466,7 @@ func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
 
 func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config string) error {
 	if integration.Spec.Traits == nil {
-		integration.Spec.Traits = make(map[string]v1alpha1.IntegrationTraitSpec)
+		integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
 	}
 
 	parts := traitConfigRegexp.FindStringSubmatch(config)
@@ -479,7 +479,7 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 
 	spec, ok := integration.Spec.Traits[traitID]
 	if !ok {
-		spec = v1alpha1.IntegrationTraitSpec{
+		spec = v1alpha1.TraitSpec{
 			Configuration: make(map[string]string),
 		}
 	}

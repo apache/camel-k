@@ -40,7 +40,7 @@ func TestDebugTraitApplicability(t *testing.T) {
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
 			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+				Traits: map[string]v1alpha1.TraitSpec{
 					"debug": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -72,7 +72,7 @@ func TestApplyDebugTrait(t *testing.T) {
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
 			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+				Traits: map[string]v1alpha1.TraitSpec{
 					"debug": {
 						Configuration: map[string]string{
 							"enabled": "true",
