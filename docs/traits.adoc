@@ -98,8 +98,17 @@ The following is a list of common traits that can be configured by the end users
 [cols="m,"]
 !===
 
-! knative.sources
+! knative.channel-sources
 ! Configures a (comma-separated) list of channels to which the Knative service must be subscribed (to receive cloudevents from a channel).
+
+! knative.channel-sinks
+! Configures a (comma-separated) list of channels to which the Knative service publishes.
+
+! knative.endpoint-sources
+! Configures a (comma-separated) list of endpoints the Knative service exposes (the name is).
+
+! knative.endpoint-sinks
+! Configures a (comma-separated) list of endpoints the Knative consumes.
 
 !===
 
