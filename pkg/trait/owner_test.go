@@ -54,7 +54,7 @@ func TestOwnerWithoutFinalizer(t *testing.T) {
 
 func SetUpOwnerEnvironment(t *testing.T) *Environment {
 	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
-	env.Integration.Spec.Traits = map[string]v1alpha1.IntegrationTraitSpec{
+	env.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
 		"owner": {
 			Configuration: map[string]string{
 				"target-labels":      "com.mycompany/mylabel1",

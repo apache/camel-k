@@ -104,7 +104,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 			},
 			Spec: v1alpha1.IntegrationSpec{
 				Profile: v1alpha1.TraitProfileOpenShift,
-				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+				Traits: map[string]v1alpha1.TraitSpec{
 					"environment": {
 						Configuration: map[string]string{
 							"container-meta": "true",
@@ -169,7 +169,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 			},
 			Spec: v1alpha1.IntegrationSpec{
 				Profile: v1alpha1.TraitProfileOpenShift,
-				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+				Traits: map[string]v1alpha1.TraitSpec{
 					"environment": {
 						Configuration: map[string]string{
 							"container-meta": "false",

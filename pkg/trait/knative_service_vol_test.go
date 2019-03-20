@@ -79,7 +79,7 @@ func TestKnativeWithVolumeBinding(t *testing.T) {
 					{Type: "secret", Value: "my-secret"},
 					{Type: "property", Value: "my-property=my-property-value"},
 				},
-				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+				Traits: map[string]v1alpha1.TraitSpec{
 					"knative-service": {
 						Configuration: map[string]string{
 							"configuration-type": "volume",
@@ -217,7 +217,7 @@ func TestKnativeWithVolumeBindingAndContainerImage(t *testing.T) {
 					{Type: "configmap", Value: "my-cm"},
 					{Type: "secret", Value: "my-secret"},
 				},
-				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+				Traits: map[string]v1alpha1.TraitSpec{
 					"deployer": {
 						Configuration: map[string]string{
 							"container-image": "true",
