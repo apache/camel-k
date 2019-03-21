@@ -69,7 +69,7 @@ func TestKnativeEnvConfiguration(t *testing.T) {
 				Profile:   v1alpha1.TraitProfileKnative,
 				Sources:   []v1alpha1.SourceSpec{},
 				Resources: []v1alpha1.ResourceSpec{},
-				Traits: map[string]v1alpha1.IntegrationTraitSpec{
+				Traits: map[string]v1alpha1.TraitSpec{
 					"knative": {
 						Configuration: map[string]string{
 							"enabled":          "true",
