@@ -47,14 +47,14 @@ func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
 }
 
 // CreateSubscription ---
-func CreateSubscription(channel string, name string) eventing.Subscription {
+func CreateSubscription(namespace string, channel string, name string) eventing.Subscription {
 	return eventing.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: eventing.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: name,
+			Namespace: namespace,
 			Name:      channel + "-" + name,
 		},
 		Spec: eventing.SubscriptionSpec{
