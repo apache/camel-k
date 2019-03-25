@@ -5,19 +5,18 @@ package defaults
 // ***********************
 
 const (
-  // Version -- 
-  Version = "0.3.2-SNAPSHOT"
+	// Version --
+	Version = "0.3.2-SNAPSHOT"
 
-  // CamelVersionConstraint -- 
-  CamelVersionConstraint = "~2.23.x"
+	// CamelVersionConstraint --
+	CamelVersionConstraint = "~2.23.x"
 
-  // RuntimeVersion -- 
-  RuntimeVersion = "0.3.1"
+	// RuntimeVersion --
+	RuntimeVersion = "0.3.1"
 
-  // BaseImage -- 
-  BaseImage = "fabric8/s2i-java:3.0-java8"
+	// BaseImage --
+	BaseImage = "fabric8/s2i-java:3.0-java8"
 
-  // LocalRepository -- 
-  LocalRepository = "/tmp/artifacts/m2"
+	// LocalRepository --
+	LocalRepository = "/tmp/artifacts/m2"
 )
-
