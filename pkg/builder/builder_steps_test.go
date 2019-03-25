@@ -124,7 +124,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
-	assert.Equal(t, 3, len(ctx.Project.Dependencies))
+	assert.Equal(t, 4, len(ctx.Project.Dependencies))
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-jvm",
@@ -138,6 +138,12 @@ func TestGenerateJvmProject(t *testing.T) {
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-adapter-camel-2",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.logging.log4j",
+		ArtifactID: "log4j-slf4j-impl",
+		Version:    "2.11.2",
+		Scope:      "runtime",
 	})
 }
 
@@ -173,7 +179,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
 	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
 
-	assert.Equal(t, 5, len(ctx.Project.Dependencies))
+	assert.Equal(t, 6, len(ctx.Project.Dependencies))
 
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
@@ -198,6 +204,12 @@ func TestGenerateGroovyProject(t *testing.T) {
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel",
 		ArtifactID: "camel-groovy",
+	})
+	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.logging.log4j",
+		ArtifactID: "log4j-slf4j-impl",
+		Version:    "2.11.2",
+		Scope:      "runtime",
 	})
 }
 
