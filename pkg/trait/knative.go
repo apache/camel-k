@@ -145,7 +145,7 @@ func (t *knativeTrait) createConfiguration(e *Environment) error {
 func (t *knativeTrait) createSubscriptions(e *Environment) error {
 	channels := t.extractNames(t.ChannelSources)
 	for _, ch := range channels {
-		sub := knativeutil.CreateSubscription(ch, e.Integration.Name)
+		sub := knativeutil.CreateSubscription(e.Integration.Namespace, ch, e.Integration.Name)
 		e.Resources.Add(&sub)
 	}
 
