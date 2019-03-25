@@ -87,6 +87,14 @@ func GenerateProject(ctx *Context) error {
 		}
 	}
 
+	// Add Log4j 2 SLF4J binding as default logging impl
+	ctx.Project.AddDependency(maven.Dependency{
+		GroupID:    "org.apache.logging.log4j",
+		ArtifactID: "log4j-slf4j-impl",
+		Version:    "2.11.2",
+		Scope:      "runtime",
+	})
+
 	return nil
 }
 
