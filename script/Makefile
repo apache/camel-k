@@ -37,6 +37,7 @@ codegen:
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
 	@echo ")" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
+	gofmt -w pkg/util/defaults/defaults.go
 
 generate:
 	operator-sdk generate k8s
