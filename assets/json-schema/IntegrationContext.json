@@ -227,7 +227,7 @@
           "patternProperties": {
             ".*": {
               "$schema": "http://json-schema.org/draft-04/schema#",
-              "$ref": "#/definitions/IntegrationTraitSpec"
+              "$ref": "#/definitions/TraitSpec"
             }
           },
           "type": "object"
@@ -269,20 +269,6 @@
         },
         "runtimeVersion": {
           "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "IntegrationTraitSpec": {
-      "properties": {
-        "configuration": {
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
-          },
-          "type": "object"
         }
       },
       "additionalProperties": false,
@@ -399,6 +385,20 @@
       "type": "object"
     },
     "Time": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TraitSpec": {
+      "properties": {
+        "configuration": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     }
