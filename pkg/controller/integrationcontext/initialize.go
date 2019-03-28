@@ -64,7 +64,7 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 	}
 
 	if target.Spec.Image == "" {
-		// by default the context should be build
+		// by default the context should be built
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildSubmitted
 	} else {
 		// but in case it has been created from an image, mark the

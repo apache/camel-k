@@ -147,15 +147,15 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 	}
 
 	switch res.Status {
-	case builder.StatusSubmitted:
+	case v1alpha1.BuildScheduled:
 		action.L.Info("Build submitted")
-	case builder.StatusStarted:
+	case v1alpha1.BuildStarted:
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildRunning
 
 		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
-	case builder.StatusError:
+	case v1alpha1.BuildError:
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
 		// by the user
@@ -187,7 +187,7 @@ func (action *buildAction) handleBuildStateChange(ctx context.Context, res *buil
 		action.L.Error(res.Error, "IntegrationContext state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
-	case builder.StatusCompleted:
+	case v1alpha1.BuildCompleted:
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
 		// by the user
