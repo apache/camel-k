@@ -136,7 +136,7 @@ type Result struct {
 	Image       string
 	PublicImage string
 	Error       error
-	Status      Status
+	Status      v1alpha1.BuildPhase
 	Artifacts   []v1alpha1.Artifact
 	Task        Task
 }
@@ -179,23 +179,3 @@ type PublishedImage struct {
 	Artifacts    []v1alpha1.Artifact
 	Dependencies []string
 }
-
-// Status --
-type Status int
-
-const (
-	// StatusSubmitted --
-	StatusSubmitted Status = iota
-
-	// StatusStarted --
-	StatusStarted
-
-	// StatusCompleted --
-	StatusCompleted
-
-	// StatusError --
-	StatusError
-
-	// StatusInterrupted --
-	StatusInterrupted
-)

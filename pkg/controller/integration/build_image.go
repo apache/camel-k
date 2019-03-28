@@ -24,14 +24,13 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/util/cancellable"
-
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -162,15 +161,15 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 	}
 
 	switch res.Status {
-	case builder.StatusSubmitted:
+	case v1alpha1.BuildScheduled:
 		action.L.Info("Build submitted")
-	case builder.StatusStarted:
+	case v1alpha1.BuildStarted:
 		target.Status.Phase = v1alpha1.IntegrationPhaseBuildImageRunning
 
 		action.L.Info("Integration state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
-	case builder.StatusError:
+	case v1alpha1.BuildError:
 		target.Status.Phase = v1alpha1.IntegrationPhaseBuildFailureRecovery
 
 		if target.Status.Failure == nil {
@@ -187,7 +186,7 @@ func (action *buildImageAction) handleBuildStateChange(ctx context.Context, res 
 		action.L.Error(res.Error, "Integration state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
-	case builder.StatusCompleted:
+	case v1alpha1.BuildCompleted:
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
 		if res.PublicImage != "" {
 			target.Status.Image = res.PublicImage

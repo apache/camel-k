@@ -37,7 +37,7 @@ func GetPlatformBuilder(c client.Client, namespace string) (builder.Builder, err
 		return gBuilder, nil
 	}
 
-	gBuilder = builder.New(c, namespace)
+	gBuilder = builder.NewPodBuilder(c, namespace)
 
 	return gBuilder, nil
 }
