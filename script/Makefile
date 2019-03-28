@@ -42,7 +42,7 @@ codegen:
 generate:
 	operator-sdk generate k8s
 
-build: build-operator build-kamel build-publisher build-compile-integration-tests
+build: build-operator build-kamel build-publisher build-builder build-compile-integration-tests
 
 test: build
 	go test ./...
@@ -59,6 +59,9 @@ build-kamel:
 build-publisher:
 	go build -o publisher ./cmd/util/publisher/*.go
 
+build-builder:
+	env GOOS=linux go build -o builder ./cmd/builder/*.go
+
 build-resources:
 	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION)
 	./script/build_catalog.sh 2.23.0 $(RUNTIME_VERSION)
@@ -73,6 +76,7 @@ clean:
 	rm -f camel-k
 	rm -f kamel
 	rm -f publisher
+	rm -f builder
 	rm -rf build/_maven_output
 	rm -rf build/_output
 	rm -rf camel-k-client-*.tar.gz
@@ -89,6 +93,7 @@ lint:
 
 images: test
 	mkdir -p build/_maven_output
+	cp builder build/_output/bin
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
 images-dev: test package-artifacts

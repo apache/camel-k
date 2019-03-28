@@ -47,7 +47,7 @@ type buildTask struct {
 	request Request
 }
 
-type defaultBuilder struct {
+type localBuilder struct {
 	log       log.Logger
 	ctx       cancellable.Context
 	client    client.Client
@@ -58,10 +58,10 @@ type defaultBuilder struct {
 	namespace string
 }
 
-// New --
-func New(c client.Client, namespace string) Builder {
-	m := defaultBuilder{
-		log:       log.WithName("builder"),
+// NewLocalBuilder --
+func NewLocalBuilder(c client.Client, namespace string) Builder {
+	m := localBuilder{
+		log:       log.WithName("local builder"),
 		ctx:       cancellable.NewContext(),
 		client:    c,
 		tasks:     make(chan buildTask),
@@ -73,14 +73,14 @@ func New(c client.Client, namespace string) Builder {
 	return &m
 }
 
-func (b *defaultBuilder) IsBuilding(object metav1.ObjectMeta) bool {
+func (b *localBuilder) IsBuilding(object metav1.ObjectMeta) bool {
 	_, ok := b.request.Load(object.Name)
 
 	return ok
 }
 
 // Submit --
-func (b *defaultBuilder) Submit(request Request, handler func(*Result)) {
+func (b *localBuilder) Submit(request Request, handler func(*Result)) {
 	if atomic.CompareAndSwapInt32(&b.running, 0, 1) {
 		go b.loop()
 	}
@@ -90,7 +90,7 @@ func (b *defaultBuilder) Submit(request Request, handler func(*Result)) {
 		r := Result{
 			Builder: b,
 			Request: request,
-			Status:  StatusSubmitted,
+			Status:  v1alpha1.BuildScheduled,
 		}
 
 		b.log.Infof("submitting request: %+v", request)
@@ -104,7 +104,7 @@ func (b *defaultBuilder) Submit(request Request, handler func(*Result)) {
 	}
 }
 
-func (b *defaultBuilder) Close() {
+func (b *localBuilder) Close() {
 	b.ctx.Cancel()
 }
 
@@ -114,7 +114,7 @@ func (b *defaultBuilder) Close() {
 //
 // ********************************
 
-func (b *defaultBuilder) loop() {
+func (b *localBuilder) loop() {
 	for atomic.LoadInt32(&b.running) == 1 {
 		select {
 		case <-b.ctx.Done():
@@ -133,12 +133,12 @@ func (b *defaultBuilder) loop() {
 	}
 }
 
-func (b *defaultBuilder) process(request Request, handler func(*Result)) {
+func (b *localBuilder) process(request Request, handler func(*Result)) {
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
 
 		r := result.(Result)
-		r.Status = StatusError
+		r.Status = v1alpha1.BuildError
 		r.Error = fmt.Errorf("no info found for: %s/%s", request.Meta.Namespace, request.Meta.Name)
 
 		b.log.Error(r.Error, "error processing request")
@@ -152,7 +152,7 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 
 	// update the status
 	r := result.(Result)
-	r.Status = StatusStarted
+	r.Status = v1alpha1.BuildStarted
 	r.Task.StartedAt = time.Now()
 
 	if handler != nil {
@@ -168,7 +168,7 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 	if err != nil {
 		log.Error(err, "Unexpected error while creating a temporary dir")
 
-		r.Status = StatusError
+		r.Status = v1alpha1.BuildError
 		r.Error = err
 	}
 
@@ -190,7 +190,7 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 
 	// base image is mandatory
 	if c.Image == "" {
-		r.Status = StatusError
+		r.Status = v1alpha1.BuildError
 		r.Image = ""
 		r.PublicImage = ""
 		r.Error = errors.New("no base image defined")
@@ -205,7 +205,7 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 	// update the cache
 	b.request.Store(request.Meta.Name, r)
 
-	if r.Status == StatusError {
+	if r.Status == v1alpha1.BuildError {
 		if handler != nil {
 			handler(&r)
 		}
@@ -220,15 +220,15 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 
 	b.log.Infof("steps: %v", request.Steps)
 	for _, step := range request.Steps {
-		if c.Error != nil || r.Status == StatusInterrupted {
+		if c.Error != nil || r.Status == v1alpha1.BuildInterrupted {
 			break
 		}
 
 		select {
 		case <-b.interrupt:
-			c.Error = errors.New("build canceled")
+			c.Error = errors.New("builder canceled")
 		case <-request.C.Done():
-			r.Status = StatusInterrupted
+			r.Status = v1alpha1.BuildInterrupted
 		default:
 			l := b.log.WithValues(
 				"step", step.ID(),
@@ -251,21 +251,21 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 
 	r.Task.CompletedAt = time.Now()
 
-	if r.Status != StatusInterrupted {
-		r.Status = StatusCompleted
+	if r.Status != v1alpha1.BuildInterrupted {
+		r.Status = v1alpha1.BuildCompleted
 		r.BaseImage = c.BaseImage
 		r.Image = c.Image
 		r.PublicImage = c.PublicImage
 		r.Error = c.Error
 
 		if r.Error != nil {
-			r.Status = StatusError
+			r.Status = v1alpha1.BuildError
 		}
 
 		r.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
 		r.Artifacts = append(r.Artifacts, c.Artifacts...)
 
-		b.log.Infof("build request %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+		b.log.Infof("builder request %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
 		b.log.Infof("dependencies: %s", request.Dependencies)
 		b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
 		b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
@@ -274,7 +274,7 @@ func (b *defaultBuilder) process(request Request, handler func(*Result)) {
 		b.log.Infof("resolved image: %s", c.Image)
 		b.log.Infof("resolved public image: %s", c.PublicImage)
 	} else {
-		b.log.Infof("build request %s interrupted after %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+		b.log.Infof("builder request %s interrupted after %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
 	}
 
 	// update the cache

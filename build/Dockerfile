@@ -9,3 +9,4 @@ RUN chgrp -R 0 /tmp/artifacts/m2 \
 USER 1000
 
 ADD build/_output/bin/camel-k /usr/local/bin/camel-k
+ADD build/_output/bin/builder /usr/local/bin/camel-k-builder

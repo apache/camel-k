@@ -301,7 +301,7 @@ func TestFailure(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
-	b := New(nil, "ns")
+	b := NewLocalBuilder(nil, "ns")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -329,23 +329,22 @@ func TestFailure(t *testing.T) {
 
 	b.Submit(r, func(result *Result) {
 		switch result.Status {
-		case StatusError:
+		case v1alpha1.BuildError:
 			res = result
 			wg.Done()
-		case StatusCompleted:
+		case v1alpha1.BuildCompleted:
 			res = result
 			wg.Done()
-		case StatusInterrupted:
+		case v1alpha1.BuildInterrupted:
 			res = result
 			wg.Done()
 		}
-
 	})
 
 	wg.Wait()
 
 	assert.NotNil(t, res)
-	assert.Equal(t, StatusError, res.Status)
+	assert.Equal(t, v1alpha1.BuildError, res.Status)
 }
 
 func TestListPublishedImages(t *testing.T) {

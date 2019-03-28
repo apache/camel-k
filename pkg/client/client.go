@@ -68,6 +68,11 @@ func (c *defaultClient) GetScheme() *runtime.Scheme {
 // NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster
 func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 	initialize(kubeconfig)
+	return NewClient()
+}
+
+// NewClient creates a new k8s client that can be used from outside or in the cluster
+func NewClient() (Client, error) {
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {

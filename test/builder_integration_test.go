@@ -43,7 +43,7 @@ func handler(in chan builder.Result, out chan builder.Result) {
 	for {
 		select {
 		case res := <-in:
-			if res.Status == builder.StatusCompleted || res.Status == builder.StatusError {
+			if res.Status == v1alpha1.BuildCompleted || res.Status == v1alpha1.BuildError {
 				out <- res
 				return
 			}
@@ -57,7 +57,7 @@ func handler(in chan builder.Result, out chan builder.Result) {
 
 func TestBuildManagerBuild(t *testing.T) {
 	namespace := getTargetNamespace()
-	b := builder.New(testClient, namespace)
+	b := builder.NewLocalBuilder(testClient, namespace)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -101,14 +101,14 @@ func TestBuildManagerBuild(t *testing.T) {
 
 	result, ok := <-rc
 	assert.True(t, ok)
-	assert.NotEqual(t, builder.StatusError, result.Status)
-	assert.Equal(t, builder.StatusCompleted, result.Status)
+	assert.NotEqual(t, v1alpha1.BuildError, result.Status)
+	assert.Equal(t, v1alpha1.BuildCompleted, result.Status)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
 func TestBuildManagerFailedBuild(t *testing.T) {
 	namespace := getTargetNamespace()
-	b := builder.New(testClient, namespace)
+	b := builder.NewLocalBuilder(testClient, namespace)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -151,6 +151,6 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 
 	result, ok := <-rc
 	assert.True(t, ok)
-	assert.Equal(t, builder.StatusError, result.Status)
-	assert.NotEqual(t, builder.StatusCompleted, result.Status)
+	assert.Equal(t, v1alpha1.BuildError, result.Status)
+	assert.NotEqual(t, v1alpha1.BuildCompleted, result.Status)
 }
