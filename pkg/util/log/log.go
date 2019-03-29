@@ -84,6 +84,16 @@ func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
 	}
 }
 
+// ForBuild --
+func (l Logger) ForBuild(target *v1alpha1.Build) Logger {
+	return l.WithValues(
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
+		"ns", target.Namespace,
+		"name", target.Name,
+	)
+}
+
 // ForIntegration --
 func (l Logger) ForIntegration(target *v1alpha1.Integration) Logger {
 	return l.WithValues(

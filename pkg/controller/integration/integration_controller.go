@@ -4,9 +4,6 @@ import (
 	"context"
 	"time"
 
-	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -19,6 +16,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
 /**
@@ -53,10 +53,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Integration
-	err = c.Watch(&source.Kind{Type: &camelv1alpha1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = c.Watch(&source.Kind{Type: &v1alpha1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegration := e.ObjectOld.(*camelv1alpha1.Integration)
-			newIntegration := e.ObjectNew.(*camelv1alpha1.Integration)
+			oldIntegration := e.ObjectOld.(*v1alpha1.Integration)
+			newIntegration := e.ObjectNew.(*v1alpha1.Integration)
 			// Ignore updates to the integration status in which case metadata.Generation does not change,
 			// or except when the integration phase changes as it's used to transition from one phase
 			// to another
@@ -67,6 +67,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			// Evaluates to false if the object has been confirmed deleted
 			return !e.DeleteStateUnknown
 		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch for changes to secondary resource Builds and requeue the owner IntegrationContext
+	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &v1alpha1.Integration{},
 	})
 	if err != nil {
 		return err
@@ -97,7 +106,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	ctx := context.TODO()
 
 	// Fetch the Integration instance
-	instance := &camelv1alpha1.Integration{}
+	instance := &v1alpha1.Integration{}
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -122,7 +131,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 	// Delete phase
 	if instance.GetDeletionTimestamp() != nil {
-		instance.Status.Phase = camelv1alpha1.IntegrationPhaseDeleting
+		instance.Status.Phase = v1alpha1.IntegrationPhaseDeleting
 	}
 
 	ilog := rlog.ForIntegration(instance)
@@ -146,14 +155,14 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 	// Fetch the Integration again and check the state
 	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		if k8serrors.IsNotFound(err) && instance.Status.Phase == camelv1alpha1.IntegrationPhaseDeleting {
+		if k8serrors.IsNotFound(err) && instance.Status.Phase == v1alpha1.IntegrationPhaseDeleting {
 			return reconcile.Result{}, nil
 		}
 
 		return reconcile.Result{}, err
 	}
 
-	if instance.Status.Phase == camelv1alpha1.IntegrationPhaseRunning {
+	if instance.Status.Phase == v1alpha1.IntegrationPhaseRunning {
 		return reconcile.Result{}, nil
 	}
 

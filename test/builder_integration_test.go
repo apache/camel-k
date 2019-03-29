@@ -43,7 +43,7 @@ func handler(in chan builder.Result, out chan builder.Result) {
 	for {
 		select {
 		case res := <-in:
-			if res.Status == v1alpha1.BuildCompleted || res.Status == v1alpha1.BuildError {
+			if res.Status == v1alpha1.BuildPhaseSucceeded || res.Status == v1alpha1.BuildPhaseFailed {
 				out <- res
 				return
 			}
@@ -101,8 +101,8 @@ func TestBuildManagerBuild(t *testing.T) {
 
 	result, ok := <-rc
 	assert.True(t, ok)
-	assert.NotEqual(t, v1alpha1.BuildError, result.Status)
-	assert.Equal(t, v1alpha1.BuildCompleted, result.Status)
+	assert.NotEqual(t, v1alpha1.BuildPhaseFailed, result.Status)
+	assert.Equal(t, v1alpha1.BuildPhaseSucceeded, result.Status)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
@@ -151,6 +151,6 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 
 	result, ok := <-rc
 	assert.True(t, ok)
-	assert.Equal(t, v1alpha1.BuildError, result.Status)
-	assert.NotEqual(t, v1alpha1.BuildCompleted, result.Status)
+	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Status)
+	assert.NotEqual(t, v1alpha1.BuildPhaseSucceeded, result.Status)
 }
