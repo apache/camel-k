@@ -1,27 +1,25 @@
-package integrationcontext
+package build
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/client"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
 )
 
-// Add creates a new IntegrationContext Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new Build Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	c, err := client.FromManager(mgr)
@@ -33,7 +31,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
-	return &ReconcileIntegrationContext{
+	return &ReconcileBuild{
 		client: c,
 		scheme: mgr.GetScheme(),
 	}
@@ -42,35 +40,21 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("integrationcontext-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("build-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to primary resource IntegrationContext
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationContext{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegrationContext := e.ObjectOld.(*v1alpha1.IntegrationContext)
-			newIntegrationContext := e.ObjectNew.(*v1alpha1.IntegrationContext)
-			// Ignore updates to the integration context status in which case metadata.Generation
-			// does not change, or except when the integration context phase changes as it's used
-			// to transition from one phase to another
-			return oldIntegrationContext.Generation != newIntegrationContext.Generation ||
-				oldIntegrationContext.Status.Phase != newIntegrationContext.Status.Phase
-		},
-		DeleteFunc: func(e event.DeleteEvent) bool {
-			// Evaluates to false if the object has been confirmed deleted
-			return !e.DeleteStateUnknown
-		},
-	})
+	// Watch for changes to primary resource Build
+	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to secondary resource Builds and requeue the owner IntegrationContext
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForOwner{
+	// Watch for changes to secondary resource Pods and requeue the owner Build
+	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &v1alpha1.IntegrationContext{},
+		OwnerType:    &v1alpha1.Build{},
 	})
 	if err != nil {
 		return err
@@ -79,29 +63,29 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileIntegrationContext{}
+var _ reconcile.Reconciler = &ReconcileBuild{}
 
-// ReconcileIntegrationContext reconciles a IntegrationContext object
-type ReconcileIntegrationContext struct {
+// ReconcileBuild reconciles a Build object
+type ReconcileBuild struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client client.Client
 	scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a IntegrationContext object and makes changes based on the state read
-// and what is in the IntegrationContext.Spec
+// Reconcile reads that state of the cluster for a Build object and makes changes based on the state read
+// and what is in the Build.Spec
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling IntegrationContext")
+	rlog.Info("Reconciling Build")
 
 	ctx := context.TODO()
 
-	// Fetch the IntegrationContext instance
-	instance := &v1alpha1.IntegrationContext{}
+	// Fetch the Integration instance
+	instance := &v1alpha1.Build{}
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -114,22 +98,21 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
-	integrationContextActionPool := []Action{
+	buildActionPool := []Action{
 		NewInitializeAction(),
-		NewBuildAction(),
-		NewErrorRecoveryAction(),
+		NewScheduleAction(),
 		NewMonitorAction(),
 	}
 
-	ilog := rlog.ForIntegrationContext(instance)
-	for _, a := range integrationContextActionPool {
+	blog := rlog.ForBuild(instance)
+	for _, a := range buildActionPool {
 		a.InjectClient(r.client)
-		a.InjectLogger(ilog)
+		a.InjectLogger(blog)
 		if a.CanHandle(instance) {
-			ilog.Infof("Invoking action %s", a.Name())
+			blog.Infof("Invoking action %s", a.Name())
 			if err := a.Handle(ctx, instance); err != nil {
 				if k8serrors.IsConflict(err) {
-					ilog.Error(err, "conflict")
+					blog.Error(err, "conflict")
 					return reconcile.Result{
 						Requeue: true,
 					}, nil
@@ -140,14 +123,15 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
-	// Fetch the IntegrationContext again and check the state
+	// Fetch the Integration again and check the state
 	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if instance.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+	if instance.Status.Phase == v1alpha1.BuildPhaseRunning {
 		return reconcile.Result{}, nil
 	}
+
 	// Requeue
 	return reconcile.Result{
 		RequeueAfter: 5 * time.Second,

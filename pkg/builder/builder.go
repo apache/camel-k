@@ -90,7 +90,7 @@ func (b *localBuilder) Submit(request Request, handler func(*Result)) {
 		r := Result{
 			Builder: b,
 			Request: request,
-			Status:  v1alpha1.BuildScheduled,
+			Status:  v1alpha1.BuildPhaseScheduling,
 		}
 
 		b.log.Infof("submitting request: %+v", request)
@@ -138,7 +138,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 	if !present || result == nil {
 
 		r := result.(Result)
-		r.Status = v1alpha1.BuildError
+		r.Status = v1alpha1.BuildPhaseFailed
 		r.Error = fmt.Errorf("no info found for: %s/%s", request.Meta.Namespace, request.Meta.Name)
 
 		b.log.Error(r.Error, "error processing request")
@@ -152,7 +152,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 
 	// update the status
 	r := result.(Result)
-	r.Status = v1alpha1.BuildStarted
+	r.Status = v1alpha1.BuildPhaseRunning
 	r.Task.StartedAt = time.Now()
 
 	if handler != nil {
@@ -168,7 +168,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 	if err != nil {
 		log.Error(err, "Unexpected error while creating a temporary dir")
 
-		r.Status = v1alpha1.BuildError
+		r.Status = v1alpha1.BuildPhaseFailed
 		r.Error = err
 	}
 
@@ -190,7 +190,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 
 	// base image is mandatory
 	if c.Image == "" {
-		r.Status = v1alpha1.BuildError
+		r.Status = v1alpha1.BuildPhaseFailed
 		r.Image = ""
 		r.PublicImage = ""
 		r.Error = errors.New("no base image defined")
@@ -205,7 +205,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 	// update the cache
 	b.request.Store(request.Meta.Name, r)
 
-	if r.Status == v1alpha1.BuildError {
+	if r.Status == v1alpha1.BuildPhaseFailed {
 		if handler != nil {
 			handler(&r)
 		}
@@ -220,7 +220,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 
 	b.log.Infof("steps: %v", request.Steps)
 	for _, step := range request.Steps {
-		if c.Error != nil || r.Status == v1alpha1.BuildInterrupted {
+		if c.Error != nil || r.Status == v1alpha1.BuildPhaseInterrupted {
 			break
 		}
 
@@ -228,7 +228,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 		case <-b.interrupt:
 			c.Error = errors.New("builder canceled")
 		case <-request.C.Done():
-			r.Status = v1alpha1.BuildInterrupted
+			r.Status = v1alpha1.BuildPhaseInterrupted
 		default:
 			l := b.log.WithValues(
 				"step", step.ID(),
@@ -251,15 +251,15 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 
 	r.Task.CompletedAt = time.Now()
 
-	if r.Status != v1alpha1.BuildInterrupted {
-		r.Status = v1alpha1.BuildCompleted
+	if r.Status != v1alpha1.BuildPhaseInterrupted {
+		r.Status = v1alpha1.BuildPhaseSucceeded
 		r.BaseImage = c.BaseImage
 		r.Image = c.Image
 		r.PublicImage = c.PublicImage
 		r.Error = c.Error
 
 		if r.Error != nil {
-			r.Status = v1alpha1.BuildError
+			r.Status = v1alpha1.BuildPhaseFailed
 		}
 
 		r.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))

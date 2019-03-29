@@ -39,16 +39,20 @@ type BuildStatus struct {
 type BuildPhase string
 
 const (
-	// BuildScheduled --
-	BuildScheduled BuildPhase = "Scheduled"
-	// BuildStarted --
-	BuildStarted BuildPhase = "Started"
-	// BuildCompleted --
-	BuildCompleted BuildPhase = "Completed"
-	// BuildError --
-	BuildError BuildPhase = "Error"
-	// BuildInterrupted --
-	BuildInterrupted = "Interrupted"
+	// BuildPhaseInitial --
+	BuildPhaseInitial BuildPhase = ""
+	// BuildPhaseScheduling --
+	BuildPhaseScheduling BuildPhase = "Scheduling"
+	// BuildPhasePending --
+	BuildPhasePending BuildPhase = "Pending"
+	// BuildPhaseRunning --
+	BuildPhaseRunning BuildPhase = "Running"
+	// BuildPhaseSucceeded --
+	BuildPhaseSucceeded BuildPhase = "Succeeded"
+	// BuildPhaseFailed --
+	BuildPhaseFailed BuildPhase = "Failed"
+	// BuildPhaseInterrupted --
+	BuildPhaseInterrupted = "Interrupted"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

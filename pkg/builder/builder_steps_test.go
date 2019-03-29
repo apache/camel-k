@@ -329,13 +329,13 @@ func TestFailure(t *testing.T) {
 
 	b.Submit(r, func(result *Result) {
 		switch result.Status {
-		case v1alpha1.BuildError:
+		case v1alpha1.BuildPhaseFailed:
 			res = result
 			wg.Done()
-		case v1alpha1.BuildCompleted:
+		case v1alpha1.BuildPhaseSucceeded:
 			res = result
 			wg.Done()
-		case v1alpha1.BuildInterrupted:
+		case v1alpha1.BuildPhaseInterrupted:
 			res = result
 			wg.Done()
 		}
@@ -344,7 +344,7 @@ func TestFailure(t *testing.T) {
 	wg.Wait()
 
 	assert.NotNil(t, res)
-	assert.Equal(t, v1alpha1.BuildError, res.Status)
+	assert.Equal(t, v1alpha1.BuildPhaseFailed, res.Status)
 }
 
 func TestListPublishedImages(t *testing.T) {

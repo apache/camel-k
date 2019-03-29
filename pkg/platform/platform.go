@@ -22,25 +22,9 @@ import (
 	"errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-// gBuilder is the current builder
-// Note: it cannot be changed at runtime, needs a operator restart
-var gBuilder builder.Builder
-
-// GetPlatformBuilder --
-func GetPlatformBuilder(c client.Client, namespace string) (builder.Builder, error) {
-	if gBuilder != nil {
-		return gBuilder, nil
-	}
-
-	gBuilder = builder.NewPodBuilder(c, namespace)
-
-	return gBuilder, nil
-}
 
 // GetCurrentPlatform returns the currently installed platform
 func GetCurrentPlatform(ctx context.Context, c client.Client, namespace string) (*v1alpha1.IntegrationPlatform, error) {
