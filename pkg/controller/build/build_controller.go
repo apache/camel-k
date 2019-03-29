@@ -3,12 +3,12 @@ package build
 import (
 	"context"
 	"github.com/apache/camel-k/pkg/client"
-	"time"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -52,10 +52,20 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to secondary resource Pods and requeue the owner Build
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &v1alpha1.Build{},
-	})
+	err = c.Watch(&source.Kind{Type: &corev1.Pod{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &v1alpha1.Build{},
+		},
+		predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldPod := e.ObjectOld.(*corev1.Pod)
+				newPod := e.ObjectNew.(*corev1.Pod)
+				// Ignore updates to the build pods except when the pod phase changes
+				// as it's used to transition the builds from one phase to another
+				return oldPod.Status.Phase != newPod.Status.Phase
+			},
+		})
 	if err != nil {
 		return err
 	}
@@ -123,17 +133,10 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 	}
 
-	// Fetch the Integration again and check the state
+	// Refresh the build and check the state
 	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if instance.Status.Phase == v1alpha1.BuildPhaseRunning {
-		return reconcile.Result{}, nil
-	}
-
-	// Requeue
-	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
-	}, nil
+	return reconcile.Result{}, nil
 }
