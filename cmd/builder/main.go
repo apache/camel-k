@@ -20,13 +20,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"math/rand"
 	"os"
 	"runtime"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
@@ -74,7 +74,7 @@ func main() {
 		},
 	}
 
-	err = c.Get(ctx, types.NamespacedName{Namespace: build.GetNamespace(), Name: build.GetName()}, build)
+	err = c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)
@@ -137,47 +137,47 @@ func main() {
 
 func buildHandler(build *v1alpha1.Build, result *builder.Result, c client.Client, ctx cancellable.Context) {
 	// Refresh build
-	err := c.Get(ctx, types.NamespacedName{Namespace: build.GetNamespace(), Name: build.GetName()}, build)
+	err := c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
 	if err != nil {
 		log.Error(err, "Build refresh failed")
 		completed <- false
 	}
 
 	switch result.Status {
-	//case v1alpha1.BuildScheduled:
+	//case v1alpha1.BuildPhaseScheduling:
 	//	log.Info("Build submitted")
 
-	case v1alpha1.BuildStarted:
+	case v1alpha1.BuildPhaseRunning:
 		log.Info("Build started")
 
 		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildStarted
+		b.Status.Phase = v1alpha1.BuildPhaseRunning
 		updateBuildStatus(b, c, ctx)
 
-	case v1alpha1.BuildInterrupted:
+	case v1alpha1.BuildPhaseInterrupted:
 		log.Info("Build interrupted")
 
 		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildInterrupted
+		b.Status.Phase = v1alpha1.BuildPhaseInterrupted
 		updateBuildStatus(b, c, ctx)
 
 		completed <- false
 
-	case v1alpha1.BuildError:
+	case v1alpha1.BuildPhaseFailed:
 		log.Error(result.Error, "Build error")
 
 		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildError
+		b.Status.Phase = v1alpha1.BuildPhaseFailed
 		b.Status.Error = result.Error.Error()
 		updateBuildStatus(b, c, ctx)
 
 		completed <- false
 
-	case v1alpha1.BuildCompleted:
+	case v1alpha1.BuildPhaseSucceeded:
 		log.Info("Build completed")
 
 		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildCompleted
+		b.Status.Phase = v1alpha1.BuildPhaseSucceeded
 		b.Status.Image = result.Image
 		b.Status.BaseImage = result.BaseImage
 		b.Status.PublicImage = result.PublicImage
