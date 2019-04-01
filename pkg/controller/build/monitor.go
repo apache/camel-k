@@ -19,10 +19,10 @@ package build
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/types"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
@@ -55,17 +55,16 @@ func (action *monitorAction) Handle(ctx context.Context, build *v1alpha1.Build) 
 	pod := &corev1.Pod{}
 	err := action.client.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: buildPodName(build.Spec.Meta)}, pod)
 	if err != nil {
-		if build.Status.Phase == v1alpha1.BuildPhasePending && k8serrors.IsNotFound(err) {
-			// Let's requeue until the pod gets created
-			return nil
-		} else {
+		if k8serrors.IsNotFound(err) {
+			// We let the requesting controller (e.g. integration or integration context controllers)
+			// handle the interruption
 			target.Status.Phase = v1alpha1.BuildPhaseInterrupted
+		} else {
+			return err
 		}
 	}
 
-	switch phase := pod.Status.Phase; phase {
-	case corev1.PodPending:
-		return nil
+	switch pod.Status.Phase {
 	case corev1.PodRunning:
 		target.Status.Phase = v1alpha1.BuildPhaseRunning
 	case corev1.PodSucceeded:

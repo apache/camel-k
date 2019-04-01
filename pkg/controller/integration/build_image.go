@@ -138,6 +138,11 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 			return err
 		}
 
+		err = action.client.Delete(ctx, build)
+		if err != nil && !k8serrors.IsNotFound(err) {
+			return errors.Wrap(err, "cannot delete build pod")
+		}
+
 		err = action.client.Create(ctx, build)
 		if err != nil {
 			return err
@@ -168,9 +173,6 @@ func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, int
 	case v1alpha1.BuildPhaseRunning:
 		action.L.Info("Build running")
 
-	case v1alpha1.BuildPhaseInterrupted:
-		// TODO
-
 	case v1alpha1.BuildPhaseSucceeded:
 		target := integration.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseDeploying
@@ -193,7 +195,7 @@ func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, int
 			return err
 		}
 
-	case v1alpha1.BuildPhaseFailed:
+	case v1alpha1.BuildPhaseFailed, v1alpha1.BuildPhaseInterrupted:
 		target := integration.DeepCopy()
 		target.Status.Phase = v1alpha1.IntegrationPhaseBuildFailureRecovery
 
