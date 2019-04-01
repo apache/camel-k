@@ -35,6 +35,9 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // LocalRepository -- " >> $(VERSIONFILE)
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // ImageName -- " >> $(VERSIONFILE)
+	@echo "  ImageName = \"$(IMAGE_NAME)\"" >> $(VERSIONFILE)
 	@echo ")" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	gofmt -w pkg/util/defaults/defaults.go
