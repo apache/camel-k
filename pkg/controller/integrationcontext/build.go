@@ -19,7 +19,6 @@ package integrationcontext
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,6 +27,8 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
@@ -121,6 +122,11 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 			return err
 		}
 
+		err = action.client.Delete(ctx, build)
+		if err != nil && !k8serrors.IsNotFound(err) {
+			return errors.Wrap(err, "cannot delete build pod")
+		}
+
 		err = action.client.Create(ctx, build)
 		if err != nil {
 			return err
@@ -151,17 +157,12 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 	case v1alpha1.BuildPhaseRunning:
 		action.L.Info("Build running")
 
-	case v1alpha1.BuildPhaseInterrupted:
-		// TODO
-
 	case v1alpha1.BuildPhaseSucceeded:
 		target := ictx.DeepCopy()
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
 		// by the user
 		if target.Status.Phase != v1alpha1.IntegrationContextPhaseBuildRunning {
-			// TODO: Delete the build
-
 			return fmt.Errorf("found context %s not in the expected phase (expectd=%s, found=%s)",
 				build.Spec.Meta.Name,
 				string(v1alpha1.IntegrationContextPhaseBuildRunning),
@@ -194,14 +195,12 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 			return err
 		}
 
-	case v1alpha1.BuildPhaseFailed:
+	case v1alpha1.BuildPhaseFailed, v1alpha1.BuildPhaseInterrupted:
 		target := ictx.DeepCopy()
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
 		// by the user
 		if target.Status.Phase != v1alpha1.IntegrationContextPhaseBuildRunning {
-			// TODO: Delete the build
-
 			return fmt.Errorf("found context %s not the an expected phase (expectd=%s, found=%s)",
 				build.Spec.Meta.Name,
 				string(v1alpha1.IntegrationContextPhaseBuildRunning),
