@@ -29,6 +29,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // NewScheduleAction creates a new schedule action
@@ -91,7 +92,7 @@ func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
 			Containers: []corev1.Container{
 				{
 					Name:  "builder",
-					Image: "docker.io/apache/camel-k:0.3.2-SNAPSHOT",
+					Image: defaults.ImageName + ":" + defaults.Version,
 					Args: []string{
 						"camel-k-builder",
 						build.Namespace,
