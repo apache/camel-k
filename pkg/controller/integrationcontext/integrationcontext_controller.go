@@ -68,10 +68,21 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to secondary resource Builds and requeue the owner IntegrationContext
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &v1alpha1.IntegrationContext{},
-	})
+	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &v1alpha1.IntegrationContext{},
+		},
+		predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldBuild := e.ObjectOld.(*v1alpha1.Build)
+				newBuild := e.ObjectNew.(*v1alpha1.Build)
+				// Ignore updates to the build CR except when the build phase changes
+				// as it's used to transition the integration context from one phase
+				// to another during the image build
+				return oldBuild.Status.Phase != newBuild.Status.Phase
+			},
+		})
 	if err != nil {
 		return err
 	}
