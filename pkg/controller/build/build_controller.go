@@ -48,7 +48,18 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Build
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForObject{},
+		predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldBuild := e.ObjectOld.(*v1alpha1.Build)
+				newBuild := e.ObjectNew.(*v1alpha1.Build)
+				// Ignore updates to the build status in which case metadata.Generation does not change,
+				// or except when the build phase changes as it's used to transition from one phase
+				// to another
+				return oldBuild.Generation != newBuild.Generation ||
+					oldBuild.Status.Phase != newBuild.Status.Phase
+			},
+		})
 	if err != nil {
 		return err
 	}
