@@ -105,7 +105,22 @@ func (in *BuildList) DeepCopyObject() runtime.Object {
 func (in *BuildSpec) DeepCopyInto(out *BuildSpec) {
 	*out = *in
 	in.Meta.DeepCopyInto(&out.Meta)
+	if in.Steps != nil {
+		in, out := &in.Steps, &out.Steps
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	in.Platform.DeepCopyInto(&out.Platform)
+	if in.Sources != nil {
+		in, out := &in.Sources, &out.Sources
+		*out = make([]SourceSpec, len(*in))
+		copy(*out, *in)
+	}
+	if in.Resources != nil {
+		in, out := &in.Resources, &out.Resources
+		*out = make([]ResourceSpec, len(*in))
+		copy(*out, *in)
+	}
 	if in.Dependencies != nil {
 		in, out := &in.Dependencies, &out.Dependencies
 		*out = make([]string, len(*in))
@@ -113,11 +128,6 @@ func (in *BuildSpec) DeepCopyInto(out *BuildSpec) {
 	}
 	if in.Repositories != nil {
 		in, out := &in.Repositories, &out.Repositories
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
-	if in.Steps != nil {
-		in, out := &in.Steps, &out.Steps
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
