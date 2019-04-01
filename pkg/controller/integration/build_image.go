@@ -20,7 +20,6 @@ package integration
 import (
 	"context"
 	"fmt"
-	"path"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +30,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -96,16 +94,6 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 
 		// This build do not require to determine dependencies nor a project, the
 		// builder step do remove them
-		//
-
-		// inline source and resources so they are copied over the generated
-		// container image
-		//if err := action.inlineSources(ctx, integration, &r, env); err != nil {
-		//	return err
-		//}
-		//if err := action.inlineResources(ctx, integration, &r, env); err != nil {
-		//	return err
-		//}
 
 		steps := make([]string, len(env.Steps))
 		for i, s := range env.Steps {
@@ -123,14 +111,24 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 			},
 			Spec: v1alpha1.BuildSpec{
 				Meta:           integration.ObjectMeta,
+				Image:          ictx.Status.Image,
 				CamelVersion:   env.CamelCatalog.Version,
 				RuntimeVersion: env.RuntimeVersion,
-				Image:          ictx.Status.Image,
 				Platform:       env.Platform.Spec,
 				Steps:          steps,
 				//	BuildDir:       env.BuildDir,
-				//Resources:    request.Resources,
 			},
+		}
+
+		// Inline source and resources so they are copied over the generated
+		// container image. For the time being, references are being resolved
+		// and their content serialized. We may want to resolve after the build
+		// is submitted, just before the build is run.
+		if err := action.inlineSources(ctx, integration, build, env); err != nil {
+			return err
+		}
+		if err := action.inlineResources(ctx, integration, build, env); err != nil {
+			return err
 		}
 
 		// Set the integration context instance as the owner and controller
@@ -218,40 +216,26 @@ func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, int
 	return nil
 }
 
-func (action *buildImageAction) inlineSources(ctx context.Context, integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
+func (action *buildImageAction) inlineSources(ctx context.Context, integration *v1alpha1.Integration, build *v1alpha1.Build, e *trait.Environment) error {
 	sources, err := kubernetes.ResolveIntegrationSources(ctx, action.client, integration, e.Resources)
 	if err != nil {
 		return err
 	}
 
-	for _, data := range sources {
-		r.Resources = append(r.Resources, builder.Resource{
-			Content: []byte(data.Content),
-			Target:  path.Join("sources", data.Name),
-		})
-	}
+	build.Spec.Sources = make([]v1alpha1.SourceSpec, 0, len(sources))
+	build.Spec.Sources = append(build.Spec.Sources, sources...)
 
 	return nil
 }
 
-func (action *buildImageAction) inlineResources(ctx context.Context, integration *v1alpha1.Integration, r *builder.Request, e *trait.Environment) error {
+func (action *buildImageAction) inlineResources(ctx context.Context, integration *v1alpha1.Integration, build *v1alpha1.Build, e *trait.Environment) error {
 	resources, err := kubernetes.ResolveIntegrationResources(ctx, action.client, integration, e.Resources)
 	if err != nil {
 		return err
 	}
 
-	for _, data := range resources {
-		t := path.Join("resources", data.Name)
-
-		if data.MountPath != "" {
-			t = path.Join(data.MountPath, data.Name)
-		}
-
-		r.Resources = append(r.Resources, builder.Resource{
-			Content: []byte(data.Content),
-			Target:  t,
-		})
-	}
+	build.Spec.Resources = make([]v1alpha1.ResourceSpec, 0, len(resources))
+	build.Spec.Resources = append(build.Spec.Resources, resources...)
 
 	return nil
 }

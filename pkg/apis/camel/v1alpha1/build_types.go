@@ -12,27 +12,27 @@ type BuildSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	Meta           metav1.ObjectMeta       `json:"meta,omitempty"`
+	Image          string                  `json:"image,omitempty"`
+	Steps          []string                `json:"steps,omitempty"`
 	CamelVersion   string                  `json:"camelVersion,omitempty"`
 	RuntimeVersion string                  `json:"runtimeVersion,omitempty"`
 	Platform       IntegrationPlatformSpec `json:"platform,omitempty"`
+	Sources        []SourceSpec            `json:"sources,omitempty"`
+	Resources      []ResourceSpec          `json:"resources,omitempty"`
 	Dependencies   []string                `json:"dependencies,omitempty"`
 	Repositories   []string                `json:"repositories,omitempty"`
-	Steps          []string                `json:"steps,omitempty"`
-	Image          string                  `json:"image,omitempty"`
-	//Resources      []Resource              `json:"resources,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build
 type BuildStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	BaseImage   string     `json:"baseImage,omitempty"`
-	Image       string     `json:"image,omitempty"`
-	PublicImage string     `json:"publicImage,omitempty"`
-	Error       string     `json:"error,omitempty"`
 	Phase       BuildPhase `json:"phase,omitempty"`
+	Image       string     `json:"image,omitempty"`
+	BaseImage   string     `json:"baseImage,omitempty"`
+	PublicImage string     `json:"publicImage,omitempty"`
 	Artifacts   []Artifact `json:"artifacts,omitempty"`
-	//Task        Task
+	Error       string     `json:"error,omitempty"`
 }
 
 // BuildPhase --
