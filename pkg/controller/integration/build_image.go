@@ -162,7 +162,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, integration *v1alpha1.Integration) error {
 	build := &v1alpha1.Build{}
 	err := action.client.Get(ctx, types.NamespacedName{Namespace: integration.Namespace, Name: integration.Name}, build)
-	if err != nil && !k8serrors.IsNotFound(err) {
+	if err != nil {
 		return err
 	}
 
