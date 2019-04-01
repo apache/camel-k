@@ -2,21 +2,23 @@ package build
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/client"
+	"time"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
 // Add creates a new Build Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -136,6 +138,13 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	// Refresh the build and check the state
 	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
 		return reconcile.Result{}, err
+	}
+
+	// Requeue scheduling build so that it re-enters the build working queue
+	if instance.Status.Phase == v1alpha1.BuildPhaseScheduling {
+		return reconcile.Result{
+			RequeueAfter: 5 * time.Second,
+		}, nil
 	}
 
 	return reconcile.Result{}, nil
