@@ -116,7 +116,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 				RuntimeVersion: env.RuntimeVersion,
 				Platform:       env.Platform.Spec,
 				Steps:          steps,
-				//	BuildDir:       env.BuildDir,
+				BuildDir:       env.BuildDir,
 			},
 		}
 
