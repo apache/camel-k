@@ -122,12 +122,12 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 
 		err = action.client.Delete(ctx, build)
 		if err != nil && !k8serrors.IsNotFound(err) {
-			return errors.Wrap(err, "cannot delete build pod")
+			return errors.Wrap(err, "cannot delete build")
 		}
 
 		err = action.client.Create(ctx, build)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "cannot create build")
 		}
 	}
 
