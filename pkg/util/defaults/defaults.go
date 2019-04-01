@@ -19,4 +19,7 @@ const (
 
 	// LocalRepository --
 	LocalRepository = "/tmp/artifacts/m2"
+
+	// ImageName --
+	ImageName = "docker.io/apache/camel-k"
 )
