@@ -107,13 +107,11 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 				Meta:           ictx.ObjectMeta,
 				CamelVersion:   env.CamelCatalog.Version,
 				RuntimeVersion: env.RuntimeVersion,
-				//Image:          "",
-				Platform:     env.Platform.Spec,
-				Dependencies: ictx.Spec.Dependencies,
-				Repositories: repositories,
-				Steps:        steps,
-				//	BuildDir:       env.BuildDir,
-				//Resources:    request.Resources,
+				Platform:       env.Platform.Spec,
+				Dependencies:   ictx.Spec.Dependencies,
+				Repositories:   repositories,
+				Steps:          steps,
+				BuildDir:       env.BuildDir,
 			},
 		}
 
