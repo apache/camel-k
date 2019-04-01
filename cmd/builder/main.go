@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"runtime"
 	"time"
 
@@ -110,10 +111,31 @@ func main() {
 		Dependencies:   build.Spec.Dependencies,
 		Repositories:   build.Spec.Repositories,
 		Steps:          steps,
-		BuildDir:       "",
+		BuildDir:       build.Spec.BuildDir,
 		Platform:       build.Spec.Platform,
 		Image:          build.Spec.Image,
-		//Resources:      build.Spec.Resources,
+	}
+
+	// Add sources
+	for _, data := range build.Spec.Sources {
+		request.Resources = append(request.Resources, builder.Resource{
+			Content: []byte(data.Content),
+			Target:  path.Join("sources", data.Name),
+		})
+	}
+
+	// Add resources
+	for _, data := range build.Spec.Resources {
+		t := path.Join("resources", data.Name)
+
+		if data.MountPath != "" {
+			t = path.Join(data.MountPath, data.Name)
+		}
+
+		request.Resources = append(request.Resources, builder.Resource{
+			Content: []byte(data.Content),
+			Target:  t,
+		})
 	}
 
 	b.Submit(request, func(result *builder.Result) {
