@@ -146,7 +146,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
 	build := &v1alpha1.Build{}
 	err := action.client.Get(ctx, types.NamespacedName{Namespace: ictx.Namespace, Name: ictx.Name}, build)
-	if err != nil && !k8serrors.IsNotFound(err) {
+	if err != nil {
 		return err
 	}
 
