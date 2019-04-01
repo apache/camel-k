@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pkg/errors"
@@ -53,6 +53,30 @@ func (action *scheduleAction) CanHandle(build *v1alpha1.Build) bool {
 
 // Handle handles the builds
 func (action *scheduleAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
+	builds := &v1alpha1.BuildList{}
+	options := &k8sclient.ListOptions{Namespace: build.Namespace}
+	err := action.client.List(ctx, options, builds)
+	if err != nil {
+		return err
+	}
+
+	// Emulate a serialized working queue to only allow one build to run at a given time.
+	// This is currently necessary for the incremental build to work as expected.
+	hasScheduledPod := false
+	for _, b := range builds.Items {
+		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
+			hasScheduledPod = true
+		}
+	}
+
+	if hasScheduledPod {
+		// Let's requeue the build in case one is already running
+		return nil
+	}
+
+	// Otherwise, let's create the build pod
+	// We may want to explicitly manage build priority as opposed to relying on
+	// the reconcile loop to handle the queuing
 	pod := newBuildPod(build)
 
 	// Set the Build instance as the owner and controller
@@ -60,7 +84,7 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1alpha1.Build)
 		return err
 	}
 
-	err := action.client.Delete(ctx, pod)
+	err = action.client.Delete(ctx, pod)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete build pod")
 	}
