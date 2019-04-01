@@ -20,4 +20,4 @@ package build
 import "github.com/apache/camel-k/pkg/util/log"
 
 // Log --
-var Log = log.Log.WithName("controller").WithName("integration")
+var Log = log.Log.WithName("controller").WithName("build")
