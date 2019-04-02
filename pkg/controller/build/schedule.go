@@ -102,6 +102,34 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1alpha1.Build)
 }
 
 func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
+	var volumes []corev1.Volume
+	var volumeMounts []corev1.VolumeMount
+	// Mount persistent volume used to coordinate build output with Kaniko cache and image build input
+	if build.Spec.Platform.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+		volumes = []corev1.Volume{
+			{
+				Name: "camel-k-builder",
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: build.Spec.Platform.Build.PersistentVolumeClaim,
+					},
+				},
+			},
+		}
+		volumeMounts = []corev1.VolumeMount{
+			{
+				Name:      "camel-k-builder",
+				MountPath: build.Spec.BuildDir,
+			},
+		}
+	}
+
+	// The pod will be scheduled to nodes that are selected by the persistent volume
+	// node affinity spec, if any, as provisioned by the persistent volume claim storage
+	// class provisioner.
+	// See:
+	// - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#node-affinity
+	// - https://kubernetes.io/docs/concepts/storage/volumes/#local
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -122,9 +150,11 @@ func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
 						build.Namespace,
 						build.Name,
 					},
+					VolumeMounts: volumeMounts,
 				},
 			},
 			RestartPolicy: corev1.RestartPolicyNever,
+			Volumes:       volumes,
 		},
 	}
 
