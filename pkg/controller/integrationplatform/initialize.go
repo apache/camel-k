@@ -21,7 +21,13 @@ import (
 	"context"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -108,6 +114,9 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 	if target.Spec.Build.Timeout.Duration == 0 {
 		target.Spec.Build.Timeout.Duration = 5 * time.Minute
 	}
+	if target.Spec.Build.PersistentVolumeClaim == "" {
+		target.Spec.Build.PersistentVolumeClaim = target.Name
+	}
 
 	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
 	action.L.Infof("RuntimeVersion set to %s", target.Spec.Build.RuntimeVersion)
@@ -129,9 +138,17 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 	}
 
 	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
-		// create the Kaniko warmer pod that caches the base image into the Camel K builder volume
+		// Create the persistent volume claim used to coordinate build pod output
+		// with Kaniko cache and build input
+		action.L.Info("Create persistent volume claim")
+		err := createPersistentVolumeClaim(ctx, action.client, target)
+		if err != nil {
+			return err
+		}
+
+		// Create the Kaniko warmer pod that caches the base image into the Camel K builder volume
 		action.L.Info("Create Kaniko cache warmer pod")
-		err := createKanikoCacheWarmerPod(ctx, action.client, target)
+		err = createKanikoCacheWarmerPod(ctx, action.client, target)
 		if err != nil {
 			return err
 		}
@@ -158,4 +175,43 @@ func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v
 	}
 
 	return false, nil
+}
+
+func createPersistentVolumeClaim(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
+	volumeSize, err := resource.ParseQuantity("1Gi")
+	if err != nil {
+		return err
+	}
+
+	pvc := &corev1.PersistentVolumeClaim{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "PersistentVolumeClaim",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: platform.Namespace,
+			Name:      platform.Spec.Build.PersistentVolumeClaim,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				corev1.ReadWriteOnce,
+			},
+			Resources:corev1.ResourceRequirements{
+				Requests:corev1.ResourceList{
+					corev1.ResourceStorage: volumeSize,
+				},
+			},
+		},
+	}
+
+	err = client.Create(ctx, pvc)
+	// Skip the error in case the PVC already exists
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		return err
+	}
+
+	return nil
 }

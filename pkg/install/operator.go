@@ -75,7 +75,6 @@ func installKubernetes(ctx context.Context, c client.Client, namespace string, c
 		"operator-service-account.yaml",
 		"operator-role-kubernetes.yaml",
 		"operator-role-binding.yaml",
-		"builder-pvc.yaml",
 		"operator-deployment-kubernetes.yaml",
 	)
 }

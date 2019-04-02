@@ -19,11 +19,13 @@ package integrationplatform
 
 import (
 	"context"
+
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/client"
 
 	"github.com/pkg/errors"
@@ -57,7 +59,7 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      "camel-k-builder",
-							MountPath: "/workspace",
+							MountPath: kaniko.BuildDir,
 						},
 					},
 				},
@@ -87,7 +89,7 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					Name: "camel-k-builder",
 					VolumeSource: corev1.VolumeSource{
 						PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-							ClaimName: "camel-k-builder",
+							ClaimName: platform.Spec.Build.PersistentVolumeClaim,
 						},
 					},
 				},

@@ -72,15 +72,16 @@ var allTraitProfiles = []TraitProfile{TraitProfileOpenShift, TraitProfileKuberne
 
 // IntegrationPlatformBuildSpec contains platform related build information
 type IntegrationPlatformBuildSpec struct {
-	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
-	CamelVersion    string                                  `json:"camelVersion,omitempty"`
-	RuntimeVersion  string                                  `json:"runtimeVersion,omitempty"`
-	BaseImage       string                                  `json:"baseImage,omitempty"`
-	Properties      map[string]string                       `json:"properties,omitempty"`
-	LocalRepository string                                  `json:"localRepository,omitempty"`
-	Repositories    []string                                `json:"repositories,omitempty"`
-	Registry        IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`
-	Timeout         metav1.Duration                         `json:"timeout,omitempty"`
+	PublishStrategy       IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	CamelVersion          string                                  `json:"camelVersion,omitempty"`
+	RuntimeVersion        string                                  `json:"runtimeVersion,omitempty"`
+	BaseImage             string                                  `json:"baseImage,omitempty"`
+	Properties            map[string]string                       `json:"properties,omitempty"`
+	LocalRepository       string                                  `json:"localRepository,omitempty"`
+	Repositories          []string                                `json:"repositories,omitempty"`
+	Registry              IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`
+	Timeout               metav1.Duration                         `json:"timeout,omitempty"`
+	PersistentVolumeClaim string                                  `json:"persistentVolumeClaim,omitempty"`
 }
 
 // IntegrationPlatformRegistrySpec --
