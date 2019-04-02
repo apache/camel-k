@@ -56,6 +56,7 @@ make package-artifacts
 echo "Copying binary file to docker dir"
 mkdir -p ./build/_output/bin
 cp ./camel-k ./build/_output/bin/
+cp ./builder ./build/_output/bin/
 
 echo "Building the images"
 export IMAGE=docker.io/apache/camel-k:$(make version)
