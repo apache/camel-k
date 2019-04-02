@@ -40,6 +40,9 @@ type BuildStatus struct {
 type BuildPhase string
 
 const (
+	// BuildKind --
+	BuildKind string = "Build"
+
 	// BuildPhaseInitial --
 	BuildPhaseInitial BuildPhase = ""
 	// BuildPhaseScheduling --
