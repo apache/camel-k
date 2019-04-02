@@ -70,7 +70,10 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		return err
 	}
 
-	if err != nil && k8serrors.IsNotFound(err) {
+	if err != nil && k8serrors.IsNotFound(err) ||
+		build.Status.Phase == v1alpha1.BuildPhaseFailed ||
+		build.Status.Phase == v1alpha1.BuildPhaseInterrupted ||
+		build.Status.Phase == v1alpha1.BuildPhaseSucceeded {
 		p, err := platform.GetCurrentPlatform(ctx, action.client, ictx.Namespace)
 		if err != nil {
 			return err
