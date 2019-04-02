@@ -131,4 +131,4 @@ install-minishift:
 install-minikube:
 	./script/install_minikube.sh
 
-.PHONY: build build-operator build-kamel build-resources dep codegen images images-dec images-push test check test-integration clean release cross-compile package-examples set-version git-tag publish-base-images 
+.PHONY: build build-operator build-kamel build-resources build-builder dep codegen images images-dec images-push test check test-integration clean release cross-compile package-examples set-version git-tag publish-base-images
