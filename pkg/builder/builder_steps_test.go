@@ -27,6 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/test"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -345,4 +346,81 @@ func TestFailure(t *testing.T) {
 
 	assert.NotNil(t, res)
 	assert.Equal(t, StatusError, res.Status)
+}
+
+func TestListPublishedImages(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	c, err := test.NewFakeClient(
+		&v1alpha1.IntegrationContext{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+				Kind:       v1alpha1.IntegrationContextKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "my-context-1",
+				Labels: map[string]string{
+					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+				},
+			},
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase:        v1alpha1.IntegrationContextPhaseError,
+				Image:        "image-1",
+				CamelVersion: catalog.Version,
+			},
+		},
+		&v1alpha1.IntegrationContext{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+				Kind:       v1alpha1.IntegrationContextKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "my-context-2",
+				Labels: map[string]string{
+					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+				},
+			},
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase:        v1alpha1.IntegrationContextPhaseBuildFailureRecovery,
+				Image:        "image-3",
+				CamelVersion: catalog.Version,
+			},
+		},
+		&v1alpha1.IntegrationContext{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+				Kind:       v1alpha1.IntegrationContextKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "my-context-3",
+				Labels: map[string]string{
+					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+				},
+			},
+			Status: v1alpha1.IntegrationContextStatus{
+				Phase:        v1alpha1.IntegrationContextPhaseReady,
+				Image:        "image-3",
+				CamelVersion: catalog.Version,
+			},
+		},
+	)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+
+	i, err := ListPublishedImages(&Context{
+		Client:  c,
+		Catalog: catalog,
+		Request: Request{
+			C: cancellable.NewContext(),
+		},
+	})
+
+	assert.Nil(t, err)
+	assert.Len(t, i, 1)
+	assert.Equal(t, "image-3", i[0].Image)
 }

@@ -323,6 +323,9 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	for _, item := range list.Items {
 		ctx := item
 
+		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady {
+			continue
+		}
 		if ctx.Status.CamelVersion != context.Catalog.Version {
 			continue
 		}

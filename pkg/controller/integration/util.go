@@ -55,6 +55,13 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 	for _, ctx := range ctxList.Items {
 		ctx := ctx // pin
 
+		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
+			continue
+		}
+		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildFailureRecovery {
+			continue
+		}
+
 		if ctx.Status.CamelVersion != integration.Status.CamelVersion {
 			continue
 		}
