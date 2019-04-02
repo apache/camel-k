@@ -4192,6 +4192,55 @@ spec:
         passive: false
 
 `
+	Resources["cr-example.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: Integration
+metadata:
+  name: example
+spec:
+  source:
+    content: |-
+      // This is Camel K Groovy example route
+
+      rnd = new Random()
+
+      from('timer:groovy?period=1s')
+          .routeId('groovy')
+          .setBody()
+              .constant('Hello Camel K!')
+          .process {
+              it.in.headers['RandomValue'] = rnd.nextInt()
+          }
+          .to('log:info?showHeaders=true')
+    name: routes.groovy
+`
+	Resources["crd-build.yaml"] =
+		`
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: builds.camel.apache.org
+  labels:
+    app: "camel-k"
+spec:
+  group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
+  names:
+    kind: Build
+    listKind: BuildList
+    plural: builds
+    singular: build
+  subresources:
+    status: {}
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The build phase
+      JSONPath: .status.phase
+
+`
 	Resources["crd-camel-catalog.yaml"] =
 		`
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -4316,29 +4365,6 @@ spec:
       description: The IntegrationContext to use
       JSONPath: .status.context
 
-`
-	Resources["cr-example.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: Integration
-metadata:
-  name: example
-spec:
-  source:
-    content: |-
-      // This is Camel K Groovy example route
-
-      rnd = new Random()
-
-      from('timer:groovy?period=1s')
-          .routeId('groovy')
-          .setBody()
-              .constant('Hello Camel K!')
-          .process {
-              it.in.headers['RandomValue'] = rnd.nextInt()
-          }
-          .to('log:info?showHeaders=true')
-    name: routes.groovy
 `
 	Resources["operator-deployment-kubernetes.yaml"] =
 		`

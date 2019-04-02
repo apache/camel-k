@@ -92,6 +92,9 @@ func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace stri
 		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.CamelCatalogKind {
 			return nil
 		}
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.BuildKind {
+			return nil
+		}
 		if obj.GetObjectKind().GroupVersionKind().Kind == "PersistentVolumeClaim" {
 			return nil
 		}
