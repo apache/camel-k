@@ -63,7 +63,7 @@ func Publisher(ctx *builder.Context) error {
 			Name: "camel-k-builder",
 			VolumeSource: corev1.VolumeSource{
 				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-					ClaimName: "camel-k-builder",
+					ClaimName: ctx.Request.Platform.Build.PersistentVolumeClaim,
 				},
 			},
 		},
@@ -71,7 +71,7 @@ func Publisher(ctx *builder.Context) error {
 	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      "camel-k-builder",
-			MountPath: "/workspace",
+			MountPath: BuildDir,
 		},
 	}
 	envs := make([]corev1.EnvVar, 0)
