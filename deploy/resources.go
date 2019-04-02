@@ -24,22 +24,6 @@ var Resources map[string]string
 func init() {
 	Resources = make(map[string]string)
 
-	Resources["builder-pvc.yaml"] =
-		`
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: camel-k-builder
-  labels:
-    app: "camel-k"
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-
-`
 	Resources["camel-catalog-2.23.0.yaml"] =
 		`
 apiVersion: camel.apache.org/v1alpha1
