@@ -69,6 +69,11 @@ func SetupClusterwideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
+	// Install CRD for Build (if needed)
+	if err := installCRD(ctx, c, "Build", "crd-build.yaml", collection); err != nil {
+		return err
+	}
+
 	// Installing ClusterRole
 	clusterRoleInstalled, err := IsClusterRoleInstalled(ctx, c)
 	if err != nil {
@@ -124,7 +129,17 @@ func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
 	} else if !ok {
 		return false, nil
 	}
-	return IsCRDInstalled(ctx, c, "Integration")
+	if ok, err := IsCRDInstalled(ctx, c, "Integration"); err != nil {
+		return ok, err
+	} else if !ok {
+		return false, nil
+	}
+	if ok, err := IsCRDInstalled(ctx, c, "CamelCatalog"); err != nil {
+		return ok, err
+	} else if !ok {
+		return false, nil
+	}
+	return IsCRDInstalled(ctx, c, "Build")
 }
 
 // IsCRDInstalled check if the given CRD kind is installed
