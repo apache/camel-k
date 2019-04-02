@@ -4390,24 +4390,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-          volumeMounts:
-          - mountPath: /workspace
-            name: camel-k-builder
-      initContainers:
-        - command:
-          - chmod
-          - "777"
-          - /workspace
-          image: busybox
-          imagePullPolicy: IfNotPresent
-          name: build-volume-permission
-          volumeMounts:
-          - mountPath: /workspace
-            name: camel-k-builder
-      volumes:
-      - name: camel-k-builder
-        persistentVolumeClaim:
-          claimName: camel-k-builder
 
 `
 	Resources["operator-deployment-openshift.yaml"] =
