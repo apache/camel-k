@@ -83,7 +83,10 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		return err
 	}
 
-	if err != nil && k8serrors.IsNotFound(err) {
+	if err != nil && k8serrors.IsNotFound(err) ||
+		build.Status.Phase == v1alpha1.BuildPhaseFailed ||
+		build.Status.Phase == v1alpha1.BuildPhaseInterrupted ||
+		build.Status.Phase == v1alpha1.BuildPhaseSucceeded {
 		env, err := trait.Apply(ctx, action.client, integration, ictx)
 		if err != nil {
 			return err
