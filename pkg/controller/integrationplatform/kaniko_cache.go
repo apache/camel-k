@@ -19,8 +19,6 @@ package integrationplatform
 
 import (
 	"context"
-	"os"
-
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,6 +30,12 @@ import (
 )
 
 func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
+	// The pod will be scheduled to nodes that are selected by the persistent volume
+	// node affinity spec, if any, as provisioned by the persistent volume claim storage
+	// class provisioner.
+	// See:
+	// - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#node-affinity
+	// - https://kubernetes.io/docs/concepts/storage/volumes/#local
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -89,29 +93,6 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 				},
 			},
 		},
-	}
-
-	// Co-locate with the builder pod for sharing the host path volume as the current
-	// persistent volume claim uses the default storage class which is likely relying
-	// on the host path provisioner.
-	// Note that pod affinity is skipped when not running in-cluster to be able to run
-	// the operator in development mode.
-	host, port := os.Getenv("KUBERNETES_SERVICE_HOST"), os.Getenv("KUBERNETES_SERVICE_PORT")
-	if len(host) > 0 && len(port) > 0 {
-		pod.Spec.Affinity = &corev1.Affinity{
-			PodAffinity: &corev1.PodAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-					{
-						LabelSelector: &metav1.LabelSelector{
-							MatchLabels: map[string]string{
-								"camel.apache.org/component": "operator",
-							},
-						},
-						TopologyKey: "kubernetes.io/hostname",
-					},
-				},
-			},
-		}
 	}
 
 	err := client.Delete(ctx, &pod)
