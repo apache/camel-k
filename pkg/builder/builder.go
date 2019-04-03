@@ -27,12 +27,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/cancellable"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -90,7 +89,7 @@ func (b *localBuilder) Submit(request Request, handler func(*Result)) {
 		r := Result{
 			Builder: b,
 			Request: request,
-			Status:  v1alpha1.BuildPhaseScheduling,
+			Status:  v1alpha1.BuildPhasePending,
 		}
 
 		b.log.Infof("submitting request: %+v", request)

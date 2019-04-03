@@ -43,8 +43,9 @@ func (action *monitorAction) Name() string {
 
 // CanHandle tells whether this action can handle the build
 func (action *monitorAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhasePending ||
-		build.Status.Phase == v1alpha1.BuildPhaseRunning
+	return (build.Status.Phase == v1alpha1.BuildPhasePending ||
+		build.Status.Phase == v1alpha1.BuildPhaseRunning) &&
+		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyPod
 }
 
 // Handle handles the builds
@@ -65,8 +66,6 @@ func (action *monitorAction) Handle(ctx context.Context, build *v1alpha1.Build) 
 	}
 
 	switch pod.Status.Phase {
-	case corev1.PodRunning:
-		target.Status.Phase = v1alpha1.BuildPhaseRunning
 	case corev1.PodSucceeded:
 		target.Status.Phase = v1alpha1.BuildPhaseSucceeded
 	case corev1.PodFailed:
