@@ -23,6 +23,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	b "github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/util"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
@@ -68,10 +70,14 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 		return nil
 	}
 
-	err = SubmitBuildRequest(ctx, action.client, build, action.L, nil)
+	builder := b.NewLocalBuilder(action.client, build.Namespace)
+	req, err := util.NewRequestForBuild(ctx, action.client, build)
 	if err != nil {
-		return nil
+		return err
 	}
+	builder.Submit(*req, func(result *b.Result) {
+		util.UpdateBuildFromResult(build, result, action.client, req.C, action.L)
+	})
 
 	target := build.DeepCopy()
 	target.Status.Phase = v1alpha1.BuildPhasePending

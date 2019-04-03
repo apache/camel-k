@@ -15,17 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package build
+package util
 
 import (
 	"context"
-	"path"
-
+	"github.com/apache/camel-k/pkg/builder"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"path"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/client"
@@ -34,12 +33,13 @@ import (
 	logger "github.com/apache/camel-k/pkg/util/log"
 )
 
-func SubmitBuildRequest(ctx context.Context, c client.Client, build *v1alpha1.Build, log logger.Logger, callback func(v1alpha1.BuildPhase)) error {
-	b := builder.NewLocalBuilder(c, build.Namespace)
+var log = logger.WithName("local builder")
 
+// NewRequestForBuild--
+func NewRequestForBuild(ctx context.Context, c client.Client, build *v1alpha1.Build) (*builder.Request, error) {
 	catalog, err := camel.Catalog(ctx, c, build.Namespace, build.Spec.CamelVersion)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	stepsDictionary := make(map[string]builder.Step)
@@ -60,7 +60,7 @@ func SubmitBuildRequest(ctx context.Context, c client.Client, build *v1alpha1.Bu
 		steps = append(steps, s)
 	}
 
-	request := builder.Request{
+	request := &builder.Request{
 		C:              cancellable.NewContext(),
 		Catalog:        catalog,
 		RuntimeVersion: build.Spec.RuntimeVersion,
@@ -95,14 +95,11 @@ func SubmitBuildRequest(ctx context.Context, c client.Client, build *v1alpha1.Bu
 		})
 	}
 
-	b.Submit(request, func(result *builder.Result) {
-		buildHandler(build, result, c, request.C, log, callback)
-	})
-
-	return nil
+	return request, nil
 }
 
-func buildHandler(build *v1alpha1.Build, result *builder.Result, c client.Client, ctx cancellable.Context, log logger.Logger, callback func(v1alpha1.BuildPhase)) {
+// UpdateBuildFromResult --
+func UpdateBuildFromResult(build *v1alpha1.Build, result *builder.Result, c client.Client, ctx cancellable.Context, log logger.Logger) {
 	// Refresh build
 	err := c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
 	if err != nil {
@@ -145,12 +142,10 @@ func buildHandler(build *v1alpha1.Build, result *builder.Result, c client.Client
 		err = updateBuildStatus(b, c, ctx, log)
 	}
 
-	if callback != nil {
-		if err != nil {
-			callback(v1alpha1.BuildPhaseFailed)
-		} else {
-			callback(result.Status)
-		}
+	// Forward the error to the next handler in the chain
+	if err != nil {
+		result.Status = v1alpha1.BuildPhaseFailed
+		result.Error = err
 	}
 }
 

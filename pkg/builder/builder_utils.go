@@ -22,10 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 

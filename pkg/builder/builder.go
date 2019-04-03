@@ -42,7 +42,7 @@ import (
 // ********************************
 
 type buildTask struct {
-	handler func(*Result)
+	handlers []func(*Result)
 	request Request
 }
 
@@ -79,7 +79,7 @@ func (b *localBuilder) IsBuilding(object metav1.ObjectMeta) bool {
 }
 
 // Submit --
-func (b *localBuilder) Submit(request Request, handler func(*Result)) {
+func (b *localBuilder) Submit(request Request, handlers... func(*Result)) {
 	if atomic.CompareAndSwapInt32(&b.running, 0, 1) {
 		go b.loop()
 	}
@@ -94,12 +94,12 @@ func (b *localBuilder) Submit(request Request, handler func(*Result)) {
 
 		b.log.Infof("submitting request: %+v", request)
 
-		if handler != nil {
+		for _, handler := range handlers {
 			handler(&r)
 		}
 
 		b.request.Store(request.Meta.Name, r)
-		b.tasks <- buildTask{handler: handler, request: request}
+		b.tasks <- buildTask{handlers: handlers, request: request}
 	}
 }
 
@@ -126,13 +126,13 @@ func (b *localBuilder) loop() {
 		case t, ok := <-b.tasks:
 			if ok {
 				b.log.Infof("executing request: %+v", t.request)
-				b.process(t.request, t.handler)
+				b.process(t.request, t.handlers...)
 			}
 		}
 	}
 }
 
-func (b *localBuilder) process(request Request, handler func(*Result)) {
+func (b *localBuilder) process(request Request, handlers... func(*Result)) {
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
 
@@ -142,7 +142,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 
 		b.log.Error(r.Error, "error processing request")
 
-		if handler != nil {
+		for _, handler := range handlers {
 			handler(&r)
 		}
 
@@ -154,7 +154,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 	r.Status = v1alpha1.BuildPhaseRunning
 	r.Task.StartedAt = time.Now()
 
-	if handler != nil {
+	for _, handler := range handlers {
 		handler(&r)
 	}
 
@@ -205,7 +205,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 	b.request.Store(request.Meta.Name, r)
 
 	if r.Status == v1alpha1.BuildPhaseFailed {
-		if handler != nil {
+		for _, handler := range handlers {
 			handler(&r)
 		}
 
@@ -279,7 +279,7 @@ func (b *localBuilder) process(request Request, handler func(*Result)) {
 	// update the cache
 	b.request.Store(request.Meta.Name, r)
 
-	if handler != nil {
+	for _, handler := range handlers {
 		handler(&r)
 	}
 }
