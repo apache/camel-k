@@ -23,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -32,27 +33,28 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewScheduleAction creates a new schedule action
-func NewScheduleAction() Action {
-	return &scheduleAction{}
+// NewSchedulePodAction creates a new schedule action
+func NewSchedulePodAction() Action {
+	return &schedulePodAction{}
 }
 
-type scheduleAction struct {
+type schedulePodAction struct {
 	baseAction
 }
 
 // Name returns a common name of the action
-func (action *scheduleAction) Name() string {
-	return "schedule"
+func (action *schedulePodAction) Name() string {
+	return "schedule-pod"
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *scheduleAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseScheduling
+func (action *schedulePodAction) CanHandle(build *v1alpha1.Build) bool {
+	return build.Status.Phase == v1alpha1.BuildPhaseScheduling &&
+		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyPod
 }
 
 // Handle handles the builds
-func (action *scheduleAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
+func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
 	builds := &v1alpha1.BuildList{}
 	options := &k8sclient.ListOptions{Namespace: build.Namespace}
 	err := action.client.List(ctx, options, builds)
