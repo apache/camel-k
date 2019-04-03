@@ -28,8 +28,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	b "github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/util"
 	"github.com/apache/camel-k/pkg/client"
-	b "github.com/apache/camel-k/pkg/controller/build"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logger "github.com/apache/camel-k/pkg/util/log"
@@ -65,9 +66,16 @@ func main() {
 		c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build),
 	)
 
-	exitOnError(
-		b.SubmitBuildRequest(ctx, c, build, log, func(phase v1alpha1.BuildPhase) {
-			switch phase {
+	builder := b.NewLocalBuilder(c, build.Namespace)
+	req, err := util.NewRequestForBuild(ctx, c, build)
+	exitOnError(err)
+
+	builder.Submit(*req,
+		func(result *b.Result) {
+			util.UpdateBuildFromResult(build, result, c, req.C, log)
+		},
+		func(result *b.Result) {
+			switch result.Status {
 			case v1alpha1.BuildPhaseInterrupted:
 				completed <- false
 			case v1alpha1.BuildPhaseFailed:
@@ -75,7 +83,7 @@ func main() {
 			case v1alpha1.BuildPhaseSucceeded:
 				completed <- true
 			}
-		}),
+		},
 	)
 
 	for {
