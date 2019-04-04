@@ -2,12 +2,10 @@ package integration
 
 import (
 	"context"
-	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -135,7 +133,6 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		NewBuildContextAction(),
 		NewBuildImageAction(),
 		NewDeployAction(),
-		NewErrorRecoveryAction(),
 		NewMonitorAction(),
 		NewDeleteAction(),
 	}
@@ -164,21 +161,5 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		}
 	}
 
-	// Fetch the Integration again and check the state
-	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		if k8serrors.IsNotFound(err) && instance.Status.Phase == v1alpha1.IntegrationPhaseDeleting {
-			return reconcile.Result{}, nil
-		}
-
-		return reconcile.Result{}, err
-	}
-
-	if instance.Status.Phase == v1alpha1.IntegrationPhaseRunning {
-		return reconcile.Result{}, nil
-	}
-
-	// Requeue
-	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
-	}, nil
+	return reconcile.Result{}, nil
 }

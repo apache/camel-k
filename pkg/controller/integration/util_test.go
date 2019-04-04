@@ -21,12 +21,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/test"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestLookupContextForIntegration(t *testing.T) {
@@ -72,28 +72,6 @@ func TestLookupContextForIntegration(t *testing.T) {
 				},
 			},
 			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseBuildFailureRecovery,
-			},
-		},
-		&v1alpha1.IntegrationContext{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-				Name:      "my-context-3",
-				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
-				},
-			},
-			Spec: v1alpha1.IntegrationContextSpec{
-				Dependencies: []string{
-					"camel-core",
-					"camel-irc",
-				},
-			},
-			Status: v1alpha1.IntegrationContextStatus{
 				Phase: v1alpha1.IntegrationContextPhaseReady,
 			},
 		},
@@ -120,5 +98,5 @@ func TestLookupContextForIntegration(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, i)
-	assert.Equal(t, "my-context-3", i.Name)
+	assert.Equal(t, "my-context-2", i.Name)
 }

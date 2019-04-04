@@ -70,7 +70,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 			}
 		}
 
-		if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseError || ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildFailureRecovery {
+		if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
 			target := integration.DeepCopy()
 			target.Status.Image = ictx.ImageForIntegration()
 			target.Status.Context = ictx.Name

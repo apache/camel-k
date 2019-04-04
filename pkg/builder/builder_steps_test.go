@@ -383,26 +383,8 @@ func TestListPublishedImages(t *testing.T) {
 				},
 			},
 			Status: v1alpha1.IntegrationContextStatus{
-				Phase:        v1alpha1.IntegrationContextPhaseBuildFailureRecovery,
-				Image:        "image-3",
-				CamelVersion: catalog.Version,
-			},
-		},
-		&v1alpha1.IntegrationContext{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-				Name:      "my-context-3",
-				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
-				},
-			},
-			Status: v1alpha1.IntegrationContextStatus{
 				Phase:        v1alpha1.IntegrationContextPhaseReady,
-				Image:        "image-3",
+				Image:        "image-2",
 				CamelVersion: catalog.Version,
 			},
 		},
@@ -421,5 +403,5 @@ func TestListPublishedImages(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Len(t, i, 1)
-	assert.Equal(t, "image-3", i[0].Image)
+	assert.Equal(t, "image-2", i[0].Image)
 }

@@ -34,6 +34,7 @@ type BuildStatus struct {
 	PublicImage string     `json:"publicImage,omitempty"`
 	Artifacts   []Artifact `json:"artifacts,omitempty"`
 	Error       string     `json:"error,omitempty"`
+	Failure     *Failure   `json:"failure,omitempty"`
 }
 
 // BuildPhase --
@@ -57,6 +58,8 @@ const (
 	BuildPhaseFailed BuildPhase = "Failed"
 	// BuildPhaseInterrupted --
 	BuildPhaseInterrupted = "Interrupted"
+	// IntegrationContextPhaseError --
+	BuildPhaseError BuildPhase = "Error"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

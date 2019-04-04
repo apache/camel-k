@@ -57,9 +57,8 @@ func (action *monitorAction) Handle(ctx context.Context, build *v1alpha1.Build) 
 	err := action.client.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: buildPodName(build.Spec.Meta)}, pod)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			// We let the requesting controller (e.g. integration or integration context controllers)
-			// handle the interruption
-			target.Status.Phase = v1alpha1.BuildPhaseInterrupted
+			// Let's reschedule the build
+			target.Status.Phase = v1alpha1.BuildPhaseScheduling
 		} else {
 			return err
 		}

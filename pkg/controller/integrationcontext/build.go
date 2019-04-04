@@ -71,7 +71,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 	}
 
 	if err != nil && k8serrors.IsNotFound(err) ||
-		build.Status.Phase == v1alpha1.BuildPhaseFailed ||
+		build.Status.Phase == v1alpha1.BuildPhaseError ||
 		build.Status.Phase == v1alpha1.BuildPhaseInterrupted ||
 		build.Status.Phase == v1alpha1.BuildPhaseSucceeded {
 		p, err := platform.GetCurrentPlatform(ctx, action.client, ictx.Namespace)
@@ -160,6 +160,7 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 
 	case v1alpha1.BuildPhaseSucceeded:
 		target := ictx.DeepCopy()
+
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
 		// by the user
@@ -196,8 +197,9 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 			return err
 		}
 
-	case v1alpha1.BuildPhaseFailed, v1alpha1.BuildPhaseInterrupted:
+	case v1alpha1.BuildPhaseError, v1alpha1.BuildPhaseInterrupted:
 		target := ictx.DeepCopy()
+
 		// we should ensure that the integration context is still in the right
 		// phase, if not there is a chance that the context has been modified
 		// by the user
@@ -209,18 +211,9 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 			)
 		}
 
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildFailureRecovery
-
-		if target.Status.Failure == nil {
-			target.Status.Failure = &v1alpha1.Failure{
-				Reason: build.Status.Error,
-				Time:   metav1.Now(),
-				Recovery: v1alpha1.FailureRecovery{
-					Attempt:    0,
-					AttemptMax: 5,
-				},
-			}
-		}
+		// Let's copy the build failure to the integration context status
+		target.Status.Failure = build.Status.Failure
+		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
 
 		action.L.Error(fmt.Errorf(build.Status.Error), "IntegrationContext state transition", "phase", target.Status.Phase)
 

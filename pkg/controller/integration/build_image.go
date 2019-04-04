@@ -84,7 +84,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 	}
 
 	if err != nil && k8serrors.IsNotFound(err) ||
-		build.Status.Phase == v1alpha1.BuildPhaseFailed ||
+		build.Status.Phase == v1alpha1.BuildPhaseError ||
 		build.Status.Phase == v1alpha1.BuildPhaseInterrupted ||
 		build.Status.Phase == v1alpha1.BuildPhaseSucceeded {
 		env, err := trait.Apply(ctx, action.client, integration, ictx)
@@ -196,20 +196,12 @@ func (action *buildImageAction) handleBuildImageRunning(ctx context.Context, int
 			return err
 		}
 
-	case v1alpha1.BuildPhaseFailed, v1alpha1.BuildPhaseInterrupted:
+	case v1alpha1.BuildPhaseError, v1alpha1.BuildPhaseInterrupted:
 		target := integration.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationPhaseBuildFailureRecovery
 
-		if target.Status.Failure == nil {
-			target.Status.Failure = &v1alpha1.Failure{
-				Reason: build.Status.Error,
-				Time:   metav1.Now(),
-				Recovery: v1alpha1.FailureRecovery{
-					Attempt:    0,
-					AttemptMax: 5,
-				},
-			}
-		}
+		// Let's copy the build failure to the integration status
+		target.Status.Failure = build.Status.Failure
+		target.Status.Phase = v1alpha1.IntegrationPhaseError
 
 		action.L.Error(fmt.Errorf(build.Status.Error), "Integration state transition", "phase", target.Status.Phase)
 
