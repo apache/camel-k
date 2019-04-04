@@ -152,6 +152,11 @@ func (in *BuildStatus) DeepCopyInto(out *BuildStatus) {
 		*out = make([]Artifact, len(*in))
 		copy(*out, *in)
 	}
+	if in.Failure != nil {
+		in, out := &in.Failure, &out.Failure
+		*out = new(Failure)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

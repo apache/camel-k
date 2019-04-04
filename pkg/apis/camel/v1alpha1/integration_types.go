@@ -142,8 +142,6 @@ const (
 	IntegrationPhaseRunning IntegrationPhase = "Running"
 	// IntegrationPhaseError --
 	IntegrationPhaseError IntegrationPhase = "Error"
-	// IntegrationPhaseBuildFailureRecovery --
-	IntegrationPhaseBuildFailureRecovery IntegrationPhase = "Building Failure Recovery"
 	// IntegrationPhaseDeleting --
 	IntegrationPhaseDeleting IntegrationPhase = "Deleting"
 )

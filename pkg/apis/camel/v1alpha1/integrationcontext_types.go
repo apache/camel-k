@@ -74,8 +74,6 @@ const (
 	IntegrationContextPhaseReady IntegrationContextPhase = "Ready"
 	// IntegrationContextPhaseError --
 	IntegrationContextPhaseError IntegrationContextPhase = "Error"
-	// IntegrationContextPhaseBuildFailureRecovery --
-	IntegrationContextPhaseBuildFailureRecovery IntegrationContextPhase = "Build Failure Recovery"
 )
 
 func init() {

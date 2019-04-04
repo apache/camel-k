@@ -20,10 +20,12 @@ package integration
 import (
 	"context"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
+
 	"github.com/pkg/errors"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var allowedLookupLabels = map[string]bool{
@@ -58,10 +60,6 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
 			continue
 		}
-		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildFailureRecovery {
-			continue
-		}
-
 		if ctx.Status.CamelVersion != integration.Status.CamelVersion {
 			continue
 		}

@@ -2,12 +2,10 @@ package integrationcontext
 
 import (
 	"context"
-	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -128,7 +126,6 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 	integrationContextActionPool := []Action{
 		NewInitializeAction(),
 		NewBuildAction(),
-		NewErrorRecoveryAction(),
 		NewMonitorAction(),
 	}
 
@@ -151,16 +148,5 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 		}
 	}
 
-	// Fetch the IntegrationContext again and check the state
-	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	if instance.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
-		return reconcile.Result{}, nil
-	}
-	// Requeue
-	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
-	}, nil
+	return reconcile.Result{}, nil
 }
