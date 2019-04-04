@@ -19,12 +19,13 @@ package util
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/builder"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 	"path"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/client"
@@ -99,7 +100,7 @@ func NewRequestForBuild(ctx context.Context, c client.Client, build *v1alpha1.Bu
 }
 
 // UpdateBuildFromResult --
-func UpdateBuildFromResult(build *v1alpha1.Build, result *builder.Result, c client.Client, ctx cancellable.Context, log logger.Logger) {
+func UpdateBuildFromResult(ctx context.Context, build *v1alpha1.Build, result *builder.Result, c client.Client, log logger.Logger) {
 	// Refresh build
 	err := c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
 	if err != nil {
@@ -113,14 +114,14 @@ func UpdateBuildFromResult(build *v1alpha1.Build, result *builder.Result, c clie
 
 		b := build.DeepCopy()
 		b.Status.Phase = v1alpha1.BuildPhaseRunning
-		err = updateBuildStatus(b, c, ctx, log)
+		err = updateBuildStatus(ctx, b, c, log)
 
 	case v1alpha1.BuildPhaseInterrupted:
 		log.Info("Build interrupted")
 
 		b := build.DeepCopy()
 		b.Status.Phase = v1alpha1.BuildPhaseInterrupted
-		err = updateBuildStatus(b, c, ctx, log)
+		err = updateBuildStatus(ctx, b, c, log)
 
 	case v1alpha1.BuildPhaseFailed:
 		log.Error(result.Error, "Build failed")
@@ -128,7 +129,7 @@ func UpdateBuildFromResult(build *v1alpha1.Build, result *builder.Result, c clie
 		b := build.DeepCopy()
 		b.Status.Phase = v1alpha1.BuildPhaseFailed
 		b.Status.Error = result.Error.Error()
-		err = updateBuildStatus(b, c, ctx, log)
+		err = updateBuildStatus(ctx, b, c, log)
 
 	case v1alpha1.BuildPhaseSucceeded:
 		log.Info("Build completed")
@@ -139,7 +140,7 @@ func UpdateBuildFromResult(build *v1alpha1.Build, result *builder.Result, c clie
 		b.Status.BaseImage = result.BaseImage
 		b.Status.PublicImage = result.PublicImage
 		b.Status.Artifacts = result.Artifacts
-		err = updateBuildStatus(b, c, ctx, log)
+		err = updateBuildStatus(ctx, b, c, log)
 	}
 
 	// Forward the error to the next handler in the chain
@@ -149,7 +150,7 @@ func UpdateBuildFromResult(build *v1alpha1.Build, result *builder.Result, c clie
 	}
 }
 
-func updateBuildStatus(b *v1alpha1.Build, c client.Client, ctx cancellable.Context, log logger.Logger) error {
+func updateBuildStatus(ctx context.Context, b *v1alpha1.Build, c client.Client, log logger.Logger) error {
 	err := c.Status().Update(ctx, b)
 	if err != nil {
 		if k8serrors.IsConflict(err) {
@@ -159,7 +160,7 @@ func updateBuildStatus(b *v1alpha1.Build, c client.Client, ctx cancellable.Conte
 				log.Error(err, "Build refresh failed")
 				return err
 			}
-			return updateBuildStatus(b, c, ctx, log)
+			return updateBuildStatus(ctx, b, c, log)
 		}
 		log.Error(err, "Build update failed")
 		return err

@@ -66,12 +66,10 @@ func (t *containerTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *containerTrait) configureResources(e *Environment, container *corev1.Container) error {
-
+func (t *containerTrait) configureResources(_ *Environment, container *corev1.Container) {
 	//
 	// Requests
 	//
-
 	if container.Resources.Requests == nil {
 		container.Resources.Requests = make(corev1.ResourceList)
 	}
@@ -79,24 +77,23 @@ func (t *containerTrait) configureResources(e *Environment, container *corev1.Co
 	if t.RequestCPU != "" {
 		v, err := resource.ParseQuantity(t.RequestCPU)
 		if err != nil {
-			return err
+			t.L.Error(err, "unable to parse quantity", "request-cpu", t.RequestCPU)
+		} else {
+			container.Resources.Requests[corev1.ResourceCPU] = v
 		}
-
-		container.Resources.Requests[corev1.ResourceCPU] = v
 	}
 	if t.RequestMemory != "" {
 		v, err := resource.ParseQuantity(t.RequestMemory)
 		if err != nil {
-			return err
+			t.L.Error(err, "unable to parse quantity", "request-memory", t.RequestMemory)
+		} else {
+			container.Resources.Requests[corev1.ResourceMemory] = v
 		}
-
-		container.Resources.Requests[corev1.ResourceMemory] = v
 	}
 
 	//
 	// Limits
 	//
-
 	if container.Resources.Limits == nil {
 		container.Resources.Limits = make(corev1.ResourceList)
 	}
@@ -104,19 +101,17 @@ func (t *containerTrait) configureResources(e *Environment, container *corev1.Co
 	if t.LimitCPU != "" {
 		v, err := resource.ParseQuantity(t.LimitCPU)
 		if err != nil {
-			return err
+			t.L.Error(err, "unable to parse quantity", "limit-cpu", t.LimitCPU)
+		} else {
+			container.Resources.Limits[corev1.ResourceCPU] = v
 		}
-
-		container.Resources.Limits[corev1.ResourceCPU] = v
 	}
 	if t.LimitMemory != "" {
 		v, err := resource.ParseQuantity(t.LimitMemory)
 		if err != nil {
-			return err
+			t.L.Error(err, "unable to parse quantity", "limit-memory", t.LimitMemory)
+		} else {
+			container.Resources.Limits[corev1.ResourceMemory] = v
 		}
-
-		container.Resources.Limits[corev1.ResourceMemory] = v
 	}
-
-	return nil
 }

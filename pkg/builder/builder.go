@@ -43,7 +43,7 @@ import (
 
 type buildTask struct {
 	handlers []func(*Result)
-	request Request
+	request  Request
 }
 
 type localBuilder struct {
@@ -79,7 +79,7 @@ func (b *localBuilder) IsBuilding(object metav1.ObjectMeta) bool {
 }
 
 // Submit --
-func (b *localBuilder) Submit(request Request, handlers... func(*Result)) {
+func (b *localBuilder) Submit(request Request, handlers ...func(*Result)) {
 	if atomic.CompareAndSwapInt32(&b.running, 0, 1) {
 		go b.loop()
 	}
@@ -132,7 +132,7 @@ func (b *localBuilder) loop() {
 	}
 }
 
-func (b *localBuilder) process(request Request, handlers... func(*Result)) {
+func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
 	result, present := b.request.Load(request.Meta.Name)
 	if !present || result == nil {
 
