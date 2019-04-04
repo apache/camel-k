@@ -126,6 +126,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		NewScheduleRoutineAction(),
 		NewSchedulePodAction(),
 		NewMonitorAction(),
+		NewErrorRecoveryAction(),
 	}
 
 	blog := rlog.ForBuild(instance)
@@ -153,7 +154,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 
 	// Requeue scheduling build so that it re-enters the build working queue
-	if instance.Status.Phase == v1alpha1.BuildPhaseScheduling {
+	if instance.Status.Phase == v1alpha1.BuildPhaseScheduling ||
+		instance.Status.Phase == v1alpha1.BuildPhaseFailed {
 		return reconcile.Result{
 			RequeueAfter: 5 * time.Second,
 		}, nil
