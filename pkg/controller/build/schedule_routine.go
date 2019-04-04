@@ -76,7 +76,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 		return err
 	}
 	builder.Submit(*req, func(result *b.Result) {
-		util.UpdateBuildFromResult(build, result, action.client, req.C, action.L)
+		util.UpdateBuildFromResult(req.C, build, result, action.client, action.L)
 	})
 
 	target := build.DeepCopy()

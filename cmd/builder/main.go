@@ -72,7 +72,7 @@ func main() {
 
 	builder.Submit(*req,
 		func(result *b.Result) {
-			util.UpdateBuildFromResult(build, result, c, req.C, log)
+			util.UpdateBuildFromResult(req.C, build, result, c, log)
 		},
 		func(result *b.Result) {
 			switch result.Status {

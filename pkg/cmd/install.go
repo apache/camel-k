@@ -105,6 +105,7 @@ type installCmdOptions struct {
 	registry             v1alpha1.IntegrationPlatformRegistrySpec
 }
 
+// nolint: gocyclo
 func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 	var collection *kubernetes.Collection
 	if o.outputFormat != "" {
