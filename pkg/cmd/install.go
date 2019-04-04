@@ -70,6 +70,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.runtimeVersion, "runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
 	cmd.Flags().StringSliceVar(&impl.contexts, "context", nil, "Add a camel context to build at startup, by default all known contexts are built")
+	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", v1alpha1.IntegrationPlatformBuildStrategyRoutine, "Set the build strategy")
 	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
 
 	// completion support
@@ -96,6 +97,7 @@ type installCmdOptions struct {
 	runtimeVersion       string
 	baseImage            string
 	localRepository      string
+	buildStrategy        string
 	buildTimeout         string
 	repositories         []string
 	properties           []string
@@ -185,6 +187,16 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 		}
 		if o.baseImage != "" {
 			platform.Spec.Build.BaseImage = o.baseImage
+		}
+		if o.buildStrategy != "" {
+			switch s := o.buildStrategy; s {
+			case v1alpha1.IntegrationPlatformBuildStrategyPod:
+				platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+			case v1alpha1.IntegrationPlatformBuildStrategyRoutine:
+				platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
+			default:
+				return fmt.Errorf("unknown build strategy: %s", s)
+			}
 		}
 		if o.buildTimeout != "" {
 			d, err := time.ParseDuration(o.buildTimeout)
