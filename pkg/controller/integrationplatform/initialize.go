@@ -85,7 +85,7 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 	}
 
 	if target.Spec.Build.BuildStrategy == "" {
-		target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+		target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
 	}
 
 	if target.Spec.Build.PublishStrategy == "" {
