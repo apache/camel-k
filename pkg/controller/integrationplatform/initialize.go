@@ -203,8 +203,8 @@ func createPersistentVolumeClaim(ctx context.Context, client client.Client, plat
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				corev1.ReadWriteOnce,
 			},
-			Resources:corev1.ResourceRequirements{
-				Requests:corev1.ResourceList{
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
 					corev1.ResourceStorage: volumeSize,
 				},
 			},
