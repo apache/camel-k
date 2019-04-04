@@ -75,13 +75,24 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	if err != nil {
 		return err
 	}
-	builder.Submit(*req, func(result *b.Result) {
-		util.UpdateBuildFromResult(req.C, build, result, action.client, action.L)
-	})
+	builder.Submit(*req,
+		func(result *b.Result) {
+			if result.Status == v1alpha1.BuildPhasePending {
+				target := build.DeepCopy()
+				target.Status.Phase = v1alpha1.BuildPhasePending
+				action.L.Info("Build state transition", "phase", target.Status.Phase)
 
-	target := build.DeepCopy()
-	target.Status.Phase = v1alpha1.BuildPhasePending
-	action.L.Info("Build state transition", "phase", target.Status.Phase)
+				err := action.client.Status().Update(ctx, target)
+				if err != nil {
+					result.Status = v1alpha1.BuildPhaseFailed
+					result.Error = err
+				}
+			}
+		},
+		func(result *b.Result) {
+			util.UpdateBuildFromResult(req.C, build, result, action.client, action.L)
+		},
+	)
 
-	return action.client.Status().Update(ctx, target)
+	return nil
 }
