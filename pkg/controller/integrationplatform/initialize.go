@@ -84,15 +84,20 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 		}
 	}
 
-	if target.Spec.Build.BuildStrategy == "" {
-		target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
-	}
-
 	if target.Spec.Build.PublishStrategy == "" {
 		if target.Spec.Cluster == v1alpha1.IntegrationPlatformClusterOpenShift {
 			target.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
 			target.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko
+		}
+	}
+
+	if target.Spec.Build.BuildStrategy == "" {
+		if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+			// The build output has to be shared with Kaniko via a persistent volume
+			target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+		} else {
+			target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
 		}
 	}
 

@@ -70,7 +70,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.runtimeVersion, "runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
 	cmd.Flags().StringSliceVar(&impl.contexts, "context", nil, "Add a camel context to build at startup, by default all known contexts are built")
-	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", v1alpha1.IntegrationPlatformBuildStrategyRoutine, "Set the build strategy")
+	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", "", "Set the build strategy")
 	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
 
 	// completion support
