@@ -19,6 +19,7 @@ package build
 
 import (
 	"context"
+	"sync"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -40,6 +41,7 @@ func NewSchedulePodAction() Action {
 
 type schedulePodAction struct {
 	baseAction
+	lock sync.Mutex
 }
 
 // Name returns a common name of the action
@@ -55,6 +57,10 @@ func (action *schedulePodAction) CanHandle(build *v1alpha1.Build) bool {
 
 // Handle handles the builds
 func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
+	// Enter critical section
+	action.lock.Lock()
+	defer action.lock.Unlock()
+
 	builds := &v1alpha1.BuildList{}
 	options := &k8sclient.ListOptions{Namespace: build.Namespace}
 	err := action.client.List(ctx, options, builds)
@@ -64,14 +70,14 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
-	hasScheduledPod := false
+	hasScheduledBuild := false
 	for _, b := range builds.Items {
 		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
-			hasScheduledPod = true
+			hasScheduledBuild = true
 		}
 	}
 
-	if hasScheduledPod {
+	if hasScheduledBuild {
 		// Let's requeue the build in case one is already running
 		return nil
 	}
