@@ -111,12 +111,6 @@ func Publisher(ctx *builder.Context) error {
 		args = baseArgs
 	}
 
-	// The pod will be scheduled to nodes that are selected by the persistent volume
-	// node affinity spec, if any, as provisioned by the persistent volume claim storage
-	// class provisioner.
-	// See:
-	// - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#node-affinity
-	// - https://kubernetes.io/docs/concepts/storage/volumes/#local
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -138,6 +132,21 @@ func Publisher(ctx *builder.Context) error {
 			},
 			RestartPolicy: corev1.RestartPolicyNever,
 			Volumes:       volumes,
+			// Co-locate with builder pod for sharing the volume
+			Affinity: &corev1.Affinity{
+				PodAffinity: &corev1.PodAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+						{
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"camel.apache.org/component": "operator",
+								},
+							},
+							TopologyKey: "kubernetes.io/hostname",
+						},
+					},
+				},
+			},
 		},
 	}
 
