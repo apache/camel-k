@@ -94,6 +94,23 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					},
 				},
 			},
+			// Co-locate with the builder pod for sharing the host path volume as the current
+			// persistent volume claim uses the default storage class which is likely relying
+			// on the host path provisioner.
+			Affinity: &corev1.Affinity{
+				PodAffinity: &corev1.PodAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+						{
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"camel.apache.org/component": "operator",
+								},
+							},
+							TopologyKey: "kubernetes.io/hostname",
+						},
+					},
+				},
+			},
 		},
 	}
 

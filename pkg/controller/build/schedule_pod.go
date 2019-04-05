@@ -104,34 +104,6 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 }
 
 func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
-	var volumes []corev1.Volume
-	var volumeMounts []corev1.VolumeMount
-	// Mount persistent volume used to coordinate build output with Kaniko cache and image build input
-	if build.Spec.Platform.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
-		volumes = []corev1.Volume{
-			{
-				Name: "camel-k-builder",
-				VolumeSource: corev1.VolumeSource{
-					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: build.Spec.Platform.Build.PersistentVolumeClaim,
-					},
-				},
-			},
-		}
-		volumeMounts = []corev1.VolumeMount{
-			{
-				Name:      "camel-k-builder",
-				MountPath: build.Spec.BuildDir,
-			},
-		}
-	}
-
-	// The pod will be scheduled to nodes that are selected by the persistent volume
-	// node affinity spec, if any, as provisioned by the persistent volume claim storage
-	// class provisioner.
-	// See:
-	// - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#node-affinity
-	// - https://kubernetes.io/docs/concepts/storage/volumes/#local
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -152,12 +124,47 @@ func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
 						build.Namespace,
 						build.Name,
 					},
-					VolumeMounts: volumeMounts,
 				},
 			},
 			RestartPolicy: corev1.RestartPolicyNever,
-			Volumes:       volumes,
 		},
+	}
+
+	if build.Spec.Platform.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+		// Mount persistent volume used to coordinate build output with Kaniko cache and image build input
+		pod.Spec.Volumes = []corev1.Volume{
+			{
+				Name: "camel-k-builder",
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: build.Spec.Platform.Build.PersistentVolumeClaim,
+					},
+				},
+			},
+		}
+		pod.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
+			{
+				Name:      "camel-k-builder",
+				MountPath: build.Spec.BuildDir,
+			},
+		}
+		// Co-locate with the builder pod for sharing the host path volume as the current
+		// persistent volume claim uses the default storage class which is likely relying
+		// on the host path provisioner.
+		pod.Spec.Affinity = &corev1.Affinity{
+			PodAffinity: &corev1.PodAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+					{
+						LabelSelector: &metav1.LabelSelector{
+							MatchLabels: map[string]string{
+								"camel.apache.org/component": "operator",
+							},
+						},
+						TopologyKey: "kubernetes.io/hostname",
+					},
+				},
+			},
+		}
 	}
 
 	return pod
