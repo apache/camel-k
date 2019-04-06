@@ -29,6 +29,7 @@ import (
 
 type deploymentTrait struct {
 	BaseTrait `property:",squash"`
+	Replicas  *int32 `property:"replicas"`
 	deployer  deployerTrait
 }
 
@@ -157,7 +158,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Annotations: annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: e.Integration.Spec.Replicas,
+			Replicas: t.Replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},

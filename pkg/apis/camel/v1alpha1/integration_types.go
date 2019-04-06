@@ -8,7 +8,6 @@ import (
 
 // IntegrationSpec defines the desired state of Integration
 type IntegrationSpec struct {
-	Replicas           *int32               `json:"replicas,omitempty"`
 	Sources            []SourceSpec         `json:"sources,omitempty"`
 	Resources          []ResourceSpec       `json:"resources,omitempty"`
 	Context            string               `json:"context,omitempty"`
