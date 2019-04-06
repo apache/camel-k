@@ -2,6 +2,7 @@
 /camel-k
 /kamel
 /publisher
+/builder
 
 # Released Packages
 *.tar.gz
