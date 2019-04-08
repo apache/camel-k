@@ -20,33 +20,35 @@ package integrationplatform
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-// NewStartAction returns a action that waits for all required platform resources to start
-func NewStartAction() Action {
-	return &startAction{}
+// NewMonitorAction returns an action that waits for all required platform resources to be ready
+func NewMonitorAction() Action {
+	return &monitorAction{}
 }
 
-type startAction struct {
+type monitorAction struct {
 	baseAction
 }
 
-func (action *startAction) Name() string {
-	return "start"
+func (action *monitorAction) Name() string {
+	return "monitor"
 }
 
-func (action *startAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bool {
+func (action *monitorAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseStarting || platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseError
 }
 
-func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
+func (action *monitorAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
 	aggregatePhase, err := action.aggregatePlatformPhaseFromContexts(ctx, platform.Namespace)
 	if err != nil {
 		return err
 	}
+
 	if platform.Status.Phase != aggregatePhase {
 		target := platform.DeepCopy()
 		target.Status.Phase = aggregatePhase
@@ -55,11 +57,11 @@ func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.Integr
 
 		return action.client.Status().Update(ctx, target)
 	}
-	// wait
+
 	return nil
 }
 
-func (action *startAction) aggregatePlatformPhaseFromContexts(ctx context.Context, namespace string) (v1alpha1.IntegrationPlatformPhase, error) {
+func (action *monitorAction) aggregatePlatformPhaseFromContexts(ctx context.Context, namespace string) (v1alpha1.IntegrationPlatformPhase, error) {
 	ctxs := v1alpha1.NewIntegrationContextList()
 	options := k8sclient.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labels.Set{

@@ -4,9 +4,6 @@ import (
 	"context"
 	"time"
 
-	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -19,6 +16,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
 // Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -48,10 +48,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(&source.Kind{Type: &camelv1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegrationPlatform := e.ObjectOld.(*camelv1alpha1.IntegrationPlatform)
-			newIntegrationPlatform := e.ObjectNew.(*camelv1alpha1.IntegrationPlatform)
+			oldIntegrationPlatform := e.ObjectOld.(*v1alpha1.IntegrationPlatform)
+			newIntegrationPlatform := e.ObjectNew.(*v1alpha1.IntegrationPlatform)
 			// Ignore updates to the integration platform status in which case metadata.Generation
 			// does not change, or except when the integration platform phase changes as it's used
 			// to transition from one phase to another
@@ -63,6 +63,24 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return !e.DeleteStateUnknown
 		},
 	})
+	if err != nil {
+		return err
+	}
+
+	// Watch for changes to secondary resource Builds and requeue the owner IntegrationContext
+	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationContext{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &v1alpha1.IntegrationPlatform{},
+		},
+		predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldIctx := e.ObjectOld.(*v1alpha1.IntegrationContext)
+				newIctx := e.ObjectNew.(*v1alpha1.IntegrationContext)
+				// Ignore updates to the integration context CR except when the phase changes
+				return oldIctx.Status.Phase != newIctx.Status.Phase
+			},
+		})
 	if err != nil {
 		return err
 	}
@@ -92,7 +110,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 	ctx := context.TODO()
 
 	// Fetch the IntegrationPlatform instance
-	instance := &camelv1alpha1.IntegrationPlatform{}
+	instance := &v1alpha1.IntegrationPlatform{}
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -109,7 +127,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		NewInitializeAction(),
 		NewWarmAction(),
 		NewCreateAction(),
-		NewStartAction(),
+		NewMonitorAction(),
 	}
 
 	ilog := rlog.ForIntegrationPlatform(instance)
@@ -136,12 +154,12 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		return reconcile.Result{}, err
 	}
 
-	if instance.Status.Phase == camelv1alpha1.IntegrationPlatformPhaseReady {
-		return reconcile.Result{}, nil
+	if instance.Status.Phase == v1alpha1.IntegrationPlatformPhaseWarming {
+		// We need to poll the Kaniko warmer pod status
+		return reconcile.Result{
+			RequeueAfter: 5 * time.Second,
+		}, nil
 	}
-	// Requeue
-	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
-	}, nil
 
+	return reconcile.Result{}, nil
 }
