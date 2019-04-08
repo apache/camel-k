@@ -20,6 +20,8 @@ package integrationcontext
 import (
 	"context"
 
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
@@ -45,19 +47,24 @@ func (action *initializeAction) CanHandle(ictx *v1alpha1.IntegrationContext) boo
 
 func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
 	// The integration platform needs to be initialized before starting to create contexts
-	if _, err := platform.GetCurrentPlatform(ctx, action.client, ictx.Namespace); err != nil {
+	p, err := platform.GetCurrentPlatform(ctx, action.client, ictx.Namespace)
+	if err != nil {
 		action.L.Info("Waiting for the integration platform to be initialized")
 		return nil
 	}
 
 	target := ictx.DeepCopy()
 
-	_, err := trait.Apply(ctx, action.client, nil, target)
+	// Set the platform as the owner and controller
+	if err := controllerutil.SetControllerReference(p, target, action.client.GetScheme()); err != nil {
+		return err
+	}
+
+	_, err = trait.Apply(ctx, action.client, nil, target)
 	if err != nil {
 		return err
 	}
 
-	// Updating the whole integration context as it may have changed
 	action.L.Info("Updating IntegrationContext")
 	if err := action.client.Update(ctx, target); err != nil {
 		return err
@@ -70,7 +77,6 @@ func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.Integ
 		// but in case it has been created from an image, mark the
 		// context as ready
 		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
-
 		// and set the image to be used
 		target.Status.Image = target.Spec.Image
 	}
