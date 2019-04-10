@@ -28,9 +28,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/util"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logger "github.com/apache/camel-k/pkg/util/log"
@@ -64,7 +64,6 @@ func main() {
 		c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build),
 	)
 
-	builder := platform.GetPlatformBuilder(c)
 	req, err := util.NewRequestForBuild(ctx, c, build)
 	exitOnError(err)
 
@@ -74,7 +73,7 @@ func main() {
 		util.UpdateBuildStatus(ctx, target, c, log),
 	)
 
-	result := builder.Build(*req)
+	result := builder.New(c).Build(*req)
 
 	exitOnError(
 		util.UpdateBuildFromResult(req.C, build, result, c, log),

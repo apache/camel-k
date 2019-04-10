@@ -22,10 +22,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
-	"sync"
 	"time"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -34,48 +31,24 @@ import (
 )
 
 type defaultBuilder struct {
-	log       log.Logger
-	ctx       cancellable.Context
-	client    client.Client
-	interrupt chan bool
-	builds    sync.Map
+	log    log.Logger
+	ctx    cancellable.Context
+	client client.Client
 }
 
 // New --
 func New(c client.Client) Builder {
 	m := defaultBuilder{
-		log:       log.WithName("builder"),
-		ctx:       cancellable.NewContext(),
-		client:    c,
-		interrupt: make(chan bool, 1),
+		log:    log.WithName("builder"),
+		ctx:    cancellable.NewContext(),
+		client: c,
 	}
 
 	return &m
 }
 
-// IsBuilding --
-func (b *defaultBuilder) IsBuilding(object metav1.ObjectMeta) bool {
-	_, ok := b.builds.Load(object.Name)
-
-	return ok
-}
-
 // Build --
 func (b *defaultBuilder) Build(request Request) Result {
-	if result, present := b.builds.Load(request.Meta.Name); present && result != nil {
-		log.Infof("Build is already running: %s", result)
-	}
-
-	b.builds.Store(request.Meta.Name, true)
-
-	return b.process(request)
-}
-
-func (b *defaultBuilder) Close() {
-	b.ctx.Cancel()
-}
-
-func (b *defaultBuilder) process(request Request) Result {
 	result := Result{
 		Builder: b,
 		Request: request,
@@ -95,7 +68,6 @@ func (b *defaultBuilder) process(request Request) Result {
 	}
 
 	defer os.RemoveAll(builderPath)
-	defer b.builds.Delete(request.Meta.Name)
 
 	c := Context{
 		Client:    b.client,
@@ -137,8 +109,6 @@ func (b *defaultBuilder) process(request Request) Result {
 		}
 
 		select {
-		case <-b.interrupt:
-			c.Error = errors.New("builder canceled")
 		case <-request.C.Done():
 			result.Status = v1alpha1.BuildPhaseInterrupted
 		default:
