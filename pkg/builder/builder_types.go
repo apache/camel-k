@@ -48,9 +48,7 @@ const (
 
 // Builder --
 type Builder interface {
-	IsBuilding(object metav1.ObjectMeta) bool
 	Build(request Request) Result
-	Close()
 }
 
 // Step --
