@@ -27,20 +27,21 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/util"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/platform"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(c client.Client) Action {
+func NewScheduleRoutineAction(c client.Client, b builder.Builder, r *sync.Map) Action {
 	return &scheduleRoutineAction{
-		builder: platform.GetPlatformBuilder(c),
+		builder:  b,
+		routines: r,
 	}
 }
 
 type scheduleRoutineAction struct {
 	baseAction
-	lock    sync.Mutex
-	builder builder.Builder
+	lock     sync.Mutex
+	builder  builder.Builder
+	routines *sync.Map
 }
 
 // Name returns a common name of the action
@@ -92,12 +93,15 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	}
 
 	// and run it asynchronously to avoid blocking the reconcile loop
+	action.routines.Store(build.Name, true)
 	go action.build(ctx, build)
 
 	return nil
 }
 
 func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.Build) {
+	defer action.routines.Delete(build.Name)
+
 	req, err := util.NewRequestForBuild(ctx, action.client, build)
 	if err != nil {
 		target := build.DeepCopy()
@@ -107,6 +111,7 @@ func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.
 		err = action.client.Status().Update(ctx, target)
 		if err != nil {
 			action.L.Errorf(err, "Error while running build: %s", build.Name)
+			return
 		}
 	}
 
