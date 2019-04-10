@@ -2,6 +2,7 @@ package build
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -18,6 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 )
 
@@ -34,8 +36,9 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileBuild{
-		client: c,
-		scheme: mgr.GetScheme(),
+		client:  c,
+		scheme:  mgr.GetScheme(),
+		builder: builder.New(c),
 	}
 }
 
@@ -92,8 +95,10 @@ var _ reconcile.Reconciler = &ReconcileBuild{}
 type ReconcileBuild struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client   client.Client
+	scheme   *runtime.Scheme
+	builder  builder.Builder
+	routines sync.Map
 }
 
 // Reconcile reads that state of the cluster for a Build object and makes changes based on the state read
@@ -123,9 +128,10 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	buildActionPool := []Action{
 		NewInitializeAction(),
-		NewScheduleRoutineAction(r.client),
+		NewScheduleRoutineAction(r.client, r.builder, &r.routines),
 		NewSchedulePodAction(),
-		NewMonitorAction(),
+		NewMonitorRoutineAction(&r.routines),
+		NewMonitorPodAction(),
 		NewErrorRecoveryAction(),
 	}
 

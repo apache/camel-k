@@ -27,29 +27,29 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-// NewMonitorAction creates a new monitor action
-func NewMonitorAction() Action {
-	return &monitorAction{}
+// NewMonitorPodAction creates a new monitor action for scheduled pod
+func NewMonitorPodAction() Action {
+	return &monitorPodAction{}
 }
 
-type monitorAction struct {
+type monitorPodAction struct {
 	baseAction
 }
 
 // Name returns a common name of the action
-func (action *monitorAction) Name() string {
-	return "monitor"
+func (action *monitorPodAction) Name() string {
+	return "monitor-pod"
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *monitorAction) CanHandle(build *v1alpha1.Build) bool {
+func (action *monitorPodAction) CanHandle(build *v1alpha1.Build) bool {
 	return (build.Status.Phase == v1alpha1.BuildPhasePending ||
 		build.Status.Phase == v1alpha1.BuildPhaseRunning) &&
 		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyPod
 }
 
 // Handle handles the builds
-func (action *monitorAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
+func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
 	target := build.DeepCopy()
 
 	// Get the build pod
