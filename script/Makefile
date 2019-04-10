@@ -108,7 +108,7 @@ images-push:
 	docker push $(IMAGE_NAME):$(VERSION)
 
 set-version:
-	./script/set_version.sh $(VERSION)
+	./script/set_version.sh $(VERSION) $(IMAGE_NAME)
 
 git-tag:
 	./script/git_tag.sh $(VERSION) $(RELEASE_GIT_REMOTE)
