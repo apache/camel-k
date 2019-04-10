@@ -58,7 +58,7 @@ const (
 	BuildPhaseFailed BuildPhase = "Failed"
 	// BuildPhaseInterrupted --
 	BuildPhaseInterrupted = "Interrupted"
-	// IntegrationContextPhaseError --
+	// BuildPhaseError --
 	BuildPhaseError BuildPhase = "Error"
 )
 
