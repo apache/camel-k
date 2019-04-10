@@ -123,7 +123,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	buildActionPool := []Action{
 		NewInitializeAction(),
-		NewScheduleRoutineAction(),
+		NewScheduleRoutineAction(r.client),
 		NewSchedulePodAction(),
 		NewMonitorAction(),
 		NewErrorRecoveryAction(),

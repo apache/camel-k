@@ -24,18 +24,23 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	b "github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/util"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction() Action {
-	return &scheduleRoutineAction{}
+func NewScheduleRoutineAction(c client.Client) Action {
+	return &scheduleRoutineAction{
+		builder: platform.GetPlatformBuilder(c),
+	}
 }
 
 type scheduleRoutineAction struct {
 	baseAction
-	lock sync.Mutex
+	lock    sync.Mutex
+	builder builder.Builder
 }
 
 // Name returns a common name of the action
@@ -68,6 +73,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	for _, b := range builds.Items {
 		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
 			hasScheduledBuild = true
+			break
 		}
 	}
 
@@ -76,29 +82,38 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 		return nil
 	}
 
-	builder := b.NewLocalBuilder(action.client, build.Namespace)
-	req, err := util.NewRequestForBuild(ctx, action.client, build)
+	// Transition the build to running state
+	target := build.DeepCopy()
+	target.Status.Phase = v1alpha1.BuildPhaseRunning
+	action.L.Info("Build state transition", "phase", target.Status.Phase)
+	err = action.client.Status().Update(ctx, target)
 	if err != nil {
 		return err
 	}
-	builder.Submit(*req,
-		func(result *b.Result) {
-			if result.Status == v1alpha1.BuildPhasePending {
-				target := build.DeepCopy()
-				target.Status.Phase = v1alpha1.BuildPhasePending
-				action.L.Info("Build state transition", "phase", target.Status.Phase)
 
-				err := action.client.Status().Update(ctx, target)
-				if err != nil {
-					result.Status = v1alpha1.BuildPhaseFailed
-					result.Error = err
-				}
-			}
-		},
-		func(result *b.Result) {
-			util.UpdateBuildFromResult(req.C, build, result, action.client, action.L)
-		},
-	)
+	// and run it asynchronously to avoid blocking the reconcile loop
+	go action.build(ctx, build)
 
 	return nil
+}
+
+func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.Build) {
+	req, err := util.NewRequestForBuild(ctx, action.client, build)
+	if err != nil {
+		target := build.DeepCopy()
+		target.Status.Phase = v1alpha1.BuildPhaseFailed
+		target.Status.Error = err.Error()
+		action.L.Info("Build state transition", "phase", target.Status.Phase)
+		err = action.client.Status().Update(ctx, target)
+		if err != nil {
+			action.L.Errorf(err, "Error while running build: %s", build.Name)
+		}
+	}
+
+	result := action.builder.Build(*req)
+
+	err = util.UpdateBuildFromResult(req.C, build, result, action.client, action.L)
+	if err != nil {
+		action.L.Errorf(err, "Error while running build: %s", build.Name)
+	}
 }

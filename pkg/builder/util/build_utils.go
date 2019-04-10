@@ -34,7 +34,7 @@ import (
 	logger "github.com/apache/camel-k/pkg/util/log"
 )
 
-var log = logger.WithName("local builder")
+var log = logger.WithName("builder")
 
 // NewRequestForBuild--
 func NewRequestForBuild(ctx context.Context, c client.Client, build *v1alpha1.Build) (*builder.Request, error) {
@@ -100,7 +100,7 @@ func NewRequestForBuild(ctx context.Context, c client.Client, build *v1alpha1.Bu
 }
 
 // UpdateBuildFromResult --
-func UpdateBuildFromResult(ctx context.Context, build *v1alpha1.Build, result *builder.Result, c client.Client, log logger.Logger) {
+func UpdateBuildFromResult(ctx context.Context, build *v1alpha1.Build, result builder.Result, c client.Client, log logger.Logger) error {
 	// Refresh build
 	err := c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
 	if err != nil {
@@ -109,19 +109,12 @@ func UpdateBuildFromResult(ctx context.Context, build *v1alpha1.Build, result *b
 
 	switch result.Status {
 
-	case v1alpha1.BuildPhaseRunning:
-		log.Info("Build started")
-
-		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildPhaseRunning
-		err = updateBuildStatus(ctx, b, c, log)
-
 	case v1alpha1.BuildPhaseInterrupted:
 		log.Info("Build interrupted")
 
 		b := build.DeepCopy()
 		b.Status.Phase = v1alpha1.BuildPhaseInterrupted
-		err = updateBuildStatus(ctx, b, c, log)
+		err = UpdateBuildStatus(ctx, b, c, log)
 
 	case v1alpha1.BuildPhaseFailed:
 		log.Error(result.Error, "Build failed")
@@ -129,7 +122,7 @@ func UpdateBuildFromResult(ctx context.Context, build *v1alpha1.Build, result *b
 		b := build.DeepCopy()
 		b.Status.Phase = v1alpha1.BuildPhaseFailed
 		b.Status.Error = result.Error.Error()
-		err = updateBuildStatus(ctx, b, c, log)
+		err = UpdateBuildStatus(ctx, b, c, log)
 
 	case v1alpha1.BuildPhaseSucceeded:
 		log.Info("Build completed")
@@ -140,17 +133,17 @@ func UpdateBuildFromResult(ctx context.Context, build *v1alpha1.Build, result *b
 		b.Status.BaseImage = result.BaseImage
 		b.Status.PublicImage = result.PublicImage
 		b.Status.Artifacts = result.Artifacts
-		err = updateBuildStatus(ctx, b, c, log)
+		err = UpdateBuildStatus(ctx, b, c, log)
 	}
 
-	// Forward the error to the next handler in the chain
 	if err != nil {
-		result.Status = v1alpha1.BuildPhaseFailed
-		result.Error = err
+		return err
 	}
+
+	return nil
 }
 
-func updateBuildStatus(ctx context.Context, b *v1alpha1.Build, c client.Client, log logger.Logger) error {
+func UpdateBuildStatus(ctx context.Context, b *v1alpha1.Build, c client.Client, log logger.Logger) error {
 	err := c.Status().Update(ctx, b)
 	if err != nil {
 		if k8serrors.IsConflict(err) {
@@ -160,7 +153,7 @@ func updateBuildStatus(ctx context.Context, b *v1alpha1.Build, c client.Client, 
 				log.Error(err, "Build refresh failed")
 				return err
 			}
-			return updateBuildStatus(ctx, b, c, log)
+			return UpdateBuildStatus(ctx, b, c, log)
 		}
 		log.Error(err, "Build update failed")
 		return err
