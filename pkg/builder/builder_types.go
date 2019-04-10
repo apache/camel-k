@@ -49,7 +49,7 @@ const (
 // Builder --
 type Builder interface {
 	IsBuilding(object metav1.ObjectMeta) bool
-	Submit(request Request, handlers ...func(*Result))
+	Build(request Request) Result
 	Close()
 }
 

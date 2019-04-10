@@ -28,9 +28,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	b "github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/util"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logger "github.com/apache/camel-k/pkg/util/log"
@@ -43,8 +43,6 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
 	log.Info(fmt.Sprintf("Camel K Version: %v", defaults.Version))
 }
-
-var completed = make(chan bool)
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -66,38 +64,27 @@ func main() {
 		c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build),
 	)
 
-	builder := b.NewLocalBuilder(c, build.Namespace)
+	builder := platform.GetPlatformBuilder(c)
 	req, err := util.NewRequestForBuild(ctx, c, build)
 	exitOnError(err)
 
-	builder.Submit(*req,
-		func(result *b.Result) {
-			util.UpdateBuildFromResult(req.C, build, result, c, log)
-		},
-		func(result *b.Result) {
-			switch result.Status {
-			case v1alpha1.BuildPhaseInterrupted:
-				completed <- false
-			case v1alpha1.BuildPhaseFailed:
-				completed <- false
-			case v1alpha1.BuildPhaseSucceeded:
-				completed <- true
-			}
-		},
+	target := build.DeepCopy()
+	target.Status.Phase = v1alpha1.BuildPhaseRunning
+	exitOnError(
+		util.UpdateBuildStatus(ctx, target, c, log),
 	)
 
-	for {
-		select {
-		case success := <-completed:
-			if !success {
-				os.Exit(1)
-			} else {
-				os.Exit(0)
-			}
-		default:
-			log.Debug("Waiting for the build to complete...")
-			time.Sleep(time.Millisecond * 100)
-		}
+	result := builder.Build(*req)
+
+	exitOnError(
+		util.UpdateBuildFromResult(req.C, build, result, c, log),
+	)
+
+	switch result.Status {
+	case v1alpha1.BuildPhaseSucceeded:
+		os.Exit(0)
+	default:
+		os.Exit(1)
 	}
 }
 

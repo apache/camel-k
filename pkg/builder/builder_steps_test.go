@@ -19,7 +19,6 @@ package builder
 
 import (
 	"errors"
-	"sync"
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -313,10 +312,7 @@ func TestFailure(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
-	b := NewLocalBuilder(nil, "ns")
-
-	var wg sync.WaitGroup
-	wg.Add(1)
+	b := New(nil)
 
 	r := Request{
 		C:              cancellable.NewContext(),
@@ -337,26 +333,10 @@ func TestFailure(t *testing.T) {
 		},
 	}
 
-	var res *Result
+	result := b.Build(r)
 
-	b.Submit(r, func(result *Result) {
-		switch result.Status {
-		case v1alpha1.BuildPhaseFailed:
-			res = result
-			wg.Done()
-		case v1alpha1.BuildPhaseSucceeded:
-			res = result
-			wg.Done()
-		case v1alpha1.BuildPhaseInterrupted:
-			res = result
-			wg.Done()
-		}
-	})
-
-	wg.Wait()
-
-	assert.NotNil(t, res)
-	assert.Equal(t, v1alpha1.BuildPhaseFailed, res.Status)
+	assert.NotNil(t, result)
+	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Status)
 }
 
 func TestListPublishedImages(t *testing.T) {
