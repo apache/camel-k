@@ -19,12 +19,10 @@ package builder
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"sort"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,127 +33,52 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-// ********************************
-//
-// Default builder
-//
-// ********************************
-
-type buildTask struct {
-	handlers []func(*Result)
-	request  Request
-}
-
-type localBuilder struct {
+type defaultBuilder struct {
 	log       log.Logger
 	ctx       cancellable.Context
 	client    client.Client
-	tasks     chan buildTask
 	interrupt chan bool
-	request   sync.Map
-	running   int32
-	namespace string
+	builds    sync.Map
 }
 
-// NewLocalBuilder --
-func NewLocalBuilder(c client.Client, namespace string) Builder {
-	m := localBuilder{
-		log:       log.WithName("local builder"),
+// New --
+func New(c client.Client) Builder {
+	m := defaultBuilder{
+		log:       log.WithName("builder"),
 		ctx:       cancellable.NewContext(),
 		client:    c,
-		tasks:     make(chan buildTask),
 		interrupt: make(chan bool, 1),
-		running:   0,
-		namespace: namespace,
 	}
 
 	return &m
 }
 
-func (b *localBuilder) IsBuilding(object metav1.ObjectMeta) bool {
-	_, ok := b.request.Load(object.Name)
+// IsBuilding --
+func (b *defaultBuilder) IsBuilding(object metav1.ObjectMeta) bool {
+	_, ok := b.builds.Load(object.Name)
 
 	return ok
 }
 
-// Submit --
-func (b *localBuilder) Submit(request Request, handlers ...func(*Result)) {
-	if atomic.CompareAndSwapInt32(&b.running, 0, 1) {
-		go b.loop()
+// Build --
+func (b *defaultBuilder) Build(request Request) Result {
+	if result, present := b.builds.Load(request.Meta.Name); present && result != nil {
+		log.Infof("Build is already running: %s", result)
 	}
 
-	result, present := b.request.Load(request.Meta.Name)
-	if !present || result == nil {
-		r := Result{
-			Builder: b,
-			Request: request,
-			Status:  v1alpha1.BuildPhasePending,
-		}
+	b.builds.Store(request.Meta.Name, true)
 
-		b.log.Infof("submitting request: %+v", request)
-
-		for _, handler := range handlers {
-			handler(&r)
-		}
-
-		b.request.Store(request.Meta.Name, r)
-		b.tasks <- buildTask{handlers: handlers, request: request}
-	}
+	return b.process(request)
 }
 
-func (b *localBuilder) Close() {
+func (b *defaultBuilder) Close() {
 	b.ctx.Cancel()
 }
 
-// ********************************
-//
-// Helpers
-//
-// ********************************
-
-func (b *localBuilder) loop() {
-	for atomic.LoadInt32(&b.running) == 1 {
-		select {
-		case <-b.ctx.Done():
-			b.interrupt <- true
-
-			close(b.interrupt)
-			close(b.tasks)
-
-			atomic.StoreInt32(&b.running, 0)
-		case t, ok := <-b.tasks:
-			if ok {
-				b.log.Infof("executing request: %+v", t.request)
-				b.process(t.request, t.handlers...)
-			}
-		}
-	}
-}
-
-func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
-	result, present := b.request.Load(request.Meta.Name)
-	if !present || result == nil {
-
-		r := result.(Result)
-		r.Status = v1alpha1.BuildPhaseFailed
-		r.Error = fmt.Errorf("no info found for: %s/%s", request.Meta.Namespace, request.Meta.Name)
-
-		b.log.Error(r.Error, "error processing request")
-
-		for _, handler := range handlers {
-			handler(&r)
-		}
-
-		return
-	}
-
-	// update the status
-	r := result.(Result)
-	r.Status = v1alpha1.BuildPhaseRunning
-	r.Task.StartedAt = time.Now()
-
-	for _, handler := range handlers {
-		handler(&r)
+func (b *defaultBuilder) process(request Request) Result {
+	result := Result{
+		Builder: b,
+		Request: request,
 	}
 
 	// create tmp path
@@ -167,18 +90,18 @@ func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
 	if err != nil {
 		log.Error(err, "Unexpected error while creating a temporary dir")
 
-		r.Status = v1alpha1.BuildPhaseFailed
-		r.Error = err
+		result.Status = v1alpha1.BuildPhaseFailed
+		result.Error = err
 	}
 
 	defer os.RemoveAll(builderPath)
-	defer b.request.Delete(request.Meta.Name)
+	defer b.builds.Delete(request.Meta.Name)
 
 	c := Context{
 		Client:    b.client,
 		Catalog:   request.Catalog,
 		Path:      builderPath,
-		Namespace: b.namespace,
+		Namespace: request.Meta.Namespace,
 		Request:   request,
 		Image:     request.Platform.Build.BaseImage,
 	}
@@ -189,27 +112,17 @@ func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
 
 	// base image is mandatory
 	if c.Image == "" {
-		r.Status = v1alpha1.BuildPhaseFailed
-		r.Image = ""
-		r.PublicImage = ""
-		r.Error = errors.New("no base image defined")
-		r.Task.CompletedAt = time.Now()
-
-		// update the cache
-		b.request.Store(request.Meta.Name, r)
+		result.Status = v1alpha1.BuildPhaseFailed
+		result.Image = ""
+		result.PublicImage = ""
+		result.Error = errors.New("no base image defined")
+		result.Task.CompletedAt = time.Now()
 	}
 
 	c.BaseImage = c.Image
 
-	// update the cache
-	b.request.Store(request.Meta.Name, r)
-
-	if r.Status == v1alpha1.BuildPhaseFailed {
-		for _, handler := range handlers {
-			handler(&r)
-		}
-
-		return
+	if result.Status == v1alpha1.BuildPhaseFailed {
+		return result
 	}
 
 	// Sort steps by phase
@@ -219,7 +132,7 @@ func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
 
 	b.log.Infof("steps: %v", request.Steps)
 	for _, step := range request.Steps {
-		if c.Error != nil || r.Status == v1alpha1.BuildPhaseInterrupted {
+		if c.Error != nil || result.Status == v1alpha1.BuildPhaseInterrupted {
 			break
 		}
 
@@ -227,7 +140,7 @@ func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
 		case <-b.interrupt:
 			c.Error = errors.New("builder canceled")
 		case <-request.C.Done():
-			r.Status = v1alpha1.BuildPhaseInterrupted
+			result.Status = v1alpha1.BuildPhaseInterrupted
 		default:
 			l := b.log.WithValues(
 				"step", step.ID(),
@@ -248,23 +161,23 @@ func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
 		}
 	}
 
-	r.Task.CompletedAt = time.Now()
+	result.Task.CompletedAt = time.Now()
 
-	if r.Status != v1alpha1.BuildPhaseInterrupted {
-		r.Status = v1alpha1.BuildPhaseSucceeded
-		r.BaseImage = c.BaseImage
-		r.Image = c.Image
-		r.PublicImage = c.PublicImage
-		r.Error = c.Error
+	if result.Status != v1alpha1.BuildPhaseInterrupted {
+		result.Status = v1alpha1.BuildPhaseSucceeded
+		result.BaseImage = c.BaseImage
+		result.Image = c.Image
+		result.PublicImage = c.PublicImage
+		result.Error = c.Error
 
-		if r.Error != nil {
-			r.Status = v1alpha1.BuildPhaseFailed
+		if result.Error != nil {
+			result.Status = v1alpha1.BuildPhaseFailed
 		}
 
-		r.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
-		r.Artifacts = append(r.Artifacts, c.Artifacts...)
+		result.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
+		result.Artifacts = append(result.Artifacts, c.Artifacts...)
 
-		b.log.Infof("builder request %s executed in %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+		b.log.Infof("build request %s executed in %f seconds", request.Meta.Name, result.Task.Elapsed().Seconds())
 		b.log.Infof("dependencies: %s", request.Dependencies)
 		b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
 		b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
@@ -273,13 +186,8 @@ func (b *localBuilder) process(request Request, handlers ...func(*Result)) {
 		b.log.Infof("resolved image: %s", c.Image)
 		b.log.Infof("resolved public image: %s", c.PublicImage)
 	} else {
-		b.log.Infof("builder request %s interrupted after %f seconds", request.Meta.Name, r.Task.Elapsed().Seconds())
+		b.log.Infof("build request %s interrupted after %f seconds", request.Meta.Name, result.Task.Elapsed().Seconds())
 	}
 
-	// update the cache
-	b.request.Store(request.Meta.Name, r)
-
-	for _, handler := range handlers {
-		handler(&r)
-	}
+	return result
 }

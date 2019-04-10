@@ -22,42 +22,23 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
 	"testing"
 	"time"
-
-	"github.com/apache/camel-k/pkg/util/cancellable"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/s2i"
+	"github.com/apache/camel-k/pkg/util/cancellable"
+	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func handler(in chan builder.Result, out chan builder.Result) {
-	for {
-		select {
-		case res := <-in:
-			if res.Status == v1alpha1.BuildPhaseSucceeded || res.Status == v1alpha1.BuildPhaseFailed {
-				out <- res
-				return
-			}
-		case <-time.After(5 * time.Minute):
-			fmt.Println("timeout 1")
-			close(out)
-			return
-		}
-	}
-}
-
 func TestBuildManagerBuild(t *testing.T) {
-	namespace := getTargetNamespace()
-	b := builder.NewLocalBuilder(testClient, namespace)
+	b := builder.New(testClient)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -68,6 +49,7 @@ func TestBuildManagerBuild(t *testing.T) {
 		RuntimeVersion: defaults.RuntimeVersion,
 		Meta: metav1.ObjectMeta{
 			Name:            "man-test",
+			Namespace:       getTargetNamespace(),
 			ResourceVersion: "1",
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
@@ -87,28 +69,15 @@ func TestBuildManagerBuild(t *testing.T) {
 		Steps: s2i.DefaultSteps,
 	}
 
-	hc := make(chan builder.Result)
-	rc := make(chan builder.Result)
+	result := b.Build(r)
 
-	go func() {
-		handler(hc, rc)
-	}()
-	go func() {
-		b.Submit(r, func(res *builder.Result) {
-			hc <- *res
-		})
-	}()
-
-	result, ok := <-rc
-	assert.True(t, ok)
 	assert.NotEqual(t, v1alpha1.BuildPhaseFailed, result.Status)
 	assert.Equal(t, v1alpha1.BuildPhaseSucceeded, result.Status)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
 func TestBuildManagerFailedBuild(t *testing.T) {
-	namespace := getTargetNamespace()
-	b := builder.NewLocalBuilder(testClient, namespace)
+	b := builder.New(testClient)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -119,6 +88,7 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		RuntimeVersion: defaults.RuntimeVersion,
 		Meta: metav1.ObjectMeta{
 			Name:            "man-test",
+			Namespace:       getTargetNamespace(),
 			ResourceVersion: "1",
 		},
 		Platform: v1alpha1.IntegrationPlatformSpec{
@@ -137,20 +107,8 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		Steps: s2i.DefaultSteps,
 	}
 
-	hc := make(chan builder.Result)
-	rc := make(chan builder.Result)
+	result := b.Build(r)
 
-	go func() {
-		handler(hc, rc)
-	}()
-	go func() {
-		b.Submit(r, func(res *builder.Result) {
-			hc <- *res
-		})
-	}()
-
-	result, ok := <-rc
-	assert.True(t, ok)
 	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Status)
 	assert.NotEqual(t, v1alpha1.BuildPhaseSucceeded, result.Status)
 }
