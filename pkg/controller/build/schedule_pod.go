@@ -74,6 +74,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	for _, b := range builds.Items {
 		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
 			hasScheduledBuild = true
+			break
 		}
 	}
 
