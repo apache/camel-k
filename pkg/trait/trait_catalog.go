@@ -31,6 +31,7 @@ import (
 // Catalog collects all information about traits in one place
 type Catalog struct {
 	L                 log.Logger
+	tAffinity         Trait
 	tCamel            Trait
 	tDebug            Trait
 	tDependencies     Trait
@@ -60,6 +61,7 @@ type Catalog struct {
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
 		L:                 log.Log.WithName("trait"),
+		tAffinity:         newAffinityTrait(),
 		tCamel:            newCamelTrait(),
 		tDebug:            newDebugTrait(),
 		tRestDsl:          newRestDslTrait(),
@@ -98,6 +100,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 
 func (c *Catalog) allTraits() []Trait {
 	return []Trait{
+		c.tAffinity,
 		c.tCamel,
 		c.tDebug,
 		c.tRestDsl,
@@ -143,6 +146,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tPrometheus,
 			c.tDeployer,
 			c.tDeployment,
+			c.tAffinity,
 			c.tContainer,
 			c.tClasspath,
 			c.tProbes,
@@ -165,6 +169,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tPrometheus,
 			c.tDeployer,
 			c.tDeployment,
+			c.tAffinity,
 			c.tContainer,
 			c.tClasspath,
 			c.tProbes,
@@ -186,6 +191,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tSpringBoot,
 			c.tDeployer,
 			c.tDeployment,
+			c.tAffinity,
 			c.tKnativeService,
 			c.tContainer,
 			c.tClasspath,
