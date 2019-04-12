@@ -46,7 +46,7 @@ func newAffinityTrait() *affinityTrait {
 }
 
 func (t *affinityTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if t.Enabled == nil || !*t.Enabled {
 		return false, nil
 	}
 
