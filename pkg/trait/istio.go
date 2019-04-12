@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"strconv"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -26,6 +28,7 @@ import (
 type istioTrait struct {
 	BaseTrait `property:",squash"`
 	Allow     string `property:"allow"`
+	Inject    *bool  `property:"inject"`
 }
 
 const (
@@ -67,6 +70,9 @@ func (t *istioTrait) injectIstioAnnotation(annotations map[string]string, includ
 	annotations[istioOutboundIPRangesAnnotation] = t.Allow
 	if includeInject {
 		annotations[istioSidecarInjectAnnotation] = "true"
+	}
+	if t.Inject != nil {
+		annotations[istioSidecarInjectAnnotation] = strconv.FormatBool(*t.Inject)
 	}
 	return annotations
 }
