@@ -88,6 +88,53 @@ The following is a list of common traits that can be configured by the end users
   +
   It's enabled by default on vanilla Kubernetes/Openshift profiles.
 
+| affinity
+| All
+| Allows to constrain which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node, or with inter-pod affinity and anti-affinity, based on labels on pods that are already running on the nodes.
+  +
+  +
+  It's disabled by default.
+
+[cols="m,"]
+!===
+
+! affinity.pod-affinity
+! Always co-locates multiple replicas of the integration in the same node (default `false`).
+
+! affinity.pod-affinity-labels
+! Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the integration pod(s) should be co-located with.
+
+! affinity.pod-anti-affinity
+! Never co-locates multiple replicas of the integration in the same node (default `false`).
+
+! affinity.pod-anti-affinity-labels
+! Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the integration pod(s) should not be co-located with.
+
+! affinity.node-affinity-labels
+! Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
+
+!===
+
+Examples:
+
+* To schedule the integration pod(s) on a specific node using the https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#interlude-built-in-node-labels[built-in node label] `kubernetes.io/hostname`:
+[source,shell]
+$ kamel run -t affinity.node-affinity-labels="kubernetes.io/hostname in(node-66-50.hosted.k8s.tld)" ...
+
+* To schedule a single integration pod per node (using the `Exists` operator):
+[source,shell]
+$ kamel run -t affinity.node-anti-affinity-labels="camel.apache.org/integration" ...
+
+* To co-locate the integration pod(s) with other integration pod(s):
+[source,shell]
+$ kamel run -t affinity.node-affinity-labels="camel.apache.org/integration in(it1, it2)" ...
+
+The labels options follow the requirements from https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors[Label selectors]. They can be multi-valuated, then the requirements list is ANDed, e.g., to schedule a single integration pod per node AND not co-located with the Camel K operator pod(s):
+[source,shell]
+$ kamel run -t affinity.node-anti-affinity-labels="camel.apache.org/integration" -t affinity.node-anti-affinity-labels="camel.apache.org/component=operator" ...
+
+More information can be found in the official Kubernetes documentation about https://kubernetes.io/docs/concepts/configuration/assign-pod-node/[Assigning Pods to Nodes].
+
 | knative
 | Knative (Kubernetes, OpenShift)
 | Creates Knative resources to run the integration instead of the standard Kubernetes resources.
