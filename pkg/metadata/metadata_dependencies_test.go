@@ -118,3 +118,74 @@ func TestDependencies(t *testing.T) {
 	// assert all dependencies are found and sorted (removing duplicates)
 	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:twitter"}, meta.Dependencies)
 }
+
+func TestJacksonDependency(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
+			    from("http4:test").unmarshal().json(JsonLibrary.Jackson).to("log:end");
+		    `,
+		},
+		Language: v1alpha1.LanguageJavaSource,
+	}
+
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+
+	// assert all dependencies are found and sorted (removing duplicates)
+	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:jackson"}, meta.Dependencies)
+}
+
+func TestHystrixDependency(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.groovy",
+			Content: `
+			    from("http4:test")
+					.hystrix()
+						.to("log:end")
+					.onFallback()
+						.to("log:fallback")
+		    `,
+		},
+		Language: v1alpha1.LanguageGroovy,
+	}
+
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+
+	// assert all dependencies are found and sorted (removing duplicates)
+	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:hystrix"}, meta.Dependencies)
+}
+
+func TestXMLHystrixDependency(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+
+		DataSpec: v1alpha1.DataSpec{
+			Name: "routes.xml",
+			Content: `
+			<from uri="direct:ciao" />
+			<hystrix>
+				<to uri="log:info" />
+				<onFallback>
+					<to uri="kafka:topic" />
+				</onFallback>
+			</hystrix>
+		`,
+		},
+		Language: v1alpha1.LanguageXML,
+	}
+
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+
+	// assert all dependencies are found and sorted (removing duplicates)
+	assert.Equal(t, []string{"camel:core", "camel:hystrix", "camel:kafka"}, meta.Dependencies)
+}
