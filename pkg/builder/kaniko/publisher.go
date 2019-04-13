@@ -110,6 +110,24 @@ func Publisher(ctx *builder.Context) error {
 		})
 		args = baseArgs
 	}
+	
+	if ctx.Request.Platform.Build.Registry.DockerConfig != "" {
+		volumes = append(volumes, corev1.Volume{
+			Name: "docker-config",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: ctx.Request.Platform.Build.Registry.DockerConfig,
+					},
+				},
+			},
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "docker-config",
+			MountPath: "/kaniko/.docker",
+		})
+		args = baseArgs
+	}
 
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
