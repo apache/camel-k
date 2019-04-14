@@ -52,7 +52,7 @@ kubectl create secret generic kaniko-secret --from-file=kaniko-secret.json
 You're ready to install Camel K. You should now execute the following command to install cluster resources and the operator (in the current namespace):
 
 ```
-kamel install --registry gcr.io --organization <<your-project-id>> --push-secret kaniko-secret
+kamel install --registry gcr.io --organization <<your-project-id>> --registry-secret kaniko-secret
 ```
 
 Use the project id that you've annotated when executing the first connection string.
