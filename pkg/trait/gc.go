@@ -84,16 +84,20 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 }
 
 func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
-	// Retrieve older generation resources that may can enlisted for garbage collection
+	// Retrieve older generation resources to be enlisted for garbage collection.
 	// We rely on the discovery API to retrieve all the resources group and kind.
 	// That results in an unbounded collection that can be a bit slow.
 	// We may want to refine that step by white-listing or enlisting types to speed-up
 	// the collection duration.
 
 	selectors := []string{
+		// Select resources labelled with the current integration.
 		fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
-		"camel.apache.org/generation",
+		// Garbage collect older generation resources only.
+		// By the time async garbage collecting is executed, newer generations may exist.
+		fmt.Sprintf("camel.apache.org/generation<%d", e.Integration.GetGeneration()),
 	}
+
 	resources, err := kubernetes.LookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
 	if err != nil {
 		t.L.ForIntegration(e.Integration).Errorf(err, "cannot collect older generation resources")
@@ -104,19 +108,6 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 	for _, resource := range resources {
 		// pin the resource
 		resource := resource
-
-		labels := resource.GetLabels()
-		generation, err := strconv.ParseInt(labels["camel.apache.org/generation"], 10, 64)
-		if err != nil {
-			t.L.ForIntegration(e.Integration).Errorf(err, "cannot parse generation label: %s", labels["camel.apache.org/generation"])
-		}
-
-		// Garbage collect older generation resource only.
-		// By the time async garbage collecting is executed, newer generations may exist.
-		if generation >= e.Integration.GetGeneration() {
-			continue
-		}
-
 		err = e.Client.Delete(context.TODO(), &resource, client.PropagationPolicy(metav1.DeletePropagationBackground))
 		if err != nil {
 			// The resource may have already been deleted
