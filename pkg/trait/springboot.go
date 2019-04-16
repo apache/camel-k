@@ -21,12 +21,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/springboot"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 type springBootTrait struct {
