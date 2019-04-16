@@ -27,6 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
@@ -47,6 +49,8 @@ func printVersion() {
 }
 
 func main() {
+	logf.SetLogger(logf.ZapLogger(false))
+
 	rand.Seed(time.Now().UTC().UnixNano())
 	printVersion()
 
