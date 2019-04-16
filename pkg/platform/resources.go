@@ -24,7 +24,6 @@ var DefaultContexts = []string{
 	"platform-integration-context-jvm.yaml",
 	"platform-integration-context-groovy.yaml",
 	"platform-integration-context-kotlin.yaml",
-	"platform-integration-context-spring-boot.yaml",
 }
 
 // KnativeContexts --
