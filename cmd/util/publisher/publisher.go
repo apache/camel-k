@@ -28,18 +28,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
+	clientscheme "k8s.io/client-go/kubernetes/scheme"
 
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform/images"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/cancellable"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	clientscheme "k8s.io/client-go/kubernetes/scheme"
 )
 
 // PublisherOptions --
@@ -141,9 +141,7 @@ func (options *PublisherOptions) build(component string, runtimeVersion string, 
 	ctx := builder.Context{
 		Catalog: catalog,
 		Path:    dir,
-		Request: builder.Request{
-			C:              cancellable.NewContext(),
-			Catalog:        catalog,
+		Build: v1alpha1.BuildSpec{
 			RuntimeVersion: runtimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{

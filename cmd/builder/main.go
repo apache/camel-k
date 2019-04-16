@@ -29,6 +29,8 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/kaniko"
+	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/builder/util"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/cancellable"
@@ -64,22 +66,19 @@ func main() {
 		c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build),
 	)
 
-	req, err := util.NewRequestForBuild(ctx, c, build)
-	exitOnError(err)
-
-	target := build.DeepCopy()
-	target.Status.Phase = v1alpha1.BuildPhaseRunning
+	status := v1alpha1.BuildStatus{
+		Phase: v1alpha1.BuildPhaseRunning,
+	}
 	exitOnError(
-		util.UpdateBuildStatus(ctx, target, c, log),
+		util.UpdateBuildStatus(ctx, build, status, c, log),
 	)
 
-	result := builder.New(c).Build(*req)
-
+	status = builder.New(c, kaniko.DefaultSteps, s2i.DefaultSteps).Build(build.Spec)
 	exitOnError(
-		util.UpdateBuildFromResult(req.C, build, result, c, log),
+		util.UpdateBuildStatus(ctx, build, status, c, log),
 	)
 
-	switch result.Status {
+	switch build.Status.Phase {
 	case v1alpha1.BuildPhaseSucceeded:
 		os.Exit(0)
 	default:

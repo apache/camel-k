@@ -18,15 +18,15 @@ limitations under the License.
 package builder
 
 import (
-	"errors"
 	"testing"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/test"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,8 +37,7 @@ func TestMavenRepositories(t *testing.T) {
 
 	ctx := Context{
 		Catalog: catalog,
-		Request: Request{
-			Catalog:        catalog,
+		Build: v1alpha1.BuildSpec{
 			RuntimeVersion: defaults.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
@@ -98,8 +97,7 @@ func TestGenerateJvmProject(t *testing.T) {
 
 	ctx := Context{
 		Catalog: catalog,
-		Request: Request{
-			Catalog:        catalog,
+		Build: v1alpha1.BuildSpec{
 			RuntimeVersion: defaults.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
@@ -153,8 +151,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 
 	ctx := Context{
 		Catalog: catalog,
-		Request: Request{
-			Catalog:        catalog,
+		Build: v1alpha1.BuildSpec{
 			RuntimeVersion: defaults.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
@@ -219,8 +216,7 @@ func TestGenerateProjectWithRepositories(t *testing.T) {
 
 	ctx := Context{
 		Catalog: catalog,
-		Request: Request{
-			Catalog: catalog,
+		Build: v1alpha1.BuildSpec{
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -260,8 +256,7 @@ func TestSanitizeDependencies(t *testing.T) {
 
 	ctx := Context{
 		Catalog: catalog,
-		Request: Request{
-			Catalog:        catalog,
+		Build: v1alpha1.BuildSpec{
 			RuntimeVersion: defaults.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
@@ -306,37 +301,6 @@ func TestSanitizeDependencies(t *testing.T) {
 		Version:    "1.2.3",
 		Type:       "jar",
 	})
-}
-
-func TestFailure(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
-	assert.Nil(t, err)
-
-	b := New(nil)
-
-	r := Request{
-		C:              cancellable.NewContext(),
-		Catalog:        catalog,
-		RuntimeVersion: defaults.RuntimeVersion,
-		Steps: []Step{
-			NewStep("step1", InitPhase, func(i *Context) error {
-				return nil
-			}),
-			NewStep("step2", ApplicationPublishPhase, func(i *Context) error {
-				return errors.New("an error")
-			}),
-		},
-		Platform: v1alpha1.IntegrationPlatformSpec{
-			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: catalog.Version,
-			},
-		},
-	}
-
-	result := b.Build(r)
-
-	assert.NotNil(t, result)
-	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Status)
 }
 
 func TestListPublishedImages(t *testing.T) {
@@ -388,9 +352,7 @@ func TestListPublishedImages(t *testing.T) {
 	i, err := ListPublishedImages(&Context{
 		Client:  c,
 		Catalog: catalog,
-		Request: Request{
-			C: cancellable.NewContext(),
-		},
+		C:       cancellable.NewContext(),
 	})
 
 	assert.Nil(t, err)

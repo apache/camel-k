@@ -29,13 +29,12 @@ import (
 	"github.com/scylladb/go-set/strset"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/tar"
 
 	yaml2 "gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
-
-	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 // GenerateProject --
@@ -51,9 +50,9 @@ func GenerateProject(ctx *Context) error {
 	// set-up dependencies
 	//
 
-	ctx.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", ctx.Request.RuntimeVersion)
+	ctx.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", ctx.Build.RuntimeVersion)
 
-	for _, d := range ctx.Request.Dependencies {
+	for _, d := range ctx.Build.Dependencies {
 		switch {
 		case strings.HasPrefix(d, "camel:"):
 			artifactID := strings.TrimPrefix(d, "camel:")
@@ -70,7 +69,7 @@ func GenerateProject(ctx *Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
+			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
@@ -79,7 +78,7 @@ func GenerateProject(ctx *Context) error {
 		case strings.HasPrefix(d, "runtime:"):
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
+			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
 		case strings.HasPrefix(d, "bom:"):
 			// no-op
 		default:
@@ -108,7 +107,7 @@ func InjectDependencies(ctx *Context) error {
 	copy(deps, ctx.Project.Dependencies)
 
 	for _, d := range deps {
-		if a, ok := ctx.Request.Catalog.Artifacts[d.ArtifactID]; ok {
+		if a, ok := ctx.Catalog.Artifacts[d.ArtifactID]; ok {
 			for _, dep := range a.Dependencies {
 				md := maven.Dependency{
 					GroupID:    dep.GroupID,
@@ -137,7 +136,7 @@ func InjectDependencies(ctx *Context) error {
 	copy(deps, ctx.Project.Dependencies)
 
 	for _, d := range deps {
-		if a, ok := ctx.Request.Catalog.Artifacts[d.ArtifactID]; ok {
+		if a, ok := ctx.Catalog.Artifacts[d.ArtifactID]; ok {
 			md := maven.Dependency{
 				GroupID:    a.GroupID,
 				ArtifactID: a.ArtifactID,
@@ -173,7 +172,7 @@ func SanitizeDependencies(ctx *Context) error {
 			// Force every runtime dependency to have the required version discardin
 			// any version eventually set on the catalog
 			//
-			ctx.Project.Dependencies[i].Version = ctx.Request.RuntimeVersion
+			ctx.Project.Dependencies[i].Version = ctx.Build.RuntimeVersion
 		}
 	}
 
@@ -190,8 +189,8 @@ func ComputeDependencies(ctx *Context) error {
 	}
 
 	opts := make([]string, 0, 2)
-	opts = append(opts, maven.ExtraOptions(ctx.Request.Platform.Build.LocalRepository)...)
-	opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Request.RuntimeVersion))
+	opts = append(opts, maven.ExtraOptions(ctx.Build.Platform.Build.LocalRepository)...)
+	opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Build.RuntimeVersion))
 
 	err = maven.Run(p, opts...)
 	if err != nil {
@@ -258,7 +257,7 @@ func IncrementalPackager(ctx *Context) error {
 	return packager(ctx, func(ctx *Context) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
-		bestImage, commonLibs := FindBestImage(images, ctx.Request.Dependencies, ctx.Artifacts)
+		bestImage, commonLibs := FindBestImage(images, ctx.Build.Dependencies, ctx.Artifacts)
 		if bestImage.Image != "" {
 			selectedArtifacts := make([]v1alpha1.Artifact, 0)
 			for _, entry := range ctx.Artifacts {
@@ -307,7 +306,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 		}
 	}
 
-	for _, entry := range ctx.Request.Resources {
+	for _, entry := range ctx.Resources {
 		if err := tarAppender.AddData(entry.Content, entry.Target); err != nil {
 			return err
 		}
@@ -322,7 +321,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	list := v1alpha1.NewIntegrationContextList()
 
-	err := context.Client.List(context.Request.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
+	err := context.Client.List(context.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
 	if err != nil {
 		return nil, err
 	}
@@ -337,7 +336,7 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 		if ctx.Status.CamelVersion != context.Catalog.Version {
 			continue
 		}
-		if ctx.Status.RuntimeVersion != context.Request.RuntimeVersion {
+		if ctx.Status.RuntimeVersion != context.Build.RuntimeVersion {
 			continue
 		}
 		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {

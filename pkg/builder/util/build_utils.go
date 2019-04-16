@@ -19,144 +19,32 @@ package util
 
 import (
 	"context"
-	"path"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/builder/kaniko"
-	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/cancellable"
 	logger "github.com/apache/camel-k/pkg/util/log"
 )
 
-var log = logger.WithName("builder")
-
-// NewRequestForBuild--
-func NewRequestForBuild(ctx context.Context, c client.Client, build *v1alpha1.Build) (*builder.Request, error) {
-	catalog, err := camel.Catalog(ctx, c, build.Namespace, build.Spec.CamelVersion)
-	if err != nil {
-		return nil, err
-	}
-
-	stepsDictionary := make(map[string]builder.Step)
-	for _, step := range kaniko.DefaultSteps {
-		stepsDictionary[step.ID()] = step
-	}
-	for _, step := range s2i.DefaultSteps {
-		stepsDictionary[step.ID()] = step
-	}
-
-	steps := make([]builder.Step, 0)
-	for _, step := range build.Spec.Steps {
-		s, ok := stepsDictionary[step]
-		if !ok {
-			log.Info("Skipping unknown build step", "step", step)
-			continue
-		}
-		steps = append(steps, s)
-	}
-
-	request := &builder.Request{
-		C:              cancellable.NewContext(),
-		Catalog:        catalog,
-		RuntimeVersion: build.Spec.RuntimeVersion,
-		Meta:           build.Spec.Meta,
-		Dependencies:   build.Spec.Dependencies,
-		Repositories:   build.Spec.Repositories,
-		Steps:          steps,
-		BuildDir:       build.Spec.BuildDir,
-		Platform:       build.Spec.Platform,
-		Image:          build.Spec.Image,
-	}
-
-	// Add sources
-	for _, data := range build.Spec.Sources {
-		request.Resources = append(request.Resources, builder.Resource{
-			Content: []byte(data.Content),
-			Target:  path.Join("sources", data.Name),
-		})
-	}
-
-	// Add resources
-	for _, data := range build.Spec.Resources {
-		t := path.Join("resources", data.Name)
-
-		if data.MountPath != "" {
-			t = path.Join(data.MountPath, data.Name)
-		}
-
-		request.Resources = append(request.Resources, builder.Resource{
-			Content: []byte(data.Content),
-			Target:  t,
-		})
-	}
-
-	return request, nil
-}
-
-// UpdateBuildFromResult --
-func UpdateBuildFromResult(ctx context.Context, build *v1alpha1.Build, result builder.Result, c client.Client, log logger.Logger) error {
-	// Refresh build
-	err := c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
-	if err != nil {
-		log.Error(err, "Build refresh failed")
-	}
-
-	switch result.Status {
-
-	case v1alpha1.BuildPhaseInterrupted:
-		log.Info("Build interrupted")
-
-		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildPhaseInterrupted
-		err = UpdateBuildStatus(ctx, b, c, log)
-
-	case v1alpha1.BuildPhaseFailed:
-		log.Error(result.Error, "Build failed")
-
-		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildPhaseFailed
-		b.Status.Error = result.Error.Error()
-		err = UpdateBuildStatus(ctx, b, c, log)
-
-	case v1alpha1.BuildPhaseSucceeded:
-		log.Info("Build completed")
-
-		b := build.DeepCopy()
-		b.Status.Phase = v1alpha1.BuildPhaseSucceeded
-		b.Status.Image = result.Image
-		b.Status.BaseImage = result.BaseImage
-		b.Status.PublicImage = result.PublicImage
-		b.Status.Artifacts = result.Artifacts
-		err = UpdateBuildStatus(ctx, b, c, log)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UpdateBuildStatus(ctx context.Context, b *v1alpha1.Build, c client.Client, log logger.Logger) error {
-	err := c.Status().Update(ctx, b)
+func UpdateBuildStatus(ctx context.Context, build *v1alpha1.Build, status v1alpha1.BuildStatus, c client.Client, log logger.Logger) error {
+	target := build.DeepCopy()
+	target.Status = status
+	err := c.Status().Update(ctx, target)
 	if err != nil {
 		if k8serrors.IsConflict(err) {
 			// Refresh build
-			err := c.Get(ctx, types.NamespacedName{Namespace: b.Namespace, Name: b.Name}, b)
+			err := c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
 			if err != nil {
 				log.Error(err, "Build refresh failed")
 				return err
 			}
-			return UpdateBuildStatus(ctx, b, c, log)
+			return UpdateBuildStatus(ctx, build, status, c, log)
 		}
 		log.Error(err, "Build update failed")
 		return err
 	}
+	build.Status = status
 	return nil
 }
