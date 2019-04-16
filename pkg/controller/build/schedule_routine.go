@@ -25,7 +25,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/builder/util"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
@@ -103,7 +102,7 @@ func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.
 
 	status := action.builder.Build(build.Spec)
 
-	err := util.UpdateBuildStatus(ctx, build, status, action.client, action.L)
+	err := builder.UpdateBuildStatus(ctx, build, status, action.client, action.L)
 	if err != nil {
 		action.L.Errorf(err, "Error while running build: %s", build.Name)
 	}

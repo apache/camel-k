@@ -33,7 +33,6 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/builder/util"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -74,12 +73,12 @@ func main() {
 		Phase: v1alpha1.BuildPhaseRunning,
 	}
 	exitOnError(
-		util.UpdateBuildStatus(ctx, build, status, c, log),
+		builder.UpdateBuildStatus(ctx, build, status, c, log),
 	)
 
 	status = builder.New(c, kaniko.DefaultSteps, s2i.DefaultSteps).Build(build.Spec)
 	exitOnError(
-		util.UpdateBuildStatus(ctx, build, status, c, log),
+		builder.UpdateBuildStatus(ctx, build, status, c, log),
 	)
 
 	switch build.Status.Phase {
