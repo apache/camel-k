@@ -18,14 +18,15 @@ limitations under the License.
 package builder
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
+	"path"
 	"sort"
 	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -34,28 +35,37 @@ type defaultBuilder struct {
 	log    log.Logger
 	ctx    cancellable.Context
 	client client.Client
+	steps  map[string]Step
 }
 
 // New --
-func New(c client.Client) Builder {
+func New(c client.Client, steps0 []Step, stepsI ...[]Step) Builder {
+	s := make(map[string]Step)
+	for _, step := range steps0 {
+		s[step.ID()] = step
+	}
+	for _, steps := range stepsI {
+		for _, step := range steps {
+			s[step.ID()] = step
+		}
+	}
+
 	m := defaultBuilder{
 		log:    log.WithName("builder"),
 		ctx:    cancellable.NewContext(),
 		client: c,
+		steps:  s,
 	}
 
 	return &m
 }
 
 // Build --
-func (b *defaultBuilder) Build(request Request) Result {
-	result := Result{
-		Builder: b,
-		Request: request,
-	}
+func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
+	result := v1alpha1.BuildStatus{}
 
 	// create tmp path
-	buildDir := request.BuildDir
+	buildDir := build.BuildDir
 	if buildDir == "" {
 		buildDir = os.TempDir()
 	}
@@ -63,59 +73,97 @@ func (b *defaultBuilder) Build(request Request) Result {
 	if err != nil {
 		log.Error(err, "Unexpected error while creating a temporary dir")
 
-		result.Status = v1alpha1.BuildPhaseFailed
-		result.Error = err
+		result.Phase = v1alpha1.BuildPhaseFailed
+		result.Error = err.Error()
 	}
 
 	defer os.RemoveAll(builderPath)
 
-	c := Context{
-		Client:    b.client,
-		Catalog:   request.Catalog,
-		Path:      builderPath,
-		Namespace: request.Meta.Namespace,
-		Request:   request,
-		Image:     request.Platform.Build.BaseImage,
+	catalog, err := camel.Catalog(b.ctx, b.client, build.Meta.Namespace, build.CamelVersion)
+	if err != nil {
+		log.Error(err, "Error while loading Camel catalog")
+
+		result.Phase = v1alpha1.BuildPhaseFailed
+		result.Error = err.Error()
 	}
 
-	if request.Image != "" {
-		c.Image = request.Image
+	c := Context{
+		Client:    b.client,
+		Catalog:   catalog,
+		Path:      builderPath,
+		Namespace: build.Meta.Namespace,
+		Build:     build,
+		Image:     build.Platform.Build.BaseImage,
+	}
+
+	if build.Image != "" {
+		c.Image = build.Image
 	}
 
 	// base image is mandatory
 	if c.Image == "" {
-		result.Status = v1alpha1.BuildPhaseFailed
+		result.Phase = v1alpha1.BuildPhaseFailed
 		result.Image = ""
 		result.PublicImage = ""
-		result.Error = errors.New("no base image defined")
-		result.Task.CompletedAt = time.Now()
+		result.Error = "no base image defined"
 	}
 
 	c.BaseImage = c.Image
 
-	if result.Status == v1alpha1.BuildPhaseFailed {
+	// Add sources
+	for _, data := range build.Sources {
+		c.Resources = append(c.Resources, Resource{
+			Content: []byte(data.Content),
+			Target:  path.Join("sources", data.Name),
+		})
+	}
+
+	// Add resources
+	for _, data := range build.Resources {
+		t := path.Join("resources", data.Name)
+
+		if data.MountPath != "" {
+			t = path.Join(data.MountPath, data.Name)
+		}
+
+		c.Resources = append(c.Resources, Resource{
+			Content: []byte(data.Content),
+			Target:  t,
+		})
+	}
+
+	if result.Phase == v1alpha1.BuildPhaseFailed {
 		return result
 	}
 
+	steps := make([]Step, 0)
+	for _, step := range build.Steps {
+		s, ok := b.steps[step]
+		if !ok {
+			log.Info("Skipping unknown build step", "step", step)
+			continue
+		}
+		steps = append(steps, s)
+	}
 	// Sort steps by phase
-	sort.SliceStable(request.Steps, func(i, j int) bool {
-		return request.Steps[i].Phase() < request.Steps[j].Phase()
+	sort.SliceStable(steps, func(i, j int) bool {
+		return steps[i].Phase() < steps[j].Phase()
 	})
 
-	b.log.Infof("steps: %v", request.Steps)
-	for _, step := range request.Steps {
-		if c.Error != nil || result.Status == v1alpha1.BuildPhaseInterrupted {
+	b.log.Infof("steps: %v", steps)
+	for _, step := range steps {
+		if c.Error != nil || result.Phase == v1alpha1.BuildPhaseInterrupted {
 			break
 		}
 
 		select {
-		case <-request.C.Done():
-			result.Status = v1alpha1.BuildPhaseInterrupted
+		case <-b.ctx.Done():
+			result.Phase = v1alpha1.BuildPhaseInterrupted
 		default:
 			l := b.log.WithValues(
 				"step", step.ID(),
 				"phase", step.Phase(),
-				"context", request.Meta.Name,
+				"context", build.Meta.Name,
 			)
 
 			l.Infof("executing step")
@@ -131,32 +179,32 @@ func (b *defaultBuilder) Build(request Request) Result {
 		}
 	}
 
-	result.Task.CompletedAt = time.Now()
+	//result.Task.CompletedAt = time.Now()
 
-	if result.Status != v1alpha1.BuildPhaseInterrupted {
-		result.Status = v1alpha1.BuildPhaseSucceeded
+	if result.Phase != v1alpha1.BuildPhaseInterrupted {
+		result.Phase = v1alpha1.BuildPhaseSucceeded
 		result.BaseImage = c.BaseImage
 		result.Image = c.Image
 		result.PublicImage = c.PublicImage
-		result.Error = c.Error
 
-		if result.Error != nil {
-			result.Status = v1alpha1.BuildPhaseFailed
+		if c.Error != nil {
+			result.Error = c.Error.Error()
+			result.Phase = v1alpha1.BuildPhaseFailed
 		}
 
 		result.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
 		result.Artifacts = append(result.Artifacts, c.Artifacts...)
 
-		b.log.Infof("build request %s executed in %f seconds", request.Meta.Name, result.Task.Elapsed().Seconds())
-		b.log.Infof("dependencies: %s", request.Dependencies)
+		//b.log.Infof("build request %s executed in %f seconds", build.Name, result.Task.Elapsed().Seconds())
+		b.log.Infof("dependencies: %s", build.Dependencies)
 		b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
 		b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
-		b.log.Infof("requested image: %s", request.Image)
+		b.log.Infof("requested image: %s", build.Image)
 		b.log.Infof("base image: %s", c.BaseImage)
 		b.log.Infof("resolved image: %s", c.Image)
 		b.log.Infof("resolved public image: %s", c.PublicImage)
 	} else {
-		b.log.Infof("build request %s interrupted after %f seconds", request.Meta.Name, result.Task.Elapsed().Seconds())
+		//b.log.Infof("build request %s interrupted after %f seconds", build.Name, result.Task.Elapsed().Seconds())
 	}
 
 	return result

@@ -27,8 +27,8 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -38,14 +38,12 @@ import (
 )
 
 func TestBuildManagerBuild(t *testing.T) {
-	b := builder.New(testClient)
+	b := builder.New(testClient, kaniko.DefaultSteps, s2i.DefaultSteps)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
-	r := builder.Request{
-		C:              cancellable.NewContext(),
-		Catalog:        catalog,
+	r := v1alpha1.BuildSpec{
 		RuntimeVersion: defaults.RuntimeVersion,
 		Meta: metav1.ObjectMeta{
 			Name:            "man-test",
@@ -66,25 +64,23 @@ func TestBuildManagerBuild(t *testing.T) {
 			"mvn:org.apache.camel/camel-core",
 			"camel:telegram",
 		},
-		Steps: s2i.DefaultSteps,
+		Steps: getSteps(),
 	}
 
 	result := b.Build(r)
 
-	assert.NotEqual(t, v1alpha1.BuildPhaseFailed, result.Status)
-	assert.Equal(t, v1alpha1.BuildPhaseSucceeded, result.Status)
+	assert.NotEqual(t, v1alpha1.BuildPhaseFailed, result.Phase)
+	assert.Equal(t, v1alpha1.BuildPhaseSucceeded, result.Phase)
 	assert.Regexp(t, ".*/.*/.*:.*", result.Image)
 }
 
 func TestBuildManagerFailedBuild(t *testing.T) {
-	b := builder.New(testClient)
+	b := builder.New(testClient, kaniko.DefaultSteps, s2i.DefaultSteps)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
-	r := builder.Request{
-		C:              cancellable.NewContext(),
-		Catalog:        catalog,
+	r := v1alpha1.BuildSpec{
 		RuntimeVersion: defaults.RuntimeVersion,
 		Meta: metav1.ObjectMeta{
 			Name:            "man-test",
@@ -104,11 +100,21 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-cippalippa",
 		},
-		Steps: s2i.DefaultSteps,
+		Steps: getSteps(),
 	}
 
 	result := b.Build(r)
 
-	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Status)
-	assert.NotEqual(t, v1alpha1.BuildPhaseSucceeded, result.Status)
+	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Phase)
+	assert.NotEqual(t, v1alpha1.BuildPhaseSucceeded, result.Phase)
+}
+
+func getSteps() []string {
+	steps := make([]string, 0)
+
+	for _, step := range s2i.DefaultSteps {
+		steps = append(steps, step.ID())
+	}
+
+	return steps
 }

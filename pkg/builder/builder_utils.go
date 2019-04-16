@@ -45,7 +45,7 @@ func NewProject(ctx *Context) (maven.Project, error) {
 	// Catalog
 	//
 	if ctx.Catalog == nil {
-		c, err := camel.Catalog(ctx.Request.C, ctx.Client, ctx.Namespace, ctx.Request.Platform.Build.CamelVersion)
+		c, err := camel.Catalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Platform.Build.CamelVersion)
 		if err != nil {
 			return maven.Project{}, err
 		}
@@ -62,7 +62,7 @@ func NewProject(ctx *Context) (maven.Project, error) {
 		GroupID:              "org.apache.camel.k.integration",
 		ArtifactID:           "camel-k-integration",
 		Version:              defaults.Version,
-		Properties:           ctx.Request.Platform.Build.Properties,
+		Properties:           ctx.Build.Platform.Build.Properties,
 		DependencyManagement: maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)},
 		Dependencies:         make([]maven.Dependency, 0),
 	}
@@ -79,7 +79,7 @@ func NewProject(ctx *Context) (maven.Project, error) {
 		Scope:      "import",
 	})
 
-	for _, d := range ctx.Request.Dependencies {
+	for _, d := range ctx.Build.Dependencies {
 		if strings.HasPrefix(d, "bom:") {
 			mid := strings.TrimPrefix(d, "bom:")
 			gav := strings.Replace(mid, "/", ":", -1)
@@ -105,10 +105,10 @@ func NewProject(ctx *Context) (maven.Project, error) {
 	// Repositories
 	//
 
-	p.Repositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
-	p.PluginRepositories = make([]maven.Repository, 0, len(ctx.Request.Repositories))
+	p.Repositories = make([]maven.Repository, 0, len(ctx.Build.Repositories))
+	p.PluginRepositories = make([]maven.Repository, 0, len(ctx.Build.Repositories))
 
-	for i, r := range ctx.Request.Repositories {
+	for i, r := range ctx.Build.Repositories {
 		repo := maven.NewRepository(r)
 		if repo.ID == "" {
 			repo.ID = fmt.Sprintf("repo-%03d", i)

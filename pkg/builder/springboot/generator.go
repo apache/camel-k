@@ -41,7 +41,7 @@ func GenerateProject(ctx *builder.Context) error {
 	ctx.Project.AddDependency(maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-spring-boot",
-		Version:    ctx.Request.RuntimeVersion,
+		Version:    ctx.Build.RuntimeVersion,
 		Exclusions: &[]maven.Exclusion{
 			{
 				GroupID:    "org.apache.camel",
@@ -62,7 +62,7 @@ func GenerateProject(ctx *builder.Context) error {
 	// others
 	//
 
-	for _, d := range ctx.Request.Dependencies {
+	for _, d := range ctx.Build.Dependencies {
 		switch {
 		case strings.HasPrefix(d, "camel:"):
 			if d == "camel:core" {
@@ -109,7 +109,7 @@ func GenerateProject(ctx *builder.Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
+			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
@@ -126,7 +126,7 @@ func GenerateProject(ctx *builder.Context) error {
 			}
 
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
-			dependency := maven.NewDependency("org.apache.camel.k", artifactID, ctx.Request.RuntimeVersion)
+			dependency := maven.NewDependency("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
 
 			ctx.Project.AddDependency(dependency)
 		case strings.HasPrefix(d, "bom:"):

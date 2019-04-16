@@ -36,11 +36,11 @@ import (
 
 // Publisher --
 func Publisher(ctx *builder.Context) error {
-	organization := ctx.Request.Platform.Build.Registry.Organization
+	organization := ctx.Build.Platform.Build.Registry.Organization
 	if organization == "" {
 		organization = ctx.Namespace
 	}
-	image := ctx.Request.Platform.Build.Registry.Address + "/" + organization + "/camel-k-" + ctx.Request.Meta.Name + ":" + ctx.Request.Meta.ResourceVersion
+	image := ctx.Build.Platform.Build.Registry.Address + "/" + organization + "/camel-k-" + ctx.Build.Meta.Name + ":" + ctx.Build.Meta.ResourceVersion
 	baseDir, _ := path.Split(ctx.Archive)
 	contextDir := path.Join(baseDir, "context")
 	if err := tar.Extract(ctx.Archive, contextDir); err != nil {
@@ -63,7 +63,7 @@ func Publisher(ctx *builder.Context) error {
 			Name: "camel-k-builder",
 			VolumeSource: corev1.VolumeSource{
 				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-					ClaimName: ctx.Request.Platform.Build.PersistentVolumeClaim,
+					ClaimName: ctx.Build.Platform.Build.PersistentVolumeClaim,
 				},
 			},
 		},
@@ -86,17 +86,17 @@ func Publisher(ctx *builder.Context) error {
 	args := make([]string, 0, len(baseArgs))
 	args = append(args, baseArgs...)
 
-	if ctx.Request.Platform.Build.Registry.Insecure {
+	if ctx.Build.Platform.Build.Registry.Insecure {
 		args = append(args, "--insecure")
 		args = append(args, "--insecure-pull")
 	}
 
-	if ctx.Request.Platform.Build.Registry.Secret != "" {
+	if ctx.Build.Platform.Build.Registry.Secret != "" {
 		volumes = append(volumes, corev1.Volume{
 			Name: "kaniko-secret",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: ctx.Request.Platform.Build.Registry.Secret,
+					SecretName: ctx.Build.Platform.Build.Registry.Secret,
 				},
 			},
 		})
@@ -118,7 +118,7 @@ func Publisher(ctx *builder.Context) error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ctx.Namespace,
-			Name:      "camel-k-" + ctx.Request.Meta.Name,
+			Name:      "camel-k-" + ctx.Build.Meta.Name,
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
@@ -150,17 +150,17 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err = ctx.Client.Delete(ctx.Request.C, &pod)
+	err = ctx.Client.Delete(ctx.C, &pod)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete kaniko builder pod")
 	}
 
-	err = ctx.Client.Create(ctx.Request.C, &pod)
+	err = ctx.Client.Create(ctx.C, &pod)
 	if err != nil {
 		return errors.Wrap(err, "cannot create kaniko builder pod")
 	}
 
-	err = kubernetes.WaitCondition(ctx.Request.C, ctx.Client, &pod, func(obj interface{}) (bool, error) {
+	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &pod, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*corev1.Pod); ok {
 			if val.Status.Phase == corev1.PodSucceeded {
 				return true, nil

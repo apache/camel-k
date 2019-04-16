@@ -20,18 +20,19 @@ package s2i
 import (
 	"io/ioutil"
 
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/json"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	buildv1 "github.com/openshift/api/build/v1"
+	imagev1 "github.com/openshift/api/image/v1"
 
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-
-	buildv1 "github.com/openshift/api/build/v1"
-	imagev1 "github.com/openshift/api/image/v1"
-	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pkg/errors"
 )
@@ -44,7 +45,7 @@ func Publisher(ctx *builder.Context) error {
 			Kind:       "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Request.Meta.Name,
+			Name:      "camel-k-" + ctx.Build.Meta.Name,
 			Namespace: ctx.Namespace,
 		},
 		Spec: buildv1.BuildConfigSpec{
@@ -63,19 +64,19 @@ func Publisher(ctx *builder.Context) error {
 				Output: buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: "camel-k-" + ctx.Request.Meta.Name + ":" + ctx.Request.Meta.ResourceVersion,
+						Name: "camel-k-" + ctx.Build.Meta.Name + ":" + ctx.Build.Meta.ResourceVersion,
 					},
 				},
 			},
 		},
 	}
 
-	err := ctx.Client.Delete(ctx.Request.C, &bc)
+	err := ctx.Client.Delete(ctx.C, &bc)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete build config")
 	}
 
-	err = ctx.Client.Create(ctx.Request.C, &bc)
+	err = ctx.Client.Create(ctx.C, &bc)
 	if err != nil {
 		return errors.Wrap(err, "cannot create build config")
 	}
@@ -86,7 +87,7 @@ func Publisher(ctx *builder.Context) error {
 			Kind:       "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Request.Meta.Name,
+			Name:      "camel-k-" + ctx.Build.Meta.Name,
 			Namespace: ctx.Namespace,
 		},
 		Spec: imagev1.ImageStreamSpec{
@@ -96,12 +97,12 @@ func Publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err = ctx.Client.Delete(ctx.Request.C, &is)
+	err = ctx.Client.Delete(ctx.C, &is)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete image stream")
 	}
 
-	err = ctx.Client.Create(ctx.Request.C, &is)
+	err = ctx.Client.Create(ctx.C, &is)
 	if err != nil {
 		return errors.Wrap(err, "cannot create image stream")
 	}
@@ -120,7 +121,7 @@ func Publisher(ctx *builder.Context) error {
 		Namespace(ctx.Namespace).
 		Body(resource).
 		Resource("buildconfigs").
-		Name("camel-k-" + ctx.Request.Meta.Name).
+		Name("camel-k-" + ctx.Build.Meta.Name).
 		SubResource("instantiatebinary").
 		Do()
 
@@ -139,7 +140,7 @@ func Publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "cannot unmarshal instantiated binary response")
 	}
 
-	err = kubernetes.WaitCondition(ctx.Request.C, ctx.Client, &ocbuild, func(obj interface{}) (bool, error) {
+	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &ocbuild, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*buildv1.Build); ok {
 			if val.Status.Phase == buildv1.BuildPhaseComplete {
 				return true, nil
@@ -150,7 +151,7 @@ func Publisher(ctx *builder.Context) error {
 			}
 		}
 		return false, nil
-	}, ctx.Request.Platform.Build.Timeout.Duration)
+	}, ctx.Build.Platform.Build.Timeout.Duration)
 
 	if err != nil {
 		return err
@@ -160,7 +161,7 @@ func Publisher(ctx *builder.Context) error {
 	if err != nil {
 		return err
 	}
-	err = ctx.Client.Get(ctx.Request.C, key, &is)
+	err = ctx.Client.Get(ctx.C, key, &is)
 	if err != nil {
 		return err
 	}
@@ -169,7 +170,7 @@ func Publisher(ctx *builder.Context) error {
 		return errors.New("dockerImageRepository not available in ImageStream")
 	}
 
-	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Request.Meta.ResourceVersion
+	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Meta.ResourceVersion
 
 	return nil
 }
