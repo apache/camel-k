@@ -27,8 +27,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/maven"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -48,7 +46,7 @@ const (
 
 // Builder --
 type Builder interface {
-	Build(request Request) Result
+	Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus
 }
 
 // Step --
@@ -100,50 +98,18 @@ type Resource struct {
 	Content []byte
 }
 
-// Request --
-type Request struct {
-	C              cancellable.Context
-	Catalog        *camel.RuntimeCatalog
-	RuntimeVersion string
-	Meta           metav1.ObjectMeta
-	Platform       v1alpha1.IntegrationPlatformSpec
-	Dependencies   []string
-	Repositories   []string
-	Steps          []Step
-	BuildDir       string
-	Image          string
-	Resources      []Resource
-}
-
 // Task --
 type Task struct {
 	StartedAt   time.Time
 	CompletedAt time.Time
 }
 
-// Elapsed --
-func (t Task) Elapsed() time.Duration {
-	return t.CompletedAt.Sub(t.StartedAt)
-}
-
-// Result represents the result of a build
-type Result struct {
-	Builder     Builder
-	Request     Request
-	BaseImage   string
-	Image       string
-	PublicImage string
-	Error       error
-	Status      v1alpha1.BuildPhase
-	Artifacts   []v1alpha1.Artifact
-	Task        Task
-}
-
 // Context --
 type Context struct {
 	client.Client
+	C                 cancellable.Context
 	Catalog           *camel.RuntimeCatalog
-	Request           Request
+	Build             v1alpha1.BuildSpec
 	BaseImage         string
 	Image             string
 	PublicImage       string
@@ -155,17 +121,18 @@ type Context struct {
 	SelectedArtifacts []v1alpha1.Artifact
 	Archive           string
 	ContextFilter     func(integrationContext *v1alpha1.IntegrationContext) bool
+	Resources         []Resource
 }
 
 // HasRequiredImage --
 func (c *Context) HasRequiredImage() bool {
-	return c.Request.Image != ""
+	return c.Build.Image != ""
 }
 
 // GetImage --
 func (c *Context) GetImage() string {
-	if c.Request.Image != "" {
-		return c.Request.Image
+	if c.Build.Image != "" {
+		return c.Build.Image
 	}
 
 	return c.Image

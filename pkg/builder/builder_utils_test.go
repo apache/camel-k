@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,8 +34,7 @@ func TestNewProject(t *testing.T) {
 
 	ctx := Context{
 		Catalog: catalog,
-		Request: Request{
-			Catalog:        catalog,
+		Build: v1alpha1.BuildSpec{
 			RuntimeVersion: defaults.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{

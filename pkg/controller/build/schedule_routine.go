@@ -26,11 +26,10 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/util"
-	"github.com/apache/camel-k/pkg/client"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(c client.Client, b builder.Builder, r *sync.Map) Action {
+func NewScheduleRoutineAction(b builder.Builder, r *sync.Map) Action {
 	return &scheduleRoutineAction{
 		builder:  b,
 		routines: r,
@@ -102,22 +101,9 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.Build) {
 	defer action.routines.Delete(build.Name)
 
-	req, err := util.NewRequestForBuild(ctx, action.client, build)
-	if err != nil {
-		target := build.DeepCopy()
-		target.Status.Phase = v1alpha1.BuildPhaseFailed
-		target.Status.Error = err.Error()
-		action.L.Info("Build state transition", "phase", target.Status.Phase)
-		err = action.client.Status().Update(ctx, target)
-		if err != nil {
-			action.L.Errorf(err, "Error while running build: %s", build.Name)
-			return
-		}
-	}
+	status := action.builder.Build(build.Spec)
 
-	result := action.builder.Build(*req)
-
-	err = util.UpdateBuildFromResult(req.C, build, result, action.client, action.L)
+	err := util.UpdateBuildStatus(ctx, build, status, action.client, action.L)
 	if err != nil {
 		action.L.Errorf(err, "Error while running build: %s", build.Name)
 	}
