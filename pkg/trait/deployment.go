@@ -109,11 +109,10 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	paths := e.ComputeSourcesURI(t.deployer.ContainerImage)
 	environment := make([]corev1.EnvVar, 0)
 
-	// combine Environment of integration with context, integration
-	// Environment has the priority
-	VisitKeyValConfigurations("env", e.IntegrationContext, e.Integration, func(key string, value string) {
+	// combine Environment of integration with platform, context, integration
+	for key, value := range e.CollectConfigurationPairs("env") {
 		envvar.SetVal(&environment, key, value)
-	})
+	}
 
 	// set env vars needed by the runtime
 	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")

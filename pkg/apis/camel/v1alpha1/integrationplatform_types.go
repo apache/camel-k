@@ -8,11 +8,12 @@ import (
 
 // IntegrationPlatformSpec defines the desired state of IntegrationPlatform
 type IntegrationPlatformSpec struct {
-	Cluster   IntegrationPlatformCluster       `json:"cluster,omitempty"`
-	Profile   TraitProfile                     `json:"profile,omitempty"`
-	Build     IntegrationPlatformBuildSpec     `json:"build,omitempty"`
-	Resources IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
-	Traits    map[string]TraitSpec             `json:"traits,omitempty"`
+	Cluster       IntegrationPlatformCluster       `json:"cluster,omitempty"`
+	Profile       TraitProfile                     `json:"profile,omitempty"`
+	Build         IntegrationPlatformBuildSpec     `json:"build,omitempty"`
+	Resources     IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
+	Traits        map[string]TraitSpec             `json:"traits,omitempty"`
+	Configuration []ConfigurationSpec              `json:"configuration,omitempty"`
 }
 
 // IntegrationPlatformResourcesSpec contains platform related resources
@@ -97,7 +98,7 @@ type IntegrationPlatformRegistrySpec struct {
 type IntegrationPlatformBuildStrategy string
 
 const (
-	// IntegrationPlatformBuildPublishStrategyRoutine performs the build in a routine
+	// IntegrationPlatformBuildStrategyRoutine performs the build in a routine
 	IntegrationPlatformBuildStrategyRoutine = "routine"
 
 	// IntegrationPlatformBuildStrategyPod performs the build in a pod

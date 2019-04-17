@@ -20,8 +20,11 @@ package trait
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/scylladb/go-set/strset"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -45,62 +48,64 @@ func GetIntegrationContext(ctx context.Context, c client.Client, integration *v1
 	return &ictx, err
 }
 
-// VisitConfigurations --
-func VisitConfigurations(
-	configurationType string,
-	context *v1alpha1.IntegrationContext,
-	integration *v1alpha1.Integration,
-	consumer func(string)) {
+// CollectConfigurationValues --
+func CollectConfigurationValues(configurationType string, configurable ...v1alpha1.Configurable) []string {
+	result := strset.New()
 
-	if context != nil {
-		// Add context properties first so integrations can
-		// override it
-		for _, c := range context.Spec.Configuration {
-			if c.Type == configurationType {
-				consumer(c.Value)
+	for _, c := range configurable {
+		c := c
+
+		if c == nil || reflect.ValueOf(c).IsNil() {
+			continue
+		}
+
+		entries := c.Configurations()
+		if entries == nil {
+			continue
+		}
+
+		for _, entry := range entries {
+			if entry.Type == configurationType {
+				result.Add(entry.Value)
 			}
 		}
 	}
 
-	if integration != nil {
-		for _, c := range integration.Spec.Configuration {
-			if c.Type == configurationType {
-				consumer(c.Value)
-			}
-		}
-	}
+	return result.List()
 }
 
-// VisitKeyValConfigurations --
-func VisitKeyValConfigurations(
-	configurationType string,
-	context *v1alpha1.IntegrationContext,
-	integration *v1alpha1.Integration,
-	consumer func(string, string)) {
+// CollectConfigurationPairs --
+func CollectConfigurationPairs(configurationType string, configurable ...v1alpha1.Configurable) map[string]string {
+	result := make(map[string]string)
 
-	if context != nil {
-		// Add context properties first so integrations can
-		// override it
-		for _, c := range context.Spec.Configuration {
-			if c.Type == configurationType {
-				pair := strings.Split(c.Value, "=")
+	for _, c := range configurable {
+		c := c
+
+		if c == nil || reflect.ValueOf(c).IsNil() {
+			continue
+		}
+
+		entries := c.Configurations()
+		if entries == nil {
+			continue
+		}
+
+		for _, entry := range entries {
+			if entry.Type == configurationType {
+				pair := strings.SplitN(entry.Value, "=", 2)
 				if len(pair) == 2 {
-					consumer(pair[0], pair[1])
+					k := strings.TrimSpace(pair[0])
+					v := strings.TrimSpace(pair[1])
+
+					if len(k) > 0 && len(v) > 0 {
+						result[k] = v
+					}
 				}
 			}
 		}
 	}
 
-	if integration != nil {
-		for _, c := range integration.Spec.Configuration {
-			if c.Type == configurationType {
-				pair := strings.Split(c.Value, "=")
-				if len(pair) == 2 {
-					consumer(pair[0], pair[1])
-				}
-			}
-		}
-	}
+	return result
 }
 
 var (

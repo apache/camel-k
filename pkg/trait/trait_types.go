@@ -264,9 +264,9 @@ func (e *Environment) ComputeConfigMaps(container bool) []runtime.Object {
 	// properties have the priority
 	properties := ""
 
-	VisitKeyValConfigurations("property", e.IntegrationContext, e.Integration, func(key string, val string) {
+	for key, val := range e.CollectConfigurationPairs("property") {
 		properties += fmt.Sprintf("%s=%s\n", key, val)
-	})
+	}
 
 	maps = append(
 		maps,
@@ -514,7 +514,7 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 	// Volumes :: Additional ConfigMaps
 	//
 
-	VisitConfigurations("configmap", e.IntegrationContext, e.Integration, func(cmName string) {
+	for _, cmName := range e.CollectConfigurationValues("configmap") {
 		refName := kubernetes.SanitizeLabel(cmName)
 		fileName := "integration-cm-" + strings.ToLower(cmName)
 
@@ -533,13 +533,13 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 			Name:      refName,
 			MountPath: path.Join("/etc/camel/conf.d", fileName),
 		})
-	})
+	}
 
 	//
 	// Volumes :: Additional Secrets
 	//
 
-	VisitConfigurations("secret", e.IntegrationContext, e.Integration, func(secretName string) {
+	for _, secretName := range e.CollectConfigurationValues("secret") {
 		refName := kubernetes.SanitizeLabel(secretName)
 		fileName := "integration-secret-" + strings.ToLower(secretName)
 
@@ -556,5 +556,15 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 			Name:      refName,
 			MountPath: path.Join("/etc/camel/conf.d", fileName),
 		})
-	})
+	}
+}
+
+// CollectConfigurationValues --
+func (e *Environment) CollectConfigurationValues(configurationType string) []string {
+	return CollectConfigurationValues(configurationType, e.Platform, e.IntegrationContext, e.Integration)
+}
+
+// CollectConfigurationPairs --
+func (e *Environment) CollectConfigurationPairs(configurationType string) map[string]string {
+	return CollectConfigurationPairs(configurationType, e.Platform, e.IntegrationContext, e.Integration)
 }

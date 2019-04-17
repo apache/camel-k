@@ -56,3 +56,21 @@ func TraitProfileByName(name string) TraitProfile {
 	}
 	return ""
 }
+
+// Configurations --
+func (in *IntegrationPlatformSpec) Configurations() []ConfigurationSpec {
+	if in == nil {
+		return []ConfigurationSpec{}
+	}
+
+	return in.Configuration
+}
+
+// Configurations --
+func (in *IntegrationPlatform) Configurations() []ConfigurationSpec {
+	if in == nil {
+		return []ConfigurationSpec{}
+	}
+
+	return in.Spec.Configuration
+}
