@@ -25,19 +25,16 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// GenerateProject --
-func GenerateProject(ctx *builder.Context) error {
+func generateProject(ctx *builder.Context) error {
 	p, err := builder.NewProject(ctx)
 	if err != nil {
 		return err
 	}
 
 	ctx.Project = p
-
 	//
 	// set-up dependencies
 	//
-
 	ctx.Project.AddDependency(maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-spring-boot",

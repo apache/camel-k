@@ -39,22 +39,12 @@ type defaultBuilder struct {
 }
 
 // New --
-func New(c client.Client, steps0 []Step, stepsI ...[]Step) Builder {
-	s := make(map[string]Step)
-	for _, step := range steps0 {
-		s[step.ID()] = step
-	}
-	for _, steps := range stepsI {
-		for _, step := range steps {
-			s[step.ID()] = step
-		}
-	}
-
+func New(c client.Client) Builder {
 	m := defaultBuilder{
 		log:    log.WithName("builder"),
 		ctx:    cancellable.NewContext(),
 		client: c,
-		steps:  s,
+		steps:  StepsByID,
 	}
 
 	return &m
@@ -197,8 +187,8 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 
 		//b.log.Infof("build request %s executed in %f seconds", build.Name, result.Task.Elapsed().Seconds())
 		b.log.Infof("dependencies: %s", build.Dependencies)
-		b.log.Infof("artifacts: %s", ArtifactIDs(c.Artifacts))
-		b.log.Infof("artifacts selected: %s", ArtifactIDs(c.SelectedArtifacts))
+		b.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
+		b.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
 		b.log.Infof("requested image: %s", build.Image)
 		b.log.Infof("base image: %s", c.BaseImage)
 		b.log.Infof("resolved image: %s", c.Image)

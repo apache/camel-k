@@ -31,9 +31,9 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/builder/kaniko"
-	"github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/builder/springboot"
+	_ "github.com/apache/camel-k/pkg/builder/kaniko"
+	_ "github.com/apache/camel-k/pkg/builder/s2i"
+	_ "github.com/apache/camel-k/pkg/builder/springboot"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -77,7 +77,7 @@ func main() {
 		builder.UpdateBuildStatus(ctx, build, status, c, log),
 	)
 
-	status = builder.New(c, kaniko.DefaultSteps, s2i.DefaultSteps, springboot.DefaultSteps).Build(build.Spec)
+	status = builder.New(c).Build(build.Spec)
 	exitOnError(
 		builder.UpdateBuildStatus(ctx, build, status, c, log),
 	)

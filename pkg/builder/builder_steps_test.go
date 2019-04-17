@@ -54,9 +54,9 @@ func TestMavenRepositories(t *testing.T) {
 		},
 	}
 
-	err = GenerateProject(&ctx)
+	err = generateProject(&ctx)
 	assert.Nil(t, err)
-	err = InjectDependencies(&ctx)
+	err = injectDependencies(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 2, len(ctx.Project.Repositories))
@@ -110,9 +110,9 @@ func TestGenerateJvmProject(t *testing.T) {
 		},
 	}
 
-	err = GenerateProject(&ctx)
+	err = generateProject(&ctx)
 	assert.Nil(t, err)
-	err = InjectDependencies(&ctx)
+	err = injectDependencies(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
@@ -164,9 +164,9 @@ func TestGenerateGroovyProject(t *testing.T) {
 		},
 	}
 
-	err = GenerateProject(&ctx)
+	err = generateProject(&ctx)
 	assert.Nil(t, err)
-	err = InjectDependencies(&ctx)
+	err = injectDependencies(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
@@ -229,9 +229,9 @@ func TestGenerateProjectWithRepositories(t *testing.T) {
 		},
 	}
 
-	err = GenerateProject(&ctx)
+	err = generateProject(&ctx)
 	assert.Nil(t, err)
-	err = InjectDependencies(&ctx)
+	err = injectDependencies(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
@@ -272,11 +272,11 @@ func TestSanitizeDependencies(t *testing.T) {
 		},
 	}
 
-	err = GenerateProject(&ctx)
+	err = generateProject(&ctx)
 	assert.Nil(t, err)
-	err = InjectDependencies(&ctx)
+	err = injectDependencies(&ctx)
 	assert.Nil(t, err)
-	err = SanitizeDependencies(&ctx)
+	err = sanitizeDependencies(&ctx)
 	assert.Nil(t, err)
 
 	assert.Contains(t, ctx.Project.Dependencies, maven.Dependency{
@@ -349,7 +349,7 @@ func TestListPublishedImages(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 
-	i, err := ListPublishedImages(&Context{
+	i, err := listPublishedImages(&Context{
 		Client:  c,
 		Catalog: catalog,
 		C:       cancellable.NewContext(),

@@ -21,9 +21,30 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 )
 
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.NewStep("initialize/spring-boot", builder.InitPhase, Initialize),
-	builder.NewStep("build/compute-boot-dependencies", builder.ProjectBuildPhase+1, ComputeDependencies),
-	builder.NewStep("generate/spring-boot", builder.ProjectGenerationPhase, GenerateProject),
+func init() {
+	builder.RegisterSteps(Steps)
+}
+
+type steps struct {
+	Initialize          builder.Step
+	ComputeDependencies builder.Step
+	GenerateProject     builder.Step
+}
+
+var Steps = steps{
+	Initialize: builder.NewStep(
+		"initialize/spring-boot",
+		builder.InitPhase,
+		initialize,
+	),
+	ComputeDependencies: builder.NewStep(
+		"build/compute-boot-dependencies",
+		builder.ProjectBuildPhase+1,
+		computeDependencies,
+	),
+	GenerateProject: builder.NewStep(
+		"generate/spring-boot",
+		builder.ProjectGenerationPhase,
+		generateProject,
+	),
 }

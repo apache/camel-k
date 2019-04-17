@@ -21,13 +21,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/maven"
-
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// ComputeDependencies --
-func ComputeDependencies(ctx *builder.Context) error {
+func computeDependencies(ctx *builder.Context) error {
 	for i := 0; i < len(ctx.Artifacts); i++ {
 		if strings.HasPrefix(ctx.Artifacts[i].ID, "org.apache.camel.k:camel-k-runtime-spring-boot:") {
 

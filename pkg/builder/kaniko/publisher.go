@@ -34,8 +34,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Publisher --
-func Publisher(ctx *builder.Context) error {
+func publisher(ctx *builder.Context) error {
 	organization := ctx.Build.Platform.Build.Registry.Organization
 	if organization == "" {
 		organization = ctx.Namespace

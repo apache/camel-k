@@ -57,11 +57,9 @@ func (t *springBootTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *springBootTrait) Apply(e *Environment) error {
-
 	//
 	// Integration
 	//
-
 	if e.IntegrationInPhase("") {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "runtime:spring-boot")
 
@@ -105,20 +103,18 @@ func (t *springBootTrait) Apply(e *Environment) error {
 		envvar.SetVal(&e.EnvVars, "LOADER_HOME", "/deployments")
 		envvar.SetVal(&e.EnvVars, "LOADER_PATH", strings.Join(deps, ","))
 	}
-
 	//
 	// Integration IntegrationContext
 	//
-
 	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
 		// add custom initialization logic
-		e.Steps = append(e.Steps, builder.NewStep("initialize/spring-boot", builder.InitPhase, springboot.Initialize))
-		e.Steps = append(e.Steps, builder.NewStep("build/compute-boot-dependencies", builder.ProjectBuildPhase+1, springboot.ComputeDependencies))
+		e.Steps = append(e.Steps, springboot.Steps.Initialize.ID())
+		e.Steps = append(e.Steps, springboot.Steps.ComputeDependencies.ID())
 
 		// replace project generator
 		for i := 0; i < len(e.Steps); i++ {
-			if e.Steps[i].Phase() == builder.ProjectGenerationPhase {
-				e.Steps[i] = builder.NewStep("generate/spring-boot", builder.ProjectGenerationPhase, springboot.GenerateProject)
+			if builder.StepsByID[e.Steps[i]].Phase() == builder.ProjectGenerationPhase {
+				e.Steps[i] = springboot.Steps.GenerateProject.ID()
 			}
 		}
 	}

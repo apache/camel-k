@@ -98,11 +98,6 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 		// This build do not require to determine dependencies nor a project, the
 		// builder step do remove them
 
-		steps := make([]string, len(env.Steps))
-		for i, s := range env.Steps {
-			steps[i] = s.ID()
-		}
-
 		build = &v1alpha1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "camel.apache.org/v1alpha1",
@@ -118,7 +113,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 				CamelVersion:   env.CamelCatalog.Version,
 				RuntimeVersion: env.RuntimeVersion,
 				Platform:       env.Platform.Spec,
-				Steps:          steps,
+				Steps:          env.Steps,
 				BuildDir:       env.BuildDir,
 			},
 		}
