@@ -40,8 +40,8 @@ var (
 
 	additionalDependencies = map[string]string{
 		".*JsonLibrary\\.Jackson.*": "camel:jackson",
-		".*\\.hystrix().*": "camel:hystrix",
-		".*<hystrix>.*": "camel:hystrix",
+		".*\\.hystrix().*":          "camel:hystrix",
+		".*<hystrix>.*":             "camel:hystrix",
 	}
 )
 
