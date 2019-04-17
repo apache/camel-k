@@ -31,3 +31,7 @@ spec:
       # format: duration
       description: The build last execution duration
       JSONPath: .status.duration
+    - name: Attempts
+      type: integer
+      description: The number of execution attempts
+      JSONPath: .status.failure.recovery.attempt
