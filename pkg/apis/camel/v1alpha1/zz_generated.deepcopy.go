@@ -157,6 +157,7 @@ func (in *BuildStatus) DeepCopyInto(out *BuildStatus) {
 		*out = new(Failure)
 		(*in).DeepCopyInto(*out)
 	}
+	in.StartedAt.DeepCopyInto(&out.StartedAt)
 	return
 }
 
