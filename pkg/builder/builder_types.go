@@ -20,7 +20,6 @@ package builder
 import (
 	"fmt"
 	"math"
-	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -96,12 +95,6 @@ func NewStep(id string, phase int32, task StepTask) Step {
 type Resource struct {
 	Target  string
 	Content []byte
-}
-
-// Task --
-type Task struct {
-	StartedAt   time.Time
-	CompletedAt time.Time
 }
 
 // Context --
