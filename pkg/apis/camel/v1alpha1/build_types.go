@@ -28,13 +28,17 @@ type BuildSpec struct {
 type BuildStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	Phase       BuildPhase `json:"phase,omitempty"`
-	Image       string     `json:"image,omitempty"`
-	BaseImage   string     `json:"baseImage,omitempty"`
-	PublicImage string     `json:"publicImage,omitempty"`
-	Artifacts   []Artifact `json:"artifacts,omitempty"`
-	Error       string     `json:"error,omitempty"`
-	Failure     *Failure   `json:"failure,omitempty"`
+	Phase       BuildPhase  `json:"phase,omitempty"`
+	Image       string      `json:"image,omitempty"`
+	BaseImage   string      `json:"baseImage,omitempty"`
+	PublicImage string      `json:"publicImage,omitempty"`
+	Artifacts   []Artifact  `json:"artifacts,omitempty"`
+	Error       string      `json:"error,omitempty"`
+	Failure     *Failure    `json:"failure,omitempty"`
+	StartedAt   metav1.Time `json:"startedAt,omitempty"`
+	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
+	// https://github.com/OAI/OpenAPI-Specification/issues/845
+	Duration string `json:"duration,omitempty"`
 }
 
 // BuildPhase --

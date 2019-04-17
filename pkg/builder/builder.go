@@ -24,6 +24,8 @@ import (
 	"sort"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -53,6 +55,8 @@ func New(c client.Client) Builder {
 // Build --
 func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 	result := v1alpha1.BuildStatus{}
+
+	result.StartedAt = metav1.Now()
 
 	// create tmp path
 	buildDir := build.BuildDir
@@ -123,6 +127,7 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 	}
 
 	if result.Phase == v1alpha1.BuildPhaseFailed {
+		result.Duration = metav1.Now().Sub(result.StartedAt.Time).String()
 		return result
 	}
 
@@ -169,7 +174,7 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 		}
 	}
 
-	//result.Task.CompletedAt = time.Now()
+	result.Duration = metav1.Now().Sub(result.StartedAt.Time).String()
 
 	if result.Phase != v1alpha1.BuildPhaseInterrupted {
 		result.Phase = v1alpha1.BuildPhaseSucceeded
@@ -185,7 +190,7 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 		result.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
 		result.Artifacts = append(result.Artifacts, c.Artifacts...)
 
-		//b.log.Infof("build request %s executed in %f seconds", build.Name, result.Task.Elapsed().Seconds())
+		b.log.Infof("build request %s executed in %s", build.Meta.Name, result.Duration)
 		b.log.Infof("dependencies: %s", build.Dependencies)
 		b.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
 		b.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
@@ -194,7 +199,7 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 		b.log.Infof("resolved image: %s", c.Image)
 		b.log.Infof("resolved public image: %s", c.PublicImage)
 	} else {
-		//b.log.Infof("build request %s interrupted after %f seconds", build.Name, result.Task.Elapsed().Seconds())
+		b.log.Infof("build request %s interrupted after %s", build.Meta.Name, result.Duration)
 	}
 
 	return result
