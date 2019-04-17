@@ -22,6 +22,7 @@ limitations under the License.
 package test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/assert"
@@ -41,6 +43,17 @@ func TestBuildManagerBuild(t *testing.T) {
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
+
+	err = testClient.Create(context.TODO(), &v1alpha1.CamelCatalog{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "catalog-test",
+			Namespace: getTargetNamespace(),
+		},
+		Spec: catalog.CamelCatalogSpec,
+	})
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		assert.Error(t, err)
+	}
 
 	r := v1alpha1.BuildSpec{
 		RuntimeVersion: defaults.RuntimeVersion,
@@ -78,6 +91,17 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
+
+	err = testClient.Create(context.TODO(), &v1alpha1.CamelCatalog{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "catalog-test",
+			Namespace: getTargetNamespace(),
+		},
+		Spec: catalog.CamelCatalogSpec,
+	})
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		assert.Error(t, err)
+	}
 
 	r := v1alpha1.BuildSpec{
 		RuntimeVersion: defaults.RuntimeVersion,
