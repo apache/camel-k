@@ -186,10 +186,9 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	environment := &svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
 
 	// combine Environment of integration with context, integration
-	// Environment has the priority
-	VisitKeyValConfigurations("env", e.IntegrationContext, e.Integration, func(key string, value string) {
+	for key, value := range e.CollectConfigurationPairs("env") {
 		envvar.SetVal(environment, key, value)
-	})
+	}
 
 	// set env vars needed by the runtime
 	envvar.SetVal(environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")

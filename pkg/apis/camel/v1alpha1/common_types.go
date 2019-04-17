@@ -66,3 +66,8 @@ type FailureRecovery struct {
 type TraitSpec struct {
 	Configuration map[string]string `json:"configuration,omitempty"`
 }
+
+// Configurable --
+type Configurable interface {
+	Configurations() []ConfigurationSpec
+}

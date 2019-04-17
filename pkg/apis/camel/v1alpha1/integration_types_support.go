@@ -49,10 +49,10 @@ func NewIntegrationList() IntegrationList {
 }
 
 // Sources return a new slice containing all the sources associated to the integration
-func (i *Integration) Sources() []SourceSpec {
-	allSources := make([]SourceSpec, 0, len(i.Spec.Sources)+len(i.Status.GeneratedSources))
-	allSources = append(allSources, i.Spec.Sources...)
-	allSources = append(allSources, i.Status.GeneratedSources...)
+func (in *Integration) Sources() []SourceSpec {
+	allSources := make([]SourceSpec, 0, len(in.Spec.Sources)+len(in.Status.GeneratedSources))
+	allSources = append(allSources, in.Spec.Sources...)
+	allSources = append(allSources, in.Status.GeneratedSources...)
 
 	return allSources
 }
@@ -88,6 +88,24 @@ func (is *IntegrationSpec) AddDependency(dependency string) {
 	default:
 		util.StringSliceUniqueAdd(&is.Dependencies, dependency)
 	}
+}
+
+// Configurations --
+func (is *IntegrationSpec) Configurations() []ConfigurationSpec {
+	if is == nil {
+		return []ConfigurationSpec{}
+	}
+
+	return is.Configuration
+}
+
+// Configurations --
+func (in *Integration) Configurations() []ConfigurationSpec {
+	if in == nil {
+		return []ConfigurationSpec{}
+	}
+
+	return in.Spec.Configurations()
 }
 
 // NewSourceSpec --

@@ -35,14 +35,9 @@ func (t *knativeServiceTrait) bindToEnvVar(e *Environment, service *serving.Serv
 	//
 	// Properties
 	//
-
 	properties := make(map[string]string)
 
-	VisitKeyValConfigurations("property", e.IntegrationContext, e.Integration, func(key string, val string) {
-		properties[key] = val
-	})
-
-	VisitConfigurations("configmap", e.IntegrationContext, e.Integration, func(cmName string) {
+	for _, cmName := range e.CollectConfigurationValues("configmap") {
 		cm, err := kubernetes.GetConfigMap(e.C, e.Client, cmName, e.Integration.Namespace)
 		if err != nil {
 			t.L.Errorf(err, "failed to lookup ConfigMap %s", cmName)
@@ -55,9 +50,9 @@ func (t *knativeServiceTrait) bindToEnvVar(e *Environment, service *serving.Serv
 				t.L.Errorf(err, "failed to extract properties from ConfigMap %s", cmName)
 			}
 		}
-	})
+	}
 
-	VisitConfigurations("secret", e.IntegrationContext, e.Integration, func(secretName string) {
+	for _, secretName := range e.CollectConfigurationValues("secret") {
 		cm, err := kubernetes.GetSecret(e.C, e.Client, secretName, e.Integration.Namespace)
 		if err != nil {
 			t.L.Errorf(err, "failed to lookup Secret %s", secretName)
@@ -70,7 +65,11 @@ func (t *knativeServiceTrait) bindToEnvVar(e *Environment, service *serving.Serv
 				t.L.Errorf(err, "failed to extract properties from Secret %s", secretName)
 			}
 		}
-	})
+	}
+
+	for key, value := range e.CollectConfigurationPairs("property") {
+		properties[key] = value
+	}
 
 	p := ""
 
