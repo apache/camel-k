@@ -18,19 +18,13 @@ limitations under the License.
 package builder
 
 import (
-	"context"
 	"encoding/xml"
 	"fmt"
 	"strings"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	logger "github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
@@ -71,11 +65,9 @@ func NewProject(ctx *Context) (maven.Project, error) {
 		DependencyManagement: maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)},
 		Dependencies:         make([]maven.Dependency, 0),
 	}
-
 	//
 	// DependencyManagement
 	//
-
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel",
 		ArtifactID: "camel-bom",
@@ -103,13 +95,11 @@ func NewProject(ctx *Context) (maven.Project, error) {
 			})
 		}
 	}
-
 	//p.DependencyManagement.Dependencies = dm
 
 	//
 	// Repositories
 	//
-
 	p.Repositories = make([]maven.Repository, 0, len(ctx.Build.Repositories))
 	p.PluginRepositories = make([]maven.Repository, 0, len(ctx.Build.Repositories))
 
@@ -124,26 +114,4 @@ func NewProject(ctx *Context) (maven.Project, error) {
 	}
 
 	return p, nil
-}
-
-// UpdateBuildStatus --
-func UpdateBuildStatus(ctx context.Context, build *v1alpha1.Build, status v1alpha1.BuildStatus, c client.Client, log logger.Logger) error {
-	target := build.DeepCopy()
-	target.Status = status
-	err := c.Status().Update(ctx, target)
-	if err != nil {
-		if k8serrors.IsConflict(err) {
-			// Refresh the build
-			err := c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build)
-			if err != nil {
-				log.Error(err, "Build refresh failed")
-				return err
-			}
-			return UpdateBuildStatus(ctx, build, status, c, log)
-		}
-		log.Error(err, "Build update failed")
-		return err
-	}
-	build.Status = status
-	return nil
 }

@@ -35,6 +35,7 @@ import (
 	_ "github.com/apache/camel-k/pkg/builder/s2i"
 	_ "github.com/apache/camel-k/pkg/builder/springboot"
 	"github.com/apache/camel-k/pkg/client"
+	util "github.com/apache/camel-k/pkg/controller/build"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logger "github.com/apache/camel-k/pkg/util/log"
@@ -74,12 +75,12 @@ func main() {
 		Phase: v1alpha1.BuildPhaseRunning,
 	}
 	exitOnError(
-		builder.UpdateBuildStatus(ctx, build, status, c, log),
+		util.UpdateBuildStatus(ctx, build, status, c, log),
 	)
 
 	status = builder.New(c).Build(build.Spec)
 	exitOnError(
-		builder.UpdateBuildStatus(ctx, build, status, c, log),
+		util.UpdateBuildStatus(ctx, build, status, c, log),
 	)
 
 	switch build.Status.Phase {

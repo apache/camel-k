@@ -102,7 +102,7 @@ func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.
 
 	status := action.builder.Build(build.Spec)
 
-	err := builder.UpdateBuildStatus(ctx, build, status, action.client, action.L)
+	err := UpdateBuildStatus(ctx, build, status, action.client, action.L)
 	if err != nil {
 		action.L.Errorf(err, "Error while running build: %s", build.Name)
 	}
