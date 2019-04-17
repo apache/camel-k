@@ -19,6 +19,7 @@ package s2i
 
 import (
 	"io/ioutil"
+	"regexp"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -37,8 +38,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Publisher --
-func Publisher(ctx *builder.Context) error {
+const (
+	openShiftDockerRegistryHost = "docker-registry.default.svc"
+)
+
+func publisher(ctx *builder.Context) error {
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: buildv1.SchemeGroupVersion.String(),
@@ -173,4 +177,14 @@ func Publisher(ctx *builder.Context) error {
 	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Meta.ResourceVersion
 
 	return nil
+}
+
+func replaceHost(ctx *builder.Context) error {
+	ctx.PublicImage = getImageWithOpenShiftHost(ctx.Image)
+	return nil
+}
+
+func getImageWithOpenShiftHost(image string) string {
+	pattern := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+([:/].*)`)
+	return pattern.ReplaceAllString(image, openShiftDockerRegistryHost+"$1")
 }

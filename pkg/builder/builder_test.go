@@ -35,16 +35,22 @@ func TestFailure(t *testing.T) {
 	c, err := test.NewFakeClient()
 	assert.Nil(t, err)
 
-	b := New(c, []Step{
+	b := New(c)
+
+	RegisterStep(
 		NewStep("step1", InitPhase, func(i *Context) error {
 			return nil
 		}),
 		NewStep("step2", ApplicationPublishPhase, func(i *Context) error {
 			return errors.New("an error")
 		}),
-	})
+	)
 
 	r := v1alpha1.BuildSpec{
+		Steps: []string{
+			"step1",
+			"step2",
+		},
 		RuntimeVersion: defaults.RuntimeVersion,
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{

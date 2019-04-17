@@ -34,8 +34,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// ArtifactIDs --
-func ArtifactIDs(artifacts []v1alpha1.Artifact) []string {
+func artifactIDs(artifacts []v1alpha1.Artifact) []string {
 	result := make([]string, 0, len(artifacts))
 
 	for _, a := range artifacts {

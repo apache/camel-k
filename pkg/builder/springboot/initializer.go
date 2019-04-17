@@ -22,8 +22,7 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 )
 
-// Initialize --
-func Initialize(ctx *builder.Context) error {
+func initialize(ctx *builder.Context) error {
 	// do not take into account any image that does not have spring-boot
 	// as required dependency to avoid picking up a base image with wrong
 	// classpath or layout

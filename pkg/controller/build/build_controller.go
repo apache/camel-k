@@ -20,9 +20,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/builder/kaniko"
-	"github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/builder/springboot"
 	"github.com/apache/camel-k/pkg/client"
 )
 
@@ -41,7 +38,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileBuild{
 		client:  c,
 		scheme:  mgr.GetScheme(),
-		builder: builder.New(c, kaniko.DefaultSteps, s2i.DefaultSteps, springboot.DefaultSteps),
+		builder: builder.New(c),
 	}
 }
 

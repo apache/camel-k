@@ -92,11 +92,6 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 			return errors.New("undefined camel catalog")
 		}
 
-		steps := make([]string, len(env.Steps))
-		for i, s := range env.Steps {
-			steps[i] = s.ID()
-		}
-
 		build = &v1alpha1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "camel.apache.org/v1alpha1",
@@ -113,7 +108,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 				Platform:       env.Platform.Spec,
 				Dependencies:   ictx.Spec.Dependencies,
 				Repositories:   repositories,
-				Steps:          steps,
+				Steps:          env.Steps,
 				BuildDir:       env.BuildDir,
 			},
 		}

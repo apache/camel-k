@@ -152,15 +152,15 @@ func (options *PublisherOptions) build(component string, runtimeVersion string, 
 		},
 	}
 
-	err = builder.GenerateProject(&ctx)
+	err = builder.Steps.GenerateProject.Execute(&ctx)
 	if err != nil {
 		return err
 	}
-	err = builder.ComputeDependencies(&ctx)
+	err = builder.Steps.ComputeDependencies.Execute(&ctx)
 	if err != nil {
 		return err
 	}
-	err = builder.StandardPackager(&ctx)
+	err = builder.Steps.StandardPackager.Execute(&ctx)
 	if err != nil {
 		return err
 	}
