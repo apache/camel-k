@@ -63,6 +63,11 @@ Properties associated to an integration can be configured either using a ConfigM
 ```
 kamel run --property my.message=test examples/props.js
 ```
+kamel run --configmap=<your name here> examples/props.js
+Note: to create the config map first create a file called application.properties which contains lines with key=value pairs
+e.g. my.message="The text to display"
+Create the config map in the usual manner e.g. kubectl create configmap <your name here>  --from-file=application.properties
+```
 
 ==== Configure Integration Logging
 
