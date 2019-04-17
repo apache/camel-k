@@ -21,12 +21,34 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 )
 
+func init() {
+	builder.RegisterSteps(Steps)
+}
+
+type steps struct {
+	Publisher   builder.Step
+	ReplaceHost builder.Step
+}
+
+var Steps = steps{
+	Publisher: builder.NewStep(
+		"publisher/s2i",
+		builder.ApplicationPublishPhase,
+		publisher,
+	),
+	ReplaceHost: builder.NewStep(
+		"publisher/replaceHost",
+		builder.ApplicationPublishPhase+1,
+		replaceHost,
+	),
+}
+
 // DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.NewStep("project/generate", builder.ProjectGenerationPhase, builder.GenerateProject),
-	builder.NewStep("project/inject-dependencies", builder.ProjectGenerationPhase+1, builder.InjectDependencies),
-	builder.NewStep("project/sanitize-dependencies", builder.ProjectGenerationPhase+2, builder.SanitizeDependencies),
-	builder.NewStep("build/compute-dependencies", builder.ProjectBuildPhase, builder.ComputeDependencies),
-	builder.NewStep("packager/incremental", builder.ApplicationPackagePhase, builder.IncrementalPackager),
-	builder.NewStep("publisher/s2i", builder.ApplicationPublishPhase, Publisher),
+var DefaultSteps = []string{
+	builder.Steps.GenerateProject.ID(),
+	builder.Steps.InjectDependencies.ID(),
+	builder.Steps.SanitizeDependencies.ID(),
+	builder.Steps.ComputeDependencies.ID(),
+	builder.Steps.IncrementalPackager.ID(),
+	Steps.Publisher.ID(),
 }

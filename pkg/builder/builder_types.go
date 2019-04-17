@@ -138,8 +138,7 @@ func (c *Context) GetImage() string {
 	return c.Image
 }
 
-// PublishedImage --
-type PublishedImage struct {
+type publishedImage struct {
 	Image        string
 	Artifacts    []v1alpha1.Artifact
 	Dependencies []string

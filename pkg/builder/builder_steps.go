@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,19 +38,80 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GenerateProject --
-func GenerateProject(ctx *Context) error {
+var StepsByID = make(map[string]Step)
+
+func init() {
+	RegisterSteps(Steps)
+}
+
+type steps struct {
+	GenerateProject      Step
+	InjectDependencies   Step
+	SanitizeDependencies Step
+	ComputeDependencies  Step
+	StandardPackager     Step
+	IncrementalPackager  Step
+}
+
+var Steps = steps{
+	GenerateProject: NewStep(
+		"project/generate",
+		ProjectGenerationPhase,
+		generateProject,
+	),
+	InjectDependencies: NewStep(
+		"project/inject-dependencies",
+		ProjectGenerationPhase+1,
+		injectDependencies,
+	),
+	SanitizeDependencies: NewStep(
+		"project/sanitize-dependencies",
+		ProjectGenerationPhase+2,
+		sanitizeDependencies,
+	),
+	ComputeDependencies: NewStep(
+		"build/compute-dependencies",
+		ProjectBuildPhase,
+		computeDependencies,
+	),
+	StandardPackager: NewStep(
+		"packager",
+		ApplicationPackagePhase,
+		standardPackager,
+	),
+	IncrementalPackager: NewStep(
+		"packager/incremental",
+		ApplicationPackagePhase,
+		incrementalPackager,
+	),
+}
+
+func RegisterSteps(steps interface{}) {
+	v := reflect.ValueOf(steps)
+	for i := 0; i < v.NumField(); i++ {
+		if step, ok := v.Field(i).Interface().(Step); ok {
+			RegisterStep(step)
+		}
+	}
+}
+
+func RegisterStep(steps ...Step) {
+	for _, step := range steps {
+		StepsByID[step.ID()] = step
+	}
+}
+
+// generateProject --
+func generateProject(ctx *Context) error {
 	p, err := NewProject(ctx)
 	if err != nil {
 		return err
 	}
 
 	ctx.Project = p
-
 	//
 	// set-up dependencies
 	//
-
 	ctx.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", ctx.Build.RuntimeVersion)
 
 	for _, d := range ctx.Build.Dependencies {
@@ -97,12 +159,10 @@ func GenerateProject(ctx *Context) error {
 	return nil
 }
 
-// InjectDependencies --
-func InjectDependencies(ctx *Context) error {
+func injectDependencies(ctx *Context) error {
 	//
 	// Add dependencies from catalog
 	//
-
 	deps := make([]maven.Dependency, len(ctx.Project.Dependencies))
 	copy(deps, ctx.Project.Dependencies)
 
@@ -127,11 +187,9 @@ func InjectDependencies(ctx *Context) error {
 			}
 		}
 	}
-
 	//
 	// post process dependencies
 	//
-
 	deps = make([]maven.Dependency, len(ctx.Project.Dependencies))
 	copy(deps, ctx.Project.Dependencies)
 
@@ -156,8 +214,7 @@ func InjectDependencies(ctx *Context) error {
 	return nil
 }
 
-// SanitizeDependencies --
-func SanitizeDependencies(ctx *Context) error {
+func sanitizeDependencies(ctx *Context) error {
 	for i := 0; i < len(ctx.Project.Dependencies); i++ {
 		dep := ctx.Project.Dependencies[i]
 
@@ -179,8 +236,7 @@ func SanitizeDependencies(ctx *Context) error {
 	return nil
 }
 
-// ComputeDependencies --
-func ComputeDependencies(ctx *Context) error {
+func computeDependencies(ctx *Context) error {
 	p := path.Join(ctx.Path, "maven")
 
 	err := maven.CreateStructure(p, ctx.Project)
@@ -230,8 +286,7 @@ func ComputeDependencies(ctx *Context) error {
 // ArtifactsSelector --
 type ArtifactsSelector func(ctx *Context) error
 
-// StandardPackager --
-func StandardPackager(ctx *Context) error {
+func standardPackager(ctx *Context) error {
 	return packager(ctx, func(ctx *Context) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
@@ -239,17 +294,16 @@ func StandardPackager(ctx *Context) error {
 	})
 }
 
-// IncrementalPackager --
-func IncrementalPackager(ctx *Context) error {
+func incrementalPackager(ctx *Context) error {
 	if ctx.HasRequiredImage() {
 		//
 		// If the build requires a specific image, don't try to determine the
 		// base image using artifact so just use the standard packages
 		//
-		return StandardPackager(ctx)
+		return standardPackager(ctx)
 	}
 
-	images, err := ListPublishedImages(ctx)
+	images, err := listPublishedImages(ctx)
 	if err != nil {
 		return err
 	}
@@ -257,7 +311,7 @@ func IncrementalPackager(ctx *Context) error {
 	return packager(ctx, func(ctx *Context) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
-		bestImage, commonLibs := FindBestImage(images, ctx.Build.Dependencies, ctx.Artifacts)
+		bestImage, commonLibs := findBestImage(images, ctx.Build.Dependencies, ctx.Artifacts)
 		if bestImage.Image != "" {
 			selectedArtifacts := make([]v1alpha1.Artifact, 0)
 			for _, entry := range ctx.Artifacts {
@@ -317,8 +371,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 	return nil
 }
 
-// ListPublishedImages --
-func ListPublishedImages(context *Context) ([]PublishedImage, error) {
+func listPublishedImages(context *Context) ([]publishedImage, error) {
 	list := v1alpha1.NewIntegrationContextList()
 
 	err := context.Client.List(context.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
@@ -326,7 +379,7 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 		return nil, err
 	}
 
-	images := make([]PublishedImage, 0)
+	images := make([]publishedImage, 0)
 	for _, item := range list.Items {
 		ctx := item
 
@@ -349,7 +402,7 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 			continue
 		}
 
-		images = append(images, PublishedImage{
+		images = append(images, publishedImage{
 			Image:        ctx.Status.Image,
 			Artifacts:    ctx.Status.Artifacts,
 			Dependencies: ctx.Spec.Dependencies,
@@ -358,9 +411,8 @@ func ListPublishedImages(context *Context) ([]PublishedImage, error) {
 	return images, nil
 }
 
-// FindBestImage --
-func FindBestImage(images []PublishedImage, dependencies []string, artifacts []v1alpha1.Artifact) (PublishedImage, map[string]bool) {
-	var bestImage PublishedImage
+func findBestImage(images []publishedImage, dependencies []string, artifacts []v1alpha1.Artifact) (publishedImage, map[string]bool) {
+	var bestImage publishedImage
 
 	if len(images) == 0 {
 		return bestImage, nil

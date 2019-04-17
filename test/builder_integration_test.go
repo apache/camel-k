@@ -27,7 +27,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -38,7 +37,7 @@ import (
 )
 
 func TestBuildManagerBuild(t *testing.T) {
-	b := builder.New(testClient, kaniko.DefaultSteps, s2i.DefaultSteps)
+	b := builder.New(testClient)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -64,7 +63,7 @@ func TestBuildManagerBuild(t *testing.T) {
 			"mvn:org.apache.camel/camel-core",
 			"camel:telegram",
 		},
-		Steps: getSteps(),
+		Steps: s2i.DefaultSteps,
 	}
 
 	result := b.Build(r)
@@ -75,7 +74,7 @@ func TestBuildManagerBuild(t *testing.T) {
 }
 
 func TestBuildManagerFailedBuild(t *testing.T) {
-	b := builder.New(testClient, kaniko.DefaultSteps, s2i.DefaultSteps)
+	b := builder.New(testClient)
 
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -100,21 +99,11 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-cippalippa",
 		},
-		Steps: getSteps(),
+		Steps: s2i.DefaultSteps,
 	}
 
 	result := b.Build(r)
 
 	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Phase)
 	assert.NotEqual(t, v1alpha1.BuildPhaseSucceeded, result.Phase)
-}
-
-func getSteps() []string {
-	steps := make([]string, 0)
-
-	for _, step := range s2i.DefaultSteps {
-		steps = append(steps, step.ID())
-	}
-
-	return steps
 }

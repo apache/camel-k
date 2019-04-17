@@ -49,7 +49,7 @@ func TestNewProject(t *testing.T) {
 		},
 	}
 
-	err = GenerateProject(&ctx)
+	err = generateProject(&ctx)
 	assert.Nil(t, err)
 
 	assert.Len(t, ctx.Project.DependencyManagement.Dependencies, 3)

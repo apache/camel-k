@@ -52,9 +52,9 @@ func TestMavenRepositories(t *testing.T) {
 		},
 	}
 
-	err = GenerateProject(&ctx)
+	err = generateProject(&ctx)
 	assert.Nil(t, err)
-	err = builder.InjectDependencies(&ctx)
+	err = builder.Steps.InjectDependencies.Execute(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 2, len(ctx.Project.Repositories))

@@ -21,20 +21,20 @@ import (
 	"context"
 	"testing"
 
-	"github.com/scylladb/go-set/strset"
-
-	"github.com/apache/camel-k/pkg/util/defaults"
-
-	"github.com/apache/camel-k/pkg/util/test"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/kaniko"
+	"github.com/apache/camel-k/pkg/builder/s2i"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/scylladb/go-set/strset"
 )
 
 func TestBuilderTraitNotAppliedBecauseOfNilContext(t *testing.T) {
@@ -90,7 +90,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.Len(t, env.Steps, 6)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
-			if s.ID() == "publisher/s2i" && s.Phase() == builder.ApplicationPublishPhase {
+			if s == s2i.Steps.Publisher.ID() && builder.StepsByID[s].Phase() == builder.ApplicationPublishPhase {
 				return true
 			}
 		}
@@ -110,7 +110,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.Len(t, env.Steps, 6)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
-			if s.ID() == "publisher/kaniko" && s.Phase() == builder.ApplicationPublishPhase {
+			if s == kaniko.Steps.Publisher.ID() && builder.StepsByID[s].Phase() == builder.ApplicationPublishPhase {
 				return true
 			}
 		}
@@ -158,16 +158,6 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
-}
-
-func TestIPReplacement(t *testing.T) {
-	assert.Equal(t, "docker-registry.default.svc:5000/myproject/camel-k:1234", getImageWithOpenShiftHost("172.30.1.1:5000/myproject/camel-k:1234"))
-	assert.Equal(t, "docker-registry.default.svc/myproject/camel-k:1234", getImageWithOpenShiftHost("172.30.1.1/myproject/camel-k:1234"))
-	assert.Equal(t, "docker-registry.default.svc/myproject/camel-k:1234", getImageWithOpenShiftHost("10.0.0.1/myproject/camel-k:1234"))
-	assert.Equal(t, "docker-registry.default.svc/camel-k", getImageWithOpenShiftHost("10.0.0.1/camel-k"))
-	assert.Equal(t, "10.0.2.3.4/camel-k", getImageWithOpenShiftHost("10.0.2.3.4/camel-k"))
-	assert.Equal(t, "gcr.io/camel-k/camel-k:latest", getImageWithOpenShiftHost("gcr.io/camel-k/camel-k:latest"))
-	assert.Equal(t, "docker.io/camel-k:latest", getImageWithOpenShiftHost("docker.io/camel-k:latest"))
 }
 
 func NewBuilderTestCatalog() *Catalog {
