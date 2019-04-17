@@ -1,4 +1,4 @@
-Apache Camel K
+Apache Camel K 
 ==============
 
 image:https://travis-ci.org/apache/camel-k.svg?branch=master["Build Status", link="https://travis-ci.org/apache/camel-k"]
