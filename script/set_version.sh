@@ -2,15 +2,15 @@
 
 set -e
 
-if [ "$#" -ne 1 ]; then
-    echo "usage: $0 version"
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+    echo "usage: $0 version [image_name]"
     exit 1
 fi
 
 location=$(dirname $0)
 version=$1
 image_name=${2:-docker.io\/apache\/camel-k}
-sanitized_image_name=${image_name/\//\\\/}
+sanitized_image_name=${image_name//\//\\\/}
 
 
 for f in $(find $location/../deploy -type f -name "*.yaml"); 
