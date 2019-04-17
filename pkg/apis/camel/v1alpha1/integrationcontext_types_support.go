@@ -44,9 +44,27 @@ func NewIntegrationContextList() IntegrationContextList {
 }
 
 // ImageForIntegration returns the image to use when using it for running an integration
-func (c IntegrationContext) ImageForIntegration() string {
-	if c.Status.PublicImage != "" {
-		return c.Status.PublicImage
+func (in *IntegrationContext) ImageForIntegration() string {
+	if in.Status.PublicImage != "" {
+		return in.Status.PublicImage
 	}
-	return c.Status.Image
+	return in.Status.Image
+}
+
+// Configurations --
+func (in *IntegrationContextSpec) Configurations() []ConfigurationSpec {
+	if in == nil {
+		return []ConfigurationSpec{}
+	}
+
+	return in.Configuration
+}
+
+// Configurations --
+func (in *IntegrationContext) Configurations() []ConfigurationSpec {
+	if in == nil {
+		return []ConfigurationSpec{}
+	}
+
+	return in.Spec.Configuration
 }
