@@ -57,7 +57,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		if platform.SupportsS2iPublishStrategy(e.Platform) {
 			e.Steps = s2i.DefaultSteps
 			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
-				e.Steps = append(e.Steps, s2i.Steps.ReplaceHost.ID())
+				e.Steps = append(e.Steps, s2i.Steps.ReplaceHost)
 			}
 		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
 			e.Steps = kaniko.DefaultSteps
@@ -67,17 +67,17 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildImageSubmitted) {
 		if platform.SupportsS2iPublishStrategy(e.Platform) {
-			e.Steps = []string{
-				builder.Steps.StandardPackager.ID(),
-				s2i.Steps.Publisher.ID(),
+			e.Steps = []builder.Step{
+				builder.Steps.StandardPackager,
+				s2i.Steps.Publisher,
 			}
 			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
-				e.Steps = append(e.Steps, s2i.Steps.ReplaceHost.ID())
+				e.Steps = append(e.Steps, s2i.Steps.ReplaceHost)
 			}
 		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
-			e.Steps = []string{
-				builder.Steps.StandardPackager.ID(),
-				kaniko.Steps.Publisher.ID(),
+			e.Steps = []builder.Step{
+				builder.Steps.StandardPackager,
+				kaniko.Steps.Publisher,
 			}
 			e.BuildDir = kaniko.BuildDir
 		}

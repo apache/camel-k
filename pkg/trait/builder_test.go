@@ -90,7 +90,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.Len(t, env.Steps, 6)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
-			if s == s2i.Steps.Publisher.ID() && builder.StepsByID[s].Phase() == builder.ApplicationPublishPhase {
+			if s == s2i.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
 				return true
 			}
 		}
@@ -110,7 +110,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.Len(t, env.Steps, 6)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
-			if s == kaniko.Steps.Publisher.ID() && builder.StepsByID[s].Phase() == builder.ApplicationPublishPhase {
+			if s == kaniko.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
 				return true
 			}
 		}

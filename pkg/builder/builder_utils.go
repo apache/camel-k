@@ -28,6 +28,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
+func StepIDsFor(steps ...Step) []string {
+	IDs := make([]string, 0)
+	for _, step := range steps {
+		IDs = append(IDs, step.ID())
+	}
+	return IDs
+}
+
 func artifactIDs(artifacts []v1alpha1.Artifact) []string {
 	result := make([]string, 0, len(artifacts))
 

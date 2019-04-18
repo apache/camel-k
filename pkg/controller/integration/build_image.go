@@ -30,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -113,7 +114,7 @@ func (action *buildImageAction) handleBuildImageSubmitted(ctx context.Context, i
 				CamelVersion:   env.CamelCatalog.Version,
 				RuntimeVersion: env.RuntimeVersion,
 				Platform:       env.Platform.Spec,
-				Steps:          env.Steps,
+				Steps:          builder.StepIDsFor(env.Steps...),
 				BuildDir:       env.BuildDir,
 			},
 		}
