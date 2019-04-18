@@ -38,7 +38,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var StepsByID = make(map[string]Step)
+var stepsByID = make(map[string]Step)
 
 func init() {
 	RegisterSteps(Steps)
@@ -98,10 +98,10 @@ func RegisterSteps(steps interface{}) {
 
 func registerStep(steps ...Step) {
 	for _, step := range steps {
-		if _, exists := StepsByID[step.ID()]; exists {
+		if _, exists := stepsByID[step.ID()]; exists {
 			panic(fmt.Errorf("the build step is already registered: %s", step.ID()))
 		}
-		StepsByID[step.ID()] = step
+		stepsByID[step.ID()] = step
 	}
 }
 

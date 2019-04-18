@@ -37,7 +37,6 @@ type defaultBuilder struct {
 	log    log.Logger
 	ctx    cancellable.Context
 	client client.Client
-	steps  map[string]Step
 }
 
 // New --
@@ -46,7 +45,6 @@ func New(c client.Client) Builder {
 		log:    log.WithName("builder"),
 		ctx:    cancellable.NewContext(),
 		client: c,
-		steps:  StepsByID,
 	}
 
 	return &m
@@ -133,7 +131,7 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 
 	steps := make([]Step, 0)
 	for _, step := range build.Steps {
-		s, ok := b.steps[step]
+		s, ok := stepsByID[step]
 		if !ok {
 			log.Info("Skipping unknown build step", "step", step)
 			continue
