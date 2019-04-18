@@ -78,7 +78,7 @@ func TestBuildManagerBuild(t *testing.T) {
 			"mvn:org.apache.camel/camel-core",
 			"camel:telegram",
 		},
-		Steps: s2i.DefaultSteps,
+		Steps: builder.StepIDsFor(s2i.DefaultSteps...),
 	}
 
 	result := b.Build(r)
@@ -125,7 +125,7 @@ func TestBuildManagerFailedBuild(t *testing.T) {
 		Dependencies: []string{
 			"mvn:org.apache.camel/camel-cippalippa",
 		},
-		Steps: s2i.DefaultSteps,
+		Steps: builder.StepIDsFor(s2i.DefaultSteps...),
 	}
 
 	result := b.Build(r)

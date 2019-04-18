@@ -31,6 +31,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 )
@@ -108,7 +109,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 				Platform:       env.Platform.Spec,
 				Dependencies:   ictx.Spec.Dependencies,
 				Repositories:   repositories,
-				Steps:          env.Steps,
+				Steps:          builder.StepIDsFor(env.Steps...),
 				BuildDir:       env.BuildDir,
 			},
 		}

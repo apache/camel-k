@@ -38,7 +38,6 @@ type testSteps struct {
 func TestRegisterDuplicatedSteps(t *testing.T) {
 	steps := testSteps{
 		TestStep: NewStep(
-			"step",
 			ApplicationPublishPhase,
 			func(context *Context) error {
 				return nil

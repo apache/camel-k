@@ -31,20 +31,19 @@ type steps struct {
 
 var Steps = steps{
 	Publisher: builder.NewStep(
-		"publisher/kaniko",
 		builder.ApplicationPublishPhase,
 		publisher,
 	),
 }
 
 // DefaultSteps --
-var DefaultSteps = []string{
-	builder.Steps.GenerateProject.ID(),
-	builder.Steps.InjectDependencies.ID(),
-	builder.Steps.SanitizeDependencies.ID(),
-	builder.Steps.ComputeDependencies.ID(),
-	builder.Steps.IncrementalPackager.ID(),
-	Steps.Publisher.ID(),
+var DefaultSteps = []builder.Step{
+	builder.Steps.GenerateProject,
+	builder.Steps.InjectDependencies,
+	builder.Steps.SanitizeDependencies,
+	builder.Steps.ComputeDependencies,
+	builder.Steps.IncrementalPackager,
+	Steps.Publisher,
 }
 
 // BuildDir is the directory where to build artifacts (shared with the Kaniko pod)

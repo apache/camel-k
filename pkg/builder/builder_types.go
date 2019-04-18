@@ -56,17 +56,17 @@ type Step interface {
 }
 
 type stepWrapper struct {
-	id    string
-	phase int32
-	task  StepTask
+	StepID string
+	phase  int32
+	task   StepTask
 }
 
 func (s *stepWrapper) String() string {
-	return fmt.Sprintf("%s@%d", s.id, s.phase)
+	return fmt.Sprintf("%s@%d", s.StepID, s.phase)
 }
 
 func (s *stepWrapper) ID() string {
-	return s.id
+	return s.StepID
 }
 
 func (s *stepWrapper) Phase() int32 {
@@ -81,9 +81,8 @@ func (s *stepWrapper) Execute(ctx *Context) error {
 type StepTask func(*Context) error
 
 // NewStep --
-func NewStep(id string, phase int32, task StepTask) Step {
+func NewStep(phase int32, task StepTask) Step {
 	s := stepWrapper{
-		id:    id,
 		phase: phase,
 		task:  task,
 	}
