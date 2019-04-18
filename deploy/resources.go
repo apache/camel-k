@@ -6219,6 +6219,21 @@ spec:
       type: string
       description: The build phase
       JSONPath: .status.phase
+    - name: Age
+      type: date
+      description: The time at which the build was last (re-)started
+      JSONPath: .status.startedAt
+    - name: Duration
+      type: string
+      # Change when CRD uses OpenAPI spec v3
+      # https://github.com/OAI/OpenAPI-Specification/issues/845
+      # format: duration
+      description: The build last execution duration
+      JSONPath: .status.duration
+    - name: Attempts
+      type: integer
+      description: The number of execution attempts
+      JSONPath: .status.failure.recovery.attempt
 
 `
 	Resources["crd-camel-catalog.yaml"] =
