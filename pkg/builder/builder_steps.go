@@ -97,6 +97,9 @@ func RegisterSteps(steps interface{}) {
 
 func RegisterStep(steps ...Step) {
 	for _, step := range steps {
+		if _, exists := StepsByID[step.ID()]; exists {
+			panic(fmt.Errorf("the build step is already registered: %s", step.ID()))
+		}
 		StepsByID[step.ID()] = step
 	}
 }

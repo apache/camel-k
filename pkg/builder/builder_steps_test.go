@@ -31,6 +31,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type testSteps struct {
+	TestStep Step
+}
+
+func TestRegisterDuplicatedSteps(t *testing.T) {
+	steps := testSteps{
+		TestStep: NewStep(
+			"step",
+			ApplicationPublishPhase,
+			func(context *Context) error {
+				return nil
+			},
+		),
+	}
+	RegisterSteps(steps)
+	assert.Panics(t, func() {
+		RegisterSteps(steps)
+	})
+}
+
 func TestMavenRepositories(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
