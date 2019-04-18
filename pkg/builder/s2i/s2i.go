@@ -32,23 +32,21 @@ type steps struct {
 
 var Steps = steps{
 	Publisher: builder.NewStep(
-		"publisher/s2i",
 		builder.ApplicationPublishPhase,
 		publisher,
 	),
 	ReplaceHost: builder.NewStep(
-		"publisher/replaceHost",
 		builder.ApplicationPublishPhase+1,
 		replaceHost,
 	),
 }
 
 // DefaultSteps --
-var DefaultSteps = []string{
-	builder.Steps.GenerateProject.ID(),
-	builder.Steps.InjectDependencies.ID(),
-	builder.Steps.SanitizeDependencies.ID(),
-	builder.Steps.ComputeDependencies.ID(),
-	builder.Steps.IncrementalPackager.ID(),
-	Steps.Publisher.ID(),
+var DefaultSteps = []builder.Step{
+	builder.Steps.GenerateProject,
+	builder.Steps.InjectDependencies,
+	builder.Steps.SanitizeDependencies,
+	builder.Steps.ComputeDependencies,
+	builder.Steps.IncrementalPackager,
+	Steps.Publisher,
 }

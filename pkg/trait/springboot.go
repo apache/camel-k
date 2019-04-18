@@ -108,13 +108,13 @@ func (t *springBootTrait) Apply(e *Environment) error {
 	//
 	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
 		// add custom initialization logic
-		e.Steps = append(e.Steps, springboot.Steps.Initialize.ID())
-		e.Steps = append(e.Steps, springboot.Steps.ComputeDependencies.ID())
+		e.Steps = append(e.Steps, springboot.Steps.Initialize)
+		e.Steps = append(e.Steps, springboot.Steps.ComputeDependencies)
 
 		// replace project generator
 		for i := 0; i < len(e.Steps); i++ {
-			if builder.StepsByID[e.Steps[i]].Phase() == builder.ProjectGenerationPhase {
-				e.Steps[i] = springboot.Steps.GenerateProject.ID()
+			if e.Steps[i].Phase() == builder.ProjectGenerationPhase {
+				e.Steps[i] = springboot.Steps.GenerateProject
 			}
 		}
 	}

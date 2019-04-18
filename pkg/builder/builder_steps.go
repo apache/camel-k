@@ -55,32 +55,26 @@ type steps struct {
 
 var Steps = steps{
 	GenerateProject: NewStep(
-		"project/generate",
 		ProjectGenerationPhase,
 		generateProject,
 	),
 	InjectDependencies: NewStep(
-		"project/inject-dependencies",
 		ProjectGenerationPhase+1,
 		injectDependencies,
 	),
 	SanitizeDependencies: NewStep(
-		"project/sanitize-dependencies",
 		ProjectGenerationPhase+2,
 		sanitizeDependencies,
 	),
 	ComputeDependencies: NewStep(
-		"build/compute-dependencies",
 		ProjectBuildPhase,
 		computeDependencies,
 	),
 	StandardPackager: NewStep(
-		"packager",
 		ApplicationPackagePhase,
 		standardPackager,
 	),
 	IncrementalPackager: NewStep(
-		"packager/incremental",
 		ApplicationPackagePhase,
 		incrementalPackager,
 	),
@@ -88,14 +82,21 @@ var Steps = steps{
 
 func RegisterSteps(steps interface{}) {
 	v := reflect.ValueOf(steps)
+	t := reflect.TypeOf(steps)
+
 	for i := 0; i < v.NumField(); i++ {
+		field := t.Field(i)
 		if step, ok := v.Field(i).Interface().(Step); ok {
-			RegisterStep(step)
+			id := t.PkgPath() + "/" + field.Name
+			// Set the fully qualified step ID
+			reflect.Indirect(v.Field(i).Elem()).FieldByName("StepID").SetString(id)
+
+			registerStep(step)
 		}
 	}
 }
 
-func RegisterStep(steps ...Step) {
+func registerStep(steps ...Step) {
 	for _, step := range steps {
 		if _, exists := StepsByID[step.ID()]; exists {
 			panic(fmt.Errorf("the build step is already registered: %s", step.ID()))

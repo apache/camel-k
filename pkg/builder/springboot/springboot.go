@@ -33,17 +33,14 @@ type steps struct {
 
 var Steps = steps{
 	Initialize: builder.NewStep(
-		"initialize/spring-boot",
 		builder.InitPhase,
 		initialize,
 	),
 	ComputeDependencies: builder.NewStep(
-		"build/compute-boot-dependencies",
 		builder.ProjectBuildPhase+1,
 		computeDependencies,
 	),
 	GenerateProject: builder.NewStep(
-		"generate/spring-boot",
 		builder.ProjectGenerationPhase,
 		generateProject,
 	),
