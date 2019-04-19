@@ -28,8 +28,9 @@ import (
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(b builder.Builder, r *sync.Map) Action {
+func NewScheduleRoutineAction(reader k8sclient.Reader, b builder.Builder, r *sync.Map) Action {
 	return &scheduleRoutineAction{
+		reader:   reader,
 		builder:  b,
 		routines: r,
 	}
@@ -38,6 +39,7 @@ func NewScheduleRoutineAction(b builder.Builder, r *sync.Map) Action {
 type scheduleRoutineAction struct {
 	baseAction
 	lock     sync.Mutex
+	reader   k8sclient.Reader
 	builder  builder.Builder
 	routines *sync.Map
 }
@@ -61,7 +63,9 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 
 	builds := &v1alpha1.BuildList{}
 	options := &k8sclient.ListOptions{Namespace: build.Namespace}
-	err := action.client.List(ctx, options, builds)
+	// We use the non-caching client as informers cache is not invalidated nor updated
+	// atomically by write operations
+	err := action.reader.List(ctx, options, builds)
 	if err != nil {
 		return err
 	}

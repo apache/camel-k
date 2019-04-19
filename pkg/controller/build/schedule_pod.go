@@ -35,13 +35,16 @@ import (
 )
 
 // NewSchedulePodAction creates a new schedule action
-func NewSchedulePodAction() Action {
-	return &schedulePodAction{}
+func NewSchedulePodAction(reader k8sclient.Reader) Action {
+	return &schedulePodAction{
+		reader: reader,
+	}
 }
 
 type schedulePodAction struct {
 	baseAction
-	lock sync.Mutex
+	lock   sync.Mutex
+	reader k8sclient.Reader
 }
 
 // Name returns a common name of the action
@@ -63,7 +66,9 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 
 	builds := &v1alpha1.BuildList{}
 	options := &k8sclient.ListOptions{Namespace: build.Namespace}
-	err := action.client.List(ctx, options, builds)
+	// We use the non-caching client as informers cache is not invalidated nor updated
+	// atomically by write operations
+	err := action.reader.List(ctx, options, builds)
 	if err != nil {
 		return err
 	}
