@@ -110,9 +110,9 @@ const (
 var Languages = []Language{
 	LanguageJavaSource,
 	LanguageJavaClass,
-	LanguageJavaScript,
 	LanguageGroovy,
 	LanguageJavaScript,
+	LanguageXML,
 	LanguageKotlin,
 	LanguageYamlFlow,
 }

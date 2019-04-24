@@ -18,18 +18,36 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLanguageJavaSource(t *testing.T) {
-	code := SourceSpec{
-		DataSpec: DataSpec{
-			Name: "Request.java",
-		},
+func TestAllLanguages(t *testing.T) {
+	assert.Contains(t, Languages, LanguageJavaClass)
+	assert.Contains(t, Languages, LanguageJavaSource)
+	assert.Contains(t, Languages, LanguageJavaScript)
+	assert.Contains(t, Languages, LanguageGroovy)
+	assert.Contains(t, Languages, LanguageKotlin)
+	assert.Contains(t, Languages, LanguageXML)
+	assert.Contains(t, Languages, LanguageYamlFlow)
+}
+
+func TestLanguageFromName(t *testing.T) {
+	for _, l := range Languages {
+		t.Run(string(l), func(t *testing.T) {
+			code := SourceSpec{
+				DataSpec: DataSpec{
+					Name: fmt.Sprintf("code.%s", l),
+				},
+			}
+
+			if l != code.InferLanguage() {
+				t.Errorf("got %s, want %s", code.InferLanguage(), l)
+			}
+		})
 	}
-	assert.Equal(t, LanguageJavaSource, code.InferLanguage())
 }
 
 func TestLanguageAlreadySet(t *testing.T) {
