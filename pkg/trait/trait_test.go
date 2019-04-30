@@ -257,6 +257,24 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 						Type: "data",
 					},
 				},
+				Configuration: []v1alpha1.ConfigurationSpec{
+					{
+						Type:  "configmap",
+						Value: "test-configmap",
+					},
+					{
+						Type:  "secret",
+						Value: "test-secret",
+					},
+					{
+						Type:  "volume",
+						Value: "testvolume:/foo/bar",
+					},
+					{
+						Type:  "volume",
+						Value: "an-invalid-volume-spec",
+					},
+				},
 			},
 		},
 	}
@@ -266,8 +284,8 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 
 	env.ConfigureVolumesAndMounts(false, &vols, &mnts)
 
-	assert.Len(t, vols, 5)
-	assert.Len(t, mnts, 5)
+	assert.Len(t, vols, 8)
+	assert.Len(t, mnts, 8)
 
 	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
 	assert.NotNil(t, v)
@@ -313,6 +331,34 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	assert.NotNil(t, m)
 	assert.Equal(t, "/etc/camel/resources/i-resource-003", m.MountPath)
 
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "test-configmap" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.NotNil(t, v.VolumeSource.ConfigMap.LocalObjectReference)
+	assert.Equal(t, "test-configmap", v.VolumeSource.ConfigMap.LocalObjectReference.Name)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-configmap" })
+	assert.NotNil(t, m)
+	assert.Equal(t, "/etc/camel/conf.d/integration-cm-test-configmap", m.MountPath)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "test-secret" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.Secret)
+	assert.Equal(t, "test-secret", v.Secret.SecretName)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-secret" })
+	assert.NotNil(t, m)
+	assert.Equal(t, "/etc/camel/conf.d/integration-secret-test-secret", m.MountPath)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "testvolume-data" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource)
+	assert.NotNil(t, v.VolumeSource.PersistentVolumeClaim)
+	assert.Equal(t, "testvolume", v.VolumeSource.PersistentVolumeClaim.ClaimName)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "testvolume-data" })
+	assert.NotNil(t, m)
+	assert.Equal(t, "/foo/bar", m.MountPath)
 }
 
 func findVolume(vols []corev1.Volume, condition func(corev1.Volume) bool) *corev1.Volume {

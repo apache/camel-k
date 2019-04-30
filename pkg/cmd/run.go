@@ -87,6 +87,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&options.Resources, "resource", nil, "Add a resource")
 	cmd.Flags().StringSliceVar(&options.OpenAPIs, "open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringVar(&options.DeletionPolicy, "deletion-policy", "owner", "Policy used to cleanup child resources, default owner")
+	cmd.Flags().StringSliceVarP(&options.Volumes, "volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -116,6 +117,7 @@ type runCmdOptions struct {
 	Repositories       []string
 	Traits             []string
 	LoggingLevels      []string
+	Volumes            []string
 }
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
@@ -141,6 +143,13 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 			} else if resp.StatusCode != 200 {
 				return errors.New("The URL provided is not reachable " + fileName + " The error code returned is " + strconv.Itoa(resp.StatusCode))
 			}
+		}
+	}
+
+	for _, volume := range o.Volumes {
+		volumeConfig := strings.Split(volume, ":")
+		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 || len(strings.TrimSpace(volumeConfig[1])) == 0 {
+			return fmt.Errorf("Volume '%s' is invalid. It should be in the format: pvcname:/container/path", volume)
 		}
 	}
 
@@ -367,6 +376,10 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	}
 	for _, item := range o.Secrets {
 		integration.Spec.AddConfiguration("secret", item)
+	}
+
+	for _, item := range o.Volumes {
+		integration.Spec.AddConfiguration("volume", item)
 	}
 
 	for _, traitConf := range o.Traits {
