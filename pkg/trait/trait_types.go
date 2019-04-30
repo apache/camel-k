@@ -556,6 +556,35 @@ func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.V
 			MountPath: path.Join("/etc/camel/conf.d", fileName),
 		})
 	}
+
+	//
+	// Volumes :: Additional user provided volumes
+	//
+	for _, volumeConfig := range e.CollectConfigurationValues("volume") {
+		configParts := strings.Split(volumeConfig, ":")
+
+		if len(configParts) != 2 {
+			continue
+		}
+
+		pvcName := configParts[0]
+		mountPath := configParts[1]
+		volumeName := pvcName + "-data"
+
+		*vols = append(*vols, corev1.Volume{
+			Name: volumeName,
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: pvcName,
+				},
+			},
+		})
+
+		*mnts = append(*mnts, corev1.VolumeMount{
+			Name:      volumeName,
+			MountPath: mountPath,
+		})
+	}
 }
 
 // CollectConfigurationValues --
