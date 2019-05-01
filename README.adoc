@@ -1,4 +1,4 @@
-Apache Camel K 
+Apache Camel K
 ==============
 
 image:https://travis-ci.org/apache/camel-k.svg?branch=master["Build Status", link="https://travis-ci.org/apache/camel-k"]
@@ -68,7 +68,7 @@ kamel run --configmap=<your name here> examples/props.js
 ```
 Note: to create the config map first create a file called application.properties which contains lines with key=value pairs
 e.g. my.message="The text to display"
-Create the config map in the usual manner e.g. 
+Create the config map in the usual manner e.g.
 ```
 kubectl create configmap <your name here>  --from-file=application.properties
 ```
@@ -139,6 +139,14 @@ This results in:
 ====
 The final repositories list is the sum of the repositories defined on the resource (integration/context) and the platform ones
 ====
+
+==== Configure Integration Volumes
+
+It's possible to mount persistent volumes into integration containers by using the `-v` or `--volume` flag. The format of volume flag value is similar to that of the docker CLI. But instead of specifying a host path to mount from, you reference the name of a `PersistentVolumeClaim` that you have already configured within the cluster. E.g
+
+```
+kamel run examples/Sample.java -v myPvcName:/some/path
+```
 
 === Running Integrations in "Dev" Mode for Fast Feedback
 
