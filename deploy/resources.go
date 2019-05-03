@@ -10585,7 +10585,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.3.3-SNAPSHOT
+          image: docker.io/apache/camel-k:0.3.4-SNAPSHOT
           command:
           - camel-k
           imagePullPolicy: IfNotPresent
@@ -10627,7 +10627,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.3.3-SNAPSHOT
+          image: docker.io/apache/camel-k:0.3.4-SNAPSHOT
           command:
           - camel-k
           imagePullPolicy: IfNotPresent
