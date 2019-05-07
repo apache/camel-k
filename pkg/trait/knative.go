@@ -71,7 +71,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 
 			t.ChannelSources = strings.Join(items, ",")
 		}
-		if t.EndpointSinks == "" {
+		if t.ChannelSinks == "" {
 			items := make([]string, 0)
 
 			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
@@ -79,7 +79,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 
-			t.EndpointSinks = strings.Join(items, ",")
+			t.ChannelSinks = strings.Join(items, ",")
 		}
 		if t.EndpointSources == "" {
 			items := make([]string, 0)
