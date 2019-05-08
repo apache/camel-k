@@ -54,6 +54,66 @@ After the initial setup, you can run a Camel integration on the cluster by execu
 kamel run examples/Sample.java
 ```
 
+During your first run you may see your console stuck with the following message:
+
+```
+integration "sample" created
+integration "sample" in phase Waiting For Platform
+```
+
+NOTE: It will take some time for your integration to get started for the first time. This is because the camel-k operator has to pull and cache the camel-k builder images into the cluster’s registry. 
+
+You can follow this process by watching the pods in the namespace where the operator is running:
+
+```
+kubectl get pods -w
+```
+
+you shold see something like:
+
+```
+$ kubectl get pods -w
+NAME                                READY   STATUS      RESTARTS   AGE
+camel-k-cache                       0/1     Completed   0          3m29s
+camel-k-groovy-builder              1/1     Running     0          32s
+camel-k-jvm                         0/1     Completed   0          61s
+camel-k-jvm-builder                 0/1     Completed   0          2m13s
+camel-k-operator-587b579567-fkz54   1/1     Running     1          43m
+camel-k-groovy   0/1   Pending   0     0s
+camel-k-groovy   0/1   ContainerCreating   0     0s
+camel-k-groovy   1/1   Running   0     2s
+camel-k-groovy   0/1   Completed   0     4s
+camel-k-kotlin-builder   0/1   Pending   0     0s
+camel-k-kotlin-builder   0/1   Pending   0     0s
+camel-k-kotlin-builder   0/1   ContainerCreating   0     0s
+camel-k-groovy-builder   0/1   Completed   0     75s
+...
+```
+
+after a couple of minutes you can see your integration runnning. To see the output log of your integration container get thet pod id:
+
+```
+kubectl get pods | grep sample
+sample-67699569c4-724dv             1/1     Running     0          15m
+```
+
+And then see the logs using:
+
+```
+kubectl logs -f sample-67699569c4-724dv
+```
+
+An output like this should appear:
+
+```
+Starting the Java application using /opt/run-java/run-java.sh ...
+...
+2019-05-08 19:35:21.883 INFO  [main] DefaultCamelContext - Apache Camel 2.23.2 (CamelContext: camel-k) started in 0.874 seconds
+2019-05-08 19:35:22.889 INFO  [Camel (camel-k) thread #2 - timer://tick] route1 - Hello Camel K!
+2019-05-08 19:36:22.881 INFO  [Camel (camel-k) thread #2 - timer://tick] route1 - Hello Camel K!
+...
+```
+
 A "Sample.java" file is included in the link:/examples[/examples] folder of this repository. You can change the content of the file and execute the command again to see the changes.
 
 ==== Configure Integration properties
