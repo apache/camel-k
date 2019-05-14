@@ -33,7 +33,6 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	_ "github.com/apache/camel-k/pkg/builder/kaniko"
 	_ "github.com/apache/camel-k/pkg/builder/s2i"
-	_ "github.com/apache/camel-k/pkg/builder/springboot"
 	"github.com/apache/camel-k/pkg/client"
 	util "github.com/apache/camel-k/pkg/controller/build"
 	"github.com/apache/camel-k/pkg/util/cancellable"
