@@ -20,11 +20,11 @@ package integration
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/util"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util"
-
 	"github.com/pkg/errors"
 )
 
@@ -75,6 +75,22 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 				continue
 			}
 
+			//
+			// When a platform context is created it inherits the traits from the integrations and as
+			// some traits may influence the build thus the artifacts present on the container image,
+			// we need to take traits into account when looking up for compatible contexts.
+			//
+			// It could also happen that an integration is updated and a trait is modified, if we do
+			// not include traits in the lookup, we may use a context that does not have all the
+			// characteristics required by the integration.
+			//
+			// An context be used only if it contains a subset of the traits and related configurations
+			// declared on integration.
+			//
+			if !HasMatchingTraits(&ctx, integration) {
+				continue
+			}
+
 			if util.StringSliceContains(ctx.Spec.Dependencies, integration.Status.Dependencies) {
 				return &ctx, nil
 			}
@@ -82,4 +98,32 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 	}
 
 	return nil, nil
+}
+
+// HasMatchingTraits compare traits defined on context against those defined on integration.
+func HasMatchingTraits(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) bool {
+	for ctxTraitName, ctxTraitConf := range ctx.Spec.Traits {
+		iTraitConf, ok := integration.Spec.Traits[ctxTraitName]
+		if !ok {
+			// skip it because trait configured on context is not defined on integration.
+			return false
+		}
+
+		for ck, cv := range ctxTraitConf.Configuration {
+			iv, ok := iTraitConf.Configuration[ck]
+
+			if !ok {
+				// skip it because trait configured on context has a value that is not defined
+				// in integration trait
+				return false
+			}
+			if iv != cv {
+				// skip it because trait configured on context has a value that differs from
+				// the one configured on integration
+				return false
+			}
+		}
+	}
+
+	return true
 }
