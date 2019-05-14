@@ -19,7 +19,6 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/platform"
@@ -41,46 +40,18 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
-		return true, nil
-	}
-
-	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildImageSubmitted) {
-		return true, nil
-	}
-
-	return false, nil
+	return e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted), nil
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
-	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted) {
-		if platform.SupportsS2iPublishStrategy(e.Platform) {
-			e.Steps = s2i.DefaultSteps
-			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
-				e.Steps = append(e.Steps, s2i.Steps.ReplaceHost)
-			}
-		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
-			e.Steps = kaniko.DefaultSteps
-			e.BuildDir = kaniko.BuildDir
+	if platform.SupportsS2iPublishStrategy(e.Platform) {
+		e.Steps = s2i.DefaultSteps
+		if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
+			e.Steps = append(e.Steps, s2i.Steps.ReplaceHost)
 		}
-	}
-
-	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseBuildImageSubmitted) {
-		if platform.SupportsS2iPublishStrategy(e.Platform) {
-			e.Steps = []builder.Step{
-				builder.Steps.StandardPackager,
-				s2i.Steps.Publisher,
-			}
-			if e.DetermineProfile() == v1alpha1.TraitProfileKnative {
-				e.Steps = append(e.Steps, s2i.Steps.ReplaceHost)
-			}
-		} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
-			e.Steps = []builder.Step{
-				builder.Steps.StandardPackager,
-				kaniko.Steps.Publisher,
-			}
-			e.BuildDir = kaniko.BuildDir
-		}
+	} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
+		e.Steps = kaniko.DefaultSteps
+		e.BuildDir = kaniko.BuildDir
 	}
 
 	return nil
