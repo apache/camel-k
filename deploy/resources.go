@@ -8352,6 +8352,29 @@ spec:
         passive: false
 
 `
+	Resources["cr-example.yaml"] =
+		`
+apiVersion: camel.apache.org/v1alpha1
+kind: Integration
+metadata:
+  name: example
+spec:
+  source:
+    content: |-
+      // This is Camel K Groovy example route
+
+      rnd = new Random()
+
+      from('timer:groovy?period=1s')
+          .routeId('groovy')
+          .setBody()
+              .constant('Hello Camel K!')
+          .process {
+              it.in.headers['RandomValue'] = rnd.nextInt()
+          }
+          .to('log:info?showHeaders=true')
+    name: routes.groovy
+`
 	Resources["crd-build.yaml"] =
 		`
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -8518,72 +8541,7 @@ spec:
       JSONPath: .status.context
 
 `
-	Resources["cr-example.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: Integration
-metadata:
-  name: example
-spec:
-  source:
-    content: |-
-      // This is Camel K Groovy example route
-
-      rnd = new Random()
-
-      from('timer:groovy?period=1s')
-          .routeId('groovy')
-          .setBody()
-              .constant('Hello Camel K!')
-          .process {
-              it.in.headers['RandomValue'] = rnd.nextInt()
-          }
-          .to('log:info?showHeaders=true')
-    name: routes.groovy
-`
-	Resources["operator-deployment-kubernetes.yaml"] =
-		`
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: camel-k-operator
-  labels:
-    app: "camel-k"
-    camel.apache.org/component: operator
-spec:
-  replicas: 1
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      name: camel-k-operator
-  template:
-    metadata:
-      labels:
-        name: camel-k-operator
-        camel.apache.org/component: operator
-    spec:
-      serviceAccountName: camel-k-operator
-      containers:
-        - name: camel-k-operator
-          image: docker.io/apache/camel-k:0.3.4-SNAPSHOT
-          command:
-          - camel-k
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: OPERATOR_NAME
-              value: "camel-k"
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-
-`
-	Resources["operator-deployment-openshift.yaml"] =
+	Resources["operator-deployment.yaml"] =
 		`
 apiVersion: apps/v1
 kind: Deployment

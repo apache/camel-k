@@ -1,4 +1,4 @@
-operator-path: deploy/operator-deployment-kubernetes.yaml
+operator-path: deploy/operator-deployment.yaml
 crd-cr-paths:
   - deploy/crd-build.yaml
   - deploy/crd-camel-catalog.yaml
