@@ -35,7 +35,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestKnativeWithVolumeBinding(t *testing.T) {
+func TestKnativeService(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -82,7 +82,7 @@ func TestKnativeWithVolumeBinding(t *testing.T) {
 				Traits: map[string]v1alpha1.TraitSpec{
 					"knative-service": {
 						Configuration: map[string]string{
-							"configuration-type": "volume",
+							"enabled": "true",
 						},
 					},
 				},
