@@ -115,7 +115,7 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 		return err
 	}
 
-	maps := e.ComputeConfigMaps(t.deployer.ContainerImage)
+	maps := e.ComputeConfigMaps()
 
 	e.Resources.Add(svc)
 	e.Resources.AddAll(maps)

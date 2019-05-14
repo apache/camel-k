@@ -255,7 +255,7 @@ func (e *Environment) DetermineRuntimeVersion() string {
 }
 
 // ComputeConfigMaps --
-func (e *Environment) ComputeConfigMaps(container bool) []runtime.Object {
+func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	sources := e.Integration.Sources()
 	maps := make([]runtime.Object, 0, len(sources)+1)
 
@@ -287,92 +287,84 @@ func (e *Environment) ComputeConfigMaps(container bool) []runtime.Object {
 		},
 	)
 
-	if !container {
-		for i, s := range sources {
-			if s.ContentRef != "" {
-				continue
-			}
-
-			cm := corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
-					Namespace: e.Integration.Namespace,
-					Labels: map[string]string{
-						"camel.apache.org/integration": e.Integration.Name,
-					},
-					Annotations: map[string]string{
-						"camel.apache.org/source.language":    string(s.InferLanguage()),
-						"camel.apache.org/source.name":        s.Name,
-						"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
-					},
-				},
-				Data: map[string]string{
-					"content": s.Content,
-				},
-			}
-
-			maps = append(maps, &cm)
+	for i, s := range sources {
+		if s.ContentRef != "" {
+			continue
 		}
 
-		for i, r := range e.Integration.Spec.Resources {
-			if r.Type != v1alpha1.ResourceTypeData {
-				continue
-			}
-			if r.ContentRef != "" {
-				continue
-			}
-
-			cmKey := "content"
-			if r.ContentKey != "" {
-				cmKey = r.ContentKey
-			}
-
-			cm := corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
+		cm := corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
+				Namespace: e.Integration.Namespace,
+				Labels: map[string]string{
+					"camel.apache.org/integration": e.Integration.Name,
 				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i),
-					Namespace: e.Integration.Namespace,
-					Labels: map[string]string{
-						"camel.apache.org/integration": e.Integration.Name,
-					},
-					Annotations: map[string]string{
-						"camel.apache.org/resource.name":        r.Name,
-						"camel.apache.org/resource.compression": strconv.FormatBool(r.Compression),
-					},
+				Annotations: map[string]string{
+					"camel.apache.org/source.language":    string(s.InferLanguage()),
+					"camel.apache.org/source.name":        s.Name,
+					"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
 				},
-				Data: map[string]string{
-					cmKey: r.Content,
-				},
-			}
-
-			maps = append(maps, &cm)
+			},
+			Data: map[string]string{
+				"content": s.Content,
+			},
 		}
+
+		maps = append(maps, &cm)
+	}
+
+	for i, r := range e.Integration.Spec.Resources {
+		if r.Type != v1alpha1.ResourceTypeData {
+			continue
+		}
+		if r.ContentRef != "" {
+			continue
+		}
+
+		cmKey := "content"
+		if r.ContentKey != "" {
+			cmKey = r.ContentKey
+		}
+
+		cm := corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i),
+				Namespace: e.Integration.Namespace,
+				Labels: map[string]string{
+					"camel.apache.org/integration": e.Integration.Name,
+				},
+				Annotations: map[string]string{
+					"camel.apache.org/resource.name":        r.Name,
+					"camel.apache.org/resource.compression": strconv.FormatBool(r.Compression),
+				},
+			},
+			Data: map[string]string{
+				cmKey: r.Content,
+			},
+		}
+
+		maps = append(maps, &cm)
 	}
 
 	return maps
 }
 
 // ComputeSourcesURI --
-func (e *Environment) ComputeSourcesURI(container bool) []string {
+func (e *Environment) ComputeSourcesURI() []string {
 	sources := e.Integration.Sources()
 	paths := make([]string, 0, len(sources))
 
 	for i, s := range sources {
 		root := "/etc/camel/sources"
-
-		if container {
-			// assume sources are copied over the standard deployments folder
-			root = "/deployments/sources"
-		} else {
-			root = path.Join(root, fmt.Sprintf("i-source-%03d", i))
-		}
+		root = path.Join(root, fmt.Sprintf("i-source-%03d", i))
 
 		srcName := strings.TrimPrefix(s.Name, "/")
 		src := path.Join(root, srcName)
@@ -397,90 +389,87 @@ func (e *Environment) ComputeSourcesURI(container bool) []string {
 }
 
 // ConfigureVolumesAndMounts --
-func (e *Environment) ConfigureVolumesAndMounts(container bool, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
+func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
 
-	if !container {
+	//
+	// Volumes :: Sources
+	//
 
-		//
-		// Volumes :: Sources
-		//
+	for i, s := range e.Integration.Sources() {
+		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
+		refName := fmt.Sprintf("i-source-%03d", i)
+		resName := strings.TrimPrefix(s.Name, "/")
+		resPath := path.Join("/etc/camel/sources", refName)
 
-		for i, s := range e.Integration.Sources() {
-			cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
-			refName := fmt.Sprintf("i-source-%03d", i)
-			resName := strings.TrimPrefix(s.Name, "/")
-			resPath := path.Join("/etc/camel/sources", refName)
+		if s.ContentRef != "" {
+			cmName = s.ContentRef
+		}
 
-			if s.ContentRef != "" {
-				cmName = s.ContentRef
-			}
-
-			*vols = append(*vols, corev1.Volume{
-				Name: refName,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: cmName,
-						},
-						Items: []corev1.KeyToPath{
-							{
-								Key:  "content",
-								Path: resName,
-							},
+		*vols = append(*vols, corev1.Volume{
+			Name: refName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: cmName,
+					},
+					Items: []corev1.KeyToPath{
+						{
+							Key:  "content",
+							Path: resName,
 						},
 					},
 				},
-			})
+			},
+		})
 
-			*mnts = append(*mnts, corev1.VolumeMount{
-				Name:      refName,
-				MountPath: resPath,
-			})
+		*mnts = append(*mnts, corev1.VolumeMount{
+			Name:      refName,
+			MountPath: resPath,
+		})
+	}
+
+	for i, r := range e.Integration.Spec.Resources {
+		if r.Type != v1alpha1.ResourceTypeData {
+			continue
 		}
 
-		for i, r := range e.Integration.Spec.Resources {
-			if r.Type != v1alpha1.ResourceTypeData {
-				continue
-			}
+		cmName := fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i)
+		refName := fmt.Sprintf("i-resource-%03d", i)
+		resName := strings.TrimPrefix(r.Name, "/")
+		cmKey := "content"
+		resPath := path.Join("/etc/camel/resources", refName)
 
-			cmName := fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i)
-			refName := fmt.Sprintf("i-resource-%03d", i)
-			resName := strings.TrimPrefix(r.Name, "/")
-			cmKey := "content"
-			resPath := path.Join("/etc/camel/resources", refName)
+		if r.ContentRef != "" {
+			cmName = r.ContentRef
+		}
+		if r.ContentKey != "" {
+			cmKey = r.ContentKey
+		}
+		if r.MountPath != "" {
+			resPath = r.MountPath
+		}
 
-			if r.ContentRef != "" {
-				cmName = r.ContentRef
-			}
-			if r.ContentKey != "" {
-				cmKey = r.ContentKey
-			}
-			if r.MountPath != "" {
-				resPath = r.MountPath
-			}
-
-			*vols = append(*vols, corev1.Volume{
-				Name: refName,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: cmName,
-						},
-						Items: []corev1.KeyToPath{
-							{
-								Key:  cmKey,
-								Path: resName,
-							},
+		*vols = append(*vols, corev1.Volume{
+			Name: refName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: cmName,
+					},
+					Items: []corev1.KeyToPath{
+						{
+							Key:  cmKey,
+							Path: resName,
 						},
 					},
 				},
-			})
+			},
+		})
 
-			*mnts = append(*mnts, corev1.VolumeMount{
-				Name:      refName,
-				MountPath: resPath,
-			})
-		}
+		*mnts = append(*mnts, corev1.VolumeMount{
+			Name:      refName,
+			MountPath: resPath,
+		})
 	}
 
 	//
