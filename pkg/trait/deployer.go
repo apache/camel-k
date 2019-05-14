@@ -18,9 +18,8 @@ limitations under the License.
 package trait
 
 type deployerTrait struct {
-	BaseTrait      `property:",squash"`
-	ContainerImage bool   `property:"container-image"`
-	Kind           string `property:"kind"`
+	BaseTrait `property:",squash"`
+	Kind      string `property:"kind"`
 }
 
 func newDeployerTrait() *deployerTrait {

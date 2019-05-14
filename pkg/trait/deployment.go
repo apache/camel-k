@@ -74,25 +74,17 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseReady) &&
 		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingContext, v1alpha1.IntegrationPhaseResolvingContext) {
 
-		if t.deployer.ContainerImage {
-			e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-				// trigger container image build
-				e.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildImageSubmitted
-				return nil
-			})
-		} else {
-			e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-				// trigger integration deploy
-				e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
-				return nil
-			})
-		}
+		e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
+			// trigger integration deploy
+			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+			return nil
+		})
 
 		return nil
 	}
 
 	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
-		e.Resources.AddAll(e.ComputeConfigMaps(t.deployer.ContainerImage))
+		e.Resources.AddAll(e.ComputeConfigMaps())
 		e.Resources.Add(t.getDeploymentFor(e))
 	}
 
@@ -106,7 +98,7 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 // **********************************
 
 func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
-	paths := e.ComputeSourcesURI(t.deployer.ContainerImage)
+	paths := e.ComputeSourcesURI()
 	environment := make([]corev1.EnvVar, 0)
 
 	// combine Environment of integration with platform, context, integration
@@ -179,7 +171,6 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	}
 
 	e.ConfigureVolumesAndMounts(
-		t.deployer.ContainerImage,
 		&deployment.Spec.Template.Spec.Volumes,
 		&deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
 	)

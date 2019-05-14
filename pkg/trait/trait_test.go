@@ -282,7 +282,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	vols := make([]corev1.Volume, 0)
 	mnts := make([]corev1.VolumeMount, 0)
 
-	env.ConfigureVolumesAndMounts(false, &vols, &mnts)
+	env.ConfigureVolumesAndMounts(&vols, &mnts)
 
 	assert.Len(t, vols, 8)
 	assert.Len(t, mnts, 8)

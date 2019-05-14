@@ -26,13 +26,11 @@ import (
 
 func (t *knativeServiceTrait) bindToVolumes(e *Environment, service *serving.Service) {
 	e.ConfigureVolumesAndMounts(
-		t.deployer.ContainerImage,
 		&service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Volumes,
 		&service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts,
 	)
 
-	paths := e.ComputeSourcesURI(t.deployer.ContainerImage)
-
+	paths := e.ComputeSourcesURI()
 	environment := &service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
 
 	envvar.SetVal(environment, "CAMEL_K_ROUTES", strings.Join(paths, ","))

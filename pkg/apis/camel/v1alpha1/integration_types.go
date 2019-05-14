@@ -132,10 +132,6 @@ const (
 	IntegrationPhaseBuildingContext IntegrationPhase = "Building Context"
 	// IntegrationPhaseResolvingContext --
 	IntegrationPhaseResolvingContext IntegrationPhase = "Resolving Context"
-	// IntegrationPhaseBuildImageSubmitted --
-	IntegrationPhaseBuildImageSubmitted IntegrationPhase = "Build Image Submitted"
-	// IntegrationPhaseBuildImageRunning --
-	IntegrationPhaseBuildImageRunning IntegrationPhase = "Build Image Running"
 	// IntegrationPhaseDeploying --
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --

@@ -131,7 +131,6 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	integrationActionPool := []Action{
 		NewInitializeAction(),
 		NewBuildContextAction(),
-		NewBuildImageAction(),
 		NewDeployAction(),
 		NewMonitorAction(),
 		NewDeleteAction(),
