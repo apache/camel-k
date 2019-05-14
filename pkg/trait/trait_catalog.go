@@ -48,7 +48,6 @@ type Catalog struct {
 	tOwner            Trait
 	tImages           Trait
 	tBuilder          Trait
-	tSpringBoot       Trait
 	tIstio            Trait
 	tEnvironment      Trait
 	tClasspath        Trait
@@ -79,7 +78,6 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tOwner:            newOwnerTrait(),
 		tImages:           newImagesTrait(),
 		tBuilder:          newBuilderTrait(),
-		tSpringBoot:       newSpringBootTrait(),
 		tIstio:            newIstioTrait(),
 		tEnvironment:      newEnvironmentTrait(),
 		tClasspath:        newClasspathTrait(),
@@ -118,7 +116,6 @@ func (c *Catalog) allTraits() []Trait {
 		c.tOwner,
 		c.tImages,
 		c.tBuilder,
-		c.tSpringBoot,
 		c.tIstio,
 		c.tEnvironment,
 		c.tClasspath,
@@ -141,7 +138,6 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
-			c.tSpringBoot,
 			c.tJolokia,
 			c.tPrometheus,
 			c.tDeployer,
@@ -164,7 +160,6 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
-			c.tSpringBoot,
 			c.tJolokia,
 			c.tPrometheus,
 			c.tDeployer,
@@ -188,7 +183,6 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
-			c.tSpringBoot,
 			c.tDeployer,
 			c.tDeployment,
 			c.tAffinity,
