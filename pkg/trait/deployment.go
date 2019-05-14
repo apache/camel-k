@@ -131,6 +131,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
+
 	// Resolve registry host names when used
 	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
 

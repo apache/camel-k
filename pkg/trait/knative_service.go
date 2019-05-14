@@ -19,6 +19,7 @@ package trait
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
@@ -40,15 +41,14 @@ const (
 )
 
 type knativeServiceTrait struct {
-	BaseTrait         `property:",squash"`
-	Class             string `property:"autoscaling-class"`
-	Metric            string `property:"autoscaling-metric"`
-	Target            *int   `property:"autoscaling-target"`
-	MinScale          *int   `property:"min-scale"`
-	MaxScale          *int   `property:"max-scale"`
-	Auto              *bool  `property:"auto"`
-	ConfigurationType string `property:"configuration-type"`
-	deployer          deployerTrait
+	BaseTrait `property:",squash"`
+	Class     string `property:"autoscaling-class"`
+	Metric    string `property:"autoscaling-metric"`
+	Target    *int   `property:"autoscaling-target"`
+	MinScale  *int   `property:"min-scale"`
+	MaxScale  *int   `property:"max-scale"`
+	Auto      *bool  `property:"auto"`
+	deployer  deployerTrait
 }
 
 func newKnativeServiceTrait() *knativeServiceTrait {
@@ -183,6 +183,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		},
 	}
 
+	paths := e.ComputeSourcesURI()
 	environment := &svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
 
 	// combine Environment of integration with context, integration
@@ -197,19 +198,19 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	// has been changed
 	envvar.SetVal(environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
 
-	// optimizations
-	envvar.SetVal(environment, "AB_JOLOKIA_OFF", True)
-
-	if t.ConfigurationType == "volume" {
-		t.bindToVolumes(e, &svc)
-	} else if err := t.bindToEnvVar(e, &svc); err != nil {
-		return nil, err
-	}
+	envvar.SetVal(environment, "CAMEL_K_ROUTES", strings.Join(paths, ","))
+	envvar.SetVal(environment, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
+	envvar.SetVal(environment, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 
 	// add env vars from traits
 	for _, envVar := range e.EnvVars {
 		envvar.SetVar(&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVar)
 	}
+
+	e.ConfigureVolumesAndMounts(
+		&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Volumes,
+		&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts,
+	)
 
 	return &svc, nil
 }
