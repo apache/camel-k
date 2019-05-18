@@ -218,7 +218,7 @@ func TestLookupContextForIntegration_DiscardContextsWithIncompatibleTraits(t *te
 			},
 		},
 		//
-		// Should be discarded because it contains a subset of the required traits and
+		// Should NOT be discarded because it contains a subset of the required traits and
 		// same configuration values
 		//
 		&v1alpha1.IntegrationContext{
