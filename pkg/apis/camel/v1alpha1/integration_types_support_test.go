@@ -36,16 +36,16 @@ func TestAllLanguages(t *testing.T) {
 
 func TestLanguageFromName(t *testing.T) {
 	for _, l := range Languages {
-		l := l
-		t.Run(string(l), func(t *testing.T) {
+		language := l
+		t.Run(string(language), func(t *testing.T) {
 			code := SourceSpec{
 				DataSpec: DataSpec{
-					Name: fmt.Sprintf("code.%s", l),
+					Name: fmt.Sprintf("code.%s", language),
 				},
 			}
 
-			if l != code.InferLanguage() {
-				t.Errorf("got %s, want %s", code.InferLanguage(), l)
+			if language != code.InferLanguage() {
+				t.Errorf("got %s, want %s", code.InferLanguage(), language)
 			}
 		})
 	}
