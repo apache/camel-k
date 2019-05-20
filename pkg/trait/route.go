@@ -29,10 +29,16 @@ import (
 )
 
 type routeTrait struct {
-	BaseTrait `property:",squash"`
-	Auto      *bool  `property:"auto"`
-	Host      string `property:"host"`
-	service   *corev1.Service
+	BaseTrait                        `property:",squash"`
+	Auto                             *bool  `property:"auto"`
+	Host                             string `property:"host"`
+	TLSTermination                   string `property:"tls-termination"`
+	TLSCertificate                   string `property:"tls-certificate"`
+	TLSKey                           string `property:"tls-key"`
+	TLSCACertificate                 string `property:"tls-ca-certificate"`
+	TLSDestinationCACertificate      string `property:"tls-destination-ca-certificate"`
+	TLSInsecureEdgeTerminationPolicy string `property:"tls-insecure-edge-termination-policy"`
+	service                          *corev1.Service
 }
 
 func newRouteTrait() *routeTrait {
@@ -103,7 +109,22 @@ func (t *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
 				Name: service.Name,
 			},
 			Host: t.Host,
+			TLS:  t.getTLSConfig(),
 		},
 	}
 	return &route
+}
+
+func (t *routeTrait) getTLSConfig() *routev1.TLSConfig {
+
+	config := routev1.TLSConfig{
+		Termination:                   routev1.TLSTerminationType(t.TLSTermination),
+		Certificate:                   t.TLSCertificate,
+		Key:                           t.TLSKey,
+		CACertificate:                 t.TLSCACertificate,
+		DestinationCACertificate:      t.TLSDestinationCACertificate,
+		InsecureEdgeTerminationPolicy: routev1.InsecureEdgeTerminationPolicyType(t.TLSInsecureEdgeTerminationPolicy),
+	}
+
+	return &config
 }
