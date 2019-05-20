@@ -36,6 +36,7 @@ func TestAllLanguages(t *testing.T) {
 
 func TestLanguageFromName(t *testing.T) {
 	for _, l := range Languages {
+		l := l
 		t.Run(string(l), func(t *testing.T) {
 			code := SourceSpec{
 				DataSpec: DataSpec{

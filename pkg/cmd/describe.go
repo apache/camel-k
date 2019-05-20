@@ -51,10 +51,6 @@ func (iw *indentedWriter) write(indentLevel int, format string, i ...interface{}
 	fmt.Fprintf(iw.out, prefix+format, i...)
 }
 
-func (iw *indentedWriter) writeLine(i ...interface{}) {
-	fmt.Fprintln(iw.out, i...)
-}
-
 func (iw *indentedWriter) Flush() {
 	if f, ok := iw.out.(flusher); ok {
 		f.flush()
@@ -104,8 +100,8 @@ func indentedString(f func(io.Writer)) string {
 	f(out)
 
 	out.Flush()
-	str := string(buf.String())
-	return str
+
+	return buf.String()
 }
 
 func newCmdDescribe(rootCmdOptions *RootCmdOptions) *cobra.Command {
