@@ -149,7 +149,7 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	for _, volume := range o.Volumes {
 		volumeConfig := strings.Split(volume, ":")
 		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 || len(strings.TrimSpace(volumeConfig[1])) == 0 {
-			return fmt.Errorf("Volume '%s' is invalid. It should be in the format: pvcname:/container/path", volume)
+			return fmt.Errorf("volume '%s' is invalid, it should be in the format: pvcname:/container/path", volume)
 		}
 	}
 

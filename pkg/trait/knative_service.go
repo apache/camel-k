@@ -110,11 +110,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {
-	svc, err := t.getServiceFor(e)
-	if err != nil {
-		return err
-	}
-
+	svc := t.getServiceFor(e)
 	maps := e.ComputeConfigMaps()
 
 	e.Resources.Add(svc)
@@ -123,7 +119,7 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, error) {
+func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 	labels := map[string]string{
 		"camel.apache.org/integration": e.Integration.Name,
 	}
@@ -212,5 +208,5 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts,
 	)
 
-	return &svc, nil
+	return &svc
 }
