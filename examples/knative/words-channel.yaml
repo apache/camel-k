@@ -6,4 +6,4 @@ spec:
   provisioner:
     apiVersion: eventing.knative.dev/v1alpha1
     kind: ClusterChannelProvisioner
-    name: in-memory-channel
+    name: in-memory
