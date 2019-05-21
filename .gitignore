@@ -22,6 +22,9 @@ build/_output
 build/_test
 build/_maven_output
 
+# envrc
+.envrc
+
 # eclipse / vscode
 .settings
 .classpath
