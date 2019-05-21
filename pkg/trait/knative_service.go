@@ -125,6 +125,14 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 	}
 
 	annotations := make(map[string]string)
+
+	// Copy annotations from the integration resource
+	if e.Integration.Annotations != nil {
+		for k, v := range e.Integration.Annotations {
+			annotations[k] = v
+		}
+	}
+
 	// Resolve registry host names when used
 	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
 
