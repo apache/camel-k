@@ -19,6 +19,7 @@ package trait
 
 import (
 	"sort"
+	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
@@ -69,6 +70,19 @@ func (t *probesTrait) Apply(e *Environment) error {
 
 		// sort the dependencies to get always the same list if they don't change
 		sort.Strings(e.Integration.Status.Dependencies)
+
+		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+			//
+			// TODO: At the moment the servlet engine is used only for health but we need to
+			//       have a dedicated servlet trait and maybe an option to create a dedicated
+			//       server for management stuffs like health
+			//
+			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.enabled=true"},
+			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindHost=" + t.BindHost},
+			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindPort=" + strconv.Itoa(t.BindPort)},
+			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.health.enabled=true"},
+			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.health.path=" + t.Path},
+		)
 	}
 
 	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {

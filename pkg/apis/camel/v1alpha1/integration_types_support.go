@@ -100,12 +100,25 @@ func (is *IntegrationSpec) Configurations() []ConfigurationSpec {
 }
 
 // Configurations --
+func (is *IntegrationStatus) Configurations() []ConfigurationSpec {
+	if is == nil {
+		return []ConfigurationSpec{}
+	}
+
+	return is.Configuration
+}
+
+// Configurations --
 func (in *Integration) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}
 	}
 
-	return in.Spec.Configurations()
+	answer := make([]ConfigurationSpec, 0)
+	answer = append(answer, in.Status.Configuration...)
+	answer = append(answer, in.Spec.Configuration...)
+
+	return answer
 }
 
 // NewSourceSpec --
