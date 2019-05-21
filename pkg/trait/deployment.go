@@ -130,7 +130,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// create a copy to avoid sharing the underlying annotation map
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for k, v := range e.Integration.Annotations {
+		for k, v := range FilterTransferableAnnotations(e.Integration.Annotations) {
 			annotations[k] = v
 		}
 	}
@@ -146,9 +146,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      e.Integration.Name,
 			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
-			},
+			Labels: labels,
 			Annotations: annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -159,6 +157,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: labels,
+					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: e.Integration.Spec.ServiceAccountName,

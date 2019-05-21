@@ -133,6 +133,19 @@ func parseCsvMap(csvMap *string) (map[string]string, error) {
 	return m, nil
 }
 
+// FilterTransferableAnnotations returns a map containing annotations that are meaningful for being transferred to child resources.
+func FilterTransferableAnnotations(annotations map[string]string) map[string]string {
+	res := make(map[string]string)
+	for k, v := range annotations {
+		if strings.HasPrefix(k, "kubectl.kubernetes.io") {
+			// filter out kubectl annotations
+			continue
+		}
+		res[k]=v
+	}
+	return res
+}
+
 func decodeTraitSpec(in *v1alpha1.TraitSpec, target interface{}) error {
 	md := mapstructure.Metadata{}
 
