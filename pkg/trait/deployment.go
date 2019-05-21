@@ -127,9 +127,12 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		"camel.apache.org/integration": e.Integration.Name,
 	}
 
-	annotations := e.Integration.Annotations
-	if annotations == nil {
-		annotations = make(map[string]string)
+	// create a copy to avoid sharing the underlying annotation map
+	annotations := make(map[string]string)
+	if e.Integration.Annotations != nil {
+		for k, v := range e.Integration.Annotations {
+			annotations[k] = v
+		}
 	}
 
 	// Resolve registry host names when used
