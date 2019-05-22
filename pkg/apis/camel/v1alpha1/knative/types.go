@@ -60,11 +60,13 @@ const (
 
 // Meta Options
 const (
-	CamelMetaServicePath     = "service.path"
-	CamelMetaServiceID       = "service.id"
-	CamelMetaServiceName     = "service.name"
-	CamelMetaServiceHost     = "service.host"
-	CamelMetaServicePort     = "service.port"
-	CamelMetaServiceZone     = "service.zone"
-	CamelMetaServiceProtocol = "service.protocol"
+	CamelMetaServicePath       = "service.path"
+	CamelMetaServiceID         = "service.id"
+	CamelMetaServiceName       = "service.name"
+	CamelMetaServiceHost       = "service.host"
+	CamelMetaServicePort       = "service.port"
+	CamelMetaServiceZone       = "service.zone"
+	CamelMetaServiceProtocol   = "service.protocol"
+	CamelMetaFilterHeaderName  = "filter.header.name"
+	CamelMetaFilterHeaderValue = "filter.header.value"
 )
