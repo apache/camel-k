@@ -24,6 +24,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/scylladb/go-set/strset"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -130,4 +131,23 @@ func parseCsvMap(csvMap *string) (map[string]string, error) {
 	}
 
 	return m, nil
+}
+
+func decodeTraitSpec(in *v1alpha1.TraitSpec, target interface{}) error {
+	md := mapstructure.Metadata{}
+
+	decoder, err := mapstructure.NewDecoder(
+		&mapstructure.DecoderConfig{
+			Metadata:         &md,
+			WeaklyTypedInput: true,
+			TagName:          "property",
+			Result:           &target,
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return decoder.Decode(in.Configuration)
 }
