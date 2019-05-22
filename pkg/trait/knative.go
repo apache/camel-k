@@ -106,8 +106,10 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 
 			t.EndpointSinks = strings.Join(items, ",")
 		}
-		if t.FilterSourceChannels == nil && len(strings.Split(t.ChannelSources, ",")) > 1 {
-			// Filter channels when the integration subscribes to more than one
+		if len(strings.Split(t.ChannelSources, ",")) > 1 {
+			// Always filter channels when the integration subscribes to more than one
+			// Using Knative experimental header: https://github.com/knative/eventing/blob/master/pkg/provisioners/message.go#L28
+			// TODO: filter automatically all source channels when the feature becomes stable
 			filter := true
 			t.FilterSourceChannels = &filter
 		}

@@ -157,6 +157,9 @@ More information can be found in the official Kubernetes documentation about htt
 ! knative.endpoint-sinks
 ! Configures a (comma-separated) list of endpoints the Knative consumes.
 
+! knative.filter-source-channels
+! Force the knative endpoint to filter messages based on the `ce-knativehistory` header (Knative experimental feature). It's enabled automatically when there are more than 2 source channels. It's optional (default to false) when there's a single source channel.
+
 !===
 
 | istio
