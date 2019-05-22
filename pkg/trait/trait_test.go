@@ -157,7 +157,7 @@ func TestTraitDecode(t *testing.T) {
 	env.Integration.Spec.Traits["service"] = svcTrait
 
 	svc := newServiceTrait()
-	err := svcTrait.Decode(svc)
+	err := decodeTraitSpec(&svcTrait, svc)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 7071, svc.Port)
