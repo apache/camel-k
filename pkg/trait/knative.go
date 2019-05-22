@@ -34,14 +34,19 @@ import (
 )
 
 type knativeTrait struct {
-	BaseTrait       `property:",squash"`
-	Configuration   string `property:"configuration"`
-	ChannelSources  string `property:"channel-sources"`
-	ChannelSinks    string `property:"channel-sinks"`
-	EndpointSources string `property:"endpoint-sources"`
-	EndpointSinks   string `property:"endpoint-sinks"`
-	Auto            *bool  `property:"auto"`
+	BaseTrait            `property:",squash"`
+	Configuration        string `property:"configuration"`
+	ChannelSources       string `property:"channel-sources"`
+	ChannelSinks         string `property:"channel-sinks"`
+	EndpointSources      string `property:"endpoint-sources"`
+	EndpointSinks        string `property:"endpoint-sinks"`
+	FilterSourceChannels *bool  `property:"filter-source-channels"`
+	Auto                 *bool  `property:"auto"`
 }
+
+const (
+	knativeHistoryHeader = "ce-knativehistory"
+)
 
 func newKnativeTrait() *knativeTrait {
 	t := &knativeTrait{
@@ -100,6 +105,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			})
 
 			t.EndpointSinks = strings.Join(items, ",")
+		}
+		if t.FilterSourceChannels == nil && len(strings.Split(t.ChannelSources, ",")) > 1 {
+			// Filter channels when the integration subscribes to more than one
+			filter := true
+			t.FilterSourceChannels = &filter
 		}
 	}
 
@@ -169,15 +179,21 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 		if env.ContainsService(ch, knativeapi.CamelServiceTypeChannel) {
 			continue
 		}
+		meta := map[string]string{
+			knativeapi.CamelMetaServicePath: "/",
+		}
+		if t.FilterSourceChannels != nil && *t.FilterSourceChannels {
+			fullName := ch + "." + e.Integration.Namespace + ".channels.cluster.local"
+			meta[knativeapi.CamelMetaFilterHeaderName] = knativeHistoryHeader
+			meta[knativeapi.CamelMetaFilterHeaderValue] = fullName
+		}
 		svc := knativeapi.CamelServiceDefinition{
 			Name:        ch,
 			Host:        "0.0.0.0",
 			Port:        8080,
 			Protocol:    knativeapi.CamelProtocolHTTP,
 			ServiceType: knativeapi.CamelServiceTypeChannel,
-			Metadata: map[string]string{
-				knativeapi.CamelMetaServicePath: "/",
-			},
+			Metadata: meta,
 		}
 		env.Services = append(env.Services, svc)
 	}
