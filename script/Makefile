@@ -91,7 +91,7 @@ version:
 	@echo $(VERSION)
 
 dep:
-	dep ensure -v
+	go mod tidy
 
 lint:
 	golangci-lint run
@@ -100,12 +100,16 @@ images: test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 	cp builder build/_output/bin
+	# To be removed when Operator SDK supports Go modules
+	go mod vendor
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
 images-dev: test package-artifacts
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 	cp builder build/_output/bin
+	# To be removed when Operator SDK supports Go modules
+	go mod vendor
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
 images-push:
