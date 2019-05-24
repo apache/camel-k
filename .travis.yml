@@ -21,10 +21,11 @@ sudo: required
 language: go
 
 go:
-  - "1.10.x"
+  - "1.11.4"
 
 env:
   global:
+    - GO111MODULE="on"
     - OPENSHIFT_VERSION=3.10.0
     - OPENSHIFT_COMMIT=dd10d17
     - MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn

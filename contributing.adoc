@@ -12,8 +12,7 @@ to manage the lifecycle of those custom resources.
 
 In order to build the project, you need to comply with the following requirements:
 
-* **Go version 1.10+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
-* **Dep version 0.5.0**: for managing dependencies. You can find installation instructions in the https://github.com/golang/dep[dep GitHub repository].
+* **Go version 1.11.4+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
 * **Operator SDK v0.3.0+**: used to build the operator and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
 * **GNU Make**: used to define composite build actions. This should be already installed or available as package if you have a good OS (https://www.gnu.org/software/make/).
 
@@ -28,19 +27,12 @@ You can run checks via `make lint` or you can install a GIT pre-commit hook and 
 [[checking-out]]
 == Checking Out the Sources
 
-You can create a fork of this project from Github, then clone your fork with the `git` command line tool.
-
-You need to put the project in your $GOPATH (refer to https://golang.org/doc/install[Go documentation] for information).
-So, make sure that the **root** of the github repo is in the path:
-
-```
-$GOPATH/src/github.com/apache/camel-k/
-```
+You can create a fork of this project from GitHub, then clone your fork with the `git` command line tool.
 
 [[structure]]
 == Structure
 
-This is a high level overview of the project structure:
+This is a high-level overview of the project structure:
 
 .Structure
 [options="header"]
@@ -54,23 +46,13 @@ This is a high level overview of the project structure:
 | link:/runtime[/runtime]	| The Java runtime code that is used inside the integration Docker containers.
 | link:/script[/script]		| Contains scripts used during make operations for building the project.
 | link:/test[/test]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
-| /vendor					| Project dependencies (staged in git).
 | link:/version[/version]	| Contains the global version of the project.
 |=======================
-
 
 [[building]]
 == Building
 
-Go dependencies in the *vendor* directory are not included when you clone the project.
-
-Before compiling the source code, you need to sync your local *vendor* directory with the project dependencies, using the following command:
-
-```
-make dep
-```
-
-The `make dep` command runs `dep ensure -v` under the hood, so make sure that `dep` is properly installed.
+Since Camel K uses Go modules, you need to invoke the Go commands with the environment variable `GO111MODULE=on`, in case you've checked out the repository inside of the `$GOPATH/src` tree.
 
 To build the whole project you now need to run:
 
@@ -93,7 +75,7 @@ make images
 [[push-snapshot]]
 == Push runtime snapshot
 
-For the Java bits in runtime you can push to the snapshost to the Apache Snapshot repository with:
+For the Java bits in runtime you can push to the Apache Snapshot repository with:
 
 * `make push-runtime-snapshot`: to push the Java-based runtime snapshot JARs.
 
@@ -112,9 +94,9 @@ In your settings.xml you'll need to have the correct ASF credentials to push.
     </server>
 ```
 
-Don't forget to first run a `make build-runtime` before pushing the snapshot
+Don't forget to first run a `make build-runtime` before pushing the snapshot.
 
-The above command produces a `camel-k` image with name `docker.io/apache/camel-k`.  Sometimes you might need to produce camel-k images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `imgDestination` to the make as shown below:
+The above command produces a `camel-k` image with name `docker.io/apache/camel-k`. Sometimes you might need to produce camel-k images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `imgDestination` to the make as shown below:
 
 ```
 make imgDestination='docker.io/myrepo' images
