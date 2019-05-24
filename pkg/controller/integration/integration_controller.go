@@ -6,7 +6,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -17,6 +19,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
 /**
@@ -86,6 +89,40 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return oldBuild.Status.Phase != newBuild.Status.Phase
 			},
 		})
+	if err != nil {
+		return err
+	}
+
+	// Watch for IntegrationPlatform phase transitioning to ready
+	// and enqueue requests for any integrations that are in phase waiting for platform
+	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+			platform := a.Object.(*v1alpha1.IntegrationPlatform)
+			requests := []reconcile.Request{}
+
+			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+				list := &v1alpha1.IntegrationList{}
+
+				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: platform.Namespace}, list); err != nil {
+					log.Error(err, "Failed to retrieve integration list")
+					return requests
+				}
+
+				for _, integration := range list.Items {
+					if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
+						requests = append(requests, reconcile.Request{
+							NamespacedName: types.NamespacedName{
+								Namespace: integration.Namespace,
+								Name:      integration.Name,
+							},
+						})
+					}
+				}
+			}
+
+			return requests
+		}),
+	})
 	if err != nil {
 		return err
 	}
