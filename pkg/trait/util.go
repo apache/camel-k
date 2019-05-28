@@ -141,7 +141,7 @@ func FilterTransferableAnnotations(annotations map[string]string) map[string]str
 			// filter out kubectl annotations
 			continue
 		}
-		res[k]=v
+		res[k] = v
 	}
 	return res
 }

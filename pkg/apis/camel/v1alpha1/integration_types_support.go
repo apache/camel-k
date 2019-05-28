@@ -85,8 +85,8 @@ func (is *IntegrationSpec) AddDependency(dependency string) {
 		is.Dependencies = make([]string, 0)
 	}
 	newDep := dependency
-	if (strings.HasPrefix(newDep, "camel-")) {
-		newDep = "camel:"+strings.TrimPrefix(dependency, "camel-")
+	if strings.HasPrefix(newDep, "camel-") {
+		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-")
 	}
 	for _, d := range is.Dependencies {
 		if d == newDep {

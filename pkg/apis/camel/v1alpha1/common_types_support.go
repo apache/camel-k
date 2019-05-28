@@ -39,4 +39,3 @@ func (flows Flows) Serialize() (string, error) {
 	}
 	return string(res), nil
 }
-
