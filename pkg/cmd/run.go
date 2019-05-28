@@ -88,6 +88,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&options.OpenAPIs, "open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringVar(&options.DeletionPolicy, "deletion-policy", "owner", "Policy used to cleanup child resources, default owner")
 	cmd.Flags().StringSliceVarP(&options.Volumes, "volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
+	cmd.Flags().StringSliceVarP(&options.EnvVars, "env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -118,6 +119,7 @@ type runCmdOptions struct {
 	Traits             []string
 	LoggingLevels      []string
 	Volumes            []string
+	EnvVars            []string
 }
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
@@ -377,9 +379,11 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	for _, item := range o.Secrets {
 		integration.Spec.AddConfiguration("secret", item)
 	}
-
 	for _, item := range o.Volumes {
 		integration.Spec.AddConfiguration("volume", item)
+	}
+	for _, item := range o.EnvVars {
+		integration.Spec.AddConfiguration("env", item)
 	}
 
 	for _, traitConf := range o.Traits {

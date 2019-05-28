@@ -61,7 +61,7 @@ integration "sample" created
 integration "sample" in phase Waiting For Platform
 ```
 
-NOTE: It will take some time for your integration to get started for the first time. This is because the camel-k operator has to pull and cache the camel-k builder images into the cluster’s registry. 
+NOTE: It will take some time for your integration to get started for the first time. This is because the camel-k operator has to pull and cache the camel-k builder images into the cluster’s registry.
 
 You can follow this process by watching the pods in the namespace where the operator is running:
 
@@ -206,6 +206,14 @@ It's possible to mount persistent volumes into integration containers by using t
 
 ```
 kamel run examples/Sample.java -v myPvcName:/some/path
+```
+
+==== Configure Environment Variables
+
+It's possible to configure environment variables for integration containers by using the `-e` or `--env` flag:
+
+```
+kamel run examples/Sample.java -e MY_ENV_VAR=some-value
 ```
 
 === Running Integrations in "Dev" Mode for Fast Feedback
