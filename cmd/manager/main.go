@@ -28,6 +28,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/controller"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"
 	"github.com/operator-framework/operator-sdk/pkg/ready"
@@ -41,11 +42,14 @@ import (
 )
 
 var log = logf.Log.WithName("cmd")
+var GitCommit string
 
 func printVersion() {
 	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
 	log.Info(fmt.Sprintf("operator-sdk Version: %v", sdkVersion.Version))
+	log.Info(fmt.Sprintf("Camel K Operator Version: %v", defaults.Version))
+	log.Info(fmt.Sprintf("Camel K Git Commit: %v", GitCommit))
 }
 
 func main() {

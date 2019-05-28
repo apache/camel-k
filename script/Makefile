@@ -7,6 +7,10 @@ BASE_IMAGE := fabric8/s2i-java:3.0-java8
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream
+GIT_COMMIT := $(shell git rev-list -1 HEAD)
+
+GOLDFLAGS += -X main.GitCommit=$(GIT_COMMIT)
+GOFLAGS = -ldflags "$(GOLDFLAGS)"
 
 default: test
 
@@ -54,7 +58,7 @@ test-integration: build
 	go test ./... -tags=integration
 
 build-operator:
-	go build -o camel-k ./cmd/manager/*.go
+	go build $(GOFLAGS) -o camel-k ./cmd/manager/*.go
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
