@@ -49,7 +49,7 @@ codegen:
 generate:
 	operator-sdk generate k8s
 
-build: build-operator build-kamel build-publisher build-builder build-compile-integration-tests
+build: build-operator build-kamel build-builder build-compile-integration-tests
 
 test: build
 	go test ./...
@@ -62,9 +62,6 @@ build-operator:
 
 build-kamel:
 	go build -o kamel ./cmd/kamel/*.go
-
-build-publisher:
-	go build -o publisher ./cmd/util/publisher/*.go
 
 build-builder:
 	env GOOS=linux go build -o builder ./cmd/builder/*.go
@@ -92,7 +89,6 @@ clean:
 	GO111MODULE=off go clean
 	rm -f camel-k
 	rm -f kamel
-	rm -f publisher
 	rm -f builder
 	rm -rf build/_maven_output
 	rm -rf build/_output
@@ -142,9 +138,6 @@ package-examples:
 package-artifacts:
 	./script/package_maven_artifacts.sh $(RUNTIME_VERSION)
 
-publish-base-images:
-	go run cmd/util/publisher/publisher.go --runtime-version=$(RUNTIME_VERSION)
-
 release: clean codegen set-version build-resources build images images-push cross-compile package-examples git-tag
 
 install-minishift:
@@ -152,4 +145,4 @@ install-minishift:
 install-minikube:
 	./script/install_minikube.sh
 
-.PHONY: build build-operator build-kamel build-resources build-builder dep codegen images images-dec images-push test check test-integration clean release cross-compile package-examples set-version git-tag publish-base-images
+.PHONY: build build-operator build-kamel build-resources build-builder dep codegen images images-dec images-push test check test-integration clean release cross-compile package-examples set-version git-tag
