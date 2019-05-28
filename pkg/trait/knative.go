@@ -195,7 +195,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			Port:        8080,
 			Protocol:    knativeapi.CamelProtocolHTTP,
 			ServiceType: knativeapi.CamelServiceTypeChannel,
-			Metadata: meta,
+			Metadata:    meta,
 		}
 		env.Services = append(env.Services, svc)
 	}
