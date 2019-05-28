@@ -46,7 +46,6 @@ type Catalog struct {
 	tJolokia          Trait
 	tPrometheus       Trait
 	tOwner            Trait
-	tImages           Trait
 	tBuilder          Trait
 	tIstio            Trait
 	tEnvironment      Trait
@@ -76,7 +75,6 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tJolokia:          newJolokiaTrait(),
 		tPrometheus:       newPrometheusTrait(),
 		tOwner:            newOwnerTrait(),
-		tImages:           newImagesTrait(),
 		tBuilder:          newBuilderTrait(),
 		tIstio:            newIstioTrait(),
 		tEnvironment:      newEnvironmentTrait(),
@@ -114,7 +112,6 @@ func (c *Catalog) allTraits() []Trait {
 		c.tJolokia,
 		c.tPrometheus,
 		c.tOwner,
-		c.tImages,
 		c.tBuilder,
 		c.tIstio,
 		c.tEnvironment,
@@ -135,7 +132,6 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
-			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
 			c.tJolokia,
@@ -157,7 +153,6 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
-			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
 			c.tJolokia,
@@ -180,7 +175,6 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tRestDsl,
 			c.tKnative,
 			c.tDependencies,
-			c.tImages,
 			c.tBuilder,
 			c.tEnvironment,
 			c.tDeployer,
