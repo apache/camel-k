@@ -266,7 +266,8 @@ func (c *Catalog) configureTraits(traits map[string]v1alpha1.TraitSpec) error {
 	for id, traitSpec := range traits {
 		catTrait := c.GetTrait(id)
 		if catTrait != nil {
-			if err := decodeTraitSpec(&traitSpec, catTrait); err != nil {
+			trait := traitSpec
+			if err := decodeTraitSpec(&trait, catTrait); err != nil {
 				return err
 			}
 		}
