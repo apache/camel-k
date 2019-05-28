@@ -1,8 +1,8 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 0.3.4-SNAPSHOT
 RUNTIME_VERSION := 0.3.2
-CAMEL_VERSION := 2.23.2
-CAMEL_VERSION_CONSTRAINT := ~2.23.x
+CAMEL_VERSION := 2.24.0
+CAMEL_VERSION_CONSTRAINT := ~2.24.x
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
@@ -69,6 +69,7 @@ build-resources:
 	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION)
 	./script/build_catalog.sh 2.23.0 $(RUNTIME_VERSION)
 	./script/build_catalog.sh 2.23.1 $(RUNTIME_VERSION)
+	./script/build_catalog.sh 2.23.2 $(RUNTIME_VERSION)
 	./script/build_catalog.sh 3.0.0-M2 $(RUNTIME_VERSION)
 	./script/embed_resources.sh deploy
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
