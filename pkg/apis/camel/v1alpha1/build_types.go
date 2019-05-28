@@ -22,6 +22,7 @@ type BuildSpec struct {
 	Dependencies   []string                `json:"dependencies,omitempty"`
 	Repositories   []string                `json:"repositories,omitempty"`
 	BuildDir       string                  `json:"buildDir,omitempty"`
+	OperatorImage  string                  `json:"operatorImage,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build

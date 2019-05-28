@@ -116,6 +116,10 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 }
 
 func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
+	builderImage := build.Spec.OperatorImage
+	if builderImage == "" {
+		builderImage = defaults.ImageName + ":" + defaults.Version
+	}
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -130,7 +134,7 @@ func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
 			Containers: []corev1.Container{
 				{
 					Name:  "builder",
-					Image: defaults.ImageName + ":" + defaults.Version,
+					Image: builderImage,
 					Args: []string{
 						"camel-k-builder",
 						build.Namespace,

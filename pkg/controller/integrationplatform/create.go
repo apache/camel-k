@@ -50,7 +50,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 	for k := range deploy.Resources {
 		if strings.HasPrefix(k, "camel-catalog-") {
 			action.L.Infof("Installing camel catalog: %s", k)
-			err := install.Resources(ctx, action.client, platform.Namespace, k)
+			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, k)
 			if err != nil {
 				return err
 			}
@@ -79,21 +79,21 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 
 		if len(res) > 0 {
 			action.L.Info("Installing custom platform resources")
-			err := install.Resources(ctx, action.client, platform.Namespace, res...)
+			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, res...)
 			if err != nil {
 				return err
 			}
 		}
 	} else {
 		action.L.Info("Installing default platform resources")
-		err := install.Resources(ctx, action.client, platform.Namespace, p.DefaultContexts...)
+		err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, p.DefaultContexts...)
 		if err != nil {
 			return err
 		}
 
 		if platform.Spec.Profile == v1alpha1.TraitProfileKnative {
 			action.L.Info("Installing knative resources")
-			err := install.Resources(ctx, action.client, platform.Namespace, p.KnativeContexts...)
+			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, p.KnativeContexts...)
 			if err != nil {
 				return err
 			}
