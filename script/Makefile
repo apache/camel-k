@@ -81,7 +81,15 @@ build-compile-integration-tests:
 	go test -c -tags=integration ./test/*.go
 
 clean:
-	go clean
+	# go clean fails if modules support are turned on as it tries to 
+	# resolve modules, if module support is turned off, it does not
+	# care about modules and simply deletes bits.
+	#
+	# For more info:
+	#
+	#   https://github.com/golang/go/commit/9238a8ffe12b6eb44aab12de1b861c0f045da8b7
+	#
+	GO111MODULE=off go clean
 	rm -f camel-k
 	rm -f kamel
 	rm -f publisher
