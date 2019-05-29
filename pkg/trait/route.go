@@ -19,6 +19,7 @@ package trait
 
 import (
 	"errors"
+	"reflect"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
@@ -116,7 +117,6 @@ func (t *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
 }
 
 func (t *routeTrait) getTLSConfig() *routev1.TLSConfig {
-
 	config := routev1.TLSConfig{
 		Termination:                   routev1.TLSTerminationType(t.TLSTermination),
 		Certificate:                   t.TLSCertificate,
@@ -124,6 +124,10 @@ func (t *routeTrait) getTLSConfig() *routev1.TLSConfig {
 		CACertificate:                 t.TLSCACertificate,
 		DestinationCACertificate:      t.TLSDestinationCACertificate,
 		InsecureEdgeTerminationPolicy: routev1.InsecureEdgeTerminationPolicyType(t.TLSInsecureEdgeTerminationPolicy),
+	}
+
+	if reflect.DeepEqual(config, routev1.TLSConfig{}) {
+		return nil
 	}
 
 	return &config
