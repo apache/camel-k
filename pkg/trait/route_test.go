@@ -34,15 +34,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestRoute_TLS(t *testing.T) {
+func createTestRouteEnvironment(t *testing.T) *Environment {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
-
-	environment := Environment{
+	return &Environment{
 		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
+		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-i",
@@ -51,15 +49,7 @@ func TestRoute_TLS(t *testing.T) {
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.TraitSpec{
-					"route": {
-						Configuration: map[string]string{
-							"tls-termination": string(routev1.TLSTerminationEdge),
-						},
-					},
-				},
-			},
+			Spec: v1alpha1.IntegrationSpec{},
 		},
 		IntegrationContext: &v1alpha1.IntegrationContext{
 			Status: v1alpha1.IntegrationContextStatus{
@@ -98,8 +88,39 @@ func TestRoute_TLS(t *testing.T) {
 			},
 		}),
 	}
+}
 
-	err = traitCatalog.apply(&environment)
+func TestRoute_Default(t *testing.T) {
+	environment := createTestRouteEnvironment(t)
+	traitsCatalog := environment.Catalog
+
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait(ID("route")))
+
+	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
+		return r.ObjectMeta.Name == "test-i"
+	})
+
+	assert.NotNil(t, route)
+	assert.Nil(t, route.Spec.TLS)
+}
+
+func TestRoute_TLS(t *testing.T) {
+	environment := createTestRouteEnvironment(t)
+	traitsCatalog := environment.Catalog
+
+	environment.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+		"route": {
+			Configuration: map[string]string{
+				"tls-termination": string(routev1.TLSTerminationEdge),
+			},
+		},
+	}
+
+	err := traitsCatalog.apply(environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
