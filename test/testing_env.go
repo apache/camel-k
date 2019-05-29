@@ -55,7 +55,7 @@ func init() {
 		panic(err)
 	}
 
-	err = install.Operator(testContext, testClient, getTargetNamespace())
+	err = install.Operator(testContext, testClient, "", getTargetNamespace())
 	if err != nil {
 		panic(err)
 	}

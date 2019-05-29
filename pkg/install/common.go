@@ -29,15 +29,23 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+// ResourceCustomizer can be used to inject code that changes the objects before they are created
+type ResourceCustomizer func(object runtime.Object)runtime.Object
+// IdentityResourceCustomizer is a ResourceCustomizer that does nothing
+var IdentityResourceCustomizer = func(object runtime.Object)runtime.Object {
+	return object
+}
+
+
 // Resources installs named resources from the project resource directory
-func Resources(ctx context.Context, c client.Client, namespace string, names ...string) error {
-	return ResourcesOrCollect(ctx, c, namespace, nil, names...)
+func Resources(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, names ...string) error {
+	return ResourcesOrCollect(ctx, c, namespace, nil, customizer, names...)
 }
 
 // ResourcesOrCollect --
-func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, names ...string) error {
+func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, customizer ResourceCustomizer, names ...string) error {
 	for _, name := range names {
-		if err := ResourceOrCollect(ctx, c, namespace, collection, name); err != nil {
+		if err := ResourceOrCollect(ctx, c, namespace, collection, customizer, name); err != nil {
 			return err
 		}
 	}
@@ -45,18 +53,18 @@ func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, 
 }
 
 // Resource installs a single named resource from the project resource directory
-func Resource(ctx context.Context, c client.Client, namespace string, name string) error {
-	return ResourceOrCollect(ctx, c, namespace, nil, name)
+func Resource(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, name string) error {
+	return ResourceOrCollect(ctx, c, namespace, nil, customizer, name)
 }
 
 // ResourceOrCollect --
-func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, name string) error {
+func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, customizer ResourceCustomizer, name string) error {
 	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.Resources[name])
 	if err != nil {
 		return err
 	}
 
-	return RuntimeObjectOrCollect(ctx, c, namespace, collection, obj)
+	return RuntimeObjectOrCollect(ctx, c, namespace, collection, customizer(obj))
 }
 
 // RuntimeObject installs a single runtime object
