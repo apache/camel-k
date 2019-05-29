@@ -21,6 +21,9 @@ import (
 	"context"
 	"errors"
 
+	v1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -31,22 +34,33 @@ import (
 )
 
 // Operator installs the operator resources in the given namespace
-func Operator(ctx context.Context, c client.Client, namespace string) error {
-	return OperatorOrCollect(ctx, c, namespace, nil)
+func Operator(ctx context.Context, c client.Client, customImage string, namespace string) error {
+	return OperatorOrCollect(ctx, c, namespace, customImage, nil)
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
-func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
+func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, customImage string, collection *kubernetes.Collection) error {
+	customizer := IdentityResourceCustomizer
+	if customImage != "" {
+		customizer = func(o runtime.Object) runtime.Object {
+			if d, ok := o.(*v1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					d.Spec.Template.Spec.Containers[0].Image = customImage
+				}
+			}
+			return o
+		}
+	}
 	isOpenshift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return err
 	}
 	if isOpenshift {
-		if err := installOpenshift(ctx, c, namespace, collection); err != nil {
+		if err := installOpenshift(ctx, c, namespace, customizer, collection); err != nil {
 			return err
 		}
 	} else {
-		if err := installKubernetes(ctx, c, namespace, collection); err != nil {
+		if err := installKubernetes(ctx, c, namespace, customizer, collection); err != nil {
 			return err
 		}
 	}
@@ -61,8 +75,8 @@ func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, c
 	return nil
 }
 
-func installOpenshift(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection,
+func installOpenshift(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
 		"operator-service-account.yaml",
 		"operator-role-openshift.yaml",
 		"operator-role-binding.yaml",
@@ -70,8 +84,8 @@ func installOpenshift(ctx context.Context, c client.Client, namespace string, co
 	)
 }
 
-func installKubernetes(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection,
+func installKubernetes(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
 		"operator-service-account.yaml",
 		"operator-role-kubernetes.yaml",
 		"operator-role-binding.yaml",
@@ -80,7 +94,7 @@ func installKubernetes(ctx context.Context, c client.Client, namespace string, c
 }
 
 func installKnative(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection,
+	return ResourcesOrCollect(ctx, c, namespace, collection, IdentityResourceCustomizer,
 		"operator-role-knative.yaml",
 		"operator-role-binding-knative.yaml",
 	)
@@ -143,7 +157,7 @@ func Example(ctx context.Context, c client.Client, namespace string) error {
 
 // ExampleOrCollect --
 func ExampleOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection,
+	return ResourcesOrCollect(ctx, c, namespace, collection, IdentityResourceCustomizer,
 		"cr-example.yaml",
 	)
 }

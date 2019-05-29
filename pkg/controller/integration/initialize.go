@@ -50,6 +50,9 @@ func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) boo
 // Handle handles the integrations
 func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
 	pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace)
+	if err != nil {
+		return err
+	}
 
 	// The integration platform needs to be ready before starting to create integrations
 	if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
