@@ -21,6 +21,9 @@ import (
 	"context"
 	"sync"
 
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +34,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // NewSchedulePodAction creates a new schedule action
@@ -88,10 +90,16 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 		return nil
 	}
 
+	// Try to get operator image name before starting the build
+	operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
+	if err != nil {
+		return err
+	}
+
 	// Otherwise, let's create the build pod
 	// We may want to explicitly manage build priority as opposed to relying on
 	// the reconcile loop to handle the queuing
-	pod := newBuildPod(build)
+	pod := newBuildPod(build, operatorImage)
 
 	// Set the Build instance as the owner and controller
 	if err := controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
@@ -115,7 +123,11 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	return action.client.Status().Update(ctx, target)
 }
 
-func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
+func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
+	builderImage := operatorImage
+	if builderImage == "" {
+		builderImage = defaults.ImageName + ":" + defaults.Version
+	}
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -130,7 +142,8 @@ func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
 			Containers: []corev1.Container{
 				{
 					Name:  "builder",
-					Image: defaults.ImageName + ":" + defaults.Version,
+					Image: builderImage,
+					ImagePullPolicy: "IfNotPresent",
 					Args: []string{
 						"camel-k-builder",
 						build.Namespace,

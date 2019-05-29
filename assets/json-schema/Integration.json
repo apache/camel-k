@@ -243,6 +243,12 @@
         "camelVersion": {
           "type": "string"
         },
+        "configuration": {
+          "items": {
+            "$ref": "#/definitions/ConfigurationSpec"
+          },
+          "type": "array"
+        },
         "context": {
           "type": "string"
         },

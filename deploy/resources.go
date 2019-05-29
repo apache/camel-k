@@ -8581,6 +8581,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            # NAMESPACE is always the operator namespace, independently from WATCH_NAMESPACE
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
 
 `
 	Resources["operator-role-binding-knative.yaml"] =
@@ -8954,28 +8959,6 @@ spec:
     - runtime:jvm
     - runtime:kotlin
     - camel:core
-`
-	Resources["platform-integration-context-spring-boot.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
-metadata:
-  name: spring-boot
-  labels:
-    app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: camel-k-operator
-    camel.apache.org/context.type: platform
-spec:
-  dependencies:
-    - runtime:jvm
-    - runtime:spring-boot
-    - camel:core
-  traits:
-    springboot:
-      configuration:
-        enabled: "true"
-
 `
 	Resources["user-cluster-role.yaml"] =
 		`
