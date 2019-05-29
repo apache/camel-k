@@ -111,7 +111,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 				Repositories:   repositories,
 				Steps:          builder.StepIDsFor(env.Steps...),
 				BuildDir:       env.BuildDir,
-				OperatorImage:  p.Spec.Build.OperatorImage,
+				BuilderImage:   p.Spec.Build.OperatorImage,
 			},
 		}
 

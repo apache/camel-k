@@ -43,7 +43,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, c
 	if customImage != "" {
 		customizer = func(o runtime.Object) runtime.Object {
 			if d, ok := o.(*v1.Deployment); ok {
-				if v, pres := d.Labels["camel.apache.org/component"]; pres && v == "operator" {
+				if d.Labels["camel.apache.org/component"] == "operator" {
 					d.Spec.Template.Spec.Containers[0].Image = customImage
 				}
 			}

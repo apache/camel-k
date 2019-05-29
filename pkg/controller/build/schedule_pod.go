@@ -116,7 +116,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 }
 
 func newBuildPod(build *v1alpha1.Build) *corev1.Pod {
-	builderImage := build.Spec.OperatorImage
+	builderImage := build.Spec.BuilderImage
 	if builderImage == "" {
 		builderImage = defaults.ImageName + ":" + defaults.Version
 	}
