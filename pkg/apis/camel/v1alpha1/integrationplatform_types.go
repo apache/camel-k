@@ -84,6 +84,7 @@ type IntegrationPlatformBuildSpec struct {
 	Registry              IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`
 	Timeout               metav1.Duration                         `json:"timeout,omitempty"`
 	PersistentVolumeClaim string                                  `json:"persistentVolumeClaim,omitempty"`
+	Proxies               []Proxy                                 `json:"proxies,omitempty"`
 }
 
 // IntegrationPlatformRegistrySpec --

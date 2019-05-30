@@ -15,40 +15,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package s2i
+package maven
 
-import (
-	"github.com/apache/camel-k/pkg/builder"
-)
+import "encoding/xml"
 
-func init() {
-	builder.RegisterSteps(Steps)
+// Settings represent a maven settings
+type Settings struct {
+	XMLName           xml.Name
+	XMLNs             string  `xml:"xmlns,attr"`
+	XMLNsXsi          string  `xml:"xmlns:xsi,attr"`
+	XsiSchemaLocation string  `xml:"xsi:schemaLocation,attr"`
+	Proxies           []Proxy `xml:"proxies>proxy,omitempty"`
 }
 
-type steps struct {
-	Publisher   builder.Step
-	ReplaceHost builder.Step
-}
-
-// Steps --
-var Steps = steps{
-	Publisher: builder.NewStep(
-		builder.ApplicationPublishPhase,
-		publisher,
-	),
-	ReplaceHost: builder.NewStep(
-		builder.ApplicationPublishPhase+1,
-		replaceHost,
-	),
-}
-
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.Steps.GenerateProject,
-	builder.Steps.GenerateProjectSettings,
-	builder.Steps.InjectDependencies,
-	builder.Steps.SanitizeDependencies,
-	builder.Steps.ComputeDependencies,
-	builder.Steps.IncrementalPackager,
-	Steps.Publisher,
+// Proxy --
+type Proxy struct {
+	Active        bool   `xml:"active"`
+	Port          int32  `xml:"port"`
+	ID            string `xml:"id"`
+	Protocol      string `xml:"protocol"`
+	Host          string `xml:"host"`
+	NonProxyHosts string `xml:"nonProxyHosts,omitempty"`
+	Username      string `xml:"username,omitempty"`
+	Password      string `xml:"password,omitempty"`
 }

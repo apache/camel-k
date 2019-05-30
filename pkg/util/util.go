@@ -18,13 +18,13 @@ limitations under the License.
 package util
 
 import (
+	"bytes"
+	"encoding/xml"
 	"os"
 	"os/signal"
 	"path"
 	"regexp"
 	"syscall"
-
-	"github.com/magiconair/properties"
 
 	"github.com/scylladb/go-set/strset"
 
@@ -104,6 +104,22 @@ func WaitForSignal(sig chan os.Signal, exit func(int)) {
 	}()
 }
 
+// EncodeXML --
+func EncodeXML(content interface{}) (string, error) {
+	w := &bytes.Buffer{}
+	w.WriteString(xml.Header)
+
+	e := xml.NewEncoder(w)
+	e.Indent("", "  ")
+
+	err := e.Encode(content)
+	if err != nil {
+		return "", err
+	}
+
+	return w.String(), nil
+}
+
 // WriteFileWithContent --
 func WriteFileWithContent(buildDir string, relativePath string, content string) error {
 	filePath := path.Join(buildDir, relativePath)
@@ -154,42 +170,4 @@ func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []str
 		}
 	}
 	return submatchs.List()
-}
-
-// ExtractApplicationPropertiesString --
-func ExtractApplicationPropertiesString(data map[string]string, consumer func(string, string)) error {
-	pstr, ok := data["application.properties"]
-	if !ok {
-		return nil
-	}
-
-	p, err := properties.LoadString(pstr)
-	if err != nil {
-		return err
-	}
-
-	for _, k := range p.Keys() {
-		consumer(k, p.MustGet(k))
-	}
-
-	return nil
-}
-
-// ExtractApplicationPropertiesBytes --
-func ExtractApplicationPropertiesBytes(data map[string][]byte, consumer func(string, string)) error {
-	pstr, ok := data["application.properties"]
-	if !ok {
-		return nil
-	}
-
-	p, err := properties.Load(pstr, properties.UTF8)
-	if err != nil {
-		return err
-	}
-
-	for _, k := range p.Keys() {
-		consumer(k, p.MustGet(k))
-	}
-
-	return nil
 }

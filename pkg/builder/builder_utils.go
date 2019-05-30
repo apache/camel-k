@@ -18,9 +18,10 @@ limitations under the License.
 package builder
 
 import (
-	"encoding/xml"
 	"fmt"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -28,6 +29,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
+// StepIDsFor --
 func StepIDsFor(steps ...Step) []string {
 	IDs := make([]string, 0)
 	for _, step := range steps {
@@ -46,8 +48,8 @@ func artifactIDs(artifacts []v1alpha1.Artifact) []string {
 	return result
 }
 
-// NewProject --
-func NewProject(ctx *Context) (maven.Project, error) {
+// NewMavenProject --
+func NewMavenProject(ctx *Context) (maven.Project, error) {
 	//
 	// Catalog
 	//
@@ -60,19 +62,11 @@ func NewProject(ctx *Context) (maven.Project, error) {
 		ctx.Catalog = c
 	}
 
-	p := maven.Project{
-		XMLName:              xml.Name{Local: "project"},
-		XMLNs:                "http://maven.apache.org/POM/4.0.0",
-		XMLNsXsi:             "http://www.w3.org/2001/XMLSchema-instance",
-		XsiSchemaLocation:    "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-		ModelVersion:         "4.0.0",
-		GroupID:              "org.apache.camel.k.integration",
-		ArtifactID:           "camel-k-integration",
-		Version:              defaults.Version,
-		Properties:           ctx.Build.Platform.Build.Properties,
-		DependencyManagement: maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)},
-		Dependencies:         make([]maven.Dependency, 0),
-	}
+	p := maven.NewProject("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
+	p.Properties = ctx.Build.Platform.Build.Properties
+	p.DependencyManagement = maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
+	p.Dependencies = make([]maven.Dependency, 0)
+
 	//
 	// DependencyManagement
 	//
@@ -122,4 +116,57 @@ func NewProject(ctx *Context) (maven.Project, error) {
 	}
 
 	return p, nil
+}
+
+// NewMavenSettings --
+func NewMavenSettings(ctx *Context) (maven.Settings, error) {
+	settings := maven.NewSettings()
+	settings.Proxies = make([]maven.Proxy, 0, len(ctx.Build.Platform.Build.Proxies))
+
+	for i, p := range ctx.Build.Platform.Build.Proxies {
+		proxy := maven.Proxy{
+			Active:        true,
+			ID:            p.ID,
+			Protocol:      p.Protocol,
+			Host:          p.Host,
+			Port:          p.Port,
+			NonProxyHosts: p.NonProxyHosts,
+			Username:      p.Username,
+			Password:      p.Password,
+		}
+
+		if p.Active != nil {
+			proxy.Active = *p.Active
+		}
+
+		if proxy.ID == "" {
+			proxy.ID = fmt.Sprintf("proxy-%03d", i)
+		}
+
+		if proxy.Protocol == "" {
+			proxy.Protocol = "http"
+		}
+
+		if p.UsernameFrom != nil {
+			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, p.UsernameFrom)
+			if err != nil {
+				return maven.Settings{}, err
+			}
+
+			proxy.Username = val
+		}
+
+		if p.PasswordFrom != nil {
+			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, p.PasswordFrom)
+			if err != nil {
+				return maven.Settings{}, err
+			}
+
+			proxy.Password = val
+		}
+
+		settings.Proxies = append(settings.Proxies, proxy)
+	}
+
+	return settings, nil
 }

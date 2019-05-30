@@ -18,8 +18,22 @@ limitations under the License.
 package maven
 
 import (
+	"encoding/xml"
 	"strings"
 )
+
+func NewProject(group string, artifact string, version string) Project {
+	return Project{
+		XMLName:           xml.Name{Local: "project"},
+		XMLNs:             "http://maven.apache.org/POM/4.0.0",
+		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
+		ModelVersion:      "4.0.0",
+		GroupID:           group,
+		ArtifactID:        artifact,
+		Version:           version,
+	}
+}
 
 // LookupDependency --
 func (p *Project) LookupDependency(dep Dependency) *Dependency {

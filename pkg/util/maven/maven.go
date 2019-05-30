@@ -18,11 +18,10 @@ limitations under the License.
 package maven
 
 import (
-	"bytes"
-	"encoding/xml"
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"strings"
 
@@ -35,32 +34,26 @@ import (
 // Log --
 var Log = log.WithName("maven")
 
-// GeneratePomContent generate a pom.xml file from the given project definition
-func GeneratePomContent(project Project) (string, error) {
-	w := &bytes.Buffer{}
-	w.WriteString(xml.Header)
-
-	e := xml.NewEncoder(w)
-	e.Indent("", "  ")
-
-	err := e.Encode(project)
-	if err != nil {
-		return "", err
-	}
-
-	return w.String(), nil
-}
-
 // CreateStructure --
-func CreateStructure(buildDir string, project Project) error {
+func CreateStructure(buildDir string, project Project, settings Settings) error {
 	Log.Infof("write project: %+v", project)
 
-	pom, err := GeneratePomContent(project)
+	pomContent, err := util.EncodeXML(project)
 	if err != nil {
 		return err
 	}
 
-	err = util.WriteFileWithContent(buildDir, "pom.xml", pom)
+	err = util.WriteFileWithContent(buildDir, "pom.xml", pomContent)
+	if err != nil {
+		return err
+	}
+
+	settingsContent, err := util.EncodeXML(settings)
+	if err != nil {
+		return err
+	}
+
+	err = util.WriteFileWithContent(buildDir, "settings.xml", settingsContent)
 	if err != nil {
 		return err
 	}
@@ -76,6 +69,7 @@ func Run(buildDir string, args ...string) error {
 	}
 
 	args = append(args, "--batch-mode")
+	args = append(args, "--settings", path.Join(buildDir, "settings.xml"))
 
 	cmd := exec.Command(mvnCmd, args...)
 	cmd.Dir = buildDir

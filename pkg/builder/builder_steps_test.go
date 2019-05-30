@@ -20,6 +20,7 @@ package builder
 import (
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -107,6 +108,116 @@ func TestMavenRepositories(t *testing.T) {
 		URL:       "https://oss.sonatype.org/content/repositories/snapshots/",
 		Snapshots: maven.RepositoryPolicy{Enabled: true},
 		Releases:  maven.RepositoryPolicy{Enabled: true},
+	})
+}
+
+func TestMavenProxies(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	c, err := test.NewFakeClient(
+		&corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-proxy",
+			},
+			Data: map[string]string{
+				"proxy-user": "user-from-cm",
+			},
+		},
+		&corev1.Secret{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "Secret",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-proxy-secret",
+			},
+			Data: map[string][]byte{
+				"proxy-user": []byte("user-from-secret"),
+			},
+		},
+	)
+
+	ctx := Context{
+		Catalog:   catalog,
+		Client:    c,
+		Namespace: "ns",
+		Build: v1alpha1.BuildSpec{
+			RuntimeVersion: defaults.RuntimeVersion,
+			Platform: v1alpha1.IntegrationPlatformSpec{
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					CamelVersion: catalog.Version,
+					Proxies: []v1alpha1.Proxy{
+						{
+							ID:   "my-poxy-1",
+							Host: "my-host",
+							Port: 8999,
+						},
+						{
+							ID:   "my-poxy-2",
+							Host: "my-cm-host",
+							Port: 9998,
+							UsernameFrom: &v1alpha1.ValueSource{
+								ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "maven-proxy",
+									},
+									Key: "proxy-user",
+								},
+							},
+						},
+						{
+							ID:   "my-poxy-3",
+							Host: "my-secret-host",
+							Port: 9988,
+							UsernameFrom: &v1alpha1.ValueSource{
+								SecretKeyRef: &corev1.SecretKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "maven-proxy-secret",
+									},
+									Key: "proxy-user",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err = generateProjectSettings(&ctx)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 3, len(ctx.Settings.Proxies))
+
+	assert.Contains(t, ctx.Settings.Proxies, maven.Proxy{
+		ID:       "my-poxy-1",
+		Active:   true,
+		Protocol: "http",
+		Host:     "my-host",
+		Port:     8999,
+	})
+	assert.Contains(t, ctx.Settings.Proxies, maven.Proxy{
+		ID:       "my-poxy-2",
+		Active:   true,
+		Protocol: "http",
+		Host:     "my-cm-host",
+		Port:     9998,
+		Username: "user-from-cm",
+	})
+	assert.Contains(t, ctx.Settings.Proxies, maven.Proxy{
+		ID:       "my-poxy-3",
+		Active:   true,
+		Protocol: "http",
+		Host:     "my-secret-host",
+		Port:     9988,
+		Username: "user-from-secret",
 	})
 }
 

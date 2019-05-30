@@ -108,6 +108,7 @@ type Context struct {
 	Error             error
 	Namespace         string
 	Project           maven.Project
+	Settings          maven.Settings
 	Path              string
 	Artifacts         []v1alpha1.Artifact
 	SelectedArtifacts []v1alpha1.Artifact
