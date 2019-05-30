@@ -9,6 +9,9 @@ IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 
+# For signing binary artifacts
+GPG_PASS := $(GPG_PASS)
+
 GOLDFLAGS += -X main.GitCommit=$(GIT_COMMIT)
 GOFLAGS = -ldflags "$(GOLDFLAGS)"
 
@@ -132,7 +135,7 @@ git-tag:
 	./script/git_tag.sh $(VERSION) $(RELEASE_GIT_REMOTE)
 
 cross-compile:
-	./script/cross_compile.sh $(VERSION)
+	./script/cross_compile.sh $(VERSION) $(GPG_PASS)
 
 package-examples:
 	./script/package_examples.sh $(VERSION)
