@@ -40,8 +40,8 @@ minikube addons enable registry
 
 The following section is optional and needed if and only if you are going to use Knative with Camel K. Run the following commands to install the Knative components:
 
-[#install-knative]
-== Install Knative
+[#install-knative-on-minikube]
+== Install Knative on Minikube
 
 [source,bash,linenums,subs="+macros,+attributes"]
 ----
@@ -116,5 +116,11 @@ Then you can start the cluster with:
 minishift start
 ```
 
-You can now proceed to link:/README.adoc[install Camel K].
+The following section is optional and needed if and only if you are going to use Knative with Camel K. Run the following commands to install the Knative components:
 
+[#install-knative-on-minishift]
+== Install Knative on Minishift
+
+Please follow the instructions in the https://knative.dev/docs/install/knative-with-minishift/[official doc] of Knative to install the Knative on Minishift.
+
+You can now proceed to link:/README.adoc[install Camel K].
