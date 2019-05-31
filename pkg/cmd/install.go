@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -37,6 +38,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -62,8 +64,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.registry.Address, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&impl.registry.Secret, "registry-secret", "", "A secret used to push/pull images to the Docker registry")
 	cmd.Flags().BoolVar(&impl.registry.Insecure, "registry-insecure", false, "Configure to configure registry access in insecure mode or not")
-	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
-	cmd.Flags().BoolVar(&impl.snapshotRepositories, "snapshot-repositories", false, "Automatically include known snapshot repositories")
 	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
@@ -73,6 +73,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&impl.contexts, "context", nil, "Add a camel context to build at startup, by default all known contexts are built")
 	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", "", "Set the build strategy")
 	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
+	cmd.Flags().StringVar(&impl.mavenSettings, "maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -88,23 +89,22 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	wait                 bool
-	clusterSetupOnly     bool
-	skipClusterSetup     bool
-	exampleSetup         bool
-	snapshotRepositories bool
-	outputFormat         string
-	camelVersion         string
-	runtimeVersion       string
-	baseImage            string
-	operatorImage        string
-	localRepository      string
-	buildStrategy        string
-	buildTimeout         string
-	repositories         []string
-	properties           []string
-	contexts             []string
-	registry             v1alpha1.IntegrationPlatformRegistrySpec
+	wait             bool
+	clusterSetupOnly bool
+	skipClusterSetup bool
+	exampleSetup     bool
+	outputFormat     string
+	camelVersion     string
+	runtimeVersion   string
+	baseImage        string
+	operatorImage    string
+	localRepository  string
+	buildStrategy    string
+	buildTimeout     string
+	mavenSettings    string
+	properties       []string
+	contexts         []string
+	registry         v1alpha1.IntegrationPlatformRegistrySpec
 }
 
 // nolint: gocyclo
@@ -165,23 +165,6 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 		if o.localRepository != "" {
 			platform.Spec.Build.LocalRepository = o.localRepository
 		}
-		if len(o.repositories) > 0 {
-			platform.Spec.Build.Repositories = o.repositories
-		}
-		if o.snapshotRepositories {
-			if platform.Spec.Build.Repositories == nil {
-				platform.Spec.Build.Repositories = make([]string, 0)
-			}
-
-			platform.Spec.Build.Repositories = append(
-				platform.Spec.Build.Repositories,
-				"https://repository.apache.org/content/repositories/snapshots@id=apache.snapshots@snapshots",
-			)
-			platform.Spec.Build.Repositories = append(
-				platform.Spec.Build.Repositories,
-				"https://oss.sonatype.org/content/repositories/snapshots/@id=sonatype.snapshots@snapshots",
-			)
-		}
 		if o.camelVersion != "" {
 			platform.Spec.Build.CamelVersion = o.camelVersion
 		}
@@ -208,6 +191,15 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			}
 
 			platform.Spec.Build.Timeout.Duration = d
+		}
+
+		if o.mavenSettings != "" {
+			mavenSettings, err := decodeMavenSettings(o.mavenSettings)
+			if err != nil {
+				return err
+			}
+
+			platform.Spec.Build.Maven.Settings = mavenSettings
 		}
 
 		platform.Spec.Resources.Contexts = o.contexts
@@ -332,4 +324,49 @@ func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string, nrCont
 		}
 	}
 	return errors.Errorf("Unknown context '%s'", context)
+}
+
+func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
+	sub := make([]string, 0)
+	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
+	hits := rex.FindAllStringSubmatch(mavenSettings, -1)
+
+	for _, hit := range hits {
+		if len(hit) > 1 {
+			for _, match := range hit[1:] {
+				sub = append(sub, match)
+			}
+		}
+	}
+
+	if len(sub) >= 2 {
+		key := "settings.xml"
+
+		if len(sub) == 4 {
+			key = sub[3]
+		}
+
+		if sub[0] == "configmap" {
+			return v1alpha1.ValueSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: sub[1],
+					},
+					Key: key,
+				},
+			}, nil
+		}
+		if sub[0] == "secret" {
+			return v1alpha1.ValueSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: sub[1],
+					},
+					Key: key,
+				},
+			}, nil
+		}
+	}
+
+	return v1alpha1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
 }

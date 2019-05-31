@@ -20,6 +20,7 @@ package builder
 import (
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -47,66 +48,6 @@ func TestRegisterDuplicatedSteps(t *testing.T) {
 	RegisterSteps(steps)
 	assert.Panics(t, func() {
 		RegisterSteps(steps)
-	})
-}
-
-func TestMavenRepositories(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
-	assert.Nil(t, err)
-
-	ctx := Context{
-		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: defaults.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
-			Dependencies: []string{
-				"runtime:jvm",
-			},
-			Repositories: []string{
-				"https://repository.apache.org/content/repositories/snapshots@id=apache.snapshots@snapshots@noreleases",
-				"https://oss.sonatype.org/content/repositories/snapshots/@id=sonatype.snapshots@snapshots",
-			},
-		},
-	}
-
-	err = generateProject(&ctx)
-	assert.Nil(t, err)
-	err = injectDependencies(&ctx)
-	assert.Nil(t, err)
-
-	assert.Equal(t, 2, len(ctx.Project.Repositories))
-	assert.Equal(t, 2, len(ctx.Project.PluginRepositories))
-
-	assert.Contains(t, ctx.Project.Repositories, maven.Repository{
-		ID:        "apache.snapshots",
-		URL:       "https://repository.apache.org/content/repositories/snapshots",
-		Snapshots: maven.RepositoryPolicy{Enabled: true},
-		Releases:  maven.RepositoryPolicy{Enabled: false},
-	})
-
-	assert.Contains(t, ctx.Project.Repositories, maven.Repository{
-		ID:        "sonatype.snapshots",
-		URL:       "https://oss.sonatype.org/content/repositories/snapshots/",
-		Snapshots: maven.RepositoryPolicy{Enabled: true},
-		Releases:  maven.RepositoryPolicy{Enabled: true},
-	})
-
-	assert.Contains(t, ctx.Project.PluginRepositories, maven.Repository{
-		ID:        "apache.snapshots",
-		URL:       "https://repository.apache.org/content/repositories/snapshots",
-		Snapshots: maven.RepositoryPolicy{Enabled: true},
-		Releases:  maven.RepositoryPolicy{Enabled: false},
-	})
-
-	assert.Contains(t, ctx.Project.PluginRepositories, maven.Repository{
-		ID:        "sonatype.snapshots",
-		URL:       "https://oss.sonatype.org/content/repositories/snapshots/",
-		Snapshots: maven.RepositoryPolicy{Enabled: true},
-		Releases:  maven.RepositoryPolicy{Enabled: true},
 	})
 }
 
@@ -162,6 +103,106 @@ func TestGenerateJvmProject(t *testing.T) {
 		Version:    "2.11.2",
 		Scope:      "runtime",
 	})
+}
+
+func TestMavenSettingsFromConfigMap(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	c, err := test.NewFakeClient(
+		&corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-settings",
+			},
+			Data: map[string]string{
+				"settings.xml": "setting-data",
+			},
+		},
+	)
+
+	ctx := Context{
+		Catalog:   catalog,
+		Client:    c,
+		Namespace: "ns",
+		Build: v1alpha1.BuildSpec{
+			RuntimeVersion: defaults.RuntimeVersion,
+			Platform: v1alpha1.IntegrationPlatformSpec{
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					CamelVersion: catalog.Version,
+					Maven: v1alpha1.MavenSpec{
+						Settings: v1alpha1.ValueSource{
+							ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: "maven-settings",
+								},
+								Key: "settings.xml",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err = generateProjectSettings(&ctx)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte("setting-data"), ctx.Settings.Content)
+}
+
+func TestMavenSettingsFromSecret(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	c, err := test.NewFakeClient(
+		&corev1.Secret{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "Secret",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-settings",
+			},
+			Data: map[string][]byte{
+				"settings.xml": []byte("setting-data"),
+			},
+		},
+	)
+
+	ctx := Context{
+		Catalog:   catalog,
+		Client:    c,
+		Namespace: "ns",
+		Build: v1alpha1.BuildSpec{
+			RuntimeVersion: defaults.RuntimeVersion,
+			Platform: v1alpha1.IntegrationPlatformSpec{
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					CamelVersion: catalog.Version,
+					Maven: v1alpha1.MavenSpec{
+						Settings: v1alpha1.ValueSource{
+							SecretKeyRef: &corev1.SecretKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: "maven-settings",
+								},
+								Key: "settings.xml",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err = generateProjectSettings(&ctx)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte("setting-data"), ctx.Settings.Content)
 }
 
 func TestGenerateGroovyProject(t *testing.T) {
@@ -227,46 +268,6 @@ func TestGenerateGroovyProject(t *testing.T) {
 		Version:    "2.11.2",
 		Scope:      "runtime",
 	})
-}
-
-func TestGenerateProjectWithRepositories(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
-	assert.Nil(t, err)
-
-	ctx := Context{
-		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
-			Repositories: []string{
-				"https://repository.apache.org/content/groups/snapshots-group@id=apache-snapshots@snapshots@noreleases",
-				"https://oss.sonatype.org/content/repositories/ops4j-snapshots@id=ops4j-snapshots@snapshots@noreleases",
-			},
-		},
-	}
-
-	err = generateProject(&ctx)
-	assert.Nil(t, err)
-	err = injectDependencies(&ctx)
-	assert.Nil(t, err)
-
-	assert.Equal(t, 1, len(ctx.Project.DependencyManagement.Dependencies))
-	assert.Equal(t, "org.apache.camel", ctx.Project.DependencyManagement.Dependencies[0].GroupID)
-	assert.Equal(t, "camel-bom", ctx.Project.DependencyManagement.Dependencies[0].ArtifactID)
-	assert.Equal(t, catalog.Version, ctx.Project.DependencyManagement.Dependencies[0].Version)
-	assert.Equal(t, "pom", ctx.Project.DependencyManagement.Dependencies[0].Type)
-	assert.Equal(t, "import", ctx.Project.DependencyManagement.Dependencies[0].Scope)
-
-	assert.Equal(t, 2, len(ctx.Project.Repositories))
-	assert.Equal(t, "apache-snapshots", ctx.Project.Repositories[0].ID)
-	assert.False(t, ctx.Project.Repositories[0].Releases.Enabled)
-	assert.True(t, ctx.Project.Repositories[0].Snapshots.Enabled)
-	assert.Equal(t, "ops4j-snapshots", ctx.Project.Repositories[1].ID)
-	assert.False(t, ctx.Project.Repositories[1].Releases.Enabled)
-	assert.True(t, ctx.Project.Repositories[1].Snapshots.Enabled)
 }
 
 func TestSanitizeDependencies(t *testing.T) {

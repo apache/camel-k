@@ -237,3 +237,47 @@ func LookUpResources(ctx context.Context, client client.Client, namespace string
 	}
 	return res, nil
 }
+
+// GetSecretRefValue returns the value of a secret in the supplied namespace --
+func GetSecretRefValue(ctx context.Context, client client.Client, namespace string, selector *corev1.SecretKeySelector) (string, error) {
+	secret, err := GetSecret(ctx, client, selector.Name, namespace)
+	if err != nil {
+		return "", err
+	}
+
+	if data, ok := secret.Data[selector.Key]; ok {
+		return string(data), nil
+	}
+
+	return "", fmt.Errorf("key %s not found in secret %s", selector.Key, selector.Name)
+
+}
+
+// GetConfigMapRefValue returns the value of a configmap in the supplied namespace
+func GetConfigMapRefValue(ctx context.Context, client client.Client, namespace string, selector *corev1.ConfigMapKeySelector) (string, error) {
+	cm, err := GetConfigMap(ctx, client, selector.Name, namespace)
+	if err != nil {
+		return "", err
+	}
+
+	if data, ok := cm.Data[selector.Key]; ok {
+		return data, nil
+	}
+
+	return "", fmt.Errorf("key %s not found in config map %s", selector.Key, selector.Name)
+}
+
+// ResolveValueSource --
+func ResolveValueSource(ctx context.Context, client client.Client, namespace string, valueSource *v1alpha1.ValueSource) (string, error) {
+	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
+		return "", fmt.Errorf("value source has bot config map and secret configuired")
+	}
+	if valueSource.ConfigMapKeyRef != nil {
+		return GetConfigMapRefValue(ctx, client, namespace, valueSource.ConfigMapKeyRef)
+	}
+	if valueSource.SecretKeyRef != nil {
+		return GetSecretRefValue(ctx, client, namespace, valueSource.SecretKeyRef)
+	}
+
+	return "", fmt.Errorf("value source does not refer to a config map nor a secret")
+}

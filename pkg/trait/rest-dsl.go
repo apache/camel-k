@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -27,6 +26,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -111,12 +112,16 @@ func (t *restDslTrait) Apply(e *Environment) error {
 		opts = append(opts, "-Dopenapi.spec="+in)
 		opts = append(opts, "-Ddsl.out="+out)
 
-		project, err := t.generateProject(e)
+		project, err := t.generateMavenProject(e)
+		if err != nil {
+			return err
+		}
+		settings, err := t.generateMavenSettings(e)
 		if err != nil {
 			return err
 		}
 
-		err = maven.CreateStructure(tmpDir, project)
+		err = maven.CreateStructure(tmpDir, project, settings)
 		if err != nil {
 			return err
 		}
@@ -202,61 +207,50 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *restDslTrait) generateProject(e *Environment) (maven.Project, error) {
+func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, error) {
 	if e.CamelCatalog == nil {
 		return maven.Project{}, errors.New("unknown camel catalog")
 	}
 
-	p := maven.Project{
-		XMLName:           xml.Name{Local: "project"},
-		XMLNs:             "http://maven.apache.org/POM/4.0.0",
-		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
-		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-		ModelVersion:      "4.0.0",
-		GroupID:           "org.apache.camel.k.integration",
-		ArtifactID:        "camel-k-red-dsl-generator",
-		Version:           defaults.Version,
-		Build: maven.Build{
-			DefaultGoal: "generate-resources",
-			Plugins: []maven.Plugin{
+	p := maven.NewProject("org.apache.camel.k.integration", "camel-k-rest-dsl-generator", defaults.Version)
+	p.Build.DefaultGoal = "generate-resources"
+	p.Build.Plugins = []maven.Plugin{
+		{
+			GroupID:    "org.apache.camel.k",
+			ArtifactID: "camel-k-maven-plugin",
+			Version:    e.RuntimeVersion,
+			Executions: []maven.Execution{
 				{
-					GroupID:    "org.apache.camel.k",
-					ArtifactID: "camel-k-maven-plugin",
-					Version:    e.RuntimeVersion,
-					Executions: []maven.Execution{
-						{
-							Phase: "generate-resources",
-							Goals: []string{
-								"generate-rest-xml",
-							},
-						},
+					Phase: "generate-resources",
+					Goals: []string{
+						"generate-rest-xml",
 					},
-					Dependencies: []maven.Dependency{
-						{
-							GroupID:    "org.apache.camel",
-							ArtifactID: "camel-swagger-rest-dsl-generator",
-							Version:    e.CamelCatalog.Version,
-						},
-					},
+				},
+			},
+			Dependencies: []maven.Dependency{
+				{
+					GroupID:    "org.apache.camel",
+					ArtifactID: "camel-swagger-rest-dsl-generator",
+					Version:    e.CamelCatalog.Version,
 				},
 			},
 		},
 	}
 
-	//
-	// Repositories
-	//
+	return p, nil
+}
 
-	p.Repositories = make([]maven.Repository, 0, len(e.Platform.Spec.Build.Repositories))
+func (t *restDslTrait) generateMavenSettings(e *Environment) (maven.Settings, error) {
+	settings := maven.NewSettings()
 
-	for i, r := range e.Platform.Spec.Build.Repositories {
-		repo := maven.NewRepository(r)
-		if repo.ID == "" {
-			repo.ID = fmt.Sprintf("repo-%03d", i)
-		}
-
-		p.Repositories = append(p.Repositories, repo)
+	val, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Spec.Build.Maven.Settings)
+	if err != nil {
+		return maven.Settings{}, err
 	}
 
-	return p, nil
+	if val != "" {
+		settings.Content = []byte(val)
+	}
+
+	return settings, nil
 }

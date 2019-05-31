@@ -20,7 +20,6 @@ type BuildSpec struct {
 	Sources        []SourceSpec            `json:"sources,omitempty"`
 	Resources      []ResourceSpec          `json:"resources,omitempty"`
 	Dependencies   []string                `json:"dependencies,omitempty"`
-	Repositories   []string                `json:"repositories,omitempty"`
 	BuildDir       string                  `json:"buildDir,omitempty"`
 }
 

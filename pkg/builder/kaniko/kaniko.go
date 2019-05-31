@@ -29,6 +29,7 @@ type steps struct {
 	Publisher builder.Step
 }
 
+// Steps --
 var Steps = steps{
 	Publisher: builder.NewStep(
 		builder.ApplicationPublishPhase,
@@ -39,6 +40,7 @@ var Steps = steps{
 // DefaultSteps --
 var DefaultSteps = []builder.Step{
 	builder.Steps.GenerateProject,
+	builder.Steps.GenerateProjectSettings,
 	builder.Steps.InjectDependencies,
 	builder.Steps.SanitizeDependencies,
 	builder.Steps.ComputeDependencies,

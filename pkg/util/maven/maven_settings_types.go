@@ -15,40 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package s2i
+package maven
 
-import (
-	"github.com/apache/camel-k/pkg/builder"
-)
-
-func init() {
-	builder.RegisterSteps(Steps)
-}
-
-type steps struct {
-	Publisher   builder.Step
-	ReplaceHost builder.Step
-}
-
-// Steps --
-var Steps = steps{
-	Publisher: builder.NewStep(
-		builder.ApplicationPublishPhase,
-		publisher,
-	),
-	ReplaceHost: builder.NewStep(
-		builder.ApplicationPublishPhase+1,
-		replaceHost,
-	),
-}
-
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.Steps.GenerateProject,
-	builder.Steps.GenerateProjectSettings,
-	builder.Steps.InjectDependencies,
-	builder.Steps.SanitizeDependencies,
-	builder.Steps.ComputeDependencies,
-	builder.Steps.IncrementalPackager,
-	Steps.Publisher,
+// Settings --
+type Settings struct {
+	Content []byte
 }

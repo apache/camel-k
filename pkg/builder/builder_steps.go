@@ -45,25 +45,31 @@ func init() {
 }
 
 type steps struct {
-	GenerateProject      Step
-	InjectDependencies   Step
-	SanitizeDependencies Step
-	ComputeDependencies  Step
-	StandardPackager     Step
-	IncrementalPackager  Step
+	GenerateProject         Step
+	GenerateProjectSettings Step
+	InjectDependencies      Step
+	SanitizeDependencies    Step
+	ComputeDependencies     Step
+	StandardPackager        Step
+	IncrementalPackager     Step
 }
 
+// Steps --
 var Steps = steps{
 	GenerateProject: NewStep(
 		ProjectGenerationPhase,
 		generateProject,
 	),
-	InjectDependencies: NewStep(
+	GenerateProjectSettings: NewStep(
 		ProjectGenerationPhase+1,
+		generateProjectSettings,
+	),
+	InjectDependencies: NewStep(
+		ProjectGenerationPhase+2,
 		injectDependencies,
 	),
 	SanitizeDependencies: NewStep(
-		ProjectGenerationPhase+2,
+		ProjectGenerationPhase+3,
 		sanitizeDependencies,
 	),
 	ComputeDependencies: NewStep(
@@ -80,6 +86,7 @@ var Steps = steps{
 	),
 }
 
+// RegisterSteps --
 func RegisterSteps(steps interface{}) {
 	v := reflect.ValueOf(steps)
 	t := reflect.TypeOf(steps)
@@ -107,7 +114,7 @@ func registerStep(steps ...Step) {
 
 // generateProject --
 func generateProject(ctx *Context) error {
-	p, err := NewProject(ctx)
+	p, err := NewMavenProject(ctx)
 	if err != nil {
 		return err
 	}
@@ -159,6 +166,18 @@ func generateProject(ctx *Context) error {
 		Version:    "2.11.2",
 		Scope:      "runtime",
 	})
+
+	return nil
+}
+
+// generateProjectSettings --
+func generateProjectSettings(ctx *Context) error {
+	settings, err := NewMavenSettings(ctx)
+	if err != nil {
+		return err
+	}
+
+	ctx.Settings = settings
 
 	return nil
 }
@@ -243,7 +262,7 @@ func sanitizeDependencies(ctx *Context) error {
 func computeDependencies(ctx *Context) error {
 	p := path.Join(ctx.Path, "maven")
 
-	err := maven.CreateStructure(p, ctx.Project)
+	err := maven.CreateStructure(p, ctx.Project, ctx.Settings)
 	if err != nil {
 		return err
 	}

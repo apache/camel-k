@@ -18,11 +18,10 @@ limitations under the License.
 package maven
 
 import (
-	"bytes"
-	"encoding/xml"
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"strings"
 
@@ -35,34 +34,25 @@ import (
 // Log --
 var Log = log.WithName("maven")
 
-// GeneratePomContent generate a pom.xml file from the given project definition
-func GeneratePomContent(project Project) (string, error) {
-	w := &bytes.Buffer{}
-	w.WriteString(xml.Header)
-
-	e := xml.NewEncoder(w)
-	e.Indent("", "  ")
-
-	err := e.Encode(project)
-	if err != nil {
-		return "", err
-	}
-
-	return w.String(), nil
-}
-
 // CreateStructure --
-func CreateStructure(buildDir string, project Project) error {
+func CreateStructure(buildDir string, project Project, settings Settings) error {
 	Log.Infof("write project: %+v", project)
 
-	pom, err := GeneratePomContent(project)
+	pomContent, err := util.EncodeXML(project)
 	if err != nil {
 		return err
 	}
 
-	err = util.WriteFileWithContent(buildDir, "pom.xml", pom)
+	err = util.WriteFileWithContent(buildDir, "pom.xml", []byte(pomContent))
 	if err != nil {
 		return err
+	}
+
+	if len(settings.Content) > 0 {
+		err = util.WriteFileWithContent(buildDir, "settings.xml", settings.Content)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -76,6 +66,16 @@ func Run(buildDir string, args ...string) error {
 	}
 
 	args = append(args, "--batch-mode")
+
+	settingsPath := path.Join(buildDir, "settings.xml")
+	settingsExists, err := util.FileExists(settingsPath)
+	if err != nil {
+		return err
+	}
+
+	if settingsExists {
+		args = append(args, "--settings", settingsPath)
+	}
 
 	cmd := exec.Command(mvnCmd, args...)
 	cmd.Dir = buildDir
