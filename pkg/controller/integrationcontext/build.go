@@ -32,7 +32,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 )
 
@@ -75,19 +74,11 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		build.Status.Phase == v1alpha1.BuildPhaseError ||
 		build.Status.Phase == v1alpha1.BuildPhaseInterrupted ||
 		build.Status.Phase == v1alpha1.BuildPhaseSucceeded {
-		p, err := platform.GetCurrentPlatform(ctx, action.client, ictx.Namespace)
-		if err != nil {
-			return err
-		}
+
 		env, err := trait.Apply(ctx, action.client, nil, ictx)
 		if err != nil {
 			return err
 		}
-
-		// assume there's no duplication nor conflict for now
-		repositories := make([]string, 0, len(ictx.Spec.Repositories)+len(p.Spec.Build.Repositories))
-		repositories = append(repositories, ictx.Spec.Repositories...)
-		repositories = append(repositories, p.Spec.Build.Repositories...)
 
 		if env.CamelCatalog == nil {
 			return errors.New("undefined camel catalog")
@@ -108,7 +99,6 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 				RuntimeVersion: env.RuntimeVersion,
 				Platform:       env.Platform.Spec,
 				Dependencies:   ictx.Spec.Dependencies,
-				Repositories:   repositories,
 				Steps:          builder.StepIDsFor(env.Steps...),
 				BuildDir:       env.BuildDir,
 			},

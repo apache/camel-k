@@ -18,8 +18,9 @@ limitations under the License.
 package maven
 
 import (
-	"encoding/xml"
 	"testing"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -81,67 +82,58 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
 </project>`
 
 func TestPomGeneration(t *testing.T) {
-	project := Project{
-		XMLName:           xml.Name{Local: "project"},
-		XMLNs:             "http://maven.apache.org/POM/4.0.0",
-		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
-		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
-		ModelVersion:      "4.0.0",
-		GroupID:           "org.apache.camel.k.integration",
-		ArtifactID:        "camel-k-integration",
-		Version:           "1.0.0",
-		DependencyManagement: DependencyManagement{
-			Dependencies: []Dependency{
-				{
-					GroupID:    "org.apache.camel",
-					ArtifactID: "camel-bom",
-					Version:    "2.22.1",
-					Type:       "pom",
-					Scope:      "import",
-				},
-			},
-		},
+	project := NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", "1.0.0")
+	project.DependencyManagement = DependencyManagement{
 		Dependencies: []Dependency{
 			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-jvm",
-				Version:    "1.0.0",
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-bom",
+				Version:    "2.22.1",
+				Type:       "pom",
+				Scope:      "import",
 			},
 		},
-		Repositories: []Repository{
-			{
-				ID:  "central",
-				URL: "https://repo.maven.apache.org/maven2",
-				Snapshots: RepositoryPolicy{
-					Enabled: false,
-				},
-				Releases: RepositoryPolicy{
-					Enabled:      true,
-					UpdatePolicy: "never",
-				},
+	}
+	project.Dependencies = []Dependency{
+		{
+			GroupID:    "org.apache.camel.k",
+			ArtifactID: "camel-k-runtime-jvm",
+			Version:    "1.0.0",
+		},
+	}
+	project.Repositories = []Repository{
+		{
+			ID:  "central",
+			URL: "https://repo.maven.apache.org/maven2",
+			Snapshots: RepositoryPolicy{
+				Enabled: false,
+			},
+			Releases: RepositoryPolicy{
+				Enabled:      true,
+				UpdatePolicy: "never",
 			},
 		},
-		PluginRepositories: []Repository{
-			{
-				ID:  "central",
-				URL: "https://repo.maven.apache.org/maven2",
-				Snapshots: RepositoryPolicy{
-					Enabled: false,
-				},
-				Releases: RepositoryPolicy{
-					Enabled:      true,
-					UpdatePolicy: "never",
-				},
+	}
+	project.PluginRepositories = []Repository{
+		{
+			ID:  "central",
+			URL: "https://repo.maven.apache.org/maven2",
+			Snapshots: RepositoryPolicy{
+				Enabled: false,
+			},
+			Releases: RepositoryPolicy{
+				Enabled:      true,
+				UpdatePolicy: "never",
 			},
 		},
 	}
 
-	pom, err := GeneratePomContent(project)
+	pom, err := util.EncodeXML(project)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, pom)
 
-	assert.Equal(t, expectedPom, pom)
+	assert.Equal(t, expectedPom, string(pom))
 }
 
 func TestParseSimpleGAV(t *testing.T) {

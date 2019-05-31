@@ -15,40 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package s2i
+package maven
 
-import (
-	"github.com/apache/camel-k/pkg/builder"
-)
+import "encoding/xml"
 
-func init() {
-	builder.RegisterSteps(Steps)
-}
-
-type steps struct {
-	Publisher   builder.Step
-	ReplaceHost builder.Step
-}
-
-// Steps --
-var Steps = steps{
-	Publisher: builder.NewStep(
-		builder.ApplicationPublishPhase,
-		publisher,
-	),
-	ReplaceHost: builder.NewStep(
-		builder.ApplicationPublishPhase+1,
-		replaceHost,
-	),
-}
-
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.Steps.GenerateProject,
-	builder.Steps.GenerateProjectSettings,
-	builder.Steps.InjectDependencies,
-	builder.Steps.SanitizeDependencies,
-	builder.Steps.ComputeDependencies,
-	builder.Steps.IncrementalPackager,
-	Steps.Publisher,
+// NewSettings --
+func NewSettings() Settings {
+	return Settings{
+		XMLName:           xml.Name{Local: "settings"},
+		XMLNs:             "http://maven.apache.org/SETTINGS/1.0.0",
+		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+		XsiSchemaLocation: "http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd",
+	}
 }

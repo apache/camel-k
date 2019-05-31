@@ -18,11 +18,12 @@ limitations under the License.
 package maven
 
 import (
-	"bytes"
-	"encoding/xml"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"strings"
 
@@ -35,50 +36,75 @@ import (
 // Log --
 var Log = log.WithName("maven")
 
-// GeneratePomContent generate a pom.xml file from the given project definition
-func GeneratePomContent(project Project) (string, error) {
-	w := &bytes.Buffer{}
-	w.WriteString(xml.Header)
-
-	e := xml.NewEncoder(w)
-	e.Indent("", "  ")
-
-	err := e.Encode(project)
-	if err != nil {
-		return "", err
-	}
-
-	return w.String(), nil
-}
-
-// CreateStructure --
-func CreateStructure(buildDir string, project Project) error {
-	Log.Infof("write project: %+v", project)
-
-	pom, err := GeneratePomContent(project)
-	if err != nil {
+// GenerateProjectStructure --
+func GenerateProjectStructure(context Context) error {
+	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", context.Project); err != nil {
 		return err
 	}
 
-	err = util.WriteFileWithContent(buildDir, "pom.xml", pom)
-	if err != nil {
-		return err
+	if context.SettingsData != nil {
+		if err := util.WriteFileWithContent(context.Path, "settings.xml", context.SettingsData); err != nil {
+			return err
+		}
+	} else if context.Settings != nil {
+		if err := util.WriteFileWithBytesMarshallerContent(context.Path, "settings.xml", context.Settings); err != nil {
+			return err
+		}
+	}
+
+	for k, v := range context.AdditionalEntries {
+		var bytes []byte
+		var err error
+
+		if dc, ok := v.([]byte); ok {
+			bytes = dc
+		} else if dc, ok := v.(io.Reader); ok {
+			bytes, err = ioutil.ReadAll(dc)
+			if err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("unknown content type: name=%s, content=%+v", k, v)
+		}
+
+		if len(bytes) > 0 {
+			Log.Infof("write entry: %s (%d bytes)", k, len(bytes))
+
+			err = util.WriteFileWithContent(context.Path, k, bytes)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
 }
 
 // Run --
-func Run(buildDir string, args ...string) error {
+func Run(context Context) error {
+	if err := GenerateProjectStructure(context); err != nil {
+		return err
+	}
+
 	mvnCmd := "mvn"
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
 	}
 
-	args = append(args, "--batch-mode")
+	args := append(context.AdditionalArguments, "--batch-mode")
+
+	settingsPath := path.Join(context.Path, "settings.xml")
+	settingsExists, err := util.FileExists(settingsPath)
+	if err != nil {
+		return err
+	}
+
+	if settingsExists {
+		args = append(args, "--settings", settingsPath)
+	}
 
 	cmd := exec.Command(mvnCmd, args...)
-	cmd.Dir = buildDir
+	cmd.Dir = context.Path
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

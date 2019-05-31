@@ -87,7 +87,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait(ID("builder")))
 	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 6)
+	assert.Len(t, env.Steps, 7)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
 			if s == s2i.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
@@ -107,7 +107,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait(ID("builder")))
 	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 6)
+	assert.Len(t, env.Steps, 7)
 	assert.Condition(t, func() bool {
 		for _, s := range env.Steps {
 			if s == kaniko.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
