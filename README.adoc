@@ -156,49 +156,50 @@ As example if you want to change the queue size of the seda component, you can u
 camel.component.seda.queueSize = 10
 ```
 
-==== Configure additional maven repositories
+==== Configure maven settings
 
-Additional maven repositories can be defined at platform installation time or at integration/context build time:
+Maven settings can be configured by providing a custom settings.xml through a CaonfigMap or secret.
+The source for maven setttings can be configuired using either the `kamel` cli at installation time or by editing Camel K's IntegrationPlatform:
 
+- cli:
++
+.Syntax
+[source]
+----
+kamel install --maven-settings=configmap|secret:name[/key]
+----
++
+.Example
+[source]
+----
+kamel cmd --maven-settings=configmap:maven-settings/settings.xml
+----
+
+- IntegrationPlatform:
++
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationPlatform
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k
+spec:
+  build:
+    maven:
+      settings:
+        configMapKeyRef:
+          key: settings.xml
+          name: maven-settings
+----
+
+To quickly create a config map you can use the following command:
 
 [source]
 ----
-kamel cmd --repository http://repo1.my-company.com --repository http://repo2.my-company.com
+kubectl create configmap maven-settings --from-file=settigns.xml
 ----
-
-A repository url follow conventions used to configure additional repositories in https://karaf.apache.org[_Apache Karaf_] so it can be appended with zero or more of the following flags:
-
-* **@snapshots**: the repository contains snapshots
-* **@noreleases**: the repository does not contain any released artifacts
-* **@id=repository.id**: the id for the repository
-
-[source]
-----
-kamel install --repository http://repository.apache.org/content/groups/snapshots-group@id=apache@snapshots@noreleases
-----
-
-This results in:
-
-[source,xml]
-----
-<repositories>
-  <repository>
-    <id>apache</id>
-    <url>http://repository.apache.org/content/groups/snapshots-group</url>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-    <releases>
-      <enabled>false</enabled>
-    </releases>
-  </repository>
-</repositories>
-----
-
-[NOTE]
-====
-The final repositories list is the sum of the repositories defined on the resource (integration/context) and the platform ones
-====
 
 ==== Configure Integration Volumes
 
