@@ -26,7 +26,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/install"
-	p "github.com/apache/camel-k/pkg/platform"
 )
 
 // NewCreateAction returns a action that creates resources needed by the platform
@@ -61,11 +60,6 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		res := make([]string, 0, l)
 
 		for _, c := range platform.Spec.Resources.Contexts {
-			if c == p.NoContext {
-				// Signals nothing to install
-				continue
-			}
-
 			//
 			// Assuming that if the resource ends with a yaml extension, the full
 			// resource name is provided
@@ -80,20 +74,6 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		if len(res) > 0 {
 			action.L.Info("Installing custom platform resources")
 			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, res...)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		action.L.Info("Installing default platform resources")
-		err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, p.DefaultContexts...)
-		if err != nil {
-			return err
-		}
-
-		if platform.Spec.Profile == v1alpha1.TraitProfileKnative {
-			action.L.Info("Installing knative resources")
-			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, p.KnativeContexts...)
 			if err != nil {
 				return err
 			}
