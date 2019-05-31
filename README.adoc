@@ -156,10 +156,10 @@ As example if you want to change the queue size of the seda component, you can u
 camel.component.seda.queueSize = 10
 ```
 
-==== Configure maven settings
+==== Configure Maven settings
 
-Maven settings can be configured by providing a custom settings.xml through a CaonfigMap or secret.
-The source for maven setttings can be configuired using either the `kamel` cli at installation time or by editing Camel K's IntegrationPlatform:
+Maven settings can be configured by providing a custom settings.xml through a ConfigMap or secret.
+The source for maven setttings can be configuired using either the `kamel` CLI at installation time or by editing Camel K's IntegrationPlatform:
 
 - cli:
 +
@@ -198,7 +198,7 @@ To quickly create a config map you can use the following command:
 
 [source]
 ----
-kubectl create configmap maven-settings --from-file=settigns.xml
+kubectl create configmap maven-settings --from-file=settings.xml
 ----
 
 ==== Configure Integration Volumes
