@@ -156,14 +156,58 @@ As example if you want to change the queue size of the seda component, you can u
 camel.component.seda.queueSize = 10
 ```
 
-==== Configure additional maven repositories
+==== Configure Maven settings
 
-Additional maven repositories can be defined at platform installation time or at integration/context build time:
+Maven settings can be configured by providing a custom settings.xml through a ConfigMap or secret.
+The source for maven settings can be configured using either the `kamel` CLI at installation time or by editing Camel K's IntegrationPlatform:
+
+- cli:
++
+.Syntax
+[source]
+----
+kamel install --maven-settings=configmap|secret:name[/key]
+----
++
+.Example
+[source]
+----
+kamel cmd --maven-settings=configmap:maven-settings/settings.xml
+----
+
+- IntegrationPlatform:
++
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationPlatform
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k
+spec:
+  build:
+    maven:
+      settings:
+        configMapKeyRef:
+          key: settings.xml
+          name: maven-settings
+----
+
+To quickly create a config map you can use the following command:
+
+[source]
+----
+kubectl create configmap maven-settings --from-file=settings.xml
+----
+
+
+As an installation shortcut, additional maven repositories can be alternatively added using the `--maven-repository` option
 
 
 [source]
 ----
-kamel cmd --repository http://repo1.my-company.com --repository http://repo2.my-company.com
+kamel cmd --maven-repository http://repo1.my-company.com --maven-repository http://repo2.my-company.com
 ----
 
 A repository url follow conventions used to configure additional repositories in https://karaf.apache.org[_Apache Karaf_] so it can be appended with zero or more of the following flags:
@@ -174,7 +218,7 @@ A repository url follow conventions used to configure additional repositories in
 
 [source]
 ----
-kamel install --repository http://repository.apache.org/content/groups/snapshots-group@id=apache@snapshots@noreleases
+kamel install --maven-repository http://repository.apache.org/content/groups/snapshots-group@id=apache@snapshots@noreleases
 ----
 
 This results in:
@@ -195,9 +239,9 @@ This results in:
 </repositories>
 ----
 
-[NOTE]
+IMPORTANT
 ====
-The final repositories list is the sum of the repositories defined on the resource (integration/context) and the platform ones
+the options `--maven-settings` and `--maven-repository` are mutually exclusive
 ====
 
 ==== Configure Integration Volumes

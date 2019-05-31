@@ -133,14 +133,6 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
 	action.L.Infof("Timeout set to %s", target.Spec.Build.Timeout)
 
-	for i, r := range target.Spec.Build.Repositories {
-		if i == 0 {
-			action.L.Info("Repositories:")
-		}
-
-		action.L.Infof("%d - %s", i, r)
-	}
-
 	err = action.client.Update(ctx, target)
 	if err != nil {
 		return err

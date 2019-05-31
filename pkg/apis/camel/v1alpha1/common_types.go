@@ -18,6 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -70,4 +71,17 @@ type TraitSpec struct {
 // Configurable --
 type Configurable interface {
 	Configurations() []ConfigurationSpec
+}
+
+// MavenSpec --
+type MavenSpec struct {
+	Settings ValueSource `json:"settings,omitempty"`
+}
+
+// ValueSource --
+type ValueSource struct {
+	// Selects a key of a ConfigMap.
+	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty"`
+	// Selects a key of a secret.
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty" `
 }
