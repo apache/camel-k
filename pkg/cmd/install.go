@@ -24,7 +24,6 @@ import (
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
-	"github.com/apache/camel-k/pkg/platform"
 	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -306,16 +305,6 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 }
 
 func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string, nrContexts int) error {
-
-	if context == platform.NoContext {
-		if nrContexts > 1 {
-			return errors.New("You can only use one --context argument when selecting 'none'")
-		}
-
-		// Indicates that nothing should be installed
-		return nil
-	}
-
 	for _, resource := range deploy.Resources {
 		resource, err := kubernetes.LoadResourceFromYaml(schema, resource)
 		if err != nil {
