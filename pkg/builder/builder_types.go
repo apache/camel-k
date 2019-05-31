@@ -107,13 +107,18 @@ type Context struct {
 	PublicImage       string
 	Error             error
 	Namespace         string
-	Project           maven.Project
 	Path              string
 	Artifacts         []v1alpha1.Artifact
 	SelectedArtifacts []v1alpha1.Artifact
 	Archive           string
 	ContextFilter     func(integrationContext *v1alpha1.IntegrationContext) bool
 	Resources         []Resource
+
+	Maven struct {
+		Project      maven.Project
+		Settings     *maven.Settings
+		SettingsData []byte
+	}
 }
 
 // HasRequiredImage --

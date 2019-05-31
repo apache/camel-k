@@ -25,6 +25,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/scylladb/go-set/strset"
@@ -45,25 +47,31 @@ func init() {
 }
 
 type steps struct {
-	GenerateProject      Step
-	InjectDependencies   Step
-	SanitizeDependencies Step
-	ComputeDependencies  Step
-	StandardPackager     Step
-	IncrementalPackager  Step
+	GenerateProject         Step
+	GenerateProjectSettings Step
+	InjectDependencies      Step
+	SanitizeDependencies    Step
+	ComputeDependencies     Step
+	StandardPackager        Step
+	IncrementalPackager     Step
 }
 
+// Steps --
 var Steps = steps{
 	GenerateProject: NewStep(
 		ProjectGenerationPhase,
 		generateProject,
 	),
-	InjectDependencies: NewStep(
+	GenerateProjectSettings: NewStep(
 		ProjectGenerationPhase+1,
+		generateProjectSettings,
+	),
+	InjectDependencies: NewStep(
+		ProjectGenerationPhase+2,
 		injectDependencies,
 	),
 	SanitizeDependencies: NewStep(
-		ProjectGenerationPhase+2,
+		ProjectGenerationPhase+3,
 		sanitizeDependencies,
 	),
 	ComputeDependencies: NewStep(
@@ -80,6 +88,7 @@ var Steps = steps{
 	),
 }
 
+// RegisterSteps --
 func RegisterSteps(steps interface{}) {
 	v := reflect.ValueOf(steps)
 	t := reflect.TypeOf(steps)
@@ -107,16 +116,16 @@ func registerStep(steps ...Step) {
 
 // generateProject --
 func generateProject(ctx *Context) error {
-	p, err := NewProject(ctx)
+	p, err := NewMavenProject(ctx)
 	if err != nil {
 		return err
 	}
 
-	ctx.Project = p
+	ctx.Maven.Project = p
 	//
 	// set-up dependencies
 	//
-	ctx.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", ctx.Build.RuntimeVersion)
+	ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", ctx.Build.RuntimeVersion)
 
 	for _, d := range ctx.Build.Dependencies {
 		switch {
@@ -127,7 +136,7 @@ func generateProject(ctx *Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			ctx.Project.AddDependencyGAV("org.apache.camel", artifactID, "")
+			ctx.Maven.Project.AddDependencyGAV("org.apache.camel", artifactID, "")
 		case strings.HasPrefix(d, "camel-k:"):
 			artifactID := strings.TrimPrefix(d, "camel-k:")
 
@@ -135,16 +144,16 @@ func generateProject(ctx *Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
+			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
 
-			ctx.Project.AddEncodedDependencyGAV(gav)
+			ctx.Maven.Project.AddEncodedDependencyGAV(gav)
 		case strings.HasPrefix(d, "runtime:"):
 			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
 
-			ctx.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
+			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
 		case strings.HasPrefix(d, "bom:"):
 			// no-op
 		default:
@@ -153,7 +162,7 @@ func generateProject(ctx *Context) error {
 	}
 
 	// Add Log4j 2 SLF4J binding as default logging impl
-	ctx.Project.AddDependency(maven.Dependency{
+	ctx.Maven.Project.AddDependency(maven.Dependency{
 		GroupID:    "org.apache.logging.log4j",
 		ArtifactID: "log4j-slf4j-impl",
 		Version:    "2.11.2",
@@ -163,12 +172,25 @@ func generateProject(ctx *Context) error {
 	return nil
 }
 
+// generateProjectSettings --
+func generateProjectSettings(ctx *Context) error {
+	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Platform.Build.Maven.Settings)
+	if err != nil {
+		return err
+	}
+	if val != "" {
+		ctx.Maven.SettingsData = []byte(val)
+	}
+
+	return nil
+}
+
 func injectDependencies(ctx *Context) error {
 	//
 	// Add dependencies from catalog
 	//
-	deps := make([]maven.Dependency, len(ctx.Project.Dependencies))
-	copy(deps, ctx.Project.Dependencies)
+	deps := make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
+	copy(deps, ctx.Maven.Project.Dependencies)
 
 	for _, d := range deps {
 		if a, ok := ctx.Catalog.Artifacts[d.ArtifactID]; ok {
@@ -178,7 +200,7 @@ func injectDependencies(ctx *Context) error {
 					ArtifactID: dep.ArtifactID,
 				}
 
-				ctx.Project.AddDependency(md)
+				ctx.Maven.Project.AddDependency(md)
 
 				for _, e := range dep.Exclusions {
 					me := maven.Exclusion{
@@ -186,7 +208,7 @@ func injectDependencies(ctx *Context) error {
 						ArtifactID: e.ArtifactID,
 					}
 
-					ctx.Project.AddDependencyExclusion(md, me)
+					ctx.Maven.Project.AddDependencyExclusion(md, me)
 				}
 			}
 		}
@@ -194,8 +216,8 @@ func injectDependencies(ctx *Context) error {
 	//
 	// post process dependencies
 	//
-	deps = make([]maven.Dependency, len(ctx.Project.Dependencies))
-	copy(deps, ctx.Project.Dependencies)
+	deps = make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
+	copy(deps, ctx.Maven.Project.Dependencies)
 
 	for _, d := range deps {
 		if a, ok := ctx.Catalog.Artifacts[d.ArtifactID]; ok {
@@ -210,7 +232,7 @@ func injectDependencies(ctx *Context) error {
 					ArtifactID: e.ArtifactID,
 				}
 
-				ctx.Project.AddDependencyExclusion(md, me)
+				ctx.Maven.Project.AddDependencyExclusion(md, me)
 			}
 		}
 	}
@@ -219,21 +241,21 @@ func injectDependencies(ctx *Context) error {
 }
 
 func sanitizeDependencies(ctx *Context) error {
-	for i := 0; i < len(ctx.Project.Dependencies); i++ {
-		dep := ctx.Project.Dependencies[i]
+	for i := 0; i < len(ctx.Maven.Project.Dependencies); i++ {
+		dep := ctx.Maven.Project.Dependencies[i]
 
 		switch dep.GroupID {
 		case "org.apache.camel":
 			//
 			// Remove the version so we force using the one configured by the bom
 			//
-			ctx.Project.Dependencies[i].Version = ""
+			ctx.Maven.Project.Dependencies[i].Version = ""
 		case "org.apache.camel.k":
 			//
 			// Force every runtime dependency to have the required version discardin
 			// any version eventually set on the catalog
 			//
-			ctx.Project.Dependencies[i].Version = ctx.Build.RuntimeVersion
+			ctx.Maven.Project.Dependencies[i].Version = ctx.Build.RuntimeVersion
 		}
 	}
 
@@ -241,23 +263,17 @@ func sanitizeDependencies(ctx *Context) error {
 }
 
 func computeDependencies(ctx *Context) error {
-	p := path.Join(ctx.Path, "maven")
+	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
+	mc.Settings = ctx.Maven.Settings
+	mc.SettingsData = ctx.Maven.SettingsData
+	mc.AddArguments(maven.ExtraOptions(ctx.Build.Platform.Build.LocalRepository)...)
+	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Build.RuntimeVersion)
 
-	err := maven.CreateStructure(p, ctx.Project)
-	if err != nil {
-		return err
-	}
-
-	opts := make([]string, 0, 2)
-	opts = append(opts, maven.ExtraOptions(ctx.Build.Platform.Build.LocalRepository)...)
-	opts = append(opts, fmt.Sprintf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Build.RuntimeVersion))
-
-	err = maven.Run(p, opts...)
-	if err != nil {
+	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while determining classpath")
 	}
 
-	dependencies := path.Join(p, "target", "dependencies.yaml")
+	dependencies := path.Join(mc.Path, "target", "dependencies.yaml")
 	content, err := ioutil.ReadFile(dependencies)
 	if err != nil {
 		return err

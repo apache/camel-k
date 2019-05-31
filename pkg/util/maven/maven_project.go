@@ -18,8 +18,47 @@ limitations under the License.
 package maven
 
 import (
+	"bytes"
+	"encoding/xml"
 	"strings"
 )
+
+// NewProject --
+func NewProject() Project {
+	return Project{
+		XMLName:           xml.Name{Local: "project"},
+		XMLNs:             "http://maven.apache.org/POM/4.0.0",
+		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+		XsiSchemaLocation: "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
+		ModelVersion:      "4.0.0",
+	}
+}
+
+// NewProjectWithGAV --
+func NewProjectWithGAV(group string, artifact string, version string) Project {
+	p := NewProject()
+	p.GroupID = group
+	p.ArtifactID = artifact
+	p.Version = version
+
+	return p
+}
+
+// MarshalBytes --
+func (p Project) MarshalBytes() ([]byte, error) {
+	w := &bytes.Buffer{}
+	w.WriteString(xml.Header)
+
+	e := xml.NewEncoder(w)
+	e.Indent("", "  ")
+
+	err := e.Encode(p)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return w.Bytes(), nil
+}
 
 // LookupDependency --
 func (p *Project) LookupDependency(dep Dependency) *Dependency {
