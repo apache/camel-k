@@ -1158,6 +1158,12 @@ spec:
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
     camel-k-runtime-yaml:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-yaml
@@ -3234,6 +3240,12 @@ spec:
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
     camel-k-runtime-yaml:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-yaml
@@ -5310,6 +5322,12 @@ spec:
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
     camel-k-runtime-yaml:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-yaml
@@ -7410,6 +7428,12 @@ spec:
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
     camel-k-runtime-yaml:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-yaml
@@ -9499,6 +9523,12 @@ spec:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
       version: 1.0.0
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
     camel-k-runtime-yaml:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-yaml
