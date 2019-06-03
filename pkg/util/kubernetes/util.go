@@ -279,5 +279,5 @@ func ResolveValueSource(ctx context.Context, client client.Client, namespace str
 		return GetSecretRefValue(ctx, client, namespace, valueSource.SecretKeyRef)
 	}
 
-	return "", fmt.Errorf("value source does not refer to a config map nor a secret")
+	return "", nil
 }
