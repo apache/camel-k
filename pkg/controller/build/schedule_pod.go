@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 
@@ -105,6 +106,11 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 		return err
 	}
 
+	// Ensure service account is present
+	if err := action.ensureServiceAccount(ctx, pod); err != nil {
+		return errors.Wrap(err, "cannot ensure service account is present")
+	}
+
 	err = action.client.Delete(ctx, pod)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete build pod")
@@ -120,6 +126,21 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	action.L.Info("Build state transition", "phase", target.Status.Phase)
 
 	return action.client.Status().Update(ctx, target)
+}
+
+func (action *schedulePodAction) ensureServiceAccount(ctx context.Context, buildPod *corev1.Pod) error {
+	sa := corev1.ServiceAccount{}
+	saKey := k8sclient.ObjectKey{
+		Name:      "camel-k-operator",
+		Namespace: buildPod.Namespace,
+	}
+
+	err := action.client.Get(ctx, saKey, &sa)
+	if err != nil && k8serrors.IsNotFound(err) {
+		// Create a proper service account
+		return install.ServiceAccountRoles(ctx, action.client, buildPod.Namespace)
+	}
+	return err
 }
 
 func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {

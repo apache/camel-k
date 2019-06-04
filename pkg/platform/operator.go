@@ -21,11 +21,13 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const operatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
 const operatorNamespaceEnvVariable = "NAMESPACE"
 const operatorPodNameEnvVariable = "POD_NAME"
 
@@ -54,4 +56,12 @@ func GetCurrentOperatorImage(ctx context.Context, c client.Client) (string, erro
 		return "", errors.New("no containers found in operator pod")
 	}
 	return pod.Spec.Containers[0].Image, nil
+}
+
+// IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces
+func IsCurrentOperatorGlobal() bool {
+	if watchNamespace, envSet := os.LookupEnv(operatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
+		return true
+	}
+	return false
 }
