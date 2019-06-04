@@ -81,7 +81,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	// maven settings
 	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
 	cmd.Flags().StringVar(&impl.mavenSettings, "maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
-	cmd.Flags().StringSliceVar(&impl.mavenRpositories, "maven-repository", nil, "Add a maven repository")
+	cmd.Flags().StringSliceVar(&impl.mavenRepositories, "maven-repository", nil, "Add a maven repository")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -97,23 +97,23 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	wait             bool
-	clusterSetupOnly bool
-	skipClusterSetup bool
-	exampleSetup     bool
-	outputFormat     string
-	camelVersion     string
-	runtimeVersion   string
-	baseImage        string
-	operatorImage    string
-	localRepository  string
-	buildStrategy    string
-	buildTimeout     string
-	mavenRpositories []string
-	mavenSettings    string
-	properties       []string
-	contexts         []string
-	registry         v1alpha1.IntegrationPlatformRegistrySpec
+	wait              bool
+	clusterSetupOnly  bool
+	skipClusterSetup  bool
+	exampleSetup      bool
+	outputFormat      string
+	camelVersion      string
+	runtimeVersion    string
+	baseImage         string
+	operatorImage     string
+	localRepository   string
+	buildStrategy     string
+	buildTimeout      string
+	mavenRepositories []string
+	mavenSettings     string
+	properties        []string
+	contexts          []string
+	registry          v1alpha1.IntegrationPlatformRegistrySpec
 }
 
 // nolint: gocyclo
@@ -202,13 +202,13 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			platform.Spec.Build.Timeout.Duration = d
 		}
 
-		if len(o.mavenRpositories) > 0 {
+		if len(o.mavenRepositories) > 0 {
 			o.mavenSettings = fmt.Sprintf("configmap:%s-maven-settings/settings.xml", platform.Name)
 
 			settings := maven.NewSettings()
-			repositories := make([]maven.Repository, 0, len(o.mavenRpositories))
+			repositories := make([]maven.Repository, 0, len(o.mavenRepositories))
 
-			for i, r := range o.mavenRpositories {
+			for i, r := range o.mavenRepositories {
 				repository := maven.NewRepository(r)
 				if repository.ID == "" {
 					repository.ID = fmt.Sprintf("repository-%03d", i)
@@ -357,8 +357,8 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		result = multierr.Append(result, err)
 	}
 
-	if len(o.mavenRpositories) > 0 && o.mavenSettings != "" {
-		result = fmt.Errorf("incompatible options combinations: you canno set both mavenRpository and mavenSettings")
+	if len(o.mavenRepositories) > 0 && o.mavenSettings != "" {
+		result = fmt.Errorf("incompatible options combinations: you cannot set both mavenRepository and mavenSettings")
 	}
 
 	return result
