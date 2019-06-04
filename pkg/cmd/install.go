@@ -60,6 +60,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	cmd.Flags().BoolVarP(&impl.wait, "wait", "w", false, "Waits for the platform to be running")
 	cmd.Flags().BoolVar(&impl.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
+	cmd.Flags().BoolVar(&impl.skipOperatorSetup, "skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
 
@@ -98,6 +99,7 @@ type installCmdOptions struct {
 	*RootCmdOptions
 	wait              bool
 	clusterSetupOnly  bool
+	skipOperatorSetup bool
 	skipClusterSetup  bool
 	exampleSetup      bool
 	outputFormat      string
@@ -149,9 +151,13 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 
 		namespace := o.Namespace
 
-		err = install.OperatorOrCollect(o.Context, c, namespace, o.operatorImage, collection)
-		if err != nil {
-			return err
+		if !o.skipOperatorSetup {
+			err = install.OperatorOrCollect(o.Context, c, namespace, o.operatorImage, collection)
+			if err != nil {
+				return err
+			}
+		} else {
+			fmt.Println("Camel K operator installation skipped")
 		}
 
 		platform, err := install.PlatformOrCollect(o.Context, c, namespace, o.registry, collection)
