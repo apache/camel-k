@@ -123,10 +123,6 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		envvar.SetVar(&environment, envVar)
 	}
 
-	labels := map[string]string{
-		"camel.apache.org/integration": e.Integration.Name,
-	}
-
 	// create a copy to avoid sharing the underlying annotation map
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
@@ -144,19 +140,25 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			APIVersion: appsv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        e.Integration.Name,
-			Namespace:   e.Integration.Namespace,
-			Labels:      labels,
+			Name:      e.Integration.Name,
+			Namespace: e.Integration.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
 			Annotations: annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: e.Integration.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
+				MatchLabels: map[string]string{
+					"camel.apache.org/integration": e.Integration.Name,
+				},
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      labels,
+					Labels: map[string]string{
+						"camel.apache.org/integration": e.Integration.Name,
+					},
 					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
