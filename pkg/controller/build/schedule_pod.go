@@ -156,6 +156,9 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: build.Namespace,
 			Name:      buildPodName(build.Spec.Meta),
+			Labels: map[string]string{
+				"camel.apache.org/build": build.Name,
+			},
 		},
 		Spec: corev1.PodSpec{
 			ServiceAccountName: "camel-k-operator",
@@ -193,22 +196,26 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 				MountPath: build.Spec.BuildDir,
 			},
 		}
-		// Co-locate with the builder pod for sharing the host path volume as the current
-		// persistent volume claim uses the default storage class which is likely relying
-		// on the host path provisioner.
-		pod.Spec.Affinity = &corev1.Affinity{
-			PodAffinity: &corev1.PodAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-					{
-						LabelSelector: &metav1.LabelSelector{
-							MatchLabels: map[string]string{
-								"camel.apache.org/component": "operator",
+
+		// Use affinity only when the operator is present in the namespaced
+		if build.Namespace == platform.GetOperatorNamespace() {
+			// Co-locate with the builder pod for sharing the host path volume as the current
+			// persistent volume claim uses the default storage class which is likely relying
+			// on the host path provisioner.
+			pod.Spec.Affinity = &corev1.Affinity{
+				PodAffinity: &corev1.PodAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+						{
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"camel.apache.org/component": "operator",
+								},
 							},
+							TopologyKey: "kubernetes.io/hostname",
 						},
-						TopologyKey: "kubernetes.io/hostname",
 					},
 				},
-			},
+			}
 		}
 	}
 
