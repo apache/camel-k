@@ -24,18 +24,19 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // ResourceCustomizer can be used to inject code that changes the objects before they are created
-type ResourceCustomizer func(object runtime.Object)runtime.Object
+type ResourceCustomizer func(object runtime.Object) runtime.Object
+
 // IdentityResourceCustomizer is a ResourceCustomizer that does nothing
-var IdentityResourceCustomizer = func(object runtime.Object)runtime.Object {
+var IdentityResourceCustomizer = func(object runtime.Object) runtime.Object {
 	return object
 }
-
 
 // Resources installs named resources from the project resource directory
 func Resources(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, names ...string) error {
