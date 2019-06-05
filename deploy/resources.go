@@ -10815,6 +10815,9 @@ rules:
   - persistentvolumeclaims
   - configmaps
   - secrets
+  - serviceaccounts
+  - roles
+  - rolebindings
   verbs:
   - create
   - delete
@@ -10895,6 +10898,9 @@ rules:
   - persistentvolumeclaims
   - configmaps
   - secrets
+  - serviceaccounts
+  - roles
+  - rolebindings
   verbs:
   - create
   - delete

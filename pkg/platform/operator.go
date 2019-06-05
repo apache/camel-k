@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -33,13 +34,9 @@ const operatorPodNameEnvVariable = "POD_NAME"
 
 // GetCurrentOperatorImage returns the image currently used by the running operator if present (when running out of cluster, it may be absent).
 func GetCurrentOperatorImage(ctx context.Context, c client.Client) (string, error) {
-	var podNamespace string
-	var podName string
-	var envSet bool
-	if podNamespace, envSet = os.LookupEnv(operatorNamespaceEnvVariable); !envSet || podNamespace == "" {
-		return "", nil
-	}
-	if podName, envSet = os.LookupEnv(operatorPodNameEnvVariable); !envSet || podName == "" {
+	podNamespace := GetOperatorNamespace()
+	podName := GetOperatorPodName()
+	if podNamespace == "" || podName == "" {
 		return "", nil
 	}
 
@@ -49,7 +46,9 @@ func GetCurrentOperatorImage(ctx context.Context, c client.Client) (string, erro
 	}
 	pod := v1.Pod{}
 
-	if err := c.Get(ctx, podKey, &pod); err != nil {
+	if err := c.Get(ctx, podKey, &pod); err != nil && k8serrors.IsNotFound(err) {
+		return "", nil
+	} else if err != nil {
 		return "", err
 	}
 	if len(pod.Spec.Containers) == 0 {
@@ -64,4 +63,20 @@ func IsCurrentOperatorGlobal() bool {
 		return true
 	}
 	return false
+}
+
+// GetOperatorNamespace returns the namespace where the current operator is located (if set)
+func GetOperatorNamespace() string {
+	if podNamespace, envSet := os.LookupEnv(operatorNamespaceEnvVariable); envSet {
+		return podNamespace
+	}
+	return ""
+}
+
+// GetOperatorPodName returns the pod that is running the current operator (if any)
+func GetOperatorPodName() string {
+	if podName, envSet := os.LookupEnv(operatorPodNameEnvVariable); envSet {
+		return podName
+	}
+	return ""
 }
