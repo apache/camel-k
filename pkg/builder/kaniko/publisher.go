@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/tar"
 
@@ -131,19 +132,32 @@ func publisher(ctx *builder.Context) error {
 			},
 			RestartPolicy: corev1.RestartPolicyNever,
 			Volumes:       volumes,
-			// Co-locate with builder pod for sharing the volume
-			Affinity: &corev1.Affinity{
-				PodAffinity: &corev1.PodAffinity{
-					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-						{
-							LabelSelector: &metav1.LabelSelector{
-								MatchLabels: map[string]string{
-									"camel.apache.org/component": "operator",
-								},
-							},
-							TopologyKey: "kubernetes.io/hostname",
+		},
+	}
+
+
+	var labelKey string
+	var labelValue string
+	if ctx.Namespace == platform.GetOperatorNamespace() {
+		// Check if the operator is running in the same namespace
+		labelKey = "camel.apache.org/component"
+		labelValue = "operator"
+	} else {
+		labelKey = "camel.apache.org/build"
+		labelValue = ctx.Build.Meta.Name
+	}
+
+	// Co-locate with builder pod for sharing the volume
+	pod.Spec.Affinity = &corev1.Affinity{
+		PodAffinity: &corev1.PodAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+				{
+					LabelSelector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{
+							labelKey: labelValue,
 						},
 					},
+					TopologyKey: "kubernetes.io/hostname",
 				},
 			},
 		},
