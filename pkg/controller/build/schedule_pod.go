@@ -21,6 +21,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 
@@ -32,8 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pkg/errors"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 // NewSchedulePodAction creates a new schedule action
@@ -141,8 +140,8 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 			ServiceAccountName: "camel-k-operator",
 			Containers: []corev1.Container{
 				{
-					Name:  "builder",
-					Image: builderImage,
+					Name:            "builder",
+					Image:           builderImage,
 					ImagePullPolicy: "IfNotPresent",
 					Args: []string{
 						"camel-k-builder",

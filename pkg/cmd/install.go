@@ -298,13 +298,13 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 	for _, context := range o.contexts {
-		err := errorIfContextIsNotAvailable(schema, context, len(o.contexts))
+		err := errorIfContextIsNotAvailable(schema, context)
 		result = multierr.Append(result, err)
 	}
 	return result
 }
 
-func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string, nrContexts int) error {
+func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string) error {
 	for _, resource := range deploy.Resources {
 		resource, err := kubernetes.LoadResourceFromYaml(schema, resource)
 		if err != nil {
