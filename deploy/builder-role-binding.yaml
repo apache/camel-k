@@ -1,0 +1,13 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-builder
+  labels:
+    app: "camel-k"
+subjects:
+- kind: ServiceAccount
+  name: camel-k-builder
+roleRef:
+  kind: Role
+  name: camel-k-builder
+  apiGroup: rbac.authorization.k8s.io

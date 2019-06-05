@@ -20,48 +20,39 @@ package install
 import (
 	"context"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
-// ServiceAccountRoles installs the service account and related roles in the given namespace
-func ServiceAccountRoles(ctx context.Context, c client.Client, namespace string) error {
+// BuilderServiceAccountRoles installs the builder service account and related roles in the given namespace
+func BuilderServiceAccountRoles(ctx context.Context, c client.Client, namespace string) error {
 	isOpenshift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return err
 	}
 	if isOpenshift {
-		if err := installServiceAccountRolesOpenshift(ctx, c, namespace); err != nil {
+		if err := installBuilderServiceAccountRolesOpenshift(ctx, c, namespace); err != nil {
 			return err
 		}
 	} else {
-		if err := installServiceAccountRolesKubernetes(ctx, c, namespace); err != nil {
+		if err := installBuilderServiceAccountRolesKubernetes(ctx, c, namespace); err != nil {
 			return err
 		}
-	}
-	// Install Knative resources if required
-	isKnative, err := knative.IsInstalled(ctx, c)
-	if err != nil {
-		return err
-	}
-	if isKnative {
-		return installKnative(ctx, c, namespace, nil)
 	}
 	return nil
 }
 
-func installServiceAccountRolesOpenshift(ctx context.Context, c client.Client, namespace string) error {
+func installBuilderServiceAccountRolesOpenshift(ctx context.Context, c client.Client, namespace string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, IdentityResourceCustomizer,
-		"operator-service-account.yaml",
-		"operator-role-openshift.yaml",
-		"operator-role-binding.yaml",
+		"builder-service-account.yaml",
+		"builder-role-openshift.yaml",
+		"builder-role-binding.yaml",
 	)
 }
 
-func installServiceAccountRolesKubernetes(ctx context.Context, c client.Client, namespace string) error {
+func installBuilderServiceAccountRolesKubernetes(ctx context.Context, c client.Client, namespace string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, IdentityResourceCustomizer,
-		"operator-service-account.yaml",
-		"operator-role-kubernetes.yaml",
-		"operator-role-binding.yaml",
+		"builder-service-account.yaml",
+		"builder-role-kubernetes.yaml",
+		"builder-role-binding.yaml",
 	)
 }
