@@ -131,14 +131,14 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 func (action *schedulePodAction) ensureServiceAccount(ctx context.Context, buildPod *corev1.Pod) error {
 	sa := corev1.ServiceAccount{}
 	saKey := k8sclient.ObjectKey{
-		Name:      "camel-k-operator",
+		Name:      "camel-k-builder",
 		Namespace: buildPod.Namespace,
 	}
 
 	err := action.client.Get(ctx, saKey, &sa)
 	if err != nil && k8serrors.IsNotFound(err) {
 		// Create a proper service account
-		return install.ServiceAccountRoles(ctx, action.client, buildPod.Namespace)
+		return install.BuilderServiceAccountRoles(ctx, action.client, buildPod.Namespace)
 	}
 	return err
 }
@@ -161,7 +161,7 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 			},
 		},
 		Spec: corev1.PodSpec{
-			ServiceAccountName: "camel-k-operator",
+			ServiceAccountName: "camel-k-builder",
 			Containers: []corev1.Container{
 				{
 					Name:            "builder",

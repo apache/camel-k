@@ -24,6 +24,153 @@ var Resources map[string]string
 func init() {
 	Resources = make(map[string]string)
 
+	Resources["builder-role-binding.yaml"] =
+		`
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-builder
+  labels:
+    app: "camel-k"
+subjects:
+- kind: ServiceAccount
+  name: camel-k-builder
+roleRef:
+  kind: Role
+  name: camel-k-builder
+  apiGroup: rbac.authorization.k8s.io
+
+`
+	Resources["builder-role-kubernetes.yaml"] =
+		`
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-builder
+  labels:
+    app: "camel-k"
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+
+`
+	Resources["builder-role-openshift.yaml"] =
+		`
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-builder
+  labels:
+    app: "camel-k"
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  - "build.openshift.io"
+  resources:
+  - buildconfigs
+  - buildconfigs/webhooks
+  - builds
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  - "image.openshift.io"
+  resources:
+  - imagestreamimages
+  - imagestreammappings
+  - imagestreams
+  - imagestreams/secrets
+  - imagestreamtags
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  - build.openshift.io
+  attributeRestrictions: null
+  resources:
+  - buildconfigs/instantiate
+  - buildconfigs/instantiatebinary
+  - builds/clone
+  verbs:
+  - create
+
+`
+	Resources["builder-service-account.yaml"] =
+		`
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: camel-k-builder
+  labels:
+    app: "camel-k"
+
+`
 	Resources["camel-catalog-2.23.0.yaml"] =
 		`
 apiVersion: camel.apache.org/v1alpha1
@@ -10816,6 +10963,18 @@ rules:
   - configmaps
   - secrets
   - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
   - roles
   - rolebindings
   verbs:
@@ -10899,6 +11058,18 @@ rules:
   - configmaps
   - secrets
   - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
   - roles
   - rolebindings
   verbs:
