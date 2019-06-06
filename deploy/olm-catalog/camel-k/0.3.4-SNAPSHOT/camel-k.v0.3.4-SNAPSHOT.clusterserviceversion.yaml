@@ -8,16 +8,6 @@ metadata:
         "kind": "IntegrationPlatform",
         "metadata": {
           "name": "example"
-        },
-        "spec": {
-          "build": {
-            "buildStrategy": "pod"
-          },
-          "resources": {
-            "contexts": [
-              "jvm"
-            ]
-          }
         }
       },
       {
@@ -163,7 +153,7 @@ spec:
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
-                      fieldPath: metadata.namespace
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
                 - name: OPERATOR_NAME
                   value: camel-k
                 - name: POD_NAME
@@ -383,7 +373,7 @@ spec:
   minKubeVersion: 1.11.0
   provider:
     name: The Apache Software Foundation
-  replaces: camel-k.v0.3.3
+  replaces: camel-k-operator.v0.3.3
   selector:
     matchLabels:
       name: camel-k-operator
