@@ -94,7 +94,7 @@ build-resources:
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
 build-olm:
-	operator-sdk olm-catalog gen-csv --csv-version $(VERSION) --csv-config deploy/olm-catalog/csv-config.yaml --update-crds
+	./script/build_olm.sh $(VERSION)
 
 build-compile-integration-tests:
 	go test -c -tags=integration ./test/*.go
