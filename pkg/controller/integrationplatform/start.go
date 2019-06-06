@@ -60,10 +60,10 @@ func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.Integr
 }
 
 func (action *startAction) aggregatePlatformPhaseFromContexts(ctx context.Context, namespace string) (v1alpha1.IntegrationPlatformPhase, error) {
-	ctxs := v1alpha1.NewIntegrationContextList()
+	ctxs := v1alpha1.NewIntegrationKitList()
 	options := k8sclient.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labels.Set{
-			"camel.apache.org/context.type": "platform",
+			"camel.apache.org/kit.type": "platform",
 		}),
 		Namespace: namespace,
 	}
@@ -73,9 +73,9 @@ func (action *startAction) aggregatePlatformPhaseFromContexts(ctx context.Contex
 
 	countReady := 0
 	for _, ctx := range ctxs.Items {
-		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
+		if ctx.Status.Phase == v1alpha1.IntegrationKitPhaseError {
 			return v1alpha1.IntegrationPlatformPhaseError, nil
-		} else if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+		} else if ctx.Status.Phase == v1alpha1.IntegrationKitPhaseReady {
 			countReady++
 		}
 	}

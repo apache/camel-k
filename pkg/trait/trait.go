@@ -34,8 +34,8 @@ import (
 const True = "true"
 
 // Apply --
-func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integration, ictx *v1alpha1.IntegrationContext) (*Environment, error) {
-	environment, err := newEnvironment(ctx, c, integration, ictx)
+func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integration, kit *v1alpha1.IntegrationKit) (*Environment, error) {
+	environment, err := newEnvironment(ctx, c, integration, kit)
 	if err != nil {
 		return nil, err
 	}
@@ -54,16 +54,16 @@ func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integrati
 }
 
 // newEnvironment creates a Environment from the given data
-func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.Integration, ictx *v1alpha1.IntegrationContext) (*Environment, error) {
+func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.Integration, kit *v1alpha1.IntegrationKit) (*Environment, error) {
 	if integration == nil && ctx == nil {
-		return nil, errors.New("neither integration nor context are ste")
+		return nil, errors.New("neither integration nor kit are ste")
 	}
 
 	namespace := ""
 	if integration != nil {
 		namespace = integration.Namespace
-	} else if ictx != nil {
-		namespace = ictx.Namespace
+	} else if kit != nil {
+		namespace = kit.Namespace
 	}
 
 	pl, err := platform.GetCurrentPlatform(ctx, c, namespace)
@@ -71,22 +71,22 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.
 		return nil, err
 	}
 
-	if ictx == nil {
-		ictx, err = GetIntegrationContext(ctx, c, integration)
+	if kit == nil {
+		kit, err = GetIntegrationKit(ctx, c, integration)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	env := Environment{
-		C:                  ctx,
-		Platform:           pl,
-		Client:             c,
-		IntegrationContext: ictx,
-		Integration:        integration,
-		ExecutedTraits:     make([]Trait, 0),
-		Resources:          kubernetes.NewCollection(),
-		EnvVars:            make([]corev1.EnvVar, 0),
+		C:              ctx,
+		Platform:       pl,
+		Client:         c,
+		IntegrationKit: kit,
+		Integration:    integration,
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+		EnvVars:        make([]corev1.EnvVar, 0),
 	}
 
 	return &env, nil

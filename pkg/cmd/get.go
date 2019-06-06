@@ -70,7 +70,7 @@ func (o *getCmdOptions) run(_ *cobra.Command, _ []string) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tCONTEXT")
 	for _, integration := range integrationList.Items {
-		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), integration.Status.Context)
+		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), integration.Status.Kit)
 	}
 	w.Flush()
 

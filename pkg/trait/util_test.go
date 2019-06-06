@@ -35,11 +35,11 @@ func TestCollectConfigurationValues(t *testing.T) {
 				},
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{
-			Spec: v1alpha1.IntegrationContextSpec{
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Configuration: []v1alpha1.ConfigurationSpec{
-					{Type: "configmap", Value: "my-cm-context"},
-					{Type: "property", Value: "my-p-context"},
+					{Type: "configmap", Value: "my-cm-kit"},
+					{Type: "property", Value: "my-p-kit"},
 				},
 			},
 		},
@@ -57,7 +57,7 @@ func TestCollectConfigurationValues(t *testing.T) {
 
 	assert.Contains(t, e.CollectConfigurationValues("configmap"), "my-cm-integration")
 	assert.Contains(t, e.CollectConfigurationValues("secret"), "my-secret-platform")
-	assert.Contains(t, e.CollectConfigurationValues("property"), "my-p-context")
+	assert.Contains(t, e.CollectConfigurationValues("property"), "my-p-kit")
 	assert.Contains(t, e.CollectConfigurationValues("env"), "my-env-integration")
 }
 
@@ -71,11 +71,11 @@ func TestCollectConfigurationPairs(t *testing.T) {
 				},
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{
-			Spec: v1alpha1.IntegrationContextSpec{
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Configuration: []v1alpha1.ConfigurationSpec{
-					{Type: "property", Value: "p1=context"},
-					{Type: "property", Value: "p2=context"},
+					{Type: "property", Value: "p1=kit"},
+					{Type: "property", Value: "p2=kit"},
 				},
 			},
 		},
@@ -93,7 +93,7 @@ func TestCollectConfigurationPairs(t *testing.T) {
 
 	pairs := e.CollectConfigurationPairs("property")
 	assert.Equal(t, "integration", pairs["p1"])
-	assert.Equal(t, "context", pairs["p2"])
+	assert.Equal(t, "kit", pairs["p2"])
 	assert.Equal(t, "platform", pairs["p3"])
 	assert.Equal(t, "integration", pairs["p4"])
 }

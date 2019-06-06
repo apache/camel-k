@@ -103,9 +103,9 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 		return err
 	}
 
-	target.Status.Phase = v1alpha1.IntegrationPhaseBuildingContext
+	target.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
 	target.Status.Digest = dgst
-	target.Status.Context = integration.Spec.Context
+	target.Status.Kit = integration.Spec.Kit
 	target.Status.Image = ""
 
 	action.L.Info("Integration state transition", "phase", target.Status.Phase)

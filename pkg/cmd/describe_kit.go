@@ -26,16 +26,16 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newDescribeContextCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
-	impl := &describeContextCommand{
+	impl := &describeKitCommand{
 		rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:   "context",
-		Short: "Describe an Integration Context",
-		Long:  `Describe an Integration Context.`,
+		Use:   "kit",
+		Short: "Describe an Integration Kit",
+		Long:  `Describe an Integration Kit.`,
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err
@@ -51,77 +51,77 @@ func newDescribeContextCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	return &cmd
 }
 
-type describeContextCommand struct {
+type describeKitCommand struct {
 	*RootCmdOptions
 }
 
-func (command *describeContextCommand) validate(args []string) error {
+func (command *describeKitCommand) validate(args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("accepts at least 1 arg, received %d", len(args))
 	}
 	return nil
 }
 
-func (command *describeContextCommand) run(args []string) error {
+func (command *describeKitCommand) run(args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
-	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
-	key := k8sclient.ObjectKey{
+	kit := v1alpha1.NewIntegrationKit(command.Namespace, args[0])
+	kitKey := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
 
-	if err := c.Get(command.Context, key, &ctx); err == nil {
-		fmt.Print(command.describeIntegrationContext(ctx))
+	if err := c.Get(command.Context, kitKey, &kit); err == nil {
+		fmt.Print(command.describeIntegrationKit(kit))
 	} else {
-		fmt.Printf("IntegrationContext '%s' does not exist.\n", args[0])
+		fmt.Printf("IntegrationKit '%s' does not exist.\n", args[0])
 	}
 
 	return nil
 }
 
-func (command *describeContextCommand) describeIntegrationContext(i v1alpha1.IntegrationContext) string {
+func (command *describeKitCommand) describeIntegrationKit(kit v1alpha1.IntegrationKit) string {
 	return indentedString(func(out io.Writer) {
 		w := newIndentedWriter(out)
 
-		describeObjectMeta(w, i.ObjectMeta)
+		describeObjectMeta(w, kit.ObjectMeta)
 
-		w.write(0, "Phase:\t%s\n", i.Status.Phase)
-		w.write(0, "Camel Version:\t%s\n", i.Status.CamelVersion)
-		w.write(0, "Image:\t%s\n", i.Status.Image)
+		w.write(0, "Phase:\t%s\n", kit.Status.Phase)
+		w.write(0, "Camel Version:\t%s\n", kit.Status.CamelVersion)
+		w.write(0, "Image:\t%s\n", kit.Status.Image)
 
-		if len(i.Status.Artifacts) > 0 {
+		if len(kit.Status.Artifacts) > 0 {
 			w.write(0, "Artifacts:\t\n")
-			for _, artifact := range i.Status.Artifacts {
+			for _, artifact := range kit.Status.Artifacts {
 				w.write(1, "%s\n", artifact.ID)
 			}
 		}
 
-		if len(i.Spec.Configuration) > 0 {
+		if len(kit.Spec.Configuration) > 0 {
 			w.write(0, "Configuration:\n")
-			for _, config := range i.Spec.Configuration {
+			for _, config := range kit.Spec.Configuration {
 				w.write(1, "Type:\t%s\n", config.Type)
 				w.write(1, "Value:\t%s\n", config.Value)
 			}
 		}
 
-		if len(i.Spec.Dependencies) > 0 {
+		if len(kit.Spec.Dependencies) > 0 {
 			w.write(0, "Dependencies:\t\n")
-			for _, dependency := range i.Spec.Dependencies {
+			for _, dependency := range kit.Spec.Dependencies {
 				w.write(1, "%s\n", dependency)
 			}
 		}
 
-		if len(i.Spec.Repositories) > 0 {
+		if len(kit.Spec.Repositories) > 0 {
 			w.write(0, "Repositories:\n")
-			for _, repository := range i.Spec.Repositories {
+			for _, repository := range kit.Spec.Repositories {
 				w.write(1, "%s\n", repository)
 			}
 		}
 
-		describeTraits(w, i.Spec.Traits)
+		describeTraits(w, kit.Spec.Traits)
 	})
 }

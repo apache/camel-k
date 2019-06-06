@@ -29,27 +29,27 @@ import (
 )
 
 var allowedLookupLabels = map[string]bool{
-	v1alpha1.IntegrationContextTypePlatform: true,
-	v1alpha1.IntegrationContextTypeExternal: true,
+	v1alpha1.IntegrationKitTypePlatform: true,
+	v1alpha1.IntegrationKitTypeExternal: true,
 }
 
-// LookupContextForIntegration --
-func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
-	if integration.Status.Context != "" {
-		name := integration.Status.Context
-		ictx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
+// LookupKitForIntegration --
+func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1alpha1.Integration) (*v1alpha1.IntegrationKit, error) {
+	if integration.Status.Kit != "" {
+		name := integration.Status.Kit
+		kit := v1alpha1.NewIntegrationKit(integration.Namespace, name)
 		key := k8sclient.ObjectKey{
 			Namespace: integration.Namespace,
 			Name:      name,
 		}
-		if err := c.Get(ctx, key, &ictx); err != nil {
-			return nil, errors.Wrapf(err, "unable to find integration context %s, %s", name, err)
+		if err := c.Get(ctx, key, &kit); err != nil {
+			return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", name, err)
 		}
 
-		return &ictx, nil
+		return &kit, nil
 	}
 
-	ctxList := v1alpha1.NewIntegrationContextList()
+	ctxList := v1alpha1.NewIntegrationKitList()
 	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: integration.Namespace}, &ctxList); err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 	for _, ctx := range ctxList.Items {
 		ctx := ctx // pin
 
-		if ctx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
+		if ctx.Status.Phase == v1alpha1.IntegrationKitPhaseError {
 			continue
 		}
 		if ctx.Status.CamelVersion != integration.Status.CamelVersion {
@@ -67,7 +67,7 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 			continue
 		}
 
-		if allowed, ok := allowedLookupLabels[ctx.Labels["camel.apache.org/context.type"]]; ok && allowed {
+		if allowed, ok := allowedLookupLabels[ctx.Labels["camel.apache.org/kit.type"]]; ok && allowed {
 			ideps := len(integration.Status.Dependencies)
 			cdeps := len(ctx.Spec.Dependencies)
 
@@ -76,15 +76,15 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 			}
 
 			//
-			// When a platform context is created it inherits the traits from the integrations and as
+			// When a platform kit is created it inherits the traits from the integrations and as
 			// some traits may influence the build thus the artifacts present on the container image,
-			// we need to take traits into account when looking up for compatible contexts.
+			// we need to take traits into account when looking up for compatible kits.
 			//
 			// It could also happen that an integration is updated and a trait is modified, if we do
-			// not include traits in the lookup, we may use a context that does not have all the
+			// not include traits in the lookup, we may use a kit that does not have all the
 			// characteristics required by the integration.
 			//
-			// An context be used only if it contains a subset of the traits and related configurations
+			// A kit can be used only if it contains a subset of the traits and related configurations
 			// declared on integration.
 			//
 			if !HasMatchingTraits(&ctx, integration) {
@@ -100,12 +100,12 @@ func LookupContextForIntegration(ctx context.Context, c k8sclient.Reader, integr
 	return nil, nil
 }
 
-// HasMatchingTraits compare traits defined on context against those defined on integration.
-func HasMatchingTraits(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.Integration) bool {
-	for ctxTraitName, ctxTraitConf := range ctx.Spec.Traits {
+// HasMatchingTraits compare traits defined on kit against those defined on integration.
+func HasMatchingTraits(kit *v1alpha1.IntegrationKit, integration *v1alpha1.Integration) bool {
+	for ctxTraitName, ctxTraitConf := range kit.Spec.Traits {
 		iTraitConf, ok := integration.Spec.Traits[ctxTraitName]
 		if !ok {
-			// skip it because trait configured on context is not defined on integration.
+			// skip it because trait configured on kit is not defined on integration.
 			return false
 		}
 
@@ -113,12 +113,12 @@ func HasMatchingTraits(ctx *v1alpha1.IntegrationContext, integration *v1alpha1.I
 			iv, ok := iTraitConf.Configuration[ck]
 
 			if !ok {
-				// skip it because trait configured on context has a value that is not defined
+				// skip it because trait configured on kit has a value that is not defined
 				// in integration trait
 				return false
 			}
 			if iv != cv {
-				// skip it because trait configured on context has a value that differs from
+				// skip it because trait configured on kit has a value that differs from
 				// the one configured on integration
 				return false
 			}

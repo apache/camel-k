@@ -29,7 +29,7 @@ import (
 )
 
 func TestInstallation(t *testing.T) {
-	installedCtxCRD, err := install.IsCRDInstalled(testContext, testClient, "IntegrationContext")
+	installedCtxCRD, err := install.IsCRDInstalled(testContext, testClient, "IntegrationKit")
 	assert.Nil(t, err)
 	assert.True(t, installedCtxCRD)
 

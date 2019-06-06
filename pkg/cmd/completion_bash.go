@@ -130,31 +130,31 @@ __kamel_kubectl_get_integrations() {
     fi
 }
 
-__kamel_kubectl_get_integrationcontexts() {
+__kamel_kubectl_get_integrationkits() {
     local template
     local kubectl_out
 
     template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
 
-    if kubectl_out=$(kubectl get -o template --template="${template}" integrationcontexts 2>/dev/null); then
+    if kubectl_out=$(kubectl get -o template --template="${template}" integrationkits 2>/dev/null); then
         COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
     fi
 }
 
-__kamel_kubectl_get_non_platform_integrationcontexts() {
+__kamel_kubectl_get_non_platform_integrationkits() {
     local template
     local kubectl_out
 
     template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
-    label_condition="camel.apache.org/context.type!=platform"
+    label_condition="camel.apache.org/kit.type!=platform"
 
-    if kubectl_out=$(kubectl get -l ${label_condition} -o template --template="${template}" integrationcontexts 2>/dev/null); then
+    if kubectl_out=$(kubectl get -l ${label_condition} -o template --template="${template}" integrationkits 2>/dev/null); then
         COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
     fi
 }
 
-__kamel_kubectl_get_known_integrationcontexts() {
-    local type_list="` + strings.Join(platform.GetContextsNames(), " ") + `"
+__kamel_kubectl_get_known_integrationkits() {
+    local type_list="` + strings.Join(platform.GetKitsNames(), " ") + `"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
     compopt -o nospace
 }
@@ -169,8 +169,8 @@ __custom_func() {
             __kamel_kubectl_get_integrations
             return
             ;;
-        kamel_context_delete)
-            __kamel_kubectl_get_non_platform_integrationcontexts
+        kamel_kit_delete)
+            __kamel_kubectl_get_non_platform_integrationkits
             return
             ;;
         *)
@@ -223,9 +223,9 @@ func configureKnownBashCompletions(command *cobra.Command) {
 	)
 	configureBashAnnotationForFlag(
 		command,
-		"context",
+		"kit",
 		map[string][]string{
-			cobra.BashCompCustom: {"__kamel_kubectl_get_non_platform_integrationcontexts"},
+			cobra.BashCompCustom: {"__kamel_kubectl_get_non_platform_integrationkits"},
 		},
 	)
 	configureBashAnnotationForFlag(

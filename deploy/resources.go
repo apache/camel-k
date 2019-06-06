@@ -10735,7 +10735,7 @@ spec:
 
 
 `
-	Resources["crd-integration-context.yaml"] =
+	Resources["crd-integration-kit.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -10757,7 +10757,7 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: integrationcontexts.camel.apache.org
+  name: integrationkits.camel.apache.org
   labels:
     app: "camel-k"
 spec:
@@ -10767,24 +10767,24 @@ spec:
   subresources:
     status: {}
   names:
-    kind: IntegrationContext
-    listKind: IntegrationContextList
-    plural: integrationcontexts
-    singular: integrationcontext
+    kind: IntegrationKit
+    listKind: IntegrationKitList
+    plural: integrationkits
+    singular: integrationkit
     shortNames:
-    - ictx
+    - itk
   additionalPrinterColumns:
     - name: Phase
       type: string
-      description: The IntegrationContext phase
+      description: The IntegrationKit phase
       JSONPath: .status.phase
     - name: Type
       type: string
-      description: The IntegrationContext type
-      JSONPath: .metadata.labels.camel\.apache\.org\/context\.type
+      description: The IntegrationKit type
+      JSONPath: .metadata.labels.camel\.apache\.org\/kit\.type
     - name: Image
       type: string
-      description: The IntegrationContext image
+      description: The IntegrationKit image
       JSONPath: .status.image
 
 `
@@ -10876,10 +10876,10 @@ spec:
       type: string
       description: The Integration phase
       JSONPath: .status.phase
-    - name: Context
+    - name: Kit
       type: string
-      description: The IntegrationContext to use
-      JSONPath: .status.context
+      description: The IntegrationKit to use
+      JSONPath: .status.kit
 
 `
 	Resources["cr-example.yaml"] =
@@ -11625,7 +11625,7 @@ metadata:
     app: "camel-k"
 
 `
-	Resources["platform-integration-context-groovy.yaml"] =
+	Resources["platform-integration-kit-groovy.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -11645,21 +11645,21 @@ metadata:
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
+kind: IntegrationKit
 metadata:
   name: groovy
   labels:
     app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: camel-k-operator
-    camel.apache.org/context.type: platform
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
 spec:
   dependencies:
     - runtime:jvm
     - runtime:groovy
     - camel:core
 `
-	Resources["platform-integration-context-jvm.yaml"] =
+	Resources["platform-integration-kit-jvm.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -11679,20 +11679,20 @@ spec:
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
+kind: IntegrationKit
 metadata:
   name: jvm
   labels:
     app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: camel-k-operator
-    camel.apache.org/context.type: platform
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
 spec:
   dependencies:
     - runtime:jvm
     - camel:core
 `
-	Resources["platform-integration-context-knative.yaml"] =
+	Resources["platform-integration-kit-knative.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -11712,14 +11712,14 @@ spec:
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
+kind: IntegrationKit
 metadata:
   name: knative
   labels:
     app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: camel-k-operator
-    camel.apache.org/context.type: platform
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
 spec:
   dependencies:
     - runtime:jvm
@@ -11727,7 +11727,7 @@ spec:
     - camel:core
     - camel-k:knative
 `
-	Resources["platform-integration-context-kotlin.yaml"] =
+	Resources["platform-integration-kit-kotlin.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -11747,14 +11747,14 @@ spec:
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
+kind: IntegrationKit
 metadata:
   name: kotlin
   labels:
     app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: camel-k-operator
-    camel.apache.org/context.type: platform
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
 spec:
   dependencies:
     - runtime:jvm

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package integrationcontext
+package integrationkit
 
 import (
 	"context"
@@ -35,7 +35,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-// Add creates a new IntegrationContext Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	c, err := client.FromManager(mgr)
@@ -47,7 +47,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
-	return &ReconcileIntegrationContext{
+	return &ReconcileIntegrationKit{
 		client: c,
 		scheme: mgr.GetScheme(),
 	}
@@ -56,21 +56,21 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("integrationcontext-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("integrationkit-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to primary resource IntegrationContext
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationContext{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	// Watch for changes to primary resource IntegrationKit
+	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationKit{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegrationContext := e.ObjectOld.(*v1alpha1.IntegrationContext)
-			newIntegrationContext := e.ObjectNew.(*v1alpha1.IntegrationContext)
-			// Ignore updates to the integration context status in which case metadata.Generation
-			// does not change, or except when the integration context phase changes as it's used
+			oldIntegrationKit := e.ObjectOld.(*v1alpha1.IntegrationKit)
+			newIntegrationKit := e.ObjectNew.(*v1alpha1.IntegrationKit)
+			// Ignore updates to the integration kit status in which case metadata.Generation
+			// does not change, or except when the integration kit phase changes as it's used
 			// to transition from one phase to another
-			return oldIntegrationContext.Generation != newIntegrationContext.Generation ||
-				oldIntegrationContext.Status.Phase != newIntegrationContext.Status.Phase
+			return oldIntegrationKit.Generation != newIntegrationKit.Generation ||
+				oldIntegrationKit.Status.Phase != newIntegrationKit.Status.Phase
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			// Evaluates to false if the object has been confirmed deleted
@@ -81,18 +81,18 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to secondary resource Builds and requeue the owner IntegrationContext
+	// Watch for changes to secondary resource Builds and requeue the owner IntegrationKit
 	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &v1alpha1.IntegrationContext{},
+			OwnerType:    &v1alpha1.IntegrationKit{},
 		},
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
 				oldBuild := e.ObjectOld.(*v1alpha1.Build)
 				newBuild := e.ObjectNew.(*v1alpha1.Build)
 				// Ignore updates to the build CR except when the build phase changes
-				// as it's used to transition the integration context from one phase
+				// as it's used to transition the integration kit from one phase
 				// to another during the image build
 				return oldBuild.Status.Phase != newBuild.Status.Phase
 			},
@@ -104,29 +104,29 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileIntegrationContext{}
+var _ reconcile.Reconciler = &ReconcileIntegrationKit{}
 
-// ReconcileIntegrationContext reconciles a IntegrationContext object
-type ReconcileIntegrationContext struct {
+// ReconcileIntegrationKit reconciles a IntegrationKit object
+type ReconcileIntegrationKit struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client client.Client
 	scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a IntegrationContext object and makes changes based on the state read
-// and what is in the IntegrationContext.Spec
+// Reconcile reads that state of the cluster for a IntegrationKit object and makes changes based on the state read
+// and what is in the IntegrationKit.Spec
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling IntegrationContext")
+	rlog.Info("Reconciling IntegrationKit")
 
 	ctx := context.TODO()
 
-	// Fetch the IntegrationContext instance
-	instance := &v1alpha1.IntegrationContext{}
+	// Fetch the IntegrationKit instance
+	instance := &v1alpha1.IntegrationKit{}
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -139,14 +139,14 @@ func (r *ReconcileIntegrationContext) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
-	integrationContextActionPool := []Action{
+	actionPool := []Action{
 		NewInitializeAction(),
 		NewBuildAction(),
 		NewMonitorAction(),
 	}
 
-	ilog := rlog.ForIntegrationContext(instance)
-	for _, a := range integrationContextActionPool {
+	ilog := rlog.ForIntegrationKit(instance)
+	for _, a := range actionPool {
 		a.InjectClient(r.client)
 		a.InjectLogger(ilog)
 		if a.CanHandle(instance) {

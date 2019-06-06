@@ -104,8 +104,8 @@ func (l Logger) ForIntegration(target *v1alpha1.Integration) Logger {
 	)
 }
 
-// ForIntegrationContext --
-func (l Logger) ForIntegrationContext(target *v1alpha1.IntegrationContext) Logger {
+// ForIntegrationKit --
+func (l Logger) ForIntegrationKit(target *v1alpha1.IntegrationKit) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,
@@ -145,9 +145,9 @@ func ForIntegration(target *v1alpha1.Integration) Logger {
 	return Log.ForIntegration(target)
 }
 
-// ForIntegrationContext --
-func ForIntegrationContext(target *v1alpha1.IntegrationContext) Logger {
-	return Log.ForIntegrationContext(target)
+// ForIntegrationKit --
+func ForIntegrationKit(target *v1alpha1.IntegrationKit) Logger {
+	return Log.ForIntegrationKit(target)
 }
 
 // ForIntegrationPlatform --

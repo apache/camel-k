@@ -20,6 +20,6 @@ crd-cr-paths:
   - deploy/crd-build.yaml
   - deploy/crd-camel-catalog.yaml
   - deploy/crd-integration.yaml
-  - deploy/crd-integration-context.yaml
+  - deploy/crd-integration-kit.yaml
   - deploy/crd-integration-platform.yaml
 role-path: deploy/operator-role-olm.yaml

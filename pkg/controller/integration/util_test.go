@@ -29,57 +29,57 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLookupContextForIntegration_DiscardContextsInError(t *testing.T) {
+func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 	c, err := test.NewFakeClient(
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-1",
+				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationContextSpec{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseError,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseError,
 			},
 		},
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-2",
+				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationContextSpec{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 	)
 
 	assert.Nil(t, err)
 
-	i, err := LookupContextForIntegration(context.TODO(), c, &v1alpha1.Integration{
+	i, err := LookupKitForIntegration(context.TODO(), c, &v1alpha1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       v1alpha1.IntegrationKind,
@@ -98,28 +98,28 @@ func TestLookupContextForIntegration_DiscardContextsInError(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, i)
-	assert.Equal(t, "my-context-2", i.Name)
+	assert.Equal(t, "my-kit-2", i.Name)
 }
 
-func TestLookupContextForIntegration_DiscardContextsWithIncompatibleTraits(t *testing.T) {
+func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T) {
 	c, err := test.NewFakeClient(
 		//
 		// Should be discarded because it contains both of the required traits but one
 		// contains a different configuration value
 		//
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-1",
+				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationContextSpec{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
@@ -137,27 +137,27 @@ func TestLookupContextForIntegration_DiscardContextsWithIncompatibleTraits(t *te
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 		//
 		// Should be discarded because it contains a subset of the required traits but
 		// with different configuration value
 		//
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-2",
+				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationContextSpec{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
@@ -170,27 +170,27 @@ func TestLookupContextForIntegration_DiscardContextsWithIncompatibleTraits(t *te
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 		//
 		// Should be discarded because it contains both of the required traits but
 		// also an additional one
 		//
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-3",
+				Name:      "my-kit-3",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationContextSpec{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
@@ -213,27 +213,27 @@ func TestLookupContextForIntegration_DiscardContextsWithIncompatibleTraits(t *te
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 		//
 		// Should NOT be discarded because it contains a subset of the required traits and
 		// same configuration values
 		//
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-4",
+				Name:      "my-kit-4",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationContextSpec{
+			Spec: v1alpha1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
@@ -246,15 +246,15 @@ func TestLookupContextForIntegration_DiscardContextsWithIncompatibleTraits(t *te
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 	)
 
 	assert.Nil(t, err)
 
-	i, err := LookupContextForIntegration(context.TODO(), c, &v1alpha1.Integration{
+	i, err := LookupKitForIntegration(context.TODO(), c, &v1alpha1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       v1alpha1.IntegrationKind,
@@ -287,5 +287,5 @@ func TestLookupContextForIntegration_DiscardContextsWithIncompatibleTraits(t *te
 
 	assert.Nil(t, err)
 	assert.NotNil(t, i)
-	assert.Equal(t, "my-context-4", i.Name)
+	assert.Equal(t, "my-kit-4", i.Name)
 }

@@ -51,29 +51,29 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying), nil
+	return e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying), nil
 }
 
 func (t *classpathTrait) Apply(e *Environment) error {
-	ctx := e.IntegrationContext
+	kit := e.IntegrationKit
 
-	if ctx == nil && e.Integration.Status.Context != "" {
-		name := e.Integration.Status.Context
-		c := v1alpha1.NewIntegrationContext(e.Integration.Namespace, name)
+	if kit == nil && e.Integration.Status.Kit != "" {
+		name := e.Integration.Status.Kit
+		k := v1alpha1.NewIntegrationKit(e.Integration.Namespace, name)
 		key := k8sclient.ObjectKey{
 			Namespace: e.Integration.Namespace,
 			Name:      name,
 		}
 
-		if err := t.client.Get(t.ctx, key, &c); err != nil {
-			return errors.Wrapf(err, "unable to find integration context %s, %s", name, err)
+		if err := t.client.Get(t.ctx, key, &k); err != nil {
+			return errors.Wrapf(err, "unable to find integration kit %s, %s", name, err)
 		}
 
-		ctx = &c
+		kit = &k
 	}
 
-	if ctx == nil {
-		return fmt.Errorf("unable to find integration context %s", e.Integration.Status.Context)
+	if kit == nil {
+		return fmt.Errorf("unable to find integration kit %s", e.Integration.Status.Kit)
 	}
 
 	if e.Classpath == nil {
@@ -83,13 +83,13 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	e.Classpath.Add("/etc/camel/resources")
 	e.Classpath.Add("./resources")
 
-	for _, artifact := range ctx.Status.Artifacts {
+	for _, artifact := range kit.Status.Artifacts {
 		e.Classpath.Add(artifact.Target)
 	}
 
-	if e.IntegrationContext.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypeExternal {
+	if e.IntegrationKit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypeExternal {
 		//
-		// In case of an external created context. we do not have any information about
+		// In case of an external created kit, we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account
 		//

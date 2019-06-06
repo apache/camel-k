@@ -39,7 +39,7 @@ spec:
       type: string
       description: The Integration phase
       JSONPath: .status.phase
-    - name: Context
+    - name: Kit
       type: string
-      description: The IntegrationContext to use
-      JSONPath: .status.context
+      description: The IntegrationKit to use
+      JSONPath: .status.kit

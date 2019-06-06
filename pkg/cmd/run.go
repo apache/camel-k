@@ -70,7 +70,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
-	cmd.Flags().StringVarP(&options.IntegrationContext, "context", "x", "", "The context used to run the integration")
+	cmd.Flags().StringVarP(&options.IntegrationKit, "kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayVarP(&options.Properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
@@ -98,28 +98,28 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type runCmdOptions struct {
 	*RootCmdOptions
-	Compression        bool
-	Wait               bool
-	Logs               bool
-	Sync               bool
-	Dev                bool
-	DeletionPolicy     string
-	IntegrationContext string
-	Runtime            string
-	IntegrationName    string
-	Profile            string
-	OutputFormat       string
-	Resources          []string
-	OpenAPIs           []string
-	Dependencies       []string
-	Properties         []string
-	ConfigMaps         []string
-	Secrets            []string
-	Repositories       []string
-	Traits             []string
-	LoggingLevels      []string
-	Volumes            []string
-	EnvVars            []string
+	Compression     bool
+	Wait            bool
+	Logs            bool
+	Sync            bool
+	Dev             bool
+	DeletionPolicy  string
+	IntegrationKit  string
+	Runtime         string
+	IntegrationName string
+	Profile         string
+	OutputFormat    string
+	Resources       []string
+	OpenAPIs        []string
+	Dependencies    []string
+	Properties      []string
+	ConfigMaps      []string
+	Secrets         []string
+	Repositories    []string
+	Traits          []string
+	LoggingLevels   []string
+	Volumes         []string
+	EnvVars         []string
 }
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
@@ -300,7 +300,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		},
 		Spec: v1alpha1.IntegrationSpec{
 			Dependencies:  make([]string, 0, len(o.Dependencies)),
-			Context:       o.IntegrationContext,
+			Kit:           o.IntegrationKit,
 			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
 			Repositories:  o.Repositories,
 			Profile:       v1alpha1.TraitProfileByName(o.Profile),

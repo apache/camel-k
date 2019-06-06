@@ -48,9 +48,9 @@ func TestDefaultEnvironment(t *testing.T) {
 				Profile: v1alpha1.TraitProfileOpenShift,
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{
@@ -113,9 +113,9 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 				},
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{
@@ -178,9 +178,9 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 				},
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{

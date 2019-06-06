@@ -62,7 +62,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+	if !e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
 		return false, nil
 	}
 
@@ -190,7 +190,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 	paths := e.ComputeSourcesURI()
 	environment := &svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
 
-	// combine Environment of integration with context, integration
+	// combine Environment of integration with kit, integration
 	for key, value := range e.CollectConfigurationPairs("env") {
 		envvar.SetVal(environment, key, value)
 	}

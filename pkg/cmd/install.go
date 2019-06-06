@@ -74,7 +74,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.runtimeVersion, "runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
 	cmd.Flags().StringVar(&impl.operatorImage, "operator-image", "", "Set the operator image used for the operator deployment")
-	cmd.Flags().StringSliceVar(&impl.contexts, "context", nil, "Add a camel context to build at startup, by default all known contexts are built")
+	cmd.Flags().StringSliceVar(&impl.kits, "kit", nil, "Add an integration kit to build at startup")
 	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", "", "Set the build strategy")
 	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
 
@@ -113,7 +113,7 @@ type installCmdOptions struct {
 	mavenRepositories []string
 	mavenSettings     string
 	properties        []string
-	contexts          []string
+	kits              []string
 	registry          v1alpha1.IntegrationPlatformRegistrySpec
 }
 
@@ -269,7 +269,7 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			platform.Spec.Build.Maven.Settings = mavenSettings
 		}
 
-		platform.Spec.Resources.Contexts = o.contexts
+		platform.Spec.Resources.Kits = o.kits
 
 		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
 		if err != nil {
@@ -354,22 +354,20 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	if o.contexts == nil {
-		return nil
-	}
-	for _, context := range o.contexts {
-		err := errorIfContextIsNotAvailable(schema, context)
+	for _, kit := range o.kits {
+		err := errorIfKitIsNotAvailable(schema, kit)
 		result = multierr.Append(result, err)
 	}
 
 	if len(o.mavenRepositories) > 0 && o.mavenSettings != "" {
-		result = fmt.Errorf("incompatible options combinations: you cannot set both mavenRepository and mavenSettings")
+		err := fmt.Errorf("incompatible options combinations: you cannot set both mavenRepository and mavenSettings")
+		result = multierr.Append(result, err)
 	}
 
 	return result
 }
 
-func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string) error {
+func errorIfKitIsNotAvailable(schema *runtime.Scheme, context string) error {
 	for _, resource := range deploy.Resources {
 		resource, err := kubernetes.LoadResourceFromYaml(schema, resource)
 		if err != nil {
@@ -377,11 +375,11 @@ func errorIfContextIsNotAvailable(schema *runtime.Scheme, context string) error 
 			continue
 		}
 		kind := resource.GetObjectKind().GroupVersionKind()
-		if kind.Kind != "IntegrationContext" {
+		if kind.Kind != "IntegrationKit" {
 			continue
 		}
-		integrationContext := resource.(*v1alpha1.IntegrationContext)
-		if integrationContext.Name == context {
+		integrationKit := resource.(*v1alpha1.IntegrationKit)
+		if integrationKit.Name == context {
 			return nil
 		}
 	}

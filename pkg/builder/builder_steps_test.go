@@ -328,38 +328,38 @@ func TestListPublishedImages(t *testing.T) {
 	assert.Nil(t, err)
 
 	c, err := test.NewFakeClient(
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-1",
+				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase:        v1alpha1.IntegrationContextPhaseError,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase:        v1alpha1.IntegrationKitPhaseError,
 				Image:        "image-1",
 				CamelVersion: catalog.Version,
 			},
 		},
-		&v1alpha1.IntegrationContext{
+		&v1alpha1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationContextKind,
+				Kind:       v1alpha1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
-				Name:      "my-context-2",
+				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/context.type": v1alpha1.IntegrationContextTypePlatform,
+					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
 				},
 			},
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase:        v1alpha1.IntegrationContextPhaseReady,
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase:        v1alpha1.IntegrationKitPhaseReady,
 				Image:        "image-2",
 				CamelVersion: catalog.Version,
 			},

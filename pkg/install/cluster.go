@@ -54,8 +54,8 @@ func SetupClusterwideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
-	// Install CRD for Integration Context (if needed)
-	if err := installCRD(ctx, c, "IntegrationContext", "crd-integration-context.yaml", collection); err != nil {
+	// Install CRD for Integration Kit (if needed)
+	if err := installCRD(ctx, c, "IntegrationKit", "crd-integration-kit.yaml", collection); err != nil {
 		return err
 	}
 
@@ -124,7 +124,7 @@ func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "IntegrationContext"); err != nil {
+	if ok, err := IsCRDInstalled(ctx, c, "IntegrationKit"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil

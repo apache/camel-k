@@ -111,7 +111,6 @@ type Context struct {
 	Artifacts         []v1alpha1.Artifact
 	SelectedArtifacts []v1alpha1.Artifact
 	Archive           string
-	ContextFilter     func(integrationContext *v1alpha1.IntegrationContext) bool
 	Resources         []Resource
 
 	Maven struct {

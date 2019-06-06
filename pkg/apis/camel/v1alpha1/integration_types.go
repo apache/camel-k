@@ -28,7 +28,7 @@ type IntegrationSpec struct {
 	Replicas           *int32               `json:"replicas,omitempty"`
 	Sources            []SourceSpec         `json:"sources,omitempty"`
 	Resources          []ResourceSpec       `json:"resources,omitempty"`
-	Context            string               `json:"context,omitempty"`
+	Kit                string               `json:"kit,omitempty"`
 	Dependencies       []string             `json:"dependencies,omitempty"`
 	Profile            TraitProfile         `json:"profile,omitempty"`
 	Traits             map[string]TraitSpec `json:"traits,omitempty"`
@@ -43,7 +43,7 @@ type IntegrationStatus struct {
 	Digest           string              `json:"digest,omitempty"`
 	Image            string              `json:"image,omitempty"`
 	Dependencies     []string            `json:"dependencies,omitempty"`
-	Context          string              `json:"context,omitempty"`
+	Kit              string              `json:"kit,omitempty"`
 	GeneratedSources []SourceSpec        `json:"generatedSources,omitempty"`
 	Failure          *Failure            `json:"failure,omitempty"`
 	CamelVersion     string              `json:"camelVersion,omitempty"`
@@ -146,10 +146,10 @@ const (
 	IntegrationPhaseInitial IntegrationPhase = ""
 	// IntegrationPhaseWaitingForPlatform --
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
-	// IntegrationPhaseBuildingContext --
-	IntegrationPhaseBuildingContext IntegrationPhase = "Building Context"
-	// IntegrationPhaseResolvingContext --
-	IntegrationPhaseResolvingContext IntegrationPhase = "Resolving Context"
+	// IntegrationPhaseBuildingKit --
+	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
+	// IntegrationPhaseResolvingKit --
+	IntegrationPhaseResolvingKit IntegrationPhase = "Resolving Kit"
 	// IntegrationPhaseDeploying --
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --
