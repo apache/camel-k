@@ -114,6 +114,9 @@ build-resources:
 	./script/embed_resources.sh deploy
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
+build-olm:
+	operator-sdk olm-catalog gen-csv --csv-version $(VERSION) --csv-config deploy/olm-catalog/csv-config.yaml --update-crds
+
 build-compile-integration-tests:
 	go test -c -tags=integration ./test/*.go
 
@@ -179,11 +182,14 @@ package-examples:
 package-artifacts:
 	./script/package_maven_artifacts.sh $(RUNTIME_VERSION)
 
-release: clean codegen set-version build-resources build images images-push cross-compile package-examples git-tag
+unsnapshot-olm:
+	./script/unsnapshot_olm.sh
+
+release: clean codegen set-version build-resources unsnapshot-olm build images images-push cross-compile package-examples git-tag
 
 install-minishift:
 	./script/install_minishift.sh
 install-minikube:
 	./script/install_minikube.sh
 
-.PHONY: build build-operator build-kamel build-resources build-builder dep codegen images images-dec images-push test check test-integration clean release cross-compile package-examples set-version git-tag
+.PHONY: build build-operator build-kamel build-resources build-builder build-olm unsnapshot-olm dep codegen images images-dec images-push test check test-integration clean release cross-compile package-examples set-version git-tag
