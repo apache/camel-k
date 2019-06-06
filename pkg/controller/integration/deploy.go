@@ -45,21 +45,21 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
-	ictxName := integration.Status.Context
-	if ictxName == "" {
-		return errors.Errorf("no context set on integration %s", integration.Name)
+	kitName := integration.Status.Kit
+	if kitName == "" {
+		return errors.Errorf("no kit set on integration %s", integration.Name)
 	}
-	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, ictxName)
-	ictxKey := k8sclient.ObjectKey{
+	kit := v1alpha1.NewIntegrationKit(integration.Namespace, kitName)
+	kitKey := k8sclient.ObjectKey{
 		Namespace: integration.Namespace,
-		Name:      ictxName,
+		Name:      kitName,
 	}
 
-	if err := action.client.Get(ctx, ictxKey, &ictx); err != nil {
-		return errors.Wrapf(err, "unable to find integration context %s, %s", ictxName, err)
+	if err := action.client.Get(ctx, kitKey, &kit); err != nil {
+		return errors.Wrapf(err, "unable to find integration kit %s, %s", kitName, err)
 	}
 
-	env, err := trait.Apply(ctx, action.client, integration, &ictx)
+	env, err := trait.Apply(ctx, action.client, integration, &kit)
 	if err != nil {
 		return err
 	}

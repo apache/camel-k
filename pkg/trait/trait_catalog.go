@@ -242,8 +242,8 @@ func (c *Catalog) configure(env *Environment) error {
 			return err
 		}
 	}
-	if env.IntegrationContext != nil && env.IntegrationContext.Spec.Traits != nil {
-		if err := c.configureTraits(env.IntegrationContext.Spec.Traits); err != nil {
+	if env.IntegrationKit != nil && env.IntegrationKit.Spec.Traits != nil {
+		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
 			return err
 		}
 	}

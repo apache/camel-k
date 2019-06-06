@@ -40,7 +40,7 @@ metadata:
             "buildStrategy": "pod"
           },
           "resources": {
-            "contexts": [
+            "kits": [
               "jvm"
             ]
           }
@@ -61,7 +61,7 @@ metadata:
       },
       {
         "apiVersion": "camel.apache.org/v1alpha1",
-        "kind": "IntegrationContext",
+        "kind": "IntegrationKit",
         "metadata": {
           "name": "example"
         }
@@ -162,10 +162,10 @@ spec:
         version: v1alpha1
         displayName: Integration
         description: A Camel K integration
-      - kind: IntegrationContext
-        name: integrationcontexts.camel.apache.org
-        displayName: Integration Context
-        description: A Camel K integration context
+      - kind: IntegrationKit
+        name: integrationlkits.camel.apache.org
+        displayName: Integration Kit
+        description: A Camel K integration kit
         version: v1alpha1
       - kind: IntegrationPlatform
         name: integrationplatforms.camel.apache.org

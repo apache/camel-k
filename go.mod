@@ -30,7 +30,6 @@ require (
 	github.com/knative/eventing v0.4.0
 	github.com/knative/pkg v0.0.0-20190214162945-0183bf9cdc73
 	github.com/knative/serving v0.4.0
-	github.com/magiconair/properties v1.8.0
 	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "$ref": "#/definitions/IntegrationContext",
+  "$ref": "#/definitions/IntegrationKit",
   "definitions": {
     "Artifact": {
       "required": [
@@ -109,7 +109,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "IntegrationContext": {
+    "IntegrationKit": {
       "properties": {
         "annotations": {
           "patternProperties": {
@@ -183,11 +183,11 @@
         },
         "spec": {
           "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/IntegrationContextSpec"
+          "$ref": "#/definitions/IntegrationKitSpec"
         },
         "status": {
           "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/IntegrationContextStatus"
+          "$ref": "#/definitions/IntegrationKitStatus"
         },
         "uid": {
           "type": "string"
@@ -196,7 +196,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "IntegrationContextSpec": {
+    "IntegrationKitSpec": {
       "properties": {
         "configuration": {
           "items": {
@@ -236,7 +236,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "IntegrationContextStatus": {
+    "IntegrationKitStatus": {
       "properties": {
         "artifacts": {
           "items": {

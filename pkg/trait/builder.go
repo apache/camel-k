@@ -40,7 +40,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseBuildSubmitted), nil
+	return e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseBuildSubmitted), nil
 }
 
 func (t *builderTrait) Apply(e *Environment) error {

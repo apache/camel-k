@@ -35,8 +35,8 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
 		return "", err
 	}
-	// Integration Context is relevant
-	if _, err := hash.Write([]byte(integration.Spec.Context)); err != nil {
+	// Integration Kit is relevant
+	if _, err := hash.Write([]byte(integration.Spec.Kit)); err != nil {
 		return "", err
 	}
 
@@ -75,21 +75,21 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 	return digest, nil
 }
 
-// ComputeForIntegrationContext a digest of the fields that are relevant for the deployment
+// ComputeForIntegrationKit a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegrationContext(context *v1alpha1.IntegrationContext) (string, error) {
+func ComputeForIntegrationKit(kit *v1alpha1.IntegrationKit) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
 		return "", err
 	}
 
-	for _, item := range context.Spec.Dependencies {
+	for _, item := range kit.Spec.Dependencies {
 		if _, err := hash.Write([]byte(item)); err != nil {
 			return "", err
 		}
 	}
-	for _, item := range context.Spec.Configuration {
+	for _, item := range kit.Spec.Configuration {
 		if _, err := hash.Write([]byte(item.String())); err != nil {
 			return "", err
 		}

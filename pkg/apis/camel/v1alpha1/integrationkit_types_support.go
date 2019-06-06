@@ -19,12 +19,12 @@ package v1alpha1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-// NewIntegrationContext --
-func NewIntegrationContext(namespace string, name string) IntegrationContext {
-	return IntegrationContext{
+// NewIntegrationKit --
+func NewIntegrationKit(namespace string, name string) IntegrationKit {
+	return IntegrationKit{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationContextKind,
+			Kind:       IntegrationKindKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -33,18 +33,18 @@ func NewIntegrationContext(namespace string, name string) IntegrationContext {
 	}
 }
 
-// NewIntegrationContextList --
-func NewIntegrationContextList() IntegrationContextList {
-	return IntegrationContextList{
+// NewIntegrationKitList --
+func NewIntegrationKitList() IntegrationKitList {
+	return IntegrationKitList{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationContextKind,
+			Kind:       IntegrationKindKind,
 		},
 	}
 }
 
 // ImageForIntegration returns the image to use when using it for running an integration
-func (in *IntegrationContext) ImageForIntegration() string {
+func (in *IntegrationKit) ImageForIntegration() string {
 	if in.Status.PublicImage != "" {
 		return in.Status.PublicImage
 	}
@@ -52,7 +52,7 @@ func (in *IntegrationContext) ImageForIntegration() string {
 }
 
 // Configurations --
-func (in *IntegrationContextSpec) Configurations() []ConfigurationSpec {
+func (in *IntegrationKitSpec) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}
 	}
@@ -61,7 +61,7 @@ func (in *IntegrationContextSpec) Configurations() []ConfigurationSpec {
 }
 
 // Configurations --
-func (in *IntegrationContext) Configurations() []ConfigurationSpec {
+func (in *IntegrationKit) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}
 	}

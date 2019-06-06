@@ -55,8 +55,8 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		}
 
 		enabled = strategy == ControllerStrategyDeployment
-	} else if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseReady) &&
-		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingContext, v1alpha1.IntegrationPhaseResolvingContext) {
+	} else if e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseReady) &&
+		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingKit, v1alpha1.IntegrationPhaseResolvingKit) {
 		enabled = true
 	}
 
@@ -71,8 +71,8 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
-	if e.IntegrationContextInPhase(v1alpha1.IntegrationContextPhaseReady) &&
-		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingContext, v1alpha1.IntegrationPhaseResolvingContext) {
+	if e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseReady) &&
+		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingKit, v1alpha1.IntegrationPhaseResolvingKit) {
 
 		e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
 			// trigger integration deploy
@@ -83,7 +83,7 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	if e.InPhase(v1alpha1.IntegrationContextPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+	if e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
 		e.Resources.AddAll(e.ComputeConfigMaps())
 		e.Resources.Add(t.getDeploymentFor(e))
 	}
@@ -101,7 +101,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	paths := e.ComputeSourcesURI()
 	environment := make([]corev1.EnvVar, 0)
 
-	// combine Environment of integration with platform, context, integration
+	// combine Environment of integration with platform, kit, integration
 	for key, value := range e.CollectConfigurationPairs("env") {
 		envvar.SetVal(&environment, key, value)
 	}

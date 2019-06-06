@@ -19,30 +19,30 @@ package platform
 
 import "strings"
 
-// DefaultContexts --
-var DefaultContexts = []string{
-	"platform-integration-context-jvm.yaml",
-	"platform-integration-context-groovy.yaml",
-	"platform-integration-context-kotlin.yaml",
+// DefaultKits --
+var DefaultKits = []string{
+	"platform-integration-kit-jvm.yaml",
+	"platform-integration-kit-groovy.yaml",
+	"platform-integration-kit-kotlin.yaml",
 }
 
-// KnativeContexts --
-var KnativeContexts = []string{
-	"platform-integration-context-knative.yaml",
+// KnativeKits --
+var KnativeKits = []string{
+	"platform-integration-kit-knative.yaml",
 }
 
-// GetContexts --
-func GetContexts() []string {
-	return append(DefaultContexts, KnativeContexts...)
+// GetKits --
+func GetKits() []string {
+	return append(DefaultKits, KnativeKits...)
 }
 
-// GetContextsNames --
-func GetContextsNames() []string {
-	ctxs := GetContexts()
+// GetKitsNames --
+func GetKitsNames() []string {
+	ctxs := GetKits()
 	names := make([]string, 0, len(ctxs))
 
 	for _, r := range ctxs {
-		r = strings.TrimPrefix(r, "platform-integration-context-")
+		r = strings.TrimPrefix(r, "platform-integration-kit-")
 		r = strings.TrimSuffix(r, ".yaml")
 
 		names = append(names, r)

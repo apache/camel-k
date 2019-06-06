@@ -34,7 +34,7 @@ type IntegrationPlatformSpec struct {
 
 // IntegrationPlatformResourcesSpec contains platform related resources
 type IntegrationPlatformResourcesSpec struct {
-	Contexts []string `json:"contexts,omitempty"`
+	Kits []string `json:"kits,omitempty"`
 }
 
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform

@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package integrationcontext
+package integrationkit
 
 import (
 	"context"
@@ -32,11 +32,11 @@ type Action interface {
 	// a user friendly name for the action
 	Name() string
 
-	// returns true if the action can handle the integration context
-	CanHandle(integration *v1alpha1.IntegrationContext) bool
+	// returns true if the action can handle the integration kit
+	CanHandle(kit *v1alpha1.IntegrationKit) bool
 
 	// executes the handling function
-	Handle(ctx context.Context, integration *v1alpha1.IntegrationContext) error
+	Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) error
 
 	// Inject integration logger
 	InjectLogger(log.Logger)

@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package integrationcontext
+package integrationkit
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 )
 
-// NewMonitorAction creates a new monitoring handling action for the context
+// NewMonitorAction creates a new monitoring handling action for the kit
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }
@@ -37,23 +37,23 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(ictx *v1alpha1.IntegrationContext) bool {
-	return ictx.Status.Phase == v1alpha1.IntegrationContextPhaseReady || ictx.Status.Phase == v1alpha1.IntegrationContextPhaseError
+func (action *monitorAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
+	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady || kit.Status.Phase == v1alpha1.IntegrationKitPhaseError
 }
 
-func (action *monitorAction) Handle(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
-	hash, err := digest.ComputeForIntegrationContext(ictx)
+func (action *monitorAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+	hash, err := digest.ComputeForIntegrationKit(kit)
 	if err != nil {
 		return err
 	}
-	if hash != ictx.Status.Digest {
-		action.L.Info("IntegrationContext needs a rebuild")
+	if hash != kit.Status.Digest {
+		action.L.Info("IntegrationKit needs a rebuild")
 
-		target := ictx.DeepCopy()
+		target := kit.DeepCopy()
 		target.Status.Digest = hash
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildSubmitted
+		target.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
 
-		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
+		action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
 	}

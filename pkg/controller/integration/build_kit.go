@@ -28,52 +28,52 @@ import (
 	"github.com/rs/xid"
 )
 
-// NewBuildContextAction create an action that handles integration context build
-func NewBuildContextAction() Action {
-	return &buildContextAction{}
+// NewBuildKitAction create an action that handles integration kit build
+func NewBuildKitAction() Action {
+	return &buildKitAction{}
 }
 
-type buildContextAction struct {
+type buildKitAction struct {
 	baseAction
 }
 
-func (action *buildContextAction) Name() string {
-	return "build-context"
+func (action *buildKitAction) Name() string {
+	return "build-kit"
 }
 
-func (action *buildContextAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingContext ||
-		integration.Status.Phase == v1alpha1.IntegrationPhaseResolvingContext
+func (action *buildKitAction) CanHandle(integration *v1alpha1.Integration) bool {
+	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingKit ||
+		integration.Status.Phase == v1alpha1.IntegrationPhaseResolvingKit
 }
 
-func (action *buildContextAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
-	ictx, err := LookupContextForIntegration(ctx, action.client, integration)
+func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+	kit, err := LookupKitForIntegration(ctx, action.client, integration)
 	if err != nil {
 		//TODO: we may need to add a wait strategy, i.e give up after some time
 		return err
 	}
 
-	if ictx != nil {
-		if ictx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
-			// This is a platform context and as it is auto generated it may get
+	if kit != nil {
+		if kit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
+			// This is a platform kit and as it is auto generated it may get
 			// out of sync if the integration that has generated it, has been
 			// amended to add/remove dependencies
 
 			//TODO: this is a very simple check, we may need to provide a deps comparison strategy
-			if !util.StringSliceContains(ictx.Spec.Dependencies, integration.Status.Dependencies) {
-				// We need to re-generate a context or search for a new one that
+			if !util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
+				// We need to re-generate a kit or search for a new one that
 				// satisfies integrations needs so let's remove the association
-				// with a context
+				// with a kit
 				target := integration.DeepCopy()
-				target.Status.Context = ""
+				target.Status.Kit = ""
 				return action.client.Status().Update(ctx, target)
 			}
 		}
 
-		if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseError {
+		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
 			target := integration.DeepCopy()
-			target.Status.Image = ictx.ImageForIntegration()
-			target.Status.Context = ictx.Name
+			target.Status.Image = kit.ImageForIntegration()
+			target.Status.Kit = kit.Name
 			target.Status.Phase = v1alpha1.IntegrationPhaseError
 
 			target.Status.Digest, err = digest.ComputeForIntegration(target)
@@ -86,10 +86,10 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 			return action.client.Status().Update(ctx, target)
 		}
 
-		if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseReady {
+		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady {
 			target := integration.DeepCopy()
-			target.Status.Image = ictx.ImageForIntegration()
-			target.Status.Context = ictx.Name
+			target.Status.Image = kit.ImageForIntegration()
+			target.Status.Kit = kit.Name
 
 			dgst, err := digest.ComputeForIntegration(target)
 			if err != nil {
@@ -98,7 +98,7 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 
 			target.Status.Digest = dgst
 
-			if _, err := trait.Apply(ctx, action.client, target, ictx); err != nil {
+			if _, err := trait.Apply(ctx, action.client, target, kit); err != nil {
 				return err
 			}
 
@@ -107,30 +107,30 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 			return action.client.Status().Update(ctx, target)
 		}
 
-		if integration.Status.Context == "" {
-			// We need to set the context
+		if integration.Status.Kit == "" {
+			// We need to set the kit
 			target := integration.DeepCopy()
-			target.Status.Context = ictx.Name
+			target.Status.Kit = kit.Name
 			return action.client.Status().Update(ctx, target)
 		}
 
 		return nil
 	}
 
-	platformCtxName := fmt.Sprintf("ctx-%s", xid.New())
-	platformCtx := v1alpha1.NewIntegrationContext(integration.Namespace, platformCtxName)
+	platformCtxName := fmt.Sprintf("kit-%s", xid.New())
+	platformCtx := v1alpha1.NewIntegrationKit(integration.Namespace, platformCtxName)
 
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
 	platformCtx.Labels = map[string]string{
-		"camel.apache.org/context.type":               v1alpha1.IntegrationContextTypePlatform,
-		"camel.apache.org/context.created.by.kind":    v1alpha1.IntegrationKind,
-		"camel.apache.org/context.created.by.name":    integration.Name,
-		"camel.apache.org/context.created.by.version": integration.ResourceVersion,
+		"camel.apache.org/kit.type":               v1alpha1.IntegrationKitTypePlatform,
+		"camel.apache.org/kit.created.by.kind":    v1alpha1.IntegrationKind,
+		"camel.apache.org/kit.created.by.name":    integration.Name,
+		"camel.apache.org/kit.created.by.version": integration.ResourceVersion,
 	}
 
-	// Set the context to have the same characteristics as the integrations
-	platformCtx.Spec = v1alpha1.IntegrationContextSpec{
+	// Set the kit to have the same characteristics as the integrations
+	platformCtx.Spec = v1alpha1.IntegrationKitSpec{
 		Dependencies: integration.Status.Dependencies,
 		Repositories: integration.Spec.Repositories,
 		Traits:       integration.Spec.Traits,
@@ -140,10 +140,10 @@ func (action *buildContextAction) Handle(ctx context.Context, integration *v1alp
 		return err
 	}
 
-	// Set the context name so the next handle loop, will fall through the
-	// same path as integration with a user defined context
+	// Set the kit name so the next handle loop, will fall through the
+	// same path as integration with a user defined kit
 	target := integration.DeepCopy()
-	target.Status.Context = platformCtxName
+	target.Status.Kit = platformCtxName
 
 	return action.client.Status().Update(ctx, target)
 }

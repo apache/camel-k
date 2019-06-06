@@ -187,14 +187,14 @@
           },
           "type": "array"
         },
-        "context": {
-          "type": "string"
-        },
         "dependencies": {
           "items": {
             "type": "string"
           },
           "type": "array"
+        },
+        "kit": {
+          "type": "string"
         },
         "profile": {
           "type": "string"
@@ -249,9 +249,6 @@
           },
           "type": "array"
         },
-        "context": {
-          "type": "string"
-        },
         "dependencies": {
           "items": {
             "type": "string"
@@ -272,6 +269,9 @@
           "type": "array"
         },
         "image": {
+          "type": "string"
+        },
+        "kit": {
           "type": "string"
         },
         "phase": {

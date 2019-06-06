@@ -111,7 +111,7 @@ func newCmdDescribe(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Long:  `Describe a Camel K resource.`,
 	}
 
-	cmd.AddCommand(newDescribeContextCmd(rootCmdOptions))
+	cmd.AddCommand(newDescribeKitCmd(rootCmdOptions))
 	cmd.AddCommand(newDescribeIntegrationCmd(rootCmdOptions))
 	cmd.AddCommand(newDescribePlatformCmd(rootCmdOptions))
 

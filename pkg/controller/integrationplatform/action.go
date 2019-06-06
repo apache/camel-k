@@ -32,7 +32,7 @@ type Action interface {
 	// a user friendly name for the action
 	Name() string
 
-	// returns true if the action can handle the integration context
+	// returns true if the action can handle the integration platform
 	CanHandle(platform *v1alpha1.IntegrationPlatform) bool
 
 	// executes the handling function

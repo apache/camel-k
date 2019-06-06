@@ -21,16 +21,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newCmdContext(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdKit(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
-		Use:   "context",
-		Short: "Configure an Integration Context",
-		Long:  `Configure an Integration Context.`,
+		Use:   "kit",
+		Short: "Configure an Integration Kit",
+		Long:  `Configure an Integration Kit.`,
 	}
 
-	cmd.AddCommand(newContextCreateCmd(rootCmdOptions))
-	cmd.AddCommand(newContextDeleteCmd(rootCmdOptions))
-	cmd.AddCommand(newContextGetCmd(rootCmdOptions))
+	cmd.AddCommand(newKitCreateCmd(rootCmdOptions))
+	cmd.AddCommand(newKitDeleteCmd(rootCmdOptions))
+	cmd.AddCommand(newKitGetCmd(rootCmdOptions))
 
 	return &cmd
 }

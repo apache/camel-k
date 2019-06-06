@@ -28,15 +28,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := contextGetCommand{
+func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	impl := kitGetCommand{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
 		Use:   "get",
-		Short: "Get defined Integration Context",
-		Long:  `Get defined Integration Context.`,
+		Short: "Get defined Integration Kit",
+		Long:  `Get defined Integration Kit.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := impl.validate(cmd, args); err != nil {
 				return err
@@ -49,42 +49,42 @@ func newContextGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&impl.user, v1alpha1.IntegrationContextTypeUser, true, "Includes user contexts")
-	cmd.Flags().BoolVar(&impl.external, v1alpha1.IntegrationContextTypeExternal, true, "Includes external contexts")
-	cmd.Flags().BoolVar(&impl.platform, v1alpha1.IntegrationContextTypePlatform, true, "Includes platform contexts")
+	cmd.Flags().BoolVar(&impl.user, v1alpha1.IntegrationKitTypeUser, true, "Includes user kits")
+	cmd.Flags().BoolVar(&impl.external, v1alpha1.IntegrationKitTypeExternal, true, "Includes external kits")
+	cmd.Flags().BoolVar(&impl.platform, v1alpha1.IntegrationKitTypePlatform, true, "Includes platform kits")
 
 	return &cmd
 }
 
-type contextGetCommand struct {
+type kitGetCommand struct {
 	*RootCmdOptions
 	user     bool
 	external bool
 	platform bool
 }
 
-func (command *contextGetCommand) validate(cmd *cobra.Command, args []string) error {
+func (command *kitGetCommand) validate(cmd *cobra.Command, args []string) error {
 	return nil
 
 }
 
-func (command *contextGetCommand) run() error {
-	ctxList := v1alpha1.NewIntegrationContextList()
+func (command *kitGetCommand) run() error {
+	kitList := v1alpha1.NewIntegrationKitList()
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
-	if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
+	if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &kitList); err != nil {
 		return err
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
-	for _, ctx := range ctxList.Items {
-		t := ctx.Labels["camel.apache.org/context.type"]
-		u := command.user && t == v1alpha1.IntegrationContextTypeUser
-		e := command.external && t == v1alpha1.IntegrationContextTypeExternal
-		p := command.platform && t == v1alpha1.IntegrationContextTypePlatform
+	for _, ctx := range kitList.Items {
+		t := ctx.Labels["camel.apache.org/kit.type"]
+		u := command.user && t == v1alpha1.IntegrationKitTypeUser
+		e := command.external && t == v1alpha1.IntegrationKitTypeExternal
+		p := command.platform && t == v1alpha1.IntegrationKitTypePlatform
 
 		if u || e || p {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, string(ctx.Status.Phase), t, ctx.Status.Image)

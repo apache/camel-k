@@ -29,15 +29,15 @@ import (
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-func newContextDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := contextDeleteCommand{
+func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	impl := kitDeleteCommand{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
 		Use:   "delete",
-		Short: "Delete an Integration Context",
-		Long:  `Delete an Integration Context.`,
+		Short: "Delete an Integration Kit",
+		Long:  `Delete an Integration Kit.`,
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err
@@ -50,28 +50,28 @@ func newContextDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&impl.all, "all", false, "Delete all integration contexts")
+	cmd.Flags().BoolVar(&impl.all, "all", false, "Delete all integration kits")
 
 	return &cmd
 }
 
-type contextDeleteCommand struct {
+type kitDeleteCommand struct {
 	*RootCmdOptions
 	all bool
 }
 
-func (command *contextDeleteCommand) validate(args []string) error {
+func (command *kitDeleteCommand) validate(args []string) error {
 	if command.all && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and named contexts are set")
+		return errors.New("invalid combination: both all flag and named kits are set")
 	}
 	if !command.all && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor named contexts are set")
+		return errors.New("invalid combination: neither all flag nor named kits are set")
 	}
 
 	return nil
 }
 
-func (command *contextDeleteCommand) run(args []string) error {
+func (command *kitDeleteCommand) run(args []string) error {
 	names := args
 
 	c, err := command.GetCmdClient()
@@ -80,15 +80,15 @@ func (command *contextDeleteCommand) run(args []string) error {
 	}
 
 	if command.all {
-		ctxList := v1alpha1.NewIntegrationContextList()
-		if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &ctxList); err != nil {
+		kitList := v1alpha1.NewIntegrationKitList()
+		if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &kitList); err != nil {
 			return err
 		}
 
-		names = make([]string, 0, len(ctxList.Items))
-		for _, item := range ctxList.Items {
-			// only include non platform contexts
-			if item.Labels["camel.apache.org/context.type"] != v1alpha1.IntegrationContextTypePlatform {
+		names = make([]string, 0, len(kitList.Items))
+		for _, item := range kitList.Items {
+			// only include non platform kits
+			if item.Labels["camel.apache.org/kit.type"] != v1alpha1.IntegrationKitTypePlatform {
 				names = append(names, item.Name)
 			}
 		}
@@ -103,8 +103,8 @@ func (command *contextDeleteCommand) run(args []string) error {
 	return nil
 }
 
-func (command *contextDeleteCommand) delete(name string) error {
-	ctx := v1alpha1.NewIntegrationContext(command.Namespace, name)
+func (command *kitDeleteCommand) delete(name string) error {
+	ctx := v1alpha1.NewIntegrationKit(command.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      name,
@@ -116,9 +116,9 @@ func (command *contextDeleteCommand) delete(name string) error {
 
 	err = c.Get(command.Context, key, &ctx)
 
-	// pass through if the context is not found
+	// pass through if the kit is not found
 	if err != nil && k8errors.IsNotFound(err) {
-		return fmt.Errorf("no integration context found with name \"%s\"", ctx.Name)
+		return fmt.Errorf("no integration kit found with name \"%s\"", ctx.Name)
 	}
 
 	// fail otherwise
@@ -128,25 +128,25 @@ func (command *contextDeleteCommand) delete(name string) error {
 
 	// check that it is not a platform one which is supposed to be "read only"
 	// thus not managed by the end user
-	if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
-		// skip platform contexts while deleting all contexts
+	if ctx.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
+		// skip platform kits while deleting all kits
 		if command.all {
 			return nil
 		}
 
-		return fmt.Errorf("integration context \"%s\" is not editable", ctx.Name)
+		return fmt.Errorf("integration kit \"%s\" is not editable", ctx.Name)
 	}
 
 	err = c.Delete(command.Context, &ctx)
 
 	if err != nil && !k8errors.IsNotFound(err) {
-		return fmt.Errorf("error deleting integration context \"%s\", %s", ctx.Name, err)
+		return fmt.Errorf("error deleting integration kit \"%s\", %s", ctx.Name, err)
 	}
 	if err != nil && k8errors.IsNotFound(err) {
-		return fmt.Errorf("no integration context found with name \"%s\"", ctx.Name)
+		return fmt.Errorf("no integration kit found with name \"%s\"", ctx.Name)
 	}
 
-	fmt.Printf("integration context \"%s\" has been deleted\n", ctx.Name)
+	fmt.Printf("integration kit \"%s\" has been deleted\n", ctx.Name)
 
 	return err
 }

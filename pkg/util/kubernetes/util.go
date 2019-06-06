@@ -120,13 +120,13 @@ func GetSecret(context context.Context, client client.Client, name string, names
 }
 
 // GetIntegrationContext --
-func GetIntegrationContext(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationContext, error) {
+func GetIntegrationContext(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationKit, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewIntegrationContext(namespace, name)
+	answer := v1alpha1.NewIntegrationKit(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err

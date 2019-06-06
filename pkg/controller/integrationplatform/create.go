@@ -56,16 +56,16 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		}
 	}
 
-	if l := len(platform.Spec.Resources.Contexts); l > 0 {
+	if l := len(platform.Spec.Resources.Kits); l > 0 {
 		res := make([]string, 0, l)
 
-		for _, c := range platform.Spec.Resources.Contexts {
+		for _, c := range platform.Spec.Resources.Kits {
 			//
 			// Assuming that if the resource ends with a yaml extension, the full
 			// resource name is provided
 			//
 			if !strings.HasSuffix(c, ".yaml") && !strings.HasSuffix(c, ".yml") {
-				c = fmt.Sprintf("platform-integration-context-%s.yaml", c)
+				c = fmt.Sprintf("platform-integration-kit-%s.yaml", c)
 			}
 
 			res = append(res, c)
