@@ -22,4 +22,4 @@ crd-cr-paths:
   - deploy/crd-integration.yaml
   - deploy/crd-integration-context.yaml
   - deploy/crd-integration-platform.yaml
-role-path: deploy/operator-role-kubernetes.yaml
+role-path: deploy/operator-role-olm.yaml
