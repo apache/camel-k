@@ -178,8 +178,8 @@ func TestTraitHierarchyDecode(t *testing.T) {
 		},
 	}
 
-	env.IntegrationContext.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.IntegrationContext.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+	env.IntegrationKit.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+	env.IntegrationKit.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled":   "true",
 			"min-scale": "5",
@@ -417,9 +417,9 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 				Phase: v1alpha1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationContext: &v1alpha1.IntegrationContext{
-			Status: v1alpha1.IntegrationContextStatus{
-				Phase: v1alpha1.IntegrationContextPhaseReady,
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{

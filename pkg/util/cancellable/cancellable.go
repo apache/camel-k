@@ -19,7 +19,7 @@ package cancellable
 
 import "context"
 
-// Context --
+// Kit --
 type Context interface {
 	context.Context
 

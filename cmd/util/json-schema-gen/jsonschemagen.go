@@ -33,7 +33,7 @@ import (
 func main() {
 	sources := []interface{}{
 		v1alpha1.Integration{},
-		v1alpha1.IntegrationContext{},
+		v1alpha1.IntegrationKit{},
 		//v1alpha1.IntegrationPlatform{},
 		v1alpha1.CamelCatalog{},
 	}

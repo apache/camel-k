@@ -100,22 +100,22 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 
 // A Environment provides the context where the trait is executed
 type Environment struct {
-	CamelCatalog       *camel.RuntimeCatalog
-	RuntimeVersion     string
-	Catalog            *Catalog
-	C                  context.Context
-	Client             client.Client
-	Platform           *v1alpha1.IntegrationPlatform
-	IntegrationContext *v1alpha1.IntegrationContext
-	Integration        *v1alpha1.Integration
-	Resources          *kubernetes.Collection
-	PostActions        []func(*Environment) error
-	PostProcessors     []func(*Environment) error
-	Steps              []builder.Step
-	BuildDir           string
-	ExecutedTraits     []Trait
-	EnvVars            []corev1.EnvVar
-	Classpath          *strset.Set
+	CamelCatalog   *camel.RuntimeCatalog
+	RuntimeVersion string
+	Catalog        *Catalog
+	C              context.Context
+	Client         client.Client
+	Platform       *v1alpha1.IntegrationPlatform
+	IntegrationKit *v1alpha1.IntegrationKit
+	Integration    *v1alpha1.Integration
+	Resources      *kubernetes.Collection
+	PostActions    []func(*Environment) error
+	PostProcessors []func(*Environment) error
+	Steps          []builder.Step
+	BuildDir       string
+	ExecutedTraits []Trait
+	EnvVars        []corev1.EnvVar
+	Classpath      *strset.Set
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -153,14 +153,14 @@ func (e *Environment) IntegrationInPhase(phases ...v1alpha1.IntegrationPhase) bo
 	return false
 }
 
-// IntegrationContextInPhase --
-func (e *Environment) IntegrationContextInPhase(phases ...v1alpha1.IntegrationContextPhase) bool {
-	if e.IntegrationContext == nil {
+// IntegrationKitInPhase --
+func (e *Environment) IntegrationKitInPhase(phases ...v1alpha1.IntegrationKitPhase) bool {
+	if e.IntegrationKit == nil {
 		return false
 	}
 
 	for _, phase := range phases {
-		if e.IntegrationContext.Status.Phase == phase {
+		if e.IntegrationKit.Status.Phase == phase {
 			return true
 		}
 	}
@@ -169,21 +169,21 @@ func (e *Environment) IntegrationContextInPhase(phases ...v1alpha1.IntegrationCo
 }
 
 // InPhase --
-func (e *Environment) InPhase(c v1alpha1.IntegrationContextPhase, i v1alpha1.IntegrationPhase) bool {
-	return e.IntegrationContextInPhase(c) && e.IntegrationInPhase(i)
+func (e *Environment) InPhase(c v1alpha1.IntegrationKitPhase, i v1alpha1.IntegrationPhase) bool {
+	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
 }
 
 // DetermineProfile determines the TraitProfile of the environment.
 // First looking at the Integration.Spec for a Profile,
-// next looking at the IntegrationContext.Spec
+// next looking at the IntegrationKit.Spec
 // and lastly the Platform Profile
 func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
 	if e.Integration != nil && e.Integration.Spec.Profile != "" {
 		return e.Integration.Spec.Profile
 	}
 
-	if e.IntegrationContext != nil && e.IntegrationContext.Spec.Profile != "" {
-		return e.IntegrationContext.Spec.Profile
+	if e.IntegrationKit != nil && e.IntegrationKit.Spec.Profile != "" {
+		return e.IntegrationKit.Spec.Profile
 	}
 
 	return platform.GetProfile(e.Platform)
@@ -227,8 +227,8 @@ func (e *Environment) DetermineCamelVersion() string {
 	if e.Integration != nil {
 		version = e.Integration.Status.CamelVersion
 	}
-	if e.IntegrationContext != nil && version == "" {
-		version = e.IntegrationContext.Status.CamelVersion
+	if e.IntegrationKit != nil && version == "" {
+		version = e.IntegrationKit.Status.CamelVersion
 	}
 	if version == "" {
 		version = e.Platform.Spec.Build.CamelVersion
@@ -244,8 +244,8 @@ func (e *Environment) DetermineRuntimeVersion() string {
 	if e.Integration != nil {
 		version = e.Integration.Status.RuntimeVersion
 	}
-	if e.IntegrationContext != nil && version == "" {
-		version = e.IntegrationContext.Status.RuntimeVersion
+	if e.IntegrationKit != nil && version == "" {
+		version = e.IntegrationKit.Status.RuntimeVersion
 	}
 	if version == "" {
 		version = e.Platform.Spec.Build.RuntimeVersion
@@ -259,7 +259,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	sources := e.Integration.Sources()
 	maps := make([]runtime.Object, 0, len(sources)+1)
 
-	// combine properties of integration with context, integration
+	// combine properties of integration with kit, integration
 	// properties have the priority
 	properties := ""
 
@@ -578,10 +578,10 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 // CollectConfigurationValues --
 func (e *Environment) CollectConfigurationValues(configurationType string) []string {
-	return CollectConfigurationValues(configurationType, e.Platform, e.IntegrationContext, e.Integration)
+	return CollectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
 // CollectConfigurationPairs --
 func (e *Environment) CollectConfigurationPairs(configurationType string) map[string]string {
-	return CollectConfigurationPairs(configurationType, e.Platform, e.IntegrationContext, e.Integration)
+	return CollectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }

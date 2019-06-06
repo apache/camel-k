@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package integrationcontext
+package integrationkit
 
 import (
 	"context"
@@ -35,7 +35,7 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 )
 
-// NewBuildAction creates a new build request handling action for the context
+// NewBuildAction creates a new build request handling action for the kit
 func NewBuildAction() Action {
 	return &buildAction{}
 }
@@ -48,24 +48,24 @@ func (action *buildAction) Name() string {
 	return "build-submitted"
 }
 
-func (action *buildAction) CanHandle(ictx *v1alpha1.IntegrationContext) bool {
-	return ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildSubmitted ||
-		ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildRunning
+func (action *buildAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
+	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseBuildSubmitted ||
+		kit.Status.Phase == v1alpha1.IntegrationKitPhaseBuildRunning
 }
 
-func (action *buildAction) Handle(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
-	if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildSubmitted {
-		return action.handleBuildSubmitted(ctx, ictx)
-	} else if ictx.Status.Phase == v1alpha1.IntegrationContextPhaseBuildRunning {
-		return action.handleBuildRunning(ctx, ictx)
+func (action *buildAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+	if kit.Status.Phase == v1alpha1.IntegrationKitPhaseBuildSubmitted {
+		return action.handleBuildSubmitted(ctx, kit)
+	} else if kit.Status.Phase == v1alpha1.IntegrationKitPhaseBuildRunning {
+		return action.handleBuildRunning(ctx, kit)
 	}
 
 	return nil
 }
 
-func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
+func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
 	build := &v1alpha1.Build{}
-	err := action.client.Get(ctx, types.NamespacedName{Namespace: ictx.Namespace, Name: ictx.Name}, build)
+	err := action.client.Get(ctx, types.NamespacedName{Namespace: kit.Namespace, Name: kit.Name}, build)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
@@ -75,7 +75,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 		build.Status.Phase == v1alpha1.BuildPhaseInterrupted ||
 		build.Status.Phase == v1alpha1.BuildPhaseSucceeded {
 
-		env, err := trait.Apply(ctx, action.client, nil, ictx)
+		env, err := trait.Apply(ctx, action.client, nil, kit)
 		if err != nil {
 			return err
 		}
@@ -90,22 +90,22 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 				Kind:       "Build",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ictx.Namespace,
-				Name:      ictx.Name,
+				Namespace: kit.Namespace,
+				Name:      kit.Name,
 			},
 			Spec: v1alpha1.BuildSpec{
-				Meta:           ictx.ObjectMeta,
+				Meta:           kit.ObjectMeta,
 				CamelVersion:   env.CamelCatalog.Version,
 				RuntimeVersion: env.RuntimeVersion,
 				Platform:       env.Platform.Spec,
-				Dependencies:   ictx.Spec.Dependencies,
+				Dependencies:   kit.Spec.Dependencies,
 				Steps:          builder.StepIDsFor(env.Steps...),
 				BuildDir:       env.BuildDir,
 			},
 		}
 
-		// Set the integration context instance as the owner and controller
-		if err := controllerutil.SetControllerReference(ictx, build, action.client.GetScheme()); err != nil {
+		// Set the integration kit instance as the owner and controller
+		if err := controllerutil.SetControllerReference(kit, build, action.client.GetScheme()); err != nil {
 			return err
 		}
 
@@ -121,10 +121,10 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 	}
 
 	if build.Status.Phase == v1alpha1.BuildPhaseRunning {
-		target := ictx.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildRunning
+		target := kit.DeepCopy()
+		target.Status.Phase = v1alpha1.IntegrationKitPhaseBuildRunning
 
-		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
+		action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
 	}
@@ -132,9 +132,9 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, ictx *v1alp
 	return nil
 }
 
-func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
+func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
 	build := &v1alpha1.Build{}
-	err := action.client.Get(ctx, types.NamespacedName{Namespace: ictx.Namespace, Name: ictx.Name}, build)
+	err := action.client.Get(ctx, types.NamespacedName{Namespace: kit.Namespace, Name: kit.Name}, build)
 	if err != nil {
 		return err
 	}
@@ -145,15 +145,14 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 		action.L.Info("Build running")
 
 	case v1alpha1.BuildPhaseSucceeded:
-		target := ictx.DeepCopy()
+		target := kit.DeepCopy()
 
-		// we should ensure that the integration context is still in the right
-		// phase, if not there is a chance that the context has been modified
-		// by the user
-		if target.Status.Phase != v1alpha1.IntegrationContextPhaseBuildRunning {
-			return fmt.Errorf("found context %s not in the expected phase (expectd=%s, found=%s)",
+		// we should ensure that the integration kit is still in the right phase,
+		// if not there is a chance that the kit has been modified by the user
+		if target.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
+			return fmt.Errorf("found kit %s not in the expected phase (expectd=%s, found=%s)",
 				build.Spec.Meta.Name,
-				string(v1alpha1.IntegrationContextPhaseBuildRunning),
+				string(v1alpha1.IntegrationKitPhaseBuildRunning),
 				string(target.Status.Phase),
 			)
 		}
@@ -161,7 +160,7 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 		target.Status.BaseImage = build.Status.BaseImage
 		target.Status.Image = build.Status.Image
 		target.Status.PublicImage = build.Status.PublicImage
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
+		target.Status.Phase = v1alpha1.IntegrationKitPhaseReady
 		target.Status.Artifacts = make([]v1alpha1.Artifact, 0, len(build.Status.Artifacts))
 
 		for _, a := range build.Status.Artifacts {
@@ -173,35 +172,34 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 			})
 		}
 
-		action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
+		action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
 		if err := action.client.Status().Update(ctx, target); err != nil {
 			return err
 		}
 
-		action.L.Info("Inform integrations about context state change")
+		action.L.Info("Inform integrations about kit state change")
 		if err := action.informIntegrations(ctx, target); err != nil {
 			return err
 		}
 
 	case v1alpha1.BuildPhaseError, v1alpha1.BuildPhaseInterrupted:
-		target := ictx.DeepCopy()
+		target := kit.DeepCopy()
 
-		// we should ensure that the integration context is still in the right
-		// phase, if not there is a chance that the context has been modified
-		// by the user
-		if target.Status.Phase != v1alpha1.IntegrationContextPhaseBuildRunning {
-			return fmt.Errorf("found context %s not the an expected phase (expectd=%s, found=%s)",
+		// we should ensure that the integration kit is still in the right phase,
+		// if not there is a chance that the kit has been modified by the user
+		if target.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
+			return fmt.Errorf("found kit %s not the an expected phase (expectd=%s, found=%s)",
 				build.Spec.Meta.Name,
-				string(v1alpha1.IntegrationContextPhaseBuildRunning),
+				string(v1alpha1.IntegrationKitPhaseBuildRunning),
 				string(target.Status.Phase),
 			)
 		}
 
-		// Let's copy the build failure to the integration context status
+		// Let's copy the build failure to the integration kit status
 		target.Status.Failure = build.Status.Failure
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseError
+		target.Status.Phase = v1alpha1.IntegrationKitPhaseError
 
-		action.L.Error(fmt.Errorf(build.Status.Error), "IntegrationContext state transition", "phase", target.Status.Phase)
+		action.L.Error(fmt.Errorf(build.Status.Error), "IntegrationKit state transition", "phase", target.Status.Phase)
 
 		return action.client.Status().Update(ctx, target)
 	}
@@ -209,19 +207,19 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, ictx *v1alpha
 	return nil
 }
 
-// informIntegrations triggers the processing of all integrations waiting for this context to be built
-func (action *buildAction) informIntegrations(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
+// informIntegrations triggers the processing of all integrations waiting for this kit to be built
+func (action *buildAction) informIntegrations(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
 	list := v1alpha1.NewIntegrationList()
-	err := action.client.List(ctx, &k8sclient.ListOptions{Namespace: ictx.Namespace}, &list)
+	err := action.client.List(ctx, &k8sclient.ListOptions{Namespace: kit.Namespace}, &list)
 	if err != nil {
 		return err
 	}
 	for _, integration := range list.Items {
 		integration := integration // pin
-		if integration.Status.Context != ictx.Name {
+		if integration.Status.Kit != kit.Name {
 			continue
 		}
-		integration.Status.Phase = v1alpha1.IntegrationPhaseResolvingContext
+		integration.Status.Phase = v1alpha1.IntegrationPhaseResolvingKit
 		err = action.client.Status().Update(ctx, &integration)
 		if err != nil {
 			return err

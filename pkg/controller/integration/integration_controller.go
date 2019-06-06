@@ -89,7 +89,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to secondary resource Builds and requeue the owner IntegrationContext
+	// Watch for changes to secondary resource Builds and requeue the owner IntegrationKit
 	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
@@ -183,7 +183,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 	integrationActionPool := []Action{
 		NewInitializeAction(),
-		NewBuildContextAction(),
+		NewBuildKitAction(),
 		NewDeployAction(),
 		NewMonitorAction(),
 		NewDeleteAction(),

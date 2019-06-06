@@ -58,11 +58,11 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 	}
 	fmt.Printf("%d integrations deleted from namespace %s\n", n, o.Namespace)
 
-	if n, err = o.deleteAllIntegrationContexts(c); err != nil {
+	if n, err = o.deleteAllIntegrationKits(c); err != nil {
 		fmt.Print(err)
 		return
 	}
-	fmt.Printf("%d integration contexts deleted from namespace %s\n", n, o.Namespace)
+	fmt.Printf("%d integration kits deleted from namespace %s\n", n, o.Namespace)
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
 		fmt.Print(err)
@@ -86,15 +86,15 @@ func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 	return len(list.Items), nil
 }
 
-func (o *resetCmdOptions) deleteAllIntegrationContexts(c client.Client) (int, error) {
-	list := v1alpha1.NewIntegrationContextList()
+func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error) {
+	list := v1alpha1.NewIntegrationKitList()
 	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
-		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration contexts from namespace %s", o.Namespace))
+		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration kits from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
-		ictx := i
-		if err := c.Delete(o.Context, &ictx); err != nil {
-			return 0, errors.Wrap(err, fmt.Sprintf("could not delete integration context %s from namespace %s", ictx.Name, ictx.Namespace))
+		kit := i
+		if err := c.Delete(o.Context, &kit); err != nil {
+			return 0, errors.Wrap(err, fmt.Sprintf("could not delete integration kit %s from namespace %s", kit.Name, kit.Namespace))
 		}
 	}
 	return len(list.Items), nil

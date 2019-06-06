@@ -156,7 +156,7 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 			l := b.log.WithValues(
 				"step", step.ID(),
 				"phase", step.Phase(),
-				"context", build.Meta.Name,
+				"kit", build.Meta.Name,
 			)
 
 			l.Infof("executing step")

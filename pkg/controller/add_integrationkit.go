@@ -14,10 +14,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+package controller
 
-package integrationcontext
+import (
+	"github.com/apache/camel-k/pkg/controller/integrationkit"
+)
 
-import "github.com/apache/camel-k/pkg/util/log"
-
-// Log --
-var Log = log.Log.WithName("controller").WithName("integrationcontext")
+func init() {
+	// AddToManagerFuncs is a list of functions to create controllers and add them to a manager.
+	AddToManagerFuncs = append(AddToManagerFuncs, integrationkit.Add)
+}

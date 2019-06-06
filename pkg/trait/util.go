@@ -33,20 +33,20 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// GetIntegrationContext retrieves the context set on the integration
-func GetIntegrationContext(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationContext, error) {
-	if integration.Status.Context == "" {
+// GetIntegrationKit retrieves the kit set on the integration
+func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationKit, error) {
+	if integration.Status.Kit == "" {
 		return nil, nil
 	}
 
-	name := integration.Status.Context
-	ictx := v1alpha1.NewIntegrationContext(integration.Namespace, name)
+	name := integration.Status.Kit
+	kit := v1alpha1.NewIntegrationKit(integration.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Namespace: integration.Namespace,
 		Name:      name,
 	}
-	err := c.Get(ctx, key, &ictx)
-	return &ictx, err
+	err := c.Get(ctx, key, &kit)
+	return &kit, err
 }
 
 // CollectConfigurationValues --

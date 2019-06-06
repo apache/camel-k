@@ -15,17 +15,35 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
-kind: IntegrationContext
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
 metadata:
-  name: kotlin
+  name: integrationkits.camel.apache.org
   labels:
     app: "camel-k"
-    camel.apache.org/context.created.by.kind: Operator
-    camel.apache.org/context.created.by.name: camel-k-operator
-    camel.apache.org/context.type: platform
 spec:
-  dependencies:
-    - runtime:jvm
-    - runtime:kotlin
-    - camel:core
+  group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
+  subresources:
+    status: {}
+  names:
+    kind: IntegrationKit
+    listKind: IntegrationKitList
+    plural: integrationkits
+    singular: integrationkit
+    shortNames:
+    - itk
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The IntegrationKit phase
+      JSONPath: .status.phase
+    - name: Type
+      type: string
+      description: The IntegrationKit type
+      JSONPath: .metadata.labels.camel\.apache\.org\/kit\.type
+    - name: Image
+      type: string
+      description: The IntegrationKit image
+      JSONPath: .status.image

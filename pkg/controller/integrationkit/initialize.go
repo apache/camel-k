@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package integrationcontext
+package integrationkit
 
 import (
 	"context"
@@ -26,7 +26,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 )
 
-// NewInitializeAction creates a new initialization handling action for the context
+// NewInitializeAction creates a new initialization handling action for the kit
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -39,48 +39,48 @@ func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *initializeAction) CanHandle(ictx *v1alpha1.IntegrationContext) bool {
-	return ictx.Status.Phase == ""
+func (action *initializeAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
+	return kit.Status.Phase == ""
 }
 
-func (action *initializeAction) Handle(ctx context.Context, ictx *v1alpha1.IntegrationContext) error {
-	// The integration platform needs to be initialized before starting to create contexts
-	if _, err := platform.GetCurrentPlatform(ctx, action.client, ictx.Namespace); err != nil {
+func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+	// The integration platform needs to be initialized before starting to create kits
+	if _, err := platform.GetCurrentPlatform(ctx, action.client, kit.Namespace); err != nil {
 		action.L.Info("Waiting for the integration platform to be initialized")
 		return nil
 	}
 
-	target := ictx.DeepCopy()
+	target := kit.DeepCopy()
 
 	_, err := trait.Apply(ctx, action.client, nil, target)
 	if err != nil {
 		return err
 	}
 
-	// Updating the whole integration context as it may have changed
-	action.L.Info("Updating IntegrationContext")
+	// Updating the whole integration kit as it may have changed
+	action.L.Info("Updating IntegrationKit")
 	if err := action.client.Update(ctx, target); err != nil {
 		return err
 	}
 
 	if target.Spec.Image == "" {
-		// by default the context should be built
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseBuildSubmitted
+		// by default the kit should be built
+		target.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
 	} else {
 		// but in case it has been created from an image, mark the
-		// context as ready
-		target.Status.Phase = v1alpha1.IntegrationContextPhaseReady
+		// kit as ready
+		target.Status.Phase = v1alpha1.IntegrationKitPhaseReady
 
 		// and set the image to be used
 		target.Status.Image = target.Spec.Image
 	}
 
-	dgst, err := digest.ComputeForIntegrationContext(target)
+	dgst, err := digest.ComputeForIntegrationKit(target)
 	if err != nil {
 		return err
 	}
 	target.Status.Digest = dgst
 
-	action.L.Info("IntegrationContext state transition", "phase", target.Status.Phase)
+	action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
 	return action.client.Status().Update(ctx, target)
 }

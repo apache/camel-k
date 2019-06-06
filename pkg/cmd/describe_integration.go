@@ -92,7 +92,7 @@ func (command *describeIntegrationCommand) describeIntegration(i v1alpha1.Integr
 
 		w.write(0, "Phase:\t%s\n", i.Status.Phase)
 		w.write(0, "Camel Version:\t%s\n", i.Status.CamelVersion)
-		w.write(0, "Context:\t%s\n", i.Status.Context)
+		w.write(0, "Kit:\t%s\n", i.Status.Kit)
 		w.write(0, "Image:\t%s\n", i.Status.Image)
 
 		if len(i.Spec.Configuration) > 0 {

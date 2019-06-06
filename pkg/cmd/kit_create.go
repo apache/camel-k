@@ -35,22 +35,21 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewCmdContext --
-func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := &contextCreateCommand{
+func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	impl := &kitCreateCommand{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
 		Use:   "create",
-		Short: "Create an Integration Context",
-		Long:  `Create an Integration Context.`,
+		Short: "Create an Integration Kit",
+		Long:  `Create an Integration Kit.`,
 		Args:  impl.validateArgs,
 		RunE:  impl.run,
 	}
 
-	cmd.Flags().StringVarP(&impl.runtime, "runtime", "r", "jvm", "Runtime provided by the context")
-	cmd.Flags().StringVar(&impl.image, "image", "", "Image used to create the context")
+	cmd.Flags().StringVarP(&impl.runtime, "runtime", "r", "jvm", "Runtime provided by the kit")
+	cmd.Flags().StringVar(&impl.image, "image", "", "Image used to create the kit")
 	cmd.Flags().StringSliceVarP(&impl.dependencies, "dependency", "d", nil, "Add a dependency")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringSliceVar(&impl.configmaps, "configmap", nil, "Add a ConfigMap")
@@ -64,7 +63,7 @@ func newContextCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	return &cmd
 }
 
-type contextCreateCommand struct {
+type kitCreateCommand struct {
 	*RootCmdOptions
 
 	runtime      string
@@ -77,7 +76,7 @@ type contextCreateCommand struct {
 	traits       []string
 }
 
-func (command *contextCreateCommand) validateArgs(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommand) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
 	}
@@ -85,7 +84,7 @@ func (command *contextCreateCommand) validateArgs(_ *cobra.Command, args []strin
 	return nil
 }
 
-func (command *contextCreateCommand) run(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -102,26 +101,26 @@ func (command *contextCreateCommand) run(_ *cobra.Command, args []string) error 
 		}
 	}
 
-	ctx := v1alpha1.NewIntegrationContext(command.Namespace, args[0])
+	ctx := v1alpha1.NewIntegrationKit(command.Namespace, args[0])
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
 	if err := c.Get(command.Context, key, &ctx); err == nil {
-		// the integration context already exists, let's check that it is
+		// the integration kit already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if ctx.Labels["camel.apache.org/context.type"] == v1alpha1.IntegrationContextTypePlatform {
-			fmt.Printf("integration context \"%s\" is not editable\n", ctx.Name)
+		if ctx.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
+			fmt.Printf("integration kit \"%s\" is not editable\n", ctx.Name)
 			return nil
 		}
 	}
 
-	ctx = v1alpha1.NewIntegrationContext(command.Namespace, kubernetes.SanitizeName(args[0]))
+	ctx = v1alpha1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
 	ctx.Labels = map[string]string{
-		"camel.apache.org/context.type": v1alpha1.IntegrationContextTypeUser,
+		"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypeUser,
 	}
-	ctx.Spec = v1alpha1.IntegrationContextSpec{
+	ctx.Spec = v1alpha1.IntegrationKitSpec{
 		Dependencies:  make([]string, 0, len(command.dependencies)),
 		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
 		Repositories:  command.repositories,
@@ -129,14 +128,14 @@ func (command *contextCreateCommand) run(_ *cobra.Command, args []string) error 
 
 	if command.image != "" {
 		//
-		// if the image is set, the context do not require any build but
+		// if the image is set, the kit do not require any build but
 		// is be marked as external as the information about the classpath
-		// is missing so it cannot be used as base for other contexts
+		// is missing so it cannot be used as base for other kits
 		//
-		ctx.Labels["camel.apache.org/context.type"] = v1alpha1.IntegrationContextTypeExternal
+		ctx.Labels["camel.apache.org/kit.type"] = v1alpha1.IntegrationKitTypeExternal
 
 		//
-		// Set the image to be used by the context
+		// Set the image to be used by the kit
 		//
 		ctx.Spec.Image = command.image
 	}
@@ -202,15 +201,15 @@ func (command *contextCreateCommand) run(_ *cobra.Command, args []string) error 
 	}
 
 	if !existed {
-		fmt.Printf("integration context \"%s\" created\n", ctx.Name)
+		fmt.Printf("integration kit \"%s\" created\n", ctx.Name)
 	} else {
-		fmt.Printf("integration context \"%s\" updated\n", ctx.Name)
+		fmt.Printf("integration kit \"%s\" updated\n", ctx.Name)
 	}
 
 	return nil
 }
 
-func (*contextCreateCommand) configureTrait(ctx *v1alpha1.IntegrationContext, config string) error {
+func (*kitCreateCommand) configureTrait(ctx *v1alpha1.IntegrationKit, config string) error {
 	if ctx.Spec.Traits == nil {
 		ctx.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
 	}

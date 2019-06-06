@@ -72,7 +72,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 		e.Integration.Status.RuntimeVersion = e.RuntimeVersion
 	}
 
-	if e.IntegrationContext != nil {
+	if e.IntegrationKit != nil {
 		if e.CamelCatalog == nil {
 			version := e.DetermineCamelVersion()
 
@@ -80,7 +80,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 				version = t.Version
 			}
 
-			c, err := camel.Catalog(e.C, e.Client, e.IntegrationContext.Namespace, version)
+			c, err := camel.Catalog(e.C, e.Client, e.IntegrationKit.Namespace, version)
 			if err != nil {
 				return err
 			}
@@ -91,8 +91,8 @@ func (t *camelTrait) Apply(e *Environment) error {
 			e.CamelCatalog = c
 		}
 
-		e.IntegrationContext.Status.CamelVersion = e.CamelCatalog.Version
-		e.IntegrationContext.Status.RuntimeVersion = e.RuntimeVersion
+		e.IntegrationKit.Status.CamelVersion = e.CamelCatalog.Version
+		e.IntegrationKit.Status.RuntimeVersion = e.RuntimeVersion
 	}
 
 	return nil

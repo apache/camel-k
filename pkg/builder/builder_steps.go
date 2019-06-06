@@ -392,7 +392,7 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 }
 
 func listPublishedImages(context *Context) ([]publishedImage, error) {
-	list := v1alpha1.NewIntegrationContextList()
+	list := v1alpha1.NewIntegrationKitList()
 
 	err := context.Client.List(context.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
 	if err != nil {
@@ -401,31 +401,28 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 
 	images := make([]publishedImage, 0)
 	for _, item := range list.Items {
-		ctx := item
+		kit := item
 
-		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady {
+		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady {
 			continue
 		}
-		if ctx.Status.CamelVersion != context.Catalog.Version {
+		if kit.Status.CamelVersion != context.Catalog.Version {
 			continue
 		}
-		if ctx.Status.RuntimeVersion != context.Build.RuntimeVersion {
+		if kit.Status.RuntimeVersion != context.Build.RuntimeVersion {
 			continue
 		}
-		if ctx.Status.Phase != v1alpha1.IntegrationContextPhaseReady || ctx.Labels == nil {
+		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady || kit.Labels == nil {
 			continue
 		}
-		if context.ContextFilter != nil && !context.ContextFilter(&ctx) {
-			continue
-		}
-		if ctxType, present := ctx.Labels["camel.apache.org/context.type"]; !present || ctxType != v1alpha1.IntegrationContextTypePlatform {
+		if ctxType, present := kit.Labels["camel.apache.org/kit.type"]; !present || ctxType != v1alpha1.IntegrationKitTypePlatform {
 			continue
 		}
 
 		images = append(images, publishedImage{
-			Image:        ctx.Status.Image,
-			Artifacts:    ctx.Status.Artifacts,
-			Dependencies: ctx.Spec.Dependencies,
+			Image:        kit.Status.Image,
+			Artifacts:    kit.Status.Artifacts,
+			Dependencies: kit.Spec.Dependencies,
 		})
 	}
 	return images, nil

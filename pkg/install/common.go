@@ -91,8 +91,8 @@ func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace stri
 		if obj.GetObjectKind().GroupVersionKind().Kind == "Service" {
 			return nil
 		}
-		// Don't recreate integration contexts, platforms, etc
-		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationContextKind {
+		// Don't recreate integration kits, platforms, etc
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationKindKind {
 			return nil
 		}
 		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationPlatformKind {
