@@ -27,6 +27,9 @@ GIT_COMMIT := $(shell git rev-list -1 HEAD)
 # For signing binary artifacts
 GPG_PASS := $(GPG_PASS)
 
+# Used to push pre-relase artifacts
+STAGING_IMAGE_NAME := docker.io/camelk/camel-k
+
 GOLDFLAGS += -X main.GitCommit=$(GIT_COMMIT)
 GOFLAGS = -ldflags "$(GOLDFLAGS)"
 
@@ -167,6 +170,10 @@ images-dev: test package-artifacts
 images-push:
 	docker push $(IMAGE_NAME):$(VERSION)
 
+images-push-staging:
+	docker tag $(IMAGE_NAME):$(VERSION) $(STAGING_IMAGE_NAME):$(VERSION)
+	docker push $(STAGING_IMAGE_NAME):$(VERSION)
+
 set-version:
 	./script/set_version.sh $(VERSION) $(IMAGE_NAME)
 
@@ -187,9 +194,11 @@ unsnapshot-olm:
 
 release: clean codegen set-version build-resources unsnapshot-olm build images images-push cross-compile package-examples git-tag
 
+release-staging: clean codegen set-version build-resources unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
+
 install-minishift:
 	./script/install_minishift.sh
 install-minikube:
 	./script/install_minikube.sh
 
-.PHONY: build build-operator build-kamel build-resources build-builder build-olm unsnapshot-olm dep codegen images images-dec images-push test check test-integration clean release cross-compile package-examples set-version git-tag
+.PHONY: build build-operator build-kamel build-resources build-builder build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag
