@@ -33,7 +33,7 @@ spec:
     plural: integrationkits
     singular: integrationkit
     shortNames:
-    - itk
+    - ik
   additionalPrinterColumns:
     - name: Phase
       type: string
