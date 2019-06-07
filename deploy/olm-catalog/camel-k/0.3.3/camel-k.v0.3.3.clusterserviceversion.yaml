@@ -22,7 +22,7 @@ metadata:
     capabilities: Basic Install
     categories: "Integration & Delivery"
     repository: https://github.com/apache/camel-k
-    containerImage: docker.io/apache/camel-k:0.3.3
+    containerImage: docker.io/apache/camel-k:0.3.4
     support: Camel
     createdAt: 2019-05-06T16:45:00Z
     certified: "false"
@@ -203,7 +203,7 @@ spec:
                         valueFrom:
                           fieldRef:
                             fieldPath: metadata.name
-                    image: docker.io/apache/camel-k:0.3.3
+                    image: docker.io/apache/camel-k:0.3.4
                     imagePullPolicy: IfNotPresent
                     name: camel-k-operator
                 serviceAccountName: camel-k-operator

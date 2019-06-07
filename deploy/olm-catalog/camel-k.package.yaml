@@ -18,4 +18,4 @@
 packageName: camel-k
 channels:
 - name: alpha
-  currentCSV: camel-k-operator.v0.3.4-SNAPSHOT
+  currentCSV: camel-k-operator.v0.3.4
