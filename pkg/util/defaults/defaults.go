@@ -22,7 +22,7 @@ package defaults
 
 const (
 	// Version --
-	Version = "0.3.4-SNAPSHOT"
+	Version = "0.4.0-SNAPSHOT"
 
 	// CamelVersionConstraint --
 	CamelVersionConstraint = "~2.24.x"
