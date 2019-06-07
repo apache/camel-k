@@ -98,7 +98,7 @@ func NewContext(buildDir string, project Project) Context {
 	}
 }
 
-// Kit --
+// Context --
 type Context struct {
 	Path                string
 	Project             Project
