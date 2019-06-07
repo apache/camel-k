@@ -47,6 +47,8 @@ cross_compile () {
 	    gpg --output ${targetdir}/kamel${extension}.asc --armor --detach-sig --passphrase ${gpg_pass} ${targetdir}/kamel${extension}
 	fi
 
+    pushd . && cd ${targetdir} && sha512sum -b kamel${extension} > kamel${extension}.sha512 && popd
+
 	cp ${location}/../LICENSE ${targetdir}/
 	cp ${location}/../NOTICE ${targetdir}/
 
