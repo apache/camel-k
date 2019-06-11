@@ -20,6 +20,8 @@
 //
 //     kamel run --name=rest-with-restlet --dependency=camel-restlet examples/RestWithRestlet.java
 //
+import org.apache.camel.Exchange;
+
 public class RestWithRestlet extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
@@ -33,6 +35,7 @@ public class RestWithRestlet extends org.apache.camel.builder.RouteBuilder {
             .to("direct:hello");
 
         from("direct:hello")
+            .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
             .transform().simple("Hello World");
     }
 }
