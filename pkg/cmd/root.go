@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
@@ -51,7 +52,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		Long:                   kamelCommandLongDescription,
 	}
 
-	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", "", "Path to the config file to use for CLI requests")
+	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", os.Getenv("KUBECONFIG"), "Path to the config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 
 	cmd.AddCommand(newCmdCompletion(&cmd))
