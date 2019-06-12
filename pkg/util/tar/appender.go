@@ -74,7 +74,7 @@ func (t *Appender) AddFile(filePath string, tarDir string) (string, error) {
 	if err := t.writer.WriteHeader(&atar.Header{
 		Name:    fileName,
 		Size:    info.Size(),
-		Mode:    int64(info.Mode()),
+		Mode:    0644,
 		ModTime: info.ModTime(),
 	}); err != nil {
 		return "", err
@@ -108,7 +108,7 @@ func (t *Appender) AddFileWithName(fileName string, filePath string, tarDir stri
 	if err := t.writer.WriteHeader(&atar.Header{
 		Name:    fileName,
 		Size:    info.Size(),
-		Mode:    int64(info.Mode()),
+		Mode:    0644,
 		ModTime: info.ModTime(),
 	}); err != nil {
 		return "", err
