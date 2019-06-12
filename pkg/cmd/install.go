@@ -229,6 +229,7 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 						ActiveByDefault: true,
 					},
 					Repositories: repositories,
+					PluginRepositories: repositories,
 				},
 			}
 
