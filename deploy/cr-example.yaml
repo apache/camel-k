@@ -20,8 +20,8 @@ kind: Integration
 metadata:
   name: example
 spec:
-  source:
-    content: |-
+  sources:
+  - content: |-
       // This is Camel K Groovy example route
 
       rnd = new Random()
