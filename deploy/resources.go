@@ -10772,7 +10772,7 @@ spec:
     plural: integrationkits
     singular: integrationkit
     shortNames:
-    - itk
+    - ik
   additionalPrinterColumns:
     - name: Phase
       type: string
@@ -10906,8 +10906,8 @@ kind: Integration
 metadata:
   name: example
 spec:
-  source:
-    content: |-
+  sources:
+  - content: |-
       // This is Camel K Groovy example route
 
       rnd = new Random()
