@@ -84,6 +84,9 @@ func (t *serviceTrait) Apply(e *Environment) (err error) {
 	}
 	svc.Spec.Ports = append(svc.Spec.Ports, port)
 
+	// Mark the service as a user service
+	svc.Labels["camel.apache.org/service.type"] = "user"
+
 	// Register a post processor to add a container port to the integration deployment
 	e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
 		var container *corev1.Container
