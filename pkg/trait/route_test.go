@@ -78,6 +78,7 @@ func createTestRouteEnvironment(t *testing.T) *Environment {
 				Namespace: "test-ns",
 				Labels: map[string]string{
 					"camel.apache.org/integration": "test-i",
+					"camel.apache.org/service.type": "user",
 				},
 			},
 			Spec: corev1.ServiceSpec{
