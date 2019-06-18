@@ -63,6 +63,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&impl.skipOperatorSetup, "skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
+	cmd.Flags().BoolVar(&impl.global, "global", false, "Configure the operator to watch all namespaces")
 
 	cmd.Flags().StringVarP(&impl.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().StringVar(&impl.registry.Organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
@@ -102,6 +103,7 @@ type installCmdOptions struct {
 	skipOperatorSetup bool
 	skipClusterSetup  bool
 	exampleSetup      bool
+	global            bool
 	outputFormat      string
 	camelVersion      string
 	runtimeVersion    string
@@ -152,7 +154,12 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 		namespace := o.Namespace
 
 		if !o.skipOperatorSetup {
-			err = install.OperatorOrCollect(o.Context, c, namespace, o.operatorImage, collection)
+			cfg := install.OperatorConfiguration{
+				CustomImage: o.operatorImage,
+				Namespace:   namespace,
+				Global:      o.global,
+			}
+			err = install.OperatorOrCollect(o.Context, c, cfg, collection)
 			if err != nil {
 				return err
 			}
