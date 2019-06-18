@@ -20,47 +20,99 @@ package install
 import (
 	"context"
 	"errors"
+	"strings"
 
 	v1 "k8s.io/api/apps/v1"
+	v1beta1 "k8s.io/api/rbac/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
+// OperatorConfiguration --
+type OperatorConfiguration struct {
+	CustomImage string
+	Namespace   string
+	Global      bool
+}
+
 // Operator installs the operator resources in the given namespace
-func Operator(ctx context.Context, c client.Client, customImage string, namespace string) error {
-	return OperatorOrCollect(ctx, c, namespace, customImage, nil)
+func Operator(ctx context.Context, c client.Client, cfg OperatorConfiguration) error {
+	return OperatorOrCollect(ctx, c, cfg, nil)
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
-func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, customImage string, collection *kubernetes.Collection) error {
-	customizer := IdentityResourceCustomizer
-	if customImage != "" {
-		customizer = func(o runtime.Object) runtime.Object {
+func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection) error {
+	customizer := func(o runtime.Object) runtime.Object {
+		if cfg.CustomImage != "" {
 			if d, ok := o.(*v1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
-					d.Spec.Template.Spec.Containers[0].Image = customImage
+					d.Spec.Template.Spec.Containers[0].Image = cfg.CustomImage
 				}
 			}
-			return o
 		}
+
+		if cfg.Global {
+			if d, ok := o.(*v1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					// Make the operator watch all namespaces
+					envvar.SetVal(&d.Spec.Template.Spec.Containers[0].Env, "WATCH_NAMESPACE", "")
+				}
+			}
+
+			// Turn Role & RoleBinding into their equivalent cluster types
+			if r, ok := o.(*v1beta1.Role); ok {
+				if strings.HasPrefix(r.Name, "camel-k-operator") {
+					o = &v1beta1.ClusterRole{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: cfg.Namespace,
+							Name:      r.Name,
+						},
+						Rules: r.Rules,
+					}
+				}
+			}
+
+			if rb, ok := o.(*v1beta1.RoleBinding); ok {
+				if strings.HasPrefix(rb.Name, "camel-k-operator") {
+					rb.Subjects[0].Namespace = cfg.Namespace
+
+					o = &v1beta1.ClusterRoleBinding{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: cfg.Namespace,
+							Name:      rb.Name,
+						},
+						Subjects: rb.Subjects,
+						RoleRef: v1beta1.RoleRef{
+							APIGroup: rb.RoleRef.APIGroup,
+							Kind:     "ClusterRole",
+							Name:     rb.RoleRef.Name,
+						},
+					}
+				}
+			}
+		}
+		return o
 	}
+
 	isOpenshift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return err
 	}
 	if isOpenshift {
-		if err := installOpenshift(ctx, c, namespace, customizer, collection); err != nil {
+		if err := installOpenshift(ctx, c, cfg.Namespace, customizer, collection); err != nil {
 			return err
 		}
 	} else {
-		if err := installKubernetes(ctx, c, namespace, customizer, collection); err != nil {
+		if err := installKubernetes(ctx, c, cfg.Namespace, customizer, collection); err != nil {
 			return err
 		}
 	}
@@ -70,7 +122,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, namespace string, c
 		return err
 	}
 	if isKnative {
-		return installKnative(ctx, c, namespace, collection)
+		return installKnative(ctx, c, cfg.Namespace, collection)
 	}
 	return nil
 }

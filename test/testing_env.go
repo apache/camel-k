@@ -23,13 +23,14 @@ package test
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/labels"
 	"time"
+
+	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,7 +56,11 @@ func init() {
 		panic(err)
 	}
 
-	err = install.Operator(testContext, testClient, "", getTargetNamespace())
+	cfg := install.OperatorConfiguration{
+		Namespace: getTargetNamespace(),
+	}
+
+	err = install.Operator(testContext, testClient, cfg)
 	if err != nil {
 		panic(err)
 	}
