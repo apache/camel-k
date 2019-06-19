@@ -171,8362 +171,25 @@ metadata:
     app: "camel-k"
 
 `
-	Resources["camel-catalog-2.23.0.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: CamelCatalog
-metadata:
-  name: camel-catalog-2.23.0
-  labels:
-    app: camel-k
-    camel.apache.org/catalog.version: 2.23.0
-    camel.apache.org/catalog.loader.version: 2.23.0
-spec:
-  version: 2.23.0
-  artifacts:
-    camel-ahc:
-      groupId: org.apache.camel
-      artifactId: camel-ahc
-      schemes:
-      - id: ahc
-        http: true
-        passive: false
-    camel-ahc-ws:
-      groupId: org.apache.camel
-      artifactId: camel-ahc-ws
-      schemes:
-      - id: ahc-ws
-        http: true
-        passive: false
-      - id: ahc-wss
-        http: false
-        passive: false
-    camel-amqp:
-      groupId: org.apache.camel
-      artifactId: camel-amqp
-      schemes:
-      - id: amqp
-        http: false
-        passive: false
-    camel-apns:
-      groupId: org.apache.camel
-      artifactId: camel-apns
-      schemes:
-      - id: apns
-        http: false
-        passive: false
-    camel-as2:
-      groupId: org.apache.camel
-      artifactId: camel-as2
-      schemes:
-      - id: as2
-        http: false
-        passive: false
-    camel-asn1:
-      groupId: org.apache.camel
-      artifactId: camel-asn1
-      dataformats:
-      - asn1
-    camel-asterisk:
-      groupId: org.apache.camel
-      artifactId: camel-asterisk
-      schemes:
-      - id: asterisk
-        http: false
-        passive: false
-    camel-atmos:
-      groupId: org.apache.camel
-      artifactId: camel-atmos
-      schemes:
-      - id: atmos
-        http: false
-        passive: false
-    camel-atmosphere-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-atmosphere-websocket
-      schemes:
-      - id: atmosphere-websocket
-        http: true
-        passive: false
-    camel-atom:
-      groupId: org.apache.camel
-      artifactId: camel-atom
-      schemes:
-      - id: atom
-        http: false
-        passive: false
-    camel-atomix:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      schemes:
-      - id: atomix-map
-        http: false
-        passive: false
-      - id: atomix-messaging
-        http: false
-        passive: false
-      - id: atomix-multimap
-        http: false
-        passive: false
-      - id: atomix-queue
-        http: false
-        passive: false
-      - id: atomix-set
-        http: false
-        passive: false
-      - id: atomix-value
-        http: false
-        passive: false
-    camel-avro:
-      groupId: org.apache.camel
-      artifactId: camel-avro
-      schemes:
-      - id: avro
-        http: false
-        passive: false
-      dataformats:
-      - avro
-    camel-aws:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      schemes:
-      - id: aws-cw
-        http: false
-        passive: false
-      - id: aws-ddb
-        http: false
-        passive: false
-      - id: aws-ddbstream
-        http: false
-        passive: false
-      - id: aws-ec2
-        http: false
-        passive: false
-      - id: aws-iam
-        http: false
-        passive: false
-      - id: aws-kinesis
-        http: false
-        passive: false
-      - id: aws-kinesis-firehose
-        http: false
-        passive: false
-      - id: aws-kms
-        http: false
-        passive: false
-      - id: aws-lambda
-        http: false
-        passive: false
-      - id: aws-mq
-        http: false
-        passive: false
-      - id: aws-s3
-        http: false
-        passive: false
-      - id: aws-sdb
-        http: false
-        passive: false
-      - id: aws-ses
-        http: false
-        passive: false
-      - id: aws-sns
-        http: false
-        passive: false
-      - id: aws-sqs
-        http: false
-        passive: false
-      - id: aws-swf
-        http: false
-        passive: false
-    camel-azure:
-      groupId: org.apache.camel
-      artifactId: camel-azure
-      schemes:
-      - id: azure-blob
-        http: false
-        passive: false
-      - id: azure-queue
-        http: false
-        passive: false
-    camel-barcode:
-      groupId: org.apache.camel
-      artifactId: camel-barcode
-      dataformats:
-      - barcode
-    camel-base64:
-      groupId: org.apache.camel
-      artifactId: camel-base64
-      dataformats:
-      - base64
-    camel-bean-validator:
-      groupId: org.apache.camel
-      artifactId: camel-bean-validator
-      schemes:
-      - id: bean-validator
-        http: false
-        passive: false
-    camel-beanio:
-      groupId: org.apache.camel
-      artifactId: camel-beanio
-      dataformats:
-      - beanio
-    camel-beanstalk:
-      groupId: org.apache.camel
-      artifactId: camel-beanstalk
-      schemes:
-      - id: beanstalk
-        http: false
-        passive: false
-    camel-bindy:
-      groupId: org.apache.camel
-      artifactId: camel-bindy
-      dataformats:
-      - bindy-csv
-      - bindy-fixed
-      - bindy-kvp
-    camel-bonita:
-      groupId: org.apache.camel
-      artifactId: camel-bonita
-      schemes:
-      - id: bonita
-        http: false
-        passive: false
-    camel-boon:
-      groupId: org.apache.camel
-      artifactId: camel-boon
-      dataformats:
-      - boon
-    camel-box:
-      groupId: org.apache.camel
-      artifactId: camel-box
-      schemes:
-      - id: box
-        http: false
-        passive: false
-    camel-braintree:
-      groupId: org.apache.camel
-      artifactId: camel-braintree
-      schemes:
-      - id: braintree
-        http: false
-        passive: false
-    camel-cache:
-      groupId: org.apache.camel
-      artifactId: camel-cache
-      schemes:
-      - id: cache
-        http: false
-        passive: false
-    camel-caffeine:
-      groupId: org.apache.camel
-      artifactId: camel-caffeine
-      schemes:
-      - id: caffeine-cache
-        http: false
-        passive: false
-      - id: caffeine-loadcache
-        http: false
-        passive: false
-    camel-cassandraql:
-      groupId: org.apache.camel
-      artifactId: camel-cassandraql
-      schemes:
-      - id: cql
-        http: false
-        passive: false
-    camel-castor:
-      groupId: org.apache.camel
-      artifactId: camel-castor
-      dataformats:
-      - castor
-    camel-chronicle:
-      groupId: org.apache.camel
-      artifactId: camel-chronicle
-      schemes:
-      - id: chronicle-engine
-        http: false
-        passive: false
-    camel-chunk:
-      groupId: org.apache.camel
-      artifactId: camel-chunk
-      schemes:
-      - id: chunk
-        http: false
-        passive: false
-    camel-cm-sms:
-      groupId: org.apache.camel
-      artifactId: camel-cm-sms
-      schemes:
-      - id: cm-sms
-        http: false
-        passive: false
-    camel-cmis:
-      groupId: org.apache.camel
-      artifactId: camel-cmis
-      schemes:
-      - id: cmis
-        http: false
-        passive: false
-    camel-coap:
-      groupId: org.apache.camel
-      artifactId: camel-coap
-      schemes:
-      - id: coap
-        http: false
-        passive: false
-    camel-cometd:
-      groupId: org.apache.camel
-      artifactId: camel-cometd
-      schemes:
-      - id: cometd
-        http: false
-        passive: false
-      - id: cometds
-        http: false
-        passive: false
-    camel-consul:
-      groupId: org.apache.camel
-      artifactId: camel-consul
-      schemes:
-      - id: consul
-        http: false
-        passive: false
-    camel-context:
-      groupId: org.apache.camel
-      artifactId: camel-context
-      schemes:
-      - id: context
-        http: false
-        passive: false
-    camel-core:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      schemes:
-      - id: bean
-        http: false
-        passive: true
-      - id: binding
-        http: false
-        passive: true
-      - id: browse
-        http: false
-        passive: true
-      - id: class
-        http: false
-        passive: true
-      - id: controlbus
-        http: false
-        passive: true
-      - id: dataformat
-        http: false
-        passive: true
-      - id: dataset
-        http: false
-        passive: true
-      - id: direct
-        http: false
-        passive: true
-      - id: direct-vm
-        http: false
-        passive: true
-      - id: file
-        http: false
-        passive: false
-      - id: language
-        http: false
-        passive: true
-      - id: log
-        http: false
-        passive: true
-      - id: mock
-        http: false
-        passive: true
-      - id: properties
-        http: false
-        passive: true
-      - id: ref
-        http: false
-        passive: true
-      - id: rest
-        http: true
-        passive: false
-      - id: rest-api
-        http: false
-        passive: false
-      - id: saga
-        http: false
-        passive: false
-      - id: scheduler
-        http: false
-        passive: false
-      - id: seda
-        http: false
-        passive: true
-      - id: stub
-        http: false
-        passive: true
-      - id: test
-        http: false
-        passive: true
-      - id: timer
-        http: false
-        passive: false
-      - id: validator
-        http: false
-        passive: true
-      - id: vm
-        http: false
-        passive: true
-      - id: xslt
-        http: false
-        passive: false
-      languages:
-      - bean
-      - constant
-      - exchangeProperty
-      - file
-      - header
-      - ref
-      - simple
-      - tokenize
-      - xpath
-      - xtokenize
-      dataformats:
-      - gzip
-      - serialization
-      - string
-      - zip
-    camel-couchbase:
-      groupId: org.apache.camel
-      artifactId: camel-couchbase
-      schemes:
-      - id: couchbase
-        http: false
-        passive: false
-    camel-couchdb:
-      groupId: org.apache.camel
-      artifactId: camel-couchdb
-      schemes:
-      - id: couchdb
-        http: false
-        passive: false
-    camel-crypto:
-      groupId: org.apache.camel
-      artifactId: camel-crypto
-      schemes:
-      - id: crypto
-        http: false
-        passive: false
-      dataformats:
-      - crypto
-      - pgp
-    camel-crypto-cms:
-      groupId: org.apache.camel
-      artifactId: camel-crypto-cms
-      schemes:
-      - id: crypto-cms
-        http: false
-        passive: false
-    camel-csv:
-      groupId: org.apache.camel
-      artifactId: camel-csv
-      dataformats:
-      - csv
-    camel-cxf:
-      groupId: org.apache.camel
-      artifactId: camel-cxf
-      schemes:
-      - id: cxf
-        http: true
-        passive: false
-      - id: cxfrs
-        http: true
-        passive: false
-    camel-digitalocean:
-      groupId: org.apache.camel
-      artifactId: camel-digitalocean
-      schemes:
-      - id: digitalocean
-        http: false
-        passive: false
-    camel-disruptor:
-      groupId: org.apache.camel
-      artifactId: camel-disruptor
-      schemes:
-      - id: disruptor
-        http: false
-        passive: false
-      - id: disruptor-vm
-        http: false
-        passive: false
-    camel-dns:
-      groupId: org.apache.camel
-      artifactId: camel-dns
-      schemes:
-      - id: dns
-        http: false
-        passive: false
-    camel-docker:
-      groupId: org.apache.camel
-      artifactId: camel-docker
-      schemes:
-      - id: docker
-        http: false
-        passive: false
-    camel-dozer:
-      groupId: org.apache.camel
-      artifactId: camel-dozer
-      schemes:
-      - id: dozer
-        http: false
-        passive: false
-    camel-drill:
-      groupId: org.apache.camel
-      artifactId: camel-drill
-      schemes:
-      - id: drill
-        http: false
-        passive: false
-    camel-dropbox:
-      groupId: org.apache.camel
-      artifactId: camel-dropbox
-      schemes:
-      - id: dropbox
-        http: false
-        passive: false
-    camel-ehcache:
-      groupId: org.apache.camel
-      artifactId: camel-ehcache
-      schemes:
-      - id: ehcache
-        http: false
-        passive: false
-    camel-ejb:
-      groupId: org.apache.camel
-      artifactId: camel-ejb
-      schemes:
-      - id: ejb
-        http: false
-        passive: false
-    camel-elasticsearch:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch
-      schemes:
-      - id: elasticsearch
-        http: false
-        passive: false
-    camel-elasticsearch-rest:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch-rest
-      schemes:
-      - id: elasticsearch-rest
-        http: false
-        passive: false
-    camel-elasticsearch5:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch5
-      schemes:
-      - id: elasticsearch5
-        http: false
-        passive: false
-    camel-elsql:
-      groupId: org.apache.camel
-      artifactId: camel-elsql
-      schemes:
-      - id: elsql
-        http: false
-        passive: false
-    camel-etcd:
-      groupId: org.apache.camel
-      artifactId: camel-etcd
-      schemes:
-      - id: etcd
-        http: false
-        passive: false
-    camel-eventadmin:
-      groupId: org.apache.camel
-      artifactId: camel-eventadmin
-      schemes:
-      - id: eventadmin
-        http: false
-        passive: false
-    camel-exec:
-      groupId: org.apache.camel
-      artifactId: camel-exec
-      schemes:
-      - id: exec
-        http: false
-        passive: false
-    camel-facebook:
-      groupId: org.apache.camel
-      artifactId: camel-facebook
-      schemes:
-      - id: facebook
-        http: false
-        passive: false
-    camel-fastjson:
-      groupId: org.apache.camel
-      artifactId: camel-fastjson
-      dataformats:
-      - json-fastjson
-    camel-fhir:
-      groupId: org.apache.camel
-      artifactId: camel-fhir
-      schemes:
-      - id: fhir
-        http: false
-        passive: false
-      dataformats:
-      - fhirJson
-      - fhirXml
-    camel-flatpack:
-      groupId: org.apache.camel
-      artifactId: camel-flatpack
-      schemes:
-      - id: flatpack
-        http: false
-        passive: false
-      dataformats:
-      - flatpack
-    camel-flink:
-      groupId: org.apache.camel
-      artifactId: camel-flink
-      schemes:
-      - id: flink
-        http: false
-        passive: false
-    camel-fop:
-      groupId: org.apache.camel
-      artifactId: camel-fop
-      schemes:
-      - id: fop
-        http: false
-        passive: false
-    camel-freemarker:
-      groupId: org.apache.camel
-      artifactId: camel-freemarker
-      schemes:
-      - id: freemarker
-        http: false
-        passive: false
-    camel-ftp:
-      groupId: org.apache.camel
-      artifactId: camel-ftp
-      schemes:
-      - id: ftp
-        http: false
-        passive: false
-      - id: ftps
-        http: false
-        passive: false
-      - id: sftp
-        http: false
-        passive: false
-    camel-ganglia:
-      groupId: org.apache.camel
-      artifactId: camel-ganglia
-      schemes:
-      - id: ganglia
-        http: false
-        passive: false
-    camel-geocoder:
-      groupId: org.apache.camel
-      artifactId: camel-geocoder
-      schemes:
-      - id: geocoder
-        http: false
-        passive: false
-    camel-git:
-      groupId: org.apache.camel
-      artifactId: camel-git
-      schemes:
-      - id: git
-        http: false
-        passive: false
-    camel-github:
-      groupId: org.apache.camel
-      artifactId: camel-github
-      schemes:
-      - id: github
-        http: false
-        passive: false
-    camel-google-bigquery:
-      groupId: org.apache.camel
-      artifactId: camel-google-bigquery
-      schemes:
-      - id: google-bigquery
-        http: false
-        passive: false
-    camel-google-calendar:
-      groupId: org.apache.camel
-      artifactId: camel-google-calendar
-      schemes:
-      - id: google-calendar
-        http: false
-        passive: false
-      - id: google-calendar-stream
-        http: false
-        passive: false
-    camel-google-drive:
-      groupId: org.apache.camel
-      artifactId: camel-google-drive
-      schemes:
-      - id: google-drive
-        http: false
-        passive: false
-    camel-google-mail:
-      groupId: org.apache.camel
-      artifactId: camel-google-mail
-      schemes:
-      - id: google-mail
-        http: false
-        passive: false
-      - id: google-mail-stream
-        http: false
-        passive: false
-    camel-google-pubsub:
-      groupId: org.apache.camel
-      artifactId: camel-google-pubsub
-      schemes:
-      - id: google-pubsub
-        http: false
-        passive: false
-    camel-google-sheets:
-      groupId: org.apache.camel
-      artifactId: camel-google-sheets
-      schemes:
-      - id: google-sheets
-        http: false
-        passive: false
-      - id: google-sheets-stream
-        http: false
-        passive: false
-    camel-gora:
-      groupId: org.apache.camel
-      artifactId: camel-gora
-      schemes:
-      - id: gora
-        http: false
-        passive: false
-    camel-grape:
-      groupId: org.apache.camel
-      artifactId: camel-grape
-      schemes:
-      - id: grape
-        http: false
-        passive: false
-    camel-groovy:
-      groupId: org.apache.camel
-      artifactId: camel-groovy
-      languages:
-      - groovy
-    camel-grpc:
-      groupId: org.apache.camel
-      artifactId: camel-grpc
-      schemes:
-      - id: grpc
-        http: true
-        passive: false
-    camel-gson:
-      groupId: org.apache.camel
-      artifactId: camel-gson
-      dataformats:
-      - json-gson
-    camel-guava-eventbus:
-      groupId: org.apache.camel
-      artifactId: camel-guava-eventbus
-      schemes:
-      - id: guava-eventbus
-        http: false
-        passive: false
-    camel-hazelcast:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      schemes:
-      - id: hazelcast-atomicvalue
-        http: false
-        passive: false
-      - id: hazelcast-instance
-        http: false
-        passive: false
-      - id: hazelcast-list
-        http: false
-        passive: false
-      - id: hazelcast-map
-        http: false
-        passive: false
-      - id: hazelcast-multimap
-        http: false
-        passive: false
-      - id: hazelcast-queue
-        http: false
-        passive: false
-      - id: hazelcast-replicatedmap
-        http: false
-        passive: false
-      - id: hazelcast-ringbuffer
-        http: false
-        passive: false
-      - id: hazelcast-seda
-        http: false
-        passive: false
-      - id: hazelcast-set
-        http: false
-        passive: false
-      - id: hazelcast-topic
-        http: false
-        passive: false
-    camel-hbase:
-      groupId: org.apache.camel
-      artifactId: camel-hbase
-      schemes:
-      - id: hbase
-        http: false
-        passive: false
-    camel-hdfs:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs
-      schemes:
-      - id: hdfs
-        http: false
-        passive: false
-    camel-hdfs2:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs2
-      schemes:
-      - id: hdfs2
-        http: false
-        passive: false
-    camel-hessian:
-      groupId: org.apache.camel
-      artifactId: camel-hessian
-      dataformats:
-      - hessian
-    camel-hipchat:
-      groupId: org.apache.camel
-      artifactId: camel-hipchat
-      schemes:
-      - id: hipchat
-        http: false
-        passive: false
-    camel-hl7:
-      groupId: org.apache.camel
-      artifactId: camel-hl7
-      languages:
-      - terser
-      dataformats:
-      - hl7
-    camel-http:
-      groupId: org.apache.camel
-      artifactId: camel-http
-      schemes:
-      - id: http
-        http: false
-        passive: false
-      - id: https
-        http: false
-        passive: false
-    camel-http4:
-      groupId: org.apache.camel
-      artifactId: camel-http4
-      schemes:
-      - id: http4
-        http: false
-        passive: false
-      - id: https4
-        http: false
-        passive: false
-    camel-ibatis:
-      groupId: org.apache.camel
-      artifactId: camel-ibatis
-      schemes:
-      - id: ibatis
-        http: false
-        passive: false
-    camel-ical:
-      groupId: org.apache.camel
-      artifactId: camel-ical
-      dataformats:
-      - ical
-    camel-iec60870:
-      groupId: org.apache.camel
-      artifactId: camel-iec60870
-      schemes:
-      - id: iec60870-client
-        http: false
-        passive: false
-      - id: iec60870-server
-        http: false
-        passive: false
-    camel-ignite:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      schemes:
-      - id: ignite-cache
-        http: false
-        passive: false
-      - id: ignite-compute
-        http: false
-        passive: false
-      - id: ignite-events
-        http: false
-        passive: false
-      - id: ignite-idgen
-        http: false
-        passive: false
-      - id: ignite-messaging
-        http: false
-        passive: false
-      - id: ignite-queue
-        http: false
-        passive: false
-      - id: ignite-set
-        http: false
-        passive: false
-    camel-infinispan:
-      groupId: org.apache.camel
-      artifactId: camel-infinispan
-      schemes:
-      - id: infinispan
-        http: false
-        passive: false
-    camel-influxdb:
-      groupId: org.apache.camel
-      artifactId: camel-influxdb
-      schemes:
-      - id: influxdb
-        http: false
-        passive: false
-    camel-ipfs:
-      groupId: org.apache.camel
-      artifactId: camel-ipfs
-      schemes:
-      - id: ipfs
-        http: false
-        passive: false
-    camel-irc:
-      groupId: org.apache.camel
-      artifactId: camel-irc
-      schemes:
-      - id: irc
-        http: false
-        passive: false
-    camel-ironmq:
-      groupId: org.apache.camel
-      artifactId: camel-ironmq
-      schemes:
-      - id: ironmq
-        http: false
-        passive: false
-    camel-jackson:
-      groupId: org.apache.camel
-      artifactId: camel-jackson
-      dataformats:
-      - json-jackson
-    camel-jacksonxml:
-      groupId: org.apache.camel
-      artifactId: camel-jacksonxml
-      dataformats:
-      - jacksonxml
-    camel-javaspace:
-      groupId: org.apache.camel
-      artifactId: camel-javaspace
-      schemes:
-      - id: javaspace
-        http: false
-        passive: false
-    camel-jaxb:
-      groupId: org.apache.camel
-      artifactId: camel-jaxb
-      dataformats:
-      - jaxb
-    camel-jbpm:
-      groupId: org.apache.camel
-      artifactId: camel-jbpm
-      schemes:
-      - id: jbpm
-        http: false
-        passive: false
-    camel-jcache:
-      groupId: org.apache.camel
-      artifactId: camel-jcache
-      schemes:
-      - id: jcache
-        http: false
-        passive: false
-    camel-jclouds:
-      groupId: org.apache.camel
-      artifactId: camel-jclouds
-      schemes:
-      - id: jclouds
-        http: false
-        passive: false
-    camel-jcr:
-      groupId: org.apache.camel
-      artifactId: camel-jcr
-      schemes:
-      - id: jcr
-        http: false
-        passive: false
-    camel-jdbc:
-      groupId: org.apache.camel
-      artifactId: camel-jdbc
-      schemes:
-      - id: jdbc
-        http: false
-        passive: false
-    camel-jetty9:
-      groupId: org.apache.camel
-      artifactId: camel-jetty9
-      schemes:
-      - id: jetty
-        http: true
-        passive: false
-    camel-jgroups:
-      groupId: org.apache.camel
-      artifactId: camel-jgroups
-      schemes:
-      - id: jgroups
-        http: false
-        passive: false
-    camel-jibx:
-      groupId: org.apache.camel
-      artifactId: camel-jibx
-      dataformats:
-      - jibx
-    camel-jing:
-      groupId: org.apache.camel
-      artifactId: camel-jing
-      schemes:
-      - id: jing
-        http: false
-        passive: false
-    camel-jira:
-      groupId: org.apache.camel
-      artifactId: camel-jira
-      schemes:
-      - id: jira
-        http: false
-        passive: false
-    camel-jms:
-      groupId: org.apache.camel
-      artifactId: camel-jms
-      schemes:
-      - id: jms
-        http: false
-        passive: false
-    camel-jmx:
-      groupId: org.apache.camel
-      artifactId: camel-jmx
-      schemes:
-      - id: jmx
-        http: false
-        passive: false
-    camel-johnzon:
-      groupId: org.apache.camel
-      artifactId: camel-johnzon
-      dataformats:
-      - json-johnzon
-    camel-jolt:
-      groupId: org.apache.camel
-      artifactId: camel-jolt
-      schemes:
-      - id: jolt
-        http: false
-        passive: false
-    camel-josql:
-      groupId: org.apache.camel
-      artifactId: camel-josql
-      languages:
-      - sql
-    camel-jpa:
-      groupId: org.apache.camel
-      artifactId: camel-jpa
-      schemes:
-      - id: jpa
-        http: false
-        passive: false
-    camel-jsch:
-      groupId: org.apache.camel
-      artifactId: camel-jsch
-      schemes:
-      - id: scp
-        http: false
-        passive: false
-    camel-json-validator:
-      groupId: org.apache.camel
-      artifactId: camel-json-validator
-      schemes:
-      - id: json-validator
-        http: false
-        passive: false
-    camel-jsonpath:
-      groupId: org.apache.camel
-      artifactId: camel-jsonpath
-      languages:
-      - jsonpath
-    camel-jt400:
-      groupId: org.apache.camel
-      artifactId: camel-jt400
-      schemes:
-      - id: jt400
-        http: false
-        passive: false
-    camel-juel:
-      groupId: org.apache.camel
-      artifactId: camel-juel
-      languages:
-      - el
-    camel-jxpath:
-      groupId: org.apache.camel
-      artifactId: camel-jxpath
-      languages:
-      - jxpath
-    camel-k-runtime-groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-groovy
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-groovy
-    camel-k-runtime-health:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-health
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-k-runtime-jvm:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-jvm
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-core
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-adapter-camel-2
-    camel-k-runtime-kotlin:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-kotlin
-    camel-k-runtime-servlet:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-servlet
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-servlet
-    camel-k-runtime-yaml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-yaml
-    camel-kafka:
-      groupId: org.apache.camel
-      artifactId: camel-kafka
-      schemes:
-      - id: kafka
-        http: false
-        passive: false
-    camel-kestrel:
-      groupId: org.apache.camel
-      artifactId: camel-kestrel
-      schemes:
-      - id: kestrel
-        http: false
-        passive: false
-    camel-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-knative
-      schemes:
-      - id: knative
-        http: true
-        passive: false
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-krati:
-      groupId: org.apache.camel
-      artifactId: camel-krati
-      schemes:
-      - id: krati
-        http: false
-        passive: false
-    camel-kubernetes:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      schemes:
-      - id: kubernetes
-        http: false
-        passive: false
-      - id: kubernetes-config-maps
-        http: false
-        passive: false
-      - id: kubernetes-deployments
-        http: false
-        passive: false
-      - id: kubernetes-hpa
-        http: false
-        passive: false
-      - id: kubernetes-job
-        http: false
-        passive: false
-      - id: kubernetes-namespaces
-        http: false
-        passive: false
-      - id: kubernetes-nodes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes-claims
-        http: false
-        passive: false
-      - id: kubernetes-pods
-        http: false
-        passive: false
-      - id: kubernetes-replication-controllers
-        http: false
-        passive: false
-      - id: kubernetes-resources-quota
-        http: false
-        passive: false
-      - id: kubernetes-secrets
-        http: false
-        passive: false
-      - id: kubernetes-service-accounts
-        http: false
-        passive: false
-      - id: kubernetes-services
-        http: false
-        passive: false
-      - id: openshift-build-configs
-        http: false
-        passive: false
-      - id: openshift-builds
-        http: false
-        passive: false
-    camel-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-ldap
-      schemes:
-      - id: ldap
-        http: false
-        passive: false
-    camel-ldif:
-      groupId: org.apache.camel
-      artifactId: camel-ldif
-      schemes:
-      - id: ldif
-        http: false
-        passive: false
-    camel-linkedin:
-      groupId: org.apache.camel
-      artifactId: camel-linkedin
-      schemes:
-      - id: linkedin
-        http: false
-        passive: false
-    camel-lucene:
-      groupId: org.apache.camel
-      artifactId: camel-lucene
-      schemes:
-      - id: lucene
-        http: false
-        passive: false
-    camel-lumberjack:
-      groupId: org.apache.camel
-      artifactId: camel-lumberjack
-      schemes:
-      - id: lumberjack
-        http: false
-        passive: false
-    camel-lzf:
-      groupId: org.apache.camel
-      artifactId: camel-lzf
-      dataformats:
-      - lzf
-    camel-mail:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      schemes:
-      - id: imap
-        http: false
-        passive: false
-      - id: imaps
-        http: false
-        passive: false
-      - id: pop3
-        http: false
-        passive: false
-      - id: pop3s
-        http: false
-        passive: false
-      - id: smtp
-        http: false
-        passive: false
-      - id: smtps
-        http: false
-        passive: false
-      dataformats:
-      - mime-multipart
-    camel-master:
-      groupId: org.apache.camel
-      artifactId: camel-master
-      schemes:
-      - id: master
-        http: false
-        passive: false
-    camel-metrics:
-      groupId: org.apache.camel
-      artifactId: camel-metrics
-      schemes:
-      - id: metrics
-        http: false
-        passive: false
-    camel-micrometer:
-      groupId: org.apache.camel
-      artifactId: camel-micrometer
-      schemes:
-      - id: micrometer
-        http: false
-        passive: false
-    camel-milo:
-      groupId: org.apache.camel
-      artifactId: camel-milo
-      schemes:
-      - id: milo-client
-        http: false
-        passive: false
-      - id: milo-server
-        http: false
-        passive: false
-    camel-mina:
-      groupId: org.apache.camel
-      artifactId: camel-mina
-      schemes:
-      - id: mina
-        http: false
-        passive: false
-    camel-mina2:
-      groupId: org.apache.camel
-      artifactId: camel-mina2
-      schemes:
-      - id: mina2
-        http: false
-        passive: false
-    camel-mllp:
-      groupId: org.apache.camel
-      artifactId: camel-mllp
-      schemes:
-      - id: mllp
-        http: false
-        passive: false
-    camel-mongodb:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb
-      schemes:
-      - id: mongodb
-        http: false
-        passive: false
-    camel-mongodb-gridfs:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb-gridfs
-      schemes:
-      - id: mongodb-gridfs
-        http: false
-        passive: false
-    camel-mongodb3:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb3
-      schemes:
-      - id: mongodb3
-        http: false
-        passive: false
-    camel-mqtt:
-      groupId: org.apache.camel
-      artifactId: camel-mqtt
-      schemes:
-      - id: mqtt
-        http: false
-        passive: false
-    camel-msv:
-      groupId: org.apache.camel
-      artifactId: camel-msv
-      schemes:
-      - id: msv
-        http: false
-        passive: false
-    camel-mustache:
-      groupId: org.apache.camel
-      artifactId: camel-mustache
-      schemes:
-      - id: mustache
-        http: false
-        passive: false
-    camel-mvel:
-      groupId: org.apache.camel
-      artifactId: camel-mvel
-      schemes:
-      - id: mvel
-        http: false
-        passive: false
-      languages:
-      - mvel
-    camel-mybatis:
-      groupId: org.apache.camel
-      artifactId: camel-mybatis
-      schemes:
-      - id: mybatis
-        http: false
-        passive: false
-      - id: mybatis-bean
-        http: false
-        passive: false
-    camel-nagios:
-      groupId: org.apache.camel
-      artifactId: camel-nagios
-      schemes:
-      - id: nagios
-        http: false
-        passive: false
-    camel-nats:
-      groupId: org.apache.camel
-      artifactId: camel-nats
-      schemes:
-      - id: nats
-        http: false
-        passive: false
-    camel-netty:
-      groupId: org.apache.camel
-      artifactId: camel-netty
-      schemes:
-      - id: netty
-        http: false
-        passive: false
-    camel-netty-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty-http
-      schemes:
-      - id: netty-http
-        http: true
-        passive: false
-    camel-netty4:
-      groupId: org.apache.camel
-      artifactId: camel-netty4
-      schemes:
-      - id: netty4
-        http: false
-        passive: false
-    camel-netty4-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty4-http
-      schemes:
-      - id: netty4-http
-        http: true
-        passive: false
-    camel-nsq:
-      groupId: org.apache.camel
-      artifactId: camel-nsq
-      schemes:
-      - id: nsq
-        http: false
-        passive: false
-    camel-ognl:
-      groupId: org.apache.camel
-      artifactId: camel-ognl
-      languages:
-      - ognl
-    camel-olingo2:
-      groupId: org.apache.camel
-      artifactId: camel-olingo2
-      schemes:
-      - id: olingo2
-        http: false
-        passive: false
-    camel-olingo4:
-      groupId: org.apache.camel
-      artifactId: camel-olingo4
-      schemes:
-      - id: olingo4
-        http: false
-        passive: false
-    camel-openshift:
-      groupId: org.apache.camel
-      artifactId: camel-openshift
-      schemes:
-      - id: openshift
-        http: false
-        passive: false
-    camel-openstack:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      schemes:
-      - id: openstack-cinder
-        http: false
-        passive: false
-      - id: openstack-glance
-        http: false
-        passive: false
-      - id: openstack-keystone
-        http: false
-        passive: false
-      - id: openstack-neutron
-        http: false
-        passive: false
-      - id: openstack-nova
-        http: false
-        passive: false
-      - id: openstack-swift
-        http: false
-        passive: false
-    camel-optaplanner:
-      groupId: org.apache.camel
-      artifactId: camel-optaplanner
-      schemes:
-      - id: optaplanner
-        http: false
-        passive: false
-    camel-paho:
-      groupId: org.apache.camel
-      artifactId: camel-paho
-      schemes:
-      - id: paho
-        http: false
-        passive: false
-    camel-paxlogging:
-      groupId: org.apache.camel
-      artifactId: camel-paxlogging
-      schemes:
-      - id: paxlogging
-        http: false
-        passive: false
-    camel-pdf:
-      groupId: org.apache.camel
-      artifactId: camel-pdf
-      schemes:
-      - id: pdf
-        http: false
-        passive: false
-    camel-pgevent:
-      groupId: org.apache.camel
-      artifactId: camel-pgevent
-      schemes:
-      - id: pgevent
-        http: false
-        passive: false
-    camel-printer:
-      groupId: org.apache.camel
-      artifactId: camel-printer
-      schemes:
-      - id: lpr
-        http: false
-        passive: false
-    camel-protobuf:
-      groupId: org.apache.camel
-      artifactId: camel-protobuf
-      dataformats:
-      - protobuf
-    camel-pubnub:
-      groupId: org.apache.camel
-      artifactId: camel-pubnub
-      schemes:
-      - id: pubnub
-        http: false
-        passive: false
-    camel-quartz:
-      groupId: org.apache.camel
-      artifactId: camel-quartz
-      schemes:
-      - id: quartz
-        http: false
-        passive: false
-    camel-quartz2:
-      groupId: org.apache.camel
-      artifactId: camel-quartz2
-      schemes:
-      - id: quartz2
-        http: false
-        passive: false
-    camel-quickfix:
-      groupId: org.apache.camel
-      artifactId: camel-quickfix
-      schemes:
-      - id: quickfix
-        http: false
-        passive: false
-    camel-rabbitmq:
-      groupId: org.apache.camel
-      artifactId: camel-rabbitmq
-      schemes:
-      - id: rabbitmq
-        http: false
-        passive: false
-    camel-reactive-streams:
-      groupId: org.apache.camel
-      artifactId: camel-reactive-streams
-      schemes:
-      - id: reactive-streams
-        http: false
-        passive: false
-    camel-rest-swagger:
-      groupId: org.apache.camel
-      artifactId: camel-rest-swagger
-      schemes:
-      - id: rest-swagger
-        http: false
-        passive: false
-    camel-restlet:
-      groupId: org.apache.camel
-      artifactId: camel-restlet
-      schemes:
-      - id: restlet
-        http: true
-        passive: false
-    camel-rmi:
-      groupId: org.apache.camel
-      artifactId: camel-rmi
-      schemes:
-      - id: rmi
-        http: false
-        passive: false
-    camel-routebox:
-      groupId: org.apache.camel
-      artifactId: camel-routebox
-      schemes:
-      - id: routebox
-        http: false
-        passive: false
-    camel-rss:
-      groupId: org.apache.camel
-      artifactId: camel-rss
-      schemes:
-      - id: rss
-        http: false
-        passive: false
-      dataformats:
-      - rss
-    camel-salesforce:
-      groupId: org.apache.camel
-      artifactId: camel-salesforce
-      schemes:
-      - id: salesforce
-        http: false
-        passive: false
-    camel-sap-netweaver:
-      groupId: org.apache.camel
-      artifactId: camel-sap-netweaver
-      schemes:
-      - id: sap-netweaver
-        http: false
-        passive: false
-    camel-saxon:
-      groupId: org.apache.camel
-      artifactId: camel-saxon
-      schemes:
-      - id: xquery
-        http: false
-        passive: false
-      languages:
-      - xquery
-    camel-schematron:
-      groupId: org.apache.camel
-      artifactId: camel-schematron
-      schemes:
-      - id: schematron
-        http: false
-        passive: false
-    camel-script:
-      groupId: org.apache.camel
-      artifactId: camel-script
-      languages:
-      - javaScript
-      - php
-      - python
-      - ruby
-    camel-service:
-      groupId: org.apache.camel
-      artifactId: camel-service
-      schemes:
-      - id: service
-        http: false
-        passive: false
-    camel-servicenow:
-      groupId: org.apache.camel
-      artifactId: camel-servicenow
-      schemes:
-      - id: servicenow
-        http: false
-        passive: false
-    camel-servlet:
-      groupId: org.apache.camel
-      artifactId: camel-servlet
-      schemes:
-      - id: servlet
-        http: true
-        passive: false
-    camel-sip:
-      groupId: org.apache.camel
-      artifactId: camel-sip
-      schemes:
-      - id: sip
-        http: false
-        passive: false
-      - id: sips
-        http: false
-        passive: false
-    camel-sjms:
-      groupId: org.apache.camel
-      artifactId: camel-sjms
-      schemes:
-      - id: sjms
-        http: false
-        passive: false
-      - id: sjms-batch
-        http: false
-        passive: false
-    camel-sjms2:
-      groupId: org.apache.camel
-      artifactId: camel-sjms2
-      schemes:
-      - id: sjms2
-        http: false
-        passive: false
-    camel-slack:
-      groupId: org.apache.camel
-      artifactId: camel-slack
-      schemes:
-      - id: slack
-        http: false
-        passive: false
-    camel-smpp:
-      groupId: org.apache.camel
-      artifactId: camel-smpp
-      schemes:
-      - id: smpp
-        http: false
-        passive: false
-      - id: smpps
-        http: false
-        passive: false
-    camel-snakeyaml:
-      groupId: org.apache.camel
-      artifactId: camel-snakeyaml
-      dataformats:
-      - yaml-snakeyaml
-    camel-snmp:
-      groupId: org.apache.camel
-      artifactId: camel-snmp
-      schemes:
-      - id: snmp
-        http: false
-        passive: false
-    camel-soap:
-      groupId: org.apache.camel
-      artifactId: camel-soap
-      dataformats:
-      - soapjaxb
-    camel-solr:
-      groupId: org.apache.camel
-      artifactId: camel-solr
-      schemes:
-      - id: solr
-        http: false
-        passive: false
-      - id: solrs
-        http: false
-        passive: false
-      - id: solrCloud
-        http: false
-        passive: false
-    camel-spark:
-      groupId: org.apache.camel
-      artifactId: camel-spark
-      schemes:
-      - id: spark
-        http: false
-        passive: false
-    camel-spark-rest:
-      groupId: org.apache.camel
-      artifactId: camel-spark-rest
-      schemes:
-      - id: spark-rest
-        http: true
-        passive: false
-    camel-splunk:
-      groupId: org.apache.camel
-      artifactId: camel-splunk
-      schemes:
-      - id: splunk
-        http: false
-        passive: false
-    camel-spring:
-      groupId: org.apache.camel
-      artifactId: camel-spring
-      schemes:
-      - id: spring-event
-        http: false
-        passive: false
-      languages:
-      - spel
-    camel-spring-batch:
-      groupId: org.apache.camel
-      artifactId: camel-spring-batch
-      schemes:
-      - id: spring-batch
-        http: false
-        passive: false
-    camel-spring-integration:
-      groupId: org.apache.camel
-      artifactId: camel-spring-integration
-      schemes:
-      - id: spring-integration
-        http: false
-        passive: false
-    camel-spring-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ldap
-      schemes:
-      - id: spring-ldap
-        http: false
-        passive: false
-    camel-spring-redis:
-      groupId: org.apache.camel
-      artifactId: camel-spring-redis
-      schemes:
-      - id: spring-redis
-        http: false
-        passive: false
-    camel-spring-ws:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ws
-      schemes:
-      - id: spring-ws
-        http: true
-        passive: false
-    camel-sql:
-      groupId: org.apache.camel
-      artifactId: camel-sql
-      schemes:
-      - id: sql
-        http: false
-        passive: false
-      - id: sql-stored
-        http: false
-        passive: false
-    camel-ssh:
-      groupId: org.apache.camel
-      artifactId: camel-ssh
-      schemes:
-      - id: ssh
-        http: false
-        passive: false
-    camel-stax:
-      groupId: org.apache.camel
-      artifactId: camel-stax
-      schemes:
-      - id: stax
-        http: false
-        passive: false
-    camel-stomp:
-      groupId: org.apache.camel
-      artifactId: camel-stomp
-      schemes:
-      - id: stomp
-        http: false
-        passive: false
-    camel-stream:
-      groupId: org.apache.camel
-      artifactId: camel-stream
-      schemes:
-      - id: stream
-        http: false
-        passive: false
-    camel-stringtemplate:
-      groupId: org.apache.camel
-      artifactId: camel-stringtemplate
-      schemes:
-      - id: string-template
-        http: false
-        passive: false
-    camel-syslog:
-      groupId: org.apache.camel
-      artifactId: camel-syslog
-      dataformats:
-      - syslog
-    camel-tagsoup:
-      groupId: org.apache.camel
-      artifactId: camel-tagsoup
-      dataformats:
-      - tidyMarkup
-    camel-tarfile:
-      groupId: org.apache.camel
-      artifactId: camel-tarfile
-      dataformats:
-      - tarfile
-    camel-telegram:
-      groupId: org.apache.camel
-      artifactId: camel-telegram
-      schemes:
-      - id: telegram
-        http: false
-        passive: false
-    camel-thrift:
-      groupId: org.apache.camel
-      artifactId: camel-thrift
-      schemes:
-      - id: thrift
-        http: false
-        passive: false
-      dataformats:
-      - thrift
-    camel-tika:
-      groupId: org.apache.camel
-      artifactId: camel-tika
-      schemes:
-      - id: tika
-        http: false
-        passive: false
-    camel-twilio:
-      groupId: org.apache.camel
-      artifactId: camel-twilio
-      schemes:
-      - id: twilio
-        http: false
-        passive: false
-    camel-twitter:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      schemes:
-      - id: twitter
-        http: false
-        passive: false
-      - id: twitter-directmessage
-        http: false
-        passive: false
-      - id: twitter-search
-        http: false
-        passive: false
-      - id: twitter-streaming
-        http: false
-        passive: false
-      - id: twitter-timeline
-        http: false
-        passive: false
-    camel-undertow:
-      groupId: org.apache.camel
-      artifactId: camel-undertow
-      schemes:
-      - id: undertow
-        http: true
-        passive: false
-    camel-univocity-parsers:
-      groupId: org.apache.camel
-      artifactId: camel-univocity-parsers
-      dataformats:
-      - univocity-csv
-      - univocity-fixed
-      - univocity-tsv
-    camel-velocity:
-      groupId: org.apache.camel
-      artifactId: camel-velocity
-      schemes:
-      - id: velocity
-        http: false
-        passive: false
-    camel-vertx:
-      groupId: org.apache.camel
-      artifactId: camel-vertx
-      schemes:
-      - id: vertx
-        http: false
-        passive: false
-    camel-weather:
-      groupId: org.apache.camel
-      artifactId: camel-weather
-      schemes:
-      - id: weather
-        http: false
-        passive: false
-    camel-web3j:
-      groupId: org.apache.camel
-      artifactId: camel-web3j
-      schemes:
-      - id: web3j
-        http: false
-        passive: false
-    camel-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-websocket
-      schemes:
-      - id: websocket
-        http: true
-        passive: false
-    camel-wordpress:
-      groupId: org.apache.camel
-      artifactId: camel-wordpress
-      schemes:
-      - id: wordpress
-        http: false
-        passive: false
-    camel-xchange:
-      groupId: org.apache.camel
-      artifactId: camel-xchange
-      schemes:
-      - id: xchange
-        http: false
-        passive: false
-    camel-xmlbeans:
-      groupId: org.apache.camel
-      artifactId: camel-xmlbeans
-      dataformats:
-      - xmlBeans
-    camel-xmljson:
-      groupId: org.apache.camel
-      artifactId: camel-xmljson
-      dataformats:
-      - xmljson
-    camel-xmlrpc:
-      groupId: org.apache.camel
-      artifactId: camel-xmlrpc
-      schemes:
-      - id: xmlrpc
-        http: false
-        passive: false
-      dataformats:
-      - xmlrpc
-    camel-xmlsecurity:
-      groupId: org.apache.camel
-      artifactId: camel-xmlsecurity
-      schemes:
-      - id: xmlsecurity
-        http: false
-        passive: false
-      dataformats:
-      - secureXML
-    camel-xmpp:
-      groupId: org.apache.camel
-      artifactId: camel-xmpp
-      schemes:
-      - id: xmpp
-        http: false
-        passive: false
-    camel-xstream:
-      groupId: org.apache.camel
-      artifactId: camel-xstream
-      dataformats:
-      - json-xstream
-      - xstream
-    camel-yammer:
-      groupId: org.apache.camel
-      artifactId: camel-yammer
-      schemes:
-      - id: yammer
-        http: false
-        passive: false
-    camel-yql:
-      groupId: org.apache.camel
-      artifactId: camel-yql
-      schemes:
-      - id: yql
-        http: false
-        passive: false
-    camel-zendesk:
-      groupId: org.apache.camel
-      artifactId: camel-zendesk
-      schemes:
-      - id: zendesk
-        http: false
-        passive: false
-    camel-zipfile:
-      groupId: org.apache.camel
-      artifactId: camel-zipfile
-      dataformats:
-      - zipfile
-    camel-zookeeper:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper
-      schemes:
-      - id: zookeeper
-        http: false
-        passive: false
-    camel-zookeeper-master:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper-master
-      schemes:
-      - id: zookeeper-master
-        http: false
-        passive: false
-
-`
-	Resources["camel-catalog-2.23.1.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: CamelCatalog
-metadata:
-  name: camel-catalog-2.23.1
-  labels:
-    app: camel-k
-    camel.apache.org/catalog.version: 2.23.1
-    camel.apache.org/catalog.loader.version: 2.23.1
-spec:
-  version: 2.23.1
-  artifacts:
-    camel-ahc:
-      groupId: org.apache.camel
-      artifactId: camel-ahc
-      schemes:
-      - id: ahc
-        http: true
-        passive: false
-    camel-ahc-ws:
-      groupId: org.apache.camel
-      artifactId: camel-ahc-ws
-      schemes:
-      - id: ahc-ws
-        http: true
-        passive: false
-      - id: ahc-wss
-        http: false
-        passive: false
-    camel-amqp:
-      groupId: org.apache.camel
-      artifactId: camel-amqp
-      schemes:
-      - id: amqp
-        http: false
-        passive: false
-    camel-apns:
-      groupId: org.apache.camel
-      artifactId: camel-apns
-      schemes:
-      - id: apns
-        http: false
-        passive: false
-    camel-as2:
-      groupId: org.apache.camel
-      artifactId: camel-as2
-      schemes:
-      - id: as2
-        http: false
-        passive: false
-    camel-asn1:
-      groupId: org.apache.camel
-      artifactId: camel-asn1
-      dataformats:
-      - asn1
-    camel-asterisk:
-      groupId: org.apache.camel
-      artifactId: camel-asterisk
-      schemes:
-      - id: asterisk
-        http: false
-        passive: false
-    camel-atmos:
-      groupId: org.apache.camel
-      artifactId: camel-atmos
-      schemes:
-      - id: atmos
-        http: false
-        passive: false
-    camel-atmosphere-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-atmosphere-websocket
-      schemes:
-      - id: atmosphere-websocket
-        http: true
-        passive: false
-    camel-atom:
-      groupId: org.apache.camel
-      artifactId: camel-atom
-      schemes:
-      - id: atom
-        http: false
-        passive: false
-    camel-atomix:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      schemes:
-      - id: atomix-map
-        http: false
-        passive: false
-      - id: atomix-messaging
-        http: false
-        passive: false
-      - id: atomix-multimap
-        http: false
-        passive: false
-      - id: atomix-queue
-        http: false
-        passive: false
-      - id: atomix-set
-        http: false
-        passive: false
-      - id: atomix-value
-        http: false
-        passive: false
-    camel-avro:
-      groupId: org.apache.camel
-      artifactId: camel-avro
-      schemes:
-      - id: avro
-        http: false
-        passive: false
-      dataformats:
-      - avro
-    camel-aws:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      schemes:
-      - id: aws-cw
-        http: false
-        passive: false
-      - id: aws-ddb
-        http: false
-        passive: false
-      - id: aws-ddbstream
-        http: false
-        passive: false
-      - id: aws-ec2
-        http: false
-        passive: false
-      - id: aws-iam
-        http: false
-        passive: false
-      - id: aws-kinesis
-        http: false
-        passive: false
-      - id: aws-kinesis-firehose
-        http: false
-        passive: false
-      - id: aws-kms
-        http: false
-        passive: false
-      - id: aws-lambda
-        http: false
-        passive: false
-      - id: aws-mq
-        http: false
-        passive: false
-      - id: aws-s3
-        http: false
-        passive: false
-      - id: aws-sdb
-        http: false
-        passive: false
-      - id: aws-ses
-        http: false
-        passive: false
-      - id: aws-sns
-        http: false
-        passive: false
-      - id: aws-sqs
-        http: false
-        passive: false
-      - id: aws-swf
-        http: false
-        passive: false
-    camel-azure:
-      groupId: org.apache.camel
-      artifactId: camel-azure
-      schemes:
-      - id: azure-blob
-        http: false
-        passive: false
-      - id: azure-queue
-        http: false
-        passive: false
-    camel-barcode:
-      groupId: org.apache.camel
-      artifactId: camel-barcode
-      dataformats:
-      - barcode
-    camel-base64:
-      groupId: org.apache.camel
-      artifactId: camel-base64
-      dataformats:
-      - base64
-    camel-bean-validator:
-      groupId: org.apache.camel
-      artifactId: camel-bean-validator
-      schemes:
-      - id: bean-validator
-        http: false
-        passive: false
-    camel-beanio:
-      groupId: org.apache.camel
-      artifactId: camel-beanio
-      dataformats:
-      - beanio
-    camel-beanstalk:
-      groupId: org.apache.camel
-      artifactId: camel-beanstalk
-      schemes:
-      - id: beanstalk
-        http: false
-        passive: false
-    camel-bindy:
-      groupId: org.apache.camel
-      artifactId: camel-bindy
-      dataformats:
-      - bindy-csv
-      - bindy-fixed
-      - bindy-kvp
-    camel-bonita:
-      groupId: org.apache.camel
-      artifactId: camel-bonita
-      schemes:
-      - id: bonita
-        http: false
-        passive: false
-    camel-boon:
-      groupId: org.apache.camel
-      artifactId: camel-boon
-      dataformats:
-      - boon
-    camel-box:
-      groupId: org.apache.camel
-      artifactId: camel-box
-      schemes:
-      - id: box
-        http: false
-        passive: false
-    camel-braintree:
-      groupId: org.apache.camel
-      artifactId: camel-braintree
-      schemes:
-      - id: braintree
-        http: false
-        passive: false
-    camel-cache:
-      groupId: org.apache.camel
-      artifactId: camel-cache
-      schemes:
-      - id: cache
-        http: false
-        passive: false
-    camel-caffeine:
-      groupId: org.apache.camel
-      artifactId: camel-caffeine
-      schemes:
-      - id: caffeine-cache
-        http: false
-        passive: false
-      - id: caffeine-loadcache
-        http: false
-        passive: false
-    camel-cassandraql:
-      groupId: org.apache.camel
-      artifactId: camel-cassandraql
-      schemes:
-      - id: cql
-        http: false
-        passive: false
-    camel-castor:
-      groupId: org.apache.camel
-      artifactId: camel-castor
-      dataformats:
-      - castor
-    camel-chronicle:
-      groupId: org.apache.camel
-      artifactId: camel-chronicle
-      schemes:
-      - id: chronicle-engine
-        http: false
-        passive: false
-    camel-chunk:
-      groupId: org.apache.camel
-      artifactId: camel-chunk
-      schemes:
-      - id: chunk
-        http: false
-        passive: false
-    camel-cm-sms:
-      groupId: org.apache.camel
-      artifactId: camel-cm-sms
-      schemes:
-      - id: cm-sms
-        http: false
-        passive: false
-    camel-cmis:
-      groupId: org.apache.camel
-      artifactId: camel-cmis
-      schemes:
-      - id: cmis
-        http: false
-        passive: false
-    camel-coap:
-      groupId: org.apache.camel
-      artifactId: camel-coap
-      schemes:
-      - id: coap
-        http: false
-        passive: false
-    camel-cometd:
-      groupId: org.apache.camel
-      artifactId: camel-cometd
-      schemes:
-      - id: cometd
-        http: false
-        passive: false
-      - id: cometds
-        http: false
-        passive: false
-    camel-consul:
-      groupId: org.apache.camel
-      artifactId: camel-consul
-      schemes:
-      - id: consul
-        http: false
-        passive: false
-    camel-context:
-      groupId: org.apache.camel
-      artifactId: camel-context
-      schemes:
-      - id: context
-        http: false
-        passive: false
-    camel-core:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      schemes:
-      - id: bean
-        http: false
-        passive: true
-      - id: binding
-        http: false
-        passive: true
-      - id: browse
-        http: false
-        passive: true
-      - id: class
-        http: false
-        passive: true
-      - id: controlbus
-        http: false
-        passive: true
-      - id: dataformat
-        http: false
-        passive: true
-      - id: dataset
-        http: false
-        passive: true
-      - id: direct
-        http: false
-        passive: true
-      - id: direct-vm
-        http: false
-        passive: true
-      - id: file
-        http: false
-        passive: false
-      - id: language
-        http: false
-        passive: true
-      - id: log
-        http: false
-        passive: true
-      - id: mock
-        http: false
-        passive: true
-      - id: properties
-        http: false
-        passive: true
-      - id: ref
-        http: false
-        passive: true
-      - id: rest
-        http: true
-        passive: false
-      - id: rest-api
-        http: false
-        passive: false
-      - id: saga
-        http: false
-        passive: false
-      - id: scheduler
-        http: false
-        passive: false
-      - id: seda
-        http: false
-        passive: true
-      - id: stub
-        http: false
-        passive: true
-      - id: test
-        http: false
-        passive: true
-      - id: timer
-        http: false
-        passive: false
-      - id: validator
-        http: false
-        passive: true
-      - id: vm
-        http: false
-        passive: true
-      - id: xslt
-        http: false
-        passive: false
-      languages:
-      - bean
-      - constant
-      - exchangeProperty
-      - file
-      - header
-      - ref
-      - simple
-      - tokenize
-      - xpath
-      - xtokenize
-      dataformats:
-      - gzip
-      - serialization
-      - string
-      - zip
-    camel-couchbase:
-      groupId: org.apache.camel
-      artifactId: camel-couchbase
-      schemes:
-      - id: couchbase
-        http: false
-        passive: false
-    camel-couchdb:
-      groupId: org.apache.camel
-      artifactId: camel-couchdb
-      schemes:
-      - id: couchdb
-        http: false
-        passive: false
-    camel-crypto:
-      groupId: org.apache.camel
-      artifactId: camel-crypto
-      schemes:
-      - id: crypto
-        http: false
-        passive: false
-      dataformats:
-      - crypto
-      - pgp
-    camel-crypto-cms:
-      groupId: org.apache.camel
-      artifactId: camel-crypto-cms
-      schemes:
-      - id: crypto-cms
-        http: false
-        passive: false
-    camel-csv:
-      groupId: org.apache.camel
-      artifactId: camel-csv
-      dataformats:
-      - csv
-    camel-cxf:
-      groupId: org.apache.camel
-      artifactId: camel-cxf
-      schemes:
-      - id: cxf
-        http: true
-        passive: false
-      - id: cxfrs
-        http: true
-        passive: false
-    camel-digitalocean:
-      groupId: org.apache.camel
-      artifactId: camel-digitalocean
-      schemes:
-      - id: digitalocean
-        http: false
-        passive: false
-    camel-disruptor:
-      groupId: org.apache.camel
-      artifactId: camel-disruptor
-      schemes:
-      - id: disruptor
-        http: false
-        passive: false
-      - id: disruptor-vm
-        http: false
-        passive: false
-    camel-dns:
-      groupId: org.apache.camel
-      artifactId: camel-dns
-      schemes:
-      - id: dns
-        http: false
-        passive: false
-    camel-docker:
-      groupId: org.apache.camel
-      artifactId: camel-docker
-      schemes:
-      - id: docker
-        http: false
-        passive: false
-    camel-dozer:
-      groupId: org.apache.camel
-      artifactId: camel-dozer
-      schemes:
-      - id: dozer
-        http: false
-        passive: false
-    camel-drill:
-      groupId: org.apache.camel
-      artifactId: camel-drill
-      schemes:
-      - id: drill
-        http: false
-        passive: false
-    camel-dropbox:
-      groupId: org.apache.camel
-      artifactId: camel-dropbox
-      schemes:
-      - id: dropbox
-        http: false
-        passive: false
-    camel-ehcache:
-      groupId: org.apache.camel
-      artifactId: camel-ehcache
-      schemes:
-      - id: ehcache
-        http: false
-        passive: false
-    camel-ejb:
-      groupId: org.apache.camel
-      artifactId: camel-ejb
-      schemes:
-      - id: ejb
-        http: false
-        passive: false
-    camel-elasticsearch:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch
-      schemes:
-      - id: elasticsearch
-        http: false
-        passive: false
-    camel-elasticsearch-rest:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch-rest
-      schemes:
-      - id: elasticsearch-rest
-        http: false
-        passive: false
-    camel-elasticsearch5:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch5
-      schemes:
-      - id: elasticsearch5
-        http: false
-        passive: false
-    camel-elsql:
-      groupId: org.apache.camel
-      artifactId: camel-elsql
-      schemes:
-      - id: elsql
-        http: false
-        passive: false
-    camel-etcd:
-      groupId: org.apache.camel
-      artifactId: camel-etcd
-      schemes:
-      - id: etcd
-        http: false
-        passive: false
-    camel-eventadmin:
-      groupId: org.apache.camel
-      artifactId: camel-eventadmin
-      schemes:
-      - id: eventadmin
-        http: false
-        passive: false
-    camel-exec:
-      groupId: org.apache.camel
-      artifactId: camel-exec
-      schemes:
-      - id: exec
-        http: false
-        passive: false
-    camel-facebook:
-      groupId: org.apache.camel
-      artifactId: camel-facebook
-      schemes:
-      - id: facebook
-        http: false
-        passive: false
-    camel-fastjson:
-      groupId: org.apache.camel
-      artifactId: camel-fastjson
-      dataformats:
-      - json-fastjson
-    camel-fhir:
-      groupId: org.apache.camel
-      artifactId: camel-fhir
-      schemes:
-      - id: fhir
-        http: false
-        passive: false
-      dataformats:
-      - fhirJson
-      - fhirXml
-    camel-flatpack:
-      groupId: org.apache.camel
-      artifactId: camel-flatpack
-      schemes:
-      - id: flatpack
-        http: false
-        passive: false
-      dataformats:
-      - flatpack
-    camel-flink:
-      groupId: org.apache.camel
-      artifactId: camel-flink
-      schemes:
-      - id: flink
-        http: false
-        passive: false
-    camel-fop:
-      groupId: org.apache.camel
-      artifactId: camel-fop
-      schemes:
-      - id: fop
-        http: false
-        passive: false
-    camel-freemarker:
-      groupId: org.apache.camel
-      artifactId: camel-freemarker
-      schemes:
-      - id: freemarker
-        http: false
-        passive: false
-    camel-ftp:
-      groupId: org.apache.camel
-      artifactId: camel-ftp
-      schemes:
-      - id: ftp
-        http: false
-        passive: false
-      - id: ftps
-        http: false
-        passive: false
-      - id: sftp
-        http: false
-        passive: false
-    camel-ganglia:
-      groupId: org.apache.camel
-      artifactId: camel-ganglia
-      schemes:
-      - id: ganglia
-        http: false
-        passive: false
-    camel-geocoder:
-      groupId: org.apache.camel
-      artifactId: camel-geocoder
-      schemes:
-      - id: geocoder
-        http: false
-        passive: false
-    camel-git:
-      groupId: org.apache.camel
-      artifactId: camel-git
-      schemes:
-      - id: git
-        http: false
-        passive: false
-    camel-github:
-      groupId: org.apache.camel
-      artifactId: camel-github
-      schemes:
-      - id: github
-        http: false
-        passive: false
-    camel-google-bigquery:
-      groupId: org.apache.camel
-      artifactId: camel-google-bigquery
-      schemes:
-      - id: google-bigquery
-        http: false
-        passive: false
-    camel-google-calendar:
-      groupId: org.apache.camel
-      artifactId: camel-google-calendar
-      schemes:
-      - id: google-calendar
-        http: false
-        passive: false
-      - id: google-calendar-stream
-        http: false
-        passive: false
-    camel-google-drive:
-      groupId: org.apache.camel
-      artifactId: camel-google-drive
-      schemes:
-      - id: google-drive
-        http: false
-        passive: false
-    camel-google-mail:
-      groupId: org.apache.camel
-      artifactId: camel-google-mail
-      schemes:
-      - id: google-mail
-        http: false
-        passive: false
-      - id: google-mail-stream
-        http: false
-        passive: false
-    camel-google-pubsub:
-      groupId: org.apache.camel
-      artifactId: camel-google-pubsub
-      schemes:
-      - id: google-pubsub
-        http: false
-        passive: false
-    camel-google-sheets:
-      groupId: org.apache.camel
-      artifactId: camel-google-sheets
-      schemes:
-      - id: google-sheets
-        http: false
-        passive: false
-      - id: google-sheets-stream
-        http: false
-        passive: false
-    camel-gora:
-      groupId: org.apache.camel
-      artifactId: camel-gora
-      schemes:
-      - id: gora
-        http: false
-        passive: false
-    camel-grape:
-      groupId: org.apache.camel
-      artifactId: camel-grape
-      schemes:
-      - id: grape
-        http: false
-        passive: false
-    camel-groovy:
-      groupId: org.apache.camel
-      artifactId: camel-groovy
-      languages:
-      - groovy
-    camel-grpc:
-      groupId: org.apache.camel
-      artifactId: camel-grpc
-      schemes:
-      - id: grpc
-        http: true
-        passive: false
-    camel-gson:
-      groupId: org.apache.camel
-      artifactId: camel-gson
-      dataformats:
-      - json-gson
-    camel-guava-eventbus:
-      groupId: org.apache.camel
-      artifactId: camel-guava-eventbus
-      schemes:
-      - id: guava-eventbus
-        http: false
-        passive: false
-    camel-hazelcast:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      schemes:
-      - id: hazelcast-atomicvalue
-        http: false
-        passive: false
-      - id: hazelcast-instance
-        http: false
-        passive: false
-      - id: hazelcast-list
-        http: false
-        passive: false
-      - id: hazelcast-map
-        http: false
-        passive: false
-      - id: hazelcast-multimap
-        http: false
-        passive: false
-      - id: hazelcast-queue
-        http: false
-        passive: false
-      - id: hazelcast-replicatedmap
-        http: false
-        passive: false
-      - id: hazelcast-ringbuffer
-        http: false
-        passive: false
-      - id: hazelcast-seda
-        http: false
-        passive: false
-      - id: hazelcast-set
-        http: false
-        passive: false
-      - id: hazelcast-topic
-        http: false
-        passive: false
-    camel-hbase:
-      groupId: org.apache.camel
-      artifactId: camel-hbase
-      schemes:
-      - id: hbase
-        http: false
-        passive: false
-    camel-hdfs:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs
-      schemes:
-      - id: hdfs
-        http: false
-        passive: false
-    camel-hdfs2:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs2
-      schemes:
-      - id: hdfs2
-        http: false
-        passive: false
-    camel-hessian:
-      groupId: org.apache.camel
-      artifactId: camel-hessian
-      dataformats:
-      - hessian
-    camel-hipchat:
-      groupId: org.apache.camel
-      artifactId: camel-hipchat
-      schemes:
-      - id: hipchat
-        http: false
-        passive: false
-    camel-hl7:
-      groupId: org.apache.camel
-      artifactId: camel-hl7
-      languages:
-      - terser
-      dataformats:
-      - hl7
-    camel-http:
-      groupId: org.apache.camel
-      artifactId: camel-http
-      schemes:
-      - id: http
-        http: false
-        passive: false
-      - id: https
-        http: false
-        passive: false
-    camel-http4:
-      groupId: org.apache.camel
-      artifactId: camel-http4
-      schemes:
-      - id: http4
-        http: false
-        passive: false
-      - id: https4
-        http: false
-        passive: false
-    camel-ibatis:
-      groupId: org.apache.camel
-      artifactId: camel-ibatis
-      schemes:
-      - id: ibatis
-        http: false
-        passive: false
-    camel-ical:
-      groupId: org.apache.camel
-      artifactId: camel-ical
-      dataformats:
-      - ical
-    camel-iec60870:
-      groupId: org.apache.camel
-      artifactId: camel-iec60870
-      schemes:
-      - id: iec60870-client
-        http: false
-        passive: false
-      - id: iec60870-server
-        http: false
-        passive: false
-    camel-ignite:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      schemes:
-      - id: ignite-cache
-        http: false
-        passive: false
-      - id: ignite-compute
-        http: false
-        passive: false
-      - id: ignite-events
-        http: false
-        passive: false
-      - id: ignite-idgen
-        http: false
-        passive: false
-      - id: ignite-messaging
-        http: false
-        passive: false
-      - id: ignite-queue
-        http: false
-        passive: false
-      - id: ignite-set
-        http: false
-        passive: false
-    camel-infinispan:
-      groupId: org.apache.camel
-      artifactId: camel-infinispan
-      schemes:
-      - id: infinispan
-        http: false
-        passive: false
-    camel-influxdb:
-      groupId: org.apache.camel
-      artifactId: camel-influxdb
-      schemes:
-      - id: influxdb
-        http: false
-        passive: false
-    camel-ipfs:
-      groupId: org.apache.camel
-      artifactId: camel-ipfs
-      schemes:
-      - id: ipfs
-        http: false
-        passive: false
-    camel-irc:
-      groupId: org.apache.camel
-      artifactId: camel-irc
-      schemes:
-      - id: irc
-        http: false
-        passive: false
-    camel-ironmq:
-      groupId: org.apache.camel
-      artifactId: camel-ironmq
-      schemes:
-      - id: ironmq
-        http: false
-        passive: false
-    camel-jackson:
-      groupId: org.apache.camel
-      artifactId: camel-jackson
-      dataformats:
-      - json-jackson
-    camel-jacksonxml:
-      groupId: org.apache.camel
-      artifactId: camel-jacksonxml
-      dataformats:
-      - jacksonxml
-    camel-javaspace:
-      groupId: org.apache.camel
-      artifactId: camel-javaspace
-      schemes:
-      - id: javaspace
-        http: false
-        passive: false
-    camel-jaxb:
-      groupId: org.apache.camel
-      artifactId: camel-jaxb
-      dataformats:
-      - jaxb
-    camel-jbpm:
-      groupId: org.apache.camel
-      artifactId: camel-jbpm
-      schemes:
-      - id: jbpm
-        http: false
-        passive: false
-    camel-jcache:
-      groupId: org.apache.camel
-      artifactId: camel-jcache
-      schemes:
-      - id: jcache
-        http: false
-        passive: false
-    camel-jclouds:
-      groupId: org.apache.camel
-      artifactId: camel-jclouds
-      schemes:
-      - id: jclouds
-        http: false
-        passive: false
-    camel-jcr:
-      groupId: org.apache.camel
-      artifactId: camel-jcr
-      schemes:
-      - id: jcr
-        http: false
-        passive: false
-    camel-jdbc:
-      groupId: org.apache.camel
-      artifactId: camel-jdbc
-      schemes:
-      - id: jdbc
-        http: false
-        passive: false
-    camel-jetty9:
-      groupId: org.apache.camel
-      artifactId: camel-jetty9
-      schemes:
-      - id: jetty
-        http: true
-        passive: false
-    camel-jgroups:
-      groupId: org.apache.camel
-      artifactId: camel-jgroups
-      schemes:
-      - id: jgroups
-        http: false
-        passive: false
-    camel-jibx:
-      groupId: org.apache.camel
-      artifactId: camel-jibx
-      dataformats:
-      - jibx
-    camel-jing:
-      groupId: org.apache.camel
-      artifactId: camel-jing
-      schemes:
-      - id: jing
-        http: false
-        passive: false
-    camel-jira:
-      groupId: org.apache.camel
-      artifactId: camel-jira
-      schemes:
-      - id: jira
-        http: false
-        passive: false
-    camel-jms:
-      groupId: org.apache.camel
-      artifactId: camel-jms
-      schemes:
-      - id: jms
-        http: false
-        passive: false
-    camel-jmx:
-      groupId: org.apache.camel
-      artifactId: camel-jmx
-      schemes:
-      - id: jmx
-        http: false
-        passive: false
-    camel-johnzon:
-      groupId: org.apache.camel
-      artifactId: camel-johnzon
-      dataformats:
-      - json-johnzon
-    camel-jolt:
-      groupId: org.apache.camel
-      artifactId: camel-jolt
-      schemes:
-      - id: jolt
-        http: false
-        passive: false
-    camel-josql:
-      groupId: org.apache.camel
-      artifactId: camel-josql
-      languages:
-      - sql
-    camel-jpa:
-      groupId: org.apache.camel
-      artifactId: camel-jpa
-      schemes:
-      - id: jpa
-        http: false
-        passive: false
-    camel-jsch:
-      groupId: org.apache.camel
-      artifactId: camel-jsch
-      schemes:
-      - id: scp
-        http: false
-        passive: false
-    camel-json-validator:
-      groupId: org.apache.camel
-      artifactId: camel-json-validator
-      schemes:
-      - id: json-validator
-        http: false
-        passive: false
-    camel-jsonpath:
-      groupId: org.apache.camel
-      artifactId: camel-jsonpath
-      languages:
-      - jsonpath
-    camel-jt400:
-      groupId: org.apache.camel
-      artifactId: camel-jt400
-      schemes:
-      - id: jt400
-        http: false
-        passive: false
-    camel-juel:
-      groupId: org.apache.camel
-      artifactId: camel-juel
-      languages:
-      - el
-    camel-jxpath:
-      groupId: org.apache.camel
-      artifactId: camel-jxpath
-      languages:
-      - jxpath
-    camel-k-runtime-groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-groovy
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-groovy
-    camel-k-runtime-health:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-health
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-k-runtime-jvm:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-jvm
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-core
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-adapter-camel-2
-    camel-k-runtime-kotlin:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-kotlin
-    camel-k-runtime-servlet:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-servlet
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-servlet
-    camel-k-runtime-yaml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-yaml
-    camel-kafka:
-      groupId: org.apache.camel
-      artifactId: camel-kafka
-      schemes:
-      - id: kafka
-        http: false
-        passive: false
-    camel-kestrel:
-      groupId: org.apache.camel
-      artifactId: camel-kestrel
-      schemes:
-      - id: kestrel
-        http: false
-        passive: false
-    camel-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-knative
-      schemes:
-      - id: knative
-        http: true
-        passive: false
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-krati:
-      groupId: org.apache.camel
-      artifactId: camel-krati
-      schemes:
-      - id: krati
-        http: false
-        passive: false
-    camel-kubernetes:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      schemes:
-      - id: kubernetes
-        http: false
-        passive: false
-      - id: kubernetes-config-maps
-        http: false
-        passive: false
-      - id: kubernetes-deployments
-        http: false
-        passive: false
-      - id: kubernetes-hpa
-        http: false
-        passive: false
-      - id: kubernetes-job
-        http: false
-        passive: false
-      - id: kubernetes-namespaces
-        http: false
-        passive: false
-      - id: kubernetes-nodes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes-claims
-        http: false
-        passive: false
-      - id: kubernetes-pods
-        http: false
-        passive: false
-      - id: kubernetes-replication-controllers
-        http: false
-        passive: false
-      - id: kubernetes-resources-quota
-        http: false
-        passive: false
-      - id: kubernetes-secrets
-        http: false
-        passive: false
-      - id: kubernetes-service-accounts
-        http: false
-        passive: false
-      - id: kubernetes-services
-        http: false
-        passive: false
-      - id: openshift-build-configs
-        http: false
-        passive: false
-      - id: openshift-builds
-        http: false
-        passive: false
-    camel-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-ldap
-      schemes:
-      - id: ldap
-        http: false
-        passive: false
-    camel-ldif:
-      groupId: org.apache.camel
-      artifactId: camel-ldif
-      schemes:
-      - id: ldif
-        http: false
-        passive: false
-    camel-linkedin:
-      groupId: org.apache.camel
-      artifactId: camel-linkedin
-      schemes:
-      - id: linkedin
-        http: false
-        passive: false
-    camel-lucene:
-      groupId: org.apache.camel
-      artifactId: camel-lucene
-      schemes:
-      - id: lucene
-        http: false
-        passive: false
-    camel-lumberjack:
-      groupId: org.apache.camel
-      artifactId: camel-lumberjack
-      schemes:
-      - id: lumberjack
-        http: false
-        passive: false
-    camel-lzf:
-      groupId: org.apache.camel
-      artifactId: camel-lzf
-      dataformats:
-      - lzf
-    camel-mail:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      schemes:
-      - id: imap
-        http: false
-        passive: false
-      - id: imaps
-        http: false
-        passive: false
-      - id: pop3
-        http: false
-        passive: false
-      - id: pop3s
-        http: false
-        passive: false
-      - id: smtp
-        http: false
-        passive: false
-      - id: smtps
-        http: false
-        passive: false
-      dataformats:
-      - mime-multipart
-    camel-master:
-      groupId: org.apache.camel
-      artifactId: camel-master
-      schemes:
-      - id: master
-        http: false
-        passive: false
-    camel-metrics:
-      groupId: org.apache.camel
-      artifactId: camel-metrics
-      schemes:
-      - id: metrics
-        http: false
-        passive: false
-    camel-micrometer:
-      groupId: org.apache.camel
-      artifactId: camel-micrometer
-      schemes:
-      - id: micrometer
-        http: false
-        passive: false
-    camel-milo:
-      groupId: org.apache.camel
-      artifactId: camel-milo
-      schemes:
-      - id: milo-client
-        http: false
-        passive: false
-      - id: milo-server
-        http: false
-        passive: false
-    camel-mina:
-      groupId: org.apache.camel
-      artifactId: camel-mina
-      schemes:
-      - id: mina
-        http: false
-        passive: false
-    camel-mina2:
-      groupId: org.apache.camel
-      artifactId: camel-mina2
-      schemes:
-      - id: mina2
-        http: false
-        passive: false
-    camel-mllp:
-      groupId: org.apache.camel
-      artifactId: camel-mllp
-      schemes:
-      - id: mllp
-        http: false
-        passive: false
-    camel-mongodb:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb
-      schemes:
-      - id: mongodb
-        http: false
-        passive: false
-    camel-mongodb-gridfs:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb-gridfs
-      schemes:
-      - id: mongodb-gridfs
-        http: false
-        passive: false
-    camel-mongodb3:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb3
-      schemes:
-      - id: mongodb3
-        http: false
-        passive: false
-    camel-mqtt:
-      groupId: org.apache.camel
-      artifactId: camel-mqtt
-      schemes:
-      - id: mqtt
-        http: false
-        passive: false
-    camel-msv:
-      groupId: org.apache.camel
-      artifactId: camel-msv
-      schemes:
-      - id: msv
-        http: false
-        passive: false
-    camel-mustache:
-      groupId: org.apache.camel
-      artifactId: camel-mustache
-      schemes:
-      - id: mustache
-        http: false
-        passive: false
-    camel-mvel:
-      groupId: org.apache.camel
-      artifactId: camel-mvel
-      schemes:
-      - id: mvel
-        http: false
-        passive: false
-      languages:
-      - mvel
-    camel-mybatis:
-      groupId: org.apache.camel
-      artifactId: camel-mybatis
-      schemes:
-      - id: mybatis
-        http: false
-        passive: false
-      - id: mybatis-bean
-        http: false
-        passive: false
-    camel-nagios:
-      groupId: org.apache.camel
-      artifactId: camel-nagios
-      schemes:
-      - id: nagios
-        http: false
-        passive: false
-    camel-nats:
-      groupId: org.apache.camel
-      artifactId: camel-nats
-      schemes:
-      - id: nats
-        http: false
-        passive: false
-    camel-netty:
-      groupId: org.apache.camel
-      artifactId: camel-netty
-      schemes:
-      - id: netty
-        http: false
-        passive: false
-    camel-netty-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty-http
-      schemes:
-      - id: netty-http
-        http: true
-        passive: false
-    camel-netty4:
-      groupId: org.apache.camel
-      artifactId: camel-netty4
-      schemes:
-      - id: netty4
-        http: false
-        passive: false
-    camel-netty4-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty4-http
-      schemes:
-      - id: netty4-http
-        http: true
-        passive: false
-    camel-nsq:
-      groupId: org.apache.camel
-      artifactId: camel-nsq
-      schemes:
-      - id: nsq
-        http: false
-        passive: false
-    camel-ognl:
-      groupId: org.apache.camel
-      artifactId: camel-ognl
-      languages:
-      - ognl
-    camel-olingo2:
-      groupId: org.apache.camel
-      artifactId: camel-olingo2
-      schemes:
-      - id: olingo2
-        http: false
-        passive: false
-    camel-olingo4:
-      groupId: org.apache.camel
-      artifactId: camel-olingo4
-      schemes:
-      - id: olingo4
-        http: false
-        passive: false
-    camel-openshift:
-      groupId: org.apache.camel
-      artifactId: camel-openshift
-      schemes:
-      - id: openshift
-        http: false
-        passive: false
-    camel-openstack:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      schemes:
-      - id: openstack-cinder
-        http: false
-        passive: false
-      - id: openstack-glance
-        http: false
-        passive: false
-      - id: openstack-keystone
-        http: false
-        passive: false
-      - id: openstack-neutron
-        http: false
-        passive: false
-      - id: openstack-nova
-        http: false
-        passive: false
-      - id: openstack-swift
-        http: false
-        passive: false
-    camel-optaplanner:
-      groupId: org.apache.camel
-      artifactId: camel-optaplanner
-      schemes:
-      - id: optaplanner
-        http: false
-        passive: false
-    camel-paho:
-      groupId: org.apache.camel
-      artifactId: camel-paho
-      schemes:
-      - id: paho
-        http: false
-        passive: false
-    camel-paxlogging:
-      groupId: org.apache.camel
-      artifactId: camel-paxlogging
-      schemes:
-      - id: paxlogging
-        http: false
-        passive: false
-    camel-pdf:
-      groupId: org.apache.camel
-      artifactId: camel-pdf
-      schemes:
-      - id: pdf
-        http: false
-        passive: false
-    camel-pgevent:
-      groupId: org.apache.camel
-      artifactId: camel-pgevent
-      schemes:
-      - id: pgevent
-        http: false
-        passive: false
-    camel-printer:
-      groupId: org.apache.camel
-      artifactId: camel-printer
-      schemes:
-      - id: lpr
-        http: false
-        passive: false
-    camel-protobuf:
-      groupId: org.apache.camel
-      artifactId: camel-protobuf
-      dataformats:
-      - protobuf
-    camel-pubnub:
-      groupId: org.apache.camel
-      artifactId: camel-pubnub
-      schemes:
-      - id: pubnub
-        http: false
-        passive: false
-    camel-quartz:
-      groupId: org.apache.camel
-      artifactId: camel-quartz
-      schemes:
-      - id: quartz
-        http: false
-        passive: false
-    camel-quartz2:
-      groupId: org.apache.camel
-      artifactId: camel-quartz2
-      schemes:
-      - id: quartz2
-        http: false
-        passive: false
-    camel-quickfix:
-      groupId: org.apache.camel
-      artifactId: camel-quickfix
-      schemes:
-      - id: quickfix
-        http: false
-        passive: false
-    camel-rabbitmq:
-      groupId: org.apache.camel
-      artifactId: camel-rabbitmq
-      schemes:
-      - id: rabbitmq
-        http: false
-        passive: false
-    camel-reactive-streams:
-      groupId: org.apache.camel
-      artifactId: camel-reactive-streams
-      schemes:
-      - id: reactive-streams
-        http: false
-        passive: false
-    camel-rest-swagger:
-      groupId: org.apache.camel
-      artifactId: camel-rest-swagger
-      schemes:
-      - id: rest-swagger
-        http: false
-        passive: false
-    camel-restlet:
-      groupId: org.apache.camel
-      artifactId: camel-restlet
-      schemes:
-      - id: restlet
-        http: true
-        passive: false
-    camel-rmi:
-      groupId: org.apache.camel
-      artifactId: camel-rmi
-      schemes:
-      - id: rmi
-        http: false
-        passive: false
-    camel-routebox:
-      groupId: org.apache.camel
-      artifactId: camel-routebox
-      schemes:
-      - id: routebox
-        http: false
-        passive: false
-    camel-rss:
-      groupId: org.apache.camel
-      artifactId: camel-rss
-      schemes:
-      - id: rss
-        http: false
-        passive: false
-      dataformats:
-      - rss
-    camel-salesforce:
-      groupId: org.apache.camel
-      artifactId: camel-salesforce
-      schemes:
-      - id: salesforce
-        http: false
-        passive: false
-    camel-sap-netweaver:
-      groupId: org.apache.camel
-      artifactId: camel-sap-netweaver
-      schemes:
-      - id: sap-netweaver
-        http: false
-        passive: false
-    camel-saxon:
-      groupId: org.apache.camel
-      artifactId: camel-saxon
-      schemes:
-      - id: xquery
-        http: false
-        passive: false
-      languages:
-      - xquery
-    camel-schematron:
-      groupId: org.apache.camel
-      artifactId: camel-schematron
-      schemes:
-      - id: schematron
-        http: false
-        passive: false
-    camel-script:
-      groupId: org.apache.camel
-      artifactId: camel-script
-      languages:
-      - javaScript
-      - php
-      - python
-      - ruby
-    camel-service:
-      groupId: org.apache.camel
-      artifactId: camel-service
-      schemes:
-      - id: service
-        http: false
-        passive: false
-    camel-servicenow:
-      groupId: org.apache.camel
-      artifactId: camel-servicenow
-      schemes:
-      - id: servicenow
-        http: false
-        passive: false
-    camel-servlet:
-      groupId: org.apache.camel
-      artifactId: camel-servlet
-      schemes:
-      - id: servlet
-        http: true
-        passive: false
-    camel-sip:
-      groupId: org.apache.camel
-      artifactId: camel-sip
-      schemes:
-      - id: sip
-        http: false
-        passive: false
-      - id: sips
-        http: false
-        passive: false
-    camel-sjms:
-      groupId: org.apache.camel
-      artifactId: camel-sjms
-      schemes:
-      - id: sjms
-        http: false
-        passive: false
-      - id: sjms-batch
-        http: false
-        passive: false
-    camel-sjms2:
-      groupId: org.apache.camel
-      artifactId: camel-sjms2
-      schemes:
-      - id: sjms2
-        http: false
-        passive: false
-    camel-slack:
-      groupId: org.apache.camel
-      artifactId: camel-slack
-      schemes:
-      - id: slack
-        http: false
-        passive: false
-    camel-smpp:
-      groupId: org.apache.camel
-      artifactId: camel-smpp
-      schemes:
-      - id: smpp
-        http: false
-        passive: false
-      - id: smpps
-        http: false
-        passive: false
-    camel-snakeyaml:
-      groupId: org.apache.camel
-      artifactId: camel-snakeyaml
-      dataformats:
-      - yaml-snakeyaml
-    camel-snmp:
-      groupId: org.apache.camel
-      artifactId: camel-snmp
-      schemes:
-      - id: snmp
-        http: false
-        passive: false
-    camel-soap:
-      groupId: org.apache.camel
-      artifactId: camel-soap
-      dataformats:
-      - soapjaxb
-    camel-solr:
-      groupId: org.apache.camel
-      artifactId: camel-solr
-      schemes:
-      - id: solr
-        http: false
-        passive: false
-      - id: solrs
-        http: false
-        passive: false
-      - id: solrCloud
-        http: false
-        passive: false
-    camel-spark:
-      groupId: org.apache.camel
-      artifactId: camel-spark
-      schemes:
-      - id: spark
-        http: false
-        passive: false
-    camel-spark-rest:
-      groupId: org.apache.camel
-      artifactId: camel-spark-rest
-      schemes:
-      - id: spark-rest
-        http: true
-        passive: false
-    camel-splunk:
-      groupId: org.apache.camel
-      artifactId: camel-splunk
-      schemes:
-      - id: splunk
-        http: false
-        passive: false
-    camel-spring:
-      groupId: org.apache.camel
-      artifactId: camel-spring
-      schemes:
-      - id: spring-event
-        http: false
-        passive: false
-      languages:
-      - spel
-    camel-spring-batch:
-      groupId: org.apache.camel
-      artifactId: camel-spring-batch
-      schemes:
-      - id: spring-batch
-        http: false
-        passive: false
-    camel-spring-integration:
-      groupId: org.apache.camel
-      artifactId: camel-spring-integration
-      schemes:
-      - id: spring-integration
-        http: false
-        passive: false
-    camel-spring-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ldap
-      schemes:
-      - id: spring-ldap
-        http: false
-        passive: false
-    camel-spring-redis:
-      groupId: org.apache.camel
-      artifactId: camel-spring-redis
-      schemes:
-      - id: spring-redis
-        http: false
-        passive: false
-    camel-spring-ws:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ws
-      schemes:
-      - id: spring-ws
-        http: true
-        passive: false
-    camel-sql:
-      groupId: org.apache.camel
-      artifactId: camel-sql
-      schemes:
-      - id: sql
-        http: false
-        passive: false
-      - id: sql-stored
-        http: false
-        passive: false
-    camel-ssh:
-      groupId: org.apache.camel
-      artifactId: camel-ssh
-      schemes:
-      - id: ssh
-        http: false
-        passive: false
-    camel-stax:
-      groupId: org.apache.camel
-      artifactId: camel-stax
-      schemes:
-      - id: stax
-        http: false
-        passive: false
-    camel-stomp:
-      groupId: org.apache.camel
-      artifactId: camel-stomp
-      schemes:
-      - id: stomp
-        http: false
-        passive: false
-    camel-stream:
-      groupId: org.apache.camel
-      artifactId: camel-stream
-      schemes:
-      - id: stream
-        http: false
-        passive: false
-    camel-stringtemplate:
-      groupId: org.apache.camel
-      artifactId: camel-stringtemplate
-      schemes:
-      - id: string-template
-        http: false
-        passive: false
-    camel-syslog:
-      groupId: org.apache.camel
-      artifactId: camel-syslog
-      dataformats:
-      - syslog
-    camel-tagsoup:
-      groupId: org.apache.camel
-      artifactId: camel-tagsoup
-      dataformats:
-      - tidyMarkup
-    camel-tarfile:
-      groupId: org.apache.camel
-      artifactId: camel-tarfile
-      dataformats:
-      - tarfile
-    camel-telegram:
-      groupId: org.apache.camel
-      artifactId: camel-telegram
-      schemes:
-      - id: telegram
-        http: false
-        passive: false
-    camel-thrift:
-      groupId: org.apache.camel
-      artifactId: camel-thrift
-      schemes:
-      - id: thrift
-        http: false
-        passive: false
-      dataformats:
-      - thrift
-    camel-tika:
-      groupId: org.apache.camel
-      artifactId: camel-tika
-      schemes:
-      - id: tika
-        http: false
-        passive: false
-    camel-twilio:
-      groupId: org.apache.camel
-      artifactId: camel-twilio
-      schemes:
-      - id: twilio
-        http: false
-        passive: false
-    camel-twitter:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      schemes:
-      - id: twitter
-        http: false
-        passive: false
-      - id: twitter-directmessage
-        http: false
-        passive: false
-      - id: twitter-search
-        http: false
-        passive: false
-      - id: twitter-streaming
-        http: false
-        passive: false
-      - id: twitter-timeline
-        http: false
-        passive: false
-    camel-undertow:
-      groupId: org.apache.camel
-      artifactId: camel-undertow
-      schemes:
-      - id: undertow
-        http: true
-        passive: false
-    camel-univocity-parsers:
-      groupId: org.apache.camel
-      artifactId: camel-univocity-parsers
-      dataformats:
-      - univocity-csv
-      - univocity-fixed
-      - univocity-tsv
-    camel-velocity:
-      groupId: org.apache.camel
-      artifactId: camel-velocity
-      schemes:
-      - id: velocity
-        http: false
-        passive: false
-    camel-vertx:
-      groupId: org.apache.camel
-      artifactId: camel-vertx
-      schemes:
-      - id: vertx
-        http: false
-        passive: false
-    camel-weather:
-      groupId: org.apache.camel
-      artifactId: camel-weather
-      schemes:
-      - id: weather
-        http: false
-        passive: false
-    camel-web3j:
-      groupId: org.apache.camel
-      artifactId: camel-web3j
-      schemes:
-      - id: web3j
-        http: false
-        passive: false
-    camel-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-websocket
-      schemes:
-      - id: websocket
-        http: true
-        passive: false
-    camel-wordpress:
-      groupId: org.apache.camel
-      artifactId: camel-wordpress
-      schemes:
-      - id: wordpress
-        http: false
-        passive: false
-    camel-xchange:
-      groupId: org.apache.camel
-      artifactId: camel-xchange
-      schemes:
-      - id: xchange
-        http: false
-        passive: false
-    camel-xmlbeans:
-      groupId: org.apache.camel
-      artifactId: camel-xmlbeans
-      dataformats:
-      - xmlBeans
-    camel-xmljson:
-      groupId: org.apache.camel
-      artifactId: camel-xmljson
-      dataformats:
-      - xmljson
-    camel-xmlrpc:
-      groupId: org.apache.camel
-      artifactId: camel-xmlrpc
-      schemes:
-      - id: xmlrpc
-        http: false
-        passive: false
-      dataformats:
-      - xmlrpc
-    camel-xmlsecurity:
-      groupId: org.apache.camel
-      artifactId: camel-xmlsecurity
-      schemes:
-      - id: xmlsecurity
-        http: false
-        passive: false
-      dataformats:
-      - secureXML
-    camel-xmpp:
-      groupId: org.apache.camel
-      artifactId: camel-xmpp
-      schemes:
-      - id: xmpp
-        http: false
-        passive: false
-    camel-xstream:
-      groupId: org.apache.camel
-      artifactId: camel-xstream
-      dataformats:
-      - json-xstream
-      - xstream
-    camel-yammer:
-      groupId: org.apache.camel
-      artifactId: camel-yammer
-      schemes:
-      - id: yammer
-        http: false
-        passive: false
-    camel-yql:
-      groupId: org.apache.camel
-      artifactId: camel-yql
-      schemes:
-      - id: yql
-        http: false
-        passive: false
-    camel-zendesk:
-      groupId: org.apache.camel
-      artifactId: camel-zendesk
-      schemes:
-      - id: zendesk
-        http: false
-        passive: false
-    camel-zipfile:
-      groupId: org.apache.camel
-      artifactId: camel-zipfile
-      dataformats:
-      - zipfile
-    camel-zookeeper:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper
-      schemes:
-      - id: zookeeper
-        http: false
-        passive: false
-    camel-zookeeper-master:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper-master
-      schemes:
-      - id: zookeeper-master
-        http: false
-        passive: false
-
-`
-	Resources["camel-catalog-2.23.2.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: CamelCatalog
-metadata:
-  name: camel-catalog-2.23.2
-  labels:
-    app: camel-k
-    camel.apache.org/catalog.version: 2.23.2
-    camel.apache.org/catalog.loader.version: 2.23.2
-spec:
-  version: 2.23.2
-  artifacts:
-    camel-ahc:
-      groupId: org.apache.camel
-      artifactId: camel-ahc
-      schemes:
-      - id: ahc
-        http: true
-        passive: false
-    camel-ahc-ws:
-      groupId: org.apache.camel
-      artifactId: camel-ahc-ws
-      schemes:
-      - id: ahc-ws
-        http: true
-        passive: false
-      - id: ahc-wss
-        http: false
-        passive: false
-    camel-amqp:
-      groupId: org.apache.camel
-      artifactId: camel-amqp
-      schemes:
-      - id: amqp
-        http: false
-        passive: false
-    camel-apns:
-      groupId: org.apache.camel
-      artifactId: camel-apns
-      schemes:
-      - id: apns
-        http: false
-        passive: false
-    camel-as2:
-      groupId: org.apache.camel
-      artifactId: camel-as2
-      schemes:
-      - id: as2
-        http: false
-        passive: false
-    camel-asn1:
-      groupId: org.apache.camel
-      artifactId: camel-asn1
-      dataformats:
-      - asn1
-    camel-asterisk:
-      groupId: org.apache.camel
-      artifactId: camel-asterisk
-      schemes:
-      - id: asterisk
-        http: false
-        passive: false
-    camel-atmos:
-      groupId: org.apache.camel
-      artifactId: camel-atmos
-      schemes:
-      - id: atmos
-        http: false
-        passive: false
-    camel-atmosphere-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-atmosphere-websocket
-      schemes:
-      - id: atmosphere-websocket
-        http: true
-        passive: false
-    camel-atom:
-      groupId: org.apache.camel
-      artifactId: camel-atom
-      schemes:
-      - id: atom
-        http: false
-        passive: false
-    camel-atomix:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      schemes:
-      - id: atomix-map
-        http: false
-        passive: false
-      - id: atomix-messaging
-        http: false
-        passive: false
-      - id: atomix-multimap
-        http: false
-        passive: false
-      - id: atomix-queue
-        http: false
-        passive: false
-      - id: atomix-set
-        http: false
-        passive: false
-      - id: atomix-value
-        http: false
-        passive: false
-    camel-avro:
-      groupId: org.apache.camel
-      artifactId: camel-avro
-      schemes:
-      - id: avro
-        http: false
-        passive: false
-      dataformats:
-      - avro
-    camel-aws:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      schemes:
-      - id: aws-cw
-        http: false
-        passive: false
-      - id: aws-ddb
-        http: false
-        passive: false
-      - id: aws-ddbstream
-        http: false
-        passive: false
-      - id: aws-ec2
-        http: false
-        passive: false
-      - id: aws-iam
-        http: false
-        passive: false
-      - id: aws-kinesis
-        http: false
-        passive: false
-      - id: aws-kinesis-firehose
-        http: false
-        passive: false
-      - id: aws-kms
-        http: false
-        passive: false
-      - id: aws-lambda
-        http: false
-        passive: false
-      - id: aws-mq
-        http: false
-        passive: false
-      - id: aws-s3
-        http: false
-        passive: false
-      - id: aws-sdb
-        http: false
-        passive: false
-      - id: aws-ses
-        http: false
-        passive: false
-      - id: aws-sns
-        http: false
-        passive: false
-      - id: aws-sqs
-        http: false
-        passive: false
-      - id: aws-swf
-        http: false
-        passive: false
-    camel-azure:
-      groupId: org.apache.camel
-      artifactId: camel-azure
-      schemes:
-      - id: azure-blob
-        http: false
-        passive: false
-      - id: azure-queue
-        http: false
-        passive: false
-    camel-barcode:
-      groupId: org.apache.camel
-      artifactId: camel-barcode
-      dataformats:
-      - barcode
-    camel-base64:
-      groupId: org.apache.camel
-      artifactId: camel-base64
-      dataformats:
-      - base64
-    camel-bean-validator:
-      groupId: org.apache.camel
-      artifactId: camel-bean-validator
-      schemes:
-      - id: bean-validator
-        http: false
-        passive: false
-    camel-beanio:
-      groupId: org.apache.camel
-      artifactId: camel-beanio
-      dataformats:
-      - beanio
-    camel-beanstalk:
-      groupId: org.apache.camel
-      artifactId: camel-beanstalk
-      schemes:
-      - id: beanstalk
-        http: false
-        passive: false
-    camel-bindy:
-      groupId: org.apache.camel
-      artifactId: camel-bindy
-      dataformats:
-      - bindy-csv
-      - bindy-fixed
-      - bindy-kvp
-    camel-bonita:
-      groupId: org.apache.camel
-      artifactId: camel-bonita
-      schemes:
-      - id: bonita
-        http: false
-        passive: false
-    camel-boon:
-      groupId: org.apache.camel
-      artifactId: camel-boon
-      dataformats:
-      - boon
-    camel-box:
-      groupId: org.apache.camel
-      artifactId: camel-box
-      schemes:
-      - id: box
-        http: false
-        passive: false
-    camel-braintree:
-      groupId: org.apache.camel
-      artifactId: camel-braintree
-      schemes:
-      - id: braintree
-        http: false
-        passive: false
-    camel-cache:
-      groupId: org.apache.camel
-      artifactId: camel-cache
-      schemes:
-      - id: cache
-        http: false
-        passive: false
-    camel-caffeine:
-      groupId: org.apache.camel
-      artifactId: camel-caffeine
-      schemes:
-      - id: caffeine-cache
-        http: false
-        passive: false
-      - id: caffeine-loadcache
-        http: false
-        passive: false
-    camel-cassandraql:
-      groupId: org.apache.camel
-      artifactId: camel-cassandraql
-      schemes:
-      - id: cql
-        http: false
-        passive: false
-    camel-castor:
-      groupId: org.apache.camel
-      artifactId: camel-castor
-      dataformats:
-      - castor
-    camel-chronicle:
-      groupId: org.apache.camel
-      artifactId: camel-chronicle
-      schemes:
-      - id: chronicle-engine
-        http: false
-        passive: false
-    camel-chunk:
-      groupId: org.apache.camel
-      artifactId: camel-chunk
-      schemes:
-      - id: chunk
-        http: false
-        passive: false
-    camel-cm-sms:
-      groupId: org.apache.camel
-      artifactId: camel-cm-sms
-      schemes:
-      - id: cm-sms
-        http: false
-        passive: false
-    camel-cmis:
-      groupId: org.apache.camel
-      artifactId: camel-cmis
-      schemes:
-      - id: cmis
-        http: false
-        passive: false
-    camel-coap:
-      groupId: org.apache.camel
-      artifactId: camel-coap
-      schemes:
-      - id: coap
-        http: false
-        passive: false
-    camel-cometd:
-      groupId: org.apache.camel
-      artifactId: camel-cometd
-      schemes:
-      - id: cometd
-        http: false
-        passive: false
-      - id: cometds
-        http: false
-        passive: false
-    camel-consul:
-      groupId: org.apache.camel
-      artifactId: camel-consul
-      schemes:
-      - id: consul
-        http: false
-        passive: false
-    camel-context:
-      groupId: org.apache.camel
-      artifactId: camel-context
-      schemes:
-      - id: context
-        http: false
-        passive: false
-    camel-core:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      schemes:
-      - id: bean
-        http: false
-        passive: true
-      - id: binding
-        http: false
-        passive: true
-      - id: browse
-        http: false
-        passive: true
-      - id: class
-        http: false
-        passive: true
-      - id: controlbus
-        http: false
-        passive: true
-      - id: dataformat
-        http: false
-        passive: true
-      - id: dataset
-        http: false
-        passive: true
-      - id: direct
-        http: false
-        passive: true
-      - id: direct-vm
-        http: false
-        passive: true
-      - id: file
-        http: false
-        passive: false
-      - id: language
-        http: false
-        passive: true
-      - id: log
-        http: false
-        passive: true
-      - id: mock
-        http: false
-        passive: true
-      - id: properties
-        http: false
-        passive: true
-      - id: ref
-        http: false
-        passive: true
-      - id: rest
-        http: true
-        passive: false
-      - id: rest-api
-        http: false
-        passive: false
-      - id: saga
-        http: false
-        passive: false
-      - id: scheduler
-        http: false
-        passive: false
-      - id: seda
-        http: false
-        passive: true
-      - id: stub
-        http: false
-        passive: true
-      - id: test
-        http: false
-        passive: true
-      - id: timer
-        http: false
-        passive: false
-      - id: validator
-        http: false
-        passive: true
-      - id: vm
-        http: false
-        passive: true
-      - id: xslt
-        http: false
-        passive: false
-      languages:
-      - bean
-      - constant
-      - exchangeProperty
-      - file
-      - header
-      - ref
-      - simple
-      - tokenize
-      - xpath
-      - xtokenize
-      dataformats:
-      - gzip
-      - serialization
-      - string
-      - zip
-    camel-couchbase:
-      groupId: org.apache.camel
-      artifactId: camel-couchbase
-      schemes:
-      - id: couchbase
-        http: false
-        passive: false
-    camel-couchdb:
-      groupId: org.apache.camel
-      artifactId: camel-couchdb
-      schemes:
-      - id: couchdb
-        http: false
-        passive: false
-    camel-crypto:
-      groupId: org.apache.camel
-      artifactId: camel-crypto
-      schemes:
-      - id: crypto
-        http: false
-        passive: false
-      dataformats:
-      - crypto
-      - pgp
-    camel-crypto-cms:
-      groupId: org.apache.camel
-      artifactId: camel-crypto-cms
-      schemes:
-      - id: crypto-cms
-        http: false
-        passive: false
-    camel-csv:
-      groupId: org.apache.camel
-      artifactId: camel-csv
-      dataformats:
-      - csv
-    camel-cxf:
-      groupId: org.apache.camel
-      artifactId: camel-cxf
-      schemes:
-      - id: cxf
-        http: true
-        passive: false
-      - id: cxfrs
-        http: true
-        passive: false
-    camel-digitalocean:
-      groupId: org.apache.camel
-      artifactId: camel-digitalocean
-      schemes:
-      - id: digitalocean
-        http: false
-        passive: false
-    camel-disruptor:
-      groupId: org.apache.camel
-      artifactId: camel-disruptor
-      schemes:
-      - id: disruptor
-        http: false
-        passive: false
-      - id: disruptor-vm
-        http: false
-        passive: false
-    camel-dns:
-      groupId: org.apache.camel
-      artifactId: camel-dns
-      schemes:
-      - id: dns
-        http: false
-        passive: false
-    camel-docker:
-      groupId: org.apache.camel
-      artifactId: camel-docker
-      schemes:
-      - id: docker
-        http: false
-        passive: false
-    camel-dozer:
-      groupId: org.apache.camel
-      artifactId: camel-dozer
-      schemes:
-      - id: dozer
-        http: false
-        passive: false
-    camel-drill:
-      groupId: org.apache.camel
-      artifactId: camel-drill
-      schemes:
-      - id: drill
-        http: false
-        passive: false
-    camel-dropbox:
-      groupId: org.apache.camel
-      artifactId: camel-dropbox
-      schemes:
-      - id: dropbox
-        http: false
-        passive: false
-    camel-ehcache:
-      groupId: org.apache.camel
-      artifactId: camel-ehcache
-      schemes:
-      - id: ehcache
-        http: false
-        passive: false
-    camel-ejb:
-      groupId: org.apache.camel
-      artifactId: camel-ejb
-      schemes:
-      - id: ejb
-        http: false
-        passive: false
-    camel-elasticsearch:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch
-      schemes:
-      - id: elasticsearch
-        http: false
-        passive: false
-    camel-elasticsearch-rest:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch-rest
-      schemes:
-      - id: elasticsearch-rest
-        http: false
-        passive: false
-    camel-elasticsearch5:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch5
-      schemes:
-      - id: elasticsearch5
-        http: false
-        passive: false
-    camel-elsql:
-      groupId: org.apache.camel
-      artifactId: camel-elsql
-      schemes:
-      - id: elsql
-        http: false
-        passive: false
-    camel-etcd:
-      groupId: org.apache.camel
-      artifactId: camel-etcd
-      schemes:
-      - id: etcd
-        http: false
-        passive: false
-    camel-eventadmin:
-      groupId: org.apache.camel
-      artifactId: camel-eventadmin
-      schemes:
-      - id: eventadmin
-        http: false
-        passive: false
-    camel-exec:
-      groupId: org.apache.camel
-      artifactId: camel-exec
-      schemes:
-      - id: exec
-        http: false
-        passive: false
-    camel-facebook:
-      groupId: org.apache.camel
-      artifactId: camel-facebook
-      schemes:
-      - id: facebook
-        http: false
-        passive: false
-    camel-fastjson:
-      groupId: org.apache.camel
-      artifactId: camel-fastjson
-      dataformats:
-      - json-fastjson
-    camel-fhir:
-      groupId: org.apache.camel
-      artifactId: camel-fhir
-      schemes:
-      - id: fhir
-        http: false
-        passive: false
-      dataformats:
-      - fhirJson
-      - fhirXml
-    camel-flatpack:
-      groupId: org.apache.camel
-      artifactId: camel-flatpack
-      schemes:
-      - id: flatpack
-        http: false
-        passive: false
-      dataformats:
-      - flatpack
-    camel-flink:
-      groupId: org.apache.camel
-      artifactId: camel-flink
-      schemes:
-      - id: flink
-        http: false
-        passive: false
-    camel-fop:
-      groupId: org.apache.camel
-      artifactId: camel-fop
-      schemes:
-      - id: fop
-        http: false
-        passive: false
-    camel-freemarker:
-      groupId: org.apache.camel
-      artifactId: camel-freemarker
-      schemes:
-      - id: freemarker
-        http: false
-        passive: false
-    camel-ftp:
-      groupId: org.apache.camel
-      artifactId: camel-ftp
-      schemes:
-      - id: ftp
-        http: false
-        passive: false
-      - id: ftps
-        http: false
-        passive: false
-      - id: sftp
-        http: false
-        passive: false
-    camel-ganglia:
-      groupId: org.apache.camel
-      artifactId: camel-ganglia
-      schemes:
-      - id: ganglia
-        http: false
-        passive: false
-    camel-geocoder:
-      groupId: org.apache.camel
-      artifactId: camel-geocoder
-      schemes:
-      - id: geocoder
-        http: false
-        passive: false
-    camel-git:
-      groupId: org.apache.camel
-      artifactId: camel-git
-      schemes:
-      - id: git
-        http: false
-        passive: false
-    camel-github:
-      groupId: org.apache.camel
-      artifactId: camel-github
-      schemes:
-      - id: github
-        http: false
-        passive: false
-    camel-google-bigquery:
-      groupId: org.apache.camel
-      artifactId: camel-google-bigquery
-      schemes:
-      - id: google-bigquery
-        http: false
-        passive: false
-    camel-google-calendar:
-      groupId: org.apache.camel
-      artifactId: camel-google-calendar
-      schemes:
-      - id: google-calendar
-        http: false
-        passive: false
-      - id: google-calendar-stream
-        http: false
-        passive: false
-    camel-google-drive:
-      groupId: org.apache.camel
-      artifactId: camel-google-drive
-      schemes:
-      - id: google-drive
-        http: false
-        passive: false
-    camel-google-mail:
-      groupId: org.apache.camel
-      artifactId: camel-google-mail
-      schemes:
-      - id: google-mail
-        http: false
-        passive: false
-      - id: google-mail-stream
-        http: false
-        passive: false
-    camel-google-pubsub:
-      groupId: org.apache.camel
-      artifactId: camel-google-pubsub
-      schemes:
-      - id: google-pubsub
-        http: false
-        passive: false
-    camel-google-sheets:
-      groupId: org.apache.camel
-      artifactId: camel-google-sheets
-      schemes:
-      - id: google-sheets
-        http: false
-        passive: false
-      - id: google-sheets-stream
-        http: false
-        passive: false
-    camel-gora:
-      groupId: org.apache.camel
-      artifactId: camel-gora
-      schemes:
-      - id: gora
-        http: false
-        passive: false
-    camel-grape:
-      groupId: org.apache.camel
-      artifactId: camel-grape
-      schemes:
-      - id: grape
-        http: false
-        passive: false
-    camel-groovy:
-      groupId: org.apache.camel
-      artifactId: camel-groovy
-      languages:
-      - groovy
-    camel-grpc:
-      groupId: org.apache.camel
-      artifactId: camel-grpc
-      schemes:
-      - id: grpc
-        http: true
-        passive: false
-    camel-gson:
-      groupId: org.apache.camel
-      artifactId: camel-gson
-      dataformats:
-      - json-gson
-    camel-guava-eventbus:
-      groupId: org.apache.camel
-      artifactId: camel-guava-eventbus
-      schemes:
-      - id: guava-eventbus
-        http: false
-        passive: false
-    camel-hazelcast:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      schemes:
-      - id: hazelcast-atomicvalue
-        http: false
-        passive: false
-      - id: hazelcast-instance
-        http: false
-        passive: false
-      - id: hazelcast-list
-        http: false
-        passive: false
-      - id: hazelcast-map
-        http: false
-        passive: false
-      - id: hazelcast-multimap
-        http: false
-        passive: false
-      - id: hazelcast-queue
-        http: false
-        passive: false
-      - id: hazelcast-replicatedmap
-        http: false
-        passive: false
-      - id: hazelcast-ringbuffer
-        http: false
-        passive: false
-      - id: hazelcast-seda
-        http: false
-        passive: false
-      - id: hazelcast-set
-        http: false
-        passive: false
-      - id: hazelcast-topic
-        http: false
-        passive: false
-    camel-hbase:
-      groupId: org.apache.camel
-      artifactId: camel-hbase
-      schemes:
-      - id: hbase
-        http: false
-        passive: false
-    camel-hdfs:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs
-      schemes:
-      - id: hdfs
-        http: false
-        passive: false
-    camel-hdfs2:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs2
-      schemes:
-      - id: hdfs2
-        http: false
-        passive: false
-    camel-hessian:
-      groupId: org.apache.camel
-      artifactId: camel-hessian
-      dataformats:
-      - hessian
-    camel-hipchat:
-      groupId: org.apache.camel
-      artifactId: camel-hipchat
-      schemes:
-      - id: hipchat
-        http: false
-        passive: false
-    camel-hl7:
-      groupId: org.apache.camel
-      artifactId: camel-hl7
-      languages:
-      - terser
-      dataformats:
-      - hl7
-    camel-http:
-      groupId: org.apache.camel
-      artifactId: camel-http
-      schemes:
-      - id: http
-        http: false
-        passive: false
-      - id: https
-        http: false
-        passive: false
-    camel-http4:
-      groupId: org.apache.camel
-      artifactId: camel-http4
-      schemes:
-      - id: http4
-        http: false
-        passive: false
-      - id: https4
-        http: false
-        passive: false
-    camel-ibatis:
-      groupId: org.apache.camel
-      artifactId: camel-ibatis
-      schemes:
-      - id: ibatis
-        http: false
-        passive: false
-    camel-ical:
-      groupId: org.apache.camel
-      artifactId: camel-ical
-      dataformats:
-      - ical
-    camel-iec60870:
-      groupId: org.apache.camel
-      artifactId: camel-iec60870
-      schemes:
-      - id: iec60870-client
-        http: false
-        passive: false
-      - id: iec60870-server
-        http: false
-        passive: false
-    camel-ignite:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      schemes:
-      - id: ignite-cache
-        http: false
-        passive: false
-      - id: ignite-compute
-        http: false
-        passive: false
-      - id: ignite-events
-        http: false
-        passive: false
-      - id: ignite-idgen
-        http: false
-        passive: false
-      - id: ignite-messaging
-        http: false
-        passive: false
-      - id: ignite-queue
-        http: false
-        passive: false
-      - id: ignite-set
-        http: false
-        passive: false
-    camel-infinispan:
-      groupId: org.apache.camel
-      artifactId: camel-infinispan
-      schemes:
-      - id: infinispan
-        http: false
-        passive: false
-    camel-influxdb:
-      groupId: org.apache.camel
-      artifactId: camel-influxdb
-      schemes:
-      - id: influxdb
-        http: false
-        passive: false
-    camel-ipfs:
-      groupId: org.apache.camel
-      artifactId: camel-ipfs
-      schemes:
-      - id: ipfs
-        http: false
-        passive: false
-    camel-irc:
-      groupId: org.apache.camel
-      artifactId: camel-irc
-      schemes:
-      - id: irc
-        http: false
-        passive: false
-    camel-ironmq:
-      groupId: org.apache.camel
-      artifactId: camel-ironmq
-      schemes:
-      - id: ironmq
-        http: false
-        passive: false
-    camel-jackson:
-      groupId: org.apache.camel
-      artifactId: camel-jackson
-      dataformats:
-      - json-jackson
-    camel-jacksonxml:
-      groupId: org.apache.camel
-      artifactId: camel-jacksonxml
-      dataformats:
-      - jacksonxml
-    camel-javaspace:
-      groupId: org.apache.camel
-      artifactId: camel-javaspace
-      schemes:
-      - id: javaspace
-        http: false
-        passive: false
-    camel-jaxb:
-      groupId: org.apache.camel
-      artifactId: camel-jaxb
-      dataformats:
-      - jaxb
-    camel-jbpm:
-      groupId: org.apache.camel
-      artifactId: camel-jbpm
-      schemes:
-      - id: jbpm
-        http: false
-        passive: false
-    camel-jcache:
-      groupId: org.apache.camel
-      artifactId: camel-jcache
-      schemes:
-      - id: jcache
-        http: false
-        passive: false
-    camel-jclouds:
-      groupId: org.apache.camel
-      artifactId: camel-jclouds
-      schemes:
-      - id: jclouds
-        http: false
-        passive: false
-    camel-jcr:
-      groupId: org.apache.camel
-      artifactId: camel-jcr
-      schemes:
-      - id: jcr
-        http: false
-        passive: false
-    camel-jdbc:
-      groupId: org.apache.camel
-      artifactId: camel-jdbc
-      schemes:
-      - id: jdbc
-        http: false
-        passive: false
-    camel-jetty9:
-      groupId: org.apache.camel
-      artifactId: camel-jetty9
-      schemes:
-      - id: jetty
-        http: true
-        passive: false
-    camel-jgroups:
-      groupId: org.apache.camel
-      artifactId: camel-jgroups
-      schemes:
-      - id: jgroups
-        http: false
-        passive: false
-    camel-jibx:
-      groupId: org.apache.camel
-      artifactId: camel-jibx
-      dataformats:
-      - jibx
-    camel-jing:
-      groupId: org.apache.camel
-      artifactId: camel-jing
-      schemes:
-      - id: jing
-        http: false
-        passive: false
-    camel-jira:
-      groupId: org.apache.camel
-      artifactId: camel-jira
-      schemes:
-      - id: jira
-        http: false
-        passive: false
-    camel-jms:
-      groupId: org.apache.camel
-      artifactId: camel-jms
-      schemes:
-      - id: jms
-        http: false
-        passive: false
-    camel-jmx:
-      groupId: org.apache.camel
-      artifactId: camel-jmx
-      schemes:
-      - id: jmx
-        http: false
-        passive: false
-    camel-johnzon:
-      groupId: org.apache.camel
-      artifactId: camel-johnzon
-      dataformats:
-      - json-johnzon
-    camel-jolt:
-      groupId: org.apache.camel
-      artifactId: camel-jolt
-      schemes:
-      - id: jolt
-        http: false
-        passive: false
-    camel-josql:
-      groupId: org.apache.camel
-      artifactId: camel-josql
-      languages:
-      - sql
-    camel-jpa:
-      groupId: org.apache.camel
-      artifactId: camel-jpa
-      schemes:
-      - id: jpa
-        http: false
-        passive: false
-    camel-jsch:
-      groupId: org.apache.camel
-      artifactId: camel-jsch
-      schemes:
-      - id: scp
-        http: false
-        passive: false
-    camel-json-validator:
-      groupId: org.apache.camel
-      artifactId: camel-json-validator
-      schemes:
-      - id: json-validator
-        http: false
-        passive: false
-    camel-jsonpath:
-      groupId: org.apache.camel
-      artifactId: camel-jsonpath
-      languages:
-      - jsonpath
-    camel-jt400:
-      groupId: org.apache.camel
-      artifactId: camel-jt400
-      schemes:
-      - id: jt400
-        http: false
-        passive: false
-    camel-juel:
-      groupId: org.apache.camel
-      artifactId: camel-juel
-      languages:
-      - el
-    camel-jxpath:
-      groupId: org.apache.camel
-      artifactId: camel-jxpath
-      languages:
-      - jxpath
-    camel-k-runtime-groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-groovy
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-groovy
-    camel-k-runtime-health:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-health
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-k-runtime-jvm:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-jvm
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-core
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-adapter-camel-2
-    camel-k-runtime-kotlin:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-kotlin
-    camel-k-runtime-servlet:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-servlet
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-servlet
-    camel-k-runtime-yaml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-yaml
-    camel-kafka:
-      groupId: org.apache.camel
-      artifactId: camel-kafka
-      schemes:
-      - id: kafka
-        http: false
-        passive: false
-    camel-kestrel:
-      groupId: org.apache.camel
-      artifactId: camel-kestrel
-      schemes:
-      - id: kestrel
-        http: false
-        passive: false
-    camel-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-knative
-      schemes:
-      - id: knative
-        http: true
-        passive: false
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-krati:
-      groupId: org.apache.camel
-      artifactId: camel-krati
-      schemes:
-      - id: krati
-        http: false
-        passive: false
-    camel-kubernetes:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      schemes:
-      - id: kubernetes
-        http: false
-        passive: false
-      - id: kubernetes-config-maps
-        http: false
-        passive: false
-      - id: kubernetes-deployments
-        http: false
-        passive: false
-      - id: kubernetes-hpa
-        http: false
-        passive: false
-      - id: kubernetes-job
-        http: false
-        passive: false
-      - id: kubernetes-namespaces
-        http: false
-        passive: false
-      - id: kubernetes-nodes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes-claims
-        http: false
-        passive: false
-      - id: kubernetes-pods
-        http: false
-        passive: false
-      - id: kubernetes-replication-controllers
-        http: false
-        passive: false
-      - id: kubernetes-resources-quota
-        http: false
-        passive: false
-      - id: kubernetes-secrets
-        http: false
-        passive: false
-      - id: kubernetes-service-accounts
-        http: false
-        passive: false
-      - id: kubernetes-services
-        http: false
-        passive: false
-      - id: openshift-build-configs
-        http: false
-        passive: false
-      - id: openshift-builds
-        http: false
-        passive: false
-    camel-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-ldap
-      schemes:
-      - id: ldap
-        http: false
-        passive: false
-    camel-ldif:
-      groupId: org.apache.camel
-      artifactId: camel-ldif
-      schemes:
-      - id: ldif
-        http: false
-        passive: false
-    camel-linkedin:
-      groupId: org.apache.camel
-      artifactId: camel-linkedin
-      schemes:
-      - id: linkedin
-        http: false
-        passive: false
-    camel-lucene:
-      groupId: org.apache.camel
-      artifactId: camel-lucene
-      schemes:
-      - id: lucene
-        http: false
-        passive: false
-    camel-lumberjack:
-      groupId: org.apache.camel
-      artifactId: camel-lumberjack
-      schemes:
-      - id: lumberjack
-        http: false
-        passive: false
-    camel-lzf:
-      groupId: org.apache.camel
-      artifactId: camel-lzf
-      dataformats:
-      - lzf
-    camel-mail:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      schemes:
-      - id: imap
-        http: false
-        passive: false
-      - id: imaps
-        http: false
-        passive: false
-      - id: pop3
-        http: false
-        passive: false
-      - id: pop3s
-        http: false
-        passive: false
-      - id: smtp
-        http: false
-        passive: false
-      - id: smtps
-        http: false
-        passive: false
-      dataformats:
-      - mime-multipart
-    camel-master:
-      groupId: org.apache.camel
-      artifactId: camel-master
-      schemes:
-      - id: master
-        http: false
-        passive: false
-    camel-metrics:
-      groupId: org.apache.camel
-      artifactId: camel-metrics
-      schemes:
-      - id: metrics
-        http: false
-        passive: false
-    camel-micrometer:
-      groupId: org.apache.camel
-      artifactId: camel-micrometer
-      schemes:
-      - id: micrometer
-        http: false
-        passive: false
-    camel-milo:
-      groupId: org.apache.camel
-      artifactId: camel-milo
-      schemes:
-      - id: milo-client
-        http: false
-        passive: false
-      - id: milo-server
-        http: false
-        passive: false
-    camel-mina:
-      groupId: org.apache.camel
-      artifactId: camel-mina
-      schemes:
-      - id: mina
-        http: false
-        passive: false
-    camel-mina2:
-      groupId: org.apache.camel
-      artifactId: camel-mina2
-      schemes:
-      - id: mina2
-        http: false
-        passive: false
-    camel-mllp:
-      groupId: org.apache.camel
-      artifactId: camel-mllp
-      schemes:
-      - id: mllp
-        http: false
-        passive: false
-    camel-mongodb:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb
-      schemes:
-      - id: mongodb
-        http: false
-        passive: false
-    camel-mongodb-gridfs:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb-gridfs
-      schemes:
-      - id: mongodb-gridfs
-        http: false
-        passive: false
-    camel-mongodb3:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb3
-      schemes:
-      - id: mongodb3
-        http: false
-        passive: false
-    camel-mqtt:
-      groupId: org.apache.camel
-      artifactId: camel-mqtt
-      schemes:
-      - id: mqtt
-        http: false
-        passive: false
-    camel-msv:
-      groupId: org.apache.camel
-      artifactId: camel-msv
-      schemes:
-      - id: msv
-        http: false
-        passive: false
-    camel-mustache:
-      groupId: org.apache.camel
-      artifactId: camel-mustache
-      schemes:
-      - id: mustache
-        http: false
-        passive: false
-    camel-mvel:
-      groupId: org.apache.camel
-      artifactId: camel-mvel
-      schemes:
-      - id: mvel
-        http: false
-        passive: false
-      languages:
-      - mvel
-    camel-mybatis:
-      groupId: org.apache.camel
-      artifactId: camel-mybatis
-      schemes:
-      - id: mybatis
-        http: false
-        passive: false
-      - id: mybatis-bean
-        http: false
-        passive: false
-    camel-nagios:
-      groupId: org.apache.camel
-      artifactId: camel-nagios
-      schemes:
-      - id: nagios
-        http: false
-        passive: false
-    camel-nats:
-      groupId: org.apache.camel
-      artifactId: camel-nats
-      schemes:
-      - id: nats
-        http: false
-        passive: false
-    camel-netty:
-      groupId: org.apache.camel
-      artifactId: camel-netty
-      schemes:
-      - id: netty
-        http: false
-        passive: false
-    camel-netty-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty-http
-      schemes:
-      - id: netty-http
-        http: true
-        passive: false
-    camel-netty4:
-      groupId: org.apache.camel
-      artifactId: camel-netty4
-      schemes:
-      - id: netty4
-        http: false
-        passive: false
-    camel-netty4-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty4-http
-      schemes:
-      - id: netty4-http
-        http: true
-        passive: false
-    camel-nsq:
-      groupId: org.apache.camel
-      artifactId: camel-nsq
-      schemes:
-      - id: nsq
-        http: false
-        passive: false
-    camel-ognl:
-      groupId: org.apache.camel
-      artifactId: camel-ognl
-      languages:
-      - ognl
-    camel-olingo2:
-      groupId: org.apache.camel
-      artifactId: camel-olingo2
-      schemes:
-      - id: olingo2
-        http: false
-        passive: false
-    camel-olingo4:
-      groupId: org.apache.camel
-      artifactId: camel-olingo4
-      schemes:
-      - id: olingo4
-        http: false
-        passive: false
-    camel-openshift:
-      groupId: org.apache.camel
-      artifactId: camel-openshift
-      schemes:
-      - id: openshift
-        http: false
-        passive: false
-    camel-openstack:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      schemes:
-      - id: openstack-cinder
-        http: false
-        passive: false
-      - id: openstack-glance
-        http: false
-        passive: false
-      - id: openstack-keystone
-        http: false
-        passive: false
-      - id: openstack-neutron
-        http: false
-        passive: false
-      - id: openstack-nova
-        http: false
-        passive: false
-      - id: openstack-swift
-        http: false
-        passive: false
-    camel-optaplanner:
-      groupId: org.apache.camel
-      artifactId: camel-optaplanner
-      schemes:
-      - id: optaplanner
-        http: false
-        passive: false
-    camel-paho:
-      groupId: org.apache.camel
-      artifactId: camel-paho
-      schemes:
-      - id: paho
-        http: false
-        passive: false
-    camel-paxlogging:
-      groupId: org.apache.camel
-      artifactId: camel-paxlogging
-      schemes:
-      - id: paxlogging
-        http: false
-        passive: false
-    camel-pdf:
-      groupId: org.apache.camel
-      artifactId: camel-pdf
-      schemes:
-      - id: pdf
-        http: false
-        passive: false
-    camel-pgevent:
-      groupId: org.apache.camel
-      artifactId: camel-pgevent
-      schemes:
-      - id: pgevent
-        http: false
-        passive: false
-    camel-printer:
-      groupId: org.apache.camel
-      artifactId: camel-printer
-      schemes:
-      - id: lpr
-        http: false
-        passive: false
-    camel-protobuf:
-      groupId: org.apache.camel
-      artifactId: camel-protobuf
-      dataformats:
-      - protobuf
-    camel-pubnub:
-      groupId: org.apache.camel
-      artifactId: camel-pubnub
-      schemes:
-      - id: pubnub
-        http: false
-        passive: false
-    camel-quartz:
-      groupId: org.apache.camel
-      artifactId: camel-quartz
-      schemes:
-      - id: quartz
-        http: false
-        passive: false
-    camel-quartz2:
-      groupId: org.apache.camel
-      artifactId: camel-quartz2
-      schemes:
-      - id: quartz2
-        http: false
-        passive: false
-    camel-quickfix:
-      groupId: org.apache.camel
-      artifactId: camel-quickfix
-      schemes:
-      - id: quickfix
-        http: false
-        passive: false
-    camel-rabbitmq:
-      groupId: org.apache.camel
-      artifactId: camel-rabbitmq
-      schemes:
-      - id: rabbitmq
-        http: false
-        passive: false
-    camel-reactive-streams:
-      groupId: org.apache.camel
-      artifactId: camel-reactive-streams
-      schemes:
-      - id: reactive-streams
-        http: false
-        passive: false
-    camel-rest-swagger:
-      groupId: org.apache.camel
-      artifactId: camel-rest-swagger
-      schemes:
-      - id: rest-swagger
-        http: false
-        passive: false
-    camel-restlet:
-      groupId: org.apache.camel
-      artifactId: camel-restlet
-      schemes:
-      - id: restlet
-        http: true
-        passive: false
-    camel-rmi:
-      groupId: org.apache.camel
-      artifactId: camel-rmi
-      schemes:
-      - id: rmi
-        http: false
-        passive: false
-    camel-routebox:
-      groupId: org.apache.camel
-      artifactId: camel-routebox
-      schemes:
-      - id: routebox
-        http: false
-        passive: false
-    camel-rss:
-      groupId: org.apache.camel
-      artifactId: camel-rss
-      schemes:
-      - id: rss
-        http: false
-        passive: false
-      dataformats:
-      - rss
-    camel-salesforce:
-      groupId: org.apache.camel
-      artifactId: camel-salesforce
-      schemes:
-      - id: salesforce
-        http: false
-        passive: false
-    camel-sap-netweaver:
-      groupId: org.apache.camel
-      artifactId: camel-sap-netweaver
-      schemes:
-      - id: sap-netweaver
-        http: false
-        passive: false
-    camel-saxon:
-      groupId: org.apache.camel
-      artifactId: camel-saxon
-      schemes:
-      - id: xquery
-        http: false
-        passive: false
-      languages:
-      - xquery
-    camel-schematron:
-      groupId: org.apache.camel
-      artifactId: camel-schematron
-      schemes:
-      - id: schematron
-        http: false
-        passive: false
-    camel-script:
-      groupId: org.apache.camel
-      artifactId: camel-script
-      languages:
-      - javaScript
-      - php
-      - python
-      - ruby
-    camel-service:
-      groupId: org.apache.camel
-      artifactId: camel-service
-      schemes:
-      - id: service
-        http: false
-        passive: false
-    camel-servicenow:
-      groupId: org.apache.camel
-      artifactId: camel-servicenow
-      schemes:
-      - id: servicenow
-        http: false
-        passive: false
-    camel-servlet:
-      groupId: org.apache.camel
-      artifactId: camel-servlet
-      schemes:
-      - id: servlet
-        http: true
-        passive: false
-    camel-sip:
-      groupId: org.apache.camel
-      artifactId: camel-sip
-      schemes:
-      - id: sip
-        http: false
-        passive: false
-      - id: sips
-        http: false
-        passive: false
-    camel-sjms:
-      groupId: org.apache.camel
-      artifactId: camel-sjms
-      schemes:
-      - id: sjms
-        http: false
-        passive: false
-      - id: sjms-batch
-        http: false
-        passive: false
-    camel-sjms2:
-      groupId: org.apache.camel
-      artifactId: camel-sjms2
-      schemes:
-      - id: sjms2
-        http: false
-        passive: false
-    camel-slack:
-      groupId: org.apache.camel
-      artifactId: camel-slack
-      schemes:
-      - id: slack
-        http: false
-        passive: false
-    camel-smpp:
-      groupId: org.apache.camel
-      artifactId: camel-smpp
-      schemes:
-      - id: smpp
-        http: false
-        passive: false
-      - id: smpps
-        http: false
-        passive: false
-    camel-snakeyaml:
-      groupId: org.apache.camel
-      artifactId: camel-snakeyaml
-      dataformats:
-      - yaml-snakeyaml
-    camel-snmp:
-      groupId: org.apache.camel
-      artifactId: camel-snmp
-      schemes:
-      - id: snmp
-        http: false
-        passive: false
-    camel-soap:
-      groupId: org.apache.camel
-      artifactId: camel-soap
-      dataformats:
-      - soapjaxb
-    camel-solr:
-      groupId: org.apache.camel
-      artifactId: camel-solr
-      schemes:
-      - id: solr
-        http: false
-        passive: false
-      - id: solrs
-        http: false
-        passive: false
-      - id: solrCloud
-        http: false
-        passive: false
-    camel-spark:
-      groupId: org.apache.camel
-      artifactId: camel-spark
-      schemes:
-      - id: spark
-        http: false
-        passive: false
-    camel-spark-rest:
-      groupId: org.apache.camel
-      artifactId: camel-spark-rest
-      schemes:
-      - id: spark-rest
-        http: true
-        passive: false
-    camel-splunk:
-      groupId: org.apache.camel
-      artifactId: camel-splunk
-      schemes:
-      - id: splunk
-        http: false
-        passive: false
-    camel-spring:
-      groupId: org.apache.camel
-      artifactId: camel-spring
-      schemes:
-      - id: spring-event
-        http: false
-        passive: false
-      languages:
-      - spel
-    camel-spring-batch:
-      groupId: org.apache.camel
-      artifactId: camel-spring-batch
-      schemes:
-      - id: spring-batch
-        http: false
-        passive: false
-    camel-spring-integration:
-      groupId: org.apache.camel
-      artifactId: camel-spring-integration
-      schemes:
-      - id: spring-integration
-        http: false
-        passive: false
-    camel-spring-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ldap
-      schemes:
-      - id: spring-ldap
-        http: false
-        passive: false
-    camel-spring-redis:
-      groupId: org.apache.camel
-      artifactId: camel-spring-redis
-      schemes:
-      - id: spring-redis
-        http: false
-        passive: false
-    camel-spring-ws:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ws
-      schemes:
-      - id: spring-ws
-        http: true
-        passive: false
-    camel-sql:
-      groupId: org.apache.camel
-      artifactId: camel-sql
-      schemes:
-      - id: sql
-        http: false
-        passive: false
-      - id: sql-stored
-        http: false
-        passive: false
-    camel-ssh:
-      groupId: org.apache.camel
-      artifactId: camel-ssh
-      schemes:
-      - id: ssh
-        http: false
-        passive: false
-    camel-stax:
-      groupId: org.apache.camel
-      artifactId: camel-stax
-      schemes:
-      - id: stax
-        http: false
-        passive: false
-    camel-stomp:
-      groupId: org.apache.camel
-      artifactId: camel-stomp
-      schemes:
-      - id: stomp
-        http: false
-        passive: false
-    camel-stream:
-      groupId: org.apache.camel
-      artifactId: camel-stream
-      schemes:
-      - id: stream
-        http: false
-        passive: false
-    camel-stringtemplate:
-      groupId: org.apache.camel
-      artifactId: camel-stringtemplate
-      schemes:
-      - id: string-template
-        http: false
-        passive: false
-    camel-syslog:
-      groupId: org.apache.camel
-      artifactId: camel-syslog
-      dataformats:
-      - syslog
-    camel-tagsoup:
-      groupId: org.apache.camel
-      artifactId: camel-tagsoup
-      dataformats:
-      - tidyMarkup
-    camel-tarfile:
-      groupId: org.apache.camel
-      artifactId: camel-tarfile
-      dataformats:
-      - tarfile
-    camel-telegram:
-      groupId: org.apache.camel
-      artifactId: camel-telegram
-      schemes:
-      - id: telegram
-        http: false
-        passive: false
-    camel-thrift:
-      groupId: org.apache.camel
-      artifactId: camel-thrift
-      schemes:
-      - id: thrift
-        http: false
-        passive: false
-      dataformats:
-      - thrift
-    camel-tika:
-      groupId: org.apache.camel
-      artifactId: camel-tika
-      schemes:
-      - id: tika
-        http: false
-        passive: false
-    camel-twilio:
-      groupId: org.apache.camel
-      artifactId: camel-twilio
-      schemes:
-      - id: twilio
-        http: false
-        passive: false
-    camel-twitter:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      schemes:
-      - id: twitter
-        http: false
-        passive: false
-      - id: twitter-directmessage
-        http: false
-        passive: false
-      - id: twitter-search
-        http: false
-        passive: false
-      - id: twitter-streaming
-        http: false
-        passive: false
-      - id: twitter-timeline
-        http: false
-        passive: false
-    camel-undertow:
-      groupId: org.apache.camel
-      artifactId: camel-undertow
-      schemes:
-      - id: undertow
-        http: true
-        passive: false
-    camel-univocity-parsers:
-      groupId: org.apache.camel
-      artifactId: camel-univocity-parsers
-      dataformats:
-      - univocity-csv
-      - univocity-fixed
-      - univocity-tsv
-    camel-velocity:
-      groupId: org.apache.camel
-      artifactId: camel-velocity
-      schemes:
-      - id: velocity
-        http: false
-        passive: false
-    camel-vertx:
-      groupId: org.apache.camel
-      artifactId: camel-vertx
-      schemes:
-      - id: vertx
-        http: false
-        passive: false
-    camel-weather:
-      groupId: org.apache.camel
-      artifactId: camel-weather
-      schemes:
-      - id: weather
-        http: false
-        passive: false
-    camel-web3j:
-      groupId: org.apache.camel
-      artifactId: camel-web3j
-      schemes:
-      - id: web3j
-        http: false
-        passive: false
-    camel-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-websocket
-      schemes:
-      - id: websocket
-        http: true
-        passive: false
-    camel-wordpress:
-      groupId: org.apache.camel
-      artifactId: camel-wordpress
-      schemes:
-      - id: wordpress
-        http: false
-        passive: false
-    camel-xchange:
-      groupId: org.apache.camel
-      artifactId: camel-xchange
-      schemes:
-      - id: xchange
-        http: false
-        passive: false
-    camel-xmlbeans:
-      groupId: org.apache.camel
-      artifactId: camel-xmlbeans
-      dataformats:
-      - xmlBeans
-    camel-xmljson:
-      groupId: org.apache.camel
-      artifactId: camel-xmljson
-      dataformats:
-      - xmljson
-    camel-xmlrpc:
-      groupId: org.apache.camel
-      artifactId: camel-xmlrpc
-      schemes:
-      - id: xmlrpc
-        http: false
-        passive: false
-      dataformats:
-      - xmlrpc
-    camel-xmlsecurity:
-      groupId: org.apache.camel
-      artifactId: camel-xmlsecurity
-      schemes:
-      - id: xmlsecurity
-        http: false
-        passive: false
-      dataformats:
-      - secureXML
-    camel-xmpp:
-      groupId: org.apache.camel
-      artifactId: camel-xmpp
-      schemes:
-      - id: xmpp
-        http: false
-        passive: false
-    camel-xstream:
-      groupId: org.apache.camel
-      artifactId: camel-xstream
-      dataformats:
-      - json-xstream
-      - xstream
-    camel-yammer:
-      groupId: org.apache.camel
-      artifactId: camel-yammer
-      schemes:
-      - id: yammer
-        http: false
-        passive: false
-    camel-yql:
-      groupId: org.apache.camel
-      artifactId: camel-yql
-      schemes:
-      - id: yql
-        http: false
-        passive: false
-    camel-zendesk:
-      groupId: org.apache.camel
-      artifactId: camel-zendesk
-      schemes:
-      - id: zendesk
-        http: false
-        passive: false
-    camel-zipfile:
-      groupId: org.apache.camel
-      artifactId: camel-zipfile
-      dataformats:
-      - zipfile
-    camel-zookeeper:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper
-      schemes:
-      - id: zookeeper
-        http: false
-        passive: false
-    camel-zookeeper-master:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper-master
-      schemes:
-      - id: zookeeper-master
-        http: false
-        passive: false
-
-`
-	Resources["camel-catalog-2.24.0.yaml"] =
-		`
-apiVersion: camel.apache.org/v1alpha1
-kind: CamelCatalog
-metadata:
-  name: camel-catalog-2.24.0
-  labels:
-    app: camel-k
-    camel.apache.org/catalog.version: 2.24.0
-    camel.apache.org/catalog.loader.version: 2.24.0
-spec:
-  version: 2.24.0
-  artifacts:
-    camel-ahc:
-      groupId: org.apache.camel
-      artifactId: camel-ahc
-      schemes:
-      - id: ahc
-        http: true
-        passive: false
-    camel-ahc-ws:
-      groupId: org.apache.camel
-      artifactId: camel-ahc-ws
-      schemes:
-      - id: ahc-ws
-        http: true
-        passive: false
-      - id: ahc-wss
-        http: false
-        passive: false
-    camel-amqp:
-      groupId: org.apache.camel
-      artifactId: camel-amqp
-      schemes:
-      - id: amqp
-        http: false
-        passive: false
-    camel-apns:
-      groupId: org.apache.camel
-      artifactId: camel-apns
-      schemes:
-      - id: apns
-        http: false
-        passive: false
-    camel-as2:
-      groupId: org.apache.camel
-      artifactId: camel-as2
-      schemes:
-      - id: as2
-        http: false
-        passive: false
-    camel-asn1:
-      groupId: org.apache.camel
-      artifactId: camel-asn1
-      dataformats:
-      - asn1
-    camel-asterisk:
-      groupId: org.apache.camel
-      artifactId: camel-asterisk
-      schemes:
-      - id: asterisk
-        http: false
-        passive: false
-    camel-atmos:
-      groupId: org.apache.camel
-      artifactId: camel-atmos
-      schemes:
-      - id: atmos
-        http: false
-        passive: false
-    camel-atmosphere-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-atmosphere-websocket
-      schemes:
-      - id: atmosphere-websocket
-        http: true
-        passive: false
-    camel-atom:
-      groupId: org.apache.camel
-      artifactId: camel-atom
-      schemes:
-      - id: atom
-        http: false
-        passive: false
-    camel-atomix:
-      groupId: org.apache.camel
-      artifactId: camel-atomix
-      schemes:
-      - id: atomix-map
-        http: false
-        passive: false
-      - id: atomix-messaging
-        http: false
-        passive: false
-      - id: atomix-multimap
-        http: false
-        passive: false
-      - id: atomix-queue
-        http: false
-        passive: false
-      - id: atomix-set
-        http: false
-        passive: false
-      - id: atomix-value
-        http: false
-        passive: false
-    camel-avro:
-      groupId: org.apache.camel
-      artifactId: camel-avro
-      schemes:
-      - id: avro
-        http: false
-        passive: false
-      dataformats:
-      - avro
-    camel-aws:
-      groupId: org.apache.camel
-      artifactId: camel-aws
-      schemes:
-      - id: aws-cw
-        http: false
-        passive: false
-      - id: aws-ddb
-        http: false
-        passive: false
-      - id: aws-ddbstream
-        http: false
-        passive: false
-      - id: aws-ec2
-        http: false
-        passive: false
-      - id: aws-iam
-        http: false
-        passive: false
-      - id: aws-kinesis
-        http: false
-        passive: false
-      - id: aws-kinesis-firehose
-        http: false
-        passive: false
-      - id: aws-kms
-        http: false
-        passive: false
-      - id: aws-lambda
-        http: false
-        passive: false
-      - id: aws-mq
-        http: false
-        passive: false
-      - id: aws-s3
-        http: false
-        passive: false
-      - id: aws-sdb
-        http: false
-        passive: false
-      - id: aws-ses
-        http: false
-        passive: false
-      - id: aws-sns
-        http: false
-        passive: false
-      - id: aws-sqs
-        http: false
-        passive: false
-      - id: aws-swf
-        http: false
-        passive: false
-    camel-azure:
-      groupId: org.apache.camel
-      artifactId: camel-azure
-      schemes:
-      - id: azure-blob
-        http: false
-        passive: false
-      - id: azure-queue
-        http: false
-        passive: false
-    camel-barcode:
-      groupId: org.apache.camel
-      artifactId: camel-barcode
-      dataformats:
-      - barcode
-    camel-base64:
-      groupId: org.apache.camel
-      artifactId: camel-base64
-      dataformats:
-      - base64
-    camel-bean-validator:
-      groupId: org.apache.camel
-      artifactId: camel-bean-validator
-      schemes:
-      - id: bean-validator
-        http: false
-        passive: false
-    camel-beanio:
-      groupId: org.apache.camel
-      artifactId: camel-beanio
-      dataformats:
-      - beanio
-    camel-beanstalk:
-      groupId: org.apache.camel
-      artifactId: camel-beanstalk
-      schemes:
-      - id: beanstalk
-        http: false
-        passive: false
-    camel-bindy:
-      groupId: org.apache.camel
-      artifactId: camel-bindy
-      dataformats:
-      - bindy-csv
-      - bindy-fixed
-      - bindy-kvp
-    camel-bonita:
-      groupId: org.apache.camel
-      artifactId: camel-bonita
-      schemes:
-      - id: bonita
-        http: false
-        passive: false
-    camel-boon:
-      groupId: org.apache.camel
-      artifactId: camel-boon
-      dataformats:
-      - boon
-    camel-box:
-      groupId: org.apache.camel
-      artifactId: camel-box
-      schemes:
-      - id: box
-        http: false
-        passive: false
-    camel-braintree:
-      groupId: org.apache.camel
-      artifactId: camel-braintree
-      schemes:
-      - id: braintree
-        http: false
-        passive: false
-    camel-cache:
-      groupId: org.apache.camel
-      artifactId: camel-cache
-      schemes:
-      - id: cache
-        http: false
-        passive: false
-    camel-caffeine:
-      groupId: org.apache.camel
-      artifactId: camel-caffeine
-      schemes:
-      - id: caffeine-cache
-        http: false
-        passive: false
-      - id: caffeine-loadcache
-        http: false
-        passive: false
-    camel-cassandraql:
-      groupId: org.apache.camel
-      artifactId: camel-cassandraql
-      schemes:
-      - id: cql
-        http: false
-        passive: false
-    camel-castor:
-      groupId: org.apache.camel
-      artifactId: camel-castor
-      dataformats:
-      - castor
-    camel-chronicle:
-      groupId: org.apache.camel
-      artifactId: camel-chronicle
-      schemes:
-      - id: chronicle-engine
-        http: false
-        passive: false
-    camel-chunk:
-      groupId: org.apache.camel
-      artifactId: camel-chunk
-      schemes:
-      - id: chunk
-        http: false
-        passive: false
-    camel-cm-sms:
-      groupId: org.apache.camel
-      artifactId: camel-cm-sms
-      schemes:
-      - id: cm-sms
-        http: false
-        passive: false
-    camel-cmis:
-      groupId: org.apache.camel
-      artifactId: camel-cmis
-      schemes:
-      - id: cmis
-        http: false
-        passive: false
-    camel-coap:
-      groupId: org.apache.camel
-      artifactId: camel-coap
-      schemes:
-      - id: coap
-        http: false
-        passive: false
-    camel-cometd:
-      groupId: org.apache.camel
-      artifactId: camel-cometd
-      schemes:
-      - id: cometd
-        http: false
-        passive: false
-      - id: cometds
-        http: false
-        passive: false
-    camel-consul:
-      groupId: org.apache.camel
-      artifactId: camel-consul
-      schemes:
-      - id: consul
-        http: false
-        passive: false
-    camel-context:
-      groupId: org.apache.camel
-      artifactId: camel-context
-      schemes:
-      - id: context
-        http: false
-        passive: false
-    camel-corda:
-      groupId: org.apache.camel
-      artifactId: camel-corda
-      schemes:
-      - id: corda
-        http: false
-        passive: false
-    camel-core:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      schemes:
-      - id: bean
-        http: false
-        passive: true
-      - id: binding
-        http: false
-        passive: true
-      - id: browse
-        http: false
-        passive: true
-      - id: class
-        http: false
-        passive: true
-      - id: controlbus
-        http: false
-        passive: true
-      - id: dataformat
-        http: false
-        passive: true
-      - id: dataset
-        http: false
-        passive: true
-      - id: direct
-        http: false
-        passive: true
-      - id: direct-vm
-        http: false
-        passive: true
-      - id: file
-        http: false
-        passive: false
-      - id: language
-        http: false
-        passive: true
-      - id: log
-        http: false
-        passive: true
-      - id: mock
-        http: false
-        passive: true
-      - id: properties
-        http: false
-        passive: true
-      - id: ref
-        http: false
-        passive: true
-      - id: rest
-        http: true
-        passive: false
-      - id: rest-api
-        http: false
-        passive: false
-      - id: saga
-        http: false
-        passive: false
-      - id: scheduler
-        http: false
-        passive: false
-      - id: seda
-        http: false
-        passive: true
-      - id: stub
-        http: false
-        passive: true
-      - id: test
-        http: false
-        passive: true
-      - id: timer
-        http: false
-        passive: false
-      - id: validator
-        http: false
-        passive: true
-      - id: vm
-        http: false
-        passive: true
-      - id: xslt
-        http: false
-        passive: false
-      languages:
-      - bean
-      - constant
-      - exchangeProperty
-      - file
-      - header
-      - ref
-      - simple
-      - tokenize
-      - xpath
-      - xtokenize
-      dataformats:
-      - gzip
-      - serialization
-      - string
-      - zip
-    camel-couchbase:
-      groupId: org.apache.camel
-      artifactId: camel-couchbase
-      schemes:
-      - id: couchbase
-        http: false
-        passive: false
-    camel-couchdb:
-      groupId: org.apache.camel
-      artifactId: camel-couchdb
-      schemes:
-      - id: couchdb
-        http: false
-        passive: false
-    camel-crypto:
-      groupId: org.apache.camel
-      artifactId: camel-crypto
-      schemes:
-      - id: crypto
-        http: false
-        passive: false
-      dataformats:
-      - crypto
-      - pgp
-    camel-crypto-cms:
-      groupId: org.apache.camel
-      artifactId: camel-crypto-cms
-      schemes:
-      - id: crypto-cms
-        http: false
-        passive: false
-    camel-csv:
-      groupId: org.apache.camel
-      artifactId: camel-csv
-      dataformats:
-      - csv
-    camel-cxf:
-      groupId: org.apache.camel
-      artifactId: camel-cxf
-      schemes:
-      - id: cxf
-        http: true
-        passive: false
-      - id: cxfrs
-        http: true
-        passive: false
-    camel-digitalocean:
-      groupId: org.apache.camel
-      artifactId: camel-digitalocean
-      schemes:
-      - id: digitalocean
-        http: false
-        passive: false
-    camel-disruptor:
-      groupId: org.apache.camel
-      artifactId: camel-disruptor
-      schemes:
-      - id: disruptor
-        http: false
-        passive: false
-      - id: disruptor-vm
-        http: false
-        passive: false
-    camel-dns:
-      groupId: org.apache.camel
-      artifactId: camel-dns
-      schemes:
-      - id: dns
-        http: false
-        passive: false
-    camel-docker:
-      groupId: org.apache.camel
-      artifactId: camel-docker
-      schemes:
-      - id: docker
-        http: false
-        passive: false
-    camel-dozer:
-      groupId: org.apache.camel
-      artifactId: camel-dozer
-      schemes:
-      - id: dozer
-        http: false
-        passive: false
-    camel-drill:
-      groupId: org.apache.camel
-      artifactId: camel-drill
-      schemes:
-      - id: drill
-        http: false
-        passive: false
-    camel-dropbox:
-      groupId: org.apache.camel
-      artifactId: camel-dropbox
-      schemes:
-      - id: dropbox
-        http: false
-        passive: false
-    camel-ehcache:
-      groupId: org.apache.camel
-      artifactId: camel-ehcache
-      schemes:
-      - id: ehcache
-        http: false
-        passive: false
-    camel-ejb:
-      groupId: org.apache.camel
-      artifactId: camel-ejb
-      schemes:
-      - id: ejb
-        http: false
-        passive: false
-    camel-elasticsearch:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch
-      schemes:
-      - id: elasticsearch
-        http: false
-        passive: false
-    camel-elasticsearch-rest:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch-rest
-      schemes:
-      - id: elasticsearch-rest
-        http: false
-        passive: false
-    camel-elasticsearch5:
-      groupId: org.apache.camel
-      artifactId: camel-elasticsearch5
-      schemes:
-      - id: elasticsearch5
-        http: false
-        passive: false
-    camel-elsql:
-      groupId: org.apache.camel
-      artifactId: camel-elsql
-      schemes:
-      - id: elsql
-        http: false
-        passive: false
-    camel-etcd:
-      groupId: org.apache.camel
-      artifactId: camel-etcd
-      schemes:
-      - id: etcd
-        http: false
-        passive: false
-    camel-eventadmin:
-      groupId: org.apache.camel
-      artifactId: camel-eventadmin
-      schemes:
-      - id: eventadmin
-        http: false
-        passive: false
-    camel-exec:
-      groupId: org.apache.camel
-      artifactId: camel-exec
-      schemes:
-      - id: exec
-        http: false
-        passive: false
-    camel-facebook:
-      groupId: org.apache.camel
-      artifactId: camel-facebook
-      schemes:
-      - id: facebook
-        http: false
-        passive: false
-    camel-fastjson:
-      groupId: org.apache.camel
-      artifactId: camel-fastjson
-      dataformats:
-      - json-fastjson
-    camel-fhir:
-      groupId: org.apache.camel
-      artifactId: camel-fhir
-      schemes:
-      - id: fhir
-        http: false
-        passive: false
-      dataformats:
-      - fhirJson
-      - fhirXml
-    camel-flatpack:
-      groupId: org.apache.camel
-      artifactId: camel-flatpack
-      schemes:
-      - id: flatpack
-        http: false
-        passive: false
-      dataformats:
-      - flatpack
-    camel-flink:
-      groupId: org.apache.camel
-      artifactId: camel-flink
-      schemes:
-      - id: flink
-        http: false
-        passive: false
-    camel-fop:
-      groupId: org.apache.camel
-      artifactId: camel-fop
-      schemes:
-      - id: fop
-        http: false
-        passive: false
-    camel-freemarker:
-      groupId: org.apache.camel
-      artifactId: camel-freemarker
-      schemes:
-      - id: freemarker
-        http: false
-        passive: false
-    camel-ftp:
-      groupId: org.apache.camel
-      artifactId: camel-ftp
-      schemes:
-      - id: ftp
-        http: false
-        passive: false
-      - id: ftps
-        http: false
-        passive: false
-      - id: sftp
-        http: false
-        passive: false
-    camel-ganglia:
-      groupId: org.apache.camel
-      artifactId: camel-ganglia
-      schemes:
-      - id: ganglia
-        http: false
-        passive: false
-    camel-geocoder:
-      groupId: org.apache.camel
-      artifactId: camel-geocoder
-      schemes:
-      - id: geocoder
-        http: false
-        passive: false
-    camel-git:
-      groupId: org.apache.camel
-      artifactId: camel-git
-      schemes:
-      - id: git
-        http: false
-        passive: false
-    camel-github:
-      groupId: org.apache.camel
-      artifactId: camel-github
-      schemes:
-      - id: github
-        http: false
-        passive: false
-    camel-google-bigquery:
-      groupId: org.apache.camel
-      artifactId: camel-google-bigquery
-      schemes:
-      - id: google-bigquery
-        http: false
-        passive: false
-      - id: google-bigquery-sql
-        http: false
-        passive: false
-    camel-google-calendar:
-      groupId: org.apache.camel
-      artifactId: camel-google-calendar
-      schemes:
-      - id: google-calendar
-        http: false
-        passive: false
-      - id: google-calendar-stream
-        http: false
-        passive: false
-    camel-google-drive:
-      groupId: org.apache.camel
-      artifactId: camel-google-drive
-      schemes:
-      - id: google-drive
-        http: false
-        passive: false
-    camel-google-mail:
-      groupId: org.apache.camel
-      artifactId: camel-google-mail
-      schemes:
-      - id: google-mail
-        http: false
-        passive: false
-      - id: google-mail-stream
-        http: false
-        passive: false
-    camel-google-pubsub:
-      groupId: org.apache.camel
-      artifactId: camel-google-pubsub
-      schemes:
-      - id: google-pubsub
-        http: false
-        passive: false
-    camel-google-sheets:
-      groupId: org.apache.camel
-      artifactId: camel-google-sheets
-      schemes:
-      - id: google-sheets
-        http: false
-        passive: false
-      - id: google-sheets-stream
-        http: false
-        passive: false
-    camel-gora:
-      groupId: org.apache.camel
-      artifactId: camel-gora
-      schemes:
-      - id: gora
-        http: false
-        passive: false
-    camel-grape:
-      groupId: org.apache.camel
-      artifactId: camel-grape
-      schemes:
-      - id: grape
-        http: false
-        passive: false
-    camel-groovy:
-      groupId: org.apache.camel
-      artifactId: camel-groovy
-      languages:
-      - groovy
-    camel-grpc:
-      groupId: org.apache.camel
-      artifactId: camel-grpc
-      schemes:
-      - id: grpc
-        http: true
-        passive: false
-    camel-gson:
-      groupId: org.apache.camel
-      artifactId: camel-gson
-      dataformats:
-      - json-gson
-    camel-guava-eventbus:
-      groupId: org.apache.camel
-      artifactId: camel-guava-eventbus
-      schemes:
-      - id: guava-eventbus
-        http: false
-        passive: false
-    camel-hazelcast:
-      groupId: org.apache.camel
-      artifactId: camel-hazelcast
-      schemes:
-      - id: hazelcast-atomicvalue
-        http: false
-        passive: false
-      - id: hazelcast-instance
-        http: false
-        passive: false
-      - id: hazelcast-list
-        http: false
-        passive: false
-      - id: hazelcast-map
-        http: false
-        passive: false
-      - id: hazelcast-multimap
-        http: false
-        passive: false
-      - id: hazelcast-queue
-        http: false
-        passive: false
-      - id: hazelcast-replicatedmap
-        http: false
-        passive: false
-      - id: hazelcast-ringbuffer
-        http: false
-        passive: false
-      - id: hazelcast-seda
-        http: false
-        passive: false
-      - id: hazelcast-set
-        http: false
-        passive: false
-      - id: hazelcast-topic
-        http: false
-        passive: false
-    camel-hbase:
-      groupId: org.apache.camel
-      artifactId: camel-hbase
-      schemes:
-      - id: hbase
-        http: false
-        passive: false
-    camel-hdfs:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs
-      schemes:
-      - id: hdfs
-        http: false
-        passive: false
-    camel-hdfs2:
-      groupId: org.apache.camel
-      artifactId: camel-hdfs2
-      schemes:
-      - id: hdfs2
-        http: false
-        passive: false
-    camel-hessian:
-      groupId: org.apache.camel
-      artifactId: camel-hessian
-      dataformats:
-      - hessian
-    camel-hipchat:
-      groupId: org.apache.camel
-      artifactId: camel-hipchat
-      schemes:
-      - id: hipchat
-        http: false
-        passive: false
-    camel-hl7:
-      groupId: org.apache.camel
-      artifactId: camel-hl7
-      languages:
-      - terser
-      dataformats:
-      - hl7
-    camel-http:
-      groupId: org.apache.camel
-      artifactId: camel-http
-      schemes:
-      - id: http
-        http: false
-        passive: false
-      - id: https
-        http: false
-        passive: false
-    camel-http4:
-      groupId: org.apache.camel
-      artifactId: camel-http4
-      schemes:
-      - id: http4
-        http: false
-        passive: false
-      - id: https4
-        http: false
-        passive: false
-    camel-ibatis:
-      groupId: org.apache.camel
-      artifactId: camel-ibatis
-      schemes:
-      - id: ibatis
-        http: false
-        passive: false
-    camel-ical:
-      groupId: org.apache.camel
-      artifactId: camel-ical
-      dataformats:
-      - ical
-    camel-iec60870:
-      groupId: org.apache.camel
-      artifactId: camel-iec60870
-      schemes:
-      - id: iec60870-client
-        http: false
-        passive: false
-      - id: iec60870-server
-        http: false
-        passive: false
-    camel-ignite:
-      groupId: org.apache.camel
-      artifactId: camel-ignite
-      schemes:
-      - id: ignite-cache
-        http: false
-        passive: false
-      - id: ignite-compute
-        http: false
-        passive: false
-      - id: ignite-events
-        http: false
-        passive: false
-      - id: ignite-idgen
-        http: false
-        passive: false
-      - id: ignite-messaging
-        http: false
-        passive: false
-      - id: ignite-queue
-        http: false
-        passive: false
-      - id: ignite-set
-        http: false
-        passive: false
-    camel-infinispan:
-      groupId: org.apache.camel
-      artifactId: camel-infinispan
-      schemes:
-      - id: infinispan
-        http: false
-        passive: false
-    camel-influxdb:
-      groupId: org.apache.camel
-      artifactId: camel-influxdb
-      schemes:
-      - id: influxdb
-        http: false
-        passive: false
-    camel-iota:
-      groupId: org.apache.camel
-      artifactId: camel-iota
-      schemes:
-      - id: iota
-        http: false
-        passive: false
-    camel-ipfs:
-      groupId: org.apache.camel
-      artifactId: camel-ipfs
-      schemes:
-      - id: ipfs
-        http: false
-        passive: false
-    camel-irc:
-      groupId: org.apache.camel
-      artifactId: camel-irc
-      schemes:
-      - id: irc
-        http: false
-        passive: false
-    camel-ironmq:
-      groupId: org.apache.camel
-      artifactId: camel-ironmq
-      schemes:
-      - id: ironmq
-        http: false
-        passive: false
-    camel-jackson:
-      groupId: org.apache.camel
-      artifactId: camel-jackson
-      dataformats:
-      - json-jackson
-    camel-jacksonxml:
-      groupId: org.apache.camel
-      artifactId: camel-jacksonxml
-      dataformats:
-      - jacksonxml
-    camel-javaspace:
-      groupId: org.apache.camel
-      artifactId: camel-javaspace
-      schemes:
-      - id: javaspace
-        http: false
-        passive: false
-    camel-jaxb:
-      groupId: org.apache.camel
-      artifactId: camel-jaxb
-      dataformats:
-      - jaxb
-    camel-jbpm:
-      groupId: org.apache.camel
-      artifactId: camel-jbpm
-      schemes:
-      - id: jbpm
-        http: false
-        passive: false
-    camel-jcache:
-      groupId: org.apache.camel
-      artifactId: camel-jcache
-      schemes:
-      - id: jcache
-        http: false
-        passive: false
-    camel-jclouds:
-      groupId: org.apache.camel
-      artifactId: camel-jclouds
-      schemes:
-      - id: jclouds
-        http: false
-        passive: false
-    camel-jcr:
-      groupId: org.apache.camel
-      artifactId: camel-jcr
-      schemes:
-      - id: jcr
-        http: false
-        passive: false
-    camel-jdbc:
-      groupId: org.apache.camel
-      artifactId: camel-jdbc
-      schemes:
-      - id: jdbc
-        http: false
-        passive: false
-    camel-jetty9:
-      groupId: org.apache.camel
-      artifactId: camel-jetty9
-      schemes:
-      - id: jetty
-        http: true
-        passive: false
-    camel-jgroups:
-      groupId: org.apache.camel
-      artifactId: camel-jgroups
-      schemes:
-      - id: jgroups
-        http: false
-        passive: false
-    camel-jgroups-raft:
-      groupId: org.apache.camel
-      artifactId: camel-jgroups-raft
-      schemes:
-      - id: jgroups-raft
-        http: false
-        passive: false
-    camel-jibx:
-      groupId: org.apache.camel
-      artifactId: camel-jibx
-      dataformats:
-      - jibx
-    camel-jing:
-      groupId: org.apache.camel
-      artifactId: camel-jing
-      schemes:
-      - id: jing
-        http: false
-        passive: false
-    camel-jira:
-      groupId: org.apache.camel
-      artifactId: camel-jira
-      schemes:
-      - id: jira
-        http: false
-        passive: false
-    camel-jms:
-      groupId: org.apache.camel
-      artifactId: camel-jms
-      schemes:
-      - id: jms
-        http: false
-        passive: false
-    camel-jmx:
-      groupId: org.apache.camel
-      artifactId: camel-jmx
-      schemes:
-      - id: jmx
-        http: false
-        passive: false
-    camel-johnzon:
-      groupId: org.apache.camel
-      artifactId: camel-johnzon
-      dataformats:
-      - json-johnzon
-    camel-jolt:
-      groupId: org.apache.camel
-      artifactId: camel-jolt
-      schemes:
-      - id: jolt
-        http: false
-        passive: false
-    camel-josql:
-      groupId: org.apache.camel
-      artifactId: camel-josql
-      languages:
-      - sql
-    camel-jpa:
-      groupId: org.apache.camel
-      artifactId: camel-jpa
-      schemes:
-      - id: jpa
-        http: false
-        passive: false
-    camel-jsch:
-      groupId: org.apache.camel
-      artifactId: camel-jsch
-      schemes:
-      - id: scp
-        http: false
-        passive: false
-    camel-json-validator:
-      groupId: org.apache.camel
-      artifactId: camel-json-validator
-      schemes:
-      - id: json-validator
-        http: false
-        passive: false
-    camel-jsonpath:
-      groupId: org.apache.camel
-      artifactId: camel-jsonpath
-      languages:
-      - jsonpath
-    camel-jt400:
-      groupId: org.apache.camel
-      artifactId: camel-jt400
-      schemes:
-      - id: jt400
-        http: false
-        passive: false
-    camel-juel:
-      groupId: org.apache.camel
-      artifactId: camel-juel
-      languages:
-      - el
-    camel-jxpath:
-      groupId: org.apache.camel
-      artifactId: camel-jxpath
-      languages:
-      - jxpath
-    camel-k-runtime-groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-groovy
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-groovy
-    camel-k-runtime-health:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-health
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-k-runtime-jvm:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-jvm
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-core
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-adapter-camel-2
-    camel-k-runtime-kotlin:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-kotlin
-    camel-k-runtime-servlet:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-servlet
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-servlet
-    camel-k-runtime-yaml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-yaml
-    camel-kafka:
-      groupId: org.apache.camel
-      artifactId: camel-kafka
-      schemes:
-      - id: kafka
-        http: false
-        passive: false
-    camel-kestrel:
-      groupId: org.apache.camel
-      artifactId: camel-kestrel
-      schemes:
-      - id: kestrel
-        http: false
-        passive: false
-    camel-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-knative
-      schemes:
-      - id: knative
-        http: true
-        passive: false
-      dependencies:
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-krati:
-      groupId: org.apache.camel
-      artifactId: camel-krati
-      schemes:
-      - id: krati
-        http: false
-        passive: false
-    camel-kubernetes:
-      groupId: org.apache.camel
-      artifactId: camel-kubernetes
-      schemes:
-      - id: kubernetes
-        http: false
-        passive: false
-      - id: kubernetes-config-maps
-        http: false
-        passive: false
-      - id: kubernetes-deployments
-        http: false
-        passive: false
-      - id: kubernetes-hpa
-        http: false
-        passive: false
-      - id: kubernetes-job
-        http: false
-        passive: false
-      - id: kubernetes-namespaces
-        http: false
-        passive: false
-      - id: kubernetes-nodes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes
-        http: false
-        passive: false
-      - id: kubernetes-persistent-volumes-claims
-        http: false
-        passive: false
-      - id: kubernetes-pods
-        http: false
-        passive: false
-      - id: kubernetes-replication-controllers
-        http: false
-        passive: false
-      - id: kubernetes-resources-quota
-        http: false
-        passive: false
-      - id: kubernetes-secrets
-        http: false
-        passive: false
-      - id: kubernetes-service-accounts
-        http: false
-        passive: false
-      - id: kubernetes-services
-        http: false
-        passive: false
-      - id: openshift-build-configs
-        http: false
-        passive: false
-      - id: openshift-builds
-        http: false
-        passive: false
-    camel-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-ldap
-      schemes:
-      - id: ldap
-        http: false
-        passive: false
-    camel-ldif:
-      groupId: org.apache.camel
-      artifactId: camel-ldif
-      schemes:
-      - id: ldif
-        http: false
-        passive: false
-    camel-linkedin:
-      groupId: org.apache.camel
-      artifactId: camel-linkedin
-      schemes:
-      - id: linkedin
-        http: false
-        passive: false
-    camel-lucene:
-      groupId: org.apache.camel
-      artifactId: camel-lucene
-      schemes:
-      - id: lucene
-        http: false
-        passive: false
-    camel-lumberjack:
-      groupId: org.apache.camel
-      artifactId: camel-lumberjack
-      schemes:
-      - id: lumberjack
-        http: false
-        passive: false
-    camel-lzf:
-      groupId: org.apache.camel
-      artifactId: camel-lzf
-      dataformats:
-      - lzf
-    camel-mail:
-      groupId: org.apache.camel
-      artifactId: camel-mail
-      schemes:
-      - id: imap
-        http: false
-        passive: false
-      - id: imaps
-        http: false
-        passive: false
-      - id: pop3
-        http: false
-        passive: false
-      - id: pop3s
-        http: false
-        passive: false
-      - id: smtp
-        http: false
-        passive: false
-      - id: smtps
-        http: false
-        passive: false
-      dataformats:
-      - mime-multipart
-    camel-master:
-      groupId: org.apache.camel
-      artifactId: camel-master
-      schemes:
-      - id: master
-        http: false
-        passive: false
-    camel-metrics:
-      groupId: org.apache.camel
-      artifactId: camel-metrics
-      schemes:
-      - id: metrics
-        http: false
-        passive: false
-    camel-micrometer:
-      groupId: org.apache.camel
-      artifactId: camel-micrometer
-      schemes:
-      - id: micrometer
-        http: false
-        passive: false
-    camel-milo:
-      groupId: org.apache.camel
-      artifactId: camel-milo
-      schemes:
-      - id: milo-client
-        http: false
-        passive: false
-      - id: milo-server
-        http: false
-        passive: false
-    camel-mina:
-      groupId: org.apache.camel
-      artifactId: camel-mina
-      schemes:
-      - id: mina
-        http: false
-        passive: false
-    camel-mina2:
-      groupId: org.apache.camel
-      artifactId: camel-mina2
-      schemes:
-      - id: mina2
-        http: false
-        passive: false
-    camel-mllp:
-      groupId: org.apache.camel
-      artifactId: camel-mllp
-      schemes:
-      - id: mllp
-        http: false
-        passive: false
-    camel-mongodb:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb
-      schemes:
-      - id: mongodb
-        http: false
-        passive: false
-    camel-mongodb-gridfs:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb-gridfs
-      schemes:
-      - id: mongodb-gridfs
-        http: false
-        passive: false
-    camel-mongodb3:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb3
-      schemes:
-      - id: mongodb3
-        http: false
-        passive: false
-    camel-mqtt:
-      groupId: org.apache.camel
-      artifactId: camel-mqtt
-      schemes:
-      - id: mqtt
-        http: false
-        passive: false
-    camel-msv:
-      groupId: org.apache.camel
-      artifactId: camel-msv
-      schemes:
-      - id: msv
-        http: false
-        passive: false
-    camel-mustache:
-      groupId: org.apache.camel
-      artifactId: camel-mustache
-      schemes:
-      - id: mustache
-        http: false
-        passive: false
-    camel-mvel:
-      groupId: org.apache.camel
-      artifactId: camel-mvel
-      schemes:
-      - id: mvel
-        http: false
-        passive: false
-      languages:
-      - mvel
-    camel-mybatis:
-      groupId: org.apache.camel
-      artifactId: camel-mybatis
-      schemes:
-      - id: mybatis
-        http: false
-        passive: false
-      - id: mybatis-bean
-        http: false
-        passive: false
-    camel-nagios:
-      groupId: org.apache.camel
-      artifactId: camel-nagios
-      schemes:
-      - id: nagios
-        http: false
-        passive: false
-    camel-nats:
-      groupId: org.apache.camel
-      artifactId: camel-nats
-      schemes:
-      - id: nats
-        http: false
-        passive: false
-    camel-netty:
-      groupId: org.apache.camel
-      artifactId: camel-netty
-      schemes:
-      - id: netty
-        http: false
-        passive: false
-    camel-netty-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty-http
-      schemes:
-      - id: netty-http
-        http: true
-        passive: false
-    camel-netty4:
-      groupId: org.apache.camel
-      artifactId: camel-netty4
-      schemes:
-      - id: netty4
-        http: false
-        passive: false
-    camel-netty4-http:
-      groupId: org.apache.camel
-      artifactId: camel-netty4-http
-      schemes:
-      - id: netty4-http
-        http: true
-        passive: false
-    camel-nsq:
-      groupId: org.apache.camel
-      artifactId: camel-nsq
-      schemes:
-      - id: nsq
-        http: false
-        passive: false
-    camel-ognl:
-      groupId: org.apache.camel
-      artifactId: camel-ognl
-      languages:
-      - ognl
-    camel-olingo2:
-      groupId: org.apache.camel
-      artifactId: camel-olingo2
-      schemes:
-      - id: olingo2
-        http: false
-        passive: false
-    camel-olingo4:
-      groupId: org.apache.camel
-      artifactId: camel-olingo4
-      schemes:
-      - id: olingo4
-        http: false
-        passive: false
-    camel-openshift:
-      groupId: org.apache.camel
-      artifactId: camel-openshift
-      schemes:
-      - id: openshift
-        http: false
-        passive: false
-    camel-openstack:
-      groupId: org.apache.camel
-      artifactId: camel-openstack
-      schemes:
-      - id: openstack-cinder
-        http: false
-        passive: false
-      - id: openstack-glance
-        http: false
-        passive: false
-      - id: openstack-keystone
-        http: false
-        passive: false
-      - id: openstack-neutron
-        http: false
-        passive: false
-      - id: openstack-nova
-        http: false
-        passive: false
-      - id: openstack-swift
-        http: false
-        passive: false
-    camel-optaplanner:
-      groupId: org.apache.camel
-      artifactId: camel-optaplanner
-      schemes:
-      - id: optaplanner
-        http: false
-        passive: false
-    camel-paho:
-      groupId: org.apache.camel
-      artifactId: camel-paho
-      schemes:
-      - id: paho
-        http: false
-        passive: false
-    camel-paxlogging:
-      groupId: org.apache.camel
-      artifactId: camel-paxlogging
-      schemes:
-      - id: paxlogging
-        http: false
-        passive: false
-    camel-pdf:
-      groupId: org.apache.camel
-      artifactId: camel-pdf
-      schemes:
-      - id: pdf
-        http: false
-        passive: false
-    camel-pgevent:
-      groupId: org.apache.camel
-      artifactId: camel-pgevent
-      schemes:
-      - id: pgevent
-        http: false
-        passive: false
-    camel-printer:
-      groupId: org.apache.camel
-      artifactId: camel-printer
-      schemes:
-      - id: lpr
-        http: false
-        passive: false
-    camel-protobuf:
-      groupId: org.apache.camel
-      artifactId: camel-protobuf
-      dataformats:
-      - protobuf
-    camel-pubnub:
-      groupId: org.apache.camel
-      artifactId: camel-pubnub
-      schemes:
-      - id: pubnub
-        http: false
-        passive: false
-    camel-pulsar:
-      groupId: org.apache.camel
-      artifactId: camel-pulsar
-      schemes:
-      - id: pulsar
-        http: false
-        passive: false
-    camel-quartz:
-      groupId: org.apache.camel
-      artifactId: camel-quartz
-      schemes:
-      - id: quartz
-        http: false
-        passive: false
-    camel-quartz2:
-      groupId: org.apache.camel
-      artifactId: camel-quartz2
-      schemes:
-      - id: quartz2
-        http: false
-        passive: false
-    camel-quickfix:
-      groupId: org.apache.camel
-      artifactId: camel-quickfix
-      schemes:
-      - id: quickfix
-        http: false
-        passive: false
-    camel-rabbitmq:
-      groupId: org.apache.camel
-      artifactId: camel-rabbitmq
-      schemes:
-      - id: rabbitmq
-        http: false
-        passive: false
-    camel-reactive-streams:
-      groupId: org.apache.camel
-      artifactId: camel-reactive-streams
-      schemes:
-      - id: reactive-streams
-        http: false
-        passive: false
-    camel-rest-swagger:
-      groupId: org.apache.camel
-      artifactId: camel-rest-swagger
-      schemes:
-      - id: rest-swagger
-        http: false
-        passive: false
-    camel-restlet:
-      groupId: org.apache.camel
-      artifactId: camel-restlet
-      schemes:
-      - id: restlet
-        http: true
-        passive: false
-    camel-rmi:
-      groupId: org.apache.camel
-      artifactId: camel-rmi
-      schemes:
-      - id: rmi
-        http: false
-        passive: false
-    camel-routebox:
-      groupId: org.apache.camel
-      artifactId: camel-routebox
-      schemes:
-      - id: routebox
-        http: false
-        passive: false
-    camel-rss:
-      groupId: org.apache.camel
-      artifactId: camel-rss
-      schemes:
-      - id: rss
-        http: false
-        passive: false
-      dataformats:
-      - rss
-    camel-salesforce:
-      groupId: org.apache.camel
-      artifactId: camel-salesforce
-      schemes:
-      - id: salesforce
-        http: false
-        passive: false
-    camel-sap-netweaver:
-      groupId: org.apache.camel
-      artifactId: camel-sap-netweaver
-      schemes:
-      - id: sap-netweaver
-        http: false
-        passive: false
-    camel-saxon:
-      groupId: org.apache.camel
-      artifactId: camel-saxon
-      schemes:
-      - id: xquery
-        http: false
-        passive: false
-      languages:
-      - xquery
-    camel-schematron:
-      groupId: org.apache.camel
-      artifactId: camel-schematron
-      schemes:
-      - id: schematron
-        http: false
-        passive: false
-    camel-script:
-      groupId: org.apache.camel
-      artifactId: camel-script
-      languages:
-      - javaScript
-      - php
-      - python
-      - ruby
-    camel-service:
-      groupId: org.apache.camel
-      artifactId: camel-service
-      schemes:
-      - id: service
-        http: false
-        passive: false
-    camel-servicenow:
-      groupId: org.apache.camel
-      artifactId: camel-servicenow
-      schemes:
-      - id: servicenow
-        http: false
-        passive: false
-    camel-servlet:
-      groupId: org.apache.camel
-      artifactId: camel-servlet
-      schemes:
-      - id: servlet
-        http: true
-        passive: false
-    camel-sip:
-      groupId: org.apache.camel
-      artifactId: camel-sip
-      schemes:
-      - id: sip
-        http: false
-        passive: false
-      - id: sips
-        http: false
-        passive: false
-    camel-sjms:
-      groupId: org.apache.camel
-      artifactId: camel-sjms
-      schemes:
-      - id: sjms
-        http: false
-        passive: false
-      - id: sjms-batch
-        http: false
-        passive: false
-    camel-sjms2:
-      groupId: org.apache.camel
-      artifactId: camel-sjms2
-      schemes:
-      - id: sjms2
-        http: false
-        passive: false
-    camel-slack:
-      groupId: org.apache.camel
-      artifactId: camel-slack
-      schemes:
-      - id: slack
-        http: false
-        passive: false
-    camel-smpp:
-      groupId: org.apache.camel
-      artifactId: camel-smpp
-      schemes:
-      - id: smpp
-        http: false
-        passive: false
-      - id: smpps
-        http: false
-        passive: false
-    camel-snakeyaml:
-      groupId: org.apache.camel
-      artifactId: camel-snakeyaml
-      dataformats:
-      - yaml-snakeyaml
-    camel-snmp:
-      groupId: org.apache.camel
-      artifactId: camel-snmp
-      schemes:
-      - id: snmp
-        http: false
-        passive: false
-    camel-soap:
-      groupId: org.apache.camel
-      artifactId: camel-soap
-      dataformats:
-      - soapjaxb
-    camel-solr:
-      groupId: org.apache.camel
-      artifactId: camel-solr
-      schemes:
-      - id: solr
-        http: false
-        passive: false
-      - id: solrs
-        http: false
-        passive: false
-      - id: solrCloud
-        http: false
-        passive: false
-    camel-spark:
-      groupId: org.apache.camel
-      artifactId: camel-spark
-      schemes:
-      - id: spark
-        http: false
-        passive: false
-    camel-spark-rest:
-      groupId: org.apache.camel
-      artifactId: camel-spark-rest
-      schemes:
-      - id: spark-rest
-        http: true
-        passive: false
-    camel-splunk:
-      groupId: org.apache.camel
-      artifactId: camel-splunk
-      schemes:
-      - id: splunk
-        http: false
-        passive: false
-    camel-spring:
-      groupId: org.apache.camel
-      artifactId: camel-spring
-      schemes:
-      - id: spring-event
-        http: false
-        passive: false
-      languages:
-      - spel
-    camel-spring-batch:
-      groupId: org.apache.camel
-      artifactId: camel-spring-batch
-      schemes:
-      - id: spring-batch
-        http: false
-        passive: false
-    camel-spring-integration:
-      groupId: org.apache.camel
-      artifactId: camel-spring-integration
-      schemes:
-      - id: spring-integration
-        http: false
-        passive: false
-    camel-spring-ldap:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ldap
-      schemes:
-      - id: spring-ldap
-        http: false
-        passive: false
-    camel-spring-redis:
-      groupId: org.apache.camel
-      artifactId: camel-spring-redis
-      schemes:
-      - id: spring-redis
-        http: false
-        passive: false
-    camel-spring-ws:
-      groupId: org.apache.camel
-      artifactId: camel-spring-ws
-      schemes:
-      - id: spring-ws
-        http: true
-        passive: false
-    camel-sql:
-      groupId: org.apache.camel
-      artifactId: camel-sql
-      schemes:
-      - id: sql
-        http: false
-        passive: false
-      - id: sql-stored
-        http: false
-        passive: false
-    camel-ssh:
-      groupId: org.apache.camel
-      artifactId: camel-ssh
-      schemes:
-      - id: ssh
-        http: false
-        passive: false
-    camel-stax:
-      groupId: org.apache.camel
-      artifactId: camel-stax
-      schemes:
-      - id: stax
-        http: false
-        passive: false
-    camel-stomp:
-      groupId: org.apache.camel
-      artifactId: camel-stomp
-      schemes:
-      - id: stomp
-        http: false
-        passive: false
-    camel-stream:
-      groupId: org.apache.camel
-      artifactId: camel-stream
-      schemes:
-      - id: stream
-        http: false
-        passive: false
-    camel-stringtemplate:
-      groupId: org.apache.camel
-      artifactId: camel-stringtemplate
-      schemes:
-      - id: string-template
-        http: false
-        passive: false
-    camel-syslog:
-      groupId: org.apache.camel
-      artifactId: camel-syslog
-      dataformats:
-      - syslog
-    camel-tagsoup:
-      groupId: org.apache.camel
-      artifactId: camel-tagsoup
-      dataformats:
-      - tidyMarkup
-    camel-tarfile:
-      groupId: org.apache.camel
-      artifactId: camel-tarfile
-      dataformats:
-      - tarfile
-    camel-telegram:
-      groupId: org.apache.camel
-      artifactId: camel-telegram
-      schemes:
-      - id: telegram
-        http: false
-        passive: false
-    camel-thrift:
-      groupId: org.apache.camel
-      artifactId: camel-thrift
-      schemes:
-      - id: thrift
-        http: false
-        passive: false
-      dataformats:
-      - thrift
-    camel-tika:
-      groupId: org.apache.camel
-      artifactId: camel-tika
-      schemes:
-      - id: tika
-        http: false
-        passive: false
-    camel-twilio:
-      groupId: org.apache.camel
-      artifactId: camel-twilio
-      schemes:
-      - id: twilio
-        http: false
-        passive: false
-    camel-twitter:
-      groupId: org.apache.camel
-      artifactId: camel-twitter
-      schemes:
-      - id: twitter
-        http: false
-        passive: false
-      - id: twitter-directmessage
-        http: false
-        passive: false
-      - id: twitter-search
-        http: false
-        passive: false
-      - id: twitter-streaming
-        http: false
-        passive: false
-      - id: twitter-timeline
-        http: false
-        passive: false
-    camel-undertow:
-      groupId: org.apache.camel
-      artifactId: camel-undertow
-      schemes:
-      - id: undertow
-        http: true
-        passive: false
-    camel-univocity-parsers:
-      groupId: org.apache.camel
-      artifactId: camel-univocity-parsers
-      dataformats:
-      - univocity-csv
-      - univocity-fixed
-      - univocity-tsv
-    camel-velocity:
-      groupId: org.apache.camel
-      artifactId: camel-velocity
-      schemes:
-      - id: velocity
-        http: false
-        passive: false
-    camel-vertx:
-      groupId: org.apache.camel
-      artifactId: camel-vertx
-      schemes:
-      - id: vertx
-        http: false
-        passive: false
-    camel-weather:
-      groupId: org.apache.camel
-      artifactId: camel-weather
-      schemes:
-      - id: weather
-        http: false
-        passive: false
-    camel-web3j:
-      groupId: org.apache.camel
-      artifactId: camel-web3j
-      schemes:
-      - id: web3j
-        http: false
-        passive: false
-    camel-websocket:
-      groupId: org.apache.camel
-      artifactId: camel-websocket
-      schemes:
-      - id: websocket
-        http: true
-        passive: false
-    camel-websocket-jsr356:
-      groupId: org.apache.camel
-      artifactId: camel-websocket-jsr356
-      schemes:
-      - id: websocket-jsr356
-        http: false
-        passive: false
-    camel-wordpress:
-      groupId: org.apache.camel
-      artifactId: camel-wordpress
-      schemes:
-      - id: wordpress
-        http: false
-        passive: false
-    camel-xchange:
-      groupId: org.apache.camel
-      artifactId: camel-xchange
-      schemes:
-      - id: xchange
-        http: false
-        passive: false
-    camel-xmlbeans:
-      groupId: org.apache.camel
-      artifactId: camel-xmlbeans
-      dataformats:
-      - xmlBeans
-    camel-xmlrpc:
-      groupId: org.apache.camel
-      artifactId: camel-xmlrpc
-      schemes:
-      - id: xmlrpc
-        http: false
-        passive: false
-      dataformats:
-      - xmlrpc
-    camel-xmlsecurity:
-      groupId: org.apache.camel
-      artifactId: camel-xmlsecurity
-      schemes:
-      - id: xmlsecurity
-        http: false
-        passive: false
-      dataformats:
-      - secureXML
-    camel-xmpp:
-      groupId: org.apache.camel
-      artifactId: camel-xmpp
-      schemes:
-      - id: xmpp
-        http: false
-        passive: false
-    camel-xstream:
-      groupId: org.apache.camel
-      artifactId: camel-xstream
-      dataformats:
-      - json-xstream
-      - xstream
-    camel-yammer:
-      groupId: org.apache.camel
-      artifactId: camel-yammer
-      schemes:
-      - id: yammer
-        http: false
-        passive: false
-    camel-zendesk:
-      groupId: org.apache.camel
-      artifactId: camel-zendesk
-      schemes:
-      - id: zendesk
-        http: false
-        passive: false
-    camel-zipfile:
-      groupId: org.apache.camel
-      artifactId: camel-zipfile
-      dataformats:
-      - zipfile
-    camel-zookeeper:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper
-      schemes:
-      - id: zookeeper
-        http: false
-        passive: false
-    camel-zookeeper-master:
-      groupId: org.apache.camel
-      artifactId: camel-zookeeper-master
-      schemes:
-      - id: zookeeper-master
-        http: false
-        passive: false
-
-`
 	Resources["camel-catalog-3.0.0-M2.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
@@ -9656,7 +1319,9 @@ spec:
       artifactId: camel-k-runtime-health
       dependencies:
       - groupId: org.apache.camel
-        artifactId: camel-netty4-http
+        artifactId: camel-servlet
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-servlet
     camel-k-runtime-jvm:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-jvm
@@ -9664,8 +1329,6 @@ spec:
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-core
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-adapter-camel-3
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
@@ -9676,9 +1339,6 @@ spec:
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-servlet
-    camel-k-runtime-yaml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-yaml
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -10610,6 +2270,2177 @@ spec:
       - id: zendesk
         http: false
         passive: false
+    camel-zipfile:
+      groupId: org.apache.camel
+      artifactId: camel-zipfile
+      dataformats:
+      - zipfile
+    camel-zookeeper:
+      groupId: org.apache.camel
+      artifactId: camel-zookeeper
+      schemes:
+      - id: zookeeper
+        http: false
+        passive: false
+    camel-zookeeper-master:
+      groupId: org.apache.camel
+      artifactId: camel-zookeeper-master
+      schemes:
+      - id: zookeeper-master
+        http: false
+        passive: false
+
+`
+	Resources["camel-catalog-3.0.0-M3.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1alpha1
+kind: CamelCatalog
+metadata:
+  name: camel-catalog-3.0.0-m3
+  labels:
+    app: camel-k
+    camel.apache.org/catalog.version: 3.0.0-M3
+    camel.apache.org/catalog.loader.version: 3.0.0-M3
+spec:
+  version: 3.0.0-M3
+  artifacts:
+    camel-activemq:
+      groupId: org.apache.camel
+      artifactId: camel-activemq
+      schemes:
+      - id: activemq
+        http: false
+        passive: false
+    camel-ahc:
+      groupId: org.apache.camel
+      artifactId: camel-ahc
+      schemes:
+      - id: ahc
+        http: true
+        passive: false
+    camel-ahc-ws:
+      groupId: org.apache.camel
+      artifactId: camel-ahc-ws
+      schemes:
+      - id: ahc-ws
+        http: true
+        passive: false
+      - id: ahc-wss
+        http: false
+        passive: false
+    camel-amqp:
+      groupId: org.apache.camel
+      artifactId: camel-amqp
+      schemes:
+      - id: amqp
+        http: false
+        passive: false
+    camel-apns:
+      groupId: org.apache.camel
+      artifactId: camel-apns
+      schemes:
+      - id: apns
+        http: false
+        passive: false
+    camel-as2:
+      groupId: org.apache.camel
+      artifactId: camel-as2
+      schemes:
+      - id: as2
+        http: false
+        passive: false
+    camel-asn1:
+      groupId: org.apache.camel
+      artifactId: camel-asn1
+      dataformats:
+      - asn1
+    camel-asterisk:
+      groupId: org.apache.camel
+      artifactId: camel-asterisk
+      schemes:
+      - id: asterisk
+        http: false
+        passive: false
+    camel-atmos:
+      groupId: org.apache.camel
+      artifactId: camel-atmos
+      schemes:
+      - id: atmos
+        http: false
+        passive: false
+    camel-atmosphere-websocket:
+      groupId: org.apache.camel
+      artifactId: camel-atmosphere-websocket
+      schemes:
+      - id: atmosphere-websocket
+        http: true
+        passive: false
+    camel-atom:
+      groupId: org.apache.camel
+      artifactId: camel-atom
+      schemes:
+      - id: atom
+        http: false
+        passive: false
+    camel-atomix:
+      groupId: org.apache.camel
+      artifactId: camel-atomix
+      schemes:
+      - id: atomix-map
+        http: false
+        passive: false
+      - id: atomix-messaging
+        http: false
+        passive: false
+      - id: atomix-multimap
+        http: false
+        passive: false
+      - id: atomix-queue
+        http: false
+        passive: false
+      - id: atomix-set
+        http: false
+        passive: false
+      - id: atomix-value
+        http: false
+        passive: false
+    camel-avro:
+      groupId: org.apache.camel
+      artifactId: camel-avro
+      schemes:
+      - id: avro
+        http: false
+        passive: false
+      dataformats:
+      - avro
+    camel-aws-cw:
+      groupId: org.apache.camel
+      artifactId: camel-aws-cw
+      schemes:
+      - id: aws-cw
+        http: false
+        passive: false
+    camel-aws-ddb:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ddb
+      schemes:
+      - id: aws-ddb
+        http: false
+        passive: false
+      - id: aws-ddbstream
+        http: false
+        passive: false
+    camel-aws-ec2:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ec2
+      schemes:
+      - id: aws-ec2
+        http: false
+        passive: false
+    camel-aws-ecs:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ecs
+      schemes:
+      - id: aws-ecs
+        http: false
+        passive: false
+    camel-aws-eks:
+      groupId: org.apache.camel
+      artifactId: camel-aws-eks
+      schemes:
+      - id: aws-eks
+        http: false
+        passive: false
+    camel-aws-iam:
+      groupId: org.apache.camel
+      artifactId: camel-aws-iam
+      schemes:
+      - id: aws-iam
+        http: false
+        passive: false
+    camel-aws-kinesis:
+      groupId: org.apache.camel
+      artifactId: camel-aws-kinesis
+      schemes:
+      - id: aws-kinesis
+        http: false
+        passive: false
+      - id: aws-kinesis-firehose
+        http: false
+        passive: false
+    camel-aws-kms:
+      groupId: org.apache.camel
+      artifactId: camel-aws-kms
+      schemes:
+      - id: aws-kms
+        http: false
+        passive: false
+    camel-aws-lambda:
+      groupId: org.apache.camel
+      artifactId: camel-aws-lambda
+      schemes:
+      - id: aws-lambda
+        http: false
+        passive: false
+    camel-aws-mq:
+      groupId: org.apache.camel
+      artifactId: camel-aws-mq
+      schemes:
+      - id: aws-mq
+        http: false
+        passive: false
+    camel-aws-msk:
+      groupId: org.apache.camel
+      artifactId: camel-aws-msk
+      schemes:
+      - id: aws-msk
+        http: false
+        passive: false
+    camel-aws-s3:
+      groupId: org.apache.camel
+      artifactId: camel-aws-s3
+      schemes:
+      - id: aws-s3
+        http: false
+        passive: false
+    camel-aws-sdb:
+      groupId: org.apache.camel
+      artifactId: camel-aws-sdb
+      schemes:
+      - id: aws-sdb
+        http: false
+        passive: false
+    camel-aws-ses:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ses
+      schemes:
+      - id: aws-ses
+        http: false
+        passive: false
+    camel-aws-sns:
+      groupId: org.apache.camel
+      artifactId: camel-aws-sns
+      schemes:
+      - id: aws-sns
+        http: false
+        passive: false
+    camel-aws-sqs:
+      groupId: org.apache.camel
+      artifactId: camel-aws-sqs
+      schemes:
+      - id: aws-sqs
+        http: false
+        passive: false
+    camel-aws-swf:
+      groupId: org.apache.camel
+      artifactId: camel-aws-swf
+      schemes:
+      - id: aws-swf
+        http: false
+        passive: false
+    camel-azure:
+      groupId: org.apache.camel
+      artifactId: camel-azure
+      schemes:
+      - id: azure-blob
+        http: false
+        passive: false
+      - id: azure-queue
+        http: false
+        passive: false
+    camel-barcode:
+      groupId: org.apache.camel
+      artifactId: camel-barcode
+      dataformats:
+      - barcode
+    camel-base:
+      groupId: org.apache.camel
+      artifactId: camel-base
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+    camel-base64:
+      groupId: org.apache.camel
+      artifactId: camel-base64
+      dataformats:
+      - base64
+    camel-bean:
+      groupId: org.apache.camel
+      artifactId: camel-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
+    camel-bean-validator:
+      groupId: org.apache.camel
+      artifactId: camel-bean-validator
+      schemes:
+      - id: bean-validator
+        http: false
+        passive: false
+    camel-beanio:
+      groupId: org.apache.camel
+      artifactId: camel-beanio
+      dataformats:
+      - beanio
+    camel-beanstalk:
+      groupId: org.apache.camel
+      artifactId: camel-beanstalk
+      schemes:
+      - id: beanstalk
+        http: false
+        passive: false
+    camel-bindy:
+      groupId: org.apache.camel
+      artifactId: camel-bindy
+      dataformats:
+      - bindy-csv
+      - bindy-fixed
+      - bindy-kvp
+    camel-bonita:
+      groupId: org.apache.camel
+      artifactId: camel-bonita
+      schemes:
+      - id: bonita
+        http: false
+        passive: false
+    camel-boon:
+      groupId: org.apache.camel
+      artifactId: camel-boon
+      dataformats:
+      - boon
+    camel-box:
+      groupId: org.apache.camel
+      artifactId: camel-box
+      schemes:
+      - id: box
+        http: false
+        passive: false
+    camel-braintree:
+      groupId: org.apache.camel
+      artifactId: camel-braintree
+      schemes:
+      - id: braintree
+        http: false
+        passive: false
+    camel-browse:
+      groupId: org.apache.camel
+      artifactId: camel-browse
+      schemes:
+      - id: browse
+        http: false
+        passive: true
+    camel-caffeine:
+      groupId: org.apache.camel
+      artifactId: camel-caffeine
+      schemes:
+      - id: caffeine-cache
+        http: false
+        passive: false
+      - id: caffeine-loadcache
+        http: false
+        passive: false
+    camel-cassandraql:
+      groupId: org.apache.camel
+      artifactId: camel-cassandraql
+      schemes:
+      - id: cql
+        http: false
+        passive: false
+    camel-cbor:
+      groupId: org.apache.camel
+      artifactId: camel-cbor
+      dataformats:
+      - cbor
+    camel-chatscript:
+      groupId: org.apache.camel
+      artifactId: camel-chatscript
+      schemes:
+      - id: chatscript
+        http: false
+        passive: false
+    camel-chunk:
+      groupId: org.apache.camel
+      artifactId: camel-chunk
+      schemes:
+      - id: chunk
+        http: false
+        passive: false
+    camel-cm-sms:
+      groupId: org.apache.camel
+      artifactId: camel-cm-sms
+      schemes:
+      - id: cm-sms
+        http: false
+        passive: false
+    camel-cmis:
+      groupId: org.apache.camel
+      artifactId: camel-cmis
+      schemes:
+      - id: cmis
+        http: false
+        passive: false
+    camel-coap:
+      groupId: org.apache.camel
+      artifactId: camel-coap
+      schemes:
+      - id: coap
+        http: false
+        passive: false
+      - id: coaps
+        http: false
+        passive: false
+      - id: coap+tcp
+        http: false
+        passive: false
+      - id: coaps+tcp
+        http: false
+        passive: false
+    camel-cometd:
+      groupId: org.apache.camel
+      artifactId: camel-cometd
+      schemes:
+      - id: cometd
+        http: false
+        passive: false
+      - id: cometds
+        http: false
+        passive: false
+    camel-consul:
+      groupId: org.apache.camel
+      artifactId: camel-consul
+      schemes:
+      - id: consul
+        http: false
+        passive: false
+    camel-controlbus:
+      groupId: org.apache.camel
+      artifactId: camel-controlbus
+      schemes:
+      - id: controlbus
+        http: false
+        passive: true
+    camel-corda:
+      groupId: org.apache.camel
+      artifactId: camel-corda
+      schemes:
+      - id: corda
+        http: false
+        passive: false
+    camel-couchbase:
+      groupId: org.apache.camel
+      artifactId: camel-couchbase
+      schemes:
+      - id: couchbase
+        http: false
+        passive: false
+    camel-couchdb:
+      groupId: org.apache.camel
+      artifactId: camel-couchdb
+      schemes:
+      - id: couchdb
+        http: false
+        passive: false
+    camel-crypto:
+      groupId: org.apache.camel
+      artifactId: camel-crypto
+      schemes:
+      - id: crypto
+        http: false
+        passive: false
+      dataformats:
+      - crypto
+      - pgp
+    camel-crypto-cms:
+      groupId: org.apache.camel
+      artifactId: camel-crypto-cms
+      schemes:
+      - id: crypto-cms
+        http: false
+        passive: false
+    camel-csv:
+      groupId: org.apache.camel
+      artifactId: camel-csv
+      dataformats:
+      - csv
+    camel-cxf:
+      groupId: org.apache.camel
+      artifactId: camel-cxf
+      schemes:
+      - id: cxf
+        http: true
+        passive: false
+      - id: cxfrs
+        http: true
+        passive: false
+    camel-dataformat:
+      groupId: org.apache.camel
+      artifactId: camel-dataformat
+      schemes:
+      - id: dataformat
+        http: false
+        passive: true
+    camel-dataset:
+      groupId: org.apache.camel
+      artifactId: camel-dataset
+      schemes:
+      - id: dataset
+        http: false
+        passive: true
+      - id: dataset-test
+        http: false
+        passive: false
+    camel-digitalocean:
+      groupId: org.apache.camel
+      artifactId: camel-digitalocean
+      schemes:
+      - id: digitalocean
+        http: false
+        passive: false
+    camel-direct:
+      groupId: org.apache.camel
+      artifactId: camel-direct
+      schemes:
+      - id: direct
+        http: false
+        passive: true
+    camel-directvm:
+      groupId: org.apache.camel
+      artifactId: camel-directvm
+      schemes:
+      - id: direct-vm
+        http: false
+        passive: true
+    camel-disruptor:
+      groupId: org.apache.camel
+      artifactId: camel-disruptor
+      schemes:
+      - id: disruptor
+        http: false
+        passive: false
+      - id: disruptor-vm
+        http: false
+        passive: false
+    camel-dns:
+      groupId: org.apache.camel
+      artifactId: camel-dns
+      schemes:
+      - id: dns
+        http: false
+        passive: false
+    camel-docker:
+      groupId: org.apache.camel
+      artifactId: camel-docker
+      schemes:
+      - id: docker
+        http: false
+        passive: false
+    camel-dozer:
+      groupId: org.apache.camel
+      artifactId: camel-dozer
+      schemes:
+      - id: dozer
+        http: false
+        passive: false
+    camel-drill:
+      groupId: org.apache.camel
+      artifactId: camel-drill
+      schemes:
+      - id: drill
+        http: false
+        passive: false
+    camel-dropbox:
+      groupId: org.apache.camel
+      artifactId: camel-dropbox
+      schemes:
+      - id: dropbox
+        http: false
+        passive: false
+    camel-ehcache:
+      groupId: org.apache.camel
+      artifactId: camel-ehcache
+      schemes:
+      - id: ehcache
+        http: false
+        passive: false
+    camel-ejb:
+      groupId: org.apache.camel
+      artifactId: camel-ejb
+      schemes:
+      - id: ejb
+        http: false
+        passive: false
+    camel-elasticsearch-rest:
+      groupId: org.apache.camel
+      artifactId: camel-elasticsearch-rest
+      schemes:
+      - id: elasticsearch-rest
+        http: false
+        passive: false
+    camel-elsql:
+      groupId: org.apache.camel
+      artifactId: camel-elsql
+      schemes:
+      - id: elsql
+        http: false
+        passive: false
+    camel-etcd:
+      groupId: org.apache.camel
+      artifactId: camel-etcd
+      schemes:
+      - id: etcd
+        http: false
+        passive: false
+    camel-eventadmin:
+      groupId: org.apache.camel
+      artifactId: camel-eventadmin
+      schemes:
+      - id: eventadmin
+        http: false
+        passive: false
+    camel-exec:
+      groupId: org.apache.camel
+      artifactId: camel-exec
+      schemes:
+      - id: exec
+        http: false
+        passive: false
+    camel-facebook:
+      groupId: org.apache.camel
+      artifactId: camel-facebook
+      schemes:
+      - id: facebook
+        http: false
+        passive: false
+    camel-fastjson:
+      groupId: org.apache.camel
+      artifactId: camel-fastjson
+      dataformats:
+      - json-fastjson
+    camel-fhir:
+      groupId: org.apache.camel
+      artifactId: camel-fhir
+      schemes:
+      - id: fhir
+        http: false
+        passive: false
+      dataformats:
+      - fhirJson
+      - fhirXml
+    camel-file:
+      groupId: org.apache.camel
+      artifactId: camel-file
+      schemes:
+      - id: file
+        http: false
+        passive: false
+    camel-flatpack:
+      groupId: org.apache.camel
+      artifactId: camel-flatpack
+      schemes:
+      - id: flatpack
+        http: false
+        passive: false
+      dataformats:
+      - flatpack
+    camel-flink:
+      groupId: org.apache.camel
+      artifactId: camel-flink
+      schemes:
+      - id: flink
+        http: false
+        passive: false
+    camel-fop:
+      groupId: org.apache.camel
+      artifactId: camel-fop
+      schemes:
+      - id: fop
+        http: false
+        passive: false
+    camel-freemarker:
+      groupId: org.apache.camel
+      artifactId: camel-freemarker
+      schemes:
+      - id: freemarker
+        http: false
+        passive: false
+    camel-ftp:
+      groupId: org.apache.camel
+      artifactId: camel-ftp
+      schemes:
+      - id: ftp
+        http: false
+        passive: false
+      - id: ftps
+        http: false
+        passive: false
+      - id: sftp
+        http: false
+        passive: false
+    camel-ganglia:
+      groupId: org.apache.camel
+      artifactId: camel-ganglia
+      schemes:
+      - id: ganglia
+        http: false
+        passive: false
+    camel-geocoder:
+      groupId: org.apache.camel
+      artifactId: camel-geocoder
+      schemes:
+      - id: geocoder
+        http: false
+        passive: false
+    camel-git:
+      groupId: org.apache.camel
+      artifactId: camel-git
+      schemes:
+      - id: git
+        http: false
+        passive: false
+    camel-github:
+      groupId: org.apache.camel
+      artifactId: camel-github
+      schemes:
+      - id: github
+        http: false
+        passive: false
+    camel-google-bigquery:
+      groupId: org.apache.camel
+      artifactId: camel-google-bigquery
+      schemes:
+      - id: google-bigquery
+        http: false
+        passive: false
+      - id: google-bigquery-sql
+        http: false
+        passive: false
+    camel-google-calendar:
+      groupId: org.apache.camel
+      artifactId: camel-google-calendar
+      schemes:
+      - id: google-calendar
+        http: false
+        passive: false
+      - id: google-calendar-stream
+        http: false
+        passive: false
+    camel-google-drive:
+      groupId: org.apache.camel
+      artifactId: camel-google-drive
+      schemes:
+      - id: google-drive
+        http: false
+        passive: false
+    camel-google-mail:
+      groupId: org.apache.camel
+      artifactId: camel-google-mail
+      schemes:
+      - id: google-mail
+        http: false
+        passive: false
+      - id: google-mail-stream
+        http: false
+        passive: false
+    camel-google-pubsub:
+      groupId: org.apache.camel
+      artifactId: camel-google-pubsub
+      schemes:
+      - id: google-pubsub
+        http: false
+        passive: false
+    camel-google-sheets:
+      groupId: org.apache.camel
+      artifactId: camel-google-sheets
+      schemes:
+      - id: google-sheets
+        http: false
+        passive: false
+      - id: google-sheets-stream
+        http: false
+        passive: false
+    camel-gora:
+      groupId: org.apache.camel
+      artifactId: camel-gora
+      schemes:
+      - id: gora
+        http: false
+        passive: false
+    camel-grape:
+      groupId: org.apache.camel
+      artifactId: camel-grape
+      schemes:
+      - id: grape
+        http: false
+        passive: false
+    camel-groovy:
+      groupId: org.apache.camel
+      artifactId: camel-groovy
+      languages:
+      - groovy
+    camel-grpc:
+      groupId: org.apache.camel
+      artifactId: camel-grpc
+      schemes:
+      - id: grpc
+        http: true
+        passive: false
+    camel-gson:
+      groupId: org.apache.camel
+      artifactId: camel-gson
+      dataformats:
+      - json-gson
+    camel-guava-eventbus:
+      groupId: org.apache.camel
+      artifactId: camel-guava-eventbus
+      schemes:
+      - id: guava-eventbus
+        http: false
+        passive: false
+    camel-hazelcast:
+      groupId: org.apache.camel
+      artifactId: camel-hazelcast
+      schemes:
+      - id: hazelcast-atomicvalue
+        http: false
+        passive: false
+      - id: hazelcast-instance
+        http: false
+        passive: false
+      - id: hazelcast-list
+        http: false
+        passive: false
+      - id: hazelcast-map
+        http: false
+        passive: false
+      - id: hazelcast-multimap
+        http: false
+        passive: false
+      - id: hazelcast-queue
+        http: false
+        passive: false
+      - id: hazelcast-replicatedmap
+        http: false
+        passive: false
+      - id: hazelcast-ringbuffer
+        http: false
+        passive: false
+      - id: hazelcast-seda
+        http: false
+        passive: false
+      - id: hazelcast-set
+        http: false
+        passive: false
+      - id: hazelcast-topic
+        http: false
+        passive: false
+    camel-hbase:
+      groupId: org.apache.camel
+      artifactId: camel-hbase
+      schemes:
+      - id: hbase
+        http: false
+        passive: false
+    camel-hdfs2:
+      groupId: org.apache.camel
+      artifactId: camel-hdfs2
+      schemes:
+      - id: hdfs
+        http: false
+        passive: false
+      - id: hdfs2
+        http: false
+        passive: false
+    camel-hipchat:
+      groupId: org.apache.camel
+      artifactId: camel-hipchat
+      schemes:
+      - id: hipchat
+        http: false
+        passive: false
+    camel-hl7:
+      groupId: org.apache.camel
+      artifactId: camel-hl7
+      languages:
+      - hl7terser
+      dataformats:
+      - hl7
+    camel-http4:
+      groupId: org.apache.camel
+      artifactId: camel-http4
+      schemes:
+      - id: http
+        http: false
+        passive: false
+      - id: http4
+        http: false
+        passive: false
+      - id: https4
+        http: false
+        passive: false
+      - id: https
+        http: false
+        passive: false
+    camel-ical:
+      groupId: org.apache.camel
+      artifactId: camel-ical
+      dataformats:
+      - ical
+    camel-iec60870:
+      groupId: org.apache.camel
+      artifactId: camel-iec60870
+      schemes:
+      - id: iec60870-client
+        http: false
+        passive: false
+      - id: iec60870-server
+        http: false
+        passive: false
+    camel-ignite:
+      groupId: org.apache.camel
+      artifactId: camel-ignite
+      schemes:
+      - id: ignite-cache
+        http: false
+        passive: false
+      - id: ignite-compute
+        http: false
+        passive: false
+      - id: ignite-events
+        http: false
+        passive: false
+      - id: ignite-idgen
+        http: false
+        passive: false
+      - id: ignite-messaging
+        http: false
+        passive: false
+      - id: ignite-queue
+        http: false
+        passive: false
+      - id: ignite-set
+        http: false
+        passive: false
+    camel-infinispan:
+      groupId: org.apache.camel
+      artifactId: camel-infinispan
+      schemes:
+      - id: infinispan
+        http: false
+        passive: false
+    camel-influxdb:
+      groupId: org.apache.camel
+      artifactId: camel-influxdb
+      schemes:
+      - id: influxdb
+        http: false
+        passive: false
+    camel-iota:
+      groupId: org.apache.camel
+      artifactId: camel-iota
+      schemes:
+      - id: iota
+        http: false
+        passive: false
+    camel-ipfs:
+      groupId: org.apache.camel
+      artifactId: camel-ipfs
+      schemes:
+      - id: ipfs
+        http: false
+        passive: false
+    camel-irc:
+      groupId: org.apache.camel
+      artifactId: camel-irc
+      schemes:
+      - id: irc
+        http: false
+        passive: false
+    camel-ironmq:
+      groupId: org.apache.camel
+      artifactId: camel-ironmq
+      schemes:
+      - id: ironmq
+        http: false
+        passive: false
+    camel-jackson:
+      groupId: org.apache.camel
+      artifactId: camel-jackson
+      dataformats:
+      - json-jackson
+    camel-jacksonxml:
+      groupId: org.apache.camel
+      artifactId: camel-jacksonxml
+      dataformats:
+      - jacksonxml
+    camel-jaxb:
+      groupId: org.apache.camel
+      artifactId: camel-jaxb
+      dataformats:
+      - jaxb
+    camel-jaxp:
+      groupId: org.apache.camel
+      artifactId: camel-jaxp
+      languages:
+      - xtokenize
+    camel-jbpm:
+      groupId: org.apache.camel
+      artifactId: camel-jbpm
+      schemes:
+      - id: jbpm
+        http: false
+        passive: false
+    camel-jcache:
+      groupId: org.apache.camel
+      artifactId: camel-jcache
+      schemes:
+      - id: jcache
+        http: false
+        passive: false
+    camel-jclouds:
+      groupId: org.apache.camel
+      artifactId: camel-jclouds
+      schemes:
+      - id: jclouds
+        http: false
+        passive: false
+    camel-jcr:
+      groupId: org.apache.camel
+      artifactId: camel-jcr
+      schemes:
+      - id: jcr
+        http: false
+        passive: false
+    camel-jdbc:
+      groupId: org.apache.camel
+      artifactId: camel-jdbc
+      schemes:
+      - id: jdbc
+        http: false
+        passive: false
+    camel-jetty:
+      groupId: org.apache.camel
+      artifactId: camel-jetty
+      schemes:
+      - id: jetty
+        http: true
+        passive: false
+    camel-jgroups:
+      groupId: org.apache.camel
+      artifactId: camel-jgroups
+      schemes:
+      - id: jgroups
+        http: false
+        passive: false
+    camel-jgroups-raft:
+      groupId: org.apache.camel
+      artifactId: camel-jgroups-raft
+      schemes:
+      - id: jgroups-raft
+        http: false
+        passive: false
+    camel-jing:
+      groupId: org.apache.camel
+      artifactId: camel-jing
+      schemes:
+      - id: jing
+        http: false
+        passive: false
+    camel-jira:
+      groupId: org.apache.camel
+      artifactId: camel-jira
+      schemes:
+      - id: jira
+        http: false
+        passive: false
+    camel-jms:
+      groupId: org.apache.camel
+      artifactId: camel-jms
+      schemes:
+      - id: jms
+        http: false
+        passive: false
+    camel-jmx:
+      groupId: org.apache.camel
+      artifactId: camel-jmx
+      schemes:
+      - id: jmx
+        http: false
+        passive: false
+    camel-johnzon:
+      groupId: org.apache.camel
+      artifactId: camel-johnzon
+      dataformats:
+      - json-johnzon
+    camel-jolt:
+      groupId: org.apache.camel
+      artifactId: camel-jolt
+      schemes:
+      - id: jolt
+        http: false
+        passive: false
+    camel-jooq:
+      groupId: org.apache.camel
+      artifactId: camel-jooq
+      schemes:
+      - id: jooq
+        http: false
+        passive: false
+    camel-jpa:
+      groupId: org.apache.camel
+      artifactId: camel-jpa
+      schemes:
+      - id: jpa
+        http: false
+        passive: false
+    camel-jsch:
+      groupId: org.apache.camel
+      artifactId: camel-jsch
+      schemes:
+      - id: scp
+        http: false
+        passive: false
+    camel-json-validator:
+      groupId: org.apache.camel
+      artifactId: camel-json-validator
+      schemes:
+      - id: json-validator
+        http: false
+        passive: false
+    camel-jsonapi:
+      groupId: org.apache.camel
+      artifactId: camel-jsonapi
+      dataformats:
+      - jsonApi
+    camel-jsonpath:
+      groupId: org.apache.camel
+      artifactId: camel-jsonpath
+      languages:
+      - jsonpath
+    camel-jt400:
+      groupId: org.apache.camel
+      artifactId: camel-jt400
+      schemes:
+      - id: jt400
+        http: false
+        passive: false
+    camel-k-runtime-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-groovy
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-servlet
+    camel-k-runtime-jvm:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-jvm
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core
+    camel-k-runtime-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-kotlin
+      version: 1.0.0
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+    camel-kafka:
+      groupId: org.apache.camel
+      artifactId: camel-kafka
+      schemes:
+      - id: kafka
+        http: false
+        passive: false
+    camel-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-knative
+      version: 1.0.0
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-netty4-http
+    camel-kubernetes:
+      groupId: org.apache.camel
+      artifactId: camel-kubernetes
+      schemes:
+      - id: kubernetes-config-maps
+        http: false
+        passive: false
+      - id: kubernetes-deployments
+        http: false
+        passive: false
+      - id: kubernetes-hpa
+        http: false
+        passive: false
+      - id: kubernetes-job
+        http: false
+        passive: false
+      - id: kubernetes-namespaces
+        http: false
+        passive: false
+      - id: kubernetes-nodes
+        http: false
+        passive: false
+      - id: kubernetes-persistent-volumes
+        http: false
+        passive: false
+      - id: kubernetes-persistent-volumes-claims
+        http: false
+        passive: false
+      - id: kubernetes-pods
+        http: false
+        passive: false
+      - id: kubernetes-replication-controllers
+        http: false
+        passive: false
+      - id: kubernetes-resources-quota
+        http: false
+        passive: false
+      - id: kubernetes-secrets
+        http: false
+        passive: false
+      - id: kubernetes-service-accounts
+        http: false
+        passive: false
+      - id: kubernetes-services
+        http: false
+        passive: false
+      - id: openshift-build-configs
+        http: false
+        passive: false
+      - id: openshift-builds
+        http: false
+        passive: false
+    camel-language:
+      groupId: org.apache.camel
+      artifactId: camel-language
+      schemes:
+      - id: language
+        http: false
+        passive: true
+    camel-ldap:
+      groupId: org.apache.camel
+      artifactId: camel-ldap
+      schemes:
+      - id: ldap
+        http: false
+        passive: false
+    camel-ldif:
+      groupId: org.apache.camel
+      artifactId: camel-ldif
+      schemes:
+      - id: ldif
+        http: false
+        passive: false
+    camel-linkedin:
+      groupId: org.apache.camel
+      artifactId: camel-linkedin
+      schemes:
+      - id: linkedin
+        http: false
+        passive: false
+    camel-log:
+      groupId: org.apache.camel
+      artifactId: camel-log
+      schemes:
+      - id: log
+        http: false
+        passive: true
+    camel-lucene:
+      groupId: org.apache.camel
+      artifactId: camel-lucene
+      schemes:
+      - id: lucene
+        http: false
+        passive: false
+    camel-lumberjack:
+      groupId: org.apache.camel
+      artifactId: camel-lumberjack
+      schemes:
+      - id: lumberjack
+        http: false
+        passive: false
+    camel-lzf:
+      groupId: org.apache.camel
+      artifactId: camel-lzf
+      dataformats:
+      - lzf
+    camel-mail:
+      groupId: org.apache.camel
+      artifactId: camel-mail
+      schemes:
+      - id: imap
+        http: false
+        passive: false
+      - id: imaps
+        http: false
+        passive: false
+      - id: pop3
+        http: false
+        passive: false
+      - id: pop3s
+        http: false
+        passive: false
+      - id: smtp
+        http: false
+        passive: false
+      - id: smtps
+        http: false
+        passive: false
+      dataformats:
+      - mime-multipart
+    camel-master:
+      groupId: org.apache.camel
+      artifactId: camel-master
+      schemes:
+      - id: master
+        http: false
+        passive: false
+    camel-metrics:
+      groupId: org.apache.camel
+      artifactId: camel-metrics
+      schemes:
+      - id: metrics
+        http: false
+        passive: false
+    camel-micrometer:
+      groupId: org.apache.camel
+      artifactId: camel-micrometer
+      schemes:
+      - id: micrometer
+        http: false
+        passive: false
+    camel-milo:
+      groupId: org.apache.camel
+      artifactId: camel-milo
+      schemes:
+      - id: milo-client
+        http: false
+        passive: false
+      - id: milo-server
+        http: false
+        passive: false
+    camel-mina2:
+      groupId: org.apache.camel
+      artifactId: camel-mina2
+      schemes:
+      - id: mina
+        http: false
+        passive: false
+      - id: mina2
+        http: false
+        passive: false
+    camel-mllp:
+      groupId: org.apache.camel
+      artifactId: camel-mllp
+      schemes:
+      - id: mllp
+        http: false
+        passive: false
+    camel-mock:
+      groupId: org.apache.camel
+      artifactId: camel-mock
+      schemes:
+      - id: mock
+        http: false
+        passive: true
+    camel-mongodb-gridfs:
+      groupId: org.apache.camel
+      artifactId: camel-mongodb-gridfs
+      schemes:
+      - id: mongodb-gridfs
+        http: false
+        passive: false
+    camel-mongodb3:
+      groupId: org.apache.camel
+      artifactId: camel-mongodb3
+      schemes:
+      - id: mongodb3
+        http: false
+        passive: false
+    camel-mqtt:
+      groupId: org.apache.camel
+      artifactId: camel-mqtt
+      schemes:
+      - id: mqtt
+        http: false
+        passive: false
+    camel-msv:
+      groupId: org.apache.camel
+      artifactId: camel-msv
+      schemes:
+      - id: msv
+        http: false
+        passive: false
+    camel-mustache:
+      groupId: org.apache.camel
+      artifactId: camel-mustache
+      schemes:
+      - id: mustache
+        http: false
+        passive: false
+    camel-mvel:
+      groupId: org.apache.camel
+      artifactId: camel-mvel
+      schemes:
+      - id: mvel
+        http: false
+        passive: false
+      languages:
+      - mvel
+    camel-mybatis:
+      groupId: org.apache.camel
+      artifactId: camel-mybatis
+      schemes:
+      - id: mybatis
+        http: false
+        passive: false
+      - id: mybatis-bean
+        http: false
+        passive: false
+    camel-nagios:
+      groupId: org.apache.camel
+      artifactId: camel-nagios
+      schemes:
+      - id: nagios
+        http: false
+        passive: false
+    camel-nats:
+      groupId: org.apache.camel
+      artifactId: camel-nats
+      schemes:
+      - id: nats
+        http: false
+        passive: false
+    camel-netty4:
+      groupId: org.apache.camel
+      artifactId: camel-netty4
+      schemes:
+      - id: netty
+        http: false
+        passive: false
+      - id: netty4
+        http: false
+        passive: false
+    camel-netty4-http:
+      groupId: org.apache.camel
+      artifactId: camel-netty4-http
+      schemes:
+      - id: netty-http
+        http: true
+        passive: false
+      - id: netty4-http
+        http: true
+        passive: false
+    camel-nsq:
+      groupId: org.apache.camel
+      artifactId: camel-nsq
+      schemes:
+      - id: nsq
+        http: false
+        passive: false
+    camel-ognl:
+      groupId: org.apache.camel
+      artifactId: camel-ognl
+      languages:
+      - ognl
+    camel-olingo2:
+      groupId: org.apache.camel
+      artifactId: camel-olingo2
+      schemes:
+      - id: olingo2
+        http: false
+        passive: false
+    camel-olingo4:
+      groupId: org.apache.camel
+      artifactId: camel-olingo4
+      schemes:
+      - id: olingo4
+        http: false
+        passive: false
+    camel-openstack:
+      groupId: org.apache.camel
+      artifactId: camel-openstack
+      schemes:
+      - id: openstack-cinder
+        http: false
+        passive: false
+      - id: openstack-glance
+        http: false
+        passive: false
+      - id: openstack-keystone
+        http: false
+        passive: false
+      - id: openstack-neutron
+        http: false
+        passive: false
+      - id: openstack-nova
+        http: false
+        passive: false
+      - id: openstack-swift
+        http: false
+        passive: false
+    camel-optaplanner:
+      groupId: org.apache.camel
+      artifactId: camel-optaplanner
+      schemes:
+      - id: optaplanner
+        http: false
+        passive: false
+    camel-paho:
+      groupId: org.apache.camel
+      artifactId: camel-paho
+      schemes:
+      - id: paho
+        http: false
+        passive: false
+    camel-paxlogging:
+      groupId: org.apache.camel
+      artifactId: camel-paxlogging
+      schemes:
+      - id: paxlogging
+        http: false
+        passive: false
+    camel-pdf:
+      groupId: org.apache.camel
+      artifactId: camel-pdf
+      schemes:
+      - id: pdf
+        http: false
+        passive: false
+    camel-pgevent:
+      groupId: org.apache.camel
+      artifactId: camel-pgevent
+      schemes:
+      - id: pgevent
+        http: false
+        passive: false
+    camel-printer:
+      groupId: org.apache.camel
+      artifactId: camel-printer
+      schemes:
+      - id: lpr
+        http: false
+        passive: false
+    camel-properties:
+      groupId: org.apache.camel
+      artifactId: camel-properties
+      schemes:
+      - id: properties
+        http: false
+        passive: true
+    camel-protobuf:
+      groupId: org.apache.camel
+      artifactId: camel-protobuf
+      dataformats:
+      - protobuf
+    camel-pubnub:
+      groupId: org.apache.camel
+      artifactId: camel-pubnub
+      schemes:
+      - id: pubnub
+        http: false
+        passive: false
+    camel-pulsar:
+      groupId: org.apache.camel
+      artifactId: camel-pulsar
+      schemes:
+      - id: pulsar
+        http: false
+        passive: false
+    camel-quartz2:
+      groupId: org.apache.camel
+      artifactId: camel-quartz2
+      schemes:
+      - id: quartz2
+        http: false
+        passive: false
+    camel-quickfix:
+      groupId: org.apache.camel
+      artifactId: camel-quickfix
+      schemes:
+      - id: quickfix
+        http: false
+        passive: false
+    camel-rabbitmq:
+      groupId: org.apache.camel
+      artifactId: camel-rabbitmq
+      schemes:
+      - id: rabbitmq
+        http: false
+        passive: false
+    camel-reactive-streams:
+      groupId: org.apache.camel
+      artifactId: camel-reactive-streams
+      schemes:
+      - id: reactive-streams
+        http: false
+        passive: false
+    camel-ref:
+      groupId: org.apache.camel
+      artifactId: camel-ref
+      schemes:
+      - id: ref
+        http: false
+        passive: true
+    camel-rest:
+      groupId: org.apache.camel
+      artifactId: camel-rest
+      schemes:
+      - id: rest
+        http: true
+        passive: false
+      - id: rest-api
+        http: false
+        passive: false
+    camel-rest-swagger:
+      groupId: org.apache.camel
+      artifactId: camel-rest-swagger
+      schemes:
+      - id: rest-swagger
+        http: false
+        passive: false
+    camel-restlet:
+      groupId: org.apache.camel
+      artifactId: camel-restlet
+      schemes:
+      - id: restlet
+        http: true
+        passive: false
+    camel-rss:
+      groupId: org.apache.camel
+      artifactId: camel-rss
+      schemes:
+      - id: rss
+        http: false
+        passive: false
+      dataformats:
+      - rss
+    camel-saga:
+      groupId: org.apache.camel
+      artifactId: camel-saga
+      schemes:
+      - id: saga
+        http: false
+        passive: false
+    camel-salesforce:
+      groupId: org.apache.camel
+      artifactId: camel-salesforce
+      schemes:
+      - id: salesforce
+        http: false
+        passive: false
+    camel-sap-netweaver:
+      groupId: org.apache.camel
+      artifactId: camel-sap-netweaver
+      schemes:
+      - id: sap-netweaver
+        http: false
+        passive: false
+    camel-saxon:
+      groupId: org.apache.camel
+      artifactId: camel-saxon
+      schemes:
+      - id: xquery
+        http: false
+        passive: false
+      languages:
+      - xquery
+    camel-scheduler:
+      groupId: org.apache.camel
+      artifactId: camel-scheduler
+      schemes:
+      - id: scheduler
+        http: false
+        passive: false
+    camel-schematron:
+      groupId: org.apache.camel
+      artifactId: camel-schematron
+      schemes:
+      - id: schematron
+        http: false
+        passive: false
+    camel-seda:
+      groupId: org.apache.camel
+      artifactId: camel-seda
+      schemes:
+      - id: seda
+        http: false
+        passive: true
+    camel-service:
+      groupId: org.apache.camel
+      artifactId: camel-service
+      schemes:
+      - id: service
+        http: false
+        passive: false
+    camel-servicenow:
+      groupId: org.apache.camel
+      artifactId: camel-servicenow
+      schemes:
+      - id: servicenow
+        http: false
+        passive: false
+    camel-servlet:
+      groupId: org.apache.camel
+      artifactId: camel-servlet
+      schemes:
+      - id: servlet
+        http: true
+        passive: false
+    camel-sip:
+      groupId: org.apache.camel
+      artifactId: camel-sip
+      schemes:
+      - id: sip
+        http: false
+        passive: false
+      - id: sips
+        http: false
+        passive: false
+    camel-sjms:
+      groupId: org.apache.camel
+      artifactId: camel-sjms
+      schemes:
+      - id: sjms
+        http: false
+        passive: false
+      - id: sjms-batch
+        http: false
+        passive: false
+    camel-sjms2:
+      groupId: org.apache.camel
+      artifactId: camel-sjms2
+      schemes:
+      - id: sjms2
+        http: false
+        passive: false
+    camel-slack:
+      groupId: org.apache.camel
+      artifactId: camel-slack
+      schemes:
+      - id: slack
+        http: false
+        passive: false
+    camel-smpp:
+      groupId: org.apache.camel
+      artifactId: camel-smpp
+      schemes:
+      - id: smpp
+        http: false
+        passive: false
+      - id: smpps
+        http: false
+        passive: false
+    camel-snakeyaml:
+      groupId: org.apache.camel
+      artifactId: camel-snakeyaml
+      dataformats:
+      - yaml-snakeyaml
+    camel-snmp:
+      groupId: org.apache.camel
+      artifactId: camel-snmp
+      schemes:
+      - id: snmp
+        http: false
+        passive: false
+    camel-soap:
+      groupId: org.apache.camel
+      artifactId: camel-soap
+      dataformats:
+      - soapjaxb
+    camel-solr:
+      groupId: org.apache.camel
+      artifactId: camel-solr
+      schemes:
+      - id: solr
+        http: false
+        passive: false
+      - id: solrs
+        http: false
+        passive: false
+      - id: solrCloud
+        http: false
+        passive: false
+    camel-soroush:
+      groupId: org.apache.camel
+      artifactId: camel-soroush
+      schemes:
+      - id: soroush
+        http: false
+        passive: false
+    camel-spark:
+      groupId: org.apache.camel
+      artifactId: camel-spark
+      schemes:
+      - id: spark
+        http: false
+        passive: false
+    camel-spark-rest:
+      groupId: org.apache.camel
+      artifactId: camel-spark-rest
+      schemes:
+      - id: spark-rest
+        http: true
+        passive: false
+    camel-splunk:
+      groupId: org.apache.camel
+      artifactId: camel-splunk
+      schemes:
+      - id: splunk
+        http: false
+        passive: false
+    camel-spring:
+      groupId: org.apache.camel
+      artifactId: camel-spring
+      schemes:
+      - id: spring-event
+        http: false
+        passive: false
+      languages:
+      - spel
+    camel-spring-batch:
+      groupId: org.apache.camel
+      artifactId: camel-spring-batch
+      schemes:
+      - id: spring-batch
+        http: false
+        passive: false
+    camel-spring-integration:
+      groupId: org.apache.camel
+      artifactId: camel-spring-integration
+      schemes:
+      - id: spring-integration
+        http: false
+        passive: false
+    camel-spring-ldap:
+      groupId: org.apache.camel
+      artifactId: camel-spring-ldap
+      schemes:
+      - id: spring-ldap
+        http: false
+        passive: false
+    camel-spring-redis:
+      groupId: org.apache.camel
+      artifactId: camel-spring-redis
+      schemes:
+      - id: spring-redis
+        http: false
+        passive: false
+    camel-spring-ws:
+      groupId: org.apache.camel
+      artifactId: camel-spring-ws
+      schemes:
+      - id: spring-ws
+        http: true
+        passive: false
+    camel-sql:
+      groupId: org.apache.camel
+      artifactId: camel-sql
+      schemes:
+      - id: sql
+        http: false
+        passive: false
+      - id: sql-stored
+        http: false
+        passive: false
+    camel-ssh:
+      groupId: org.apache.camel
+      artifactId: camel-ssh
+      schemes:
+      - id: ssh
+        http: false
+        passive: false
+    camel-stax:
+      groupId: org.apache.camel
+      artifactId: camel-stax
+      schemes:
+      - id: stax
+        http: false
+        passive: false
+    camel-stomp:
+      groupId: org.apache.camel
+      artifactId: camel-stomp
+      schemes:
+      - id: stomp
+        http: false
+        passive: false
+    camel-stream:
+      groupId: org.apache.camel
+      artifactId: camel-stream
+      schemes:
+      - id: stream
+        http: false
+        passive: false
+    camel-stringtemplate:
+      groupId: org.apache.camel
+      artifactId: camel-stringtemplate
+      schemes:
+      - id: string-template
+        http: false
+        passive: false
+    camel-stub:
+      groupId: org.apache.camel
+      artifactId: camel-stub
+      schemes:
+      - id: stub
+        http: false
+        passive: true
+    camel-syslog:
+      groupId: org.apache.camel
+      artifactId: camel-syslog
+      dataformats:
+      - syslog
+    camel-tagsoup:
+      groupId: org.apache.camel
+      artifactId: camel-tagsoup
+      dataformats:
+      - tidyMarkup
+    camel-tarfile:
+      groupId: org.apache.camel
+      artifactId: camel-tarfile
+      dataformats:
+      - tarfile
+    camel-telegram:
+      groupId: org.apache.camel
+      artifactId: camel-telegram
+      schemes:
+      - id: telegram
+        http: false
+        passive: false
+    camel-thrift:
+      groupId: org.apache.camel
+      artifactId: camel-thrift
+      schemes:
+      - id: thrift
+        http: false
+        passive: false
+      dataformats:
+      - thrift
+    camel-tika:
+      groupId: org.apache.camel
+      artifactId: camel-tika
+      schemes:
+      - id: tika
+        http: false
+        passive: false
+    camel-timer:
+      groupId: org.apache.camel
+      artifactId: camel-timer
+      schemes:
+      - id: timer
+        http: false
+        passive: false
+    camel-twilio:
+      groupId: org.apache.camel
+      artifactId: camel-twilio
+      schemes:
+      - id: twilio
+        http: false
+        passive: false
+    camel-twitter:
+      groupId: org.apache.camel
+      artifactId: camel-twitter
+      schemes:
+      - id: twitter-directmessage
+        http: false
+        passive: false
+      - id: twitter-search
+        http: false
+        passive: false
+      - id: twitter-streaming
+        http: false
+        passive: false
+      - id: twitter-timeline
+        http: false
+        passive: false
+    camel-undertow:
+      groupId: org.apache.camel
+      artifactId: camel-undertow
+      schemes:
+      - id: undertow
+        http: true
+        passive: false
+    camel-univocity-parsers:
+      groupId: org.apache.camel
+      artifactId: camel-univocity-parsers
+      dataformats:
+      - univocity-csv
+      - univocity-fixed
+      - univocity-tsv
+    camel-validator:
+      groupId: org.apache.camel
+      artifactId: camel-validator
+      schemes:
+      - id: validator
+        http: false
+        passive: true
+    camel-velocity:
+      groupId: org.apache.camel
+      artifactId: camel-velocity
+      schemes:
+      - id: velocity
+        http: false
+        passive: false
+    camel-vertx:
+      groupId: org.apache.camel
+      artifactId: camel-vertx
+      schemes:
+      - id: vertx
+        http: false
+        passive: false
+    camel-vm:
+      groupId: org.apache.camel
+      artifactId: camel-vm
+      schemes:
+      - id: vm
+        http: false
+        passive: true
+    camel-weather:
+      groupId: org.apache.camel
+      artifactId: camel-weather
+      schemes:
+      - id: weather
+        http: false
+        passive: false
+    camel-web3j:
+      groupId: org.apache.camel
+      artifactId: camel-web3j
+      schemes:
+      - id: web3j
+        http: false
+        passive: false
+    camel-webhook:
+      groupId: org.apache.camel
+      artifactId: camel-webhook
+      schemes:
+      - id: webhook
+        http: false
+        passive: false
+    camel-websocket:
+      groupId: org.apache.camel
+      artifactId: camel-websocket
+      schemes:
+      - id: websocket
+        http: true
+        passive: false
+    camel-websocket-jsr356:
+      groupId: org.apache.camel
+      artifactId: camel-websocket-jsr356
+      schemes:
+      - id: websocket-jsr356
+        http: false
+        passive: false
+    camel-wordpress:
+      groupId: org.apache.camel
+      artifactId: camel-wordpress
+      schemes:
+      - id: wordpress
+        http: false
+        passive: false
+    camel-xchange:
+      groupId: org.apache.camel
+      artifactId: camel-xchange
+      schemes:
+      - id: xchange
+        http: false
+        passive: false
+    camel-xmlsecurity:
+      groupId: org.apache.camel
+      artifactId: camel-xmlsecurity
+      schemes:
+      - id: xmlsecurity
+        http: false
+        passive: false
+      dataformats:
+      - secureXML
+    camel-xmpp:
+      groupId: org.apache.camel
+      artifactId: camel-xmpp
+      schemes:
+      - id: xmpp
+        http: false
+        passive: false
+    camel-xpath:
+      groupId: org.apache.camel
+      artifactId: camel-xpath
+      languages:
+      - xpath
+    camel-xslt:
+      groupId: org.apache.camel
+      artifactId: camel-xslt
+      schemes:
+      - id: xslt
+        http: false
+        passive: false
+    camel-xstream:
+      groupId: org.apache.camel
+      artifactId: camel-xstream
+      dataformats:
+      - json-xstream
+      - xstream
+    camel-yammer:
+      groupId: org.apache.camel
+      artifactId: camel-yammer
+      schemes:
+      - id: yammer
+        http: false
+        passive: false
+    camel-zendesk:
+      groupId: org.apache.camel
+      artifactId: camel-zendesk
+      schemes:
+      - id: zendesk
+        http: false
+        passive: false
+    camel-zip-deflater:
+      groupId: org.apache.camel
+      artifactId: camel-zip-deflater
+      dataformats:
+      - gzipdeflater
+      - zipdeflater
     camel-zipfile:
       groupId: org.apache.camel
       artifactId: camel-zipfile

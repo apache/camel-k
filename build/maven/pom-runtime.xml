@@ -32,25 +32,17 @@
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-maven-plugin</artifactId>
             <version>${runtime.version}</version>
+            <type>maven-plugin</type>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-knative</artifactId>
+            <artifactId>camel-k-runtime-bom</artifactId>
             <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-knative-http</artifactId>
-            <version>${runtime.version}</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-runtime-core</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-runtime-jvm</artifactId>
             <version>${runtime.version}</version>
         </dependency>
         <dependency>
@@ -60,7 +52,22 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-runtime-health</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-runtime-jvm</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-runtime-kotlin</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-runtime-servlet</artifactId>
             <version>${runtime.version}</version>
         </dependency>
         <dependency>
@@ -70,12 +77,12 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-adapter-camel-2</artifactId>
+            <artifactId>camel-knative</artifactId>
             <version>${runtime.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-adapter-camel-3</artifactId>
+            <artifactId>camel-knative-http</artifactId>
             <version>${runtime.version}</version>
         </dependency>
     </dependencies>
