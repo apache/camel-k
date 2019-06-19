@@ -46,7 +46,7 @@ func TestDependenciesJavaSource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram", "camel:twitter"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies)
 }
 
 func TestDependenciesJavaScript(t *testing.T) {
@@ -69,7 +69,7 @@ func TestDependenciesJavaScript(t *testing.T) {
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:log", "camel:telegram", "camel:timer"}, meta.Dependencies)
 }
 
 func TestDependenciesGroovy(t *testing.T) {
@@ -94,7 +94,7 @@ func TestDependenciesGroovy(t *testing.T) {
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:amqp", "camel:core", "camel:telegram", "camel:twitter"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies)
 }
 
 func TestDependencies(t *testing.T) {
@@ -116,7 +116,7 @@ func TestDependencies(t *testing.T) {
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:twitter"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:http4", "camel:log", "camel:mock", "camel:twitter"}, meta.Dependencies)
 }
 
 func TestJacksonDependency(t *testing.T) {
@@ -136,7 +136,7 @@ func TestJacksonDependency(t *testing.T) {
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:jackson"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:http4", "camel:jackson", "camel:log"}, meta.Dependencies)
 }
 
 func TestHystrixDependency(t *testing.T) {
@@ -160,7 +160,7 @@ func TestHystrixDependency(t *testing.T) {
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:core", "camel:http4", "camel:hystrix"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:http4", "camel:hystrix", "camel:log"}, meta.Dependencies)
 }
 
 func TestXMLHystrixDependency(t *testing.T) {
@@ -187,5 +187,5 @@ func TestXMLHystrixDependency(t *testing.T) {
 	meta := Extract(catalog, code)
 
 	// assert all dependencies are found and sorted (removing duplicates)
-	assert.Equal(t, []string{"camel:core", "camel:hystrix", "camel:kafka"}, meta.Dependencies)
+	assert.Equal(t, []string{"camel:direct", "camel:hystrix", "camel:kafka", "camel:log"}, meta.Dependencies)
 }
