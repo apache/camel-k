@@ -27,7 +27,7 @@ func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
 	catalog, err := DefaultCatalog()
 	assert.Nil(t, err)
 
-	assert.Equal(t, "2.24.0", catalog.Version)
+	assert.Equal(t, "3.0.0-M3", catalog.Version)
 
 	artifact := catalog.GetArtifactByScheme("knative")
 	assert.Equal(t, 1, len(artifact.Schemes))

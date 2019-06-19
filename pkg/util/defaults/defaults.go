@@ -25,10 +25,10 @@ const (
 	Version = "1.0.0-M1-SNAPSHOT"
 
 	// CamelVersionConstraint --
-	CamelVersionConstraint = "~2.24.x"
+	CamelVersionConstraint = ">=3.0.0-M2"
 
 	// RuntimeVersion --
-	RuntimeVersion = "0.3.3"
+	RuntimeVersion = "1.0.0-SNAPSHOT"
 
 	// BaseImage --
 	BaseImage = "fabric8/s2i-java:3.0-java8"
