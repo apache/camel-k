@@ -55,8 +55,8 @@ type Plugin struct {
 
 // Execution --
 type Execution struct {
-	ID    string   `xml:"id"`
-	Phase string   `xml:"phase"`
+	ID    string   `xml:"id,omitempty"`
+	Phase string   `xml:"phase,omitempty"`
 	Goals []string `xml:"goals>goal,omitempty"`
 }
 
@@ -132,6 +132,11 @@ func (c *Context) AddArguments(arguments ...string) {
 	c.AdditionalArguments = append(c.AdditionalArguments, arguments...)
 }
 
+// AddSystemProperty --
+func (c *Context) AddSystemProperty(name string, value string) {
+	c.AddArgumentf("-D%s=%s", name, value)
+}
+
 // Settings represent a maven settings
 type Settings struct {
 	XMLName           xml.Name
@@ -161,19 +166,19 @@ func (s Settings) MarshalBytes() ([]byte, error) {
 // Project represent a maven project
 type Project struct {
 	XMLName              xml.Name
-	XMLNs                string               `xml:"xmlns,attr"`
-	XMLNsXsi             string               `xml:"xmlns:xsi,attr"`
-	XsiSchemaLocation    string               `xml:"xsi:schemaLocation,attr"`
-	ModelVersion         string               `xml:"modelVersion"`
-	GroupID              string               `xml:"groupId"`
-	ArtifactID           string               `xml:"artifactId"`
-	Version              string               `xml:"version"`
-	Properties           Properties           `xml:"properties,omitempty"`
-	DependencyManagement DependencyManagement `xml:"dependencyManagement"`
-	Dependencies         []Dependency         `xml:"dependencies>dependency,omitempty"`
-	Repositories         []Repository         `xml:"repositories>repository,omitempty"`
-	PluginRepositories   []Repository         `xml:"pluginRepositories>pluginRepository,omitempty"`
-	Build                Build                `xml:"build,omitempty"`
+	XMLNs                string                `xml:"xmlns,attr"`
+	XMLNsXsi             string                `xml:"xmlns:xsi,attr"`
+	XsiSchemaLocation    string                `xml:"xsi:schemaLocation,attr"`
+	ModelVersion         string                `xml:"modelVersion"`
+	GroupID              string                `xml:"groupId"`
+	ArtifactID           string                `xml:"artifactId"`
+	Version              string                `xml:"version"`
+	Properties           Properties            `xml:"properties,omitempty"`
+	DependencyManagement *DependencyManagement `xml:"dependencyManagement"`
+	Dependencies         []Dependency          `xml:"dependencies>dependency,omitempty"`
+	Repositories         []Repository          `xml:"repositories>repository,omitempty"`
+	PluginRepositories   []Repository          `xml:"pluginRepositories>pluginRepository,omitempty"`
+	Build                *Build                `xml:"build,omitempty"`
 }
 
 // Exclusion represent a maven's dependency exlucsion

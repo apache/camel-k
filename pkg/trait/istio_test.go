@@ -29,6 +29,7 @@ import (
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service) Environment {
@@ -53,6 +54,9 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service) Env
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+			},
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 				Profile: v1alpha1.TraitProfileKnative,
