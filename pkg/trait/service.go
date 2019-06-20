@@ -30,16 +30,22 @@ import (
 type serviceTrait struct {
 	BaseTrait `property:",squash"`
 
-	Auto *bool `property:"auto"`
-	Port int   `property:"port"`
+	Auto              *bool  `property:"auto"`
+	Port              int    `property:"port"`
+	PortName          string `property:"port-name"`
+	ContainerPort     int    `property:"container-port"`
+	ContainerPortName string `property:"container-port-name"`
 }
 
 const httpPortName = "http"
 
 func newServiceTrait() *serviceTrait {
 	return &serviceTrait{
-		BaseTrait: newBaseTrait("service"),
-		Port:      8080,
+		BaseTrait:         newBaseTrait("service"),
+		Port:              80,
+		PortName:          httpPortName,
+		ContainerPort:     8080,
+		ContainerPortName: httpPortName,
 	}
 }
 
@@ -77,10 +83,10 @@ func (t *serviceTrait) Apply(e *Environment) (err error) {
 		e.Resources.Add(svc)
 	}
 	port := corev1.ServicePort{
-		Name:       httpPortName,
-		Port:       80,
+		Name:       t.PortName,
+		Port:       int32(t.Port),
 		Protocol:   corev1.ProtocolTCP,
-		TargetPort: intstr.FromString(httpPortName),
+		TargetPort: intstr.FromString(t.ContainerPortName),
 	}
 	svc.Spec.Ports = append(svc.Spec.Ports, port)
 
@@ -97,8 +103,8 @@ func (t *serviceTrait) Apply(e *Environment) (err error) {
 		})
 		if container != nil {
 			container.Ports = append(container.Ports, corev1.ContainerPort{
-				Name:          httpPortName,
-				ContainerPort: int32(t.Port),
+				Name:          t.ContainerPortName,
+				ContainerPort: int32(t.ContainerPort),
 				Protocol:      corev1.ProtocolTCP,
 			})
 		} else {
