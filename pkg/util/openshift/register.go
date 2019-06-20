@@ -23,6 +23,7 @@ import (
 	authorization "github.com/openshift/api/authorization/v1"
 	build "github.com/openshift/api/build/v1"
 	image "github.com/openshift/api/image/v1"
+	project "github.com/openshift/api/project/v1"
 	route "github.com/openshift/api/route/v1"
 	template "github.com/openshift/api/template/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -42,6 +43,7 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	err = doAdd(route.AddToScheme, scheme, err)
 	err = doAdd(build.AddToScheme, scheme, err)
 	err = doAdd(authorization.AddToScheme, scheme, err)
+	err = doAdd(project.AddToScheme, scheme, err)
 
 	return err
 }
