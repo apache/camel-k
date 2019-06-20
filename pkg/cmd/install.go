@@ -375,7 +375,7 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	return result
 }
 
-func errorIfKitIsNotAvailable(schema *runtime.Scheme, context string) error {
+func errorIfKitIsNotAvailable(schema *runtime.Scheme, kit string) error {
 	for _, resource := range deploy.Resources {
 		resource, err := kubernetes.LoadResourceFromYaml(schema, resource)
 		if err != nil {
@@ -387,11 +387,11 @@ func errorIfKitIsNotAvailable(schema *runtime.Scheme, context string) error {
 			continue
 		}
 		integrationKit := resource.(*v1alpha1.IntegrationKit)
-		if integrationKit.Name == context {
+		if integrationKit.Name == kit {
 			return nil
 		}
 	}
-	return errors.Errorf("Unknown context '%s'", context)
+	return errors.Errorf("Unknown kit '%s'", kit)
 }
 
 func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
