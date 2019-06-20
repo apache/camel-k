@@ -191,7 +191,16 @@ More information can be found in the official Kubernetes documentation about htt
 !===
 
 ! service.port
+! To configure a different port exposed by the service (default `80`).
+
+! service.port-name
+! To configure a different port name for the port exposed by the service (default `http`).
+
+! service.container-port
 ! To configure a different port exposed by the container (default `8080`).
+
+! service.container-port-name
+! To configure a different port name for the port exposed by the container (default `http`).
 
 !===
 
