@@ -122,7 +122,7 @@ build-olm:
 	./script/build_olm.sh $(VERSION)
 
 build-compile-integration-tests:
-	go test -c -tags=integration ./e2e/*.go
+	go test -c -tags=integration ./test/*.go
 
 clean:
 	# go clean fails if modules support are turned on as it tries to 
