@@ -66,7 +66,7 @@ echo "openshift is deployed and reachable"
 oc describe nodes
 
 echo "Adding maven artifacts to the image context"
-make package-artifacts
+make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
 
 echo "Copying binary file to docker dir"
 mkdir -p ./build/_output/bin

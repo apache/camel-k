@@ -17,15 +17,30 @@
 
 location=$(dirname $0)
 
-if [ "$#" -ne 1 ]; then
-    echo "usage: $0 version"
+if [ "$#" -ne 2 ]; then
+    echo "usage: $0 version strategy"
     exit 1
 fi
 
+version=$1
+strategy=$2
+
 cd ${location}/..
 
-./mvnw \
-    -f build/maven/pom-runtime.xml \
-    -DoutputDirectory=$PWD/build/_maven_output \
-    -Druntime.version=$1 \
-    dependency:copy-dependencies
+if [ "$strategy" = "copy" ]; then
+    ./mvnw \
+        -f build/maven/pom-runtime.xml \
+        -DoutputDirectory=$PWD/build/_maven_output \
+        -Druntime.version=$1 \
+        dependency:copy-dependencies
+elif [ "$strategy" = "download" ]; then
+    ./mvnw \
+        -f build/maven/pom-runtime.xml \
+        -Dmaven.repo.local=$PWD/build/_maven_output \
+        -Druntime.version=$1 \
+        install
+else
+    echo "unknown strategy: $strategy"
+    exit 1
+fi
+
