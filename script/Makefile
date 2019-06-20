@@ -30,6 +30,10 @@ GPG_PASS := $(GPG_PASS)
 # Used to push pre-relase artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
+# When packaging artifacts into the docker image, you can "copy" them from local maven
+# or "download" them from Apache Snapshots and Maven Central
+PACKAGE_ARTIFACTS_STRATEGY := copy
+
 GOLDFLAGS += -X main.GitCommit=$(GIT_COMMIT)
 GOFLAGS = -ldflags "$(GOLDFLAGS)"
 
@@ -118,7 +122,7 @@ build-olm:
 	./script/build_olm.sh $(VERSION)
 
 build-compile-integration-tests:
-	go test -c -tags=integration ./test/*.go
+	go test -c -tags=integration ./e2e/*.go
 
 clean:
 	# go clean fails if modules support are turned on as it tries to 
@@ -184,7 +188,7 @@ package-examples:
 	./script/package_examples.sh $(VERSION)
 
 package-artifacts:
-	./script/package_maven_artifacts.sh $(RUNTIME_VERSION)
+	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY)
 
 unsnapshot-olm:
 	./script/unsnapshot_olm.sh
