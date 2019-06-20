@@ -19,25 +19,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package test
+package e2e
 
 import (
 	"testing"
+	"time"
 
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	. "github.com/onsi/gomega"
 )
 
-func TestInstallation(t *testing.T) {
-	installedCtxCRD, err := install.IsCRDInstalled(testContext, testClient, "IntegrationKit")
-	assert.Nil(t, err)
-	assert.True(t, installedCtxCRD)
+func TestKitJVMFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "jvm")
+}
 
-	installedCRD, err := install.IsCRDInstalled(testContext, testClient, "Integration")
-	assert.Nil(t, err)
-	assert.True(t, installedCRD)
+func TestKitGroovyFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "groovy")
+}
 
-	installedClusterRole, err := install.IsClusterRoleInstalled(testContext, testClient)
-	assert.Nil(t, err)
-	assert.True(t, installedClusterRole)
+func TestKitKotlinFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "kotlin")
+}
+
+func TestKitHealthFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "knative")
+}
+
+func doNamedKitFullBuild(t *testing.T, name string) {
+	withNewTestNamespace(func(ns string) {
+		RegisterTestingT(t)
+		Expect(kamel("install", "-n", ns, "--kit", name).Execute()).Should(BeNil())
+		Eventually(build(ns, name)).ShouldNot(BeNil())
+		Eventually(func() v1alpha1.BuildPhase {
+			return build(ns, name)().Status.Phase
+		}, 5*time.Minute).Should(Equal(v1alpha1.BuildPhaseSucceeded))
+	})
 }

@@ -19,7 +19,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef // indirect
 	github.com/google/go-containerregistry v0.0.0-20190206233756-dbc4da98389f // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
-	github.com/google/uuid v1.1.0 // indirect
+	github.com/google/uuid v1.1.0
 	github.com/googleapis/gnostic v0.2.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
@@ -36,7 +36,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
-	github.com/onsi/gomega v1.5.0 // indirect
+	github.com/onsi/gomega v1.5.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/operator-framework/operator-sdk v0.8.0
 	github.com/pborman/uuid v1.2.0 // indirect
