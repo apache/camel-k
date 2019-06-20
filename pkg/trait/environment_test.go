@@ -31,6 +31,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
@@ -54,6 +55,9 @@ func TestDefaultEnvironment(t *testing.T) {
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+			},
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 			},
@@ -119,6 +123,9 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+			},
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 			},
@@ -184,6 +191,9 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 			},
 		},
 		Platform: &v1alpha1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+			},
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
 			},

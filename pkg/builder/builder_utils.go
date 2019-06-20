@@ -61,7 +61,7 @@ func NewMavenProject(ctx *Context) (maven.Project, error) {
 
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.Properties = ctx.Build.Platform.Build.Properties
-	p.DependencyManagement = maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
+	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)
 
 	//

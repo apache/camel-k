@@ -19,6 +19,35 @@ package v1alpha1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+// NewCamelCatalog --
+func NewCamelCatalog(namespace string, name string) CamelCatalog {
+	return CamelCatalog{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       CamelCatalogKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+	}
+}
+
+// NewCamelCatalogWithSpecs --
+func NewCamelCatalogWithSpecs(namespace string, name string, spec CamelCatalogSpec) CamelCatalog {
+	return CamelCatalog{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       CamelCatalogKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: spec,
+	}
+}
+
 // NewCamelCatalogList --
 func NewCamelCatalogList() CamelCatalogList {
 	return CamelCatalogList{
