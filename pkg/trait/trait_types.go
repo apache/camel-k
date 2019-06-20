@@ -260,6 +260,21 @@ func (e *Environment) DetermineRuntimeVersion() string {
 	return version
 }
 
+// DetermineNamespace --
+func (e *Environment) DetermineNamespace() string {
+	if e.Integration != nil && e.Integration.Namespace != "" {
+		return e.Integration.Namespace
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Namespace != "" {
+		return e.IntegrationKit.Namespace
+	}
+	if e.Platform != nil && e.Platform.Namespace != "" {
+		return e.Platform.Namespace
+	}
+
+	return ""
+}
+
 // ComputeConfigMaps --
 func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	sources := e.Integration.Sources()

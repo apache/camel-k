@@ -212,25 +212,27 @@ func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, erro
 	}
 
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-rest-dsl-generator", defaults.Version)
-	p.Build.DefaultGoal = "generate-resources"
-	p.Build.Plugins = []maven.Plugin{
-		{
-			GroupID:    "org.apache.camel.k",
-			ArtifactID: "camel-k-maven-plugin",
-			Version:    e.RuntimeVersion,
-			Executions: []maven.Execution{
-				{
-					Phase: "generate-resources",
-					Goals: []string{
-						"generate-rest-xml",
+	p.Build = &maven.Build{
+		DefaultGoal: "generate-resources",
+		Plugins: []maven.Plugin{
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-maven-plugin",
+				Version:    e.RuntimeVersion,
+				Executions: []maven.Execution{
+					{
+						Phase: "generate-resources",
+						Goals: []string{
+							"generate-rest-xml",
+						},
 					},
 				},
-			},
-			Dependencies: []maven.Dependency{
-				{
-					GroupID:    "org.apache.camel",
-					ArtifactID: "camel-swagger-rest-dsl-generator",
-					Version:    e.CamelCatalog.Version,
+				Dependencies: []maven.Dependency{
+					{
+						GroupID:    "org.apache.camel",
+						ArtifactID: "camel-swagger-rest-dsl-generator",
+						Version:    e.CamelCatalog.Version,
+					},
 				},
 			},
 		},
