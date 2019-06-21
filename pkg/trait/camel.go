@@ -143,7 +143,8 @@ func (t *camelTrait) GenerateCatalog(e *Environment, version string) (*camel.Run
 	}
 
 	mc := maven.NewContext(tmpDir, project)
-	mc.AddArguments(maven.ExtraOptions(e.Platform.Spec.Build.LocalRepository)...)
+	mc.LocalRepository = e.Platform.Spec.Build.LocalRepository
+	mc.Timeout = e.Platform.Spec.Build.Maven.Timeout.Duration
 	mc.AddSystemProperty("catalog.path", tmpDir)
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
 
@@ -157,7 +158,7 @@ func (t *camelTrait) GenerateCatalog(e *Environment, version string) (*camel.Run
 		return nil, err
 	}
 	if settings != "" {
-		mc.SettingsData = []byte(settings)
+		mc.SettingsContent = []byte(settings)
 	}
 
 	err = maven.Run(mc)

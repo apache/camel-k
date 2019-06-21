@@ -75,7 +75,8 @@ type Configurable interface {
 
 // MavenSpec --
 type MavenSpec struct {
-	Settings ValueSource `json:"settings,omitempty"`
+	Settings ValueSource     `json:"settings,omitempty"`
+	Timeout  metav1.Duration `json:"timeout,omitempty"`
 }
 
 // ValueSource --

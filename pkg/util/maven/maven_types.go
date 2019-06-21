@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"time"
 )
 
 // Repository --
@@ -102,10 +103,11 @@ func NewContext(buildDir string, project Project) Context {
 type Context struct {
 	Path                string
 	Project             Project
-	Settings            *Settings
-	SettingsData        []byte
+	SettingsContent     []byte
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
+	Timeout             time.Duration
+	LocalRepository     string
 }
 
 // AddEntry --
