@@ -35,6 +35,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	KnativeServiceTestNamespace = "ns"
+	KnativeServiceTestName      = "test"
+)
+
 func TestKnativeService(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -46,8 +51,8 @@ func TestKnativeService(t *testing.T) {
 		Catalog:      traitCatalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test",
-				Namespace: "ns",
+				Name:      KnativeServiceTestName,
+				Namespace: KnativeServiceTestNamespace,
 			},
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -117,7 +122,7 @@ func TestKnativeService(t *testing.T) {
 	assert.Equal(t, 4, environment.Resources.Size())
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
-		return service.Name == "test"
+		return service.Name == KnativeServiceTestName
 	})
 
 	assert.NotNil(t, s)

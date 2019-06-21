@@ -83,11 +83,12 @@ func (t *routeTrait) Apply(e *Environment) error {
 func (t *routeTrait) getTargetService(e *Environment) (service *corev1.Service) {
 	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
-			if intName, ok := s.ObjectMeta.Labels["camel.apache.org/integration"]; ok && intName == e.Integration.Name {
-				if s.ObjectMeta.Labels["camel.apache.org/service.type"] == "user" {
-					// We should build a route only on top of the user service (e.g. not if the service contains only prometheus)
-					service = s
-				}
+			if s.ObjectMeta.Labels["camel.apache.org/integration"] == e.Integration.Name &&
+				s.ObjectMeta.Labels["camel.apache.org/service.type"] == ServiceTypeUser {
+
+				// We should build a route only on top of the user service (e.g. not if the service contains
+				// only prometheus)
+				service = s
 			}
 		}
 	})

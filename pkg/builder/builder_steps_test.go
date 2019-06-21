@@ -125,6 +125,8 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		},
 	)
 
+	assert.Nil(t, err)
+
 	ctx := Context{
 		Catalog:   catalog,
 		Client:    c,
@@ -174,6 +176,8 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 			},
 		},
 	)
+
+	assert.Nil(t, err)
 
 	ctx := Context{
 		Catalog:   catalog,

@@ -222,21 +222,19 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 func (t *knativeServiceTrait) getAllowedEnvVars(e *Environment) []corev1.EnvVar {
 	res := make([]corev1.EnvVar, 0, len(e.EnvVars))
 	for _, env := range e.EnvVars {
-		if env.ValueFrom == nil {
-			// Standard env vars are supported
+		switch {
+		case env.ValueFrom == nil:
 			res = append(res, env)
-		} else if env.ValueFrom.FieldRef != nil && env.ValueFrom.FieldRef.FieldPath == "metadata.namespace" {
-			// Namespace is known to the operator
+		case env.ValueFrom.FieldRef != nil && env.ValueFrom.FieldRef.FieldPath == "metadata.namespace":
 			res = append(res, corev1.EnvVar{
 				Name:  env.Name,
 				Value: e.Integration.Namespace,
 			})
-		} else if env.ValueFrom.FieldRef != nil {
+		case env.ValueFrom.FieldRef != nil:
 			t.L.Infof("Environment variable %s uses fieldRef and cannot be set on a Knative service", env.Name)
-		} else if env.ValueFrom.ResourceFieldRef != nil {
+		case env.ValueFrom.ResourceFieldRef != nil:
 			t.L.Infof("Environment variable %s uses resourceFieldRef and cannot be set on a Knative service", env.Name)
-		} else {
-			// Other downward APIs should be supported
+		default:
 			res = append(res, env)
 		}
 	}

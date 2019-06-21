@@ -18,15 +18,15 @@ limitations under the License.
 package maven
 
 import (
-  "testing"
+	"testing"
 
-  "github.com/apache/camel-k/pkg/util"
-  "github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/stretchr/testify/assert"
 )
 
 const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
-  `xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <localRepository>/tmp/artifacts/m2</localRepository>
   <profiles>
     <profile>
@@ -53,34 +53,34 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
 </settings>`
 
 func TestSettingsGeneration(t *testing.T) {
-  settings := NewSettings()
-  settings.LocalRepository = "/tmp/artifacts/m2"
-  settings.Profiles = []Profile{
-    {
-      ID: "my-profile",
-      Activation: Activation{
-        ActiveByDefault: true,
-      },
-      Repositories: []Repository{
-        {
-          ID:  "central",
-          URL: "https://repo.maven.apache.org/maven2",
-          Snapshots: RepositoryPolicy{
-            Enabled: false,
-          },
-          Releases: RepositoryPolicy{
-            Enabled:      true,
-            UpdatePolicy: "never",
-          },
-        },
-      },
-    },
-  }
+	settings := NewSettings()
+	settings.LocalRepository = "/tmp/artifacts/m2"
+	settings.Profiles = []Profile{
+		{
+			ID: "my-profile",
+			Activation: Activation{
+				ActiveByDefault: true,
+			},
+			Repositories: []Repository{
+				{
+					ID:  "central",
+					URL: "https://repo.maven.apache.org/maven2",
+					Snapshots: RepositoryPolicy{
+						Enabled: false,
+					},
+					Releases: RepositoryPolicy{
+						Enabled:      true,
+						UpdatePolicy: "never",
+					},
+				},
+			},
+		},
+	}
 
-  content, err := util.EncodeXML(settings)
+	content, err := util.EncodeXML(settings)
 
-  assert.Nil(t, err)
-  assert.NotNil(t, settings)
+	assert.Nil(t, err)
+	assert.NotNil(t, settings)
 
-  assert.Equal(t, expectedSettings, string(content))
+	assert.Equal(t, expectedSettings, string(content))
 }

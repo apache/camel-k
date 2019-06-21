@@ -36,8 +36,8 @@ import (
 )
 
 const (
-	TestDeployment = "test"
-	TestProperties = "test-properties"
+	TestDeploymentName = "test"
+	TestProperties     = "test-properties"
 )
 
 func TestOpenShiftTraits(t *testing.T) {
@@ -53,7 +53,7 @@ func TestOpenShiftTraits(t *testing.T) {
 		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == TestDeployment
+		return deployment.Name == TestDeploymentName
 	}))
 }
 
@@ -68,13 +68,13 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == TestDeployment
+		return deployment.Name == TestDeploymentName
 	}))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == TestDeployment
+		return svc.Name == TestDeploymentName
 	}))
 	assert.NotNil(t, res.GetRoute(func(svc *routev1.Route) bool {
-		return svc.Name == TestDeployment
+		return svc.Name == TestDeploymentName
 	}))
 }
 
@@ -90,7 +90,7 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 	assert.NotNil(t, env.GetTrait(ID("service")))
 	assert.NotNil(t, env.GetTrait(ID("route")))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == TestDeployment && svc.Spec.Ports[0].TargetPort.StrVal == "http"
+		return svc.Name == TestDeploymentName && svc.Spec.Ports[0].TargetPort.StrVal == "http"
 	}))
 }
 
@@ -122,7 +122,7 @@ func TestKubernetesTraits(t *testing.T) {
 		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == TestDeployment
+		return deployment.Name == TestDeploymentName
 	}))
 }
 
@@ -137,10 +137,10 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 		return cm.Name == TestProperties
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == TestDeployment
+		return deployment.Name == TestDeploymentName
 	}))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == TestDeployment
+		return svc.Name == TestDeploymentName
 	}))
 }
 
@@ -222,7 +222,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	env := Environment{
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      TestDeployment,
+				Name:      TestDeploymentName,
 				Namespace: "ns",
 			},
 			Spec: v1alpha1.IntegrationSpec{
@@ -309,7 +309,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	assert.NotNil(t, m)
 	assert.Equal(t, "/etc/camel/resources/i-resource-001", m.MountPath)
 
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == TestDeployment+"-resource-002" })
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == TestDeploymentName+"-resource-002" })
 	assert.NotNil(t, v)
 	assert.NotNil(t, v.VolumeSource.ConfigMap)
 	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
@@ -320,7 +320,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	assert.NotNil(t, m)
 	assert.Equal(t, "/etc/camel/resources/i-resource-002", m.MountPath)
 
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == TestDeployment+"-resource-003" })
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == TestDeploymentName+"-resource-003" })
 	assert.NotNil(t, v)
 	assert.NotNil(t, v.VolumeSource.ConfigMap)
 	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
@@ -399,7 +399,7 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      TestDeployment,
+				Name:      TestDeploymentName,
 				Namespace: "ns",
 			},
 			Spec: v1alpha1.IntegrationSpec{
