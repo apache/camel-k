@@ -27,7 +27,6 @@ import (
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -59,6 +58,13 @@ func newKnativeServiceTrait() *knativeServiceTrait {
 
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			"explicitly disabled",
+		)
+
 		return false, nil
 	}
 
@@ -66,22 +72,36 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
-	if err != nil {
-		return false, err
-	}
-	if strategy != ControllerStrategyKnativeService {
+	if e.Resources.GetDeploymentForIntegration(e.Integration) != nil {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			"controller strategy: "+ControllerStrategyDeployment,
+		)
+
+		// A controller is already present for the integration
 		return false, nil
 	}
 
-	deployment := e.Resources.GetDeployment(func(d *appsv1.Deployment) bool {
-		if name, ok := d.ObjectMeta.Labels["camel.apache.org/integration"]; ok {
-			return name == e.Integration.Name
-		}
-		return false
-	})
-	if deployment != nil {
-		// A controller is already present for the integration
+	strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
+	if err != nil {
+		e.Integration.Status.SetErrorCondition(
+			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			err,
+		)
+
+		return false, err
+	}
+	if strategy != ControllerStrategyKnativeService {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			"controller strategy: "+string(strategy),
+		)
+
 		return false, nil
 	}
 
@@ -90,6 +110,12 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		if t.MinScale == nil {
 			sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
 			if err != nil {
+				e.Integration.Status.SetErrorCondition(
+					v1alpha1.IntegrationConditionKnativeServiceAvailable,
+					v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+					err,
+				)
+
 				return false, err
 			}
 
@@ -110,11 +136,18 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {
-	svc := t.getServiceFor(e)
+	ksvc := t.getServiceFor(e)
 	maps := e.ComputeConfigMaps()
 
-	e.Resources.Add(svc)
 	e.Resources.AddAll(maps)
+	e.Resources.Add(ksvc)
+
+	e.Integration.Status.SetCondition(
+		v1alpha1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionTrue,
+		v1alpha1.IntegrationConditionKnativeServiceAvailableReason,
+		ksvc.Name,
+	)
 
 	return nil
 }

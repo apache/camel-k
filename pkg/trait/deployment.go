@@ -40,6 +40,13 @@ func newDeploymentTrait() *deploymentTrait {
 
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionDeploymentAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionDeploymentAvailableReason,
+			"explicitly disabled",
+		)
+
 		return false, nil
 	}
 
@@ -51,6 +58,12 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		//
 		strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
 		if err != nil {
+			e.Integration.Status.SetErrorCondition(
+				v1alpha1.IntegrationConditionDeploymentAvailable,
+				v1alpha1.IntegrationConditionDeploymentAvailableReason,
+				err,
+			)
+
 			return false, err
 		}
 
@@ -84,8 +97,18 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 	}
 
 	if e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
-		e.Resources.AddAll(e.ComputeConfigMaps())
-		e.Resources.Add(t.getDeploymentFor(e))
+		maps := e.ComputeConfigMaps()
+		depl := t.getDeploymentFor(e)
+
+		e.Resources.AddAll(maps)
+		e.Resources.Add(depl)
+
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionDeploymentAvailable,
+			corev1.ConditionTrue,
+			v1alpha1.IntegrationConditionDeploymentAvailableReason,
+			depl.Name,
+		)
 	}
 
 	return nil

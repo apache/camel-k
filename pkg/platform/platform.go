@@ -24,11 +24,25 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
+// GetOrLookup --
+func GetOrLookup(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1alpha1.IntegrationPlatform, error) {
+	if name != "" {
+		return Get(ctx, c, namespace, name)
+	}
+
+	return GetCurrentPlatform(ctx, c, namespace)
+}
+
+// Get returns the currently installed platform
+func Get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1alpha1.IntegrationPlatform, error) {
+	return kubernetes.GetIntegrationPlatform(ctx, c, namespace, name)
+}
+
 // GetCurrentPlatform returns the currently installed platform
-func GetCurrentPlatform(ctx context.Context, c client.Client, namespace string) (*v1alpha1.IntegrationPlatform, error) {
+func GetCurrentPlatform(ctx context.Context, c k8sclient.Reader, namespace string) (*v1alpha1.IntegrationPlatform, error) {
 	lst, err := ListPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
@@ -44,7 +58,7 @@ func GetCurrentPlatform(ctx context.Context, c client.Client, namespace string) 
 }
 
 // ListPlatforms returns all platforms installed in a given namespace (only one will be active)
-func ListPlatforms(ctx context.Context, c client.Client, namespace string) (*v1alpha1.IntegrationPlatformList, error) {
+func ListPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1alpha1.IntegrationPlatformList, error) {
 	lst := v1alpha1.NewIntegrationPlatformList()
 	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &lst); err != nil {
 		return nil, err

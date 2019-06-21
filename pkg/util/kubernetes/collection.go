@@ -18,6 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -101,6 +102,17 @@ func (c *Collection) GetDeployment(filter func(*appsv1.Deployment) bool) *appsv1
 	return retValue
 }
 
+// GetDeploymentForIntegration returns a Deployment for the given integration
+func (c *Collection) GetDeploymentForIntegration(integration *v1alpha1.Integration) *appsv1.Deployment {
+	if integration == nil {
+		return nil
+	}
+
+	return c.GetDeployment(func(d *appsv1.Deployment) bool {
+		return d.ObjectMeta.Labels["camel.apache.org/integration"] == integration.Name
+	})
+}
+
 // HasDeployment returns true if a deployment matching the given condition is present
 func (c *Collection) HasDeployment(filter func(*appsv1.Deployment) bool) bool {
 	return c.GetDeployment(filter) != nil
@@ -174,6 +186,18 @@ func (c *Collection) GetService(filter func(*corev1.Service) bool) *corev1.Servi
 	return retValue
 }
 
+// GetUserServiceForIntegration returns a user Service for the given integration
+func (c *Collection) GetUserServiceForIntegration(integration *v1alpha1.Integration) *corev1.Service {
+	if integration == nil {
+		return nil
+	}
+	return c.GetService(func(s *corev1.Service) bool {
+		return s.ObjectMeta.Labels != nil &&
+			s.ObjectMeta.Labels["camel.apache.org/integration"] == integration.Name &&
+			s.ObjectMeta.Labels["camel.apache.org/service.type"] == v1alpha1.ServiceTypeUser
+	})
+}
+
 // GetKnativeService returns a knative Service that matches the given function
 func (c *Collection) GetKnativeService(filter func(*serving.Service) bool) *serving.Service {
 	var retValue *serving.Service
@@ -212,6 +236,19 @@ func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
 			visitor(conv)
 		}
 	})
+}
+
+// GetContainer --
+func (c *Collection) GetContainer(filter func(container *corev1.Container) bool) *corev1.Container {
+	var retValue *corev1.Container
+
+	c.VisitContainer(func(container *corev1.Container) {
+		if filter(container) {
+			retValue = container
+		}
+	})
+
+	return retValue
 }
 
 // VisitContainer executes the visitor function on all Containers inside deployments or other resources

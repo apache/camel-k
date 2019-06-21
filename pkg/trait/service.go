@@ -18,10 +18,11 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -51,6 +52,13 @@ func newServiceTrait() *serviceTrait {
 
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionServiceAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionServiceNotAvailableReason,
+			"explicitly disabled",
+		)
+
 		return false, nil
 	}
 
@@ -61,10 +69,25 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	if t.Auto == nil || *t.Auto {
 		sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
 		if err != nil {
+			e.Integration.Status.SetCondition(
+				v1alpha1.IntegrationConditionServiceAvailable,
+				corev1.ConditionFalse,
+				v1alpha1.IntegrationConditionServiceNotAvailableReason,
+				err.Error(),
+			)
+
 			return false, err
 		}
+
 		meta := metadata.ExtractAll(e.CamelCatalog, sources)
 		if !meta.RequiresHTTPService {
+			e.Integration.Status.SetCondition(
+				v1alpha1.IntegrationConditionServiceAvailable,
+				corev1.ConditionFalse,
+				v1alpha1.IntegrationConditionServiceNotAvailableReason,
+				"no http service required",
+			)
+
 			return false, nil
 		}
 	}
@@ -91,24 +114,34 @@ func (t *serviceTrait) Apply(e *Environment) (err error) {
 	svc.Spec.Ports = append(svc.Spec.Ports, port)
 
 	// Mark the service as a user service
-	svc.Labels["camel.apache.org/service.type"] = ServiceTypeUser
+	svc.Labels["camel.apache.org/service.type"] = v1alpha1.ServiceTypeUser
 
 	// Register a post processor to add a container port to the integration deployment
 	e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-		var container *corev1.Container
-		environment.Resources.VisitContainer(func(c *corev1.Container) {
-			if c.Name == environment.Integration.Name {
-				container = c
-			}
+		container := environment.Resources.GetContainer(func(c *corev1.Container) bool {
+			return c.Name == environment.Integration.Name
 		})
+
 		if container != nil {
 			container.Ports = append(container.Ports, corev1.ContainerPort{
 				Name:          t.ContainerPortName,
 				ContainerPort: int32(t.ContainerPort),
 				Protocol:      corev1.ProtocolTCP,
 			})
+
+			message := fmt.Sprintf("%s(%s/%d) -> %s(%s/%d)",
+				svc.Name, port.Name, port.Port,
+				container.Name, t.ContainerPortName, t.ContainerPort,
+			)
+
+			environment.Integration.Status.SetCondition(
+				v1alpha1.IntegrationConditionServiceAvailable,
+				corev1.ConditionTrue,
+				v1alpha1.IntegrationConditionServiceAvailableReason,
+				message,
+			)
 		} else {
-			return errors.New("Cannot add HTTP container port: no integration container")
+			return fmt.Errorf("cannot add %s container port: no integration container", t.ContainerPortName)
 		}
 		return nil
 	})
