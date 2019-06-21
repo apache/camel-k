@@ -32,7 +32,6 @@
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-maven-plugin</artifactId>
             <version>${runtime.version}</version>
-            <type>maven-plugin</type>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
