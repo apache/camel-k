@@ -902,6 +902,7 @@ func (in *IntegrationStatus) DeepCopy() *IntegrationStatus {
 func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 	*out = *in
 	in.Settings.DeepCopyInto(&out.Settings)
+	out.Timeout = in.Timeout
 	return
 }
 
