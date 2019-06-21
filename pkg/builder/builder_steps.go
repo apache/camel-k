@@ -264,9 +264,9 @@ func sanitizeDependencies(ctx *Context) error {
 
 func computeDependencies(ctx *Context) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
-	mc.Settings = ctx.Maven.Settings
-	mc.SettingsData = ctx.Maven.SettingsData
-	mc.AddArguments(maven.ExtraOptions(ctx.Build.Platform.Build.LocalRepository)...)
+	mc.SettingsContent = ctx.Maven.SettingsData
+	mc.LocalRepository = ctx.Build.Platform.Build.LocalRepository
+	mc.Timeout = ctx.Build.Platform.Build.Maven.Timeout.Duration
 	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Build.RuntimeVersion)
 
 	if err := maven.Run(mc); err != nil {

@@ -115,7 +115,6 @@ type Context struct {
 
 	Maven struct {
 		Project      maven.Project
-		Settings     *maven.Settings
 		SettingsData []byte
 	}
 }

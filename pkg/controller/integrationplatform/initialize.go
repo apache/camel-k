@@ -132,12 +132,20 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 	if target.Spec.Build.PersistentVolumeClaim == "" {
 		target.Spec.Build.PersistentVolumeClaim = target.Name
 	}
+	if target.Spec.Build.Maven.Timeout.Duration == 0 {
+		target.Spec.Build.Maven.Timeout.Duration = 2 * time.Minute
+	}
 
 	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
 	action.L.Infof("RuntimeVersion set to %s", target.Spec.Build.RuntimeVersion)
 	action.L.Infof("BaseImage set to %s", target.Spec.Build.BaseImage)
 	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
 	action.L.Infof("Timeout set to %s", target.Spec.Build.Timeout)
+	action.L.Infof("Maven Timeout set to %s", target.Spec.Build.Maven.Timeout.Duration)
+
+	if target.Spec.Build.Maven.Timeout.Duration != 0 {
+		action.L.Infof("Maven Timeout set to %s", target.Spec.Build.Maven.Timeout.Duration)
+	}
 
 	err = action.client.Update(ctx, target)
 	if err != nil {

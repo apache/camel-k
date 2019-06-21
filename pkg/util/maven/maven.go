@@ -18,9 +18,11 @@ limitations under the License.
 package maven
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"os"
 	"os/exec"
 	"path"
@@ -42,12 +44,8 @@ func GenerateProjectStructure(context Context) error {
 		return err
 	}
 
-	if context.SettingsData != nil {
-		if err := util.WriteFileWithContent(context.Path, "settings.xml", context.SettingsData); err != nil {
-			return err
-		}
-	} else if context.Settings != nil {
-		if err := util.WriteFileWithBytesMarshallerContent(context.Path, "settings.xml", context.Settings); err != nil {
+	if context.SettingsContent != nil {
+		if err := util.WriteFileWithContent(context.Path, "settings.xml", context.SettingsContent); err != nil {
 			return err
 		}
 	}
@@ -81,8 +79,8 @@ func GenerateProjectStructure(context Context) error {
 }
 
 // Run --
-func Run(context Context) error {
-	if err := GenerateProjectStructure(context); err != nil {
+func Run(ctx Context) error {
+	if err := GenerateProjectStructure(ctx); err != nil {
 		return err
 	}
 
@@ -91,9 +89,15 @@ func Run(context Context) error {
 		mvnCmd = c
 	}
 
-	args := append(context.AdditionalArguments, "--batch-mode")
+	args := append(ctx.AdditionalArguments, "--batch-mode")
 
-	settingsPath := path.Join(context.Path, "settings.xml")
+	if ctx.LocalRepository == "" {
+		args = append(ctx.AdditionalArguments, "-Dcamel.noop=true")
+	} else if _, err := os.Stat(ctx.LocalRepository); err == nil {
+		args = append(ctx.AdditionalArguments, "-Dmaven.repo.local="+ctx.LocalRepository)
+	}
+
+	settingsPath := path.Join(ctx.Path, "settings.xml")
 	settingsExists, err := util.FileExists(settingsPath)
 	if err != nil {
 		return err
@@ -103,12 +107,20 @@ func Run(context Context) error {
 		args = append(args, "--settings", settingsPath)
 	}
 
-	cmd := exec.Command(mvnCmd, args...)
-	cmd.Dir = context.Path
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	timeout := ctx.Timeout
+	if timeout == 0 {
+		timeout = math.MaxInt64
+	}
 
-	Log.Infof("execute: %s", strings.Join(cmd.Args, " "))
+	c, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(c, mvnCmd, args...)
+	cmd.Dir = ctx.Path
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	Log.WithValues("timeout", timeout.String()).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
 	return cmd.Run()
 }
@@ -149,12 +161,4 @@ func ParseGAV(gav string) (Dependency, error) {
 	}
 
 	return dep, nil
-}
-
-// ExtraOptions --
-func ExtraOptions(localRepo string) []string {
-	if _, err := os.Stat(localRepo); err == nil {
-		return []string{"-Dmaven.repo.local=" + localRepo}
-	}
-	return []string{"-Dcamel.noop=true"}
 }
