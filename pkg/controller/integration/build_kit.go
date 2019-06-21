@@ -67,22 +67,23 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 				// We need to re-generate a kit or search for a new one that
 				// satisfies integrations needs so let's remove the association
 				// with a kit
-				integration.Status.Kit = ""
+				integration.SetIntegrationKit(&v1alpha1.IntegrationKit{})
+
 				return integration, nil
 			}
 		}
 
 		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
 			integration.Status.Image = kit.ImageForIntegration()
-			integration.Status.Kit = kit.Name
 			integration.Status.Phase = v1alpha1.IntegrationPhaseError
+			integration.SetIntegrationKit(kit)
 
 			return integration, nil
 		}
 
 		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady {
 			integration.Status.Image = kit.ImageForIntegration()
-			integration.Status.Kit = kit.Name
+			integration.SetIntegrationKit(kit)
 
 			if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
 				return nil, err
@@ -92,7 +93,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 		}
 
 		if integration.Status.Kit == "" {
-			integration.Status.Kit = kit.Name
+			integration.SetIntegrationKit(kit)
 
 			return integration, nil
 		}
@@ -100,12 +101,12 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 		return nil, nil
 	}
 
-	platformCtxName := fmt.Sprintf("kit-%s", xid.New())
-	platformCtx := v1alpha1.NewIntegrationKit(integration.Namespace, platformCtxName)
+	platformKitName := fmt.Sprintf("kit-%s", xid.New())
+	platformKit := v1alpha1.NewIntegrationKit(integration.Namespace, platformKitName)
 
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
-	platformCtx.Labels = map[string]string{
+	platformKit.Labels = map[string]string{
 		"camel.apache.org/kit.type":               v1alpha1.IntegrationKitTypePlatform,
 		"camel.apache.org/kit.created.by.kind":    v1alpha1.IntegrationKind,
 		"camel.apache.org/kit.created.by.name":    integration.Name,
@@ -113,19 +114,19 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 	}
 
 	// Set the kit to have the same characteristics as the integrations
-	platformCtx.Spec = v1alpha1.IntegrationKitSpec{
+	platformKit.Spec = v1alpha1.IntegrationKitSpec{
 		Dependencies: integration.Status.Dependencies,
 		Repositories: integration.Spec.Repositories,
 		Traits:       integration.Spec.Traits,
 	}
 
-	if err := action.client.Create(ctx, &platformCtx); err != nil {
+	if err := action.client.Create(ctx, &platformKit); err != nil {
 		return nil, err
 	}
 
 	// Set the kit name so the next handle loop, will fall through the
 	// same path as integration with a user defined kit
-	integration.Status.Kit = platformCtxName
+	integration.SetIntegrationKit(&platformKit)
 
 	return integration, nil
 }

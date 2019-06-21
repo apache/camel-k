@@ -167,7 +167,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	targetLog := rlog.ForBuild(target)
 
 	if target.Status.Phase == v1alpha1.BuildPhaseNone || target.Status.Phase == v1alpha1.BuildPhaseWaitingForPlatform {
-		pl, err := platform.GetCurrentPlatform(ctx, r.client, target.Namespace)
+		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
 		switch {
 		case err != nil:
 			target.Status.Phase = v1alpha1.BuildPhaseError
@@ -179,6 +179,10 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
+			if pl != nil {
+				target.SetIntegrationPlatform(pl)
+			}
+
 			return r.update(ctx, targetLog, target)
 		}
 

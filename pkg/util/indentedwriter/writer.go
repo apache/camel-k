@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -41,12 +42,15 @@ func NewWriter(out io.Writer) *Writer {
 
 // Write --
 func (iw *Writer) Write(indentLevel int, format string, i ...interface{}) {
-	indent := "  "
-	prefix := ""
-	for i := 0; i < indentLevel; i++ {
-		prefix += indent
-	}
-	fmt.Fprintf(iw.out, prefix+format, i...)
+	fmt.Fprint(iw.out, strings.Repeat("  ", indentLevel))
+	fmt.Fprintf(iw.out, format, i...)
+}
+
+// Writeln --
+func (iw *Writer) Writeln(indentLevel int, format string, i ...interface{}) {
+	fmt.Fprint(iw.out, strings.Repeat("  ", indentLevel))
+	fmt.Fprintf(iw.out, format, i...)
+	fmt.Fprint(iw.out, "\n")
 }
 
 // Flush --

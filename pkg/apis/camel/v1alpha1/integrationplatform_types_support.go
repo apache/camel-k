@@ -20,6 +20,7 @@ package v1alpha1
 import (
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -73,4 +74,80 @@ func (in *IntegrationPlatform) Configurations() []ConfigurationSpec {
 	}
 
 	return in.Spec.Configuration
+}
+
+// GetCondition returns the condition with the provided type.
+func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformConditionType) *IntegrationPlatformCondition {
+	for i := range in.Conditions {
+		c := in.Conditions[i]
+		if c.Type == condType {
+			return &c
+		}
+
+	}
+	return nil
+}
+
+// SetCondition --
+func (in *IntegrationPlatformStatus) SetCondition(condType IntegrationPlatformConditionType, status corev1.ConditionStatus, reason string, message string) {
+	in.SetConditions(IntegrationPlatformCondition{
+		Type:               condType,
+		Status:             status,
+		LastUpdateTime:     metav1.Now(),
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Message:            message,
+	})
+}
+
+// SetErrorCondition --
+func (in *IntegrationPlatformStatus) SetErrorCondition(condType IntegrationPlatformConditionType, reason string, err error) {
+	in.SetConditions(IntegrationPlatformCondition{
+		Type:               condType,
+		Status:             corev1.ConditionFalse,
+		LastUpdateTime:     metav1.Now(),
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Message:            err.Error(),
+	})
+}
+
+// SetConditions updates the resource to include the provided conditions.
+//
+// If a condition that we are about to add already exists and has the same status and
+// reason then we are not going to update.
+func (in *IntegrationPlatformStatus) SetConditions(conditions ...IntegrationPlatformCondition) {
+	for _, condition := range conditions {
+		if condition.LastUpdateTime.IsZero() {
+			condition.LastUpdateTime = metav1.Now()
+		}
+		if condition.LastTransitionTime.IsZero() {
+			condition.LastTransitionTime = metav1.Now()
+		}
+
+		currentCond := in.GetCondition(condition.Type)
+
+		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
+			return
+		}
+		// Do not update lastTransitionTime if the status of the condition doesn't change.
+		if currentCond != nil && currentCond.Status == condition.Status {
+			condition.LastTransitionTime = currentCond.LastTransitionTime
+		}
+
+		in.RemoveCondition(condition.Type)
+		in.Conditions = append(in.Conditions, condition)
+	}
+}
+
+// RemoveCondition removes the resource condition with the provided type.
+func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatformConditionType) {
+	newConditions := in.Conditions[:0]
+	for _, c := range in.Conditions {
+		if c.Type != condType {
+			newConditions = append(newConditions, c)
+		}
+	}
+
+	in.Conditions = newConditions
 }

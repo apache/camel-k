@@ -59,6 +59,11 @@ type Configurable interface {
 	Configurations() []ConfigurationSpec
 }
 
+// PlatformInjectable --
+type PlatformInjectable interface {
+	SetIntegrationPlatform(platform *IntegrationPlatform)
+}
+
 // MavenSpec --
 type MavenSpec struct {
 	Settings ValueSource     `json:"settings,omitempty"`
@@ -72,3 +77,8 @@ type ValueSource struct {
 	// Selects a key of a secret.
 	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty" `
 }
+
+const (
+	// ServiceTypeUser --
+	ServiceTypeUser = "user"
+)

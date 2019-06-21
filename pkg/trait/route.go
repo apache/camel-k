@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -49,6 +50,13 @@ func newRouteTrait() *routeTrait {
 
 func (t *routeTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionExposureAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionRouteNotAvailableReason,
+			"explicitly disabled",
+		)
+
 		return false, nil
 	}
 
@@ -56,8 +64,15 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	t.service = t.getTargetService(e)
+	t.service = e.Resources.GetUserServiceForIntegration(e.Integration)
 	if t.service == nil {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionExposureAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionRouteNotAvailableReason,
+			"no target service found",
+		)
+
 		return false, nil
 	}
 
@@ -65,41 +80,14 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *routeTrait) Apply(e *Environment) error {
-	if e.Integration == nil || e.Integration.Status.Phase != v1alpha1.IntegrationPhaseDeploying {
-		return nil
-	}
-
-	e.Resources.Add(t.getRouteFor(t.service))
-	return nil
-}
-
-func (t *routeTrait) getTargetService(e *Environment) *corev1.Service {
-	var service *corev1.Service
-
-	e.Resources.VisitService(func(s *corev1.Service) {
-		if s.ObjectMeta.Labels != nil {
-			if s.ObjectMeta.Labels["camel.apache.org/integration"] == e.Integration.Name &&
-				s.ObjectMeta.Labels["camel.apache.org/service.type"] == ServiceTypeUser {
-
-				// We should build a route only on top of the user service (e.g. not if the service contains
-				// only prometheus)
-				service = s
-			}
-		}
-	})
-
-	return service
-}
-
-func (t *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
 			APIVersion: routev1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      service.Name,
-			Namespace: service.Namespace,
+			Name:      t.service.Name,
+			Namespace: t.service.Namespace,
 		},
 		Spec: routev1.RouteSpec{
 			Port: &routev1.RoutePort{
@@ -107,13 +95,38 @@ func (t *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
 			},
 			To: routev1.RouteTargetReference{
 				Kind: "Service",
-				Name: service.Name,
+				Name: t.service.Name,
 			},
 			Host: t.Host,
 			TLS:  t.getTLSConfig(),
 		},
 	}
-	return &route
+
+	e.Resources.Add(&route)
+
+	var message string
+
+	if t.Host == "" {
+		message = fmt.Sprintf("%s -> %s(%s)",
+			route.Name,
+			route.Spec.To.Name,
+			route.Spec.Port.TargetPort.String())
+	} else {
+		message = fmt.Sprintf("%s(%s) -> %s(%s)",
+			route.Name,
+			t.Host,
+			route.Spec.To.Name,
+			route.Spec.Port.TargetPort.String())
+	}
+
+	e.Integration.Status.SetCondition(
+		v1alpha1.IntegrationConditionExposureAvailable,
+		corev1.ConditionTrue,
+		v1alpha1.IntegrationConditionRouteAvailableReason,
+		message,
+	)
+
+	return nil
 }
 
 func (t *routeTrait) getTLSConfig() *routev1.TLSConfig {

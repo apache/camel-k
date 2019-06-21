@@ -24,11 +24,12 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -78,6 +79,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			oldIntegration := e.ObjectOld.(*v1alpha1.Integration)
 			newIntegration := e.ObjectNew.(*v1alpha1.Integration)
+
+			if oldIntegration.Status.Phase != newIntegration.Status.Phase {
+				Log.ForIntegration(newIntegration).Info(
+					"Phase transition",
+					"old-phase", oldIntegration.Status.Phase,
+					"new-phase", newIntegration.Status.Phase,
+				)
+			}
 			// Ignore updates to the integration status in which case metadata.Generation does not change,
 			// or except when the integration phase changes as it's used to transition from one phase
 			// to another
@@ -226,16 +235,16 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	// Delete phase
-	if instance.GetDeletionTimestamp() != nil {
-		instance.Status.Phase = v1alpha1.IntegrationPhaseDeleting
-	}
-
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
+	// Delete phase
+	if target.GetDeletionTimestamp() != nil {
+		target.Status.Phase = v1alpha1.IntegrationPhaseDeleting
+	}
+
 	if target.Status.Phase == v1alpha1.IntegrationPhaseNone || target.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
-		pl, err := platform.GetCurrentPlatform(ctx, r.client, target.Namespace)
+		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
 		switch {
 		case err != nil:
 			target.Status.Phase = v1alpha1.IntegrationPhaseError
@@ -247,6 +256,10 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
+			if pl != nil {
+				target.SetIntegrationPlatform(pl)
+			}
+
 			return r.update(ctx, targetLog, target)
 		}
 

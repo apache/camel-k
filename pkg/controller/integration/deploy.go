@@ -53,7 +53,8 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 		return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
 	}
 
-	if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
+	_, err = trait.Apply(ctx, action.client, integration, kit)
+	if err != nil {
 		return nil, err
 	}
 

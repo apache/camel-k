@@ -19,12 +19,15 @@ package trait
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+
 	"k8s.io/api/extensions/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ingressTrait struct {
@@ -42,6 +45,12 @@ func newIngressTrait() *ingressTrait {
 
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionExposureAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionIngressNotAvailableReason,
+			"explicitly disabled",
+		)
 		return false, nil
 	}
 
@@ -50,16 +59,30 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.Auto == nil || *t.Auto {
-		hasService := t.getTargetService(e) != nil
+		hasService := e.Resources.GetUserServiceForIntegration(e.Integration) != nil
 		hasHost := t.Host != ""
 		enabled := hasService && hasHost
 
 		if !enabled {
+			e.Integration.Status.SetCondition(
+				v1alpha1.IntegrationConditionExposureAvailable,
+				corev1.ConditionFalse,
+				v1alpha1.IntegrationConditionIngressNotAvailableReason,
+				"no host or service defined",
+			)
+
 			return false, nil
 		}
 	}
 
 	if t.Host == "" {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionExposureAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionIngressNotAvailableReason,
+			"no host defined",
+		)
+
 		return false, errors.New("cannot Apply ingress trait: no host defined")
 	}
 
@@ -67,33 +90,11 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *ingressTrait) Apply(e *Environment) error {
-	if t.Host == "" {
-		return errors.New("cannot Apply ingress trait: no host defined")
-	}
-	service := t.getTargetService(e)
+	service := e.Resources.GetUserServiceForIntegration(e.Integration)
 	if service == nil {
 		return errors.New("cannot Apply ingress trait: no target service")
 	}
 
-	e.Resources.Add(t.getIngressFor(service))
-	return nil
-}
-
-func (t *ingressTrait) getTargetService(e *Environment) (service *corev1.Service) {
-	e.Resources.VisitService(func(s *corev1.Service) {
-		if s.ObjectMeta.Labels != nil {
-			if s.ObjectMeta.Labels["camel.apache.org/integration"] == e.Integration.Name &&
-				s.ObjectMeta.Labels["camel.apache.org/service.type"] == ServiceTypeUser {
-				// We should build an ingress only on top of the user service (e.g. not if the service contains
-				// only prometheus)
-				service = s
-			}
-		}
-	})
-	return
-}
-
-func (t *ingressTrait) getIngressFor(service *corev1.Service) *v1beta1.Ingress {
 	ingress := v1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
@@ -115,5 +116,21 @@ func (t *ingressTrait) getIngressFor(service *corev1.Service) *v1beta1.Ingress {
 			},
 		},
 	}
-	return &ingress
+
+	e.Resources.Add(&ingress)
+
+	message := fmt.Sprintf("%s(%s) -> %s(%s)",
+		ingress.Name,
+		t.Host,
+		ingress.Spec.Backend.ServiceName,
+		ingress.Spec.Backend.ServicePort.String())
+
+	e.Integration.Status.SetCondition(
+		v1alpha1.IntegrationConditionExposureAvailable,
+		corev1.ConditionTrue,
+		v1alpha1.IntegrationConditionIngressAvailableReason,
+		message,
+	)
+
+	return nil
 }

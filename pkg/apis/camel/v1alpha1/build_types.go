@@ -18,6 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -42,16 +43,17 @@ type BuildSpec struct {
 
 // BuildStatus defines the observed state of Build
 type BuildStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	Phase       BuildPhase  `json:"phase,omitempty"`
-	Image       string      `json:"image,omitempty"`
-	BaseImage   string      `json:"baseImage,omitempty"`
-	PublicImage string      `json:"publicImage,omitempty"`
-	Artifacts   []Artifact  `json:"artifacts,omitempty"`
-	Error       string      `json:"error,omitempty"`
-	Failure     *Failure    `json:"failure,omitempty"`
-	StartedAt   metav1.Time `json:"startedAt,omitempty"`
+	Phase       BuildPhase       `json:"phase,omitempty"`
+	Image       string           `json:"image,omitempty"`
+	BaseImage   string           `json:"baseImage,omitempty"`
+	PublicImage string           `json:"publicImage,omitempty"`
+	Artifacts   []Artifact       `json:"artifacts,omitempty"`
+	Error       string           `json:"error,omitempty"`
+	Failure     *Failure         `json:"failure,omitempty"`
+	StartedAt   metav1.Time      `json:"startedAt,omitempty"`
+	Platform    string           `json:"platform,omitempty"`
+	Conditions  []BuildCondition `json:"conditions,omitempty"`
+
 	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
 	// https://github.com/OAI/OpenAPI-Specification/issues/845
 	Duration string `json:"duration,omitempty"`
@@ -59,6 +61,9 @@ type BuildStatus struct {
 
 // BuildPhase --
 type BuildPhase string
+
+// BuildConditionType --
+type BuildConditionType string
 
 const (
 	// BuildKind --
@@ -84,6 +89,11 @@ const (
 	BuildPhaseInterrupted = "Interrupted"
 	// BuildPhaseError --
 	BuildPhaseError BuildPhase = "Error"
+
+	// BuildConditionPlatformAvailable --
+	BuildConditionPlatformAvailable BuildConditionType = "IntegrationPlatformAvailable"
+	// BuildConditionPlatformAvailableReason --
+	BuildConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -105,6 +115,22 @@ type BuildList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Build `json:"items"`
+}
+
+// Condition describes the state of a resource at a certain point.
+type BuildCondition struct {
+	// Type of integration condition.
+	Type BuildConditionType `json:"type"`
+	// Status of the condition, one of True, False, Unknown.
+	Status corev1.ConditionStatus `json:"status"`
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+	// Last time the condition transitioned from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	// The reason for the condition's last transition.
+	Reason string `json:"reason,omitempty"`
+	// A human readable message indicating details about the transition.
+	Message string `json:"message,omitempty"`
 }
 
 func init() {

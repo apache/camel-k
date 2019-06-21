@@ -22,17 +22,18 @@ import (
 	"io"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	impl := &describeIntegrationCommand{
-		rootCmdOptions,
+		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
@@ -52,11 +53,14 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().BoolVar(&impl.showSourceContent, "show-source-content", false, "Print source content")
+
 	return &cmd
 }
 
 type describeIntegrationCommand struct {
 	*RootCmdOptions
+	showSourceContent bool
 }
 
 func (command *describeIntegrationCommand) validate(args []string) error {
@@ -133,10 +137,42 @@ func (command *describeIntegrationCommand) describeIntegration(i v1alpha1.Integr
 
 		if len(i.Sources()) > 0 {
 			w.Write(0, "Sources:\n")
-			for _, s := range i.Sources() {
-				w.Write(1, "Name:\t%s\n", s.Name)
-				w.Write(1, "Content:\n")
-				w.Write(2, "%s\n", strings.TrimSpace(s.Content))
+			if command.showSourceContent {
+				for _, s := range i.Sources() {
+					w.Write(1, "Name:\t%s\n", s.Name)
+					w.Write(1, "Language:\t%s\n", s.InferLanguage())
+					w.Write(1, "Compression:\t%t\n", s.Compression)
+					w.Write(1, "Content:\n")
+
+					if s.ContentRef == "" {
+						w.Write(2, "%s\n", strings.TrimSpace(s.Content))
+					} else {
+						w.Write(2, "Ref:\t%s\n", s.ContentRef)
+						w.Write(2, "Ref Key:\t%s\n", s.ContentKey)
+					}
+				}
+			} else {
+				w.Write(1, "Name\tLanguage\tCompression\tRef\tRef Key\n")
+				for _, s := range i.Sources() {
+					w.Write(1, "%s\t%s\t%t\t%s\t%s\n",
+						s.Name,
+						s.InferLanguage(),
+						s.Compression,
+						s.ContentRef,
+						s.ContentKey)
+				}
+			}
+		}
+
+		if len(i.Status.Conditions) > 0 {
+			w.Write(0, "Conditions:\n")
+			w.Write(1, "Type\tStatus\tReason\tMessage\n")
+			for _, condition := range i.Status.Conditions {
+				w.Write(1, "%s\t%s\t%s\t%s\n",
+					condition.Type,
+					condition.Status,
+					condition.Reason,
+					condition.Message)
 			}
 		}
 
