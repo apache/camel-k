@@ -22,8 +22,9 @@ import (
 	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
+
 	corev1 "k8s.io/api/core/v1"
+	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ResolveSources --
@@ -78,7 +79,12 @@ func Resolve(data *v1alpha1.DataSpec, mapLookup func(string) (*corev1.ConfigMap,
 }
 
 // ResolveIntegrationSources --
-func ResolveIntegrationSources(context context.Context, client client.Client, integration *v1alpha1.Integration, resources *Collection) ([]v1alpha1.SourceSpec, error) {
+func ResolveIntegrationSources(
+	context context.Context,
+	client controller.Reader,
+	integration *v1alpha1.Integration,
+	resources *Collection) ([]v1alpha1.SourceSpec, error) {
+
 	if integration == nil {
 		return nil, nil
 	}
@@ -100,7 +106,12 @@ func ResolveIntegrationSources(context context.Context, client client.Client, in
 
 // ResolveIntegrationResources --
 // nolint: lll
-func ResolveIntegrationResources(context context.Context, client client.Client, integration *v1alpha1.Integration, resources *Collection) ([]v1alpha1.ResourceSpec, error) {
+func ResolveIntegrationResources(
+	context context.Context,
+	client controller.Reader,
+	integration *v1alpha1.Integration,
+	resources *Collection) ([]v1alpha1.ResourceSpec, error) {
+
 	if integration == nil {
 		return nil, nil
 	}

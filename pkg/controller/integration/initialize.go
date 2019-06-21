@@ -50,9 +50,10 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 		return nil, err
 	}
 
+	kit := v1alpha1.NewIntegrationKit(integration.Namespace, integration.Spec.Kit)
+
 	integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
-	integration.Status.Kit = integration.Spec.Kit
-	integration.Status.Image = ""
+	integration.SetIntegrationKit(&kit)
 	integration.Status.Version = defaults.Version
 
 	return integration, nil

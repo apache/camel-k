@@ -20,12 +20,13 @@ package integration
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+
+	"github.com/pkg/errors"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 var allowedLookupLabels = map[string]bool{
@@ -36,17 +37,12 @@ var allowedLookupLabels = map[string]bool{
 // LookupKitForIntegration --
 func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1alpha1.Integration) (*v1alpha1.IntegrationKit, error) {
 	if integration.Status.Kit != "" {
-		name := integration.Status.Kit
-		kit := v1alpha1.NewIntegrationKit(integration.Namespace, name)
-		key := k8sclient.ObjectKey{
-			Namespace: integration.Namespace,
-			Name:      name,
-		}
-		if err := c.Get(ctx, key, &kit); err != nil {
-			return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", name, err)
+		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.Kit, integration.Namespace)
+		if err != nil {
+			return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
 		}
 
-		return &kit, nil
+		return kit, nil
 	}
 
 	ctxList := v1alpha1.NewIntegrationKitList()

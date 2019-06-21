@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,16 +35,18 @@ type IntegrationKitSpec struct {
 
 // IntegrationKitStatus defines the observed state of IntegrationKit
 type IntegrationKitStatus struct {
-	Phase          IntegrationKitPhase `json:"phase,omitempty"`
-	BaseImage      string              `json:"baseImage,omitempty"`
-	Image          string              `json:"image,omitempty"`
-	PublicImage    string              `json:"publicImage,omitempty"`
-	Digest         string              `json:"digest,omitempty"`
-	Artifacts      []Artifact          `json:"artifacts,omitempty"`
-	Failure        *Failure            `json:"failure,omitempty"`
-	CamelVersion   string              `json:"camelVersion,omitempty"`
-	RuntimeVersion string              `json:"runtimeVersion,omitempty"`
-	Version        string              `json:"version,omitempty"`
+	Phase          IntegrationKitPhase       `json:"phase,omitempty"`
+	BaseImage      string                    `json:"baseImage,omitempty"`
+	Image          string                    `json:"image,omitempty"`
+	PublicImage    string                    `json:"publicImage,omitempty"`
+	Digest         string                    `json:"digest,omitempty"`
+	Artifacts      []Artifact                `json:"artifacts,omitempty"`
+	Failure        *Failure                  `json:"failure,omitempty"`
+	CamelVersion   string                    `json:"camelVersion,omitempty"`
+	RuntimeVersion string                    `json:"runtimeVersion,omitempty"`
+	Platform       string                    `json:"platform,omitempty"`
+	Conditions     []IntegrationKitCondition `json:"conditions,omitempty"`
+	Version        string                    `json:"version,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -69,6 +72,9 @@ type IntegrationKitList struct {
 
 // IntegrationKitPhase --
 type IntegrationKitPhase string
+
+// IntegrationKitConditionType --
+type IntegrationKitConditionType string
 
 const (
 	// IntegrationKindKind --
@@ -97,7 +103,28 @@ const (
 	IntegrationKitPhaseReady IntegrationKitPhase = "Ready"
 	// IntegrationKitPhaseError --
 	IntegrationKitPhaseError IntegrationKitPhase = "Error"
+
+	// IntegrationKitConditionPlatformAvailable --
+	IntegrationKitConditionPlatformAvailable IntegrationKitConditionType = "IntegrationPlatformAvailable"
+	// IntegrationKitConditionPlatformAvailableReason --
+	IntegrationKitConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
 )
+
+// Condition describes the state of a resource at a certain point.
+type IntegrationKitCondition struct {
+	// Type of integration condition.
+	Type IntegrationKitConditionType `json:"type"`
+	// Status of the condition, one of True, False, Unknown.
+	Status corev1.ConditionStatus `json:"status"`
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+	// Last time the condition transitioned from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	// The reason for the condition's last transition.
+	Reason string `json:"reason,omitempty"`
+	// A human readable message indicating details about the transition.
+	Message string `json:"message,omitempty"`
+}
 
 func init() {
 	SchemeBuilder.Register(&IntegrationKit{}, &IntegrationKitList{})
