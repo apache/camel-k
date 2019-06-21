@@ -19,6 +19,7 @@ package install
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )

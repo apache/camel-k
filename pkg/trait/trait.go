@@ -30,9 +30,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// True --
-const True = "true"
-
 // Apply --
 func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integration, kit *v1alpha1.IntegrationKit) (*Environment, error) {
 	environment, err := newEnvironment(ctx, c, integration, kit)

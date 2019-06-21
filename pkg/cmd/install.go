@@ -23,21 +23,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/apache/camel-k/pkg/util/maven"
-
-	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/apis"
 	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/watch"
-
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/pkg/util/watch"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -235,7 +233,7 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 					Activation: maven.Activation{
 						ActiveByDefault: true,
 					},
-					Repositories: repositories,
+					Repositories:       repositories,
 					PluginRepositories: repositories,
 				},
 			}
@@ -401,9 +399,7 @@ func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
 
 	for _, hit := range hits {
 		if len(hit) > 1 {
-			for _, match := range hit[1:] {
-				sub = append(sub, match)
-			}
+			sub = append(sub, hit[1:]...)
 		}
 	}
 

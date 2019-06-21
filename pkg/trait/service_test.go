@@ -34,6 +34,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	ServiceTestNamespace = "ns"
+	ServiceTestName      = "test"
+)
+
 func TestServiceWithDefaults(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
@@ -45,7 +50,7 @@ func TestServiceWithDefaults(t *testing.T) {
 		Catalog:      traitCatalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test",
+				Name:      ServiceTestName,
 				Namespace: "ns",
 			},
 			Status: v1alpha1.IntegrationStatus{
@@ -101,10 +106,10 @@ func TestServiceWithDefaults(t *testing.T) {
 	assert.NotNil(t, environment.GetTrait(ID("service")))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
-		return service.Name == "test"
+		return service.Name == ServiceTestName
 	})
 	d := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == "test"
+		return deployment.Name == ServiceTestName
 	})
 
 	assert.NotNil(t, d)
@@ -132,8 +137,8 @@ func TestService(t *testing.T) {
 		Catalog:      traitCatalog,
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test",
-				Namespace: "ns",
+				Name:      ServiceTestName,
+				Namespace: ServiceTestNamespace,
 			},
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -192,10 +197,10 @@ func TestService(t *testing.T) {
 	assert.NotNil(t, environment.GetTrait(ID("service")))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
-		return service.Name == "test"
+		return service.Name == ServiceTestName
 	})
 	d := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == "test"
+		return deployment.Name == ServiceTestName
 	})
 
 	assert.NotNil(t, d)

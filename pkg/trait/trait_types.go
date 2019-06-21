@@ -40,6 +40,12 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
+// True --
+const True = "true"
+
+// ServiceTypeUser --
+const ServiceTypeUser = "user"
+
 // Identifiable represent an identifiable type
 type Identifiable interface {
 	ID() ID

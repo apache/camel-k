@@ -135,7 +135,6 @@ func publisher(ctx *builder.Context) error {
 		},
 	}
 
-
 	var labelKey string
 	var labelValue string
 	if ctx.Namespace == platform.GetOperatorNamespace() {
