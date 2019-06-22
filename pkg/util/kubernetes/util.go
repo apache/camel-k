@@ -119,8 +119,8 @@ func GetSecret(context context.Context, client client.Client, name string, names
 	return &answer, nil
 }
 
-// GetIntegrationContext --
-func GetIntegrationContext(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationKit, error) {
+// GetIntegrationKit --
+func GetIntegrationKit(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationKit, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
