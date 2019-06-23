@@ -151,6 +151,22 @@ func GetIntegration(context context.Context, client client.Client, name string, 
 	return &answer, nil
 }
 
+// GetBuild --
+func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.Build, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	answer := v1alpha1.NewBuild(namespace, name)
+
+	if err := client.Get(context, key, &answer); err != nil {
+		return nil, err
+	}
+
+	return &answer, nil
+}
+
 // GetService --
 func GetService(context context.Context, client client.Client, name string, namespace string) (*corev1.Service, error) {
 	key := k8sclient.ObjectKey{
