@@ -22,17 +22,16 @@ import (
 	"fmt"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/pkg/errors"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/trait"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/pkg/errors"
 )
 
 // NewBuildAction creates a new build request handling action for the kit
@@ -175,11 +174,6 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1
 			return err
 		}
 
-		action.L.Info("Inform integrations about kit state change")
-		if err := action.informIntegrations(ctx, target); err != nil {
-			return err
-		}
-
 	case v1alpha1.BuildPhaseError, v1alpha1.BuildPhaseInterrupted:
 		target := kit.DeepCopy()
 
@@ -202,26 +196,5 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1
 		return action.client.Status().Update(ctx, target)
 	}
 
-	return nil
-}
-
-// informIntegrations triggers the processing of all integrations waiting for this kit to be built
-func (action *buildAction) informIntegrations(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
-	list := v1alpha1.NewIntegrationList()
-	err := action.client.List(ctx, &k8sclient.ListOptions{Namespace: kit.Namespace}, &list)
-	if err != nil {
-		return err
-	}
-	for _, integration := range list.Items {
-		integration := integration // pin
-		if integration.Status.Kit != kit.Name {
-			continue
-		}
-		integration.Status.Phase = v1alpha1.IntegrationPhaseResolvingKit
-		err = action.client.Status().Update(ctx, &integration)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
