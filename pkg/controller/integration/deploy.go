@@ -24,7 +24,6 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewDeployAction create an action that handles integration deploy
@@ -45,21 +44,16 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 }
 
 func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
-	kitName := integration.Status.Kit
-	if kitName == "" {
+	if integration.Status.Kit == "" {
 		return errors.Errorf("no kit set on integration %s", integration.Name)
 	}
-	kit := v1alpha1.NewIntegrationKit(integration.Namespace, kitName)
-	kitKey := k8sclient.ObjectKey{
-		Namespace: integration.Namespace,
-		Name:      kitName,
+
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.Kit, integration.Namespace)
+	if err != nil {
+		return errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
 	}
 
-	if err := action.client.Get(ctx, kitKey, &kit); err != nil {
-		return errors.Wrapf(err, "unable to find integration kit %s, %s", kitName, err)
-	}
-
-	env, err := trait.Apply(ctx, action.client, integration, &kit)
+	env, err := trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {
 		return err
 	}

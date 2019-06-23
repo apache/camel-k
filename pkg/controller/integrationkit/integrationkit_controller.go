@@ -125,9 +125,10 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 
 	ctx := context.TODO()
 
+	var instance v1alpha1.IntegrationKit
+
 	// Fetch the IntegrationKit instance
-	instance := &v1alpha1.IntegrationKit{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
+	err := r.client.Get(ctx, request.NamespacedName, &instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -145,13 +146,13 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 		NewMonitorAction(),
 	}
 
-	ilog := rlog.ForIntegrationKit(instance)
+	ilog := rlog.ForIntegrationKit(&instance)
 	for _, a := range actionPool {
 		a.InjectClient(r.client)
 		a.InjectLogger(ilog)
-		if a.CanHandle(instance) {
+		if a.CanHandle(&instance) {
 			ilog.Infof("Invoking action %s", a.Name())
-			if err := a.Handle(ctx, instance); err != nil {
+			if err := a.Handle(ctx, &instance); err != nil {
 				if k8serrors.IsConflict(err) {
 					ilog.Error(err, "conflict")
 					return reconcile.Result{
