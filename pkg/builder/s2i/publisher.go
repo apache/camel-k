@@ -179,6 +179,7 @@ func publisher(ctx *builder.Context) error {
 	return nil
 }
 
+//nolint: unparam
 func replaceHost(ctx *builder.Context) error {
 	ctx.PublicImage = getImageWithOpenShiftHost(ctx.Image)
 	return nil
