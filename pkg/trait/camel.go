@@ -31,8 +31,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/pkg/errors"
 
-	"gopkg.in/yaml.v2"
-
+	yaml2 "gopkg.in/yaml.v2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -95,7 +94,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 				cx.Labels["app"] = "camel-k"
 				cx.Labels["camel.apache.org/catalog.version"] = cv
 				cx.Labels["camel.apache.org/catalog.loader.version"] = cv
-				cx.Labels["camel.apache.org/catalog.generated"] = "true"
+				cx.Labels["camel.apache.org/catalog.generated"] = True
 
 				err = e.Client.Create(e.C, &cx)
 				if err != nil && !k8serrors.IsAlreadyExists(err) {
@@ -171,7 +170,7 @@ func (t *camelTrait) GenerateCatalog(e *Environment, version string) (*camel.Run
 	}
 
 	catalog := v1alpha1.CamelCatalog{}
-	if err := yaml.Unmarshal(content, &catalog); err != nil {
+	if err := yaml2.Unmarshal(content, &catalog); err != nil {
 		return nil, err
 	}
 
