@@ -21,10 +21,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -64,8 +64,7 @@ func (action *buildAction) Handle(ctx context.Context, kit *v1alpha1.Integration
 }
 
 func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
-	build := &v1alpha1.Build{}
-	err := action.client.Get(ctx, types.NamespacedName{Namespace: kit.Namespace, Name: kit.Name}, build)
+	build, err := kubernetes.GetBuild(ctx, action.client, kit.Name, kit.Namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
@@ -133,8 +132,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alph
 }
 
 func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
-	build := &v1alpha1.Build{}
-	err := action.client.Get(ctx, types.NamespacedName{Namespace: kit.Namespace, Name: kit.Name}, build)
+	build, err := kubernetes.GetBuild(ctx, action.client, kit.Name, kit.Namespace)
 	if err != nil {
 		return err
 	}
