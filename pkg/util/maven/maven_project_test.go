@@ -187,6 +187,8 @@ func TestNewRepository(t *testing.T) {
 	assert.Equal(t, "http://nexus/public", r.URL)
 	assert.True(t, r.Releases.Enabled)
 	assert.False(t, r.Snapshots.Enabled)
+	assert.Equal(t, "fail", r.Releases.ChecksumPolicy)
+	assert.Equal(t, "fail", r.Snapshots.ChecksumPolicy)
 }
 
 func TestNewRepositoryWithSnapshots(t *testing.T) {
@@ -195,6 +197,8 @@ func TestNewRepositoryWithSnapshots(t *testing.T) {
 	assert.Equal(t, "http://nexus/public", r.URL)
 	assert.True(t, r.Releases.Enabled)
 	assert.True(t, r.Snapshots.Enabled)
+	assert.Equal(t, "fail", r.Releases.ChecksumPolicy)
+	assert.Equal(t, "fail", r.Snapshots.ChecksumPolicy)
 }
 
 func TestNewRepositoryWithSnapshotsAndID(t *testing.T) {
@@ -203,6 +207,8 @@ func TestNewRepositoryWithSnapshotsAndID(t *testing.T) {
 	assert.Equal(t, "http://nexus/public", r.URL)
 	assert.True(t, r.Releases.Enabled)
 	assert.True(t, r.Snapshots.Enabled)
+	assert.Equal(t, "fail", r.Releases.ChecksumPolicy)
+	assert.Equal(t, "fail", r.Snapshots.ChecksumPolicy)
 }
 
 func TestNewRepositoryWithID(t *testing.T) {
@@ -211,4 +217,16 @@ func TestNewRepositoryWithID(t *testing.T) {
 	assert.Equal(t, "http://nexus/public", r.URL)
 	assert.True(t, r.Releases.Enabled)
 	assert.False(t, r.Snapshots.Enabled)
+	assert.Equal(t, "fail", r.Releases.ChecksumPolicy)
+	assert.Equal(t, "fail", r.Snapshots.ChecksumPolicy)
+}
+
+func TestNewRepositoryWithChecksumPolicy(t *testing.T) {
+	r := NewRepository("http://nexus/public@checksumpolicy=warn")
+	assert.Equal(t, "", r.ID)
+	assert.Equal(t, "http://nexus/public", r.URL)
+	assert.True(t, r.Releases.Enabled)
+	assert.False(t, r.Snapshots.Enabled)
+	assert.Equal(t, "warn", r.Releases.ChecksumPolicy)
+	assert.Equal(t, "warn", r.Snapshots.ChecksumPolicy)
 }

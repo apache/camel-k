@@ -40,10 +40,12 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
           <url>https://repo.maven.apache.org/maven2</url>
           <snapshots>
             <enabled>false</enabled>
+            <checksumPolicy>warn</checksumPolicy>
           </snapshots>
           <releases>
             <enabled>true</enabled>
             <updatePolicy>never</updatePolicy>
+            <checksumPolicy>fail</checksumPolicy>
           </releases>
         </repository>
       </repositories>
@@ -66,11 +68,13 @@ func TestSettingsGeneration(t *testing.T) {
 					ID:  "central",
 					URL: "https://repo.maven.apache.org/maven2",
 					Snapshots: RepositoryPolicy{
-						Enabled: false,
+						Enabled:        false,
+						ChecksumPolicy: "warn",
 					},
 					Releases: RepositoryPolicy{
-						Enabled:      true,
-						UpdatePolicy: "never",
+						Enabled:        true,
+						UpdatePolicy:   "never",
+						ChecksumPolicy: "fail",
 					},
 				},
 			},
