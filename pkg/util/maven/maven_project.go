@@ -166,10 +166,12 @@ func NewRepository(repo string) Repository {
 	r := Repository{
 		URL: repo,
 		Releases: RepositoryPolicy{
-			Enabled: true,
+			Enabled:        true,
+			ChecksumPolicy: "fail",
 		},
 		Snapshots: RepositoryPolicy{
-			Enabled: false,
+			Enabled:        false,
+			ChecksumPolicy: "fail",
 		},
 	}
 
@@ -184,6 +186,9 @@ func NewRepository(repo string) Repository {
 				r.Releases.Enabled = false
 			case strings.HasPrefix(attribute, "id="):
 				r.ID = attribute[3:]
+			case strings.HasPrefix(attribute, "checksumpolicy="):
+				r.Snapshots.ChecksumPolicy = attribute[15:]
+				r.Releases.ChecksumPolicy = attribute[15:]
 			}
 		}
 	}
