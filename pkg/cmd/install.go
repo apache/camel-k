@@ -212,58 +212,62 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			platform.Spec.Build.Timeout.Duration = d
 		}
 
-		if len(o.mavenRepositories) > 0 {
-			o.mavenSettings = fmt.Sprintf("configmap:%s-maven-settings/settings.xml", platform.Name)
+		o.mavenSettings = fmt.Sprintf("configmap:%s-maven-settings/settings.xml", platform.Name)
 
-			settings := maven.NewSettings()
-			repositories := make([]maven.Repository, 0, len(o.mavenRepositories))
+		settings := maven.NewSettings()
+		repositories := make([]maven.Repository, 0, len(o.mavenRepositories))
 
-			for i, r := range o.mavenRepositories {
-				repository := maven.NewRepository(r)
-				if repository.ID == "" {
-					repository.ID = fmt.Sprintf("repository-%03d", i)
-				}
-
-				repositories = append(repositories, repository)
+		for i, r := range o.mavenRepositories {
+			repository := maven.NewRepository(r)
+			if repository.ID == "" {
+				repository.ID = fmt.Sprintf("repository-%03d", i)
 			}
 
-			settings.Profiles = []maven.Profile{
-				{
-					ID: "maven-settings",
-					Activation: maven.Activation{
-						ActiveByDefault: true,
-					},
-					Repositories:       repositories,
-					PluginRepositories: repositories,
+			repositories = append(repositories, repository)
+		}
+
+		// Enables strict checksums for Maven central if not already configured
+		if !containsMvnCentral(repositories) {
+			repository := maven.NewRepository("https://repo.maven.apache.org/maven2@id=central")
+			repositories = append([]maven.Repository{repository}, repositories...)
+		}
+
+		settings.Profiles = []maven.Profile{
+			{
+				ID: "maven-settings",
+				Activation: maven.Activation{
+					ActiveByDefault: true,
 				},
-			}
+				Repositories:       repositories,
+				PluginRepositories: repositories,
+			},
+		}
 
-			data, err := util.EncodeXML(settings)
-			if err != nil {
-				return err
-			}
+		data, err := util.EncodeXML(settings)
+		if err != nil {
+			return err
+		}
 
-			cm := corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
+		cm := corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      platform.Name + "-maven-settings",
+				Namespace: namespace,
+				Labels: map[string]string{
+					"app": "camel-k",
 				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      platform.Name + "-maven-settings",
-					Namespace: namespace,
-					Labels: map[string]string{
-						"app": "camel-k",
-					},
-				},
-				Data: map[string]string{
-					"settings.xml": string(data),
-				},
-			}
+			},
+			Data: map[string]string{
+				"settings.xml": string(data),
+			},
+		}
 
-			err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, &cm)
-			if err != nil {
-				return err
-			}
+		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, &cm)
+		if err != nil {
+			return err
 		}
 
 		if o.mavenSettings != "" {
@@ -433,4 +437,13 @@ func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
 	}
 
 	return v1alpha1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
+}
+
+func containsMvnCentral(repositories []maven.Repository) bool {
+	for _, r := range repositories {
+		if r.ID == "central" {
+			return true
+		}
+	}
+	return false
 }

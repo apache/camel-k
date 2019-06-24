@@ -35,8 +35,9 @@ type Repository struct {
 
 // RepositoryPolicy --
 type RepositoryPolicy struct {
-	Enabled      bool   `xml:"enabled"`
-	UpdatePolicy string `xml:"updatePolicy,omitempty"`
+	Enabled        bool   `xml:"enabled"`
+	UpdatePolicy   string `xml:"updatePolicy,omitempty"`
+	ChecksumPolicy string `xml:"checksumPolicy,omitempty"`
 }
 
 // Build --
