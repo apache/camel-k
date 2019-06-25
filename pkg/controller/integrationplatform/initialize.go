@@ -126,14 +126,35 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 	if target.Spec.Build.LocalRepository == "" {
 		target.Spec.Build.LocalRepository = defaults.LocalRepository
 	}
-	if target.Spec.Build.Timeout.Duration == 0 {
-		target.Spec.Build.Timeout.Duration = 5 * time.Minute
-	}
 	if target.Spec.Build.PersistentVolumeClaim == "" {
 		target.Spec.Build.PersistentVolumeClaim = target.Name
 	}
+
+	if target.Spec.Build.Timeout.Duration != 0 {
+		d := target.Spec.Build.Timeout.Duration.Truncate(time.Second)
+
+		if target.Spec.Build.Timeout.Duration != d {
+			action.L.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", target.Spec.Build.Timeout.Duration, d)
+		}
+
+		target.Spec.Build.Timeout.Duration = d
+	}
+	if target.Spec.Build.Timeout.Duration == 0 {
+		target.Spec.Build.Timeout.Duration = 5 * time.Minute
+	}
+
+	if target.Spec.Build.Maven.Timeout.Duration != 0 {
+		d := target.Spec.Build.Maven.Timeout.Duration.Truncate(time.Second)
+
+		if target.Spec.Build.Maven.Timeout.Duration != d {
+			action.L.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", target.Spec.Build.Maven.Timeout.Duration, d)
+		}
+
+		target.Spec.Build.Maven.Timeout.Duration = d
+	}
 	if target.Spec.Build.Maven.Timeout.Duration == 0 {
-		target.Spec.Build.Maven.Timeout.Duration = 2 * time.Minute
+		n := target.Spec.Build.Timeout.Duration.Seconds() * 0.75
+		target.Spec.Build.Maven.Timeout.Duration = (time.Duration(n) * time.Second).Truncate(time.Second)
 	}
 
 	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
