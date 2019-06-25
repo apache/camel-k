@@ -55,7 +55,7 @@ func init() {
 	}
 
 	// Defaults for testing
-	gomega.SetDefaultEventuallyTimeout(10 * time.Second)
+	gomega.SetDefaultEventuallyTimeout(60 * time.Second)
 }
 
 func newTestClient() (client.Client, error) {
