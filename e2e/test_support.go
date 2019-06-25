@@ -210,7 +210,7 @@ func operatorPod(ns string) func() *v1.Pod {
 		}
 		opts := k8sclient.ListOptions{
 			LabelSelector: labels.SelectorFromSet(labels.Set{
-				"camel.apache.org/component": "operatorPod",
+				"camel.apache.org/component": "operator",
 			}),
 			Namespace: ns,
 		}
