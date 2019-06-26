@@ -40,7 +40,7 @@ sudo chmod 755 /usr/local/bin/oc
 IP_ADDR="$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)"
 
 # Start OpenShift
-oc cluster up --public-hostname=$IP_ADDR
+oc cluster up --public-hostname=$IP_ADDR --enable=-sample-templates,-web-console
 
 oc login -u system:admin
 
