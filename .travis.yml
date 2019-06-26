@@ -23,6 +23,8 @@ language: go
 go:
   - "1.11.4"
 
+install: true
+
 env:
   global:
     - GO111MODULE="on"
@@ -33,5 +35,9 @@ env:
 services:
   - docker
 
+before_script:
+  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b . v1.17.1
+
 script:
+  - ./golangci-lint run || travis_terminate 1;
   - ./script/travis_build.sh
