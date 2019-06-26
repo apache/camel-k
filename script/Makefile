@@ -101,7 +101,7 @@ test: build
 	go test ./...
 
 test-integration: build
-	go test ./... -tags=integration
+	go test -v ./... -tags=integration
 
 build-operator:
 	go build $(GOFLAGS) -o camel-k ./cmd/manager/*.go
