@@ -55,7 +55,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	}
 
 	// The integration platform needs to be ready before starting to create integrations
-	if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
+	if pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
 		action.L.Info("Waiting for the integration platform to be initialized")
 
 		if integration.Status.Phase != v1alpha1.IntegrationPhaseWaitingForPlatform {

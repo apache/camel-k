@@ -89,20 +89,19 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 	}
 
 	reader := bufio.NewReader(byteReader)
-	err = nil
-	for err == nil {
-		str, err := reader.ReadString('\n')
+	for {
+		data, err := reader.ReadBytes('\n')
+		if err == io.EOF {
+			return
+		}
 		if err != nil {
 			break
 		}
-		_, err = out.WriteString(str)
+		_, err = out.Write(data)
 		if err != nil {
 			break
 		}
 		out.Flush()
-	}
-	if err == io.EOF {
-		return
 	}
 
 	s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
