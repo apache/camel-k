@@ -34,4 +34,4 @@ services:
   - docker
 
 script:
-  - ./script/travis_build.sh
+  - travis_wait 30 ./script/travis_build.sh
