@@ -66,6 +66,9 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 		if ctx.Status.RuntimeVersion != integration.Status.RuntimeVersion {
 			continue
 		}
+		if ctx.Status.Version != integration.Status.Version {
+			continue
+		}
 
 		if allowed, ok := allowedLookupLabels[ctx.Labels["camel.apache.org/kit.type"]]; ok && allowed {
 			ideps := len(integration.Status.Dependencies)

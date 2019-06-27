@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
 )
 
@@ -52,6 +53,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 
 		integration.Status.Digest = hash
 		integration.Status.Phase = v1alpha1.IntegrationPhaseInitialization
+		integration.Status.Version = defaults.Version
 
 		return integration, nil
 	}

@@ -58,8 +58,12 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 			// out of sync if the integration that has generated it, has been
 			// amended to add/remove dependencies
 
+			versionMatch := kit.Status.Version == integration.Status.Version
+
 			//TODO: this is a very simple check, we may need to provide a deps comparison strategy
-			if !util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
+			dependenciesMatch := util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies)
+
+			if !dependenciesMatch || !versionMatch {
 				// We need to re-generate a kit or search for a new one that
 				// satisfies integrations needs so let's remove the association
 				// with a kit

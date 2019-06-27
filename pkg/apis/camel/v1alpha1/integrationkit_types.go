@@ -43,6 +43,7 @@ type IntegrationKitStatus struct {
 	Failure        *Failure            `json:"failure,omitempty"`
 	CamelVersion   string              `json:"camelVersion,omitempty"`
 	RuntimeVersion string              `json:"runtimeVersion,omitempty"`
+	Version        string              `json:"version,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

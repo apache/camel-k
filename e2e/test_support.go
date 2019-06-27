@@ -23,6 +23,8 @@ package e2e
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -35,6 +37,7 @@ import (
 	projectv1 "github.com/openshift/api/project/v1"
 	"github.com/spf13/cobra"
 	"io/ioutil"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -121,6 +124,16 @@ func integrationPodPhase(ns string, name string) func() v1.PodPhase {
 	}
 }
 
+func integrationPodImage(ns string, name string) func() string {
+	return func() string {
+		pod := integrationPod(ns, name)()
+		if pod == nil || len(pod.Spec.Containers) == 0 {
+			return ""
+		}
+		return pod.Spec.Containers[0].Image
+	}
+}
+
 func integrationPod(ns string, name string) func() *v1.Pod {
 	return func() *v1.Pod {
 		lst := v1.PodList{
@@ -143,6 +156,86 @@ func integrationPod(ns string, name string) func() *v1.Pod {
 		}
 		return &lst.Items[0]
 	}
+}
+
+func integration(ns string, name string) func() *v1alpha1.Integration {
+	return func() *v1alpha1.Integration {
+		it := v1alpha1.NewIntegration(ns, name)
+		key := k8sclient.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		if err := testClient.Get(testContext, key, &it); err != nil && !k8serrors.IsNotFound(err) {
+			panic(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return &it
+	}
+}
+
+func integrationVersion(ns string, name string) func() string {
+	return func() string {
+		it := integration(ns, name)()
+		if it == nil {
+			return ""
+		}
+		return it.Status.Version
+	}
+}
+
+func setIntegrationVersion(ns string, name string, version string) error {
+	it := integration(ns, name)()
+	if it == nil {
+		return fmt.Errorf("no integration named %s found", name)
+	}
+	it.Status.Version = version
+	return testClient.Status().Update(testContext, it)
+}
+
+func setIntegrationPhase(ns string, name string, phase v1alpha1.IntegrationPhase) error {
+	it := integration(ns, name)()
+	if it == nil {
+		return fmt.Errorf("no integration named %s found", name)
+	}
+	it.Status.Phase = phase
+	return testClient.Status().Update(testContext, it)
+}
+
+func kits(ns string) func() []v1alpha1.IntegrationKit {
+	return func() []v1alpha1.IntegrationKit {
+		lst := v1alpha1.NewIntegrationKitList()
+		opts := k8sclient.ListOptions{
+			Namespace: ns,
+		}
+		if err := testClient.List(testContext, &opts, &lst); err != nil {
+			panic(err)
+		}
+		return lst.Items
+	}
+}
+
+func kitsWithVersion(ns string, version string) func() int {
+	return func() int {
+		count := 0
+		for _, k := range kits(ns)() {
+			if k.Status.Version == version {
+				count++
+			}
+		}
+		return count
+	}
+}
+
+func setAllKitsVersion(ns string, version string) error {
+	for _, k := range kits(ns)() {
+		kit := k
+		kit.Status.Version = version
+		if err := testClient.Status().Update(testContext, &kit); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func operatorImage(ns string) func() string {
@@ -200,6 +293,44 @@ func build(ns string, name string) func() *v1alpha1.Build {
 	}
 }
 
+func platform(ns string) func() *v1alpha1.IntegrationPlatform {
+	return func() *v1alpha1.IntegrationPlatform {
+		lst := v1alpha1.NewIntegrationPlatformList()
+		opts := k8sclient.ListOptions{
+			Namespace: ns,
+		}
+		if err := testClient.List(testContext, &opts, &lst); err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		if len(lst.Items) > 1 {
+			panic("multiple integration platforms found in namespace " + ns)
+		}
+		return &lst.Items[0]
+	}
+}
+
+func setPlatformVersion(ns string, version string) error {
+	p := platform(ns)()
+	if p == nil {
+		return errors.New("no platform found")
+	}
+	p.Status.Version = version
+	return testClient.Status().Update(testContext, p)
+}
+
+func platformVersion(ns string) func() string {
+	return func() string {
+		p := platform(ns)()
+		if p == nil {
+			return ""
+		}
+		return p.Status.Version
+	}
+}
+
 func operatorPod(ns string) func() *v1.Pod {
 	return func() *v1.Pod {
 		lst := v1.PodList{
@@ -222,6 +353,55 @@ func operatorPod(ns string) func() *v1.Pod {
 		}
 		return &lst.Items[0]
 	}
+}
+
+func operatorTryPodForceKill(ns string) {
+	pod := operatorPod(ns)()
+	if pod != nil {
+		opts := func(options *k8sclient.DeleteOptions) {
+			zero := int64(0)
+			options.GracePeriodSeconds = &zero
+		}
+		if err := testClient.Delete(testContext, pod, opts); err != nil {
+			log.Error(err, "cannot forcefully kill the pod")
+		}
+	}
+}
+
+func scaleOperator(ns string, replicas int32) error {
+	lst := appsv1.DeploymentList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Deployment",
+			APIVersion: appsv1.SchemeGroupVersion.String(),
+		},
+	}
+	opts := k8sclient.ListOptions{
+		LabelSelector: labels.SelectorFromSet(labels.Set{
+			"camel.apache.org/component": "operator",
+		}),
+		Namespace: ns,
+	}
+	if err := testClient.List(testContext, &opts, &lst); err != nil {
+		return err
+	}
+	if len(lst.Items) == 0 {
+		return errors.New("camel k operator not found")
+	} else if len(lst.Items) > 1 {
+		return errors.New("too many camel k operators")
+	}
+
+	operatorDeployment := lst.Items[0]
+	operatorDeployment.Spec.Replicas = &replicas
+	err := testClient.Update(testContext, &operatorDeployment)
+	if err != nil {
+		return err
+	}
+
+	if replicas == 0 {
+		// speedup scale down by killing the pod
+		operatorTryPodForceKill(ns)
+	}
+	return nil
 }
 
 /*
