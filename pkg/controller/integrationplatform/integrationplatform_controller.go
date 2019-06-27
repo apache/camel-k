@@ -129,6 +129,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		NewInitializeAction(),
 		NewWarmAction(),
 		NewCreateAction(),
+		NewMonitorAction(),
 	}
 
 	var targetPhase camelv1alpha1.IntegrationPlatformPhase

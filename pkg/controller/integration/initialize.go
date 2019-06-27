@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // NewInitializeAction creates a new initialize action
@@ -52,6 +53,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
 	integration.Status.Kit = integration.Spec.Kit
 	integration.Status.Image = ""
+	integration.Status.Version = defaults.Version
 
 	return integration, nil
 }

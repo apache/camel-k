@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // NewInitializeAction creates a new initialization handling action for the kit
@@ -58,6 +59,7 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.Integr
 		// and set the image to be used
 		kit.Status.Image = kit.Spec.Image
 	}
+	kit.Status.Version = defaults.Version
 
 	return kit, nil
 }
