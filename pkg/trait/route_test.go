@@ -21,6 +21,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/rs/xid"
+
 	"github.com/scylladb/go-set/strset"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -34,7 +36,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func createTestRouteEnvironment(t *testing.T) *Environment {
+func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -43,7 +45,7 @@ func createTestRouteEnvironment(t *testing.T) *Environment {
 		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-i",
+				Name:      name,
 				Namespace: "test-ns",
 			},
 			Status: v1alpha1.IntegrationStatus{
@@ -68,31 +70,34 @@ func createTestRouteEnvironment(t *testing.T) *Environment {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Classpath:      strset.New(),
-		Resources: kubernetes.NewCollection(&corev1.Service{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Service",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-i",
-				Namespace: "test-ns",
-				Labels: map[string]string{
-					"camel.apache.org/integration":  "test-i",
-					"camel.apache.org/service.type": ServiceTypeUser,
+		Resources: kubernetes.NewCollection(
+			&corev1.Service{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "Service",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      name,
+					Namespace: "test-ns",
+					Labels: map[string]string{
+						"camel.apache.org/integration":  name,
+						"camel.apache.org/service.type": ServiceTypeUser,
+					},
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{},
+					Selector: map[string]string{
+						"camel.apache.org/integration": name,
+					},
 				},
 			},
-			Spec: corev1.ServiceSpec{
-				Ports: []corev1.ServicePort{},
-				Selector: map[string]string{
-					"camel.apache.org/integration": "test-i",
-				},
-			},
-		}),
+		),
 	}
 }
 
 func TestRoute_Default(t *testing.T) {
-	environment := createTestRouteEnvironment(t)
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
 	err := traitsCatalog.apply(environment)
@@ -102,15 +107,41 @@ func TestRoute_Default(t *testing.T) {
 	assert.NotNil(t, environment.GetTrait(ID("route")))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
-		return r.ObjectMeta.Name == "test-i"
+		return r.ObjectMeta.Name == name
 	})
 
 	assert.NotNil(t, route)
 	assert.Nil(t, route.Spec.TLS)
 }
 
+func TestRoute_Disabled(t *testing.T) {
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	environment.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+		"route": {
+			Configuration: map[string]string{
+				"enabled": "false",
+			},
+		},
+	}
+
+	traitsCatalog := environment.Catalog
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.Nil(t, environment.GetTrait(ID("route")))
+
+	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
+		return r.ObjectMeta.Name == name
+	})
+
+	assert.Nil(t, route)
+}
+
 func TestRoute_TLS(t *testing.T) {
-	environment := createTestRouteEnvironment(t)
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
@@ -128,7 +159,7 @@ func TestRoute_TLS(t *testing.T) {
 	assert.NotNil(t, environment.GetTrait(ID("route")))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
-		return r.ObjectMeta.Name == "test-i"
+		return r.ObjectMeta.Name == name
 	})
 
 	assert.NotNil(t, route)

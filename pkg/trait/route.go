@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
 	"reflect"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -31,7 +30,6 @@ import (
 
 type routeTrait struct {
 	BaseTrait                        `property:",squash"`
-	Auto                             *bool  `property:"auto"`
 	Host                             string `property:"host"`
 	TLSTermination                   string `property:"tls-termination"`
 	TLSCertificate                   string `property:"tls-certificate"`
@@ -39,7 +37,8 @@ type routeTrait struct {
 	TLSCACertificate                 string `property:"tls-ca-certificate"`
 	TLSDestinationCACertificate      string `property:"tls-destination-ca-certificate"`
 	TLSInsecureEdgeTerminationPolicy string `property:"tls-insecure-edge-termination-policy"`
-	service                          *corev1.Service
+
+	service *corev1.Service
 }
 
 func newRouteTrait() *routeTrait {
@@ -57,15 +56,9 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
-		t.service = t.getTargetService(e)
-		if t.service == nil {
-			return false, nil
-		}
-	}
-
+	t.service = t.getTargetService(e)
 	if t.service == nil {
-		return false, errors.New("cannot apply route trait: no target service")
+		return false, nil
 	}
 
 	return true, nil
@@ -80,7 +73,9 @@ func (t *routeTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *routeTrait) getTargetService(e *Environment) (service *corev1.Service) {
+func (t *routeTrait) getTargetService(e *Environment) *corev1.Service {
+	var service *corev1.Service
+
 	e.Resources.VisitService(func(s *corev1.Service) {
 		if s.ObjectMeta.Labels != nil {
 			if s.ObjectMeta.Labels["camel.apache.org/integration"] == e.Integration.Name &&
@@ -92,7 +87,8 @@ func (t *routeTrait) getTargetService(e *Environment) (service *corev1.Service) 
 			}
 		}
 	})
-	return
+
+	return service
 }
 
 func (t *routeTrait) getRouteFor(service *corev1.Service) *routev1.Route {
