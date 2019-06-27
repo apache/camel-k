@@ -104,7 +104,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				// during image build
 				return oldBuild.Status.Phase != newBuild.Status.Phase
 			},
-		})
+		},
+	)
+
 	if err != nil {
 		return err
 	}
@@ -142,6 +144,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		}),
 	})
 
+	if err != nil {
+		return err
+	}
+
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integrations that are in phase waiting for platform
 	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
@@ -173,6 +179,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return requests
 		}),
 	})
+
 	if err != nil {
 		return err
 	}
