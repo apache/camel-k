@@ -138,8 +138,12 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 				return errors.Wrap(err, "error while accessing file "+fileName)
 			}
 		} else {
-			/* #nosec */
+			// nolint: gosec
 			resp, err := http.Get(fileName)
+			if resp != nil && resp.Body != nil {
+				resp.Body.Close()
+			}
+
 			if err != nil {
 				return errors.Wrap(err, "The URL provided is not reachable")
 			} else if resp.StatusCode != 200 {
