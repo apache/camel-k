@@ -49,6 +49,7 @@ type IntegrationStatus struct {
 	CamelVersion     string              `json:"camelVersion,omitempty"`
 	RuntimeVersion   string              `json:"runtimeVersion,omitempty"`
 	Configuration    []ConfigurationSpec `json:"configuration,omitempty"`
+	Version			 string				 `json:"version,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

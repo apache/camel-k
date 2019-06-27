@@ -148,6 +148,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	} else {
 		platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 	}
+	platform.Status.Version = defaults.Version
 
 	return platform, nil
 }

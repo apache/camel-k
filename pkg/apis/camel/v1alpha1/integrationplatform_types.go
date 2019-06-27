@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package v1alpha1
 
 import (
@@ -39,7 +40,8 @@ type IntegrationPlatformResourcesSpec struct {
 
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform
 type IntegrationPlatformStatus struct {
-	Phase IntegrationPlatformPhase `json:"phase,omitempty"`
+	Phase   IntegrationPlatformPhase `json:"phase,omitempty"`
+	Version string                   `json:"version,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
