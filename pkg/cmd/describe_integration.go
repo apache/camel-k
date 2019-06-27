@@ -36,9 +36,10 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "integration",
-		Short: "Describe an Integration",
-		Long:  `Describe an Integration.`,
+		Use:     "integration",
+		Aliases: []string{"it"},
+		Short:   "Describe an Integration",
+		Long:    `Describe an Integration.`,
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err
@@ -96,6 +97,7 @@ func (command *describeIntegrationCommand) describeIntegration(i v1alpha1.Integr
 		w.Write(0, "Camel Version:\t%s\n", i.Status.CamelVersion)
 		w.Write(0, "Kit:\t%s\n", i.Status.Kit)
 		w.Write(0, "Image:\t%s\n", i.Status.Image)
+		w.Write(0, "Version:\t%s\n", i.Status.Version)
 
 		if len(i.Spec.Configuration) > 0 {
 			w.Write(0, "Configuration:\n")
