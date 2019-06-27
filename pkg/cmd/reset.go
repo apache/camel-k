@@ -38,11 +38,16 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Run:   options.reset,
 	}
 
+	cmd.Flags().BoolVar(&options.SkipKits, "skip-kits", false, "Do not delete the integration kits")
+	cmd.Flags().BoolVar(&options.SkipIntegrations, "skip-integrations", false, "Do not delete the integrations")
+
 	return &cmd
 }
 
 type resetCmdOptions struct {
 	*RootCmdOptions
+	SkipKits         bool
+	SkipIntegrations bool
 }
 
 func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
@@ -51,18 +56,23 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 		fmt.Print(err)
 		return
 	}
-	var n int
-	if n, err = o.deleteAllIntegrations(c); err != nil {
-		fmt.Print(err)
-		return
-	}
-	fmt.Printf("%d integrations deleted from namespace %s\n", n, o.Namespace)
 
-	if n, err = o.deleteAllIntegrationKits(c); err != nil {
-		fmt.Print(err)
-		return
+	var n int
+	if !o.SkipIntegrations {
+		if n, err = o.deleteAllIntegrations(c); err != nil {
+			fmt.Print(err)
+			return
+		}
+		fmt.Printf("%d integrations deleted from namespace %s\n", n, o.Namespace)
 	}
-	fmt.Printf("%d integration kits deleted from namespace %s\n", n, o.Namespace)
+
+	if !o.SkipKits {
+		if n, err = o.deleteAllIntegrationKits(c); err != nil {
+			fmt.Print(err)
+			return
+		}
+		fmt.Printf("%d integration kits deleted from namespace %s\n", n, o.Namespace)
+	}
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
 		fmt.Print(err)
