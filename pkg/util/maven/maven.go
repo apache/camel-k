@@ -89,12 +89,14 @@ func Run(ctx Context) error {
 		mvnCmd = c
 	}
 
-	args := append(ctx.AdditionalArguments, "--batch-mode")
+	args := make([]string, 0)
+	args = append(args, ctx.AdditionalArguments...)
+	args = append(args, "--batch-mode")
 
 	if ctx.LocalRepository == "" {
-		args = append(ctx.AdditionalArguments, "-Dcamel.noop=true")
+		args = append(args, "-Dcamel.noop=true")
 	} else if _, err := os.Stat(ctx.LocalRepository); err == nil {
-		args = append(ctx.AdditionalArguments, "-Dmaven.repo.local="+ctx.LocalRepository)
+		args = append(args, "-Dmaven.repo.local="+ctx.LocalRepository)
 	}
 
 	settingsPath := path.Join(ctx.Path, "settings.xml")

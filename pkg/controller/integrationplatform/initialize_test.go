@@ -22,19 +22,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rs/xid"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/stretchr/testify/assert"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func TestTimeouts_Default(t *testing.T) {
 	ip := v1alpha1.IntegrationPlatform{}
 	ip.Namespace = "ns"
-	ip.Name = "camel-k"
+	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 
 	c, err := test.NewFakeClient(&ip)
@@ -67,7 +70,7 @@ func TestTimeouts_Default(t *testing.T) {
 func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	ip := v1alpha1.IntegrationPlatform{}
 	ip.Namespace = "ns"
-	ip.Name = "camel-k"
+	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 
 	timeout, err := time.ParseDuration("1m1ms")
@@ -107,7 +110,7 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 func TestTimeouts_Truncated(t *testing.T) {
 	ip := v1alpha1.IntegrationPlatform{}
 	ip.Namespace = "ns"
-	ip.Name = "camel-k"
+	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 
 	bt, err := time.ParseDuration("5m1ms")
@@ -144,6 +147,6 @@ func TestTimeouts_Truncated(t *testing.T) {
 	err = c.Get(context.TODO(), key, &answer)
 	assert.Nil(t, err)
 
-	assert.Equal(t, time.Duration(2*time.Minute), answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, time.Duration(5*time.Minute), answer.Spec.Build.Timeout.Duration)
+	assert.Equal(t, 2*time.Minute, answer.Spec.Build.Maven.Timeout.Duration)
+	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
 }
