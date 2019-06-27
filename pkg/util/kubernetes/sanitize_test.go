@@ -33,6 +33,9 @@ func TestSanitizeName(t *testing.T) {
 		{"input": "http://foo.bar.com/cheese/wine/beer/abc.java", "expect": "abc"},
 		{"input": "http://foo.bar.com/cheese", "expect": "cheese"},
 		{"input": "http://foo.bar.com", "expect": "foo"},
+		{"input": "-foo-bar-", "expect": "foo-bar"},
+		{"input": "1foo-bar2", "expect": "1foo-bar2"},
+		{"input": "foo-bar-1", "expect": "foo-bar-1"},
 	}
 
 	for _, c := range cases {
