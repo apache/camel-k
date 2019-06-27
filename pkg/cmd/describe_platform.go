@@ -89,6 +89,7 @@ func (command *describePlatformCommand) describeIntegrationPlatform(platform v1a
 		w := indentedwriter.NewWriter(out)
 		describeObjectMeta(w, platform.ObjectMeta)
 		w.Write(0, "Phase:\t%s\n", platform.Status.Phase)
+		w.Write(0, "Version:\t%s\n", platform.Status.Version)
 		w.Write(0, "Base Image:\t%s\n", platform.Spec.Build.BaseImage)
 		w.Write(0, "Camel Version:\t%s\n", platform.Spec.Build.CamelVersion)
 		w.Write(0, "Local Repository:\t%s\n", platform.Spec.Build.LocalRepository)

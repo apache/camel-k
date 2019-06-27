@@ -94,6 +94,7 @@ func (command *describeKitCommand) describeIntegrationKit(kit v1alpha1.Integrati
 		w.Write(0, "Phase:\t%s\n", kit.Status.Phase)
 		w.Write(0, "Camel Version:\t%s\n", kit.Status.CamelVersion)
 		w.Write(0, "Image:\t%s\n", kit.Status.Image)
+		w.Write(0, "Version:\t%s\n", kit.Status.Version)
 
 		if len(kit.Status.Artifacts) > 0 {
 			w.Write(0, "Artifacts:\t\n")
