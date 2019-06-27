@@ -23,7 +23,8 @@ language: go
 go:
   - "1.11.4"
 
-install: true
+install:
+  - go mod vendor
 
 env:
   global:
