@@ -90,7 +90,7 @@ func TestIntegrationUpgrade(t *testing.T) {
 		Eventually(integrationVersion(ns, "js")).Should(Equal(defaults.Version))
 		Eventually(kitsWithVersion(ns, "an.older.one")).Should(Equal(1)) // old one is not recycled
 		Eventually(kitsWithVersion(ns, defaults.Version)).Should(Equal(1))
-		Eventually(integrationPodImage(ns, "js")).ShouldNot(Equal(initialImage)) // rolling deployment triggered
+		Eventually(integrationPodImage(ns, "js"), 5*time.Minute).ShouldNot(Equal(initialImage)) // rolling deployment triggered
 		Eventually(integrationPodPhase(ns, "js"), 5*time.Minute).Should(Equal(v1.PodRunning))
 	})
 }
