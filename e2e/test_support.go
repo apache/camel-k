@@ -193,15 +193,6 @@ func setIntegrationVersion(ns string, name string, version string) error {
 	return testClient.Status().Update(testContext, it)
 }
 
-func setIntegrationPhase(ns string, name string, phase v1alpha1.IntegrationPhase) error {
-	it := integration(ns, name)()
-	if it == nil {
-		return fmt.Errorf("no integration named %s found", name)
-	}
-	it.Status.Phase = phase
-	return testClient.Status().Update(testContext, it)
-}
-
 func kits(ns string) func() []v1alpha1.IntegrationKit {
 	return func() []v1alpha1.IntegrationKit {
 		lst := v1alpha1.NewIntegrationKitList()
@@ -247,6 +238,16 @@ func operatorImage(ns string) func() string {
 			}
 		}
 		return ""
+	}
+}
+
+func operatorPodPhase(ns string) func() v1.PodPhase {
+	return func() v1.PodPhase {
+		pod := operatorPod(ns)()
+		if pod == nil {
+			return ""
+		}
+		return pod.Status.Phase
 	}
 }
 
@@ -408,6 +409,24 @@ func scaleOperator(ns string, replicas int32) error {
 	Namespace testing functions
 */
 
+func numPods(ns string) func() int {
+	return func() int {
+		lst := v1.PodList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: v1.SchemeGroupVersion.String(),
+			},
+		}
+		opts := k8sclient.ListOptions{
+			Namespace: ns,
+		}
+		if err := testClient.List(testContext, &opts, &lst); err != nil {
+			panic(err)
+		}
+		return len(lst.Items)
+	}
+}
+
 func withNewTestNamespace(doRun func(string)) {
 	ns := newTestNamespace()
 	defer deleteTestNamespace(ns)
@@ -438,6 +457,9 @@ func deleteTestNamespace(ns metav1.Object) {
 			log.Error(err, "cannot delete test namespace", "name", ns.GetName())
 		}
 	}
+
+	// Wait for all pods to be deleted
+	gomega.Eventually(numPods(ns.GetName()), 30 * time.Second).Should(gomega.Equal(0))
 }
 
 func newTestNamespace() metav1.Object {

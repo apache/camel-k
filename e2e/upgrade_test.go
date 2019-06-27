@@ -25,7 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
@@ -79,9 +78,13 @@ func TestIntegrationUpgrade(t *testing.T) {
 		// Scale the operator up
 		Expect(scaleOperator(ns, 1)).Should(BeNil())
 		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Eventually(operatorPodPhase(ns)).Should(Equal(v1.PodRunning))
 
-		// Clear the integration phase
-		Expect(setIntegrationPhase(ns, "js", v1alpha1.IntegrationPhaseNone)).Should(BeNil())
+		// No auto-update expected
+		Consistently(integrationVersion(ns, "js"), 3*time.Second).Should(Equal("an.older.one"))
+
+		// Clear the integration status
+		Expect(kamel("rebuild", "js", "-n", ns).Execute()).Should(BeNil())
 
 		// Check the integration version change
 		Eventually(integrationVersion(ns, "js")).Should(Equal(defaults.Version))
