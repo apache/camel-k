@@ -148,9 +148,9 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	ctx := context.TODO()
 
 	// Fetch the Integration instance
-	instance := &v1alpha1.Build{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
-	if err != nil {
+	var instance v1alpha1.Build
+
+	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -161,7 +161,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		return reconcile.Result{}, err
 	}
 
-	buildActionPool := []Action{
+	actions := []Action{
 		NewInitializeAction(),
 		NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
 		NewSchedulePodAction(r.reader),
@@ -170,18 +170,47 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		NewErrorRecoveryAction(),
 	}
 
-	blog := rlog.ForBuild(instance)
-	for _, a := range buildActionPool {
+	var targetPhase v1alpha1.BuildPhase
+
+	target := instance.DeepCopy()
+	targetLog := rlog.ForBuild(target)
+
+	for _, a := range actions {
 		a.InjectClient(r.client)
-		a.InjectLogger(blog)
-		if a.CanHandle(instance) {
-			blog.Infof("Invoking action %s", a.Name())
-			if err := a.Handle(ctx, instance); err != nil {
-				if k8serrors.IsConflict(err) {
-					blog.Error(err, "conflict")
-					return reconcile.Result{
-						Requeue: true,
-					}, nil
+		a.InjectLogger(targetLog)
+
+		if a.CanHandle(target) {
+			targetLog.Infof("Invoking action %s", a.Name())
+
+			phaseFrom := target.Status.Phase
+			target = target.DeepCopy()
+
+			t, err := a.Handle(ctx, target)
+			if err != nil {
+				return reconcile.Result{
+					Requeue: true,
+				}, nil
+			}
+
+			if t != nil {
+				target = t
+				if err := r.client.Status().Update(ctx, target); err != nil {
+					if k8serrors.IsConflict(err) {
+						targetLog.Error(err, "conflict")
+						return reconcile.Result{
+							Requeue: true,
+						}, nil
+					}
+				}
+
+				targetPhase = target.Status.Phase
+
+				if targetPhase != phaseFrom {
+					targetLog.Info(
+						"state transition",
+						"phase-from", phaseFrom,
+						"phase-to", target.Status.Phase,
+					)
 				}
 
 				return reconcile.Result{}, err
@@ -189,14 +218,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 	}
 
-	// Refresh the build and check the state
-	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		return reconcile.Result{}, err
-	}
-
 	// Requeue scheduling build so that it re-enters the build working queue
-	if instance.Status.Phase == v1alpha1.BuildPhaseScheduling ||
-		instance.Status.Phase == v1alpha1.BuildPhaseFailed {
+	if targetPhase == v1alpha1.BuildPhaseScheduling || targetPhase == v1alpha1.BuildPhaseFailed {
 		return reconcile.Result{
 			RequeueAfter: 5 * time.Second,
 		}, nil

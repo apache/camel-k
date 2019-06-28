@@ -61,7 +61,7 @@ func (action *schedulePodAction) CanHandle(build *v1alpha1.Build) bool {
 }
 
 // Handle handles the builds
-func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
+func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	// Enter critical section
 	action.lock.Lock()
 	defer action.lock.Unlock()
@@ -72,7 +72,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	// atomically by write operations
 	err := action.reader.List(ctx, options, builds)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Emulate a serialized working queue to only allow one build to run at a given time.
@@ -87,13 +87,13 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 
 	if hasScheduledBuild {
 		// Let's requeue the build in case one is already running
-		return nil
+		return nil, nil
 	}
 
 	// Try to get operator image name before starting the build
 	operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Otherwise, let's create the build pod
@@ -103,29 +103,27 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 
 	// Set the Build instance as the owner and controller
 	if err := controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Ensure service account is present
 	if err := action.ensureServiceAccount(ctx, pod); err != nil {
-		return errors.Wrap(err, "cannot ensure service account is present")
+		return nil, errors.Wrap(err, "cannot ensure service account is present")
 	}
 
 	err = action.client.Delete(ctx, pod)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return errors.Wrap(err, "cannot delete build pod")
+		return nil, errors.Wrap(err, "cannot delete build pod")
 	}
 
 	err = action.client.Create(ctx, pod)
 	if err != nil {
-		return errors.Wrap(err, "cannot create build pod")
+		return nil, errors.Wrap(err, "cannot create build pod")
 	}
 
-	target := build.DeepCopy()
-	target.Status.Phase = v1alpha1.BuildPhasePending
-	action.L.Info("Build state transition", "phase", target.Status.Phase)
+	build.Status.Phase = v1alpha1.BuildPhasePending
 
-	return action.client.Status().Update(ctx, target)
+	return build, nil
 }
 
 func (action *schedulePodAction) ensureServiceAccount(ctx context.Context, buildPod *corev1.Pod) error {

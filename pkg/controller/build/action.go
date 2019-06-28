@@ -28,6 +28,7 @@ import (
 // Action --
 type Action interface {
 	client.Injectable
+	log.Injectable
 
 	// a user friendly name for the action
 	Name() string
@@ -36,10 +37,7 @@ type Action interface {
 	CanHandle(build *v1alpha1.Build) bool
 
 	// executes the handling function
-	Handle(ctx context.Context, build *v1alpha1.Build) error
-
-	// Inject integration logger
-	InjectLogger(log.Logger)
+	Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error)
 }
 
 type baseAction struct {

@@ -49,34 +49,30 @@ func (action *monitorPodAction) CanHandle(build *v1alpha1.Build) bool {
 }
 
 // Handle handles the builds
-func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
-	target := build.DeepCopy()
-
+func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	// Get the build pod
 	pod := &corev1.Pod{}
 	err := action.client.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: buildPodName(build.Spec.Meta)}, pod)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Let's reschedule the build
-			target.Status.Phase = v1alpha1.BuildPhaseScheduling
+			build.Status.Phase = v1alpha1.BuildPhaseScheduling
 		} else {
-			return err
+			return nil, err
 		}
 	}
 
 	switch pod.Status.Phase {
 	case corev1.PodSucceeded:
-		target.Status.Phase = v1alpha1.BuildPhaseSucceeded
+		build.Status.Phase = v1alpha1.BuildPhaseSucceeded
 	case corev1.PodFailed:
-		target.Status.Phase = v1alpha1.BuildPhaseFailed
+		build.Status.Phase = v1alpha1.BuildPhaseFailed
 	}
 
-	if target.Status.Phase == build.Status.Phase {
+	if build.Status.Phase == build.Status.Phase {
 		// Status is already up-to-date
-		return nil
+		return nil, nil
 	}
 
-	action.L.Info("Build state transition", "phase", target.Status.Phase)
-
-	return action.client.Status().Update(ctx, target)
+	return build, nil
 }
