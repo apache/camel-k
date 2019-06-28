@@ -19,6 +19,8 @@ package integration
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/util/digest"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -209,9 +211,9 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	ctx := context.TODO()
 
 	// Fetch the Integration instance
-	instance := &v1alpha1.Integration{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
-	if err != nil {
+	var instance v1alpha1.Integration
+
+	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -222,7 +224,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	integrationActionPool := []Action{
+	actions := []Action{
 		NewInitializeAction(),
 		NewBuildKitAction(),
 		NewDeployAction(),
@@ -235,18 +237,57 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		instance.Status.Phase = v1alpha1.IntegrationPhaseDeleting
 	}
 
-	ilog := rlog.ForIntegration(instance)
-	for _, a := range integrationActionPool {
+	var targetPhase v1alpha1.IntegrationPhase
+
+	target := instance.DeepCopy()
+	targetLog := rlog.ForIntegration(target)
+
+	for _, a := range actions {
 		a.InjectClient(r.client)
-		a.InjectLogger(ilog)
-		if a.CanHandle(instance) {
-			ilog.Infof("Invoking action %s", a.Name())
-			if err := a.Handle(ctx, instance); err != nil {
-				if k8serrors.IsConflict(err) {
-					ilog.Error(err, "conflict")
+		a.InjectLogger(targetLog)
+
+		if a.CanHandle(target) {
+			targetLog.Infof("Invoking action %s", a.Name())
+
+			phaseFrom := target.Status.Phase
+			target = target.DeepCopy()
+
+			t, err := a.Handle(ctx, target)
+			if err != nil {
+				return reconcile.Result{
+					Requeue: true,
+				}, nil
+			}
+
+			if t != nil {
+				target = t
+
+				dgst, err := digest.ComputeForIntegration(target)
+				if err != nil {
 					return reconcile.Result{
 						Requeue: true,
 					}, nil
+				}
+
+				target.Status.Digest = dgst
+
+				if err := r.client.Status().Update(ctx, target); err != nil {
+					if k8serrors.IsConflict(err) {
+						targetLog.Error(err, "conflict")
+						return reconcile.Result{
+							Requeue: true,
+						}, nil
+					}
+				}
+
+				targetPhase = target.Status.Phase
+
+				if targetPhase != phaseFrom {
+					targetLog.Info(
+						"state transition",
+						"phase-from", phaseFrom,
+						"phase-to", target.Status.Phase,
+					)
 				}
 
 				return reconcile.Result{}, err
