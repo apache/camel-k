@@ -133,6 +133,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 	}
 
 	var targetPhase camelv1alpha1.IntegrationPlatformPhase
+	var err error
 
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationPlatform(target)
@@ -145,18 +146,15 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 			targetLog.Infof("Invoking action %s", a.Name())
 
 			phaseFrom := target.Status.Phase
-			target = target.DeepCopy()
 
-			t, err := a.Handle(ctx, target)
+			target, err = a.Handle(ctx, target)
 			if err != nil {
 				return reconcile.Result{
 					Requeue: true,
 				}, nil
 			}
 
-			if t != nil {
-				target = t
-
+			if target != nil {
 				if err := r.client.Status().Update(ctx, target); err != nil {
 					if k8serrors.IsConflict(err) {
 						targetLog.Error(err, "conflict")
@@ -164,6 +162,8 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 							Requeue: true,
 						}, nil
 					}
+
+					return reconcile.Result{}, err
 				}
 
 				targetPhase = target.Status.Phase
@@ -175,9 +175,11 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 						"phase-to", target.Status.Phase,
 					)
 				}
-
-				return reconcile.Result{}, err
 			}
+
+			// handle one action at time so the resource
+			// is always at its latest state
+			break
 		}
 	}
 
