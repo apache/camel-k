@@ -238,6 +238,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	var targetPhase v1alpha1.IntegrationPhase
+	var err error
 
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
@@ -250,18 +251,15 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 			targetLog.Infof("Invoking action %s", a.Name())
 
 			phaseFrom := target.Status.Phase
-			target = target.DeepCopy()
 
-			t, err := a.Handle(ctx, target)
+			target, err = a.Handle(ctx, target)
 			if err != nil {
 				return reconcile.Result{
 					Requeue: true,
 				}, nil
 			}
 
-			if t != nil {
-				target = t
-
+			if target != nil {
 				dgst, err := digest.ComputeForIntegration(target)
 				if err != nil {
 					return reconcile.Result{
@@ -278,6 +276,8 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 							Requeue: true,
 						}, nil
 					}
+
+					return reconcile.Result{}, err
 				}
 
 				targetPhase = target.Status.Phase
@@ -289,9 +289,11 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 						"phase-to", target.Status.Phase,
 					)
 				}
-
-				return reconcile.Result{}, err
 			}
+
+			// handle one action at time so the resource
+			// is always at its latest state
+			break
 		}
 	}
 
