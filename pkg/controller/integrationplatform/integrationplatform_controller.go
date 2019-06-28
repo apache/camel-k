@@ -22,6 +22,7 @@ import (
 	"time"
 
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/pkg/client"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -97,8 +98,8 @@ type ReconcileIntegrationPlatform struct {
 	scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a IntegrationPlatform object and makes changes based on the state read
-// and what is in the IntegrationPlatform.Spec
+// Reconcile reads that state of the cluster for a IntegrationPlatform object and makes changes based
+// on the state read and what is in the IntegrationPlatform.Spec
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
@@ -109,12 +110,14 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 	ctx := context.TODO()
 
 	// Fetch the IntegrationPlatform instance
-	instance := &camelv1alpha1.IntegrationPlatform{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
-	if err != nil {
+	var instance camelv1alpha1.IntegrationPlatform
+
+	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Owned objects are automatically garbage collected. For additional cleanup
+			// logic use finalizers.
+
 			// Return and don't requeue
 			return reconcile.Result{}, nil
 		}
@@ -122,25 +125,55 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		return reconcile.Result{}, err
 	}
 
-	integrationPlatformActionPool := []Action{
+	actions := []Action{
 		NewInitializeAction(),
 		NewWarmAction(),
 		NewCreateAction(),
 		NewStartAction(),
 	}
 
-	ilog := rlog.ForIntegrationPlatform(instance)
-	for _, a := range integrationPlatformActionPool {
+	var targetPhase camelv1alpha1.IntegrationPlatformPhase
+
+	target := instance.DeepCopy()
+	targetLog := rlog.ForIntegrationPlatform(target)
+
+	for _, a := range actions {
 		a.InjectClient(r.client)
-		a.InjectLogger(ilog)
-		if a.CanHandle(instance) {
-			ilog.Infof("Invoking action %s", a.Name())
-			if err := a.Handle(ctx, instance); err != nil {
-				if k8serrors.IsConflict(err) {
-					ilog.Error(err, "conflict")
-					return reconcile.Result{
-						Requeue: true,
-					}, nil
+		a.InjectLogger(targetLog)
+
+		if a.CanHandle(target) {
+			targetLog.Infof("Invoking action %s", a.Name())
+
+			phaseFrom := target.Status.Phase
+			target = target.DeepCopy()
+
+			t, err := a.Handle(ctx, target)
+			if err != nil {
+				return reconcile.Result{
+					Requeue: true,
+				}, nil
+			}
+
+			if t != nil {
+				target = t
+
+				if err := r.client.Status().Update(ctx, target); err != nil {
+					if k8serrors.IsConflict(err) {
+						targetLog.Error(err, "conflict")
+						return reconcile.Result{
+							Requeue: true,
+						}, nil
+					}
+				}
+
+				targetPhase = target.Status.Phase
+
+				if targetPhase != phaseFrom {
+					targetLog.Info(
+						"state transition",
+						"phase-from", phaseFrom,
+						"phase-to", target.Status.Phase,
+					)
 				}
 
 				return reconcile.Result{}, err
@@ -148,14 +181,10 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		}
 	}
 
-	// Fetch the IntegrationPlatform again and check the state
-	if err = r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	if instance.Status.Phase == camelv1alpha1.IntegrationPlatformPhaseReady {
+	if targetPhase == camelv1alpha1.IntegrationPlatformPhaseReady {
 		return reconcile.Result{}, nil
 	}
+
 	// Requeue
 	return reconcile.Result{
 		RequeueAfter: 5 * time.Second,

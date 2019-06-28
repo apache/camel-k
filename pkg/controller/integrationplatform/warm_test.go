@@ -20,105 +20,109 @@ package integrationplatform
 import (
 	"context"
 	"testing"
-	"time"
 
-	"github.com/rs/xid"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
-
+	"github.com/rs/xid"
 	"github.com/stretchr/testify/assert"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestTimeouts_Default(t *testing.T) {
+func TestWarm_Succeeded(t *testing.T) {
 	ip := v1alpha1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 
-	c, err := test.NewFakeClient(&ip)
+	pod := corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ip.Namespace,
+			Name:      ip.Name + "-cache",
+		},
+		Status: corev1.PodStatus{
+			Phase: corev1.PodSucceeded,
+		},
+	}
+
+	c, err := test.NewFakeClient(&ip, &pod)
 	assert.Nil(t, err)
 
-	h := NewInitializeAction()
+	h := NewWarmAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
 	answer, err := h.Handle(context.TODO(), &ip)
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
-
-	n := answer.Spec.Build.Timeout.Duration.Seconds() * 0.75
-	d := (time.Duration(n) * time.Second).Truncate(time.Second)
-
-	assert.Equal(t, d, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
 }
 
-func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
+func TestWarm_Failing(t *testing.T) {
 	ip := v1alpha1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 
-	timeout, err := time.ParseDuration("1m1ms")
-	assert.Nil(t, err)
-
-	ip.Spec.Build.Timeout = metav1.Duration{
-		Duration: timeout,
+	pod := corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ip.Namespace,
+			Name:      ip.Name + "-cache",
+		},
+		Status: corev1.PodStatus{
+			Phase: corev1.PodFailed,
+		},
 	}
 
-	c, err := test.NewFakeClient(&ip)
+	c, err := test.NewFakeClient(&ip, &pod)
 	assert.Nil(t, err)
 
-	h := NewInitializeAction()
+	h := NewWarmAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
 	answer, err := h.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
-	assert.NotNil(t, answer)
-
-	n := answer.Spec.Build.Timeout.Duration.Seconds() * 0.75
-	d := (time.Duration(n) * time.Second).Truncate(time.Second)
-
-	assert.Equal(t, d, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 1*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.NotNil(t, err)
+	assert.Nil(t, answer)
 }
 
-func TestTimeouts_Truncated(t *testing.T) {
+func TestWarm_WarmingUp(t *testing.T) {
 	ip := v1alpha1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 
-	bt, err := time.ParseDuration("5m1ms")
-	assert.Nil(t, err)
-
-	ip.Spec.Build.Timeout = metav1.Duration{
-		Duration: bt,
+	pod := corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ip.Namespace,
+			Name:      ip.Name + "-cache",
+		},
+		Status: corev1.PodStatus{
+			Phase: corev1.PodRunning,
+		},
 	}
 
-	mt, err := time.ParseDuration("2m1ms")
+	c, err := test.NewFakeClient(&ip, &pod)
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Maven.Timeout = metav1.Duration{
-		Duration: mt,
-	}
-
-	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
-
-	h := NewInitializeAction()
+	h := NewWarmAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
 	answer, err := h.Handle(context.TODO(), &ip)
 	assert.Nil(t, err)
-	assert.NotNil(t, answer)
-
-	assert.Equal(t, 2*time.Minute, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.Nil(t, answer)
 }
