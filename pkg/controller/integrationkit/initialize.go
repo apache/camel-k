@@ -77,12 +77,6 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.Integr
 		return nil, err
 	}
 
-	// Updating the whole integration kit as it may have changed
-	action.L.Info("Updating IntegrationKit")
-	if err := action.client.Update(ctx, kit); err != nil {
-		return nil, err
-	}
-
 	if kit.Spec.Image == "" {
 		// by default the kit should be built
 		kit.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
