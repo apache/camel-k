@@ -20,8 +20,6 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
@@ -93,13 +91,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	target := integration.DeepCopy()
 
 	// execute custom initialization
-	env, err := trait.Apply(ctx, action.client, target, nil)
-	if err != nil {
-		return err
-	}
-
-	err = kubernetes.ReplaceResources(ctx, action.client, env.Resources.Items())
-	if err != nil {
+	if _, err := trait.Apply(ctx, action.client, target, nil); err != nil {
 		return err
 	}
 
