@@ -42,25 +42,21 @@ func (action *monitorAction) CanHandle(integration *v1alpha1.Integration) bool {
 		integration.Status.Phase == v1alpha1.IntegrationPhaseError
 }
 
-func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
-
+func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
 	hash, err := digest.ComputeForIntegration(integration)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if hash != integration.Status.Digest {
 		action.L.Info("Integration needs a rebuild")
 
-		target := integration.DeepCopy()
-		target.Status.Digest = hash
-		target.Status.Phase = ""
+		integration.Status.Digest = hash
+		integration.Status.Phase = ""
 
-		action.L.Info("Integration state transition", "phase", target.Status.Phase)
-
-		return action.client.Status().Update(ctx, target)
+		return integration, nil
 	}
 
 	// TODO check also if deployment matches (e.g. replicas)
-	return nil
+	return nil, nil
 }

@@ -23,7 +23,6 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util/digest"
 )
 
 // NewInitializeAction creates a new initialize action
@@ -46,10 +45,10 @@ func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) boo
 }
 
 // Handle handles the integrations
-func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
 	pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// The integration platform needs to be ready before starting to create integrations
@@ -57,20 +56,11 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 		action.L.Info("Waiting for the integration platform to be initialized")
 
 		if integration.Status.Phase != v1alpha1.IntegrationPhaseWaitingForPlatform {
-			target := integration.DeepCopy()
-			target.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
-
-			action.L.Info("Integration state transition", "phase", target.Status.Phase)
-
-			return action.client.Status().Update(ctx, target)
+			integration.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
+			return integration, nil
 		}
 
-		return nil
-	}
-
-	dgst, err := digest.ComputeForIntegration(integration)
-	if err != nil {
-		return err
+		return nil, nil
 	}
 
 	//
@@ -78,29 +68,22 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	// WaitingForPlatform phase
 	//
 	if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
-		target := integration.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationPhaseInitial
-		target.Status.Digest = dgst
+		integration.Status.Phase = v1alpha1.IntegrationPhaseInitial
 
-		return action.client.Status().Update(ctx, target)
+		return integration, nil
 	}
 
 	// better not changing the spec section of the target because it may be used for comparison by a
 	// higher level controller (e.g. Knative source controller)
-
-	target := integration.DeepCopy()
 
 	// execute custom initialization
 	if _, err := trait.Apply(ctx, action.client, target, nil); err != nil {
 		return err
 	}
 
-	target.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
-	target.Status.Digest = dgst
-	target.Status.Kit = integration.Spec.Kit
-	target.Status.Image = ""
+	integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
+	integration.Status.Kit = integration.Spec.Kit
+	integration.Status.Image = ""
 
-	action.L.Info("Integration state transition", "phase", target.Status.Phase)
-
-	return action.client.Status().Update(ctx, target)
+	return integration, nil
 }

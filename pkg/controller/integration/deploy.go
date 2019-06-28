@@ -43,14 +43,14 @@ func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
 }
 
-func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
 	if integration.Status.Kit == "" {
-		return errors.Errorf("no kit set on integration %s", integration.Name)
+		return nil, errors.Errorf("no kit set on integration %s", integration.Name)
 	}
 
 	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.Kit, integration.Namespace)
 	if err != nil {
-		return errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
+		return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
 	}
 
 	if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
@@ -60,7 +60,5 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 	target := integration.DeepCopy()
 	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
 
-	action.L.Info("Integration state transition", "phase", target.Status.Phase)
-
-	return action.client.Status().Update(ctx, target)
+	return integration, nil
 }
