@@ -23,7 +23,6 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util/digest"
 )
 
 // NewInitializeAction creates a new initialization handling action for the kit
@@ -43,44 +42,35 @@ func (action *initializeAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
 	return kit.Status.Phase == ""
 }
 
-func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
 	// The integration platform needs to be initialized before starting to create kits
 	if _, err := platform.GetCurrentPlatform(ctx, action.client, kit.Namespace); err != nil {
 		action.L.Info("Waiting for the integration platform to be initialized")
-		return nil
+		return nil, nil
 	}
 
-	target := kit.DeepCopy()
-
-	_, err := trait.Apply(ctx, action.client, nil, target)
+	_, err := trait.Apply(ctx, action.client, nil, kit)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Updating the whole integration kit as it may have changed
 	action.L.Info("Updating IntegrationKit")
-	if err := action.client.Update(ctx, target); err != nil {
-		return err
+	if err := action.client.Update(ctx, kit); err != nil {
+		return nil, err
 	}
 
-	if target.Spec.Image == "" {
+	if kit.Spec.Image == "" {
 		// by default the kit should be built
-		target.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
 	} else {
 		// but in case it has been created from an image, mark the
 		// kit as ready
-		target.Status.Phase = v1alpha1.IntegrationKitPhaseReady
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseReady
 
 		// and set the image to be used
-		target.Status.Image = target.Spec.Image
+		kit.Status.Image = kit.Spec.Image
 	}
 
-	dgst, err := digest.ComputeForIntegrationKit(target)
-	if err != nil {
-		return err
-	}
-	target.Status.Digest = dgst
-
-	action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
-	return action.client.Status().Update(ctx, target)
+	return kit, nil
 }

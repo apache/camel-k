@@ -41,22 +41,19 @@ func (action *monitorAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
 	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady || kit.Status.Phase == v1alpha1.IntegrationKitPhaseError
 }
 
-func (action *monitorAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+func (action *monitorAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
 	hash, err := digest.ComputeForIntegrationKit(kit)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if hash != kit.Status.Digest {
 		action.L.Info("IntegrationKit needs a rebuild")
 
-		target := kit.DeepCopy()
-		target.Status.Digest = hash
-		target.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
+		kit.Status.Digest = hash
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
 
-		action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
-
-		return action.client.Status().Update(ctx, target)
+		return kit, nil
 	}
 
-	return nil
+	return nil, nil
 }
