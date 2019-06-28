@@ -42,21 +42,19 @@ func (action *startAction) CanHandle(platform *v1alpha1.IntegrationPlatform) boo
 	return platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseStarting || platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseError
 }
 
-func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
+func (action *startAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
 	aggregatePhase, err := action.aggregatePlatformPhaseFromContexts(ctx, platform.Namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
 	if platform.Status.Phase != aggregatePhase {
-		target := platform.DeepCopy()
-		target.Status.Phase = aggregatePhase
-
-		action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
-
-		return action.client.Status().Update(ctx, target)
+		platform.Status.Phase = aggregatePhase
+		return platform, nil
 	}
+
 	// wait
-	return nil
+	return nil, nil
 }
 
 func (action *startAction) aggregatePlatformPhaseFromContexts(ctx context.Context, namespace string) (v1alpha1.IntegrationPlatformPhase, error) {

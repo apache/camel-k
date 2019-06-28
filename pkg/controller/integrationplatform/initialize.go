@@ -28,9 +28,10 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
+
+	platformutil "github.com/apache/camel-k/pkg/platform"
 )
 
 // NewInitializeAction returns a action that initializes the platform configuration when not provided by the user
@@ -50,119 +51,115 @@ func (action *initializeAction) CanHandle(platform *v1alpha1.IntegrationPlatform
 	return platform.Status.Phase == "" || platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseDuplicate
 }
 
-func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.IntegrationPlatform) error {
-	target := ip.DeepCopy()
+func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
 
-	duplicate, err := action.isDuplicate(ctx, ip)
+	duplicate, err := action.isDuplicate(ctx, platform)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if duplicate {
 		// another platform already present in the namespace
-		if ip.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate {
-			target := ip.DeepCopy()
-			target.Status.Phase = v1alpha1.IntegrationPlatformPhaseDuplicate
+		if platform.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate {
+			platform := platform.DeepCopy()
+			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseDuplicate
 
-			action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
-
-			return action.client.Status().Update(ctx, target)
+			return platform, nil
 		}
-		return nil
+
+		return nil, nil
 	}
 
 	// update missing fields in the resource
-	if target.Spec.Cluster == "" {
+	if platform.Spec.Cluster == "" {
 		// determine the kind of cluster the platform is installed into
 		isOpenShift, err := openshift.IsOpenShift(action.client)
 		switch {
 		case err != nil:
-			return err
+			return nil, err
 		case isOpenShift:
-			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+			platform.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 		default:
-			target.Spec.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
+			platform.Spec.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
 		}
 	}
 
-	if target.Spec.Build.PublishStrategy == "" {
-		if target.Spec.Cluster == v1alpha1.IntegrationPlatformClusterOpenShift {
-			target.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
+	if platform.Spec.Build.PublishStrategy == "" {
+		if platform.Spec.Cluster == v1alpha1.IntegrationPlatformClusterOpenShift {
+			platform.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
-			target.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko
+			platform.Spec.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko
 		}
 	}
 
-	if target.Spec.Build.BuildStrategy == "" {
+	if platform.Spec.Build.BuildStrategy == "" {
 		// If the operator is global, a global build strategy should be used
-		if platform.IsCurrentOperatorGlobal() {
+		if platformutil.IsCurrentOperatorGlobal() {
 			// The only global strategy we have for now
-			target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+			platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
 		} else {
-			if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+			if platform.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
 				// The build output has to be shared with Kaniko via a persistent volume
-				target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+				platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
 			} else {
-				target.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
+				platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
 			}
 		}
 	}
 
-	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && target.Spec.Build.Registry.Address == "" {
+	if platform.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && platform.Spec.Build.Registry.Address == "" {
 		action.L.Info("No registry specified for publishing images")
 	}
 
-	action.setDefaults(target)
+	action.setDefaults(platform)
 
-	if target.Spec.Build.Maven.Timeout.Duration != 0 {
-		action.L.Infof("Maven Timeout set to %s", target.Spec.Build.Maven.Timeout.Duration)
+	if platform.Spec.Build.Maven.Timeout.Duration != 0 {
+		action.L.Infof("Maven Timeout set to %s", platform.Spec.Build.Maven.Timeout.Duration)
 	}
 
-	err = action.client.Update(ctx, target)
+	err = action.client.Update(ctx, platform)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if target.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+	if platform.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
 		// Create the persistent volume claim used to coordinate build pod output
 		// with Kaniko cache and build input
 		action.L.Info("Create persistent volume claim")
-		err := createPersistentVolumeClaim(ctx, action.client, target)
+		err := createPersistentVolumeClaim(ctx, action.client, platform)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// Check if the operator is running in the same namespace before starting the cache warmer
-		if target.Namespace == platform.GetOperatorNamespace() {
+		if platform.Namespace == platformutil.GetOperatorNamespace() {
 			// Create the Kaniko warmer pod that caches the base image into the Camel K builder volume
 			action.L.Info("Create Kaniko cache warmer pod")
-			err = createKanikoCacheWarmerPod(ctx, action.client, target)
+			err = createKanikoCacheWarmerPod(ctx, action.client, platform)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
-			target.Status.Phase = v1alpha1.IntegrationPlatformPhaseWarming
+			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseWarming
 		} else {
 			// Skip the warmer pod creation
-			target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 		}
 
 	} else {
-		target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+		platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 	}
 
-	// next phase
-	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
-	return action.client.Status().Update(ctx, target)
+	return platform, nil
 }
 
 func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v1alpha1.IntegrationPlatform) (bool, error) {
-	platforms, err := platform.ListPlatforms(ctx, action.client, thisPlatform.Namespace)
+	platforms, err := platformutil.ListPlatforms(ctx, action.client, thisPlatform.Namespace)
 	if err != nil {
 		return false, err
 	}
 	for _, p := range platforms.Items {
 		p := p // pin
-		if p.Name != thisPlatform.Name && platform.IsActive(&p) {
+		if p.Name != thisPlatform.Name && platformutil.IsActive(&p) {
 			return true, nil
 		}
 	}
@@ -170,59 +167,59 @@ func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v
 	return false, nil
 }
 
-func (action *initializeAction) setDefaults(target *v1alpha1.IntegrationPlatform) {
-	if target.Spec.Profile == "" {
-		target.Spec.Profile = platform.GetProfile(target)
+func (action *initializeAction) setDefaults(platform *v1alpha1.IntegrationPlatform) {
+	if platform.Spec.Profile == "" {
+		platform.Spec.Profile = platformutil.GetProfile(platform)
 	}
-	if target.Spec.Build.CamelVersion == "" {
-		target.Spec.Build.CamelVersion = defaults.CamelVersionConstraint
+	if platform.Spec.Build.CamelVersion == "" {
+		platform.Spec.Build.CamelVersion = defaults.CamelVersionConstraint
 	}
-	if target.Spec.Build.RuntimeVersion == "" {
-		target.Spec.Build.RuntimeVersion = defaults.RuntimeVersion
+	if platform.Spec.Build.RuntimeVersion == "" {
+		platform.Spec.Build.RuntimeVersion = defaults.RuntimeVersion
 	}
-	if target.Spec.Build.BaseImage == "" {
-		target.Spec.Build.BaseImage = defaults.BaseImage
+	if platform.Spec.Build.BaseImage == "" {
+		platform.Spec.Build.BaseImage = defaults.BaseImage
 	}
-	if target.Spec.Build.LocalRepository == "" {
-		target.Spec.Build.LocalRepository = defaults.LocalRepository
+	if platform.Spec.Build.LocalRepository == "" {
+		platform.Spec.Build.LocalRepository = defaults.LocalRepository
 	}
-	if target.Spec.Build.PersistentVolumeClaim == "" {
-		target.Spec.Build.PersistentVolumeClaim = target.Name
+	if platform.Spec.Build.PersistentVolumeClaim == "" {
+		platform.Spec.Build.PersistentVolumeClaim = platform.Name
 	}
 
-	if target.Spec.Build.Timeout.Duration != 0 {
-		d := target.Spec.Build.Timeout.Duration.Truncate(time.Second)
+	if platform.Spec.Build.Timeout.Duration != 0 {
+		d := platform.Spec.Build.Timeout.Duration.Truncate(time.Second)
 
-		if target.Spec.Build.Timeout.Duration != d {
-			action.L.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", target.Spec.Build.Timeout.Duration, d)
+		if platform.Spec.Build.Timeout.Duration != d {
+			action.L.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", platform.Spec.Build.Timeout.Duration, d)
 		}
 
-		target.Spec.Build.Timeout.Duration = d
+		platform.Spec.Build.Timeout.Duration = d
 	}
-	if target.Spec.Build.Timeout.Duration == 0 {
-		target.Spec.Build.Timeout.Duration = 5 * time.Minute
+	if platform.Spec.Build.Timeout.Duration == 0 {
+		platform.Spec.Build.Timeout.Duration = 5 * time.Minute
 	}
 
-	if target.Spec.Build.Maven.Timeout.Duration != 0 {
-		d := target.Spec.Build.Maven.Timeout.Duration.Truncate(time.Second)
+	if platform.Spec.Build.Maven.Timeout.Duration != 0 {
+		d := platform.Spec.Build.Maven.Timeout.Duration.Truncate(time.Second)
 
-		if target.Spec.Build.Maven.Timeout.Duration != d {
-			action.L.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", target.Spec.Build.Maven.Timeout.Duration, d)
+		if platform.Spec.Build.Maven.Timeout.Duration != d {
+			action.L.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", platform.Spec.Build.Maven.Timeout.Duration, d)
 		}
 
-		target.Spec.Build.Maven.Timeout.Duration = d
+		platform.Spec.Build.Maven.Timeout.Duration = d
 	}
-	if target.Spec.Build.Maven.Timeout.Duration == 0 {
-		n := target.Spec.Build.Timeout.Duration.Seconds() * 0.75
-		target.Spec.Build.Maven.Timeout.Duration = (time.Duration(n) * time.Second).Truncate(time.Second)
+	if platform.Spec.Build.Maven.Timeout.Duration == 0 {
+		n := platform.Spec.Build.Timeout.Duration.Seconds() * 0.75
+		platform.Spec.Build.Maven.Timeout.Duration = (time.Duration(n) * time.Second).Truncate(time.Second)
 	}
 
-	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
-	action.L.Infof("RuntimeVersion set to %s", target.Spec.Build.RuntimeVersion)
-	action.L.Infof("BaseImage set to %s", target.Spec.Build.BaseImage)
-	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
-	action.L.Infof("Timeout set to %s", target.Spec.Build.Timeout)
-	action.L.Infof("Maven Timeout set to %s", target.Spec.Build.Maven.Timeout.Duration)
+	action.L.Infof("CamelVersion set to %s", platform.Spec.Build.CamelVersion)
+	action.L.Infof("RuntimeVersion set to %s", platform.Spec.Build.RuntimeVersion)
+	action.L.Infof("BaseImage set to %s", platform.Spec.Build.BaseImage)
+	action.L.Infof("LocalRepository set to %s", platform.Spec.Build.LocalRepository)
+	action.L.Infof("Timeout set to %s", platform.Spec.Build.Timeout)
+	action.L.Infof("Maven Timeout set to %s", platform.Spec.Build.Maven.Timeout.Duration)
 }
 
 func createPersistentVolumeClaim(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
