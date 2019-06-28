@@ -56,5 +56,5 @@ type FakeClient struct {
 
 // GetScheme ---
 func (c *FakeClient) GetScheme() *runtime.Scheme {
-	return nil
+	return clientscheme.Scheme
 }
