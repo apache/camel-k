@@ -420,8 +420,11 @@ func numPods(ns string) func() int {
 		opts := k8sclient.ListOptions{
 			Namespace: ns,
 		}
-		if err := testClient.List(testContext, &opts, &lst); err != nil {
-			panic(err)
+		if err := testClient.List(testContext, &opts, &lst); err != nil && k8serrors.IsUnauthorized(err) {
+			return 0
+		} else if err != nil {
+			log.Error(err, "Error while listing the pods")
+			return 0
 		}
 		return len(lst.Items)
 	}
