@@ -39,17 +39,40 @@ func (action *initializeAction) Name() string {
 }
 
 func (action *initializeAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
-	return kit.Status.Phase == ""
+	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseInitial || kit.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
 	// The integration platform needs to be initialized before starting to create kits
-	if _, err := platform.GetCurrentPlatform(ctx, action.client, kit.Namespace); err != nil {
+	pl, err := platform.GetCurrentPlatform(ctx, action.client, kit.Namespace)
+	if err != nil {
 		action.L.Info("Waiting for the integration platform to be initialized")
 		return nil, nil
 	}
 
-	_, err := trait.Apply(ctx, action.client, nil, kit)
+	// The integration platform needs to be ready before starting to create integrations
+	if pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
+		action.L.Info("Waiting for the integration platform to be initialized")
+
+		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseWaitingForPlatform {
+			kit.Status.Phase = v1alpha1.IntegrationKitPhaseWaitingForPlatform
+			return kit, nil
+		}
+
+		return nil, nil
+	}
+
+	//
+	// restore phase to initial phase as traits are not aware of
+	// WaitingForPlatform phase
+	//
+	if kit.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform {
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseInitial
+
+		return kit, nil
+	}
+
+	_, err = trait.Apply(ctx, action.client, nil, kit)
 	if err != nil {
 		return nil, err
 	}

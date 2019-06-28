@@ -82,6 +82,10 @@ const (
 	// IntegrationKitTypeExternal --
 	IntegrationKitTypeExternal = "external"
 
+	// IntegrationKitPhaseInitial --
+	IntegrationKitPhaseInitial IntegrationKitPhase = ""
+	// IntegrationKitPhaseWaitingForPlatform --
+	IntegrationKitPhaseWaitingForPlatform IntegrationKitPhase = "Waiting For Platform"
 	// IntegrationKitPhaseBuildSubmitted --
 	IntegrationKitPhaseBuildSubmitted IntegrationKitPhase = "Build Submitted"
 	// IntegrationKitPhaseBuildRunning --
