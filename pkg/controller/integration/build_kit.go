@@ -24,7 +24,6 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/rs/xid"
 )
 
@@ -46,11 +45,11 @@ func (action *buildKitAction) CanHandle(integration *v1alpha1.Integration) bool 
 		integration.Status.Phase == v1alpha1.IntegrationPhaseResolvingKit
 }
 
-func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
 	kit, err := LookupKitForIntegration(ctx, action.client, integration)
 	if err != nil {
 		//TODO: we may need to add a wait strategy, i.e give up after some time
-		return err
+		return nil, err
 	}
 
 	if kit != nil {
@@ -64,57 +63,37 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 				// We need to re-generate a kit or search for a new one that
 				// satisfies integrations needs so let's remove the association
 				// with a kit
-				target := integration.DeepCopy()
-				target.Status.Kit = ""
-				return action.client.Status().Update(ctx, target)
+				integration.Status.Kit = ""
+				return integration, nil
 			}
 		}
 
 		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
-			target := integration.DeepCopy()
-			target.Status.Image = kit.ImageForIntegration()
-			target.Status.Kit = kit.Name
-			target.Status.Phase = v1alpha1.IntegrationPhaseError
+			integration.Status.Image = kit.ImageForIntegration()
+			integration.Status.Kit = kit.Name
+			integration.Status.Phase = v1alpha1.IntegrationPhaseError
 
-			target.Status.Digest, err = digest.ComputeForIntegration(target)
-			if err != nil {
-				return err
-			}
-
-			action.L.Info("Integration state transition", "phase", target.Status.Phase)
-
-			return action.client.Status().Update(ctx, target)
+			return integration, nil
 		}
 
 		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady {
-			target := integration.DeepCopy()
-			target.Status.Image = kit.ImageForIntegration()
-			target.Status.Kit = kit.Name
+			integration.Status.Image = kit.ImageForIntegration()
+			integration.Status.Kit = kit.Name
 
-			dgst, err := digest.ComputeForIntegration(target)
-			if err != nil {
-				return err
+			if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
+				return nil, err
 			}
 
-			target.Status.Digest = dgst
-
-			if _, err := trait.Apply(ctx, action.client, target, kit); err != nil {
-				return err
-			}
-
-			action.L.Info("Integration state transition", "phase", target.Status.Phase)
-
-			return action.client.Status().Update(ctx, target)
+			return integration, nil
 		}
 
 		if integration.Status.Kit == "" {
-			// We need to set the kit
-			target := integration.DeepCopy()
-			target.Status.Kit = kit.Name
-			return action.client.Status().Update(ctx, target)
+			integration.Status.Kit = kit.Name
+
+			return integration, nil
 		}
 
-		return nil
+		return nil, nil
 	}
 
 	platformCtxName := fmt.Sprintf("kit-%s", xid.New())
@@ -137,13 +116,12 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 	}
 
 	if err := action.client.Create(ctx, &platformCtx); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Set the kit name so the next handle loop, will fall through the
 	// same path as integration with a user defined kit
-	target := integration.DeepCopy()
-	target.Status.Kit = platformCtxName
+	integration.Status.Kit = platformCtxName
 
-	return action.client.Status().Update(ctx, target)
+	return integration, nil
 }

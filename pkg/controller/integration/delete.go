@@ -52,18 +52,16 @@ func (action *deleteAction) CanHandle(integration *v1alpha1.Integration) bool {
 	return integration.Status.Phase == v1alpha1.IntegrationPhaseDeleting
 }
 
-func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.Integration) error {
+func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
 	l := log.Log.ForIntegration(integration)
 
 	ok, err := finalizer.Exists(integration, finalizer.CamelIntegrationFinalizer)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !ok {
-		return nil
+		return nil, nil
 	}
-
-	target := integration.DeepCopy()
 
 	// Select all resources created by this integration
 	selectors := []string{
@@ -71,24 +69,24 @@ func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.In
 	}
 
 	l.Info("Collecting resources to delete")
-	resources, err := kubernetes.LookUpResources(ctx, action.client, target.Namespace, selectors)
+	resources, err := kubernetes.LookUpResources(ctx, action.client, integration.Namespace, selectors)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// If the ForegroundDeletion deletion is not set remove the finalizer and
 	// delete child resources from a dedicated goroutine
-	foreground, err := finalizer.Exists(target, finalizer.ForegroundDeletion)
+	foreground, err := finalizer.Exists(integration, finalizer.ForegroundDeletion)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !foreground {
 		//
 		// Async
 		//
-		if err := action.removeFinalizer(ctx, target); err != nil {
-			return err
+		if err := action.removeFinalizer(ctx, integration); err != nil {
+			return nil, err
 		}
 
 		go func() {
@@ -101,14 +99,14 @@ func (action *deleteAction) Handle(ctx context.Context, integration *v1alpha1.In
 		// Sync
 		//
 		if err := action.deleteChildResources(ctx, &l, resources); err != nil {
-			return err
+			return nil, err
 		}
-		if err = action.removeFinalizer(ctx, target); err != nil {
-			return err
+		if err = action.removeFinalizer(ctx, integration); err != nil {
+			return nil, err
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (action *deleteAction) removeFinalizer(ctx context.Context, integration *v1alpha1.Integration) error {
