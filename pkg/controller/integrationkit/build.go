@@ -52,20 +52,20 @@ func (action *buildAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
 		kit.Status.Phase == v1alpha1.IntegrationKitPhaseBuildRunning
 }
 
-func (action *buildAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+func (action *buildAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
 	if kit.Status.Phase == v1alpha1.IntegrationKitPhaseBuildSubmitted {
 		return action.handleBuildSubmitted(ctx, kit)
 	} else if kit.Status.Phase == v1alpha1.IntegrationKitPhaseBuildRunning {
 		return action.handleBuildRunning(ctx, kit)
 	}
 
-	return nil
+	return nil, nil
 }
 
-func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
 	build, err := kubernetes.GetBuild(ctx, action.client, kit.Name, kit.Namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return err
+		return nil, err
 	}
 
 	if err != nil && k8serrors.IsNotFound(err) ||
@@ -75,11 +75,11 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alph
 
 		env, err := trait.Apply(ctx, action.client, nil, kit)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if env.CamelCatalog == nil {
-			return errors.New("undefined camel catalog")
+			return nil, errors.New("undefined camel catalog")
 		}
 
 		build = &v1alpha1.Build{
@@ -104,97 +104,81 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alph
 
 		// Set the integration kit instance as the owner and controller
 		if err := controllerutil.SetControllerReference(kit, build, action.client.GetScheme()); err != nil {
-			return err
+			return nil, err
 		}
 
 		err = action.client.Delete(ctx, build)
 		if err != nil && !k8serrors.IsNotFound(err) {
-			return errors.Wrap(err, "cannot delete build")
+			return nil, errors.Wrap(err, "cannot delete build")
 		}
 
 		err = action.client.Create(ctx, build)
 		if err != nil {
-			return errors.Wrap(err, "cannot create build")
+			return nil, errors.Wrap(err, "cannot create build")
 		}
 	}
 
 	if build.Status.Phase == v1alpha1.BuildPhaseRunning {
-		target := kit.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationKitPhaseBuildRunning
-
-		action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
-
-		return action.client.Status().Update(ctx, target)
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseBuildRunning
+		return kit, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
-func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1.IntegrationKit) error {
+func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
 	build, err := kubernetes.GetBuild(ctx, action.client, kit.Name, kit.Namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	switch build.Status.Phase {
-
 	case v1alpha1.BuildPhaseRunning:
 		action.L.Info("Build running")
-
 	case v1alpha1.BuildPhaseSucceeded:
-		target := kit.DeepCopy()
-
 		// we should ensure that the integration kit is still in the right phase,
 		// if not there is a chance that the kit has been modified by the user
-		if target.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
-			return fmt.Errorf("found kit %s not in the expected phase (expectd=%s, found=%s)",
+		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
+			return nil, fmt.Errorf("found kit %s not in the expected phase (expectd=%s, found=%s)",
 				build.Spec.Meta.Name,
 				string(v1alpha1.IntegrationKitPhaseBuildRunning),
-				string(target.Status.Phase),
+				string(kit.Status.Phase),
 			)
 		}
 
-		target.Status.BaseImage = build.Status.BaseImage
-		target.Status.Image = build.Status.Image
-		target.Status.PublicImage = build.Status.PublicImage
-		target.Status.Phase = v1alpha1.IntegrationKitPhaseReady
-		target.Status.Artifacts = make([]v1alpha1.Artifact, 0, len(build.Status.Artifacts))
+		kit.Status.BaseImage = build.Status.BaseImage
+		kit.Status.Image = build.Status.Image
+		kit.Status.PublicImage = build.Status.PublicImage
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseReady
+		kit.Status.Artifacts = make([]v1alpha1.Artifact, 0, len(build.Status.Artifacts))
 
 		for _, a := range build.Status.Artifacts {
 			// do not include artifact location
-			target.Status.Artifacts = append(target.Status.Artifacts, v1alpha1.Artifact{
+			kit.Status.Artifacts = append(kit.Status.Artifacts, v1alpha1.Artifact{
 				ID:       a.ID,
 				Location: "",
 				Target:   a.Target,
 			})
 		}
 
-		action.L.Info("IntegrationKit state transition", "phase", target.Status.Phase)
-		if err := action.client.Status().Update(ctx, target); err != nil {
-			return err
-		}
-
+		return kit, err
 	case v1alpha1.BuildPhaseError, v1alpha1.BuildPhaseInterrupted:
-		target := kit.DeepCopy()
-
 		// we should ensure that the integration kit is still in the right phase,
 		// if not there is a chance that the kit has been modified by the user
-		if target.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
-			return fmt.Errorf("found kit %s not the an expected phase (expectd=%s, found=%s)",
+		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
+			return nil, fmt.Errorf("found kit %s not the an expected phase (expectd=%s, found=%s)",
 				build.Spec.Meta.Name,
 				string(v1alpha1.IntegrationKitPhaseBuildRunning),
-				string(target.Status.Phase),
+				string(kit.Status.Phase),
 			)
 		}
 
 		// Let's copy the build failure to the integration kit status
-		target.Status.Failure = build.Status.Failure
-		target.Status.Phase = v1alpha1.IntegrationKitPhaseError
+		kit.Status.Failure = build.Status.Failure
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseError
 
-		action.L.Error(fmt.Errorf(build.Status.Error), "IntegrationKit state transition", "phase", target.Status.Phase)
-
-		return action.client.Status().Update(ctx, target)
+		return kit, nil
 	}
 
-	return nil
+	return nil, nil
 }
