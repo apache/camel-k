@@ -43,10 +43,8 @@ func (action *initializeAction) CanHandle(build *v1alpha1.Build) bool {
 }
 
 // Handle handles the builds
-func (action *initializeAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
-	target := build.DeepCopy()
-	target.Status.Phase = v1alpha1.BuildPhaseScheduling
-	action.L.Info("Build state transition", "phase", target.Status.Phase)
+func (action *initializeAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+	build.Status.Phase = v1alpha1.BuildPhaseScheduling
 
-	return action.client.Status().Update(ctx, target)
+	return build, nil
 }

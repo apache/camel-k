@@ -56,7 +56,7 @@ func (action *scheduleRoutineAction) CanHandle(build *v1alpha1.Build) bool {
 }
 
 // Handle handles the builds
-func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
+func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	// Enter critical section
 	action.lock.Lock()
 	defer action.lock.Unlock()
@@ -67,7 +67,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	// atomically by write operations
 	err := action.reader.List(ctx, options, builds)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Emulate a serialized working queue to only allow one build to run at a given time.
@@ -82,7 +82,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 
 	if hasScheduledBuild {
 		// Let's requeue the build in case one is already running
-		return nil
+		return nil, nil
 	}
 
 	// Transition the build to running state
@@ -91,14 +91,14 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	action.L.Info("Build state transition", "phase", target.Status.Phase)
 	err = action.client.Status().Update(ctx, target)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// and run it asynchronously to avoid blocking the reconcile loop
 	action.routines.Store(build.Name, true)
 	go action.build(ctx, build)
 
-	return nil
+	return nil, nil
 }
 
 func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.Build) {

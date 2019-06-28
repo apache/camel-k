@@ -55,11 +55,11 @@ func (action *errorRecoveryAction) CanHandle(build *v1alpha1.Build) bool {
 	return build.Status.Phase == v1alpha1.BuildPhaseFailed
 }
 
-func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
+func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	// The integration platform must be initialized before handling the error recovery
 	if _, err := platform.GetCurrentPlatform(ctx, action.client, build.Namespace); err != nil {
 		action.L.Info("Waiting for an integration platform to be initialized")
-		return nil
+		return nil, nil
 	}
 
 	if build.Status.Failure == nil {
@@ -75,17 +75,12 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 
 	err := action.client.Status().Update(ctx, build)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	target := build.DeepCopy()
-
 	if build.Status.Failure.Recovery.Attempt >= build.Status.Failure.Recovery.AttemptMax {
-		target.Status.Phase = v1alpha1.BuildPhaseError
-
-		action.L.Info("Max recovery attempt reached, transition to error phase")
-
-		return action.client.Status().Update(ctx, target)
+		build.Status.Phase = v1alpha1.BuildPhaseError
+		return build, nil
 	}
 
 	lastAttempt := build.Status.Failure.Recovery.AttemptTime.Time
@@ -97,19 +92,19 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 	elapsedMin := action.backOff.ForAttempt(float64(build.Status.Failure.Recovery.Attempt)).Seconds()
 
 	if elapsed < elapsedMin {
-		return nil
+		return nil, nil
 	}
 
-	target.Status = v1alpha1.BuildStatus{}
-	target.Status.Phase = ""
-	target.Status.Failure = build.Status.Failure
-	target.Status.Failure.Recovery.Attempt = build.Status.Failure.Recovery.Attempt + 1
-	target.Status.Failure.Recovery.AttemptTime = metav1.Now()
+	build.Status = v1alpha1.BuildStatus{}
+	build.Status.Phase = ""
+	build.Status.Failure = build.Status.Failure
+	build.Status.Failure.Recovery.Attempt = build.Status.Failure.Recovery.Attempt + 1
+	build.Status.Failure.Recovery.AttemptTime = metav1.Now()
 
 	action.L.Infof("Recovery attempt (%d/%d)",
-		target.Status.Failure.Recovery.Attempt,
-		target.Status.Failure.Recovery.AttemptMax,
+		build.Status.Failure.Recovery.Attempt,
+		build.Status.Failure.Recovery.AttemptMax,
 	)
 
-	return action.client.Status().Update(ctx, target)
+	return build, nil
 }

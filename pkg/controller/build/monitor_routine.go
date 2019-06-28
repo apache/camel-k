@@ -49,19 +49,15 @@ func (action *monitorRoutineAction) CanHandle(build *v1alpha1.Build) bool {
 }
 
 // Handle handles the builds
-func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) error {
-	target := build.DeepCopy()
-
+func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	// Check the build routine
 	if _, ok := action.routines.Load(build.Name); !ok {
 		// and reschedule the build if it's missing. This can happen when the operator
 		// stops abruptly and restarts.
-		target.Status.Phase = v1alpha1.BuildPhaseScheduling
+		build.Status.Phase = v1alpha1.BuildPhaseScheduling
 
-		action.L.Info("Build state transition", "phase", target.Status.Phase)
-
-		return action.client.Status().Update(ctx, target)
+		return build, nil
 	}
 
-	return nil
+	return nil, nil
 }
