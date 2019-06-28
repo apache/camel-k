@@ -45,13 +45,13 @@ func (action *createAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bo
 	return platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseCreating
 }
 
-func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
+func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
 	for k := range deploy.Resources {
 		if strings.HasPrefix(k, "camel-catalog-") {
 			action.L.Infof("Installing camel catalog: %s", k)
 			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, k)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
@@ -75,14 +75,12 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 			action.L.Info("Installing custom platform resources")
 			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, res...)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 
-	target := platform.DeepCopy()
-	target.Status.Phase = v1alpha1.IntegrationPlatformPhaseStarting
-	action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
+	platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseStarting
 
-	return action.client.Status().Update(ctx, target)
+	return platform, nil
 }

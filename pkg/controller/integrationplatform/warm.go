@@ -45,7 +45,7 @@ func (action *warmAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bool
 	return platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseWarming
 }
 
-func (action *warmAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
+func (action *warmAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
 	// Check Kaniko warmer pod status
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -60,24 +60,22 @@ func (action *warmAction) Handle(ctx context.Context, platform *v1alpha1.Integra
 
 	err := action.client.Get(ctx, types.NamespacedName{Namespace: pod.Namespace, Name: pod.Name}, &pod)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	switch pod.Status.Phase {
 
 	case corev1.PodSucceeded:
 		action.L.Info("Kaniko cache successfully warmed up")
-		target := platform.DeepCopy()
-		target.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
-		action.L.Info("IntegrationPlatform state transition", "phase", target.Status.Phase)
-		return action.client.Status().Update(ctx, target)
+		platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+		return platform, nil
 
 	case corev1.PodFailed:
-		return errors.New("failed to warm up Kaniko cache")
+		return nil, errors.New("failed to warm up Kaniko cache")
 
 	default:
 		action.L.Info("Waiting for Kaniko cache to warm up...")
 		// Requeue
-		return nil
+		return nil, nil
 	}
 }
