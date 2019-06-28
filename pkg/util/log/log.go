@@ -35,6 +35,11 @@ func init() {
 	}
 }
 
+// Injectable identifies objects that can receive a Logger
+type Injectable interface {
+	InjectLogger(Logger)
+}
+
 // Logger --
 type Logger struct {
 	delegate logr.Logger
