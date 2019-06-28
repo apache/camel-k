@@ -53,21 +53,8 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 		return errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
 	}
 
-	env, err := trait.Apply(ctx, action.client, integration, kit)
-	if err != nil {
+	if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
 		return err
-	}
-
-	err = kubernetes.ReplaceResources(ctx, action.client, env.Resources.Items())
-	if err != nil {
-		return err
-	}
-
-	for _, postAction := range env.PostActions {
-		err := postAction(env)
-		if err != nil {
-			action.L.Errorf(err, "error executing deployment post action")
-		}
 	}
 
 	target := integration.DeepCopy()
