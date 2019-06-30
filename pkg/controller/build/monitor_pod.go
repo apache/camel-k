@@ -62,17 +62,21 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Buil
 		}
 	}
 
+	var buildPhase v1alpha1.BuildPhase
+
 	switch pod.Status.Phase {
 	case corev1.PodSucceeded:
-		build.Status.Phase = v1alpha1.BuildPhaseSucceeded
+		buildPhase = v1alpha1.BuildPhaseSucceeded
 	case corev1.PodFailed:
-		build.Status.Phase = v1alpha1.BuildPhaseFailed
+		buildPhase = v1alpha1.BuildPhaseFailed
 	}
 
-	if build.Status.Phase == build.Status.Phase {
+	if build.Status.Phase == buildPhase {
 		// Status is already up-to-date
 		return nil, nil
 	}
+
+	build.Status.Phase = buildPhase
 
 	return build, nil
 }
