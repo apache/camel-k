@@ -96,9 +96,8 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 	}
 
 	build.Status = v1alpha1.BuildStatus{}
-	build.Status.Phase = ""
-	build.Status.Failure = build.Status.Failure
-	build.Status.Failure.Recovery.Attempt = build.Status.Failure.Recovery.Attempt + 1
+	build.Status.Phase = v1alpha1.BuildPhaseInitial
+	build.Status.Failure.Recovery.Attempt++
 	build.Status.Failure.Recovery.AttemptTime = metav1.Now()
 
 	action.L.Infof("Recovery attempt (%d/%d)",
