@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -83,20 +85,20 @@ func (command *describePlatformCommand) run(args []string) error {
 }
 
 func (command *describePlatformCommand) describeIntegrationPlatform(platform v1alpha1.IntegrationPlatform) string {
-	return indentedString(func(out io.Writer) {
-		w := newIndentedWriter(out)
+	return indentedwriter.IndentedString(func(out io.Writer) {
+		w := indentedwriter.NewWriter(out)
 		describeObjectMeta(w, platform.ObjectMeta)
-		w.write(0, "Phase:\t%s\n", platform.Status.Phase)
-		w.write(0, "Base Image:\t%s\n", platform.Spec.Build.BaseImage)
-		w.write(0, "Camel Version:\t%s\n", platform.Spec.Build.CamelVersion)
-		w.write(0, "Local Repository:\t%s\n", platform.Spec.Build.LocalRepository)
-		w.write(0, "Publish Strategy:\t%s\n", platform.Spec.Build.PublishStrategy)
+		w.Write(0, "Phase:\t%s\n", platform.Status.Phase)
+		w.Write(0, "Base Image:\t%s\n", platform.Spec.Build.BaseImage)
+		w.Write(0, "Camel Version:\t%s\n", platform.Spec.Build.CamelVersion)
+		w.Write(0, "Local Repository:\t%s\n", platform.Spec.Build.LocalRepository)
+		w.Write(0, "Publish Strategy:\t%s\n", platform.Spec.Build.PublishStrategy)
 
 		if len(platform.Spec.Resources.Kits) > 0 {
-			w.write(0, "Resources:\n")
-			w.write(1, "Kits:\n")
+			w.Write(0, "Resources:\n")
+			w.Write(1, "Kits:\n")
 			for _, kit := range platform.Spec.Resources.Kits {
-				w.write(2, "%s\n", kit)
+				w.Write(2, "%s\n", kit)
 			}
 		}
 	})

@@ -22,6 +22,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -85,54 +87,54 @@ func (command *describeIntegrationCommand) run(args []string) error {
 }
 
 func (command *describeIntegrationCommand) describeIntegration(i v1alpha1.Integration) string {
-	return indentedString(func(out io.Writer) {
-		w := newIndentedWriter(out)
+	return indentedwriter.IndentedString(func(out io.Writer) {
+		w := indentedwriter.NewWriter(out)
 
 		describeObjectMeta(w, i.ObjectMeta)
 
-		w.write(0, "Phase:\t%s\n", i.Status.Phase)
-		w.write(0, "Camel Version:\t%s\n", i.Status.CamelVersion)
-		w.write(0, "Kit:\t%s\n", i.Status.Kit)
-		w.write(0, "Image:\t%s\n", i.Status.Image)
+		w.Write(0, "Phase:\t%s\n", i.Status.Phase)
+		w.Write(0, "Camel Version:\t%s\n", i.Status.CamelVersion)
+		w.Write(0, "Kit:\t%s\n", i.Status.Kit)
+		w.Write(0, "Image:\t%s\n", i.Status.Image)
 
 		if len(i.Spec.Configuration) > 0 {
-			w.write(0, "Configuration:\n")
+			w.Write(0, "Configuration:\n")
 			for _, config := range i.Spec.Configuration {
-				w.write(1, "Type:\t%s\n", config.Type)
-				w.write(1, "Value:\t%s\n", config.Value)
+				w.Write(1, "Type:\t%s\n", config.Type)
+				w.Write(1, "Value:\t%s\n", config.Value)
 			}
 		}
 
 		if len(i.Status.Dependencies) > 0 {
-			w.write(0, "Dependencies:\n")
+			w.Write(0, "Dependencies:\n")
 			for _, dependency := range i.Status.Dependencies {
-				w.write(1, "%s\n", dependency)
+				w.Write(1, "%s\n", dependency)
 			}
 		}
 
 		if len(i.Spec.Repositories) > 0 {
-			w.write(0, "Repositories:\n")
+			w.Write(0, "Repositories:\n")
 			for _, repository := range i.Spec.Repositories {
-				w.write(1, "%s\n", repository)
+				w.Write(1, "%s\n", repository)
 			}
 		}
 
 		if len(i.Spec.Resources) > 0 {
-			w.write(0, "Resources:\n")
+			w.Write(0, "Resources:\n")
 			for _, resource := range i.Spec.Resources {
-				w.write(1, "Content:\n")
-				w.write(2, "%s\n", strings.TrimSpace(resource.Content))
-				w.write(1, "Name:\t%s\n", resource.Name)
-				w.write(1, "Type:\t%s\n", resource.Type)
+				w.Write(1, "Content:\n")
+				w.Write(2, "%s\n", strings.TrimSpace(resource.Content))
+				w.Write(1, "Name:\t%s\n", resource.Name)
+				w.Write(1, "Type:\t%s\n", resource.Type)
 			}
 		}
 
 		if len(i.Sources()) > 0 {
-			w.write(0, "Sources:\n")
+			w.Write(0, "Sources:\n")
 			for _, s := range i.Sources() {
-				w.write(1, "Name:\t%s\n", s.Name)
-				w.write(1, "Content:\n")
-				w.write(2, "%s\n", strings.TrimSpace(s.Content))
+				w.Write(1, "Name:\t%s\n", s.Name)
+				w.Write(1, "Content:\n")
+				w.Write(2, "%s\n", strings.TrimSpace(s.Content))
 			}
 		}
 

@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -84,41 +86,41 @@ func (command *describeKitCommand) run(args []string) error {
 }
 
 func (command *describeKitCommand) describeIntegrationKit(kit v1alpha1.IntegrationKit) string {
-	return indentedString(func(out io.Writer) {
-		w := newIndentedWriter(out)
+	return indentedwriter.IndentedString(func(out io.Writer) {
+		w := indentedwriter.NewWriter(out)
 
 		describeObjectMeta(w, kit.ObjectMeta)
 
-		w.write(0, "Phase:\t%s\n", kit.Status.Phase)
-		w.write(0, "Camel Version:\t%s\n", kit.Status.CamelVersion)
-		w.write(0, "Image:\t%s\n", kit.Status.Image)
+		w.Write(0, "Phase:\t%s\n", kit.Status.Phase)
+		w.Write(0, "Camel Version:\t%s\n", kit.Status.CamelVersion)
+		w.Write(0, "Image:\t%s\n", kit.Status.Image)
 
 		if len(kit.Status.Artifacts) > 0 {
-			w.write(0, "Artifacts:\t\n")
+			w.Write(0, "Artifacts:\t\n")
 			for _, artifact := range kit.Status.Artifacts {
-				w.write(1, "%s\n", artifact.ID)
+				w.Write(1, "%s\n", artifact.ID)
 			}
 		}
 
 		if len(kit.Spec.Configuration) > 0 {
-			w.write(0, "Configuration:\n")
+			w.Write(0, "Configuration:\n")
 			for _, config := range kit.Spec.Configuration {
-				w.write(1, "Type:\t%s\n", config.Type)
-				w.write(1, "Value:\t%s\n", config.Value)
+				w.Write(1, "Type:\t%s\n", config.Type)
+				w.Write(1, "Value:\t%s\n", config.Value)
 			}
 		}
 
 		if len(kit.Spec.Dependencies) > 0 {
-			w.write(0, "Dependencies:\t\n")
+			w.Write(0, "Dependencies:\t\n")
 			for _, dependency := range kit.Spec.Dependencies {
-				w.write(1, "%s\n", dependency)
+				w.Write(1, "%s\n", dependency)
 			}
 		}
 
 		if len(kit.Spec.Repositories) > 0 {
-			w.write(0, "Repositories:\n")
+			w.Write(0, "Repositories:\n")
 			for _, repository := range kit.Spec.Repositories {
-				w.write(1, "%s\n", repository)
+				w.Write(1, "%s\n", repository)
 			}
 		}
 
