@@ -77,8 +77,8 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 	// higher level controller (e.g. Knative source controller)
 
 	// execute custom initialization
-	if _, err := trait.Apply(ctx, action.client, target, nil); err != nil {
-		return err
+	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
+		return nil, err
 	}
 
 	integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
