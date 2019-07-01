@@ -54,7 +54,7 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 	}
 
 	if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
-		return err
+		return nil, err
 	}
 
 	target := integration.DeepCopy()
