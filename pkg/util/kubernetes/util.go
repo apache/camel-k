@@ -119,6 +119,40 @@ func GetSecret(context context.Context, client client.Client, name string, names
 	return &answer, nil
 }
 
+// GetIntegrationPlatforms --
+func GetIntegrationPlatforms(context context.Context, client client.Client, namespace string) (v1alpha1.IntegrationPlatformList, error) {
+	list := v1alpha1.NewIntegrationPlatformList()
+	opts := k8sclient.ListOptions{Namespace: namespace}
+	err := client.List(context, &opts, &list)
+
+	return list, err
+}
+
+// GetIntegrationPlatform --
+func GetIntegrationPlatform(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationPlatform, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	answer := v1alpha1.NewIntegrationPlatform(namespace, name)
+
+	if err := client.Get(context, key, &answer); err != nil {
+		return nil, err
+	}
+
+	return &answer, nil
+}
+
+// GetIntegrationKits --
+func GetIntegrationKits(context context.Context, client client.Client, namespace string) (v1alpha1.IntegrationKitList, error) {
+	list := v1alpha1.NewIntegrationKitList()
+	opts := k8sclient.ListOptions{Namespace: namespace}
+	err := client.List(context, &opts, &list)
+
+	return list, err
+}
+
 // GetIntegrationKit --
 func GetIntegrationKit(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.IntegrationKit, error) {
 	key := k8sclient.ObjectKey{
@@ -135,6 +169,15 @@ func GetIntegrationKit(context context.Context, client client.Client, name strin
 	return &answer, nil
 }
 
+// GetIntegrations --
+func GetIntegrations(context context.Context, client client.Client, namespace string) (v1alpha1.IntegrationList, error) {
+	list := v1alpha1.NewIntegrationList()
+	opts := k8sclient.ListOptions{Namespace: namespace}
+	err := client.List(context, &opts, &list)
+
+	return list, err
+}
+
 // GetIntegration --
 func GetIntegration(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.Integration, error) {
 	key := k8sclient.ObjectKey{
@@ -149,6 +192,15 @@ func GetIntegration(context context.Context, client client.Client, name string, 
 	}
 
 	return &answer, nil
+}
+
+// GetBuilds --
+func GetBuilds(context context.Context, client client.Client, namespace string) (v1alpha1.BuildList, error) {
+	list := v1alpha1.NewBuildList()
+	opts := k8sclient.ListOptions{Namespace: namespace}
+	err := client.List(context, &opts, &list)
+
+	return list, err
 }
 
 // GetBuild --

@@ -22,19 +22,26 @@ limitations under the License.
 package e2e
 
 import (
+	"bufio"
 	"context"
+	"fmt"
+	"io"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
+
+	"io/ioutil"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	projectv1 "github.com/openshift/api/project/v1"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -224,6 +231,32 @@ func operatorPod(ns string) func() *v1.Pod {
 	}
 }
 
+func buildPods(ns string) []v1.Pod {
+	lst := v1.PodList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+	}
+
+	selector, err := labels.Parse("openshift.io/build.name")
+	if err != nil {
+		panic(err)
+	}
+
+	opts := k8sclient.ListOptions{
+		LabelSelector: selector,
+		Namespace:     ns,
+	}
+	if err := testClient.List(testContext, &opts, &lst); err != nil {
+		panic(err)
+	}
+	if len(lst.Items) == 0 {
+		return nil
+	}
+	return lst.Items
+}
+
 /*
 	Namespace testing functions
 */
@@ -231,6 +264,11 @@ func operatorPod(ns string) func() *v1.Pod {
 func withNewTestNamespace(doRun func(string)) {
 	ns := newTestNamespace()
 	defer deleteTestNamespace(ns)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go dumpStats(ctx, ns.GetName())
+	defer cancel()
 
 	doRun(ns.GetName())
 }
@@ -294,4 +332,182 @@ func newTestNamespace() metav1.Object {
 		panic(err)
 	}
 	return obj.(metav1.Object)
+}
+
+func dumpStats(ctx context.Context, namespace string) {
+	ticker := time.NewTicker(5 * time.Second)
+
+	var op *v1.Pod
+
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Context done, giving up")
+			return
+		case <-ticker.C:
+			p, err := kubernetes.GetIntegrationPlatforms(ctx, testClient, namespace)
+			if err != nil {
+				fmt.Printf("Error while retrieving integration platform list from namespace %s: %s\n", namespace, err)
+				continue
+			}
+			k, err := kubernetes.GetIntegrationKits(ctx, testClient, namespace)
+			if err != nil {
+				fmt.Printf("Error while retrieving integration kit list from namespace %s: %s\n", namespace, err)
+				continue
+			}
+			i, err := kubernetes.GetIntegrations(ctx, testClient, namespace)
+			if err != nil {
+				fmt.Printf("Error while retrieving integration list from namespace %s: %s\n", namespace, err)
+				continue
+			}
+			b, err := kubernetes.GetBuilds(ctx, testClient, namespace)
+			if err != nil {
+				fmt.Printf("Error while retrieving buil list from namespace %s: %s\n", namespace, err)
+				continue
+			}
+
+			if len(p.Items) > 0 || len(k.Items) > 0 || len(i.Items) > 0 || len(b.Items) > 0 {
+				fmt.Printf("\n")
+				fmt.Printf("Namespace: %s\n", namespace)
+				fmt.Printf("Resources:\n")
+
+				fmt.Printf(indentedwriter.IndentedString(func(out io.Writer) {
+					w := indentedwriter.NewWriter(out)
+					w.Write(1, "Type\tName\tPhase\tReason\tSince Creation\n")
+
+					for _, e := range p.Items {
+						w.Write(1, "%s\t%s\t%s\t%s\t%s\n",
+							e.TypeMeta.Kind,
+							e.Name,
+							e.Status.Phase,
+							"",
+							time.Since(e.CreationTimestamp.Time).Truncate(time.Second))
+					}
+					for _, e := range k.Items {
+						reason := ""
+
+						if e.Status.Failure != nil {
+							reason = e.Status.Failure.Reason
+						}
+
+						w.Write(1, "%s\t%s\t%s\t%s\t%s\n",
+							e.TypeMeta.Kind,
+							e.Name,
+							e.Status.Phase,
+							reason,
+							time.Since(e.CreationTimestamp.Time).Truncate(time.Second))
+
+					}
+					for _, e := range i.Items {
+						reason := ""
+
+						if e.Status.Failure != nil {
+							reason = e.Status.Failure.Reason
+						}
+
+						w.Write(1, "%s\t%s\t%s\t%s\t%s\n",
+							e.TypeMeta.Kind,
+							e.Name,
+							e.Status.Phase,
+							reason,
+							time.Since(e.CreationTimestamp.Time).Truncate(time.Second))
+					}
+					for _, e := range b.Items {
+						reason := ""
+
+						if e.Status.Failure != nil {
+							reason = e.Status.Failure.Reason
+						}
+
+						w.Write(1, "%s\t%s\t%s\t%s\t%s\n",
+							e.TypeMeta.Kind,
+							e.Name,
+							e.Status.Phase,
+							reason,
+							time.Since(e.CreationTimestamp.Time).Truncate(time.Second))
+					}
+
+					w.Flush()
+				}))
+			}
+
+			if op == nil {
+				op = operatorPod(namespace)()
+			}
+
+			if op != nil {
+				containerName := ""
+				if len(op.Spec.Containers) > 1 {
+					containerName = op.Spec.Containers[0].Name
+				}
+				tail := int64(5)
+				logOptions := v1.PodLogOptions{
+					Follow:    false,
+					Container: containerName,
+					TailLines: &tail,
+				}
+				byteReader, err := testClient.CoreV1().Pods(namespace).GetLogs(op.Name, &logOptions).Context(testContext).Stream()
+				if err != nil {
+					fmt.Printf("Error while reading the pod logs: %s\n", err)
+					continue
+				}
+
+				fmt.Printf("Operator Logs:\n")
+				fmt.Printf(indentedwriter.IndentedString(func(out io.Writer) {
+					w := indentedwriter.NewWriter(out)
+
+					scanner := bufio.NewScanner(byteReader)
+					for scanner.Scan() {
+						w.Write(1, scanner.Text()+"\n")
+					}
+					if err := scanner.Err(); err != nil {
+						fmt.Printf("Error while reading the pod logs content: %s\n", err)
+					}
+				}))
+
+				if err := byteReader.Close(); err != nil {
+					fmt.Printf("Error closing the stream: %s\n", err)
+					continue
+				}
+			}
+
+			buildPods := buildPods(namespace)
+
+			if buildPods != nil && len(buildPods) > 0 {
+				fmt.Printf("Build Logs:\n")
+				for _, bp := range buildPods {
+					containerName := ""
+					if len(bp.Spec.Containers) > 1 {
+						containerName = bp.Spec.Containers[0].Name
+					}
+					tail := int64(5)
+					logOptions := v1.PodLogOptions{
+						Follow:    false,
+						Container: containerName,
+						TailLines: &tail,
+					}
+					fmt.Printf(indentedwriter.IndentedString(func(out io.Writer) {
+						w := indentedwriter.NewWriter(out)
+
+						byteReader, err := testClient.CoreV1().Pods(namespace).GetLogs(bp.Name, &logOptions).Context(testContext).Stream()
+						if err != nil {
+							w.Write(1, "Error while reading the pod logs: %s\n", err)
+							return
+						}
+
+						scanner := bufio.NewScanner(byteReader)
+						for scanner.Scan() {
+							w.Write(1, "%s: %s\n", bp.Name, scanner.Text())
+						}
+						if err := scanner.Err(); err != nil {
+							w.Write(1, "Error while reading the pod logs content: %s\n", err)
+						}
+						if err := byteReader.Close(); err != nil {
+							w.Write(1, "Error closing the stream: %s\n", err)
+						}
+					}))
+				}
+			}
+		}
+	}
 }
