@@ -37,10 +37,12 @@ services:
   - docker
 
 before_script:
-  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b . v1.17.1
+  - curl -sfL https://raw.githubusercontent.com/boz/kail/master/godownloader.sh | sh -s -- -b .
+  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b . v1.17.1
   - ./golangci-lint config path
   - ./golangci-lint --version
 
 script:
   - ./golangci-lint run --verbose --config .golangci.yml || travis_terminate 1;
-  - ./script/travis_build.sh
+  - ./script/travis_build.sh 2>&1 > /dev/null &
+  - kail
