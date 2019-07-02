@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 )
 
@@ -39,18 +38,11 @@ func (action *initializeAction) Name() string {
 }
 
 func (action *initializeAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
-	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseInitial || kit.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform
+	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseInitialization
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
-	// The integration platform needs to be initialized before starting to create kits
-	_, err := platform.GetCurrentPlatform(ctx, action.client, kit.Namespace)
-	if err != nil {
-		action.L.Info("Waiting for the integration platform to be initialized")
-		return nil, nil
-	}
-
-	_, err = trait.Apply(ctx, action.client, nil, kit)
+	_, err := trait.Apply(ctx, action.client, nil, kit)
 	if err != nil {
 		return nil, err
 	}

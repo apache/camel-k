@@ -24,24 +24,24 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 )
 
-// NewMonitorAction creates a new monitoring action for an integration
-func NewMonitorAction() Action {
-	return &monitorAction{}
+// NewErrorAction creates a new error action for an integration
+func NewErrorAction() Action {
+	return &errorAction{}
 }
 
-type monitorAction struct {
+type errorAction struct {
 	baseAction
 }
 
-func (action *monitorAction) Name() string {
-	return "monitor"
+func (action *errorAction) Name() string {
+	return "error"
 }
 
-func (action *monitorAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseRunning
+func (action *errorAction) CanHandle(integration *v1alpha1.Integration) bool {
+	return integration.Status.Phase == v1alpha1.IntegrationPhaseError
 }
 
-func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
+func (action *errorAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
 	hash, err := digest.ComputeForIntegration(integration)
 	if err != nil {
 		return nil, err

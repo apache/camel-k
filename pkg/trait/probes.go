@@ -58,14 +58,14 @@ func newProbesTrait() *probesTrait {
 
 func (t *probesTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && *t.Enabled {
-		return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitial) || e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+		return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) || e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 	}
 
 	return false, nil
 }
 
 func (t *probesTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitial) {
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "runtime:health")
 
 		// sort the dependencies to get always the same list if they don't change

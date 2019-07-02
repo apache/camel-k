@@ -57,8 +57,7 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 		return nil, err
 	}
 
-	target := integration.DeepCopy()
-	target.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
 
 	return integration, nil
 }

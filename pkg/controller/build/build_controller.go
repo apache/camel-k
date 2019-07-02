@@ -21,6 +21,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/apache/camel-k/pkg/platform"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -161,6 +162,34 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		return reconcile.Result{}, err
 	}
 
+	target := instance.DeepCopy()
+	targetLog := rlog.ForBuild(target)
+
+	if target.Status.Phase == v1alpha1.BuildPhaseNone || target.Status.Phase == v1alpha1.BuildPhaseWaitingForPlatform {
+		pl, err := platform.GetCurrentPlatform(ctx, r.client, target.Namespace)
+		switch {
+		case err != nil:
+			target.Status.Phase = v1alpha1.BuildPhaseError
+			target.Status.Failure = v1alpha1.NewErrorFailure(err)
+		case pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady:
+			target.Status.Phase = v1alpha1.BuildPhaseWaitingForPlatform
+		default:
+			target.Status.Phase = v1alpha1.BuildPhaseInitialization
+		}
+
+		if instance.Status.Phase != target.Status.Phase {
+			err = r.update(ctx, target)
+			if err != nil {
+				if k8serrors.IsConflict(err) {
+					targetLog.Error(err, "conflict")
+					err = nil
+				}
+			}
+		}
+
+		return reconcile.Result{}, err
+	}
+
 	actions := []Action{
 		NewInitializeAction(),
 		NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
@@ -168,13 +197,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		NewMonitorRoutineAction(&r.routines),
 		NewMonitorPodAction(),
 		NewErrorRecoveryAction(),
+		NewErrorAction(),
 	}
-
-	var err error
-
-	target := instance.DeepCopy()
-	targetPhase := target.Status.Phase
-	targetLog := rlog.ForBuild(target)
 
 	for _, a := range actions {
 		a.InjectClient(r.client)
@@ -183,15 +207,13 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		if a.CanHandle(target) {
 			targetLog.Infof("Invoking action %s", a.Name())
 
-			phaseFrom := target.Status.Phase
-
-			target, err = a.Handle(ctx, target)
+			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
 				return reconcile.Result{}, err
 			}
 
-			if target != nil {
-				if err := r.client.Status().Update(ctx, target); err != nil {
+			if newTarget != nil {
+				if err := r.update(ctx, newTarget); err != nil {
 					if k8serrors.IsConflict(err) {
 						targetLog.Error(err, "conflict")
 						return reconcile.Result{
@@ -202,15 +224,15 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 					return reconcile.Result{}, err
 				}
 
-				targetPhase = target.Status.Phase
-
-				if targetPhase != phaseFrom {
+				if newTarget.Status.Phase != target.Status.Phase {
 					targetLog.Info(
 						"state transition",
-						"phase-from", phaseFrom,
-						"phase-to", target.Status.Phase,
+						"phase-from", target.Status.Phase,
+						"phase-to", newTarget.Status.Phase,
 					)
 				}
+
+				target = newTarget
 			}
 
 			// handle one action at time so the resource
@@ -220,11 +242,16 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 
 	// Requeue scheduling build so that it re-enters the build working queue
-	if targetPhase == v1alpha1.BuildPhaseScheduling || targetPhase == v1alpha1.BuildPhaseFailed {
+	if target.Status.Phase == v1alpha1.BuildPhaseScheduling || target.Status.Phase == v1alpha1.BuildPhaseFailed {
 		return reconcile.Result{
 			RequeueAfter: 5 * time.Second,
 		}, nil
 	}
 
 	return reconcile.Result{}, nil
+}
+
+// Update --
+func (r *ReconcileBuild) update(ctx context.Context, target *v1alpha1.Build) error {
+	return r.client.Status().Update(ctx, target)
 }
