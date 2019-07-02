@@ -142,8 +142,10 @@ const (
 	// IntegrationKind --
 	IntegrationKind string = "Integration"
 
-	// IntegrationPhaseInitial --
-	IntegrationPhaseInitial IntegrationPhase = ""
+	// IntegrationPhaseNone --
+	IntegrationPhaseNone IntegrationPhase = ""
+	// IntegrationPhaseInitialization --
+	IntegrationPhaseInitialization IntegrationPhase = "initialization"
 	// IntegrationPhaseWaitingForPlatform --
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
 	// IntegrationPhaseBuildingKit --

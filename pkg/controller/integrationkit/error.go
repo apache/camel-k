@@ -15,36 +15,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package build
+package integrationkit
 
 import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/digest"
 )
 
-// NewInitializeAction creates a new initialize action
-func NewInitializeAction() Action {
-	return &initializeAction{}
+// NewErrorAction creates a new error handling action for the kit
+func NewErrorAction() Action {
+	return &errorAction{}
 }
 
-type initializeAction struct {
+type errorAction struct {
 	baseAction
 }
 
-// Name returns a common name of the action
-func (action *initializeAction) Name() string {
-	return "initialize"
+func (action *errorAction) Name() string {
+	return "error"
 }
 
-// CanHandle tells whether this action can handle the build
-func (action *initializeAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseInitialization
+func (action *errorAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
+	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseError
 }
 
-// Handle handles the builds
-func (action *initializeAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
-	build.Status.Phase = v1alpha1.BuildPhaseScheduling
+func (action *errorAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
+	hash, err := digest.ComputeForIntegrationKit(kit)
+	if err != nil {
+		return nil, err
+	}
+	if hash != kit.Status.Digest {
+		action.L.Info("IntegrationKit needs a rebuild")
 
-	return build, nil
+		kit.Status.Digest = hash
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
+
+		return kit, nil
+	}
+
+	return nil, nil
 }

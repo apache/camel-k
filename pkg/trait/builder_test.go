@@ -66,7 +66,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 
 	for _, e := range environments {
 		e := e // pin
-		e.IntegrationKit.Status.Phase = ""
+		e.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
 
 		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)

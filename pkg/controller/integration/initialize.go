@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 )
 
@@ -41,42 +40,11 @@ func (action *initializeAction) Name() string {
 
 // CanHandle tells whether this action can handle the integration
 func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseInitial || integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform
+	return integration.Status.Phase == v1alpha1.IntegrationPhaseInitialization
 }
 
 // Handle handles the integrations
 func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
-	pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	// The integration platform needs to be ready before starting to create integrations
-	if pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-		action.L.Info("Waiting for the integration platform to be initialized")
-
-		if integration.Status.Phase != v1alpha1.IntegrationPhaseWaitingForPlatform {
-			integration.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
-			return integration, nil
-		}
-
-		return nil, nil
-	}
-
-	//
-	// restore phase to initial phase as traits are not aware of
-	// WaitingForPlatform phase
-	//
-	if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
-		integration.Status.Phase = v1alpha1.IntegrationPhaseInitial
-
-		return integration, nil
-	}
-
-	// better not changing the spec section of the target because it may be used for comparison by a
-	// higher level controller (e.g. Knative source controller)
-
-	// execute custom initialization
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		return nil, err
 	}
