@@ -21,7 +21,10 @@ sudo: required
 language: go
 
 go:
-  - "1.11.4"
+  - 1.12.x
+
+install:
+  - go mod vendor
 
 env:
   global:
@@ -33,5 +36,11 @@ env:
 services:
   - docker
 
+before_script:
+  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b . v1.17.1
+  - ./golangci-lint config path
+  - ./golangci-lint --version
+
 script:
-  - travis_wait 30 ./script/travis_build.sh
+  - ./golangci-lint run --verbose --config .golangci.yml || travis_terminate 1;
+  - ./script/travis_build.sh

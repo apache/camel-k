@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"time"
 )
 
 // Repository --
@@ -34,8 +35,9 @@ type Repository struct {
 
 // RepositoryPolicy --
 type RepositoryPolicy struct {
-	Enabled      bool   `xml:"enabled"`
-	UpdatePolicy string `xml:"updatePolicy,omitempty"`
+	Enabled        bool   `xml:"enabled"`
+	UpdatePolicy   string `xml:"updatePolicy,omitempty"`
+	ChecksumPolicy string `xml:"checksumPolicy,omitempty"`
 }
 
 // Build --
@@ -102,10 +104,11 @@ func NewContext(buildDir string, project Project) Context {
 type Context struct {
 	Path                string
 	Project             Project
-	Settings            *Settings
-	SettingsData        []byte
+	SettingsContent     []byte
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
+	Timeout             time.Duration
+	LocalRepository     string
 }
 
 // AddEntry --

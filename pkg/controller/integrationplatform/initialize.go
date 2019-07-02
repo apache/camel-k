@@ -111,33 +111,11 @@ func (action *initializeAction) Handle(ctx context.Context, ip *v1alpha1.Integra
 		action.L.Info("No registry specified for publishing images")
 	}
 
-	if target.Spec.Profile == "" {
-		target.Spec.Profile = platform.GetProfile(target)
-	}
-	if target.Spec.Build.CamelVersion == "" {
-		target.Spec.Build.CamelVersion = defaults.CamelVersionConstraint
-	}
-	if target.Spec.Build.RuntimeVersion == "" {
-		target.Spec.Build.RuntimeVersion = defaults.RuntimeVersion
-	}
-	if target.Spec.Build.BaseImage == "" {
-		target.Spec.Build.BaseImage = defaults.BaseImage
-	}
-	if target.Spec.Build.LocalRepository == "" {
-		target.Spec.Build.LocalRepository = defaults.LocalRepository
-	}
-	if target.Spec.Build.Timeout.Duration == 0 {
-		target.Spec.Build.Timeout.Duration = 5 * time.Minute
-	}
-	if target.Spec.Build.PersistentVolumeClaim == "" {
-		target.Spec.Build.PersistentVolumeClaim = target.Name
-	}
+	action.setDefaults(target)
 
-	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
-	action.L.Infof("RuntimeVersion set to %s", target.Spec.Build.RuntimeVersion)
-	action.L.Infof("BaseImage set to %s", target.Spec.Build.BaseImage)
-	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
-	action.L.Infof("Timeout set to %s", target.Spec.Build.Timeout)
+	if target.Spec.Build.Maven.Timeout.Duration != 0 {
+		action.L.Infof("Maven Timeout set to %s", target.Spec.Build.Maven.Timeout.Duration)
+	}
 
 	err = action.client.Update(ctx, target)
 	if err != nil {
@@ -190,6 +168,61 @@ func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v
 	}
 
 	return false, nil
+}
+
+func (action *initializeAction) setDefaults(target *v1alpha1.IntegrationPlatform) {
+	if target.Spec.Profile == "" {
+		target.Spec.Profile = platform.GetProfile(target)
+	}
+	if target.Spec.Build.CamelVersion == "" {
+		target.Spec.Build.CamelVersion = defaults.CamelVersionConstraint
+	}
+	if target.Spec.Build.RuntimeVersion == "" {
+		target.Spec.Build.RuntimeVersion = defaults.RuntimeVersion
+	}
+	if target.Spec.Build.BaseImage == "" {
+		target.Spec.Build.BaseImage = defaults.BaseImage
+	}
+	if target.Spec.Build.LocalRepository == "" {
+		target.Spec.Build.LocalRepository = defaults.LocalRepository
+	}
+	if target.Spec.Build.PersistentVolumeClaim == "" {
+		target.Spec.Build.PersistentVolumeClaim = target.Name
+	}
+
+	if target.Spec.Build.Timeout.Duration != 0 {
+		d := target.Spec.Build.Timeout.Duration.Truncate(time.Second)
+
+		if target.Spec.Build.Timeout.Duration != d {
+			action.L.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", target.Spec.Build.Timeout.Duration, d)
+		}
+
+		target.Spec.Build.Timeout.Duration = d
+	}
+	if target.Spec.Build.Timeout.Duration == 0 {
+		target.Spec.Build.Timeout.Duration = 5 * time.Minute
+	}
+
+	if target.Spec.Build.Maven.Timeout.Duration != 0 {
+		d := target.Spec.Build.Maven.Timeout.Duration.Truncate(time.Second)
+
+		if target.Spec.Build.Maven.Timeout.Duration != d {
+			action.L.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", target.Spec.Build.Maven.Timeout.Duration, d)
+		}
+
+		target.Spec.Build.Maven.Timeout.Duration = d
+	}
+	if target.Spec.Build.Maven.Timeout.Duration == 0 {
+		n := target.Spec.Build.Timeout.Duration.Seconds() * 0.75
+		target.Spec.Build.Maven.Timeout.Duration = (time.Duration(n) * time.Second).Truncate(time.Second)
+	}
+
+	action.L.Infof("CamelVersion set to %s", target.Spec.Build.CamelVersion)
+	action.L.Infof("RuntimeVersion set to %s", target.Spec.Build.RuntimeVersion)
+	action.L.Infof("BaseImage set to %s", target.Spec.Build.BaseImage)
+	action.L.Infof("LocalRepository set to %s", target.Spec.Build.LocalRepository)
+	action.L.Infof("Timeout set to %s", target.Spec.Build.Timeout)
+	action.L.Infof("Maven Timeout set to %s", target.Spec.Build.Maven.Timeout.Duration)
 }
 
 func createPersistentVolumeClaim(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {

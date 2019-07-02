@@ -104,28 +104,32 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				// during image build
 				return oldBuild.Status.Phase != newBuild.Status.Phase
 			},
-		})
+		},
+	)
+
 	if err != nil {
 		return err
 	}
 
-	// Watch for IntegrationPlatform phase transitioning to ready
-	// and enqueue requests for any integrations that are in phase waiting for platform
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+	// Watch for IntegrationKit phase transitioning to ready or error and
+	// enqueue requests for any integrations that are in phase waiting for
+	// kit
+	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationKit{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			platform := a.Object.(*v1alpha1.IntegrationPlatform)
-			requests := []reconcile.Request{}
+			kit := a.Object.(*v1alpha1.IntegrationKit)
+			var requests []reconcile.Request
 
-			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+			if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady || kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
 				list := &v1alpha1.IntegrationList{}
 
-				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: platform.Namespace}, list); err != nil {
+				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: kit.Namespace}, list); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}
 
 				for _, integration := range list.Items {
-					if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
+					if integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingKit {
+						log.Infof("Kit %s ready, wake-up integration: %s", kit.Name, integration.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
 								Namespace: integration.Namespace,
@@ -139,6 +143,43 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return requests
 		}),
 	})
+
+	if err != nil {
+		return err
+	}
+
+	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
+	// requests for any integrations that are in phase waiting for platform
+	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+			platform := a.Object.(*v1alpha1.IntegrationPlatform)
+			var requests []reconcile.Request
+
+			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+				list := &v1alpha1.IntegrationList{}
+
+				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: platform.Namespace}, list); err != nil {
+					log.Error(err, "Failed to retrieve integration list")
+					return requests
+				}
+
+				for _, integration := range list.Items {
+					if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
+						log.Infof("Platform %s ready, wake-up integration: %s", platform.Name, integration.Name)
+						requests = append(requests, reconcile.Request{
+							NamespacedName: types.NamespacedName{
+								Namespace: integration.Namespace,
+								Name:      integration.Name,
+							},
+						})
+					}
+				}
+			}
+
+			return requests
+		}),
+	})
+
 	if err != nil {
 		return err
 	}
