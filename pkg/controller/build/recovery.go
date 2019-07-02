@@ -24,8 +24,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/platform"
-
 	"github.com/jpillora/backoff"
 )
 
@@ -56,12 +54,6 @@ func (action *errorRecoveryAction) CanHandle(build *v1alpha1.Build) bool {
 }
 
 func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
-	// The integration platform must be initialized before handling the error recovery
-	if _, err := platform.GetCurrentPlatform(ctx, action.client, build.Namespace); err != nil {
-		action.L.Info("Waiting for an integration platform to be initialized")
-		return nil, nil
-	}
-
 	if build.Status.Failure == nil {
 		build.Status.Failure = &v1alpha1.Failure{
 			Reason: build.Status.Error,
@@ -96,7 +88,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 	}
 
 	build.Status = v1alpha1.BuildStatus{}
-	build.Status.Phase = v1alpha1.BuildPhaseInitial
+	build.Status.Phase = v1alpha1.BuildPhaseInitialization
 	build.Status.Failure.Recovery.Attempt++
 	build.Status.Failure.Recovery.AttemptTime = metav1.Now()
 

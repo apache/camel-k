@@ -64,8 +64,12 @@ const (
 	// BuildKind --
 	BuildKind string = "Build"
 
-	// BuildPhaseInitial --
-	BuildPhaseInitial BuildPhase = ""
+	// BuildPhaseNone --
+	BuildPhaseNone BuildPhase = ""
+	// BuildPhaseInitialization --
+	BuildPhaseInitialization BuildPhase = "initialization"
+	// BuildPhaseWaitingForPlatform --
+	BuildPhaseWaitingForPlatform BuildPhase = "Waiting For Platform"
 	// BuildPhaseScheduling --
 	BuildPhaseScheduling BuildPhase = "Scheduling"
 	// BuildPhasePending --

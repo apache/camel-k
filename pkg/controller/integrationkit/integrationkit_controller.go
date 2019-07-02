@@ -19,6 +19,8 @@ package integrationkit
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/platform"
+
 	"github.com/apache/camel-k/pkg/util/digest"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -141,17 +143,40 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 
+	target := instance.DeepCopy()
+	targetLog := rlog.ForIntegrationKit(target)
+
+	if target.Status.Phase == v1alpha1.IntegrationKitPhaseNone || target.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform {
+		pl, err := platform.GetCurrentPlatform(ctx, r.client, target.Namespace)
+		switch {
+		case err != nil:
+			target.Status.Phase = v1alpha1.IntegrationKitPhaseError
+			target.Status.Failure = v1alpha1.NewErrorFailure(err)
+		case pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady:
+			target.Status.Phase = v1alpha1.IntegrationKitPhaseWaitingForPlatform
+		default:
+			target.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
+		}
+
+		if instance.Status.Phase != target.Status.Phase {
+			err = r.update(ctx, target)
+			if err != nil {
+				if k8serrors.IsConflict(err) {
+					targetLog.Error(err, "conflict")
+					err = nil
+				}
+			}
+		}
+
+		return reconcile.Result{}, err
+	}
+
 	actions := []Action{
 		NewInitializeAction(),
 		NewBuildAction(),
 		NewMonitorAction(),
+		NewErrorAction(),
 	}
-
-	var targetPhase v1alpha1.IntegrationKitPhase
-	var err error
-
-	target := instance.DeepCopy()
-	targetLog := rlog.ForIntegrationKit(target)
 
 	for _, a := range actions {
 		a.InjectClient(r.client)
@@ -160,23 +185,13 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 		if a.CanHandle(target) {
 			targetLog.Infof("Invoking action %s", a.Name())
 
-			phaseFrom := target.Status.Phase
-
-			target, err = a.Handle(ctx, target)
+			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
 				return reconcile.Result{}, err
 			}
 
-			if target != nil {
-				dgst, err := digest.ComputeForIntegrationKit(target)
-				if err != nil {
-					return reconcile.Result{}, err
-				}
-
-				target.Status.Digest = dgst
-
-				err = r.client.Status().Update(ctx, target)
-				if err != nil {
+			if newTarget != nil {
+				if err := r.update(ctx, newTarget); err != nil {
 					if k8serrors.IsConflict(err) {
 						targetLog.Error(err, "conflict")
 						return reconcile.Result{
@@ -187,13 +202,11 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 					return reconcile.Result{}, err
 				}
 
-				targetPhase = target.Status.Phase
-
-				if targetPhase != phaseFrom {
+				if newTarget.Status.Phase != target.Status.Phase {
 					targetLog.Info(
 						"state transition",
-						"phase-from", phaseFrom,
-						"phase-to", target.Status.Phase,
+						"phase-from", target.Status.Phase,
+						"phase-to", newTarget.Status.Phase,
 					)
 				}
 			}
@@ -205,4 +218,16 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 	}
 
 	return reconcile.Result{}, nil
+}
+
+// Update --
+func (r *ReconcileIntegrationKit) update(ctx context.Context, target *v1alpha1.IntegrationKit) error {
+	dgst, err := digest.ComputeForIntegrationKit(target)
+	if err != nil {
+		return err
+	}
+
+	target.Status.Digest = dgst
+
+	return r.client.Status().Update(ctx, target)
 }

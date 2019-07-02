@@ -34,7 +34,7 @@ func TestProbesDeps(t *testing.T) {
 	e := Environment{
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseInitial,
+				Phase: v1alpha1.IntegrationPhaseInitialization,
 			},
 		},
 	}

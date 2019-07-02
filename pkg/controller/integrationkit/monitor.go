@@ -38,7 +38,7 @@ func (action *monitorAction) Name() string {
 }
 
 func (action *monitorAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
-	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady || kit.Status.Phase == v1alpha1.IntegrationKitPhaseError
+	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady
 }
 
 func (action *monitorAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
@@ -50,7 +50,7 @@ func (action *monitorAction) Handle(ctx context.Context, kit *v1alpha1.Integrati
 		action.L.Info("IntegrationKit needs a rebuild")
 
 		kit.Status.Digest = hash
-		kit.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
+		kit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
 
 		return kit, nil
 	}
