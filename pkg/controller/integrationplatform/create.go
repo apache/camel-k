@@ -80,7 +80,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		}
 	}
 
-	platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseStarting
+	platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseReady
 
 	return platform, nil
 }
