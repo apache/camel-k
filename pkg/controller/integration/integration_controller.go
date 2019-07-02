@@ -254,17 +254,13 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
-				return reconcile.Result{
-					Requeue: true,
-				}, nil
+				return reconcile.Result{}, err
 			}
 
 			if target != nil {
 				dgst, err := digest.ComputeForIntegration(target)
 				if err != nil {
-					return reconcile.Result{
-						Requeue: true,
-					}, nil
+					return reconcile.Result{}, err
 				}
 
 				target.Status.Digest = dgst

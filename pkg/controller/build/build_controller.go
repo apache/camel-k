@@ -170,10 +170,10 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		NewErrorRecoveryAction(),
 	}
 
-	var targetPhase v1alpha1.BuildPhase
 	var err error
 
 	target := instance.DeepCopy()
+	targetPhase := target.Status.Phase
 	targetLog := rlog.ForBuild(target)
 
 	for _, a := range actions {
@@ -187,9 +187,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
-				return reconcile.Result{
-					Requeue: true,
-				}, nil
+				return reconcile.Result{}, err
 			}
 
 			if target != nil {
