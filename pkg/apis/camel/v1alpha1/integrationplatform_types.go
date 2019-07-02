@@ -143,8 +143,6 @@ const (
 	IntegrationPlatformPhaseCreating IntegrationPlatformPhase = "Creating"
 	// IntegrationPlatformPhaseWarming --
 	IntegrationPlatformPhaseWarming IntegrationPlatformPhase = "Warming"
-	// IntegrationPlatformPhaseStarting --
-	IntegrationPlatformPhaseStarting IntegrationPlatformPhase = "Starting"
 	// IntegrationPlatformPhaseReady --
 	IntegrationPlatformPhaseReady IntegrationPlatformPhase = "Ready"
 	// IntegrationPlatformPhaseError --
