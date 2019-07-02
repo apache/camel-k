@@ -149,9 +149,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
-				return reconcile.Result{
-					Requeue: true,
-				}, nil
+				return reconcile.Result{}, err
 			}
 
 			if target != nil {

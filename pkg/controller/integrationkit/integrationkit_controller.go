@@ -164,17 +164,13 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
-				return reconcile.Result{
-					Requeue: true,
-				}, nil
+				return reconcile.Result{}, err
 			}
 
 			if target != nil {
 				dgst, err := digest.ComputeForIntegrationKit(target)
 				if err != nil {
-					return reconcile.Result{
-						Requeue: true,
-					}, nil
+					return reconcile.Result{}, err
 				}
 
 				target.Status.Digest = dgst
