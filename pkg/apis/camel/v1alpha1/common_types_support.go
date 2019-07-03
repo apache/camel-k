@@ -19,8 +19,6 @@ package v1alpha1
 
 import (
 	"fmt"
-
-	yaml2 "gopkg.in/yaml.v2"
 )
 
 func (in *Artifact) String() string {
@@ -29,13 +27,4 @@ func (in *Artifact) String() string {
 
 func (spec ConfigurationSpec) String() string {
 	return fmt.Sprintf("%s=%s", spec.Type, spec.Value)
-}
-
-// Serialize serializes a Flow
-func (flows Flows) Serialize() (string, error) {
-	res, err := yaml2.Marshal(flows)
-	if err != nil {
-		return "", err
-	}
-	return string(res), nil
 }

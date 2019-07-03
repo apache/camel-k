@@ -258,21 +258,27 @@ func TestJavascript1(t *testing.T) {
 	assert.Len(t, metadata.ToURIs, 4)
 }
 
-const yamlFlow = `
-- steps:
-  - kind: "endpoint"
+const yaml = `
+- from:
     uri: "timer:tick"
-  - kind: "endpoint"
-    uri: "log:info"
+    steps:
+        - to: "log:info1"
+        - to: 
+            uri: "log:info2"
+        - split:
+            tokenizer: 't'
+            steps:
+                - to: "log:info3"
+            
 `
 
-func TestJYamlFlow(t *testing.T) {
+func TestJYaml(t *testing.T) {
 	source := v1alpha1.SourceSpec{
 		DataSpec: v1alpha1.DataSpec{
 			Name:    "test",
-			Content: yamlFlow,
+			Content: yaml,
 		},
-		Language: v1alpha1.LanguageYamlFlow,
+		Language: v1alpha1.LanguageYaml,
 	}
 
 	catalog, err := test.DefaultCatalog()
@@ -285,6 +291,8 @@ func TestJYamlFlow(t *testing.T) {
 	assert.Len(t, metadata.FromURIs, 1)
 
 	assert.NotEmpty(t, metadata.ToURIs)
-	assert.Contains(t, metadata.ToURIs, "log:info")
-	assert.Len(t, metadata.ToURIs, 1)
+	assert.Contains(t, metadata.ToURIs, "log:info1")
+	assert.Contains(t, metadata.ToURIs, "log:info2")
+	assert.Contains(t, metadata.ToURIs, "log:info3")
+	assert.Len(t, metadata.ToURIs, 3)
 }

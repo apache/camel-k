@@ -35,20 +35,6 @@ type Artifact struct {
 	Target   string `json:"target,omitempty" yaml:"target,omitempty"`
 }
 
-// Flow --
-type Flow struct {
-	Steps []Step `json:"steps"`
-}
-
-// Flows are collections of Flow
-type Flows []Flow
-
-// Step --
-type Step struct {
-	Kind string `json:"kind"`
-	URI  string `json:"uri"`
-}
-
 // Failure --
 type Failure struct {
 	Reason   string          `json:"reason"`

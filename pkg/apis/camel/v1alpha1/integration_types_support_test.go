@@ -31,7 +31,7 @@ func TestAllLanguages(t *testing.T) {
 	assert.Contains(t, Languages, LanguageGroovy)
 	assert.Contains(t, Languages, LanguageKotlin)
 	assert.Contains(t, Languages, LanguageXML)
-	assert.Contains(t, Languages, LanguageYamlFlow)
+	assert.Contains(t, Languages, LanguageYaml)
 }
 
 func TestLanguageFromName(t *testing.T) {

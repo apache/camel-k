@@ -58,7 +58,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 			util.StringSliceUniqueAdd(&dependencies, "runtime:groovy")
 		case v1alpha1.LanguageKotlin:
 			util.StringSliceUniqueAdd(&dependencies, "runtime:kotlin")
-		case v1alpha1.LanguageYamlFlow:
+		case v1alpha1.LanguageYaml:
 			util.StringSliceUniqueAdd(&dependencies, "runtime:yaml")
 		}
 

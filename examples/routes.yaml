@@ -1,0 +1,11 @@
+- id: "yaml"
+  from:
+    uri: "timer:tick"
+    parameters:
+      period: "5s"
+    steps:
+      - set-body:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "log:info"
