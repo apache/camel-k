@@ -23,6 +23,7 @@ LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
+GO_PATH := $(shell go env GOPATH)
 
 # For signing binary artifacts
 GPG_PASS := $(GPG_PASS)
@@ -35,7 +36,7 @@ STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 PACKAGE_ARTIFACTS_STRATEGY := copy
 
 GOLDFLAGS += -X main.GitCommit=$(GIT_COMMIT)
-GOFLAGS = -ldflags "$(GOLDFLAGS)"
+GOFLAGS = -ldflags "$(GOLDFLAGS)" -gcflags=-trimpath=$(GO_PATH) -asmflags=-trimpath=$(GO_PATH)
 
 define LICENSE_HEADER
 Licensed to the Apache Software Foundation (ASF) under one or more
@@ -107,7 +108,7 @@ build-operator:
 	go build $(GOFLAGS) -o camel-k ./cmd/manager/*.go
 
 build-kamel:
-	go build -o kamel ./cmd/kamel/*.go
+	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
 build-builder:
 	env GOOS=linux go build -o builder ./cmd/builder/*.go
