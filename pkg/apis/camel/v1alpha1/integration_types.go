@@ -120,8 +120,8 @@ const (
 	LanguageXML Language = "xml"
 	// LanguageKotlin --
 	LanguageKotlin Language = "kts"
-	// LanguageYamlFlow --
-	LanguageYamlFlow Language = "flow"
+	// LanguageYaml --
+	LanguageYaml Language = "yaml"
 )
 
 // Languages is the list of all supported languages
@@ -132,7 +132,7 @@ var Languages = []Language{
 	LanguageJavaScript,
 	LanguageXML,
 	LanguageKotlin,
-	LanguageYamlFlow,
+	LanguageYaml,
 }
 
 // IntegrationPhase --

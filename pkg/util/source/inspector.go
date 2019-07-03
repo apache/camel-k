@@ -83,8 +83,8 @@ func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1alpha1.Langu
 				catalog: catalog,
 			},
 		}
-	case v1alpha1.LanguageYamlFlow:
-		return &YAMLFlowInspector{
+	case v1alpha1.LanguageYaml:
+		return &YAMLInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},
@@ -105,6 +105,7 @@ func (i baseInspector) Extract(v1alpha1.SourceSpec, *Metadata) error {
 func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *Metadata) []string {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
 	candidates := strset.New()
+	candidates.Add(meta.Dependencies...)
 
 	for _, uri := range uris {
 		candidateComp := i.decodeComponent(uri)
