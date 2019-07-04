@@ -67,7 +67,7 @@ const (
 	// BuildPhaseNone --
 	BuildPhaseNone BuildPhase = ""
 	// BuildPhaseInitialization --
-	BuildPhaseInitialization BuildPhase = "initialization"
+	BuildPhaseInitialization BuildPhase = "Initialization"
 	// BuildPhaseWaitingForPlatform --
 	BuildPhaseWaitingForPlatform BuildPhase = "Waiting For Platform"
 	// BuildPhaseScheduling --

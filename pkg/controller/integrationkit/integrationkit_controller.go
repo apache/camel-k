@@ -22,6 +22,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/log"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -159,13 +160,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
-			err = r.update(ctx, target)
-			if err != nil {
-				if k8serrors.IsConflict(err) {
-					targetLog.Error(err, "conflict")
-					err = nil
-				}
-			}
+			return r.update(ctx, targetLog, target)
 		}
 
 		return reconcile.Result{}, err
@@ -191,15 +186,8 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 			}
 
 			if newTarget != nil {
-				if err := r.update(ctx, newTarget); err != nil {
-					if k8serrors.IsConflict(err) {
-						targetLog.Error(err, "conflict")
-						return reconcile.Result{
-							Requeue: true,
-						}, nil
-					}
-
-					return reconcile.Result{}, err
+				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+					return r, err
 				}
 
 				if newTarget.Status.Phase != target.Status.Phase {
@@ -221,13 +209,24 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 }
 
 // Update --
-func (r *ReconcileIntegrationKit) update(ctx context.Context, target *v1alpha1.IntegrationKit) error {
+func (r *ReconcileIntegrationKit) update(ctx context.Context, log log.Logger, target *v1alpha1.IntegrationKit) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegrationKit(target)
 	if err != nil {
-		return err
+		return reconcile.Result{}, err
 	}
 
 	target.Status.Digest = dgst
 
-	return r.client.Status().Update(ctx, target)
+	err = r.client.Status().Update(ctx, target)
+	if err != nil {
+		if k8serrors.IsConflict(err) {
+			log.Error(err, "conflict")
+
+			return reconcile.Result{
+				Requeue: true,
+			}, nil
+		}
+	}
+
+	return reconcile.Result{}, err
 }

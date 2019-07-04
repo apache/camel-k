@@ -39,6 +39,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
 // Add creates a new Build Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -178,13 +179,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
-			err = r.update(ctx, target)
-			if err != nil {
-				if k8serrors.IsConflict(err) {
-					targetLog.Error(err, "conflict")
-					err = nil
-				}
-			}
+			return r.update(ctx, targetLog, target)
 		}
 
 		return reconcile.Result{}, err
@@ -213,15 +208,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 			}
 
 			if newTarget != nil {
-				if err := r.update(ctx, newTarget); err != nil {
-					if k8serrors.IsConflict(err) {
-						targetLog.Error(err, "conflict")
-						return reconcile.Result{
-							Requeue: true,
-						}, nil
-					}
-
-					return reconcile.Result{}, err
+				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+					return r, err
 				}
 
 				if newTarget.Status.Phase != target.Status.Phase {
@@ -252,6 +240,17 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 }
 
 // Update --
-func (r *ReconcileBuild) update(ctx context.Context, target *v1alpha1.Build) error {
-	return r.client.Status().Update(ctx, target)
+func (r *ReconcileBuild) update(ctx context.Context, log log.Logger, target *v1alpha1.Build) (reconcile.Result, error) {
+	err := r.client.Status().Update(ctx, target)
+	if err != nil {
+		if k8serrors.IsConflict(err) {
+			log.Error(err, "conflict")
+
+			return reconcile.Result{
+				Requeue: true,
+			}, nil
+		}
+	}
+
+	return reconcile.Result{}, err
 }
