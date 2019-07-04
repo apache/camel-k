@@ -247,13 +247,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
-			err = r.update(ctx, target)
-			if err != nil {
-				if k8serrors.IsConflict(err) {
-					targetLog.Error(err, "conflict")
-					err = nil
-				}
-			}
+			return r.update(ctx, targetLog, target)
 		}
 
 		return reconcile.Result{}, err
@@ -281,15 +275,8 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 			}
 
 			if newTarget != nil {
-				if err := r.update(ctx, newTarget); err != nil {
-					if k8serrors.IsConflict(err) {
-						targetLog.Error(err, "conflict")
-						return reconcile.Result{
-							Requeue: true,
-						}, nil
-					}
-
-					return reconcile.Result{}, err
+				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+					return r, err
 				}
 
 				if newTarget.Status.Phase != target.Status.Phase {
@@ -311,13 +298,24 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 }
 
 // Update --
-func (r *ReconcileIntegration) update(ctx context.Context, target *v1alpha1.Integration) error {
+func (r *ReconcileIntegration) update(ctx context.Context, log log.Logger, target *v1alpha1.Integration) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegration(target)
 	if err != nil {
-		return err
+		return reconcile.Result{}, err
 	}
 
 	target.Status.Digest = dgst
 
-	return r.client.Status().Update(ctx, target)
+	err = r.client.Status().Update(ctx, target)
+	if err != nil {
+		if k8serrors.IsConflict(err) {
+			log.Error(err, "conflict")
+
+			return reconcile.Result{
+				Requeue: true,
+			}, nil
+		}
+	}
+
+	return reconcile.Result{}, err
 }

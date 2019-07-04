@@ -85,7 +85,7 @@ const (
 	// IntegrationKitPhaseNone --
 	IntegrationKitPhaseNone IntegrationKitPhase = ""
 	// IntegrationKitPhaseInitialization --
-	IntegrationKitPhaseInitialization IntegrationKitPhase = "initialization"
+	IntegrationKitPhaseInitialization IntegrationKitPhase = "Initialization"
 	// IntegrationKitPhaseWaitingForPlatform --
 	IntegrationKitPhaseWaitingForPlatform IntegrationKitPhase = "Waiting For Platform"
 	// IntegrationKitPhaseBuildSubmitted --
