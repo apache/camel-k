@@ -87,7 +87,6 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 		return nil, nil
 	}
 
-	build.Status = v1alpha1.BuildStatus{}
 	build.Status.Phase = v1alpha1.BuildPhaseInitialization
 	build.Status.Failure.Recovery.Attempt++
 	build.Status.Failure.Recovery.AttemptTime = metav1.Now()
