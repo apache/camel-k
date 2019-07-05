@@ -286,7 +286,7 @@ func GetConfigMapRefValue(ctx context.Context, client client.Client, namespace s
 // ResolveValueSource --
 func ResolveValueSource(ctx context.Context, client client.Client, namespace string, valueSource *v1alpha1.ValueSource) (string, error) {
 	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
-		return "", fmt.Errorf("value source has bot config map and secret configuired")
+		return "", fmt.Errorf("value source has bot config map and secret configured")
 	}
 	if valueSource.ConfigMapKeyRef != nil {
 		return GetConfigMapRefValue(ctx, client, namespace, valueSource.ConfigMapKeyRef)

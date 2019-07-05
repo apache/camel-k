@@ -40,7 +40,7 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(""), nil
+	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization), nil
 }
 
 func (t *dependenciesTrait) Apply(e *Environment) error {
