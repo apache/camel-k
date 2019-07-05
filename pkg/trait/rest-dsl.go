@@ -60,7 +60,7 @@ func (t *restDslTrait) Configure(e *Environment) (bool, error) {
 
 	for _, resource := range e.Integration.Spec.Resources {
 		if resource.Type == v1alpha1.ResourceTypeOpenAPI {
-			return e.IntegrationInPhase(""), nil
+			return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization), nil
 		}
 	}
 
