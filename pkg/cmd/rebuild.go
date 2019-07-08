@@ -94,7 +94,7 @@ func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]
 	return ints, nil
 }
 
-func (o *rebuildCmdOptions) rebuildIntegrations(c client.Client, integrations []v1alpha1.Integration) error {
+func (o *rebuildCmdOptions) rebuildIntegrations(c k8sclient.StatusClient, integrations []v1alpha1.Integration) error {
 	for _, i := range integrations {
 		it := i
 		it.Status = v1alpha1.IntegrationStatus{}
