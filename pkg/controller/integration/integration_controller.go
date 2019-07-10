@@ -79,14 +79,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			oldIntegration := e.ObjectOld.(*v1alpha1.Integration)
 			newIntegration := e.ObjectNew.(*v1alpha1.Integration)
-
-			if oldIntegration.Status.Phase != newIntegration.Status.Phase {
-				Log.ForIntegration(newIntegration).Info(
-					"Phase transition",
-					"old-phase", oldIntegration.Status.Phase,
-					"new-phase", newIntegration.Status.Phase,
-				)
-			}
 			// Ignore updates to the integration status in which case metadata.Generation does not change,
 			// or except when the integration phase changes as it's used to transition from one phase
 			// to another
