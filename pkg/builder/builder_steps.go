@@ -165,7 +165,6 @@ func generateProject(ctx *Context) error {
 	ctx.Maven.Project.AddDependency(maven.Dependency{
 		GroupID:    "org.apache.logging.log4j",
 		ArtifactID: "log4j-slf4j-impl",
-		Version:    "2.11.2",
 		Scope:      "runtime",
 	})
 

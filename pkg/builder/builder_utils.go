@@ -74,6 +74,13 @@ func NewMavenProject(ctx *Context) (maven.Project, error) {
 		Type:       "pom",
 		Scope:      "import",
 	})
+	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
+		GroupID:    "org.apache.camel.k",
+		ArtifactID: "camel-k-runtime-bom",
+		Version:    ctx.Build.RuntimeVersion,
+		Type:       "pom",
+		Scope:      "import",
+	})
 
 	for _, d := range ctx.Build.Dependencies {
 		if strings.HasPrefix(d, "bom:") {
