@@ -38,7 +38,7 @@ func GetOrLookup(ctx context.Context, c k8sclient.Reader, namespace string, name
 
 // Get returns the currently installed platform
 func Get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1alpha1.IntegrationPlatform, error) {
-	return kubernetes.GetIntegrationPlatform(ctx, c, namespace, name)
+	return kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
 }
 
 // GetCurrentPlatform returns the currently installed platform

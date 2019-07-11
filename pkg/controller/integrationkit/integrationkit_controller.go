@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package integrationkit
 
 import (
@@ -27,6 +28,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -102,6 +105,41 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return oldBuild.Status.Phase != newBuild.Status.Phase
 			},
 		})
+	if err != nil {
+		return err
+	}
+
+	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
+	// requests for any integrationkits that are in phase waiting for platform
+	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+			platform := a.Object.(*v1alpha1.IntegrationPlatform)
+			var requests []reconcile.Request
+
+			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+				list := &v1alpha1.IntegrationKitList{}
+
+				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: platform.Namespace}, list); err != nil {
+					log.Error(err, "Failed to retrieve integrationkit list")
+					return requests
+				}
+
+				for _, kit := range list.Items {
+					if kit.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform {
+						log.Infof("Platform %s ready, wake-up integrationkit: %s", platform.Name, kit.Name)
+						requests = append(requests, reconcile.Request{
+							NamespacedName: types.NamespacedName{
+								Namespace: kit.Namespace,
+								Name:      kit.Name,
+							},
+						})
+					}
+				}
+			}
+
+			return requests
+		}),
+	})
 	if err != nil {
 		return err
 	}
