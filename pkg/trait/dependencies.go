@@ -62,9 +62,8 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 			util.StringSliceUniqueAdd(&dependencies, "runtime:yaml")
 		}
 
-		// jvm runtime and camel-core required by default
+		// jvm runtime required by default
 		util.StringSliceUniqueAdd(&dependencies, "runtime:jvm")
-		util.StringSliceUniqueAdd(&dependencies, "camel:core")
 
 		for _, d := range meta.Dependencies {
 			util.StringSliceUniqueAdd(&dependencies, d)

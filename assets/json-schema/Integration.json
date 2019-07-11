@@ -178,6 +178,34 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "IntegrationCondition": {
+      "required": [
+        "type",
+        "status"
+      ],
+      "properties": {
+        "lastTransitionTime": {
+          "$ref": "#/definitions/Time"
+        },
+        "lastUpdateTime": {
+          "$ref": "#/definitions/Time"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "IntegrationSpec": {
       "properties": {
         "configuration": {
@@ -243,6 +271,13 @@
         "camelVersion": {
           "type": "string"
         },
+        "conditions": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/IntegrationCondition"
+          },
+          "type": "array"
+        },
         "configuration": {
           "items": {
             "$ref": "#/definitions/ConfigurationSpec"
@@ -277,7 +312,13 @@
         "phase": {
           "type": "string"
         },
+        "platform": {
+          "type": "string"
+        },
         "runtimeVersion": {
+          "type": "string"
+        },
+        "version": {
           "type": "string"
         }
       },

@@ -78,7 +78,7 @@ func TestIntegrationDefaultDeps(t *testing.T) {
 
 	err = trait.Apply(e)
 	assert.Nil(t, err)
-	assert.ElementsMatch(t, []string{"camel:core", "camel:direct", "camel:log", "runtime:jvm"}, e.Integration.Status.Dependencies)
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:log", "runtime:jvm"}, e.Integration.Status.Dependencies)
 }
 
 func TestIntegrationCustomDeps(t *testing.T) {
@@ -116,6 +116,6 @@ func TestIntegrationCustomDeps(t *testing.T) {
 
 	err = trait.Apply(e)
 	assert.Nil(t, err)
-	assert.ElementsMatch(t, []string{"camel:core", "camel:direct", "camel:log",
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:log",
 		"camel:undertow", "org.foo:bar", "runtime:jvm"}, e.Integration.Status.Dependencies)
 }
