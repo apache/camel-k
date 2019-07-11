@@ -75,30 +75,56 @@ func TestGenerateJvmProject(t *testing.T) {
 	err = injectDependencies(&ctx)
 	assert.Nil(t, err)
 
-	assert.Equal(t, 1, len(ctx.Maven.Project.DependencyManagement.Dependencies))
-	assert.Equal(t, "org.apache.camel", ctx.Maven.Project.DependencyManagement.Dependencies[0].GroupID)
-	assert.Equal(t, "camel-bom", ctx.Maven.Project.DependencyManagement.Dependencies[0].ArtifactID)
-	assert.Equal(t, catalog.Version, ctx.Maven.Project.DependencyManagement.Dependencies[0].Version)
-	assert.Equal(t, "pom", ctx.Maven.Project.DependencyManagement.Dependencies[0].Type)
-	assert.Equal(t, "import", ctx.Maven.Project.DependencyManagement.Dependencies[0].Scope)
+	assert.ElementsMatch(
+		t,
+		ctx.Maven.Project.DependencyManagement.Dependencies,
+		[]maven.Dependency{
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-bom",
+				Version:    catalog.Version,
+				Type:       "pom",
+				Scope:      "import",
+			},
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-bom",
+				Version:    defaults.RuntimeVersion,
+				Type:       "pom",
+				Scope:      "import",
+			},
+		},
+	)
 
-	assert.Equal(t, 3, len(ctx.Maven.Project.Dependencies))
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel.k",
-		ArtifactID: "camel-k-runtime-jvm",
-		Version:    defaults.RuntimeVersion,
-		Type:       "jar",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel",
-		ArtifactID: "camel-core",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.logging.log4j",
-		ArtifactID: "log4j-slf4j-impl",
-		Version:    "2.11.2",
-		Scope:      "runtime",
-	})
+	assert.ElementsMatch(
+		t,
+		ctx.Maven.Project.Dependencies,
+		[]maven.Dependency{
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-jvm",
+				Version:    defaults.RuntimeVersion,
+				Type:       "jar",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-core-engine",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-main",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-properties",
+			},
+			{
+				GroupID:    "org.apache.logging.log4j",
+				ArtifactID: "log4j-slf4j-impl",
+				Scope:      "runtime",
+			},
+		},
+	)
 }
 
 func TestMavenSettingsFromConfigMap(t *testing.T) {
@@ -229,41 +255,66 @@ func TestGenerateGroovyProject(t *testing.T) {
 	err = injectDependencies(&ctx)
 	assert.Nil(t, err)
 
-	assert.Equal(t, 1, len(ctx.Maven.Project.DependencyManagement.Dependencies))
-	assert.Equal(t, "org.apache.camel", ctx.Maven.Project.DependencyManagement.Dependencies[0].GroupID)
-	assert.Equal(t, "camel-bom", ctx.Maven.Project.DependencyManagement.Dependencies[0].ArtifactID)
-	assert.Equal(t, catalog.Version, ctx.Maven.Project.DependencyManagement.Dependencies[0].Version)
-	assert.Equal(t, "pom", ctx.Maven.Project.DependencyManagement.Dependencies[0].Type)
-	assert.Equal(t, "import", ctx.Maven.Project.DependencyManagement.Dependencies[0].Scope)
+	assert.ElementsMatch(
+		t,
+		ctx.Maven.Project.DependencyManagement.Dependencies,
+		[]maven.Dependency{
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-bom",
+				Version:    catalog.Version,
+				Type:       "pom",
+				Scope:      "import",
+			},
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-bom",
+				Version:    defaults.RuntimeVersion,
+				Type:       "pom",
+				Scope:      "import",
+			},
+		},
+	)
 
-	assert.Equal(t, 5, len(ctx.Maven.Project.Dependencies))
-
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel.k",
-		ArtifactID: "camel-k-runtime-jvm",
-		Version:    defaults.RuntimeVersion,
-		Type:       "jar",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel.k",
-		ArtifactID: "camel-k-runtime-groovy",
-		Version:    defaults.RuntimeVersion,
-		Type:       "jar",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel",
-		ArtifactID: "camel-core",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel",
-		ArtifactID: "camel-groovy",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.logging.log4j",
-		ArtifactID: "log4j-slf4j-impl",
-		Version:    "2.11.2",
-		Scope:      "runtime",
-	})
+	assert.ElementsMatch(
+		t,
+		ctx.Maven.Project.Dependencies,
+		[]maven.Dependency{
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-jvm",
+				Version:    defaults.RuntimeVersion,
+				Type:       "jar",
+			},
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-groovy",
+				Version:    defaults.RuntimeVersion,
+				Type:       "jar",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-core-engine",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-main",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-properties",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-groovy",
+			},
+			{
+				GroupID:    "org.apache.logging.log4j",
+				ArtifactID: "log4j-slf4j-impl",
+				Scope:      "runtime",
+			},
+		},
+	)
 }
 
 func TestSanitizeDependencies(t *testing.T) {

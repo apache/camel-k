@@ -18,13 +18,13 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-m2
+  name: camel-catalog-3.0.0-m4
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.0.0-M2
-    camel.apache.org/catalog.loader.version: 3.0.0-M2
+    camel.apache.org/catalog.version: 3.0.0-M4
+    camel.apache.org/catalog.loader.version: 3.0.0-M4
 spec:
-  version: 3.0.0-M2
+  version: 3.0.0-M4
   artifacts:
     camel-activemq:
       groupId: org.apache.camel
@@ -275,11 +275,34 @@ spec:
       artifactId: camel-barcode
       dataformats:
       - barcode
+    camel-base:
+      groupId: org.apache.camel
+      artifactId: camel-base
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
     camel-base64:
       groupId: org.apache.camel
       artifactId: camel-base64
       dataformats:
       - base64
+    camel-bean:
+      groupId: org.apache.camel
+      artifactId: camel-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
     camel-bean-validator:
       groupId: org.apache.camel
       artifactId: camel-bean-validator
@@ -356,6 +379,11 @@ spec:
       - id: cql
         http: false
         passive: false
+    camel-cbor:
+      groupId: org.apache.camel
+      artifactId: camel-cbor
+      dataformats:
+      - cbor
     camel-chatscript:
       groupId: org.apache.camel
       artifactId: camel-chatscript
@@ -391,6 +419,15 @@ spec:
       - id: coap
         http: false
         passive: false
+      - id: coaps
+        http: false
+        passive: false
+      - id: coap+tcp
+        http: false
+        passive: false
+      - id: coaps+tcp
+        http: false
+        passive: false
     camel-cometd:
       groupId: org.apache.camel
       artifactId: camel-cometd
@@ -422,41 +459,6 @@ spec:
       - id: corda
         http: false
         passive: false
-    camel-core:
-      groupId: org.apache.camel
-      artifactId: camel-core
-      schemes:
-      - id: bean
-        http: false
-        passive: true
-      - id: class
-        http: false
-        passive: true
-      - id: dataset
-        http: false
-        passive: true
-      - id: mock
-        http: false
-        passive: true
-      - id: test
-        http: false
-        passive: true
-      languages:
-      - bean
-      - constant
-      - exchangeProperty
-      - file
-      - header
-      - ref
-      - simple
-      - tokenize
-      - xpath
-      - xtokenize
-      dataformats:
-      - gzip
-      - serialization
-      - string
-      - zip
     camel-couchbase:
       groupId: org.apache.camel
       artifactId: camel-couchbase
@@ -510,6 +512,16 @@ spec:
       - id: dataformat
         http: false
         passive: true
+    camel-dataset:
+      groupId: org.apache.camel
+      artifactId: camel-dataset
+      schemes:
+      - id: dataset
+        http: false
+        passive: true
+      - id: dataset-test
+        http: false
+        passive: false
     camel-digitalocean:
       groupId: org.apache.camel
       artifactId: camel-digitalocean
@@ -793,6 +805,11 @@ spec:
       - id: grape
         http: false
         passive: false
+    camel-grok:
+      groupId: org.apache.camel
+      artifactId: camel-grok
+      dataformats:
+      - grok
     camel-groovy:
       groupId: org.apache.camel
       artifactId: camel-groovy
@@ -901,6 +918,9 @@ spec:
       - id: https
         http: false
         passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-file
     camel-ical:
       groupId: org.apache.camel
       artifactId: camel-ical
@@ -998,6 +1018,11 @@ spec:
       artifactId: camel-jaxb
       dataformats:
       - jaxb
+    camel-jaxp:
+      groupId: org.apache.camel
+      artifactId: camel-jaxp
+      languages:
+      - xtokenize
     camel-jbpm:
       groupId: org.apache.camel
       artifactId: camel-jbpm
@@ -1054,16 +1079,18 @@ spec:
       - id: jgroups-raft
         http: false
         passive: false
-    camel-jibx:
-      groupId: org.apache.camel
-      artifactId: camel-jibx
-      dataformats:
-      - jibx
     camel-jing:
       groupId: org.apache.camel
       artifactId: camel-jing
       schemes:
       - id: jing
+        http: false
+        passive: false
+    camel-jira:
+      groupId: org.apache.camel
+      artifactId: camel-jira
+      schemes:
+      - id: jira
         http: false
         passive: false
     camel-jms:
@@ -1120,6 +1147,11 @@ spec:
       - id: json-validator
         http: false
         passive: false
+    camel-jsonapi:
+      groupId: org.apache.camel
+      artifactId: camel-jsonapi
+      dataformats:
+      - jsonApi
     camel-jsonpath:
       groupId: org.apache.camel
       artifactId: camel-jsonpath
@@ -1153,7 +1185,23 @@ spec:
       version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
-        artifactId: camel-core
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+      - groupId: org.apache.camel
+        artifactId: camel-properties
+    camel-k-runtime-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-knative
+      dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+      - groupId: org.apache.camel
+        artifactId: camel-netty4-http
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
@@ -1360,6 +1408,13 @@ spec:
       - id: mllp
         http: false
         passive: false
+    camel-mock:
+      groupId: org.apache.camel
+      artifactId: camel-mock
+      schemes:
+      - id: mock
+        http: false
+        passive: true
     camel-mongodb-gridfs:
       groupId: org.apache.camel
       artifactId: camel-mongodb-gridfs
@@ -1524,6 +1579,13 @@ spec:
       - id: pdf
         http: false
         passive: false
+    camel-pg-replication-slot:
+      groupId: org.apache.camel
+      artifactId: camel-pg-replication-slot
+      schemes:
+      - id: pg-replication-slot
+        http: false
+        passive: false
     camel-pgevent:
       groupId: org.apache.camel
       artifactId: camel-pgevent
@@ -1555,6 +1617,13 @@ spec:
       artifactId: camel-pubnub
       schemes:
       - id: pubnub
+        http: false
+        passive: false
+    camel-pulsar:
+      groupId: org.apache.camel
+      artifactId: camel-pulsar
+      schemes:
+      - id: pulsar
         http: false
         passive: false
     camel-quartz2:
@@ -1616,13 +1685,6 @@ spec:
       - id: restlet
         http: true
         passive: false
-    camel-rmi:
-      groupId: org.apache.camel
-      artifactId: camel-rmi
-      schemes:
-      - id: rmi
-        http: false
-        passive: false
     camel-rss:
       groupId: org.apache.camel
       artifactId: camel-rss
@@ -1676,11 +1738,6 @@ spec:
       - id: schematron
         http: false
         passive: false
-    camel-script:
-      groupId: org.apache.camel
-      artifactId: camel-script
-      languages:
-      - javaScript
     camel-seda:
       groupId: org.apache.camel
       artifactId: camel-seda
@@ -1781,6 +1838,13 @@ spec:
         http: false
         passive: false
       - id: solrCloud
+        http: false
+        passive: false
+    camel-soroush:
+      groupId: org.apache.camel
+      artifactId: camel-soroush
+      schemes:
+      - id: soroush
         http: false
         passive: false
     camel-spark:
@@ -2024,6 +2088,13 @@ spec:
       - id: web3j
         http: false
         passive: false
+    camel-webhook:
+      groupId: org.apache.camel
+      artifactId: camel-webhook
+      schemes:
+      - id: webhook
+        http: false
+        passive: false
     camel-websocket:
       groupId: org.apache.camel
       artifactId: camel-websocket
@@ -2068,6 +2139,11 @@ spec:
       - id: xmpp
         http: false
         passive: false
+    camel-xpath:
+      groupId: org.apache.camel
+      artifactId: camel-xpath
+      languages:
+      - xpath
     camel-xslt:
       groupId: org.apache.camel
       artifactId: camel-xslt
@@ -2095,6 +2171,12 @@ spec:
       - id: zendesk
         http: false
         passive: false
+    camel-zip-deflater:
+      groupId: org.apache.camel
+      artifactId: camel-zip-deflater
+      dataformats:
+      - gzipdeflater
+      - zipdeflater
     camel-zipfile:
       groupId: org.apache.camel
       artifactId: camel-zipfile

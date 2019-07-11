@@ -196,6 +196,34 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "IntegrationKitCondition": {
+      "required": [
+        "type",
+        "status"
+      ],
+      "properties": {
+        "lastTransitionTime": {
+          "$ref": "#/definitions/Time"
+        },
+        "lastUpdateTime": {
+          "$ref": "#/definitions/Time"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "IntegrationKitSpec": {
       "properties": {
         "configuration": {
@@ -251,6 +279,13 @@
         "camelVersion": {
           "type": "string"
         },
+        "conditions": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/IntegrationKitCondition"
+          },
+          "type": "array"
+        },
         "digest": {
           "type": "string"
         },
@@ -264,10 +299,16 @@
         "phase": {
           "type": "string"
         },
+        "platform": {
+          "type": "string"
+        },
         "publicImage": {
           "type": "string"
         },
         "runtimeVersion": {
+          "type": "string"
+        },
+        "version": {
           "type": "string"
         }
       },

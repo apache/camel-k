@@ -51,27 +51,38 @@ func TestNewProject(t *testing.T) {
 
 	err = generateProject(&ctx)
 	assert.Nil(t, err)
-
-	assert.Len(t, ctx.Maven.Project.DependencyManagement.Dependencies, 3)
-	assert.Contains(t, ctx.Maven.Project.DependencyManagement.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel",
-		ArtifactID: "camel-bom",
-		Version:    ctx.Catalog.Version,
-		Type:       "pom",
-		Scope:      "import",
-	})
-	assert.Contains(t, ctx.Maven.Project.DependencyManagement.Dependencies, maven.Dependency{
-		GroupID:    "my.company",
-		ArtifactID: "my-artifact-1",
-		Version:    "1.0.0",
-		Type:       "pom",
-		Scope:      "import",
-	})
-	assert.Contains(t, ctx.Maven.Project.DependencyManagement.Dependencies, maven.Dependency{
-		GroupID:    "my.company",
-		ArtifactID: "my-artifact-2",
-		Version:    "2.0.0",
-		Type:       "pom",
-		Scope:      "import",
-	})
+	assert.ElementsMatch(
+		t,
+		ctx.Maven.Project.DependencyManagement.Dependencies,
+		[]maven.Dependency{
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-bom",
+				Version:    ctx.Catalog.Version,
+				Type:       "pom",
+				Scope:      "import",
+			},
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-bom",
+				Version:    defaults.RuntimeVersion,
+				Type:       "pom",
+				Scope:      "import",
+			},
+			{
+				GroupID:    "my.company",
+				ArtifactID: "my-artifact-1",
+				Version:    "1.0.0",
+				Type:       "pom",
+				Scope:      "import",
+			},
+			{
+				GroupID:    "my.company",
+				ArtifactID: "my-artifact-2",
+				Version:    "2.0.0",
+				Type:       "pom",
+				Scope:      "import",
+			},
+		},
+	)
 }
