@@ -237,17 +237,17 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 	if target.Status.Phase == v1alpha1.IntegrationPhaseNone || target.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
 		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
-		switch {
-		case err != nil:
-			target.Status.Phase = v1alpha1.IntegrationPhaseError
-			target.Status.Failure = v1alpha1.NewErrorFailure(err)
-		case pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady:
+		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
-		default:
+		} else {
 			target.Status.Phase = v1alpha1.IntegrationPhaseInitialization
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
+			if err != nil {
+				target.Status.SetErrorCondition(v1alpha1.IntegrationConditionPlatformAvailable, v1alpha1.IntegrationConditionPlatformAvailableReason, err)
+			}
+
 			if pl != nil {
 				target.SetIntegrationPlatform(pl)
 			}
