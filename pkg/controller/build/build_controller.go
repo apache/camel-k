@@ -168,17 +168,17 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	if target.Status.Phase == v1alpha1.BuildPhaseNone || target.Status.Phase == v1alpha1.BuildPhaseWaitingForPlatform {
 		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
-		switch {
-		case err != nil:
-			target.Status.Phase = v1alpha1.BuildPhaseError
-			target.Status.Failure = v1alpha1.NewErrorFailure(err)
-		case pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady:
+		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1alpha1.BuildPhaseWaitingForPlatform
-		default:
+		} else {
 			target.Status.Phase = v1alpha1.BuildPhaseInitialization
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
+			if err != nil {
+				target.Status.SetErrorCondition(v1alpha1.BuildConditionPlatformAvailable, v1alpha1.BuildConditionPlatformAvailableReason, err)
+			}
+
 			if pl != nil {
 				target.SetIntegrationPlatform(pl)
 			}
