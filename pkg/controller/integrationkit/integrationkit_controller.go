@@ -187,17 +187,17 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 
 	if target.Status.Phase == v1alpha1.IntegrationKitPhaseNone || target.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform {
 		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
-		switch {
-		case err != nil:
-			target.Status.Phase = v1alpha1.IntegrationKitPhaseError
-			target.Status.Failure = v1alpha1.NewErrorFailure(err)
-		case pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady:
+		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1alpha1.IntegrationKitPhaseWaitingForPlatform
-		default:
+		} else {
 			target.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
+			if err != nil {
+				target.Status.SetErrorCondition(v1alpha1.IntegrationKitConditionPlatformAvailable, v1alpha1.IntegrationKitConditionPlatformAvailableReason, err)
+			}
+
 			if pl != nil {
 				target.SetIntegrationPlatform(pl)
 			}
