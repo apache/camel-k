@@ -40,10 +40,6 @@ func (inspector YAMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadat
 	for i := range definitions {
 		definition := definitions[i]
 
-		if len(definition) != 1 {
-			return fmt.Errorf("unable to parse step: %s", definition)
-		}
-
 		for k, v := range definition {
 			if err := inspector.parseStep(k, v, meta); err != nil {
 				return err
