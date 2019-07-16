@@ -26,6 +26,5 @@ metadata:
     camel.apache.org/kit.type: platform
 spec:
   dependencies:
-    - runtime:jvm
-    - runtime:kotlin
-    - camel:core
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-kotlin

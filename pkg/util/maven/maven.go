@@ -147,7 +147,6 @@ func ParseGAV(gav string) (Dependency, error) {
 
 	dep.GroupID = res[1]
 	dep.ArtifactID = res[2]
-	dep.Type = "jar"
 
 	cnt := strings.Count(gav, ":")
 	switch cnt {

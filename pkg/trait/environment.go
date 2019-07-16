@@ -34,6 +34,8 @@ const (
 	envVarCamelKVersion        = "CAMEL_K_VERSION"
 	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
 	envVarCamelVersion         = "CAMEL_VERSION"
+	envVarMainClass            = "JAVA_MAIN_CLASS"
+	defaultMainClass           = "org.apache.camel.k.main.Application"
 )
 
 func newEnvironmentTrait() *environmentTrait {
@@ -60,6 +62,8 @@ func (t *environmentTrait) Apply(e *Environment) error {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
 	}
+
+	envvar.SetVal(&e.EnvVars, envVarMainClass, defaultMainClass)
 
 	return nil
 }

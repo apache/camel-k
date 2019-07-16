@@ -147,7 +147,7 @@ func NewDependency(groupID string, artifactID string, version string) Dependency
 		GroupID:    groupID,
 		ArtifactID: artifactID,
 		Version:    version,
-		Type:       "jar",
+		Type:       "",
 		Classifier: "",
 	}
 }

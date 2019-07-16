@@ -29,8 +29,8 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestKitJVMFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "jvm")
+func TestKitMainFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "main")
 }
 
 func TestKitGroovyFullBuild(t *testing.T) {
@@ -39,6 +39,22 @@ func TestKitGroovyFullBuild(t *testing.T) {
 
 func TestKitKotlinFullBuild(t *testing.T) {
 	doNamedKitFullBuild(t, "kotlin")
+}
+
+func TestKitJSFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "js")
+}
+
+func TestKitXMLFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "xml")
+}
+
+func TestKitJavaFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "java")
+}
+
+func TestKitYAMLFullBuild(t *testing.T) {
+	doNamedKitFullBuild(t, "yaml")
 }
 
 func TestKitHealthFullBuild(t *testing.T) {

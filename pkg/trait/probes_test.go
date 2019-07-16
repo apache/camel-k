@@ -51,7 +51,7 @@ func TestProbesDeps(t *testing.T) {
 
 	err = tr.Apply(&e)
 	assert.Nil(t, err)
-	assert.Contains(t, e.Integration.Status.Dependencies, "runtime:health")
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-health")
 }
 
 func TestProbesOnDeployment(t *testing.T) {

@@ -48,7 +48,6 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:  impl.run,
 	}
 
-	cmd.Flags().StringVarP(&impl.runtime, "runtime", "r", "jvm", "Runtime provided by the kit")
 	cmd.Flags().StringVar(&impl.image, "image", "", "Image used to create the kit")
 	cmd.Flags().StringSliceVarP(&impl.dependencies, "dependency", "d", nil, "Add a dependency")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
@@ -66,7 +65,6 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 type kitCreateCommand struct {
 	*RootCmdOptions
 
-	runtime      string
 	image        string
 	dependencies []string
 	properties   []string
@@ -148,13 +146,6 @@ func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 		case strings.HasPrefix(item, "camel-"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
-	}
-
-	// jvm runtime required by default
-	util.StringSliceUniqueAdd(&ctx.Spec.Dependencies, "runtime:jvm")
-
-	if command.runtime != "" {
-		util.StringSliceUniqueAdd(&ctx.Spec.Dependencies, "runtime:"+command.runtime)
 	}
 
 	for _, item := range command.properties {

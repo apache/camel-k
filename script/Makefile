@@ -102,7 +102,7 @@ test: build
 	go test ./...
 
 test-integration: build
-	go test -v ./e2e/... -tags=integration
+	go test -timeout 30m -v ./e2e/... -tags=integration
 
 build-operator:
 	go build $(GOFLAGS) -o camel-k ./cmd/manager/*.go

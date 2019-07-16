@@ -42,7 +42,7 @@ func TestNewProject(t *testing.T) {
 				},
 			},
 			Dependencies: []string{
-				"runtime:jvm",
+				"camel-k:runtime-main",
 				"bom:my.company/my-artifact-1/1.0.0",
 				"bom:my.company/my-artifact-2/2.0.0",
 			},
