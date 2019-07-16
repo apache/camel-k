@@ -118,11 +118,6 @@ func TestGenerateJvmProject(t *testing.T) {
 				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-properties",
 			},
-			{
-				GroupID:    "org.apache.logging.log4j",
-				ArtifactID: "log4j-slf4j-impl",
-				Scope:      "runtime",
-			},
 		},
 	)
 }
@@ -307,11 +302,6 @@ func TestGenerateGroovyProject(t *testing.T) {
 			{
 				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-groovy",
-			},
-			{
-				GroupID:    "org.apache.logging.log4j",
-				ArtifactID: "log4j-slf4j-impl",
-				Scope:      "runtime",
 			},
 		},
 	)
