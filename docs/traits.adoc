@@ -324,6 +324,49 @@ It's disabled by default.
 
 !===
 
+| probes
+| Kubernetes, OpenShift
+| Configure LIveness and Readiness probes.
+  +
+  +
+  It's disabled by default.
+
+[cols="m,"]
+!===
+
+! probes.bind-host
+! Configures the host on which the probe is exposed (default `0.0.0.0`).
+
+! probes.bind-port
+! Configures the port on which the probe is exposed (default `8080`).
+
+! probes.path
+! Path to access on the probe ( default `/health`).
+
+! probes.liveness-initial-delay
+! Number of seconds after the container has started before liveness probes are initiated.
+! probes.liveness-timeout
+! Number of seconds after which the probe times out.
+! probes.liveness-period
+! How often to perform the probe.
+! probes.liveness-success-threshold
+! Minimum consecutive successes for the probe to be considered successful after having failed.
+! probes.liveness-failure-threshold
+! Minimum consecutive failures for the probe to be considered failed after having succeeded.
+
+! probes.readiness-initial-delay
+! Number of seconds after the container has started before liveness probes are initiated.
+! probes.readiness-timeout
+! Number of seconds after which the probe times out.
+! probes.readiness-period
+! How often to perform the probe.
+! probes.readiness-success-threshold
+! Minimum consecutive successes for the probe to be considered successful after having failed.
+! probes.readiness-failure-threshold
+! Minimum consecutive failures for the probe to be considered failed after having succeeded.
+
+!===
+
 |=======================
 
 
