@@ -21,7 +21,7 @@
 
     <route id="hello">
         <from uri="timer:hello?period=3s"/>
-        <setHeader headerName="m">
+        <setHeader name="m">
             <constant>string!</constant>
         </setHeader>
         <setBody>
