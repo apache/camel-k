@@ -26,7 +26,5 @@ metadata:
     camel.apache.org/kit.type: platform
 spec:
   dependencies:
-    - runtime:jvm
-    - runtime:yaml
-    - camel:core
-    - camel-k:knative
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-runtime-knative

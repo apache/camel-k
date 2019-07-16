@@ -29,8 +29,6 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/scylladb/go-set/strset"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/tar"
@@ -122,10 +120,6 @@ func generateProject(ctx *Context) error {
 	}
 
 	ctx.Maven.Project = p
-	//
-	// set-up dependencies
-	//
-	ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", "camel-k-runtime-jvm", ctx.Build.RuntimeVersion)
 
 	for _, d := range ctx.Build.Dependencies {
 		switch {
@@ -140,20 +134,16 @@ func generateProject(ctx *Context) error {
 		case strings.HasPrefix(d, "camel-k:"):
 			artifactID := strings.TrimPrefix(d, "camel-k:")
 
-			if !strings.HasPrefix(artifactID, "camel-") {
-				artifactID = "camel-" + artifactID
+			if !strings.HasPrefix(artifactID, "camel-k-") {
+				artifactID = "camel-k-" + artifactID
 			}
 
-			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
+			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
 
 			ctx.Maven.Project.AddEncodedDependencyGAV(gav)
-		case strings.HasPrefix(d, "runtime:"):
-			artifactID := strings.Replace(d, "runtime:", "camel-k-runtime-", 1)
-
-			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, ctx.Build.RuntimeVersion)
 		case strings.HasPrefix(d, "bom:"):
 			// no-op
 		default:
@@ -244,10 +234,9 @@ func sanitizeDependencies(ctx *Context) error {
 			ctx.Maven.Project.Dependencies[i].Version = ""
 		case "org.apache.camel.k":
 			//
-			// Force every runtime dependency to have the required version discardin
-			// any version eventually set on the catalog
+			// Remove the version so we force using the one configured by the bom
 			//
-			ctx.Maven.Project.Dependencies[i].Version = ctx.Build.RuntimeVersion
+			ctx.Maven.Project.Dependencies[i].Version = ""
 		}
 	}
 
@@ -323,7 +312,7 @@ func incrementalPackager(ctx *Context) error {
 	return packager(ctx, func(ctx *Context) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
-		bestImage, commonLibs := findBestImage(images, ctx.Build.Dependencies, ctx.Artifacts)
+		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
 			selectedArtifacts := make([]v1alpha1.Artifact, 0)
 			for _, entry := range ctx.Artifacts {
@@ -420,7 +409,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 	return images, nil
 }
 
-func findBestImage(images []publishedImage, dependencies []string, artifacts []v1alpha1.Artifact) (publishedImage, map[string]bool) {
+func findBestImage(images []publishedImage, artifacts []v1alpha1.Artifact) (publishedImage, map[string]bool) {
 	var bestImage publishedImage
 
 	if len(images) == 0 {
@@ -432,33 +421,10 @@ func findBestImage(images []publishedImage, dependencies []string, artifacts []v
 		requiredLibs[entry.ID] = true
 	}
 
-	requiredRuntimes := strset.New()
-	for _, entry := range dependencies {
-		if strings.HasPrefix(entry, "runtime:") {
-			requiredRuntimes.Add(entry)
-		}
-	}
-
 	bestImageCommonLibs := make(map[string]bool)
 	bestImageSurplusLibs := 0
 
 	for _, image := range images {
-		runtimes := strset.New()
-		for _, entry := range image.Dependencies {
-			if strings.HasPrefix(entry, "runtime:") {
-				runtimes.Add(entry)
-			}
-		}
-
-		//
-		// check if the image has the same runtime requirements to avoid the heuristic
-		// selector to include unwanted runtime bits such as spring-boot (which may have
-		// an additional artifact only thus it may match)
-		//
-		if !requiredRuntimes.IsSubset(runtimes) {
-			continue
-		}
-
 		common := make(map[string]bool)
 		for _, artifact := range image.Artifacts {
 			if _, ok := requiredLibs[artifact.ID]; ok {

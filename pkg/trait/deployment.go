@@ -129,9 +129,6 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		envvar.SetVal(&environment, key, value)
 	}
 
-	// set env vars needed by the runtime
-	envvar.SetVal(&environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
-
 	// camel-k runtime
 	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(paths, ","))
 	envvar.SetVal(&environment, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")

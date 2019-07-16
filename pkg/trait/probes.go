@@ -66,7 +66,7 @@ func (t *probesTrait) Configure(e *Environment) (bool, error) {
 
 func (t *probesTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "runtime:health")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-health")
 
 		// sort the dependencies to get always the same list if they don't change
 		sort.Strings(e.Integration.Status.Dependencies)

@@ -18,7 +18,7 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: IntegrationKit
 metadata:
-  name: jvm
+  name: js
   labels:
     app: "camel-k"
     camel.apache.org/kit.created.by.kind: Operator
@@ -26,5 +26,5 @@ metadata:
     camel.apache.org/kit.type: platform
 spec:
   dependencies:
-    - runtime:jvm
-    - camel:core
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-js

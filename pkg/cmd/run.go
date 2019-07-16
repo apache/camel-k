@@ -66,7 +66,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:  options.run,
 	}
 
-	cmd.Flags().StringVarP(&options.Runtime, "runtime", "r", "", "Runtime used by the integration")
 	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
 	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
 	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
@@ -105,7 +104,6 @@ type runCmdOptions struct {
 	Dev             bool
 	DeletionPolicy  string
 	IntegrationKit  string
-	Runtime         string
 	IntegrationName string
 	Profile         string
 	OutputFormat    string
@@ -362,10 +360,6 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		integration.Finalizers = []string{
 			finalizer.CamelIntegrationFinalizer,
 		}
-	}
-
-	if o.Runtime != "" {
-		integration.Spec.AddDependency("runtime:" + o.Runtime)
 	}
 
 	for _, item := range o.Dependencies {

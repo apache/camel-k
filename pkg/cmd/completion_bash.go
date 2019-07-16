@@ -87,11 +87,6 @@ __kamel_languages() {
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 }
 
-__kamel_runtimes() {
-    local type_list="jvm groovy kotlin"
-    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
-}
-
 __kamel_deletion_policy() {
     local type_list="owner label"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
@@ -233,13 +228,6 @@ func configureKnownBashCompletions(command *cobra.Command) {
 		"language",
 		map[string][]string{
 			cobra.BashCompCustom: {"__kamel_languages"},
-		},
-	)
-	configureBashAnnotationForFlag(
-		command,
-		"runtime",
-		map[string][]string{
-			cobra.BashCompCustom: {"__kamel_runtimes"},
 		},
 	)
 	configureBashAnnotationForFlag(

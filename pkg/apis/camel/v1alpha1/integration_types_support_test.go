@@ -63,18 +63,14 @@ func TestLanguageAlreadySet(t *testing.T) {
 
 func TestAddDependency(t *testing.T) {
 	integration := IntegrationSpec{}
-	integration.AddDependency("camel-ciaone")
-	assert.Equal(t, integration.Dependencies, []string{"camel:ciaone"})
+	integration.AddDependency("camel-file")
+	assert.Equal(t, integration.Dependencies, []string{"camel:file"})
 
 	integration = IntegrationSpec{}
-	integration.AddDependency("runtime:ciaone")
-	assert.Equal(t, integration.Dependencies, []string{"runtime:ciaone"})
+	integration.AddDependency("mvn:com.my/company")
+	assert.Equal(t, integration.Dependencies, []string{"mvn:com.my/company"})
 
 	integration = IntegrationSpec{}
-	integration.AddDependency("mvn:ciaone")
-	assert.Equal(t, integration.Dependencies, []string{"mvn:ciaone"})
-
-	integration = IntegrationSpec{}
-	integration.AddDependency("file:ciaone")
-	assert.Equal(t, integration.Dependencies, []string{"file:ciaone"})
+	integration.AddDependency("file:dep")
+	assert.Equal(t, integration.Dependencies, []string{"file:dep"})
 }

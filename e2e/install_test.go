@@ -43,11 +43,11 @@ func TestAlternativeImageInstallation(t *testing.T) {
 	})
 }
 
-func TestKitJVMInstallation(t *testing.T) {
+func TestKitMainInstallation(t *testing.T) {
 	withNewTestNamespace(func(ns string) {
 		RegisterTestingT(t)
-		Expect(kamel("install", "-n", ns, "--kit", "jvm").Execute()).Should(BeNil())
-		Eventually(build(ns, "jvm")).ShouldNot(BeNil())
+		Expect(kamel("install", "-n", ns, "--kit", "main").Execute()).Should(BeNil())
+		Eventually(build(ns, "main")).ShouldNot(BeNil())
 	})
 }
 
@@ -56,9 +56,8 @@ func TestMavenRepositoryInstallation(t *testing.T) {
 		RegisterTestingT(t)
 		Expect(kamel("install", "-n", ns, "--maven-repository", "https://my.repo.org/public/").Execute()).Should(BeNil())
 		Eventually(configmap(ns, "camel-k-maven-settings")).Should(Not(BeNil()))
-		Eventually(func()string {
+		Eventually(func() string {
 			return configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
 		}).Should(ContainSubstring("https://my.repo.org/public/"))
 	})
 }
-
