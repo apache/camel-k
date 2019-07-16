@@ -140,7 +140,7 @@ func TestParseSimpleGAV(t *testing.T) {
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Equal(t, dep.Version, "2.21.1")
-	assert.Equal(t, dep.Type, "jar")
+	assert.Equal(t, dep.Type, "")
 	assert.Equal(t, dep.Classifier, "")
 }
 

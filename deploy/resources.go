@@ -1339,11 +1339,36 @@ spec:
       - id: jt400
         http: false
         passive: false
+    camel-k-loader-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-loader-java:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-java
+      version: 1.0.0
+    camel-k-loader-js:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-js
+      version: 1.0.0
+    camel-k-loader-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-kotlin
+      version: 1.0.0
+    camel-k-loader-xml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-xml
+      version: 1.0.0
     camel-k-runtime-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-groovy
       version: 1.0.0
       dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-groovy
       - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-runtime-health:
@@ -1359,6 +1384,14 @@ spec:
       artifactId: camel-k-runtime-jvm
       version: 1.0.0
       dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-main
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-js
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-xml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-java
       - groupId: org.apache.camel
         artifactId: camel-core-engine
       - groupId: org.apache.camel
@@ -1370,7 +1403,7 @@ spec:
       artifactId: camel-k-runtime-knative
       dependencies:
       - groupId: org.apache.camel.k
-        artifactId: camel-k-runtime-yaml
+        artifactId: camel-k-loader-yaml
       - groupId: org.apache.camel.k
         artifactId: camel-knative
       - groupId: org.apache.camel.k
@@ -1381,12 +1414,33 @@ spec:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
       version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-kotlin
+    camel-k-runtime-main:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-main
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+      - groupId: org.apache.camel
+        artifactId: camel-properties
     camel-k-runtime-servlet:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-servlet
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-servlet
+    camel-k-runtime-yaml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-yaml
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-yaml
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -3397,11 +3451,10 @@ metadata:
     camel.apache.org/kit.type: platform
 spec:
   dependencies:
-    - runtime:jvm
-    - runtime:groovy
-    - camel:core
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-groovy
 `
-	Resources["platform-integration-kit-jvm.yaml"] =
+	Resources["platform-integration-kit-java.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -3423,7 +3476,7 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: IntegrationKit
 metadata:
-  name: jvm
+  name: java
   labels:
     app: "camel-k"
     camel.apache.org/kit.created.by.kind: Operator
@@ -3431,8 +3484,41 @@ metadata:
     camel.apache.org/kit.type: platform
 spec:
   dependencies:
-    - runtime:jvm
-    - camel:core
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-java
+`
+	Resources["platform-integration-kit-js.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationKit
+metadata:
+  name: js
+  labels:
+    app: "camel-k"
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
+spec:
+  dependencies:
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-js
 `
 	Resources["platform-integration-kit-knative.yaml"] =
 		`
@@ -3464,10 +3550,8 @@ metadata:
     camel.apache.org/kit.type: platform
 spec:
   dependencies:
-    - runtime:jvm
-    - runtime:yaml
-    - camel:core
-    - camel-k:knative
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-runtime-knative
 `
 	Resources["platform-integration-kit-kotlin.yaml"] =
 		`
@@ -3499,9 +3583,106 @@ metadata:
     camel.apache.org/kit.type: platform
 spec:
   dependencies:
-    - runtime:jvm
-    - runtime:kotlin
-    - camel:core
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-kotlin
+`
+	Resources["platform-integration-kit-main.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationKit
+metadata:
+  name: main
+  labels:
+    app: "camel-k"
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
+spec:
+  dependencies:
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+`
+	Resources["platform-integration-kit-xml.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationKit
+metadata:
+  name: xml
+  labels:
+    app: "camel-k"
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
+spec:
+  dependencies:
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-js
+`
+	Resources["platform-integration-kit-yaml.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationKit
+metadata:
+  name: yaml
+  labels:
+    app: "camel-k"
+    camel.apache.org/kit.created.by.kind: Operator
+    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/kit.type: platform
+spec:
+  dependencies:
+    - mvn:org.apache.camel.k/camel-k-runtime-main
+    - mvn:org.apache.camel.k/camel-k-loader-yaml
 `
 	Resources["user-cluster-role.yaml"] =
 		`

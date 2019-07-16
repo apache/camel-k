@@ -65,7 +65,7 @@ func TestGenerateJvmProject(t *testing.T) {
 				},
 			},
 			Dependencies: []string{
-				"runtime:jvm",
+				"camel-k:runtime-main",
 			},
 		},
 	}
@@ -102,9 +102,7 @@ func TestGenerateJvmProject(t *testing.T) {
 		[]maven.Dependency{
 			{
 				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-jvm",
-				Version:    defaults.RuntimeVersion,
-				Type:       "jar",
+				ArtifactID: "camel-k-runtime-main",
 			},
 			{
 				GroupID:    "org.apache.camel",
@@ -240,7 +238,8 @@ func TestGenerateGroovyProject(t *testing.T) {
 				},
 			},
 			Dependencies: []string{
-				"runtime:groovy",
+				"camel-k:runtime-main",
+				"camel-k:loader-groovy",
 			},
 		},
 	}
@@ -277,15 +276,11 @@ func TestGenerateGroovyProject(t *testing.T) {
 		[]maven.Dependency{
 			{
 				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-jvm",
-				Version:    defaults.RuntimeVersion,
-				Type:       "jar",
+				ArtifactID: "camel-k-runtime-main",
 			},
 			{
 				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-groovy",
-				Version:    defaults.RuntimeVersion,
-				Type:       "jar",
+				ArtifactID: "camel-k-loader-groovy",
 			},
 			{
 				GroupID:    "org.apache.camel",
@@ -323,7 +318,7 @@ func TestSanitizeDependencies(t *testing.T) {
 			Dependencies: []string{
 				"camel:undertow",
 				"mvn:org.apache.camel/camel-core/2.18.0",
-				"mvn:org.apache.camel.k/camel-k-runtime-jvm/1.0.0",
+				"mvn:org.apache.camel.k/camel-k-runtime-main/1.0.0",
 				"mvn:com.mycompany/my-dep/1.2.3",
 			},
 		},
@@ -338,25 +333,20 @@ func TestSanitizeDependencies(t *testing.T) {
 
 	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
-		ArtifactID: "camel-k-runtime-jvm",
-		Version:    defaults.RuntimeVersion,
-		Type:       "jar",
+		ArtifactID: "camel-k-runtime-main",
 	})
 	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel",
 		ArtifactID: "camel-core",
-		Type:       "jar",
 	})
 	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel",
 		ArtifactID: "camel-undertow",
-		Type:       "jar",
 	})
 	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
 		GroupID:    "com.mycompany",
 		ArtifactID: "my-dep",
 		Version:    "1.2.3",
-		Type:       "jar",
 	})
 }
 

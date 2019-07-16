@@ -114,9 +114,11 @@ func (t *camelTrait) Apply(e *Environment) error {
 
 	if e.Integration != nil {
 		e.Integration.Status.CamelVersion = e.CamelCatalog.Version
+		e.Integration.Status.RuntimeVersion = rv
 	}
 	if e.IntegrationKit != nil {
 		e.IntegrationKit.Status.CamelVersion = e.CamelCatalog.Version
+		e.IntegrationKit.Status.RuntimeVersion = rv
 	}
 
 	return nil

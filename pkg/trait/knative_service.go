@@ -228,9 +228,6 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 		envvar.SetVal(environment, key, value)
 	}
 
-	// set env vars needed by the runtime
-	envvar.SetVal(environment, "JAVA_MAIN_CLASS", "org.apache.camel.k.jvm.Application")
-
 	// add a dummy env var to trigger deployment if everything but the code
 	// has been changed
 	envvar.SetVal(environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)

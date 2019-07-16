@@ -18,7 +18,7 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: IntegrationKit
 metadata:
-  name: groovy
+  name: xml
   labels:
     app: "camel-k"
     camel.apache.org/kit.created.by.kind: Operator
@@ -27,4 +27,4 @@ metadata:
 spec:
   dependencies:
     - mvn:org.apache.camel.k/camel-k-runtime-main
-    - mvn:org.apache.camel.k/camel-k-loader-groovy
+    - mvn:org.apache.camel.k/camel-k-loader-js

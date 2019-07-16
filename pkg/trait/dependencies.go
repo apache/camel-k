@@ -55,15 +55,23 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 
 		switch s.InferLanguage() {
 		case v1alpha1.LanguageGroovy:
-			util.StringSliceUniqueAdd(&dependencies, "runtime:groovy")
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-groovy")
 		case v1alpha1.LanguageKotlin:
-			util.StringSliceUniqueAdd(&dependencies, "runtime:kotlin")
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-kotlin")
 		case v1alpha1.LanguageYaml:
-			util.StringSliceUniqueAdd(&dependencies, "runtime:yaml")
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-yaml")
+		case v1alpha1.LanguageXML:
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
+		case v1alpha1.LanguageJavaScript:
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
+		case v1alpha1.LanguageJavaClass:
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
+		case v1alpha1.LanguageJavaSource:
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
 		}
 
-		// jvm runtime required by default
-		util.StringSliceUniqueAdd(&dependencies, "runtime:jvm")
+		// main required by default
+		util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-runtime-main")
 
 		for _, d := range meta.Dependencies {
 			util.StringSliceUniqueAdd(&dependencies, d)

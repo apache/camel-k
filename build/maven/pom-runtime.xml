@@ -47,6 +47,65 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-runtime-main</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-runtime-servlet</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-runtime-knative</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-knative</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-knative-http</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-loader-java</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-loader-js</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-loader-xml</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-loader-kotlin</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-loader-groovy</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-loader-yaml</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+
+        <!-- legacy -->
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-runtime-groovy</artifactId>
             <version>${runtime.version}</version>
         </dependency>
@@ -67,22 +126,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-runtime-servlet</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-runtime-yaml</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-knative</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-knative-http</artifactId>
             <version>${runtime.version}</version>
         </dependency>
     </dependencies>

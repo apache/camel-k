@@ -1164,11 +1164,36 @@ spec:
       - id: jt400
         http: false
         passive: false
+    camel-k-loader-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-loader-java:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-java
+      version: 1.0.0
+    camel-k-loader-js:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-js
+      version: 1.0.0
+    camel-k-loader-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-kotlin
+      version: 1.0.0
+    camel-k-loader-xml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-xml
+      version: 1.0.0
     camel-k-runtime-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-groovy
       version: 1.0.0
       dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-groovy
       - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-runtime-health:
@@ -1184,6 +1209,14 @@ spec:
       artifactId: camel-k-runtime-jvm
       version: 1.0.0
       dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-main
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-js
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-xml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-java
       - groupId: org.apache.camel
         artifactId: camel-core-engine
       - groupId: org.apache.camel
@@ -1195,7 +1228,7 @@ spec:
       artifactId: camel-k-runtime-knative
       dependencies:
       - groupId: org.apache.camel.k
-        artifactId: camel-k-runtime-yaml
+        artifactId: camel-k-loader-yaml
       - groupId: org.apache.camel.k
         artifactId: camel-knative
       - groupId: org.apache.camel.k
@@ -1206,12 +1239,33 @@ spec:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
       version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-kotlin
+    camel-k-runtime-main:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-main
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+      - groupId: org.apache.camel
+        artifactId: camel-properties
     camel-k-runtime-servlet:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-servlet
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-servlet
+    camel-k-runtime-yaml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-yaml
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-yaml
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
