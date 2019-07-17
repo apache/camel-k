@@ -1,5 +1,5 @@
 [[running]]
-= Running Integrations
+= Running
 
 After completing the xref:installation/index.adoc[installation] you should be connected to a Kubernetes/OpenShift cluster
 and have the "kamel" CLI correctly configured.
