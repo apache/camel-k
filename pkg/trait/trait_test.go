@@ -156,13 +156,13 @@ func TestTraitDecode(t *testing.T) {
 	}
 	env.Integration.Spec.Traits["service"] = svcTrait
 
-	svc := newServiceTrait()
-	err := decodeTraitSpec(&svcTrait, svc)
+	ctr := newContainerTrait()
+	err := decodeTraitSpec(&svcTrait, ctr)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 7071, svc.Port)
-	assert.NotNil(t, svc.Enabled)
-	assert.Equal(t, false, *svc.Enabled)
+	assert.Equal(t, 7071, ctr.Port)
+	assert.NotNil(t, ctr.Enabled)
+	assert.Equal(t, false, *ctr.Enabled)
 }
 
 func TestTraitHierarchyDecode(t *testing.T) {

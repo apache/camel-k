@@ -94,7 +94,7 @@ func TestServiceWithDefaults(t *testing.T) {
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(&appsv1.Deployment{}),
+		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
 
@@ -104,6 +104,7 @@ func TestServiceWithDefaults(t *testing.T) {
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait(ID("deployment")))
 	assert.NotNil(t, environment.GetTrait(ID("service")))
+	assert.NotNil(t, environment.GetTrait(ID("container")))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
 		return service.Name == ServiceTestName
@@ -158,12 +159,18 @@ func TestService(t *testing.T) {
 				Traits: map[string]v1alpha1.TraitSpec{
 					"service": {
 						Configuration: map[string]string{
-							"enabled":             "true",
-							"auto":                "false",
-							"port":                "81",
-							"port-name":           "http-81",
-							"container-port":      "8081",
-							"container-port-name": "http-8081",
+							"enabled": "true",
+						},
+					},
+					"container": {
+						Configuration: map[string]string{
+							"enabled":           "true",
+							"auto":              "false",
+							"expose":            "true",
+							"port":              "8081",
+							"port-name":         "http-8081",
+							"service-port":      "81",
+							"service-port-name": "http-81",
 						},
 					},
 				},
@@ -185,7 +192,7 @@ func TestService(t *testing.T) {
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(&appsv1.Deployment{}),
+		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
 
@@ -195,6 +202,7 @@ func TestService(t *testing.T) {
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait(ID("deployment")))
 	assert.NotNil(t, environment.GetTrait(ID("service")))
+	assert.NotNil(t, environment.GetTrait(ID("container")))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
 		return service.Name == ServiceTestName
