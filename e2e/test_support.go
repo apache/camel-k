@@ -27,6 +27,8 @@ import (
 	"fmt"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
@@ -36,7 +38,6 @@ import (
 	"github.com/onsi/gomega"
 	projectv1 "github.com/openshift/api/project/v1"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -369,40 +370,42 @@ func operatorTryPodForceKill(ns string) {
 	}
 }
 
-func scaleOperator(ns string, replicas int32) error {
-	lst := appsv1.DeploymentList{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Deployment",
-			APIVersion: appsv1.SchemeGroupVersion.String(),
-		},
-	}
-	opts := k8sclient.ListOptions{
-		LabelSelector: labels.SelectorFromSet(labels.Set{
-			"camel.apache.org/component": "operator",
-		}),
-		Namespace: ns,
-	}
-	if err := testClient.List(testContext, &opts, &lst); err != nil {
-		return err
-	}
-	if len(lst.Items) == 0 {
-		return errors.New("camel k operator not found")
-	} else if len(lst.Items) > 1 {
-		return errors.New("too many camel k operators")
-	}
+func scaleOperator(ns string, replicas int32) func() error {
+	return func() error {
+		lst := appsv1.DeploymentList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Deployment",
+				APIVersion: appsv1.SchemeGroupVersion.String(),
+			},
+		}
+		opts := k8sclient.ListOptions{
+			LabelSelector: labels.SelectorFromSet(labels.Set{
+				"camel.apache.org/component": "operator",
+			}),
+			Namespace: ns,
+		}
+		if err := testClient.List(testContext, &opts, &lst); err != nil {
+			return err
+		}
+		if len(lst.Items) == 0 {
+			return errors.New("camel k operator not found")
+		} else if len(lst.Items) > 1 {
+			return errors.New("too many camel k operators")
+		}
 
-	operatorDeployment := lst.Items[0]
-	operatorDeployment.Spec.Replicas = &replicas
-	err := testClient.Update(testContext, &operatorDeployment)
-	if err != nil {
-		return err
-	}
+		operatorDeployment := lst.Items[0]
+		operatorDeployment.Spec.Replicas = &replicas
+		err := testClient.Update(testContext, &operatorDeployment)
+		if err != nil {
+			return err
+		}
 
-	if replicas == 0 {
-		// speedup scale down by killing the pod
-		operatorTryPodForceKill(ns)
+		if replicas == 0 {
+			// speedup scale down by killing the pod
+			operatorTryPodForceKill(ns)
+		}
+		return nil
 	}
-	return nil
 }
 
 /*
@@ -462,7 +465,7 @@ func deleteTestNamespace(ns metav1.Object) {
 	}
 
 	// Wait for all pods to be deleted
-	gomega.Eventually(numPods(ns.GetName()), 30 * time.Second).Should(gomega.Equal(0))
+	gomega.Eventually(numPods(ns.GetName()), 30*time.Second).Should(gomega.Equal(0))
 }
 
 func newTestNamespace() metav1.Object {
