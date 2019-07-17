@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -66,43 +66,36 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	// Configure the Prometheus Java agent
 	envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_PORT", strconv.Itoa(t.Port))
 
-	// Expose the Prometheus endpoint
-	// Either update the existing service added by previously executed traits
-	// (e.g. the service trait) or add a new service resource
-	svc := e.Resources.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == e.Integration.Name
-	})
-	if svc == nil {
-		svc = getServiceFor(e)
-		e.Resources.Add(svc)
-	}
-	port := corev1.ServicePort{
-		Name:       prometheusPortName,
-		Port:       int32(t.Port),
-		Protocol:   corev1.ProtocolTCP,
-		TargetPort: intstr.FromString(prometheusPortName),
-	}
-	svc.Spec.Ports = append(svc.Spec.Ports, port)
+	service, servicePort := t.configureServicePort(e)
+	container, containerPort := t.configureContainerPort(e)
 
-	// Register a post processor to add a container port to the integration deployment
-	e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-		var container *corev1.Container
-		environment.Resources.VisitContainer(func(c *corev1.Container) {
-			if c.Name == environment.Integration.Name {
-				container = c
-			}
-		})
-		if container != nil {
-			container.Ports = append(container.Ports, corev1.ContainerPort{
-				Name:          prometheusPortName,
-				ContainerPort: int32(t.Port),
-				Protocol:      corev1.ProtocolTCP,
-			})
-		} else {
-			return errors.New("cannot add Prometheus container port: no integration container")
-		}
+	condition := v1alpha1.IntegrationCondition{
+		Type:   v1alpha1.IntegrationConditionPrometheusAvailable,
+		Status: corev1.ConditionTrue,
+		Reason: v1alpha1.IntegrationConditionPrometheusAvailableReason,
+	}
+
+	if servicePort != nil {
+		service.Spec.Ports = append(service.Spec.Ports, *servicePort)
+		condition.Message = fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port)
+	} else {
+		condition.Status = corev1.ConditionFalse
+		condition.Reason = v1alpha1.IntegrationConditionServiceNotAvailableReason
+	}
+
+	if containerPort != nil {
+		container.Ports = append(container.Ports, *containerPort)
+		condition.Message += fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
+	} else {
+		condition.Status = corev1.ConditionFalse
+		condition.Reason = v1alpha1.IntegrationConditionContainerNotAvailableReason
+	}
+
+	e.Integration.Status.SetConditions(condition)
+
+	if condition.Status == corev1.ConditionFalse {
 		return nil
-	})
+	}
 
 	if t.ServiceMonitor {
 		// Add the ServiceMonitor resource
@@ -114,6 +107,37 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	}
 
 	return nil
+}
+
+func (t *prometheusTrait) configureContainerPort(e *Environment) (*corev1.Container, *corev1.ContainerPort) {
+	container := e.Resources.GetContainerForIntegration(e.Integration)
+	if container == nil {
+		return nil, nil
+	}
+
+	containerPort := corev1.ContainerPort{
+		Name:          prometheusPortName,
+		ContainerPort: int32(t.Port),
+		Protocol:      corev1.ProtocolTCP,
+	}
+
+	return container, &containerPort
+}
+
+func (t *prometheusTrait) configureServicePort(e *Environment) (*corev1.Service, *corev1.ServicePort) {
+	service := e.Resources.GetServiceForIntegration(e.Integration)
+	if service == nil {
+		return nil, nil
+	}
+
+	servicePort := corev1.ServicePort{
+		Name:       prometheusPortName,
+		Port:       int32(t.Port),
+		Protocol:   corev1.ProtocolTCP,
+		TargetPort: intstr.FromString(prometheusPortName),
+	}
+
+	return service, &servicePort
 }
 
 func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.ServiceMonitor, error) {

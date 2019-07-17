@@ -180,6 +180,10 @@ const (
 	IntegrationConditionKnativeServiceAvailable IntegrationConditionType = "KnativeServiceAvailable"
 	// IntegrationConditionExposureAvailable --
 	IntegrationConditionExposureAvailable IntegrationConditionType = "ExposureAvailable"
+	// IntegrationConditionPrometheusAvailable --
+	IntegrationConditionPrometheusAvailable IntegrationConditionType = "PrometheusAvailable"
+	// IntegrationConditionJolokiaAvailable --
+	IntegrationConditionJolokiaAvailable IntegrationConditionType = "JolokiaAvailable"
 
 	// IntegrationConditionKitAvailableReason --
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
@@ -193,6 +197,8 @@ const (
 	IntegrationConditionServiceAvailableReason string = "ServiceAvailable"
 	// IntegrationConditionServiceNotAvailableReason --
 	IntegrationConditionServiceNotAvailableReason string = "ServiceNotAvailable"
+	// IntegrationConditionContainerNotAvailableReason --
+	IntegrationConditionContainerNotAvailableReason string = "ContainerNotAvailable"
 	// IntegrationConditionRouteAvailableReason --
 	IntegrationConditionRouteAvailableReason string = "RouteAvailable"
 	// IntegrationConditionRouteNotAvailableReason --
@@ -205,6 +211,10 @@ const (
 	IntegrationConditionKnativeServiceAvailableReason string = "KnativeServiceAvailable"
 	// IntegrationConditionKnativeServiceNotAvailableReason --
 	IntegrationConditionKnativeServiceNotAvailableReason string = "KnativeServiceNotAvailable"
+	// IntegrationConditionPrometheusAvailableReason --
+	IntegrationConditionPrometheusAvailableReason string = "PrometheusAvailable"
+	// IntegrationConditionJolokiaAvailableReason --
+	IntegrationConditionJolokiaAvailableReason string = "JolokiaAvailable"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.

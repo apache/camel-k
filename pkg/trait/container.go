@@ -18,24 +18,38 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type containerTrait struct {
-	BaseTrait     `property:",squash"`
-	RequestCPU    string `property:"request-cpu"`
-	RequestMemory string `property:"request-memory"`
-	LimitCPU      string `property:"limit-cpu"`
-	LimitMemory   string `property:"limit-memory"`
+	BaseTrait `property:",squash"`
+
+	Auto            *bool  `property:"auto"`
+	RequestCPU      string `property:"request-cpu"`
+	RequestMemory   string `property:"request-memory"`
+	LimitCPU        string `property:"limit-cpu"`
+	LimitMemory     string `property:"limit-memory"`
+	Expose          *bool  `property:"expose"`
+	Port            int    `property:"port"`
+	PortName        string `property:"port-name"`
+	ServicePort     int    `property:"service-port"`
+	ServicePortName string `property:"service-port-name"`
 }
 
 func newContainerTrait() *containerTrait {
 	return &containerTrait{
-		BaseTrait: newBaseTrait("container"),
+		BaseTrait:       newBaseTrait("container"),
+		Port:            8080,
+		PortName:        httpPortName,
+		ServicePort:     80,
+		ServicePortName: httpPortName,
 	}
 }
 
@@ -44,7 +58,18 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+		return false, nil
+	}
+
+	if t.Auto == nil || *t.Auto {
+		if t.Expose == nil {
+			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
+			t.Expose = &e
+		}
+	}
+
+	return true, nil
 }
 
 func (t *containerTrait) Apply(e *Environment) error {
@@ -63,7 +88,53 @@ func (t *containerTrait) Apply(e *Environment) error {
 		})
 	}
 
+	if t.Expose != nil && *t.Expose {
+		t.configureService(e)
+	}
+
 	return nil
+}
+
+func (t *containerTrait) configureService(e *Environment) {
+	service := e.Resources.GetServiceForIntegration(e.Integration)
+	if service == nil {
+		return
+	}
+
+	container := e.Resources.GetContainerForIntegration(e.Integration)
+	if container == nil {
+		return
+	}
+
+	containerPort := corev1.ContainerPort{
+		Name:          t.PortName,
+		ContainerPort: int32(t.Port),
+		Protocol:      corev1.ProtocolTCP,
+	}
+
+	servicePort := corev1.ServicePort{
+		Name:       t.ServicePortName,
+		Port:       int32(t.ServicePort),
+		Protocol:   corev1.ProtocolTCP,
+		TargetPort: intstr.FromString(t.PortName),
+	}
+
+	e.Integration.Status.SetCondition(
+		v1alpha1.IntegrationConditionServiceAvailable,
+		corev1.ConditionTrue,
+		v1alpha1.IntegrationConditionServiceAvailableReason,
+
+		// service -> container
+		fmt.Sprintf("%s(%s/%d) -> %s(%s/%d)",
+			service.Name, servicePort.Name, servicePort.Port,
+			container.Name, containerPort.Name, containerPort.ContainerPort),
+	)
+
+	container.Ports = append(container.Ports, containerPort)
+	service.Spec.Ports = append(service.Spec.Ports, servicePort)
+
+	// Mark the service as a user service
+	service.Labels["camel.apache.org/service.type"] = v1alpha1.ServiceTypeUser
 }
 
 func (t *containerTrait) configureResources(_ *Environment, container *corev1.Container) {

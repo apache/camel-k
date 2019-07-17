@@ -97,9 +97,6 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	}
 
 	if e.Resources != nil {
-		//
-		// Add mounted volumes as resources
-		//
 		e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 			for i := 0; i < len(deployment.Spec.Template.Spec.Containers); i++ {
 				cp := e.Classpath.Copy()

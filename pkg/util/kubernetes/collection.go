@@ -198,6 +198,16 @@ func (c *Collection) GetUserServiceForIntegration(integration *v1alpha1.Integrat
 	})
 }
 
+// GetServiceForIntegration returns a user Service for the given integration
+func (c *Collection) GetServiceForIntegration(integration *v1alpha1.Integration) *corev1.Service {
+	if integration == nil {
+		return nil
+	}
+	return c.GetService(func(s *corev1.Service) bool {
+		return s.ObjectMeta.Labels != nil && s.ObjectMeta.Labels["camel.apache.org/integration"] == integration.Name
+	})
+}
+
 // GetKnativeService returns a knative Service that matches the given function
 func (c *Collection) GetKnativeService(filter func(*serving.Service) bool) *serving.Service {
 	var retValue *serving.Service
@@ -249,6 +259,17 @@ func (c *Collection) GetContainer(filter func(container *corev1.Container) bool)
 	})
 
 	return retValue
+}
+
+// GetContainerForIntegration --
+func (c *Collection) GetContainerForIntegration(integration *v1alpha1.Integration) *corev1.Container {
+	if integration == nil {
+		return nil
+	}
+
+	return c.GetContainer(func(c *corev1.Container) bool {
+		return c.Name == integration.Name
+	})
 }
 
 // VisitContainer executes the visitor function on all Containers inside deployments or other resources
