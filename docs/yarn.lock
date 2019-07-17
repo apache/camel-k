@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@antora/asciidoc-loader@2.0.0":
+"@antora/asciidoc-loader@2.0.0", "@antora/asciidoc-loader@~2.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@antora/asciidoc-loader/-/asciidoc-loader-2.0.0.tgz#99a00c26e755414205ad034b1815b62f21a3d787"
   integrity sha512-kbpSBMM618Do5dXtG5mC5kk8VEXYDsciJ0orw7vrYeFzRBbR4Y4qpzbsQeuQNB4r2iLoztxErvg04SBb5CsGdQ==
@@ -17,7 +17,7 @@
     "@antora/playbook-builder" "2.0.0"
     commander "^2.19.0"
 
-"@antora/content-aggregator@2.0.0":
+"@antora/content-aggregator@2.0.0", "@antora/content-aggregator@~2.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@antora/content-aggregator/-/content-aggregator-2.0.0.tgz#b4e0398123c6b632d75551c14cb589ddec79766f"
   integrity sha512-24JQSDQZ609yJHs7abIqF5FikNg0EWvFwBYck1Kbl5vRikmDTpSMBhhPKJhAVe4lREm6/FVYO7t9CEmjp69prA==
@@ -35,7 +35,7 @@
     vinyl "^2.2.0"
     vinyl-fs "^3.0.3"
 
-"@antora/content-classifier@2.0.0":
+"@antora/content-classifier@2.0.0", "@antora/content-classifier@~2.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@antora/content-classifier/-/content-classifier-2.0.0.tgz#8d741b2a6743f034cf6df92dcb0ab4a1c67a1904"
   integrity sha512-d1MB57X3AaXy30rw+dudxbJ2cdw/Uk1U4JxHbWIkdrEJKty2fbnBu3xjyb70qAv5G0ayovJpqZOaR+YwS0ibbQ==
@@ -43,7 +43,7 @@
     lodash "^4.17.11"
     vinyl "^2.2.0"
 
-"@antora/document-converter@2.0.0":
+"@antora/document-converter@2.0.0", "@antora/document-converter@~2.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@antora/document-converter/-/document-converter-2.0.0.tgz#99448a415e51fd4829891624802961f6861e23be"
   integrity sha512-8slnLdeMxI4kU64fMsNp58HjpFYZ7chrl5tCYr1/4Jr00fVHwn8vx2YS1cKyowcrmb9uG6YI/pMNt9F3kjTtYA==
@@ -70,7 +70,7 @@
     handlebars "^4.0.12"
     require-from-string "^2.0.2"
 
-"@antora/playbook-builder@2.0.0":
+"@antora/playbook-builder@2.0.0", "@antora/playbook-builder@~2.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@antora/playbook-builder/-/playbook-builder-2.0.0.tgz#bc9313131a60d44ed45a632fb7041983ac132445"
   integrity sha512-uLU4+rpIRZiMit8s1lkbiz5L5V8cPL40RJMRHFb4B7k2PXbvNiZZAMHZBeFgVwfJIKmKAIeUCDgOHgiBIlFc+A==
@@ -144,6 +144,16 @@
     through2 "^3.0.0"
     vinyl "^2.2.0"
     vinyl-fs "^3.0.3"
+
+"@antora/xref-validator@gitlab:antora/xref-validator":
+  version "1.0.0-alpha.1"
+  resolved "https://gitlab.com/antora/xref-validator/repository/archive.tar.gz?ref=84f28a20b8be888b7664a4540cda5aca56de0824"
+  dependencies:
+    "@antora/asciidoc-loader" "~2.0"
+    "@antora/content-aggregator" "~2.0"
+    "@antora/content-classifier" "~2.0"
+    "@antora/document-converter" "~2.0"
+    "@antora/playbook-builder" "~2.0"
 
 "@babel/runtime@^7.1.5":
   version "7.5.4"
