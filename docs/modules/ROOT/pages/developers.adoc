@@ -128,7 +128,7 @@ After you log in into your cluster, you can run the following command to execute
 make test-integration
 ```
 
-[running]
+[[running]]
 == Running
 
 If you want to install everything you have in your source code and see it running on Kubernetes, you need to run the following command:
