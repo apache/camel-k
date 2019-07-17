@@ -37,7 +37,7 @@ func TestPlatformUpgrade(t *testing.T) {
 		Eventually(platformVersion(ns)).Should(Equal(defaults.Version))
 
 		// Scale the operator down to zero
-		Expect(scaleOperator(ns, 0)).Should(BeNil())
+		Eventually(scaleOperator(ns, 0), 10*time.Second).Should(BeNil())
 		Eventually(operatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
@@ -45,7 +45,7 @@ func TestPlatformUpgrade(t *testing.T) {
 		Eventually(platformVersion(ns)).Should(Equal("an.older.one"))
 
 		// Scale the operator up
-		Expect(scaleOperator(ns, 1)).Should(BeNil())
+		Eventually(scaleOperator(ns, 1)).Should(BeNil())
 		Eventually(operatorPod(ns)).ShouldNot(BeNil())
 
 		// Check the platform version change
@@ -65,7 +65,7 @@ func TestIntegrationUpgrade(t *testing.T) {
 		initialImage := integrationPodImage(ns, "js")()
 
 		// Scale the operator down to zero
-		Expect(scaleOperator(ns, 0)).Should(BeNil())
+		Eventually(scaleOperator(ns, 0)).Should(BeNil())
 		Eventually(operatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
@@ -76,7 +76,7 @@ func TestIntegrationUpgrade(t *testing.T) {
 		Eventually(kitsWithVersion(ns, defaults.Version)).Should(Equal(0))
 
 		// Scale the operator up
-		Expect(scaleOperator(ns, 1)).Should(BeNil())
+		Eventually(scaleOperator(ns, 1)).Should(BeNil())
 		Eventually(operatorPod(ns)).ShouldNot(BeNil())
 		Eventually(operatorPodPhase(ns)).Should(Equal(v1.PodRunning))
 
