@@ -1,0 +1,9 @@
+[[uninstalling]]
+= Uninstalling Camel K
+
+If you really need to, it is possible to completely uninstall Camel K from OpenShift or Kubernetes with the following command, using the "oc" or "kubectl" tool:
+
+```
+# kubectl on plain Kubernetes
+oc delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
+```

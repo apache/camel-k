@@ -1,0 +1,18 @@
+{
+  "name": "camel-k-docs",
+  "version": "1.0.0",
+  "description": "Camel K Documentation",
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "@antora/cli": "~2.0",
+    "@antora/site-generator-default": "~2.0",
+    "@antora/xref-validator": "gitlab:antora/xref-validator",
+    "lite-server": "^2.4.0"
+  },
+  "scripts": {
+    "preview": "cd public && lite-server",
+    "build": "yarn antora --stacktrace site.yml",
+    "dev": "yarn build && yarn preview",
+    "checks": "yarn antora --generator @antora/xref-validator site.yml"
+  }
+}

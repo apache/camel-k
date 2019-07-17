@@ -1,0 +1,19 @@
+[[installation-on-minikube]]
+= Installing Camel K on Minikube
+
+You can run Camel K integrations on plain Kubernetes using the Minikube cluster creation tool.
+Follow the instructions in the https://github.com/kubernetes/minikube#installation[official doc] for the installation.
+
+Start a new instance of Minikube using the command:
+
+```
+minikube start
+```
+
+After the startup process is completed, you need to **enable the `registry` addon**:
+
+```
+minikube addons enable registry
+```
+
+You can now proceed with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].

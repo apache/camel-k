@@ -1,0 +1,30 @@
+Camel K Documentation
+=====================
+
+== Environment Setup
+
+To setup the environment you need to execute the following command once (and every time you change yarn dependencies):
+
+```
+yarn install
+```
+
+== Build the Documentation Website
+
+To generate the documentation website, execute:
+
+```
+yarn build
+```
+
+To preview it in the local browser, execute:
+
+```
+yarn preview
+```
+
+To both build and preview, execute:
+
+```
+yarn dev
+```

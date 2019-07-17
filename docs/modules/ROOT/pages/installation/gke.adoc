@@ -1,6 +1,5 @@
-[[gke-cluster]]
-Configuring a Google Kubernetes Engine (GKE) Cluster
-====================================================
+[[installation-on-gke]]
+= Installing Camel K on Google Kubernetes Engine (GKE)
 
 This guide assumes you've already created a Kubernetes Engine cluster on https://console.cloud.google.com.
 
@@ -49,7 +48,10 @@ After the renaming, execute the following command to create the secret:
 kubectl create secret generic kaniko-secret --from-file=kaniko-secret.json
 ```
 
-You're ready to install Camel K. You should now execute the following command to install cluster resources and the operator (in the current namespace):
+You're ready to install Camel K. You need to get the *kamel* CLI tool the from https://github.com/apache/camel-k/releases[release page]
+and put it on your system path.
+
+You should now execute the following command to install cluster resources and the operator (in the current namespace):
 
 ```
 kamel install --registry gcr.io --organization <<your-project-id>> --registry-secret kaniko-secret

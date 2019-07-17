@@ -1,5 +1,4 @@
-Apache Camel K
-==============
+= Apache Camel K
 
 image:https://travis-ci.org/apache/camel-k.svg?branch=master["Build Status", link="https://travis-ci.org/apache/camel-k"]
 image:https://goreportcard.com/badge/github.com/apache/camel-k["Go Report Card", link="https://goreportcard.com/report/github.com/apache/camel-k"]
@@ -15,7 +14,7 @@ Apache Camel K is a lightweight integration platform, born on Kubernetes, with s
 Camel K allows to run integrations directly on a Kubernetes or OpenShift cluster.
 To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
-If you need help on how to create a local development environment based on *Minishift* or *Minikube*, you can follow the link:/docs/cluster-setup.adoc[local cluster setup guide].
+If you need help on how to create a local development environment based on *Minishift* or *Minikube*, you can follow the xref:docs/modules/ROOT/pages/installation/installation.adoc[local cluster setup guide].
 
 [[installation]]
 === Installation
@@ -23,15 +22,17 @@ If you need help on how to create a local development environment based on *Mini
 Make sure you apply specific configuration settings for your cluster before installing Camel K. Customized instructions are needed for
 the following cluster types:
 
-- link:/docs/cluster-setup.adoc[Minishift or Minikube]
-- link:/docs/gke-setup.adoc[Google Kubernetes Engine (GKE)]
+- xref:docs/modules/ROOT/pages/installation/minikube.adoc[Minikube]
+- xref:docs/modules/ROOT/pages/installation/minishift.adoc[Minishift]
+- xref:docs/modules/ROOT/pages/installation/gke.adoc[Google Kubernetes Engine (GKE)]
+- xref:docs/modules/ROOT/pages/installation/openshift.adoc[OpenShift]
 
 Other cluster types (such as OpenShift clusters) should not need prior configuration.
 
 To start using Camel K you need the **"kamel"** binary, that can be used to both configure the cluster and run integrations.
 Look into the https://github.com/apache/camel-k/releases[release page] for latest version of the `kamel` tool.
 
-If you want to contribute, you can also **build it from source!** Refer to the link:/contributing.adoc[contributing guide]
+If you want to contribute, you can also **build it from source!** Refer to the xref:docs/modules/ROOT/pages/developers.adoc[contributing guide]
 for information on how to do it.
 
 Once you have the "kamel" binary, log into your cluster using the standard "oc" (OpenShift) or "kubectl" (Kubernetes) client tool and execute the following command to install Camel K:
@@ -331,7 +332,7 @@ Camel K supports multiple languages for writing integrations:
 | Kotlin			| Kotlin Script `.kts` files are supported (experimental).
 |=======================
 
-More information about supported languages is provided in the link:docs/languages.adoc[languages guide].
+More information about supported languages is provided in the xref:docs/modules/ROOT/pages/languages/languages.adoc[languages guide].
 
 Integrations written in different languages are provided in the link:/examples[examples] directory.
 
@@ -357,7 +358,7 @@ kamel run examples/dns.js
 === Traits
 
 The details of how the integration is mapped into Kubernetes resources can be *customized using traits*.
-More information is provided in the link:docs/traits.adoc[traits section].
+More information is provided in the xref:docs/modules/ROOT/pages/traits.adoc[traits section].
 
 === Monitoring the Status
 
@@ -373,7 +374,7 @@ kamel get
 
 We love contributions and we want to make Camel K great!
 
-Contributing is easy, just take a look at our link:/contributing.adoc[developer's guide].
+Contributing is easy, just take a look at our xref:docs/modules/ROOT/pages/traits.adoc[developer's guide].
 
 [[uninstalling]]
 == Uninstalling
@@ -389,4 +390,3 @@ oc delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,cl
 == Licensing
 
 This software is licensed under the terms you may find in the file named LICENSE in this directory.
-
