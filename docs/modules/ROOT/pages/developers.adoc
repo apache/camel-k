@@ -3,7 +3,7 @@
 
 We love contributions!
 
-The project is written in https://golang.org/[go] and contains some parts written in Java for the link:/runtime[integration runtime]
+The project is written in https://golang.org/[go] and contains some parts written in Java for the https://github.com/apache/camel-k-runtime/[integration runtime]
 Camel K is built on top of Kubernetes through *Custom Resource Definitions*. The https://github.com/operator-framework/operator-sdk[Operator SDK] is used
 to manage the lifecycle of those custom resources.
 
@@ -38,15 +38,15 @@ This is a high-level overview of the project structure:
 [options="header"]
 |=======================
 | Path						| Content
-| link:/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary (manager) and the **kamel** client tool.
-| link:/build[/build]		| Contains build data used by the operator-sdk.
-| link:/deploy[/deploy]		| Contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
-| link:/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
-| link:/pkg[/pkg]			| This is where the code resides. The code is divided in multiple subpackages.
-| link:/runtime[/runtime]	| The Java runtime code that is used inside the integration Docker containers.
-| link:/script[/script]		| Contains scripts used during make operations for building the project.
-| link:/test[/test]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
-| link:/version[/version]	| Contains the global version of the project.
+| https://github.com/apache/camel-k/tree/master/build[/build]			| Contains the Docker and Maven build configuration.
+| https://github.com/apache/camel-k/tree/master/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary (manager) and the **kamel** client tool.
+| https://github.com/apache/camel-k/tree/master/build[/build]		| Contains build data used by the operator-sdk.
+| https://github.com/apache/camel-k/tree/master/deploy[/deploy]		| Contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
+| https://github.com/apache/camel-k/tree/master/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
+| https://github.com/apache/camel-k/tree/master/e2e[/e2e]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
+| https://github.com/apache/camel-k/tree/master/examples[/examples]			| Various examples of Camel K usage.
+| https://github.com/apache/camel-k/tree/master/pkg[/pkg]			| This is where the code resides. The code is divided in multiple subpackages.
+| https://github.com/apache/camel-k/tree/master/script[/script]		| Contains scripts used during make operations for building the project.
 |=======================
 
 [[building]]
@@ -110,7 +110,7 @@ Unit tests are executed automatically as part of the build. They use the standar
 Integration tests (aimed at ensuring that the code integrates correctly with Kubernetes and OpenShift), need special care.
 
 The **convention** used in this repo is to name unit tests `xxx_test.go`, and name integration tests `yyy_integration_test.go`.
-Integration tests are all in the link:/test[/test] dir.
+Integration tests are all in the https://github.com/apache/camel-k/tree/master/e2e[/e2e] dir.
 
 Since both names end with `_test.go`, both would be executed by go during build, so you need to put a special **build tag** to mark
 integration tests. A integration test should start with the following line:
@@ -119,7 +119,7 @@ integration tests. A integration test should start with the following line:
 // +build integration
 ```
 
-Look into the link:/test[/test] directory for examples of integration tests.
+Look into the https://github.com/apache/camel-k/tree/master/e2e[/e2e] directory for examples of integration tests.
 
 Before running a integration test, you need to be connected to a Kubernetes/OpenShift namespace.
 After you log in into your cluster, you can run the following command to execute **all** integration tests:
@@ -167,7 +167,7 @@ Sometimes it's useful to debug the code from the IDE when troubleshooting.
 
 .**Debugging the `kamel` binary**
 
-It should be straightforward: just execute the link:/cmd/kamel/main.go[/cmd/kamel/main.go] file from the IDE (e.g. Goland) in debug mode.
+It should be straightforward: just execute the https://github.com/apache/camel-k/tree/master/cmd/kamel/main.go[/cmd/kamel/main.go] file from the IDE (e.g. Goland) in debug mode.
 
 .**Debugging the operator**
 
@@ -182,7 +182,7 @@ oc scale deployment/camel-k-operator --replicas 0
 
 You can scale it back to 1 when you're done and you have updated the operator image.
 
-You can setup the IDE (e.g. Goland) to execute the link:/cmd/camel-k/main.go[/cmd/camel-k/main.go] file in debug mode.
+You can setup the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode.
 
 When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen*:
 
