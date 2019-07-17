@@ -1,5 +1,4 @@
-Apache Camel K
-==============
+= Apache Camel K
 
 image:https://travis-ci.org/apache/camel-k.svg?branch=master["Build Status", link="https://travis-ci.org/apache/camel-k"]
 image:https://goreportcard.com/badge/github.com/apache/camel-k["Go Report Card", link="https://goreportcard.com/report/github.com/apache/camel-k"]
