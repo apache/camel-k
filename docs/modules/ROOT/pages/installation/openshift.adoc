@@ -1,0 +1,19 @@
+[[installation-on-openshift]]
+= Installing Camel K on OpenShift
+
+Installation of Camel K on OpenShift requires that you execute first some specific actions as cluster-admin.
+
+OpenShift does not always provide full cluster-admin rights to all users, so you may need to contact an administrator to install the
+Kubernetes custom resources and roles needed by Camel K.
+
+You need to get the *kamel* CLI (_camel-k-client_) tool the from https://github.com/apache/camel-k/releases[release page]
+and put it on your system path (e.g. on `/usr/bin/kamel` on Linux).
+
+To install the custom resource definitions and related roles, just execute (with **cluster-admin role**):
+
+```
+kamel install --cluster-setup
+```
+
+Once you've done this **only once per the whole cluster**, you can **login as a standard user** and
+continue with the xref:installation/index.adoc#procedure[standard Camel K installation procedure].

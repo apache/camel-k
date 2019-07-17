@@ -1,5 +1,5 @@
 [[installation]]
-= Installing Camel K
+= Installation
 
 Camel K allows to run integrations directly on a Kubernetes or OpenShift cluster.
 To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
@@ -13,6 +13,7 @@ before installing it. Customized instructions are needed for the following clust
 - xref:installation/minikube.adoc[Minikube]
 - xref:installation/minishift.adoc[Minishift]
 - xref:installation/gke.adoc[Google Kubernetes Engine (GKE)]
+- xref:installation/openshift.adoc[OpenShift]
 
 Other cluster types (such as OpenShift clusters) should *not need* prior configuration.
 
