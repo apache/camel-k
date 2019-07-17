@@ -34,13 +34,13 @@ A trait may have additional properties that can be configured by the end user.
 E.g. the following command configures the container `port` that should be exposed by the service:
 
 ```
-kamel run --trait service.enabled=true --trait service.port=8081 file.groovy
+kamel run --trait service.enabled=true --trait container.service-port=8081 file.groovy
 ```
 
 Or the equivalent command (assuming that the service trait is enabled by auto-detection):
 
 ```
-kamel run -t service.port=8081 file.groovy
+kamel run -t container.service-port=8081 file.groovy
 ```
 
 NOTE: Enabling a trait does not force the trait to be activated, especially if the trait specific preconditions do not hold.
@@ -72,9 +72,6 @@ The following is a list of common traits that can be configured by the end users
 
 [cols="m,"]
 !===
-
-! deployer.container-image
-! Generates a container image for the Integration that includes the sources and resources in the generated images instead of mounting them to the pod.
 
 ! deployer.kind
 ! Allows to explicitly select the desired deployment kind between `deployment` or `knative-service` when creating the resources for running the integration.
@@ -189,18 +186,6 @@ More information can be found in the official Kubernetes documentation about htt
 
 [cols="m,"]
 !===
-
-! service.port
-! To configure a different port exposed by the service (default `80`).
-
-! service.port-name
-! To configure a different port name for the port exposed by the service (default `http`).
-
-! service.container-port
-! To configure a different port exposed by the container (default `8080`).
-
-! service.container-port-name
-! To configure a different port name for the port exposed by the container (default `http`).
 
 !===
 
@@ -326,7 +311,7 @@ It's disabled by default.
 
 | probes
 | Kubernetes, OpenShift
-| Configure LIveness and Readiness probes.
+| Configure Liveness and Readiness probes.
   +
   +
   It's disabled by default.
@@ -364,6 +349,42 @@ It's disabled by default.
 ! Minimum consecutive successes for the probe to be considered successful after having failed.
 ! probes.readiness-failure-threshold
 ! Minimum consecutive failures for the probe to be considered failed after having succeeded.
+
+!===
+
+| container
+| All
+| Configure integration contianer.
+  +
+  +
+  It's disabled by default.
+
+[cols="m,"]
+!===
+
+! container.request-cpu
+! The minimum amount of CPU required.
+
+! container.request-memory
+! The minimum amount of memory required.
+
+! container.limit-cpu
+! The maximum amount of CPU required.
+
+! container.limit-memory
+! The maximum amount of memory required.
+
+! container.service-port
+! To configure under which service port the container port is to be exposed (default `80`).
+
+! container.service-port-name
+! To configure under which service port name the container port is to be exposed (default `http`).
+
+! container.port
+! To configure a different port exposed by the container (default `8080`).
+
+! container.port-name
+! To configure a different port name for the port exposed by the container (default `http`).
 
 !===
 

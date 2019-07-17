@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -115,25 +115,33 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	}
 	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_OPTS", strings.Join(optionValues, ","))
 
-	// Register a post processor to add a container port to the integration deployment
-	e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-		var container *corev1.Container
-		environment.Resources.VisitContainer(func(c *corev1.Container) {
-			if c.Name == environment.Integration.Name {
-				container = c
-			}
-		})
-		if container != nil {
-			container.Ports = append(container.Ports, corev1.ContainerPort{
-				Name:          "jolokia",
-				ContainerPort: int32(t.Port),
-				Protocol:      corev1.ProtocolTCP,
-			})
-		} else {
-			return errors.New("cannot add Jolokia container port: no integration container")
-		}
+	container := e.Resources.GetContainerForIntegration(e.Integration)
+	if container == nil {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionJolokiaAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionContainerNotAvailableReason,
+			"",
+		)
+
 		return nil
-	})
+	}
+
+	containerPort := corev1.ContainerPort{
+		Name:          "jolokia",
+		ContainerPort: int32(t.Port),
+		Protocol:      corev1.ProtocolTCP,
+	}
+
+	e.Integration.Status.SetCondition(
+		v1alpha1.IntegrationConditionJolokiaAvailable,
+		corev1.ConditionTrue,
+		v1alpha1.IntegrationConditionJolokiaAvailableReason,
+		// service -> container
+		fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort),
+	)
+
+	container.Ports = append(container.Ports, containerPort)
 
 	return nil
 }
