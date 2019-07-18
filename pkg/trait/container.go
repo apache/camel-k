@@ -19,6 +19,9 @@ package trait
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/apache/camel-k/pkg/util/envvar"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -29,7 +32,7 @@ import (
 )
 
 const (
-	defaultContainerName = "integration-container"
+	defaultContainerName = "integration"
 	containerTraitID     = "container"
 )
 
@@ -80,23 +83,59 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *containerTrait) Apply(e *Environment) error {
+	container := corev1.Container{
+		Name:  t.Name,
+		Image: e.Integration.Status.Image,
+		Env:   make([]corev1.EnvVar, 0),
+	}
 
-	//
-	// Add mounted volumes as resources
-	//
+	// combine Environment of integration with platform, kit, integration
+	for key, value := range e.CollectConfigurationPairs("env") {
+		envvar.SetVal(&container.Env, key, value)
+	}
+
+	envvar.SetVal(&container.Env, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
+	envvar.SetVal(&container.Env, "CAMEL_K_ROUTES", strings.Join(e.ComputeSourcesURI(), ","))
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
+
+	t.configureResources(e, &container)
+
 	e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
-		for i := 0; i < len(deployment.Spec.Template.Spec.Containers); i++ {
-			container := &deployment.Spec.Template.Spec.Containers[i]
-			container.Name = t.Name
-
-			t.configureResources(e, container)
+		for _, envVar := range e.EnvVars {
+			envvar.SetVar(&container.Env, envVar)
 		}
-	})
-	e.Resources.VisitKnativeService(func(service *serving.Service) {
-		container := &service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container
-		container.Name = t.Name
 
-		t.configureResources(e, container)
+		e.ConfigureVolumesAndMounts(
+			&deployment.Spec.Template.Spec.Volumes,
+			&container.VolumeMounts,
+		)
+
+		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
+	})
+
+	e.Resources.VisitKnativeService(func(service *serving.Service) {
+		for _, env := range e.EnvVars {
+			switch {
+			case env.ValueFrom == nil:
+				envvar.SetVar(&container.Env, env)
+			case env.ValueFrom.FieldRef != nil && env.ValueFrom.FieldRef.FieldPath == "metadata.namespace":
+				envvar.SetVar(&container.Env, corev1.EnvVar{Name: env.Name, Value: e.Integration.Namespace})
+			case env.ValueFrom.FieldRef != nil:
+				t.L.Infof("Environment variable %s uses fieldRef and cannot be set on a Knative service", env.Name)
+			case env.ValueFrom.ResourceFieldRef != nil:
+				t.L.Infof("Environment variable %s uses resourceFieldRef and cannot be set on a Knative service", env.Name)
+			default:
+				envvar.SetVar(&container.Env, env)
+			}
+		}
+
+		e.ConfigureVolumesAndMounts(
+			&service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Volumes,
+			&container.VolumeMounts,
+		)
+
+		service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container = container
 	})
 
 	if t.Expose != nil && *t.Expose {
