@@ -31,9 +31,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/watch"
 
 	"github.com/pkg/errors"
@@ -41,7 +39,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -212,62 +209,10 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			platform.Spec.Build.Timeout.Duration = d
 		}
 
-		o.mavenSettings = fmt.Sprintf("configmap:%s-maven-settings/settings.xml", platform.Name)
-
-		settings := maven.NewSettings()
-		repositories := make([]maven.Repository, 0, len(o.mavenRepositories))
-
-		for i, r := range o.mavenRepositories {
-			repository := maven.NewRepository(r)
-			if repository.ID == "" {
-				repository.ID = fmt.Sprintf("repository-%03d", i)
+		if len(o.mavenRepositories) > 0 {
+			for _, r := range o.mavenRepositories {
+				platform.AddConfiguration("repository", r)
 			}
-
-			repositories = append(repositories, repository)
-		}
-
-		// Enables strict checksums for Maven central if not already configured
-		if !containsMvnCentral(repositories) {
-			repository := maven.NewRepository("https://repo.maven.apache.org/maven2@id=central")
-			repositories = append([]maven.Repository{repository}, repositories...)
-		}
-
-		settings.Profiles = []maven.Profile{
-			{
-				ID: "maven-settings",
-				Activation: maven.Activation{
-					ActiveByDefault: true,
-				},
-				Repositories:       repositories,
-				PluginRepositories: repositories,
-			},
-		}
-
-		data, err := util.EncodeXML(settings)
-		if err != nil {
-			return err
-		}
-
-		cm := corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      platform.Name + "-maven-settings",
-				Namespace: namespace,
-				Labels: map[string]string{
-					"app": "camel-k",
-				},
-			},
-			Data: map[string]string{
-				"settings.xml": string(data),
-			},
-		}
-
-		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, &cm)
-		if err != nil {
-			return err
 		}
 
 		if o.mavenSettings != "" {
@@ -275,7 +220,6 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			if err != nil {
 				return err
 			}
-
 			platform.Spec.Build.Maven.Settings = mavenSettings
 		}
 
@@ -437,13 +381,4 @@ func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
 	}
 
 	return v1alpha1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
-}
-
-func containsMvnCentral(repositories []maven.Repository) bool {
-	for _, r := range repositories {
-		if r.ID == "central" {
-			return true
-		}
-	}
-	return false
 }
