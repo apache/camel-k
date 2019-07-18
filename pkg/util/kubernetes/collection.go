@@ -261,14 +261,10 @@ func (c *Collection) GetContainer(filter func(container *corev1.Container) bool)
 	return retValue
 }
 
-// GetContainerForIntegration --
-func (c *Collection) GetContainerForIntegration(integration *v1alpha1.Integration) *corev1.Container {
-	if integration == nil {
-		return nil
-	}
-
+// GetContainerByName --
+func (c *Collection) GetContainerByName(name string) *corev1.Container {
 	return c.GetContainer(func(c *corev1.Container) bool {
-		return c.Name == integration.Name
+		return c.Name == name
 	})
 }
 
