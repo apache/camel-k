@@ -28,6 +28,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const (
+	defaultContainerName = "integration-container"
+	containerTraitID     = "container"
+)
+
 type containerTrait struct {
 	BaseTrait `property:",squash"`
 
@@ -41,15 +46,17 @@ type containerTrait struct {
 	PortName        string `property:"port-name"`
 	ServicePort     int    `property:"service-port"`
 	ServicePortName string `property:"service-port-name"`
+	Name            string `property:"name"`
 }
 
 func newContainerTrait() *containerTrait {
 	return &containerTrait{
-		BaseTrait:       newBaseTrait("container"),
+		BaseTrait:       newBaseTrait(containerTraitID),
 		Port:            8080,
 		PortName:        httpPortName,
 		ServicePort:     80,
 		ServicePortName: httpPortName,
+		Name:            defaultContainerName,
 	}
 }
 
@@ -74,19 +81,23 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 func (t *containerTrait) Apply(e *Environment) error {
 
-	if e.Resources != nil {
-		//
-		// Add mounted volumes as resources
-		//
-		e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
-			for i := 0; i < len(deployment.Spec.Template.Spec.Containers); i++ {
-				t.configureResources(e, &deployment.Spec.Template.Spec.Containers[i])
-			}
-		})
-		e.Resources.VisitKnativeService(func(service *serving.Service) {
-			t.configureResources(e, &service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container)
-		})
-	}
+	//
+	// Add mounted volumes as resources
+	//
+	e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		for i := 0; i < len(deployment.Spec.Template.Spec.Containers); i++ {
+			container := &deployment.Spec.Template.Spec.Containers[i]
+			container.Name = t.Name
+
+			t.configureResources(e, container)
+		}
+	})
+	e.Resources.VisitKnativeService(func(service *serving.Service) {
+		container := &service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container
+		container.Name = t.Name
+
+		t.configureResources(e, container)
+	})
 
 	if t.Expose != nil && *t.Expose {
 		t.configureService(e)
@@ -101,7 +112,7 @@ func (t *containerTrait) configureService(e *Environment) {
 		return
 	}
 
-	container := e.Resources.GetContainerForIntegration(e.Integration)
+	container := e.Resources.GetContainerByName(t.Name)
 	if container == nil {
 		return
 	}
