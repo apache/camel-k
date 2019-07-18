@@ -19,13 +19,11 @@ package trait
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -209,10 +207,6 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 						},
 						Spec: serving.RevisionSpec{
 							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
-							Container: corev1.Container{
-								Image: e.Integration.Status.Image,
-								Env:   make([]corev1.EnvVar, 0),
-							},
 						},
 					},
 				},
@@ -220,53 +214,5 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 		},
 	}
 
-	paths := e.ComputeSourcesURI()
-	environment := &svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env
-
-	// combine Environment of integration with kit, integration
-	for key, value := range e.CollectConfigurationPairs("env") {
-		envvar.SetVal(environment, key, value)
-	}
-
-	// add a dummy env var to trigger deployment if everything but the code
-	// has been changed
-	envvar.SetVal(environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-
-	envvar.SetVal(environment, "CAMEL_K_ROUTES", strings.Join(paths, ","))
-	envvar.SetVal(environment, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
-	envvar.SetVal(environment, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
-
-	// add env vars from traits
-	for _, envVar := range t.getAllowedEnvVars(e) {
-		envvar.SetVar(&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVar)
-	}
-
-	e.ConfigureVolumesAndMounts(
-		&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Volumes,
-		&svc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts,
-	)
-
 	return &svc
-}
-
-func (t *knativeServiceTrait) getAllowedEnvVars(e *Environment) []corev1.EnvVar {
-	res := make([]corev1.EnvVar, 0, len(e.EnvVars))
-	for _, env := range e.EnvVars {
-		switch {
-		case env.ValueFrom == nil:
-			res = append(res, env)
-		case env.ValueFrom.FieldRef != nil && env.ValueFrom.FieldRef.FieldPath == "metadata.namespace":
-			res = append(res, corev1.EnvVar{
-				Name:  env.Name,
-				Value: e.Integration.Namespace,
-			})
-		case env.ValueFrom.FieldRef != nil:
-			t.L.Infof("Environment variable %s uses fieldRef and cannot be set on a Knative service", env.Name)
-		case env.ValueFrom.ResourceFieldRef != nil:
-			t.L.Infof("Environment variable %s uses resourceFieldRef and cannot be set on a Knative service", env.Name)
-		default:
-			res = append(res, env)
-		}
-	}
-	return res
 }
