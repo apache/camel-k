@@ -104,6 +104,7 @@ func TestRoute_Default(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait(ID("container")))
 	assert.NotNil(t, environment.GetTrait(ID("route")))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
@@ -112,6 +113,8 @@ func TestRoute_Default(t *testing.T) {
 
 	assert.NotNil(t, route)
 	assert.Nil(t, route.Spec.TLS)
+	assert.NotNil(t, route.Spec.Port)
+	assert.Equal(t, httpPortName, route.Spec.Port.TargetPort.StrVal)
 }
 
 func TestRoute_Disabled(t *testing.T) {
@@ -165,4 +168,36 @@ func TestRoute_TLS(t *testing.T) {
 	assert.NotNil(t, route)
 	assert.NotNil(t, route.Spec.TLS)
 	assert.Equal(t, routev1.TLSTerminationEdge, route.Spec.TLS.Termination)
+}
+
+func TestRoute_WithCustomServicePort(t *testing.T) {
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	environment.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+		containerTraitID: {
+			Configuration: map[string]string{
+				"service-port-name": "my-port",
+			},
+		},
+	}
+
+	traitsCatalog := environment.Catalog
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait(ID("route")))
+
+	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
+		return r.ObjectMeta.Name == name
+	})
+
+	assert.NotNil(t, route)
+	assert.NotNil(t, route.Spec.Port)
+	assert.Equal(
+		t,
+		environment.Integration.Spec.Traits[containerTraitID].Configuration["service-port-name"],
+		route.Spec.Port.TargetPort.StrVal,
+	)
 }
