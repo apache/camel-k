@@ -18,10 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"strings"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -121,28 +118,6 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 // **********************************
 
 func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
-	paths := e.ComputeSourcesURI()
-	environment := make([]corev1.EnvVar, 0)
-
-	// combine Environment of integration with platform, kit, integration
-	for key, value := range e.CollectConfigurationPairs("env") {
-		envvar.SetVal(&environment, key, value)
-	}
-
-	// camel-k runtime
-	envvar.SetVal(&environment, "CAMEL_K_ROUTES", strings.Join(paths, ","))
-	envvar.SetVal(&environment, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
-	envvar.SetVal(&environment, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
-
-	// add a dummy env var to trigger deployment if everything but the code
-	// has been changed
-	envvar.SetVal(&environment, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-
-	// add env vars from traits
-	for _, envVar := range e.EnvVars {
-		envvar.SetVar(&environment, envVar)
-	}
-
 	// create a copy to avoid sharing the underlying annotation map
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
@@ -183,22 +158,10 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: e.Integration.Spec.ServiceAccountName,
-					Containers: []corev1.Container{
-						{
-							Name:  e.Integration.Name,
-							Image: e.Integration.Status.Image,
-							Env:   environment,
-						},
-					},
 				},
 			},
 		},
 	}
-
-	e.ConfigureVolumesAndMounts(
-		&deployment.Spec.Template.Spec.Volumes,
-		&deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
-	)
 
 	return &deployment
 }
