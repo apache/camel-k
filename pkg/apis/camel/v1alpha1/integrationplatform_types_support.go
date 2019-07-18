@@ -76,6 +76,14 @@ func (in *IntegrationPlatform) Configurations() []ConfigurationSpec {
 	return in.Spec.Configuration
 }
 
+// AddConfiguration --
+func (in *IntegrationPlatform) AddConfiguration(confType string, confValue string) {
+	in.Spec.Configuration = append(in.Spec.Configuration, ConfigurationSpec{
+		Type:  confType,
+		Value: confValue,
+	})
+}
+
 // GetCondition returns the condition with the provided type.
 func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformConditionType) *IntegrationPlatformCondition {
 	for i := range in.Conditions {

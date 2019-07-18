@@ -19,7 +19,10 @@ package integrationplatform
 
 import (
 	"context"
+	"fmt"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util/maven"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -110,7 +113,10 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 		action.L.Info("No registry specified for publishing images")
 	}
 
-	action.setDefaults(platform)
+	err = action.setDefaults(ctx, platform)
+	if err != nil {
+		return nil, err
+	}
 
 	if platform.Spec.Build.Maven.Timeout.Duration != 0 {
 		action.L.Infof("Maven Timeout set to %s", platform.Spec.Build.Maven.Timeout.Duration)
@@ -168,7 +174,7 @@ func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v
 	return false, nil
 }
 
-func (action *initializeAction) setDefaults(platform *v1alpha1.IntegrationPlatform) {
+func (action *initializeAction) setDefaults(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
 	if platform.Spec.Profile == "" {
 		platform.Spec.Profile = platformutil.GetProfile(platform)
 	}
@@ -215,12 +221,41 @@ func (action *initializeAction) setDefaults(platform *v1alpha1.IntegrationPlatfo
 		platform.Spec.Build.Maven.Timeout.Duration = (time.Duration(n) * time.Second).Truncate(time.Second)
 	}
 
+	if platform.Spec.Build.Maven.Settings.ConfigMapKeyRef == nil && platform.Spec.Build.Maven.Settings.SecretKeyRef == nil {
+		var repositories []maven.Repository
+		for i, c := range platform.Spec.Configuration {
+			if c.Type == "repository" {
+				repository := maven.NewRepository(c.Value)
+				if repository.ID == "" {
+					repository.ID = fmt.Sprintf("repository-%03d", i)
+				}
+				repositories = append(repositories, repository)
+			}
+		}
+
+		settings := maven.NewDefaultSettings(repositories)
+
+		err := createMavenSettingsConfigMap(ctx, action.client, platform, settings)
+		if err != nil {
+			return err
+		}
+
+		platform.Spec.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: platform.Name + "-maven-settings",
+			},
+			Key: "settings.xml",
+		}
+	}
+
 	action.L.Infof("CamelVersion set to %s", platform.Spec.Build.CamelVersion)
 	action.L.Infof("RuntimeVersion set to %s", platform.Spec.Build.RuntimeVersion)
 	action.L.Infof("BaseImage set to %s", platform.Spec.Build.BaseImage)
 	action.L.Infof("LocalRepository set to %s", platform.Spec.Build.LocalRepository)
 	action.L.Infof("Timeout set to %s", platform.Spec.Build.Timeout)
 	action.L.Infof("Maven Timeout set to %s", platform.Spec.Build.Maven.Timeout.Duration)
+
+	return nil
 }
 
 func createPersistentVolumeClaim(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
@@ -255,6 +290,20 @@ func createPersistentVolumeClaim(ctx context.Context, client client.Client, plat
 
 	err = client.Create(ctx, pvc)
 	// Skip the error in case the PVC already exists
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		return err
+	}
+
+	return nil
+}
+
+func createMavenSettingsConfigMap(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform, settings maven.Settings) error {
+	cm, err := maven.CreateSettingsConfigMap(platform.Namespace, platform.Name, settings)
+	if err != nil {
+		return err
+	}
+
+	err = client.Create(ctx, cm)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return err
 	}

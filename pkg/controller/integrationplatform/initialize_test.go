@@ -122,3 +122,25 @@ func TestTimeouts_Truncated(t *testing.T) {
 	assert.Equal(t, 2*time.Minute, answer.Spec.Build.Maven.Timeout.Duration)
 	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
 }
+
+func TestDefaultMavenSettingsApplied(t *testing.T) {
+	ip := v1alpha1.IntegrationPlatform{}
+	ip.Namespace = "ns"
+	ip.Name = "test-platform"
+	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+
+	c, err := test.NewFakeClient(&ip)
+	assert.Nil(t, err)
+
+	h := NewInitializeAction()
+	h.InjectLogger(log.Log)
+	h.InjectClient(c)
+
+	answer, err := h.Handle(context.TODO(), &ip)
+	assert.Nil(t, err)
+	assert.NotNil(t, answer)
+
+	assert.NotNil(t, answer.Spec.Build.Maven.Settings.ConfigMapKeyRef)
+	assert.Equal(t, "test-platform-maven-settings", answer.Spec.Build.Maven.Settings.ConfigMapKeyRef.Name)
+	assert.Equal(t, "settings.xml", answer.Spec.Build.Maven.Settings.ConfigMapKeyRef.Key)
+}

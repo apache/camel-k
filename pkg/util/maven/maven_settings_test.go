@@ -54,6 +54,114 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
   </profiles>
 </settings>`
 
+const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
+	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository></localRepository>
+  <profiles>
+    <profile>
+      <id>maven-settings</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+</settings>`
+
+const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
+	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository></localRepository>
+  <profiles>
+    <profile>
+      <id>maven-settings</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </repository>
+        <repository>
+          <id>foo</id>
+          <url>https://foo.bar.org/repo</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </pluginRepository>
+        <pluginRepository>
+          <id>foo</id>
+          <url>https://foo.bar.org/repo</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+</settings>`
+
 func TestSettingsGeneration(t *testing.T) {
 	settings := NewSettings()
 	settings.LocalRepository = "/tmp/artifacts/m2"
@@ -87,4 +195,45 @@ func TestSettingsGeneration(t *testing.T) {
 	assert.NotNil(t, settings)
 
 	assert.Equal(t, expectedSettings, string(content))
+}
+
+func TestDefaultSettingsGeneration(t *testing.T) {
+	settings := NewDefaultSettings([]Repository{})
+
+	content, err := util.EncodeXML(settings)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, settings)
+
+	assert.Equal(t, expectedDefaultSettings, string(content))
+}
+
+func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
+	repositories := []Repository{
+		NewRepository("https://repo1.maven.org/maven2@id=central"),
+		NewRepository("https://foo.bar.org/repo@id=foo"),
+	}
+	settings := NewDefaultSettings(repositories)
+
+	content, err := util.EncodeXML(settings)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, settings)
+
+	assert.Equal(t, expectedDefaultSettingsWithExtraRepo, string(content))
+}
+
+func TestCreateSettingsConfigMap(t *testing.T) {
+	settings := NewDefaultSettings([]Repository{})
+
+	configMap, err := CreateSettingsConfigMap("foo", "bar", settings)
+	assert.Nil(t, err)
+	assert.NotNil(t, configMap)
+
+	content, err := util.EncodeXML(settings)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, settings)
+
+	assert.Equal(t, string(content), configMap.Data["settings.xml"])
 }

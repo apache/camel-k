@@ -17,7 +17,14 @@ limitations under the License.
 
 package maven
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+
+	"github.com/apache/camel-k/pkg/util"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // NewSettings --
 func NewSettings() Settings {
@@ -27,4 +34,63 @@ func NewSettings() Settings {
 		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
 		XsiSchemaLocation: "http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd",
 	}
+}
+
+// NewDefaultSettings --
+func NewDefaultSettings(repositories []Repository) Settings {
+	settings := NewSettings()
+
+	if !containsMvnCentral(repositories) {
+		repository := NewRepository("https://repo.maven.apache.org/maven2@id=central")
+		repositories = append([]Repository{repository}, repositories...)
+	}
+
+	settings.Profiles = []Profile{
+		{
+			ID: "maven-settings",
+			Activation: Activation{
+				ActiveByDefault: true,
+			},
+			Repositories:       repositories,
+			PluginRepositories: repositories,
+		},
+	}
+
+	return settings
+}
+
+// CreateSettingsConfigMap --
+func CreateSettingsConfigMap(namespace string, name string, settings Settings) (*corev1.ConfigMap, error) {
+	data, err := util.EncodeXML(settings)
+	if err != nil {
+		return nil, err
+	}
+
+	cm := &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name + "-maven-settings",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
+		},
+		Data: map[string]string{
+			"settings.xml": string(data),
+		},
+	}
+
+	return cm, nil
+}
+
+func containsMvnCentral(repositories []Repository) bool {
+	for _, r := range repositories {
+		if r.ID == "central" {
+			return true
+		}
+	}
+	return false
 }
