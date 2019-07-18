@@ -110,7 +110,13 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 }
 
 func (t *prometheusTrait) configureContainerPort(e *Environment) (*corev1.Container, *corev1.ContainerPort) {
-	container := e.Resources.GetContainerForIntegration(e.Integration)
+	containerName := defaultContainerName
+	dt := e.Catalog.GetTrait(containerTraitID)
+	if dt != nil {
+		containerName = dt.(*containerTrait).Name
+	}
+
+	container := e.Resources.GetContainerByName(containerName)
 	if container == nil {
 		return nil, nil
 	}

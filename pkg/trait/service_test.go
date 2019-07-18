@@ -224,3 +224,76 @@ func TestService(t *testing.T) {
 	assert.Equal(t, int32(8081), d.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort)
 	assert.Equal(t, "http-8081", d.Spec.Template.Spec.Containers[0].Ports[0].Name)
 }
+
+func TestServiceWithCustomContainerName(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1alpha1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: ServiceTestNamespace,
+			},
+			Status: v1alpha1.IntegrationStatus{
+				Phase: v1alpha1.IntegrationPhaseDeploying,
+			},
+			Spec: v1alpha1.IntegrationSpec{
+				Profile: v1alpha1.TraitProfileKubernetes,
+				Traits: map[string]v1alpha1.TraitSpec{
+					"service": {
+						Configuration: map[string]string{
+							"enabled": "true",
+							"auto":    "false",
+						},
+					},
+					"container": {
+						Configuration: map[string]string{
+							"name": "my-container-name",
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1alpha1.IntegrationPlatform{
+			Spec: v1alpha1.IntegrationPlatformSpec{
+				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+				},
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+		Classpath:      strset.New(),
+	}
+
+	err = traitCatalog.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait(ID("deployment")))
+	assert.NotNil(t, environment.GetTrait(ID("service")))
+	assert.NotNil(t, environment.GetTrait(ID("container")))
+
+	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	assert.NotNil(t, d)
+
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.Equal(
+		t,
+		environment.Integration.Spec.Traits["container"].Configuration["name"],
+		d.Spec.Template.Spec.Containers[0].Name,
+	)
+}

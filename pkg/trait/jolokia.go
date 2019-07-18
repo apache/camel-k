@@ -115,7 +115,13 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	}
 	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_OPTS", strings.Join(optionValues, ","))
 
-	container := e.Resources.GetContainerForIntegration(e.Integration)
+	containerName := defaultContainerName
+	dt := e.Catalog.GetTrait(containerTraitID)
+	if dt != nil {
+		containerName = dt.(*containerTrait).Name
+	}
+
+	container := e.Resources.GetContainerByName(containerName)
 	if container == nil {
 		e.Integration.Status.SetCondition(
 			v1alpha1.IntegrationConditionJolokiaAvailable,
@@ -137,7 +143,6 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		v1alpha1.IntegrationConditionJolokiaAvailable,
 		corev1.ConditionTrue,
 		v1alpha1.IntegrationConditionJolokiaAvailableReason,
-		// service -> container
 		fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort),
 	)
 
