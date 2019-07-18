@@ -80,6 +80,12 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *routeTrait) Apply(e *Environment) error {
+	servicePortName := httpPortName
+	dt := e.Catalog.GetTrait(containerTraitID)
+	if dt != nil {
+		servicePortName = dt.(*containerTrait).ServicePortName
+	}
+
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
@@ -91,7 +97,7 @@ func (t *routeTrait) Apply(e *Environment) error {
 		},
 		Spec: routev1.RouteSpec{
 			Port: &routev1.RoutePort{
-				TargetPort: intstr.FromString("http"),
+				TargetPort: intstr.FromString(servicePortName),
 			},
 			To: routev1.RouteTargetReference{
 				Kind: "Service",
