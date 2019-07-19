@@ -20,11 +20,8 @@ package build
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // NewMonitorPodAction creates a new monitor action for scheduled pod
@@ -51,24 +48,21 @@ func (action *monitorPodAction) CanHandle(build *v1alpha1.Build) bool {
 // Handle handles the builds
 func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	// Get the build pod
-	pod := &corev1.Pod{}
-	err := action.client.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: buildPodName(build.Spec.Meta)}, pod)
+	pod, err := getBuilderPod(ctx, action.client, build)
 	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			// Let's reschedule the build
-			build.Status.Phase = v1alpha1.BuildPhaseScheduling
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
-
 	var buildPhase v1alpha1.BuildPhase
 
-	switch pod.Status.Phase {
-	case corev1.PodSucceeded:
+	switch {
+	case pod == nil:
+		build.Status.Phase = v1alpha1.BuildPhaseScheduling
+	case pod.Status.Phase == corev1.PodSucceeded:
 		buildPhase = v1alpha1.BuildPhaseSucceeded
-	case corev1.PodFailed:
+	case pod.Status.Phase == corev1.PodFailed:
 		buildPhase = v1alpha1.BuildPhaseFailed
+	default:
+		buildPhase = build.Status.Phase
 	}
 
 	if build.Status.Phase == buildPhase {
