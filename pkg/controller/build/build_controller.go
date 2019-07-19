@@ -190,7 +190,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 
 	actions := []Action{
-		NewInitializeAction(),
+		NewInitializeRoutineAction(),
+		NewInitializePodAction(),
 		NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
 		NewSchedulePodAction(r.reader),
 		NewMonitorRoutineAction(&r.routines),
