@@ -23,27 +23,28 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-// NewInitializeAction creates a new initialize action
-func NewInitializeAction() Action {
-	return &initializeAction{}
+// NewInitializeRoutineAction creates a new initialize action
+func NewInitializeRoutineAction() Action {
+	return &initializeRoutineAction{}
 }
 
-type initializeAction struct {
+type initializeRoutineAction struct {
 	baseAction
 }
 
 // Name returns a common name of the action
-func (action *initializeAction) Name() string {
+func (action *initializeRoutineAction) Name() string {
 	return "initialize"
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *initializeAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseInitialization
+func (action *initializeRoutineAction) CanHandle(build *v1alpha1.Build) bool {
+	return build.Status.Phase == v1alpha1.BuildPhaseInitialization &&
+		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyRoutine
 }
 
 // Handle handles the builds
-func (action *initializeAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *initializeRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	build.Status.Phase = v1alpha1.BuildPhaseScheduling
 
 	return build, nil

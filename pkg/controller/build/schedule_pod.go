@@ -22,12 +22,10 @@ import (
 	"sync"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -77,68 +75,42 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
-	hasScheduledBuild := false
 	for _, b := range builds.Items {
 		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
-			hasScheduledBuild = true
-			break
+			// Let's requeue the build in case one is already running
+			return nil, nil
 		}
 	}
 
-	if hasScheduledBuild {
-		// Let's requeue the build in case one is already running
-		return nil, nil
-	}
-
-	// Try to get operator image name before starting the build
-	operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
+	pod, err := getBuilderPod(ctx, action.client, build)
 	if err != nil {
 		return nil, err
 	}
 
-	// Otherwise, let's create the build pod
-	// We may want to explicitly manage build priority as opposed to relying on
-	// the reconcile loop to handle the queuing
-	pod := newBuildPod(build, operatorImage)
+	if pod == nil {
+		// Try to get operator image name before starting the build
+		operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
+		if err != nil {
+			return nil, err
+		}
 
-	// Set the Build instance as the owner and controller
-	if err := controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
-		return nil, err
-	}
+		// We may want to explicitly manage build priority as opposed to relying on
+		// the reconcile loop to handle the queuing
+		pod = newBuildPod(build, operatorImage)
 
-	// Ensure service account is present
-	if err := action.ensureServiceAccount(ctx, pod); err != nil {
-		return nil, errors.Wrap(err, "cannot ensure service account is present")
-	}
+		// Set the Build instance as the owner and controller
+		if err := controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
+			return nil, err
+		}
 
-	err = action.client.Delete(ctx, pod)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		return nil, errors.Wrap(err, "cannot delete build pod")
-	}
-
-	err = action.client.Create(ctx, pod)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot create build pod")
+		if err := action.client.Create(ctx, pod); err != nil {
+			return nil, errors.Wrap(err, "cannot create build pod")
+		}
 	}
 
 	build.Status.Phase = v1alpha1.BuildPhasePending
 
 	return build, nil
-}
-
-func (action *schedulePodAction) ensureServiceAccount(ctx context.Context, buildPod *corev1.Pod) error {
-	sa := corev1.ServiceAccount{}
-	saKey := k8sclient.ObjectKey{
-		Name:      "camel-k-builder",
-		Namespace: buildPod.Namespace,
-	}
-
-	err := action.client.Get(ctx, saKey, &sa)
-	if err != nil && k8serrors.IsNotFound(err) {
-		// Create a proper service account
-		return install.BuilderServiceAccountRoles(ctx, action.client, buildPod.Namespace)
-	}
-	return err
 }
 
 func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
@@ -218,8 +190,4 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 	}
 
 	return pod
-}
-
-func buildPodName(object metav1.ObjectMeta) string {
-	return "camel-k-" + object.Name + "-builder"
 }
