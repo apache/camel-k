@@ -87,7 +87,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		e.Classpath.Add(artifact.Target)
 	}
 
-	if e.IntegrationKit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypeExternal {
+	if kit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypeExternal {
 		//
 		// In case of an external created kit, we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
