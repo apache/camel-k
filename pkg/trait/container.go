@@ -21,9 +21,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -135,7 +134,7 @@ func (t *containerTrait) Apply(e *Environment) error {
 			&container.VolumeMounts,
 		)
 
-		service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers = append(service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers , container)
+		service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers = append(service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers, container)
 	})
 
 	if t.Expose != nil && *t.Expose {

@@ -277,8 +277,8 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 		}
 	})
 	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
-		for _, cnt := range cs.GetTemplate().Spec.Containers {
-			cntref := &cnt
+		for id := range cs.GetTemplate().Spec.Containers {
+			cntref := &cs.GetTemplate().Spec.Containers[id]
 			visitor(cntref)
 		}
 	})
