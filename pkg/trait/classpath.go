@@ -109,11 +109,14 @@ func (t *classpathTrait) Apply(e *Environment) error {
 			}
 		})
 		e.Resources.VisitKnativeService(func(service *serving.Service) {
-			for _, m := range service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.VolumeMounts {
-				e.Classpath.Add(m.MountPath)
+			for ci := range service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers {
+				c := &service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers[ci]
+				for mi := range c.VolumeMounts {
+					m := &c.VolumeMounts[mi]
+					e.Classpath.Add(m.MountPath)
+				}
+				t.setJavaClasspath(e.Classpath, &c.Env)
 			}
-
-			t.setJavaClasspath(e.Classpath, &service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env)
 		})
 	}
 

@@ -272,27 +272,22 @@ func (c *Collection) GetContainerByName(name string) *corev1.Container {
 func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 	c.VisitDeployment(func(d *appsv1.Deployment) {
 		for idx := range d.Spec.Template.Spec.Containers {
-			c := &d.Spec.Template.Spec.Containers[idx]
-			visitor(c)
+			cntref := &d.Spec.Template.Spec.Containers[idx]
+			visitor(cntref)
 		}
 	})
 	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
-		c := &cs.RevisionTemplate.Spec.Container
-		visitor(c)
+		for _, cnt := range cs.GetTemplate().Spec.Containers {
+			cntref := &cnt
+			visitor(cntref)
+		}
 	})
 }
 
 // VisitKnativeConfigurationSpec executes the visitor function on all knative ConfigurationSpec inside serving Services
 func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *serving.ConfigurationSpec)) {
 	c.VisitKnativeService(func(s *serving.Service) {
-		if s.Spec.RunLatest != nil {
-			c := &s.Spec.RunLatest.Configuration
-			visitor(c)
-		}
-		if s.Spec.Release != nil {
-			c := &s.Spec.Release.Configuration
-			visitor(c)
-		}
+		visitor(&s.Spec.ConfigurationSpec)
 	})
 }
 
