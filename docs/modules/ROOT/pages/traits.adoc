@@ -160,11 +160,11 @@ More information can be found in the official Kubernetes documentation about htt
 !===
 
 | istio
-| Knative (Kubernetes, OpenShift)
+| All
 | Allows to configure outbound traffic for Istio.
   +
   +
-  It's enabled by default when the Knative profile is active.
+  It's disabled by default.
 
 [cols="m,"]
 !===

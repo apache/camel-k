@@ -44,11 +44,11 @@ func newIstioTrait() *istioTrait {
 }
 
 func (t *istioTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
-		return false, nil
+	if t.Enabled != nil && *t.Enabled {
+		return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return false, nil
 }
 
 func (t *istioTrait) Apply(e *Environment) error {
@@ -69,7 +69,7 @@ func (t *istioTrait) injectIstioAnnotation(annotations map[string]string, includ
 	}
 	annotations[istioOutboundIPRangesAnnotation] = t.Allow
 	if includeInject {
-		annotations[istioSidecarInjectAnnotation] = "true"
+		annotations[istioSidecarInjectAnnotation] = True
 	}
 	if t.Inject != nil {
 		annotations[istioSidecarInjectAnnotation] = strconv.FormatBool(*t.Inject)
