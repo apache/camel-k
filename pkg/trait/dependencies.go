@@ -50,7 +50,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 			util.StringSliceUniqueAdd(&dependencies, dep)
 		}
 	}
-	for _, s := range e.Integration.Spec.Sources {
+	for _, s := range append(e.Integration.Spec.Sources, e.Integration.Status.GeneratedSources...) {
 		meta := metadata.Extract(e.CamelCatalog, s)
 
 		switch s.InferLanguage() {
