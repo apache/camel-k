@@ -131,11 +131,11 @@ func (t *containerTrait) Apply(e *Environment) error {
 		}
 
 		e.ConfigureVolumesAndMounts(
-			&service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Volumes,
+			&service.Spec.ConfigurationSpec.GetTemplate().Spec.Volumes,
 			&container.VolumeMounts,
 		)
 
-		service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container = container
+		service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers = append(service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers , container)
 	})
 
 	if t.Expose != nil && *t.Expose {
