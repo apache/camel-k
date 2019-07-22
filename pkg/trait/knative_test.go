@@ -195,8 +195,10 @@ func NewFakeClient(namespace string) (controller.Client, error) {
 				Name:      "endpoint-sink-1",
 			},
 			Status: serving.ServiceStatus{
-				Address: &duckv1alpha1.Addressable{
-					Hostname: "endpoint-sink-1.host",
+				RouteStatusFields: serving.RouteStatusFields{
+					Address: &duckv1alpha1.Addressable{
+						Hostname: "endpoint-sink-1.host",
+					},
 				},
 			},
 		},
@@ -210,8 +212,10 @@ func NewFakeClient(namespace string) (controller.Client, error) {
 				Name:      "endpoint-sink-2",
 			},
 			Status: serving.ServiceStatus{
-				Address: &duckv1alpha1.Addressable{
-					Hostname: "endpoint-sink-2.host",
+				RouteStatusFields: serving.RouteStatusFields{
+					Address: &duckv1alpha1.Addressable{
+						Hostname: "endpoint-sink-2.host",
+					},
 				},
 			},
 		},
