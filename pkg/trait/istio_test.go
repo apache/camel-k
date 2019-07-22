@@ -144,10 +144,8 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 func TestIstioDisabled(t *testing.T) {
 	s := serving.Service{
 		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{},
-				},
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: &serving.RevisionTemplateSpec{},
 			},
 		},
 	}
