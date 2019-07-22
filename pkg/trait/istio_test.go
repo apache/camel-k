@@ -74,10 +74,8 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 func TestIstioInject(t *testing.T) {
 	s := serving.Service{
 		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{},
-				},
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: &serving.RevisionTemplateSpec{},
 			},
 		},
 	}
@@ -91,17 +89,15 @@ func TestIstioInject(t *testing.T) {
 	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
-	assert.Empty(t, s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations[istioSidecarInjectAnnotation])
+	assert.Empty(t, s.Spec.ConfigurationSpec.GetTemplate().Annotations[istioSidecarInjectAnnotation])
 	assert.NotEmpty(t, d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
 }
 
 func TestIstioForcedInjectTrue(t *testing.T) {
 	s := serving.Service{
 		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{},
-				},
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: &serving.RevisionTemplateSpec{},
 			},
 		},
 	}
@@ -117,17 +113,15 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "true", s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations[istioSidecarInjectAnnotation])
+	assert.Equal(t, "true", s.Spec.ConfigurationSpec.GetTemplate().Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, "true", d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
 }
 
 func TestIstioForcedInjectFalse(t *testing.T) {
 	s := serving.Service{
 		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{},
-				},
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: &serving.RevisionTemplateSpec{},
 			},
 		},
 	}
@@ -143,7 +137,7 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "false", s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations[istioSidecarInjectAnnotation])
+	assert.Equal(t, "false", s.Spec.ConfigurationSpec.GetTemplate().Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, "false", d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
 }
 

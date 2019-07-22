@@ -127,13 +127,13 @@ func TestKnativeService(t *testing.T) {
 
 	assert.NotNil(t, s)
 
-	spec := s.Spec.RunLatest.Configuration.RevisionTemplate.Spec
+	spec := s.Spec.ConfigurationSpec.GetTemplate().Spec
 
-	assert.Len(t, spec.Container.VolumeMounts, 5)
+	assert.Len(t, spec.Containers[0].VolumeMounts, 5)
 	assert.Len(t, spec.Volumes, 5)
 
 	assert.Condition(t, func() bool {
-		for _, v := range spec.Container.VolumeMounts {
+		for _, v := range spec.Containers[0].VolumeMounts {
 			if v.Name == "integration-properties" {
 				return true
 			}
@@ -141,7 +141,7 @@ func TestKnativeService(t *testing.T) {
 		return false
 	})
 	assert.Condition(t, func() bool {
-		for _, v := range spec.Container.VolumeMounts {
+		for _, v := range spec.Containers[0].VolumeMounts {
 			if v.Name == "my-cm" {
 				return true
 			}
@@ -173,10 +173,10 @@ func TestKnativeService(t *testing.T) {
 		}
 	})
 
-	test.EnvVarExists(t, spec.Container.Env, "JAVA_CLASSPATH")
-	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_ROUTES", "file:/etc/camel/sources/i-source-000/routes.js?language=js&compression=true")
-	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
-	test.EnvVarHasValue(t, spec.Container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
+	test.EnvVarExists(t, spec.Containers[0].Env, "JAVA_CLASSPATH")
+	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_ROUTES", "file:/etc/camel/sources/i-source-000/routes.js?language=js&compression=true")
+	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
+	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 }
 
 func TestKnativeServiceWithCustomContainerName(t *testing.T) {
