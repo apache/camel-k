@@ -57,7 +57,7 @@ func (t *istioTrait) Apply(e *Environment) error {
 			d.Spec.Template.Annotations = t.injectIstioAnnotation(d.Spec.Template.Annotations, true)
 		})
 		e.Resources.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
-			cs.Template.Annotations = t.injectIstioAnnotation(cs.GetTemplate().Annotations, false)
+			cs.GetTemplate().Annotations = t.injectIstioAnnotation(cs.GetTemplate().Annotations, false)
 		})
 	}
 	return nil
