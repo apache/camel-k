@@ -32,7 +32,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service) Environment {
+func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, enabled bool) Environment {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -46,9 +46,7 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service) Env
 			Spec: v1alpha1.IntegrationSpec{
 				Traits: map[string]v1alpha1.TraitSpec{
 					"istio": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
+						Configuration: make(map[string]string),
 					},
 				},
 			},
@@ -64,6 +62,10 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service) Env
 		},
 		EnvVars:   make([]corev1.EnvVar, 0),
 		Resources: kubernetes.NewCollection(s, d),
+	}
+
+	if enabled {
+		env.Integration.Spec.Traits["istio"].Configuration["enabled"] = "true"
 	}
 
 	return env
@@ -85,8 +87,7 @@ func TestIstioInject(t *testing.T) {
 		},
 	}
 
-	env := NewIstioTestEnv(t, &d, &s)
-
+	env := NewIstioTestEnv(t, &d, &s, true)
 	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
@@ -110,7 +111,7 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 		},
 	}
 
-	env := NewIstioTestEnv(t, &d, &s)
+	env := NewIstioTestEnv(t, &d, &s, true)
 	env.Integration.Spec.Traits["istio"].Configuration["inject"] = "true"
 
 	err := env.Catalog.apply(&env)
@@ -136,7 +137,7 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 		},
 	}
 
-	env := NewIstioTestEnv(t, &d, &s)
+	env := NewIstioTestEnv(t, &d, &s, true)
 	env.Integration.Spec.Traits["istio"].Configuration["inject"] = "false"
 
 	err := env.Catalog.apply(&env)
@@ -144,4 +145,27 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 
 	assert.Equal(t, "false", s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, "false", d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
+}
+
+func TestIstioDisabled(t *testing.T) {
+	s := serving.Service{
+		Spec: serving.ServiceSpec{
+			RunLatest: &serving.RunLatestType{
+				Configuration: serving.ConfigurationSpec{
+					RevisionTemplate: serving.RevisionTemplateSpec{},
+				},
+			},
+		},
+	}
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{},
+		},
+	}
+
+	env := NewIstioTestEnv(t, &d, &s, false)
+
+	err := env.Catalog.apply(&env)
+	assert.Nil(t, err)
+	assert.NotContains(t, env.ExecutedTraits, "istio")
 }

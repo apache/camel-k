@@ -144,6 +144,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tClasspath,
 			c.tProbes,
 			c.tRoute,
+			c.tIstio,
 			c.tOwner,
 		}
 	case v1alpha1.TraitProfileKubernetes:
@@ -165,6 +166,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tClasspath,
 			c.tProbes,
 			c.tIngress,
+			c.tIstio,
 			c.tOwner,
 		}
 	case v1alpha1.TraitProfileKnative:
