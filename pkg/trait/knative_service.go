@@ -25,6 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	servingbeta "github.com/knative/serving/pkg/apis/serving/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -198,15 +199,17 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 			Annotations: e.Integration.Annotations,
 		},
 		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{
-						ObjectMeta: metav1.ObjectMeta{
-							Labels:      labels,
-							Annotations: annotations,
-						},
-						Spec: serving.RevisionSpec{
-							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: &serving.RevisionTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels:      labels,
+						Annotations: annotations,
+					},
+					Spec: serving.RevisionSpec{
+						RevisionSpec: servingbeta.RevisionSpec{
+							PodSpec: corev1.PodSpec{
+								ServiceAccountName: e.Integration.Spec.ServiceAccountName,
+							},
 						},
 					},
 				},
