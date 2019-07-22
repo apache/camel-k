@@ -254,6 +254,6 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	assert.Equal(
 		t,
 		environment.Integration.Spec.Traits["container"].Configuration["name"],
-		s.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Name,
+		s.Spec.ConfigurationSpec.GetTemplate().Spec.Containers[0].Name,
 	)
 }
