@@ -1,4 +1,4 @@
-// +build integration
+// +build integration knative
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -35,6 +35,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/google/uuid"
+	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/onsi/gomega"
 	projectv1 "github.com/openshift/api/project/v1"
 	"github.com/spf13/cobra"
@@ -407,6 +408,34 @@ func scaleOperator(ns string, replicas int32) func() error {
 		return nil
 	}
 }
+
+/*
+	Knative
+ */
+
+func createKnativeChannel(ns string, name string) func() error {
+	return func() error {
+		channel := eventing.Channel{
+			TypeMeta: metav1.TypeMeta{
+				Kind: "Channel",
+				APIVersion: eventing.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name: name,
+			},
+			Spec: eventing.ChannelSpec{
+				Provisioner: &v1.ObjectReference{
+					APIVersion: "eventing.knative.dev/v1alpha1",
+					Kind: "ClusterChannelProvisioner",
+					Name: "in-memory",
+				},
+			},
+		}
+		return testClient.Create(testContext, &channel)
+	}
+}
+
 
 /*
 	Namespace testing functions
