@@ -104,6 +104,9 @@ test: build
 test-integration: build
 	go test -timeout 30m -v ./e2e/... -tags=integration
 
+test-knative: build
+	go test -timeout 30m -v ./e2e/... -tags=knative
+
 build-operator:
 	go build $(GOFLAGS) -o camel-k ./cmd/manager/*.go
 
@@ -122,7 +125,7 @@ build-olm:
 	./script/build_olm.sh $(VERSION)
 
 build-compile-integration-tests:
-	go test -c -tags=integration ./e2e/*.go
+	go test -c -tags="integration knative" ./e2e/*.go
 
 clean:
 	# go clean fails if modules support are turned on as it tries to 

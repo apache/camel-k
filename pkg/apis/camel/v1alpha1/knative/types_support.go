@@ -24,11 +24,7 @@ import (
 )
 
 // BuildCamelServiceDefinition creates a CamelServiceDefinition from a given URL
-func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, rawurl string) (*CamelServiceDefinition, error) {
-	serviceURL, err := url.Parse(rawurl)
-	if err != nil {
-		return nil, err
-	}
+func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, serviceURL url.URL) (CamelServiceDefinition, error) {
 	protocol := CamelProtocol(serviceURL.Scheme)
 	definition := CamelServiceDefinition{
 		Name:        name,
@@ -42,7 +38,7 @@ func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, rawu
 	if portStr != "" {
 		port, err := strconv.Atoi(portStr)
 		if err != nil {
-			return nil, err
+			return CamelServiceDefinition{}, err
 		}
 		definition.Port = port
 	}
@@ -52,7 +48,7 @@ func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, rawu
 	} else {
 		definition.Metadata[CamelMetaServicePath] = "/"
 	}
-	return &definition, nil
+	return definition, nil
 }
 
 func defaultCamelProtocolPort(prot CamelProtocol) int {
