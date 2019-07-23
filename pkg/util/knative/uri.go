@@ -23,7 +23,7 @@ import (
 	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 )
 
-var uriRegexp = regexp.MustCompile("^knative:[/]*(channel|endpoint)/([a-z0-9.-]+)(?:[/?].*|$)")
+var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint)/([a-z>-Z0-9.-]+)(?:[/?].*|$)`)
 
 // ExtractChannelNames extracts all Knative named channels from the given URIs
 func ExtractChannelNames(uris []string) []string {

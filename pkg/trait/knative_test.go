@@ -21,21 +21,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
-	"k8s.io/apimachinery/pkg/runtime"
-
-	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/test"
 
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-
 	"github.com/scylladb/go-set/strset"
-
 	"github.com/stretchr/testify/assert"
-
-	"k8s.io/client-go/kubernetes"
 
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
@@ -44,11 +37,9 @@ import (
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	clientscheme "k8s.io/client-go/kubernetes/scheme"
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func TestKnativeEnvConfiguration(t *testing.T) {
+func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	catalog, err := test.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -107,9 +98,7 @@ func TestKnativeEnvConfiguration(t *testing.T) {
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
 
-	client := &FakeClient{Client: c, Interface: nil}
-
-	tc := NewCatalog(context.TODO(), client)
+	tc := NewCatalog(context.TODO(), c)
 
 	err = tc.configure(&environment)
 	assert.Nil(t, err)
@@ -148,28 +137,107 @@ func TestKnativeEnvConfiguration(t *testing.T) {
 	eSink2 := ne.FindService("endpoint-sink-2", knativeapi.CamelServiceTypeEndpoint)
 	assert.NotNil(t, eSink2)
 	assert.Equal(t, "endpoint-sink-2.host", eSink2.Host)
-
 }
 
-type FakeClient struct {
-	controller.Client
-	kubernetes.Interface
-}
+func TestKnativeEnvConfigurationFromSource(t *testing.T) {
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
 
-func (c *FakeClient) GetScheme() *runtime.Scheme {
-	return nil
-}
+	traitCatalog := NewCatalog(context.TODO(), nil)
 
-func NewFakeClient(namespace string) (controller.Client, error) {
-	scheme := clientscheme.Scheme
-
-	// Setup Scheme for all resources
-	if err := apis.AddToScheme(scheme); err != nil {
-		return nil, err
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1alpha1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1alpha1.IntegrationStatus{
+				Phase: v1alpha1.IntegrationPhaseDeploying,
+			},
+			Spec: v1alpha1.IntegrationSpec{
+				Profile: v1alpha1.TraitProfileKnative,
+				Sources: []v1alpha1.SourceSpec{
+					{
+						DataSpec: v1alpha1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:endpoint/s3fileMover1")
+											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1alpha1.LanguageJavaSource,
+					},
+				},
+				Resources: []v1alpha1.ResourceSpec{},
+				Traits: map[string]v1alpha1.TraitSpec{
+					"knative": {
+						Configuration: map[string]string{
+							"enabled": "true",
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1alpha1.IntegrationKit{
+			Status: v1alpha1.IntegrationKitStatus{
+				Phase: v1alpha1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1alpha1.IntegrationPlatform{
+			Spec: v1alpha1.IntegrationPlatformSpec{
+				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
+				Build: v1alpha1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+				},
+				Profile: v1alpha1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+		Classpath:      strset.New(),
 	}
 
-	return fake.NewFakeClientWithScheme(
-		scheme,
+	c, err := NewFakeClient("ns")
+	assert.Nil(t, err)
+
+	tc := NewCatalog(context.TODO(), c)
+
+	err = tc.configure(&environment)
+	assert.Nil(t, err)
+
+	tr := tc.GetTrait("knative").(*knativeTrait)
+
+	ok, err := tr.Configure(&environment)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+
+	err = tr.Apply(&environment)
+	assert.Nil(t, err)
+
+	kc := envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION")
+	assert.NotNil(t, kc)
+
+	ne := knativeapi.NewCamelEnvironment()
+	err = ne.Deserialize(kc.Value)
+	assert.Nil(t, err)
+
+	source := ne.FindService("s3fileMover1", knativeapi.CamelServiceTypeEndpoint)
+	assert.NotNil(t, source)
+	assert.Equal(t, knative.CamelProtocolHTTP, source.Protocol)
+	assert.Equal(t, "0.0.0.0", source.Host)
+	assert.Equal(t, 8080, source.Port)
+}
+
+func NewFakeClient(namespace string) (client.Client, error) {
+	return test.NewFakeClient(
 		&eventing.Channel{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Channel",
@@ -219,5 +287,5 @@ func NewFakeClient(namespace string) (controller.Client, error) {
 				},
 			},
 		},
-	), nil
+	)
 }
