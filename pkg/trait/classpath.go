@@ -19,20 +19,15 @@ package trait
 
 import (
 	"fmt"
-
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
-	"github.com/pkg/errors"
-
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -96,38 +91,25 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		e.Classpath.Add("/deployments/dependencies/*")
 	}
 
-	if e.Resources != nil {
-		e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
-			for i := 0; i < len(deployment.Spec.Template.Spec.Containers); i++ {
-				cp := e.Classpath.Copy()
+	containerName := defaultContainerName
+	dt := e.Catalog.GetTrait(containerTraitID)
+	if dt != nil {
+		containerName = dt.(*containerTrait).Name
+	}
 
-				for _, m := range deployment.Spec.Template.Spec.Containers[i].VolumeMounts {
-					cp.Add(m.MountPath)
-				}
+	container := e.Resources.GetContainerByName(containerName)
+	if container != nil {
+		for _, m := range container.VolumeMounts {
+			e.Classpath.Add(m.MountPath)
+		}
 
-				t.setJavaClasspath(cp, &deployment.Spec.Template.Spec.Containers[i].Env)
-			}
-		})
-		e.Resources.VisitKnativeService(func(service *serving.Service) {
-			for ci := range service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers {
-				c := &service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers[ci]
-				for mi := range c.VolumeMounts {
-					m := &c.VolumeMounts[mi]
-					e.Classpath.Add(m.MountPath)
-				}
-				t.setJavaClasspath(e.Classpath, &c.Env)
-			}
-		})
+		items := e.Classpath.List()
+
+		// keep classpath sorted
+		sort.Strings(items)
+
+		envvar.SetVal(&container.Env, "JAVA_CLASSPATH", strings.Join(items, ":"))
 	}
 
 	return nil
-}
-
-func (t *classpathTrait) setJavaClasspath(cp *strset.Set, env *[]corev1.EnvVar) {
-	items := cp.List()
-
-	// keep classpath sorted
-	sort.Strings(items)
-
-	envvar.SetVal(env, "JAVA_CLASSPATH", strings.Join(items, ":"))
 }
