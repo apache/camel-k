@@ -45,5 +45,5 @@ before_script:
   - ./golangci-lint --version
 
 script:
-  - ./golangci-lint run --verbose --config .golangci.yml || travis_terminate 1;
+  - GOGC=10 ./golangci-lint run --verbose --config .golangci.yml || travis_terminate 1;
   - ./script/travis_build.sh
