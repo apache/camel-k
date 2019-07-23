@@ -24,6 +24,8 @@ IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 GO_PATH := $(shell go env GOPATH)
+LINT_GOGC := 10
+LINT_DEADLINE := 5m
 
 # For signing binary artifacts
 GPG_PASS := $(GPG_PASS)
@@ -150,7 +152,7 @@ dep:
 	go mod tidy
 
 lint:
-	golangci-lint run
+	GOGC=$(LINT_GOGC) golangci-lint run --deadline $(LINT_DEADLINE)
 
 images: test
 	mkdir -p build/_maven_output
