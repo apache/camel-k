@@ -73,6 +73,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&impl.kits, "kit", nil, "Add an integration kit to build at startup")
 	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", "", "Set the build strategy")
 	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
+	cmd.Flags().StringVar(&impl.traitProfile, "trait-profile", "", "The profile to use for traits")
 
 	// maven settings
 	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
@@ -112,6 +113,7 @@ type installCmdOptions struct {
 	properties        []string
 	kits              []string
 	registry          v1alpha1.IntegrationPlatformRegistrySpec
+	traitProfile      string
 }
 
 // nolint: gocyclo
@@ -207,6 +209,9 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			}
 
 			platform.Spec.Build.Timeout.Duration = d
+		}
+		if o.traitProfile != "" {
+			platform.Spec.Profile = v1alpha1.TraitProfileByName(o.traitProfile)
 		}
 
 		if len(o.mavenRepositories) > 0 {
@@ -316,6 +321,14 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	if len(o.mavenRepositories) > 0 && o.mavenSettings != "" {
 		err := fmt.Errorf("incompatible options combinations: you cannot set both mavenRepository and mavenSettings")
 		result = multierr.Append(result, err)
+	}
+
+	if o.traitProfile != "" {
+		tp := v1alpha1.TraitProfileByName(o.traitProfile)
+		if tp == v1alpha1.TraitProfile("") {
+			err := fmt.Errorf("unknown trait profile %s", o.traitProfile)
+			result = multierr.Append(result, err)
+		}
 	}
 
 	return result
