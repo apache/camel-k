@@ -19,6 +19,8 @@ package trait
 
 import (
 	"context"
+	"sort"
+	"strings"
 	"testing"
 
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -107,42 +109,48 @@ func TestConfigureClasspathTraitWithIntegrationKitStatusArtifact(t *testing.T) {
 func TestConfigureClasspathTraitWithDeploymentResource(t *testing.T) {
 	trait, environment := createNominalTest()
 
-	container := corev1.Container{
-		VolumeMounts: []corev1.VolumeMount{{MountPath: "/mount/path"}},
-	}
-
-	deployment := appsv1.Deployment{
+	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{container},
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									MountPath: "/mount/path",
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 	}
 
-	environment.Resources = kubernetes.NewCollection(&deployment)
+	environment.Resources.Add(&d)
 
 	err := trait.Apply(environment)
 
+	cp := environment.Classpath.List()
+	sort.Strings(cp)
+
 	assert.Nil(t, err)
 	assert.NotNil(t, environment.Classpath)
-	assert.Equal(t, strset.New("/etc/camel/resources", "./resources"), environment.Classpath)
-
-	assert.Len(t, container.Env, 0)
+	assert.Equal(t, strset.New("/etc/camel/resources", "./resources", "/mount/path"), environment.Classpath)
+	assert.Len(t, d.Spec.Template.Spec.Containers[0].Env, 1)
+	assert.Equal(t, "JAVA_CLASSPATH", d.Spec.Template.Spec.Containers[0].Env[0].Name)
+	assert.Equal(t, strings.Join(cp, ":"), d.Spec.Template.Spec.Containers[0].Env[0].Value)
 }
 
 func TestConfigureClasspathTraitWithKNativeResource(t *testing.T) {
 	trait, environment := createNominalTest()
 
-	container := corev1.Container{
-		VolumeMounts: []corev1.VolumeMount{{MountPath: "/mount/path"}},
-	}
-
 	s := serving.Service{}
 	s.Spec.ConfigurationSpec.Template = &serving.RevisionTemplateSpec{}
 	s.Spec.ConfigurationSpec.Template.Spec.Containers = []corev1.Container{
 		{
+			Name: defaultContainerName,
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					MountPath: "/mount/path",
@@ -151,15 +159,19 @@ func TestConfigureClasspathTraitWithKNativeResource(t *testing.T) {
 		},
 	}
 
-	environment.Resources = kubernetes.NewCollection(&s)
+	environment.Resources.Add(&s)
 
 	err := trait.Apply(environment)
 
+	cp := environment.Classpath.List()
+	sort.Strings(cp)
+
 	assert.Nil(t, err)
 	assert.NotNil(t, environment.Classpath)
-	assert.Equal(t, strset.New("/etc/camel/resources", "./resources", "/mount/path"), environment.Classpath)
-
-	assert.Len(t, container.Env, 0)
+	assert.ElementsMatch(t, []string{"/etc/camel/resources", "./resources", "/mount/path"}, cp)
+	assert.Len(t, s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env, 1)
+	assert.Equal(t, "JAVA_CLASSPATH", s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env[0].Name)
+	assert.Equal(t, strings.Join(cp, ":"), s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env[0].Value)
 }
 
 func TestConfigureClasspathTraitWithNominalIntegrationKit(t *testing.T) {
@@ -201,6 +213,7 @@ func createTestWithKitType(kitType string) (*classpathTrait, *Environment) {
 	trait.client = client
 
 	environment := &Environment{
+		Catalog: NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
 			Status: v1alpha1.IntegrationStatus{
 				Phase: v1alpha1.IntegrationPhaseDeploying,
@@ -211,6 +224,7 @@ func createTestWithKitType(kitType string) (*classpathTrait, *Environment) {
 				Phase: v1alpha1.IntegrationKitPhaseReady,
 			},
 		},
+		Resources: kubernetes.NewCollection(),
 	}
 
 	return trait, environment
