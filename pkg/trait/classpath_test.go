@@ -139,15 +139,13 @@ func TestConfigureClasspathTraitWithKNativeResource(t *testing.T) {
 		VolumeMounts: []corev1.VolumeMount{{MountPath: "/mount/path"}},
 	}
 
-	s := serving.Service{
-		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{
-						Spec: serving.RevisionSpec{
-							Container: container,
-						},
-					},
+	s := serving.Service{}
+	s.Spec.ConfigurationSpec.Template = &serving.RevisionTemplateSpec{}
+	s.Spec.ConfigurationSpec.Template.Spec.Containers = []corev1.Container{
+		{
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					MountPath: "/mount/path",
 				},
 			},
 		},
