@@ -21,10 +21,10 @@ import (
 	"context"
 	"errors"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // GetOrLookup --
@@ -71,7 +71,18 @@ func IsActive(p *v1alpha1.IntegrationPlatform) bool {
 	return p.Status.Phase != "" && p.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate
 }
 
-// GetProfile returns the current profile of the platform (if present) or computes it
+// DetermineBestProfile tries to detect the best trait profile for the platform
+func DetermineBestProfile(ctx context.Context, c k8sclient.Reader, p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
+	if p.Spec.Profile != "" {
+		return p.Spec.Profile
+	}
+	if knative.IsEnabledInNamespace(ctx, c, p.Namespace) {
+		return v1alpha1.TraitProfileKnative
+	}
+	return GetProfile(p)
+}
+
+// GetProfile returns the current profile of the platform (if present) or returns the default one for the cluster
 func GetProfile(p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
 	if p.Spec.Profile != "" {
 		return p.Spec.Profile

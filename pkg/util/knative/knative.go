@@ -20,13 +20,12 @@ package knative
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/pkg/errors"
 
-	"github.com/apache/camel-k/pkg/client"
-
-	"k8s.io/client-go/kubernetes"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
@@ -35,9 +34,25 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// IsEnabledInNamespace returns true if we can list some basic knative objects in the given namespace
+func IsEnabledInNamespace(ctx context.Context, c k8sclient.Reader, namespace string) bool {
+	channels := eventing.ChannelList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Channel",
+			APIVersion: eventing.SchemeGroupVersion.String(),
+		},
+	}
+	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &channels); err != nil {
+		log.Infof("could not find knative in namespace %s, got error: %v", namespace, err)
+		return false
+	}
+	return true
+}
+
 // IsInstalled returns true if we are connected to a cluster with Knative installed
 func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
-	_, err := c.Discovery().ServerResourcesForGroupVersion("serving.knative.dev/v1alpha1")
+	// check knative eventing, since serving may be on v1beta1 in some clusters
+	_, err := c.Discovery().ServerResourcesForGroupVersion("eventing.knative.dev/v1alpha1")
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
