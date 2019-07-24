@@ -215,7 +215,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			return errors.Errorf("cannot find channel %s", ch)
 		}
 
-		svc, err := buildCamelServiceDefinitionFromAddressable(ch, knativeapi.CamelServiceTypeChannel, c.Status.Address)
+		svc, err := buildServiceDefinition(ch, knativeapi.CamelServiceTypeChannel, c.Status.Address)
 		if err != nil {
 			return errors.Wrapf(err, "cannot determine address of channel %s", ch)
 		}
@@ -268,7 +268,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 		if s == nil {
 			return errors.Errorf("cannot find endpoint %s", endpoint)
 		}
-		svc, err := buildCamelServiceDefinitionFromServiceStatus(endpoint, knativeapi.CamelServiceTypeEndpoint, s.Status)
+		svc, err := buildServiceDefinitionFromStatus(endpoint, knativeapi.CamelServiceTypeEndpoint, s.Status)
 		if err != nil {
 			return errors.Wrapf(err, "cannot determine address of endpoint %s", endpoint)
 		}
@@ -290,21 +290,21 @@ func (t *knativeTrait) extractNames(names string) []string {
 	return answer
 }
 
-// buildCamelServiceDefinitionFromServiceStatus creates a CamelServiceDefinition from a Knative ServiceStatus
-func buildCamelServiceDefinitionFromServiceStatus(name string, serviceType knativeapi.CamelServiceType, status serving.ServiceStatus) (knativeapi.CamelServiceDefinition, error) {
+// buildServiceDefinitionFromStatus creates a CamelServiceDefinition from a Knative ServiceStatus
+func buildServiceDefinitionFromStatus(name string, serviceType knativeapi.CamelServiceType, status serving.ServiceStatus) (knativeapi.CamelServiceDefinition, error) {
 	// build it using the Route URL information if available
 	if status.URL != nil && status.URL.Host != "" {
 		return knativeapi.BuildCamelServiceDefinition(name, serviceType, url.URL(*status.URL))
 	}
 	// fallback to using the addressable
 	if status.Address != nil {
-		return buildCamelServiceDefinitionFromAddressable(name, serviceType, *status.Address)
+		return buildServiceDefinition(name, serviceType, *status.Address)
 	}
 	return knativeapi.CamelServiceDefinition{}, errors.New("cannot determine service hostname")
 }
 
-// buildCamelServiceDefinitionFromAddressable creates a CamelServiceDefinition from a Knative Addressable
-func buildCamelServiceDefinitionFromAddressable(name string, serviceType knativeapi.CamelServiceType, addressable duck.Addressable) (knativeapi.CamelServiceDefinition, error) {
+// buildServiceDefinition creates a CamelServiceDefinition from a Knative Addressable
+func buildServiceDefinition(name string, serviceType knativeapi.CamelServiceType, addressable duck.Addressable) (knativeapi.CamelServiceDefinition, error) {
 	// build it using the URL information if available
 	if addressable.URL != nil && addressable.URL.Host != "" {
 		return knativeapi.BuildCamelServiceDefinition(name, serviceType, url.URL(*addressable.URL))
