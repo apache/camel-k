@@ -43,6 +43,10 @@ func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error 
 
 		if se, ok := t.(xml.StartElement); ok {
 			switch se.Name.Local {
+			case "rest", "restConfiguration":
+				meta.Dependencies.Add("camel:rest")
+			case "hystrix":
+				meta.Dependencies.Add("camel:hystrix")
 			case "from", "fromF":
 				for _, a := range se.Attr {
 					if a.Name.Local == "uri" {
@@ -59,7 +63,7 @@ func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error 
 		}
 	}
 
-	meta.Dependencies = i.discoverDependencies(source, meta)
+	i.discoverDependencies(source, meta)
 
 	return nil
 }

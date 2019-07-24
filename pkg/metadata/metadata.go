@@ -18,28 +18,23 @@ limitations under the License.
 package metadata
 
 import (
-	"sort"
-
-	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/scylladb/go-set/strset"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/gzip"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/log"
+
 	src "github.com/apache/camel-k/pkg/util/source"
 )
 
 // ExtractAll returns metadata information from all listed source codes
 func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1alpha1.SourceSpec) IntegrationMetadata {
 	// neutral metadata
-	meta := IntegrationMetadata{
-		Metadata: src.Metadata{
-			FromURIs:     []string{},
-			ToURIs:       []string{},
-			Dependencies: []string{},
-		},
-		PassiveEndpoints:    true,
-		RequiresHTTPService: false,
-	}
+	meta := NewIntegrationMetadata()
+	meta.PassiveEndpoints = true
+	meta.RequiresHTTPService = false
+
 	for _, source := range sources {
 		meta = merge(meta, Extract(catalog, source))
 	}
@@ -47,23 +42,21 @@ func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1alpha1.SourceSpec) In
 }
 
 func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
-	deps := make(map[string]bool)
-	for _, d := range m1.Dependencies {
-		deps[d] = true
-	}
-	for _, d := range m2.Dependencies {
-		deps[d] = true
-	}
-	allDependencies := make([]string, 0)
-	for k := range deps {
-		allDependencies = append(allDependencies, k)
-	}
-	sort.Strings(allDependencies)
+	d := strset.Union(m1.Dependencies, m2.Dependencies)
+
+	f := make([]string, 0, len(m1.FromURIs)+len(m2.FromURIs))
+	f = append(f, m1.FromURIs...)
+	f = append(f, m2.FromURIs...)
+
+	t := make([]string, 0, len(m1.ToURIs)+len(m2.ToURIs))
+	t = append(t, m1.ToURIs...)
+	t = append(t, m2.ToURIs...)
+
 	return IntegrationMetadata{
 		Metadata: src.Metadata{
-			FromURIs:     append(m1.FromURIs, m2.FromURIs...),
-			ToURIs:       append(m1.ToURIs, m2.ToURIs...),
-			Dependencies: allDependencies,
+			FromURIs:     f,
+			ToURIs:       t,
+			Dependencies: d,
 		},
 		RequiresHTTPService: m1.RequiresHTTPService || m2.RequiresHTTPService,
 		PassiveEndpoints:    m1.PassiveEndpoints && m2.PassiveEndpoints,
@@ -80,7 +73,7 @@ func Extract(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSpec) Integrat
 
 	language := source.InferLanguage()
 
-	m := IntegrationMetadata{}
+	m := NewIntegrationMetadata()
 
 	// TODO: handle error
 	_ = src.InspectorForLanguage(catalog, language).Extract(source, &m.Metadata)

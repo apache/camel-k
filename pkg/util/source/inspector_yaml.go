@@ -47,12 +47,19 @@ func (inspector YAMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadat
 		}
 	}
 
-	meta.Dependencies = inspector.discoverDependencies(source, meta)
+	inspector.discoverDependencies(source, meta)
 
 	return nil
 }
 
 func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
+	switch key {
+	case "rest":
+		meta.Dependencies.Add("camel:rest")
+	case "hystrix":
+		meta.Dependencies.Add("camel:hystrix")
+	}
+
 	var maybeURI string
 
 	switch t := content.(type) {
