@@ -42,7 +42,8 @@ func (i JavaSourceInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata)
 
 	meta.FromURIs = append(meta.FromURIs, from...)
 	meta.ToURIs = append(meta.ToURIs, to...)
-	meta.Dependencies = i.discoverDependencies(source, meta)
+
+	i.discoverDependencies(source, meta)
 
 	return nil
 }
