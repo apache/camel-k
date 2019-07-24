@@ -17,6 +17,8 @@ limitations under the License.
 
 package source
 
+import "github.com/scylladb/go-set/strset"
+
 // Metadata --
 type Metadata struct {
 	// All starting URIs of defined routes
@@ -24,5 +26,5 @@ type Metadata struct {
 	// All end URIs of defined routes
 	ToURIs []string
 	// All inferred dependencies required to run the integration
-	Dependencies []string
+	Dependencies *strset.Set
 }

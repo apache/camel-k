@@ -73,7 +73,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		// main required by default
 		util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-runtime-main")
 
-		for _, d := range meta.Dependencies {
+		for _, d := range meta.Dependencies.List() {
 			util.StringSliceUniqueAdd(&dependencies, d)
 		}
 	}

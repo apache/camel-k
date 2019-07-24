@@ -19,29 +19,29 @@ package source
 
 import (
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/scylladb/go-set/strset"
 )
 
 var (
-	singleQuotedFrom = regexp.MustCompile(`from\s*\(\s*'([a-z0-9-]+:[^']+)'`)
-	doubleQuotedFrom = regexp.MustCompile(`from\s*\(\s*"([a-z0-9-]+:[^"]+)"`)
-	singleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*'([a-z0-9-]+:[^']+)'`)
-	singleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*'([a-z0-9-]+:[^']+)'`)
-	singleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*'([a-z0-9-]+:[^']+)'`)
-	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-z0-9-]+:[^"]+)"`)
-	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-z0-9-]+:[^"]+)"`)
-	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-z0-9-]+:[^"]+)"`)
+	singleQuotedFrom = regexp.MustCompile(`from\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	doubleQuotedFrom = regexp.MustCompile(`from\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	singleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	singleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	singleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 
 	additionalDependencies = map[string]string{
-		".*JsonLibrary\\.Jackson.*": "camel:jackson",
-		".*\\.hystrix().*":          "camel:hystrix",
-		".*<hystrix>.*":             "camel:hystrix",
+		`.*JsonLibrary\.Jackson.*`:      "camel:jackson",
+		`.*\.hystrix().*`:               "camel:hystrix",
+		`.*restConfiguration().*`:       "camel:rest",
+		`.*rest(("[a-zA-Z0-9-/]+")*).*`: "camel:rest",
+		`^\s*rest\s*{.*`:                "camel:rest",
 	}
 )
 
@@ -102,30 +102,22 @@ func (i baseInspector) Extract(v1alpha1.SourceSpec, *Metadata) error {
 }
 
 // discoverDependencies returns a list of dependencies required by the given source code
-func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *Metadata) []string {
+func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *Metadata) {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
-	candidates := strset.New()
-	candidates.Add(meta.Dependencies...)
 
 	for _, uri := range uris {
 		candidateComp := i.decodeComponent(uri)
 		if candidateComp != "" {
-			candidates.Add(candidateComp)
+			meta.Dependencies.Add(candidateComp)
 		}
 	}
 
 	for pattern, dep := range additionalDependencies {
 		pat := regexp.MustCompile(pattern)
 		if pat.MatchString(source.Content) {
-			candidates.Add(dep)
+			meta.Dependencies.Add(dep)
 		}
 	}
-
-	components := candidates.List()
-
-	sort.Strings(components)
-
-	return components
 }
 
 func (i *baseInspector) decodeComponent(uri string) string {
