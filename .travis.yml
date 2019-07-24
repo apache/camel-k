@@ -27,7 +27,7 @@ go:
   - 1.12.x
 
 install:
-  - go mod vendor
+  - go mod tidy
 
 env:
   global:
@@ -45,5 +45,5 @@ before_script:
   - ./golangci-lint --version
 
 script:
-  - GOGC=10 ./golangci-lint run --verbose --deadline 5m --config .golangci.yml || travis_terminate 1;
+  - GOGC=20 ./golangci-lint run --verbose --deadline 10m --config .golangci.yml || travis_terminate 1;
   - ./script/travis_build.sh
