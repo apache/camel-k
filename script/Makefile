@@ -155,7 +155,7 @@ dep:
 	go mod tidy
 
 lint:
-	GOGC=$(LINT_GOGC) golangci-lint run --deadline $(LINT_DEADLINE)
+	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE)
 
 images: test
 	mkdir -p build/_maven_output
