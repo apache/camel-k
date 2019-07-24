@@ -17,10 +17,12 @@ metadata:
           "name": "example"
         },
         "spec": {
-          "source": {
-            "content": "// Add example Java code to create Integration",
-            "name": "Example.java"
-          }
+          "sources": [
+            {
+              "content": "from('timer:groovy?period=1s')\n  .setBody().simple('Hello world from Camel K!')\n  .to('log:info?showAll=false')",
+              "name": "example.groovy"
+            }
+          ]
         }
       },
       {
