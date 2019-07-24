@@ -176,7 +176,7 @@ func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v
 
 func (action *initializeAction) setDefaults(ctx context.Context, platform *v1alpha1.IntegrationPlatform) error {
 	if platform.Spec.Profile == "" {
-		platform.Spec.Profile = platformutil.GetProfile(platform)
+		platform.Spec.Profile = platformutil.DetermineBestProfile(ctx, action.client, platform)
 	}
 	if platform.Spec.Build.CamelVersion == "" {
 		platform.Spec.Build.CamelVersion = defaults.CamelVersionConstraint
