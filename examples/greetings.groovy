@@ -16,7 +16,7 @@
  */
 
 //
-//  kamel run --dev --name greetings --dependency camel-undertow --property camel.rest.port=8080 --open-api examples/greetings-api.json --logging-level org.apache.camel.k=DEBUG examples/greetings.groovy 
+//  kamel run --dev --name greetings --dependency=camel-rest --dependency camel-undertow --property camel.rest.port=8080 --open-api examples/greetings-api.json --logging-level org.apache.camel.k=DEBUG examples/greetings.groovy
 // 
 
 from('direct:greeting-api')

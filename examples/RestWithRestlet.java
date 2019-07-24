@@ -18,7 +18,7 @@
 //
 // To run this integrations use:
 //
-//     kamel run --name=rest-with-restlet --dependency=camel-restlet examples/RestWithRestlet.java
+//     kamel run --name=rest-with-restlet --dependency=camel-rest --dependency=camel-restlet examples/RestWithRestlet.java
 //
 import org.apache.camel.Exchange;
 
