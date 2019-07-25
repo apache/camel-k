@@ -13,36 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// ****************
-//
-// Setup
-//
-// ****************
-
-//l = components.get('log')
-//l.exchangeFormatter = function(e) {
-//    return "log - body=" + e.in.body + ", headers=" + e.in.headers
-//}
-
-// ****************
-//
-// Functions
-//
-// ****************
-
-function proc(e) {
-    e.getIn().setHeader('RandomValue', Math.floor((Math.random() * 100) + 1))
-}
-
-// ****************
-//
-// Route
-//
-// ****************
+// TODO: disabled because of https://github.com/oracle/graal/issues/1247
+// function proc(e) {
+//     e.getIn().setHeader('RandomValue', Math.floor((Math.random() * 100) + 1))
+// }
 
 from('timer:js?period=1s')
     .routeId('js')
     .setBody()
         .constant('Hello Camel K')
-    .process(proc)
     .to('log:info')
