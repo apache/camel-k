@@ -31,7 +31,7 @@ do
   mv ${f} ${f//-SNAPSHOT/}
 done
 
-for f in $(find ${olm_catalog} -type f);
+for f in $(find ${olm_catalog}/camel-k -type f);
 do
   sed -i 's/-SNAPSHOT//g' $f
 done
