@@ -22,13 +22,13 @@ package defaults
 
 const (
 	// Version --
-	Version = "1.0.0-M1-SNAPSHOT"
+	Version = "1.0.0-M1"
 
 	// CamelVersionConstraint --
 	CamelVersionConstraint = ">=3.0.0-M4"
 
 	// RuntimeVersion --
-	RuntimeVersion = "1.0.0-SNAPSHOT"
+	RuntimeVersion = "1.0.0"
 
 	// BaseImage --
 	BaseImage = "fabric8/s2i-java:3.0-java8"

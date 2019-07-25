@@ -14,8 +14,8 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.0.0-M1-SNAPSHOT
-RUNTIME_VERSION := 1.0.0-SNAPSHOT
+VERSION := 1.0.0-M1
+RUNTIME_VERSION := 1.0.0
 CAMEL_VERSION := 3.0.0-M4
 CAMEL_VERSION_CONSTRAINT := >=3.0.0-M4
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
