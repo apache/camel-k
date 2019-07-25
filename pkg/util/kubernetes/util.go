@@ -259,7 +259,8 @@ func LookUpResources(ctx context.Context, client client.Client, namespace string
 		if err := client.List(ctx, &options, &list); err != nil {
 			if k8serrors.IsNotFound(err) ||
 				k8serrors.IsForbidden(err) ||
-				k8serrors.IsMethodNotSupported(err) {
+				k8serrors.IsMethodNotSupported(err) ||
+				k8serrors.IsServiceUnavailable(err) {
 				continue
 			}
 			return nil, err
