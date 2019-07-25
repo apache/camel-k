@@ -142,7 +142,7 @@ clean:
 	rm -f camel-k
 	rm -f kamel
 	rm -f builder
-	rm -f test.test
+	rm -f *.test
 	rm -rf build/_maven_output
 	rm -rf build/_output
 	rm -rf camel-k-client-*.tar.gz
