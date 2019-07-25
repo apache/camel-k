@@ -13,36 +13,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// ****************
 //
-// Setup
+// To run this integrations use:
 //
-// ****************
+//     kamel run examples/routes.js
+//
 
-//l = components.get('log')
-//l.exchangeFormatter = function(e) {
-//    return "log - body=" + e.in.body + ", headers=" + e.in.headers
-//}
-
-// ****************
-//
-// Functions
-//
-// ****************
-
-function proc(e) {
-    e.getIn().setHeader('RandomValue', Math.floor((Math.random() * 100) + 1))
-}
-
-// ****************
-//
-// Route
-//
-// ****************
+l = components.get('log');
+l.setExchangeFormatter(e => {
+    return "body=" + e.getIn().getBody() + ", headers=" + e.getIn().getHeaders()
+})
 
 from('timer:js?period=1s')
     .routeId('js')
     .setBody()
-        .constant('Hello Camel K')
-    .process(proc)
-    .to('log:info')
+        .simple('Hello Camel K')
+    .process(e => {
+        e.getIn().setHeader('RandomValue', Math.floor((Math.random() * 100) + 1))
+    })
+    .to('log:info');
