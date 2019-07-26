@@ -51,6 +51,9 @@ import (
 var testContext context.Context
 var testClient client.Client
 
+// kamelHooks contains hooks useful to add option to kamel commands at runtime
+var kamelHooks []func([]string)[]string
+
 func init() {
 	var err error
 	testContext = context.TODO()
@@ -71,6 +74,9 @@ func kamel(args ...string) *cobra.Command {
 	c, err := cmd.NewKamelCommand(testContext)
 	if err != nil {
 		panic(err)
+	}
+	for _, hook := range kamelHooks {
+		args = hook(args)
 	}
 	c.SetArgs(args)
 	return c
