@@ -15,7 +15,27 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-packageName: camel-k
-channels:
-- name: alpha
-  currentCSV: camel-k-operator.v1.0.0-M2-SNAPSHOT
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: integrationplatforms.camel.apache.org
+  labels:
+    app: "camel-k"
+spec:
+  group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
+  subresources:
+    status: {}
+  names:
+    kind: IntegrationPlatform
+    listKind: IntegrationPlatformList
+    plural: integrationplatforms
+    singular: integrationplatform
+    shortNames:
+    - ip
+  additionalPrinterColumns:
+    - name: Phase
+      type: string
+      description: The IntegrationPlatform phase
+      JSONPath: .status.phase
