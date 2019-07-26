@@ -29,5 +29,5 @@ cd $location/..
 
 operator-sdk olm-catalog gen-csv --csv-version ${version} --csv-config deploy/olm-catalog/csv-config.yaml --update-crds
 
-rm $olm_catalog/camel-k/${version}/crd-*.yaml
+rm $olm_catalog/camel-k/${version}/crd-*.yaml || true
 cp $location/../deploy/crd-*.yaml $olm_catalog/camel-k/${version}/
