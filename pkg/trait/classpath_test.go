@@ -28,16 +28,16 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/scylladb/go-set/strset"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
+
+	"github.com/scylladb/go-set/strset"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConfigureClasspathTraitInRightPhasesDoesSucceed(t *testing.T) {
-	trait, environment := createNominalTest()
+	trait, environment := createNominalClasspathTest()
 
 	configured, err := trait.Configure(environment)
 	assert.Nil(t, err)
@@ -45,7 +45,7 @@ func TestConfigureClasspathTraitInRightPhasesDoesSucceed(t *testing.T) {
 }
 
 func TestConfigureClasspathTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalTest()
+	trait, environment := createNominalClasspathTest()
 	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseError
 
 	configured, err := trait.Configure(environment)
@@ -54,7 +54,7 @@ func TestConfigureClasspathTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing
 }
 
 func TestConfigureClasspathTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalTest()
+	trait, environment := createNominalClasspathTest()
 	environment.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseWaitingForPlatform
 
 	configured, err := trait.Configure(environment)
@@ -63,7 +63,7 @@ func TestConfigureClasspathTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *test
 }
 
 func TestConfigureClasspathDisabledTraitDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalTest()
+	trait, environment := createNominalClasspathTest()
 	trait.Enabled = new(bool)
 
 	configured, err := trait.Configure(environment)
@@ -71,8 +71,8 @@ func TestConfigureClasspathDisabledTraitDoesNotSucceed(t *testing.T) {
 	assert.False(t, configured)
 }
 
-func TestConfigureClasspathTraitPlaftormIntegrationKitLazyInstantiation(t *testing.T) {
-	trait, environment := createNominalTest()
+func TestApplyClasspathTraitPlaftormIntegrationKitLazyInstantiation(t *testing.T) {
+	trait, environment := createNominalClasspathTest()
 	environment.IntegrationKit = nil
 	environment.Integration.Namespace = "kit-namespace"
 	environment.Integration.Status.Kit = "kit-name"
@@ -83,8 +83,8 @@ func TestConfigureClasspathTraitPlaftormIntegrationKitLazyInstantiation(t *testi
 	assert.Equal(t, strset.New("/etc/camel/resources", "./resources"), environment.Classpath)
 }
 
-func TestConfigureClasspathTraitExternalIntegrationKitLazyInstantiation(t *testing.T) {
-	trait, environment := createTestWithKitType(v1alpha1.IntegrationKitTypeExternal)
+func TestApplyClasspathTraitExternalIntegrationKitLazyInstantiation(t *testing.T) {
+	trait, environment := createClasspathTestWithKitType(v1alpha1.IntegrationKitTypeExternal)
 	environment.IntegrationKit = nil
 	environment.Integration.Namespace = "kit-namespace"
 	environment.Integration.Status.Kit = "kit-name"
@@ -95,8 +95,8 @@ func TestConfigureClasspathTraitExternalIntegrationKitLazyInstantiation(t *testi
 	assert.Equal(t, strset.New("/etc/camel/resources", "./resources", "/deployments/dependencies/*"), environment.Classpath)
 }
 
-func TestConfigureClasspathTraitWithIntegrationKitStatusArtifact(t *testing.T) {
-	trait, environment := createNominalTest()
+func TestApplyClasspathTraitWithIntegrationKitStatusArtifact(t *testing.T) {
+	trait, environment := createNominalClasspathTest()
 	environment.IntegrationKit.Status.Artifacts = []v1alpha1.Artifact{{ID: "", Location: "", Target: "/dep/target"}}
 
 	err := trait.Apply(environment)
@@ -106,8 +106,8 @@ func TestConfigureClasspathTraitWithIntegrationKitStatusArtifact(t *testing.T) {
 	assert.Equal(t, strset.New("/etc/camel/resources", "./resources", "/dep/target"), environment.Classpath)
 }
 
-func TestConfigureClasspathTraitWithDeploymentResource(t *testing.T) {
-	trait, environment := createNominalTest()
+func TestApplyClasspathTraitWithDeploymentResource(t *testing.T) {
+	trait, environment := createNominalClasspathTest()
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -143,8 +143,8 @@ func TestConfigureClasspathTraitWithDeploymentResource(t *testing.T) {
 	assert.Equal(t, strings.Join(cp, ":"), d.Spec.Template.Spec.Containers[0].Env[0].Value)
 }
 
-func TestConfigureClasspathTraitWithKNativeResource(t *testing.T) {
-	trait, environment := createNominalTest()
+func TestApplyClasspathTraitWithKNativeResource(t *testing.T) {
+	trait, environment := createNominalClasspathTest()
 
 	s := serving.Service{}
 	s.Spec.ConfigurationSpec.Template = &serving.RevisionTemplateSpec{}
@@ -174,8 +174,8 @@ func TestConfigureClasspathTraitWithKNativeResource(t *testing.T) {
 	assert.Equal(t, strings.Join(cp, ":"), s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env[0].Value)
 }
 
-func TestConfigureClasspathTraitWithNominalIntegrationKit(t *testing.T) {
-	trait, environment := createNominalTest()
+func TestApplyClasspathTraitWithNominalIntegrationKit(t *testing.T) {
+	trait, environment := createNominalClasspathTest()
 
 	err := trait.Apply(environment)
 
@@ -184,11 +184,11 @@ func TestConfigureClasspathTraitWithNominalIntegrationKit(t *testing.T) {
 	assert.Equal(t, strset.New("/etc/camel/resources", "./resources"), environment.Classpath)
 }
 
-func createNominalTest() (*classpathTrait, *Environment) {
-	return createTestWithKitType(v1alpha1.IntegrationKitTypePlatform)
+func createNominalClasspathTest() (*classpathTrait, *Environment) {
+	return createClasspathTestWithKitType(v1alpha1.IntegrationKitTypePlatform)
 }
 
-func createTestWithKitType(kitType string) (*classpathTrait, *Environment) {
+func createClasspathTestWithKitType(kitType string) (*classpathTrait, *Environment) {
 
 	client, _ := test.NewFakeClient(
 		&v1alpha1.IntegrationKit{
