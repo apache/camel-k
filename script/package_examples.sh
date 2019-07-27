@@ -25,4 +25,4 @@ fi
 
 version=$1
 
-tar -zcvf $rootdir/camel-k-examples-$version.tar.gz examples
+pushd $rootdir/examples && tar --exclude=".*" -zcvf ../camel-k-examples-$version.tar.gz * && popd
