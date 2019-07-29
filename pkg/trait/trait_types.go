@@ -178,6 +178,18 @@ func (e *Environment) InPhase(c v1alpha1.IntegrationKitPhase, i v1alpha1.Integra
 	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
 }
 
+// Phase for Integration or IntegrationKit
+func (e *Environment) Phase() string {
+	if e.Integration != nil {
+		if e.Integration.Status.Phase != "" {
+			return string(e.Integration.Status.Phase)
+		} else if e.IntegrationKit.Status.Phase != "" {
+			return string(e.IntegrationKit.Status.Phase)
+		}
+	}
+	return string(v1alpha1.IntegrationPhaseNone)
+}
+
 // DetermineProfile determines the TraitProfile of the environment.
 // First looking at the Integration.Spec for a Profile,
 // next looking at the IntegrationKit.Spec

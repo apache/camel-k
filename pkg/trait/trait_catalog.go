@@ -207,7 +207,8 @@ func (c *Catalog) apply(environment *Environment) error {
 		}
 
 		if enabled {
-			c.L.Infof("Apply trait: %s", trait.ID())
+
+			c.L.Infof("Apply trait: %s, phase: %s", trait.ID(), environment.Phase())
 
 			err = trait.Apply(environment)
 			if err != nil {
