@@ -2757,6 +2757,7 @@ spec:
       labels:
         name: camel-k-operator
         camel.apache.org/component: operator
+        app: "camel-k"
     spec:
       serviceAccountName: camel-k-operator
       containers:

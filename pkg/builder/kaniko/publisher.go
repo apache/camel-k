@@ -119,6 +119,9 @@ func publisher(ctx *builder.Context) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ctx.Namespace,
 			Name:      "camel-k-" + ctx.Build.Meta.Name,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
