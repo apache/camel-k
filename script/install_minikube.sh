@@ -20,7 +20,7 @@
 set -e
 
 eval $(minikube docker-env)
-make images
+make images-dev
 
 # Perform installation
 ./kamel install
