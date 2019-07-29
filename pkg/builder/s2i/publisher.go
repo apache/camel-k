@@ -46,6 +46,9 @@ func publisher(ctx *builder.Context) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "camel-k-" + ctx.Build.Meta.Name,
 			Namespace: ctx.Namespace,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
 		},
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
@@ -88,6 +91,9 @@ func publisher(ctx *builder.Context) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "camel-k-" + ctx.Build.Meta.Name,
 			Namespace: ctx.Namespace,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
 		},
 		Spec: imagev1.ImageStreamSpec{
 			LookupPolicy: imagev1.ImageLookupPolicy{
