@@ -25,7 +25,7 @@ else
 fi
 
 eval $(minishift docker-env)
-make images
+make images-dev
 
 # Try setup with standard user
 ret=0
