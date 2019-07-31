@@ -113,6 +113,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdGet(options)))
 	cmd.AddCommand(cmdOnly(newCmdDelete(options)))
 	cmd.AddCommand(cmdOnly(newCmdInstall(options)))
+	cmd.AddCommand(newCmdUninstall(&options))
 	cmd.AddCommand(cmdOnly(newCmdLog(options)))
 	cmd.AddCommand(newCmdKit(options))
 	cmd.AddCommand(cmdOnly(newCmdReset(options)))
