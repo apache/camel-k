@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"io/ioutil"
@@ -73,25 +74,30 @@ func newTestClient() (client.Client, error) {
 }
 
 func kamel(args ...string) *cobra.Command {
+	var c *cobra.Command
+	var err error
+
+	kamelArgs := os.Getenv("KAMEL_ARGS")
+	kamelDefaultArgs := strings.Fields(kamelArgs)
+	args = append(kamelDefaultArgs, args...)
 
 	kamelBin := os.Getenv("KAMEL_BIN")
 	if kamelBin != "" {
 		fmt.Printf("Using external kamel binary on path %s\n", kamelBin)
-		var kamelCommand = cobra.Command{
+		c = &cobra.Command{
 			DisableFlagParsing: true,
 			Run: func(cmd *cobra.Command, args []string) {
-				out, err := exec.Command(kamelBin, args...).Output()
+				var out []byte
+				out, err = exec.Command(kamelBin, args...).Output()
+				// it is useful to know what is happening in case of error
 				if err != nil {
 					fmt.Println(string(out))
-					panic(err)
 				}
 			},
 		}
-		kamelCommand.SetArgs(args)
-		return &kamelCommand
+	} else {
+		c, err = cmd.NewKamelCommand(testContext)
 	}
-
-	c, err := cmd.NewKamelCommand(testContext)
 	if err != nil {
 		panic(err)
 	}
