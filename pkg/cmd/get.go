@@ -38,16 +38,16 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "get",
-		Short: "Get all integrations deployed on Kubernetes",
-		Long:  `Get the status of all integrations deployed on on Kubernetes.`,
+		Use:   "get [integration]",
+		Short: "Get integrations deployed on Kubernetes",
+		Long:  `Get the status of integrations deployed on on Kubernetes.`,
 		RunE:  options.run,
 	}
 
 	return &cmd
 }
 
-func (o *getCmdOptions) run(_ *cobra.Command, _ []string) error {
+func (o *getCmdOptions) run(_ *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -62,7 +62,14 @@ func (o *getCmdOptions) run(_ *cobra.Command, _ []string) error {
 
 	namespace := o.Namespace
 
-	err = c.List(o.Context, &k8sclient.ListOptions{Namespace: namespace}, &integrationList)
+	options := k8sclient.ListOptions{Namespace: namespace}
+	if len(args) == 1 {
+		if err := options.SetFieldSelector("metadata.name=" + args[0]); err != nil {
+			return err
+		}
+	}
+
+	err = c.List(o.Context, &options, &integrationList)
 	if err != nil {
 		return err
 	}
