@@ -47,3 +47,7 @@ before_script:
 script:
   - GOGC=20 ./golangci-lint run --verbose --deadline 10m --config .golangci.yml || travis_terminate 1;
   - ./script/travis_build.sh
+
+cache:
+  directories:
+    - $GOPATH/pkg/mod
