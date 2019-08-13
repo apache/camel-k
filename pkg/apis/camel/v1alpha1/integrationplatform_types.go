@@ -104,6 +104,7 @@ type IntegrationPlatformBuildSpec struct {
 	Timeout               metav1.Duration                         `json:"timeout,omitempty"`
 	PersistentVolumeClaim string                                  `json:"persistentVolumeClaim,omitempty"`
 	Maven                 MavenSpec                               `json:"maven,omitempty"`
+	HTTPProxySecret       string                                  `json:"httpProxySecret,omitempty"`
 }
 
 // IntegrationPlatformRegistrySpec --
