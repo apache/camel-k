@@ -83,7 +83,7 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					},
 				},
 			},
-			RestartPolicy: corev1.RestartPolicyNever,
+			RestartPolicy: corev1.RestartPolicyOnFailure,
 			Volumes: []corev1.Volume{
 				{
 					Name: "camel-k-builder",
