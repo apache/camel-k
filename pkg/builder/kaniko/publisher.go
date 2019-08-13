@@ -111,6 +111,46 @@ func publisher(ctx *builder.Context) error {
 		args = baseArgs
 	}
 
+	if ctx.Build.Platform.Build.HTTPProxySecret != "" {
+		optional := true
+		envs = append(envs, corev1.EnvVar{
+			Name: "HTTP_PROXY",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: ctx.Build.Platform.Build.HTTPProxySecret,
+					},
+					Key:      "HTTP_PROXY",
+					Optional: &optional,
+				},
+			},
+		})
+		envs = append(envs, corev1.EnvVar{
+			Name: "HTTPS_PROXY",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: ctx.Build.Platform.Build.HTTPProxySecret,
+					},
+					Key:      "HTTPS_PROXY",
+					Optional: &optional,
+				},
+			},
+		})
+		envs = append(envs, corev1.EnvVar{
+			Name: "NO_PROXY",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: ctx.Build.Platform.Build.HTTPProxySecret,
+					},
+					Key:      "NO_PROXY",
+					Optional: &optional,
+				},
+			},
+		})
+	}
+
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),

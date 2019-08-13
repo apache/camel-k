@@ -74,6 +74,8 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", "", "Set the build strategy")
 	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
 	cmd.Flags().StringVar(&impl.traitProfile, "trait-profile", "", "The profile to use for traits")
+	cmd.Flags().StringVar(&impl.httpProxySecret, "http-proxy-secret", "", "Configure the source of the secret holding HTTP proxy server details "+
+		"(HTTP_PROXY|HTTPS_PROXY|NO_PROXY)")
 
 	// maven settings
 	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
@@ -114,6 +116,7 @@ type installCmdOptions struct {
 	kits              []string
 	registry          v1alpha1.IntegrationPlatformRegistrySpec
 	traitProfile      string
+	httpProxySecret   string
 }
 
 // nolint: gocyclo
@@ -226,6 +229,10 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 				return err
 			}
 			platform.Spec.Build.Maven.Settings = mavenSettings
+		}
+
+		if o.httpProxySecret != "" {
+			platform.Spec.Build.HTTPProxySecret = o.httpProxySecret
 		}
 
 		platform.Spec.Resources.Kits = o.kits
