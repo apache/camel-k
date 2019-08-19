@@ -27,7 +27,7 @@ metadata:
       },
       {
         "apiVersion": "camel.apache.org/v1alpha1",
-        "kind": "IntegrationContext",
+        "kind": "IntegrationKit",
         "metadata": {
           "name": "example"
         }
@@ -76,10 +76,10 @@ spec:
       kind: Integration
       name: integrations.camel.apache.org
       version: v1alpha1
-    - description: A Camel K integration context
-      displayName: Integration Context
-      kind: IntegrationContext
-      name: integrationcontexts.camel.apache.org
+    - description: A Camel K integration kit
+      displayName: Integration Kit
+      kind: IntegrationKit
+      name: integrationkits.camel.apache.org
       version: v1alpha1
     - description: A Camel K integration platform
       displayName: Integration Platform
