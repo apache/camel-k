@@ -55,7 +55,7 @@ metadata:
       with serverless superpowers.
     repository: https://github.com/apache/camel-k
     support: Camel
-  name: camel-k-operator.v1.0.0-M2-SNAPSHOT
+  name: camel-k-operator.v1.0.0-m2-SNAPSHOT
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -375,8 +375,8 @@ spec:
   minKubeVersion: 1.11.0
   provider:
     name: The Apache Software Foundation
-  replaces: camel-k-operator.v1.0.0-M1
+  replaces: camel-k-operator.v1.0.0-m1
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.0.0-M2-SNAPSHOT
+  version: 1.0.0-m2-snapshot
