@@ -55,7 +55,7 @@ metadata:
       with serverless superpowers.
     repository: https://github.com/apache/camel-k
     support: Camel
-  name: camel-k-operator.v1.0.0-M1
+  name: camel-k-operator.v1.0.0-m1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -379,4 +379,4 @@ spec:
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.0.0-M1
+  version: 1.0.0-m1
