@@ -1,6 +1,6 @@
 site:
   title: Camel K
-  url: https://camel.apache.org/staging
+  url: https://camel.apache.org/
   start_page: camel-k::index.adoc
 content:
   sources:
