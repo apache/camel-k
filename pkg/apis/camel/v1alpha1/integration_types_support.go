@@ -185,7 +185,7 @@ func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 
 	in.Status.SetCondition(IntegrationConditionKitAvailable, cs, IntegrationConditionKitAvailableReason, kit.Name)
 	in.Status.Kit = kit.Name
-	in.Status.Image = kit.ImageForIntegration()
+	in.Status.Image = kit.Status.Image
 }
 
 // GetCondition returns the condition with the provided type.

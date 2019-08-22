@@ -148,7 +148,6 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1
 
 		kit.Status.BaseImage = build.Status.BaseImage
 		kit.Status.Image = build.Status.Image
-		kit.Status.PublicImage = build.Status.PublicImage
 		kit.Status.Phase = v1alpha1.IntegrationKitPhaseReady
 		kit.Status.Artifacts = make([]v1alpha1.Artifact, 0, len(build.Status.Artifacts))
 

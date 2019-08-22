@@ -96,7 +96,6 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 	if c.Image == "" {
 		result.Phase = v1alpha1.BuildPhaseFailed
 		result.Image = ""
-		result.PublicImage = ""
 		result.Error = "no base image defined"
 	}
 
@@ -178,7 +177,6 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 		result.Phase = v1alpha1.BuildPhaseSucceeded
 		result.BaseImage = c.BaseImage
 		result.Image = c.Image
-		result.PublicImage = c.PublicImage
 
 		if c.Error != nil {
 			result.Error = c.Error.Error()
@@ -195,7 +193,6 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 		b.log.Infof("requested image: %s", build.Image)
 		b.log.Infof("base image: %s", c.BaseImage)
 		b.log.Infof("resolved image: %s", c.Image)
-		b.log.Infof("resolved public image: %s", c.PublicImage)
 	} else {
 		b.log.Infof("build request %s interrupted after %s", build.Meta.Name, result.Duration)
 	}
