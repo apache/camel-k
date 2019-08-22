@@ -38,7 +38,6 @@ type IntegrationKitStatus struct {
 	Phase          IntegrationKitPhase       `json:"phase,omitempty"`
 	BaseImage      string                    `json:"baseImage,omitempty"`
 	Image          string                    `json:"image,omitempty"`
-	PublicImage    string                    `json:"publicImage,omitempty"`
 	Digest         string                    `json:"digest,omitempty"`
 	Artifacts      []Artifact                `json:"artifacts,omitempty"`
 	Failure        *Failure                  `json:"failure,omitempty"`

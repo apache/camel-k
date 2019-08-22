@@ -46,14 +46,6 @@ func NewIntegrationKitList() IntegrationKitList {
 	}
 }
 
-// ImageForIntegration returns the image to use when using it for running an integration
-func (in *IntegrationKit) ImageForIntegration() string {
-	if in.Status.PublicImage != "" {
-		return in.Status.PublicImage
-	}
-	return in.Status.Image
-}
-
 // Configurations --
 func (in *IntegrationKitSpec) Configurations() []ConfigurationSpec {
 	if in == nil {

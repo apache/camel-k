@@ -36,10 +36,6 @@ var Steps = steps{
 		builder.ApplicationPublishPhase,
 		publisher,
 	),
-	ReplaceHost: builder.NewStep(
-		builder.ApplicationPublishPhase+1,
-		replaceHost,
-	),
 }
 
 // DefaultSteps --

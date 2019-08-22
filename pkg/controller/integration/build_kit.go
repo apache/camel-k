@@ -74,7 +74,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 		}
 
 		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
-			integration.Status.Image = kit.ImageForIntegration()
+			integration.Status.Image = kit.Status.Image
 			integration.Status.Phase = v1alpha1.IntegrationPhaseError
 			integration.SetIntegrationKit(kit)
 
@@ -82,7 +82,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 		}
 
 		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady {
-			integration.Status.Image = kit.ImageForIntegration()
+			integration.Status.Image = kit.Status.Image
 			integration.SetIntegrationKit(kit)
 
 			if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {

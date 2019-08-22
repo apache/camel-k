@@ -19,7 +19,6 @@ package s2i
 
 import (
 	"io/ioutil"
-	"regexp"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -36,10 +35,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 
 	"github.com/pkg/errors"
-)
-
-const (
-	openShiftDockerRegistryHost = "docker-registry.default.svc"
 )
 
 func publisher(ctx *builder.Context) error {
@@ -177,15 +172,4 @@ func publisher(ctx *builder.Context) error {
 	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Meta.ResourceVersion
 
 	return nil
-}
-
-//nolint: unparam
-func replaceHost(ctx *builder.Context) error {
-	ctx.PublicImage = getImageWithOpenShiftHost(ctx.Image)
-	return nil
-}
-
-func getImageWithOpenShiftHost(image string) string {
-	pattern := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+([:/].*)`)
-	return pattern.ReplaceAllString(image, openShiftDockerRegistryHost+"$1")
 }

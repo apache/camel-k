@@ -104,7 +104,6 @@ type Context struct {
 	Build             v1alpha1.BuildSpec
 	BaseImage         string
 	Image             string
-	PublicImage       string
 	Error             error
 	Namespace         string
 	Path              string
