@@ -22,21 +22,21 @@ import (
 	"fmt"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-
-	yaml2 "gopkg.in/yaml.v2"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util"
+
+	yaml2 "gopkg.in/yaml.v2"
 )
 
 // ToJSON --
@@ -208,8 +208,8 @@ func GetService(context context.Context, client k8sclient.Reader, name string, n
 	return &answer, nil
 }
 
-// GetDiscoveryTypes --
-func GetDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
+// GetDiscoveryTypesWithVerbs --
+func GetDiscoveryTypesWithVerbs(client client.Client, verbs []string) ([]metav1.TypeMeta, error) {
 	resources, err := client.Discovery().ServerPreferredNamespacedResources()
 	if err != nil {
 		return nil, err
@@ -218,6 +218,10 @@ func GetDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
 	types := make([]metav1.TypeMeta, 0)
 	for _, resource := range resources {
 		for _, r := range resource.APIResources {
+			if len(verbs) > 0 && !util.StringSliceContains(r.Verbs, verbs) {
+				// Do not return the type if it does not support the provided verbs
+				continue
+			}
 			types = append(types, metav1.TypeMeta{
 				Kind:       r.Kind,
 				APIVersion: resource.GroupVersion,
@@ -230,7 +234,11 @@ func GetDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
 
 // LookUpResources --
 func LookUpResources(ctx context.Context, client client.Client, namespace string, selectors []string) ([]unstructured.Unstructured, error) {
-	types, err := GetDiscoveryTypes(client)
+	// We only take types that support the "list" verb as they are going
+	// to be iterated and a list query with labels selector is performed
+	// for each of them. That prevents from performing queries that we know
+	// are going to return "MethodNotAllowed".
+	types, err := GetDiscoveryTypesWithVerbs(client, []string{"list"})
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +291,6 @@ func GetSecretRefValue(ctx context.Context, client k8sclient.Reader, namespace s
 	}
 
 	return "", fmt.Errorf("key %s not found in secret %s", selector.Key, selector.Name)
-
 }
 
 // GetConfigMapRefValue returns the value of a configmap in the supplied namespace
