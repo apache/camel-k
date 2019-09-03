@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/apache/camel-k/pkg/builder"
@@ -79,7 +80,7 @@ func publisher(ctx *builder.Context) error {
 		"--dockerfile=Dockerfile",
 		"--context=" + contextDir,
 		"--destination=" + image,
-		"--cache",
+		"--cache=" + strconv.FormatBool(ctx.Build.Platform.Build.KanikoBuildCache),
 		"--cache-dir=/workspace/cache",
 	}
 
