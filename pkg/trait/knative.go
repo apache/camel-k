@@ -292,13 +292,13 @@ func (t *knativeTrait) extractNames(names string) []string {
 
 // buildServiceDefinitionFromStatus creates a CamelServiceDefinition from a Knative ServiceStatus
 func buildServiceDefinitionFromStatus(name string, serviceType knativeapi.CamelServiceType, status serving.ServiceStatus) (knativeapi.CamelServiceDefinition, error) {
-	// build it using the Route URL information if available
-	if status.URL != nil && status.URL.Host != "" {
-		return knativeapi.BuildCamelServiceDefinition(name, serviceType, url.URL(*status.URL))
-	}
-	// fallback to using the addressable
+	// use cluster-local URL from the addressable
 	if status.Address != nil {
 		return buildServiceDefinition(name, serviceType, *status.Address)
+	}
+	// fallback to using the public URL information if available
+	if status.URL != nil && status.URL.Host != "" {
+		return knativeapi.BuildCamelServiceDefinition(name, serviceType, url.URL(*status.URL))
 	}
 	return knativeapi.CamelServiceDefinition{}, errors.New("cannot determine service hostname")
 }
