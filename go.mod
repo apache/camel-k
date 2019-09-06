@@ -50,3 +50,5 @@ replace (
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20180711000925-0cf8f7e6ed1d
 	k8s.io/kubernetes => k8s.io/kubernetes v1.13.4
 )
+
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
