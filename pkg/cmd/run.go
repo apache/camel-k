@@ -203,9 +203,29 @@ func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
 		}
 	}
 	if o.Wait || o.Dev {
-		err = o.waitForIntegrationReady(integration)
-		if err != nil {
-			return err
+		for {
+			integrationPhase, err := o.waitForIntegrationReady(integration)
+			if err != nil {
+				return err
+			}
+
+			if *integrationPhase == v1alpha1.IntegrationPhaseRunning || *integrationPhase == v1alpha1.IntegrationPhaseError {
+				break
+			}
+
+			// The integration watch timed out so recreate it using the latest integration resource version
+			clone := integration.DeepCopy()
+			var key k8sclient.ObjectKey
+			key, err = k8sclient.ObjectKeyFromObject(clone)
+			if err != nil {
+				return err
+			}
+			err = c.Get(o.Context, key, clone)
+			if err != nil {
+				return err
+			}
+
+			integration.ObjectMeta.ResourceVersion = clone.ObjectMeta.ResourceVersion
 		}
 	}
 	if o.Logs || o.Dev {
@@ -222,7 +242,7 @@ func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) error {
+func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) (*v1alpha1.IntegrationPhase, error) {
 	handler := func(i *v1alpha1.Integration) bool {
 		//
 		// TODO when we add health checks, we should wait until they are passed
