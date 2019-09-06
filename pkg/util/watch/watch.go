@@ -43,16 +43,18 @@ import (
 //
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
 //
-func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.Integration, handler func(integration *v1alpha1.Integration) bool) error {
+func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.Integration,
+	handler func(integration *v1alpha1.Integration) bool) (*v1alpha1.IntegrationPhase, error) {
 	dynamicClient, err := customclient.GetDefaultDynamicClientFor("integrations", integration.Namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	watcher, err := dynamicClient.Watch(metav1.ListOptions{
-		FieldSelector: "metadata.name=" + integration.Name,
+		FieldSelector:   "metadata.name=" + integration.Name,
+		ResourceVersion: integration.ObjectMeta.ResourceVersion,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer watcher.Stop()
@@ -63,29 +65,29 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.In
 	for {
 		select {
 		case <-ctx.Done():
-			return nil
+			return lastObservedState, nil
 		case e, ok := <-events:
 			if !ok {
-				return nil
+				return lastObservedState, nil
 			}
 
 			if e.Object != nil {
 				if runtimeUnstructured, ok := e.Object.(runtime.Unstructured); ok {
 					jsondata, err := kubernetes.ToJSON(runtimeUnstructured)
 					if err != nil {
-						return err
+						return nil, err
 					}
 					copy := integration.DeepCopy()
 					err = json.Unmarshal(jsondata, copy)
 					if err != nil {
 						log.Error(err, "Unexpected error detected when watching resource")
-						return nil
+						return lastObservedState, nil
 					}
 
 					if lastObservedState == nil || *lastObservedState != copy.Status.Phase {
 						lastObservedState = &copy.Status.Phase
 						if !handler(copy) {
-							return nil
+							return lastObservedState, nil
 						}
 					}
 				}
