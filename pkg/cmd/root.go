@@ -26,9 +26,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const kamelCommandLongDescription = `Apache Camel K is a lightweight integration framework
-built from Apache Camel that runs natively on Kubernetes and is
-specifically designed for serverless and microservice architectures.
+const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless 
+superpowers.
 `
 
 // RootCmdOptions --
