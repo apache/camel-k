@@ -20,7 +20,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/trait"
@@ -41,7 +40,7 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "create",
+		Use:   "create <name>",
 		Short: "Create an Integration Kit",
 		Long:  `Create an Integration Kit.`,
 		Args:  impl.validateArgs,
@@ -76,7 +75,7 @@ type kitCreateCommand struct {
 
 func (command *kitCreateCommand) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
+		return errors.New("create expects a single name argument")
 	}
 
 	return nil
