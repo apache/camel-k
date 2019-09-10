@@ -75,7 +75,7 @@ type kitCreateCommand struct {
 
 func (command *kitCreateCommand) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("Create expects a single name argument.")
+		return errors.New("create expects a single name argument.")
 	}
 
 	return nil
