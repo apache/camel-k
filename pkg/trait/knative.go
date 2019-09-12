@@ -109,7 +109,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(strings.Split(t.ChannelSources, ",")) > 1 {
 			// Always filter channels when the integration subscribes to more than one
-			// Using Knative experimental header: https://github.com/knative/eventing/blob/master/pkg/provisioners/message.go#L28
+			// Using Knative experimental header: https://github.com/knative/eventing/blob/7df0cc56c28d58223ff25d5ddfb487fa8c29a004/pkg/provisioners/message.go#L28
 			// TODO: filter automatically all source channels when the feature becomes stable
 			filter := true
 			t.FilterSourceChannels = &filter
@@ -182,13 +182,21 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 		if env.ContainsService(ch, knativeapi.CamelServiceTypeChannel) {
 			continue
 		}
+
+		c, err := knativeutil.GetChannel(t.ctx, t.client, e.Integration.Namespace, ch)
+		if err != nil {
+			return err
+		}
+		if c == nil {
+			return errors.Errorf("cannot find channel %s", ch)
+		}
+
 		meta := map[string]string{
 			knativeapi.CamelMetaServicePath: "/",
 		}
 		if t.FilterSourceChannels != nil && *t.FilterSourceChannels {
-			fullName := ch + "." + e.Integration.Namespace + ".channels.cluster.local"
 			meta[knativeapi.CamelMetaFilterHeaderName] = knativeHistoryHeader
-			meta[knativeapi.CamelMetaFilterHeaderValue] = fullName
+			meta[knativeapi.CamelMetaFilterHeaderValue] = c.Status.Address.Hostname
 		}
 		svc := knativeapi.CamelServiceDefinition{
 			Name:        ch,

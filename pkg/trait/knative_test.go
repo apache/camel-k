@@ -245,6 +245,21 @@ func NewFakeClient(namespace string) (client.Client, error) {
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: namespace,
+				Name:      "channel-source-1",
+			},
+			Status: eventing.ChannelStatus{
+				Address: duckv1alpha1.Addressable{
+					Hostname: "channel-source-1.host",
+				},
+			},
+		},
+		&eventing.Channel{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Channel",
+				APIVersion: eventing.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
 				Name:      "channel-sink-1",
 			},
 			Status: eventing.ChannelStatus{
