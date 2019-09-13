@@ -16,5 +16,5 @@
  * limitations under the License.
  */
 
-from('knative:endpoint/messages')
+from('knative:endpoint/reader')
   .log('got ${body}')
