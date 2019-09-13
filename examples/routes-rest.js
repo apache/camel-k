@@ -29,10 +29,3 @@ rest('/say/hello')
     .get()
         .route()
         .transform().constant("Hello World");
-
-from('timer:js?period=1s')
-    .routeId('js')
-    .setBody()
-        .constant('Hello Camel K')
-    .process(e => e.getIn().setHeader('RandomValue', Math.floor((Math.random() * 100) + 1)))
-    .to('log:info?showHeaders=true')
