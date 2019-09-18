@@ -54,7 +54,7 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	printVersion()
 
-	c, err := client.NewClient()
+	c, err := client.NewClient(false)
 	exitOnError(err)
 
 	ctx := cancellable.NewContext()
