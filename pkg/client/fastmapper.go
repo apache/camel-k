@@ -21,6 +21,8 @@ var allowedAPIGroups = map[string]bool{
 	"rbac.authorization.k8s.io": true,
 }
 
+// newFastDiscoveryRESTMapper comes from https://github.com/kubernetes-sigs/controller-runtime/pull/592.
+// We may leverage the controller-runtime bits in the future, if that gets merged upstream.
 func newFastDiscoveryRESTMapper(config *rest.Config) meta.RESTMapper {
 	return meta.NewLazyRESTMapperLoader(func() (meta.RESTMapper, error) {
 		return newFastDiscoveryRESTMapperWithFilter(config, func(g *metav1.APIGroup) bool {
