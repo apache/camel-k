@@ -161,12 +161,14 @@ images: test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 	cp builder build/_output/bin
+	cp kamel build/_output/bin
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
 images-dev: test package-artifacts
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 	cp builder build/_output/bin
+	cp kamel build/_output/bin
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
 images-push:
