@@ -25,3 +25,4 @@ USER 1000
 
 ADD build/_output/bin/camel-k /usr/local/bin/camel-k
 ADD build/_output/bin/builder /usr/local/bin/camel-k-builder
+ADD build/_output/bin/kamel /usr/local/bin/kamel
