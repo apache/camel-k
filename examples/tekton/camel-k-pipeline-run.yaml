@@ -18,12 +18,14 @@ metadata:
 spec:
   steps:
     - name: install
-      image: apache/camel-k:1.0.0-M1
+      image: nferraro/camel-k:1.0.0-M2-SNAPSHOT
       command:
         - kamel
       args:
         - "install"
         - "--skip-cluster-setup"
+        - "--operator-image"
+        - "nferraro/camel-k:1.0.0-M2-SNAPSHOT"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
