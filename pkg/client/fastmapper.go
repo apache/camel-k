@@ -18,6 +18,7 @@ var allowedAPIGroups = map[string]bool{
 	"apiextensions.k8s.io":      true,
 	"apps":                      true,
 	"camel.apache.org":          true,
+	"project.openshift.io":      true, // used in e2e tests
 	"rbac.authorization.k8s.io": true,
 }
 
