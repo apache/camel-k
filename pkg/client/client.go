@@ -23,6 +23,7 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"k8s.io/apimachinery/pkg/api/meta"
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/pkg/errors"
@@ -68,11 +69,12 @@ func (c *defaultClient) GetScheme() *runtime.Scheme {
 // NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster
 func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 	initialize(kubeconfig)
-	return NewClient()
+	// using fast discovery from outside the cluster
+	return NewClient(true)
 }
 
 // NewClient creates a new k8s client that can be used from outside or in the cluster
-func NewClient() (Client, error) {
+func NewClient(fastDiscovery bool) (Client, error) {
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
@@ -91,9 +93,15 @@ func NewClient() (Client, error) {
 		return nil, err
 	}
 
+	var mapper meta.RESTMapper
+	if fastDiscovery {
+		mapper = newFastDiscoveryRESTMapper(cfg)
+	}
+
 	// Create a new client to avoid using cache (enabled by default on operator-sdk client)
 	clientOptions := controller.Options{
 		Scheme: scheme,
+		Mapper: mapper,
 	}
 	dynClient, err := controller.New(cfg, clientOptions)
 	if err != nil {
