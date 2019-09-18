@@ -40,9 +40,10 @@ func newFastDiscoveryRESTMapperWithFilter(config *rest.Config, filter func(*meta
 	wg := wait.Group{}
 	totalCount := 0
 	pickedCount := 0
-	var grs []*restmapper.APIGroupResources
+	grs := make([]*restmapper.APIGroupResources, 0)
 	for _, group := range groups.Groups {
-		pick := filter(&group)
+		pinnedGroup := group
+		pick := filter(&pinnedGroup)
 		logrus.Debugf("Group: %s %v", group.Name, pick)
 		totalCount++
 		if !pick {

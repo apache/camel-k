@@ -23,10 +23,10 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"k8s.io/apimachinery/pkg/api/meta"
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
