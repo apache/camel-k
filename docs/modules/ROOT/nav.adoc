@@ -16,6 +16,8 @@
 ** xref:languages/javascript.adoc[JavaScript]
 ** xref:languages/java.adoc[Java]
 ** xref:languages/xml.adoc[XML]
+* xref:tutorials/tutorials.adoc[Tutorials]
+** xref:tutorials/tekton/tekton.adoc[Tekton Pipelines]
 * xref:traits.adoc[Traits]
 * xref:uninstalling.adoc[Uninstalling]
 * xref:developers.adoc[Contributing to Camel K]

@@ -35,14 +35,12 @@ metadata:
 spec:
   steps:
     - name: install
-      image: nferraro/camel-k:1.0.0-M2-SNAPSHOT-v1
+      image: apache/camel-k:1.0.0-M2
       command:
         - kamel
       args:
         - "install"
         - "--skip-cluster-setup"
-        - "--operator-image"
-        - "nferraro/camel-k:1.0.0-M2-SNAPSHOT-v1"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: Task
@@ -58,7 +56,7 @@ spec:
         description: The integration file to run
   steps:
     - name: run-integration
-      image: nferraro/camel-k:1.0.0-M2-SNAPSHOT-v1
+      image: apache/camel-k:1.0.0-M2
       workingDir: /workspace/repository
       command:
         - kamel
