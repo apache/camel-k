@@ -1,0 +1,92 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: camel-k-examples-git
+spec:
+  type: git
+  params:
+    - name: revision
+      value: tekton
+    - name: url
+      value: https://github.com/nicolaferraro/camel-k
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: camel-k-install-operator
+spec:
+  steps:
+    - name: install
+      image: nferraro/camel-k:1.0.0-M2-SNAPSHOT-v1
+      command:
+        - kamel
+      args:
+        - "install"
+        - "--skip-cluster-setup"
+        - "--operator-image"
+        - "nferraro/camel-k:1.0.0-M2-SNAPSHOT-v1"
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: camel-k-run-integration
+spec:
+  inputs:
+    resources:
+      - name: repository
+        type: git
+    params:
+      - name: file
+        description: The integration file to run
+  steps:
+    - name: run-integration
+      image: nferraro/camel-k:1.0.0-M2-SNAPSHOT-v1
+      workingDir: /workspace/repository
+      command:
+        - kamel
+      args:
+        - "run"
+        - "--wait"
+        - "${inputs.params.file}"
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: camel-k-pipeline
+spec:
+  resources:
+    - name: source-repo
+      type: git
+  tasks:
+    - name: install-operator
+      taskRef:
+        name: camel-k-install-operator
+    - name: run-integration
+      runAfter: [install-operator]
+      taskRef:
+        name: camel-k-run-integration
+      resources:
+        inputs:
+          - name: repository
+            resource: source-repo
+      params:
+        - name: file
+          value: "examples/tekton/hello.groovy"

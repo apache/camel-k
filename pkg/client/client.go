@@ -26,6 +26,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -38,6 +39,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
+
+const inContainerNamespaceFile = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 
 // Client is an abstraction for a k8s client
 type Client interface {
@@ -132,6 +135,13 @@ func FromManager(manager manager.Manager) (Client, error) {
 // init initialize the k8s client for usage outside the cluster
 func initialize(kubeconfig string) {
 	if kubeconfig == "" {
+		// skip out-of-cluster initialization if inside the container
+		if kc, err := runningInKubernetesContainer(); kc && err == nil {
+			return
+		} else if err != nil {
+			logrus.Errorf("could not determine if running in a container: %v", err)
+		}
+
 		kubeconfig = getDefaultKubeConfigFile()
 	}
 	os.Setenv(k8sutil.KubeConfigEnvVar, kubeconfig)
@@ -147,6 +157,15 @@ func getDefaultKubeConfigFile() string {
 
 // GetCurrentNamespace --
 func GetCurrentNamespace(kubeconfig string) (string, error) {
+	if kubeconfig == "" {
+		kubeContainer, err := runningInKubernetesContainer()
+		if err != nil {
+			return "", err
+		}
+		if kubeContainer {
+			return getNamespaceFromKubernetesContainer()
+		}
+	}
 	if kubeconfig == "" {
 		kubeconfig = getDefaultKubeConfigFile()
 	}
@@ -173,4 +192,21 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 	cc := clientcmd.NewDefaultClientConfig(*clientcmdconfig, &clientcmd.ConfigOverrides{})
 	ns, _, err := cc.Namespace()
 	return ns, err
+}
+
+func runningInKubernetesContainer() (bool, error) {
+	_, err := os.Stat(inContainerNamespaceFile)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
+}
+
+func getNamespaceFromKubernetesContainer() (string, error) {
+	var nsba []byte
+	var err error
+	if nsba, err = ioutil.ReadFile(inContainerNamespaceFile); err != nil {
+		return "", err
+	}
+	return string(nsba), nil
 }
