@@ -15,11 +15,11 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
----
+
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
-  name: camel-k-pipeline-run-13
+  name: camel-k-pipeline-run-1
 spec:
   pipelineRef:
     name: camel-k-pipeline

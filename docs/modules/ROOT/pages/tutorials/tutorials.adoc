@@ -1,0 +1,6 @@
+[[tutorials]]
+= Camel K Tutorials
+
+This section contains a collection of tutorials that dig inside specific Camel K features.
+
+* xref:tutorials/tekton/tekton.adoc[Camel K in Tekton Pipelines]
