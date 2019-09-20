@@ -128,7 +128,7 @@ metadata:
 spec:
   steps:
     - name: install
-      image: nferraro/camel-k:1.0.0-M2
+      image: apache/camel-k:1.0.0-M2
       command:
         - kamel
       args:
