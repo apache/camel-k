@@ -25,16 +25,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 
-	"io/ioutil"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
+	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/google/uuid"
@@ -55,7 +56,10 @@ var testContext context.Context
 var testClient client.Client
 
 // kamelHooks contains hooks useful to add option to kamel commands at runtime
-var kamelHooks []func([]string)[]string
+var kamelHooks []func([]string) []string
+
+var testImageName = defaults.ImageName
+var testImageVersion = defaults.Version
 
 func init() {
 	var err error
@@ -442,32 +446,76 @@ func scaleOperator(ns string, replicas int32) func() error {
 }
 
 /*
+	Tekton
+*/
+
+func createOperatorServiceAccount(ns string) error {
+	return install.Resource(testContext, testClient, ns, install.IdentityResourceCustomizer, "operator-service-account.yaml")
+}
+
+func createOperatorRole(ns string) error {
+	return install.Resource(testContext, testClient, ns, install.IdentityResourceCustomizer, "operator-role-openshift.yaml")
+}
+
+func createOperatorRoleBinding(ns string) error {
+	return install.Resource(testContext, testClient, ns, install.IdentityResourceCustomizer, "operator-role-binding.yaml")
+}
+
+func createKamelPod(ns string, name string, command ...string) error {
+	args := command
+	for _, hook := range kamelHooks {
+		args = hook(args)
+	}
+	pod := v1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		Spec: v1.PodSpec{
+			ServiceAccountName: "camel-k-operator",
+			RestartPolicy:      v1.RestartPolicyNever,
+			Containers: []v1.Container{
+				{
+					Name:    "kamel-runner",
+					Image:   testImageName + ":" + testImageVersion,
+					Command: append([]string{"kamel"}, args...),
+				},
+			},
+		},
+	}
+	return testClient.Create(testContext, &pod)
+}
+
+/*
 	Knative
- */
+*/
 
 func createKnativeChannel(ns string, name string) func() error {
 	return func() error {
 		channel := eventing.Channel{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "Channel",
+				Kind:       "Channel",
 				APIVersion: eventing.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
-				Name: name,
+				Name:      name,
 			},
 			Spec: eventing.ChannelSpec{
 				Provisioner: &v1.ObjectReference{
 					APIVersion: "eventing.knative.dev/v1alpha1",
-					Kind: "ClusterChannelProvisioner",
-					Name: "in-memory",
+					Kind:       "ClusterChannelProvisioner",
+					Name:       "in-memory",
 				},
 			},
 		}
 		return testClient.Create(testContext, &channel)
 	}
 }
-
 
 /*
 	Namespace testing functions

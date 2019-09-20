@@ -1,4 +1,4 @@
-// +build integration knative
+// +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -21,19 +21,25 @@ limitations under the License.
 
 package e2e
 
-func init() {
-	// this hook can be used to test a released version of the operator, e.g. the staging version during a voting period
-	// Uncomment the following lines and change references to enable the hook
+import (
+	"testing"
 
-	//testImageName = "docker.io/camelk/camel-k"
-	//testImageVersion = "1.0.0-M2-SNAPSHOT"
+	. "github.com/onsi/gomega"
+)
 
-	//kamelHooks = append(kamelHooks, func(cmd []string) []string {
-	//	if len(cmd) > 0 && cmd[0] == "install" {
-	//		cmd = append(cmd, "--operator-image=docker.io/camelk/camel-k:1.0.0-M2-SNAPSHOT")
-	//		cmd = append(cmd, "--maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-1145")
-	//	}
-	//	return cmd
-	//})
+// TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.
+// This feature is used in Tekton pipelines.
+func TestTektonLikeBehavior(t *testing.T) {
+	withNewTestNamespace(func(ns string) {
+		RegisterTestingT(t)
 
+		Expect(createOperatorServiceAccount(ns)).Should(BeNil())
+		Expect(createOperatorRole(ns)).Should(BeNil())
+		Expect(createOperatorRoleBinding(ns)).Should(BeNil())
+
+		Eventually(operatorPod(ns)).Should(BeNil())
+		Expect(createKamelPod(ns, "tekton-task", "install")).Should(BeNil())
+
+		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+	})
 }
