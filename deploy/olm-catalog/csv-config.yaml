@@ -22,4 +22,5 @@ crd-cr-paths:
   - deploy/crd-integration.yaml
   - deploy/crd-integration-kit.yaml
   - deploy/crd-integration-platform.yaml
-role-path: deploy/operator-role-olm.yaml
+role-paths:
+  - deploy/operator-role-olm.yaml
