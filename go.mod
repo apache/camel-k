@@ -17,7 +17,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/operator-framework/operator-sdk v0.9.0
+	github.com/operator-framework/operator-sdk v0.10.0
 	github.com/pkg/errors v0.8.1
 	github.com/radovskyb/watcher v1.0.6
 	github.com/rs/xid v1.2.1
@@ -37,7 +37,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.1.10
 )
 
-// Pinned to operator-sdk 0.9.0 / kubernetes 1.13.4
+// Pinned to operator-sdk 0.10.0 / kubernetes 1.13.4
 replace (
 	k8s.io/api => k8s.io/api v0.0.0-20190222213804-5cb15d344471
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20190228180357-d002e88f6236
