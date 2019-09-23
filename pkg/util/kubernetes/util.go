@@ -238,11 +238,13 @@ func GetDiscoveryTypesWithVerbs(client client.Client, verbs []string) ([]metav1.
 
 // LookUpResources --
 func LookUpResources(ctx context.Context, client client.Client, namespace string, selectors []string) ([]unstructured.Unstructured, error) {
-	// We only take types that support the "list" verb as they are going
-	// to be iterated and a list query with labels selector is performed
-	// for each of them. That prevents from performing queries that we know
-	// are going to return "MethodNotAllowed".
-	types, err := GetDiscoveryTypesWithVerbs(client, []string{"list"})
+	// We only take types that support the "create" and "list" verbs as:
+	// - they have to be created to be deleted :) so that excludes read-only
+	//   resources, e.g., aggregated APIs
+	// - they are going to be iterated and a list query with labels selector
+	//   is performed for each of them. That prevents from performing queries
+	//   that we know are going to return "MethodNotAllowed".
+	types, err := GetDiscoveryTypesWithVerbs(client, []string{"create", "list"})
 	if err != nil {
 		return nil, err
 	}
@@ -269,10 +271,7 @@ func LookUpResources(ctx context.Context, client client.Client, namespace string
 			},
 		}
 		if err := client.List(ctx, &options, &list); err != nil {
-			if k8serrors.IsNotFound(err) ||
-				k8serrors.IsForbidden(err) ||
-				k8serrors.IsMethodNotSupported(err) ||
-				k8serrors.IsServiceUnavailable(err) {
+			if k8serrors.IsNotFound(err) || k8serrors.IsForbidden(err) {
 				continue
 			}
 			return nil, err
