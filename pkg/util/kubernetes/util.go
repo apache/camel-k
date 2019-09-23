@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
+	"k8s.io/client-go/discovery"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -211,7 +212,10 @@ func GetService(context context.Context, client k8sclient.Reader, name string, n
 // GetDiscoveryTypesWithVerbs --
 func GetDiscoveryTypesWithVerbs(client client.Client, verbs []string) ([]metav1.TypeMeta, error) {
 	resources, err := client.Discovery().ServerPreferredNamespacedResources()
-	if err != nil {
+	// Swallow group discovery errors, e.g., Knative serving exposes
+	// an aggregated API for custom.metrics.k8s.io that requires special
+	// authentication scheme while discovering preferred resources
+	if err != nil && !discovery.IsGroupDiscoveryFailedError(err) {
 		return nil, err
 	}
 
