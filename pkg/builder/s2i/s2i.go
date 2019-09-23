@@ -26,8 +26,7 @@ func init() {
 }
 
 type steps struct {
-	Publisher   builder.Step
-	ReplaceHost builder.Step
+	Publisher builder.Step
 }
 
 // Steps --
