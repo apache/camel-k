@@ -51,4 +51,4 @@ replace (
 	k8s.io/kubernetes => k8s.io/kubernetes v1.13.4
 )
 
-replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
