@@ -92,7 +92,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	// Add the container port
 	containerPort := t.getContainerPort()
 	container.Ports = append(container.Ports, *containerPort)
-	condition.Message += fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
+	condition.Message = fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
 
 	// Retrieve the service or create a new one if the service trait is enabled
 	serviceEnabled := false
@@ -114,7 +114,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	if serviceEnabled {
 		servicePort := t.getServicePort()
 		service.Spec.Ports = append(service.Spec.Ports, *servicePort)
-		condition.Message += fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port)
+		condition.Message = fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port) + condition.Message
 
 		// Add the ServiceMonitor resource
 		if t.ServiceMonitor {
