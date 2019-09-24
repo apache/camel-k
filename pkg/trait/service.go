@@ -30,16 +30,23 @@ type serviceTrait struct {
 	Auto      *bool `property:"auto"`
 }
 
-const httpPortName = "http"
+const (
+	serviceTraitID = "service"
+	httpPortName   = "http"
+)
 
 func newServiceTrait() *serviceTrait {
 	return &serviceTrait{
-		BaseTrait: newBaseTrait("service"),
+		BaseTrait: newBaseTrait(serviceTraitID),
 	}
 }
 
+func (t *serviceTrait) isEnabled() bool {
+	return t.Enabled == nil || *t.Enabled
+}
+
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if !t.isEnabled() {
 		e.Integration.Status.SetCondition(
 			v1alpha1.IntegrationConditionServiceAvailable,
 			corev1.ConditionFalse,
@@ -83,32 +90,34 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	return true, nil
 }
 
-func (t *serviceTrait) Apply(e *Environment) (err error) {
+func (t *serviceTrait) Apply(e *Environment) error {
 	svc := e.Resources.GetServiceForIntegration(e.Integration)
+	// add a new service if not already created
 	if svc == nil {
-		svc := corev1.Service{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Service",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      e.Integration.Name,
-				Namespace: e.Integration.Namespace,
-				Labels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
-				},
-			},
-			Spec: corev1.ServiceSpec{
-				Ports: []corev1.ServicePort{},
-				Selector: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
-				},
-			},
-		}
-
-		// add a new service if not already created
-		e.Resources.Add(&svc)
+		svc = getServiceFor(e)
+		e.Resources.Add(svc)
 	}
-
 	return nil
+}
+
+func getServiceFor(e *Environment) *corev1.Service {
+	return &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      e.Integration.Name,
+			Namespace: e.Integration.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{},
+			Selector: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
+		},
+	}
 }
