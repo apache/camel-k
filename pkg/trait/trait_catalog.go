@@ -184,6 +184,8 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tAffinity,
 			c.tKnativeService,
 			c.tContainer,
+			c.tJolokia,
+			c.tPrometheus,
 			c.tClasspath,
 			c.tProbes,
 			c.tIstio,
