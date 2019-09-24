@@ -113,12 +113,13 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 
 	err := trait.Apply(environment)
 
+	container := environment.Resources.GetContainerByName(defaultContainerName)
+
 	assert.Nil(t, err)
-	test.EnvVarHasValue(t, environment.EnvVars, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
-	test.EnvVarHasValue(t, environment.EnvVars, "AB_JOLOKIA_OPTS", "port=8778")
+	test.EnvVarHasValue(t, container.Env, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
+	test.EnvVarHasValue(t, container.Env, "AB_JOLOKIA_OPTS", "port=8778")
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
-	container := environment.Resources.GetContainerByName("integration")
 	assert.NotNil(t, container)
 	assert.Len(t, container.Ports, 1)
 	containerPort := container.Ports[0]
@@ -158,8 +159,10 @@ func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 
 	err := trait.Apply(environment)
 
+	container := environment.Resources.GetContainerByName(defaultContainerName)
+
 	assert.Nil(t, err)
-	ev := envvar.Get(environment.EnvVars, "AB_JOLOKIA_OPTS")
+	ev := envvar.Get(container.Env, "AB_JOLOKIA_OPTS")
 	assert.NotNil(t, ev)
 	assert.Contains(t, ev.Value, "port=8778", "host=explicit-host", "discoveryEnabled=true", "protocol=http", "caCert=.cacert")
 	assert.Contains(t, ev.Value, "extendedClientCheck=false", "clientPrincipal=cn:any", "useSslClientAuthentication=false")
@@ -181,8 +184,10 @@ func TestApplyDisabledJolokiaTraitShouldNotSucceed(t *testing.T) {
 
 	err := trait.Apply(environment)
 
+	container := environment.Resources.GetContainerByName(defaultContainerName)
+
 	assert.Nil(t, err)
-	test.EnvVarHasValue(t, environment.EnvVars, "AB_JOLOKIA_OFF", "true")
+	test.EnvVarHasValue(t, container.Env, "AB_JOLOKIA_OFF", "true")
 }
 
 func TestSetDefaultJolokiaOptionShoudlNotOverrideOptionsMap(t *testing.T) {
@@ -283,7 +288,6 @@ func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {
 }
 
 func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
-
 	trait := newJolokiaTrait()
 	enabled := true
 	trait.Enabled = &enabled

@@ -79,15 +79,32 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *jolokiaTrait) Apply(e *Environment) (err error) {
+	containerName := defaultContainerName
+	dt := e.Catalog.GetTrait(containerTraitID)
+	if dt != nil {
+		containerName = dt.(*containerTrait).Name
+	}
+
+	container := e.Resources.GetContainerByName(containerName)
+	if container == nil {
+		e.Integration.Status.SetCondition(
+			v1alpha1.IntegrationConditionJolokiaAvailable,
+			corev1.ConditionFalse,
+			v1alpha1.IntegrationConditionContainerNotAvailableReason,
+			"",
+		)
+		return nil
+	}
+
 	if t.Enabled == nil || !*t.Enabled {
 		// Deactivate the Jolokia Java agent
 		// Note: the AB_JOLOKIA_OFF environment variable acts as an option flag
-		envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_OFF", "true")
+		envvar.SetVal(&container.Env, "AB_JOLOKIA_OFF", "true")
 		return nil
 	}
 
 	// Need to set it explicitly as it default to true
-	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
+	envvar.SetVal(&container.Env, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
 
 	// Configure the Jolokia Java agent
 	// Populate first with the extra options
@@ -113,25 +130,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	for k, v := range options {
 		optionValues = append(optionValues, k+"="+v)
 	}
-	envvar.SetVal(&e.EnvVars, "AB_JOLOKIA_OPTS", strings.Join(optionValues, ","))
-
-	containerName := defaultContainerName
-	dt := e.Catalog.GetTrait(containerTraitID)
-	if dt != nil {
-		containerName = dt.(*containerTrait).Name
-	}
-
-	container := e.Resources.GetContainerByName(containerName)
-	if container == nil {
-		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionJolokiaAvailable,
-			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionContainerNotAvailableReason,
-			"",
-		)
-
-		return nil
-	}
+	envvar.SetVal(&container.Env, "AB_JOLOKIA_OPTS", strings.Join(optionValues, ","))
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",
