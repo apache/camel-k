@@ -94,31 +94,42 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	container.Ports = append(container.Ports, *containerPort)
 	condition.Message += fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
 
-	// Add the service port
+	// Retrieve the service or create a new one if the service trait is enabled
+	serviceEnabled := false
 	service := e.Resources.GetServiceForIntegration(e.Integration)
 	if service == nil {
-		condition.Status = corev1.ConditionFalse
-		condition.Reason = v1alpha1.IntegrationConditionServiceNotAvailableReason
-	} else {
+		trait := e.Catalog.GetTrait(serviceTraitID)
+		if serviceTrait, ok := trait.(*serviceTrait); ok {
+			serviceEnabled = serviceTrait.isEnabled()
+		}
+		if serviceEnabled {
+			// add a new service if not already created
+			service = getServiceFor(e)
+			e.Resources.Add(service)
+		}
+	}
+
+	// Add the service port and service monitor resource
+	// A better strategy may be needed when the Knative profile is active
+	if serviceEnabled {
 		servicePort := t.getServicePort()
 		service.Spec.Ports = append(service.Spec.Ports, *servicePort)
 		condition.Message += fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port)
+
+		// Add the ServiceMonitor resource
+		if t.ServiceMonitor {
+			smt, err := t.getServiceMonitorFor(e)
+			if err != nil {
+				return err
+			}
+			e.Resources.Add(smt)
+		}
+	} else {
+		condition.Status = corev1.ConditionFalse
+		condition.Reason = v1alpha1.IntegrationConditionServiceNotAvailableReason
 	}
 
 	e.Integration.Status.SetConditions(condition)
-
-	if condition.Status == corev1.ConditionFalse {
-		return nil
-	}
-
-	// Add the ServiceMonitor resource
-	if t.ServiceMonitor {
-		smt, err := t.getServiceMonitorFor(e)
-		if err != nil {
-			return err
-		}
-		e.Resources.Add(smt)
-	}
 
 	return nil
 }
@@ -167,7 +178,7 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 			},
 			Endpoints: []monitoringv1.Endpoint{
 				{
-					Port: "prometheus",
+					Port: prometheusPortName,
 				},
 			},
 		},
