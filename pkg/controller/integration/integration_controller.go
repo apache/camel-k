@@ -19,10 +19,6 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/platform"
-
-	"github.com/apache/camel-k/pkg/util/digest"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -40,6 +36,8 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -94,28 +92,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to secondary resource Builds and requeue the owner IntegrationKit
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &v1alpha1.Integration{},
-		},
-		predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild := e.ObjectOld.(*v1alpha1.Build)
-				newBuild := e.ObjectNew.(*v1alpha1.Build)
-				// Ignore updates to the build CR except when the build phase changes
-				// as it's used to transition the integration from one phase to another
-				// during image build
-				return oldBuild.Status.Phase != newBuild.Status.Phase
-			},
-		},
-	)
-
-	if err != nil {
-		return err
-	}
-
 	// Watch for IntegrationKit phase transitioning to ready or error and
 	// enqueue requests for any integrations that are in phase waiting for
 	// kit
@@ -148,7 +124,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return requests
 		}),
 	})
-
 	if err != nil {
 		return err
 	}
@@ -184,7 +159,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return requests
 		}),
 	})
-
 	if err != nil {
 		return err
 	}
