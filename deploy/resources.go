@@ -2894,6 +2894,7 @@ rules:
   - watch
 - apiGroups:
   - eventing.knative.dev
+  - messaging.knative.dev
   resources:
   - "*"
   verbs:

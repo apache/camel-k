@@ -19,7 +19,7 @@ package trait
 
 import (
 	"fmt"
-	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -27,27 +27,52 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
-	duck "github.com/knative/pkg/apis/duck/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 )
 
 type knativeTrait struct {
 	BaseTrait            `property:",squash"`
-	Configuration        string `property:"configuration"`
-	ChannelSources       string `property:"channel-sources"`
-	ChannelSinks         string `property:"channel-sinks"`
-	EndpointSources      string `property:"endpoint-sources"`
-	EndpointSinks        string `property:"endpoint-sinks"`
-	FilterSourceChannels *bool  `property:"filter-source-channels"`
-	Auto                 *bool  `property:"auto"`
+	Configuration        string   `property:"configuration"`
+	ChannelSources       string   `property:"channel-sources"`
+	ChannelSinks         string   `property:"channel-sinks"`
+	EndpointSources      string   `property:"endpoint-sources"`
+	EndpointSinks        string   `property:"endpoint-sinks"`
+	FilterSourceChannels *bool    `property:"filter-source-channels"`
+	ChannelAPIs          []string `property:"channel-apis"`
+	EndpointAPIs         []string `property:"endpoint-apis"`
+	Auto                 *bool    `property:"auto"`
 }
 
 const (
 	knativeHistoryHeader = "ce-knativehistory"
 )
+
+var (
+	kindAPIGroupVersionFormat = regexp.MustCompile(`^([^/]+)/([^/]+)/([^/]+)$`)
+
+	defaultChannelAPIs = []string{
+		"messaging.knative.dev/v1alpha1/Channel",
+		"eventing.knative.dev/v1alpha1/Channel",
+		"messaging.knative.dev/v1alpha1/InMemoryChannel",
+		"messaging.knative.dev/v1alpha1/KafkaChannel",
+		"messaging.knative.dev/v1alpha1/NatssChannel",
+	}
+
+	defaultEndpointAPIs = []string{
+		"serving.knative.dev/v1beta1/Service",
+		"serving.knative.dev/v1alpha1/Service",
+		"serving.knative.dev/v1/Service",
+	}
+)
+
+func init() {
+	// Channels are also endpoints
+	defaultEndpointAPIs = append(defaultEndpointAPIs, defaultChannelAPIs...)
+}
 
 func newKnativeTrait() *knativeTrait {
 	t := &knativeTrait{
@@ -64,6 +89,14 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 
 	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
 		return false, nil
+	}
+
+	// Always applying the defaults
+	if len(t.ChannelAPIs) == 0 {
+		t.ChannelAPIs = append(t.ChannelAPIs, defaultChannelAPIs...)
+	}
+	if len(t.EndpointAPIs) == 0 {
+		t.EndpointAPIs = append(t.EndpointAPIs, defaultEndpointAPIs...)
 	}
 
 	if t.Auto == nil || *t.Auto {
@@ -157,8 +190,16 @@ func (t *knativeTrait) createConfiguration(e *Environment) error {
 
 func (t *knativeTrait) createSubscriptions(e *Environment) error {
 	channels := t.extractNames(t.ChannelSources)
+	types, err := decodeKindAPIGroupVersions(t.ChannelAPIs)
+	if err != nil {
+		return err
+	}
 	for _, ch := range channels {
-		sub := knativeutil.CreateSubscription(e.Integration.Namespace, ch, e.Integration.Name)
+		chRef, err := knativeutil.GetAddressableReference(t.ctx, t.client, types, e.Integration.Namespace, ch)
+		if err != nil {
+			return err
+		}
+		sub := knativeutil.CreateSubscription(*chRef, e.Integration.Name)
 		e.Resources.Add(&sub)
 	}
 
@@ -174,7 +215,12 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 	is := strset.Intersection(sr, sk)
 
 	if is.Size() > 0 {
-		return fmt.Errorf("cannot use the same channels as source and synk (%s)", is.List())
+		return fmt.Errorf("cannot use the same channels as source and sink (%s)", is.List())
+	}
+
+	types, err := decodeKindAPIGroupVersions(t.ChannelAPIs)
+	if err != nil {
+		return err
 	}
 
 	// Sources
@@ -183,12 +229,11 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			continue
 		}
 
-		c, err := knativeutil.GetChannel(t.ctx, t.client, e.Integration.Namespace, ch)
-		if err != nil {
-			return err
-		}
-		if c == nil {
+		targetURL, err := knativeutil.GetAnySinkURL(t.ctx, t.client, types, e.Integration.Namespace, ch)
+		if err != nil && k8serrors.IsNotFound(err) {
 			return errors.Errorf("cannot find channel %s", ch)
+		} else if err != nil {
+			return err
 		}
 
 		meta := map[string]string{
@@ -196,7 +241,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 		}
 		if t.FilterSourceChannels != nil && *t.FilterSourceChannels {
 			meta[knativeapi.CamelMetaFilterHeaderName] = knativeHistoryHeader
-			meta[knativeapi.CamelMetaFilterHeaderValue] = c.Status.Address.Hostname
+			meta[knativeapi.CamelMetaFilterHeaderValue] = targetURL.Host
 		}
 		svc := knativeapi.CamelServiceDefinition{
 			Name:        ch,
@@ -215,15 +260,14 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			continue
 		}
 
-		c, err := knativeutil.GetChannel(t.ctx, t.client, e.Integration.Namespace, ch)
-		if err != nil {
+		targetURL, err := knativeutil.GetAnySinkURL(t.ctx, t.client, types, e.Integration.Namespace, ch)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return errors.Errorf("cannot find channel %s", ch)
+		} else if err != nil {
 			return err
 		}
-		if c == nil {
-			return errors.Errorf("cannot find channel %s", ch)
-		}
-
-		svc, err := buildServiceDefinition(ch, knativeapi.CamelServiceTypeChannel, c.Status.Address)
+		t.L.Infof("Found URL for channel %s: %s", ch, targetURL.String())
+		svc, err := knativeapi.BuildCamelServiceDefinition(ch, knativeapi.CamelServiceTypeChannel, *targetURL)
 		if err != nil {
 			return errors.Wrapf(err, "cannot determine address of channel %s", ch)
 		}
@@ -243,6 +287,11 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 
 	if is.Size() > 0 {
 		return fmt.Errorf("cannot use the same enadpoints as source and synk (%s)", is.List())
+	}
+
+	types, err := decodeKindAPIGroupVersions(t.EndpointAPIs)
+	if err != nil {
+		return err
 	}
 
 	// Sources
@@ -269,14 +318,14 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 			continue
 		}
 
-		s, err := knativeutil.GetService(t.ctx, t.client, e.Integration.Namespace, endpoint)
-		if err != nil {
+		targetURL, err := knativeutil.GetAnySinkURL(t.ctx, t.client, types, e.Integration.Namespace, endpoint)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return errors.Errorf("cannot find endpoint %s", endpoint)
+		} else if err != nil {
 			return err
 		}
-		if s == nil {
-			return errors.Errorf("cannot find endpoint %s", endpoint)
-		}
-		svc, err := buildServiceDefinitionFromStatus(endpoint, knativeapi.CamelServiceTypeEndpoint, s.Status)
+		t.L.Infof("Found URL for endpoint %s: %s", endpoint, targetURL.String())
+		svc, err := knativeapi.BuildCamelServiceDefinition(endpoint, knativeapi.CamelServiceTypeEndpoint, *targetURL)
 		if err != nil {
 			return errors.Wrapf(err, "cannot determine address of endpoint %s", endpoint)
 		}
@@ -298,32 +347,26 @@ func (t *knativeTrait) extractNames(names string) []string {
 	return answer
 }
 
-// buildServiceDefinitionFromStatus creates a CamelServiceDefinition from a Knative ServiceStatus
-func buildServiceDefinitionFromStatus(name string, serviceType knativeapi.CamelServiceType, status serving.ServiceStatus) (knativeapi.CamelServiceDefinition, error) {
-	// use cluster-local URL from the addressable
-	if status.Address != nil {
-		return buildServiceDefinition(name, serviceType, *status.Address)
+func decodeKindAPIGroupVersions(specs []string) ([]schema.GroupVersionKind, error) {
+	lst := make([]schema.GroupVersionKind, 0, len(specs))
+	for _, spec := range specs {
+		res, err := decodeKindAPIGroupVersion(spec)
+		if err != nil {
+			return lst, err
+		}
+		lst = append(lst, res)
 	}
-	// fallback to using the public URL information if available
-	if status.URL != nil && status.URL.Host != "" {
-		return knativeapi.BuildCamelServiceDefinition(name, serviceType, url.URL(*status.URL))
-	}
-	return knativeapi.CamelServiceDefinition{}, errors.New("cannot determine service hostname")
+	return lst, nil
 }
 
-// buildServiceDefinition creates a CamelServiceDefinition from a Knative Addressable
-func buildServiceDefinition(name string, serviceType knativeapi.CamelServiceType, addressable duck.Addressable) (knativeapi.CamelServiceDefinition, error) {
-	// build it using the URL information if available
-	if addressable.URL != nil && addressable.URL.Host != "" {
-		return knativeapi.BuildCamelServiceDefinition(name, serviceType, url.URL(*addressable.URL))
+func decodeKindAPIGroupVersion(spec string) (schema.GroupVersionKind, error) {
+	if !kindAPIGroupVersionFormat.MatchString(spec) {
+		return schema.GroupVersionKind{}, errors.Errorf("spec does not match the Group/Version/Kind format: %s", spec)
 	}
-	// fallback to using hostname
-	if addressable.Hostname == "" {
-		return knativeapi.CamelServiceDefinition{}, errors.New("cannot determine addressable hostname")
-	}
-	serviceURL, err := url.Parse(fmt.Sprintf("http://%s", addressable.Hostname))
-	if err != nil {
-		return knativeapi.CamelServiceDefinition{}, err
-	}
-	return knativeapi.BuildCamelServiceDefinition(name, serviceType, *serviceURL)
+	matches := kindAPIGroupVersionFormat.FindStringSubmatch(spec)
+	return schema.GroupVersionKind{
+		Group:   matches[1],
+		Version: matches[2],
+		Kind:    matches[3],
+	}, nil
 }

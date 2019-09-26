@@ -28,7 +28,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -127,7 +127,7 @@ func TestKnativeService(t *testing.T) {
 
 	assert.NotNil(t, s)
 
-	spec := s.Spec.ConfigurationSpec.GetTemplate().Spec
+	spec := s.Spec.ConfigurationSpec.Template.Spec
 
 	assert.Len(t, spec.Containers[0].VolumeMounts, 5)
 	assert.Len(t, spec.Volumes, 5)
@@ -254,6 +254,6 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	assert.Equal(
 		t,
 		environment.Integration.Spec.Traits["container"].Configuration["name"],
-		s.Spec.ConfigurationSpec.GetTemplate().Spec.Containers[0].Name,
+		s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Name,
 	)
 }

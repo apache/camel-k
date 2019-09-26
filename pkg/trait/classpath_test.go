@@ -23,10 +23,11 @@ import (
 	"strings"
 	"testing"
 
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -147,7 +148,7 @@ func TestApplyClasspathTraitWithKNativeResource(t *testing.T) {
 	trait, environment := createNominalClasspathTest()
 
 	s := serving.Service{}
-	s.Spec.ConfigurationSpec.Template = &serving.RevisionTemplateSpec{}
+	s.Spec.ConfigurationSpec.Template = servingv1.RevisionTemplateSpec{}
 	s.Spec.ConfigurationSpec.Template.Spec.Containers = []corev1.Container{
 		{
 			Name: defaultContainerName,

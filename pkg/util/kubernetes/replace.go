@@ -21,7 +21,7 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/client"
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -93,8 +93,8 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 }
 
 func mapRequiredKnativeData(from runtime.Object, to runtime.Object) {
-	if fromC, ok := from.(*eventing.Subscription); ok {
-		if toC, ok := to.(*eventing.Subscription); ok {
+	if fromC, ok := from.(*messaging.Subscription); ok {
+		if toC, ok := to.(*messaging.Subscription); ok {
 			toC.Spec.DeprecatedGeneration = fromC.Spec.DeprecatedGeneration
 		}
 	}

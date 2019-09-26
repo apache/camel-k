@@ -1,7 +1,8 @@
 module github.com/apache/camel-k
 
 require (
-	cloud.google.com/go v0.43.0 // indirect
+	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
+	contrib.go.opencensus.io/exporter/stackdriver v0.12.2
 	github.com/Masterminds/semver v1.4.2
 	github.com/alecthomas/jsonschema v0.0.0-20190122210438-a6952de1bbe6
 	github.com/coreos/prometheus-operator v0.29.0
@@ -10,9 +11,6 @@ require (
 	github.com/google/go-containerregistry v0.0.0-20190206233756-dbc4da98389f // indirect
 	github.com/google/uuid v1.1.1
 	github.com/jpillora/backoff v0.0.0-20170918002102-8eab2debe79d
-	github.com/knative/eventing v0.7.1
-	github.com/knative/pkg v0.0.0-20190624141606-d82505e6c5b4
-	github.com/knative/serving v0.7.1
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0
@@ -27,13 +25,14 @@ require (
 	github.com/stoewer/go-strcase v1.0.2
 	github.com/stretchr/testify v1.3.0
 	go.uber.org/multierr v1.1.0
-	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
-	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/api v0.0.0-20190612125737-db0771252981
 	k8s.io/apimachinery v0.0.0-20190612125636-6a5db36e93ad
 	k8s.io/client-go v11.0.0+incompatible
 	k8s.io/kube-openapi v0.0.0-20190510232812-a01b7d5d6c22 // indirect
+	knative.dev/eventing v0.9.0
+	knative.dev/pkg v0.0.0-20190913154335-74659889c421
+	knative.dev/serving v0.9.0
 	sigs.k8s.io/controller-runtime v0.1.10
 )
 
