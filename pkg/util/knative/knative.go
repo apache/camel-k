@@ -72,13 +72,9 @@ func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
 
 // CreateSubscription ---
 func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, compat08 bool) runtime.Object {
-	apiVersion := messaging.SchemeGroupVersion.String()
-	if compat08 {
-		apiVersion = knative08compat.CompatSchemeGroupVersion.String()
-	}
 	subs := messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: apiVersion,
+			APIVersion: messaging.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -102,9 +98,7 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 	}
 
 	if compat08 {
-		return &knative08compat.Subscription{
-			Subscription: subs,
-		}
+		return knative08compat.FromMessagingSubscription(subs)
 	}
 	return &subs
 }
