@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -89,7 +90,10 @@ func (t *camelTrait) Apply(e *Environment) error {
 					return err
 				}
 
-				cx := v1alpha1.NewCamelCatalogWithSpecs(ns, "camel-catalog-"+cv, c.CamelCatalogSpec)
+				// sanitize catalog name
+				catalogName := "camel-catalog-" + strings.ToLower(cv)
+
+				cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, c.CamelCatalogSpec)
 				cx.Labels = make(map[string]string)
 				cx.Labels["app"] = "camel-k"
 				cx.Labels["camel.apache.org/catalog.version"] = cv
