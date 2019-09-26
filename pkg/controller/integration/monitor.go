@@ -79,7 +79,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 	}
 	// And update the scale status accordingly
 	if len(replicaSets.Items) > 0 {
-		replicas := replicaSets.Items[0].Status.Replicas
+		replicaSet := findLatestReplicaSet(replicaSets)
+		replicas := replicaSet.Status.Replicas
 		if integration.Status.Replicas == nil || replicas != *integration.Status.Replicas {
 			integration.Status.Replicas = &replicas
 		}
@@ -104,4 +105,14 @@ func (action *monitorAction) getReplicaSetsForIntegration(ctx context.Context, i
 		return nil, err
 	}
 	return list, nil
+}
+
+func findLatestReplicaSet(list *appsv1.ReplicaSetList) *appsv1.ReplicaSet {
+	latest := list.Items[0]
+	for i, rs := range list.Items[1:] {
+		if latest.CreationTimestamp.Before(&rs.CreationTimestamp) {
+			latest = list.Items[i+1]
+		}
+	}
+	return &latest
 }
