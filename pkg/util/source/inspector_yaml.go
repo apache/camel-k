@@ -69,6 +69,31 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 		if u, ok := t["uri"]; ok {
 			maybeURI = u.(string)
 		}
+
+		if _, ok := t["simple"]; ok {
+			meta.Dependencies.Add("camel:bean")
+		}
+
+		if _, ok := t["language"]; ok {
+			if s, ok := t["language"].(string); ok {
+				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
+					meta.Dependencies.Add(dependency)
+				}
+			} else if m, ok := t["language"].(map[interface{}]interface{}); ok {
+				if err := inspector.parseStep("language", m, meta); err != nil {
+					return err
+				}
+			}
+		}
+
+		for k := range t {
+			if s, ok := k.(string); ok {
+				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
+					meta.Dependencies.Add(dependency)
+				}
+			}
+		}
+
 		if u, ok := t["steps"]; ok {
 			steps := u.([]interface{})
 
