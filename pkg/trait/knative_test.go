@@ -248,10 +248,10 @@ func TestDecodeKindAPIGroupVersion(t *testing.T) {
 		Kind:    "Channel",
 	}, kgv)
 
-	kgv, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1/Chann/el/")
+	_, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1/Chann/el/")
 	assert.NotNil(t, err)
 
-	kgv, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1")
+	_, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1")
 	assert.NotNil(t, err)
 }
 

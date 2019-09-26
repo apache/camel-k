@@ -23,11 +23,11 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
 const (

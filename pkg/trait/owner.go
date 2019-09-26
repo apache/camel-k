@@ -25,9 +25,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
 // ownerTrait ensures that all created resources belong to the integration being created
