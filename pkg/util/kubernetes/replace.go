@@ -29,6 +29,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // ReplaceResources allows to completely replace a list of resources on Kubernetes, taking care of immutable fields and resource versions
@@ -60,6 +62,8 @@ func ReplaceResource(ctx context.Context, c client.Client, res runtime.Object) e
 		mapRequiredServiceData(existing, res)
 		mapRequiredRouteData(existing, res)
 		mapRequiredKnativeData(existing, res)
+		mapRequiredKnativeServiceV1Beta1Data(existing, res)
+		mapRequiredKnativeServiceV1Data(existing, res)
 		err = c.Update(ctx, res)
 	}
 	if err != nil {
@@ -96,6 +100,38 @@ func mapRequiredKnativeData(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*messaging.Subscription); ok {
 		if toC, ok := to.(*messaging.Subscription); ok {
 			toC.Spec.DeprecatedGeneration = fromC.Spec.DeprecatedGeneration
+		}
+	}
+}
+
+func mapRequiredKnativeServiceV1Beta1Data(from runtime.Object, to runtime.Object) {
+	if fromC, ok := from.(*serving.Service); ok {
+		if toC, ok := to.(*serving.Service); ok {
+			if toC.ObjectMeta.Annotations == nil {
+				toC.ObjectMeta.Annotations = make(map[string]string)
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/creator"] = v
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"] = v
+			}
+		}
+	}
+}
+
+func mapRequiredKnativeServiceV1Data(from runtime.Object, to runtime.Object) {
+	if fromC, ok := from.(*servingv1.Service); ok {
+		if toC, ok := to.(*servingv1.Service); ok {
+			if toC.ObjectMeta.Annotations == nil {
+				toC.ObjectMeta.Annotations = make(map[string]string)
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/creator"] = v
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"] = v
+			}
 		}
 	}
 }
