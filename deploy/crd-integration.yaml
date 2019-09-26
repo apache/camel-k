@@ -40,9 +40,13 @@ spec:
   additionalPrinterColumns:
     - name: Phase
       type: string
-      description: The Integration phase
+      description: The integration phase
       JSONPath: .status.phase
     - name: Kit
       type: string
-      description: The IntegrationKit to use
+      description: The integration kit
       JSONPath: .status.kit
+    - name: Replicas
+      type: integer
+      description: The number of pods
+      JSONPath: .status.replicas
