@@ -121,19 +121,17 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 	}
 
 	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
-		// Do not reconcile the deployment if no replicas is set
-		if e.Integration.Spec.Replicas == nil {
-			return nil
-		}
-		// Otherwise set the deployment replicas if different
+		// Reconcile the deployment replicas
 		deployment := &appsv1.Deployment{}
 		err := t.client.Get(context.TODO(), client.ObjectKey{Namespace: e.Integration.Namespace, Name: e.Integration.Name}, deployment)
 		if err != nil {
 			return err
 		}
-		replicas := *e.Integration.Spec.Replicas
-		if *deployment.Spec.Replicas != replicas {
-			*deployment.Spec.Replicas = replicas
+		replicas := e.Integration.Spec.Replicas
+		if replicas == nil && deployment.Spec.Replicas != nil ||
+			replicas != nil && deployment.Spec.Replicas == nil ||
+			*deployment.Spec.Replicas != *replicas {
+			deployment.Spec.Replicas = replicas
 			err := t.client.Update(context.TODO(), deployment)
 			if err != nil {
 				return err
