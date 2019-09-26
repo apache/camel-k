@@ -19,13 +19,13 @@ package integration
 import (
 	"context"
 
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -154,6 +154,30 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 						})
 					}
 				}
+			}
+
+			return requests
+		}),
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch for ReplicaSet to reconcile replicas to the integration status
+	err = c.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+			rs := a.Object.(*appsv1.ReplicaSet)
+			var requests []reconcile.Request
+
+			labels := rs.GetLabels()
+			integrationName, ok := labels["camel.apache.org/integration"]
+			if ok {
+				requests = append(requests, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Namespace: rs.Namespace,
+						Name:      integrationName,
+					},
+				})
 			}
 
 			return requests
