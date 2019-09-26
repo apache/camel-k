@@ -47,6 +47,16 @@ func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error 
 				meta.Dependencies.Add("camel:rest")
 			case "hystrix":
 				meta.Dependencies.Add("camel:hystrix")
+			case "simple":
+				meta.Dependencies.Add("camel:bean")
+			case "language":
+				for _, a := range se.Attr {
+					if a.Name.Local == "language" {
+						if dependency, ok := i.catalog.GetLanguageDependency(a.Value); ok {
+							meta.Dependencies.Add(dependency)
+						}
+					}
+				}
 			case "from", "fromF":
 				for _, a := range se.Attr {
 					if a.Name.Local == "uri" {
@@ -59,6 +69,10 @@ func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error 
 						meta.ToURIs = append(meta.ToURIs, a.Value)
 					}
 				}
+			}
+
+			if dependency, ok := i.catalog.GetLanguageDependency(se.Name.Local); ok {
+				meta.Dependencies.Add(dependency)
 			}
 		}
 	}

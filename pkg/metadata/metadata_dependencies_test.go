@@ -135,6 +135,55 @@ func TestJacksonDependency(t *testing.T) {
 	assert.ElementsMatch(t, []string{"camel:http4", "camel:jackson", "camel:log"}, meta.Dependencies.List())
 }
 
+func TestLanguageDependencies(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Languages.java",
+			Content: `
+				from("direct:start")
+				.transform().ognl("request.body.name == 'Camel K'")
+				.transform().simple("${body.toUpperCase()}")
+				.transform().mvel("resource:classpath:script.mvel")
+				.transform().xquery("/ns:foo/bar", String.class, new Namespaces("ns", "http://foo/bar"))
+				.transform().xpath("//foo/bar")
+				.transform().jsonpath("$.foo")
+				.transform().groovy("request.body += 'modified'")
+				.split().xtokenize("/ns:foo/bar", new Namespaces("ns", "http://foo/bar"));
+			`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
+	}
+
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:saxon", "camel:xpath",
+		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
+}
+
+func TestLanguageDependenciesTransformExpression(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Languages.java",
+			Content: `
+				from("direct:start")
+				.transform(language("ognl", "request.body.name == 'Camel K'"))
+				.transform(simple("${body.toUpperCase()}"))
+				.transform(xpath("//foo/bar"))
+				.transform(jsonpath("$.foo"))
+			`,
+		},
+		Language: v1alpha1.LanguageJavaSource,
+	}
+
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:xpath", "camel:jsonpath"}, meta.Dependencies.List())
+}
+
 func TestHystrixDependency(t *testing.T) {
 	code := v1alpha1.SourceSpec{
 		DataSpec: v1alpha1.DataSpec{
@@ -232,7 +281,7 @@ func TestRestClosureDependency(t *testing.T) {
 			Name: "Request.groovy",
 			Content: `
                 rest {
-                }    
+                }
 			    from("http4:test")
                     .to("log:info")
 		    `,
@@ -304,19 +353,94 @@ func TestXMLRestDependency(t *testing.T) {
 	assert.ElementsMatch(t, []string{"camel:direct", "camel:rest", "camel:mock"}, meta.Dependencies.List())
 }
 
+func TestXMLLanguageDependencies(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name: "routes.xml",
+			Content: `
+               <from uri="direct:start" />
+               <transform>
+                 <language language="ognl">request.body.name == 'Camel K'</language>
+               </transform>
+               <transform>
+                 <simple>${body.toUpperCase()}</simple>
+               </transform>
+               <transform>
+                 <mvel>resource:classpath:script.mvel</mvel>
+               </transform>
+               <transform>
+                 <jsonpath>$.foo</jsonpath>
+               </transform>
+               <transform>
+                 <groovy>request.body += 'modified'</groovy>
+               </transform>
+               <transform>
+                 <tokenize>request.body += 'modified'</tokenize>
+               </transform>
+               <transform>
+                 <xtokenize>/ns:foo/bar</xtokenize>
+               </transform>
+               <transform>
+                 <xpath>//foo/bar</xpath>
+               </transform>
+               <transform>
+                 <xquery>//ns:foo/bar</xquery>
+               </transform>
+               <split>
+                 <tokenize token=","/>
+               </split>
+          `,
+		},
+		Language: v1alpha1.LanguageXML,
+	}
+
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:saxon", "camel:xpath",
+		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
+}
+
 const yamlWithRest = `
 - rest:
     path: "/"
     steps:
         - to: "log:info"
-        - to: "direct:hello"            
+        - to: "direct:hello"
 `
 const yamlWithHystrix = `
 - from:
     uri: "direct:start"
     steps:
         - hystrix:
-            todo: "not implemented"                    
+            todo: "not implemented"
+`
+
+const yamlWithLanguages = `
+- from:
+    uri: "direct:start"
+    steps:
+        - set-body:
+            constant: "Hello Camel K"
+        - transform:
+            language:
+                language: "ognl"
+                expression: "request.body.name == 'Camel K'"
+        - transform:
+            simple: "${body.toUpperCase()}"
+        - transform:
+            mvel: "resource:classpath:script.mvel"
+        - transform:
+            xquery: "/ns:foo/bar"
+        - transform:
+            xpath: "//foo/bar"
+        - transform:
+            jsonpath: "$.foo"
+        - transform:
+            groovy: "request.body += 'modified'"
+        - split:
+            xtokenize: "/ns:foo/bar"
 `
 
 func TestYAMLRestDependency(t *testing.T) {
@@ -353,4 +477,22 @@ func TestYAMLHystrixDependency(t *testing.T) {
 	meta := Extract(catalog, code)
 
 	assert.ElementsMatch(t, []string{"camel:direct", "camel:hystrix"}, meta.Dependencies.List())
+}
+
+func TestYAMLLanguageDependencies(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name:    "routes.yaml",
+			Content: yamlWithLanguages,
+		},
+		Language: v1alpha1.LanguageYaml,
+	}
+
+	catalog, err := test.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:saxon", "camel:xpath",
+		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
 }

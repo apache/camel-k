@@ -35,13 +35,22 @@ var (
 	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	languageRegexp   = regexp.MustCompile(`language\s*\(\s*["|']([a-zA-Z0-9-]+[^"|']+)["|']\s*,.*\)`)
 
 	additionalDependencies = map[string]string{
-		`.*JsonLibrary\.Jackson.*`:      "camel:jackson",
-		`.*\.hystrix().*`:               "camel:hystrix",
-		`.*restConfiguration().*`:       "camel:rest",
-		`.*rest(("[a-zA-Z0-9-/]+")*).*`: "camel:rest",
-		`^\s*rest\s*{.*`:                "camel:rest",
+		`.*JsonLibrary\.Jackson.*`:                         "camel:jackson",
+		`.*\.hystrix().*`:                                  "camel:hystrix",
+		`.*restConfiguration().*`:                          "camel:rest",
+		`.*rest(("[a-zA-Z0-9-/]+")*).*`:                    "camel:rest",
+		`^\s*rest\s*{.*`:                                   "camel:rest",
+		`.*\.groovy\s*\(.*\).*`:                            "camel:groovy",
+		`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`: "camel:jsonpath",
+		`.*\.ognl\s*\(.*\).*`:                              "camel:ognl",
+		`.*\.mvel\s*\(.*\).*`:                              "camel:mvel",
+		`.*\.?simple\s*\(.*\).*`:                           "camel:bean",
+		`.*\.xquery\s*\(.*\).*`:                            "camel:saxon",
+		`.*\.?xpath\s*\(.*\).*`:                            "camel:xpath",
+		`.*\.xtokenize\s*\(.*\).*`:                         "camel:jaxp",
 	}
 )
 
@@ -116,6 +125,14 @@ func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *M
 		pat := regexp.MustCompile(pattern)
 		if pat.MatchString(source.Content) {
 			meta.Dependencies.Add(dep)
+		}
+	}
+
+	for _, match := range languageRegexp.FindAllStringSubmatch(source.Content, -1) {
+		if len(match) > 1 {
+			if dependency, ok := i.catalog.GetLanguageDependency(match[1]); ok {
+				meta.Dependencies.Add(dependency)
+			}
 		}
 	}
 }

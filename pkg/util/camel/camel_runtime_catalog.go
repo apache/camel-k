@@ -29,12 +29,19 @@ func NewRuntimeCatalog(spec v1alpha1.CamelCatalogSpec) *RuntimeCatalog {
 	catalog.CamelCatalogSpec = spec
 	catalog.artifactByScheme = make(map[string]string)
 	catalog.schemesByID = make(map[string]v1alpha1.CamelScheme)
+	catalog.languageDependencies = make(map[string]string)
 
 	for id, artifact := range catalog.Artifacts {
 		for _, scheme := range artifact.Schemes {
 			scheme := scheme
 			catalog.artifactByScheme[scheme.ID] = id
 			catalog.schemesByID[scheme.ID] = scheme
+		}
+		for _, language := range artifact.Languages {
+			// Skip languages in common dependencies since they are always available to integrations
+			if artifact.ArtifactID != "camel-base" {
+				catalog.languageDependencies[language] = strings.Replace(artifact.ArtifactID, "camel-", "camel:", 1)
+			}
 		}
 	}
 
@@ -45,8 +52,9 @@ func NewRuntimeCatalog(spec v1alpha1.CamelCatalogSpec) *RuntimeCatalog {
 type RuntimeCatalog struct {
 	v1alpha1.CamelCatalogSpec
 
-	artifactByScheme map[string]string
-	schemesByID      map[string]v1alpha1.CamelScheme
+	artifactByScheme     map[string]string
+	schemesByID          map[string]v1alpha1.CamelScheme
+	languageDependencies map[string]string
 }
 
 // HasArtifact --
@@ -74,6 +82,12 @@ func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1alpha1.CamelArtif
 func (c *RuntimeCatalog) GetScheme(id string) (v1alpha1.CamelScheme, bool) {
 	scheme, ok := c.schemesByID[id]
 	return scheme, ok
+}
+
+// GetLanguageDependency returns the maven dependency for the given language name
+func (c *RuntimeCatalog) GetLanguageDependency(language string) (string, bool) {
+	language, ok := c.languageDependencies[language]
+	return language, ok
 }
 
 // VisitArtifacts --
