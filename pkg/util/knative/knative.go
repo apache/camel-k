@@ -20,13 +20,16 @@ package knative
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"net/url"
 
+	"github.com/apache/camel-k/pkg/apis/knative08compat"
 	"github.com/apache/camel-k/pkg/client"
+	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -68,10 +71,14 @@ func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
 }
 
 // CreateSubscription ---
-func CreateSubscription(channelReference corev1.ObjectReference, serviceName string) messaging.Subscription {
-	return messaging.Subscription{
+func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, compat08 bool) runtime.Object {
+	apiVersion := messaging.SchemeGroupVersion.String()
+	if compat08 {
+		apiVersion = knative08compat.CompatSchemeGroupVersion.String()
+	}
+	subs := messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: messaging.SchemeGroupVersion.String(),
+			APIVersion: apiVersion,
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -93,20 +100,29 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 			},
 		},
 	}
+
+	if compat08 {
+		return &knative08compat.Subscription{
+			Subscription: subs,
+		}
+	}
+	return &subs
 }
 
 // GetAnySinkURL looks up the resource among all given types and returns the resource sink URL if present
 func GetAnySinkURL(ctx context.Context, c client.Client, types []schema.GroupVersionKind, namespace string, name string) (*url.URL, error) {
 	for _, gvk := range types {
 		sink := corev1.ObjectReference{
-			Kind: gvk.Kind,
+			Kind:       gvk.Kind,
 			APIVersion: gvk.GroupVersion().String(),
-			Namespace: namespace,
-			Name: name,
+			Namespace:  namespace,
+			Name:       name,
 		}
 
 		res, err := GetSinkURI(ctx, c, &sink, namespace)
 		if err != nil && k8serrors.IsNotFound(err) {
+			continue
+		} else if err != nil && kubernetesutils.IsUnknownAPIError(err) {
 			continue
 		} else if err != nil {
 			return nil, err
@@ -120,14 +136,16 @@ func GetAnySinkURL(ctx context.Context, c client.Client, types []schema.GroupVer
 func GetAddressableReference(ctx context.Context, c client.Client, types []schema.GroupVersionKind, namespace string, name string) (*corev1.ObjectReference, error) {
 	for _, gvk := range types {
 		sink := corev1.ObjectReference{
-			Kind: gvk.Kind,
+			Kind:       gvk.Kind,
 			APIVersion: gvk.GroupVersion().String(),
-			Namespace: namespace,
-			Name: name,
+			Namespace:  namespace,
+			Name:       name,
 		}
 
 		_, err := GetSinkURI(ctx, c, &sink, namespace)
 		if err != nil && k8serrors.IsNotFound(err) {
+			continue
+		} else if err != nil && kubernetesutils.IsUnknownAPIError(err) {
 			continue
 		} else if err != nil {
 			return nil, err

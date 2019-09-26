@@ -49,6 +49,11 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 					"istio": {
 						Configuration: make(map[string]string),
 					},
+					"knative": {
+						Configuration: map[string]string{
+							"knative-08-compat-mode": "false", // disable it so it does not check resources in the cluster
+						},
+					},
 				},
 			},
 		},

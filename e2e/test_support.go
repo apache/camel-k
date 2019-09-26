@@ -39,7 +39,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/google/uuid"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"github.com/onsi/gomega"
 	projectv1 "github.com/openshift/api/project/v1"
 	"github.com/spf13/cobra"
@@ -49,6 +48,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -498,7 +498,7 @@ func createKnativeChannel(ns string, name string) func() error {
 	return func() error {
 		channel := messaging.InMemoryChannel{
 			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
+				Kind:       "InMemoryChannel",
 				APIVersion: messaging.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{

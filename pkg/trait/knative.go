@@ -25,6 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -32,6 +33,9 @@ import (
 
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	kubeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type knativeTrait struct {
@@ -44,6 +48,7 @@ type knativeTrait struct {
 	FilterSourceChannels *bool    `property:"filter-source-channels"`
 	ChannelAPIs          []string `property:"channel-apis"`
 	EndpointAPIs         []string `property:"endpoint-apis"`
+	Knative08CompatMode  *bool    `property:"knative-08-compat-mode"`
 	Auto                 *bool    `property:"auto"`
 }
 
@@ -147,6 +152,14 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			filter := true
 			t.FilterSourceChannels = &filter
 		}
+
+		if t.Knative08CompatMode == nil {
+			compat, err := t.shouldUseKnative08CompatMode(e.Integration.Namespace)
+			if err != nil {
+				return false, err
+			}
+			t.Knative08CompatMode = &compat
+		}
 	}
 
 	return true, nil
@@ -194,13 +207,16 @@ func (t *knativeTrait) createSubscriptions(e *Environment) error {
 	if err != nil {
 		return err
 	}
+
+	compat := t.Knative08CompatMode != nil && *t.Knative08CompatMode
+
 	for _, ch := range channels {
 		chRef, err := knativeutil.GetAddressableReference(t.ctx, t.client, types, e.Integration.Namespace, ch)
 		if err != nil {
 			return err
 		}
-		sub := knativeutil.CreateSubscription(*chRef, e.Integration.Name)
-		e.Resources.Add(&sub)
+		sub := knativeutil.CreateSubscription(*chRef, e.Integration.Name, compat)
+		e.Resources.Add(sub)
 	}
 
 	return nil
@@ -345,6 +361,23 @@ func (t *knativeTrait) extractNames(names string) []string {
 	}
 
 	return answer
+}
+
+func (t *knativeTrait) shouldUseKnative08CompatMode(namespace string) (bool, error) {
+	lst := messaging.SubscriptionList{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "Subscription",
+			APIVersion: messaging.SchemeGroupVersion.String(),
+		},
+	}
+	opts := kubeclient.ListOptions{
+		Namespace: namespace,
+	}
+	err := t.client.List(t.ctx, &opts, &lst)
+	if err != nil && kubernetes.IsUnknownAPIError(err) {
+		return true, nil
+	}
+	return false, err
 }
 
 func decodeKindAPIGroupVersions(specs []string) ([]schema.GroupVersionKind, error) {
