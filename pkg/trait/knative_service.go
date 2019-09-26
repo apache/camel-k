@@ -142,7 +142,7 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 	e.Resources.Add(ksvc)
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionDeploymentAvailable,
+		v1alpha1.IntegrationConditionKnativeServiceAvailable,
 		corev1.ConditionTrue,
 		v1alpha1.IntegrationConditionKnativeServiceAvailableReason,
 		ksvc.Name,
