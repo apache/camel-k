@@ -23,7 +23,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/envvar"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -130,11 +130,11 @@ func (t *containerTrait) Apply(e *Environment) error {
 		}
 
 		e.ConfigureVolumesAndMounts(
-			&service.Spec.ConfigurationSpec.GetTemplate().Spec.Volumes,
+			&service.Spec.ConfigurationSpec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
 
-		service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers = append(service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers, container)
+		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
 	})
 
 	if t.Expose != nil && *t.Expose {

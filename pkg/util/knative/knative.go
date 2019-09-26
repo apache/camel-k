@@ -19,24 +19,30 @@ package knative
 
 import (
 	"context"
+	"fmt"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"net/url"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/pkg/errors"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/kubernetes"
+	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/pkg/apis/duck"
+	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
 // IsEnabledInNamespace returns true if we can list some basic knative objects in the given namespace
 func IsEnabledInNamespace(ctx context.Context, c k8sclient.Reader, namespace string) bool {
-	channels := eventing.ChannelList{
+	channels := messaging.ChannelList{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Channel",
 			APIVersion: eventing.SchemeGroupVersion.String(),
@@ -62,73 +68,111 @@ func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
 }
 
 // CreateSubscription ---
-func CreateSubscription(namespace string, channel string, name string) eventing.Subscription {
-	return eventing.Subscription{
+func CreateSubscription(channelReference corev1.ObjectReference, serviceName string) messaging.Subscription {
+	return messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: eventing.SchemeGroupVersion.String(),
+			APIVersion: messaging.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      channel + "-" + name,
+			Namespace: channelReference.Namespace,
+			Name:      channelReference.Name + "-" + serviceName,
 		},
-		Spec: eventing.SubscriptionSpec{
+		Spec: messaging.SubscriptionSpec{
 			Channel: corev1.ObjectReference{
-				APIVersion: eventing.SchemeGroupVersion.String(),
-				Kind:       "Channel",
-				Name:       channel,
+				APIVersion: channelReference.GroupVersionKind().GroupVersion().String(),
+				Kind:       channelReference.Kind,
+				Name:       channelReference.Name,
 			},
-			Subscriber: &eventing.SubscriberSpec{
+			Subscriber: &messaging.SubscriberSpec{
 				Ref: &corev1.ObjectReference{
 					APIVersion: serving.SchemeGroupVersion.String(),
 					Kind:       "Service",
-					Name:       name,
+					Name:       serviceName,
 				},
 			},
 		},
 	}
 }
 
-// GetService --
-func GetService(ctx context.Context, client client.Client, namespace string, name string) (*serving.Service, error) {
-	service := serving.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: serving.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
+// GetAnySinkURL looks up the resource among all given types and returns the resource sink URL if present
+func GetAnySinkURL(ctx context.Context, c client.Client, types []schema.GroupVersionKind, namespace string, name string) (*url.URL, error) {
+	for _, gvk := range types {
+		sink := corev1.ObjectReference{
+			Kind: gvk.Kind,
+			APIVersion: gvk.GroupVersion().String(),
 			Namespace: namespace,
-			Name:      name,
-		},
+			Name: name,
+		}
+
+		res, err := GetSinkURI(ctx, c, &sink, namespace)
+		if err != nil && k8serrors.IsNotFound(err) {
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+		return url.Parse(res)
 	}
-	key := k8sclient.ObjectKey{
-		Namespace: namespace,
-		Name:      name,
-	}
-	if err := client.Get(ctx, key, &service); err != nil {
-		return nil, errors.Wrap(err, "could not retrieve service "+name+" in namespace "+namespace)
-	}
-	return &service, nil
+	return nil, k8serrors.NewNotFound(schema.GroupResource{}, name)
 }
 
-// GetChannel --
-func GetChannel(ctx context.Context, client client.Client, namespace string, name string) (*eventing.Channel, error) {
-	channel := eventing.Channel{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Channel",
-			APIVersion: eventing.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
+// GetAddressableReference looks up the resource among all given types and returns an object reference to it
+func GetAddressableReference(ctx context.Context, c client.Client, types []schema.GroupVersionKind, namespace string, name string) (*corev1.ObjectReference, error) {
+	for _, gvk := range types {
+		sink := corev1.ObjectReference{
+			Kind: gvk.Kind,
+			APIVersion: gvk.GroupVersion().String(),
 			Namespace: namespace,
-			Name:      name,
-		},
+			Name: name,
+		}
+
+		_, err := GetSinkURI(ctx, c, &sink, namespace)
+		if err != nil && k8serrors.IsNotFound(err) {
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+
+		return &sink, nil
 	}
-	key := k8sclient.ObjectKey{
-		Namespace: namespace,
-		Name:      name,
+	return nil, k8serrors.NewNotFound(schema.GroupResource{}, name)
+}
+
+// GetSinkURI retrieves the sink URI from the object referenced by the given
+// ObjectReference.
+//
+// Method taken from https://github.com/knative/eventing-contrib/blob/master/pkg/controller/sinks/sinks.go
+func GetSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (string, error) {
+	if sink == nil {
+		return "", fmt.Errorf("sink ref is nil")
 	}
-	if err := client.Get(ctx, key, &channel); err != nil {
-		return nil, errors.Wrap(err, "could not retrieve channel "+name+" in namespace "+namespace)
+
+	u := &unstructured.Unstructured{}
+	u.SetGroupVersionKind(sink.GroupVersionKind())
+	err := c.Get(ctx, controller.ObjectKey{Namespace: namespace, Name: sink.Name}, u)
+	if err != nil {
+		return "", err
 	}
-	return &channel, nil
+
+	objIdentifier := fmt.Sprintf("\"%s/%s\" (%s)", u.GetNamespace(), u.GetName(), u.GroupVersionKind())
+	// Special case v1/Service to allow it be addressable
+	if u.GroupVersionKind().Kind == "Service" && u.GroupVersionKind().Version == "v1" {
+		return fmt.Sprintf("http://%s.%s.svc/", u.GetName(), u.GetNamespace()), nil
+	}
+
+	t := duckv1alpha1.AddressableType{}
+	err = duck.FromUnstructured(u, &t)
+	if err != nil {
+		return "", fmt.Errorf("failed to deserialize sink %s: %v", objIdentifier, err)
+	}
+
+	if t.Status.Address == nil {
+		return "", fmt.Errorf("sink %s does not contain address", objIdentifier)
+	}
+
+	url := t.Status.Address.GetURL()
+	if url.Host == "" {
+		return "", fmt.Errorf("sink %s contains an empty hostname", objIdentifier)
+	}
+	return url.String(), nil
 }

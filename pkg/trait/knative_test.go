@@ -19,6 +19,8 @@ package trait
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"knative.dev/pkg/apis"
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -32,11 +34,13 @@ import (
 
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
+	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
 func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
@@ -104,7 +108,6 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	assert.Nil(t, err)
 
 	tr := tc.GetTrait("knative").(*knativeTrait)
-
 	ok, err := tr.Configure(&environment)
 	assert.Nil(t, err)
 	assert.True(t, ok)
@@ -236,35 +239,63 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	assert.Equal(t, 8080, source.Port)
 }
 
+func TestDecodeKindAPIGroupVersion(t *testing.T) {
+	kgv, err := decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1/Channel")
+	assert.Nil(t, err)
+	assert.Equal(t, schema.GroupVersionKind{
+		Group:   "messaging.knative.dev",
+		Version: "v1alpha1",
+		Kind:    "Channel",
+	}, kgv)
+
+	kgv, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1/Chann/el/")
+	assert.NotNil(t, err)
+
+	kgv, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1")
+	assert.NotNil(t, err)
+}
+
 func NewFakeClient(namespace string) (client.Client, error) {
+	sink1URL, err := apis.ParseURL("http://endpoint-sink-1.host/")
+	if err != nil {
+		return nil, err
+	}
+	sink2URL, err := apis.ParseURL("http://endpoint-sink-2.host/")
+	if err != nil {
+		return nil, err
+	}
 	return test.NewFakeClient(
-		&eventing.Channel{
+		&messaging.Channel{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Channel",
-				APIVersion: eventing.SchemeGroupVersion.String(),
+				APIVersion: messaging.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: namespace,
 				Name:      "channel-source-1",
 			},
-			Status: eventing.ChannelStatus{
-				Address: duckv1alpha1.Addressable{
-					Hostname: "channel-source-1.host",
+			Status: messaging.ChannelStatus{
+				AddressStatus: duckv1alpha1.AddressStatus{
+					Address: &duckv1alpha1.Addressable{
+						Hostname: "channel-source-1.host",
+					},
 				},
 			},
 		},
-		&eventing.Channel{
+		&messaging.Channel{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Channel",
-				APIVersion: eventing.SchemeGroupVersion.String(),
+				APIVersion: messaging.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: namespace,
 				Name:      "channel-sink-1",
 			},
-			Status: eventing.ChannelStatus{
-				Address: duckv1alpha1.Addressable{
-					Hostname: "channel-sink-1.host",
+			Status: messaging.ChannelStatus{
+				AddressStatus: duckv1alpha1.AddressStatus{
+					Address: &duckv1alpha1.Addressable{
+						Hostname: "channel-sink-1.host",
+					},
 				},
 			},
 		},
@@ -277,10 +308,11 @@ func NewFakeClient(namespace string) (client.Client, error) {
 				Namespace: namespace,
 				Name:      "endpoint-sink-1",
 			},
-			Status: serving.ServiceStatus{
-				RouteStatusFields: serving.RouteStatusFields{
-					Address: &duckv1alpha1.Addressable{
-						Hostname: "endpoint-sink-1.host",
+			Status: servingv1.ServiceStatus{
+				RouteStatusFields: servingv1.RouteStatusFields{
+
+					Address: &duckv1.Addressable{
+						URL: sink1URL,
 					},
 				},
 			},
@@ -294,10 +326,10 @@ func NewFakeClient(namespace string) (client.Client, error) {
 				Namespace: namespace,
 				Name:      "endpoint-sink-2",
 			},
-			Status: serving.ServiceStatus{
-				RouteStatusFields: serving.RouteStatusFields{
-					Address: &duckv1alpha1.Addressable{
-						Hostname: "endpoint-sink-2.host",
+			Status: servingv1.ServiceStatus{
+				RouteStatusFields: servingv1.RouteStatusFields{
+					Address: &duckv1.Addressable{
+						URL: sink2URL,
 					},
 				},
 			},

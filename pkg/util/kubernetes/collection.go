@@ -19,7 +19,8 @@ package kubernetes
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -276,16 +277,16 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 			visitor(cntref)
 		}
 	})
-	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
-		for id := range cs.GetTemplate().Spec.Containers {
-			cntref := &cs.GetTemplate().Spec.Containers[id]
+	c.VisitKnativeConfigurationSpec(func(cs *servingv1.ConfigurationSpec) {
+		for id := range cs.Template.Spec.Containers {
+			cntref := &cs.Template.Spec.Containers[id]
 			visitor(cntref)
 		}
 	})
 }
 
 // VisitKnativeConfigurationSpec executes the visitor function on all knative ConfigurationSpec inside serving Services
-func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *serving.ConfigurationSpec)) {
+func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *servingv1.ConfigurationSpec)) {
 	c.VisitKnativeService(func(s *serving.Service) {
 		visitor(&s.Spec.ConfigurationSpec)
 	})

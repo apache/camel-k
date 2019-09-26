@@ -39,7 +39,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/google/uuid"
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"github.com/onsi/gomega"
 	projectv1 "github.com/openshift/api/project/v1"
 	"github.com/spf13/cobra"
@@ -496,21 +496,14 @@ func createKamelPod(ns string, name string, command ...string) error {
 
 func createKnativeChannel(ns string, name string) func() error {
 	return func() error {
-		channel := eventing.Channel{
+		channel := messaging.InMemoryChannel{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Channel",
-				APIVersion: eventing.SchemeGroupVersion.String(),
+				APIVersion: messaging.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
 				Name:      name,
-			},
-			Spec: eventing.ChannelSpec{
-				Provisioner: &v1.ObjectReference{
-					APIVersion: "eventing.knative.dev/v1alpha1",
-					Kind:       "ClusterChannelProvisioner",
-					Name:       "in-memory",
-				},
 			},
 		}
 		return testClient.Create(testContext, &channel)

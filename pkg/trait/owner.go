@@ -25,7 +25,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -113,7 +113,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	})
 
 	e.Resources.VisitKnativeService(func(service *serving.Service) {
-		t.propagateLabelAndAnnotations(service.Spec.ConfigurationSpec.GetTemplate(), targetLabels, targetAnnotations)
+		t.propagateLabelAndAnnotations(&service.Spec.ConfigurationSpec.Template, targetLabels, targetAnnotations)
 	})
 
 	return nil

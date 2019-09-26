@@ -21,8 +21,8 @@ import (
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 type istioTrait struct {
@@ -56,8 +56,8 @@ func (t *istioTrait) Apply(e *Environment) error {
 		e.Resources.VisitDeployment(func(d *appsv1.Deployment) {
 			d.Spec.Template.Annotations = t.injectIstioAnnotation(d.Spec.Template.Annotations, true)
 		})
-		e.Resources.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
-			cs.GetTemplate().Annotations = t.injectIstioAnnotation(cs.GetTemplate().Annotations, false)
+		e.Resources.VisitKnativeConfigurationSpec(func(cs *servingv1.ConfigurationSpec) {
+			cs.Template.Annotations = t.injectIstioAnnotation(cs.Template.Annotations, false)
 		})
 	}
 	return nil

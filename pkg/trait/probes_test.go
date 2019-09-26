@@ -25,10 +25,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	servingbeta "github.com/knative/serving/pkg/apis/serving/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
 func TestProbesDeps(t *testing.T) {
@@ -101,16 +101,14 @@ func TestProbesOnDeployment(t *testing.T) {
 
 func TestProbesOnKnativeService(t *testing.T) {
 	target := serving.Service{
-		Spec: serving.ServiceSpec{
-			ConfigurationSpec: serving.ConfigurationSpec{
-				Template: &serving.RevisionTemplateSpec{
-					Spec: serving.RevisionSpec{
-						RevisionSpec: servingbeta.RevisionSpec{
-							PodSpec: corev1.PodSpec{
-								Containers: []corev1.Container{
-									{
-										Image: "dummy",
-									},
+		Spec: servingv1.ServiceSpec{
+			ConfigurationSpec: servingv1.ConfigurationSpec{
+				Template: servingv1.RevisionTemplateSpec{
+					Spec: servingv1.RevisionSpec{
+						PodSpec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Image: "dummy",
 								},
 							},
 						},
@@ -142,6 +140,6 @@ func TestProbesOnKnativeService(t *testing.T) {
 
 	err = tr.Apply(&e)
 	assert.Nil(t, err)
-	assert.Nil(t, target.Spec.ConfigurationSpec.GetTemplate().Spec.Containers[0].LivenessProbe)
-	assert.Nil(t, target.Spec.ConfigurationSpec.GetTemplate().Spec.Containers[0].ReadinessProbe)
+	assert.Nil(t, target.Spec.ConfigurationSpec.Template.Spec.Containers[0].LivenessProbe)
+	assert.Nil(t, target.Spec.ConfigurationSpec.Template.Spec.Containers[0].ReadinessProbe)
 }
