@@ -18,10 +18,15 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"context"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 type deploymentTrait struct {
@@ -45,6 +50,11 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		)
 
 		return false, nil
+	}
+
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+		condition := e.Integration.Status.GetCondition(v1alpha1.IntegrationConditionDeploymentAvailable)
+		return condition != nil && condition.Status == corev1.ConditionTrue, nil
 	}
 
 	enabled := false
@@ -106,6 +116,31 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 			v1alpha1.IntegrationConditionDeploymentAvailableReason,
 			depl.Name,
 		)
+
+		return nil
+	}
+
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+		// Do not reconcile the deployment if no replicas is set
+		if e.Integration.Spec.Replicas == nil {
+			return nil
+		}
+		// Otherwise set the deployment replicas if different
+		deployment := &appsv1.Deployment{}
+		err := t.client.Get(context.TODO(), client.ObjectKey{Namespace: e.Integration.Namespace, Name: e.Integration.Name}, deployment)
+		if err != nil {
+			return err
+		}
+		replicas := *e.Integration.Spec.Replicas
+		if *deployment.Spec.Replicas != replicas {
+			*deployment.Spec.Replicas = replicas
+			err := t.client.Update(context.TODO(), deployment)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 
 	return nil

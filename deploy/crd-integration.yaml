@@ -27,6 +27,9 @@ spec:
   version: v1alpha1
   subresources:
     status: {}
+    scale:
+      specReplicasPath: .spec.replicas
+      statusReplicasPath: .status.replicas
   names:
     kind: Integration
     listKind: IntegrationList

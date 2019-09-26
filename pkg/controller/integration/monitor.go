@@ -20,7 +20,14 @@ package integration
 import (
 	"context"
 
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
 )
@@ -58,6 +65,43 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 		return integration, nil
 	}
 
-	// TODO check also if deployment matches (e.g. replicas)
-	return nil, nil
+	// Run traits that are enabled for the running phase,
+	// such as the deployment and Knative service traits.
+	_, err = trait.Apply(ctx, action.client, integration, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check replicas
+	replicaSets, err := action.getReplicaSetsForIntegration(ctx, integration)
+	if err != nil {
+		return nil, err
+	}
+	// And update the scale status accordingly
+	if len(replicaSets.Items) > 0 {
+		replicas := replicaSets.Items[0].Status.Replicas
+		if integration.Status.Replicas == nil || replicas != *integration.Status.Replicas {
+			integration.Status.Replicas = &replicas
+		}
+	}
+
+	return integration, nil
+}
+
+func (action *monitorAction) getReplicaSetsForIntegration(ctx context.Context, integration *v1alpha1.Integration) (*appsv1.ReplicaSetList, error) {
+	byIntegrationLabel, err := labels.NewRequirement("camel.apache.org/integration", selection.Equals, []string{integration.Name})
+	if err != nil {
+		return nil, err
+	}
+	selector := labels.NewSelector().Add(*byIntegrationLabel)
+
+	options := k8sclient.ListOptions{
+		Namespace:     integration.Namespace,
+		LabelSelector: selector,
+	}
+	list := &appsv1.ReplicaSetList{}
+	if err := action.client.List(ctx, &options, list); err != nil {
+		return nil, err
+	}
+	return list, nil
 }

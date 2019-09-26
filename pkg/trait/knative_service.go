@@ -18,16 +18,20 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -67,7 +71,10 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+		condition := e.Integration.Status.GetCondition(v1alpha1.IntegrationConditionKnativeServiceAvailable)
+		return condition != nil && condition.Status == corev1.ConditionTrue, nil
+	} else if !e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
 		return false, nil
 	}
 
@@ -135,6 +142,60 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+		// Do not reconcile the Knative if no replicas is set
+		if e.Integration.Spec.Replicas == nil {
+			return nil
+		}
+		// Otherwise set the Knative scale annotations
+		replicas := int(*e.Integration.Spec.Replicas)
+
+		service := &serving.Service{}
+		err := t.client.Get(context.TODO(), client.ObjectKey{Namespace: e.Integration.Namespace, Name: e.Integration.Name}, service)
+		if err != nil {
+			return err
+		}
+
+		isUpdateRequired := false
+		minScale, ok := service.Spec.Template.Annotations[knativeServingMinScaleAnnotation]
+		if ok {
+			min, err := strconv.Atoi(minScale)
+			if err != nil {
+				return err
+			}
+			if min != replicas {
+				isUpdateRequired = true
+			}
+		} else {
+			isUpdateRequired = true
+		}
+
+		maxScale, ok := service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation]
+		if ok {
+			max, err := strconv.Atoi(maxScale)
+			if err != nil {
+				return err
+			}
+			if max != replicas {
+				isUpdateRequired = true
+			}
+		} else {
+			isUpdateRequired = true
+		}
+
+		if isUpdateRequired {
+			scale := strconv.Itoa(replicas)
+			service.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = scale
+			service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = scale
+			err := t.client.Update(context.TODO(), service)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
 	ksvc := t.getServiceFor(e)
 	maps := e.ComputeConfigMaps()
 

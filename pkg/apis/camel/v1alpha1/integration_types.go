@@ -53,6 +53,7 @@ type IntegrationStatus struct {
 	Configuration    []ConfigurationSpec    `json:"configuration,omitempty"`
 	Conditions       []IntegrationCondition `json:"conditions,omitempty"`
 	Version          string                 `json:"version,omitempty"`
+	Replicas         *int32                 `json:"replicas,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
