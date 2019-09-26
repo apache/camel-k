@@ -143,18 +143,14 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
-		// Do not reconcile the Knative if no replicas is set
-		if e.Integration.Spec.Replicas == nil {
-			return nil
-		}
-		// Otherwise set the Knative scale annotations
-		replicas := int(*e.Integration.Spec.Replicas)
-
+		// Reconcile the Knative scale annotations
 		service := &serving.Service{}
 		err := t.client.Get(context.TODO(), client.ObjectKey{Namespace: e.Integration.Namespace, Name: e.Integration.Name}, service)
 		if err != nil {
 			return err
 		}
+
+		replicas := e.Integration.Spec.Replicas
 
 		isUpdateRequired := false
 		minScale, ok := service.Spec.Template.Annotations[knativeServingMinScaleAnnotation]
@@ -163,10 +159,10 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 			if err != nil {
 				return err
 			}
-			if min != replicas {
+			if replicas == nil || min != int(*replicas) {
 				isUpdateRequired = true
 			}
-		} else {
+		} else if replicas != nil {
 			isUpdateRequired = true
 		}
 
@@ -176,17 +172,30 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 			if err != nil {
 				return err
 			}
-			if max != replicas {
+			if replicas == nil || max != int(*replicas) {
 				isUpdateRequired = true
 			}
-		} else {
+		} else if replicas != nil {
 			isUpdateRequired = true
 		}
 
 		if isUpdateRequired {
-			scale := strconv.Itoa(replicas)
-			service.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = scale
-			service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = scale
+			if replicas == nil {
+				if t.MinScale != nil && *t.MinScale > 0 {
+					service.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
+				} else {
+					delete(service.Spec.Template.Annotations, knativeServingMinScaleAnnotation)
+				}
+				if t.MaxScale != nil && *t.MaxScale > 0 {
+					service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
+				} else {
+					delete(service.Spec.Template.Annotations, knativeServingMaxScaleAnnotation)
+				}
+			} else {
+				scale := strconv.Itoa(int(*replicas))
+				service.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = scale
+				service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = scale
+			}
 			err := t.client.Update(context.TODO(), service)
 			if err != nil {
 				return err
