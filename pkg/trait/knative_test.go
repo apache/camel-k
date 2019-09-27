@@ -19,8 +19,6 @@ package trait
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"knative.dev/pkg/apis"
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -36,7 +34,9 @@ import (
 	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
