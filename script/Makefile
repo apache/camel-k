@@ -15,6 +15,7 @@
 
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-M2-SNAPSHOT
+LAST_RELEASED_VERSION := 1.0.0-M1
 RUNTIME_VERSION := 1.0.0
 CAMEL_VERSION := 3.0.0-M4
 CAMEL_VERSION_CONSTRAINT := >=3.0.0-M4
@@ -205,4 +206,7 @@ install-minishift:
 install-minikube:
 	./script/install_minikube.sh
 
-.PHONY: build build-operator build-kamel build-resources build-builder build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag
+release-notes:
+	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
+
+.PHONY: build build-operator build-kamel build-resources build-builder build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes
