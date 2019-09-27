@@ -21,16 +21,16 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/client"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ReplaceResources allows to completely replace a list of resources on Kubernetes, taking care of immutable fields and resource versions

@@ -19,14 +19,13 @@ package kubernetes
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"k8s.io/apimachinery/pkg/runtime"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
 // A Collection is a container of Kubernetes resources

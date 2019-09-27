@@ -114,9 +114,7 @@ func GetAnySinkURL(ctx context.Context, c client.Client, types []schema.GroupVer
 		}
 
 		res, err := GetSinkURI(ctx, c, &sink, namespace)
-		if err != nil && k8serrors.IsNotFound(err) {
-			continue
-		} else if err != nil && kubernetesutils.IsUnknownAPIError(err) {
+		if err != nil && (k8serrors.IsNotFound(err) || kubernetesutils.IsUnknownAPIError(err)) {
 			continue
 		} else if err != nil {
 			return nil, err
@@ -137,9 +135,7 @@ func GetAddressableReference(ctx context.Context, c client.Client, types []schem
 		}
 
 		_, err := GetSinkURI(ctx, c, &sink, namespace)
-		if err != nil && k8serrors.IsNotFound(err) {
-			continue
-		} else if err != nil && kubernetesutils.IsUnknownAPIError(err) {
+		if err != nil && (k8serrors.IsNotFound(err) || kubernetesutils.IsUnknownAPIError(err)) {
 			continue
 		} else if err != nil {
 			return nil, err
