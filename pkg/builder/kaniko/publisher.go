@@ -20,6 +20,7 @@ package kaniko
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"strconv"
 	"time"
@@ -44,6 +45,12 @@ func publisher(ctx *builder.Context) error {
 	image := ctx.Build.Platform.Build.Registry.Address + "/" + organization + "/camel-k-" + ctx.Build.Meta.Name + ":" + ctx.Build.Meta.ResourceVersion
 	baseDir, _ := path.Split(ctx.Archive)
 	contextDir := path.Join(baseDir, "context")
+
+	err := os.Mkdir(contextDir, 0777)
+	if err != nil {
+		return err
+	}
+
 	if err := tar.Extract(ctx.Archive, contextDir); err != nil {
 		return err
 	}
@@ -54,7 +61,7 @@ func publisher(ctx *builder.Context) error {
 		ADD . /deployments
 	`)
 
-	err := ioutil.WriteFile(path.Join(contextDir, "Dockerfile"), dockerFileContent, 0777)
+	err = ioutil.WriteFile(path.Join(contextDir, "Dockerfile"), dockerFileContent, 0777)
 	if err != nil {
 		return err
 	}
