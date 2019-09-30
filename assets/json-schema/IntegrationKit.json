@@ -302,9 +302,6 @@
         "platform": {
           "type": "string"
         },
-        "publicImage": {
-          "type": "string"
-        },
         "runtimeVersion": {
           "type": "string"
         },

@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless 
+const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless
 superpowers.
 `
 
@@ -65,6 +65,8 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.AddCommand(newCmdReset(&options))
 	cmd.AddCommand(newCmdDescribe(&options))
 	cmd.AddCommand(newCmdRebuild(&options))
+	cmd.AddCommand(newCmdOperator(&options))
+	cmd.AddCommand(newCmdBuilder(&options))
 
 	return &cmd, nil
 }

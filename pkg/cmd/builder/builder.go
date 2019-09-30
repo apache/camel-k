@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package builder
 
 import (
 	"fmt"
@@ -31,8 +31,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	_ "github.com/apache/camel-k/pkg/builder/kaniko"
-	_ "github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/client"
 	util "github.com/apache/camel-k/pkg/controller/build"
 	"github.com/apache/camel-k/pkg/util/cancellable"
@@ -48,7 +46,8 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Version: %v", defaults.Version))
 }
 
-func main() {
+// Run creates a build resource in the specified namespace
+func Run(namespace string, buildName string) {
 	logf.SetLogger(logf.ZapLogger(false))
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -61,8 +60,8 @@ func main() {
 
 	build := &v1alpha1.Build{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: os.Args[1],
-			Name:      os.Args[2],
+			Namespace: namespace,
+			Name:      buildName,
 		},
 	}
 

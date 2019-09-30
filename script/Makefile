@@ -38,7 +38,7 @@ STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 # or "download" them from Apache Snapshots and Maven Central
 PACKAGE_ARTIFACTS_STRATEGY := copy
 
-GOLDFLAGS += -X main.GitCommit=$(GIT_COMMIT)
+GOLDFLAGS += -X github.com/apache/camel-k/pkg/cmd/operator.GitCommit=$(GIT_COMMIT)
 GOFLAGS = -ldflags "$(GOLDFLAGS)" -gcflags=-trimpath=$(GO_PATH) -asmflags=-trimpath=$(GO_PATH)
 
 define LICENSE_HEADER
@@ -48,9 +48,9 @@ this work for additional information regarding copyright ownership.
 The ASF licenses this file to You under the Apache License, Version 2.0
 (the "License"); you may not use this file except in compliance with
 the License.  You may obtain a copy of the License at
- 
+
    http://www.apache.org/licenses/LICENSE-2.0
- 
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -99,7 +99,7 @@ codegen:
 generate:
 	operator-sdk generate k8s
 
-build: build-operator build-kamel build-builder build-compile-integration-tests
+build: build-kamel build-compile-integration-tests
 
 test: build
 	go test ./...
@@ -110,14 +110,8 @@ test-integration: build
 test-knative: build
 	go test -timeout 30m -v ./e2e/... -tags=knative
 
-build-operator:
-	go build $(GOFLAGS) -o camel-k ./cmd/manager/*.go
-
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
-
-build-builder:
-	env GOOS=linux go build -o builder ./cmd/builder/*.go
 
 build-resources:
 	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION)
@@ -131,7 +125,7 @@ build-compile-integration-tests:
 	go test -c -tags="integration knative" ./e2e/*.go
 
 clean:
-	# go clean fails if modules support are turned on as it tries to 
+	# go clean fails if modules support are turned on as it tries to
 	# resolve modules, if module support is turned off, it does not
 	# care about modules and simply deletes bits.
 	#
@@ -209,4 +203,4 @@ install-minikube:
 release-notes:
 	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
 
-.PHONY: build build-operator build-kamel build-resources build-builder build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes

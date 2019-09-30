@@ -15,41 +15,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package cmd
 
 import (
-	"context"
-	"fmt"
-	"math/rand"
-	"os"
-	"time"
-
-	_ "github.com/apache/camel-k/pkg/builder/kaniko"
-	_ "github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/cmd"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/apache/camel-k/pkg/cmd/operator"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
+func newCmdOperator(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	impl := operatorCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
+	cmd := cobra.Command{
+		Use:   "operator",
+		Short: "Run the Camel K operator",
+		Long:  `Run the Camel K operator`,
+		Run:   impl.run,
+	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// Cancel ctx as soon as main returns
-	defer cancel()
-
-	rootCmd, err := cmd.NewKamelCommand(ctx)
-	exitOnError(err)
-
-	err = rootCmd.Execute()
-	exitOnError(err)
+	return &cmd
 }
 
-func exitOnError(err error) {
-	if err != nil {
-		fmt.Println("Error:", err)
+type operatorCmdOptions struct {
+	*RootCmdOptions
+}
 
-		os.Exit(1)
-	}
+func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
+	operator.Run()
 }

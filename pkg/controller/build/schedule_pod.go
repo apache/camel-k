@@ -137,9 +137,12 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 					Name:            "builder",
 					Image:           builderImage,
 					ImagePullPolicy: "IfNotPresent",
-					Args: []string{
-						"camel-k-builder",
+					Command: []string{
+						"kamel",
+						"builder",
+						"--namespace",
 						build.Namespace,
+						"--build-name",
 						build.Name,
 					},
 				},

@@ -2764,7 +2764,8 @@ spec:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:1.0.0-M2-SNAPSHOT
           command:
-          - camel-k
+          - kamel
+          - operator
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE

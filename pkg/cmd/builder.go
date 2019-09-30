@@ -15,41 +15,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package cmd
 
 import (
-	"context"
-	"fmt"
-	"math/rand"
-	"os"
-	"time"
-
-	_ "github.com/apache/camel-k/pkg/builder/kaniko"
-	_ "github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/cmd"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/apache/camel-k/pkg/cmd/builder"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
+func newCmdBuilder(rootCmdOptions *RootCmdOptions) *cobra.Command {
+	impl := builderCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
+	cmd := cobra.Command{
+		Use:   "builder",
+		Short: "Run the Camel K builder",
+		Long:  `Run the Camel K builder`,
+		Run:   impl.run,
+	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	cmd.Flags().StringVar(&impl.BuildName, "build-name", "", "The name of the build resource")
 
-	// Cancel ctx as soon as main returns
-	defer cancel()
-
-	rootCmd, err := cmd.NewKamelCommand(ctx)
-	exitOnError(err)
-
-	err = rootCmd.Execute()
-	exitOnError(err)
+	return &cmd
 }
 
-func exitOnError(err error) {
-	if err != nil {
-		fmt.Println("Error:", err)
+type builderCmdOptions struct {
+	*RootCmdOptions
+	BuildName string
+}
 
-		os.Exit(1)
-	}
+func (o *builderCmdOptions) run(_ *cobra.Command, _ []string) {
+	builder.Run(o.Namespace, o.BuildName)
 }
