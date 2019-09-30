@@ -136,7 +136,6 @@ clean:
 	GO111MODULE=off go clean
 	rm -f camel-k
 	rm -f kamel
-	rm -f builder
 	rm -f *.test
 	rm -rf build/_maven_output
 	rm -rf build/_output
@@ -155,14 +154,12 @@ lint:
 images: test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
-	cp builder build/_output/bin
 	cp kamel build/_output/bin
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
 images-dev: test package-artifacts
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
-	cp builder build/_output/bin
 	cp kamel build/_output/bin
 	operator-sdk build $(IMAGE_NAME):$(VERSION)
 
