@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package operator
 
 import (
 	"context"
@@ -37,8 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var log = logf.Log.WithName("cmd")
@@ -52,7 +50,8 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Git Commit: %v", GitCommit))
 }
 
-func main() {
+// Run starts the Camel K operator
+func Run() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()

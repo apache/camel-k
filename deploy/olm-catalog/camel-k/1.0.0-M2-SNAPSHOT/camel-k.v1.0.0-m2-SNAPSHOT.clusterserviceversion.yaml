@@ -150,7 +150,8 @@ spec:
             spec:
               containers:
               - command:
-                - camel-k
+                - kamel
+                - operator
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
