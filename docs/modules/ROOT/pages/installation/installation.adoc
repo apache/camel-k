@@ -10,10 +10,10 @@ To use it, you need to be connected to a cloud environment or to a local cluster
 Camel K installation is usually straightforward, but for certain cluster types you need to apply specific configuration settings
 before installing it. Customized instructions are needed for the following cluster types:
 
-- xref:installation/minikube.adoc[Minikube]
-- xref:installation/minishift.adoc[Minishift]
-- xref:installation/gke.adoc[Google Kubernetes Engine (GKE)]
-- xref:installation/openshift.adoc[OpenShift]
+- xref:minikube.adoc[Minikube]
+- xref:minishift.adoc[Minishift]
+- xref:gke.adoc[Google Kubernetes Engine (GKE)]
+- xref:openshift.adoc[OpenShift]
 
 Other cluster types (such as OpenShift clusters) should *not need* prior configuration.
 

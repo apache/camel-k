@@ -18,4 +18,4 @@ Then you can start the cluster with:
 minishift start
 ```
 
-You can now proceed with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].
+You can now proceed with the xref:installation.adoc#procedure[standard Camel K installation procedure].

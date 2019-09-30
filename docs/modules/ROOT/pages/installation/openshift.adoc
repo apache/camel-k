@@ -16,4 +16,4 @@ kamel install --cluster-setup
 ```
 
 Once you've done this **only once per the whole cluster**, you can **login as a standard user** and
-continue with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].
+continue with the xref:installation.adoc#procedure[standard Camel K installation procedure].
