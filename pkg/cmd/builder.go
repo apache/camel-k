@@ -27,10 +27,11 @@ func newCmdBuilder(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "builder",
-		Short: "Run the Camel K builder",
-		Long:  `Run the Camel K builder`,
-		Run:   impl.run,
+		Use:    "builder",
+		Short:  "Run the Camel K builder",
+		Long:   `Run the Camel K builder`,
+		Hidden: true,
+		Run:    impl.run,
 	}
 
 	cmd.Flags().StringVar(&impl.BuildName, "build-name", "", "The name of the build resource")

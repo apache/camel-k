@@ -27,10 +27,11 @@ func newCmdOperator(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "operator",
-		Short: "Run the Camel K operator",
-		Long:  `Run the Camel K operator`,
-		Run:   impl.run,
+		Use:    "operator",
+		Short:  "Run the Camel K operator",
+		Long:   `Run the Camel K operator`,
+		Hidden: true,
+		Run:    impl.run,
 	}
 
 	return &cmd
