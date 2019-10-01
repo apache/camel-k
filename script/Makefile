@@ -19,6 +19,7 @@ LAST_RELEASED_VERSION := 1.0.0-M1
 RUNTIME_VERSION := 1.0.0
 CAMEL_VERSION := 3.0.0-M4
 CAMEL_VERSION_CONSTRAINT := >=3.0.0-M4
+KANIKO_VERSION := 0.9.0
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
@@ -83,6 +84,9 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // RuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  RuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
+	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // BaseImage -- " >> $(VERSIONFILE)
 	@echo "  BaseImage = \"$(BASE_IMAGE)\"" >> $(VERSIONFILE)

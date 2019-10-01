@@ -30,6 +30,9 @@ const (
 	// RuntimeVersion --
 	RuntimeVersion = "1.0.0"
 
+	// KanikoVersion --
+	KanikoVersion = "0.9.0"
+
 	// BaseImage --
 	BaseImage = "fabric8/s2i-java:3.0-java8"
 

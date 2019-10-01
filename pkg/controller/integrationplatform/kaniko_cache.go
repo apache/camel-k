@@ -19,6 +19,7 @@ package integrationplatform
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -27,6 +28,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/defaults"
 
 	"github.com/pkg/errors"
 )
@@ -51,7 +53,7 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 			Containers: []corev1.Container{
 				{
 					Name:  "warm-kaniko-cache",
-					Image: "gcr.io/kaniko-project/warmer:v0.9.0",
+					Image: fmt.Sprintf("gcr.io/kaniko-project/warmer:v%s", defaults.KanikoVersion),
 					Args: []string{
 						"--cache-dir=/workspace/cache",
 						"--image=" + platform.Spec.Build.BaseImage,
