@@ -209,7 +209,7 @@ func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
 				return err
 			}
 
-			if *integrationPhase == v1alpha1.IntegrationPhaseRunning || *integrationPhase == v1alpha1.IntegrationPhaseError {
+			if integrationPhase == nil || *integrationPhase == v1alpha1.IntegrationPhaseRunning || *integrationPhase == v1alpha1.IntegrationPhaseError {
 				break
 			}
 
