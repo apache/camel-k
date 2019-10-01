@@ -55,7 +55,6 @@ func (action *initializeAction) CanHandle(platform *v1alpha1.IntegrationPlatform
 }
 
 func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
-
 	duplicate, err := action.isDuplicate(ctx, platform)
 	if err != nil {
 		return nil, err
@@ -109,13 +108,13 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 		}
 	}
 
-	if platform.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && platform.Spec.Build.Registry.Address == "" {
-		action.L.Info("No registry specified for publishing images")
-	}
-
 	err = action.setDefaults(ctx, platform)
 	if err != nil {
 		return nil, err
+	}
+
+	if platform.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && platform.Spec.Build.Registry.Address == "" {
+		action.L.Info("No registry specified for publishing images")
 	}
 
 	if platform.Spec.Build.Maven.Timeout.Duration != 0 {
@@ -134,13 +133,6 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 		err := createPersistentVolumeClaim(ctx, action.client, platform)
 		if err != nil {
 			return nil, err
-		}
-
-		defaultKanikoBuildCache := true
-		// Check if the KanikoBuildCache has been initialized
-		if platform.Spec.Build.KanikoBuildCache == nil {
-			//if not initialized then default it to true
-			platform.Spec.Build.KanikoBuildCache = &defaultKanikoBuildCache
 		}
 
 		// Check if the operator is running in the same namespace before starting the cache warmer
@@ -253,6 +245,13 @@ func (action *initializeAction) setDefaults(ctx context.Context, platform *v1alp
 			},
 			Key: "settings.xml",
 		}
+	}
+
+	if platform.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && platform.Spec.Build.KanikoBuildCache == nil {
+		// Default to using Kaniko cache warmer
+		defaultKanikoBuildCache := true
+		platform.Spec.Build.KanikoBuildCache = &defaultKanikoBuildCache
+		action.L.Infof("Kaniko cache set to %t", *platform.Spec.Build.KanikoBuildCache)
 	}
 
 	action.L.Infof("CamelVersion set to %s", platform.Spec.Build.CamelVersion)
