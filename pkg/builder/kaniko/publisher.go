@@ -27,6 +27,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/tar"
 
@@ -175,7 +176,7 @@ func publisher(ctx *builder.Context) error {
 			Containers: []corev1.Container{
 				{
 					Name:         "kaniko",
-					Image:        "gcr.io/kaniko-project/executor:v0.9.0",
+					Image:        fmt.Sprintf("gcr.io/kaniko-project/executor:v%s", defaults.KanikoVersion),
 					Args:         args,
 					Env:          envs,
 					VolumeMounts: volumeMounts,
