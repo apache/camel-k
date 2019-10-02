@@ -112,6 +112,7 @@ rules:
   - ""
   resources:
   - events
+  - configmaps
   verbs:
   - get
   - list
