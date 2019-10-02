@@ -2662,6 +2662,9 @@ spec:
   version: v1alpha1
   subresources:
     status: {}
+    scale:
+      specReplicasPath: .spec.replicas
+      statusReplicasPath: .status.replicas
   names:
     kind: Integration
     listKind: IntegrationList
@@ -2672,12 +2675,16 @@ spec:
   additionalPrinterColumns:
     - name: Phase
       type: string
-      description: The Integration phase
+      description: The integration phase
       JSONPath: .status.phase
     - name: Kit
       type: string
-      description: The IntegrationKit to use
+      description: The integration kit
       JSONPath: .status.kit
+    - name: Replicas
+      type: integer
+      description: The number of pods
+      JSONPath: .status.replicas
 
 `
 	Resources["cr-example.yaml"] =

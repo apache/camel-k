@@ -315,6 +315,9 @@
         "platform": {
           "type": "string"
         },
+        "replicas": {
+          "type": "integer"
+        },
         "runtimeVersion": {
           "type": "string"
         },
