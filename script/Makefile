@@ -29,9 +29,6 @@ GO_PATH := $(shell go env GOPATH)
 LINT_GOGC := 10
 LINT_DEADLINE := 5m
 
-# For signing binary artifacts
-GPG_PASS := $(GPG_PASS)
-
 # Used to push pre-relase artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
@@ -181,7 +178,7 @@ git-tag:
 	./script/git_tag.sh $(VERSION) $(RELEASE_GIT_REMOTE)
 
 cross-compile:
-	./script/cross_compile.sh $(VERSION) $(GPG_PASS)
+	./script/cross_compile.sh $(VERSION) '$(GOFLAGS)'
 
 package-examples:
 	./script/package_examples.sh $(VERSION)
