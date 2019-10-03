@@ -170,6 +170,21 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 			},
 		}
 
+		// In case the kaniko cache has not run, the /workspace dir needs to have the right permissions set
+		pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
+			Name:            "prepare-kaniko-workspace",
+			Image:           "busybox",
+			ImagePullPolicy: corev1.PullIfNotPresent,
+			Command:         []string{"/bin/sh", "-c"},
+			Args:            []string{"chmod -R a+rwx /workspace"},
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					Name:      "camel-k-builder",
+					MountPath: "/workspace",
+				},
+			},
+		})
+
 		// Use affinity only when the operator is present in the namespaced
 		if build.Namespace == platform.GetOperatorNamespace() {
 			// Co-locate with the builder pod for sharing the host path volume as the current

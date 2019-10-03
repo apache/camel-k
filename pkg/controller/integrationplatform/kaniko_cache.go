@@ -72,11 +72,8 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					Name:            "create-kaniko-cache",
 					Image:           "busybox",
 					ImagePullPolicy: corev1.PullIfNotPresent,
-					Command: []string{
-						"mkdir",
-						"-p",
-						"/workspace/cache",
-					},
+					Command:         []string{"/bin/sh", "-c"},
+					Args:            []string{"mkdir -p /workspace/cache && chmod -R a+rwx /workspace"},
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      "camel-k-builder",
