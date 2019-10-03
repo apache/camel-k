@@ -22,13 +22,13 @@ rm -rf ${builddir}
 
 basename=camel-k-client
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-    echo "usage: $0 version [pgp_pass]"
+if [ "$#" -ne 2 ]; then
+    echo "usage: $0 version build_flags"
     exit 1
 fi
 
 version=$1
-gpg_pass=$2
+build_flags=$2
 
 cross_compile () {
 	local label=$1
@@ -41,10 +41,10 @@ cross_compile () {
 	fi
 
 	targetdir=${builddir}/${label}
-	go build -o ${targetdir}/kamel${extension} ./cmd/kamel/...
+	eval go build "$build_flags" -o ${targetdir}/kamel${extension} ./cmd/kamel/...
 
-	if [ -n "$gpg_pass" ]; then
-	    gpg --output ${targetdir}/kamel${extension}.asc --armor --detach-sig --passphrase ${gpg_pass} ${targetdir}/kamel${extension}
+	if [ -n "$GPG_PASS" ]; then
+	    gpg --output ${targetdir}/kamel${extension}.asc --armor --detach-sig --passphrase ${GPG_PASS} ${targetdir}/kamel${extension}
 	fi
 
     pushd . && cd ${targetdir} && sha512sum -b kamel${extension} > kamel${extension}.sha512 && popd
