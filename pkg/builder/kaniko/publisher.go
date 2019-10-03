@@ -88,7 +88,7 @@ func publisher(ctx *builder.Context) error {
 		"--dockerfile=Dockerfile",
 		"--context=" + contextDir,
 		"--destination=" + image,
-		"--cache=" + strconv.FormatBool(*ctx.Build.Platform.Build.KanikoBuildCache),
+		"--cache=" + strconv.FormatBool(ctx.Build.Platform.Build.IsKanikoCacheEnabled()),
 		"--cache-dir=/workspace/cache",
 	}
 
