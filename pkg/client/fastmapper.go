@@ -37,6 +37,7 @@ var allowedAPIGroups = map[string]bool{
 	"camel.apache.org":          true,
 	"project.openshift.io":      true, // used in e2e tests
 	"rbac.authorization.k8s.io": true,
+	"console.openshift.io":      true, // OpenShift console resources
 }
 
 // newFastDiscoveryRESTMapper comes from https://github.com/kubernetes-sigs/controller-runtime/pull/592.

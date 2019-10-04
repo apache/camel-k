@@ -18,15 +18,18 @@ limitations under the License.
 package openshift
 
 import (
-	"github.com/apache/camel-k/pkg/util/log"
+	"k8s.io/apimachinery/pkg/runtime"
+
 	apps "github.com/openshift/api/apps/v1"
 	authorization "github.com/openshift/api/authorization/v1"
 	build "github.com/openshift/api/build/v1"
+	console "github.com/openshift/api/console/v1"
 	image "github.com/openshift/api/image/v1"
 	project "github.com/openshift/api/project/v1"
 	route "github.com/openshift/api/route/v1"
 	template "github.com/openshift/api/template/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
 type registerFunction func(*runtime.Scheme) error
@@ -43,6 +46,9 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	err = doAdd(build.AddToScheme, scheme, err)
 	err = doAdd(authorization.AddToScheme, scheme, err)
 	err = doAdd(project.AddToScheme, scheme, err)
+
+	// OpenShift console API
+	err = doAdd(console.Install, scheme, err)
 
 	return err
 }
