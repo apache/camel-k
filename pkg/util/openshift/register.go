@@ -40,13 +40,13 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	var err error
 
 	// Standardized groups
-	err = doAdd(apps.AddToScheme, scheme, err)
-	err = doAdd(template.AddToScheme, scheme, err)
-	err = doAdd(image.AddToScheme, scheme, err)
-	err = doAdd(route.AddToScheme, scheme, err)
-	err = doAdd(build.AddToScheme, scheme, err)
-	err = doAdd(authorization.AddToScheme, scheme, err)
-	err = doAdd(project.AddToScheme, scheme, err)
+	err = doAdd(apps.Install, scheme, err)
+	err = doAdd(template.Install, scheme, err)
+	err = doAdd(image.Install, scheme, err)
+	err = doAdd(route.Install, scheme, err)
+	err = doAdd(build.Install, scheme, err)
+	err = doAdd(authorization.Install, scheme, err)
+	err = doAdd(project.Install, scheme, err)
 
 	// OpenShift console API
 	err = doAdd(console.Install, scheme, err)
