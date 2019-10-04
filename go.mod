@@ -2,7 +2,7 @@ module github.com/apache/camel-k
 
 require (
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
-	contrib.go.opencensus.io/exporter/stackdriver v0.12.2
+	contrib.go.opencensus.io/exporter/stackdriver v0.12.2 // indirect
 	github.com/Masterminds/semver v1.4.2
 	github.com/alecthomas/jsonschema v0.0.0-20190122210438-a6952de1bbe6
 	github.com/coreos/prometheus-operator v0.29.0
@@ -14,7 +14,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0
-	github.com/openshift/api v3.9.0+incompatible
+	github.com/openshift/api v0.0.0-20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/operator-sdk v0.10.0
 	github.com/pkg/errors v0.8.1
 	github.com/radovskyb/watcher v1.0.6

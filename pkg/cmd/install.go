@@ -132,7 +132,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		// Let's use a client provider during cluster installation, to eliminate the problem of CRD object caching
 		clientProvider := client.Provider{Get: o.NewCmdClient}
 
-		err := install.SetupClusterwideResourcesOrCollect(o.Context, clientProvider, collection)
+		err := install.SetupClusterWideResourcesOrCollect(o.Context, clientProvider, collection)
 		if err != nil && k8serrors.IsForbidden(err) {
 			fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
 
