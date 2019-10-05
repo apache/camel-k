@@ -100,7 +100,7 @@ func TestDependencies(t *testing.T) {
 		DataSpec: v1alpha1.DataSpec{
 			Name: "Request.java",
 			Content: `
-			    from("http4:test").to("log:end");
+			    from("http:test").to("log:end");
 			    from("https4:test").to("log:end");
 			    from("twitter-timeline:test").to("mock:end");
 		    `,
@@ -113,7 +113,7 @@ func TestDependencies(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http4", "camel:log", "camel:mock", "camel:twitter"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:http", "camel:log", "camel:mock", "camel:twitter"}, meta.Dependencies.List())
 }
 
 func TestJacksonDependency(t *testing.T) {
@@ -121,7 +121,7 @@ func TestJacksonDependency(t *testing.T) {
 		DataSpec: v1alpha1.DataSpec{
 			Name: "Request.java",
 			Content: `
-			    from("http4:test").unmarshal().json(JsonLibrary.Jackson).to("log:end");
+			    from("http:test").unmarshal().json(JsonLibrary.Jackson).to("log:end");
 		    `,
 		},
 		Language: v1alpha1.LanguageJavaSource,
@@ -132,7 +132,7 @@ func TestJacksonDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http4", "camel:jackson", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:http", "camel:jackson", "camel:log"}, meta.Dependencies.List())
 }
 
 func TestLanguageDependencies(t *testing.T) {
@@ -189,7 +189,7 @@ func TestHystrixDependency(t *testing.T) {
 		DataSpec: v1alpha1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
-			    from("http4:test")
+			    from("http:test")
 					.hystrix()
 						.to("log:end")
 					.onFallback()
@@ -204,7 +204,7 @@ func TestHystrixDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http4", "camel:hystrix", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:http", "camel:hystrix", "camel:log"}, meta.Dependencies.List())
 }
 
 func TestRestDependency(t *testing.T) {
@@ -215,7 +215,7 @@ func TestRestDependency(t *testing.T) {
                 rest()
                     .get("/api")
                     .to("direct:get")
-			    from("http4:test")
+			    from("http:test")
                     .to("log:info")
 		    `,
 		},
@@ -227,7 +227,7 @@ func TestRestDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http4", "camel:rest", "camel:direct", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:direct", "camel:log"}, meta.Dependencies.List())
 }
 
 func TestRestWithPathDependency(t *testing.T) {
@@ -238,7 +238,7 @@ func TestRestWithPathDependency(t *testing.T) {
                 rest("/test")
                     .get("/api")
                     .to("direct:get")
-			    from("http4:test")
+			    from("http:test")
                     .to("log:info")
 		    `,
 		},
@@ -250,7 +250,7 @@ func TestRestWithPathDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http4", "camel:rest", "camel:direct", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:direct", "camel:log"}, meta.Dependencies.List())
 }
 
 func TestRestConfigurationDependency(t *testing.T) {
@@ -260,7 +260,7 @@ func TestRestConfigurationDependency(t *testing.T) {
 			Content: `
                 restConfiguration()
                     .component("undertow")
-			    from("http4:test")
+			    from("http:test")
                     .to("log:info")
 		    `,
 		},
@@ -272,7 +272,7 @@ func TestRestConfigurationDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http4", "camel:rest", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:log"}, meta.Dependencies.List())
 }
 
 func TestRestClosureDependency(t *testing.T) {
@@ -282,7 +282,7 @@ func TestRestClosureDependency(t *testing.T) {
 			Content: `
                 rest {
                 }
-			    from("http4:test")
+			    from("http:test")
                     .to("log:info")
 		    `,
 		},
@@ -294,7 +294,7 @@ func TestRestClosureDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http4", "camel:rest", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:log"}, meta.Dependencies.List())
 }
 
 func TestXMLHystrixDependency(t *testing.T) {

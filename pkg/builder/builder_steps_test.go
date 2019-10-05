@@ -296,6 +296,10 @@ func TestGenerateGroovyProject(t *testing.T) {
 			},
 			{
 				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-endpointdsl",
+			},
+			{
+				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-groovy",
 			},
 		},
