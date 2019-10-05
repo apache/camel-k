@@ -1,5 +1,4 @@
-- id: "yaml"
-  from:
+- from:
     uri: "timer:tick"
     parameters:
       period: "5s"
