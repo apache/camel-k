@@ -27,4 +27,5 @@ $rootdir/mvnw -q \
     -f ${rootdir}/build/maven/pom-catalog.xml \
     -Dcatalog.path=${rootdir}/deploy \
     -Dcatalog.version=$1 \
+    -Dcamel.version=$1 \
     -Druntime.version=$2

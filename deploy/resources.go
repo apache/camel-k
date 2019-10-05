@@ -173,7 +173,7 @@ metadata:
     app: "camel-k"
 
 `
-	Resources["camel-catalog-3.0.0-M4.yaml"] =
+	Resources["camel-catalog-3.0.0-RC1-1.0.4.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -195,13 +195,15 @@ metadata:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-m4
+  name: camel-catalog-3.0.0-rc1-1.0.4
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.0.0-M4
-    camel.apache.org/catalog.loader.version: 3.0.0-M4
+    camel.apache.org/catalog.version: 3.0.0-RC1
+    camel.apache.org/catalog.loader.version: 3.0.0-RC1
+    camel.apache.org/runtime.version: 1.0.4
 spec:
-  version: 3.0.0-M4
+  version: 3.0.0-RC1
+  runtimeVersion: 1.0.4
   artifacts:
     camel-activemq:
       groupId: org.apache.camel
@@ -234,6 +236,11 @@ spec:
       - id: amqp
         http: false
         passive: false
+    camel-any23:
+      groupId: org.apache.camel
+      artifactId: camel-any23
+      dataformats:
+      - any23
     camel-apns:
       groupId: org.apache.camel
       artifactId: camel-apns
@@ -513,11 +520,6 @@ spec:
       - id: bonita
         http: false
         passive: false
-    camel-boon:
-      groupId: org.apache.camel
-      artifactId: camel-boon
-      dataformats:
-      - boon
     camel-box:
       groupId: org.apache.camel
       artifactId: camel-box
@@ -772,13 +774,6 @@ spec:
       - id: ehcache
         http: false
         passive: false
-    camel-ejb:
-      groupId: org.apache.camel
-      artifactId: camel-ejb
-      schemes:
-      - id: ejb
-        http: false
-        passive: false
     camel-elasticsearch-rest:
       groupId: org.apache.camel
       artifactId: camel-elasticsearch-rest
@@ -841,6 +836,13 @@ spec:
       artifactId: camel-file
       schemes:
       - id: file
+        http: false
+        passive: false
+    camel-file-watch:
+      groupId: org.apache.camel
+      artifactId: camel-file-watch
+      schemes:
+      - id: file-watch
         http: false
         passive: false
     camel-flatpack:
@@ -1055,14 +1057,11 @@ spec:
       - id: hbase
         http: false
         passive: false
-    camel-hdfs2:
+    camel-hdfs:
       groupId: org.apache.camel
-      artifactId: camel-hdfs2
+      artifactId: camel-hdfs
       schemes:
       - id: hdfs
-        http: false
-        passive: false
-      - id: hdfs2
         http: false
         passive: false
     camel-hipchat:
@@ -1079,17 +1078,11 @@ spec:
       - hl7terser
       dataformats:
       - hl7
-    camel-http4:
+    camel-http:
       groupId: org.apache.camel
-      artifactId: camel-http4
+      artifactId: camel-http
       schemes:
       - id: http
-        http: false
-        passive: false
-      - id: http4
-        http: false
-        passive: false
-      - id: https4
         http: false
         passive: false
       - id: https
@@ -1347,19 +1340,34 @@ spec:
       version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+      - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-loader-java:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-java
       version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
     camel-k-loader-js:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-js
+      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-knative
       version: 1.0.0
     camel-k-loader-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-kotlin
       version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
     camel-k-loader-xml:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-xml
@@ -1404,14 +1412,16 @@ spec:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-knative
       dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
       - groupId: org.apache.camel.k
         artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-knative
       - groupId: org.apache.camel.k
         artifactId: camel-knative
       - groupId: org.apache.camel.k
         artifactId: camel-knative-http
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
     camel-k-runtime-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-kotlin
@@ -1460,7 +1470,7 @@ spec:
         passive: false
       dependencies:
       - groupId: org.apache.camel
-        artifactId: camel-netty4-http
+        artifactId: camel-cloud
     camel-kubernetes:
       groupId: org.apache.camel
       artifactId: camel-kubernetes
@@ -1612,6 +1622,13 @@ spec:
       - id: micrometer
         http: false
         passive: false
+    camel-microprofile-metrics:
+      groupId: org.apache.camel
+      artifactId: camel-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
     camel-milo:
       groupId: org.apache.camel
       artifactId: camel-milo
@@ -1622,14 +1639,11 @@ spec:
       - id: milo-server
         http: false
         passive: false
-    camel-mina2:
+    camel-mina:
       groupId: org.apache.camel
-      artifactId: camel-mina2
+      artifactId: camel-mina
       schemes:
       - id: mina
-        http: false
-        passive: false
-      - id: mina2
         http: false
         passive: false
     camel-mllp:
@@ -1646,18 +1660,18 @@ spec:
       - id: mock
         http: false
         passive: true
+    camel-mongodb:
+      groupId: org.apache.camel
+      artifactId: camel-mongodb
+      schemes:
+      - id: mongodb
+        http: false
+        passive: false
     camel-mongodb-gridfs:
       groupId: org.apache.camel
       artifactId: camel-mongodb-gridfs
       schemes:
       - id: mongodb-gridfs
-        http: false
-        passive: false
-    camel-mongodb3:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb3
-      schemes:
-      - id: mongodb3
         http: false
         passive: false
     camel-mqtt:
@@ -1714,24 +1728,18 @@ spec:
       - id: nats
         http: false
         passive: false
-    camel-netty4:
+    camel-netty:
       groupId: org.apache.camel
-      artifactId: camel-netty4
+      artifactId: camel-netty
       schemes:
       - id: netty
         http: false
         passive: false
-      - id: netty4
-        http: false
-        passive: false
-    camel-netty4-http:
+    camel-netty-http:
       groupId: org.apache.camel
-      artifactId: camel-netty4-http
+      artifactId: camel-netty-http
       schemes:
       - id: netty-http
-        http: true
-        passive: false
-      - id: netty4-http
         http: true
         passive: false
     camel-nsq:
@@ -1857,11 +1865,11 @@ spec:
       - id: pulsar
         http: false
         passive: false
-    camel-quartz2:
+    camel-quartz:
       groupId: org.apache.camel
-      artifactId: camel-quartz2
+      artifactId: camel-quartz
       schemes:
-      - id: quartz2
+      - id: quartz
         http: false
         passive: false
     camel-quickfix:
@@ -2257,9 +2265,6 @@ spec:
       - id: twitter-search
         http: false
         passive: false
-      - id: twitter-streaming
-        http: false
-        passive: false
       - id: twitter-timeline
         http: false
         passive: false
@@ -2324,7 +2329,7 @@ spec:
       artifactId: camel-webhook
       schemes:
       - id: webhook
-        http: false
+        http: true
         passive: false
     camel-websocket:
       groupId: org.apache.camel

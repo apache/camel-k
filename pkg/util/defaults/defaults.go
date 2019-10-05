@@ -22,13 +22,13 @@ package defaults
 
 const (
 	// Version --
-	Version = "1.0.0-M2-SNAPSHOT"
+	Version = "1.0.0-M2"
 
 	// CamelVersionConstraint --
-	CamelVersionConstraint = ">=3.0.0-M4"
+	CamelVersionConstraint = ">=3.0.0-RC1"
 
 	// RuntimeVersion --
-	RuntimeVersion = "1.0.0"
+	RuntimeVersion = "1.0.4"
 
 	// KanikoVersion --
 	KanikoVersion = "0.9.0"

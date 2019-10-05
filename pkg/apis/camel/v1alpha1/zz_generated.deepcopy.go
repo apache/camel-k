@@ -705,6 +705,11 @@ func (in *IntegrationPlatformBuildSpec) DeepCopyInto(out *IntegrationPlatformBui
 	out.Registry = in.Registry
 	out.Timeout = in.Timeout
 	in.Maven.DeepCopyInto(&out.Maven)
+	if in.KanikoBuildCache != nil {
+		in, out := &in.KanikoBuildCache, &out.KanikoBuildCache
+		*out = new(bool)
+		**out = **in
+	}
 	return
 }
 

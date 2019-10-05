@@ -26,12 +26,12 @@ func init() {
 	// Uncomment the following lines and change references to enable the hook
 
 	//testImageName = "docker.io/camelk/camel-k"
-	//testImageVersion = "1.0.0-M2-SNAPSHOT"
+	//testImageVersion = "1.0.0-M2"
 
 	//kamelHooks = append(kamelHooks, func(cmd []string) []string {
 	//	if len(cmd) > 0 && cmd[0] == "install" {
-	//		cmd = append(cmd, "--operator-image=docker.io/camelk/camel-k:1.0.0-M2-SNAPSHOT")
-	//		cmd = append(cmd, "--maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-1145")
+	//		cmd = append(cmd, "--operator-image=docker.io/camelk/camel-k:1.0.0-M2")
+	//		cmd = append(cmd, "--maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-1156")
 	//	}
 	//	return cmd
 	//})
