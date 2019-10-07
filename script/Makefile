@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.0.0-M2
+VERSION := 1.0.0-M3-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M1
 RUNTIME_VERSION := 1.0.4
 CAMEL_VERSION := 3.0.0-RC1
