@@ -155,13 +155,21 @@ lint:
 images: test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
 	cp kamel build/_output/bin
+endif
 	operator-sdk build --image-builder docker $(IMAGE_NAME):$(VERSION)
 
 images-dev: test package-artifacts
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
 	cp kamel build/_output/bin
+endif
 	operator-sdk build --image-builder docker $(IMAGE_NAME):$(VERSION)
 
 images-push:
