@@ -149,7 +149,6 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 			// Skip the warmer pod creation
 			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 		}
-
 	} else {
 		platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 	}

@@ -171,7 +171,6 @@ func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, r
 	pl := platformObject.(*v1alpha1.IntegrationPlatform)
 
 	if !isOpenshift {
-
 		pl.Spec.Build.Registry = registry
 
 		// Kubernetes only (Minikube)

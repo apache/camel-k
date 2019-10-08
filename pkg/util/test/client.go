@@ -45,7 +45,6 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		Client:    c,
 		Interface: nil,
 	}, nil
-
 }
 
 // FakeClient ---

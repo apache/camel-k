@@ -91,7 +91,6 @@ func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformCo
 		if c.Type == condType {
 			return &c
 		}
-
 	}
 	return nil
 }

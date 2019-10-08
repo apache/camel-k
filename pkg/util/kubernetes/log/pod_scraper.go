@@ -178,7 +178,6 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, po
 					if err := json.Unmarshal(jsondata, recvPod); err != nil {
 						return "", err
 					}
-
 				} else if gotPod, ok := e.Object.(*corev1.Pod); ok {
 					recvPod = gotPod
 				}
@@ -193,7 +192,6 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, po
 			return "", errors.New("no state change after 30 seconds for pod " + s.podName)
 		}
 	}
-
 }
 
 func (s *PodScraper) chooseContainer(p *corev1.Pod, defaultContainerName string) string {

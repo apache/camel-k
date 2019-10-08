@@ -65,7 +65,6 @@ type kitGetCommand struct {
 
 func (command *kitGetCommand) validate(cmd *cobra.Command, args []string) error {
 	return nil
-
 }
 
 func (command *kitGetCommand) run() error {
