@@ -135,15 +135,13 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 			return nil, err
 		}
 
-		// Check if the operator is running in the same namespace before starting the cache warmer
-		if platform.Namespace == platformutil.GetOperatorNamespace() && platform.Spec.Build.IsKanikoCacheEnabled() {
+		if platform.Spec.Build.IsKanikoCacheEnabled() {
 			// Create the Kaniko warmer pod that caches the base image into the Camel K builder volume
 			action.L.Info("Create Kaniko cache warmer pod")
 			err = createKanikoCacheWarmerPod(ctx, action.client, platform)
 			if err != nil {
 				return nil, err
 			}
-
 			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseWarming
 		} else {
 			// Skip the warmer pod creation
