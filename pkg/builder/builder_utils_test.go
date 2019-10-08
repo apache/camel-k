@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -35,7 +34,7 @@ func TestNewProject(t *testing.T) {
 	ctx := Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: defaults.RuntimeVersion,
+			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -65,7 +64,7 @@ func TestNewProject(t *testing.T) {
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-runtime-bom",
-				Version:    defaults.RuntimeVersion,
+				Version:    catalog.RuntimeVersion,
 				Type:       "pom",
 				Scope:      "import",
 			},

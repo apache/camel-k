@@ -2531,10 +2531,14 @@ spec:
   subresources:
     status: {}
   additionalPrinterColumns:
-    - name: Version
+    - name: Camel Version
       type: string
-      description: The Catalog version
+      description: The Camel version
       JSONPath: .spec.version
+    - name: Runtime Version
+      type: string
+      description: The Camel K Runtime version
+      JSONPath: .spec.runtimeVersion
 
 
 `

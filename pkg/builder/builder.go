@@ -71,7 +71,7 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 
 	defer os.RemoveAll(builderPath)
 
-	catalog, err := camel.Catalog(b.ctx, b.client, build.Meta.Namespace, build.CamelVersion)
+	catalog, err := camel.LoadCatalog(b.ctx, b.client, build.Meta.Namespace, build.CamelVersion, build.RuntimeVersion)
 	if err != nil {
 		log.Error(err, "Error while loading Camel catalog")
 

@@ -159,6 +159,7 @@
     "CamelCatalogSpec": {
       "required": [
         "version",
+        "runtimeVersion",
         "artifacts"
       ],
       "properties": {
@@ -170,6 +171,9 @@
             }
           },
           "type": "object"
+        },
+        "runtimeVersion": {
+          "type": "string"
         },
         "version": {
           "type": "string"

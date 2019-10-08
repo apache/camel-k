@@ -72,7 +72,7 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 func TestCamelTraitGenerateMavenProjectSucceeds(t *testing.T) {
 	trait, _ := createNominalCamelTest()
 
-	mvnProject, err := trait.GenerateMavenProject("1.23.0")
+	mvnProject, err := trait.GenerateMavenProject("1.23.0", "1.0.0")
 	assert.Nil(t, err)
 	assert.NotNil(t, mvnProject)
 	assert.Equal(t, "org.apache.camel.k.integration", mvnProject.GroupID)

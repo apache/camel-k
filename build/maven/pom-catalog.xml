@@ -46,7 +46,7 @@
                     <dependency>
                         <groupId>org.apache.camel</groupId>
                         <artifactId>camel-catalog</artifactId>
-                        <version>${catalog.version}</version>
+                        <version>${camel.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -56,7 +56,6 @@
     <repositories>
         <repository>
             <id>apache.snapshots</id>
-            <name>Apache Development Snapshot Repository</name>
             <url>https://repository.apache.org/content/repositories/snapshots/</url>
             <releases>
                 <enabled>false</enabled>
@@ -80,7 +79,6 @@
     <pluginRepositories>
         <pluginRepository>
             <id>apache.snapshots</id>
-            <name>Apache Development Snapshot Repository</name>
             <url>https://repository.apache.org/content/repositories/snapshots/</url>
             <releases>
                 <enabled>false</enabled>
@@ -100,5 +98,9 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+
+
+
+
 
 </project>

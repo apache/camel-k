@@ -181,7 +181,7 @@ func (action *initializeAction) setDefaults(ctx context.Context, platform *v1alp
 		platform.Spec.Build.CamelVersion = defaults.CamelVersionConstraint
 	}
 	if platform.Spec.Build.RuntimeVersion == "" {
-		platform.Spec.Build.RuntimeVersion = defaults.RuntimeVersion
+		platform.Spec.Build.RuntimeVersion = defaults.RuntimeVersionConstraint
 	}
 	if platform.Spec.Build.BaseImage == "" {
 		platform.Spec.Build.BaseImage = defaults.BaseImage

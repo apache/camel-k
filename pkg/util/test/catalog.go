@@ -43,5 +43,5 @@ func DefaultCatalog() (*camel.RuntimeCatalog, error) {
 		}
 	}
 
-	return camel.FindBestMatch(defaults.CamelVersionConstraint, catalogs)
+	return camel.FindBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion)
 }
