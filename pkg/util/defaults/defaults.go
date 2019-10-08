@@ -24,11 +24,17 @@ const (
 	// Version --
 	Version = "1.0.0-M3-SNAPSHOT"
 
+	// DefaultCamelVersion --
+	DefaultCamelVersion = "3.0.0-RC1"
+
 	// CamelVersionConstraint --
 	CamelVersionConstraint = ">=3.0.0-RC1"
 
-	// RuntimeVersion --
-	RuntimeVersion = "1.0.4"
+	// DefaultRuntimeVersion --
+	DefaultRuntimeVersion = "1.0.4"
+
+	// RuntimeVersionConstraint --
+	RuntimeVersionConstraint = ">=1.0.4"
 
 	// KanikoVersion --
 	KanikoVersion = "0.9.0"

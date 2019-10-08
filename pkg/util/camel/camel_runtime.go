@@ -19,7 +19,7 @@ package camel
 
 import (
 	"context"
-	"sync"
+	"fmt"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -27,28 +27,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewRuntime --
-func NewRuntime() Runtime {
-	return Runtime{
-		catalogs: make(map[string]RuntimeCatalog),
-	}
-}
-
-// Runtime --
-type Runtime struct {
-	catalogs map[string]RuntimeCatalog
-	lock     sync.Mutex
-}
-
 // LoadCatalog --
-func (r *Runtime) LoadCatalog(ctx context.Context, client client.Client, namespace string, version string) (*RuntimeCatalog, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
-	if c, ok := r.catalogs[version]; ok {
-		return &c, nil
-	}
-
+func LoadCatalog(ctx context.Context, client client.Client, namespace string, camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
 	var catalog *RuntimeCatalog
 	var err error
 
@@ -58,9 +38,13 @@ func (r *Runtime) LoadCatalog(ctx context.Context, client client.Client, namespa
 		return nil, err
 	}
 
-	catalog, err = FindBestMatch(version, list.Items)
+	catalog, err = FindBestMatch(list.Items, camelVersion, runtimeVersion)
 	if err != nil {
 		return nil, err
+	}
+
+	if catalog == nil && err != nil {
+		return nil, fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s", camelVersion, runtimeVersion)
 	}
 
 	return catalog, nil

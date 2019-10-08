@@ -248,7 +248,7 @@ func computeDependencies(ctx *Context) error {
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Platform.Build.LocalRepository
 	mc.Timeout = ctx.Build.Platform.Build.Maven.Timeout.Duration
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Build.RuntimeVersion)
+	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.RuntimeVersion)
 
 	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while determining classpath")
@@ -390,7 +390,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 		if kit.Status.CamelVersion != context.Catalog.Version {
 			continue
 		}
-		if kit.Status.RuntimeVersion != context.Build.RuntimeVersion {
+		if kit.Status.RuntimeVersion != context.Catalog.RuntimeVersion {
 			continue
 		}
 		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady || kit.Labels == nil {

@@ -26,67 +26,73 @@ import (
 )
 
 // FindBestMatch --
-func FindBestMatch(version string, catalogs []v1alpha1.CamelCatalog) (*RuntimeCatalog, error) {
-	constraint, err := semver.NewConstraint(version)
-
-	//
-	// if the version is not a constraint, use exact match
-	//
-	if err != nil || constraint == nil {
-		if err != nil {
-			log.Debug("Unable to parse constraint: %s, error:\n", version, err.Error())
-		}
-		if constraint == nil {
-			log.Debug("Unable to parse constraint: %s\n", version)
-		}
-
-		return FindExactMatch(version, catalogs)
-	}
-
-	return FindBestSemVerMatch(constraint, catalogs)
-}
-
-// FindExactMatch --
-func FindExactMatch(version string, catalogs []v1alpha1.CamelCatalog) (*RuntimeCatalog, error) {
+func FindBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
 	for _, catalog := range catalogs {
-		if catalog.Spec.Version == version {
+		if catalog.Spec.Version == camelVersion && catalog.Spec.RuntimeVersion == runtimeVersion {
 			return NewRuntimeCatalog(catalog.Spec), nil
 		}
 	}
 
+	vc := NewSemVerConstraint(camelVersion)
+	rc := NewSemVerConstraint(runtimeVersion)
+	if vc == nil || rc == nil {
+		return nil, nil
+	}
+
+	cc := NewCatalogVersionCollection(catalogs)
+	for _, x := range cc {
+		if vc.Check(x.Version) && rc.Check(x.RuntimeVersion) {
+			return NewRuntimeCatalog(x.Catalog.Spec), nil
+		}
+	}
+
 	return nil, nil
 }
 
-// FindBestSemVerMatch --
-func FindBestSemVerMatch(constraint *semver.Constraints, catalogs []v1alpha1.CamelCatalog) (*RuntimeCatalog, error) {
-	versions := make([]*semver.Version, 0)
-
-	for _, catalog := range catalogs {
-		v, err := semver.NewVersion(catalog.Spec.Version)
+// NewSemVerConstraint --
+func NewSemVerConstraint(versionConstraint string) *semver.Constraints {
+	constraint, err := semver.NewConstraint(versionConstraint)
+	if err != nil || constraint == nil {
 		if err != nil {
-			log.Debugf("Invalid semver version %s, skip it", catalog.Spec.Version)
+			log.Debug("Unable to parse version constraint: %s, error:\n", versionConstraint, err.Error())
+		}
+		if constraint == nil {
+			log.Debug("Unable to parse version constraint: %s\n", versionConstraint)
+		}
+	}
+
+	return constraint
+}
+
+// NewCatalogVersionCollection --
+func NewCatalogVersionCollection(catalogs []v1alpha1.CamelCatalog) CatalogVersionCollection {
+	versions := make([]CatalogVersion, 0, len(catalogs))
+
+	for i := range catalogs {
+		cv, err := semver.NewVersion(catalogs[i].Spec.Version)
+		if err != nil {
+			log.Debugf("Invalid semver version (camel) %s", cv)
 			continue
 		}
 
-		versions = append(versions, v)
+		rv, err := semver.NewVersion(catalogs[i].Spec.RuntimeVersion)
+		if err != nil {
+			log.Debugf("Invalid semver version (runtime) %s", rv)
+			continue
+		}
+
+		versions = append(versions, CatalogVersion{
+			Version:        cv,
+			RuntimeVersion: rv,
+			Catalog:        &catalogs[i],
+		})
 	}
+
+	answer := CatalogVersionCollection(versions)
 
 	sort.Sort(
-		sort.Reverse(semver.Collection(versions)),
+		sort.Reverse(answer),
 	)
 
-	for _, v := range versions {
-		ver := v
-
-		if constraint.Check(ver) {
-			for _, catalog := range catalogs {
-				if catalog.Spec.Version == ver.Original() {
-					return NewRuntimeCatalog(catalog.Spec), nil
-				}
-			}
-
-		}
-	}
-
-	return nil, nil
+	return answer
 }

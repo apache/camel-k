@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
@@ -58,7 +57,7 @@ func TestFailure(t *testing.T) {
 			steps.Step1,
 			steps.Step2,
 		),
-		RuntimeVersion: defaults.RuntimeVersion,
+		RuntimeVersion: catalog.RuntimeVersion,
 		Platform: v1alpha1.IntegrationPlatformSpec{
 			Build: v1alpha1.IntegrationPlatformBuildSpec{
 				CamelVersion: catalog.Version,

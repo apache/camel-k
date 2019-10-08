@@ -51,7 +51,7 @@ func NewMavenProject(ctx *Context) (maven.Project, error) {
 	// Catalog
 	//
 	if ctx.Catalog == nil {
-		c, err := camel.Catalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Platform.Build.CamelVersion)
+		c, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Platform.Build.CamelVersion, ctx.Build.Platform.Build.RuntimeVersion)
 		if err != nil {
 			return maven.Project{}, err
 		}
@@ -77,7 +77,7 @@ func NewMavenProject(ctx *Context) (maven.Project, error) {
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-bom",
-		Version:    ctx.Build.RuntimeVersion,
+		Version:    ctx.Catalog.RuntimeVersion,
 		Type:       "pom",
 		Scope:      "import",
 	})

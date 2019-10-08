@@ -17,6 +17,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-M3-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M1
 RUNTIME_VERSION := 1.0.4
+RUNTIME_VERSION_CONSTRAINT := >=1.0.4
 CAMEL_VERSION := 3.0.0-RC1
 CAMEL_VERSION_CONSTRAINT := >=3.0.0-RC1
 KANIKO_VERSION := 0.9.0
@@ -76,11 +77,17 @@ codegen:
 	@echo "  // Version -- " >> $(VERSIONFILE)
 	@echo "  Version = \"$(VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultCamelVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultCamelVersion = \"$(CAMEL_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
 	@echo "  // CamelVersionConstraint -- " >> $(VERSIONFILE)
 	@echo "  CamelVersionConstraint = \"$(CAMEL_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // RuntimeVersion -- " >> $(VERSIONFILE)
-	@echo "  RuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // RuntimeVersionConstraint -- " >> $(VERSIONFILE)
+	@echo "  RuntimeVersionConstraint = \"$(RUNTIME_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
 	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)

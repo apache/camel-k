@@ -25,7 +25,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/cancellable"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -58,7 +57,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	ctx := Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: defaults.RuntimeVersion,
+			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -89,7 +88,7 @@ func TestGenerateJvmProject(t *testing.T) {
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-runtime-bom",
-				Version:    defaults.RuntimeVersion,
+				Version:    catalog.RuntimeVersion,
 				Type:       "pom",
 				Scope:      "import",
 			},
@@ -147,7 +146,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		Client:    c,
 		Namespace: "ns",
 		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: defaults.RuntimeVersion,
+			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -199,7 +198,7 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		Client:    c,
 		Namespace: "ns",
 		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: defaults.RuntimeVersion,
+			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -231,7 +230,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 	ctx := Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: defaults.RuntimeVersion,
+			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -263,7 +262,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-runtime-bom",
-				Version:    defaults.RuntimeVersion,
+				Version:    catalog.RuntimeVersion,
 				Type:       "pom",
 				Scope:      "import",
 			},
@@ -292,15 +291,15 @@ func TestGenerateGroovyProject(t *testing.T) {
 			},
 			{
 				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-groovy",
+			},
+			{
+				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-properties",
 			},
 			{
 				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-endpointdsl",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-groovy",
 			},
 		},
 	)
@@ -313,7 +312,7 @@ func TestSanitizeDependencies(t *testing.T) {
 	ctx := Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: defaults.RuntimeVersion,
+			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
 					CamelVersion: catalog.Version,
@@ -372,9 +371,10 @@ func TestListPublishedImages(t *testing.T) {
 				},
 			},
 			Status: v1alpha1.IntegrationKitStatus{
-				Phase:        v1alpha1.IntegrationKitPhaseError,
-				Image:        "image-1",
-				CamelVersion: catalog.Version,
+				Phase:          v1alpha1.IntegrationKitPhaseError,
+				Image:          "image-1",
+				CamelVersion:   catalog.Version,
+				RuntimeVersion: catalog.RuntimeVersion,
 			},
 		},
 		&v1alpha1.IntegrationKit{
@@ -390,9 +390,10 @@ func TestListPublishedImages(t *testing.T) {
 				},
 			},
 			Status: v1alpha1.IntegrationKitStatus{
-				Phase:        v1alpha1.IntegrationKitPhaseReady,
-				Image:        "image-2",
-				CamelVersion: catalog.Version,
+				Phase:          v1alpha1.IntegrationKitPhaseReady,
+				Image:          "image-2",
+				CamelVersion:   catalog.Version,
+				RuntimeVersion: catalog.RuntimeVersion,
 			},
 		},
 	)

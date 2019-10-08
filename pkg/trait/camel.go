@@ -73,31 +73,38 @@ func (t *camelTrait) Apply(e *Environment) error {
 	}
 
 	if e.CamelCatalog == nil {
-		c, err := camel.Catalog(e.C, e.Client, ns, cv)
+		c, err := camel.LoadCatalog(e.C, e.Client, ns, cv, rv)
 		if err != nil {
 			return err
 		}
 		if c == nil {
-			// if the catalog is not found in the cluster, try to create it if the
-			// required version is not set using semver constraints
-			matched, err := regexp.MatchString(`^(\d+)\.(\d+)\.([\w-\.]+)$`, cv)
+			// if the catalog is not found in the cluster, try to create it if
+			// the required versions (camel and runtime) are not expressed as
+			// semver constraints
+			cvHasFixedVersion, err := regexp.MatchString(`^(\d+)\.(\d+)\.([\w-\.]+)$`, cv)
 			if err != nil {
 				return err
 			}
-			if matched {
-				c, err = t.GenerateCatalog(e, cv)
+			rvHasFixedVersion, err := regexp.MatchString(`^(\d+)\.(\d+)\.([\w-\.]+)$`, rv)
+			if err != nil {
+				return err
+			}
+
+			if cvHasFixedVersion && rvHasFixedVersion {
+				c, err = t.GenerateCatalog(e, cv, rv)
 				if err != nil {
 					return err
 				}
 
 				// sanitize catalog name
-				catalogName := "camel-catalog-" + strings.ToLower(cv)
+				catalogName := "camel-catalog-" + strings.ToLower(cv+"-"+rv)
 
 				cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, c.CamelCatalogSpec)
 				cx.Labels = make(map[string]string)
 				cx.Labels["app"] = "camel-k"
 				cx.Labels["camel.apache.org/catalog.version"] = cv
 				cx.Labels["camel.apache.org/catalog.loader.version"] = cv
+				cx.Labels["camel.apache.org/runtime.version"] = rv
 				cx.Labels["camel.apache.org/catalog.generated"] = True
 
 				err = e.Client.Create(e.C, &cx)
@@ -129,7 +136,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 }
 
 // GenerateCatalog --
-func (t *camelTrait) GenerateCatalog(e *Environment, version string) (*camel.RuntimeCatalog, error) {
+func (t *camelTrait) GenerateCatalog(e *Environment, camelVersion string, runtimeVersion string) (*camel.RuntimeCatalog, error) {
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
 	if err != nil {
@@ -142,7 +149,7 @@ func (t *camelTrait) GenerateCatalog(e *Environment, version string) (*camel.Run
 		return nil, err
 	}
 
-	project, err := t.GenerateMavenProject(version)
+	project, err := t.GenerateMavenProject(camelVersion, runtimeVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +192,7 @@ func (t *camelTrait) GenerateCatalog(e *Environment, version string) (*camel.Run
 }
 
 // GenerateCatalogMavenProject --
-func (t *camelTrait) GenerateMavenProject(version string) (maven.Project, error) {
+func (t *camelTrait) GenerateMavenProject(camelVersion string, runtimeVersion string) (maven.Project, error) {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
 	p.Build = &maven.Build{
 		DefaultGoal: "generate-resources",
@@ -193,7 +200,7 @@ func (t *camelTrait) GenerateMavenProject(version string) (maven.Project, error)
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-maven-plugin",
-				Version:    defaults.RuntimeVersion,
+				Version:    runtimeVersion,
 				Executions: []maven.Execution{
 					{
 						ID: "generate-catalog",
@@ -206,7 +213,7 @@ func (t *camelTrait) GenerateMavenProject(version string) (maven.Project, error)
 					{
 						GroupID:    "org.apache.camel",
 						ArtifactID: "camel-catalog",
-						Version:    version,
+						Version:    camelVersion,
 					},
 				},
 			},
