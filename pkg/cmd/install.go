@@ -58,7 +58,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&impl.skipOperatorSetup, "skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
-	cmd.Flags().BoolVar(&impl.global, "global", false, "Configure the operator to watch all namespaces")
+	cmd.Flags().BoolVar(&impl.global, "global", false, "Configure the operator to watch all namespaces. No integration platform is created.")
 
 	cmd.Flags().StringVarP(&impl.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().StringVar(&impl.registry.Organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
@@ -249,9 +249,13 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		platform.Spec.Resources.Kits = o.kits
 
-		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
-		if err != nil {
-			return err
+		// Do not create an integration platform in global mode as platforms are expected
+		// to be created in other namespaces
+		if !o.global {
+			err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
+			if err != nil {
+				return err
+			}
 		}
 
 		if o.exampleSetup {
