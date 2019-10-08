@@ -64,15 +64,12 @@ func (action *warmAction) Handle(ctx context.Context, platform *v1alpha1.Integra
 	}
 
 	switch pod.Status.Phase {
-
 	case corev1.PodSucceeded:
 		action.L.Info("Kaniko cache successfully warmed up")
 		platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
 		return platform, nil
-
 	case corev1.PodFailed:
 		return nil, errors.New("failed to warm up Kaniko cache")
-
 	default:
 		action.L.Info("Waiting for Kaniko cache to warm up...")
 		// Requeue

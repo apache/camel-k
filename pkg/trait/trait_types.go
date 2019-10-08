@@ -410,7 +410,6 @@ func (e *Environment) ComputeSourcesURI() []string {
 
 // ConfigureVolumesAndMounts --
 func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
-
 	//
 	// Volumes :: Sources
 	//

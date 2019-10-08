@@ -189,5 +189,4 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 	return reconcile.Result{
 		RequeueAfter: 5 * time.Second,
 	}, nil
-
 }

@@ -29,7 +29,6 @@ import (
 )
 
 func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-
 	impl := &describeKitCommand{
 		rootCmdOptions,
 	}

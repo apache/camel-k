@@ -33,9 +33,7 @@ import (
 )
 
 func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
-
 	configured, err := ingressTrait.Configure(environment)
 
 	assert.True(t, configured)
@@ -44,7 +42,6 @@ func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 }
 
 func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.Enabled = new(bool)
 
@@ -58,7 +55,6 @@ func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 }
 
 func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseError
 
@@ -70,7 +66,6 @@ func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 }
 
 func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 	auto := true
 	ingressTrait.Auto = &auto
@@ -86,7 +81,6 @@ func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T)
 }
 
 func TestConfigureAutoIngressTraitWithEmptyHostDoesNotSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.Auto = nil
 	ingressTrait.Host = ""
@@ -101,7 +95,6 @@ func TestConfigureAutoIngressTraitWithEmptyHostDoesNotSucceed(t *testing.T) {
 }
 
 func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.Auto = nil
 
@@ -113,7 +106,6 @@ func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
 }
 
 func TestConfigureIngressTraitWithoutHostDoesNotSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.Host = ""
 
@@ -128,7 +120,6 @@ func TestConfigureIngressTraitWithoutHostDoesNotSucceed(t *testing.T) {
 }
 
 func TestApplyIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 	environment.Resources = kubernetes.NewCollection()
 
@@ -140,7 +131,6 @@ func TestApplyIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
 }
 
 func TestApplyIngressTraitDoesSucceed(t *testing.T) {
-
 	ingressTrait, environment := createNominalIngressTest()
 
 	err := ingressTrait.Apply(environment)
@@ -165,7 +155,6 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 }
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {
-
 	trait := newIngressTrait()
 	enabled := true
 	trait.Enabled = &enabled

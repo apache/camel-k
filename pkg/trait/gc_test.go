@@ -28,9 +28,7 @@ import (
 )
 
 func TestConfigureGarbageCollectorTraitDoesSucceed(t *testing.T) {
-
 	gcTrait, environment := createNominalGarbageCollectorTest()
-
 	configured, err := gcTrait.Configure(environment)
 
 	assert.True(t, configured)
@@ -38,7 +36,6 @@ func TestConfigureGarbageCollectorTraitDoesSucceed(t *testing.T) {
 }
 
 func TestConfigureDisabledGarbageCollectorTraitDoesNotSucceed(t *testing.T) {
-
 	gcTrait, environment := createNominalGarbageCollectorTest()
 	gcTrait.Enabled = new(bool)
 
@@ -70,7 +67,6 @@ func TestApplyGarbageCollectorTraitDuringInitializationPhaseSkipPostActions(t *t
 }
 
 func createNominalGarbageCollectorTest() (*garbageCollectorTrait, *Environment) {
-
 	trait := newGarbageCollectorTrait()
 	enabled := true
 	trait.Enabled = &enabled

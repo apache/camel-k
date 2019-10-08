@@ -99,22 +99,10 @@ func TestGenerateJvmProject(t *testing.T) {
 		t,
 		ctx.Maven.Project.Dependencies,
 		[]maven.Dependency{
-			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-main",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-core-engine",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-main",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-properties",
-			},
+			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-runtime-main"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-core-engine"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-main"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-properties"},
 		},
 	)
 }
@@ -273,34 +261,13 @@ func TestGenerateGroovyProject(t *testing.T) {
 		t,
 		ctx.Maven.Project.Dependencies,
 		[]maven.Dependency{
-			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-main",
-			},
-			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-loader-groovy",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-core-engine",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-main",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-groovy",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-properties",
-			},
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-endpointdsl",
-			},
+			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-runtime-main"},
+			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-loader-groovy"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-core-engine"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-main"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-groovy"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-properties"},
+			{GroupID: "org.apache.camel", ArtifactID: "camel-endpointdsl"},
 		},
 	)
 }

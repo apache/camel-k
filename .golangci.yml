@@ -7,3 +7,8 @@ linters:
     - dupl
     - gochecknoinits
     - gochecknoglobals
+    - funlen
+    - godox
+    - whitespace
+    - gocognit
+    - wsl
