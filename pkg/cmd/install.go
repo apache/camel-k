@@ -269,7 +269,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				}
 			}
 
-			fmt.Println("Camel K installed in namespace", namespace)
+			if o.global {
+				fmt.Println("Camel K installed in namespace", namespace, "(global mode)")
+			} else {
+				fmt.Println("Camel K installed in namespace", namespace)
+			}
 		}
 	}
 
