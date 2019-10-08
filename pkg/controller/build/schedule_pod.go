@@ -21,15 +21,17 @@ import (
 	"context"
 	"sync"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 
 	"github.com/pkg/errors"
 )
@@ -96,7 +98,10 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 
 		// We may want to explicitly manage build priority as opposed to relying on
 		// the reconcile loop to handle the queuing
-		pod = newBuildPod(build, operatorImage)
+		pod, err = action.newBuildPod(ctx, build, operatorImage)
+		if err != nil {
+			return nil, err
+		}
 
 		// Set the Build instance as the owner and controller
 		if err := controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
@@ -113,7 +118,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	return build, nil
 }
 
-func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
+func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1alpha1.Build, operatorImage string) (*corev1.Pod, error) {
 	builderImage := operatorImage
 	if builderImage == "" {
 		builderImage = defaults.ImageName + ":" + defaults.Version
@@ -127,7 +132,8 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 			Namespace: build.Namespace,
 			Name:      buildPodName(build.Spec.Meta),
 			Labels: map[string]string{
-				"camel.apache.org/build": build.Name,
+				"camel.apache.org/build":     build.Name,
+				"camel.apache.org/component": "builder",
 			},
 		},
 		Spec: corev1.PodSpec{
@@ -185,21 +191,52 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 			},
 		})
 
-		// Use affinity only when the operator is present in the namespaced
-		if build.Namespace == platform.GetOperatorNamespace() {
-			// Co-locate with the builder pod for sharing the host path volume as the current
+		// Use affinity when Kaniko cache warming is enabled
+		if build.Spec.Platform.Build.IsKanikoCacheEnabled() {
+			// Co-locate with the Kaniko warmer pod for sharing the host path volume as the current
 			// persistent volume claim uses the default storage class which is likely relying
 			// on the host path provisioner.
+			// This has to be done manually by retrieving the Kaniko warmer pod node name and using
+			// node affinity as pod affinity only works for running pods and the Kaniko warmer pod
+			// has already completed at that stage.
+
+			// Locate the kaniko warmer pod
+			byComponentLabel, err := labels.NewRequirement("camel.apache.org/component", selection.Equals, []string{"kaniko-warmer"})
+			if err != nil {
+				return nil, err
+			}
+
+			selector := labels.NewSelector().Add(*byComponentLabel)
+
+			options := &k8sclient.ListOptions{
+				Namespace:     build.Namespace,
+				LabelSelector: selector,
+			}
+
+			pods := &corev1.PodList{}
+			err = action.client.List(ctx, options, pods)
+			if err != nil {
+				return nil, err
+			}
+
+			if len(pods.Items) != 1 {
+				return nil, errors.New("failed to locate the Kaniko cache warmer pod")
+			}
+
+			// Use node affinity with the Kaniko warmer pod node name
 			pod.Spec.Affinity = &corev1.Affinity{
-				PodAffinity: &corev1.PodAffinity{
-					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-						{
-							LabelSelector: &metav1.LabelSelector{
-								MatchLabels: map[string]string{
-									"camel.apache.org/component": "operator",
+				NodeAffinity: &corev1.NodeAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+						NodeSelectorTerms: []corev1.NodeSelectorTerm{
+							{
+								MatchExpressions: []corev1.NodeSelectorRequirement{
+									{
+										Key:      "kubernetes.io/hostname",
+										Operator: "In",
+										Values:   []string{pods.Items[0].Spec.NodeName},
+									},
 								},
 							},
-							TopologyKey: "kubernetes.io/hostname",
 						},
 					},
 				},
@@ -207,5 +244,5 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 		}
 	}
 
-	return pod
+	return pod, nil
 }
