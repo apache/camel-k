@@ -19,14 +19,13 @@ package trait
 
 import (
 	"context"
-	"fmt"
 	"strconv"
-	"strings"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/discovery"
 
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
@@ -89,21 +88,22 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 }
 
 func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
+	integration, _ := labels.NewRequirement("camel.apache.org/integration", selection.Equals, []string{e.Integration.Name})
+	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
+	if err != nil {
+		t.L.ForIntegration(e.Integration).Errorf(err, "cannot determine generation requirement")
+		return
+	}
+	selector := labels.NewSelector().
+		Add(*integration).
+		Add(*generation)
+
 	// Retrieve older generation resources to be enlisted for garbage collection.
 	// We rely on the discovery API to retrieve all the resources group and kind.
 	// That results in an unbounded collection that can be a bit slow.
 	// We may want to refine that step by white-listing or enlisting types to speed-up
 	// the collection duration.
-
-	selectors := []string{
-		// Select resources labelled with the current integration.
-		fmt.Sprintf("camel.apache.org/integration=%s", e.Integration.Name),
-		// Garbage collect older generation resources only.
-		// By the time async garbage collecting is executed, newer generations may exist.
-		fmt.Sprintf("camel.apache.org/generation<%d", e.Integration.GetGeneration()),
-	}
-
-	resources, err := lookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
+	resources, err := lookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selector)
 	if err != nil {
 		t.L.ForIntegration(e.Integration).Errorf(err, "cannot collect older generation resources")
 		return
@@ -124,7 +124,8 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 		}
 	}
 }
-func lookUpResources(ctx context.Context, client client.Client, namespace string, selectors []string) ([]unstructured.Unstructured, error) {
+
+func lookUpResources(ctx context.Context, client client.Client, namespace string, selector labels.Selector) ([]unstructured.Unstructured, error) {
 	// We only take types that support the "create" and "list" verbs as:
 	// - they have to be created to be deleted :) so that excludes read-only
 	//   resources, e.g., aggregated APIs
@@ -132,11 +133,6 @@ func lookUpResources(ctx context.Context, client client.Client, namespace string
 	//   is performed for each of them. That prevents from performing queries
 	//   that we know are going to return "MethodNotAllowed".
 	types, err := getDiscoveryTypesWithVerbs(client, []string{"create", "list"})
-	if err != nil {
-		return nil, err
-	}
-
-	selector, err := labels.Parse(strings.Join(selectors, ","))
 	if err != nil {
 		return nil, err
 	}
