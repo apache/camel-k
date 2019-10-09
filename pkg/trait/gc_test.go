@@ -51,7 +51,7 @@ func TestApplyGarbageCollectorTraitDoesSucceed(t *testing.T) {
 	err := gcTrait.Apply(environment)
 
 	assert.Nil(t, err)
-	assert.Len(t, environment.PostProcessors, 1)
+	assert.Len(t, environment.PostProcessors, 0)
 	assert.Len(t, environment.PostActions, 1)
 }
 
@@ -78,7 +78,7 @@ func createNominalGarbageCollectorTest() (*garbageCollectorTrait, *Environment) 
 				Name: "integration-name",
 			},
 			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+				Phase: v1alpha1.IntegrationPhaseRunning,
 			},
 		},
 	}
