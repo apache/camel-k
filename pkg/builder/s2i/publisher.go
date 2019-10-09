@@ -40,7 +40,7 @@ import (
 func publisher(ctx *builder.Context) error {
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: buildv1.SchemeGroupVersion.String(),
+			APIVersion: buildv1.GroupVersion.String(),
 			Kind:       "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -85,7 +85,7 @@ func publisher(ctx *builder.Context) error {
 
 	is := imagev1.ImageStream{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: imagev1.SchemeGroupVersion.String(),
+			APIVersion: imagev1.GroupVersion.String(),
 			Kind:       "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
