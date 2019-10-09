@@ -21,9 +21,6 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/finalizer"
-
-	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -79,30 +76,18 @@ func (t *ownerTrait) Apply(e *Environment) error {
 		}
 	}
 
-	ok, err := finalizer.Exists(e.Integration, finalizer.CamelIntegrationFinalizer)
-	if err != nil {
-		return errors.Wrap(err, "failed to read finalizer"+finalizer.CamelIntegrationFinalizer)
-	}
-
 	e.Resources.VisitMetaObject(func(res metav1.Object) {
-		//
-		// do not add owner reference if the finalizer is set
-		// so resources are not automatically deleted by k8s
-		// when owner is deleted
-		//
-		if !ok {
-			references := []metav1.OwnerReference{
-				{
-					APIVersion:         e.Integration.APIVersion,
-					Kind:               e.Integration.Kind,
-					Name:               e.Integration.Name,
-					UID:                e.Integration.UID,
-					Controller:         &controller,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
-			}
-			res.SetOwnerReferences(references)
+		references := []metav1.OwnerReference{
+			{
+				APIVersion:         e.Integration.APIVersion,
+				Kind:               e.Integration.Kind,
+				Name:               e.Integration.Name,
+				UID:                e.Integration.UID,
+				Controller:         &controller,
+				BlockOwnerDeletion: &blockOwnerDeletion,
+			},
 		}
+		res.SetOwnerReferences(references)
 
 		// Transfer annotations
 		t.propagateLabelAndAnnotations(res, targetLabels, targetAnnotations)

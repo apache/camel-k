@@ -166,8 +166,6 @@ const (
 	IntegrationPhaseRunning IntegrationPhase = "Running"
 	// IntegrationPhaseError --
 	IntegrationPhaseError IntegrationPhase = "Error"
-	// IntegrationPhaseDeleting --
-	IntegrationPhaseDeleting IntegrationPhase = "Deleting"
 
 	// IntegrationConditionKitAvailable --
 	IntegrationConditionKitAvailable IntegrationConditionType = "IntegrationKitAvailable"

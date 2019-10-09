@@ -228,11 +228,6 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
-	// Delete phase
-	if target.GetDeletionTimestamp() != nil {
-		target.Status.Phase = v1alpha1.IntegrationPhaseDeleting
-	}
-
 	if target.Status.Phase == v1alpha1.IntegrationPhaseNone || target.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
 		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
 		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
@@ -262,7 +257,6 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		NewDeployAction(),
 		NewMonitorAction(),
 		NewErrorAction(),
-		NewDeleteAction(),
 	}
 
 	for _, a := range actions {
