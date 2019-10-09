@@ -31,8 +31,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/apache/camel-k/pkg/util/finalizer"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/gzip"
@@ -85,7 +83,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.Compression, "compression", false, "Enable store source as a compressed binary blob")
 	cmd.Flags().StringSliceVar(&options.Resources, "resource", nil, "Add a resource")
 	cmd.Flags().StringSliceVar(&options.OpenAPIs, "open-api", nil, "Add an OpenAPI v2 spec")
-	cmd.Flags().StringVar(&options.DeletionPolicy, "deletion-policy", "owner", "Policy used to cleanup child resources, default owner")
 	cmd.Flags().StringSliceVarP(&options.Volumes, "volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringSliceVarP(&options.EnvVars, "env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 
@@ -102,7 +99,6 @@ type runCmdOptions struct {
 	Logs            bool
 	Sync            bool
 	Dev             bool
-	DeletionPolicy  string
 	IntegrationKit  string
 	IntegrationName string
 	Profile         string
@@ -374,12 +370,6 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			},
 			Type: v1alpha1.ResourceTypeOpenAPI,
 		})
-	}
-
-	if o.DeletionPolicy == "label" {
-		integration.Finalizers = []string{
-			finalizer.CamelIntegrationFinalizer,
-		}
 	}
 
 	for _, item := range o.Dependencies {

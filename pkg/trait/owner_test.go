@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/finalizer"
 
 	"github.com/stretchr/testify/assert"
 
@@ -29,19 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestOwnerWithFinalizer(t *testing.T) {
-	env := SetUpOwnerEnvironment(t)
-	env.Integration.Finalizers = []string{finalizer.CamelIntegrationFinalizer}
-
-	processTestEnv(t, env)
-
-	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("owner")))
-
-	ValidateOwnerResources(t, env, false)
-}
-
-func TestOwnerWithoutFinalizer(t *testing.T) {
+func TestOwner(t *testing.T) {
 	env := SetUpOwnerEnvironment(t)
 
 	processTestEnv(t, env)
