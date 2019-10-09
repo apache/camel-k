@@ -50,39 +50,44 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) ||
-		e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return e.IntegrationInPhase(
+			v1alpha1.IntegrationPhaseInitialization,
+			v1alpha1.IntegrationPhaseDeploying,
+			v1alpha1.IntegrationPhaseRunning),
+		nil
 }
 
 func (t *garbageCollectorTrait) Apply(e *Environment) error {
-	// Register a post processor that adds the required labels to the new resources
-	e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
-		env.Resources.VisitMetaObject(func(resource metav1.Object) {
-			labels := resource.GetLabels()
-			if labels == nil {
-				labels = map[string]string{}
-			}
-			// Label the resource with the current integration generation
-			labels["camel.apache.org/generation"] = strconv.FormatInt(env.Integration.GetGeneration(), 10)
-			// Make sure the integration label is set
-			labels["camel.apache.org/integration"] = env.Integration.Name
-			resource.SetLabels(labels)
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization, v1alpha1.IntegrationPhaseDeploying) {
+		// Register a post processor that adds the required labels to the new resources
+		e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
+			env.Resources.VisitMetaObject(func(resource metav1.Object) {
+				labels := resource.GetLabels()
+				if labels == nil {
+					labels = map[string]string{}
+				}
+				// Label the resource with the current integration generation
+				labels["camel.apache.org/generation"] = strconv.FormatInt(env.Integration.GetGeneration(), 10)
+				// Make sure the integration label is set
+				labels["camel.apache.org/integration"] = env.Integration.Name
+				resource.SetLabels(labels)
+			})
+			return nil
 		})
-		return nil
-	})
+	} else if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+		// Let's run garbage collection during the integration running phase
+		// TODO: this should be refined so that it's run when all the replicas for the newer generation
+		// are ready. This is to be added when the integration scale status is refined with ready replicas
 
-	// Let's run garbage collection during the integration deploying phase
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
-		return nil
+		// Register a post action that deletes the existing resources that are labelled
+		// with the previous integration generations.
+		e.PostActions = append(e.PostActions, func(environment *Environment) error {
+			// The collection and deletion are performed asynchronously to avoid blocking
+			// the reconcile loop.
+			go t.garbageCollectResources(e)
+			return nil
+		})
 	}
-	// Register a post action that deletes the existing resources that are labelled
-	// with the previous integration generations.
-	// The collection and deletion are performed asynchronously to avoid blocking
-	// the reconcile loop.
-	e.PostActions = append(e.PostActions, func(environment *Environment) error {
-		go t.garbageCollectResources(e)
-		return nil
-	})
 
 	return nil
 }
