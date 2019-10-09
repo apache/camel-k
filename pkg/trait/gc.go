@@ -21,14 +21,19 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/discovery"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	controller "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 type garbageCollectorTrait struct {
@@ -98,7 +103,7 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 		fmt.Sprintf("camel.apache.org/generation<%d", e.Integration.GetGeneration()),
 	}
 
-	resources, err := kubernetes.LookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
+	resources, err := lookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selectors)
 	if err != nil {
 		t.L.ForIntegration(e.Integration).Errorf(err, "cannot collect older generation resources")
 		return
@@ -108,7 +113,7 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 	for _, resource := range resources {
 		// pin the resource
 		resource := resource
-		err = e.Client.Delete(context.TODO(), &resource, client.PropagationPolicy(metav1.DeletePropagationBackground))
+		err = e.Client.Delete(context.TODO(), &resource, controller.PropagationPolicy(metav1.DeletePropagationBackground))
 		if err != nil {
 			// The resource may have already been deleted
 			if !k8serrors.IsNotFound(err) {
@@ -118,4 +123,74 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 			t.L.ForIntegration(e.Integration).Debugf("child resource deleted: %s/%s", resource.GetKind(), resource.GetName())
 		}
 	}
+}
+func lookUpResources(ctx context.Context, client client.Client, namespace string, selectors []string) ([]unstructured.Unstructured, error) {
+	// We only take types that support the "create" and "list" verbs as:
+	// - they have to be created to be deleted :) so that excludes read-only
+	//   resources, e.g., aggregated APIs
+	// - they are going to be iterated and a list query with labels selector
+	//   is performed for each of them. That prevents from performing queries
+	//   that we know are going to return "MethodNotAllowed".
+	types, err := getDiscoveryTypesWithVerbs(client, []string{"create", "list"})
+	if err != nil {
+		return nil, err
+	}
+
+	selector, err := labels.Parse(strings.Join(selectors, ","))
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]unstructured.Unstructured, 0)
+
+	for _, t := range types {
+		options := controller.ListOptions{
+			Namespace:     namespace,
+			LabelSelector: selector,
+			Raw: &metav1.ListOptions{
+				TypeMeta: t,
+			},
+		}
+		list := unstructured.UnstructuredList{
+			Object: map[string]interface{}{
+				"apiVersion": t.APIVersion,
+				"kind":       t.Kind,
+			},
+		}
+		if err := client.List(ctx, &options, &list); err != nil {
+			if k8serrors.IsNotFound(err) || k8serrors.IsForbidden(err) {
+				continue
+			}
+			return nil, err
+		}
+
+		res = append(res, list.Items...)
+	}
+	return res, nil
+}
+
+func getDiscoveryTypesWithVerbs(client client.Client, verbs []string) ([]metav1.TypeMeta, error) {
+	resources, err := client.Discovery().ServerPreferredNamespacedResources()
+	// Swallow group discovery errors, e.g., Knative serving exposes
+	// an aggregated API for custom.metrics.k8s.io that requires special
+	// authentication scheme while discovering preferred resources
+	if err != nil && !discovery.IsGroupDiscoveryFailedError(err) {
+		return nil, err
+	}
+
+	types := make([]metav1.TypeMeta, 0)
+	for _, resource := range resources {
+		for _, r := range resource.APIResources {
+			if len(verbs) > 0 && !util.StringSliceContains(r.Verbs, verbs) {
+				// Do not return the type if it does not support the provided verbs
+				continue
+			}
+			types = append(types, metav1.TypeMeta{
+				Kind:       r.Kind,
+				APIVersion: resource.GroupVersion,
+			})
+		}
+	}
+
+	return types, nil
 }
