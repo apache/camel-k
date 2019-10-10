@@ -128,9 +128,11 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 			return err
 		}
 		replicas := e.Integration.Spec.Replicas
-		if replicas == nil && deployment.Spec.Replicas != nil ||
-			replicas != nil && deployment.Spec.Replicas == nil ||
-			*deployment.Spec.Replicas != *replicas {
+		// Deployment replicas defaults to 1, so we avoid forcing
+		// an update to nil that will result to another update cycle
+		// back to that default value by the Deployment controller.
+		if replicas == nil && *deployment.Spec.Replicas != 1 ||
+			replicas != nil && *deployment.Spec.Replicas != *replicas {
 			deployment.Spec.Replicas = replicas
 			err := t.client.Update(context.TODO(), deployment)
 			if err != nil {
