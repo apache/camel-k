@@ -164,7 +164,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for ReplicaSet to reconcile replicas to the integration status
+	// Watch for ReplicaSet to reconcile replicas to the integration status. We cannot use
+	// the EnqueueRequestForOwner handler as the owner depends on the deployment strategy,
+	// either regular deployment or Knative service. In any case, the integration is not the
+	// direct owner of the ReplicaSet.
 	err = c.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 			rs := a.Object.(*appsv1.ReplicaSet)
@@ -183,6 +186,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 			return requests
 		}),
+	}, predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldReplicaSet := e.ObjectOld.(*appsv1.ReplicaSet)
+			newReplicaSet := e.ObjectNew.(*appsv1.ReplicaSet)
+			// Ignore updates to the ReplicaSet other than the replicas ones,
+			// that are used to reconcile the integration replicas.
+			return oldReplicaSet.Status.Replicas != newReplicaSet.Status.Replicas
+		},
 	})
 	if err != nil {
 		return err
