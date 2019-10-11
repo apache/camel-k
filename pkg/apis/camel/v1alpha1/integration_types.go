@@ -107,6 +107,9 @@ const (
 type SourceSpec struct {
 	DataSpec
 	Language Language `json:"language,omitempty"`
+	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
+	// interpret this source at runtime
+	Loader   string   `json:"loader,omitempty"`
 }
 
 // Language --

@@ -19,6 +19,7 @@ package trait
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -68,6 +69,11 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
 		case v1alpha1.LanguageJavaSource:
 			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
+		}
+
+		if strings.HasPrefix(s.Loader, "knative-source") {
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-knative")
+			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
 		}
 
 		// main required by default

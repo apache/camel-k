@@ -325,6 +325,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 				},
 				Annotations: map[string]string{
 					"camel.apache.org/source.language":    string(s.InferLanguage()),
+					"camel.apache.org/source.loader":      s.Loader,
 					"camel.apache.org/source.name":        s.Name,
 					"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
 				},
@@ -393,6 +394,9 @@ func (e *Environment) ComputeSourcesURI() []string {
 		params := make([]string, 0)
 		if s.InferLanguage() != "" {
 			params = append(params, "language="+string(s.InferLanguage()))
+		}
+		if s.Loader != "" {
+			params = append(params, "loader="+s.Loader)
 		}
 		if s.Compression {
 			params = append(params, "compression=true")
