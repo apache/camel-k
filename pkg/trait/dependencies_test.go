@@ -22,7 +22,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -204,7 +203,7 @@ func TestIntegrationCustomLoader(t *testing.T) {
 							Content: "- from:\n    uri: direct:foo\n    steps:\n    - to: log:bar",
 						},
 						Language: v1alpha1.LanguageYaml,
-						Loader: "knative-source-yaml",
+						Loader:   "knative-source-yaml",
 					},
 				},
 			},
