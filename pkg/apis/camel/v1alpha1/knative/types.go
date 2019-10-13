@@ -32,12 +32,21 @@ func NewCamelEnvironment() CamelEnvironment {
 // CamelServiceDefinition defines the parameters to connect to Knative service. It's also used for exposed services
 type CamelServiceDefinition struct {
 	ServiceType CamelServiceType  `json:"type"`
-	Protocol    CamelProtocol     `json:"protocol"`
 	Name        string            `json:"name"`
 	Host        string            `json:"host"`
 	Port        int               `json:"port"`
 	Metadata    map[string]string `json:"metadata"`
 }
+
+// CamelEndpointKind --
+type CamelEndpointKind string
+
+const (
+	// CamelEndpointKindSource is a service that can be used to consume events
+	CamelEndpointKindSource CamelEndpointKind = "source"
+	// CamelEndpointKindSink is a service that can be used to send events to
+	CamelEndpointKindSink CamelEndpointKind = "sink"
+)
 
 // CamelServiceType --
 type CamelServiceType string
@@ -47,26 +56,23 @@ const (
 	CamelServiceTypeEndpoint CamelServiceType = "endpoint"
 	// CamelServiceTypeChannel is a callable endpoint that will be also associated to a subscription
 	CamelServiceTypeChannel CamelServiceType = "channel"
-)
-
-// CamelProtocol is the communication protocol to use for the service
-type CamelProtocol string
-
-// Knative protocols
-const (
-	CamelProtocolHTTP  CamelProtocol = "http"
-	CamelProtocolHTTPS CamelProtocol = "https"
+	// CamelServiceTypeEvent is used when the target service is the Knative broker
+	CamelServiceTypeEvent CamelServiceType = "event"
 )
 
 // Meta Options
 const (
-	CamelMetaServicePath       = "service.path"
-	CamelMetaServiceID         = "service.id"
-	CamelMetaServiceName       = "service.name"
-	CamelMetaServiceHost       = "service.host"
-	CamelMetaServicePort       = "service.port"
-	CamelMetaServiceZone       = "service.zone"
-	CamelMetaServiceProtocol   = "service.protocol"
-	CamelMetaFilterHeaderName  = "filter.header.name"
-	CamelMetaFilterHeaderValue = "filter.header.value"
+	CamelMetaServicePath = "service.path"
+	CamelMetaServiceID   = "service.id"
+	CamelMetaServiceName = "service.name"
+	CamelMetaServiceHost = "service.host"
+	CamelMetaServicePort = "service.port"
+	CamelMetaServiceZone = "service.zone"
+
+	CamelMetaKnativeKind       = "knative.kind"
+	CamelMetaKnativeAPIVersion = "knative.apiVersion"
+
+	CamelMetaEndpointKind = "camel.endpoint.kind"
+
+	CamelMetaFilterPrefix = "filter."
 )

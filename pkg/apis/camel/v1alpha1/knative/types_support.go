@@ -24,15 +24,19 @@ import (
 )
 
 // BuildCamelServiceDefinition creates a CamelServiceDefinition from a given URL
-func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, serviceURL url.URL) (CamelServiceDefinition, error) {
-	protocol := CamelProtocol(serviceURL.Scheme)
+func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType,
+	serviceURL url.URL, apiVersion, kind string) (CamelServiceDefinition, error) {
+
 	definition := CamelServiceDefinition{
 		Name:        name,
 		Host:        serviceURL.Host,
-		Port:        defaultCamelProtocolPort(protocol),
+		Port:        80,
 		ServiceType: serviceType,
-		Protocol:    protocol,
-		Metadata:    make(map[string]string),
+		Metadata: map[string]string{
+			CamelMetaEndpointKind:      string(endpointKind),
+			CamelMetaKnativeAPIVersion: apiVersion,
+			CamelMetaKnativeKind:       kind,
+		},
 	}
 	portStr := serviceURL.Port()
 	if portStr != "" {
@@ -49,17 +53,6 @@ func BuildCamelServiceDefinition(name string, serviceType CamelServiceType, serv
 		definition.Metadata[CamelMetaServicePath] = "/"
 	}
 	return definition, nil
-}
-
-func defaultCamelProtocolPort(prot CamelProtocol) int {
-	switch prot {
-	case CamelProtocolHTTP:
-		return 80
-	case CamelProtocolHTTPS:
-		return 443
-	default:
-		return -1
-	}
 }
 
 // Serialize serializes a CamelEnvironment
@@ -80,15 +73,19 @@ func (env *CamelEnvironment) Deserialize(str string) error {
 }
 
 // ContainsService tells if the environment contains a service with the given name and type
-func (env *CamelEnvironment) ContainsService(name string, serviceType CamelServiceType) bool {
-	return env.FindService(name, serviceType) != nil
+func (env *CamelEnvironment) ContainsService(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType, apiVersion, kind string) bool {
+	return env.FindService(name, endpointKind, serviceType, apiVersion, kind) != nil
 }
 
 // FindService --
-func (env *CamelEnvironment) FindService(name string, serviceType CamelServiceType) *CamelServiceDefinition {
+func (env *CamelEnvironment) FindService(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType, apiVersion, kind string) *CamelServiceDefinition {
 	for _, svc := range env.Services {
 		svc := svc
-		if svc.Name == name && svc.ServiceType == serviceType {
+		if svc.Name == name &&
+			svc.Metadata[CamelMetaEndpointKind] == string(endpointKind) &&
+			svc.ServiceType == serviceType &&
+			(apiVersion == "" || svc.Metadata[CamelMetaKnativeAPIVersion] == apiVersion) &&
+			(kind == "" || svc.Metadata[CamelMetaKnativeKind] == kind) {
 			return &svc
 		}
 	}

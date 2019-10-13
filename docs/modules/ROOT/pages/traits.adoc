@@ -143,16 +143,22 @@ More information can be found in the official Kubernetes documentation about htt
 !===
 
 ! knative.channel-sources
-! Configures a (comma-separated) list of channels to which the Knative service must be subscribed (to receive cloudevents from a channel).
+! Configures a (comma-separated) list of channels to which the Knative service must be subscribed (to receive cloudevents from a channel). May also contain Camel URIs instead of simple names.
 
 ! knative.channel-sinks
-! Configures a (comma-separated) list of channels to which the Knative service publishes.
+! Configures a (comma-separated) list of channels to which the Knative service publishes. May also contain Camel URIs instead of simple names.
 
 ! knative.endpoint-sources
-! Configures a (comma-separated) list of endpoints the Knative service exposes (the name is).
+! Configures a (comma-separated) list of endpoints the Knative service exposes (the name is). May also contain Camel URIs instead of simple names.
 
 ! knative.endpoint-sinks
-! Configures a (comma-separated) list of endpoints the Knative consumes.
+! Configures a (comma-separated) list of endpoints the Knative consumes. May also contain Camel URIs instead of simple names.
+
+! knative.event-sources
+! Configures a (comma-separated) list of events that will trigger the Knative service (receiving cloudevents from the broker). May also contain Camel URIs instead of simple names.
+
+! knative.event-sinks
+! Configures a (comma-separated) list of event types that the service will produce. May also contain Camel URIs instead of simple names.
 
 ! knative.filter-source-channels
 ! Force the knative endpoint to filter messages based on the `ce-knativehistory` header (Knative experimental feature). It's enabled automatically when there are more than 2 source channels. It's optional (default to false) when there's a single source channel.

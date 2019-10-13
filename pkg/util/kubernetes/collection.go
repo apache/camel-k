@@ -24,6 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
@@ -246,6 +247,27 @@ func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
 			visitor(conv)
 		}
 	})
+}
+
+// VisitKnativeTrigger executes the visitor function on all Knative eventing Trigger resources
+func (c *Collection) VisitKnativeTrigger(visitor func(trigger *eventing.Trigger)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*eventing.Trigger); ok {
+			visitor(conv)
+		}
+	})
+}
+
+// HasKnativeTrigger returns true if a Knative trigger respecting filter is found
+func (c *Collection) HasKnativeTrigger(filter func(trigger *eventing.Trigger) bool) bool {
+	var retValue *bool
+	c.VisitKnativeTrigger(func(re *eventing.Trigger) {
+		if filter(re) {
+			found := true
+			retValue = &found
+		}
+	})
+	return retValue != nil && *retValue
 }
 
 // GetContainer --

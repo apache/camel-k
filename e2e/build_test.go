@@ -57,7 +57,7 @@ func TestKitYAMLFullBuild(t *testing.T) {
 	doNamedKitFullBuild(t, "yaml")
 }
 
-func TestKitHealthFullBuild(t *testing.T) {
+func TestKitKnativeFullBuild(t *testing.T) {
 	doNamedKitFullBuild(t, "knative")
 }
 

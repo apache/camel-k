@@ -20,29 +20,79 @@ package knative
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
 )
 
 func TestChannelUri(t *testing.T) {
-	assert.Equal(t, "pippo", ExtractChannelName("knative:channel/pippo"))
-	assert.Equal(t, "pippo1", ExtractChannelName("knative://channel/pippo1"))
-	assert.Equal(t, "pippo-2", ExtractChannelName("knative://channel/pippo-2?pluto=12"))
-	assert.Equal(t, "pip-p-o", ExtractChannelName("knative:/channel/pip-p-o?pluto=12"))
-	assert.Equal(t, "pip.po", ExtractChannelName("knative:channel/pip.po?pluto=12"))
-	assert.Equal(t, "pip.po-1", ExtractChannelName("knative:channel/pip.po-1/hello"))
-	assert.Empty(t, ExtractChannelName("http://wikipedia.org"))
-	assert.Empty(t, ExtractChannelName("a:knative:channel/chan"))
-	assert.Empty(t, ExtractChannelName("knative:channel/pippa$"))
+	ref, err := ExtractObjectReference("knative:endpoint/ciao")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		Kind:       "",
+		APIVersion: "",
+		Name:       "ciao",
+	}, ref)
+
+	ref, err = ExtractObjectReference("knative:endpoint/ciao?apiVersion=xxx")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		Kind:       "",
+		APIVersion: "xxx",
+		Name:       "ciao",
+	}, ref)
+
+	ref, err = ExtractObjectReference("knative:endpoint/ciao?x=y&apiVersion=xxx")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		Kind:       "",
+		APIVersion: "xxx",
+		Name:       "ciao",
+	}, ref)
+
+	ref, err = ExtractObjectReference("knative:channel/ciao2?x=y&apiVersion=eventing.knative.dev/v1&kind=KafkaChannel")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		Kind:       "KafkaChannel",
+		APIVersion: "eventing.knative.dev/v1",
+		Name:       "ciao2",
+	}, ref)
+
+	ref, err = ExtractObjectReference("knative:endpoint/ciao?aapiVersion=xxx&kind=Broker")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		Kind:       "Broker",
+		APIVersion: "",
+		Name:       "ciao",
+	}, ref)
+
+	ref, err = ExtractObjectReference("knative://endpoint/ciao?&apiVersion=serving.knative.dev/v1alpha1&kind=Service&1=1")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		Kind:       "Service",
+		APIVersion: "serving.knative.dev/v1alpha1",
+		Name:       "ciao",
+	}, ref)
+
+	ref, err = ExtractObjectReference("knative://event/chuck?&brokerApiVersion=eventing.knative.dev/v1alpha1&brokerName=broker2")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		APIVersion: "eventing.knative.dev/v1alpha1",
+		Name:       "broker2",
+		Kind:       "Broker",
+	}, ref)
+
+	ref, err = ExtractObjectReference("knative://event/chuck?&brokerApxxiVersion=eventing.knative.dev/v1alpha1&brokxerName=broker2")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.ObjectReference{
+		Name: "default",
+		Kind: "Broker",
+	}, ref)
 }
 
-func TestEndpointUri(t *testing.T) {
-	assert.Equal(t, "pippo", ExtractEndpointlName("knative:endpoint/pippo"))
-	assert.Equal(t, "pippo1", ExtractEndpointlName("knative://endpoint/pippo1"))
-	assert.Equal(t, "pippo-2", ExtractEndpointlName("knative://endpoint/pippo-2?pluto=12"))
-	assert.Equal(t, "pip-p-o", ExtractEndpointlName("knative:/endpoint/pip-p-o?pluto=12"))
-	assert.Equal(t, "pip.po", ExtractEndpointlName("knative:endpoint/pip.po?pluto=12"))
-	assert.Equal(t, "pip.po-1", ExtractEndpointlName("knative:endpoint/pip.po-1/hello"))
-	assert.Empty(t, ExtractEndpointlName("http://wikipedia.org"))
-	assert.Empty(t, ExtractEndpointlName("a:knative:endpoint/chan"))
-	assert.Empty(t, ExtractEndpointlName("knative:endpoint/pippa$"))
+func TestNormalizeToUri(t *testing.T) {
+	assert.Equal(t, "knative://channel/name.chan", NormalizeToURI(knative.CamelServiceTypeChannel, "name.chan"))
+	assert.Equal(t, "knative://event/chuck", NormalizeToURI(knative.CamelServiceTypeEvent, "chuck"))
+	assert.Equal(t, "knative://endpoint/xx", NormalizeToURI(knative.CamelServiceTypeEndpoint, "xx"))
+	assert.Equal(t, "direct:xxx", NormalizeToURI(knative.CamelServiceTypeChannel, "direct:xxx"))
 }

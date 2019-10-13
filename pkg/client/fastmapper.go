@@ -28,14 +28,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// allowedAPIGroups contains a set of API groups that are allowed when using the fastmapper.
+// FastMapperAllowedAPIGroups contains a set of API groups that are allowed when using the fastmapper.
 // Those must correspond to all groups used by the "kamel" binary tool when running out-of-cluster.
-var allowedAPIGroups = map[string]bool{
+var FastMapperAllowedAPIGroups = map[string]bool{
 	"":                          true, // core APIs
 	"apiextensions.k8s.io":      true,
 	"apps":                      true,
 	"camel.apache.org":          true,
-	"project.openshift.io":      true, // used in e2e tests
 	"rbac.authorization.k8s.io": true,
 	"console.openshift.io":      true, // OpenShift console resources
 }
@@ -45,7 +44,7 @@ var allowedAPIGroups = map[string]bool{
 func newFastDiscoveryRESTMapper(config *rest.Config) meta.RESTMapper {
 	return meta.NewLazyRESTMapperLoader(func() (meta.RESTMapper, error) {
 		return newFastDiscoveryRESTMapperWithFilter(config, func(g *metav1.APIGroup) bool {
-			return allowedAPIGroups[g.Name]
+			return FastMapperAllowedAPIGroups[g.Name]
 		})
 	})
 }
