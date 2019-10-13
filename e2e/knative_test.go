@@ -55,3 +55,18 @@ func TestRunChannelCombo(t *testing.T) {
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
+
+func TestRunBroker(t *testing.T) {
+	withNewTestNamespaceWithKnativeBroker(func(ns string) {
+		RegisterTestingT(t)
+		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
+		Expect(kamel("run", "-n", ns, "files/knativeevt1.groovy").Execute()).Should(BeNil())
+		Expect(kamel("run", "-n", ns, "files/knativeevt2.groovy").Execute()).Should(BeNil())
+		Eventually(integrationPodPhase(ns, "knativeevt1"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationPodPhase(ns, "knativeevt2"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationLogs(ns, "knativeevt2"), 5*time.Minute).Should(ContainSubstring("Received 1: Hello 1"))
+		Eventually(integrationLogs(ns, "knativeevt2"), 5*time.Minute).Should(ContainSubstring("Received 2: Hello 2"))
+		Eventually(integrationLogs(ns, "knativeevt2")).ShouldNot(ContainSubstring("Received 1: Hello 2"))
+		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+	})
+}

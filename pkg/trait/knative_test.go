@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -34,7 +33,6 @@ import (
 	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
@@ -122,22 +120,22 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	err = ne.Deserialize(kc.Value)
 	assert.Nil(t, err)
 
-	cSource1 := ne.FindService("channel-source-1", knativeapi.CamelServiceTypeChannel)
+	cSource1 := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1alpha1", "Channel")
 	assert.NotNil(t, cSource1)
 	assert.Equal(t, "0.0.0.0", cSource1.Host)
 
-	cSink1 := ne.FindService("channel-sink-1", knativeapi.CamelServiceTypeChannel)
+	cSink1 := ne.FindService("channel-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1alpha1", "Channel")
 	assert.NotNil(t, cSink1)
 	assert.Equal(t, "channel-sink-1.host", cSink1.Host)
 
-	eSource1 := ne.FindService("endpoint-source-1", knativeapi.CamelServiceTypeEndpoint)
+	eSource1 := ne.FindService("endpoint-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
 	assert.NotNil(t, eSource1)
 	assert.Equal(t, "0.0.0.0", eSource1.Host)
 
-	eSink1 := ne.FindService("endpoint-sink-1", knativeapi.CamelServiceTypeEndpoint)
+	eSink1 := ne.FindService("endpoint-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
 	assert.NotNil(t, eSink1)
 	assert.Equal(t, "endpoint-sink-1.host", eSink1.Host)
-	eSink2 := ne.FindService("endpoint-sink-2", knativeapi.CamelServiceTypeEndpoint)
+	eSink2 := ne.FindService("endpoint-sink-2", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
 	assert.NotNil(t, eSink2)
 	assert.Equal(t, "endpoint-sink-2.host", eSink2.Host)
 }
@@ -232,27 +230,10 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	err = ne.Deserialize(kc.Value)
 	assert.Nil(t, err)
 
-	source := ne.FindService("s3fileMover1", knativeapi.CamelServiceTypeEndpoint)
+	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
 	assert.NotNil(t, source)
-	assert.Equal(t, knative.CamelProtocolHTTP, source.Protocol)
 	assert.Equal(t, "0.0.0.0", source.Host)
 	assert.Equal(t, 8080, source.Port)
-}
-
-func TestDecodeKindAPIGroupVersion(t *testing.T) {
-	kgv, err := decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1/Channel")
-	assert.Nil(t, err)
-	assert.Equal(t, schema.GroupVersionKind{
-		Group:   "messaging.knative.dev",
-		Version: "v1alpha1",
-		Kind:    "Channel",
-	}, kgv)
-
-	_, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1/Chann/el/")
-	assert.NotNil(t, err)
-
-	_, err = decodeKindAPIGroupVersion("messaging.knative.dev/v1alpha1")
-	assert.NotNil(t, err)
 }
 
 func NewFakeClient(namespace string) (client.Client, error) {

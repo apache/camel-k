@@ -103,47 +103,62 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 	return &subs
 }
 
-// GetAnySinkURL looks up the resource among all given types and returns the resource sink URL if present
-func GetAnySinkURL(ctx context.Context, c client.Client, types []schema.GroupVersionKind, namespace string, name string) (*url.URL, error) {
-	for _, gvk := range types {
-		sink := corev1.ObjectReference{
-			Kind:       gvk.Kind,
-			APIVersion: gvk.GroupVersion().String(),
-			Namespace:  namespace,
-			Name:       name,
-		}
+// CreateTrigger ---
+func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string) runtime.Object {
+	subs := eventing.Trigger{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventing.SchemeGroupVersion.String(),
+			Kind:       "Trigger",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: brokerReference.Namespace,
+			Name:      brokerReference.Name + "-" + serviceName + "-" + eventType,
+		},
+		Spec: eventing.TriggerSpec{
+			Filter: &eventing.TriggerFilter{
+				Attributes: &eventing.TriggerFilterAttributes{
+					"type": eventType,
+				},
+			},
+			Broker: brokerReference.Name,
+			Subscriber: &messaging.SubscriberSpec{
+				Ref: &corev1.ObjectReference{
+					APIVersion: serving.SchemeGroupVersion.String(),
+					Kind:       "Service",
+					Name:       serviceName,
+				},
+			},
+		},
+	}
+	return &subs
+}
 
-		res, err := GetSinkURI(ctx, c, &sink, namespace)
+// GetAddressableReference looks up the resource among all given types and returns an object reference to it
+func GetAddressableReference(ctx context.Context, c client.Client,
+	possibleReferences []corev1.ObjectReference, namespace string, name string) (*corev1.ObjectReference, error) {
+
+	for _, ref := range possibleReferences {
+		sink := ref.DeepCopy()
+		sink.Namespace = namespace
+		_, err := GetSinkURI(ctx, c, sink, namespace)
 		if err != nil && (k8serrors.IsNotFound(err) || kubernetesutils.IsUnknownAPIError(err)) {
 			continue
 		} else if err != nil {
 			return nil, err
 		}
-		return url.Parse(res)
+
+		return sink, nil
 	}
 	return nil, k8serrors.NewNotFound(schema.GroupResource{}, name)
 }
 
-// GetAddressableReference looks up the resource among all given types and returns an object reference to it
-func GetAddressableReference(ctx context.Context, c client.Client, types []schema.GroupVersionKind, namespace string, name string) (*corev1.ObjectReference, error) {
-	for _, gvk := range types {
-		sink := corev1.ObjectReference{
-			Kind:       gvk.Kind,
-			APIVersion: gvk.GroupVersion().String(),
-			Namespace:  namespace,
-			Name:       name,
-		}
-
-		_, err := GetSinkURI(ctx, c, &sink, namespace)
-		if err != nil && (k8serrors.IsNotFound(err) || kubernetesutils.IsUnknownAPIError(err)) {
-			continue
-		} else if err != nil {
-			return nil, err
-		}
-
-		return &sink, nil
+// GetSinkURL returns the sink as *url.URL
+func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (*url.URL, error) {
+	res, err := GetSinkURI(ctx, c, sink, namespace)
+	if err != nil {
+		return nil, err
 	}
-	return nil, k8serrors.NewNotFound(schema.GroupResource{}, name)
+	return url.Parse(res)
 }
 
 // GetSinkURI retrieves the sink URI from the object referenced by the given

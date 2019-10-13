@@ -48,6 +48,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -62,6 +63,10 @@ var testImageName = defaults.ImageName
 var testImageVersion = defaults.Version
 
 func init() {
+	// Register some resources used in e2e tests only
+	client.FastMapperAllowedAPIGroups["project.openshift.io"] = true
+	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
+
 	var err error
 	testContext = context.TODO()
 	testClient, err = newTestClient()
@@ -536,10 +541,55 @@ func numPods(ns string) func() int {
 }
 
 func withNewTestNamespace(doRun func(string)) {
-	ns := newTestNamespace()
+	ns := newTestNamespace(false)
 	defer deleteTestNamespace(ns)
 
 	doRun(ns.GetName())
+}
+
+func withNewTestNamespaceWithKnativeBroker(doRun func(string)) {
+	ns := newTestNamespace(true)
+	defer deleteTestNamespace(ns)
+	defer deleteKnativeBroker(ns)
+
+	doRun(ns.GetName())
+}
+
+func deleteKnativeBroker(ns metav1.Object) {
+	nsRef := v1.Namespace{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       "Namespace",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ns.GetName(),
+		},
+	}
+	nsKey, err := k8sclient.ObjectKeyFromObject(&nsRef)
+	if err != nil {
+		panic(err)
+	}
+	if err := testClient.Get(testContext, nsKey, &nsRef); err != nil {
+		panic(err)
+	}
+
+	nsRef.SetLabels(make(map[string]string, 0))
+	if err := testClient.Update(testContext, &nsRef); err != nil {
+		panic(err)
+	}
+	broker := eventing.Broker{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventing.SchemeGroupVersion.String(),
+			Kind:       "Broker",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns.GetName(),
+			Name:      "default",
+		},
+	}
+	if err := testClient.Delete(testContext, &broker); err != nil {
+		panic(err)
+	}
 }
 
 func deleteTestNamespace(ns metav1.Object) {
@@ -567,10 +617,10 @@ func deleteTestNamespace(ns metav1.Object) {
 	}
 
 	// Wait for all pods to be deleted
-	gomega.Eventually(numPods(ns.GetName()), 30*time.Second).Should(gomega.Equal(0))
+	gomega.Eventually(numPods(ns.GetName()), 60*time.Second).Should(gomega.Equal(0))
 }
 
-func newTestNamespace() metav1.Object {
+func newTestNamespace(injectKnativeBroker bool) metav1.Object {
 	var err error
 	var oc bool
 	var obj runtime.Object
@@ -600,6 +650,14 @@ func newTestNamespace() metav1.Object {
 			},
 		}
 	}
+
+	if injectKnativeBroker {
+		mo := obj.(metav1.Object)
+		mo.SetLabels(map[string]string{
+			"knative-eventing-injection": "enabled",
+		})
+	}
+
 	if err = testClient.Create(testContext, obj); err != nil {
 		panic(err)
 	}

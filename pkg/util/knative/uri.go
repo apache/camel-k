@@ -18,52 +18,84 @@ limitations under the License.
 package knative
 
 import (
+	"fmt"
 	"regexp"
 
 	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	v1 "k8s.io/api/core/v1"
 )
 
-var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint)/([a-z>-Z0-9.-]+)(?:[/?].*|$)`)
+var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint|event)/([A-Za-z0-9.-]+)(?:[/?].*|$)`)
+var plainNameRegexp = regexp.MustCompile(`^[A-Za-z0-9.-]+$`)
+var queryExtractorRegexp = `^[^?]+\?(?:|.*[&])%s=([^&]+)(?:[&].*|$)`
+var apiVersionRegexp = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "apiVersion"))
+var kindRegexp = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "kind"))
+var brokerNameRegexp = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "brokerName"))
+var brokerAPIVersion = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "brokerApiVersion"))
 
-// ExtractChannelNames extracts all Knative named channels from the given URIs
-func ExtractChannelNames(uris []string) []string {
-	channels := make([]string, 0)
+// FilterURIs returns all Knative URIs of the given type from a slice
+func FilterURIs(uris []string, kind knativev1.CamelServiceType) []string {
+	res := make([]string, 0)
 	for _, uri := range uris {
-		channel := ExtractChannelName(uri)
-		if channel != "" {
-			channels = append(channels, channel)
+		if isKnativeURI(kind, uri) {
+			res = append(res, uri)
 		}
 	}
-	return channels
+	return res
 }
 
-// ExtractChannelName returns a channel name from the Knative URI if present
-func ExtractChannelName(uri string) string {
-	return ExtractName(knativev1.CamelServiceTypeChannel, uri)
-}
-
-// ExtractEndpointNames extracts all Knative named endpoints from the given URIs
-func ExtractEndpointNames(uris []string) []string {
-	channels := make([]string, 0)
-	for _, uri := range uris {
-		channel := ExtractEndpointlName(uri)
-		if channel != "" {
-			channels = append(channels, channel)
-		}
+// NormalizeToURI produces a Knative uri of the given service type if the argument is a plain string
+func NormalizeToURI(kind knativev1.CamelServiceType, uriOrString string) string {
+	if plainNameRegexp.MatchString(uriOrString) {
+		return fmt.Sprintf("knative://%s/%s", string(kind), uriOrString)
 	}
-	return channels
+	return uriOrString
 }
 
-// ExtractEndpointlName returns an endpoint name from the Knative URI if present
-func ExtractEndpointlName(uri string) string {
-	return ExtractName(knativev1.CamelServiceTypeEndpoint, uri)
+// ExtractObjectReference returns a reference to the object described in the Knative URI
+func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
+	if isKnativeURI(knativev1.CamelServiceTypeEvent, uri) {
+		name := matchOrEmpty(brokerNameRegexp, 1, uri)
+		if name == "" {
+			name = "default"
+		}
+		apiVersion := matchOrEmpty(brokerAPIVersion, 1, uri)
+		return v1.ObjectReference{
+			Name:       name,
+			APIVersion: apiVersion,
+			Kind:       "Broker",
+		}, nil
+	}
+	name := matchOrEmpty(uriRegexp, 2, uri)
+	if name == "" {
+		return v1.ObjectReference{}, fmt.Errorf("cannot find name in uri %s", uri)
+	}
+	apiVersion := matchOrEmpty(apiVersionRegexp, 1, uri)
+	kind := matchOrEmpty(kindRegexp, 1, uri)
+	return v1.ObjectReference{
+		Name:       name,
+		APIVersion: apiVersion,
+		Kind:       kind,
+	}, nil
 }
 
-// ExtractName returns a channel name from the Knative URI if present
-func ExtractName(kind knativev1.CamelServiceType, uri string) string {
-	match := uriRegexp.FindStringSubmatch(uri)
-	if len(match) == 3 && match[1] == string(kind) {
-		return match[2]
+// ExtractEventType extract the eventType from a event URI
+func ExtractEventType(uri string) string {
+	return matchOrEmpty(uriRegexp, 2, uri)
+}
+
+func matchOrEmpty(reg *regexp.Regexp, index int, str string) string {
+	match := reg.FindStringSubmatch(str)
+	if len(match) > index {
+		return match[index]
 	}
 	return ""
+}
+
+func isKnativeURI(kind knativev1.CamelServiceType, uri string) bool {
+	match := uriRegexp.FindStringSubmatch(uri)
+	if len(match) == 3 && match[1] == string(kind) {
+		return true
+	}
+	return false
 }
