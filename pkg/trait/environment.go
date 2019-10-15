@@ -35,6 +35,7 @@ const (
 	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
 	envVarCamelVersion         = "CAMEL_VERSION"
 	envVarMainClass            = "JAVA_MAIN_CLASS"
+	envVarAppJAR               = "JAVA_APP_JAR"
 	defaultMainClass           = "org.apache.camel.k.main.Application"
 )
 
@@ -63,7 +64,12 @@ func (t *environmentTrait) Apply(e *Environment) error {
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
 	}
 
-	envvar.SetVal(&e.EnvVars, envVarMainClass, defaultMainClass)
+	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+	if quarkus.isEnabled() {
+		quarkus.addContainerEnvironment(e)
+	} else {
+		envvar.SetVal(&e.EnvVars, envVarMainClass, defaultMainClass)
+	}
 
 	return nil
 }

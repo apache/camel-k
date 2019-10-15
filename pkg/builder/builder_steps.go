@@ -19,23 +19,17 @@ package builder
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/tar"
-
-	yaml2 "gopkg.in/yaml.v2"
-
-	"github.com/pkg/errors"
 )
 
 var stepsByID = make(map[string]Step)
@@ -45,21 +39,15 @@ func init() {
 }
 
 type steps struct {
-	GenerateProject         Step
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
-	ComputeDependencies     Step
 	StandardPackager        Step
 	IncrementalPackager     Step
 }
 
 // Steps --
 var Steps = steps{
-	GenerateProject: NewStep(
-		ProjectGenerationPhase,
-		generateProject,
-	),
 	GenerateProjectSettings: NewStep(
 		ProjectGenerationPhase+1,
 		generateProjectSettings,
@@ -72,10 +60,6 @@ var Steps = steps{
 		ProjectGenerationPhase+3,
 		sanitizeDependencies,
 	),
-	ComputeDependencies: NewStep(
-		ProjectBuildPhase,
-		computeDependencies,
-	),
 	StandardPackager: NewStep(
 		ApplicationPackagePhase,
 		standardPackager,
@@ -84,6 +68,14 @@ var Steps = steps{
 		ApplicationPackagePhase,
 		incrementalPackager,
 	),
+}
+
+// DefaultSteps --
+var DefaultSteps = []Step{
+	Steps.GenerateProjectSettings,
+	Steps.InjectDependencies,
+	Steps.SanitizeDependencies,
+	Steps.IncrementalPackager,
 }
 
 // RegisterSteps --
@@ -112,17 +104,39 @@ func registerStep(steps ...Step) {
 	}
 }
 
-// generateProject --
-func generateProject(ctx *Context) error {
-	p, err := NewMavenProject(ctx)
+// generateProjectSettings --
+func generateProjectSettings(ctx *Context) error {
+	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Platform.Build.Maven.Settings)
 	if err != nil {
 		return err
 	}
+	if val != "" {
+		ctx.Maven.SettingsData = []byte(val)
+	}
 
-	ctx.Maven.Project = p
+	return nil
+}
 
+func injectDependencies(ctx *Context) error {
+	// Add dependencies from build
 	for _, d := range ctx.Build.Dependencies {
 		switch {
+		case strings.HasPrefix(d, "bom:"):
+			mid := strings.TrimPrefix(d, "bom:")
+			gav := strings.Replace(mid, "/", ":", -1)
+
+			d, err := maven.ParseGAV(gav)
+			if err != nil {
+				return err
+			}
+
+			ctx.Maven.Project.DependencyManagement.Dependencies = append(ctx.Maven.Project.DependencyManagement.Dependencies, maven.Dependency{
+				GroupID:    d.GroupID,
+				ArtifactID: d.ArtifactID,
+				Version:    d.Version,
+				Type:       "pom",
+				Scope:      "import",
+			})
 		case strings.HasPrefix(d, "camel:"):
 			artifactID := strings.TrimPrefix(d, "camel:")
 
@@ -144,33 +158,12 @@ func generateProject(ctx *Context) error {
 			gav := strings.Replace(mid, "/", ":", -1)
 
 			ctx.Maven.Project.AddEncodedDependencyGAV(gav)
-		case strings.HasPrefix(d, "bom:"):
-			// no-op
 		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}
 	}
 
-	return nil
-}
-
-// generateProjectSettings --
-func generateProjectSettings(ctx *Context) error {
-	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Platform.Build.Maven.Settings)
-	if err != nil {
-		return err
-	}
-	if val != "" {
-		ctx.Maven.SettingsData = []byte(val)
-	}
-
-	return nil
-}
-
-func injectDependencies(ctx *Context) error {
-	//
 	// Add dependencies from catalog
-	//
 	deps := make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
 	copy(deps, ctx.Maven.Project.Dependencies)
 
@@ -195,9 +188,8 @@ func injectDependencies(ctx *Context) error {
 			}
 		}
 	}
-	//
-	// post process dependencies
-	//
+
+	// Post process dependencies
 	deps = make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
 	copy(deps, ctx.Maven.Project.Dependencies)
 
@@ -243,49 +235,7 @@ func sanitizeDependencies(ctx *Context) error {
 	return nil
 }
 
-func computeDependencies(ctx *Context) error {
-	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
-	mc.SettingsContent = ctx.Maven.SettingsData
-	mc.LocalRepository = ctx.Build.Platform.Build.LocalRepository
-	mc.Timeout = ctx.Build.Platform.Build.Maven.Timeout.Duration
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.RuntimeVersion)
-
-	if err := maven.Run(mc); err != nil {
-		return errors.Wrap(err, "failure while determining classpath")
-	}
-
-	dependencies := path.Join(mc.Path, "target", "dependencies.yaml")
-	content, err := ioutil.ReadFile(dependencies)
-	if err != nil {
-		return err
-	}
-
-	cp := make(map[string][]v1alpha1.Artifact)
-	err = yaml2.Unmarshal(content, &cp)
-	if err != nil {
-		return err
-	}
-
-	for _, e := range cp["dependencies"] {
-		_, fileName := path.Split(e.Location)
-
-		gav, err := maven.ParseGAV(e.ID)
-		if err != nil {
-			return nil
-		}
-
-		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
-			ID:       e.ID,
-			Location: e.Location,
-			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
-		})
-	}
-
-	return nil
-}
-
-// ArtifactsSelector --
-type ArtifactsSelector func(ctx *Context) error
+type artifactsSelector func(ctx *Context) error
 
 func standardPackager(ctx *Context) error {
 	return packager(ctx, func(ctx *Context) error {
@@ -330,8 +280,7 @@ func incrementalPackager(ctx *Context) error {
 	})
 }
 
-// ClassPathPackager --
-func packager(ctx *Context, selector ArtifactsSelector) error {
+func packager(ctx *Context, selector artifactsSelector) error {
 	err := selector(ctx)
 	if err != nil {
 		return err

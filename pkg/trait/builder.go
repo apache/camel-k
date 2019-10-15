@@ -19,7 +19,9 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
+	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/platform"
 )
@@ -44,11 +46,22 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
+	e.Steps = append(e.Steps, builder.DefaultSteps...)
 	if platform.SupportsS2iPublishStrategy(e.Platform) {
-		e.Steps = s2i.DefaultSteps
+		e.Steps = append(e.Steps, s2i.S2iSteps...)
 	} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
-		e.Steps = kaniko.DefaultSteps
+		e.Steps = append(e.Steps, kaniko.KanikoSteps...)
 		e.BuildDir = kaniko.BuildDir
+	}
+
+	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+
+	if quarkus.isEnabled() {
+		// Add build steps for Quarkus runtime
+		quarkus.addBuildSteps(e)
+	} else {
+		// Add build steps for default runtime
+		e.Steps = append(e.Steps, runtime.MainSteps...)
 	}
 
 	return nil

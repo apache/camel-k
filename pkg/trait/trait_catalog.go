@@ -52,6 +52,7 @@ type Catalog struct {
 	tClasspath        Trait
 	tRestDsl          Trait
 	tProbes           Trait
+	tQuarkus          Trait
 	tContainer        Trait
 }
 
@@ -80,6 +81,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tEnvironment:      newEnvironmentTrait(),
 		tClasspath:        newClasspathTrait(),
 		tProbes:           newProbesTrait(),
+		tQuarkus:          newQuarkusTrait(),
 		tContainer:        newContainerTrait(),
 	}
 
@@ -117,6 +119,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tEnvironment,
 		c.tClasspath,
 		c.tProbes,
+		c.tQuarkus,
 		c.tContainer,
 	}
 }
@@ -133,6 +136,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tRestDsl,
 			c.tDependencies,
 			c.tBuilder,
+			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
 			c.tDeployment,
@@ -155,6 +159,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tRestDsl,
 			c.tDependencies,
 			c.tBuilder,
+			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
 			c.tDeployment,
@@ -178,6 +183,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 			c.tKnative,
 			c.tDependencies,
 			c.tBuilder,
+			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
 			c.tDeployment,
