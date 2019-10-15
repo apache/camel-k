@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package s2i
+package runtime
 
 import (
 	"github.com/apache/camel-k/pkg/builder"
@@ -25,19 +25,33 @@ func init() {
 	builder.RegisterSteps(Steps)
 }
 
+// TODO: organise runtime steps into nested structs
 type steps struct {
-	Publisher builder.Step
+	// Main
+	GenerateProject     builder.Step
+	ComputeDependencies builder.Step
+	// Quarkus
+	GenerateQuarkusProject     builder.Step
+	ComputeQuarkusDependencies builder.Step
 }
 
-// Steps --
 var Steps = steps{
-	Publisher: builder.NewStep(
-		builder.ApplicationPublishPhase,
-		publisher,
+	// Main
+	GenerateProject: builder.NewStep(
+		builder.ProjectGenerationPhase,
+		generateProject,
 	),
-}
-
-// S2iSteps --
-var S2iSteps = []builder.Step{
-	Steps.Publisher,
+	ComputeDependencies: builder.NewStep(
+		builder.ProjectBuildPhase,
+		computeDependencies,
+	),
+	// Quarkus
+	GenerateQuarkusProject: builder.NewStep(
+		builder.ProjectGenerationPhase,
+		generateQuarkusProject,
+	),
+	ComputeQuarkusDependencies: builder.NewStep(
+		builder.ProjectBuildPhase,
+		computeQuarkusDependencies,
+	),
 }

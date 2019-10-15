@@ -25,7 +25,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/cancellable"
-	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
@@ -48,63 +47,6 @@ func TestRegisterDuplicatedSteps(t *testing.T) {
 	assert.Panics(t, func() {
 		RegisterSteps(steps)
 	})
-}
-
-func TestGenerateJvmProject(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
-	assert.Nil(t, err)
-
-	ctx := Context{
-		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
-			Dependencies: []string{
-				"camel-k:runtime-main",
-			},
-		},
-	}
-
-	err = generateProject(&ctx)
-	assert.Nil(t, err)
-	err = injectDependencies(&ctx)
-	assert.Nil(t, err)
-
-	assert.ElementsMatch(
-		t,
-		ctx.Maven.Project.DependencyManagement.Dependencies,
-		[]maven.Dependency{
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-bom",
-				Version:    catalog.Version,
-				Type:       "pom",
-				Scope:      "import",
-			},
-			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-bom",
-				Version:    catalog.RuntimeVersion,
-				Type:       "pom",
-				Scope:      "import",
-			},
-		},
-	)
-
-	assert.ElementsMatch(
-		t,
-		ctx.Maven.Project.Dependencies,
-		[]maven.Dependency{
-			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-runtime-main"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-core-engine"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-main"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-properties"},
-		},
-	)
 }
 
 func TestMavenSettingsFromConfigMap(t *testing.T) {
@@ -153,7 +95,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		},
 	}
 
-	err = generateProjectSettings(&ctx)
+	err = Steps.GenerateProjectSettings.Execute(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.SettingsData)
@@ -205,119 +147,10 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		},
 	}
 
-	err = generateProjectSettings(&ctx)
+	err = Steps.GenerateProjectSettings.Execute(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.SettingsData)
-}
-
-func TestGenerateGroovyProject(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
-	assert.Nil(t, err)
-
-	ctx := Context{
-		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
-			Dependencies: []string{
-				"camel-k:runtime-main",
-				"camel-k:loader-groovy",
-			},
-		},
-	}
-
-	err = generateProject(&ctx)
-	assert.Nil(t, err)
-	err = injectDependencies(&ctx)
-	assert.Nil(t, err)
-
-	assert.ElementsMatch(
-		t,
-		ctx.Maven.Project.DependencyManagement.Dependencies,
-		[]maven.Dependency{
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-bom",
-				Version:    catalog.Version,
-				Type:       "pom",
-				Scope:      "import",
-			},
-			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-runtime-bom",
-				Version:    catalog.RuntimeVersion,
-				Type:       "pom",
-				Scope:      "import",
-			},
-		},
-	)
-
-	assert.ElementsMatch(
-		t,
-		ctx.Maven.Project.Dependencies,
-		[]maven.Dependency{
-			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-runtime-main"},
-			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-loader-groovy"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-core-engine"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-main"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-groovy"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-properties"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-endpointdsl"},
-		},
-	)
-}
-
-func TestSanitizeDependencies(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
-	assert.Nil(t, err)
-
-	ctx := Context{
-		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
-			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
-			Dependencies: []string{
-				"camel:undertow",
-				"mvn:org.apache.camel/camel-core/2.18.0",
-				"mvn:org.apache.camel.k/camel-k-runtime-main/1.0.0",
-				"mvn:com.mycompany/my-dep/1.2.3",
-			},
-		},
-	}
-
-	err = generateProject(&ctx)
-	assert.Nil(t, err)
-	err = injectDependencies(&ctx)
-	assert.Nil(t, err)
-	err = sanitizeDependencies(&ctx)
-	assert.Nil(t, err)
-
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel.k",
-		ArtifactID: "camel-k-runtime-main",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel",
-		ArtifactID: "camel-core",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel",
-		ArtifactID: "camel-undertow",
-	})
-	assert.Contains(t, ctx.Maven.Project.Dependencies, maven.Dependency{
-		GroupID:    "com.mycompany",
-		ArtifactID: "my-dep",
-		Version:    "1.2.3",
-	})
 }
 
 func TestListPublishedImages(t *testing.T) {

@@ -51,41 +51,54 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 			util.StringSliceUniqueAdd(&dependencies, dep)
 		}
 	}
-	for _, s := range e.Integration.Sources() {
-		meta := metadata.Extract(e.CamelCatalog, s)
 
-		switch s.InferLanguage() {
-		case v1alpha1.LanguageGroovy:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-groovy")
-		case v1alpha1.LanguageKotlin:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-kotlin")
-		case v1alpha1.LanguageYaml:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-yaml")
-		case v1alpha1.LanguageXML:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
-		case v1alpha1.LanguageJavaScript:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
-		case v1alpha1.LanguageJavaClass:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
-		case v1alpha1.LanguageJavaSource:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
+	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+	if quarkus.isEnabled() {
+		err := quarkus.addRuntimeDependencies(e, &dependencies)
+		if err != nil {
+			return err
 		}
-
-		if strings.HasPrefix(s.Loader, "knative-source") {
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-knative")
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
-		}
-
-		// main required by default
-		util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-runtime-main")
-
-		for _, d := range meta.Dependencies.List() {
-			util.StringSliceUniqueAdd(&dependencies, d)
-		}
+	} else {
+		addDefaultRuntimeDependencies(e, &dependencies)
 	}
 
 	// sort the dependencies to get always the same list if they don't change
 	sort.Strings(dependencies)
 	e.Integration.Status.Dependencies = dependencies
 	return nil
+}
+
+func addDefaultRuntimeDependencies(e *Environment, dependencies *[]string) {
+	for _, s := range e.Integration.Sources() {
+		meta := metadata.Extract(e.CamelCatalog, s)
+
+		switch s.InferLanguage() {
+		case v1alpha1.LanguageGroovy:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-groovy")
+		case v1alpha1.LanguageKotlin:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-kotlin")
+		case v1alpha1.LanguageYaml:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-yaml")
+		case v1alpha1.LanguageXML:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
+		case v1alpha1.LanguageJavaScript:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
+		case v1alpha1.LanguageJavaClass:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
+		case v1alpha1.LanguageJavaSource:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
+		}
+
+		if strings.HasPrefix(s.Loader, "knative-source") {
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-knative")
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
+		}
+
+		// main required by default
+		util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-runtime-main")
+
+		for _, d := range meta.Dependencies.List() {
+			util.StringSliceUniqueAdd(dependencies, d)
+		}
+	}
 }

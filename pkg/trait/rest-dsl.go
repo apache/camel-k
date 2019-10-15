@@ -27,15 +27,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/gzip"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/gzip"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 

@@ -37,14 +37,8 @@ var Steps = steps{
 	),
 }
 
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.Steps.GenerateProject,
-	builder.Steps.GenerateProjectSettings,
-	builder.Steps.InjectDependencies,
-	builder.Steps.SanitizeDependencies,
-	builder.Steps.ComputeDependencies,
-	builder.Steps.IncrementalPackager,
+// KanikoSteps --
+var KanikoSteps = []builder.Step{
 	Steps.Publisher,
 }
 
