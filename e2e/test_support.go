@@ -66,6 +66,7 @@ func init() {
 	// Register some resources used in e2e tests only
 	client.FastMapperAllowedAPIGroups["project.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
+	client.FastMapperAllowedAPIGroups["messaging.knative.dev"] = true
 
 	var err error
 	testContext = context.TODO()
