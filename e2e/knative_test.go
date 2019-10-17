@@ -56,6 +56,43 @@ func TestRunChannelCombo(t *testing.T) {
 	})
 }
 
+func TestRunChannelComboGetToPost(t *testing.T) {
+	withNewTestNamespace(func(ns string) {
+		RegisterTestingT(t)
+		Expect(createKnativeChannel(ns, "messages")()).Should(BeNil())
+		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
+		Expect(kamel("run", "-n", ns, "files/knativegetpost2.groovy").Execute()).Should(BeNil())
+		Expect(kamel("run", "-n", ns, "files/knativegetpost1.groovy").Execute()).Should(BeNil())
+		Eventually(integrationPodPhase(ns, "knativegetpost2"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationPodPhase(ns, "knativegetpost1"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationLogs(ns, "knativech2"), 5*time.Minute).Should(ContainSubstring(`Received ""`))
+		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+	})
+}
+
+func TestRunMultiChannelChain(t *testing.T) {
+	withNewTestNamespace(func(ns string) {
+		RegisterTestingT(t)
+		Expect(createKnativeChannel(ns, "messages")()).Should(BeNil())
+		Expect(createKnativeChannel(ns, "words")()).Should(BeNil())
+		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
+		Expect(kamel("run", "-n", ns, "files/knativemultihop3.groovy").Execute()).Should(BeNil())
+		Expect(kamel("run", "-n", ns, "files/knativemultihop2.groovy").Execute()).Should(BeNil())
+		Expect(kamel("run", "-n", ns, "files/knativemultihop1.groovy").Execute()).Should(BeNil())
+		Eventually(integrationPodPhase(ns, "knativemultihop3"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationPodPhase(ns, "knativemultihop2"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationPodPhase(ns, "knativemultihop1"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationLogs(ns, "knativemultihop3"), 5*time.Minute).Should(ContainSubstring(`From messages: message`))
+		Eventually(integrationLogs(ns, "knativemultihop3"), 5*time.Minute).Should(ContainSubstring(`From words: word`))
+		Eventually(integrationLogs(ns, "knativemultihop3"), 5*time.Minute).Should(ContainSubstring(`From words: transformed message`))
+		Eventually(integrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: word`))
+		Eventually(integrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From words: message`))
+		// FIXME: uncomment next test when https://github.com/apache/camel-k-runtime/issues/69 is resolved
+		// Eventually(integrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: transformed message`))
+		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+	})
+}
+
 func TestRunBroker(t *testing.T) {
 	withNewTestNamespaceWithKnativeBroker(func(ns string) {
 		RegisterTestingT(t)
