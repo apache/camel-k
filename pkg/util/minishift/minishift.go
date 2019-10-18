@@ -22,13 +22,11 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/client"
-
-	"k8s.io/apimachinery/pkg/labels"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/client"
 )
 
 const (
@@ -43,13 +41,12 @@ func FindRegistry(ctx context.Context, c client.Client) (*string, error) {
 			Kind:       "Service",
 		},
 	}
-	options := k8sclient.ListOptions{
-		LabelSelector: labels.SelectorFromSet(labels.Set{
+	err := c.List(ctx, &svcs,
+		k8sclient.InNamespace(registryNamespace),
+		k8sclient.MatchingLabels{
 			"kubernetes.io/minikube-addons": "registry",
-		}),
-		Namespace: registryNamespace,
-	}
-	if err := c.List(ctx, &options, &svcs); err != nil {
+		})
+	if err != nil {
 		return nil, err
 	}
 	if len(svcs.Items) == 0 {

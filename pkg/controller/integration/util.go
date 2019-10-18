@@ -20,13 +20,13 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pkg/errors"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 var allowedLookupLabels = map[string]bool{
@@ -46,7 +46,7 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 	}
 
 	ctxList := v1alpha1.NewIntegrationKitList()
-	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: integration.Namespace}, &ctxList); err != nil {
+	if err := c.List(ctx, &ctxList, k8sclient.InNamespace(integration.Namespace)); err != nil {
 		return nil, err
 	}
 

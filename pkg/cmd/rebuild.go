@@ -20,11 +20,13 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
 func newCmdRebuild(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -72,7 +74,7 @@ func (o *rebuildCmdOptions) rebuild(_ *cobra.Command, args []string) error {
 
 func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1alpha1.Integration, error) {
 	list := v1alpha1.NewIntegrationList()
-	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
+	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
 	}
 	return list.Items, nil

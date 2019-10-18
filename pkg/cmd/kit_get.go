@@ -22,10 +22,11 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/spf13/cobra"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/spf13/cobra"
 )
 
 func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
@@ -73,7 +74,7 @@ func (command *kitGetCommand) run() error {
 	if err != nil {
 		return err
 	}
-	if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &kitList); err != nil {
+	if err := c.List(command.Context, &kitList, k8sclient.InNamespace(command.Namespace)); err != nil {
 		return err
 	}
 

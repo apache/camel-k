@@ -51,7 +51,7 @@ func IsEnabledInNamespace(ctx context.Context, c k8sclient.Reader, namespace str
 			APIVersion: eventing.SchemeGroupVersion.String(),
 		},
 	}
-	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &channels); err != nil {
+	if err := c.List(ctx, &channels, k8sclient.InNamespace(namespace)); err != nil {
 		log.Infof("could not find knative in namespace %s, got error: %v", namespace, err)
 		return false
 	}
