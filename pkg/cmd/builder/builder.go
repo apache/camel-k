@@ -27,7 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -48,7 +49,7 @@ func printVersion() {
 
 // Run creates a build resource in the specified namespace
 func Run(namespace string, buildName string) {
-	logf.SetLogger(logf.ZapLogger(false))
+	logf.SetLogger(zap.Logger(false))
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	printVersion()
