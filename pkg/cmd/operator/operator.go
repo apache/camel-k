@@ -26,17 +26,20 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis"
-	"github.com/apache/camel-k/pkg/controller"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"
 	"github.com/operator-framework/operator-sdk/pkg/ready"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+
+	"github.com/apache/camel-k/pkg/apis"
+	"github.com/apache/camel-k/pkg/controller"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 var log = logf.Log.WithName("cmd")
@@ -61,7 +64,7 @@ func Run() {
 	// implementing the logr.Logger interface. This logger will
 	// be propagated through the whole operator, generating
 	// uniform and structured logs.
-	logf.SetLogger(logf.ZapLogger(false))
+	logf.SetLogger(zap.Logger(false))
 
 	printVersion()
 
