@@ -122,7 +122,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return err
 	}
 	if isKnative {
-		return installKnative(ctx, c, cfg.Namespace, collection)
+		return installKnative(ctx, c, cfg.Namespace, customizer, collection)
 	}
 	return nil
 }
@@ -145,8 +145,8 @@ func installKubernetes(ctx context.Context, c client.Client, namespace string, c
 	)
 }
 
-func installKnative(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, IdentityResourceCustomizer,
+func installKnative(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
 		"operator-role-knative.yaml",
 		"operator-role-binding-knative.yaml",
 	)
