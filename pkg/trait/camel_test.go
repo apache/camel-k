@@ -66,7 +66,7 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 
 	err := trait.Apply(environment)
 	assert.NotNil(t, err)
-	assert.Equal(t, "unable to find catalog for: Unmatchable version", err.Error())
+	assert.Equal(t, "unable to find catalog matching version requirement: camel=Unmatchable version, runtime=0.0.1", err.Error())
 }
 
 func TestCamelTraitGenerateMavenProjectSucceeds(t *testing.T) {

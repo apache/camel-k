@@ -50,7 +50,7 @@ func TestCreate(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	list := v1alpha1.NewCamelCatalogList()
-	err = c.List(context.TODO(), &k8sclient.ListOptions{Namespace: ip.Namespace}, &list)
+	err = c.List(context.TODO(), &list, k8sclient.InNamespace(ip.Namespace))
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, list.Items)

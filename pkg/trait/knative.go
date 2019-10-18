@@ -34,7 +34,7 @@ import (
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
-	kubeclient "sigs.k8s.io/controller-runtime/pkg/client"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type knativeTrait struct {
@@ -410,10 +410,7 @@ func (t *knativeTrait) shouldUseKnative08CompatMode(namespace string) (bool, err
 			APIVersion: messaging.SchemeGroupVersion.String(),
 		},
 	}
-	opts := kubeclient.ListOptions{
-		Namespace: namespace,
-	}
-	err := t.client.List(t.ctx, &opts, &lst)
+	err := t.client.List(t.ctx, &lst, k8sclient.InNamespace(namespace))
 	if err != nil && kubernetes.IsUnknownAPIError(err) {
 		return true, nil
 	}

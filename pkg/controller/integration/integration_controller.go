@@ -104,7 +104,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady || kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
 				list := &v1alpha1.IntegrationList{}
 
-				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: kit.Namespace}, list); err != nil {
+				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(kit.Namespace)); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}
@@ -139,7 +139,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
 				list := &v1alpha1.IntegrationList{}
 
-				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: platform.Namespace}, list); err != nil {
+				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(platform.Namespace)); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}

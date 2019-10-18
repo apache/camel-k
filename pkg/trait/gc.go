@@ -145,20 +145,17 @@ func lookUpResources(ctx context.Context, client client.Client, namespace string
 	res := make([]unstructured.Unstructured, 0)
 
 	for _, t := range types {
-		options := controller.ListOptions{
-			Namespace:     namespace,
-			LabelSelector: selector,
-			Raw: &metav1.ListOptions{
-				TypeMeta: t,
-			},
-		}
 		list := unstructured.UnstructuredList{
 			Object: map[string]interface{}{
 				"apiVersion": t.APIVersion,
 				"kind":       t.Kind,
 			},
 		}
-		if err := client.List(ctx, &options, &list); err != nil {
+		options := []controller.ListOption{
+			controller.InNamespace(namespace),
+			matchingSelector{selector: selector},
+		}
+		if err := client.List(ctx, &list, options...); err != nil {
 			if k8serrors.IsNotFound(err) || k8serrors.IsForbidden(err) {
 				continue
 			}
@@ -194,4 +191,12 @@ func getDiscoveryTypesWithVerbs(client client.Client, verbs []string) ([]metav1.
 	}
 
 	return types, nil
+}
+
+type matchingSelector struct {
+	selector labels.Selector
+}
+
+func (s matchingSelector) ApplyToList(opts *controller.ListOptions) {
+	opts.LabelSelector = s.selector
 }

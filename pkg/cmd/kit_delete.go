@@ -81,7 +81,7 @@ func (command *kitDeleteCommand) run(args []string) error {
 
 	if command.all {
 		kitList := v1alpha1.NewIntegrationKitList()
-		if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &kitList); err != nil {
+		if err := c.List(command.Context, &kitList, k8sclient.InNamespace(command.Namespace)); err != nil {
 			return err
 		}
 

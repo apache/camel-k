@@ -46,7 +46,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
@@ -185,13 +184,12 @@ func integrationPod(ns string, name string) func() *v1.Pod {
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		opts := k8sclient.ListOptions{
-			LabelSelector: labels.SelectorFromSet(labels.Set{
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
 				"camel.apache.org/integration": name,
-			}),
-			Namespace: ns,
-		}
-		if err := testClient.List(testContext, &opts, &lst); err != nil {
+			})
+		if err != nil {
 			panic(err)
 		}
 		if len(lst.Items) == 0 {
@@ -239,10 +237,7 @@ func setIntegrationVersion(ns string, name string, version string) error {
 func kits(ns string) func() []v1alpha1.IntegrationKit {
 	return func() []v1alpha1.IntegrationKit {
 		lst := v1alpha1.NewIntegrationKitList()
-		opts := k8sclient.ListOptions{
-			Namespace: ns,
-		}
-		if err := testClient.List(testContext, &opts, &lst); err != nil {
+		if err := testClient.List(testContext, &lst, k8sclient.InNamespace(ns)); err != nil {
 			panic(err)
 		}
 		return lst.Items
@@ -340,10 +335,7 @@ func build(ns string, name string) func() *v1alpha1.Build {
 func platform(ns string) func() *v1alpha1.IntegrationPlatform {
 	return func() *v1alpha1.IntegrationPlatform {
 		lst := v1alpha1.NewIntegrationPlatformList()
-		opts := k8sclient.ListOptions{
-			Namespace: ns,
-		}
-		if err := testClient.List(testContext, &opts, &lst); err != nil {
+		if err := testClient.List(testContext, &lst, k8sclient.InNamespace(ns)); err != nil {
 			panic(err)
 		}
 		if len(lst.Items) == 0 {
@@ -383,13 +375,12 @@ func operatorPod(ns string) func() *v1.Pod {
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		opts := k8sclient.ListOptions{
-			LabelSelector: labels.SelectorFromSet(labels.Set{
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
 				"camel.apache.org/component": "operator",
-			}),
-			Namespace: ns,
-		}
-		if err := testClient.List(testContext, &opts, &lst); err != nil {
+			})
+		if err != nil {
 			panic(err)
 		}
 		if len(lst.Items) == 0 {
@@ -402,11 +393,7 @@ func operatorPod(ns string) func() *v1.Pod {
 func operatorTryPodForceKill(ns string) {
 	pod := operatorPod(ns)()
 	if pod != nil {
-		opts := func(options *k8sclient.DeleteOptions) {
-			zero := int64(0)
-			options.GracePeriodSeconds = &zero
-		}
-		if err := testClient.Delete(testContext, pod, opts); err != nil {
+		if err := testClient.Delete(testContext, pod, k8sclient.GracePeriodSeconds(0)); err != nil {
 			log.Error(err, "cannot forcefully kill the pod")
 		}
 	}
@@ -420,13 +407,12 @@ func scaleOperator(ns string, replicas int32) func() error {
 				APIVersion: appsv1.SchemeGroupVersion.String(),
 			},
 		}
-		opts := k8sclient.ListOptions{
-			LabelSelector: labels.SelectorFromSet(labels.Set{
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
 				"camel.apache.org/component": "operator",
-			}),
-			Namespace: ns,
-		}
-		if err := testClient.List(testContext, &opts, &lst); err != nil {
+			})
+		if err != nil {
 			return err
 		}
 		if len(lst.Items) == 0 {
@@ -437,7 +423,7 @@ func scaleOperator(ns string, replicas int32) func() error {
 
 		operatorDeployment := lst.Items[0]
 		operatorDeployment.Spec.Replicas = &replicas
-		err := testClient.Update(testContext, &operatorDeployment)
+		err = testClient.Update(testContext, &operatorDeployment)
 		if err != nil {
 			return err
 		}
@@ -527,10 +513,7 @@ func numPods(ns string) func() int {
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		opts := k8sclient.ListOptions{
-			Namespace: ns,
-		}
-		if err := testClient.List(testContext, &opts, &lst); err != nil && k8serrors.IsUnauthorized(err) {
+		if err := testClient.List(testContext, &lst, k8sclient.InNamespace(ns)); err != nil && k8serrors.IsUnauthorized(err) {
 			return 0
 		} else if err != nil {
 			log.Error(err, "Error while listing the pods")
@@ -600,7 +583,7 @@ func deleteTestNamespace(ns metav1.Object) {
 	} else if oc {
 		prj := &projectv1.Project{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: projectv1.SchemeGroupVersion.String(),
+				APIVersion: projectv1.GroupVersion.String(),
 				Kind:       "Project",
 			},
 			ObjectMeta: metav1.ObjectMeta{
@@ -632,7 +615,7 @@ func newTestNamespace(injectKnativeBroker bool) metav1.Object {
 	} else if oc {
 		obj = &projectv1.ProjectRequest{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: projectv1.SchemeGroupVersion.String(),
+				APIVersion: projectv1.GroupVersion.String(),
 				Kind:       "ProjectRequest",
 			},
 			ObjectMeta: metav1.ObjectMeta{

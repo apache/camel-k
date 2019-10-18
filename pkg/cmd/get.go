@@ -22,11 +22,13 @@ import (
 	"os"
 	"text/tabwriter"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 type getCmdOptions struct {
@@ -62,14 +64,16 @@ func (o *getCmdOptions) run(_ *cobra.Command, args []string) error {
 
 	namespace := o.Namespace
 
-	options := k8sclient.ListOptions{Namespace: namespace}
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(namespace),
+	}
 	if len(args) == 1 {
-		if err := options.SetFieldSelector("metadata.name=" + args[0]); err != nil {
-			return err
-		}
+		options = append(options, k8sclient.MatchingFields{
+			"metadata.name": args[0],
+		})
 	}
 
-	err = c.List(o.Context, &options, &integrationList)
+	err = c.List(o.Context, &integrationList, options...)
 	if err != nil {
 		return err
 	}

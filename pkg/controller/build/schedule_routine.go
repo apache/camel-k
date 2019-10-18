@@ -62,10 +62,9 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	defer action.lock.Unlock()
 
 	builds := &v1alpha1.BuildList{}
-	options := &k8sclient.ListOptions{Namespace: build.Namespace}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
-	err := action.reader.List(ctx, options, builds)
+	err := action.reader.List(ctx, builds, k8sclient.InNamespace(build.Namespace))
 	if err != nil {
 		return nil, err
 	}

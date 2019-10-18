@@ -21,9 +21,6 @@ import (
 	"context"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -73,10 +70,16 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 	}
 
 	// Check replicas
-	replicaSets, err := action.getReplicaSetsForIntegration(ctx, integration)
+	replicaSets := &appsv1.ReplicaSetList{}
+	err = action.client.List(ctx, replicaSets,
+		k8sclient.InNamespace(integration.Namespace),
+		k8sclient.MatchingLabels{
+			"camel.apache.org/integration": integration.Name,
+		})
 	if err != nil {
 		return nil, err
 	}
+
 	// And update the scale status accordingly
 	if len(replicaSets.Items) > 0 {
 		replicaSet := findLatestReplicaSet(replicaSets)
@@ -87,24 +90,6 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 	}
 
 	return integration, nil
-}
-
-func (action *monitorAction) getReplicaSetsForIntegration(ctx context.Context, integration *v1alpha1.Integration) (*appsv1.ReplicaSetList, error) {
-	byIntegrationLabel, err := labels.NewRequirement("camel.apache.org/integration", selection.Equals, []string{integration.Name})
-	if err != nil {
-		return nil, err
-	}
-	selector := labels.NewSelector().Add(*byIntegrationLabel)
-
-	options := k8sclient.ListOptions{
-		Namespace:     integration.Namespace,
-		LabelSelector: selector,
-	}
-	list := &appsv1.ReplicaSetList{}
-	if err := action.client.List(ctx, &options, list); err != nil {
-		return nil, err
-	}
-	return list, nil
 }
 
 func findLatestReplicaSet(list *appsv1.ReplicaSetList) *appsv1.ReplicaSet {

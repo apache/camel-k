@@ -60,7 +60,7 @@ func GetCurrentPlatform(ctx context.Context, c k8sclient.Reader, namespace strin
 // ListPlatforms returns all platforms installed in a given namespace (only one will be active)
 func ListPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1alpha1.IntegrationPlatformList, error) {
 	lst := v1alpha1.NewIntegrationPlatformList()
-	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &lst); err != nil {
+	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace)); err != nil {
 		return nil, err
 	}
 	return &lst, nil

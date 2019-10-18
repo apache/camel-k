@@ -23,9 +23,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -67,10 +64,9 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	defer action.lock.Unlock()
 
 	builds := &v1alpha1.BuildList{}
-	options := &k8sclient.ListOptions{Namespace: build.Namespace}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
-	err := action.reader.List(ctx, options, builds)
+	err := action.reader.List(ctx, builds, k8sclient.InNamespace(build.Namespace))
 	if err != nil {
 		return nil, err
 	}
@@ -201,20 +197,12 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1alpha
 			// has already completed at that stage.
 
 			// Locate the kaniko warmer pod
-			byComponentLabel, err := labels.NewRequirement("camel.apache.org/component", selection.Equals, []string{"kaniko-warmer"})
-			if err != nil {
-				return nil, err
-			}
-
-			selector := labels.NewSelector().Add(*byComponentLabel)
-
-			options := &k8sclient.ListOptions{
-				Namespace:     build.Namespace,
-				LabelSelector: selector,
-			}
-
 			pods := &corev1.PodList{}
-			err = action.client.List(ctx, options, pods)
+			err := action.client.List(ctx, pods,
+				k8sclient.InNamespace(build.Namespace),
+				k8sclient.MatchingLabels{
+					"camel.apache.org/component": "kaniko-warmer",
+				})
 			if err != nil {
 				return nil, err
 			}

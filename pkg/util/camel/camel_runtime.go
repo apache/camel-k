@@ -21,10 +21,10 @@ import (
 	"context"
 	"fmt"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // LoadCatalog --
@@ -33,7 +33,7 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 	var err error
 
 	list := v1alpha1.NewCamelCatalogList()
-	err = client.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &list)
+	err = client.List(ctx, &list, k8sclient.InNamespace(namespace))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 		return nil, err
 	}
 
-	if catalog == nil && err != nil {
+	if catalog == nil {
 		return nil, fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s", camelVersion, runtimeVersion)
 	}
 
