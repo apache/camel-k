@@ -26,6 +26,23 @@ func init() {
 
 	Resources["builder-role-binding.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -43,6 +60,23 @@ roleRef:
 `
 	Resources["builder-role-kubernetes.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -82,6 +116,23 @@ rules:
 `
 	Resources["builder-role-openshift.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -165,6 +216,23 @@ rules:
 `
 	Resources["builder-service-account.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -2434,7 +2502,7 @@ spec:
         passive: false
 
 `
-	Resources["camel-catalog-3.0.0-RC1-1.0.5-SNAPSHOT.yaml"] =
+	Resources["camel-catalog-3.0.0-RC1-1.0.5.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -2456,15 +2524,15 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-rc1-1.0.5-snapshot
+  name: camel-catalog-3.0.0-rc1-1.0.5
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0-RC1
     camel.apache.org/catalog.loader.version: 3.0.0-RC1
-    camel.apache.org/runtime.version: 1.0.5-SNAPSHOT
+    camel.apache.org/runtime.version: 1.0.5
 spec:
   version: 3.0.0-RC1
-  runtimeVersion: 1.0.5-SNAPSHOT
+  runtimeVersion: 1.0.5
   artifacts:
     camel-activemq:
       groupId: org.apache.camel
@@ -3598,7 +3666,6 @@ spec:
     camel-k-loader-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-groovy
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-endpointdsl
@@ -3607,41 +3674,27 @@ spec:
     camel-k-loader-java:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-java
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-endpointdsl
     camel-k-loader-js:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-js
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-endpointdsl
     camel-k-loader-knative:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-knative
-      version: 1.0.0
     camel-k-loader-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-kotlin
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-endpointdsl
     camel-k-loader-xml:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-xml
-      version: 1.0.0
-    camel-k-runtime-groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-groovy
-      version: 1.0.0
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-groovy
-      - groupId: org.apache.camel
-        artifactId: camel-groovy
     camel-k-runtime-health:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-health
@@ -3650,25 +3703,6 @@ spec:
         artifactId: camel-servlet
       - groupId: org.apache.camel.k
         artifactId: camel-k-runtime-servlet
-    camel-k-runtime-jvm:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-jvm
-      version: 1.0.0
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-runtime-main
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-js
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-xml
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-java
-      - groupId: org.apache.camel
-        artifactId: camel-core-engine
-      - groupId: org.apache.camel
-        artifactId: camel-main
-      - groupId: org.apache.camel
-        artifactId: camel-properties
     camel-k-runtime-knative:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-knative
@@ -3685,17 +3719,9 @@ spec:
         artifactId: camel-knative
       - groupId: org.apache.camel.k
         artifactId: camel-knative-http
-    camel-k-runtime-kotlin:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-kotlin
-      version: 1.0.0
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-kotlin
     camel-k-runtime-main:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-core-engine
@@ -3709,13 +3735,6 @@ spec:
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-servlet
-    camel-k-runtime-yaml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-yaml
-      version: 1.0.0
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-yaml
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -3726,7 +3745,6 @@ spec:
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
-      version: 1.0.0
       schemes:
       - id: knative
         http: true

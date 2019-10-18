@@ -31,10 +31,10 @@ const (
 	CamelVersionConstraint = ">=3.0.0-RC1"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.0.5-SNAPSHOT"
+	DefaultRuntimeVersion = "1.0.5"
 
 	// RuntimeVersionConstraint --
-	RuntimeVersionConstraint = ">=1.0.5-SNAPSHOT"
+	RuntimeVersionConstraint = ">=1.0.5"
 
 	// KanikoVersion --
 	KanikoVersion = "0.9.0"

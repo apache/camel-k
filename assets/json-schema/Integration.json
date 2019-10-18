@@ -59,6 +59,23 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Fields": {
+      "required": [
+        "Map"
+      ],
+      "properties": {
+        "Map": {
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/Fields"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Initializer": {
       "required": [
         "name"
@@ -143,6 +160,13 @@
             }
           },
           "type": "object"
+        },
+        "managedFields": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/ManagedFieldsEntry"
+          },
+          "type": "array"
         },
         "name": {
           "type": "string"
@@ -328,6 +352,28 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "ManagedFieldsEntry": {
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "fields": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Fields"
+        },
+        "manager": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "time": {
+          "$ref": "#/definitions/Time"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "OwnerReference": {
       "required": [
         "apiVersion",
@@ -402,6 +448,9 @@
         "language": {
           "type": "string"
         },
+        "loader": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         }
@@ -432,6 +481,9 @@
         },
         "reason": {
           "type": "string"
+        },
+        "remainingItemCount": {
+          "type": "integer"
         },
         "resourceVersion": {
           "type": "string"
