@@ -159,6 +159,9 @@ dep:
 lint:
 	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE)
 
+check-licenses:
+	./script/check_licenses.sh
+
 images: test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
@@ -204,9 +207,9 @@ package-artifacts:
 unsnapshot-olm:
 	./script/unsnapshot_olm.sh
 
-release: clean codegen set-version build-resources unsnapshot-olm build images images-push cross-compile package-examples git-tag
+release: clean codegen set-version build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
 
-release-staging: clean codegen set-version build-resources unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
+release-staging: clean codegen set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
 
 install-minishift:
 	./script/install_minishift.sh
@@ -216,4 +219,4 @@ install-minikube:
 release-notes:
 	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses

@@ -2,9 +2,8 @@
 /vendor
 
 # Binary files
-/camel-k
 /kamel
-/builder
+/license-check
 
 # Released Packages
 *.tar.gz
