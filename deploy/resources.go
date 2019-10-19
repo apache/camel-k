@@ -5064,7 +5064,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:1.0.0-M3-SNAPSHOT
+          image: docker.io/apache/camel-k:1.0.0-M4-SNAPSHOT
           command:
           - kamel
           - operator
