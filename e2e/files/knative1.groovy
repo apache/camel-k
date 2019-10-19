@@ -16,5 +16,6 @@
  */
 
 from('timer:tick')
+  .setBody().constant("")
   .to('knative:endpoint/knative2')
   .log('Received: ${body}')
