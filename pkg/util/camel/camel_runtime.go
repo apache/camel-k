@@ -38,7 +38,7 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 		return nil, err
 	}
 
-	catalog, err = FindBestMatch(list.Items, camelVersion, runtimeVersion)
+	catalog, err = findBestMatch(list.Items, camelVersion, runtimeVersion)
 	if err != nil {
 		return nil, err
 	}

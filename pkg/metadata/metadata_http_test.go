@@ -20,10 +20,10 @@ package metadata
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 func TestHttpJavaSource(t *testing.T) {
@@ -39,7 +39,7 @@ func TestHttpJavaSource(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -62,7 +62,7 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -83,7 +83,7 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -104,7 +104,7 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -126,7 +126,7 @@ func TestNoHttpGroovySource(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -148,7 +148,7 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -170,7 +170,7 @@ func TestHttpXMLSource(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -193,7 +193,7 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -227,7 +227,7 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 		},
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := ExtractAll(catalog, codes)
@@ -263,7 +263,7 @@ func TestMultilangHTTPSource(t *testing.T) {
 		},
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := ExtractAll(catalog, codes)

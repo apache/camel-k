@@ -21,25 +21,25 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-// FindBestMatch --
-func FindBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
+func findBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
 	for _, catalog := range catalogs {
 		if catalog.Spec.Version == camelVersion && catalog.Spec.RuntimeVersion == runtimeVersion {
 			return NewRuntimeCatalog(catalog.Spec), nil
 		}
 	}
 
-	vc := NewSemVerConstraint(camelVersion)
-	rc := NewSemVerConstraint(runtimeVersion)
+	vc := newSemVerConstraint(camelVersion)
+	rc := newSemVerConstraint(runtimeVersion)
 	if vc == nil || rc == nil {
 		return nil, nil
 	}
 
-	cc := NewCatalogVersionCollection(catalogs)
+	cc := newCatalogVersionCollection(catalogs)
 	for _, x := range cc {
 		if vc.Check(x.Version) && rc.Check(x.RuntimeVersion) {
 			return NewRuntimeCatalog(x.Catalog.Spec), nil
@@ -49,8 +49,7 @@ func FindBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtim
 	return nil, nil
 }
 
-// NewSemVerConstraint --
-func NewSemVerConstraint(versionConstraint string) *semver.Constraints {
+func newSemVerConstraint(versionConstraint string) *semver.Constraints {
 	constraint, err := semver.NewConstraint(versionConstraint)
 	if err != nil || constraint == nil {
 		if err != nil {
@@ -64,8 +63,7 @@ func NewSemVerConstraint(versionConstraint string) *semver.Constraints {
 	return constraint
 }
 
-// NewCatalogVersionCollection --
-func NewCatalogVersionCollection(catalogs []v1alpha1.CamelCatalog) CatalogVersionCollection {
+func newCatalogVersionCollection(catalogs []v1alpha1.CamelCatalog) CatalogVersionCollection {
 	versions := make([]CatalogVersion, 0, len(catalogs))
 
 	for i := range catalogs {

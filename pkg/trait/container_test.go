@@ -22,19 +22,18 @@ import (
 	"testing"
 
 	"github.com/scylladb/go-set/strset"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestContainerWithDefaults(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -89,7 +88,7 @@ func TestContainerWithDefaults(t *testing.T) {
 }
 
 func TestContainerWithCustomName(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)

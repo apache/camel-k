@@ -22,20 +22,19 @@ import (
 	"testing"
 
 	"github.com/scylladb/go-set/strset"
-
-	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	env := Environment{
@@ -96,7 +95,7 @@ func TestDefaultEnvironment(t *testing.T) {
 }
 
 func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
-	c, err := test.DefaultCatalog()
+	c, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	env := Environment{
@@ -164,7 +163,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 }
 
 func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
-	c, err := test.DefaultCatalog()
+	c, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	env := Environment{

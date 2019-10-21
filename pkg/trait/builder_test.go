@@ -21,6 +21,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/scylladb/go-set/strset"
+	"github.com/stretchr/testify/assert"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -28,13 +31,9 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/stretchr/testify/assert"
-
-	"github.com/scylladb/go-set/strset"
 )
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
@@ -120,7 +119,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 }
 
 func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy v1alpha1.IntegrationPlatformBuildPublishStrategy) *Environment {
-	c, err := test.DefaultCatalog()
+	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
 	}

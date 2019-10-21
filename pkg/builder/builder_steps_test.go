@@ -20,14 +20,15 @@ package builder
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/stretchr/testify/assert"
 )
 
 type testSteps struct {
@@ -50,7 +51,7 @@ func TestRegisterDuplicatedSteps(t *testing.T) {
 }
 
 func TestMavenSettingsFromConfigMap(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	c, err := test.NewFakeClient(
@@ -102,7 +103,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 }
 
 func TestMavenSettingsFromSecret(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	c, err := test.NewFakeClient(
@@ -154,7 +155,7 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 }
 
 func TestListPublishedImages(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	c, err := test.NewFakeClient(

@@ -21,28 +21,30 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/envvar"
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/scylladb/go-set/strset"
 	"github.com/stretchr/testify/assert"
 
-	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
-	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/envvar"
+	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -141,7 +143,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 }
 
 func TestKnativeEnvConfigurationFromSource(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)

@@ -21,10 +21,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/stretchr/testify/assert"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 type errorTestSteps struct {
@@ -33,7 +34,7 @@ type errorTestSteps struct {
 }
 
 func TestFailure(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	c, err := test.NewFakeClient()
