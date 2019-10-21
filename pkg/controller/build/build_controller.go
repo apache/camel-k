@@ -21,7 +21,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/apache/camel-k/pkg/platform"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -39,6 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -49,33 +49,17 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
-	reconciler, err := newReconciler(mgr, c)
-	if err != nil {
-		return err
-	}
-	return add(mgr, reconciler)
+	return add(mgr, newReconciler(mgr, c))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager, c client.Client) (reconcile.Reconciler, error) {
-	// Non-caching client to be used whenever caching may cause race conditions,
-	// like in the builds scheduling critical section.
-	// TODO: to be replaced with Manager.GetAPIReader() as soon as it's available, see:
-	// https://github.com/kubernetes-sigs/controller-runtime/pull/327
-	clientOptions := k8sclient.Options{
-		Scheme: mgr.GetScheme(),
-	}
-	reader, err := k8sclient.New(mgr.GetConfig(), clientOptions)
-	if err != nil {
-		return nil, err
-	}
-
+func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileBuild{
 		client:  c,
-		reader:  reader,
+		reader:  mgr.GetAPIReader(),
 		scheme:  mgr.GetScheme(),
 		builder: builder.New(c),
-	}, nil
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -131,7 +115,9 @@ var _ reconcile.Reconciler = &ReconcileBuild{}
 type ReconcileBuild struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client   client.Client
+	client client.Client
+	// Non-caching client to be used whenever caching may cause race conditions,
+	// like in the builds scheduling critical section
 	reader   k8sclient.Reader
 	scheme   *runtime.Scheme
 	builder  builder.Builder
