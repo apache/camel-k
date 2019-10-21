@@ -10,7 +10,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
@@ -22,16 +21,6 @@ var QuarkusSteps = []builder.Step{
 }
 
 func generateQuarkusProject(ctx *builder.Context) error {
-	// Catalog
-	if ctx.Catalog == nil {
-		c, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Platform.Build.CamelVersion, ctx.Build.Platform.Build.RuntimeVersion)
-		if err != nil {
-			return err
-		}
-
-		ctx.Catalog = c
-	}
-
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.Properties = ctx.Build.Platform.Build.Properties
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}

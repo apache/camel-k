@@ -28,7 +28,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -71,17 +70,8 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 
 	defer os.RemoveAll(builderPath)
 
-	catalog, err := camel.LoadCatalog(b.ctx, b.client, build.Meta.Namespace, build.CamelVersion, build.RuntimeVersion)
-	if err != nil {
-		log.Error(err, "Error while loading Camel catalog")
-
-		result.Phase = v1alpha1.BuildPhaseFailed
-		result.Error = err.Error()
-	}
-
 	c := Context{
 		Client:    b.client,
-		Catalog:   catalog,
 		Path:      builderPath,
 		Namespace: build.Meta.Namespace,
 		Build:     build,
