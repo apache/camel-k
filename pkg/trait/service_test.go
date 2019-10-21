@@ -22,16 +22,15 @@ import (
 	"testing"
 
 	"github.com/scylladb/go-set/strset"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -40,7 +39,7 @@ const (
 )
 
 func TestServiceWithDefaults(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -128,7 +127,7 @@ func TestServiceWithDefaults(t *testing.T) {
 }
 
 func TestService(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -226,7 +225,7 @@ func TestService(t *testing.T) {
 }
 
 func TestServiceWithCustomContainerName(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)

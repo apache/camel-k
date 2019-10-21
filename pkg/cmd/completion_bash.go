@@ -25,8 +25,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/apache/camel-k/pkg/platform"
 
 	"github.com/apache/camel-k/pkg/trait"
@@ -254,7 +252,7 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 }
 
 func computeCamelDependencies() string {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	if err != nil || catalog == nil {
 		catalog = camel.NewRuntimeCatalog(v1alpha1.CamelCatalog{}.Spec)
 	}

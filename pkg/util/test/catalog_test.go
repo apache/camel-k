@@ -20,13 +20,14 @@ package test
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
 	"github.com/stretchr/testify/assert"
+
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
-	catalog, err := DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	assert.Equal(t, defaults.DefaultCamelVersion, catalog.Version)

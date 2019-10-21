@@ -20,10 +20,10 @@ package metadata
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 func TestJava1(t *testing.T) {
@@ -46,7 +46,7 @@ func TestJava1(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)
@@ -83,7 +83,7 @@ func TestJava2(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)
@@ -115,7 +115,7 @@ func TestGroovy1(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)
@@ -145,7 +145,7 @@ func TestGroovy2(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)
@@ -180,7 +180,7 @@ func TestXml1(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)
@@ -214,7 +214,7 @@ func TestKotlin1(t *testing.T) {
 		Language: v1alpha1.LanguageKotlin,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)
@@ -245,7 +245,7 @@ func TestJavascript1(t *testing.T) {
 		Language: v1alpha1.LanguageJavaScript,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)
@@ -281,7 +281,7 @@ func TestJYaml(t *testing.T) {
 		Language: v1alpha1.LanguageYaml,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	metadata := Extract(catalog, source)

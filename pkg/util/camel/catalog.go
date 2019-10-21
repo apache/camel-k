@@ -15,21 +15,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package test
+package camel
 
 import (
 	"strings"
 
+	yaml2 "gopkg.in/yaml.v2"
+
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
-
-	yaml2 "gopkg.in/yaml.v2"
 )
 
 // DefaultCatalog --
-func DefaultCatalog() (*camel.RuntimeCatalog, error) {
+func DefaultCatalog() (*RuntimeCatalog, error) {
 	catalogs := make([]v1alpha1.CamelCatalog, 0)
 
 	for name, content := range deploy.Resources {
@@ -43,5 +42,5 @@ func DefaultCatalog() (*camel.RuntimeCatalog, error) {
 		}
 	}
 
-	return camel.FindBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion)
+	return findBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion)
 }

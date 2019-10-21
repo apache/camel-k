@@ -20,10 +20,10 @@ package metadata
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/stretchr/testify/assert"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 func TestDependenciesJavaSource(t *testing.T) {
@@ -41,7 +41,7 @@ func TestDependenciesJavaSource(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -63,7 +63,7 @@ func TestDependenciesJavaScript(t *testing.T) {
 		Language: v1alpha1.LanguageJavaScript,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -87,7 +87,7 @@ func TestDependenciesGroovy(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -108,7 +108,7 @@ func TestDependencies(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -127,7 +127,7 @@ func TestJacksonDependency(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -154,7 +154,7 @@ func TestLanguageDependencies(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -177,7 +177,7 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 		Language: v1alpha1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -199,7 +199,7 @@ func TestHystrixDependency(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -222,7 +222,7 @@ func TestRestDependency(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -245,7 +245,7 @@ func TestRestWithPathDependency(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -267,7 +267,7 @@ func TestRestConfigurationDependency(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -289,7 +289,7 @@ func TestRestClosureDependency(t *testing.T) {
 		Language: v1alpha1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -315,7 +315,7 @@ func TestXMLHystrixDependency(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -345,7 +345,7 @@ func TestXMLRestDependency(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -394,7 +394,7 @@ func TestXMLLanguageDependencies(t *testing.T) {
 		Language: v1alpha1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -453,7 +453,7 @@ func TestYAMLRestDependency(t *testing.T) {
 		Language: v1alpha1.LanguageYaml,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -471,7 +471,7 @@ func TestYAMLHystrixDependency(t *testing.T) {
 		Language: v1alpha1.LanguageYaml,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -488,7 +488,7 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 		Language: v1alpha1.LanguageYaml,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)

@@ -24,12 +24,12 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestNewProject(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	ctx := builder.Context{
@@ -91,7 +91,7 @@ func TestNewProject(t *testing.T) {
 }
 
 func TestGenerateJvmProject(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	ctx := builder.Context{
@@ -148,7 +148,7 @@ func TestGenerateJvmProject(t *testing.T) {
 }
 
 func TestGenerateGroovyProject(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	ctx := builder.Context{
@@ -209,7 +209,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 }
 
 func TestSanitizeDependencies(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	ctx := builder.Context{
