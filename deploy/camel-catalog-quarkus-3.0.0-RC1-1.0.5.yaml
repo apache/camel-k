@@ -1,0 +1,304 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1alpha1
+kind: CamelCatalog
+metadata:
+  name: camel-catalog-quarkus-3.0.0-rc1-1.0.5
+  labels:
+    app: camel-k
+    camel.apache.org/catalog.version: 3.0.0-RC1
+    camel.apache.org/catalog.loader.version: 3.0.0-RC1
+    camel.apache.org/runtime.version: 1.0.5
+    camel.apache.org/runtime.provider: quarkus
+spec:
+  version: 3.0.0-RC1
+  runtimeVersion: 1.0.5
+  runtimeProvider:
+    quarkus:
+      camelQuarkusVersion: 0.2.0
+      quarkusVersion: 0.21.2
+  artifacts:
+    camel-k-loader-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-loader-java:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-java
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-js:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-js
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-knative
+    camel-k-loader-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-kotlin
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-xml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-xml
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-servlet
+    camel-k-runtime-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-knative
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-k-runtime-main:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-main
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+      - groupId: org.apache.camel
+        artifactId: camel-properties
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+    camel-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-quarkus-aws-eks:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-eks
+      schemes:
+      - id: aws-eks
+        http: false
+        passive: false
+    camel-quarkus-aws-s3:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-s3
+      schemes:
+      - id: aws-s3
+        http: false
+        passive: false
+    camel-quarkus-aws-sns:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sns
+      schemes:
+      - id: aws-sns
+        http: false
+        passive: false
+    camel-quarkus-aws-sqs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sqs
+      schemes:
+      - id: aws-sqs
+        http: false
+        passive: false
+    camel-quarkus-bean:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
+    camel-quarkus-core:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-core
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+    camel-quarkus-csv:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-csv
+      dataformats:
+      - csv
+    camel-quarkus-direct:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-direct
+      schemes:
+      - id: direct
+        http: false
+        passive: true
+    camel-quarkus-infinispan:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-infinispan
+      schemes:
+      - id: infinispan
+        http: false
+        passive: false
+    camel-quarkus-jdbc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jdbc
+      schemes:
+      - id: jdbc
+        http: false
+        passive: false
+    camel-quarkus-log:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-log
+      schemes:
+      - id: log
+        http: false
+        passive: true
+    camel-quarkus-mail:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mail
+      schemes:
+      - id: imap
+        http: false
+        passive: false
+      - id: imaps
+        http: false
+        passive: false
+      - id: pop3
+        http: false
+        passive: false
+      - id: pop3s
+        http: false
+        passive: false
+      - id: smtp
+        http: false
+        passive: false
+      - id: smtps
+        http: false
+        passive: false
+      dataformats:
+      - mime-multipart
+    camel-quarkus-microprofile-metrics:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
+    camel-quarkus-netty-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty-http
+      schemes:
+      - id: netty-http
+        http: true
+        passive: false
+    camel-quarkus-paho:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-paho
+      schemes:
+      - id: paho
+        http: false
+        passive: false
+    camel-quarkus-rest:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rest
+      schemes:
+      - id: rest
+        http: true
+        passive: false
+      - id: rest-api
+        http: false
+        passive: false
+    camel-quarkus-salesforce:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-salesforce
+      schemes:
+      - id: salesforce
+        http: false
+        passive: false
+    camel-quarkus-servlet:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-servlet
+      schemes:
+      - id: servlet
+        http: true
+        passive: false
+    camel-quarkus-tarfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tarfile
+      dataformats:
+      - tarfile
+    camel-quarkus-timer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-timer
+      schemes:
+      - id: timer
+        http: false
+        passive: false
+    camel-quarkus-twitter:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-twitter
+      schemes:
+      - id: twitter-directmessage
+        http: false
+        passive: false
+      - id: twitter-search
+        http: false
+        passive: false
+      - id: twitter-timeline
+        http: false
+        passive: false
+    camel-quarkus-zipfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zipfile
+      dataformats:
+      - zipfile
