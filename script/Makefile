@@ -20,6 +20,7 @@ RUNTIME_VERSION := 1.0.6
 RUNTIME_VERSION_CONSTRAINT := >=1.0.5
 CAMEL_VERSION := 3.0.0-RC1
 CAMEL_VERSION_CONSTRAINT := >=3.0.0-RC1
+CAMEL_QUARKUS_VERSION := 0.2.1-SNAPSHOT
 KANIKO_VERSION := 0.9.0
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
 LOCAL_REPOSITORY := /tmp/artifacts/m2
@@ -123,7 +124,8 @@ build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
 build-resources:
-	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pmain -Dcatalog.file=camel-catalog-$(CAMEL_VERSION)-$(RUNTIME_VERSION).yaml
+	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pquarkus -Dcatalog.runtime=quarkus -Dcamel-quarkus.version=$(CAMEL_QUARKUS_VERSION) -Dcatalog.file=camel-catalog-quarkus-$(CAMEL_QUARKUS_VERSION)-$(RUNTIME_VERSION).yaml
 	./script/embed_resources.sh deploy
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
