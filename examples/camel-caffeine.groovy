@@ -24,10 +24,8 @@
 
 import com.github.benmanes.caffeine.cache.Caffeine
 
-context {
-    registry {
-        caffeineCache = Caffeine.newBuilder().recordStats().build()
-    }
+beans {
+    caffeineCache = Caffeine.newBuilder().recordStats().build()
 }
 
 from('timer:tick')
