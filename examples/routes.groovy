@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom
 //     kamel run examples/routes.groovy
 //
 
-context {
+camel {
 
     //
     // configure components
@@ -36,17 +36,16 @@ context {
             }
         }
     }
-
-    //
-    // configure registry
-    //
-    registry {
-        myProcessor = processor {
-            it.in.headers['RandomValue'] = ThreadLocalRandom.current().nextInt()
-        }
-    }
 }
 
+//
+// configure beans
+//
+beans {
+    myProcessor = processor {
+        it.in.headers['RandomValue'] = ThreadLocalRandom.current().nextInt()
+    }
+}
 
 from('timer:groovy?period=1s')
     .routeId('groovy')
