@@ -27,14 +27,27 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 // MainSteps --
 var MainSteps = []builder.Step{
+	Steps.LoadCamelCatalog,
 	Steps.GenerateProject,
 	Steps.ComputeDependencies,
+}
+
+func loadCamelCatalog(ctx *builder.Context) error {
+	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, nil)
+	if err != nil {
+		return err
+	}
+
+	ctx.Catalog = catalog
+
+	return nil
 }
 
 func generateProject(ctx *builder.Context) error {

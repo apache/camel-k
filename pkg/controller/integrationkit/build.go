@@ -92,13 +92,15 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alph
 				Name:      kit.Name,
 			},
 			Spec: v1alpha1.BuildSpec{
-				Meta:           kit.ObjectMeta,
-				CamelVersion:   env.CamelCatalog.Version,
-				RuntimeVersion: env.RuntimeVersion,
-				Platform:       env.Platform.Spec,
-				Dependencies:   kit.Spec.Dependencies,
-				Steps:          builder.StepIDsFor(env.Steps...),
-				BuildDir:       env.BuildDir,
+				Meta:            kit.ObjectMeta,
+				CamelVersion:    env.CamelCatalog.Version,
+				RuntimeVersion:  env.RuntimeVersion,
+				RuntimeProvider: env.CamelCatalog.RuntimeProvider,
+				Platform:        env.Platform.Spec,
+				Dependencies:    kit.Spec.Dependencies,
+				// TODO: sort for easy read
+				Steps:    builder.StepIDsFor(env.Steps...),
+				BuildDir: env.BuildDir,
 			},
 		}
 

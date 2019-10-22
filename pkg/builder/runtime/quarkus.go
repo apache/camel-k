@@ -10,14 +10,27 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 // QuarkusSteps --
 var QuarkusSteps = []builder.Step{
+	Steps.LoadCamelQuarkusCatalog,
 	Steps.GenerateQuarkusProject,
 	Steps.ComputeQuarkusDependencies,
+}
+
+func loadCamelQuarkusCatalog(ctx *builder.Context) error {
+	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, ctx.Build.RuntimeProvider.Quarkus)
+	if err != nil {
+		return err
+	}
+
+	ctx.Catalog = catalog
+
+	return nil
 }
 
 func generateQuarkusProject(ctx *builder.Context) error {
@@ -82,7 +95,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 
 	// Build the project, as the quarkus-bootstrap plugin build-tree goal
 	// requires the artifact to be installed
-	mc.AddArgument("package")
+	mc.AddArgument("install")
 	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while building project")
 	}
