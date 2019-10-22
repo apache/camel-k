@@ -53,9 +53,10 @@ type CamelArtifact struct {
 
 // CamelCatalogSpec defines the desired state of CamelCatalog
 type CamelCatalogSpec struct {
-	Version        string                   `json:"version" yaml:"version"`
-	RuntimeVersion string                   `json:"runtimeVersion" yaml:"runtimeVersion"`
-	Artifacts      map[string]CamelArtifact `json:"artifacts" yaml:"artifacts"`
+	Version         string                   `json:"version" yaml:"version"`
+	RuntimeVersion  string                   `json:"runtimeVersion" yaml:"runtimeVersion"`
+	RuntimeProvider *RuntimeProvider         `json:"runtimeProvider,omitempty"`
+	Artifacts       map[string]CamelArtifact `json:"artifacts" yaml:"artifacts"`
 }
 
 // CamelCatalogStatus defines the observed state of CamelCatalog

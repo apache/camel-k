@@ -342,6 +342,10 @@
         "replicas": {
           "type": "integer"
         },
+        "runtimeProvider": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/RuntimeProvider"
+        },
         "runtimeVersion": {
           "type": "string"
         },
@@ -404,6 +408,18 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "QuarkusRuntimeProvider": {
+      "properties": {
+        "camelQuarkusVersion": {
+          "type": "string"
+        },
+        "quarkusVersion": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "ResourceSpec": {
       "properties": {
         "compression": {
@@ -426,6 +442,16 @@
         },
         "type": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RuntimeProvider": {
+      "properties": {
+        "quarkus": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/QuarkusRuntimeProvider"
         }
       },
       "additionalProperties": false,

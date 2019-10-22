@@ -22,6 +22,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// RuntimeProvider --
+type RuntimeProvider struct {
+	Quarkus *QuarkusRuntimeProvider `json:"quarkus,omitempty"`
+}
+
+// QuarkusRuntimeProvider --
+type QuarkusRuntimeProvider struct {
+	CamelQuarkusVersion string `json:"camelQuarkusVersion,omitempty"`
+	QuarkusVersion      string `json:"quarkusVersion,omitempty"`
+}
+
 // ConfigurationSpec --
 type ConfigurationSpec struct {
 	Type  string `json:"type"`
