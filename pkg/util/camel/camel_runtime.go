@@ -28,24 +28,38 @@ import (
 )
 
 // LoadCatalog --
-func LoadCatalog(ctx context.Context, client client.Client, namespace string, camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
-	var catalog *RuntimeCatalog
-	var err error
+func LoadCatalog(ctx context.Context, client client.Client, namespace string, camelVersion string, runtimeVersion string, provider interface{}) (*RuntimeCatalog, error) {
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(namespace),
+	}
+
+	if _, ok := provider.(v1alpha1.QuarkusRuntimeProvider); ok {
+		options = append(options, k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.provider": "quarkus",
+		})
+	}
 
 	list := v1alpha1.NewCamelCatalogList()
-	err = client.List(ctx, &list, k8sclient.InNamespace(namespace))
+	err := client.List(ctx, &list, options...)
 	if err != nil {
 		return nil, err
 	}
 
-	catalog, err = findBestMatch(list.Items, camelVersion, runtimeVersion)
+	catalog, err := findBestMatch(list.Items, camelVersion, runtimeVersion, provider)
 	if err != nil {
 		return nil, err
 	}
 
-	if catalog == nil {
-		return nil, fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s", camelVersion, runtimeVersion)
+	if catalog != nil {
+		return catalog, nil
 	}
 
-	return catalog, nil
+	switch provider := provider.(type) {
+	case v1alpha1.QuarkusRuntimeProvider:
+		return nil, fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s, camel-quarkus=%s, quarkus=%s",
+			camelVersion, runtimeVersion, provider.CamelQuarkusVersion, provider.QuarkusVersion)
+	default:
+		return nil, fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s",
+			camelVersion, runtimeVersion)
+	}
 }

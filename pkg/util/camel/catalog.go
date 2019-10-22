@@ -42,5 +42,5 @@ func DefaultCatalog() (*RuntimeCatalog, error) {
 		}
 	}
 
-	return findBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion)
+	return findBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion, nil)
 }

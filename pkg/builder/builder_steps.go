@@ -27,7 +27,6 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/tar"
@@ -40,7 +39,6 @@ func init() {
 }
 
 type steps struct {
-	LoadCatalog             Step
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
@@ -50,10 +48,6 @@ type steps struct {
 
 // Steps --
 var Steps = steps{
-	LoadCatalog: NewStep(
-		InitPhase,
-		loadCatalog,
-	),
 	GenerateProjectSettings: NewStep(
 		ProjectGenerationPhase+1,
 		generateProjectSettings,
@@ -78,7 +72,6 @@ var Steps = steps{
 
 // DefaultSteps --
 var DefaultSteps = []Step{
-	Steps.LoadCatalog,
 	Steps.GenerateProjectSettings,
 	Steps.InjectDependencies,
 	Steps.SanitizeDependencies,
@@ -109,17 +102,6 @@ func registerStep(steps ...Step) {
 		}
 		stepsByID[step.ID()] = step
 	}
-}
-
-func loadCatalog(ctx *Context) error {
-	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.CamelVersion, ctx.Build.RuntimeVersion)
-	if err != nil {
-		return err
-	}
-
-	ctx.Catalog = catalog
-
-	return nil
 }
 
 func generateProjectSettings(ctx *Context) error {

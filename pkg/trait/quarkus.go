@@ -21,10 +21,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
@@ -49,6 +52,26 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *quarkusTrait) Apply(e *Environment) error {
 	return nil
+}
+
+func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, runtimeVersion string) (*camel.RuntimeCatalog, error) {
+	ns := e.DetermineNamespace()
+	if ns == "" {
+		return nil, errors.New("unable to determine namespace")
+	}
+
+	c, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, v1alpha1.QuarkusRuntimeProvider{
+		// FIXME
+		CamelQuarkusVersion: "0.2.0",
+		QuarkusVersion:      "0.21.2",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: generate a catalog if nil
+
+	return c, nil
 }
 
 func (t *quarkusTrait) addBuildSteps(e *Environment) {
