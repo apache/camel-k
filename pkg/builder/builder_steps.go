@@ -217,13 +217,13 @@ func sanitizeDependencies(ctx *Context) error {
 	for i := 0; i < len(ctx.Maven.Project.Dependencies); i++ {
 		dep := ctx.Maven.Project.Dependencies[i]
 
+		// It may be externalized into runtime provider specific steps
 		switch dep.GroupID {
 		case "org.apache.camel":
-			//
-			// Remove the version so we force using the one configured by the bom
-			//
-			ctx.Maven.Project.Dependencies[i].Version = ""
+			fallthrough
 		case "org.apache.camel.k":
+			fallthrough
+		case "org.apache.camel.quarkus":
 			//
 			// Remove the version so we force using the one configured by the bom
 			//
