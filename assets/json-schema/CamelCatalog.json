@@ -179,6 +179,10 @@
           },
           "type": "object"
         },
+        "runtimeProvider": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/RuntimeProvider"
+        },
         "runtimeVersion": {
           "type": "string"
         },
@@ -309,6 +313,28 @@
         },
         "uid": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "QuarkusRuntimeProvider": {
+      "properties": {
+        "camelQuarkusVersion": {
+          "type": "string"
+        },
+        "quarkusVersion": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RuntimeProvider": {
+      "properties": {
+        "quarkus": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/QuarkusRuntimeProvider"
         }
       },
       "additionalProperties": false,

@@ -35,17 +35,18 @@ type IntegrationKitSpec struct {
 
 // IntegrationKitStatus defines the observed state of IntegrationKit
 type IntegrationKitStatus struct {
-	Phase          IntegrationKitPhase       `json:"phase,omitempty"`
-	BaseImage      string                    `json:"baseImage,omitempty"`
-	Image          string                    `json:"image,omitempty"`
-	Digest         string                    `json:"digest,omitempty"`
-	Artifacts      []Artifact                `json:"artifacts,omitempty"`
-	Failure        *Failure                  `json:"failure,omitempty"`
-	CamelVersion   string                    `json:"camelVersion,omitempty"`
-	RuntimeVersion string                    `json:"runtimeVersion,omitempty"`
-	Platform       string                    `json:"platform,omitempty"`
-	Conditions     []IntegrationKitCondition `json:"conditions,omitempty"`
-	Version        string                    `json:"version,omitempty"`
+	Phase           IntegrationKitPhase       `json:"phase,omitempty"`
+	BaseImage       string                    `json:"baseImage,omitempty"`
+	Image           string                    `json:"image,omitempty"`
+	Digest          string                    `json:"digest,omitempty"`
+	Artifacts       []Artifact                `json:"artifacts,omitempty"`
+	Failure         *Failure                  `json:"failure,omitempty"`
+	CamelVersion    string                    `json:"camelVersion,omitempty"`
+	RuntimeVersion  string                    `json:"runtimeVersion,omitempty"`
+	RuntimeProvider *RuntimeProvider          `json:"runtimeProvider,omitempty"`
+	Platform        string                    `json:"platform,omitempty"`
+	Conditions      []IntegrationKitCondition `json:"conditions,omitempty"`
+	Version         string                    `json:"version,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

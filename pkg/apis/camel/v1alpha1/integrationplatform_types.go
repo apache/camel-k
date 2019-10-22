@@ -97,6 +97,7 @@ type IntegrationPlatformBuildSpec struct {
 	PublishStrategy       IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	CamelVersion          string                                  `json:"camelVersion,omitempty"`
 	RuntimeVersion        string                                  `json:"runtimeVersion,omitempty"`
+	RuntimeProvider       *RuntimeProvider                        `json:"runtimeProvider,omitempty"`
 	BaseImage             string                                  `json:"baseImage,omitempty"`
 	Properties            map[string]string                       `json:"properties,omitempty"`
 	LocalRepository       string                                  `json:"localRepository,omitempty"`
