@@ -136,8 +136,8 @@ func TestDependenciesQuarkus(t *testing.T) {
 
 	assert.ElementsMatch(t,
 		[]string{
-			"mvn:org.apache.camel.quarkus:camel-quarkus-log:",
-			"mvn:org.apache.camel.quarkus:camel-quarkus-twitter:",
+			"camel-quarkus:log",
+			"camel-quarkus:twitter",
 		},
 		meta.Dependencies.List())
 }
