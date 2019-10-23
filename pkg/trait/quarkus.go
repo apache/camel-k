@@ -78,6 +78,10 @@ func (t *quarkusTrait) addBuildSteps(e *Environment) {
 	e.Steps = append(e.Steps, runtime.QuarkusSteps...)
 }
 
+func (t *quarkusTrait) addClasspath(e *Environment) {
+	// No-op as we rely on the Quarkus runner
+}
+
 func (t *quarkusTrait) addRuntimeDependencies(e *Environment, dependencies *[]string) error {
 	for _, s := range e.Integration.Sources() {
 		meta := metadata.Extract(e.CamelCatalog, s)

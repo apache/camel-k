@@ -22,13 +22,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 type classpathTrait struct {
@@ -78,8 +78,13 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	e.Classpath.Add("/etc/camel/resources")
 	e.Classpath.Add("./resources")
 
-	for _, artifact := range kit.Status.Artifacts {
-		e.Classpath.Add(artifact.Target)
+	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+	if quarkus.isEnabled() {
+		quarkus.addClasspath(e)
+	} else {
+		for _, artifact := range kit.Status.Artifacts {
+			e.Classpath.Add(artifact.Target)
+		}
 	}
 
 	if kit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypeExternal {
