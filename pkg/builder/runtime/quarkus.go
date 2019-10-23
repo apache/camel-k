@@ -127,7 +127,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 		}
 
 		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
-			ID:       fileName,
+			ID:       gav.GroupID + ":" + gav.ArtifactID + ":" + gav.Type + ":" + gav.Version,
 			Location: location,
 			Target:   path.Join("lib", fileName),
 		})
