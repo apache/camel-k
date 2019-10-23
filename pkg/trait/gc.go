@@ -33,6 +33,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util"
+	controllerUtil "github.com/apache/camel-k/pkg/util/controller"
 )
 
 type garbageCollectorTrait struct {
@@ -153,7 +154,7 @@ func lookUpResources(ctx context.Context, client client.Client, namespace string
 		}
 		options := []controller.ListOption{
 			controller.InNamespace(namespace),
-			matchingSelector{selector: selector},
+			controllerUtil.MatchingSelector{Selector: selector},
 		}
 		if err := client.List(ctx, &list, options...); err != nil {
 			if k8serrors.IsNotFound(err) || k8serrors.IsForbidden(err) {
@@ -191,12 +192,4 @@ func getDiscoveryTypesWithVerbs(client client.Client, verbs []string) ([]metav1.
 	}
 
 	return types, nil
-}
-
-type matchingSelector struct {
-	selector labels.Selector
-}
-
-func (s matchingSelector) ApplyToList(opts *controller.ListOptions) {
-	opts.LabelSelector = s.selector
 }
