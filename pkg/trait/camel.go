@@ -70,21 +70,22 @@ func (t *camelTrait) Apply(e *Environment) error {
 	}
 
 	if e.CamelCatalog == nil {
-		var catalog *camel.RuntimeCatalog
-		var err error
 		quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
 		if quarkus.isEnabled() {
-			catalog, err = quarkus.loadOrCreateCatalog(e, cv, rv)
+			err := quarkus.loadOrCreateCatalog(e, cv, rv)
+			if err != nil {
+				return err
+			}
 		} else {
-			catalog, err = t.loadOrCreateCatalog(e, cv, rv)
+			err := t.loadOrCreateCatalog(e, cv, rv)
+			if err != nil {
+				return err
+			}
 		}
-		if err != nil {
-			return err
-		} else if catalog == nil {
-			return fmt.Errorf("unable to find catalog for: %s", cv)
-		}
+	}
 
-		e.CamelCatalog = catalog
+	if e.CamelCatalog == nil {
+		return fmt.Errorf("unable to find catalog for: %s", cv)
 	}
 
 	e.RuntimeVersion = rv
@@ -103,15 +104,15 @@ func (t *camelTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, runtimeVersion string) (*camel.RuntimeCatalog, error) {
+func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, runtimeVersion string) error {
 	ns := e.DetermineNamespace()
 	if ns == "" {
-		return nil, errors.New("unable to determine namespace")
+		return errors.New("unable to determine namespace")
 	}
 
 	c, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if c == nil {
@@ -120,17 +121,17 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, ru
 		// semver constraints
 		cvHasFixedVersion, err := regexp.MatchString(`^(\d+)\.(\d+)\.([\w-\.]+)$`, camelVersion)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		rvHasFixedVersion, err := regexp.MatchString(`^(\d+)\.(\d+)\.([\w-\.]+)$`, runtimeVersion)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if cvHasFixedVersion && rvHasFixedVersion {
 			c, err = t.generateCatalog(e, camelVersion, runtimeVersion)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			// sanitize catalog name
@@ -146,11 +147,14 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, ru
 
 			err = e.Client.Create(e.C, &cx)
 			if err != nil && !k8serrors.IsAlreadyExists(err) {
-				return nil, err
+				return err
 			}
 		}
 	}
-	return c, nil
+
+	e.CamelCatalog = c
+
+	return nil
 }
 
 func (t *camelTrait) generateCatalog(e *Environment, camelVersion string, runtimeVersion string) (*camel.RuntimeCatalog, error) {
