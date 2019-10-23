@@ -37,20 +37,31 @@ var (
 	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	languageRegexp   = regexp.MustCompile(`language\s*\(\s*["|']([a-zA-Z0-9-]+[^"|']+)["|']\s*,.*\)`)
 
-	additionalDependencies = map[string]string{
-		`.*JsonLibrary\.Jackson.*`:                         "camel:jackson",
-		`.*\.hystrix().*`:                                  "camel:hystrix",
-		`.*restConfiguration().*`:                          "camel:rest",
-		`.*rest(("[a-zA-Z0-9-/]+")*).*`:                    "camel:rest",
-		`^\s*rest\s*{.*`:                                   "camel:rest",
-		`.*\.groovy\s*\(.*\).*`:                            "camel:groovy",
-		`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`: "camel:jsonpath",
-		`.*\.ognl\s*\(.*\).*`:                              "camel:ognl",
-		`.*\.mvel\s*\(.*\).*`:                              "camel:mvel",
-		`.*\.?simple\s*\(.*\).*`:                           "camel:bean",
-		`.*\.xquery\s*\(.*\).*`:                            "camel:saxon",
-		`.*\.?xpath\s*\(.*\).*`:                            "camel:xpath",
-		`.*\.xtokenize\s*\(.*\).*`:                         "camel:jaxp",
+	sourceDependencies = struct {
+		main    map[string]string
+		quarkus map[string]string
+	}{
+		main: map[string]string{
+			`.*JsonLibrary\.Jackson.*`:                         "camel:jackson",
+			`.*\.hystrix().*`:                                  "camel:hystrix",
+			`.*restConfiguration().*`:                          "camel:rest",
+			`.*rest(("[a-zA-Z0-9-/]+")*).*`:                    "camel:rest",
+			`^\s*rest\s*{.*`:                                   "camel:rest",
+			`.*\.groovy\s*\(.*\).*`:                            "camel:groovy",
+			`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`: "camel:jsonpath",
+			`.*\.ognl\s*\(.*\).*`:                              "camel:ognl",
+			`.*\.mvel\s*\(.*\).*`:                              "camel:mvel",
+			`.*\.?simple\s*\(.*\).*`:                           "camel:bean",
+			`.*\.xquery\s*\(.*\).*`:                            "camel:saxon",
+			`.*\.?xpath\s*\(.*\).*`:                            "camel:xpath",
+			`.*\.xtokenize\s*\(.*\).*`:                         "camel:jaxp",
+		},
+		quarkus: map[string]string{
+			`.*restConfiguration().*`:       "camel-quarkus:rest",
+			`.*rest(("[a-zA-Z0-9-/]+")*).*`: "camel-quarkus:rest",
+			`^\s*rest\s*{.*`:                "camel-quarkus:rest",
+			`.*\.?simple\s*\(.*\).*`:        "camel-quarkus:bean",
+		},
 	}
 )
 
@@ -121,6 +132,12 @@ func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *M
 		}
 	}
 
+	var additionalDependencies map[string]string
+	if i.catalog.RuntimeProvider != nil && i.catalog.RuntimeProvider.Quarkus != nil {
+		additionalDependencies = sourceDependencies.quarkus
+	} else {
+		additionalDependencies = sourceDependencies.main
+	}
 	for pattern, dep := range additionalDependencies {
 		pat := regexp.MustCompile(pattern)
 		if pat.MatchString(source.Content) {
