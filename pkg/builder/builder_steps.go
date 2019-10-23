@@ -152,6 +152,14 @@ func injectDependencies(ctx *Context) error {
 			}
 
 			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
+		case strings.HasPrefix(d, "camel-quarkus:"):
+			artifactID := strings.TrimPrefix(d, "camel-quarkus:")
+
+			if !strings.HasPrefix(artifactID, "camel-quarkus-") {
+				artifactID = "camel-quarkus-" + artifactID
+			}
+
+			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)

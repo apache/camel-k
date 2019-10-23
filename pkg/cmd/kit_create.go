@@ -142,6 +142,8 @@ func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
 		case strings.HasPrefix(item, "file:"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
+		case strings.HasPrefix(item, "camel-quarkus-"):
+			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel-quarkus:"+strings.TrimPrefix(item, "camel-quarkus-"))
 		case strings.HasPrefix(item, "camel-"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
