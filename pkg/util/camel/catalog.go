@@ -29,6 +29,18 @@ import (
 
 // DefaultCatalog --
 func DefaultCatalog() (*RuntimeCatalog, error) {
+	return catalogForRuntimeProvider(nil)
+}
+
+// QuarkusCatalog --
+func QuarkusCatalog() (*RuntimeCatalog, error) {
+	return catalogForRuntimeProvider(v1alpha1.QuarkusRuntimeProvider{
+		CamelQuarkusVersion: "0.2.0",
+		QuarkusVersion:      "0.21.2",
+	})
+}
+
+func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
 	catalogs := make([]v1alpha1.CamelCatalog, 0)
 
 	for name, content := range deploy.Resources {
@@ -42,5 +54,5 @@ func DefaultCatalog() (*RuntimeCatalog, error) {
 		}
 	}
 
-	return findBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion, nil)
+	return findBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion, provider)
 }

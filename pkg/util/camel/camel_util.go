@@ -27,10 +27,16 @@ import (
 )
 
 func findBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtimeVersion string, provider interface{}) (*RuntimeCatalog, error) {
-	// FIXME: take the provider into account for exact match
+	// TODO: generic exact matching logic independent of the runtime provider
 	for _, catalog := range catalogs {
 		if catalog.Spec.Version == camelVersion && catalog.Spec.RuntimeVersion == runtimeVersion {
-			return NewRuntimeCatalog(catalog.Spec), nil
+			if provider == nil && catalog.Spec.RuntimeProvider == nil {
+				return NewRuntimeCatalog(catalog.Spec), nil
+			} else if provider, ok := provider.(v1alpha1.QuarkusRuntimeProvider); ok &&
+				catalog.Spec.RuntimeProvider != nil && catalog.Spec.RuntimeProvider.Quarkus != nil &&
+				provider == *catalog.Spec.RuntimeProvider.Quarkus {
+				return NewRuntimeCatalog(catalog.Spec), nil
+			}
 		}
 	}
 

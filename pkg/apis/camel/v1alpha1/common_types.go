@@ -29,8 +29,8 @@ type RuntimeProvider struct {
 
 // QuarkusRuntimeProvider --
 type QuarkusRuntimeProvider struct {
-	CamelQuarkusVersion string `json:"camelQuarkusVersion,omitempty"`
-	QuarkusVersion      string `json:"quarkusVersion,omitempty"`
+	CamelQuarkusVersion string `json:"camelQuarkusVersion,omitempty" yaml:"camelQuarkusVersion"`
+	QuarkusVersion      string `json:"quarkusVersion,omitempty" yaml:"quarkusVersion"`
 }
 
 // ConfigurationSpec --

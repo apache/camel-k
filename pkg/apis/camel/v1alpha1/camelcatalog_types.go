@@ -55,7 +55,7 @@ type CamelArtifact struct {
 type CamelCatalogSpec struct {
 	Version         string                   `json:"version" yaml:"version"`
 	RuntimeVersion  string                   `json:"runtimeVersion" yaml:"runtimeVersion"`
-	RuntimeProvider *RuntimeProvider         `json:"runtimeProvider,omitempty"`
+	RuntimeProvider *RuntimeProvider         `json:"runtimeProvider,omitempty" yaml:"runtimeProvider"`
 	Artifacts       map[string]CamelArtifact `json:"artifacts" yaml:"artifacts"`
 }
 

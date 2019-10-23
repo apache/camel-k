@@ -116,6 +116,32 @@ func TestDependencies(t *testing.T) {
 	assert.ElementsMatch(t, []string{"camel:http", "camel:log", "camel:mock", "camel:twitter"}, meta.Dependencies.List())
 }
 
+func TestDependenciesQuarkus(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.java",
+			Content: `
+			    from("http:test").to("log:end");
+			    from("https4:test").to("log:end");
+			    from("twitter-timeline:test").to("mock:end");
+		    `,
+		},
+		Language: v1alpha1.LanguageJavaSource,
+	}
+
+	catalog, err := camel.QuarkusCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+
+	assert.ElementsMatch(t,
+		[]string{
+			"mvn:org.apache.camel.quarkus:camel-quarkus-log:",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-twitter:",
+		},
+		meta.Dependencies.List())
+}
+
 func TestJacksonDependency(t *testing.T) {
 	code := v1alpha1.SourceSpec{
 		DataSpec: v1alpha1.DataSpec{
