@@ -40,7 +40,11 @@ func NewRuntimeCatalog(spec v1alpha1.CamelCatalogSpec) *RuntimeCatalog {
 		for _, language := range artifact.Languages {
 			// Skip languages in common dependencies since they are always available to integrations
 			if artifact.ArtifactID != "camel-base" {
-				catalog.languageDependencies[language] = strings.Replace(artifact.ArtifactID, "camel-", "camel:", 1)
+				if catalog.RuntimeProvider != nil && catalog.RuntimeProvider.Quarkus != nil {
+					catalog.languageDependencies[language] = strings.Replace(artifact.ArtifactID, "camel-quarkus-", "camel-quarkus:", 1)
+				} else {
+					catalog.languageDependencies[language] = strings.Replace(artifact.ArtifactID, "camel-", "camel:", 1)
+				}
 			}
 		}
 	}
