@@ -45,30 +45,34 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *dependenciesTrait) Apply(e *Environment) error {
-	dependencies := make([]string, 0)
 	if e.Integration.Spec.Dependencies != nil {
+		dependencies := make([]string, 0)
 		for _, dep := range e.Integration.Spec.Dependencies {
 			util.StringSliceUniqueAdd(&dependencies, dep)
+			e.Integration.Status.Dependencies = dependencies
 		}
+	} else {
+		e.Integration.Status.Dependencies = make([]string, 0)
 	}
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
 	if quarkus.isEnabled() {
-		err := quarkus.addRuntimeDependencies(e, &dependencies)
+		err := quarkus.addRuntimeDependencies(e)
 		if err != nil {
 			return err
 		}
 	} else {
-		addDefaultRuntimeDependencies(e, &dependencies)
+		addDefaultRuntimeDependencies(e)
 	}
 
 	// sort the dependencies to get always the same list if they don't change
-	sort.Strings(dependencies)
-	e.Integration.Status.Dependencies = dependencies
+	sort.Strings(e.Integration.Status.Dependencies)
 	return nil
 }
 
-func addDefaultRuntimeDependencies(e *Environment, dependencies *[]string) {
+func addDefaultRuntimeDependencies(e *Environment) {
+	dependencies := &e.Integration.Status.Dependencies
+
 	for _, s := range e.Integration.Sources() {
 		meta := metadata.Extract(e.CamelCatalog, s)
 

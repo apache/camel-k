@@ -54,10 +54,10 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, runtimeVersion string) (*camel.RuntimeCatalog, error) {
+func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, runtimeVersion string) error {
 	ns := e.DetermineNamespace()
 	if ns == "" {
-		return nil, errors.New("unable to determine namespace")
+		return errors.New("unable to determine namespace")
 	}
 
 	c, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, v1alpha1.QuarkusRuntimeProvider{
@@ -66,12 +66,14 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 		QuarkusVersion:      "0.21.2",
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
+
+	e.CamelCatalog = c
 
 	// TODO: generate a catalog if nil
 
-	return c, nil
+	return nil
 }
 
 func (t *quarkusTrait) addBuildSteps(e *Environment) {
@@ -82,7 +84,9 @@ func (t *quarkusTrait) addClasspath(e *Environment) {
 	// No-op as we rely on the Quarkus runner
 }
 
-func (t *quarkusTrait) addRuntimeDependencies(e *Environment, dependencies *[]string) error {
+func (t *quarkusTrait) addRuntimeDependencies(e *Environment) error {
+	dependencies := &e.Integration.Status.Dependencies
+
 	for _, s := range e.Integration.Sources() {
 		meta := metadata.Extract(e.CamelCatalog, s)
 
@@ -102,7 +106,6 @@ func (t *quarkusTrait) addRuntimeDependencies(e *Environment, dependencies *[]st
 			addRuntimeDependency("camel-k-quarkus-knative", dependencies)
 		}
 
-		// main required by default
 		addRuntimeDependency("camel-k-runtime-quarkus", dependencies)
 
 		for _, d := range meta.Dependencies.List() {
