@@ -60,14 +60,14 @@ func generateProject(ctx *builder.Context) error {
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel",
 		ArtifactID: "camel-bom",
-		Version:    ctx.Catalog.Version,
+		Version:    ctx.Build.CamelVersion,
 		Type:       "pom",
 		Scope:      "import",
 	})
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-bom",
-		Version:    ctx.Catalog.RuntimeVersion,
+		Version:    ctx.Build.RuntimeVersion,
 		Type:       "pom",
 		Scope:      "import",
 	})
