@@ -140,8 +140,7 @@ func (t *quarkusTrait) determineQuarkusVersion(e *Environment) string {
 		e.Platform.Spec.Build.RuntimeProvider.Quarkus.QuarkusVersion != "" {
 		return e.Platform.Spec.Build.RuntimeProvider.Quarkus.QuarkusVersion
 	}
-	// FIXME
-	return "0.21.2"
+	return defaults.QuarkusVersionConstraint
 }
 
 func (t *quarkusTrait) determineCamelQuarkusVersion(e *Environment) string {
@@ -160,6 +159,5 @@ func (t *quarkusTrait) determineCamelQuarkusVersion(e *Environment) string {
 		e.Platform.Spec.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
 		return e.Platform.Spec.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion
 	}
-	// FIXME
-	return "0.2.0"
+	return defaults.CamelQuarkusVersionConstraint
 }

@@ -36,6 +36,18 @@ const (
 	// RuntimeVersionConstraint --
 	RuntimeVersionConstraint = ">=1.0.5"
 
+	// DefaultCamelQuarkusVersion --
+	DefaultCamelQuarkusVersion = "0.2.1-SNAPSHOT"
+
+	// CamelQuarkusVersionConstraint --
+	CamelQuarkusVersionConstraint = ">=0.2.0"
+
+	// DefaultQuarkusVersion --
+	DefaultQuarkusVersion = "0.21.2"
+
+	// QuarkusVersionConstraint --
+	QuarkusVersionConstraint = ">=0.21.2"
+
 	// KanikoVersion --
 	KanikoVersion = "0.9.0"
 
