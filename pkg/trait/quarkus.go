@@ -33,7 +33,9 @@ import (
 )
 
 type quarkusTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait           `property:",squash"`
+	QuarkusVersion      string `property:"quarkus-version"`
+	CamelQuarkusVersion string `property:"camel-quarkus-version"`
 }
 
 func newQuarkusTrait() *quarkusTrait {
@@ -61,9 +63,8 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 	}
 
 	c, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, v1alpha1.QuarkusRuntimeProvider{
-		// FIXME
-		CamelQuarkusVersion: "0.2.0",
-		QuarkusVersion:      "0.21.2",
+		CamelQuarkusVersion: t.determineCamelQuarkusVersion(e),
+		QuarkusVersion:      t.determineQuarkusVersion(e),
 	})
 	if err != nil {
 		return err
@@ -121,4 +122,44 @@ func (t *quarkusTrait) addContainerEnvironment(e *Environment) {
 
 func addRuntimeDependency(dependency string, dependencies *[]string) {
 	util.StringSliceUniqueAdd(dependencies, fmt.Sprintf("mvn:org.apache.camel.k/%s", dependency))
+}
+
+func (t *quarkusTrait) determineQuarkusVersion(e *Environment) string {
+	if t.QuarkusVersion != "" {
+		return t.QuarkusVersion
+	}
+	if e.Integration != nil && e.Integration.Status.RuntimeProvider != nil && e.Integration.Status.RuntimeProvider.Quarkus != nil &&
+		e.Integration.Status.RuntimeProvider.Quarkus.QuarkusVersion != "" {
+		return e.Integration.Status.RuntimeProvider.Quarkus.QuarkusVersion
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeProvider != nil && e.IntegrationKit.Status.RuntimeProvider.Quarkus != nil &&
+		e.IntegrationKit.Status.RuntimeProvider.Quarkus.QuarkusVersion != "" {
+		return e.IntegrationKit.Status.RuntimeProvider.Quarkus.QuarkusVersion
+	}
+	if e.Platform.Spec.Build.RuntimeProvider != nil && e.Platform.Spec.Build.RuntimeProvider.Quarkus != nil &&
+		e.Platform.Spec.Build.RuntimeProvider.Quarkus.QuarkusVersion != "" {
+		return e.Platform.Spec.Build.RuntimeProvider.Quarkus.QuarkusVersion
+	}
+	// FIXME
+	return "0.21.2"
+}
+
+func (t *quarkusTrait) determineCamelQuarkusVersion(e *Environment) string {
+	if t.CamelQuarkusVersion != "" {
+		return t.CamelQuarkusVersion
+	}
+	if e.Integration != nil && e.Integration.Status.RuntimeProvider != nil && e.Integration.Status.RuntimeProvider.Quarkus != nil &&
+		e.Integration.Status.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
+		return e.Integration.Status.RuntimeProvider.Quarkus.CamelQuarkusVersion
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeProvider != nil && e.IntegrationKit.Status.RuntimeProvider.Quarkus != nil &&
+		e.IntegrationKit.Status.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
+		return e.IntegrationKit.Status.RuntimeProvider.Quarkus.CamelQuarkusVersion
+	}
+	if e.Platform.Spec.Build.RuntimeProvider != nil && e.Platform.Spec.Build.RuntimeProvider.Quarkus != nil &&
+		e.Platform.Spec.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
+		return e.Platform.Spec.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion
+	}
+	// FIXME
+	return "0.2.0"
 }

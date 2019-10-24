@@ -59,15 +59,8 @@ func (t *camelTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
-	cv := e.DetermineCamelVersion()
-	rv := e.DetermineRuntimeVersion()
-
-	if t.Version != "" {
-		cv = t.Version
-	}
-	if t.RuntimeVersion != "" {
-		rv = t.RuntimeVersion
-	}
+	cv := t.determineCamelVersion(e)
+	rv := t.determineRuntimeVersion(e)
 
 	if e.CamelCatalog == nil {
 		quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
@@ -239,4 +232,30 @@ func (t *camelTrait) generateMavenProject(camelVersion string, runtimeVersion st
 	}
 
 	return p
+}
+
+func (t *camelTrait) determineCamelVersion(e *Environment) string {
+	if t.Version != "" {
+		return t.Version
+	}
+	if e.Integration != nil && e.Integration.Status.CamelVersion != "" {
+		return e.Integration.Status.CamelVersion
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.CamelVersion != "" {
+		return e.IntegrationKit.Status.CamelVersion
+	}
+	return e.Platform.Spec.Build.CamelVersion
+}
+
+func (t *camelTrait) determineRuntimeVersion(e *Environment) string {
+	if t.RuntimeVersion != "" {
+		return t.RuntimeVersion
+	}
+	if e.Integration != nil && e.Integration.Status.RuntimeVersion != "" {
+		return e.Integration.Status.RuntimeVersion
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
+		return e.IntegrationKit.Status.RuntimeVersion
+	}
+	return e.Platform.Spec.Build.RuntimeVersion
 }
