@@ -21,6 +21,9 @@ RUNTIME_VERSION_CONSTRAINT := >=1.0.5
 CAMEL_VERSION := 3.0.0-RC1
 CAMEL_VERSION_CONSTRAINT := >=3.0.0-RC1
 CAMEL_QUARKUS_VERSION := 0.2.1-SNAPSHOT
+CAMEL_QUARKUS_VERSION_CONSTRAINT := >=0.2.0
+QUARKUS_VERSION := 0.21.2
+QUARKUS_VERSION_CONSTRAINT := >=0.21.2
 KANIKO_VERSION := 0.9.0
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
 LOCAL_REPOSITORY := /tmp/artifacts/m2
@@ -90,6 +93,18 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // RuntimeVersionConstraint -- " >> $(VERSIONFILE)
 	@echo "  RuntimeVersionConstraint = \"$(RUNTIME_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultCamelQuarkusVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultCamelQuarkusVersion = \"$(CAMEL_QUARKUS_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // CamelQuarkusVersionConstraint -- " >> $(VERSIONFILE)
+	@echo "  CamelQuarkusVersionConstraint = \"$(CAMEL_QUARKUS_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultQuarkusVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultQuarkusVersion = \"$(QUARKUS_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // QuarkusVersionConstraint -- " >> $(VERSIONFILE)
+	@echo "  QuarkusVersionConstraint = \"$(QUARKUS_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
 	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)

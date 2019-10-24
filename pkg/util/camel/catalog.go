@@ -35,8 +35,9 @@ func DefaultCatalog() (*RuntimeCatalog, error) {
 // QuarkusCatalog --
 func QuarkusCatalog() (*RuntimeCatalog, error) {
 	return catalogForRuntimeProvider(v1alpha1.QuarkusRuntimeProvider{
-		CamelQuarkusVersion: "0.2.0",
-		QuarkusVersion:      "0.21.2",
+		// Can be replaced with the default Camel Quarkus version when it's stable
+		CamelQuarkusVersion: defaults.CamelQuarkusVersionConstraint,
+		QuarkusVersion:      defaults.DefaultQuarkusVersion,
 	})
 }
 
