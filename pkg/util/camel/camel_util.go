@@ -56,6 +56,9 @@ func findBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtim
 			return nil, nil
 		}
 		for _, c := range cc {
+			if c.Catalog.Spec.RuntimeProvider == nil || c.Catalog.Spec.RuntimeProvider.Quarkus == nil {
+				continue
+			}
 			qv, err := semver.NewVersion(c.Catalog.Spec.RuntimeProvider.Quarkus.QuarkusVersion)
 			if err != nil {
 				log.Debugf("Invalid semver version (quarkus) %s", qv)

@@ -131,6 +131,7 @@ func TestDependenciesQuarkus(t *testing.T) {
 
 	catalog, err := camel.QuarkusCatalog()
 	assert.Nil(t, err)
+	assert.NotNil(t, catalog)
 
 	meta := Extract(catalog, code)
 
