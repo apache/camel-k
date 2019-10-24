@@ -45,15 +45,14 @@ func generateQuarkusProject(ctx *builder.Context) error {
 		maven.Dependency{
 			GroupID:    "org.apache.camel.quarkus",
 			ArtifactID: "camel-quarkus-bom",
-			Version:    "0.2.0",
-			//Version:    ctx.Catalog.Version,
-			Type:  "pom",
-			Scope: "import",
+			Version:    ctx.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion,
+			Type:       "pom",
+			Scope:      "import",
 		},
 		maven.Dependency{
 			GroupID:    "org.apache.camel.k",
 			ArtifactID: "camel-k-runtime-bom",
-			Version:    ctx.Catalog.RuntimeVersion,
+			Version:    ctx.Build.RuntimeVersion,
 			Type:       "pom",
 			Scope:      "import",
 		},
@@ -64,14 +63,12 @@ func generateQuarkusProject(ctx *builder.Context) error {
 		maven.Plugin{
 			GroupID:    "io.quarkus",
 			ArtifactID: "quarkus-bootstrap-maven-plugin",
-			// TODO: must be the same as the version required by camel-k-runtime
-			Version: "0.21.2",
+			Version:    ctx.Build.RuntimeProvider.Quarkus.QuarkusVersion,
 		},
 		maven.Plugin{
 			GroupID:    "io.quarkus",
 			ArtifactID: "quarkus-maven-plugin",
-			// TODO: must be the same as the version required by camel-k-runtime
-			Version: "0.21.2",
+			Version:    ctx.Build.RuntimeProvider.Quarkus.QuarkusVersion,
 			Executions: []maven.Execution{
 				{
 					Goals: []string{
@@ -104,6 +101,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	mc.AdditionalArguments = nil
 	mc.AddArguments("quarkus-bootstrap:build-tree")
 	output := new(bytes.Buffer)
+	// TODO: improve logging while capturing output
 	mc.Stdout = output
 	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while determining dependencies")

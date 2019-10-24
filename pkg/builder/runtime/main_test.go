@@ -35,6 +35,7 @@ func TestNewProject(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
+			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
@@ -97,6 +98,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
+			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
@@ -154,6 +156,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
+			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
@@ -215,6 +218,7 @@ func TestSanitizeDependencies(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1alpha1.BuildSpec{
+			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Platform: v1alpha1.IntegrationPlatformSpec{
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
