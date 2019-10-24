@@ -225,40 +225,6 @@ func (e *Environment) DetermineControllerStrategy(ctx context.Context, c control
 	return ControllerStrategyKnativeService, nil
 }
 
-// DetermineCamelVersion --
-func (e *Environment) DetermineCamelVersion() string {
-	var version string
-
-	if e.Integration != nil {
-		version = e.Integration.Status.CamelVersion
-	}
-	if e.IntegrationKit != nil && version == "" {
-		version = e.IntegrationKit.Status.CamelVersion
-	}
-	if version == "" {
-		version = e.Platform.Spec.Build.CamelVersion
-	}
-
-	return version
-}
-
-// DetermineRuntimeVersion --
-func (e *Environment) DetermineRuntimeVersion() string {
-	var version string
-
-	if e.Integration != nil {
-		version = e.Integration.Status.RuntimeVersion
-	}
-	if e.IntegrationKit != nil && version == "" {
-		version = e.IntegrationKit.Status.RuntimeVersion
-	}
-	if version == "" {
-		version = e.Platform.Spec.Build.RuntimeVersion
-	}
-
-	return version
-}
-
 // DetermineNamespace --
 func (e *Environment) DetermineNamespace() string {
 	if e.Integration != nil && e.Integration.Namespace != "" {
