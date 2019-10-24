@@ -94,7 +94,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alph
 			Spec: v1alpha1.BuildSpec{
 				Meta:            kit.ObjectMeta,
 				CamelVersion:    env.CamelCatalog.Version,
-				RuntimeVersion:  env.RuntimeVersion,
+				RuntimeVersion:  env.CamelCatalog.RuntimeVersion,
 				RuntimeProvider: env.CamelCatalog.RuntimeProvider,
 				Platform:        env.Platform.Spec,
 				Dependencies:    kit.Spec.Dependencies,
