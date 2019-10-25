@@ -67,7 +67,14 @@ func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
 }
 
 // GenerateCatalog --
-func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec, camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
+func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec,
+	camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
+	return GenerateCatalogWithProvider(ctx, client, namespace, mvn, camelVersion, runtimeVersion, "", nil)
+}
+
+// GenerateCatalogWithProvider --
+func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec,
+	camelVersion string, runtimeVersion string, providerName string, providerDependency *maven.Dependency) (*RuntimeCatalog, error) {
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
 	if err != nil {
@@ -80,13 +87,16 @@ func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace str
 		return nil, err
 	}
 
-	project := generateMavenProject(camelVersion, runtimeVersion)
+	project := generateMavenProject(camelVersion, runtimeVersion, providerDependency)
 
 	mc := maven.NewContext(tmpDir, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.Timeout.Duration
 	mc.AddSystemProperty("catalog.path", tmpDir)
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
+	if providerName != "" {
+		mc.AddSystemProperty("catalog.runtime", providerName)
+	}
 
 	settings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
 	if err != nil {
@@ -114,33 +124,37 @@ func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace str
 	return NewRuntimeCatalog(catalog.Spec), nil
 }
 
-func generateMavenProject(camelVersion string, runtimeVersion string) maven.Project {
+func generateMavenProject(camelVersion string, runtimeVersion string, providerDependency *maven.Dependency) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
 
-	p.Build = &maven.Build{
-		DefaultGoal: "generate-resources",
-		Plugins: []maven.Plugin{
+	plugin := maven.Plugin{
+		GroupID:    "org.apache.camel.k",
+		ArtifactID: "camel-k-maven-plugin",
+		Version:    runtimeVersion,
+		Executions: []maven.Execution{
 			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-maven-plugin",
-				Version:    runtimeVersion,
-				Executions: []maven.Execution{
-					{
-						ID: "generate-catalog",
-						Goals: []string{
-							"generate-catalog",
-						},
-					},
-				},
-				Dependencies: []maven.Dependency{
-					{
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-catalog",
-						Version:    camelVersion,
-					},
+				ID: "generate-catalog",
+				Goals: []string{
+					"generate-catalog",
 				},
 			},
 		},
+		Dependencies: []maven.Dependency{
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-catalog",
+				Version:    camelVersion,
+			},
+		},
+	}
+
+	if providerDependency != nil {
+		plugin.Dependencies = append(plugin.Dependencies, *providerDependency)
+	}
+
+	p.Build = &maven.Build{
+		DefaultGoal: "generate-resources",
+		Plugins:     []maven.Plugin{plugin},
 	}
 
 	return p
