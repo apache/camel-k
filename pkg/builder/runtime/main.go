@@ -80,7 +80,7 @@ func generateProject(ctx *builder.Context) error {
 func computeDependencies(ctx *builder.Context) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
 	mc.SettingsContent = ctx.Maven.SettingsData
-	mc.LocalRepository = ctx.Build.Platform.Build.LocalRepository
+	mc.LocalRepository = ctx.Build.Platform.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Platform.Build.Maven.Timeout.Duration
 	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.RuntimeVersion)
 

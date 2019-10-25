@@ -183,8 +183,8 @@ func (action *initializeAction) setDefaults(ctx context.Context, platform *v1alp
 	if platform.Spec.Build.BaseImage == "" {
 		platform.Spec.Build.BaseImage = defaults.BaseImage
 	}
-	if platform.Spec.Build.LocalRepository == "" {
-		platform.Spec.Build.LocalRepository = defaults.LocalRepository
+	if platform.Spec.Build.Maven.LocalRepository == "" {
+		platform.Spec.Build.Maven.LocalRepository = defaults.LocalRepository
 	}
 	if platform.Spec.Build.PersistentVolumeClaim == "" {
 		platform.Spec.Build.PersistentVolumeClaim = platform.Name
@@ -254,7 +254,7 @@ func (action *initializeAction) setDefaults(ctx context.Context, platform *v1alp
 	action.L.Infof("CamelVersion set to %s", platform.Spec.Build.CamelVersion)
 	action.L.Infof("RuntimeVersion set to %s", platform.Spec.Build.RuntimeVersion)
 	action.L.Infof("BaseImage set to %s", platform.Spec.Build.BaseImage)
-	action.L.Infof("LocalRepository set to %s", platform.Spec.Build.LocalRepository)
+	action.L.Infof("LocalRepository set to %s", platform.Spec.Build.Maven.LocalRepository)
 	action.L.Infof("Timeout set to %s", platform.Spec.Build.Timeout)
 	action.L.Infof("Maven Timeout set to %s", platform.Spec.Build.Maven.Timeout.Duration)
 

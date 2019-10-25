@@ -92,7 +92,7 @@ func (command *describePlatformCommand) describeIntegrationPlatform(platform v1a
 		w.Write(0, "Version:\t%s\n", platform.Status.Version)
 		w.Write(0, "Base Image:\t%s\n", platform.Spec.Build.BaseImage)
 		w.Write(0, "Camel Version:\t%s\n", platform.Spec.Build.CamelVersion)
-		w.Write(0, "Local Repository:\t%s\n", platform.Spec.Build.LocalRepository)
+		w.Write(0, "Local Repository:\t%s\n", platform.Spec.Build.Maven.LocalRepository)
 		w.Write(0, "Publish Strategy:\t%s\n", platform.Spec.Build.PublishStrategy)
 
 		if len(platform.Spec.Resources.Kits) > 0 {

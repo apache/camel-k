@@ -186,7 +186,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			}
 		}
 		if o.localRepository != "" {
-			platform.Spec.Build.LocalRepository = o.localRepository
+			platform.Spec.Build.Maven.LocalRepository = o.localRepository
 		}
 		if o.camelVersion != "" {
 			platform.Spec.Build.CamelVersion = o.camelVersion
