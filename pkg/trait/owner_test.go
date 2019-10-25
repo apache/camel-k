@@ -34,7 +34,7 @@ func TestOwner(t *testing.T) {
 	processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("owner"))
 
 	ValidateOwnerResources(t, env, true)
 }
