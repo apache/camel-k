@@ -45,10 +45,10 @@ func TestOpenShiftTraits(t *testing.T) {
 	res := processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.Nil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.Nil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))
@@ -60,10 +60,10 @@ func TestOpenShiftTraits(t *testing.T) {
 func TestOpenShiftTraitsWithWeb(t *testing.T) {
 	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.NotNil(t, env.GetTrait(ID("service")))
-	assert.NotNil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.NotNil(t, env.GetTrait("service"))
+	assert.NotNil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))
@@ -87,8 +87,8 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 		},
 	}
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("service")))
-	assert.NotNil(t, env.GetTrait(ID("route")))
+	assert.NotNil(t, env.GetTrait("service"))
+	assert.NotNil(t, env.GetTrait("route"))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
 		return svc.Name == TestDeploymentName && svc.Spec.Ports[0].TargetPort.StrVal == "http"
 	}))
@@ -104,8 +104,8 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 		},
 	}
 	res := processTestEnv(t, env)
-	assert.Nil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route"))) // No route without service
+	assert.Nil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route")) // No route without service
 	assert.Nil(t, res.GetService(func(svc *corev1.Service) bool {
 		return true
 	}))
@@ -114,10 +114,10 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 func TestKubernetesTraits(t *testing.T) {
 	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.Nil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.Nil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))
@@ -129,10 +129,10 @@ func TestKubernetesTraits(t *testing.T) {
 func TestKubernetesTraitsWithWeb(t *testing.T) {
 	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.NotNil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.NotNil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))

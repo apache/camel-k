@@ -120,7 +120,7 @@ func TestKnativeService(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("knative")))
+	assert.NotNil(t, environment.GetTrait("knative"))
 	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
 	assert.Equal(t, 4, environment.Resources.Size())
 
@@ -249,8 +249,8 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("knative-service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("knative-service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName

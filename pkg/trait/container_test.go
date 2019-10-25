@@ -77,8 +77,8 @@ func TestContainerWithDefaults(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
 
@@ -139,8 +139,8 @@ func TestContainerWithCustomName(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
 

@@ -101,9 +101,9 @@ func TestServiceWithDefaults(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
 		return service.Name == ServiceTestName
@@ -199,9 +199,9 @@ func TestService(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
 		return service.Name == ServiceTestName
@@ -282,9 +282,9 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
 	assert.NotNil(t, d)

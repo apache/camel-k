@@ -51,7 +51,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
-			assert.Nil(t, e.GetTrait(ID("builder")))
+			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Steps)
 		})
 	}
@@ -72,7 +72,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
-			assert.Nil(t, e.GetTrait(ID("builder")))
+			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Steps)
 		})
 	}
@@ -84,7 +84,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("builder")))
+	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.Steps)
 	assert.Len(t, env.Steps, 8)
 	assert.Condition(t, func() bool {
@@ -104,7 +104,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("builder")))
+	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.Steps)
 	assert.Len(t, env.Steps, 8)
 	assert.Condition(t, func() bool {
