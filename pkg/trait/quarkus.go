@@ -23,6 +23,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -30,6 +32,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 type quarkusTrait struct {
@@ -62,17 +65,54 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 		return errors.New("unable to determine namespace")
 	}
 
-	c, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, v1alpha1.QuarkusRuntimeProvider{
-		CamelQuarkusVersion: t.determineCamelQuarkusVersion(e),
-		QuarkusVersion:      t.determineQuarkusVersion(e),
+	camelQuarkusVersion := t.determineCamelQuarkusVersion(e)
+	quarkusVersion := t.determineQuarkusVersion(e)
+
+	catalog, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, v1alpha1.QuarkusRuntimeProvider{
+		CamelQuarkusVersion: camelQuarkusVersion,
+		QuarkusVersion:      quarkusVersion,
 	})
 	if err != nil {
 		return err
 	}
 
-	e.CamelCatalog = c
+	if catalog == nil {
+		// if the catalog is not found in the cluster, try to create it if
+		// the required versions (camel, runtime and provider) are not expressed as
+		// semver constraints
+		if exactVersionRegexp.MatchString(camelVersion) && exactVersionRegexp.MatchString(runtimeVersion) &&
+			exactVersionRegexp.MatchString(camelQuarkusVersion) && exactVersionRegexp.MatchString(quarkusVersion) {
+			catalog, err = camel.GenerateCatalogWithProvider(e.C, e.Client, ns, e.Platform.Spec.Build.Maven, camelVersion, runtimeVersion,
+				"quarkus",
+				&maven.Dependency{
+					GroupID:    "org.apache.camel.quarkus",
+					ArtifactID: "camel-catalog-quarkus",
+					Version:    camelQuarkusVersion,
+				})
+			if err != nil {
+				return err
+			}
 
-	// TODO: generate a catalog if nil
+			// sanitize catalog name
+			catalogName := "camel-catalog-quarkus" + strings.ToLower(camelVersion+"-"+runtimeVersion)
+
+			cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
+			cx.Labels = make(map[string]string)
+			cx.Labels["app"] = "camel-k"
+			cx.Labels["camel.apache.org/catalog.version"] = camelVersion
+			cx.Labels["camel.apache.org/catalog.loader.version"] = camelVersion
+			cx.Labels["camel.apache.org/runtime.version"] = runtimeVersion
+			cx.Labels["camel.apache.org/runtime.provider"] = "quarkus"
+			cx.Labels["camel.apache.org/catalog.generated"] = True
+
+			err = e.Client.Create(e.C, &cx)
+			if err != nil && !k8serrors.IsAlreadyExists(err) {
+				return err
+			}
+		}
+	}
+
+	e.CamelCatalog = catalog
 
 	return nil
 }
