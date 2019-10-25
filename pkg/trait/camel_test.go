@@ -69,31 +69,6 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 	assert.Equal(t, "unable to find catalog matching version requirement: camel=Unmatchable version, runtime=0.0.1", err.Error())
 }
 
-func TestCamelTraitGenerateMavenProjectSucceeds(t *testing.T) {
-	trait, _ := createNominalCamelTest()
-
-	mvnProject := trait.generateMavenProject("1.23.0", "1.0.0")
-	assert.NotNil(t, mvnProject)
-	assert.Equal(t, "org.apache.camel.k.integration", mvnProject.GroupID)
-	assert.Equal(t, "camel-k-catalog-generator", mvnProject.ArtifactID)
-	assert.NotNil(t, mvnProject.Build)
-	assert.Equal(t, "generate-resources", mvnProject.Build.DefaultGoal)
-	assert.NotNil(t, mvnProject.Build.Plugins)
-	assert.Len(t, mvnProject.Build.Plugins, 1)
-	assert.Equal(t, "org.apache.camel.k", mvnProject.Build.Plugins[0].GroupID)
-	assert.Equal(t, "camel-k-maven-plugin", mvnProject.Build.Plugins[0].ArtifactID)
-	assert.NotNil(t, mvnProject.Build.Plugins[0].Executions)
-	assert.Len(t, mvnProject.Build.Plugins[0].Executions, 1)
-	assert.Equal(t, "generate-catalog", mvnProject.Build.Plugins[0].Executions[0].ID)
-	assert.NotNil(t, mvnProject.Build.Plugins[0].Executions[0].Goals)
-	assert.Len(t, mvnProject.Build.Plugins[0].Executions[0].Goals, 1)
-	assert.Equal(t, "generate-catalog", mvnProject.Build.Plugins[0].Executions[0].Goals[0])
-	assert.NotNil(t, mvnProject.Build.Plugins[0].Dependencies)
-	assert.Len(t, mvnProject.Build.Plugins[0].Dependencies, 1)
-	assert.Equal(t, "org.apache.camel", mvnProject.Build.Plugins[0].Dependencies[0].GroupID)
-	assert.Equal(t, "camel-catalog", mvnProject.Build.Plugins[0].Dependencies[0].ArtifactID)
-}
-
 func createNominalCamelTest() (*camelTrait, *Environment) {
 	client, _ := test.NewFakeClient()
 
