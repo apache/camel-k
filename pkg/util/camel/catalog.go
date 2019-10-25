@@ -18,13 +18,21 @@ limitations under the License.
 package camel
 
 import (
+	"context"
+	"io/ioutil"
+	"os"
+	"path"
 	"strings"
 
 	yaml2 "gopkg.in/yaml.v2"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 // DefaultCatalog --
@@ -56,4 +64,84 @@ func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
 	}
 
 	return findBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion, provider)
+}
+
+// GenerateCatalog --
+func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec, camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
+	root := os.TempDir()
+	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
+	if err != nil {
+		return nil, err
+	}
+
+	defer os.RemoveAll(tmpDir)
+
+	if err := os.MkdirAll(tmpDir, os.ModePerm); err != nil {
+		return nil, err
+	}
+
+	project := generateMavenProject(camelVersion, runtimeVersion)
+
+	mc := maven.NewContext(tmpDir, project)
+	mc.LocalRepository = mvn.LocalRepository
+	mc.Timeout = mvn.Timeout.Duration
+	mc.AddSystemProperty("catalog.path", tmpDir)
+	mc.AddSystemProperty("catalog.file", "catalog.yaml")
+
+	settings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
+	if err != nil {
+		return nil, err
+	}
+	if settings != "" {
+		mc.SettingsContent = []byte(settings)
+	}
+
+	err = maven.Run(mc)
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := ioutil.ReadFile(path.Join(tmpDir, "catalog.yaml"))
+	if err != nil {
+		return nil, err
+	}
+
+	catalog := v1alpha1.CamelCatalog{}
+	if err := yaml2.Unmarshal(content, &catalog); err != nil {
+		return nil, err
+	}
+
+	return NewRuntimeCatalog(catalog.Spec), nil
+}
+
+func generateMavenProject(camelVersion string, runtimeVersion string) maven.Project {
+	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
+
+	p.Build = &maven.Build{
+		DefaultGoal: "generate-resources",
+		Plugins: []maven.Plugin{
+			{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-maven-plugin",
+				Version:    runtimeVersion,
+				Executions: []maven.Execution{
+					{
+						ID: "generate-catalog",
+						Goals: []string{
+							"generate-catalog",
+						},
+					},
+				},
+				Dependencies: []maven.Dependency{
+					{
+						GroupID:    "org.apache.camel",
+						ArtifactID: "camel-catalog",
+						Version:    camelVersion,
+					},
+				},
+			},
+		},
+	}
+
+	return p
 }

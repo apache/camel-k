@@ -33,6 +33,16 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+var exactVersionRegexp regexp.Regexp
+
+func init() {
+	r, err := regexp.Compile(`^(\d+)\.(\d+)\.([\w-\.]+)$`)
+	if err != nil {
+		panic(err)
+	}
+	exactVersionRegexp = *r
+}
+
 // GetIntegrationKit retrieves the kit set on the integration
 func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationKit, error) {
 	if integration.Status.Kit == "" {
