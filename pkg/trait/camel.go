@@ -166,7 +166,7 @@ func (t *camelTrait) generateCatalog(e *Environment, camelVersion string, runtim
 	project := t.generateMavenProject(camelVersion, runtimeVersion)
 
 	mc := maven.NewContext(tmpDir, project)
-	mc.LocalRepository = e.Platform.Spec.Build.LocalRepository
+	mc.LocalRepository = e.Platform.Spec.Build.Maven.LocalRepository
 	mc.Timeout = e.Platform.Spec.Build.Maven.Timeout.Duration
 	mc.AddSystemProperty("catalog.path", tmpDir)
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
