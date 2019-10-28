@@ -75,7 +75,7 @@ func (in *BuildCondition) DeepCopy() *BuildCondition {
 func (in *BuildList) DeepCopyInto(out *BuildList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Build, len(*in))
@@ -284,7 +284,7 @@ func (in *CamelCatalog) DeepCopyObject() runtime.Object {
 func (in *CamelCatalogList) DeepCopyInto(out *CamelCatalogList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]CamelCatalog, len(*in))
@@ -531,7 +531,7 @@ func (in *IntegrationKitCondition) DeepCopy() *IntegrationKitCondition {
 func (in *IntegrationKitList) DeepCopyInto(out *IntegrationKitList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]IntegrationKit, len(*in))
@@ -635,7 +635,7 @@ func (in *IntegrationKitStatus) DeepCopy() *IntegrationKitStatus {
 func (in *IntegrationList) DeepCopyInto(out *IntegrationList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Integration, len(*in))
@@ -745,7 +745,7 @@ func (in *IntegrationPlatformCondition) DeepCopy() *IntegrationPlatformCondition
 func (in *IntegrationPlatformList) DeepCopyInto(out *IntegrationPlatformList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]IntegrationPlatform, len(*in))

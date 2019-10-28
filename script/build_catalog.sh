@@ -18,8 +18,8 @@
 location=$(dirname $0)
 rootdir=$location/../
 
-if [ "$#" -ne 2 ]; then
-    echo "usage: $0 catalog.version runtime.version"
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    echo "usage: $0 catalog.version runtime.version [staging.repo]"
     exit 1
 fi
 
@@ -27,4 +27,5 @@ $rootdir/mvnw -q \
     -f ${rootdir}/build/maven/pom-catalog.xml \
     -Dcatalog.path=${rootdir}/deploy \
     -Dcamel.version=$1 \
-    -Druntime.version=$2
+    -Druntime.version=$2 \
+    -Dstaging.repo=$3

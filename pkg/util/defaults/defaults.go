@@ -31,7 +31,7 @@ const (
 	CamelVersionConstraint = ">=3.0.0-RC1"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.0.5"
+	DefaultRuntimeVersion = "1.0.6"
 
 	// RuntimeVersionConstraint --
 	RuntimeVersionConstraint = ">=1.0.5"
