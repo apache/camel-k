@@ -394,6 +394,24 @@ It's disabled by default.
 
 !===
 
+| quarkus
+| All
+| Activates the Quarkus runtime
+  +
+  +
+It's disabled by default.
+
+[cols="m,"]
+!===
+
+! quarkus.camel-quarkus-version
+! The Camel Quarkus version to use for the integration
+
+! quarkus.quarkus-version
+! The Quarkus version to use for the integration
+
+!===
+
 |=======================
 
 
