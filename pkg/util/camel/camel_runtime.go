@@ -37,8 +37,8 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 	}
 
 	if provider == nil {
-		integration, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
-		selector := labels.NewSelector().Add(*integration)
+		requirement, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
+		selector := labels.NewSelector().Add(*requirement)
 		options = append(options, controller.MatchingSelector{Selector: selector})
 	} else if _, ok := provider.(v1alpha1.QuarkusRuntimeProvider); ok {
 		options = append(options, k8sclient.MatchingLabels{
