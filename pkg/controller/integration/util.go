@@ -22,10 +22,14 @@ import (
 
 	"github.com/pkg/errors"
 
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -45,8 +49,22 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 		return kit, nil
 	}
 
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(integration.Namespace),
+	}
+
+	if integration.Status.RuntimeProvider != nil && integration.Status.RuntimeProvider.Quarkus != nil {
+		options = append(options, k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.provider": "quarkus",
+		})
+	} else {
+		provider, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
+		selector := labels.NewSelector().Add(*provider)
+		options = append(options, controller.MatchingSelector{Selector: selector})
+	}
+
 	kits := v1alpha1.NewIntegrationKitList()
-	if err := c.List(ctx, &kits, k8sclient.InNamespace(integration.Namespace)); err != nil {
+	if err := c.List(ctx, &kits, options...); err != nil {
 		return nil, err
 	}
 
@@ -66,7 +84,7 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 			continue
 		}
 
-		// TODO: should ideally be made generic
+		// TODO: should ideally be made generic from the runtime providers
 		if integration.Status.RuntimeProvider == nil && kit.Status.RuntimeProvider != nil ||
 			integration.Status.RuntimeProvider != nil && kit.Status.RuntimeProvider == nil ||
 			integration.Status.RuntimeProvider != nil && kit.Status.RuntimeProvider != nil &&

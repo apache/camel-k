@@ -24,9 +24,13 @@ import (
 	"reflect"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/tar"
@@ -329,9 +333,22 @@ func packager(ctx *Context, selector artifactsSelector) error {
 }
 
 func listPublishedImages(context *Context) ([]publishedImage, error) {
-	list := v1alpha1.NewIntegrationKitList()
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(context.Namespace),
+	}
 
-	err := context.Client.List(context.C, &list, k8sclient.InNamespace(context.Namespace))
+	if context.Catalog.RuntimeProvider != nil && context.Catalog.RuntimeProvider.Quarkus != nil {
+		options = append(options, k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.provider": "quarkus",
+		})
+	} else {
+		provider, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
+		selector := labels.NewSelector().Add(*provider)
+		options = append(options, controller.MatchingSelector{Selector: selector})
+	}
+
+	list := v1alpha1.NewIntegrationKitList()
+	err := context.Client.List(context.C, &list, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +367,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 			continue
 		}
 
-		// TODO: should ideally be made generic
+		// TODO: should ideally be made generic from the runtime providers
 		if kit.Status.RuntimeProvider == nil && context.Catalog.RuntimeProvider != nil ||
 			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider == nil ||
 			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider != nil &&
