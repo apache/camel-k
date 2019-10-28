@@ -349,10 +349,21 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 		if kit.Status.RuntimeVersion != context.Catalog.RuntimeVersion {
 			continue
 		}
+
+		// TODO: should ideally be made generic
+		if kit.Status.RuntimeProvider == nil && context.Catalog.RuntimeProvider != nil ||
+			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider == nil ||
+			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider != nil &&
+				(kit.Status.RuntimeProvider.Quarkus != nil && context.Catalog.RuntimeProvider.Quarkus == nil ||
+					kit.Status.RuntimeProvider.Quarkus == nil && context.Catalog.RuntimeProvider.Quarkus != nil ||
+					*kit.Status.RuntimeProvider.Quarkus != *context.Catalog.RuntimeProvider.Quarkus) {
+			continue
+		}
+
 		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady || kit.Labels == nil {
 			continue
 		}
-		if ctxType, present := kit.Labels["camel.apache.org/kit.type"]; !present || ctxType != v1alpha1.IntegrationKitTypePlatform {
+		if kitType, present := kit.Labels["camel.apache.org/kit.type"]; !present || kitType != v1alpha1.IntegrationKitTypePlatform {
 			continue
 		}
 
