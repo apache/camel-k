@@ -94,7 +94,7 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 			}
 
 			// sanitize catalog name
-			catalogName := "camel-catalog-quarkus" + strings.ToLower(camelVersion+"-"+runtimeVersion)
+			catalogName := "camel-catalog-quarkus-" + strings.ToLower(camelVersion+"-"+runtimeVersion)
 
 			cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
 			cx.Labels = make(map[string]string)
@@ -110,6 +110,11 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 				return err
 			}
 		}
+	}
+
+	if catalog == nil {
+		return fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s, camel-quarkus=%s, quarkus=%s",
+			camelVersion, runtimeVersion, camelQuarkusVersion, quarkusVersion)
 	}
 
 	e.CamelCatalog = catalog

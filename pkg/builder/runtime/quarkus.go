@@ -3,6 +3,7 @@ package runtime
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"os"
 	"path"
 
@@ -26,6 +27,11 @@ func loadCamelQuarkusCatalog(ctx *builder.Context) error {
 	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, ctx.Build.RuntimeProvider.Quarkus)
 	if err != nil {
 		return err
+	}
+
+	if catalog == nil {
+		return fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s, camel-quarkus=%s, quarkus=%s",
+			ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, ctx.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion, ctx.Build.RuntimeProvider.Quarkus.QuarkusVersion)
 	}
 
 	ctx.Catalog = catalog

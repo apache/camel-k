@@ -19,7 +19,6 @@ package camel
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -28,7 +27,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	controllerUtil "github.com/apache/camel-k/pkg/util/controller"
+	"github.com/apache/camel-k/pkg/util/controller"
 )
 
 // LoadCatalog --
@@ -40,7 +39,7 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 	if provider == nil {
 		integration, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
 		selector := labels.NewSelector().Add(*integration)
-		options = append(options, controllerUtil.MatchingSelector{Selector: selector})
+		options = append(options, controller.MatchingSelector{Selector: selector})
 	} else if _, ok := provider.(v1alpha1.QuarkusRuntimeProvider); ok {
 		options = append(options, k8sclient.MatchingLabels{
 			"camel.apache.org/runtime.provider": "quarkus",
@@ -58,16 +57,5 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 		return nil, err
 	}
 
-	if catalog != nil {
-		return catalog, nil
-	}
-
-	switch provider := provider.(type) {
-	case v1alpha1.QuarkusRuntimeProvider:
-		return nil, fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s, camel-quarkus=%s, quarkus=%s",
-			camelVersion, runtimeVersion, provider.CamelQuarkusVersion, provider.QuarkusVersion)
-	default:
-		return nil, fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s",
-			camelVersion, runtimeVersion)
-	}
+	return catalog, nil
 }

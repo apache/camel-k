@@ -18,6 +18,7 @@ limitations under the License.
 package runtime
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path"
 
@@ -43,6 +44,11 @@ func loadCamelCatalog(ctx *builder.Context) error {
 	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, nil)
 	if err != nil {
 		return err
+	}
+
+	if catalog == nil {
+		return fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s",
+			ctx.Build.CamelVersion, ctx.Build.RuntimeVersion)
 	}
 
 	ctx.Catalog = catalog
