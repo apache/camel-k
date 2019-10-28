@@ -68,10 +68,6 @@ func (t *camelTrait) Apply(e *Environment) error {
 		}
 	}
 
-	if e.CamelCatalog == nil {
-		return fmt.Errorf("unable to find catalog for: %s", cv)
-	}
-
 	e.RuntimeVersion = rv
 
 	if e.Integration != nil {
@@ -94,17 +90,17 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, ru
 		return errors.New("unable to determine namespace")
 	}
 
-	c, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, nil)
+	catalog, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, nil)
 	if err != nil {
 		return err
 	}
 
-	if c == nil {
+	if catalog == nil {
 		// if the catalog is not found in the cluster, try to create it if
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(camelVersion) && exactVersionRegexp.MatchString(runtimeVersion) {
-			c, err = camel.GenerateCatalog(e.C, e.Client, ns, e.Platform.Spec.Build.Maven, camelVersion, runtimeVersion)
+			catalog, err = camel.GenerateCatalog(e.C, e.Client, ns, e.Platform.Spec.Build.Maven, camelVersion, runtimeVersion)
 			if err != nil {
 				return err
 			}
@@ -112,7 +108,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, ru
 			// sanitize catalog name
 			catalogName := "camel-catalog-" + strings.ToLower(camelVersion+"-"+runtimeVersion)
 
-			cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, c.CamelCatalogSpec)
+			cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
 			cx.Labels = make(map[string]string)
 			cx.Labels["app"] = "camel-k"
 			cx.Labels["camel.apache.org/catalog.version"] = camelVersion
@@ -127,7 +123,12 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, ru
 		}
 	}
 
-	e.CamelCatalog = c
+	if catalog == nil {
+		return fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s",
+			camelVersion, runtimeVersion)
+	}
+
+	e.CamelCatalog = catalog
 
 	return nil
 }
