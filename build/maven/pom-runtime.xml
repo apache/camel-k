@@ -164,6 +164,44 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <profiles>
+        <profile>
+            <id>staging</id>
+            <activation>
+                <property>
+                    <name>staging.repo</name>
+                </property>
+            </activation>
+
+            <repositories>
+                <repository>
+                    <id>staging</id>
+                    <url>${staging.repo}</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>staging</id>
+                    <url>${staging.repo}</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>

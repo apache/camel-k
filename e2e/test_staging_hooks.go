@@ -21,8 +21,24 @@ limitations under the License.
 
 package e2e
 
+import (
+	"fmt"
+	"os"
+)
+
 func init() {
-	// this hook can be used to test a released version of the operator, e.g. the staging version during a voting period
+	// Let's use the STAGING_RUNTIME_REPO if available
+	runtimeRepo := os.Getenv("STAGING_RUNTIME_REPO")
+	if runtimeRepo != "" {
+		kamelHooks = append(kamelHooks, func(cmd []string) []string {
+			if len(cmd) > 0 && cmd[0] == "install" {
+				cmd = append(cmd, fmt.Sprintf("--maven-repository=%s", runtimeRepo))
+			}
+			return cmd
+		})
+	}
+
+	// this hook can be also used to test a released version of the operator, e.g. the staging version during a voting period
 	// Uncomment the following lines and change references to enable the hook
 
 	//testImageName = "docker.io/camelk/camel-k"

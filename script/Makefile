@@ -16,7 +16,7 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-M4-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M2
-RUNTIME_VERSION := 1.0.5
+RUNTIME_VERSION := 1.0.6
 RUNTIME_VERSION_CONSTRAINT := >=1.0.5
 CAMEL_VERSION := 3.0.0-RC1
 CAMEL_VERSION_CONSTRAINT := >=3.0.0-RC1
@@ -32,6 +32,8 @@ LINT_DEADLINE := 5m
 
 # Used to push pre-relase artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
+
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1160
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
@@ -113,16 +115,16 @@ test: build
 	go test ./...
 
 test-integration: build
-	go test -timeout 30m -v ./e2e/... -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e/... -tags=integration
 
 test-knative: build
-	go test -timeout 30m -v ./e2e/... -tags=knative
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e/... -tags=knative
 
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
 build-resources:
-	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION)
+	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
 	./script/embed_resources.sh deploy
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
@@ -202,7 +204,7 @@ package-examples:
 	./script/package_examples.sh $(VERSION)
 
 package-artifacts:
-	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY)
+	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY) $(STAGING_RUNTIME_REPO)
 
 unsnapshot-olm:
 	./script/unsnapshot_olm.sh
