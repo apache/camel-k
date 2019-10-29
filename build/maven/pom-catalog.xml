@@ -86,6 +86,12 @@
                                 <artifactId>camel-catalog-quarkus</artifactId>
                                 <version>${camel-quarkus.version}</version>
                             </dependency>
+                            <!-- This is required to retrieve the Quarkus version -->
+                            <dependency>
+                                <groupId>org.apache.camel.quarkus</groupId>
+                                <artifactId>camel-quarkus-core</artifactId>
+                                <version>${camel-quarkus.version}</version>
+                            </dependency>
                         </dependencies>
                     </plugin>
                 </plugins>
