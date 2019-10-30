@@ -18,16 +18,16 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-quarkus-catalog-0.3.0-1.0.7
+  name: camel-quarkus-catalog-0.3.0-1.0.7-SNAPSHOT
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0-RC3
     camel.apache.org/catalog.loader.version: 3.0.0-RC3
-    camel.apache.org/runtime.version: 1.0.7
+    camel.apache.org/runtime.version: 1.0.7-SNAPSHOT
     camel.apache.org/runtime.provider: quarkus
 spec:
   version: 3.0.0-RC3
-  runtimeVersion: 1.0.7
+  runtimeVersion: 1.0.7-SNAPSHOT
   runtimeProvider:
     quarkus:
       camelQuarkusVersion: 0.3.0
