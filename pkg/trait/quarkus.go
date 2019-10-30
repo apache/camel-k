@@ -84,10 +84,18 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 			exactVersionRegexp.MatchString(camelQuarkusVersion) && exactVersionRegexp.MatchString(quarkusVersion) {
 			catalog, err = camel.GenerateCatalogWithProvider(e.C, e.Client, ns, e.Platform.Spec.Build.Maven, camelVersion, runtimeVersion,
 				"quarkus",
-				&maven.Dependency{
-					GroupID:    "org.apache.camel.quarkus",
-					ArtifactID: "camel-catalog-quarkus",
-					Version:    camelQuarkusVersion,
+				[]maven.Dependency{
+					{
+						GroupID:    "org.apache.camel.quarkus",
+						ArtifactID: "camel-catalog-quarkus",
+						Version:    camelQuarkusVersion,
+					},
+					// This is required to retrieve the Quarkus dependency version
+					{
+						GroupID:    "org.apache.camel.quarkus",
+						ArtifactID: "camel-quarkus-core",
+						Version:    camelQuarkusVersion,
+					},
 				})
 			if err != nil {
 				return err

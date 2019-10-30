@@ -69,12 +69,12 @@ func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
 // GenerateCatalog --
 func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec,
 	camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
-	return GenerateCatalogWithProvider(ctx, client, namespace, mvn, camelVersion, runtimeVersion, "", nil)
+	return GenerateCatalogWithProvider(ctx, client, namespace, mvn, camelVersion, runtimeVersion, "", []maven.Dependency{})
 }
 
 // GenerateCatalogWithProvider --
 func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec,
-	camelVersion string, runtimeVersion string, providerName string, providerDependency *maven.Dependency) (*RuntimeCatalog, error) {
+	camelVersion string, runtimeVersion string, providerName string, providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
 	if err != nil {
@@ -87,7 +87,7 @@ func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, n
 		return nil, err
 	}
 
-	project := generateMavenProject(camelVersion, runtimeVersion, providerDependency)
+	project := generateMavenProject(camelVersion, runtimeVersion, providerDependencies)
 
 	mc := maven.NewContext(tmpDir, project)
 	mc.LocalRepository = mvn.LocalRepository
@@ -124,7 +124,7 @@ func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, n
 	return NewRuntimeCatalog(catalog.Spec), nil
 }
 
-func generateMavenProject(camelVersion string, runtimeVersion string, providerDependency *maven.Dependency) maven.Project {
+func generateMavenProject(camelVersion string, runtimeVersion string, providerDependencies []maven.Dependency) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
 
 	plugin := maven.Plugin{
@@ -148,9 +148,7 @@ func generateMavenProject(camelVersion string, runtimeVersion string, providerDe
 		},
 	}
 
-	if providerDependency != nil {
-		plugin.Dependencies = append(plugin.Dependencies, *providerDependency)
-	}
+	plugin.Dependencies = append(plugin.Dependencies, providerDependencies...)
 
 	p.Build = &maven.Build{
 		DefaultGoal: "generate-resources",
