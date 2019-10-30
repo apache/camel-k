@@ -6942,7 +6942,7 @@ spec:
         passive: false
 
 `
-	Resources["camel-catalog-quarkus-3.0.0-RC1-1.0.5.yaml"] =
+	Resources["camel-quarkus-catalog-0.3.0-1.0.7.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -6964,20 +6964,20 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-quarkus-3.0.0-rc1-1.0.5
+  name: camel-quarkus-catalog-0.3.0-1.0.7
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.0.0-RC1
-    camel.apache.org/catalog.loader.version: 3.0.0-RC1
-    camel.apache.org/runtime.version: 1.0.5
+    camel.apache.org/catalog.version: 3.0.0-RC3
+    camel.apache.org/catalog.loader.version: 3.0.0-RC3
+    camel.apache.org/runtime.version: 1.0.7
     camel.apache.org/runtime.provider: quarkus
 spec:
-  version: 3.0.0-RC1
-  runtimeVersion: 1.0.5
+  version: 3.0.0-RC3
+  runtimeVersion: 1.0.7
   runtimeProvider:
     quarkus:
-      camelQuarkusVersion: 0.2.0
-      quarkusVersion: 0.21.2
+      camelQuarkusVersion: 0.3.0
+      quarkusVersion: 0.26.1
   artifacts:
     camel-k-loader-groovy:
       groupId: org.apache.camel.k
@@ -7043,14 +7043,18 @@ spec:
         artifactId: camel-core-engine
       - groupId: org.apache.camel
         artifactId: camel-main
-      - groupId: org.apache.camel
-        artifactId: camel-properties
     camel-k-runtime-servlet:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-servlet
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-servlet
+    camel-k-runtime-webhook:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-webhook
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-webhook
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
@@ -7128,6 +7132,16 @@ spec:
       - id: direct
         http: false
         passive: true
+    camel-quarkus-fhir:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-fhir
+      schemes:
+      - id: fhir
+        http: false
+        passive: false
+      dataformats:
+      - fhirJson
+      - fhirXml
     camel-quarkus-infinispan:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-infinispan
@@ -7135,6 +7149,11 @@ spec:
       - id: infinispan
         http: false
         passive: false
+    camel-quarkus-jackson:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson
+      dataformats:
+      - json-jackson
     camel-quarkus-jdbc:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jdbc
@@ -7218,6 +7237,13 @@ spec:
       - id: servlet
         http: true
         passive: false
+    camel-quarkus-slack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-slack
+      schemes:
+      - id: slack
+        http: false
+        passive: false
     camel-quarkus-tarfile:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-tarfile
@@ -7243,6 +7269,13 @@ spec:
       - id: twitter-timeline
         http: false
         passive: false
+    camel-quarkus-vm:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vm
+      schemes:
+      - id: vm
+        http: false
+        passive: true
     camel-quarkus-zipfile:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-zipfile
