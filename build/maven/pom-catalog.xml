@@ -76,17 +76,13 @@
                             </execution>
                         </executions>
                         <dependencies>
-                            <dependency>
-                                <groupId>org.apache.camel</groupId>
-                                <artifactId>camel-catalog</artifactId>
-                                <version>${camel.version}</version>
-                            </dependency>
+                            <!-- The Camel dependency version is driven by Camel Quarkus -->
                             <dependency>
                                 <groupId>org.apache.camel.quarkus</groupId>
                                 <artifactId>camel-catalog-quarkus</artifactId>
                                 <version>${camel-quarkus.version}</version>
                             </dependency>
-                            <!-- This is required to retrieve the Quarkus version -->
+                            <!-- This is required to retrieve the Quarkus dependency version -->
                             <dependency>
                                 <groupId>org.apache.camel.quarkus</groupId>
                                 <artifactId>camel-quarkus-core</artifactId>
