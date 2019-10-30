@@ -6964,7 +6964,7 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-rc1-1.0.7-SNAPSHOT
+  name: camel-catalog-3.0.0-rc1-1.0.7-snapshot
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0-RC1
@@ -9181,7 +9181,7 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-quarkus-catalog-0.3.0-1.0.7-SNAPSHOT
+  name: camel-catalog-quarkus-0.3.0-1.0.7-snapshot
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0-RC3
