@@ -1,11 +1,12 @@
 package runtime
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
+
+	yaml2 "gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
 
@@ -68,11 +69,6 @@ func generateQuarkusProject(ctx *builder.Context) error {
 	p.Build.Plugins = append(p.Build.Plugins,
 		maven.Plugin{
 			GroupID:    "io.quarkus",
-			ArtifactID: "quarkus-bootstrap-maven-plugin",
-			Version:    ctx.Build.RuntimeProvider.Quarkus.QuarkusVersion,
-		},
-		maven.Plugin{
-			GroupID:    "io.quarkus",
 			ArtifactID: "quarkus-maven-plugin",
 			Version:    ctx.Build.RuntimeProvider.Quarkus.QuarkusVersion,
 			Executions: []maven.Execution{
@@ -96,36 +92,41 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	mc.LocalRepository = ctx.Build.Platform.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Platform.Build.Maven.Timeout.Duration
 
-	// Build the project, as the quarkus-bootstrap plugin build-tree goal
-	// requires the artifact to be installed
-	mc.AddArgument("install")
+	// Build the project
+	mc.AddArgument("package")
 	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while building project")
 	}
 
-	// Call the Quarkus dependencies plugin
+	// Retrieve the runtime dependencies
 	mc.AdditionalArguments = nil
-	mc.AddArguments("quarkus-bootstrap:build-tree")
-	output := new(bytes.Buffer)
-	// TODO: improve logging while capturing output
-	mc.Stdout = output
+	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.RuntimeVersion)
 	if err := maven.Run(mc); err != nil {
-		return errors.Wrap(err, "failure while determining dependencies")
+		return errors.Wrap(err, "failure while determining classpath")
 	}
 
-	scanner := bufio.NewScanner(output)
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		gav, err := maven.ParseGAV(scanner.Text())
+	dependencies := path.Join(mc.Path, "target", "dependencies.yaml")
+	content, err := ioutil.ReadFile(dependencies)
+	if err != nil {
+		return err
+	}
+
+	cp := make(map[string][]v1alpha1.Artifact)
+	err = yaml2.Unmarshal(content, &cp)
+	if err != nil {
+		return err
+	}
+
+	for _, e := range cp["dependencies"] {
+		gav, err := maven.ParseGAV(e.ID)
 		if err != nil {
-			continue
+			return nil
 		}
 
 		fileName := gav.GroupID + "." + gav.ArtifactID + "-" + gav.Version + "." + gav.Type
 		location := path.Join(mc.Path, "target", "lib", fileName)
 		_, err = os.Stat(location)
-		// We check that the dependency actually exists in the lib directory as the
-		// quarkus-bootstrap Maven plugin reports deployment dependencies as well
+		// We check that the dependency actually exists in the lib directory
 		if os.IsNotExist(err) {
 			continue
 		}
