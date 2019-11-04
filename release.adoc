@@ -1,0 +1,172 @@
+= Releasing Apache Camel K
+
+This procedure describes all the steps required to release a new version of Apache Camel K.
+It is not intended to be final, but rather a working document that needs to be updated when new requirements are found or
+the technical process changes.
+
+[[releasing-camel-k-runtime]]
+== Releasing Camel K Runtime
+
+The https://github.com/apache/camel-k-runtime[Camel K Runtime project] is not a standalone project, it's meant to be used with Camel K. For this reason, it's common to release the runtime artifacts together with a release of Camel K.
+To avoid depending on snapshots, camel-k-runtime can be also released independently.
+
+Follow the https://github.com/apache/camel/blob/master/docs/user-manual/modules/ROOT/pages/release-guide.adoc[Camel release guide] in order to setup the Maven environment and gpg for the release.
+
+To prepare a release and check problems:
+```
+./mvnw release:prepare -DdryRun -Prelease
+```
+
+Check the signatures of the files, then clean and prepare the actual release:
+
+```
+./mvnw release:clean -Prelease
+./mvnw release:prepare -Prelease
+```
+
+Then perform the release:
+
+```
+./mvnw release:perform -Prelease
+```
+
+Go to https://repository.apache.org/ and close the staging repository.
+
+A URL will be generated for the repository, like: https://repository.apache.org/content/repositories/orgapachecamel-xxxx. The URL needs to be communicated during the voting process.
+
+
+All distribution files present in path `/org/apache/camel/k/apache-camel-k-runtime/<version>/` (including signatures) will need to be copied in the Apache dev SVN at https://dist.apache.org/repos/dist/dev/camel/camel-k-runtime/<version>.
+
+Commit all files to the SVN.
+
+Voting can start for camel-k-runtime, or a combined vote with camel-k can be started later.
+
+
+[[releasing-camel-k]]
+== Releasing Camel K
+
+Releasing the Camel K main artifacts require some manual steps.
+
+First thing is to checkout master branch and sync with upstream.
+
+Next, the version of the runtime libraries to use need to be aligned in the Makefile (use the just released camel-k-runtime version if available).
+
+```
+# Align RUNTIME_VERSION and RUNTIME_VERSION_CONSTRAINT with latest runtime release, then
+make clean codegen set-version build-resources check-licenses
+```
+
+Remove all snapshot files in the `/deploy` directory, then run again:
+```
+# After removing snapshots from /deploy
+make clean build-resources
+```
+
+Run build and basic tests:
+```
+make
+```
+
+Sync the master branch (with your changes) with upstream.
+
+```
+git add *
+git commit -m "preparing for next release"
+# assuming write permissions
+git push upstream master
+```
+
+Now the release on staging can be executed.
+
+Change the version on Makefile to next version of camel-k (usually, just remove '-SNAPSHOT' from the version)
+```
+# after removing '-SNAPSHOT' from current VERSION in makefile
+make release-staging
+```
+
+Binary files will be generated and put in the project root directory, including examples.
+All those files should be put in the corresponding directory of the camel-k dev SVN at https://dist.apache.org/repos/dist/dev/camel/camel-k/<version>.
+
+Sources are not produced directly by the scripts, but since the procedure is creating a tag, the source code in tar.gz format can be downloaded from Github
+at: https://github.com/apache/camel-k/releases
+
+After copying all the files to the dev SVN, a `sign.sh` script in the parent directory can be used to sign all the uploaded artifacts:
+
+```
+./sign.sh <version> <gpg_pass>
+```
+
+Commit all files to the SVN.
+
+A docker image `camelk/camel-k:<version>` will be pushed to the staging organization (`camelk`, not `apache`).
+
+
+[[testing]]
+== Do some testing
+
+A combined release can be immediately tested with the following install command:
+
+```
+kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-$APACHE_NEXUS_RUNTIME_REPO_ID
+```
+
+
+[[release-notes]]
+== Release notes
+
+Release notes can be generated with:
+
+
+```
+# Check that VERSION points to the current version and LAST_RELEASED_VERSION points to the immediately previous one
+make release-notes
+```
+
+A `release-notes.md` file is generated and can be attached to the release github issue for reference.
+
+
+[[voting]]
+== Voting
+
+An email should be sent to dev@camel.apache.org asking to test the staged artifacts. Voting will be left open for at least 72 hours.
+
+[[finalizing]]
+== Finalizing the release
+
+After the voting is complete with success, the artifacts can be released.
+
+Release the staging repository at: https://repository.apache.org.
+
+Republish docker image in the Apache org on Docker Hub:
+
+```
+# assuming logged in to docker hub
+docker pull camelk/camel-k:$VERSION
+docker tag camelk/camel-k:$VERSION apache/camel-k:$VERSION
+docker push apache/camel-k:$VERSION
+```
+
+Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the
+Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
+
+Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour sometimes.
+
+Binary files can be now released on Github, together with release notes generated in previous step.
+Files need to be uploaded manually to a new Github release.
+
+Before announcing the release, a simple test should be done to verify that everything is in place (running a "Hello World" integration
+after an installation done with a simple `kamel install`).
+Do a simple final test.
+
+The release can be now announced to dev@camel.apache.org and users@camel.apache.org.
+
+A PMC member with access to the @ApacheCamel Twitter account should announce the release on Twitter as well.
+
+
+[[post-release]]
+== Post Release
+
+The https://github.com/operator-framework/community-operators[OperatorHub] downstream channel should be synced to publish the latest version
+of Camel K, so that it can be easily installed on platforms that support Operator Hub.
+
+To do so, the content of `/deploy/olm-catalog/camel-k/<version>` (and package manifest) should be uploaded to the "community-operators" repository (2 PRs, one for OpenShift and one for all other platforms).
