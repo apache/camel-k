@@ -10,7 +10,7 @@ Ensure you're connected to the cluster by executing a simple command using the K
 kubectl get pod
 ```
 
-Just replace `kubectl` with `oc` if you're using OpenShift. If everything is correctly configured you should get a response from the Kuerbetes API
+Just replace `kubectl` with `oc` if you're using OpenShift. If everything is correctly configured you should get a response from the Kubernetes API
 server (you should see at least the `camel-k-operator` running).
 
 You are now ready to create your first integration using Camel K. Just create a new Groovy file with the following content:
