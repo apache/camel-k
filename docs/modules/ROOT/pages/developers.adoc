@@ -12,7 +12,7 @@ to manage the lifecycle of those custom resources.
 
 In order to build the project, you need to comply with the following requirements:
 
-* **Go version 1.12+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
+* **Go version 1.13+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
 * **Operator SDK v0.9.0+**: used to build the operator and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
 * **GNU Make**: used to define composite build actions. This should be already installed or available as package if you have a good OS (https://www.gnu.org/software/make/).
 
@@ -51,8 +51,6 @@ This is a high-level overview of the project structure:
 
 [[building]]
 == Building
-
-Since Camel K uses Go modules, you need to invoke the Go commands with the environment variable `GO111MODULE=on`, in case you've checked out the repository inside of the `$GOPATH/src` tree.
 
 To build the whole project you now need to run:
 

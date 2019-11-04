@@ -26,14 +26,13 @@ language: go
 dist: xenial
 
 go:
-  - 1.12.x
+  - 1.13.x
 
 install:
   - go mod tidy
 
 env:
   global:
-    - GO111MODULE="on"
     - OPENSHIFT_VERSION=3.10.0
     - OPENSHIFT_COMMIT=dd10d17
     - MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn

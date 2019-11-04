@@ -55,3 +55,5 @@ replace (
 // down. The github mirror should be used instead.
 // Locking to a specific version (from 'go mod graph'):
 replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
+
+go 1.13
