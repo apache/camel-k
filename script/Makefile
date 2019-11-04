@@ -26,7 +26,6 @@ LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
-GO_PATH := $(shell go env GOPATH)
 LINT_GOGC := 10
 LINT_DEADLINE := 5m
 
@@ -40,7 +39,7 @@ STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgap
 PACKAGE_ARTIFACTS_STRATEGY := copy
 
 GOLDFLAGS += -X github.com/apache/camel-k/pkg/cmd/operator.GitCommit=$(GIT_COMMIT)
-GOFLAGS = -ldflags "$(GOLDFLAGS)" -gcflags=-trimpath=$(GO_PATH) -asmflags=-trimpath=$(GO_PATH)
+GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
 
 define LICENSE_HEADER
 Licensed to the Apache Software Foundation (ASF) under one or more
