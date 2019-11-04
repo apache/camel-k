@@ -13,7 +13,7 @@ require (
 	github.com/jpillora/backoff v0.0.0-20170918002102-8eab2debe79d
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/onsi/gomega v1.5.0
-	github.com/openshift/api v0.0.0-20190927182313-d4a64ec2cbd8+incompatible
+	github.com/openshift/api v0.0.0-20190927182313-d4a64ec2cbd8
 	github.com/operator-framework/operator-sdk v0.11.0
 	github.com/pkg/errors v0.8.1
 	github.com/radovskyb/watcher v1.0.6
