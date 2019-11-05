@@ -72,12 +72,12 @@ func (t *camelTrait) Apply(e *Environment) error {
 
 	if e.Integration != nil {
 		e.Integration.Status.CamelVersion = e.CamelCatalog.Version
-		e.Integration.Status.RuntimeVersion = rv
+		e.Integration.Status.RuntimeVersion = e.CamelCatalog.RuntimeVersion
 		e.Integration.Status.RuntimeProvider = e.CamelCatalog.RuntimeProvider
 	}
 	if e.IntegrationKit != nil {
 		e.IntegrationKit.Status.CamelVersion = e.CamelCatalog.Version
-		e.IntegrationKit.Status.RuntimeVersion = rv
+		e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.RuntimeVersion
 		e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.RuntimeProvider
 	}
 
