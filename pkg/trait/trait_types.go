@@ -66,6 +66,9 @@ type Trait interface {
 
 	// Apply executes a customization of the Environment
 	Apply(environment *Environment) error
+
+	// InfluencesKit determines if the trait has any influence on Integration Kits
+	InfluencesKit() bool
 }
 
 /* Base trait */
@@ -99,6 +102,11 @@ func (trait *BaseTrait) InjectClient(c client.Client) {
 // InjectContext allows to inject a context into the trait
 func (trait *BaseTrait) InjectContext(ctx context.Context) {
 	trait.ctx = ctx
+}
+
+// InfluencesKit determines if the trait has any influence on Integration Kits
+func (trait *BaseTrait) InfluencesKit() bool {
+	return false
 }
 
 /* Environment */
