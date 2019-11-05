@@ -53,3 +53,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 	return nil
 }
+
+// InfluencesKit overrides base class method
+func (t *builderTrait) InfluencesKit() bool {
+	return true
+}

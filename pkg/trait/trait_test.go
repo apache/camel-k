@@ -361,6 +361,19 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	assert.Equal(t, "/foo/bar", m.MountPath)
 }
 
+func TestOnlySomeKitsInfluenceBuild(t *testing.T) {
+	c := NewTraitTestCatalog()
+	buildTraits := []string{"builder"}
+
+	for _, trait := range c.allTraits() {
+		if trait.InfluencesKit() {
+			assert.Contains(t, buildTraits, string(trait.ID()))
+		} else {
+			assert.NotContains(t, buildTraits, trait.ID())
+		}
+	}
+}
+
 func findVolume(vols []corev1.Volume, condition func(corev1.Volume) bool) *corev1.Volume {
 	for _, v := range vols {
 		v := v
