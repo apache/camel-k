@@ -79,7 +79,8 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{
 			CamelCatalogSpec: v1alpha1.CamelCatalogSpec{
-				Version: "1.23.0",
+				Version:        "1.23.0",
+				RuntimeVersion: "0.0.1",
 			},
 		},
 		Catalog: NewEnvironmentTestCatalog(),
