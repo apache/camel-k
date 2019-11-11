@@ -29,3 +29,29 @@ linters:
     - whitespace
     - gocognit
     - wsl
+issues:
+  exclude-rules:
+    - path: pkg/client/clientset
+      linters:
+        - golint
+        - deadcode
+        - lll
+        - unparam
+        - varcheck
+        - unused
+    - path: pkg/client/informers
+      linters:
+        - golint
+        - deadcode
+        - lll
+        - unparam
+        - varcheck
+        - unused
+    - path: pkg/client/listers
+      linters:
+        - golint
+        - deadcode
+        - lll
+        - unparam
+        - varcheck
+        - unused
