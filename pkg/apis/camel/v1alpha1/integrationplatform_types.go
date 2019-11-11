@@ -50,6 +50,7 @@ type IntegrationPlatformStatus struct {
 
 // IntegrationPlatform is the Schema for the integrationplatforms API
 // +k8s:openapi-gen=true
+// +genclient
 type IntegrationPlatform struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -160,7 +161,7 @@ const (
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 )
 
-// Condition describes the state of a resource at a certain point.
+// IntegrationPlatformCondition describes the state of a resource at a certain point.
 type IntegrationPlatformCondition struct {
 	// Type of integration condition.
 	Type IntegrationPlatformConditionType `json:"type"`

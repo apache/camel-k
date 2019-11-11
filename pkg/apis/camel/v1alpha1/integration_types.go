@@ -61,6 +61,7 @@ type IntegrationStatus struct {
 
 // Integration is the Schema for the integrations API
 // +k8s:openapi-gen=true
+// +genclient
 type Integration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
