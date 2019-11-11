@@ -445,8 +445,15 @@ func createOperatorServiceAccount(ns string) error {
 	return install.Resource(testContext, testClient, ns, install.IdentityResourceCustomizer, "operator-service-account.yaml")
 }
 
-func createOperatorRole(ns string) error {
-	return install.Resource(testContext, testClient, ns, install.IdentityResourceCustomizer, "operator-role-openshift.yaml")
+func createOperatorRole(ns string) (err error) {
+	var oc bool
+	if oc, err = openshift.IsOpenShift(testClient); err != nil {
+		panic(err)
+	}
+	if oc {
+		return install.Resource(testContext, testClient, ns, install.IdentityResourceCustomizer, "operator-role-openshift.yaml")
+	}
+	return install.Resource(testContext, testClient, ns, install.IdentityResourceCustomizer, "operator-role-kubernetes.yaml")
 }
 
 func createOperatorRoleBinding(ns string) error {
