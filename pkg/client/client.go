@@ -136,7 +136,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 func initialize(kubeconfig string) {
 	if kubeconfig == "" {
 		// skip out-of-cluster initialization if inside the container
-		if kc, err := runningInKubernetesContainer(); kc && err == nil {
+		if kc, err := shouldUseContainerMode(); kc && err == nil {
 			return
 		} else if err != nil {
 			logrus.Errorf("could not determine if running in a container: %v", err)
@@ -158,7 +158,7 @@ func getDefaultKubeConfigFile() string {
 // GetCurrentNamespace --
 func GetCurrentNamespace(kubeconfig string) (string, error) {
 	if kubeconfig == "" {
-		kubeContainer, err := runningInKubernetesContainer()
+		kubeContainer, err := shouldUseContainerMode()
 		if err != nil {
 			return "", err
 		}
@@ -194,12 +194,21 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 	return ns, err
 }
 
-func runningInKubernetesContainer() (bool, error) {
-	_, err := os.Stat(inContainerNamespaceFile)
-	if os.IsNotExist(err) {
+func shouldUseContainerMode() (bool, error) {
+	// When kube config is set, container mode is not used
+	if os.Getenv(k8sutil.KubeConfigEnvVar) != "" {
 		return false, nil
 	}
-	return true, err
+	// Use container mode only when the kubeConfigFile does not exist and the container namespace file is present
+	_, err := os.Stat(getDefaultKubeConfigFile())
+	if os.IsNotExist(err) {
+		_, err := os.Stat(inContainerNamespaceFile)
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return true, err
+	}
+	return false, nil
 }
 
 func getNamespaceFromKubernetesContainer() (string, error) {
