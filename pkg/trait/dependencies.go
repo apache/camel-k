@@ -87,8 +87,6 @@ func addDefaultRuntimeDependencies(e *Environment) {
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
 		case v1alpha1.LanguageJavaScript:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
-		case v1alpha1.LanguageJavaClass:
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
 		case v1alpha1.LanguageJavaSource:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
 		}

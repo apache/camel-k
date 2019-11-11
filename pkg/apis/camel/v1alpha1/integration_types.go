@@ -119,8 +119,6 @@ type Language string
 const (
 	// LanguageJavaSource --
 	LanguageJavaSource Language = "java"
-	// LanguageJavaClass --
-	LanguageJavaClass Language = "class"
 	// LanguageGroovy --
 	LanguageGroovy Language = "groovy"
 	// LanguageJavaScript --
@@ -136,7 +134,6 @@ const (
 // Languages is the list of all supported languages
 var Languages = []Language{
 	LanguageJavaSource,
-	LanguageJavaClass,
 	LanguageGroovy,
 	LanguageJavaScript,
 	LanguageXML,
