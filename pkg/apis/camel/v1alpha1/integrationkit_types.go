@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package v1alpha1
 
 import (
@@ -53,6 +54,7 @@ type IntegrationKitStatus struct {
 
 // IntegrationKit is the Schema for the integrationkits API
 // +k8s:openapi-gen=true
+// +genclient
 type IntegrationKit struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -110,7 +112,7 @@ const (
 	IntegrationKitConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
 )
 
-// Condition describes the state of a resource at a certain point.
+// IntegrationKitCondition describes the state of a resource at a certain point.
 type IntegrationKitCondition struct {
 	// Type of integration condition.
 	Type IntegrationKitConditionType `json:"type"`
