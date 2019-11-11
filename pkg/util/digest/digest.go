@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"math/rand"
+	"sort"
 	"strconv"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -70,6 +71,23 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 		}
 	}
 
+	// Integration traits
+	for _, name := range sortedTraitSpecMapKeys(integration.Spec.Traits) {
+		if _, err := hash.Write([]byte(name + "[")); err != nil {
+			return "", err
+		}
+		spec := integration.Spec.Traits[name]
+		for _, prop := range sortedStringMapKeys(spec.Configuration) {
+			val := spec.Configuration[prop]
+			if _, err := hash.Write([]byte(prop + "=" + val + ",")); err != nil {
+				return "", err
+			}
+		}
+		if _, err := hash.Write([]byte("]")); err != nil {
+			return "", err
+		}
+	}
+
 	// Add a letter at the beginning and use URL safe encoding
 	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
 	return digest, nil
@@ -103,4 +121,22 @@ func ComputeForIntegrationKit(kit *v1alpha1.IntegrationKit) (string, error) {
 // Random --
 func Random() string {
 	return "v" + strconv.FormatInt(rand.Int63(), 10)
+}
+
+func sortedStringMapKeys(m map[string]string) []string {
+	res := make([]string, 0, len(m))
+	for k := range m {
+		res = append(res, k)
+	}
+	sort.Strings(res)
+	return res
+}
+
+func sortedTraitSpecMapKeys(m map[string]v1alpha1.TraitSpec) []string {
+	res := make([]string, 0, len(m))
+	for k := range m {
+		res = append(res, k)
+	}
+	sort.Strings(res)
+	return res
 }
