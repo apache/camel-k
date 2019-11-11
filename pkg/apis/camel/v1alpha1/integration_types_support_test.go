@@ -25,7 +25,6 @@ import (
 )
 
 func TestAllLanguages(t *testing.T) {
-	assert.Contains(t, Languages, LanguageJavaClass)
 	assert.Contains(t, Languages, LanguageJavaSource)
 	assert.Contains(t, Languages, LanguageJavaScript)
 	assert.Contains(t, Languages, LanguageGroovy)
