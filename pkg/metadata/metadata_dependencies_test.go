@@ -162,6 +162,27 @@ func TestJacksonDependency(t *testing.T) {
 	assert.ElementsMatch(t, []string{"camel:http", "camel:jackson", "camel:log"}, meta.Dependencies.List())
 }
 
+func TestJacksonImplicitDependency(t *testing.T) {
+	code := v1alpha1.SourceSpec{
+		DataSpec: v1alpha1.DataSpec{
+			Name: "Request.groovy",
+			Content: `
+			    from("http:test")
+					.unmarshal().json()
+					.to("log:end")
+		    `,
+		},
+		Language: v1alpha1.LanguageGroovy,
+	}
+
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+
+	assert.ElementsMatch(t, []string{"camel:http", "camel:jackson", "camel:log"}, meta.Dependencies.List())
+}
+
 func TestLanguageDependencies(t *testing.T) {
 	code := v1alpha1.SourceSpec{
 		DataSpec: v1alpha1.DataSpec{

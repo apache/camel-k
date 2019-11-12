@@ -43,10 +43,10 @@ var (
 	}{
 		main: map[string]string{
 			`.*JsonLibrary\.Jackson.*`:                         "camel:jackson",
-			`.*\.json().*`:                                     "camel:jackson",
-			`.*\.hystrix().*`:                                  "camel:hystrix",
-			`.*restConfiguration().*`:                          "camel:rest",
-			`.*rest(("[a-zA-Z0-9-/]+")*).*`:                    "camel:rest",
+			`.*\.json\(\).*`:                                   "camel:jackson",
+			`.*\.hystrix\(\).*`:                                "camel:hystrix",
+			`.*restConfiguration\(\).*`:                        "camel:rest",
+			`.*rest\(("[a-zA-Z0-9-/]+")*\).*`:                  "camel:rest",
 			`^\s*rest\s*{.*`:                                   "camel:rest",
 			`.*\.groovy\s*\(.*\).*`:                            "camel:groovy",
 			`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`: "camel:jsonpath",
@@ -58,10 +58,10 @@ var (
 			`.*\.xtokenize\s*\(.*\).*`:                         "camel:jaxp",
 		},
 		quarkus: map[string]string{
-			`.*restConfiguration().*`:       "camel-quarkus:rest",
-			`.*rest(("[a-zA-Z0-9-/]+")*).*`: "camel-quarkus:rest",
-			`^\s*rest\s*{.*`:                "camel-quarkus:rest",
-			`.*\.?simple\s*\(.*\).*`:        "camel-quarkus:bean",
+			`.*restConfiguration\(\).*`:       "camel-quarkus:rest",
+			`.*rest\(("[a-zA-Z0-9-/]+")*\).*`: "camel-quarkus:rest",
+			`^\s*rest\s*{.*`:                  "camel-quarkus:rest",
+			`.*\.?simple\s*\(.*\).*`:          "camel-quarkus:bean",
 		},
 	}
 )
