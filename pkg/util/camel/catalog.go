@@ -55,8 +55,7 @@ func QuarkusCatalog() (*RuntimeCatalog, error) {
 		}
 	}
 
-	// FIXME: to be replaced with catalogForRuntimeProvider when 1.0.7 is released
-	return findBestMatch(catalogs, "3.0.0-RC3", "1.0.7-SNAPSHOT", v1alpha1.QuarkusRuntimeProvider{
+	return catalogForRuntimeProvider(v1alpha1.QuarkusRuntimeProvider{
 		CamelQuarkusVersion: defaults.CamelQuarkusVersionConstraint,
 		QuarkusVersion:      defaults.DefaultQuarkusVersion,
 	})

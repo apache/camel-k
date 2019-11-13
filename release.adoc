@@ -51,8 +51,13 @@ First thing is to checkout master branch and sync with upstream.
 
 Next, the version of the runtime libraries to use need to be aligned in the Makefile (use the just released camel-k-runtime version if available).
 
+The following tasks need to be done:
+- Align RUNTIME_VERSION and RUNTIME_VERSION_CONSTRAINT in Makefile to latest runtime release
+- Align all libraries to the ones used in the chosen runtime (e.g. CAMEL_QUARKUS_VERSION and QUARKUS_VERSION, plus CONTRAINTs)
+- Set STAGING_RUNTIME_REPO to the URL of the staging repo (if using a staged camel-k-runtime version)
+- Ensure LAST_RELEASED_VERSION points to latest released version of Camel K
+
 ```
-# Align RUNTIME_VERSION and RUNTIME_VERSION_CONSTRAINT with latest runtime release, then
 make clean codegen set-version build-resources check-licenses
 ```
 

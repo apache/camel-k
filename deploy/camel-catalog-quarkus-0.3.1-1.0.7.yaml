@@ -18,20 +18,20 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-quarkus-0.3.0-1.0.7-snapshot
+  name: camel-catalog-quarkus-0.3.1-1.0.7
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0-RC3
     camel.apache.org/catalog.loader.version: 3.0.0-RC3
-    camel.apache.org/runtime.version: 1.0.7-SNAPSHOT
+    camel.apache.org/runtime.version: 1.0.7
     camel.apache.org/runtime.provider: quarkus
 spec:
   version: 3.0.0-RC3
-  runtimeVersion: 1.0.7-SNAPSHOT
+  runtimeVersion: 1.0.7
   runtimeProvider:
     quarkus:
-      camelQuarkusVersion: 0.3.0
-      quarkusVersion: 0.26.1
+      camelQuarkusVersion: 0.3.1
+      quarkusVersion: 0.27.0
   artifacts:
     camel-k-loader-groovy:
       groupId: org.apache.camel.k
@@ -265,6 +265,13 @@ spec:
       artifactId: camel-quarkus-paho
       schemes:
       - id: paho
+        http: false
+        passive: false
+    camel-quarkus-pdf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pdf
+      schemes:
+      - id: pdf
         http: false
         passive: false
     camel-quarkus-rest:

@@ -6942,7 +6942,7 @@ spec:
         passive: false
 
 `
-	Resources["camel-catalog-3.0.0-RC1-1.0.7-SNAPSHOT.yaml"] =
+	Resources["camel-catalog-3.0.0-RC3-1.0.7.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -6964,15 +6964,15 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-rc1-1.0.7-snapshot
+  name: camel-catalog-3.0.0-rc3-1.0.7
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.0.0-RC1
-    camel.apache.org/catalog.loader.version: 3.0.0-RC1
-    camel.apache.org/runtime.version: 1.0.7-SNAPSHOT
+    camel.apache.org/catalog.version: 3.0.0-RC3
+    camel.apache.org/catalog.loader.version: 3.0.0-RC3
+    camel.apache.org/runtime.version: 1.0.7
 spec:
-  version: 3.0.0-RC1
-  runtimeVersion: 1.0.7-SNAPSHOT
+  version: 3.0.0-RC3
+  runtimeVersion: 1.0.7
   artifacts:
     camel-activemq:
       groupId: org.apache.camel
@@ -7211,6 +7211,13 @@ spec:
       artifactId: camel-aws-swf
       schemes:
       - id: aws-swf
+        http: false
+        passive: false
+    camel-aws-translate:
+      groupId: org.apache.camel
+      artifactId: camel-aws-translate
+      schemes:
+      - id: aws-translate
         http: false
         passive: false
     camel-azure:
@@ -7468,6 +7475,13 @@ spec:
         http: false
         passive: true
       - id: dataset-test
+        http: false
+        passive: false
+    camel-debezium:
+      groupId: org.apache.camel
+      artifactId: camel-debezium
+      schemes:
+      - id: debezium
         http: false
         passive: false
     camel-digitalocean:
@@ -7751,6 +7765,13 @@ spec:
       artifactId: camel-grape
       schemes:
       - id: grape
+        http: false
+        passive: false
+    camel-graphql:
+      groupId: org.apache.camel
+      artifactId: camel-graphql
+      schemes:
+      - id: graphql
         http: false
         passive: false
     camel-grok:
@@ -8167,14 +8188,18 @@ spec:
         artifactId: camel-core-engine
       - groupId: org.apache.camel
         artifactId: camel-main
-      - groupId: org.apache.camel
-        artifactId: camel-properties
     camel-k-runtime-servlet:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-servlet
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-servlet
+    camel-k-runtime-webhook:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-webhook
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-webhook
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -8399,13 +8424,6 @@ spec:
       - id: mongodb-gridfs
         http: false
         passive: false
-    camel-mqtt:
-      groupId: org.apache.camel
-      artifactId: camel-mqtt
-      schemes:
-      - id: mqtt
-        http: false
-        passive: false
     camel-msv:
       groupId: org.apache.camel
       artifactId: camel-msv
@@ -8564,13 +8582,6 @@ spec:
       - id: lpr
         http: false
         passive: false
-    camel-properties:
-      groupId: org.apache.camel
-      artifactId: camel-properties
-      schemes:
-      - id: properties
-        http: false
-        passive: true
     camel-protobuf:
       groupId: org.apache.camel
       artifactId: camel-protobuf
@@ -8642,12 +8653,12 @@ spec:
       - id: rest-swagger
         http: false
         passive: false
-    camel-restlet:
+    camel-robotframework:
       groupId: org.apache.camel
-      artifactId: camel-restlet
+      artifactId: camel-robotframework
       schemes:
-      - id: restlet
-        http: true
+      - id: robotframework
+        http: false
         passive: false
     camel-rss:
       groupId: org.apache.camel
@@ -9084,6 +9095,13 @@ spec:
       - id: xchange
         http: false
         passive: false
+    camel-xj:
+      groupId: org.apache.camel
+      artifactId: camel-xj
+      schemes:
+      - id: xj
+        http: false
+        passive: false
     camel-xmlsecurity:
       groupId: org.apache.camel
       artifactId: camel-xmlsecurity
@@ -9159,7 +9177,7 @@ spec:
         passive: false
 
 `
-	Resources["camel-catalog-quarkus-0.3.0-1.0.7-SNAPSHOT.yaml"] =
+	Resources["camel-catalog-quarkus-0.3.1-1.0.7.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -9181,20 +9199,20 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-quarkus-0.3.0-1.0.7-snapshot
+  name: camel-catalog-quarkus-0.3.1-1.0.7
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0-RC3
     camel.apache.org/catalog.loader.version: 3.0.0-RC3
-    camel.apache.org/runtime.version: 1.0.7-SNAPSHOT
+    camel.apache.org/runtime.version: 1.0.7
     camel.apache.org/runtime.provider: quarkus
 spec:
   version: 3.0.0-RC3
-  runtimeVersion: 1.0.7-SNAPSHOT
+  runtimeVersion: 1.0.7
   runtimeProvider:
     quarkus:
-      camelQuarkusVersion: 0.3.0
-      quarkusVersion: 0.26.1
+      camelQuarkusVersion: 0.3.1
+      quarkusVersion: 0.27.0
   artifacts:
     camel-k-loader-groovy:
       groupId: org.apache.camel.k
@@ -9430,6 +9448,13 @@ spec:
       - id: paho
         http: false
         passive: false
+    camel-quarkus-pdf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pdf
+      schemes:
+      - id: pdf
+        http: false
+        passive: false
     camel-quarkus-rest:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-rest
@@ -9498,6 +9523,7 @@ spec:
       artifactId: camel-quarkus-zipfile
       dataformats:
       - zipfile
+
 `
 	Resources["crd-build.yaml"] =
 		`

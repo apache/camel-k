@@ -25,28 +25,28 @@ const (
 	Version = "1.0.0-M4-SNAPSHOT"
 
 	// DefaultCamelVersion --
-	DefaultCamelVersion = "3.0.0-RC1"
+	DefaultCamelVersion = "3.0.0-RC3"
 
 	// CamelVersionConstraint --
-	CamelVersionConstraint = ">=3.0.0-RC1"
+	CamelVersionConstraint = ">=3.0.0-RC3"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.0.6"
+	DefaultRuntimeVersion = "1.0.7"
 
 	// RuntimeVersionConstraint --
-	RuntimeVersionConstraint = ">=1.0.5"
+	RuntimeVersionConstraint = ">=1.0.7"
 
 	// DefaultCamelQuarkusVersion --
-	DefaultCamelQuarkusVersion = "0.3.0"
+	DefaultCamelQuarkusVersion = "0.3.1"
 
 	// CamelQuarkusVersionConstraint --
-	CamelQuarkusVersionConstraint = ">=0.3.0"
+	CamelQuarkusVersionConstraint = ">=0.3.1"
 
 	// DefaultQuarkusVersion --
-	DefaultQuarkusVersion = "0.26.1"
+	DefaultQuarkusVersion = "0.27.0"
 
 	// QuarkusVersionConstraint --
-	QuarkusVersionConstraint = ">=0.26.1"
+	QuarkusVersionConstraint = ">=0.27.0"
 
 	// KanikoVersion --
 	KanikoVersion = "0.9.0"
