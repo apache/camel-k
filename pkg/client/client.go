@@ -141,18 +141,21 @@ func initialize(kubeconfig string) {
 		} else if err != nil {
 			logrus.Errorf("could not determine if running in a container: %v", err)
 		}
-
-		kubeconfig = getDefaultKubeConfigFile()
+		var err error
+		kubeconfig, err = getDefaultKubeConfigFile()
+		if err != nil {
+			panic(err)
+		}
 	}
 	os.Setenv(k8sutil.KubeConfigEnvVar, kubeconfig)
 }
 
-func getDefaultKubeConfigFile() string {
+func getDefaultKubeConfigFile() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
-		panic(err) // TODO handle error
+		return "", err
 	}
-	return filepath.Join(usr.HomeDir, ".kube", "config")
+	return filepath.Join(usr.HomeDir, ".kube", "config"), nil
 }
 
 // GetCurrentNamespace --
@@ -167,7 +170,11 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 		}
 	}
 	if kubeconfig == "" {
-		kubeconfig = getDefaultKubeConfigFile()
+		var err error
+		kubeconfig, err = getDefaultKubeConfigFile()
+		if err != nil {
+			logrus.Errorf("Cannot get information about current user: %v", err)
+		}
 	}
 	if kubeconfig == "" {
 		return "default", nil
@@ -200,8 +207,24 @@ func shouldUseContainerMode() (bool, error) {
 		return false, nil
 	}
 	// Use container mode only when the kubeConfigFile does not exist and the container namespace file is present
-	_, err := os.Stat(getDefaultKubeConfigFile())
-	if os.IsNotExist(err) {
+	userUnknown := false
+	configFile, err := getDefaultKubeConfigFile()
+	if err != nil {
+		_, userUnknown = err.(user.UnknownUserIdError)
+		if !userUnknown {
+			return false, err
+		}
+	}
+	configFilePresent := true
+	if !userUnknown {
+		_, err := os.Stat(configFile)
+		if err != nil && os.IsNotExist(err) {
+			configFilePresent = false
+		} else if err != nil {
+			return false, err
+		}
+	}
+	if userUnknown || !configFilePresent {
 		_, err := os.Stat(inContainerNamespaceFile)
 		if os.IsNotExist(err) {
 			return false, nil
