@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.0.0-M4-SNAPSHOT
+VERSION := 1.0.0-M4
 LAST_RELEASED_VERSION := 1.0.0-M3
 RUNTIME_VERSION := 1.0.7
 RUNTIME_VERSION_CONSTRAINT := >=1.0.7
