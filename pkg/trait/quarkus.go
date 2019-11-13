@@ -59,6 +59,11 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 	return nil
 }
 
+// InfluencesKit overrides base class method
+func (t *quarkusTrait) InfluencesKit() bool {
+	return true
+}
+
 func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, runtimeVersion string) error {
 	ns := e.DetermineNamespace()
 	if ns == "" {

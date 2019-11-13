@@ -363,7 +363,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 
 func TestOnlySomeKitsInfluenceBuild(t *testing.T) {
 	c := NewTraitTestCatalog()
-	buildTraits := []string{"builder"}
+	buildTraits := []string{"builder", "quarkus"}
 
 	for _, trait := range c.allTraits() {
 		if trait.InfluencesKit() {
