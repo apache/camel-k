@@ -22,7 +22,7 @@ package defaults
 
 const (
 	// Version --
-	Version = "1.0.0-M4-SNAPSHOT"
+	Version = "1.0.0-M5-SNAPSHOT"
 
 	// DefaultCamelVersion --
 	DefaultCamelVersion = "3.0.0-RC3"
