@@ -9199,7 +9199,7 @@ spec:
 apiVersion: camel.apache.org/v1alpha1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-quarkus-0.3.1-1.0.7
+  name: camel-quarkus-catalog-0.3.1-1.0.7
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0-RC3

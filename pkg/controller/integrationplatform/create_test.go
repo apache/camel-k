@@ -63,7 +63,13 @@ func TestCreate(t *testing.T) {
 				n := strings.TrimSuffix(k, ".yaml")
 				n = strings.ToLower(n)
 
-				if c.Name == n {
+				name := c.Name
+				// TODO can be safely removed when catalog naming is fixed in runtime maven plugin
+				if strings.HasPrefix(name,"camel-quarkus-catalog") {
+					name = "camel-catalog-quarkus" + strings.TrimPrefix(name, "camel-quarkus-catalog")
+				}
+
+				if name == n {
 					found = true
 				}
 			}
