@@ -399,4 +399,4 @@ spec:
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.0.0-m4-snapshot
+  version: 1.0.0-m4
