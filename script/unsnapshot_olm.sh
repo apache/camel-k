@@ -25,13 +25,25 @@ for d in $(find ${olm_catalog} -type d -name "*-SNAPSHOT*");
 do
   mv ${d} ${d//-SNAPSHOT/}
 done
+for d in $(find ${olm_catalog} -type d -name "*-snapshot*");
+do
+  mv ${d} ${d//-snapshot/}
+done
 
 for f in $(find ${olm_catalog} -type f -name "*-SNAPSHOT*");
 do
   mv ${f} ${f//-SNAPSHOT/}
 done
+for f in $(find ${olm_catalog} -type f -name "*-snapshot*");
+do
+  mv ${f} ${f//-snapshot/}
+done
 
 for f in $(find ${olm_catalog}/camel-k -type f);
 do
   sed -i 's/-SNAPSHOT//g' $f
+done
+for f in $(find ${olm_catalog}/camel-k -type f);
+do
+  sed -i 's/-snapshot//g' $f
 done
