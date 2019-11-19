@@ -20,6 +20,7 @@ package trait
 import (
 	"context"
 	"fmt"
+	"os/user"
 	"reflect"
 	"regexp"
 	"strings"
@@ -165,4 +166,17 @@ func decodeTraitSpec(in *v1alpha1.TraitSpec, target interface{}) error {
 	}
 
 	return decoder.Decode(in.Configuration)
+}
+
+func mustHomeDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	return usr.HomeDir
+}
+
+func toHostDir(host string) string {
+	h := strings.Replace(strings.Replace(host, "https://", "", 1), "http://", "", 1)
+	return toFileName.ReplaceAllString(h, "_")
 }

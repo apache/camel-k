@@ -19,7 +19,11 @@ package trait
 
 import (
 	"context"
+	"path/filepath"
+	"regexp"
 	"strconv"
+	"sync"
+	"time"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/discovery/cached/disk"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -36,8 +41,15 @@ import (
 	util "github.com/apache/camel-k/pkg/util/controller"
 )
 
+var (
+	toFileName                = regexp.MustCompile(`[^(\w/\.)]`)
+	diskCachedDiscoveryClient discovery.CachedDiscoveryInterface
+	DiscoveryClientLock       sync.Mutex
+)
+
 type garbageCollectorTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait      `property:",squash"`
+	DiscoveryCache string `property:"discovery-cache"`
 }
 
 func newGarbageCollectorTrait() *garbageCollectorTrait {
@@ -175,11 +187,13 @@ func (t *garbageCollectorTrait) deleteEachOf(GKVs map[schema.GroupVersionKind]st
 }
 
 func (t *garbageCollectorTrait) getDeletableTypes() (map[schema.GroupVersionKind]struct{}, map[schema.GroupVersionKind]struct{}, error) {
-	// We rely on the discovery API to retrieve all the resources GVK.
-	// That results in an unbounded collection that can be a bit slow.
-	// We may want to refine that step by white-listing or caching types to speed-up
-	// the collection duration.
-	resources, err := t.client.Discovery().ServerPreferredNamespacedResources()
+	// We rely on the discovery API to retrieve all the resources GVK,
+	// that results in an unbounded set that can impact garbage collection latency when scaling up.
+	discoveryClient, err := t.discoveryClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	resources, err := discoveryClient.ServerPreferredNamespacedResources()
 	// Swallow group discovery errors, e.g., Knative serving exposes
 	// an aggregated API for custom.metrics.k8s.io that requires special
 	// authentication scheme while discovering preferred resources
@@ -210,4 +224,25 @@ type supportsDeleteVerbOnly struct{}
 func (p supportsDeleteVerbOnly) Match(groupVersion string, r *metav1.APIResource) bool {
 	verbs := sets.NewString([]string(r.Verbs)...)
 	return verbs.Has("delete") && !verbs.Has("deletecollection")
+}
+
+func (t *garbageCollectorTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
+	DiscoveryClientLock.Lock()
+	defer DiscoveryClientLock.Unlock()
+
+	if t.DiscoveryCache != "disk" {
+		return t.client.Discovery(), nil
+	}
+
+	if diskCachedDiscoveryClient != nil {
+		return diskCachedDiscoveryClient, nil
+	}
+
+	config := t.client.GetConfig()
+	httpCacheDir := filepath.Join(mustHomeDir(), ".kube", "http-cache")
+	discCacheDir := filepath.Join(mustHomeDir(), ".kube", "cache", "discovery", toHostDir(config.Host))
+
+	var err error
+	diskCachedDiscoveryClient, err = disk.NewCachedDiscoveryClientForConfig(config, discCacheDir, httpCacheDir, 10*time.Minute)
+	return diskCachedDiscoveryClient, err
 }

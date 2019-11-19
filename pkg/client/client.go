@@ -23,21 +23,26 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/apache/camel-k/pkg/apis"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"k8s.io/client-go/kubernetes"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	"github.com/apache/camel-k/pkg/apis"
 )
 
 const inContainerNamespaceFile = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
@@ -47,6 +52,7 @@ type Client interface {
 	controller.Client
 	kubernetes.Interface
 	GetScheme() *runtime.Scheme
+	GetConfig() *rest.Config
 }
 
 // Injectable identifies objects that can receive a Client
@@ -63,10 +69,15 @@ type defaultClient struct {
 	controller.Client
 	kubernetes.Interface
 	scheme *runtime.Scheme
+	config *rest.Config
 }
 
 func (c *defaultClient) GetScheme() *runtime.Scheme {
 	return c.scheme
+}
+
+func (c *defaultClient) GetConfig() *rest.Config {
+	return c.config
 }
 
 // NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster
@@ -115,6 +126,7 @@ func NewClient(fastDiscovery bool) (Client, error) {
 		Client:    dynClient,
 		Interface: clientset,
 		scheme:    clientOptions.Scheme,
+		config:    cfg,
 	}, nil
 }
 
@@ -129,6 +141,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 		Client:    manager.GetClient(),
 		Interface: clientset,
 		scheme:    manager.GetScheme(),
+		config:    manager.GetConfig(),
 	}, nil
 }
 
