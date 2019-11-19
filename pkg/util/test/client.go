@@ -23,11 +23,11 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
-
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
+
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 // NewFakeClient ---
@@ -56,4 +56,8 @@ type FakeClient struct {
 // GetScheme ---
 func (c *FakeClient) GetScheme() *runtime.Scheme {
 	return clientscheme.Scheme
+}
+
+func (c *FakeClient) GetConfig() *rest.Config {
+	return nil
 }
