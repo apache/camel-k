@@ -25,15 +25,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/discovery"
 
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util"
-	controllerUtil "github.com/apache/camel-k/pkg/util/controller"
+	util "github.com/apache/camel-k/pkg/util/controller"
 )
 
 type garbageCollectorTrait struct {
@@ -104,92 +104,110 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 		Add(*integration).
 		Add(*generation)
 
-	// Retrieve older generation resources to be enlisted for garbage collection.
-	// We rely on the discovery API to retrieve all the resources group and kind.
-	// That results in an unbounded collection that can be a bit slow.
-	// We may want to refine that step by white-listing or enlisting types to speed-up
-	// the collection duration.
-	resources, err := lookUpResources(context.TODO(), e.Client, e.Integration.Namespace, selector)
+	collectionGVKs, deletableGVKs, err := t.getDeletableTypes()
 	if err != nil {
-		t.L.ForIntegration(e.Integration).Errorf(err, "cannot collect older generation resources")
+		t.L.ForIntegration(e.Integration).Errorf(err, "cannot discover GVK types")
 		return
 	}
 
-	// And delete them
-	for _, resource := range resources {
-		// pin the resource
-		resource := resource
-		err = e.Client.Delete(context.TODO(), &resource, controller.PropagationPolicy(metav1.DeletePropagationBackground))
+	t.deleteAllOf(collectionGVKs, e, selector)
+	// TODO: DeleteCollection is currently not supported for Service resources, so we have to keep
+	// client-side collection deletion around until it becomes supported.
+	t.deleteEachOf(deletableGVKs, e, selector)
+}
+
+func (t *garbageCollectorTrait) deleteAllOf(GKVs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
+	for GVK := range GKVs {
+		err := e.Client.DeleteAllOf(context.TODO(),
+			&unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": GVK.GroupVersion().String(),
+					"kind":       GVK.Kind,
+					"metadata": map[string]interface{}{
+						"namespace": e.Integration.Namespace,
+					},
+				},
+			},
+			// FIXME: The unstructured client doesn't take the namespace option into account
+			//controller.InNamespace(e.Integration.Namespace),
+			util.MatchingSelector{Selector: selector},
+			client.PropagationPolicy(metav1.DeletePropagationBackground),
+		)
 		if err != nil {
-			// The resource may have already been deleted
-			if !k8serrors.IsNotFound(err) {
-				t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resource: %s/%s", resource.GetKind(), resource.GetName())
-			}
+			t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resources: %v", GVK)
 		} else {
-			t.L.ForIntegration(e.Integration).Debugf("child resource deleted: %s/%s", resource.GetKind(), resource.GetName())
+			t.L.ForIntegration(e.Integration).Debugf("child resources deleted: %v", GVK)
 		}
 	}
 }
 
-func lookUpResources(ctx context.Context, client client.Client, namespace string, selector labels.Selector) ([]unstructured.Unstructured, error) {
-	// We only take types that support the "create" and "list" verbs as:
-	// - they have to be created to be deleted :) so that excludes read-only
-	//   resources, e.g., aggregated APIs
-	// - they are going to be iterated and a list query with labels selector
-	//   is performed for each of them. That prevents from performing queries
-	//   that we know are going to return "MethodNotAllowed".
-	types, err := getDiscoveryTypesWithVerbs(client, []string{"create", "list"})
-	if err != nil {
-		return nil, err
-	}
-
-	res := make([]unstructured.Unstructured, 0)
-
-	for _, t := range types {
-		list := unstructured.UnstructuredList{
+func (t *garbageCollectorTrait) deleteEachOf(GKVs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
+	for GVK := range GKVs {
+		resources := unstructured.UnstructuredList{
 			Object: map[string]interface{}{
-				"apiVersion": t.APIVersion,
-				"kind":       t.Kind,
+				"apiVersion": GVK.GroupVersion().String(),
+				"kind":       GVK.Kind,
 			},
 		}
-		options := []controller.ListOption{
-			controller.InNamespace(namespace),
-			controllerUtil.MatchingSelector{Selector: selector},
+		options := []client.ListOption{
+			client.InNamespace(e.Integration.Namespace),
+			util.MatchingSelector{Selector: selector},
 		}
-		if err := client.List(ctx, &list, options...); err != nil {
-			if k8serrors.IsNotFound(err) || k8serrors.IsForbidden(err) {
-				continue
+		if err := t.client.List(context.TODO(), &resources, options...); err != nil {
+			if !k8serrors.IsNotFound(err) && !k8serrors.IsForbidden(err) {
+				t.L.ForIntegration(e.Integration).Errorf(err, "cannot list child resources: %v", GVK)
 			}
-			return nil, err
+			continue
 		}
 
-		res = append(res, list.Items...)
+		for _, resource := range resources.Items {
+			err := t.client.Delete(context.TODO(), &resource, client.PropagationPolicy(metav1.DeletePropagationBackground))
+			if err != nil {
+				// The resource may have already been deleted
+				if !k8serrors.IsNotFound(err) {
+					t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resource: %s/%s", resource.GetKind(), resource.GetName())
+				}
+			} else {
+				t.L.ForIntegration(e.Integration).Debugf("child resource deleted: %s/%s", resource.GetKind(), resource.GetName())
+			}
+		}
 	}
-	return res, nil
 }
 
-func getDiscoveryTypesWithVerbs(client client.Client, verbs []string) ([]metav1.TypeMeta, error) {
-	resources, err := client.Discovery().ServerPreferredNamespacedResources()
+func (t *garbageCollectorTrait) getDeletableTypes() (map[schema.GroupVersionKind]struct{}, map[schema.GroupVersionKind]struct{}, error) {
+	// We rely on the discovery API to retrieve all the resources GVK.
+	// That results in an unbounded collection that can be a bit slow.
+	// We may want to refine that step by white-listing or caching types to speed-up
+	// the collection duration.
+	resources, err := t.client.Discovery().ServerPreferredNamespacedResources()
 	// Swallow group discovery errors, e.g., Knative serving exposes
 	// an aggregated API for custom.metrics.k8s.io that requires special
 	// authentication scheme while discovering preferred resources
 	if err != nil && !discovery.IsGroupDiscoveryFailedError(err) {
-		return nil, err
+		return nil, nil, err
 	}
 
-	types := make([]metav1.TypeMeta, 0)
-	for _, resource := range resources {
-		for _, r := range resource.APIResources {
-			if len(verbs) > 0 && !util.StringSliceContains(r.Verbs, verbs) {
-				// Do not return the type if it does not support the provided verbs
-				continue
-			}
-			types = append(types, metav1.TypeMeta{
-				Kind:       r.Kind,
-				APIVersion: resource.GroupVersion,
-			})
+	// We only take types that support the "delete" and "deletecollection" verbs,
+	// to prevents from performing queries that we know are going to return "MethodNotAllowed".
+	return groupVersionKinds(discovery.FilteredBy(discovery.SupportsAllVerbs{Verbs: []string{"deletecollection"}}, resources)),
+		groupVersionKinds(discovery.FilteredBy(supportsDeleteVerbOnly{}, resources)),
+		nil
+}
+
+func groupVersionKinds(rls []*metav1.APIResourceList) map[schema.GroupVersionKind]struct{} {
+	GVKs := map[schema.GroupVersionKind]struct{}{}
+	for _, rl := range rls {
+		for _, r := range rl.APIResources {
+			GVKs[schema.FromAPIVersionAndKind(rl.GroupVersion, r.Kind)] = struct{}{}
 		}
 	}
+	return GVKs
+}
 
-	return types, nil
+// supportsDeleteVerbOnly is a predicate matching a resource if it supports the delete verb, but not deletecollection.
+type supportsDeleteVerbOnly struct{}
+
+func (p supportsDeleteVerbOnly) Match(groupVersion string, r *metav1.APIResource) bool {
+	verbs := sets.NewString([]string(r.Verbs)...)
+	return verbs.Has("delete") && !verbs.Has("deletecollection")
 }
