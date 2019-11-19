@@ -29,3 +29,7 @@ type MatchingSelector struct {
 func (s MatchingSelector) ApplyToList(opts *client.ListOptions) {
 	opts.LabelSelector = s.Selector
 }
+
+func (s MatchingSelector) ApplyToDeleteAllOf(opts *client.DeleteAllOfOptions) {
+	opts.LabelSelector = s.Selector
+}
