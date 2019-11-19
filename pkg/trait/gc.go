@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -50,9 +49,17 @@ var (
 	DiscoveryClientLock         sync.Mutex
 )
 
+type discoveryCacheType string
+
+const (
+	disabledDiscoveryCache discoveryCacheType = "disabled"
+	diskDiscoveryCache     discoveryCacheType = "disk"
+	memoryDiscoveryCache   discoveryCacheType = "memory"
+)
+
 type garbageCollectorTrait struct {
 	BaseTrait      `property:",squash"`
-	DiscoveryCache string `property:"discovery-cache"`
+	DiscoveryCache *discoveryCacheType `property:"discovery-cache"`
 }
 
 func newGarbageCollectorTrait() *garbageCollectorTrait {
@@ -64,6 +71,11 @@ func newGarbageCollectorTrait() *garbageCollectorTrait {
 func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
+	}
+
+	if t.DiscoveryCache == nil {
+		s := memoryDiscoveryCache
+		t.DiscoveryCache = &s
 	}
 
 	return e.IntegrationInPhase(
@@ -233,8 +245,8 @@ func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.Disco
 	DiscoveryClientLock.Lock()
 	defer DiscoveryClientLock.Unlock()
 
-	switch strings.ToLower(t.DiscoveryCache) {
-	case "disk":
+	switch *t.DiscoveryCache {
+	case diskDiscoveryCache:
 		if diskCachedDiscoveryClient != nil {
 			return diskCachedDiscoveryClient, nil
 		}
@@ -245,18 +257,18 @@ func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.Disco
 		diskCachedDiscoveryClient, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
 		return diskCachedDiscoveryClient, err
 
-	case "memory":
+	case memoryDiscoveryCache:
 		if memoryCachedDiscoveryClient != nil {
 			return memoryCachedDiscoveryClient, nil
 		}
 		memoryCachedDiscoveryClient = memory.NewMemCacheClient(t.client.Discovery())
 		return memoryCachedDiscoveryClient, nil
 
-	case "":
+	case disabledDiscoveryCache, "":
 		return t.client.Discovery(), nil
 
 	default:
-		t.L.ForIntegration(e.Integration).Infof("unsupported discovery cache type: %s", t.DiscoveryCache)
+		t.L.ForIntegration(e.Integration).Infof("unsupported discovery cache type: %s", *t.DiscoveryCache)
 		return t.client.Discovery(), nil
 	}
 }
