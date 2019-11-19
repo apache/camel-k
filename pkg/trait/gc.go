@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -34,6 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/disk"
+	"k8s.io/client-go/discovery/cached/memory"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -42,9 +44,10 @@ import (
 )
 
 var (
-	toFileName                = regexp.MustCompile(`[^(\w/\.)]`)
-	diskCachedDiscoveryClient discovery.CachedDiscoveryInterface
-	DiscoveryClientLock       sync.Mutex
+	toFileName                  = regexp.MustCompile(`[^(\w/\.)]`)
+	diskCachedDiscoveryClient   discovery.CachedDiscoveryInterface
+	memoryCachedDiscoveryClient discovery.CachedDiscoveryInterface
+	DiscoveryClientLock         sync.Mutex
 )
 
 type garbageCollectorTrait struct {
@@ -116,7 +119,7 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 		Add(*integration).
 		Add(*generation)
 
-	collectionGVKs, deletableGVKs, err := t.getDeletableTypes()
+	collectionGVKs, deletableGVKs, err := t.getDeletableTypes(e)
 	if err != nil {
 		t.L.ForIntegration(e.Integration).Errorf(err, "cannot discover GVK types")
 		return
@@ -186,10 +189,10 @@ func (t *garbageCollectorTrait) deleteEachOf(GKVs map[schema.GroupVersionKind]st
 	}
 }
 
-func (t *garbageCollectorTrait) getDeletableTypes() (map[schema.GroupVersionKind]struct{}, map[schema.GroupVersionKind]struct{}, error) {
+func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, map[schema.GroupVersionKind]struct{}, error) {
 	// We rely on the discovery API to retrieve all the resources GVK,
 	// that results in an unbounded set that can impact garbage collection latency when scaling up.
-	discoveryClient, err := t.discoveryClient()
+	discoveryClient, err := t.discoveryClient(e)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -226,23 +229,34 @@ func (p supportsDeleteVerbOnly) Match(groupVersion string, r *metav1.APIResource
 	return verbs.Has("delete") && !verbs.Has("deletecollection")
 }
 
-func (t *garbageCollectorTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
+func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.DiscoveryInterface, error) {
 	DiscoveryClientLock.Lock()
 	defer DiscoveryClientLock.Unlock()
 
-	if t.DiscoveryCache != "disk" {
+	switch strings.ToLower(t.DiscoveryCache) {
+	case "disk":
+		if diskCachedDiscoveryClient != nil {
+			return diskCachedDiscoveryClient, nil
+		}
+		config := t.client.GetConfig()
+		httpCacheDir := filepath.Join(mustHomeDir(), ".kube", "http-cache")
+		diskCacheDir := filepath.Join(mustHomeDir(), ".kube", "cache", "discovery", toHostDir(config.Host))
+		var err error
+		diskCachedDiscoveryClient, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
+		return diskCachedDiscoveryClient, err
+
+	case "memory":
+		if memoryCachedDiscoveryClient != nil {
+			return memoryCachedDiscoveryClient, nil
+		}
+		memoryCachedDiscoveryClient = memory.NewMemCacheClient(t.client.Discovery())
+		return memoryCachedDiscoveryClient, nil
+
+	case "":
+		return t.client.Discovery(), nil
+
+	default:
+		t.L.ForIntegration(e.Integration).Infof("unsupported discovery cache type: %s", t.DiscoveryCache)
 		return t.client.Discovery(), nil
 	}
-
-	if diskCachedDiscoveryClient != nil {
-		return diskCachedDiscoveryClient, nil
-	}
-
-	config := t.client.GetConfig()
-	httpCacheDir := filepath.Join(mustHomeDir(), ".kube", "http-cache")
-	discCacheDir := filepath.Join(mustHomeDir(), ".kube", "cache", "discovery", toHostDir(config.Host))
-
-	var err error
-	diskCachedDiscoveryClient, err = disk.NewCachedDiscoveryClientForConfig(config, discCacheDir, httpCacheDir, 10*time.Minute)
-	return diskCachedDiscoveryClient, err
 }
