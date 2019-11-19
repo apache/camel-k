@@ -447,4 +447,12 @@ There are also platform traits that **normally should not be configured** by the
   +
   It's enabled by default.
 
+[cols="m,"]
+!===
+
+! gc.discovery-cache
+! Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)
+
+!===
+
 |=======================
