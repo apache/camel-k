@@ -143,13 +143,13 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 	t.deleteEachOf(deletableGVKs, e, selector)
 }
 
-func (t *garbageCollectorTrait) deleteAllOf(GKVs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
-	for GVK := range GKVs {
+func (t *garbageCollectorTrait) deleteAllOf(gvks map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
+	for gvk := range gvks {
 		err := e.Client.DeleteAllOf(context.TODO(),
 			&unstructured.Unstructured{
 				Object: map[string]interface{}{
-					"apiVersion": GVK.GroupVersion().String(),
-					"kind":       GVK.Kind,
+					"apiVersion": gvk.GroupVersion().String(),
+					"kind":       gvk.Kind,
 					"metadata": map[string]interface{}{
 						"namespace": e.Integration.Namespace,
 					},
@@ -161,19 +161,19 @@ func (t *garbageCollectorTrait) deleteAllOf(GKVs map[schema.GroupVersionKind]str
 			client.PropagationPolicy(metav1.DeletePropagationBackground),
 		)
 		if err != nil {
-			t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resources: %v", GVK)
+			t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resources: %v", gvk)
 		} else {
-			t.L.ForIntegration(e.Integration).Debugf("child resources deleted: %v", GVK)
+			t.L.ForIntegration(e.Integration).Debugf("child resources deleted: %v", gvk)
 		}
 	}
 }
 
-func (t *garbageCollectorTrait) deleteEachOf(GKVs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
-	for GVK := range GKVs {
+func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
+	for gvk := range gvks {
 		resources := unstructured.UnstructuredList{
 			Object: map[string]interface{}{
-				"apiVersion": GVK.GroupVersion().String(),
-				"kind":       GVK.Kind,
+				"apiVersion": gvk.GroupVersion().String(),
+				"kind":       gvk.Kind,
 			},
 		}
 		options := []client.ListOption{
@@ -182,13 +182,14 @@ func (t *garbageCollectorTrait) deleteEachOf(GKVs map[schema.GroupVersionKind]st
 		}
 		if err := t.client.List(context.TODO(), &resources, options...); err != nil {
 			if !k8serrors.IsNotFound(err) && !k8serrors.IsForbidden(err) {
-				t.L.ForIntegration(e.Integration).Errorf(err, "cannot list child resources: %v", GVK)
+				t.L.ForIntegration(e.Integration).Errorf(err, "cannot list child resources: %v", gvk)
 			}
 			continue
 		}
 
 		for _, resource := range resources.Items {
-			err := t.client.Delete(context.TODO(), &resource, client.PropagationPolicy(metav1.DeletePropagationBackground))
+			r := resource
+			err := t.client.Delete(context.TODO(), &r, client.PropagationPolicy(metav1.DeletePropagationBackground))
 			if err != nil {
 				// The resource may have already been deleted
 				if !k8serrors.IsNotFound(err) {
