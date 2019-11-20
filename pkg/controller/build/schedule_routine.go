@@ -71,42 +71,36 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
-	hasScheduledBuild := false
 	for _, b := range builds.Items {
 		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
-			hasScheduledBuild = true
-			break
+			// Let's requeue the build in case one is already running
+			return nil, nil
 		}
 	}
 
-	if hasScheduledBuild {
-		// Let's requeue the build in case one is already running
-		return nil, nil
-	}
-
-	// Transition the build to running state
+	// Transition the build to pending state
+	// This must be done in the critical section rather than delegated to the controller
 	target := build.DeepCopy()
-	target.Status.Phase = v1alpha1.BuildPhaseRunning
+	target.Status.Phase = v1alpha1.BuildPhasePending
 	action.L.Info("Build state transition", "phase", target.Status.Phase)
 	err = action.client.Status().Update(ctx, target)
 	if err != nil {
 		return nil, err
 	}
 
-	// and run it asynchronously to avoid blocking the reconcile loop
+	// Start the build
+	progress := action.builder.Build(build.Spec)
+	// And follow the build progress asynchronously to avoid blocking the reconcile loop
+	go func() {
+		for status := range progress {
+			err := UpdateBuildStatus(ctx, build, status, action.client, action.L)
+			if err != nil {
+				action.L.Errorf(err, "Error while updating build status: %s", build.Name)
+			}
+		}
+	}()
+
 	action.routines.Store(build.Name, true)
-	go action.build(ctx, build)
 
 	return nil, nil
-}
-
-func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.Build) {
-	defer action.routines.Delete(build.Name)
-
-	status := action.builder.Build(build.Spec)
-
-	err := UpdateBuildStatus(ctx, build, status, action.client, action.L)
-	if err != nil {
-		action.L.Errorf(err, "Error while running build: %s", build.Name)
-	}
 }

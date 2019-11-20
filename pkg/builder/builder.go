@@ -50,10 +50,17 @@ func New(c client.Client) Builder {
 }
 
 // Build --
-func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
-	result := v1alpha1.BuildStatus{}
+func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) <-chan v1alpha1.BuildStatus {
+	channel := make(chan v1alpha1.BuildStatus)
+	go b.build(build, channel)
+	return channel
+}
 
+func (b *defaultBuilder) build(build v1alpha1.BuildSpec, channel chan<- v1alpha1.BuildStatus) {
+	result := v1alpha1.BuildStatus{}
+	result.Phase = v1alpha1.BuildPhaseRunning
 	result.StartedAt = metav1.Now()
+	channel <- result
 
 	// create tmp path
 	buildDir := build.BuildDir
@@ -115,7 +122,9 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 
 	if result.Phase == v1alpha1.BuildPhaseFailed {
 		result.Duration = metav1.Now().Sub(result.StartedAt.Time).String()
-		return result
+		channel <- result
+		close(channel)
+		return
 	}
 
 	steps := make([]Step, 0)
@@ -187,5 +196,6 @@ func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus {
 		b.log.Infof("build request %s interrupted after %s", build.Meta.Name, result.Duration)
 	}
 
-	return result
+	channel <- result
+	close(channel)
 }

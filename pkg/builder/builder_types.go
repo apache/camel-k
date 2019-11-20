@@ -45,7 +45,7 @@ const (
 
 // Builder --
 type Builder interface {
-	Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus
+	Build(build v1alpha1.BuildSpec) <-chan v1alpha1.BuildStatus
 }
 
 // Step --
