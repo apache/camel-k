@@ -66,8 +66,14 @@ func TestFailure(t *testing.T) {
 		},
 	}
 
-	result := b.Build(r)
+	progress := b.Build(r)
 
-	assert.NotNil(t, result)
-	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Phase)
+	status := make([]v1alpha1.BuildStatus, 0)
+	for s := range progress {
+		status = append(status, s)
+	}
+
+	assert.Len(t, status, 2)
+	assert.Equal(t, v1alpha1.BuildPhaseRunning, status[0].Phase)
+	assert.Equal(t, v1alpha1.BuildPhaseFailed, status[1].Phase)
 }

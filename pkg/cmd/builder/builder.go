@@ -70,17 +70,10 @@ func Run(namespace string, buildName string) {
 		c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build),
 	)
 
-	status := v1alpha1.BuildStatus{
-		Phase: v1alpha1.BuildPhaseRunning,
+	progress := builder.New(c).Build(build.Spec)
+	for status := range progress {
+		exitOnError(util.UpdateBuildStatus(ctx, build, status, c, log))
 	}
-	exitOnError(
-		util.UpdateBuildStatus(ctx, build, status, c, log),
-	)
-
-	status = builder.New(c).Build(build.Spec)
-	exitOnError(
-		util.UpdateBuildStatus(ctx, build, status, c, log),
-	)
 
 	switch build.Status.Phase {
 	case v1alpha1.BuildPhaseSucceeded:
