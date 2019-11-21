@@ -21,6 +21,8 @@ rootdir=$location/..
 unset GOPATH
 GO111MODULE=on
 
+echo "Generating Go client code..."
+
 go run k8s.io/code-generator/cmd/client-gen \
 	--input=camel/v1alpha1 \
 	--go-header-file=$rootdir/script/headers/default.txt \

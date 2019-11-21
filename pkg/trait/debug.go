@@ -22,6 +22,12 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
+// The Debug trait can be used to enable debugging on the integration container,
+// so that a remote debugger can be attached.
+//
+// Enabling the trait will inject the `JAVA_DEBUG` environment variable into the integration container.
+//
+// +camel-k:trait=debug
 type debugTrait struct {
 	BaseTrait `property:",squash"`
 }

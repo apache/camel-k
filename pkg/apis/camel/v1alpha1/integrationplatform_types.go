@@ -90,7 +90,8 @@ const (
 	TraitProfileKnative = "Knative"
 )
 
-var allTraitProfiles = []TraitProfile{TraitProfileOpenShift, TraitProfileKubernetes, TraitProfileKnative}
+// AllTraitProfiles contains all allowed profiles
+var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnative, TraitProfileOpenShift}
 
 // IntegrationPlatformBuildSpec contains platform related build information
 type IntegrationPlatformBuildSpec struct {

@@ -31,6 +31,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
+// The Classpath trait is used internally to configure the classpath of the final integration.
+//
+// +camel-k:trait=classpath
 type classpathTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -117,4 +120,9 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *classpathTrait) IsPlatformTrait() bool {
+	return true
 }

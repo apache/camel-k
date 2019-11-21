@@ -121,10 +121,13 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate: generate-deepcopy generate-client
+generate: generate-deepcopy generate-client generate-doc
 
 generate-client:
 	./script/gen_client.sh
+
+generate-doc:
+	./script/gen_doc.sh
 
 generate-deepcopy:
 	operator-sdk generate k8s
@@ -234,4 +237,4 @@ install-minikube:
 release-notes:
 	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc

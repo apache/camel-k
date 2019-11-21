@@ -29,6 +29,10 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
+// The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
+// the integration will run in the cluster.
+//
+// +camel-k:trait=deployment
 type deploymentTrait struct {
 	BaseTrait `property:",squash"`
 	deployer  deployerTrait
@@ -144,6 +148,11 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *deploymentTrait) IsPlatformTrait() bool {
+	return true
 }
 
 // **********************************

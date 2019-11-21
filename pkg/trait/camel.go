@@ -29,9 +29,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
+// The Camel trait can be used to configure versions of Apache Camel and related libraries.
+//
+// +camel-k:trait=camel
 type camelTrait struct {
 	BaseTrait      `property:",squash"`
+	// The camel version to use for the integration. It overrides the default version set in the Integration Platform.
 	Version        string `property:"version"`
+	// The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
 	RuntimeVersion string `property:"runtime-version"`
 }
 
@@ -157,4 +162,9 @@ func (t *camelTrait) determineRuntimeVersion(e *Environment) string {
 		return e.IntegrationKit.Status.RuntimeVersion
 	}
 	return e.Platform.Spec.Build.RuntimeVersion
+}
+
+// IsPlatformTrait overrides base class method
+func (t *camelTrait) IsPlatformTrait() bool {
+	return true
 }

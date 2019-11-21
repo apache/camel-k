@@ -30,9 +30,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// The Ingress trait can be used to expose the service associated with the integration
+// to the outside world with a Kubernetes Ingress.
+//
+// It's enabled by default whenever a Service is added to the integration (through the `service` trait).
+//
+// +camel-k:trait=ingress
 type ingressTrait struct {
 	BaseTrait `property:",squash"`
+	// **Required**. To configure the host exposed by the ingress.
 	Host      string `property:"host"`
+	// To automatically add an ingress whenever the integration uses a HTTP endpoint consumer.
 	Auto      *bool  `property:"auto"`
 }
 

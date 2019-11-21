@@ -35,19 +35,34 @@ const (
 	containerTraitID     = "container"
 )
 
+// The Container trait can be used to configure properties of the container where the integration will run.
+//
+// It also provides configuration for Services associated to the container.
+//
+// +camel-k:trait=container
 type containerTrait struct {
 	BaseTrait `property:",squash"`
 
 	Auto            *bool  `property:"auto"`
+	// The minimum amount of CPU required.
 	RequestCPU      string `property:"request-cpu"`
+	// The minimum amount of memory required.
 	RequestMemory   string `property:"request-memory"`
+	// The maximum amount of CPU required.
 	LimitCPU        string `property:"limit-cpu"`
+	// The maximum amount of memory required.
 	LimitMemory     string `property:"limit-memory"`
+	// Can be used to enable/disable exposure via kubernetes Service.
 	Expose          *bool  `property:"expose"`
+	// To configure a different port exposed by the container (default `8080`).
 	Port            int    `property:"port"`
+	// To configure a different port name for the port exposed by the container (default `http`).
 	PortName        string `property:"port-name"`
+	// To configure under which service port the container port is to be exposed (default `80`).
 	ServicePort     int    `property:"service-port"`
+	// To configure under which service port name the container port is to be exposed (default `http`).
 	ServicePortName string `property:"service-port-name"`
+	// The main container name. It's named `integration` by default.
 	Name            string `property:"name"`
 }
 
@@ -142,6 +157,11 @@ func (t *containerTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *containerTrait) IsPlatformTrait() bool {
+	return true
 }
 
 func (t *containerTrait) configureService(e *Environment) {

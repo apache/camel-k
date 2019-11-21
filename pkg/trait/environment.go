@@ -23,6 +23,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
+// The environment trait is used internally to inject standard environment variables in the integration container,
+// such as `NAMESPACE`, `POD_NAME`, `JAVA_MAIN_CLASS` and others.
+//
+// +camel-k:trait=environment
 type environmentTrait struct {
 	BaseTrait     `property:",squash"`
 	ContainerMeta bool `property:"container-meta"`
@@ -72,4 +76,9 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *environmentTrait) IsPlatformTrait() bool {
+	return true
 }
