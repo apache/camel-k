@@ -29,21 +29,36 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+// The Probes trait allows to configure Liveness and Readiness probes on the integration container.
+//
+// +camel-k:trait=probes
 type probesTrait struct {
 	BaseTrait `property:",squash"`
-
+	// Configures the host on which the probe is exposed (default `0.0.0.0`).
 	BindHost                  string `property:"bind-host"`
+	// Configures the port on which the probe is exposed (default `8080`).
 	BindPort                  int    `property:"bind-port"`
+	// Path to access on the probe ( default `/health`).
 	Path                      string `property:"path"`
+	// Number of seconds after the container has started before liveness probes are initiated.
 	LivenessInitialDelay      int32  `property:"liveness-initial-delay"`
+	// Number of seconds after which the probe times out. Applies to the liveness probe.
 	LivenessTimeout           int32  `property:"liveness-timeout"`
+	// How often to perform the probe. Applies to the liveness probe.
 	LivenessPeriod            int32  `property:"liveness-period"`
+	// Minimum consecutive successes for the probe to be considered successful after having failed. Applies to the liveness probe.
 	LivenessSuccessThreshold  int32  `property:"liveness-success-threshold"`
+	// Minimum consecutive failures for the probe to be considered failed after having succeeded. Applies to the liveness probe.
 	LivenessFailureThreshold  int32  `property:"liveness-failure-threshold"`
+	// Number of seconds after the container has started before readiness probes are initiated.
 	ReadinessInitialDelay     int32  `property:"readiness-initial-delay"`
+	// Number of seconds after which the probe times out. Applies to the readiness probe.
 	ReadinessTimeout          int32  `property:"readiness-timeout"`
+	// How often to perform the probe. Applies to the readiness probe.
 	ReadinessPeriod           int32  `property:"readiness-period"`
+	// Minimum consecutive successes for the probe to be considered successful after having failed. Applies to the readiness probe.
 	ReadinessSuccessThreshold int32  `property:"readiness-success-threshold"`
+	// Minimum consecutive failures for the probe to be considered failed after having succeeded. Applies to the readiness probe.
 	ReadinessFailureThreshold int32  `property:"readiness-failure-threshold"`
 }
 

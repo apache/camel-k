@@ -26,7 +26,10 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 )
 
-// TODO: we should add a way to label a trait as platform so it cannot be disabled/removed
+// The builder trait is internally used to determine the best strategy to
+// build and configure IntegrationKits.
+//
+// +camel-k:trait=builder
 type builderTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -65,6 +68,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *builderTrait) IsPlatformTrait() bool {
+	return true
 }
 
 // InfluencesKit overrides base class method

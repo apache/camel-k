@@ -69,6 +69,9 @@ type Trait interface {
 
 	// InfluencesKit determines if the trait has any influence on Integration Kits
 	InfluencesKit() bool
+
+	// IsPlatformTrait marks all fundamental traits that allow the platform to work
+	IsPlatformTrait() bool
 }
 
 /* Base trait */
@@ -83,6 +86,7 @@ func newBaseTrait(id string) BaseTrait {
 // BaseTrait is the root trait with noop implementations for hooks
 type BaseTrait struct {
 	id      ID
+	// Can be used to enable or disable a trait. All traits share this common property.
 	Enabled *bool `property:"enabled"`
 	client  client.Client
 	ctx     context.Context
@@ -106,6 +110,11 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 
 // InfluencesKit determines if the trait has any influence on Integration Kits
 func (trait *BaseTrait) InfluencesKit() bool {
+	return false
+}
+
+// IsPlatformTrait marks all fundamental traits that allow the platform to work.
+func (trait *BaseTrait) IsPlatformTrait() bool {
 	return false
 }
 

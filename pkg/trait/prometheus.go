@@ -31,11 +31,23 @@ import (
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 )
 
+// The Prometheus trait exposes the integration with a `Service` and a `ServiceMonitor` resources
+// so that the Prometheus endpoint can be scraped.
+//
+// WARNING: Creating the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
+// custom resource definition to be installed. You can set `service-monitor` to `false` for the Prometheus trait to work without
+// the Prometheus operator.
+//
+// It's disabled by default.
+//
+// +camel-k:trait=prometheus
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
-
+	// The Prometheus endpoint port (default `9778`).
 	Port                 int    `property:"port"`
+	// Whether a `ServiceMonitor` resource is created (default `true`).
 	ServiceMonitor       bool   `property:"service-monitor"`
+	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 	ServiceMonitorLabels string `property:"service-monitor-labels"`
 }
 

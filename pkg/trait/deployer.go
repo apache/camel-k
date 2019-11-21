@@ -17,8 +17,13 @@ limitations under the License.
 
 package trait
 
+// The deployer trait can be used to explicitly select the kind of high level resource that
+// will deploy the integration.
+//
+// +camel-k:trait=deployer
 type deployerTrait struct {
 	BaseTrait `property:",squash"`
+	// Allows to explicitly select the desired deployment kind between `deployment` or `knative-service` when creating the resources for running the integration.
 	Kind      string `property:"kind"`
 }
 
@@ -34,4 +39,9 @@ func (t *deployerTrait) Configure(e *Environment) (bool, error) {
 
 func (t *deployerTrait) Apply(e *Environment) error {
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *deployerTrait) IsPlatformTrait() bool {
+	return true
 }

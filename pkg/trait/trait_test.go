@@ -361,7 +361,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	assert.Equal(t, "/foo/bar", m.MountPath)
 }
 
-func TestOnlySomeKitsInfluenceBuild(t *testing.T) {
+func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 	c := NewTraitTestCatalog()
 	buildTraits := []string{"builder", "quarkus"}
 
@@ -370,6 +370,19 @@ func TestOnlySomeKitsInfluenceBuild(t *testing.T) {
 			assert.Contains(t, buildTraits, string(trait.ID()))
 		} else {
 			assert.NotContains(t, buildTraits, trait.ID())
+		}
+	}
+}
+
+func TestOnlySomeTraitsArePlatform(t *testing.T) {
+	c := NewTraitTestCatalog()
+	platformTraits := []string{"builder", "camel", "classpath", "container", "dependencies", "deployer", "deployment", "environment", "rest-dsl", "owner"}
+
+	for _, trait := range c.allTraits() {
+		if trait.IsPlatformTrait() {
+			assert.Contains(t, platformTraits, string(trait.ID()))
+		} else {
+			assert.NotContains(t, platformTraits, trait.ID())
 		}
 	}
 }

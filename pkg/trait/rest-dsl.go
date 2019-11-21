@@ -37,6 +37,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
+// The Rest DSL trait is internally used to allow creating integrations from a OpenAPI specs.
+//
+// +camel-k:trait=rest-dsl
 type restDslTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -203,6 +206,11 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *restDslTrait) IsPlatformTrait() bool {
+	return true
 }
 
 func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, error) {

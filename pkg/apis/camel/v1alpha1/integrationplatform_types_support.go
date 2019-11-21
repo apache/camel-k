@@ -50,7 +50,7 @@ func NewIntegrationPlatform(namespace string, name string) IntegrationPlatform {
 
 // TraitProfileByName returns the trait profile corresponding to the given name (case insensitive)
 func TraitProfileByName(name string) TraitProfile {
-	for _, p := range allTraitProfiles {
+	for _, p := range AllTraitProfiles {
 		if strings.EqualFold(name, string(p)) {
 			return p
 		}

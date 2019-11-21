@@ -127,7 +127,16 @@ func (c *Catalog) allTraits() []Trait {
 // Traits may depend on the result of previously executed ones,
 // so care must be taken while changing the lists order.
 func (c *Catalog) traitsFor(environment *Environment) []Trait {
-	switch environment.DetermineProfile() {
+	profile := environment.DetermineProfile()
+	return c.TraitsForProfile(profile)
+}
+
+// TraitsForProfile returns all traits associated with a given profile.
+//
+// Traits may depend on the result of previously executed ones,
+// so care must be taken while changing the lists order.
+func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
+	switch profile {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
 			c.tCamel,

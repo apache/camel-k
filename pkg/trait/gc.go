@@ -46,7 +46,7 @@ var (
 	toFileName                  = regexp.MustCompile(`[^(\w/\.)]`)
 	diskCachedDiscoveryClient   discovery.CachedDiscoveryInterface
 	memoryCachedDiscoveryClient discovery.CachedDiscoveryInterface
-	DiscoveryClientLock         sync.Mutex
+	discoveryClientLock         sync.Mutex
 )
 
 type discoveryCacheType string
@@ -57,8 +57,12 @@ const (
 	memoryDiscoveryCache   discoveryCacheType = "memory"
 )
 
+// The GC Trait garbage-collects all resources that are no longer necessary upon integration updates.
+//
+// +camel-k:trait=gc
 type garbageCollectorTrait struct {
-	BaseTrait      `property:",squash"`
+	BaseTrait `property:",squash"`
+	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)
 	DiscoveryCache *discoveryCacheType `property:"discovery-cache"`
 }
 
@@ -79,9 +83,9 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	return e.IntegrationInPhase(
-			v1alpha1.IntegrationPhaseInitialization,
-			v1alpha1.IntegrationPhaseDeploying,
-			v1alpha1.IntegrationPhaseRunning),
+		v1alpha1.IntegrationPhaseInitialization,
+		v1alpha1.IntegrationPhaseDeploying,
+		v1alpha1.IntegrationPhaseRunning),
 		nil
 }
 
@@ -243,8 +247,8 @@ func (p supportsDeleteVerbOnly) Match(groupVersion string, r *metav1.APIResource
 }
 
 func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.DiscoveryInterface, error) {
-	DiscoveryClientLock.Lock()
-	defer DiscoveryClientLock.Unlock()
+	discoveryClientLock.Lock()
+	defer discoveryClientLock.Unlock()
 
 	switch *t.DiscoveryCache {
 	case diskDiscoveryCache:

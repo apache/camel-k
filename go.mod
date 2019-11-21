@@ -21,6 +21,7 @@ require (
 	github.com/scylladb/go-set v1.0.2
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
+	github.com/spf13/pflag v1.0.3
 	github.com/stoewer/go-strcase v1.0.2
 	github.com/stretchr/testify v1.3.0
 	go.uber.org/multierr v1.1.0
@@ -28,6 +29,7 @@ require (
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
+	k8s.io/gengo v0.0.0-20191010091904-7fa3014cb28f
 	knative.dev/eventing v0.9.0
 	knative.dev/pkg v0.0.0-20191017202117-b5a8deb92e5c
 	knative.dev/serving v0.9.0

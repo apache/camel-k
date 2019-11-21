@@ -35,9 +35,16 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
+// The Quarkus trait activates the Quarkus runtime.
+//
+// It's disabled by default.
+//
+// +camel-k:trait=quarkus
 type quarkusTrait struct {
-	BaseTrait           `property:",squash"`
-	QuarkusVersion      string `property:"quarkus-version"`
+	BaseTrait `property:",squash"`
+	// The Quarkus version to use for the integration
+	QuarkusVersion string `property:"quarkus-version"`
+	// The Camel-Quarkus version to use for the integration
 	CamelQuarkusVersion string `property:"camel-quarkus-version"`
 }
 

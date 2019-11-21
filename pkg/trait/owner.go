@@ -27,12 +27,15 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
-// ownerTrait ensures that all created resources belong to the integration being created
-// and transfers annotations and labels on the integration onto these owned resources being created
+// The Owner trait ensures that all created resources belong to the integration being created
+// and transfers annotations and labels on the integration onto these owned resources.
+//
+// +camel-k:trait=owner
 type ownerTrait struct {
 	BaseTrait `property:",squash"`
-
+	// The annotations to be transferred (A comma-separated list of label keys)
 	TargetAnnotations string `property:"target-annotations"`
+	// The labels to be transferred (A comma-separated list of label keys)
 	TargetLabels      string `property:"target-labels"`
 }
 
@@ -103,6 +106,12 @@ func (t *ownerTrait) Apply(e *Environment) error {
 
 	return nil
 }
+
+// IsPlatformTrait overrides base class method
+func (t *ownerTrait) IsPlatformTrait() bool {
+	return true
+}
+
 
 func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabels map[string]string, targetAnnotations map[string]string) {
 	// Transfer annotations
