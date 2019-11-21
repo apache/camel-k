@@ -36,7 +36,7 @@ type ownerTrait struct {
 	// The annotations to be transferred (A comma-separated list of label keys)
 	TargetAnnotations string `property:"target-annotations"`
 	// The labels to be transferred (A comma-separated list of label keys)
-	TargetLabels      string `property:"target-labels"`
+	TargetLabels string `property:"target-labels"`
 }
 
 func newOwnerTrait() *ownerTrait {
@@ -111,7 +111,6 @@ func (t *ownerTrait) Apply(e *Environment) error {
 func (t *ownerTrait) IsPlatformTrait() bool {
 	return true
 }
-
 
 func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabels map[string]string, targetAnnotations map[string]string) {
 	// Transfer annotations

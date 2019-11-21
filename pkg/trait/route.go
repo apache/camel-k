@@ -33,25 +33,25 @@ import (
 //
 // +camel-k:trait=route
 type routeTrait struct {
-	BaseTrait                        `property:",squash"`
+	BaseTrait `property:",squash"`
 	// To configure the host exposed by the route.
-	Host                             string `property:"host"`
+	Host string `property:"host"`
 	// The TLS termination type, like `edge`, `passthrough` or `reencrypt`.
 	//
 	// Refer to the OpenShift documentation for additional information.
-	TLSTermination                   string `property:"tls-termination"`
+	TLSTermination string `property:"tls-termination"`
 	// The TLS certificate contents.
 	//
 	// Refer to the OpenShift documentation for additional information.
-	TLSCertificate                   string `property:"tls-certificate"`
+	TLSCertificate string `property:"tls-certificate"`
 	// The TLS certificate key contents.
 	//
 	// Refer to the OpenShift documentation for additional information.
-	TLSKey                           string `property:"tls-key"`
+	TLSKey string `property:"tls-key"`
 	// The TLS cert authority certificate contents.
 	//
 	// Refer to the OpenShift documentation for additional information.
-	TLSCACertificate                 string `property:"tls-ca-certificate"`
+	TLSCACertificate string `property:"tls-ca-certificate"`
 	// The destination CA certificate provides the contents of the ca certificate of the final destination.  When using reencrypt
 	// termination this file should be provided in order to have routers use it for health checks on the secure connection.
 	// If this field is not specified, the router may provide its own destination CA and perform hostname validation using
@@ -59,7 +59,7 @@ type routeTrait struct {
 	// verify.
 	//
 	// Refer to the OpenShift documentation for additional information.
-	TLSDestinationCACertificate      string `property:"tls-destination-ca-certificate"`
+	TLSDestinationCACertificate string `property:"tls-destination-ca-certificate"`
 	// To configure how to deal with insecure traffic, e.g. `Allow`, `Disable` or `Redirect` traffic.
 	//
 	// Refer to the OpenShift documentation for additional information.

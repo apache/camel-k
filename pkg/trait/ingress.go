@@ -39,9 +39,9 @@ import (
 type ingressTrait struct {
 	BaseTrait `property:",squash"`
 	// **Required**. To configure the host exposed by the ingress.
-	Host      string `property:"host"`
+	Host string `property:"host"`
 	// To automatically add an ingress whenever the integration uses a HTTP endpoint consumer.
-	Auto      *bool  `property:"auto"`
+	Auto *bool `property:"auto"`
 }
 
 func newIngressTrait() *ingressTrait {

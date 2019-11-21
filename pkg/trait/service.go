@@ -34,7 +34,7 @@ import (
 type serviceTrait struct {
 	BaseTrait `property:",squash"`
 	// To automatically detect from the code if a Service needs to be created.
-	Auto      *bool `property:"auto"`
+	Auto *bool `property:"auto"`
 }
 
 const (

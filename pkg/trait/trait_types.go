@@ -85,7 +85,7 @@ func newBaseTrait(id string) BaseTrait {
 
 // BaseTrait is the root trait with noop implementations for hooks
 type BaseTrait struct {
-	id      ID
+	id ID
 	// Can be used to enable or disable a trait. All traits share this common property.
 	Enabled *bool `property:"enabled"`
 	client  client.Client

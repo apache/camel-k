@@ -45,7 +45,8 @@ const (
 
 func newEnvironmentTrait() *environmentTrait {
 	return &environmentTrait{
-		BaseTrait:     newBaseTrait("environment"),
+		BaseTrait: newBaseTrait("environment"),
+		// Enable injection of NAMESPACE and POD_NAME environment variables.
 		ContainerMeta: true,
 	}
 }
