@@ -24,7 +24,7 @@ package trait
 type deployerTrait struct {
 	BaseTrait `property:",squash"`
 	// Allows to explicitly select the desired deployment kind between `deployment` or `knative-service` when creating the resources for running the integration.
-	Kind      string `property:"kind"`
+	Kind string `property:"kind"`
 }
 
 func newDeployerTrait() *deployerTrait {

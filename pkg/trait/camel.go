@@ -33,9 +33,9 @@ import (
 //
 // +camel-k:trait=camel
 type camelTrait struct {
-	BaseTrait      `property:",squash"`
+	BaseTrait `property:",squash"`
 	// The camel version to use for the integration. It overrides the default version set in the Integration Platform.
-	Version        string `property:"version"`
+	Version string `property:"version"`
 	// The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
 	RuntimeVersion string `property:"runtime-version"`
 }

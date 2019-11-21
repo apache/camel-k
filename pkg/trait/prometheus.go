@@ -44,9 +44,9 @@ import (
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
 	// The Prometheus endpoint port (default `9778`).
-	Port                 int    `property:"port"`
+	Port int `property:"port"`
 	// Whether a `ServiceMonitor` resource is created (default `true`).
-	ServiceMonitor       bool   `property:"service-monitor"`
+	ServiceMonitor bool `property:"service-monitor"`
 	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 	ServiceMonitorLabels string `property:"service-monitor-labels"`
 }
