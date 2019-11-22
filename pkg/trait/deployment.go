@@ -137,8 +137,9 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 		// back to that default value by the Deployment controller.
 		if replicas == nil && *deployment.Spec.Replicas != 1 ||
 			replicas != nil && *deployment.Spec.Replicas != *replicas {
-			deployment.Spec.Replicas = replicas
-			err := t.client.Update(context.TODO(), deployment)
+			target := deployment.DeepCopy()
+			target.Spec.Replicas = replicas
+			err := t.client.Patch(context.TODO(), target, client.MergeFrom(deployment))
 			if err != nil {
 				return err
 			}
