@@ -49,7 +49,9 @@ func printVersion() {
 
 // Run creates a build resource in the specified namespace
 func Run(namespace string, buildName string) {
-	logf.SetLogger(zap.Logger(false))
+	logf.SetLogger(zap.New(func(o *zap.Options) {
+		o.Development = false
+	}))
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	printVersion()
