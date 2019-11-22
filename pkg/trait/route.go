@@ -21,12 +21,13 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
-	routev1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	routev1 "github.com/openshift/api/route/v1"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 // The Route trait can be used to configure the creation of OpenShift routes for the integration.
@@ -115,7 +116,7 @@ func (t *routeTrait) Apply(e *Environment) error {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
-			APIVersion: routev1.SchemeGroupVersion.String(),
+			APIVersion: routev1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      t.service.Name,
