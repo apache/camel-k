@@ -151,11 +151,15 @@ func initialize(kubeconfig string) {
 }
 
 func getDefaultKubeConfigFile() (string, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return "", err
+	home := os.Getenv("HOME")
+	if home == "" {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		home = usr.HomeDir
 	}
-	return filepath.Join(usr.HomeDir, ".kube", "config"), nil
+	return filepath.Join(home, ".kube", "config"), nil
 }
 
 // GetCurrentNamespace --
