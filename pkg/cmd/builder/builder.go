@@ -27,13 +27,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
-	util "github.com/apache/camel-k/pkg/controller/build"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logger "github.com/apache/camel-k/pkg/util/log"
@@ -72,7 +72,13 @@ func Run(namespace string, buildName string) {
 
 	progress := builder.New(c).Build(build.Spec)
 	for status := range progress {
-		exitOnError(util.UpdateBuildStatus(ctx, build, status, c, log))
+		target := build.DeepCopy()
+		target.Status = status
+		// Copy the failure field from the build to persist recovery state
+		target.Status.Failure = build.Status.Failure
+		// Patch the build status with the current progress
+		exitOnError(c.Status().Patch(ctx, target, controller.MergeFrom(build)))
+		build.Status = target.Status
 	}
 
 	switch build.Status.Phase {

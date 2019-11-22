@@ -21,14 +21,14 @@ import (
 	"context"
 	"sync"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(reader k8sclient.Reader, b builder.Builder, r *sync.Map) Action {
+func NewScheduleRoutineAction(reader client.Reader, b builder.Builder, r *sync.Map) Action {
 	return &scheduleRoutineAction{
 		reader:   reader,
 		builder:  b,
@@ -39,7 +39,7 @@ func NewScheduleRoutineAction(reader k8sclient.Reader, b builder.Builder, r *syn
 type scheduleRoutineAction struct {
 	baseAction
 	lock     sync.Mutex
-	reader   k8sclient.Reader
+	reader   client.Reader
 	builder  builder.Builder
 	routines *sync.Map
 }
@@ -64,7 +64,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	builds := &v1alpha1.BuildList{}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
-	err := action.reader.List(ctx, builds, k8sclient.InNamespace(build.Namespace))
+	err := action.reader.List(ctx, builds, client.InNamespace(build.Namespace))
 	if err != nil {
 		return nil, err
 	}
@@ -93,10 +93,16 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	// And follow the build progress asynchronously to avoid blocking the reconcile loop
 	go func() {
 		for status := range progress {
-			err := UpdateBuildStatus(ctx, build, status, action.client, action.L)
+			target := build.DeepCopy()
+			target.Status = status
+			// Copy the failure field from the build to persist recovery state
+			target.Status.Failure = build.Status.Failure
+			// Patch the build status with the current progress
+			err := action.client.Status().Patch(ctx, target, client.MergeFrom(build))
 			if err != nil {
 				action.L.Errorf(err, "Error while updating build status: %s", build.Name)
 			}
+			build.Status = target.Status
 		}
 	}()
 
