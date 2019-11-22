@@ -18,15 +18,15 @@
 //
 // To run this integrations use:
 //
-//     kamel run --name=rest-with-restlet --dependency=camel-rest --dependency=camel-restlet examples/RestWithRestlet.java
+//     kamel run --name=rest-with-undertow --dependency=camel-rest --dependency=camel-undertow examples/RestWithUndertow.java
 //
 import org.apache.camel.Exchange;
 
-public class RestWithRestlet extends org.apache.camel.builder.RouteBuilder {
+public class RestWithUndertow extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
         restConfiguration()
-            .component("restlet")
+            .component("undertow")
             .host("0.0.0.0")
             .port("8080");
 
