@@ -64,7 +64,9 @@ func Run() {
 	// implementing the logr.Logger interface. This logger will
 	// be propagated through the whole operator, generating
 	// uniform and structured logs.
-	logf.SetLogger(zap.Logger(false))
+	logf.SetLogger(zap.New(func(o *zap.Options) {
+		o.Development = false
+	}))
 
 	printVersion()
 
