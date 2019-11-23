@@ -83,9 +83,9 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	return e.IntegrationInPhase(
-		v1alpha1.IntegrationPhaseInitialization,
-		v1alpha1.IntegrationPhaseDeploying,
-		v1alpha1.IntegrationPhaseRunning),
+			v1alpha1.IntegrationPhaseInitialization,
+			v1alpha1.IntegrationPhaseDeploying,
+			v1alpha1.IntegrationPhaseRunning),
 		nil
 }
 
