@@ -153,6 +153,7 @@ func installKnative(ctx context.Context, c client.Client, namespace string, cust
 }
 
 // Platform installs the platform custom resource
+// nolint: lll
 func Platform(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec) (*v1alpha1.IntegrationPlatform, error) {
 	return PlatformOrCollect(ctx, c, clusterType, namespace, registry, nil)
 }
