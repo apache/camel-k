@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	v1 "k8s.io/api/apps/v1"
-	v1beta1 "k8s.io/api/rbac/v1beta1"
+	"k8s.io/api/rbac/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -34,7 +34,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
-	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 // OperatorConfiguration --
@@ -42,6 +41,7 @@ type OperatorConfiguration struct {
 	CustomImage string
 	Namespace   string
 	Global      bool
+	ClusterType string
 }
 
 // Operator installs the operator resources in the given namespace
@@ -103,7 +103,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return o
 	}
 
-	isOpenshift, err := openshift.IsOpenShift(c)
+	isOpenshift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
 		return err
 	}
@@ -153,14 +153,14 @@ func installKnative(ctx context.Context, c client.Client, namespace string, cust
 }
 
 // Platform installs the platform custom resource
-func Platform(ctx context.Context, c client.Client, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec) (*v1alpha1.IntegrationPlatform, error) {
-	return PlatformOrCollect(ctx, c, namespace, registry, nil)
+func Platform(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec) (*v1alpha1.IntegrationPlatform, error) {
+	return PlatformOrCollect(ctx, c, clusterType, namespace, registry, nil)
 }
 
 // PlatformOrCollect --
 // nolint: lll
-func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
-	isOpenshift, err := openshift.IsOpenShift(c)
+func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
+	isOpenshift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
 	}
