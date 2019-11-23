@@ -78,6 +78,10 @@ const (
 	IntegrationPlatformClusterKubernetes = "Kubernetes"
 )
 
+// AllIntegrationPlatformClusters --
+var AllIntegrationPlatformClusters = []IntegrationPlatformCluster{IntegrationPlatformClusterOpenShift, IntegrationPlatformClusterKubernetes}
+
+
 // TraitProfile represents lists of traits that are enabled for the specific installation/integration
 type TraitProfile string
 

@@ -56,6 +56,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	cmd.Flags().BoolVarP(&impl.wait, "wait", "w", false, "Waits for the platform to be running")
 	cmd.Flags().BoolVar(&impl.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
+	cmd.Flags().StringVar(&impl.clusterType, "cluster-type", "", "Set explicitly the cluster type to Kubernetes or OpenShift")
 	cmd.Flags().BoolVar(&impl.skipOperatorSetup, "skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
@@ -103,6 +104,7 @@ type installCmdOptions struct {
 	*RootCmdOptions
 	wait              bool
 	clusterSetupOnly  bool
+	clusterType       string
 	skipOperatorSetup bool
 	skipClusterSetup  bool
 	exampleSetup      bool
@@ -165,6 +167,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				CustomImage: o.operatorImage,
 				Namespace:   namespace,
 				Global:      o.global,
+				ClusterType: o.clusterType,
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection)
 			if err != nil {
@@ -184,7 +187,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			}
 		}
 
-		platform, err := install.PlatformOrCollect(o.Context, c, namespace, o.registry, collection)
+		platform, err := install.PlatformOrCollect(o.Context, c, o.clusterType, namespace, o.registry, collection)
 		if err != nil {
 			return err
 		}
@@ -254,6 +257,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		if o.httpProxySecret != "" {
 			platform.Spec.Build.HTTPProxySecret = o.httpProxySecret
+		}
+
+		if o.clusterType != "" {
+			for _, c := range v1alpha1.AllIntegrationPlatformClusters {
+				if strings.ToLower(string(c)) == strings.ToLower(o.clusterType) {
+					platform.Spec.Cluster = c
+				}
+			}
 		}
 
 		kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")

@@ -19,11 +19,13 @@ package install
 
 import (
 	"context"
+	"strings"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/openshift"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -110,4 +112,19 @@ func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace stri
 		return c.Update(ctx, obj)
 	}
 	return err
+}
+
+
+func isOpenShift(c client.Client, clusterType string) (bool, error) {
+	var res bool
+	var err error
+	if clusterType != "" {
+		res = strings.ToLower(clusterType) == strings.ToLower(string(v1alpha1.IntegrationPlatformClusterOpenShift))
+	} else {
+		res, err = openshift.IsOpenShift(c)
+		if err != nil {
+			return false, err
+		}
+	}
+	return res, nil
 }
