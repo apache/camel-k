@@ -46,6 +46,7 @@ rules:
   resources:
   - events
   - configmaps
+  - secrets
   verbs:
   - get
   - list

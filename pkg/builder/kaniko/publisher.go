@@ -29,12 +29,41 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/tar"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+type secretKind struct {
+	fileName    string
+	mountPath   string
+	destination string
+	refEnv      string
+}
+
+var (
+	secretKindGCR = secretKind{
+		fileName:    "kaniko-secret.json",
+		mountPath:   "/secret",
+		destination: "kaniko-secret.json",
+		refEnv:      "GOOGLE_APPLICATION_CREDENTIALS",
+	}
+	secretKindPlainDocker = secretKind{
+		fileName:    "config.json",
+		mountPath:   "/kaniko/.docker",
+		destination: "config.json",
+	}
+	secretKindStandardDocker = secretKind{
+		fileName:    ".dockercfg",
+		mountPath:   "/kaniko/.docker",
+		destination: "config.json",
+	}
+
+	allSecretKinds = []secretKind{secretKindGCR, secretKindPlainDocker, secretKindStandardDocker}
 )
 
 func publisher(ctx *builder.Context) error {
@@ -100,22 +129,37 @@ func publisher(ctx *builder.Context) error {
 	}
 
 	if ctx.Build.Platform.Build.Registry.Secret != "" {
+		secretKind, err := getSecretKind(ctx, ctx.Build.Platform.Build.Registry.Secret)
+		if err != nil {
+			return err
+		}
+
 		volumes = append(volumes, corev1.Volume{
 			Name: "kaniko-secret",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: ctx.Build.Platform.Build.Registry.Secret,
+					Items: []corev1.KeyToPath{
+						{
+							Key:  secretKind.fileName,
+							Path: secretKind.destination,
+						},
+					},
 				},
 			},
 		})
+
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "kaniko-secret",
-			MountPath: "/secret",
+			MountPath: secretKind.mountPath,
 		})
-		envs = append(envs, corev1.EnvVar{
-			Name:  "GOOGLE_APPLICATION_CREDENTIALS",
-			Value: "/secret/kaniko-secret.json",
-		})
+
+		if secretKind.refEnv != "" {
+			envs = append(envs, corev1.EnvVar{
+				Name:  secretKind.refEnv,
+				Value: path.Join(secretKind.mountPath, secretKind.destination),
+			})
+		}
 		args = baseArgs
 	}
 
@@ -230,4 +274,18 @@ func publisher(ctx *builder.Context) error {
 
 	ctx.Image = image
 	return nil
+}
+
+func getSecretKind(ctx *builder.Context, name string) (secretKind, error) {
+	secret := corev1.Secret{}
+	key := client.ObjectKey{Namespace: ctx.Namespace, Name: name}
+	if err := ctx.Client.Get(ctx.C, key, &secret); err != nil {
+		return secretKind{}, err
+	}
+	for _, k := range allSecretKinds {
+		if _, ok := secret.Data[k.fileName]; ok {
+			return k, nil
+		}
+	}
+	return secretKind{}, errors.New("unsupported secret type for registry authentication")
 }
