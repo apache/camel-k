@@ -104,12 +104,12 @@ type installCmdOptions struct {
 	*RootCmdOptions
 	wait              bool
 	clusterSetupOnly  bool
-	clusterType       string
 	skipOperatorSetup bool
 	skipClusterSetup  bool
 	exampleSetup      bool
 	global            bool
 	kanikoBuildCache  bool
+	clusterType       string
 	outputFormat      string
 	camelVersion      string
 	runtimeVersion    string
@@ -261,7 +261,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		if o.clusterType != "" {
 			for _, c := range v1alpha1.AllIntegrationPlatformClusters {
-				if strings.ToLower(string(c)) == strings.ToLower(o.clusterType) {
+				if strings.EqualFold(string(c), o.clusterType) {
 					platform.Spec.Cluster = c
 				}
 			}
