@@ -108,6 +108,7 @@ rules:
   resources:
   - events
   - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -164,6 +165,7 @@ rules:
   resources:
   - events
   - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -9567,6 +9569,10 @@ spec:
       description: The build phase
       JSONPath: .status.phase
     - name: Age
+      type: date
+      description: The time at which the build was created
+      JSONPath: .metadata.creationTimestamp
+    - name: Started
       type: date
       description: The time at which the build was last (re-)started
       JSONPath: .status.startedAt

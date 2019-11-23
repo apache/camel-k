@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/registry"
 	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -65,6 +66,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.registry.Address, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&impl.registry.Secret, "registry-secret", "", "A secret used to push/pull images to the Docker registry")
 	cmd.Flags().BoolVar(&impl.registry.Insecure, "registry-insecure", false, "Configure to configure registry access in insecure mode or not")
+	cmd.Flags().StringVar(&impl.registryAuth.Provider, "registry-auth-provider", "", "The docker registry authentication provider")
+	cmd.Flags().StringVar(&impl.registryAuth.Username, "registry-auth-username", "", "The docker registry authentication username")
+	cmd.Flags().StringVar(&impl.registryAuth.Password, "registry-auth-password", "", "The docker registry authentication password")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
 	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
 	cmd.Flags().StringVar(&impl.runtimeVersion, "runtime-version", "", "Set the camel-k runtime version")
@@ -117,6 +121,7 @@ type installCmdOptions struct {
 	properties        []string
 	kits              []string
 	registry          v1alpha1.IntegrationPlatformRegistrySpec
+	registryAuth      registry.Auth
 	traitProfile      string
 	httpProxySecret   string
 }
@@ -169,9 +174,23 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			fmt.Println("Camel K operator installation skipped")
 		}
 
+		generatedSecretName := ""
+		if o.registryAuth.IsSet() {
+			regData := o.registryAuth
+			regData.Registry = o.registry.Address
+			generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace, regData, collection)
+			if err != nil {
+				return err
+			}
+		}
+
 		platform, err := install.PlatformOrCollect(o.Context, c, namespace, o.registry, collection)
 		if err != nil {
 			return err
+		}
+
+		if generatedSecretName != "" {
+			platform.Spec.Build.Registry.Secret = generatedSecretName
 		}
 
 		if len(o.properties) > 0 {
@@ -356,6 +375,11 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 			err := fmt.Errorf("unknown trait profile %s", o.traitProfile)
 			result = multierr.Append(result, err)
 		}
+	}
+
+	if o.registry.Secret != "" && o.registryAuth.IsSet() {
+		err := fmt.Errorf("incompatible options combinations: you cannot set both registry-secret and registry-auth-[*] settings")
+		result = multierr.Append(result, err)
 	}
 
 	return result
