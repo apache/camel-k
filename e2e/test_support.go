@@ -93,6 +93,9 @@ func kamel(args ...string) *cobra.Command {
 
 	kamelBin := os.Getenv("KAMEL_BIN")
 	if kamelBin != "" {
+		if _, e := os.Stat(kamelBin); e != nil && os.IsNotExist(e) {
+			panic(e)
+		}
 		fmt.Printf("Using external kamel binary on path %s\n", kamelBin)
 		c = &cobra.Command{
 			DisableFlagParsing: true,
