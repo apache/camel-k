@@ -164,9 +164,6 @@ func initialize(kubeconfig string) {
 }
 
 func getDefaultKubeConfigFile() (string, error) {
-	if os.Getenv(k8sutil.KubeConfigEnvVar) != "" {
-		return os.Getenv(k8sutil.KubeConfigEnvVar), nil
-	}
 	usr, err := user.Current()
 	if err != nil {
 		return "", err
