@@ -41,6 +41,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	projectv1 "github.com/openshift/api/project/v1"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -79,7 +80,7 @@ func init() {
 }
 
 func newTestClient() (client.Client, error) {
-	return client.NewOutOfClusterClient("")
+	return client.NewOutOfClusterClient(os.Getenv(k8sutil.KubeConfigEnvVar))
 }
 
 func kamel(args ...string) *cobra.Command {
