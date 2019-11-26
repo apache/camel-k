@@ -51,7 +51,7 @@ func TestApplyGarbageCollectorTraitDoesSucceed(t *testing.T) {
 	err := gcTrait.Apply(environment)
 
 	assert.Nil(t, err)
-	assert.Len(t, environment.PostProcessors, 0)
+	assert.Len(t, environment.PostProcessors, 1)
 	assert.Len(t, environment.PostActions, 1)
 }
 

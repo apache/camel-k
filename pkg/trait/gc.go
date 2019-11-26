@@ -90,33 +90,33 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *garbageCollectorTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization, v1alpha1.IntegrationPhaseDeploying) {
+	switch e.Integration.Status.Phase {
+
+	case v1alpha1.IntegrationPhaseRunning:
+		// Register a post action that deletes the existing resources that are labelled
+		// with the previous integration generations.
+		// TODO: this should be refined so that it's run when all the replicas for the newer generation
+		// are ready. This is to be added when the integration scale status is refined with ready replicas
+		e.PostActions = append(e.PostActions, func(env *Environment) error {
+			// The collection and deletion are performed asynchronously to avoid blocking
+			// the reconcile loop.
+			go t.garbageCollectResources(env)
+			return nil
+		})
+		fallthrough
+
+	default:
 		// Register a post processor that adds the required labels to the new resources
 		e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
+			generation := strconv.FormatInt(env.Integration.GetGeneration(), 10)
 			env.Resources.VisitMetaObject(func(resource metav1.Object) {
 				labels := resource.GetLabels()
-				if labels == nil {
-					labels = map[string]string{}
-				}
 				// Label the resource with the current integration generation
-				labels["camel.apache.org/generation"] = strconv.FormatInt(env.Integration.GetGeneration(), 10)
+				labels["camel.apache.org/generation"] = generation
 				// Make sure the integration label is set
 				labels["camel.apache.org/integration"] = env.Integration.Name
 				resource.SetLabels(labels)
 			})
-			return nil
-		})
-	} else if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
-		// Let's run garbage collection during the integration running phase
-		// TODO: this should be refined so that it's run when all the replicas for the newer generation
-		// are ready. This is to be added when the integration scale status is refined with ready replicas
-
-		// Register a post action that deletes the existing resources that are labelled
-		// with the previous integration generations.
-		e.PostActions = append(e.PostActions, func(environment *Environment) error {
-			// The collection and deletion are performed asynchronously to avoid blocking
-			// the reconcile loop.
-			go t.garbageCollectResources(e)
 			return nil
 		})
 	}
