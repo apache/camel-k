@@ -225,7 +225,7 @@ func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, erro
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-maven-plugin",
-				Version:    e.RuntimeVersion,
+				Version:    e.CamelCatalog.RuntimeVersion,
 				Executions: []maven.Execution{
 					{
 						Phase: "generate-resources",
