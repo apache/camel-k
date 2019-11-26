@@ -53,6 +53,7 @@ See the trait description pages for more information on a specific trait:
 * xref:traits/owner.adoc[Owner Trait]
 * xref:traits/probes.adoc[Probes Trait]
 * xref:traits/prometheus.adoc[Prometheus Trait]
+* xref:traits/pull-secret.adoc[Pull Secret Trait]
 * xref:traits/quarkus.adoc[Quarkus Trait]
 * xref:traits/rest-dsl.adoc[Rest Dsl Trait]
 * xref:traits/route.adoc[Route Trait]

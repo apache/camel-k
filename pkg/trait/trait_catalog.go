@@ -54,6 +54,7 @@ type Catalog struct {
 	tProbes           Trait
 	tQuarkus          Trait
 	tContainer        Trait
+	tPullSecret		  Trait
 }
 
 // NewCatalog creates a new trait Catalog
@@ -83,6 +84,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tProbes:           newProbesTrait(),
 		tQuarkus:          newQuarkusTrait(),
 		tContainer:        newContainerTrait(),
+		tPullSecret:       newPullSecretTrait(),
 	}
 
 	for _, t := range catalog.allTraits() {
@@ -121,6 +123,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tProbes,
 		c.tQuarkus,
 		c.tContainer,
+		c.tPullSecret,
 	}
 }
 
@@ -152,6 +155,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tAffinity,
 			c.tService,
 			c.tContainer,
+			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
 			c.tClasspath,
@@ -175,6 +179,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tAffinity,
 			c.tService,
 			c.tContainer,
+			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
 			c.tClasspath,
@@ -199,6 +204,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tAffinity,
 			c.tKnativeService,
 			c.tContainer,
+			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
 			c.tClasspath,

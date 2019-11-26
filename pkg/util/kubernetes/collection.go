@@ -306,6 +306,16 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 	})
 }
 
+// VisitPodSpec executes the visitor function on all PodSpec inside deployments or other resources
+func (c *Collection) VisitPodSpec(visitor func(container *corev1.PodSpec)) {
+	c.VisitDeployment(func(d *appsv1.Deployment) {
+		visitor(&d.Spec.Template.Spec)
+	})
+	c.VisitKnativeConfigurationSpec(func(cs *servingv1.ConfigurationSpec) {
+		visitor(&cs.Template.Spec.PodSpec)
+	})
+}
+
 // VisitKnativeConfigurationSpec executes the visitor function on all knative ConfigurationSpec inside serving Services
 func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *servingv1.ConfigurationSpec)) {
 	c.VisitKnativeService(func(s *serving.Service) {
