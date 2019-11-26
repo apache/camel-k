@@ -18,13 +18,9 @@ limitations under the License.
 package trait
 
 import (
-	"context"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
@@ -97,7 +93,6 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 func (t *deploymentTrait) Apply(e *Environment) error {
 	if e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseReady) &&
 		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingKit, v1alpha1.IntegrationPhaseResolvingKit) {
-
 		e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
 			// trigger integration deploy
 			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
@@ -110,41 +105,30 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 	if e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) ||
 		e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseRunning) {
 		maps := e.ComputeConfigMaps()
-		depl := t.getDeploymentFor(e)
+		deployment := t.getDeploymentFor(e)
 
 		e.Resources.AddAll(maps)
-		e.Resources.Add(depl)
+		e.Resources.Add(deployment)
 
 		e.Integration.Status.SetCondition(
 			v1alpha1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionTrue,
 			v1alpha1.IntegrationConditionDeploymentAvailableReason,
-			depl.Name,
+			deployment.Name,
 		)
-	}
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
-		// Reconcile the deployment replicas
-		deployment := &appsv1.Deployment{}
-		err := t.client.Get(context.TODO(), client.ObjectKey{Namespace: e.Integration.Namespace, Name: e.Integration.Name}, deployment)
-		if err != nil {
-			return err
-		}
-		replicas := e.Integration.Spec.Replicas
-		// Deployment replicas defaults to 1, so we avoid forcing
-		// an update to nil that will result to another update cycle
-		// back to that default value by the Deployment controller.
-		if replicas == nil && *deployment.Spec.Replicas != 1 ||
-			replicas != nil && *deployment.Spec.Replicas != *replicas {
-			target := deployment.DeepCopy()
-			target.Spec.Replicas = replicas
-			err := t.client.Patch(context.TODO(), target, client.MergeFrom(deployment))
-			if err != nil {
-				return err
+		if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+			// Reconcile the deployment replicas
+			replicas := e.Integration.Spec.Replicas
+			// Deployment replicas defaults to 1, so we avoid forcing
+			// an update to nil that will result to another update cycle
+			// back to that default value by the Deployment controller.
+			if replicas == nil {
+				one := int32(1)
+				replicas = &one
 			}
+			deployment.Spec.Replicas = replicas
 		}
-
-		return nil
 	}
 
 	return nil
