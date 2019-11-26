@@ -24,9 +24,8 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
-	"github.com/stretchr/testify/assert"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -132,14 +131,13 @@ func TestApplyDeploymentTraitWhileRunningIntegrationDoesSucceed(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	deployment := &appsv1.Deployment{}
-	err = deploymentTrait.client.Get(context.TODO(), client.ObjectKey{Namespace: "namespace", Name: "integration-name"}, deployment)
-	assert.Nil(t, err)
+	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+	assert.NotNil(t, deployment)
+	assert.Equal(t, "integration-name", deployment.Name)
 	assert.Equal(t, int32(3), *deployment.Spec.Replicas)
 }
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
-
 	trait := newDeploymentTrait()
 	enabled := true
 	trait.Enabled = &enabled
