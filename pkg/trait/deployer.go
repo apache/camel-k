@@ -18,9 +18,11 @@ limitations under the License.
 package trait
 
 import (
-	jsonpatch "github.com/evanphx/json-patch"
+	"reflect"
 
 	"github.com/pkg/errors"
+
+	jsonpatch "github.com/evanphx/json-patch"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -119,24 +121,47 @@ func (s *mergeFromPositivePatch) Data(obj runtime.Object) ([]byte, error) {
 		return nil, err
 	}
 
-	patch, err := jsonpatch.CreateMergePatch(originalJSON, modifiedJSON)
+	mergePatch, err := jsonpatch.CreateMergePatch(originalJSON, modifiedJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	// The following is a work-around to remove null fields from the JSON merge patch
+	var positivePatch map[string]interface{}
+	err = json.Unmarshal(mergePatch, &positivePatch)
+	if err != nil {
+		return nil, err
+	}
+
+	// The following is a work-around to remove null fields from the JSON merge patch,
 	// so that values defaulted by controllers server-side are not deleted.
 	// It's generally acceptable as these values are orthogonal to the values managed
 	// by the traits.
-	out := obj.DeepCopyObject()
-	err = json.Unmarshal(patch, out)
-	if err != nil {
-		return nil, err
-	}
+	removeNilValues(reflect.ValueOf(positivePatch))
 
-	return json.Marshal(out)
+	return json.Marshal(positivePatch)
 }
 
 func mergeFrom(obj runtime.Object) client.Patch {
 	return &mergeFromPositivePatch{obj}
+}
+
+func removeNilValues(v reflect.Value) {
+	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+		v = v.Elem()
+	}
+	switch v.Kind() {
+	case reflect.Array, reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			removeNilValues(v.Index(i))
+		}
+	case reflect.Map:
+		for _, k := range v.MapKeys() {
+			c := v.MapIndex(k)
+			if c.IsNil() {
+				v.SetMapIndex(k, reflect.Value{})
+			} else {
+				removeNilValues(c)
+			}
+		}
+	}
 }
