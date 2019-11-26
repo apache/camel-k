@@ -255,7 +255,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 				target.SetIntegrationPlatform(pl)
 			}
 
-			return r.update(ctx, targetLog, target)
+			return r.update(ctx, &instance, target)
 		}
 
 		return reconcile.Result{}, err
@@ -282,7 +282,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+				if r, err := r.update(ctx, &instance, newTarget); err != nil {
 					return r, err
 				}
 
@@ -304,8 +304,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	return reconcile.Result{}, nil
 }
 
-// Update --
-func (r *ReconcileIntegration) update(ctx context.Context, log log.Logger, target *v1alpha1.Integration) (reconcile.Result, error) {
+func (r *ReconcileIntegration) update(ctx context.Context, base *v1alpha1.Integration, target *v1alpha1.Integration) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegration(target)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -313,16 +312,7 @@ func (r *ReconcileIntegration) update(ctx context.Context, log log.Logger, targe
 
 	target.Status.Digest = dgst
 
-	err = r.client.Status().Update(ctx, target)
-	if err != nil {
-		if k8serrors.IsConflict(err) {
-			log.Error(err, "conflict")
-
-			return reconcile.Result{
-				Requeue: true,
-			}, nil
-		}
-	}
+	err = r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err
 }
