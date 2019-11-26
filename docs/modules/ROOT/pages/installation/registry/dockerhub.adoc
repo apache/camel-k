@@ -1,0 +1,44 @@
+[[configuring-registry-dockerhub]]
+= Configuring a DockerHub Registry
+
+You can host your container images on Docker Hub in case your cluster doesn't provide a xref:installation/registry/registry.adoc[default registry].
+
+You need to create an account on https://hub.docker.com/, then use the following command to configure Camel K during installation:
+
+[source,bash]
+----
+kamel install --registry docker.io --organization your-user-id-or-org --registry-auth-username your-user-id --registry-auth-password your-password
+----
+
+The `--registry-auth-username` and `--registry-auth-password` flags are used by the `kamel` CLI to create a Kubernetes secret
+that holds your credentials for authenticating against the Docker registry.
+
+In the general case, the `--registry-auth-server` should be used, but it can be omitted for Docker Hub because it's
+automatically set to `https://index.docker.io/v1/`.
+
+== Alternative Methods
+
+In some cases, you might already have a push/pull secret for Docker Hub in your current namespace.
+Or you can also decide to create it using `kubectl`, with the following command:
+
+[source,bash]
+----
+kubectl create secret docker-registry your-secret-name --docker-username your-user --docker-password your-pass
+----
+
+Another possibility is to upload to the cluster your entire list of push/pull secrets:
+
+[source,bash]
+----
+# First login to your registry and provide credentials
+docker login
+# Then create a secret from your credentials file (may contain passwords for other registries)
+create secret generic your-secret-name --from-file ~/.docker/config.json
+----
+
+After you've created the secret, you can link it to Camel K during installation:
+
+[source,bash]
+----
+kamel install --registry docker.io --organization your-user-id-or-org --registry-secret your-secret-name
+----

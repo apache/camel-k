@@ -45,9 +45,9 @@ func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace str
 			Name:      registrySecretName,
 			Namespace: namespace,
 		},
-		Type: v1.SecretTypeDockercfg,
+		Type: v1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{
-			".dockercfg": secretData,
+			v1.DockerConfigJsonKey: secretData,
 		},
 	}
 

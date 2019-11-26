@@ -67,7 +67,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.registry.Address, "registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().StringVar(&impl.registry.Secret, "registry-secret", "", "A secret used to push/pull images to the Docker registry")
 	cmd.Flags().BoolVar(&impl.registry.Insecure, "registry-insecure", false, "Configure to configure registry access in insecure mode or not")
-	cmd.Flags().StringVar(&impl.registryAuth.Provider, "registry-auth-provider", "", "The docker registry authentication provider")
+	cmd.Flags().StringVar(&impl.registryAuth.Server, "registry-auth-server", "", "The docker registry authentication server")
 	cmd.Flags().StringVar(&impl.registryAuth.Username, "registry-auth-username", "", "The docker registry authentication username")
 	cmd.Flags().StringVar(&impl.registryAuth.Password, "registry-auth-password", "", "The docker registry authentication password")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")

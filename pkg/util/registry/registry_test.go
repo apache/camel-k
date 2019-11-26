@@ -44,7 +44,7 @@ func TestAuth_GenerateDockerConfig(t *testing.T) {
 	a = Auth{
 		Username: "nic",
 		Password: "pass",
-		Provider: "quay.io",
+		Server:   "quay.io",
 		Registry: "docker.io",
 	}
 	conf, err = a.GenerateDockerConfig()
@@ -58,11 +58,11 @@ func TestAuth_Validate(t *testing.T) {
 	}.validate())
 
 	assert.NotNil(t, Auth{
-		Provider: "quay.io",
+		Server: "quay.io",
 	}.validate())
 
 	assert.Nil(t, Auth{
 		Username: "nic",
-		Provider: "quay.io",
+		Server:   "quay.io",
 	}.validate())
 }

@@ -58,7 +58,7 @@ var (
 		destination: "config.json",
 	}
 	secretKindStandardDocker = secretKind{
-		fileName:    ".dockercfg",
+		fileName:    corev1.DockerConfigJsonKey,
 		mountPath:   "/kaniko/.docker",
 		destination: "config.json",
 	}
