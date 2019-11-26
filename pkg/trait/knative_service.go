@@ -18,10 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"strconv"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -170,18 +167,24 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
-		// Reconcile the Knative scale annotations
-		service := &serving.Service{}
-		err := t.client.Get(context.TODO(), client.ObjectKey{Namespace: e.Integration.Namespace, Name: e.Integration.Name}, service)
-		if err != nil {
-			return err
-		}
+	ksvc := t.getServiceFor(e)
+	maps := e.ComputeConfigMaps()
 
+	e.Resources.AddAll(maps)
+	e.Resources.Add(ksvc)
+
+	e.Integration.Status.SetCondition(
+		v1alpha1.IntegrationConditionKnativeServiceAvailable,
+		corev1.ConditionTrue,
+		v1alpha1.IntegrationConditionKnativeServiceAvailableReason,
+		ksvc.Name,
+	)
+
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
 		replicas := e.Integration.Spec.Replicas
 
 		isUpdateRequired := false
-		minScale, ok := service.Spec.Template.Annotations[knativeServingMinScaleAnnotation]
+		minScale, ok := ksvc.Spec.Template.Annotations[knativeServingMinScaleAnnotation]
 		if ok {
 			min, err := strconv.Atoi(minScale)
 			if err != nil {
@@ -194,7 +197,7 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 			isUpdateRequired = true
 		}
 
-		maxScale, ok := service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation]
+		maxScale, ok := ksvc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation]
 		if ok {
 			max, err := strconv.Atoi(maxScale)
 			if err != nil {
@@ -210,39 +213,22 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 		if isUpdateRequired {
 			if replicas == nil {
 				if t.MinScale != nil && *t.MinScale > 0 {
-					service.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
+					ksvc.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
 				} else {
-					delete(service.Spec.Template.Annotations, knativeServingMinScaleAnnotation)
+					delete(ksvc.Spec.Template.Annotations, knativeServingMinScaleAnnotation)
 				}
 				if t.MaxScale != nil && *t.MaxScale > 0 {
-					service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
+					ksvc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
 				} else {
-					delete(service.Spec.Template.Annotations, knativeServingMaxScaleAnnotation)
+					delete(ksvc.Spec.Template.Annotations, knativeServingMaxScaleAnnotation)
 				}
 			} else {
 				scale := strconv.Itoa(int(*replicas))
-				service.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = scale
-				service.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = scale
-			}
-			err := t.client.Update(context.TODO(), service)
-			if err != nil {
-				return err
+				ksvc.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = scale
+				ksvc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = scale
 			}
 		}
 	}
-
-	ksvc := t.getServiceFor(e)
-	maps := e.ComputeConfigMaps()
-
-	e.Resources.AddAll(maps)
-	e.Resources.Add(ksvc)
-
-	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionKnativeServiceAvailable,
-		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionKnativeServiceAvailableReason,
-		ksvc.Name,
-	)
 
 	return nil
 }
