@@ -64,7 +64,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -102,8 +102,8 @@ func (t *serviceTrait) Apply(e *Environment) error {
 	// add a new service if not already created
 	if svc == nil {
 		svc = getServiceFor(e)
-		e.Resources.Add(svc)
 	}
+	e.Resources.Add(svc)
 	return nil
 }
 

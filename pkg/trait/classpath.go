@@ -49,7 +49,8 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying), nil
+	return e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseRunning), nil
 }
 
 func (t *classpathTrait) Apply(e *Environment) error {

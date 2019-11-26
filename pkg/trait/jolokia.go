@@ -96,7 +96,7 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning), nil
 }
 
 func (t *jolokiaTrait) Apply(e *Environment) (err error) {

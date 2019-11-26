@@ -47,13 +47,6 @@ func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integrati
 		return nil, errors.Wrap(err, "error during trait customization")
 	}
 
-	// replace resources created by the trait
-	if environment.Resources != nil {
-		if err := kubernetes.ReplaceResources(ctx, c, environment.Resources.Items()); err != nil {
-			return nil, errors.Wrap(err, "error during replace resource")
-		}
-	}
-
 	// execute post actions registered by traits
 	for _, postAction := range environment.PostActions {
 		err := postAction(environment)

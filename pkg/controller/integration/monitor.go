@@ -62,8 +62,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 		return integration, nil
 	}
 
-	// Run traits that are enabled for the running phase,
-	// such as the deployment, garbage collector and Knative service traits.
+	// Run traits that are enabled for the running phase
 	_, err = trait.Apply(ctx, action.client, integration, nil)
 	if err != nil {
 		return nil, err

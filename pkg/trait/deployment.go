@@ -107,7 +107,8 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	if e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+	if e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseRunning) {
 		maps := e.ComputeConfigMaps()
 		depl := t.getDeploymentFor(e)
 
@@ -120,8 +121,6 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 			v1alpha1.IntegrationConditionDeploymentAvailableReason,
 			depl.Name,
 		)
-
-		return nil
 	}
 
 	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
