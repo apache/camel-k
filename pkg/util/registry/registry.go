@@ -25,14 +25,14 @@ import (
 )
 
 var (
-	knownProvidersByRegistry = map[string]string{
+	knownServersByRegistry = map[string]string{
 		"docker.io": "https://index.docker.io/v1/",
 	}
 )
 
 // Auth contains basic information for authenticating against a container registry
 type Auth struct {
-	Provider string
+	Server   string
 	Username string
 	Password string
 
@@ -50,14 +50,14 @@ type dockerConfig struct {
 
 // IsSet returns if information has been set on the object
 func (a Auth) IsSet() bool {
-	return a.Provider != "" ||
+	return a.Server != "" ||
 		a.Username != "" ||
 		a.Password != ""
 }
 
 // validate checks if all fields are populated correctly
 func (a Auth) validate() error {
-	if a.getActualProvider() == "" || a.Username == "" {
+	if a.getActualServer() == "" || a.Username == "" {
 		return errors.New("not enough information to generate a registry authentication file")
 	}
 	return nil
@@ -75,18 +75,18 @@ func (a Auth) GenerateDockerConfig() ([]byte, error) {
 func (a Auth) generateDockerConfigObject() dockerConfigList {
 	return dockerConfigList{
 		map[string]dockerConfig{
-			a.getActualProvider(): {
+			a.getActualServer(): {
 				a.encodedCredentials(),
 			},
 		},
 	}
 }
 
-func (a Auth) getActualProvider() string {
-	if a.Provider != "" {
-		return a.Provider
+func (a Auth) getActualServer() string {
+	if a.Server != "" {
+		return a.Server
 	}
-	if p, ok := knownProvidersByRegistry[a.Registry]; ok {
+	if p, ok := knownServersByRegistry[a.Registry]; ok {
 		return p
 	}
 	return a.Registry
