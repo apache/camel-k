@@ -1,4 +1,4 @@
-= Example of route built using multiple DSl
+= Example of route built using multiple DSLs
 
 To run it:
 
