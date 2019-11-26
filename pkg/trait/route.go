@@ -121,6 +121,9 @@ func (t *routeTrait) Apply(e *Environment) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      t.service.Name,
 			Namespace: t.service.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
 		},
 		Spec: routev1.RouteSpec{
 			Port: &routev1.RoutePort{
