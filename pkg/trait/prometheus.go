@@ -64,7 +64,7 @@ func newPrometheusTrait() *prometheusTrait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning), nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {

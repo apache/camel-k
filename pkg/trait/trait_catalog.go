@@ -143,7 +143,6 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
 			c.tCamel,
-			c.tGarbageCollector,
 			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
@@ -152,6 +151,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tEnvironment,
 			c.tDeployer,
 			c.tDeployment,
+			c.tGarbageCollector,
 			c.tAffinity,
 			c.tService,
 			c.tContainer,
@@ -167,7 +167,6 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
 			c.tCamel,
-			c.tGarbageCollector,
 			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
@@ -176,6 +175,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tEnvironment,
 			c.tDeployer,
 			c.tDeployment,
+			c.tGarbageCollector,
 			c.tAffinity,
 			c.tService,
 			c.tContainer,
@@ -191,7 +191,6 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
 			c.tCamel,
-			c.tGarbageCollector,
 			c.tDebug,
 			c.tRestDsl,
 			c.tKnative,
@@ -201,6 +200,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tEnvironment,
 			c.tDeployer,
 			c.tDeployment,
+			c.tGarbageCollector,
 			c.tAffinity,
 			c.tKnativeService,
 			c.tContainer,

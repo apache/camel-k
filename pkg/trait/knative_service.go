@@ -229,8 +229,6 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 				return err
 			}
 		}
-
-		return nil
 	}
 
 	ksvc := t.getServiceFor(e)

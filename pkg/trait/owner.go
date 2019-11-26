@@ -54,7 +54,7 @@ func (t *ownerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning), nil
 }
 
 func (t *ownerTrait) Apply(e *Environment) error {

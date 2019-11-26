@@ -73,7 +73,11 @@ func newProbesTrait() *probesTrait {
 
 func (t *probesTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && *t.Enabled {
-		return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) || e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+		return e.IntegrationInPhase(
+			v1alpha1.IntegrationPhaseInitialization,
+			v1alpha1.IntegrationPhaseDeploying,
+			v1alpha1.IntegrationPhaseRunning,
+		), nil
 	}
 
 	return false, nil
@@ -100,7 +104,7 @@ func (t *probesTrait) Apply(e *Environment) error {
 		)
 	}
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
 		e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 			if len(deployment.Spec.Template.Spec.Containers) != 1 {
 				return
