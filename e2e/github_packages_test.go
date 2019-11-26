@@ -30,18 +30,19 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func TestRunWithDockerHubRegistry(t *testing.T) {
-	user := os.Getenv("TEST_DOCKER_HUB_USERNAME")
-	pass := os.Getenv("TEST_DOCKER_HUB_PASSWORD")
-	if user == "" || pass == "" {
-		t.Skip("no docker hub credentials: skipping")
+func TestRunWithGithubPackagesRegistry(t *testing.T) {
+	user := os.Getenv("TEST_GITHUB_PACKAGES_USERNAME")
+	pass := os.Getenv("TEST_GITHUB_PACKAGES_PASSWORD")
+	repo := os.Getenv("TEST_GITHUB_PACKAGES_REPO")
+	if user == "" || pass == "" || repo == "" {
+		t.Skip("no github packages data: skipping")
 	} else {
 		withNewTestNamespace(func(ns string) {
 			RegisterTestingT(t)
 			Expect(kamel("install",
 				"-n", ns,
-				"--registry", "docker.io",
-				"--organization", user,
+				"--registry", "docker.pkg.github.com",
+				"--organization", repo,
 				"--registry-auth-username", user,
 				"--registry-auth-password", pass,
 				"--cluster-type", "kubernetes").
@@ -50,7 +51,7 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 			Expect(kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
 			Eventually(integrationPodPhase(ns, "groovy"), 5*time.Minute).Should(Equal(v1.PodRunning))
 			Eventually(integrationLogs(ns, "groovy"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
-			Eventually(integrationPodImage(ns, "groovy"), 1*time.Minute).Should(HavePrefix("docker.io"))
+			Eventually(integrationPodImage(ns, "groovy"), 1*time.Minute).Should(HavePrefix("docker.pkg.github.com"))
 
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
