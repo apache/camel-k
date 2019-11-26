@@ -19,8 +19,6 @@ package integration
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
 	appsv1 "k8s.io/api/apps/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -280,16 +278,6 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
-				// Some traits, like the deployment and knative service ones,
-				// update owned resources in the running phase, so it's better
-				// handling update conflicts gracefully, consistently with the
-				// primary integration update requests.
-				if cause := errors.Cause(err); k8serrors.IsConflict(cause) {
-					log.Error(cause, "conflict")
-					return reconcile.Result{
-						Requeue: true,
-					}, nil
-				}
 				return reconcile.Result{}, err
 			}
 
