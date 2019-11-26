@@ -54,7 +54,7 @@ type Catalog struct {
 	tProbes           Trait
 	tQuarkus          Trait
 	tContainer        Trait
-	tPullSecret		  Trait
+	tPullSecret       Trait
 }
 
 // NewCatalog creates a new trait Catalog
