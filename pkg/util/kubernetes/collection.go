@@ -35,12 +35,12 @@ type Collection struct {
 }
 
 // NewCollection creates a new empty collection
-func NewCollection(objcts ...runtime.Object) *Collection {
+func NewCollection(objects ...runtime.Object) *Collection {
 	collection := Collection{
-		items: make([]runtime.Object, 0, len(objcts)),
+		items: make([]runtime.Object, 0, len(objects)),
 	}
 
-	collection.items = append(collection.items, objcts...)
+	collection.items = append(collection.items, objects...)
 
 	return &collection
 }
