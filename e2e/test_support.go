@@ -28,7 +28,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -86,10 +85,6 @@ func newTestClient() (client.Client, error) {
 func kamel(args ...string) *cobra.Command {
 	var c *cobra.Command
 	var err error
-
-	kamelArgs := os.Getenv("KAMEL_ARGS")
-	kamelDefaultArgs := strings.Fields(kamelArgs)
-	args = append(kamelDefaultArgs, args...)
 
 	kamelBin := os.Getenv("KAMEL_BIN")
 	if kamelBin != "" {

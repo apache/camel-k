@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -71,10 +72,10 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().StringVar(&impl.registryAuth.Username, "registry-auth-username", "", "The docker registry authentication username")
 	cmd.Flags().StringVar(&impl.registryAuth.Password, "registry-auth-password", "", "The docker registry authentication password")
 	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
-	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
+	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", os.Getenv("KAMEL_CAMEL_VERSION"), "Set the camel version")
 	cmd.Flags().StringVar(&impl.runtimeVersion, "runtime-version", "", "Set the camel-k runtime version")
-	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
-	cmd.Flags().StringVar(&impl.operatorImage, "operator-image", "", "Set the operator image used for the operator deployment")
+	cmd.Flags().StringVar(&impl.baseImage, "base-image", os.Getenv("KAMEL_BASE_IMAGE"), "Set the base image used to run integrations")
+	cmd.Flags().StringVar(&impl.operatorImage, "operator-image", os.Getenv("KAMEL_OPERATOR_IMAGE"), "Set the operator image used for the operator deployment")
 	cmd.Flags().StringSliceVar(&impl.kits, "kit", nil, "Add an integration kit to build at startup")
 	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", "", "Set the build strategy")
 	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
@@ -84,9 +85,18 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		"(HTTP_PROXY|HTTPS_PROXY|NO_PROXY)")
 
 	// maven settings
-	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
-	cmd.Flags().StringVar(&impl.mavenSettings, "maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
-	cmd.Flags().StringSliceVar(&impl.mavenRepositories, "maven-repository", nil, "Add a maven repository")
+	cmd.Flags().StringVar(&impl.localRepository, "local-repository", os.Getenv("KAMEL_LOCAL_REPOSITORY"), "Location of the local maven repository")
+
+	kamelMavenSettings := os.Getenv("KAMEL_MAVEN_SETTINGS")
+	cmd.Flags().StringVar(&impl.mavenSettings, "maven-settings", kamelMavenSettings, "Configure the source of the maven settings (configmap|secret:name[/key])")
+
+	var kamelMavenRepository []string
+	if mavenRepositoryEnv := os.Getenv("KAMEL_MAVEN_REPOSITORY"); mavenRepositoryEnv == "" {
+		kamelMavenRepository = nil
+	} else {
+		kamelMavenRepository = strings.Split(mavenRepositoryEnv, ",")
+	}
+	cmd.Flags().StringSliceVar(&impl.mavenRepositories, "maven-repository", kamelMavenRepository, "Add a maven repository")
 
 	// completion support
 	configureBashAnnotationForFlag(
