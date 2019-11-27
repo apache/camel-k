@@ -34,10 +34,11 @@ func newCmdRebuild(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "rebuild [integration]",
-		Short: "Clear the state of integrations to rebuild them",
-		Long:  `Clear the state of one or more integrations causing a rebuild.`,
-		RunE:  options.rebuild,
+		Use:     "rebuild [integration]",
+		Short:   "Clear the state of integrations to rebuild them",
+		Long:    `Clear the state of one or more integrations causing a rebuild.`,
+		PreRunE: decode(&options),
+		RunE:    options.rebuild,
 	}
 
 	return &cmd

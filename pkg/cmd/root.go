@@ -20,6 +20,9 @@ package cmd
 import (
 	"context"
 	"os"
+	"strings"
+
+	"github.com/spf13/viper"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
@@ -32,10 +35,10 @@ superpowers.
 
 // RootCmdOptions --
 type RootCmdOptions struct {
-	Context    context.Context
-	_client    client.Client
-	KubeConfig string
-	Namespace  string
+	Context    context.Context `mapstructure:"-"`
+	_client    client.Client   `mapstructure:"-"`
+	KubeConfig string          `mapstructure:"kube-config"`
+	Namespace  string          `mapstructure:"namespace"`
 }
 
 // NewKamelCommand --
@@ -65,8 +68,30 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.AddCommand(newCmdReset(&options))
 	cmd.AddCommand(newCmdDescribe(&options))
 	cmd.AddCommand(newCmdRebuild(&options))
-	cmd.AddCommand(newCmdOperator(&options))
+	cmd.AddCommand(newCmdOperator())
 	cmd.AddCommand(newCmdBuilder(&options))
+
+	bindPFlagsHierarchy(&cmd)
+
+	configName := os.Getenv("KAMEL_CONFIG_NAME")
+	if configName != "" {
+		configName = "config"
+	}
+
+	viper.SetConfigName(configName)
+	viper.AddConfigPath(".kamel")
+	viper.AddConfigPath("$HOME/.kamel")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(
+		".", "_",
+		"-", "_",
+	))
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return nil, err
+		}
+	}
 
 	return &cmd, nil
 }

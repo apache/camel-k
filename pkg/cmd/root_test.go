@@ -17,21 +17,7 @@ limitations under the License.
 
 package cmd
 
-import (
-	"github.com/apache/camel-k/pkg/cmd/operator"
-	"github.com/spf13/cobra"
-)
+import "testing"
 
-func newCmdOperator() *cobra.Command {
-	cmd := cobra.Command{
-		Use:    "operator",
-		Short:  "Run the Camel K operator",
-		Long:   `Run the Camel K operator`,
-		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
-			operator.Run()
-		},
-	}
-
-	return &cmd
+func TestDecodeRoot(t *testing.T) {
 }

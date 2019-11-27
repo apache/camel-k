@@ -34,9 +34,10 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "platform",
-		Short: "Describe an Integration Platform",
-		Long:  `Describe an Integration Platform.`,
+		Use:     "platform",
+		Short:   "Describe an Integration Platform",
+		Long:    `Describe an Integration Platform.`,
+		PreRunE: decode(impl),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err

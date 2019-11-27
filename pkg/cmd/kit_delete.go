@@ -35,9 +35,10 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "delete",
-		Short: "Delete an Integration Kit",
-		Long:  `Delete an Integration Kit.`,
+		Use:     "delete",
+		Short:   "Delete an Integration Kit",
+		Long:    `Delete an Integration Kit.`,
+		PreRunE: decode(&impl),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err
@@ -50,22 +51,22 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&impl.all, "all", false, "Delete all integration kits")
+	cmd.Flags().Bool("all", false, "Delete all integration Kits")
 
 	return &cmd
 }
 
 type kitDeleteCommand struct {
 	*RootCmdOptions
-	all bool
+	All bool `mapstructure:"all"`
 }
 
 func (command *kitDeleteCommand) validate(args []string) error {
-	if command.all && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and named kits are set")
+	if command.All && len(args) > 0 {
+		return errors.New("invalid combination: both all flag and named Kits are set")
 	}
-	if !command.all && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor named kits are set")
+	if !command.All && len(args) == 0 {
+		return errors.New("invalid combination: neither all flag nor named Kits are set")
 	}
 
 	return nil
@@ -79,7 +80,7 @@ func (command *kitDeleteCommand) run(args []string) error {
 		return err
 	}
 
-	if command.all {
+	if command.All {
 		kitList := v1alpha1.NewIntegrationKitList()
 		if err := c.List(command.Context, &kitList, k8sclient.InNamespace(command.Namespace)); err != nil {
 			return err
@@ -87,7 +88,7 @@ func (command *kitDeleteCommand) run(args []string) error {
 
 		names = make([]string, 0, len(kitList.Items))
 		for _, item := range kitList.Items {
-			// only include non platform kits
+			// only include non platform Kits
 			if item.Labels["camel.apache.org/kit.type"] != v1alpha1.IntegrationKitTypePlatform {
 				names = append(names, item.Name)
 			}
@@ -129,8 +130,8 @@ func (command *kitDeleteCommand) delete(name string) error {
 	// check that it is not a platform one which is supposed to be "read only"
 	// thus not managed by the end user
 	if ctx.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
-		// skip platform kits while deleting all kits
-		if command.all {
+		// skip platform Kits while deleting all Kits
+		if command.All {
 			return nil
 		}
 

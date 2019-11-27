@@ -8,6 +8,7 @@ require (
 	github.com/coreos/prometheus-operator v0.29.0
 	github.com/evanphx/json-patch v4.5.0+incompatible
 	github.com/fatih/structs v1.1.0
+	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v0.1.0
 	github.com/google/go-containerregistry v0.0.0-20190206233756-dbc4da98389f // indirect
 	github.com/google/uuid v1.1.1
@@ -23,6 +24,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
+	github.com/spf13/viper v1.4.0
 	github.com/stoewer/go-strcase v1.0.2
 	github.com/stretchr/testify v1.3.0
 	go.uber.org/multierr v1.1.0

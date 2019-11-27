@@ -40,8 +40,10 @@ import (
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -57,34 +59,34 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "run [file to run]",
-		Short: "Run a integration on Kubernetes",
-		Long:  `Deploys and execute a integration pod on Kubernetes.`,
-		Args:  options.validateArgs,
-		RunE:  options.run,
+		Use:     "run [file to run]",
+		Short:   "Run a integration on Kubernetes",
+		Long:    `Deploys and execute a integration pod on Kubernetes.`,
+		Args:    options.validateArgs,
+		PreRunE: decode(&options),
+		RunE:    options.run,
 	}
 
-	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
-	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
-	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
-	cmd.Flags().StringVarP(&options.IntegrationKit, "kit", "k", "", "The kit used to run the integration")
-	cmd.Flags().StringArrayVarP(&options.Properties, "property", "p", nil, "Add a camel property")
-	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
-	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
-	cmd.Flags().StringSliceVar(&options.Repositories, "repository", nil, "Add a maven repository")
-	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
-	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
-	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
-	cmd.Flags().StringVar(&options.Profile, "profile", "", "Trait profile used for deployment")
-	cmd.Flags().StringSliceVarP(&options.Traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
-	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. "+
-		"E.g. \"--logging-level org.apache.camel=DEBUG\"")
-	cmd.Flags().StringVarP(&options.OutputFormat, "output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().BoolVar(&options.Compression, "compression", false, "Enable store source as a compressed binary blob")
-	cmd.Flags().StringSliceVar(&options.Resources, "resource", nil, "Add a resource")
-	cmd.Flags().StringSliceVar(&options.OpenAPIs, "open-api", nil, "Add an OpenAPI v2 spec")
-	cmd.Flags().StringSliceVarP(&options.Volumes, "volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
-	cmd.Flags().StringSliceVarP(&options.EnvVars, "env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
+	cmd.Flags().String("name", "", "The integration name")
+	cmd.Flags().StringArrayP("dependency", "d", nil, "The integration dependency")
+	cmd.Flags().BoolP("wait", "w", false, "Waits for the integration to be running")
+	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
+	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
+	cmd.Flags().StringArray("secret", nil, "Add a Secret")
+	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
+	cmd.Flags().Bool("logs", false, "Print integration logs")
+	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
+	cmd.Flags().Bool("dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
+	cmd.Flags().String("profile", "", "Trait profile used for deployment")
+	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
+	cmd.Flags().StringArray("logging-level", nil, "Configure the logging level. e.g. \"--logging-level org.apache.camel=DEBUG\"")
+	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().Bool("compression", false, "Enable store source as a compressed binary blob")
+	cmd.Flags().StringArray("resource", nil, "Add a resource")
+	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
+	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
+	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -94,26 +96,26 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type runCmdOptions struct {
 	*RootCmdOptions
-	Compression     bool
-	Wait            bool
-	Logs            bool
-	Sync            bool
-	Dev             bool
-	IntegrationKit  string
-	IntegrationName string
-	Profile         string
-	OutputFormat    string
-	Resources       []string
-	OpenAPIs        []string
-	Dependencies    []string
-	Properties      []string
-	ConfigMaps      []string
-	Secrets         []string
-	Repositories    []string
-	Traits          []string
-	LoggingLevels   []string
-	Volumes         []string
-	EnvVars         []string
+	Compression     bool     `mapstructure:"compression"`
+	Wait            bool     `mapstructure:"wait"`
+	Logs            bool     `mapstructure:"logs"`
+	Sync            bool     `mapstructure:"sync"`
+	Dev             bool     `mapstructure:"dev"`
+	IntegrationKit  string   `mapstructure:"kit"`
+	IntegrationName string   `mapstructure:"name"`
+	Profile         string   `mapstructure:"profile"`
+	OutputFormat    string   `mapstructure:"output"`
+	Resources       []string `mapstructure:"resources"`
+	OpenAPIs        []string `mapstructure:"open-apis"`
+	Dependencies    []string `mapstructure:"dependencies"`
+	Properties      []string `mapstructure:"properties"`
+	ConfigMaps      []string `mapstructure:"configmaps"`
+	Secrets         []string `mapstructure:"secrets"`
+	Repositories    []string `mapstructure:"maven-repositories"`
+	Traits          []string `mapstructure:"traits"`
+	LoggingLevels   []string `mapstructure:"logging-levels"`
+	Volumes         []string `mapstructure:"volumes"`
+	EnvVars         []string `mapstructure:"envs"`
 }
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
@@ -232,7 +234,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Sync && !o.Logs && !o.Dev {
-		// Let's add a wait point, otherwise the script terminates
+		// Let's add a Wait point, otherwise the script terminates
 		<-o.Context.Done()
 	}
 	return nil
@@ -241,7 +243,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) (*v1alpha1.IntegrationPhase, error) {
 	handler := func(i *v1alpha1.Integration) bool {
 		//
-		// TODO when we add health checks, we should wait until they are passed
+		// TODO when we add health checks, we should Wait until they are passed
 		//
 		if i.Status.Phase != "" {
 			fmt.Println("integration \""+integration.Name+"\" in phase", i.Status.Phase)
