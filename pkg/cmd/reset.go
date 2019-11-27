@@ -34,22 +34,23 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "reset",
-		Short: "Reset the Camel K installation",
-		Long:  `Reset the Camel K installation by deleting everything except current platform configuration.`,
-		Run:   options.reset,
+		Use:     "reset",
+		Short:   "Reset the Camel K installation",
+		Long:    `Reset the Camel K installation by deleting everything except current platform configuration.`,
+		PreRunE: decode(&options),
+		Run:     options.reset,
 	}
 
-	cmd.Flags().BoolVar(&options.SkipKits, "skip-kits", false, "Do not delete the integration kits")
-	cmd.Flags().BoolVar(&options.SkipIntegrations, "skip-integrations", false, "Do not delete the integrations")
+	cmd.Flags().Bool("skip-kits", false, "Do not delete the integration kits")
+	cmd.Flags().Bool("skip-integrations", false, "Do not delete the integrations")
 
 	return &cmd
 }
 
 type resetCmdOptions struct {
 	*RootCmdOptions
-	SkipKits         bool
-	SkipIntegrations bool
+	SkipKits         bool `mapstructure:"skip-kits"`
+	SkipIntegrations bool `mapstructure:"skip-integrations"`
 }
 
 func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
@@ -73,7 +74,7 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 			fmt.Print(err)
 			return
 		}
-		fmt.Printf("%d integration kits deleted from namespace %s\n", n, o.Namespace)
+		fmt.Printf("%d integration Kits deleted from namespace %s\n", n, o.Namespace)
 	}
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
@@ -101,7 +102,7 @@ func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error) {
 	list := v1alpha1.NewIntegrationKitList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration kits from namespace %s", o.Namespace))
+		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration Kits from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		kit := i

@@ -34,9 +34,10 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "get",
-		Short: "Get defined Integration Kit",
-		Long:  `Get defined Integration Kit.`,
+		Use:     "get",
+		Short:   "Get defined Integration Kit",
+		Long:    `Get defined Integration Kit.`,
+		PreRunE: decode(&impl),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := impl.validate(cmd, args); err != nil {
 				return err
@@ -49,18 +50,18 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&impl.user, v1alpha1.IntegrationKitTypeUser, true, "Includes user kits")
-	cmd.Flags().BoolVar(&impl.external, v1alpha1.IntegrationKitTypeExternal, true, "Includes external kits")
-	cmd.Flags().BoolVar(&impl.platform, v1alpha1.IntegrationKitTypePlatform, true, "Includes platform kits")
+	cmd.Flags().Bool(v1alpha1.IntegrationKitTypeUser, true, "Includes user Kits")
+	cmd.Flags().Bool(v1alpha1.IntegrationKitTypeExternal, true, "Includes external Kits")
+	cmd.Flags().Bool(v1alpha1.IntegrationKitTypePlatform, true, "Includes platform Kits")
 
 	return &cmd
 }
 
 type kitGetCommand struct {
 	*RootCmdOptions
-	user     bool
-	external bool
-	platform bool
+	User     bool `mapstructure:"user"`
+	External bool `mapstructure:"external"`
+	Platform bool `mapstructure:"platform"`
 }
 
 func (command *kitGetCommand) validate(cmd *cobra.Command, args []string) error {
@@ -81,9 +82,9 @@ func (command *kitGetCommand) run(cmd *cobra.Command) error {
 	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
 	for _, ctx := range kitList.Items {
 		t := ctx.Labels["camel.apache.org/kit.type"]
-		u := command.user && t == v1alpha1.IntegrationKitTypeUser
-		e := command.external && t == v1alpha1.IntegrationKitTypeExternal
-		p := command.platform && t == v1alpha1.IntegrationKitTypePlatform
+		u := command.User && t == v1alpha1.IntegrationKitTypeUser
+		e := command.External && t == v1alpha1.IntegrationKitTypeExternal
+		p := command.Platform && t == v1alpha1.IntegrationKitTypePlatform
 
 		if u || e || p {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, string(ctx.Status.Phase), t, ctx.Status.Image)

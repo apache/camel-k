@@ -33,11 +33,12 @@ func newCmdLog(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "log integration",
-		Short: "Print the logs of an integration",
-		Long:  `Print the logs of an integration.`,
-		Args:  options.validate,
-		RunE:  options.run,
+		Use:     "log integration",
+		Short:   "Print the logs of an integration",
+		Long:    `Print the logs of an integration.`,
+		Args:    options.validate,
+		PreRunE: decode(&options),
+		RunE:    options.run,
 	}
 
 	// completion support
@@ -85,7 +86,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Let's add a wait point, otherwise the script terminates
+	// Let's add a Wait point, otherwise the script terminates
 	<-o.Context.Done()
 
 	return nil

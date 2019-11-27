@@ -34,9 +34,10 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 
 	cmd := cobra.Command{
-		Use:   "kit",
-		Short: "Describe an Integration Kit",
-		Long:  `Describe an Integration Kit.`,
+		Use:     "kit",
+		Short:   "Describe an Integration Kit",
+		Long:    `Describe an Integration Kit.`,
+		PreRunE: decode(impl),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err

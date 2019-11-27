@@ -27,21 +27,22 @@ func newCmdBuilder(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:    "builder",
-		Short:  "Run the Camel K builder",
-		Long:   `Run the Camel K builder`,
-		Hidden: true,
-		Run:    impl.run,
+		Use:     "builder",
+		Short:   "Run the Camel K builder",
+		Long:    `Run the Camel K builder`,
+		Hidden:  true,
+		PreRunE: decode(&impl),
+		Run:     impl.run,
 	}
 
-	cmd.Flags().StringVar(&impl.BuildName, "build-name", "", "The name of the build resource")
+	cmd.Flags().String("build-name", "", "The name of the build resource")
 
 	return &cmd
 }
 
 type builderCmdOptions struct {
 	*RootCmdOptions
-	BuildName string
+	BuildName string `mapstructure:"build-name"`
 }
 
 func (o *builderCmdOptions) run(_ *cobra.Command, _ []string) {

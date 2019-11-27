@@ -41,6 +41,7 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Aliases: []string{"it"},
 		Short:   "Describe an Integration",
 		Long:    `Describe an Integration.`,
+		PreRunE: decode(&impl),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err
@@ -60,7 +61,7 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type describeIntegrationCommand struct {
 	*RootCmdOptions
-	showSourceContent bool
+	showSourceContent bool `mapstructure:"show-source-content"`
 }
 
 func (command *describeIntegrationCommand) validate(args []string) error {

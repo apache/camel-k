@@ -36,8 +36,9 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "delete [integration1] [integration2] ...",
-		Short: "Delete integrations deployed on Kubernetes",
+		Use:     "delete [integration1] [integration2] ...",
+		Short:   "Delete integrations deployed on Kubernetes",
+		PreRunE: decode(&impl),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := impl.validate(args); err != nil {
 				return err
@@ -50,21 +51,21 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&impl.deleteAll, "all", false, "Delete all integrations")
+	cmd.Flags().Bool("all", false, "Delete all integrations")
 
 	return &cmd
 }
 
 type deleteCmdOptions struct {
 	*RootCmdOptions
-	deleteAll bool
+	DeleteAll bool `mapstructure:"all"`
 }
 
 func (command *deleteCmdOptions) validate(args []string) error {
-	if command.deleteAll && len(args) > 0 {
+	if command.DeleteAll && len(args) > 0 {
 		return errors.New("invalid combination: both all flag and named integrations are set")
 	}
-	if !command.deleteAll && len(args) == 0 {
+	if !command.DeleteAll && len(args) == 0 {
 		return errors.New("invalid combination: neither all flag nor named integrations are set")
 	}
 
@@ -76,7 +77,7 @@ func (command *deleteCmdOptions) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	if len(args) != 0 && !command.deleteAll {
+	if len(args) != 0 && !command.DeleteAll {
 		for _, arg := range args {
 			name := kubernetes.SanitizeName(arg)
 			err := DeleteIntegration(command.Context, c, name, command.Namespace)
@@ -90,7 +91,7 @@ func (command *deleteCmdOptions) run(args []string) error {
 				fmt.Println("Integration " + name + " deleted")
 			}
 		}
-	} else if command.deleteAll {
+	} else if command.DeleteAll {
 		integrationList := v1alpha1.IntegrationList{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),

@@ -38,6 +38,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -49,45 +50,53 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	}
 	cmd := cobra.Command{
 		Use:     "install",
-		Short:   "Install Camel K on a Kubernetes cluster",
+		Short:   "Installs Camel K on a Kubernetes cluster",
 		Long:    `Installs Camel K on a Kubernetes or OpenShift cluster.`,
-		PreRunE: impl.validate,
-		RunE:    impl.install,
+		PreRunE: impl.decode,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := impl.validate(cmd, args); err != nil {
+				return err
+			}
+			if err := impl.install(cmd, args); err != nil {
+				return err
+			}
+			return nil
+		},
 	}
 
-	cmd.Flags().BoolVarP(&impl.wait, "wait", "w", false, "Waits for the platform to be running")
-	cmd.Flags().BoolVar(&impl.clusterSetupOnly, "cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
-	cmd.Flags().StringVar(&impl.clusterType, "cluster-type", "", "Set explicitly the cluster type to Kubernetes or OpenShift")
-	cmd.Flags().BoolVar(&impl.skipOperatorSetup, "skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
-	cmd.Flags().BoolVar(&impl.skipClusterSetup, "skip-cluster-setup", false, "Skip the cluster-setup phase")
-	cmd.Flags().BoolVar(&impl.exampleSetup, "example", false, "Install example integration")
-	cmd.Flags().BoolVar(&impl.global, "global", false, "Configure the operator to watch all namespaces. No integration platform is created.")
+	cmd.Flags().BoolP("wait", "w", false, "Waits for the platform to be running")
+	cmd.Flags().Bool("cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
+	cmd.Flags().String("cluster-type", "", "Set explicitly the cluster type to Kubernetes or OpenShift")
+	cmd.Flags().Bool("skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
+	cmd.Flags().Bool("skip-cluster-setup", false, "Skip the cluster-setup phase")
+	cmd.Flags().Bool("example", false, "Install example integration")
+	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created.")
 
-	cmd.Flags().StringVarP(&impl.outputFormat, "output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().StringVar(&impl.registry.Organization, "organization", "", "A organization on the Docker registry that can be used to publish images")
-	cmd.Flags().StringVar(&impl.registry.Address, "registry", "", "A Docker registry that can be used to publish images")
-	cmd.Flags().StringVar(&impl.registry.Secret, "registry-secret", "", "A secret used to push/pull images to the Docker registry")
-	cmd.Flags().BoolVar(&impl.registry.Insecure, "registry-insecure", false, "Configure to configure registry access in insecure mode or not")
-	cmd.Flags().StringVar(&impl.registryAuth.Server, "registry-auth-server", "", "The docker registry authentication server")
-	cmd.Flags().StringVar(&impl.registryAuth.Username, "registry-auth-username", "", "The docker registry authentication username")
-	cmd.Flags().StringVar(&impl.registryAuth.Password, "registry-auth-password", "", "The docker registry authentication password")
-	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
-	cmd.Flags().StringVar(&impl.camelVersion, "camel-version", "", "Set the camel version")
-	cmd.Flags().StringVar(&impl.runtimeVersion, "runtime-version", "", "Set the camel-k runtime version")
-	cmd.Flags().StringVar(&impl.baseImage, "base-image", "", "Set the base image used to run integrations")
-	cmd.Flags().StringVar(&impl.operatorImage, "operator-image", "", "Set the operator image used for the operator deployment")
-	cmd.Flags().StringSliceVar(&impl.kits, "kit", nil, "Add an integration kit to build at startup")
-	cmd.Flags().StringVar(&impl.buildStrategy, "build-strategy", "", "Set the build strategy")
-	cmd.Flags().StringVar(&impl.buildTimeout, "build-timeout", "", "Set how long the build process can last")
-	cmd.Flags().StringVar(&impl.traitProfile, "trait-profile", "", "The profile to use for traits")
-	cmd.Flags().BoolVar(&impl.kanikoBuildCache, "kaniko-build-cache", true, "To enable or disable the Kaniko Cache in building phase")
-	cmd.Flags().StringVar(&impl.httpProxySecret, "http-proxy-secret", "", "Configure the source of the secret holding HTTP proxy server details "+
+	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().String("organization", "", "A organization on the Docker registry that can be used to publish images")
+	cmd.Flags().String("registry", "", "A Docker registry that can be used to publish images")
+	cmd.Flags().String("registry-secret", "", "A secret used to push/pull images to the Docker registry")
+	cmd.Flags().Bool("registry-insecure", false, "Configure to configure registry access in insecure mode or not")
+	cmd.Flags().String("registry-auth-server", "", "The docker registry authentication server")
+	cmd.Flags().String("registry-auth-username", "", "The docker registry authentication username")
+	cmd.Flags().String("registry-auth-password", "", "The docker registry authentication password")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
+	cmd.Flags().String("camel-version", "", "Set the camel version")
+	cmd.Flags().String("runtime-version", "", "Set the camel-k runtime version")
+	cmd.Flags().String("base-image", "", "Set the base Image used to run integrations")
+	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
+	cmd.Flags().StringArray("kit", nil, "Add an integration kit to build at startup")
+	cmd.Flags().String("build-strategy", "", "Set the build strategy")
+	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
+	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
+	cmd.Flags().Bool("kaniko-build-cache", true, "To enable or disable the Kaniko Cache in building phase")
+	cmd.Flags().String("http-proxy-secret", "", "Configure the source of the secret holding HTTP proxy server details "+
 		"(HTTP_PROXY|HTTPS_PROXY|NO_PROXY)")
 
 	// maven settings
-	cmd.Flags().StringVar(&impl.localRepository, "local-repository", "", "Location of the local maven repository")
-	cmd.Flags().StringVar(&impl.mavenSettings, "maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
-	cmd.Flags().StringSliceVar(&impl.mavenRepositories, "maven-repository", nil, "Add a maven repository")
+	cmd.Flags().String("local-repository", "", "Location of the local maven repository")
+	cmd.Flags().String("maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
+	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -103,40 +112,41 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	wait              bool
-	clusterSetupOnly  bool
-	skipOperatorSetup bool
-	skipClusterSetup  bool
-	exampleSetup      bool
-	global            bool
-	kanikoBuildCache  bool
-	clusterType       string
-	outputFormat      string
-	camelVersion      string
-	runtimeVersion    string
-	baseImage         string
-	operatorImage     string
-	localRepository   string
-	buildStrategy     string
-	buildTimeout      string
-	mavenRepositories []string
-	mavenSettings     string
-	properties        []string
-	kits              []string
-	registry          v1alpha1.IntegrationPlatformRegistrySpec
-	registryAuth      registry.Auth
-	traitProfile      string
-	httpProxySecret   string
+	Wait              bool     `mapstructure:"wait"`
+	ClusterSetupOnly  bool     `mapstructure:"cluster-setup"`
+	SkipOperatorSetup bool     `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup  bool     `mapstructure:"skip-cluster-setup"`
+	ExampleSetup      bool     `mapstructure:"example"`
+	Global            bool     `mapstructure:"global"`
+	KanikoBuildCache  bool     `mapstructure:"kaniko-build-cache"`
+	ClusterType       string   `mapstructure:"cluster-type"`
+	OutputFormat      string   `mapstructure:"output"`
+	CamelVersion      string   `mapstructure:"camel-version"`
+	RuntimeVersion    string   `mapstructure:"runtime-version"`
+	BaseImage         string   `mapstructure:"base-image"`
+	OperatorImage     string   `mapstructure:"operator-image"`
+	LocalRepository   string   `mapstructure:"local-repository"`
+	BuildStrategy     string   `mapstructure:"build-strategy"`
+	BuildTimeout      string   `mapstructure:"build-timeout"`
+	MavenRepositories []string `mapstructure:"maven-repositories"`
+	MavenSettings     string   `mapstructure:"maven-settings"`
+	Properties        []string `mapstructure:"properties"`
+	Kits              []string `mapstructure:"kits"`
+	TraitProfile      string   `mapstructure:"trait-profile"`
+	HTTPProxySecret   string   `mapstructure:"http-proxy-secret"`
+
+	registry     v1alpha1.IntegrationPlatformRegistrySpec
+	registryAuth registry.Auth
 }
 
 // nolint: gocyclo
-func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
+func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 	var collection *kubernetes.Collection
-	if o.outputFormat != "" {
+	if o.OutputFormat != "" {
 		collection = kubernetes.NewCollection()
 	}
 
-	if !o.skipClusterSetup {
+	if !o.SkipClusterSetup {
 		// Let's use a client provider during cluster installation, to eliminate the problem of CRD object caching
 		clientProvider := client.Provider{Get: o.NewCmdClient}
 
@@ -151,7 +161,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 	}
 
-	if o.clusterSetupOnly {
+	if o.ClusterSetupOnly {
 		if collection == nil {
 			fmt.Println("Camel K cluster setup completed successfully")
 		}
@@ -163,12 +173,12 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		namespace := o.Namespace
 
-		if !o.skipOperatorSetup {
+		if !o.SkipOperatorSetup {
 			cfg := install.OperatorConfiguration{
-				CustomImage: o.operatorImage,
+				CustomImage: o.OperatorImage,
 				Namespace:   namespace,
-				Global:      o.global,
-				ClusterType: o.clusterType,
+				Global:      o.Global,
+				ClusterType: o.ClusterType,
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection)
 			if err != nil {
@@ -188,7 +198,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			}
 		}
 
-		platform, err := install.PlatformOrCollect(o.Context, c, o.clusterType, namespace, o.registry, collection)
+		platform, err := install.PlatformOrCollect(o.Context, c, o.ClusterType, namespace, o.registry, collection)
 		if err != nil {
 			return err
 		}
@@ -197,10 +207,10 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			platform.Spec.Build.Registry.Secret = generatedSecretName
 		}
 
-		if len(o.properties) > 0 {
+		if len(o.Properties) > 0 {
 			platform.Spec.Build.Properties = make(map[string]string)
 
-			for _, property := range o.properties {
+			for _, property := range o.Properties {
 				kv := strings.Split(property, "=")
 
 				if len(kv) == 2 {
@@ -208,20 +218,20 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				}
 			}
 		}
-		if o.localRepository != "" {
-			platform.Spec.Build.Maven.LocalRepository = o.localRepository
+		if o.LocalRepository != "" {
+			platform.Spec.Build.Maven.LocalRepository = o.LocalRepository
 		}
-		if o.camelVersion != "" {
-			platform.Spec.Build.CamelVersion = o.camelVersion
+		if o.CamelVersion != "" {
+			platform.Spec.Build.CamelVersion = o.CamelVersion
 		}
-		if o.runtimeVersion != "" {
-			platform.Spec.Build.RuntimeVersion = o.runtimeVersion
+		if o.RuntimeVersion != "" {
+			platform.Spec.Build.RuntimeVersion = o.RuntimeVersion
 		}
-		if o.baseImage != "" {
-			platform.Spec.Build.BaseImage = o.baseImage
+		if o.BaseImage != "" {
+			platform.Spec.Build.BaseImage = o.BaseImage
 		}
-		if o.buildStrategy != "" {
-			switch s := o.buildStrategy; s {
+		if o.BuildStrategy != "" {
+			switch s := o.BuildStrategy; s {
 			case v1alpha1.IntegrationPlatformBuildStrategyPod:
 				platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
 			case v1alpha1.IntegrationPlatformBuildStrategyRoutine:
@@ -230,8 +240,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				return fmt.Errorf("unknown build strategy: %s", s)
 			}
 		}
-		if o.buildTimeout != "" {
-			d, err := time.ParseDuration(o.buildTimeout)
+		if o.BuildTimeout != "" {
+			d, err := time.ParseDuration(o.BuildTimeout)
 			if err != nil {
 				return err
 			}
@@ -240,54 +250,52 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				Duration: d,
 			}
 		}
-		if o.traitProfile != "" {
-			platform.Spec.Profile = v1alpha1.TraitProfileByName(o.traitProfile)
+		if o.TraitProfile != "" {
+			platform.Spec.Profile = v1alpha1.TraitProfileByName(o.TraitProfile)
 		}
 
-		if len(o.mavenRepositories) > 0 {
-			for _, r := range o.mavenRepositories {
+		if len(o.MavenRepositories) > 0 {
+			for _, r := range o.MavenRepositories {
 				platform.AddConfiguration("repository", r)
 			}
 		}
 
-		if o.mavenSettings != "" {
-			mavenSettings, err := decodeMavenSettings(o.mavenSettings)
+		if o.MavenSettings != "" {
+			mavenSettings, err := decodeMavenSettings(o.MavenSettings)
 			if err != nil {
 				return err
 			}
 			platform.Spec.Build.Maven.Settings = mavenSettings
 		}
 
-		if o.httpProxySecret != "" {
-			platform.Spec.Build.HTTPProxySecret = o.httpProxySecret
+		if o.HTTPProxySecret != "" {
+			platform.Spec.Build.HTTPProxySecret = o.HTTPProxySecret
 		}
 
-		if o.clusterType != "" {
+		if o.ClusterType != "" {
 			for _, c := range v1alpha1.AllIntegrationPlatformClusters {
-				if strings.EqualFold(string(c), o.clusterType) {
+				if strings.EqualFold(string(c), o.ClusterType) {
 					platform.Spec.Cluster = c
 				}
 			}
 		}
 
-		kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")
-
-		if kanikoBuildCacheFlag.Changed {
-			platform.Spec.Build.KanikoBuildCache = &o.kanikoBuildCache
+		if !o.KanikoBuildCache {
+			platform.Spec.Build.KanikoBuildCache = &o.KanikoBuildCache
 		}
 
-		platform.Spec.Resources.Kits = o.kits
+		platform.Spec.Resources.Kits = o.Kits
 
 		// Do not create an integration platform in global mode as platforms are expected
 		// to be created in other namespaces
-		if !o.global {
+		if !o.Global {
 			err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
 			if err != nil {
 				return err
 			}
 		}
 
-		if o.exampleSetup {
+		if o.ExampleSetup {
 			err = install.ExampleOrCollect(o.Context, c, namespace, collection)
 			if err != nil {
 				return err
@@ -295,14 +303,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 
 		if collection == nil {
-			if o.wait {
+			if o.Wait {
 				err = o.waitForPlatformReady(platform)
 				if err != nil {
 					return err
 				}
 			}
 
-			if o.global {
+			if o.Global {
 				fmt.Println("Camel K installed in namespace", namespace, "(global mode)")
 			} else {
 				fmt.Println("Camel K installed in namespace", namespace)
@@ -319,7 +327,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error {
 	lst := collection.AsKubernetesList()
-	switch o.outputFormat {
+	switch o.OutputFormat {
 	case "yaml":
 		data, err := kubernetes.ToYAML(lst)
 		if err != nil {
@@ -333,7 +341,7 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 		}
 		fmt.Print(string(data))
 	default:
-		return errors.New("unknown output format: " + o.outputFormat)
+		return errors.New("unknown output format: " + o.OutputFormat)
 	}
 	return nil
 }
@@ -360,6 +368,23 @@ func (o *installCmdOptions) waitForPlatformReady(platform *v1alpha1.IntegrationP
 	return watch.HandlePlatformStateChanges(o.Context, platform, handler)
 }
 
+func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
+	path := pathToRoot(cmd)
+	if err := decodeKey(o, path); err != nil {
+		return err
+	}
+
+	o.registry.Address = viper.GetString(path + ".registry")
+	o.registry.Organization = viper.GetString(path + ".organization")
+	o.registry.Secret = viper.GetString(path + ".registry-secret")
+	o.registry.Insecure = viper.GetBool(path + ".registry-insecure")
+	o.registryAuth.Username = viper.GetString(path + ".registry-auth-username")
+	o.registryAuth.Password = viper.GetString(path + ".registry-auth-password")
+	o.registryAuth.Server = viper.GetString(path + ".registry-auth-server")
+
+	return nil
+}
+
 func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	var result error
 
@@ -369,20 +394,20 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	for _, kit := range o.kits {
+	for _, kit := range o.Kits {
 		err := errorIfKitIsNotAvailable(schema, kit)
 		result = multierr.Append(result, err)
 	}
 
-	if len(o.mavenRepositories) > 0 && o.mavenSettings != "" {
+	if len(o.MavenRepositories) > 0 && o.MavenSettings != "" {
 		err := fmt.Errorf("incompatible options combinations: you cannot set both mavenRepository and mavenSettings")
 		result = multierr.Append(result, err)
 	}
 
-	if o.traitProfile != "" {
-		tp := v1alpha1.TraitProfileByName(o.traitProfile)
+	if o.TraitProfile != "" {
+		tp := v1alpha1.TraitProfileByName(o.TraitProfile)
 		if tp == v1alpha1.TraitProfile("") {
-			err := fmt.Errorf("unknown trait profile %s", o.traitProfile)
+			err := fmt.Errorf("unknown trait profile %s", o.TraitProfile)
 			result = multierr.Append(result, err)
 		}
 	}
