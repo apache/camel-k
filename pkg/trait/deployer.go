@@ -85,7 +85,15 @@ func (t *deployerTrait) Apply(e *Environment) error {
 					return err
 				}
 
-				err = env.Client.Patch(env.C, resource, mergeFrom(object))
+				patch, err := positiveMergePatch(object, resource)
+				if err != nil {
+					return err
+				} else if len(patch) == 0 {
+					// Avoid triggering a patch request for nothing
+					continue
+				}
+
+				err = env.Client.Patch(env.C, resource, client.ConstantPatch(types.MergePatchType, patch))
 				if err != nil {
 					return errors.Wrap(err, "error during patch resource")
 				}
@@ -102,26 +110,18 @@ func (t *deployerTrait) IsPlatformTrait() bool {
 	return true
 }
 
-type mergeFromPositivePatch struct {
-	from runtime.Object
-}
-
-func (s *mergeFromPositivePatch) Type() types.PatchType {
-	return types.MergePatchType
-}
-
-func (s *mergeFromPositivePatch) Data(obj runtime.Object) ([]byte, error) {
-	originalJSON, err := json.Marshal(s.from)
+func positiveMergePatch(source runtime.Object, target runtime.Object) ([]byte, error) {
+	sourceJSON, err := json.Marshal(source)
 	if err != nil {
 		return nil, err
 	}
 
-	modifiedJSON, err := json.Marshal(obj)
+	targetJSON, err := json.Marshal(target)
 	if err != nil {
 		return nil, err
 	}
 
-	mergePatch, err := jsonpatch.CreateMergePatch(originalJSON, modifiedJSON)
+	mergePatch, err := jsonpatch.CreateMergePatch(sourceJSON, targetJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -138,11 +138,12 @@ func (s *mergeFromPositivePatch) Data(obj runtime.Object) ([]byte, error) {
 	// by the traits.
 	removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
 
-	return json.Marshal(positivePatch)
-}
+	// Return an empty patch if no keys remain
+	if len(positivePatch) == 0 {
+		return make([]byte, 0), nil
+	}
 
-func mergeFrom(obj runtime.Object) client.Patch {
-	return &mergeFromPositivePatch{obj}
+	return json.Marshal(positivePatch)
 }
 
 func removeNilValues(v reflect.Value, parent reflect.Value) {
@@ -156,15 +157,17 @@ func removeNilValues(v reflect.Value, parent reflect.Value) {
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
-			c := v.MapIndex(k)
-			if c.IsNil() {
+			switch c := v.MapIndex(k); {
+			case !c.IsValid():
+				// Skip keys previously deleted
+				continue
+			case c.IsNil(), c.Elem().Kind() == reflect.Map && len(c.Elem().MapKeys()) == 0:
 				v.SetMapIndex(k, reflect.Value{})
-			} else if c.Elem().Kind() == reflect.Map && len(c.Elem().MapKeys()) == 0 {
-				v.SetMapIndex(k, reflect.Value{})
-			} else {
+			default:
 				removeNilValues(c, v)
 			}
 		}
+		// Back process the parent map in case it has been emptied so that it's deleted as well
 		if len(v.MapKeys()) == 0 && parent.Kind() == reflect.Map {
 			removeNilValues(parent, reflect.Value{})
 		}
