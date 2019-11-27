@@ -136,7 +136,7 @@ func (s *mergeFromPositivePatch) Data(obj runtime.Object) ([]byte, error) {
 	// so that values defaulted by controllers server-side are not deleted.
 	// It's generally acceptable as these values are orthogonal to the values managed
 	// by the traits.
-	removeNilValues(reflect.ValueOf(positivePatch))
+	removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
 
 	return json.Marshal(positivePatch)
 }
@@ -145,23 +145,28 @@ func mergeFrom(obj runtime.Object) client.Patch {
 	return &mergeFromPositivePatch{obj}
 }
 
-func removeNilValues(v reflect.Value) {
+func removeNilValues(v reflect.Value, parent reflect.Value) {
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
 	}
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			removeNilValues(v.Index(i))
+			removeNilValues(v.Index(i), v)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
 			c := v.MapIndex(k)
 			if c.IsNil() {
 				v.SetMapIndex(k, reflect.Value{})
+			} else if c.Elem().Kind() == reflect.Map && len(c.Elem().MapKeys()) == 0 {
+				v.SetMapIndex(k, reflect.Value{})
 			} else {
-				removeNilValues(c)
+				removeNilValues(c, v)
 			}
+		}
+		if len(v.MapKeys()) == 0 && parent.Kind() == reflect.Map {
+			removeNilValues(parent, reflect.Value{})
 		}
 	}
 }
