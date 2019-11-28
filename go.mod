@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/jsonschema v0.0.0-20190122210438-a6952de1bbe6
 	github.com/coreos/prometheus-operator v0.29.0
+	github.com/evanphx/json-patch v4.5.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/go-logr/logr v0.1.0
 	github.com/google/go-containerregistry v0.0.0-20190206233756-dbc4da98389f // indirect
