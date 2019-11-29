@@ -49,7 +49,7 @@ const (
 	QuarkusVersionConstraint = ">=0.27.0"
 
 	// KanikoVersion --
-	KanikoVersion = "0.14.0"
+	KanikoVersion = "0.9.0"
 
 	// BaseImage --
 	BaseImage = "fabric8/s2i-java:3.0-java8"
