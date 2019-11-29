@@ -23,7 +23,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,7 +38,6 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/log"
 )
 
 // Add creates a new Build Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -169,7 +167,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 				target.SetIntegrationPlatform(pl)
 			}
 
-			return r.update(ctx, targetLog, target)
+			return r.update(ctx, &instance, target)
 		}
 
 		return reconcile.Result{}, err
@@ -199,7 +197,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+				if r, err := r.update(ctx, &instance, newTarget); err != nil {
 					return r, err
 				}
 
@@ -230,18 +228,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	return reconcile.Result{}, nil
 }
 
-// Update --
-func (r *ReconcileBuild) update(ctx context.Context, log log.Logger, target *v1alpha1.Build) (reconcile.Result, error) {
-	err := r.client.Status().Update(ctx, target)
-	if err != nil {
-		if k8serrors.IsConflict(err) {
-			log.Error(err, "conflict")
-
-			return reconcile.Result{
-				Requeue: true,
-			}, nil
-		}
-	}
+func (r *ReconcileBuild) update(ctx context.Context, base *v1alpha1.Build, target *v1alpha1.Build) (reconcile.Result, error) {
+	err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err
 }

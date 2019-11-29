@@ -26,7 +26,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -202,7 +201,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 				target.SetIntegrationPlatform(pl)
 			}
 
-			return r.update(ctx, targetLog, target)
+			return r.update(ctx, &instance, target)
 		}
 
 		return reconcile.Result{}, err
@@ -228,7 +227,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+				if r, err := r.update(ctx, &instance, newTarget); err != nil {
 					return r, err
 				}
 
@@ -250,8 +249,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 	return reconcile.Result{}, nil
 }
 
-// Update --
-func (r *ReconcileIntegrationKit) update(ctx context.Context, log log.Logger, target *v1alpha1.IntegrationKit) (reconcile.Result, error) {
+func (r *ReconcileIntegrationKit) update(ctx context.Context, base *v1alpha1.IntegrationKit, target *v1alpha1.IntegrationKit) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegrationKit(target)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -259,16 +257,7 @@ func (r *ReconcileIntegrationKit) update(ctx context.Context, log log.Logger, ta
 
 	target.Status.Digest = dgst
 
-	err = r.client.Status().Update(ctx, target)
-	if err != nil {
-		if k8serrors.IsConflict(err) {
-			log.Error(err, "conflict")
-
-			return reconcile.Result{
-				Requeue: true,
-			}, nil
-		}
-	}
+	err = r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err
 }
