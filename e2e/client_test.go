@@ -26,16 +26,13 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client/clientset/versioned"
-	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 func TestClientFunctionalities(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
-
+	withNewTestNamespace(t, func(ns string) {
 		cfg, err := config.GetConfig()
 		assert.Nil(t, err)
 		camel, err := versioned.NewForConfig(cfg)

@@ -36,8 +36,7 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 	if user == "" || pass == "" {
 		t.Skip("no docker hub credentials: skipping")
 	} else {
-		withNewTestNamespace(func(ns string) {
-			RegisterTestingT(t)
+		withNewTestNamespace(t, func(ns string) {
 			Expect(kamel("install",
 				"-n", ns,
 				"--registry", "docker.io",

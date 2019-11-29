@@ -37,8 +37,7 @@ func TestRunWithGithubPackagesRegistry(t *testing.T) {
 	if user == "" || pass == "" || repo == "" {
 		t.Skip("no github packages data: skipping")
 	} else {
-		withNewTestNamespace(func(ns string) {
-			RegisterTestingT(t)
+		withNewTestNamespace(t, func(ns string) {
 			Expect(kamel("install",
 				"-n", ns,
 				"--registry", "docker.pkg.github.com",

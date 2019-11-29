@@ -28,32 +28,28 @@ import (
 )
 
 func TestBasicInstallation(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 		Eventually(operatorPod(ns)).ShouldNot(BeNil())
 	})
 }
 
 func TestAlternativeImageInstallation(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--operator-image", "x/y:latest").Execute()).Should(BeNil())
 		Eventually(operatorImage(ns)).Should(Equal("x/y:latest"))
 	})
 }
 
 func TestKitMainInstallation(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--kit", "main").Execute()).Should(BeNil())
 		Eventually(build(ns, "main")).ShouldNot(BeNil())
 	})
 }
 
 func TestMavenRepositoryInstallation(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--maven-repository", "https://my.repo.org/public/").Execute()).Should(BeNil())
 		Eventually(configmap(ns, "camel-k-maven-settings")).Should(Not(BeNil()))
 		Eventually(func() string {
