@@ -29,8 +29,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"testing"
 	"time"
 
+	"github.com/apache/camel-k/e2e/util"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
@@ -549,19 +551,32 @@ func numPods(ns string) func() int {
 	}
 }
 
-func withNewTestNamespace(doRun func(string)) {
+func withNewTestNamespace(t *testing.T, doRun func(string)) {
 	ns := newTestNamespace(false)
 	defer deleteTestNamespace(ns)
 
-	doRun(ns.GetName())
+	invokeUserTestCode(t, ns.GetName(), doRun)
 }
 
-func withNewTestNamespaceWithKnativeBroker(doRun func(string)) {
+func withNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
 	ns := newTestNamespace(true)
 	defer deleteTestNamespace(ns)
 	defer deleteKnativeBroker(ns)
 
-	doRun(ns.GetName())
+	invokeUserTestCode(t, ns.GetName(), doRun)
+}
+
+func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
+	defer func() {
+		if t.Failed() {
+			if err := util.Dump(testClient, ns); err != nil {
+				fmt.Printf("Error while dumping namespace %s: %v\n", ns, err)
+			}
+		}
+	}()
+
+	gomega.RegisterTestingT(t)
+	doRun(ns)
 }
 
 func deleteKnativeBroker(ns metav1.Object) {

@@ -30,8 +30,8 @@ import (
 )
 
 func TestRunServiceCombo(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
+
 		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
 		Expect(kamel("run", "-n", ns, "files/knative2.groovy").Execute()).Should(BeNil())
 		Expect(kamel("run", "-n", ns, "files/knative1.groovy").Execute()).Should(BeNil())
@@ -43,8 +43,8 @@ func TestRunServiceCombo(t *testing.T) {
 }
 
 func TestRunChannelCombo(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
+
 		Expect(createKnativeChannel(ns, "messages")()).Should(BeNil())
 		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
 		Expect(kamel("run", "-n", ns, "files/knativech2.groovy").Execute()).Should(BeNil())
@@ -57,8 +57,8 @@ func TestRunChannelCombo(t *testing.T) {
 }
 
 func TestRunChannelComboGetToPost(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
+
 		Expect(createKnativeChannel(ns, "messages")()).Should(BeNil())
 		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
 		Expect(kamel("run", "-n", ns, "files/knativegetpost2.groovy").Execute()).Should(BeNil())
@@ -71,8 +71,7 @@ func TestRunChannelComboGetToPost(t *testing.T) {
 }
 
 func TestRunMultiChannelChain(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(createKnativeChannel(ns, "messages")()).Should(BeNil())
 		Expect(createKnativeChannel(ns, "words")()).Should(BeNil())
 		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
@@ -94,8 +93,7 @@ func TestRunMultiChannelChain(t *testing.T) {
 }
 
 func TestRunBroker(t *testing.T) {
-	withNewTestNamespaceWithKnativeBroker(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespaceWithKnativeBroker(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
 		Expect(kamel("run", "-n", ns, "files/knativeevt1.groovy").Execute()).Should(BeNil())
 		Expect(kamel("run", "-n", ns, "files/knativeevt2.groovy").Execute()).Should(BeNil())

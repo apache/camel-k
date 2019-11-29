@@ -26,15 +26,13 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func TestBackwardCompatibility(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 
 		data := `
 apiVersion: ` + v1alpha1.SchemeGroupVersion.String() + `

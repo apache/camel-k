@@ -62,8 +62,7 @@ func TestKitKnativeFullBuild(t *testing.T) {
 }
 
 func doNamedKitFullBuild(t *testing.T, name string) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--kit", name).Execute()).Should(BeNil())
 		Eventually(build(ns, name)).ShouldNot(BeNil())
 		Eventually(func() v1alpha1.BuildPhase {

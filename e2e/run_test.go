@@ -30,8 +30,7 @@ import (
 )
 
 func TestRunSimpleExamples(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		t.Run("run java", func(t *testing.T) {

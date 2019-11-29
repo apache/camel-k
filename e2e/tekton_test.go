@@ -30,9 +30,7 @@ import (
 // TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.
 // This feature is used in Tekton pipelines.
 func TestTektonLikeBehavior(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
-
+	withNewTestNamespace(t, func(ns string) {
 		Expect(createOperatorServiceAccount(ns)).Should(BeNil())
 		Expect(createOperatorRole(ns)).Should(BeNil())
 		Expect(createOperatorRoleBinding(ns)).Should(BeNil())
