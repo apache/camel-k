@@ -147,10 +147,10 @@ beans {
 <1> define a bean
 <2> define a custom processor
 <3> define a custom predicate
-<3> define a custom bean with name `dataSource` and type `org.apache.commons.dbcp2.BasicDataSource`
+<4> define a custom bean with name `dataSource` and type `org.apache.commons.dbcp2.BasicDataSource`
 
 
-=== Rest Support
+== Rest Support
 
 Integrations's REST endpoints can be configured using the top level _rest_ block:
 
@@ -180,4 +180,4 @@ rest {
 ----
 <1> Configure the rest engine
 <2> Configure the behavior of the method GET for the path '/my/path/get' and invoke the endpoint 'direct:get'
-<2> Configure the behavior of the method POST for the path '/post' and invoke the endpoint 'direct:post'
+<3> Configure the behavior of the method POST for the path '/post' and invoke the endpoint 'direct:post'
