@@ -159,6 +159,10 @@ build-compile-integration-tests:
 	go test -c -tags="integration knative" ./e2e/*.go
 
 clean:
+	# disable gomodules when executing go clean:
+	#
+	#    https://github.com/golang/go/issues/31002
+	#
 	go clean
 	rm -f camel-k
 	rm -f kamel
