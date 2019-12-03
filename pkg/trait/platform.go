@@ -49,7 +49,7 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
 	}
-	
+
 	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseNone, v1alpha1.IntegrationPhaseWaitingForPlatform) {
 		return false, nil
 	}
