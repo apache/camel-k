@@ -19,6 +19,7 @@ package trait
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 
@@ -31,6 +32,7 @@ import (
 // Catalog collects all information about traits in one place
 type Catalog struct {
 	L                 log.Logger
+	tPlatform         Trait
 	tAffinity         Trait
 	tCamel            Trait
 	tDebug            Trait
@@ -61,6 +63,7 @@ type Catalog struct {
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
 		L:                 log.Log.WithName("trait"),
+		tPlatform:         newPlatformTrait(),
 		tAffinity:         newAffinityTrait(),
 		tCamel:            newCamelTrait(),
 		tDebug:            newDebugTrait(),
@@ -100,6 +103,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 
 func (c *Catalog) allTraits() []Trait {
 	return []Trait{
+		c.tPlatform,
 		c.tAffinity,
 		c.tCamel,
 		c.tDebug,
@@ -142,6 +146,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 	switch profile {
 	case v1alpha1.TraitProfileOpenShift:
 		return []Trait{
+			c.tPlatform,
 			c.tCamel,
 			c.tDebug,
 			c.tRestDsl,
@@ -166,6 +171,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 		}
 	case v1alpha1.TraitProfileKubernetes:
 		return []Trait{
+			c.tPlatform,
 			c.tCamel,
 			c.tDebug,
 			c.tRestDsl,
@@ -190,6 +196,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 		}
 	case v1alpha1.TraitProfileKnative:
 		return []Trait{
+			c.tPlatform,
 			c.tCamel,
 			c.tDebug,
 			c.tRestDsl,
@@ -214,7 +221,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 		}
 	}
 
-	return nil
+	return c.allTraits()
 }
 
 func (c *Catalog) apply(environment *Environment) error {
@@ -223,7 +230,13 @@ func (c *Catalog) apply(environment *Environment) error {
 	}
 	traits := c.traitsFor(environment)
 
+	applicable := false
 	for _, trait := range traits {
+		if environment.Platform == nil && trait.RequiresIntegrationPlatform() {
+			c.L.Debug("Skipping trait because of missing integration platform: %s", trait.ID())
+			continue
+		}
+		applicable = true
 		enabled, err := trait.Configure(environment)
 		if err != nil {
 			return err
@@ -239,6 +252,10 @@ func (c *Catalog) apply(environment *Environment) error {
 
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
 		}
+	}
+
+	if !applicable && environment.Platform == nil {
+		return errors.New("no trait can be executed because of no integration platform found")
 	}
 
 	for _, processor := range environment.PostProcessors {

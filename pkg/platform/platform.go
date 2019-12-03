@@ -19,12 +19,17 @@ package platform
 
 import (
 	"context"
-	"errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+const (
+	// DefaultPlatformName is the standard name used for the integration platform
+	DefaultPlatformName = "camel-k"
 )
 
 // GetOrLookup --
@@ -54,7 +59,7 @@ func GetCurrentPlatform(ctx context.Context, c k8sclient.Reader, namespace strin
 			return &platform, nil
 		}
 	}
-	return nil, errors.New("no active integration platforms found in the namespace")
+	return nil, k8serrors.NewNotFound(v1alpha1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 
 // ListPlatforms returns all platforms installed in a given namespace (only one will be active)
