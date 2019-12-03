@@ -26,8 +26,8 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	"github.com/pkg/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // Apply --
@@ -72,7 +72,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.
 	}
 
 	pl, err := platform.GetCurrentPlatform(ctx, c, namespace)
-	if err != nil {
+	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}
 

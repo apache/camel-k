@@ -376,13 +376,26 @@ func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 
 func TestOnlySomeTraitsArePlatform(t *testing.T) {
 	c := NewTraitTestCatalog()
-	platformTraits := []string{"builder", "camel", "classpath", "container", "dependencies", "deployer", "deployment", "environment", "rest-dsl", "owner"}
+	platformTraits := []string{"builder", "camel", "classpath", "container", "dependencies", "deployer", "deployment", "environment", "rest-dsl", "owner", "platform"}
 
 	for _, trait := range c.allTraits() {
 		if trait.IsPlatformTrait() {
 			assert.Contains(t, platformTraits, string(trait.ID()))
 		} else {
 			assert.NotContains(t, platformTraits, trait.ID())
+		}
+	}
+}
+
+func TestOnlySomeTraitsDoNotRequireIntegrationPlatform(t *testing.T) {
+	c := NewTraitTestCatalog()
+	doNotRequirePlatformTraits := []string{"deployer", "platform"}
+
+	for _, trait := range c.allTraits() {
+		if !trait.RequiresIntegrationPlatform() {
+			assert.Contains(t, doNotRequirePlatformTraits, string(trait.ID()))
+		} else {
+			assert.NotContains(t, doNotRequirePlatformTraits, trait.ID())
 		}
 	}
 }

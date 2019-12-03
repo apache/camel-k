@@ -72,6 +72,9 @@ type Trait interface {
 
 	// IsPlatformTrait marks all fundamental traits that allow the platform to work
 	IsPlatformTrait() bool
+
+	// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
+	RequiresIntegrationPlatform() bool
 }
 
 /* Base trait */
@@ -116,6 +119,12 @@ func (trait *BaseTrait) InfluencesKit() bool {
 // IsPlatformTrait marks all fundamental traits that allow the platform to work.
 func (trait *BaseTrait) IsPlatformTrait() bool {
 	return false
+}
+
+// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
+func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
+	// All traits require a platform by default
+	return true
 }
 
 /* Environment */
@@ -208,7 +217,10 @@ func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
 		return e.IntegrationKit.Spec.Profile
 	}
 
-	return platform.GetProfile(e.Platform)
+	if e.Platform != nil {
+		return platform.GetProfile(e.Platform)
+	}
+	return ""
 }
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration

@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package integration
 
 import (
@@ -35,7 +36,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -238,30 +238,8 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
-	if target.Status.Phase == v1alpha1.IntegrationPhaseNone || target.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
-		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
-		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
-		} else {
-			target.Status.Phase = v1alpha1.IntegrationPhaseInitialization
-		}
-
-		if instance.Status.Phase != target.Status.Phase {
-			if err != nil {
-				target.Status.SetErrorCondition(v1alpha1.IntegrationConditionPlatformAvailable, v1alpha1.IntegrationConditionPlatformAvailableReason, err)
-			}
-
-			if pl != nil {
-				target.SetIntegrationPlatform(pl)
-			}
-
-			return r.update(ctx, &instance, target)
-		}
-
-		return reconcile.Result{}, err
-	}
-
 	actions := []Action{
+		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		NewBuildKitAction(),
 		NewDeployAction(),
