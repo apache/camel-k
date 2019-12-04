@@ -353,6 +353,20 @@ func platform(ns string) func() *v1alpha1.IntegrationPlatform {
 	}
 }
 
+func deletePlatform(ns string) func() bool {
+	return func() bool {
+		pl := platform(ns)()
+		if pl == nil {
+			return true
+		}
+		err := testClient.Delete(testContext, pl)
+		if err != nil {
+			log.Error(err, "Got error while deleting the platform")
+		}
+		return false
+	}
+}
+
 func setPlatformVersion(ns string, version string) error {
 	p := platform(ns)()
 	if p == nil {
