@@ -51,6 +51,7 @@ See the trait description pages for more information on a specific trait:
 * xref:traits/knative-service.adoc[Knative Service Trait]
 * xref:traits/knative.adoc[Knative Trait]
 * xref:traits/owner.adoc[Owner Trait]
+* xref:traits/platform.adoc[Platform Trait]
 * xref:traits/probes.adoc[Probes Trait]
 * xref:traits/prometheus.adoc[Prometheus Trait]
 * xref:traits/pull-secret.adoc[Pull Secret Trait]

@@ -33,6 +33,7 @@
 ** xref:traits/knative-service.adoc[Knative Service]
 ** xref:traits/knative.adoc[Knative]
 ** xref:traits/owner.adoc[Owner]
+** xref:traits/platform.adoc[Platform]
 ** xref:traits/probes.adoc[Probes]
 ** xref:traits/prometheus.adoc[Prometheus]
 ** xref:traits/pull-secret.adoc[Pull Secret]
