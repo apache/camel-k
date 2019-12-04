@@ -92,7 +92,7 @@ func (t *platformTrait) Apply(e *Environment) error {
 }
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1alpha1.IntegrationPlatform, error) {
-	pl, err := platform.GetOrLookup(t.ctx, t.client, e.Integration.Namespace, e.Integration.Status.Platform)
+	pl, err := platform.GetOrLookupAny(t.ctx, t.client, e.Integration.Namespace, e.Integration.Status.Platform)
 	if err != nil && k8serrors.IsNotFound(err) {
 		if t.CreateDefault != nil && *t.CreateDefault {
 			platformName := e.Integration.Status.Platform

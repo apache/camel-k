@@ -221,7 +221,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 		}
 	}
 
-	return c.allTraits()
+	return nil
 }
 
 func (c *Catalog) apply(environment *Environment) error {
