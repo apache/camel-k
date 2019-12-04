@@ -220,7 +220,8 @@ func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
 	if e.Platform != nil {
 		return platform.GetProfile(e.Platform)
 	}
-	return ""
+
+	return v1alpha1.DefaultTraitProfile
 }
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration

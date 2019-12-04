@@ -32,13 +32,22 @@ const (
 	DefaultPlatformName = "camel-k"
 )
 
-// GetOrLookup --
-func GetOrLookup(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1alpha1.IntegrationPlatform, error) {
+// GetOrLookupCurrent --
+func GetOrLookupCurrent(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1alpha1.IntegrationPlatform, error) {
 	if name != "" {
 		return Get(ctx, c, namespace, name)
 	}
 
 	return GetCurrentPlatform(ctx, c, namespace)
+}
+
+// GetOrLookupAny returns the named platform or any other platform in the namespace
+func GetOrLookupAny(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1alpha1.IntegrationPlatform, error) {
+	if name != "" {
+		return Get(ctx, c, namespace, name)
+	}
+
+	return getAnyPlatform(ctx, c, namespace, false)
 }
 
 // Get returns the currently installed platform
@@ -48,6 +57,11 @@ func Get(ctx context.Context, c k8sclient.Reader, namespace string, name string)
 
 // GetCurrentPlatform returns the currently installed platform
 func GetCurrentPlatform(ctx context.Context, c k8sclient.Reader, namespace string) (*v1alpha1.IntegrationPlatform, error) {
+	return getAnyPlatform(ctx, c, namespace, true)
+}
+
+// getAnyPlatform returns the currently installed platform or any platform existing in the namespace
+func getAnyPlatform(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1alpha1.IntegrationPlatform, error) {
 	lst, err := ListPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
@@ -59,6 +73,13 @@ func GetCurrentPlatform(ctx context.Context, c k8sclient.Reader, namespace strin
 			return &platform, nil
 		}
 	}
+
+	if !active && len(lst.Items) > 0 {
+		// does not require the platform to be active, just return one if present
+		res := lst.Items[0]
+		return &res, nil
+	}
+
 	return nil, k8serrors.NewNotFound(v1alpha1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 

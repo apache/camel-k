@@ -91,6 +91,8 @@ const (
 	TraitProfileKubernetes = "Kubernetes"
 	// TraitProfileKnative is used by default on OpenShift/Kubernetes clusters powered by Knative
 	TraitProfileKnative = "Knative"
+	// DefaultTraitProfile is the trait profile used as default when no other profile is set
+	DefaultTraitProfile = TraitProfileKubernetes
 )
 
 // AllTraitProfiles contains all allowed profiles

@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package build
 
 import (
@@ -151,7 +152,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	targetLog := rlog.ForBuild(target)
 
 	if target.Status.Phase == v1alpha1.BuildPhaseNone || target.Status.Phase == v1alpha1.BuildPhaseWaitingForPlatform {
-		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
+		pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
 		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1alpha1.BuildPhaseWaitingForPlatform
 		} else {
