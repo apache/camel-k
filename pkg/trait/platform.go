@@ -100,6 +100,10 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1alpha1.Integrati
 				platformName = platform.DefaultPlatformName
 			}
 			defaultPlatform := v1alpha1.NewIntegrationPlatform(e.Integration.Namespace, platformName)
+			if defaultPlatform.Labels == nil {
+				defaultPlatform.Labels = make(map[string]string)
+			}
+			defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
 			pl = &defaultPlatform
 			e.Resources.Add(pl)
 			return pl, nil

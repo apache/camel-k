@@ -109,6 +109,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	assert.Equal(t, v1alpha1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 	assert.Equal(t, 1, len(e.Resources.Items()))
 	defPlatform := v1alpha1.NewIntegrationPlatform("ns1", platform.DefaultPlatformName)
+	defPlatform.Labels = map[string]string{"camel.apache.org/platform.generated": True}
 	assert.Contains(t, e.Resources.Items(), &defPlatform)
 }
 
