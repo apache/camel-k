@@ -26,8 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -75,9 +74,9 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 
 func TestIstioInject(t *testing.T) {
 	s := serving.Service{
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{},
+		Spec: serving.ServiceSpec{
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: serving.RevisionTemplateSpec{},
 			},
 		},
 	}
@@ -97,9 +96,9 @@ func TestIstioInject(t *testing.T) {
 
 func TestIstioForcedInjectTrue(t *testing.T) {
 	s := serving.Service{
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{},
+		Spec: serving.ServiceSpec{
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: serving.RevisionTemplateSpec{},
 			},
 		},
 	}
@@ -121,9 +120,9 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 
 func TestIstioForcedInjectFalse(t *testing.T) {
 	s := serving.Service{
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{},
+		Spec: serving.ServiceSpec{
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: serving.RevisionTemplateSpec{},
 			},
 		},
 	}
@@ -145,9 +144,9 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 
 func TestIstioDisabled(t *testing.T) {
 	s := serving.Service{
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{},
+		Spec: serving.ServiceSpec{
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: serving.RevisionTemplateSpec{},
 			},
 		},
 	}

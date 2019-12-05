@@ -38,9 +38,9 @@ import (
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis/duck"
-	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // IsEnabledInNamespace returns true if we can list some basic knative objects in the given namespace
@@ -176,23 +176,23 @@ func GetSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 
 	objIdentifier := fmt.Sprintf("\"%s/%s\" (%s)", u.GetNamespace(), u.GetName(), u.GroupVersionKind())
 	// Special case v1/Service to allow it be addressable
-	if u.GroupVersionKind().Kind == "Service" && u.GroupVersionKind().Version == "v1" {
+	if u.GroupVersionKind().Kind == "Service" && u.GroupVersionKind().Group == "" && u.GroupVersionKind().Version == "v1" {
 		return fmt.Sprintf("http://%s.%s.svc/", u.GetName(), u.GetNamespace()), nil
 	}
 
-	t := duckv1alpha1.AddressableType{}
+	t := duckv1.AddressableType{}
 	err = duck.FromUnstructured(u, &t)
 	if err != nil {
 		return "", fmt.Errorf("failed to deserialize sink %s: %v", objIdentifier, err)
 	}
 
-	if t.Status.Address == nil {
-		return "", fmt.Errorf("sink %s does not contain address", objIdentifier)
+	if t.Status.Address == nil || t.Status.Address.URL == nil {
+		return "", fmt.Errorf("sink %s does not contain address or URL", objIdentifier)
 	}
 
-	url := t.Status.Address.GetURL()
-	if url.Host == "" {
+	addressURL := t.Status.Address.URL
+	if addressURL.Host == "" {
 		return "", fmt.Errorf("sink %s contains an empty hostname", objIdentifier)
 	}
-	return url.String(), nil
+	return addressURL.String(), nil
 }

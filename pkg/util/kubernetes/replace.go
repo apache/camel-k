@@ -28,8 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -121,8 +120,8 @@ func mapRequiredKnativeServiceV1Beta1Data(from runtime.Object, to runtime.Object
 }
 
 func mapRequiredKnativeServiceV1Data(from runtime.Object, to runtime.Object) {
-	if fromC, ok := from.(*servingv1.Service); ok {
-		if toC, ok := to.(*servingv1.Service); ok {
+	if fromC, ok := from.(*serving.Service); ok {
+		if toC, ok := to.(*serving.Service); ok {
 			if toC.ObjectMeta.Annotations == nil {
 				toC.ObjectMeta.Annotations = make(map[string]string)
 			}

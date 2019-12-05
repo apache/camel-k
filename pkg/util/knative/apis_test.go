@@ -32,7 +32,7 @@ func TestAPIs(t *testing.T) {
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Service",
-		APIVersion: "serving.knative.dev/v1beta1",
+		APIVersion: "serving.knative.dev/v1",
 		Name:       "ciao",
 	}, refs[0])
 
@@ -75,7 +75,7 @@ func TestAPIs(t *testing.T) {
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Service",
-		APIVersion: "serving.knative.dev/v1beta1",
+		APIVersion: "serving.knative.dev/v1",
 		Name:       "ciao",
 	}, refs[0])
 
