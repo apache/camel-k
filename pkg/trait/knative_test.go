@@ -31,8 +31,8 @@ import (
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
@@ -130,14 +130,14 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	assert.NotNil(t, cSink1)
 	assert.Equal(t, "channel-sink-1.host", cSink1.Host)
 
-	eSource1 := ne.FindService("endpoint-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
+	eSource1 := ne.FindService("endpoint-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSource1)
 	assert.Equal(t, "0.0.0.0", eSource1.Host)
 
-	eSink1 := ne.FindService("endpoint-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
+	eSink1 := ne.FindService("endpoint-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSink1)
 	assert.Equal(t, "endpoint-sink-1.host", eSink1.Host)
-	eSink2 := ne.FindService("endpoint-sink-2", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
+	eSink2 := ne.FindService("endpoint-sink-2", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSink2)
 	assert.Equal(t, "endpoint-sink-2.host", eSink2.Host)
 }
@@ -232,13 +232,21 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	err = ne.Deserialize(kc.Value)
 	assert.Nil(t, err)
 
-	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1beta1", "Service")
+	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, source)
 	assert.Equal(t, "0.0.0.0", source.Host)
 	assert.Equal(t, 8080, source.Port)
 }
 
 func NewFakeClient(namespace string) (client.Client, error) {
+	channelSourceURL, err := apis.ParseURL("http://channel-source-1.host/")
+	if err != nil {
+		return nil, err
+	}
+	channelSinkURL, err := apis.ParseURL("http://channel-sink-1.host/")
+	if err != nil {
+		return nil, err
+	}
 	sink1URL, err := apis.ParseURL("http://endpoint-sink-1.host/")
 	if err != nil {
 		return nil, err
@@ -260,7 +268,9 @@ func NewFakeClient(namespace string) (client.Client, error) {
 			Status: messaging.ChannelStatus{
 				AddressStatus: duckv1alpha1.AddressStatus{
 					Address: &duckv1alpha1.Addressable{
-						Hostname: "channel-source-1.host",
+						Addressable: duckv1beta1.Addressable{
+							URL: channelSourceURL,
+						},
 					},
 				},
 			},
@@ -277,7 +287,9 @@ func NewFakeClient(namespace string) (client.Client, error) {
 			Status: messaging.ChannelStatus{
 				AddressStatus: duckv1alpha1.AddressStatus{
 					Address: &duckv1alpha1.Addressable{
-						Hostname: "channel-sink-1.host",
+						Addressable: duckv1beta1.Addressable{
+							URL: channelSinkURL,
+						},
 					},
 				},
 			},
@@ -291,8 +303,8 @@ func NewFakeClient(namespace string) (client.Client, error) {
 				Namespace: namespace,
 				Name:      "endpoint-sink-1",
 			},
-			Status: servingv1.ServiceStatus{
-				RouteStatusFields: servingv1.RouteStatusFields{
+			Status: serving.ServiceStatus{
+				RouteStatusFields: serving.RouteStatusFields{
 
 					Address: &duckv1.Addressable{
 						URL: sink1URL,
@@ -309,8 +321,8 @@ func NewFakeClient(namespace string) (client.Client, error) {
 				Namespace: namespace,
 				Name:      "endpoint-sink-2",
 			},
-			Status: servingv1.ServiceStatus{
-				RouteStatusFields: servingv1.RouteStatusFields{
+			Status: serving.ServiceStatus{
+				RouteStatusFields: serving.RouteStatusFields{
 					Address: &duckv1.Addressable{
 						URL: sink2URL,
 					},

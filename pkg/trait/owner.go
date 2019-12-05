@@ -24,7 +24,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // The Owner trait ensures that all created resources belong to the integration being created

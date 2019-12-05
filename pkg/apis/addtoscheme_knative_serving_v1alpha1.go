@@ -18,7 +18,7 @@ limitations under the License.
 package apis
 
 import (
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 func init() {

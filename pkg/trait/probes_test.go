@@ -27,8 +27,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 func TestProbesDeps(t *testing.T) {
@@ -101,10 +100,10 @@ func TestProbesOnDeployment(t *testing.T) {
 
 func TestProbesOnKnativeService(t *testing.T) {
 	target := serving.Service{
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{
-					Spec: servingv1.RevisionSpec{
+		Spec: serving.ServiceSpec{
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: serving.RevisionTemplateSpec{
+					Spec: serving.RevisionSpec{
 						PodSpec: corev1.PodSpec{
 							Containers: []corev1.Container{
 								{

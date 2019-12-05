@@ -30,7 +30,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // The Knative trait automatically discovers addresses of Knative resources and inject them into the

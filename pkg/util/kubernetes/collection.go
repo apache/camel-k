@@ -25,8 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // A Collection is a container of Kubernetes resources
@@ -298,7 +297,7 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 			visitor(cntref)
 		}
 	})
-	c.VisitKnativeConfigurationSpec(func(cs *servingv1.ConfigurationSpec) {
+	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
 		for id := range cs.Template.Spec.Containers {
 			cntref := &cs.Template.Spec.Containers[id]
 			visitor(cntref)
@@ -311,13 +310,13 @@ func (c *Collection) VisitPodSpec(visitor func(container *corev1.PodSpec)) {
 	c.VisitDeployment(func(d *appsv1.Deployment) {
 		visitor(&d.Spec.Template.Spec)
 	})
-	c.VisitKnativeConfigurationSpec(func(cs *servingv1.ConfigurationSpec) {
+	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
 		visitor(&cs.Template.Spec.PodSpec)
 	})
 }
 
 // VisitKnativeConfigurationSpec executes the visitor function on all knative ConfigurationSpec inside serving Services
-func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *servingv1.ConfigurationSpec)) {
+func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *serving.ConfigurationSpec)) {
 	c.VisitKnativeService(func(s *serving.Service) {
 		visitor(&s.Spec.ConfigurationSpec)
 	})

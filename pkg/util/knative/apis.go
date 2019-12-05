@@ -59,17 +59,17 @@ var (
 		{
 			Kind:    "Service",
 			Group:   "serving.knative.dev",
+			Version: "v1",
+		},
+		{
+			Kind:    "Service",
+			Group:   "serving.knative.dev",
 			Version: "v1beta1",
 		},
 		{
 			Kind:    "Service",
 			Group:   "serving.knative.dev",
 			Version: "v1alpha1",
-		},
-		{
-			Kind:    "Service",
-			Group:   "serving.knative.dev",
-			Version: "v1",
 		},
 	}
 
