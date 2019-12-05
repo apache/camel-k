@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/apache/camel-k/pkg/apis/knative08compat"
 	"github.com/apache/camel-k/pkg/client"
 	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -71,7 +70,7 @@ func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
 }
 
 // CreateSubscription ---
-func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, compat08 bool) runtime.Object {
+func CreateSubscription(channelReference corev1.ObjectReference, serviceName string) runtime.Object {
 	subs := messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: messaging.SchemeGroupVersion.String(),
@@ -97,9 +96,6 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 		},
 	}
 
-	if compat08 {
-		return knative08compat.FromMessagingSubscription(subs)
-	}
 	return &subs
 }
 

@@ -69,11 +69,6 @@ Can contain simple event types or full Camel URIs (to use a specific broker).
 that can be removed in a future version of Knative, filtering is enabled only when the integration is
 listening from more than 1 channel.
 
-| knative.knative-08-compat-mode
-| bool
-| The Knative 0.8 compatibility mode will check the installed version of Knative and
-use resource versions compatible with Knative 0.8 if found on the cluster.
-
 | knative.auto
 | bool
 | Enable automatic discovery of all trait properties.
