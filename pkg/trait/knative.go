@@ -26,15 +26,11 @@ import (
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	serving "knative.dev/serving/pkg/apis/serving/v1beta1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // The Knative trait automatically discovers addresses of Knative resources and inject them into the
@@ -71,9 +67,6 @@ type knativeTrait struct {
 	// that can be removed in a future version of Knative, filtering is enabled only when the integration is
 	// listening from more than 1 channel.
 	FilterSourceChannels *bool `property:"filter-source-channels"`
-	// The Knative 0.8 compatibility mode will check the installed version of Knative and
-	// use resource versions compatible with Knative 0.8 if found on the cluster.
-	Knative08CompatMode *bool `property:"knative-08-compat-mode"`
 	// Enable automatic discovery of all trait properties.
 	Auto *bool `property:"auto"`
 }
@@ -167,14 +160,6 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			filter := true
 			t.FilterSourceChannels = &filter
 		}
-
-		if t.Knative08CompatMode == nil {
-			compat, err := t.shouldUseKnative08CompatMode(e.Integration.Namespace)
-			if err != nil {
-				return false, err
-			}
-			t.Knative08CompatMode = &compat
-		}
 	}
 
 	return true, nil
@@ -258,8 +243,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 }
 
 func (t *knativeTrait) createSubscription(e *Environment, ref *v1.ObjectReference) error {
-	compat := t.Knative08CompatMode != nil && *t.Knative08CompatMode
-	sub := knativeutil.CreateSubscription(*ref, e.Integration.Name, compat)
+	sub := knativeutil.CreateSubscription(*ref, e.Integration.Name)
 	e.Resources.Add(sub)
 	return nil
 }
@@ -428,18 +412,4 @@ func (t *knativeTrait) extractServices(names string, serviceType knativeapi.Came
 		}
 	}
 	return answer
-}
-
-func (t *knativeTrait) shouldUseKnative08CompatMode(namespace string) (bool, error) {
-	lst := messaging.SubscriptionList{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: messaging.SchemeGroupVersion.String(),
-		},
-	}
-	err := t.client.List(t.ctx, &lst, k8sclient.InNamespace(namespace))
-	if err != nil && kubernetes.IsUnknownAPIError(err) {
-		return true, nil
-	}
-	return false, err
 }

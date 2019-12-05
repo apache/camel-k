@@ -45,9 +45,6 @@ func TestKnativeService(t *testing.T) {
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
-	knativeTrait := traitCatalog.GetTrait("knative").(*knativeTrait)
-	falze := false
-	knativeTrait.Knative08CompatMode = &falze
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -187,9 +184,6 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
-	knativeTrait := traitCatalog.GetTrait("knative").(*knativeTrait)
-	falze := false
-	knativeTrait.Knative08CompatMode = &falze
 
 	environment := Environment{
 		CamelCatalog: catalog,
