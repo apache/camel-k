@@ -39,8 +39,7 @@ func TestPlatformlessRun(t *testing.T) {
 		return
 	}
 
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		// Delete the platform from the namespace before running the integration
