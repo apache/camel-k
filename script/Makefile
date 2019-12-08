@@ -163,7 +163,7 @@ clean:
 	#
 	#    https://github.com/golang/go/issues/31002
 	#
-	go clean
+	GO111MODULE=off go clean
 	rm -f camel-k
 	rm -f kamel
 	rm -f *.test
