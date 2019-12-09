@@ -126,7 +126,7 @@ func createPersistentVolumeClaim(ctx context.Context, client client.Client, plat
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: platform.Namespace,
-			Name:      platform.Spec.Build.PersistentVolumeClaim,
+			Name:      platform.Status.FullConfig.Build.PersistentVolumeClaim,
 			Labels: map[string]string{
 				"app": "camel-k",
 			},
