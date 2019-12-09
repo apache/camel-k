@@ -156,7 +156,7 @@ func publisher(ctx *builder.Context) error {
 			}
 		}
 		return false, nil
-	}, ctx.Build.Platform.Build.Timeout.Duration)
+	}, ctx.Build.Platform.Build.GetTimeout().Duration)
 
 	if err != nil {
 		return err

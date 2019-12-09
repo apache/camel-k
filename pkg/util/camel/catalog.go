@@ -90,7 +90,7 @@ func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, n
 
 	mc := maven.NewContext(tmpDir, project)
 	mc.LocalRepository = mvn.LocalRepository
-	mc.Timeout = mvn.Timeout.Duration
+	mc.Timeout = mvn.GetTimeout().Duration
 	mc.AddSystemProperty("catalog.path", tmpDir)
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
 	if providerName != "" {

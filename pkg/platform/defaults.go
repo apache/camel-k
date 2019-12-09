@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/openshift"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
@@ -84,8 +85,8 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 		log.Log.Info("No registry specified for publishing images")
 	}
 
-	if verbose && p.Status.FullConfig.Build.Maven.Timeout.Duration != 0 {
-		log.Log.Infof("Maven Timeout set to %s", p.Status.FullConfig.Build.Maven.Timeout.Duration)
+	if verbose && p.Status.FullConfig.Build.Maven.GetTimeout().Duration != 0 {
+		log.Log.Infof("Maven Timeout set to %s", p.Status.FullConfig.Build.Maven.GetTimeout().Duration)
 	}
 
 	return nil
@@ -111,31 +112,39 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 		p.Status.FullConfig.Build.PersistentVolumeClaim = p.Name
 	}
 
-	if p.Status.FullConfig.Build.Timeout.Duration != 0 {
-		d := p.Status.FullConfig.Build.Timeout.Duration.Truncate(time.Second)
+	if p.Status.FullConfig.Build.GetTimeout().Duration != 0 {
+		d := p.Status.FullConfig.Build.GetTimeout().Duration.Truncate(time.Second)
 
-		if verbose && p.Status.FullConfig.Build.Timeout.Duration != d {
-			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.FullConfig.Build.Timeout.Duration, d)
+		if verbose && p.Status.FullConfig.Build.GetTimeout().Duration != d {
+			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.FullConfig.Build.GetTimeout().Duration, d)
 		}
 
-		p.Status.FullConfig.Build.Timeout.Duration = d
+		p.Status.FullConfig.Build.Timeout = &v1.Duration{
+			Duration: d,
+		}
 	}
-	if p.Status.FullConfig.Build.Timeout.Duration == 0 {
-		p.Status.FullConfig.Build.Timeout.Duration = 5 * time.Minute
+	if p.Status.FullConfig.Build.GetTimeout().Duration == 0 {
+		p.Status.FullConfig.Build.Timeout = &v1.Duration{
+			Duration: 5 * time.Minute,
+		}
 	}
 
-	if p.Status.FullConfig.Build.Maven.Timeout.Duration != 0 {
-		d := p.Status.FullConfig.Build.Maven.Timeout.Duration.Truncate(time.Second)
+	if p.Status.FullConfig.Build.Maven.GetTimeout().Duration != 0 {
+		d := p.Status.FullConfig.Build.Maven.GetTimeout().Duration.Truncate(time.Second)
 
-		if verbose && p.Status.FullConfig.Build.Maven.Timeout.Duration != d {
-			log.Log.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.FullConfig.Build.Maven.Timeout.Duration, d)
+		if verbose && p.Status.FullConfig.Build.Maven.GetTimeout().Duration != d {
+			log.Log.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.FullConfig.Build.Maven.GetTimeout().Duration, d)
 		}
 
-		p.Status.FullConfig.Build.Maven.Timeout.Duration = d
+		p.Status.FullConfig.Build.Maven.Timeout = &v1.Duration{
+			Duration: d,
+		}
 	}
-	if p.Status.FullConfig.Build.Maven.Timeout.Duration == 0 {
-		n := p.Status.FullConfig.Build.Timeout.Duration.Seconds() * 0.75
-		p.Status.FullConfig.Build.Maven.Timeout.Duration = (time.Duration(n) * time.Second).Truncate(time.Second)
+	if p.Status.FullConfig.Build.Maven.GetTimeout().Duration == 0 {
+		n := p.Status.FullConfig.Build.GetTimeout().Duration.Seconds() * 0.75
+		p.Status.FullConfig.Build.Maven.Timeout = &v1.Duration{
+			Duration: (time.Duration(n) * time.Second).Truncate(time.Second),
+		}
 	}
 
 	if p.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef == nil && p.Status.FullConfig.Build.Maven.Settings.SecretKeyRef == nil {
@@ -179,8 +188,8 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 		log.Log.Infof("RuntimeVersion set to %s", p.Status.FullConfig.Build.RuntimeVersion)
 		log.Log.Infof("BaseImage set to %s", p.Status.FullConfig.Build.BaseImage)
 		log.Log.Infof("LocalRepository set to %s", p.Status.FullConfig.Build.Maven.LocalRepository)
-		log.Log.Infof("Timeout set to %s", p.Status.FullConfig.Build.Timeout)
-		log.Log.Infof("Maven Timeout set to %s", p.Status.FullConfig.Build.Maven.Timeout.Duration)
+		log.Log.Infof("Timeout set to %s", p.Status.FullConfig.Build.GetTimeout())
+		log.Log.Infof("Maven Timeout set to %s", p.Status.FullConfig.Build.Maven.GetTimeout().Duration)
 	}
 
 	return nil
