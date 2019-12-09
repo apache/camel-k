@@ -87,7 +87,7 @@ type ValueSource struct {
 	// Selects a key of a ConfigMap.
 	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty"`
 	// Selects a key of a secret.
-	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty" `
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 }
 
 const (
