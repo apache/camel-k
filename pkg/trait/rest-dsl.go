@@ -115,7 +115,7 @@ func (t *restDslTrait) Apply(e *Environment) error {
 
 		mc := maven.NewContext(tmpDir, project)
 		mc.LocalRepository = e.Platform.Status.FullConfig.Build.Maven.LocalRepository
-		mc.Timeout = e.Platform.Status.FullConfig.Build.Maven.Timeout.Duration
+		mc.Timeout = e.Platform.Status.FullConfig.Build.Maven.GetTimeout().Duration
 		mc.AddArgument("-Dopenapi.spec=" + in)
 		mc.AddArgument("-Ddsl.out=" + out)
 

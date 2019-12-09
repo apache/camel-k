@@ -25,6 +25,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/registry"
 	"go.uber.org/multierr"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/deploy"
@@ -235,7 +236,9 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				return err
 			}
 
-			platform.Spec.Build.Timeout.Duration = d
+			platform.Spec.Build.Timeout = &v1.Duration{
+				Duration: d,
+			}
 		}
 		if o.traitProfile != "" {
 			platform.Spec.Profile = v1alpha1.TraitProfileByName(o.traitProfile)

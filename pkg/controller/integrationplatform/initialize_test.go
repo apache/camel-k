@@ -53,11 +53,11 @@ func TestTimeouts_Default(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Status.FullConfig.Build.Timeout.Duration.Seconds() * 0.75
+	n := answer.Status.FullConfig.Build.GetTimeout().Duration.Seconds() * 0.75
 	d := (time.Duration(n) * time.Second).Truncate(time.Second)
 
-	assert.Equal(t, d, answer.Status.FullConfig.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Status.FullConfig.Build.Timeout.Duration)
+	assert.Equal(t, d, answer.Status.FullConfig.Build.Maven.GetTimeout().Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.FullConfig.Build.GetTimeout().Duration)
 }
 
 func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
@@ -69,7 +69,7 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	timeout, err := time.ParseDuration("1m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Timeout = metav1.Duration{
+	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: timeout,
 	}
 
@@ -86,11 +86,11 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Status.FullConfig.Build.Timeout.Duration.Seconds() * 0.75
+	n := answer.Status.FullConfig.Build.GetTimeout().Duration.Seconds() * 0.75
 	d := (time.Duration(n) * time.Second).Truncate(time.Second)
 
-	assert.Equal(t, d, answer.Status.FullConfig.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 1*time.Minute, answer.Status.FullConfig.Build.Timeout.Duration)
+	assert.Equal(t, d, answer.Status.FullConfig.Build.Maven.GetTimeout().Duration)
+	assert.Equal(t, 1*time.Minute, answer.Status.FullConfig.Build.GetTimeout().Duration)
 }
 
 func TestTimeouts_Truncated(t *testing.T) {
@@ -102,14 +102,14 @@ func TestTimeouts_Truncated(t *testing.T) {
 	bt, err := time.ParseDuration("5m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Timeout = metav1.Duration{
+	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: bt,
 	}
 
 	mt, err := time.ParseDuration("2m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Maven.Timeout = metav1.Duration{
+	ip.Spec.Build.Maven.Timeout = &metav1.Duration{
 		Duration: mt,
 	}
 
@@ -126,8 +126,8 @@ func TestTimeouts_Truncated(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, 2*time.Minute, answer.Status.FullConfig.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Status.FullConfig.Build.Timeout.Duration)
+	assert.Equal(t, 2*time.Minute, answer.Status.FullConfig.Build.Maven.GetTimeout().Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.FullConfig.Build.GetTimeout().Duration)
 }
 
 func TestDefaultMavenSettingsApplied(t *testing.T) {

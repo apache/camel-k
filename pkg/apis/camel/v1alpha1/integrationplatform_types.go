@@ -109,7 +109,7 @@ type IntegrationPlatformBuildSpec struct {
 	BaseImage             string                                  `json:"baseImage,omitempty"`
 	Properties            map[string]string                       `json:"properties,omitempty"`
 	Registry              IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`
-	Timeout               metav1.Duration                         `json:"timeout,omitempty"`
+	Timeout               *metav1.Duration                        `json:"timeout,omitempty"`
 	PersistentVolumeClaim string                                  `json:"persistentVolumeClaim,omitempty"`
 	Maven                 MavenSpec                               `json:"maven,omitempty"`
 	HTTPProxySecret       string                                  `json:"httpProxySecret,omitempty"`

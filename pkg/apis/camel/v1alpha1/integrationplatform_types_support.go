@@ -186,3 +186,19 @@ func (b IntegrationPlatformBuildSpec) IsKanikoCacheEnabled() bool {
 	}
 	return *b.KanikoBuildCache
 }
+
+// GetTimeout returns the specified duration or a default one
+func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
+	if b.Timeout == nil {
+		return metav1.Duration{}
+	}
+	return *b.Timeout
+}
+
+// GetTimeout returns the specified duration or a default one
+func (m MavenSpec) GetTimeout() metav1.Duration {
+	if m.Timeout == nil {
+		return metav1.Duration{}
+	}
+	return *m.Timeout
+}
