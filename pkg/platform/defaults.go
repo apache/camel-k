@@ -166,7 +166,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 			return err
 		}
 
-		p.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector {
+		p.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: p.Name + "-maven-settings",
 			},
