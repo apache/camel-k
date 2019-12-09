@@ -96,7 +96,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alph
 				CamelVersion:    env.CamelCatalog.Version,
 				RuntimeVersion:  env.CamelCatalog.RuntimeVersion,
 				RuntimeProvider: env.CamelCatalog.RuntimeProvider,
-				Platform:        env.Platform.Spec,
+				Platform:        env.Platform.Status.FullConfig,
 				Dependencies:    kit.Spec.Dependencies,
 				// TODO: sort for easy read
 				Steps:    builder.StepIDsFor(env.Steps...),

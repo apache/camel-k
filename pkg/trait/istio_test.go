@@ -64,6 +64,7 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 		EnvVars:   make([]corev1.EnvVar, 0),
 		Resources: kubernetes.NewCollection(s, d),
 	}
+	env.Platform.ResyncStatusFullConfig()
 
 	if enabled {
 		env.Integration.Spec.Traits["istio"].Configuration["enabled"] = "true"

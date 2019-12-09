@@ -99,8 +99,8 @@ func IsActive(p *v1alpha1.IntegrationPlatform) bool {
 
 // DetermineBestProfile tries to detect the best trait profile for the platform
 func DetermineBestProfile(ctx context.Context, c k8sclient.Reader, p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
-	if p.Spec.Profile != "" {
-		return p.Spec.Profile
+	if p.Status.FullConfig.Profile != "" {
+		return p.Status.FullConfig.Profile
 	}
 	if knative.IsEnabledInNamespace(ctx, c, p.Namespace) {
 		return v1alpha1.TraitProfileKnative
@@ -110,10 +110,11 @@ func DetermineBestProfile(ctx context.Context, c k8sclient.Reader, p *v1alpha1.I
 
 // GetProfile returns the current profile of the platform (if present) or returns the default one for the cluster
 func GetProfile(p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
-	if p.Spec.Profile != "" {
-		return p.Spec.Profile
+	if p.Status.FullConfig.Profile != "" {
+		return p.Status.FullConfig.Profile
 	}
-	switch p.Spec.Cluster {
+
+	switch p.Status.FullConfig.Cluster {
 	case v1alpha1.IntegrationPlatformClusterKubernetes:
 		return v1alpha1.TraitProfileKubernetes
 	case v1alpha1.IntegrationPlatformClusterOpenShift:
@@ -124,10 +125,10 @@ func GetProfile(p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
 
 // SupportsS2iPublishStrategy --
 func SupportsS2iPublishStrategy(p *v1alpha1.IntegrationPlatform) bool {
-	return p.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
+	return p.Status.FullConfig.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
 }
 
 // SupportsKanikoPublishStrategy --
 func SupportsKanikoPublishStrategy(p *v1alpha1.IntegrationPlatform) bool {
-	return p.Spec.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Spec.Build.Registry.Address != ""
+	return p.Status.FullConfig.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.FullConfig.Build.Registry.Address != ""
 }

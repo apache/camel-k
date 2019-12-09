@@ -21,6 +21,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/platform"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -54,6 +55,8 @@ func TestWarm_Succeeded(t *testing.T) {
 	c, err := test.NewFakeClient(&ip, &pod)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewWarmAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -86,6 +89,8 @@ func TestWarm_Failing(t *testing.T) {
 	c, err := test.NewFakeClient(&ip, &pod)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewWarmAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -117,6 +122,8 @@ func TestWarm_WarmingUp(t *testing.T) {
 
 	c, err := test.NewFakeClient(&ip, &pod)
 	assert.Nil(t, err)
+
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewWarmAction()
 	h.InjectLogger(log.Log)

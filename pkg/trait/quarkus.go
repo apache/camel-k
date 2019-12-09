@@ -94,7 +94,7 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 		// semver constraints
 		if exactVersionRegexp.MatchString(camelVersion) && exactVersionRegexp.MatchString(runtimeVersion) &&
 			exactVersionRegexp.MatchString(camelQuarkusVersion) && exactVersionRegexp.MatchString(quarkusVersion) {
-			catalog, err = camel.GenerateCatalogWithProvider(e.C, e.Client, ns, e.Platform.Spec.Build.Maven, camelVersion, runtimeVersion,
+			catalog, err = camel.GenerateCatalogWithProvider(e.C, e.Client, ns, e.Platform.Status.FullConfig.Build.Maven, camelVersion, runtimeVersion,
 				"quarkus",
 				[]maven.Dependency{
 					{
@@ -201,9 +201,9 @@ func (t *quarkusTrait) determineQuarkusVersion(e *Environment) string {
 		e.IntegrationKit.Status.RuntimeProvider.Quarkus.QuarkusVersion != "" {
 		return e.IntegrationKit.Status.RuntimeProvider.Quarkus.QuarkusVersion
 	}
-	if e.Platform.Spec.Build.RuntimeProvider != nil && e.Platform.Spec.Build.RuntimeProvider.Quarkus != nil &&
-		e.Platform.Spec.Build.RuntimeProvider.Quarkus.QuarkusVersion != "" {
-		return e.Platform.Spec.Build.RuntimeProvider.Quarkus.QuarkusVersion
+	if e.Platform.Status.FullConfig.Build.RuntimeProvider != nil && e.Platform.Status.FullConfig.Build.RuntimeProvider.Quarkus != nil &&
+		e.Platform.Status.FullConfig.Build.RuntimeProvider.Quarkus.QuarkusVersion != "" {
+		return e.Platform.Status.FullConfig.Build.RuntimeProvider.Quarkus.QuarkusVersion
 	}
 	return defaults.QuarkusVersionConstraint
 }
@@ -220,9 +220,9 @@ func (t *quarkusTrait) determineCamelQuarkusVersion(e *Environment) string {
 		e.IntegrationKit.Status.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
 		return e.IntegrationKit.Status.RuntimeProvider.Quarkus.CamelQuarkusVersion
 	}
-	if e.Platform.Spec.Build.RuntimeProvider != nil && e.Platform.Spec.Build.RuntimeProvider.Quarkus != nil &&
-		e.Platform.Spec.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
-		return e.Platform.Spec.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion
+	if e.Platform.Status.FullConfig.Build.RuntimeProvider != nil && e.Platform.Status.FullConfig.Build.RuntimeProvider.Quarkus != nil &&
+		e.Platform.Status.FullConfig.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
+		return e.Platform.Status.FullConfig.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion
 	}
 	return defaults.CamelQuarkusVersionConstraint
 }

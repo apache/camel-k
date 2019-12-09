@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -46,6 +47,11 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1alpha1.Inte
 	if platform.Status.Version != defaults.Version {
 		platform.Status.Version = defaults.Version
 		action.L.Info("IntegrationPlatform version updated", "version", platform.Status.Version)
+	}
+
+	// Refresh applied configuration
+	if err := platformutils.ConfigureDefaults(ctx, action.client, platform, false); err != nil {
+		return nil, err
 	}
 
 	return platform, nil

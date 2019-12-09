@@ -199,6 +199,7 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 		},
 		Resources: kubernetes.NewCollection(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	return trait, environment
 }

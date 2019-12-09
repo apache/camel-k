@@ -60,7 +60,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 
 	if t.Auto == nil || *t.Auto {
 		if t.SecretName == "" {
-			secret := e.Platform.Spec.Build.Registry.Secret
+			secret := e.Platform.Status.FullConfig.Build.Registry.Secret
 			if secret != "" {
 				key := client.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
 				obj := v1.Secret{}

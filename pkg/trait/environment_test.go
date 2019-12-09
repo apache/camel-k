@@ -66,6 +66,7 @@ func TestDefaultEnvironment(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	env.Platform.ResyncStatusFullConfig()
 
 	err = NewEnvironmentTestCatalog().apply(&env)
 
@@ -134,6 +135,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	env.Platform.ResyncStatusFullConfig()
 
 	err = NewEnvironmentTestCatalog().apply(&env)
 
@@ -202,6 +204,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	env.Platform.ResyncStatusFullConfig()
 
 	err = NewEnvironmentTestCatalog().apply(&env)
 

@@ -112,6 +112,7 @@ func TestKnativeService(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
@@ -238,6 +239,7 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
