@@ -109,7 +109,18 @@ func (command *describePlatformCommand) describeIntegrationPlatform(platform v1a
 	})
 }
 
-func getPlatformBaseImage(spec v1alpha1.IntegrationPlatformSpec) string {return spec.Build.BaseImage}
-func getPlatformCamelVersion(spec v1alpha1.IntegrationPlatformSpec) string {return spec.Build.CamelVersion}
-func getPlatformMavenLocalRepository(spec v1alpha1.IntegrationPlatformSpec) string {return spec.Build.Maven.LocalRepository}
-func getPlatformPublishStrategy(spec v1alpha1.IntegrationPlatformSpec) string {return string(spec.Build.PublishStrategy)}
+func getPlatformBaseImage(spec v1alpha1.IntegrationPlatformSpec) string {
+	return spec.Build.BaseImage
+}
+
+func getPlatformCamelVersion(spec v1alpha1.IntegrationPlatformSpec) string {
+	return spec.Build.CamelVersion
+}
+
+func getPlatformMavenLocalRepository(spec v1alpha1.IntegrationPlatformSpec) string {
+	return spec.Build.Maven.LocalRepository
+}
+
+func getPlatformPublishStrategy(spec v1alpha1.IntegrationPlatformSpec) string {
+	return string(spec.Build.PublishStrategy)
+}
