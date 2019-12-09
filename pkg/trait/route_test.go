@@ -39,7 +39,7 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	return &Environment{
+	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
@@ -92,6 +92,8 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 			},
 		),
 	}
+	res.Platform.ResyncStatusFullConfig()
+	return res
 }
 
 func TestRoute_Default(t *testing.T) {

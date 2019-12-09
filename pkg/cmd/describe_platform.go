@@ -90,17 +90,26 @@ func (command *describePlatformCommand) describeIntegrationPlatform(platform v1a
 		describeObjectMeta(w, platform.ObjectMeta)
 		w.Write(0, "Phase:\t%s\n", platform.Status.Phase)
 		w.Write(0, "Version:\t%s\n", platform.Status.Version)
-		w.Write(0, "Base Image:\t%s\n", platform.Spec.Build.BaseImage)
-		w.Write(0, "Camel Version:\t%s\n", platform.Spec.Build.CamelVersion)
-		w.Write(0, "Local Repository:\t%s\n", platform.Spec.Build.Maven.LocalRepository)
-		w.Write(0, "Publish Strategy:\t%s\n", platform.Spec.Build.PublishStrategy)
+		w.Write(0, "Base Image:\t%s\n", platform.GetActualValue(getPlatformBaseImage))
+		w.Write(0, "Camel Version:\t%s\n", platform.GetActualValue(getPlatformCamelVersion))
+		w.Write(0, "Local Repository:\t%s\n", platform.GetActualValue(getPlatformMavenLocalRepository))
+		w.Write(0, "Publish Strategy:\t%s\n", platform.GetActualValue(getPlatformPublishStrategy))
 
-		if len(platform.Spec.Resources.Kits) > 0 {
+		kits := platform.Status.FullConfig.Resources.Kits
+		if len(kits) == 0 {
+			kits = platform.Spec.Resources.Kits
+		}
+		if len(kits) > 0 {
 			w.Write(0, "Resources:\n")
 			w.Write(1, "Kits:\n")
-			for _, kit := range platform.Spec.Resources.Kits {
+			for _, kit := range kits {
 				w.Write(2, "%s\n", kit)
 			}
 		}
 	})
 }
+
+func getPlatformBaseImage(spec v1alpha1.IntegrationPlatformSpec) string {return spec.Build.BaseImage}
+func getPlatformCamelVersion(spec v1alpha1.IntegrationPlatformSpec) string {return spec.Build.CamelVersion}
+func getPlatformMavenLocalRepository(spec v1alpha1.IntegrationPlatformSpec) string {return spec.Build.Maven.LocalRepository}
+func getPlatformPublishStrategy(spec v1alpha1.IntegrationPlatformSpec) string {return string(spec.Build.PublishStrategy)}

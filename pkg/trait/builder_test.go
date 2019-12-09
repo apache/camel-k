@@ -46,7 +46,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 		e := e // pin
 		e.IntegrationKit = nil
 
-		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
+		t.Run(string(e.Platform.Status.FullConfig.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
@@ -67,7 +67,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 		e := e // pin
 		e.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
 
-		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
+		t.Run(string(e.Platform.Status.FullConfig.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
@@ -124,7 +124,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		panic(err)
 	}
 
-	return &Environment{
+	res := &Environment{
 		C:            context.TODO(),
 		CamelCatalog: c,
 		Catalog:      NewCatalog(context.TODO(), nil),
@@ -157,6 +157,10 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+
+	res.Platform.ResyncStatusFullConfig()
+
+	return res
 }
 
 func NewBuilderTestCatalog() *Catalog {

@@ -41,6 +41,7 @@ type IntegrationPlatformResourcesSpec struct {
 
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform
 type IntegrationPlatformStatus struct {
+	FullConfig IntegrationPlatformSpec        `json:"fullConfig,omitempty"`
 	Phase      IntegrationPlatformPhase       `json:"phase,omitempty"`
 	Conditions []IntegrationPlatformCondition `json:"conditions,omitempty"`
 	Version    string                         `json:"version,omitempty"`

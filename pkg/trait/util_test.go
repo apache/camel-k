@@ -54,6 +54,7 @@ func TestCollectConfigurationValues(t *testing.T) {
 			},
 		},
 	}
+	e.Platform.ResyncStatusFullConfig()
 
 	assert.Contains(t, e.CollectConfigurationValues("configmap"), "my-cm-integration")
 	assert.Contains(t, e.CollectConfigurationValues("secret"), "my-secret-platform")
@@ -90,6 +91,7 @@ func TestCollectConfigurationPairs(t *testing.T) {
 			},
 		},
 	}
+	e.Platform.ResyncStatusFullConfig()
 
 	pairs := e.CollectConfigurationPairs("property")
 	assert.Equal(t, "integration", pairs["p1"])

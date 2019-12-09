@@ -177,6 +177,7 @@ func TestTraitHierarchyDecode(t *testing.T) {
 			"autoscaling-target": "15",
 		},
 	}
+	env.Platform.ResyncStatusFullConfig()
 
 	env.IntegrationKit.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
 	env.IntegrationKit.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
@@ -433,7 +434,7 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	return &Environment{
+	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(context.TODO(), nil),
 		Integration: &v1alpha1.Integration{
@@ -471,6 +472,8 @@ func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, sc
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	res.Platform.ResyncStatusFullConfig()
+	return res
 }
 
 func NewTraitTestCatalog() *Catalog {

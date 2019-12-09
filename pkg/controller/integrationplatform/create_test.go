@@ -23,8 +23,8 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/deploy"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/rs/xid"
@@ -39,6 +39,9 @@ func TestCreate(t *testing.T) {
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 
 	c, err := test.NewFakeClient(&ip)
+	assert.Nil(t, err)
+
+	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
 	assert.Nil(t, err)
 
 	h := NewCreateAction()

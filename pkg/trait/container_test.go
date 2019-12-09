@@ -72,6 +72,7 @@ func TestContainerWithDefaults(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
@@ -134,6 +135,7 @@ func TestContainerWithCustomName(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 

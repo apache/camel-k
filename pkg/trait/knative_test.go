@@ -98,6 +98,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 		Resources:      k8sutils.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
@@ -207,6 +208,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 		Resources:      k8sutils.NewCollection(),
 		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)

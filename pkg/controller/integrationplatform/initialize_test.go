@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/rs/xid"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -42,6 +43,8 @@ func TestTimeouts_Default(t *testing.T) {
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -50,11 +53,11 @@ func TestTimeouts_Default(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Spec.Build.Timeout.Duration.Seconds() * 0.75
+	n := answer.Status.FullConfig.Build.Timeout.Duration.Seconds() * 0.75
 	d := (time.Duration(n) * time.Second).Truncate(time.Second)
 
-	assert.Equal(t, d, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.Equal(t, d, answer.Status.FullConfig.Build.Maven.Timeout.Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.FullConfig.Build.Timeout.Duration)
 }
 
 func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
@@ -73,6 +76,8 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -81,11 +86,11 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Spec.Build.Timeout.Duration.Seconds() * 0.75
+	n := answer.Status.FullConfig.Build.Timeout.Duration.Seconds() * 0.75
 	d := (time.Duration(n) * time.Second).Truncate(time.Second)
 
-	assert.Equal(t, d, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 1*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.Equal(t, d, answer.Status.FullConfig.Build.Maven.Timeout.Duration)
+	assert.Equal(t, 1*time.Minute, answer.Status.FullConfig.Build.Timeout.Duration)
 }
 
 func TestTimeouts_Truncated(t *testing.T) {
@@ -111,6 +116,8 @@ func TestTimeouts_Truncated(t *testing.T) {
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -119,8 +126,8 @@ func TestTimeouts_Truncated(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, 2*time.Minute, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.Equal(t, 2*time.Minute, answer.Status.FullConfig.Build.Maven.Timeout.Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.FullConfig.Build.Timeout.Duration)
 }
 
 func TestDefaultMavenSettingsApplied(t *testing.T) {
@@ -132,6 +139,8 @@ func TestDefaultMavenSettingsApplied(t *testing.T) {
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -140,7 +149,8 @@ func TestDefaultMavenSettingsApplied(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.NotNil(t, answer.Spec.Build.Maven.Settings.ConfigMapKeyRef)
-	assert.Equal(t, "test-platform-maven-settings", answer.Spec.Build.Maven.Settings.ConfigMapKeyRef.Name)
-	assert.Equal(t, "settings.xml", answer.Spec.Build.Maven.Settings.ConfigMapKeyRef.Key)
+	assert.NotNil(t, answer.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef)
+	assert.Nil(t, answer.Spec.Build.Maven.Settings.ConfigMapKeyRef)
+	assert.Equal(t, "test-platform-maven-settings", answer.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef.Name)
+	assert.Equal(t, "settings.xml", answer.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef.Key)
 }

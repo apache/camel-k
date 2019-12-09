@@ -73,6 +73,10 @@ func (in *IntegrationPlatform) Configurations() []ConfigurationSpec {
 		return []ConfigurationSpec{}
 	}
 
+	if len(in.Status.FullConfig.Configuration) > 0 {
+		return in.Status.FullConfig.Configuration
+	}
+
 	return in.Spec.Configuration
 }
 
@@ -82,6 +86,21 @@ func (in *IntegrationPlatform) AddConfiguration(confType string, confValue strin
 		Type:  confType,
 		Value: confValue,
 	})
+}
+
+// GetActualValue can be used to extract information the platform spec or its derived config in the status
+func (in *IntegrationPlatform) GetActualValue(extractor func(spec IntegrationPlatformSpec) string) string {
+	res := extractor(in.Status.FullConfig)
+	if res == "" {
+		res = extractor(in.Spec)
+	}
+	return res
+}
+
+// ResyncStatusFullConfig copies the spec configuration into the status-fullConfig field.
+func (in *IntegrationPlatform) ResyncStatusFullConfig() {
+	cl := in.Spec.DeepCopy()
+	in.Status.FullConfig = *cl
 }
 
 // GetCondition returns the condition with the provided type.
