@@ -191,14 +191,6 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 		}
 	}
 
-	var knativeInstalled bool
-	if knativeInstalled, err = knative.IsInstalled(ctx, c); err != nil {
-		return nil, err
-	}
-	if knativeInstalled {
-		pl.Spec.Profile = v1alpha1.TraitProfileKnative
-	}
-
 	return pl, nil
 }
 
