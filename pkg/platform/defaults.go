@@ -40,38 +40,38 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 	p.ResyncStatusFullConfig()
 
 	// update missing fields in the resource
-	if p.Status.FullConfig.Cluster == "" {
+	if p.Status.Cluster == "" {
 		// determine the kind of cluster the platform is installed into
 		isOpenShift, err := openshift.IsOpenShift(c)
 		switch {
 		case err != nil:
 			return err
 		case isOpenShift:
-			p.Status.FullConfig.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+			p.Status.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
 		default:
-			p.Status.FullConfig.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
+			p.Status.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
 		}
 	}
 
-	if p.Status.FullConfig.Build.PublishStrategy == "" {
-		if p.Status.FullConfig.Cluster == v1alpha1.IntegrationPlatformClusterOpenShift {
-			p.Status.FullConfig.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
+	if p.Status.Build.PublishStrategy == "" {
+		if p.Status.Cluster == v1alpha1.IntegrationPlatformClusterOpenShift {
+			p.Status.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
-			p.Status.FullConfig.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko
+			p.Status.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko
 		}
 	}
 
-	if p.Status.FullConfig.Build.BuildStrategy == "" {
+	if p.Status.Build.BuildStrategy == "" {
 		// If the operator is global, a global build strategy should be used
 		if IsCurrentOperatorGlobal() {
 			// The only global strategy we have for now
-			p.Status.FullConfig.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+			p.Status.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
 		} else {
-			if p.Status.FullConfig.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+			if p.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
 				// The build output has to be shared with Kaniko via a persistent volume
-				p.Status.FullConfig.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+				p.Status.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
 			} else {
-				p.Status.FullConfig.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
+				p.Status.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
 			}
 		}
 	}
@@ -81,75 +81,75 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 		return err
 	}
 
-	if verbose && p.Status.FullConfig.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.FullConfig.Build.Registry.Address == "" {
+	if verbose && p.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.Registry.Address == "" {
 		log.Log.Info("No registry specified for publishing images")
 	}
 
-	if verbose && p.Status.FullConfig.Build.Maven.GetTimeout().Duration != 0 {
-		log.Log.Infof("Maven Timeout set to %s", p.Status.FullConfig.Build.Maven.GetTimeout().Duration)
+	if verbose && p.Status.Build.Maven.GetTimeout().Duration != 0 {
+		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.Maven.GetTimeout().Duration)
 	}
 
 	return nil
 }
 
 func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.IntegrationPlatform, verbose bool) error {
-	if p.Status.FullConfig.Profile == "" {
-		p.Status.FullConfig.Profile = DetermineBestProfile(ctx, c, p)
+	if p.Status.Profile == "" {
+		p.Status.Profile = DetermineBestProfile(ctx, c, p)
 	}
-	if p.Status.FullConfig.Build.CamelVersion == "" {
-		p.Status.FullConfig.Build.CamelVersion = defaults.CamelVersionConstraint
+	if p.Status.Build.CamelVersion == "" {
+		p.Status.Build.CamelVersion = defaults.CamelVersionConstraint
 	}
-	if p.Status.FullConfig.Build.RuntimeVersion == "" {
-		p.Status.FullConfig.Build.RuntimeVersion = defaults.RuntimeVersionConstraint
+	if p.Status.Build.RuntimeVersion == "" {
+		p.Status.Build.RuntimeVersion = defaults.RuntimeVersionConstraint
 	}
-	if p.Status.FullConfig.Build.BaseImage == "" {
-		p.Status.FullConfig.Build.BaseImage = defaults.BaseImage
+	if p.Status.Build.BaseImage == "" {
+		p.Status.Build.BaseImage = defaults.BaseImage
 	}
-	if p.Status.FullConfig.Build.Maven.LocalRepository == "" {
-		p.Status.FullConfig.Build.Maven.LocalRepository = defaults.LocalRepository
+	if p.Status.Build.Maven.LocalRepository == "" {
+		p.Status.Build.Maven.LocalRepository = defaults.LocalRepository
 	}
-	if p.Status.FullConfig.Build.PersistentVolumeClaim == "" {
-		p.Status.FullConfig.Build.PersistentVolumeClaim = p.Name
+	if p.Status.Build.PersistentVolumeClaim == "" {
+		p.Status.Build.PersistentVolumeClaim = p.Name
 	}
 
-	if p.Status.FullConfig.Build.GetTimeout().Duration != 0 {
-		d := p.Status.FullConfig.Build.GetTimeout().Duration.Truncate(time.Second)
+	if p.Status.Build.GetTimeout().Duration != 0 {
+		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)
 
-		if verbose && p.Status.FullConfig.Build.GetTimeout().Duration != d {
-			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.FullConfig.Build.GetTimeout().Duration, d)
+		if verbose && p.Status.Build.GetTimeout().Duration != d {
+			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetTimeout().Duration, d)
 		}
 
-		p.Status.FullConfig.Build.Timeout = &v1.Duration{
+		p.Status.Build.Timeout = &v1.Duration{
 			Duration: d,
 		}
 	}
-	if p.Status.FullConfig.Build.GetTimeout().Duration == 0 {
-		p.Status.FullConfig.Build.Timeout = &v1.Duration{
+	if p.Status.Build.GetTimeout().Duration == 0 {
+		p.Status.Build.Timeout = &v1.Duration{
 			Duration: 5 * time.Minute,
 		}
 	}
 
-	if p.Status.FullConfig.Build.Maven.GetTimeout().Duration != 0 {
-		d := p.Status.FullConfig.Build.Maven.GetTimeout().Duration.Truncate(time.Second)
+	if p.Status.Build.Maven.GetTimeout().Duration != 0 {
+		d := p.Status.Build.Maven.GetTimeout().Duration.Truncate(time.Second)
 
-		if verbose && p.Status.FullConfig.Build.Maven.GetTimeout().Duration != d {
-			log.Log.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.FullConfig.Build.Maven.GetTimeout().Duration, d)
+		if verbose && p.Status.Build.Maven.GetTimeout().Duration != d {
+			log.Log.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.Maven.GetTimeout().Duration, d)
 		}
 
-		p.Status.FullConfig.Build.Maven.Timeout = &v1.Duration{
+		p.Status.Build.Maven.Timeout = &v1.Duration{
 			Duration: d,
 		}
 	}
-	if p.Status.FullConfig.Build.Maven.GetTimeout().Duration == 0 {
-		n := p.Status.FullConfig.Build.GetTimeout().Duration.Seconds() * 0.75
-		p.Status.FullConfig.Build.Maven.Timeout = &v1.Duration{
+	if p.Status.Build.Maven.GetTimeout().Duration == 0 {
+		n := p.Status.Build.GetTimeout().Duration.Seconds() * 0.75
+		p.Status.Build.Maven.Timeout = &v1.Duration{
 			Duration: (time.Duration(n) * time.Second).Truncate(time.Second),
 		}
 	}
 
-	if p.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef == nil && p.Status.FullConfig.Build.Maven.Settings.SecretKeyRef == nil {
+	if p.Status.Build.Maven.Settings.ConfigMapKeyRef == nil && p.Status.Build.Maven.Settings.SecretKeyRef == nil {
 		var repositories []maven.Repository
-		for i, c := range p.Status.FullConfig.Configuration {
+		for i, c := range p.Status.Configuration {
 			if c.Type == "repository" {
 				repository := maven.NewRepository(c.Value)
 				if repository.ID == "" {
@@ -166,7 +166,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 			return err
 		}
 
-		p.Status.FullConfig.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
+		p.Status.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: p.Name + "-maven-settings",
 			},
@@ -174,22 +174,22 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 		}
 	}
 
-	if p.Status.FullConfig.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.FullConfig.Build.KanikoBuildCache == nil {
+	if p.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.KanikoBuildCache == nil {
 		// Default to using Kaniko cache warmer
 		defaultKanikoBuildCache := true
-		p.Status.FullConfig.Build.KanikoBuildCache = &defaultKanikoBuildCache
+		p.Status.Build.KanikoBuildCache = &defaultKanikoBuildCache
 		if verbose {
-			log.Log.Infof("Kaniko cache set to %t", *p.Status.FullConfig.Build.KanikoBuildCache)
+			log.Log.Infof("Kaniko cache set to %t", *p.Status.Build.KanikoBuildCache)
 		}
 	}
 
 	if verbose {
-		log.Log.Infof("CamelVersion set to %s", p.Status.FullConfig.Build.CamelVersion)
-		log.Log.Infof("RuntimeVersion set to %s", p.Status.FullConfig.Build.RuntimeVersion)
-		log.Log.Infof("BaseImage set to %s", p.Status.FullConfig.Build.BaseImage)
-		log.Log.Infof("LocalRepository set to %s", p.Status.FullConfig.Build.Maven.LocalRepository)
-		log.Log.Infof("Timeout set to %s", p.Status.FullConfig.Build.GetTimeout())
-		log.Log.Infof("Maven Timeout set to %s", p.Status.FullConfig.Build.Maven.GetTimeout().Duration)
+		log.Log.Infof("CamelVersion set to %s", p.Status.Build.CamelVersion)
+		log.Log.Infof("RuntimeVersion set to %s", p.Status.Build.RuntimeVersion)
+		log.Log.Infof("BaseImage set to %s", p.Status.Build.BaseImage)
+		log.Log.Infof("LocalRepository set to %s", p.Status.Build.Maven.LocalRepository)
+		log.Log.Infof("Timeout set to %s", p.Status.Build.GetTimeout())
+		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.Maven.GetTimeout().Duration)
 	}
 
 	return nil

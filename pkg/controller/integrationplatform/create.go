@@ -56,10 +56,10 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		}
 	}
 
-	if l := len(platform.Status.FullConfig.Resources.Kits); l > 0 {
+	if l := len(platform.Status.Resources.Kits); l > 0 {
 		res := make([]string, 0, l)
 
-		for _, c := range platform.Status.FullConfig.Resources.Kits {
+		for _, c := range platform.Status.Resources.Kits {
 			//
 			// Assuming that if the resource ends with a yaml extension, the full
 			// resource name is provided

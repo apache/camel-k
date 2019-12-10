@@ -279,8 +279,8 @@ func (c *Catalog) GetTrait(id string) Trait {
 }
 
 func (c *Catalog) configure(env *Environment) error {
-	if env.Platform != nil && env.Platform.Status.FullConfig.Traits != nil {
-		if err := c.configureTraits(env.Platform.Status.FullConfig.Traits); err != nil {
+	if env.Platform != nil && env.Platform.Status.Traits != nil {
+		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
 			return err
 		}
 	}

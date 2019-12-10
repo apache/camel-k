@@ -46,7 +46,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 		e := e // pin
 		e.IntegrationKit = nil
 
-		t.Run(string(e.Platform.Status.FullConfig.Cluster), func(t *testing.T) {
+		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
@@ -67,7 +67,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 		e := e // pin
 		e.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
 
-		t.Run(string(e.Platform.Status.FullConfig.Cluster), func(t *testing.T) {
+		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
