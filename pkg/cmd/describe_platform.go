@@ -95,7 +95,7 @@ func (command *describePlatformCommand) describeIntegrationPlatform(platform v1a
 		w.Write(0, "Local Repository:\t%s\n", platform.GetActualValue(getPlatformMavenLocalRepository))
 		w.Write(0, "Publish Strategy:\t%s\n", platform.GetActualValue(getPlatformPublishStrategy))
 
-		kits := platform.Status.FullConfig.Resources.Kits
+		kits := platform.Status.Resources.Kits
 		if len(kits) == 0 {
 			kits = platform.Spec.Resources.Kits
 		}

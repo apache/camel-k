@@ -114,12 +114,12 @@ func (t *restDslTrait) Apply(e *Environment) error {
 		}
 
 		mc := maven.NewContext(tmpDir, project)
-		mc.LocalRepository = e.Platform.Status.FullConfig.Build.Maven.LocalRepository
-		mc.Timeout = e.Platform.Status.FullConfig.Build.Maven.GetTimeout().Duration
+		mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
+		mc.Timeout = e.Platform.Status.Build.Maven.GetTimeout().Duration
 		mc.AddArgument("-Dopenapi.spec=" + in)
 		mc.AddArgument("-Ddsl.out=" + out)
 
-		settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Status.FullConfig.Build.Maven.Settings)
+		settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Status.Build.Maven.Settings)
 		if err != nil {
 			return err
 		}

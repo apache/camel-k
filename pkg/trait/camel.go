@@ -105,7 +105,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, ru
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(camelVersion) && exactVersionRegexp.MatchString(runtimeVersion) {
-			catalog, err = camel.GenerateCatalog(e.C, e.Client, ns, e.Platform.Status.FullConfig.Build.Maven, camelVersion, runtimeVersion)
+			catalog, err = camel.GenerateCatalog(e.C, e.Client, ns, e.Platform.Status.Build.Maven, camelVersion, runtimeVersion)
 			if err != nil {
 				return err
 			}
@@ -148,7 +148,7 @@ func (t *camelTrait) determineCamelVersion(e *Environment) string {
 	if e.IntegrationKit != nil && e.IntegrationKit.Status.CamelVersion != "" {
 		return e.IntegrationKit.Status.CamelVersion
 	}
-	return e.Platform.Status.FullConfig.Build.CamelVersion
+	return e.Platform.Status.Build.CamelVersion
 }
 
 func (t *camelTrait) determineRuntimeVersion(e *Environment) string {
@@ -161,7 +161,7 @@ func (t *camelTrait) determineRuntimeVersion(e *Environment) string {
 	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
 		return e.IntegrationKit.Status.RuntimeVersion
 	}
-	return e.Platform.Status.FullConfig.Build.RuntimeVersion
+	return e.Platform.Status.Build.RuntimeVersion
 }
 
 // IsPlatformTrait overrides base class method
