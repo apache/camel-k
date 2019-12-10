@@ -26,62 +26,95 @@ import (
 
 var (
 	// KnownChannelKinds are known channel kinds belonging to Knative
-	KnownChannelKinds = []schema.GroupVersionKind{
+	KnownChannelKinds = []GroupVersionKindResource{
 		{
-			Kind:    "Channel",
-			Group:   "messaging.knative.dev",
-			Version: "v1alpha1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Channel",
+				Group:   "messaging.knative.dev",
+				Version: "v1alpha1",
+			},
+			Resource: "channels",
 		},
 		{
-			Kind:    "Channel",
-			Group:   "eventing.knative.dev",
-			Version: "v1alpha1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Channel",
+				Group:   "eventing.knative.dev",
+				Version: "v1alpha1",
+			},
+			Resource: "channels",
 		},
 		{
-			Kind:    "InMemoryChannel",
-			Group:   "messaging.knative.dev",
-			Version: "v1alpha1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "InMemoryChannel",
+				Group:   "messaging.knative.dev",
+				Version: "v1alpha1",
+			},
+			Resource: "inmemorychannels",
 		},
 		{
-			Kind:    "KafkaChannel",
-			Group:   "messaging.knative.dev",
-			Version: "v1alpha1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "KafkaChannel",
+				Group:   "messaging.knative.dev",
+				Version: "v1alpha1",
+			},
+			Resource: "kafkachannels",
 		},
 		{
-			Kind:    "NatssChannel",
-			Group:   "messaging.knative.dev",
-			Version: "v1alpha1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "NatssChannel",
+				Group:   "messaging.knative.dev",
+				Version: "v1alpha1",
+			},
+			Resource: "natsschannels",
 		},
 	}
 
 	// KnownEndpointKinds are known endpoint kinds belonging to Knative
-	KnownEndpointKinds = []schema.GroupVersionKind{
+	KnownEndpointKinds = []GroupVersionKindResource{
 		{
-			Kind:    "Service",
-			Group:   "serving.knative.dev",
-			Version: "v1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Service",
+				Group:   "serving.knative.dev",
+				Version: "v1",
+			},
+			Resource: "services",
 		},
 		{
-			Kind:    "Service",
-			Group:   "serving.knative.dev",
-			Version: "v1beta1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Service",
+				Group:   "serving.knative.dev",
+				Version: "v1beta1",
+			},
+			Resource: "services",
 		},
 		{
-			Kind:    "Service",
-			Group:   "serving.knative.dev",
-			Version: "v1alpha1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Service",
+				Group:   "serving.knative.dev",
+				Version: "v1alpha1",
+			},
+			Resource: "services",
 		},
 	}
 
 	// KnownBrokerKinds are known broker kinds belonging to Knative
-	KnownBrokerKinds = []schema.GroupVersionKind{
+	KnownBrokerKinds = []GroupVersionKindResource{
 		{
-			Kind:    "Broker",
-			Group:   "eventing.knative.dev",
-			Version: "v1alpha1",
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Broker",
+				Group:   "eventing.knative.dev",
+				Version: "v1alpha1",
+			},
+			Resource: "brokers",
 		},
 	}
 )
+
+// GroupVersionKindResource --
+type GroupVersionKindResource struct {
+	schema.GroupVersionKind
+	Resource string
+}
 
 func init() {
 	// Channels are also endpoints
@@ -107,7 +140,7 @@ func FillMissingReferenceData(serviceType knativev1.CamelServiceType, ref v1.Obj
 }
 
 // nolint: gocritic
-func fillMissingReferenceDataWith(serviceTypes []schema.GroupVersionKind, ref v1.ObjectReference) []v1.ObjectReference {
+func fillMissingReferenceDataWith(serviceTypes []GroupVersionKindResource, ref v1.ObjectReference) []v1.ObjectReference {
 	list := make([]v1.ObjectReference, 0)
 	if ref.APIVersion == "" && ref.Kind == "" {
 		for _, st := range serviceTypes {
@@ -134,7 +167,7 @@ func fillMissingReferenceDataWith(serviceTypes []schema.GroupVersionKind, ref v1
 	return list
 }
 
-func getGroupVersions(serviceTypes []schema.GroupVersionKind, kind string) []string {
+func getGroupVersions(serviceTypes []GroupVersionKindResource, kind string) []string {
 	res := make([]string, 0)
 	for _, st := range serviceTypes {
 		if st.Kind == kind {
@@ -144,7 +177,7 @@ func getGroupVersions(serviceTypes []schema.GroupVersionKind, kind string) []str
 	return res
 }
 
-func getKinds(serviceTypes []schema.GroupVersionKind, apiVersion string) []string {
+func getKinds(serviceTypes []GroupVersionKindResource, apiVersion string) []string {
 	res := make([]string, 0)
 	for _, st := range serviceTypes {
 		if st.GroupVersion().String() == apiVersion {

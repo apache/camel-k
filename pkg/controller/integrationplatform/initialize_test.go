@@ -39,6 +39,7 @@ func TestTimeouts_Default(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
@@ -65,6 +66,7 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	timeout, err := time.ParseDuration("1m1ms")
 	assert.Nil(t, err)
@@ -98,6 +100,7 @@ func TestTimeouts_Truncated(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	bt, err := time.ParseDuration("5m1ms")
 	assert.Nil(t, err)
@@ -135,6 +138,7 @@ func TestDefaultMavenSettingsApplied(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = "test-platform"
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)

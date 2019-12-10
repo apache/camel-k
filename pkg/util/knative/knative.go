@@ -24,51 +24,20 @@ import (
 
 	"github.com/apache/camel-k/pkg/client"
 	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/log"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/kubernetes"
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis/duck"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
+	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-// IsEnabledInNamespace returns true if we can list some basic knative objects in the given namespace
-func IsEnabledInNamespace(ctx context.Context, c k8sclient.Reader, namespace string) bool {
-	channels := messaging.ChannelList{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Channel",
-			APIVersion: eventing.SchemeGroupVersion.String(),
-		},
-	}
-	if err := c.List(ctx, &channels, k8sclient.InNamespace(namespace)); err != nil {
-		log.Infof("could not find knative in namespace %s, got error: %v", namespace, err)
-		return false
-	}
-	return true
-}
-
-// IsInstalled returns true if we are connected to a cluster with Knative installed
-func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
-	// check knative eventing, since serving may be on v1beta1 in some clusters
-	_, err := c.Discovery().ServerResourcesForGroupVersion("eventing.knative.dev/v1alpha1")
-	if err != nil && k8serrors.IsNotFound(err) {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	}
-	return true, nil
-}
 
 // CreateSubscription ---
 func CreateSubscription(channelReference corev1.ObjectReference, serviceName string) runtime.Object {
