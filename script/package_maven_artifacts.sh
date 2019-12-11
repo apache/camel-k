@@ -30,6 +30,8 @@ cd ${location}/..
 
 if [ "$strategy" = "copy" ]; then
     ./mvnw \
+        -V \
+        --no-transfer-progress \
         -f build/maven/pom-runtime.xml \
         -DoutputDirectory=$PWD/build/_maven_output \
         -Druntime.version=$version \
@@ -37,6 +39,8 @@ if [ "$strategy" = "copy" ]; then
         dependency:copy-dependencies
 elif [ "$strategy" = "download" ]; then
     ./mvnw \
+        -V \
+        --no-transfer-progress \
         -f build/maven/pom-runtime.xml \
         -Dmaven.repo.local=$PWD/build/_maven_output \
         -Druntime.version=$version \
