@@ -71,7 +71,9 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.AddCommand(newCmdOperator())
 	cmd.AddCommand(newCmdBuilder(&options))
 
-	bindPFlagsHierarchy(&cmd)
+	if err := bindPFlagsHierarchy(&cmd); err != nil {
+		return nil, err
+	}
 
 	configName := os.Getenv("KAMEL_CONFIG_NAME")
 	if configName != "" {
