@@ -79,6 +79,16 @@ func init() {
 
 	// Defaults for testing
 	gomega.SetDefaultEventuallyTimeout(60 * time.Second)
+
+	imageName := os.Getenv("CAMEL_K_TEST_IMAGE_NAME")
+	if imageName != "" {
+		testImageName = imageName
+	}
+	imageVersion := os.Getenv("CAMEL_K_TEST_IMAGE_VERSION")
+	if imageVersion != "" {
+		testImageVersion = imageVersion
+	}
+
 }
 
 func newTestClient() (client.Client, error) {
