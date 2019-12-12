@@ -20,6 +20,7 @@ package util
 import (
 	"bufio"
 	"fmt"
+	"testing"
 
 	"github.com/apache/camel-k/pkg/client"
 	v1 "k8s.io/api/core/v1"
@@ -27,41 +28,41 @@ import (
 )
 
 // Dump prints all information about the given namespace to debug errors
-func Dump(c client.Client, ns string) error {
+func Dump(c client.Client, ns string, t *testing.T) error {
 
-	fmt.Printf("-------------------- start dumping namespace %s --------------------\n", ns)
+	t.Logf("-------------------- start dumping namespace %s --------------------\n", ns)
 
 	lst, err := c.CoreV1().Pods(ns).List(metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Found %d pods:\n", len(lst.Items))
+	t.Logf("Found %d pods:\n", len(lst.Items))
 	for _, pod := range lst.Items {
-		fmt.Printf("name=%s\n", pod.Name)
-		dumpConditions("  ", pod.Status.Conditions)
-		fmt.Printf("  logs:\n")
+		t.Logf("name=%s\n", pod.Name)
+		dumpConditions("  ", pod.Status.Conditions, t)
+		t.Logf("  logs:\n")
 		for _, container := range pod.Spec.Containers {
 			pad := "    "
-			fmt.Printf("%s%s\n", pad, container.Name)
-			err := dumpLogs(c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name)
+			t.Logf("%s%s\n", pad, container.Name)
+			err := dumpLogs(c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, t)
 			if err != nil {
-				fmt.Printf("%sERROR while reading the logs: %v\n", pad, err)
+				t.Logf("%sERROR while reading the logs: %v\n", pad, err)
 			}
 		}
 	}
 
-	fmt.Printf("-------------------- end dumping namespace %s --------------------\n", ns)
+	t.Logf("-------------------- end dumping namespace %s --------------------\n", ns)
 	return nil
 }
 
-func dumpConditions(prefix string, conditions []v1.PodCondition) {
+func dumpConditions(prefix string, conditions []v1.PodCondition, t *testing.T) {
 	for _, cond := range conditions {
-		fmt.Printf("%scondition type=%s, status=%s, reason=%s, message=%q\n", prefix, cond.Type, cond.Status, cond.Reason, cond.Message)
+		t.Logf("%scondition type=%s, status=%s, reason=%s, message=%q\n", prefix, cond.Type, cond.Status, cond.Reason, cond.Message)
 	}
 }
 
-func dumpLogs(c client.Client, prefix string, ns string, name string, container string) error {
+func dumpLogs(c client.Client, prefix string, ns string, name string, container string, t *testing.T) error {
 	lines := int64(50)
 	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{
 		Container: container,
@@ -75,10 +76,10 @@ func dumpLogs(c client.Client, prefix string, ns string, name string, container 
 	printed := false
 	for scanner.Scan() {
 		printed = true
-		fmt.Printf("%s%s\n", prefix, scanner.Text())
+		t.Logf("%s%s\n", prefix, scanner.Text())
 	}
 	if !printed {
-		fmt.Printf("%s[no logs available]\n", prefix)
+		t.Logf("%s[no logs available]\n", prefix)
 	}
 	return nil
 }
