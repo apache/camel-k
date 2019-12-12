@@ -37,6 +37,7 @@ func TestCreate(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
