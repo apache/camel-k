@@ -16,7 +16,6 @@ items:
       targetPort: 8080
     selector:
       app: lra-coordinator
-      deploymentconfig: lra-coordinator
     type: ClusterIP
 - apiVersion: v1
   kind: PersistentVolumeClaim
@@ -31,27 +30,8 @@ items:
     resources:
       requests:
         storage: 200Mi
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    labels:
-      app: lra-coordinator
-      template: lra-coordinator
-    name: lra-coordinator
-  spec:
-    lookupPolicy:
-      local: true
-    tags:
-    - from:
-        kind: DockerImage
-        name: docker.io/jbosstm/lra-coordinator:5.9.4.Final
-      generation: 0
-      importPolicy: {}
-      name: "5.9.4.Final"
-      referencePolicy:
-        type: Source
-- apiVersion: v1
-  kind: DeploymentConfig
+- apiVersion: apps/v1
+  kind: Deployment
   metadata:
     generation: 1
     labels:
@@ -61,15 +41,14 @@ items:
   spec:
     replicas: 1
     selector:
-      app: lra-coordinator
-      deploymentconfig: lra-coordinator
+      matchLabels:
+        app: lra-coordinator
     strategy:
       type: Recreate
     template:
       metadata:
         labels:
           app: lra-coordinator
-          deploymentconfig: lra-coordinator
       spec:
         containers:
         - imagePullPolicy: IfNotPresent
@@ -83,6 +62,7 @@ items:
               scheme: HTTP
             initialDelaySeconds: 180
           name: lra-coordinator
+          image: docker.io/jbosstm/lra-coordinator:5.9.4.Final
           ports:
           - containerPort: 8080
             protocol: TCP
@@ -99,13 +79,3 @@ items:
         - name: lra-coordinator-data
           persistentVolumeClaim:
             claimName: lra-coordinator
-    triggers:
-    - type: ConfigChange
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-        - lra-coordinator
-        from:
-          kind: ImageStreamTag
-          name: "lra-coordinator:5.9.4.Final"
-      type: ImageChange
