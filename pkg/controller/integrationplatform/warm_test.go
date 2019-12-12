@@ -37,6 +37,7 @@ func TestWarm_Succeeded(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -71,6 +72,7 @@ func TestWarm_Failing(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -105,6 +107,7 @@ func TestWarm_WarmingUp(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
 	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
 
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
