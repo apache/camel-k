@@ -569,8 +569,9 @@ func withNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
 func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 	defer func() {
 		if t.Failed() {
-			if err := util.Dump(testClient, ns); err != nil {
-				fmt.Printf("Error while dumping namespace %s: %v\n", ns, err)
+
+			if err := util.Dump(testClient, ns, t); err != nil {
+				t.Logf("Error while dumping namespace %s: %v\n", ns, err)
 			}
 		}
 	}()
