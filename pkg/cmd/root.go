@@ -46,6 +46,17 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	options := RootCmdOptions{
 		Context: ctx,
 	}
+
+	var err error
+	cmd := kamelPreAddCommandInit(options)
+	cmd = addKamelSubcommands(*cmd, options)
+	cmd, err = kamelPostAddCommandInit(*cmd)
+
+	return cmd, err
+}
+
+func kamelPreAddCommandInit(options RootCmdOptions) *cobra.Command {
+
 	var cmd = cobra.Command{
 		BashCompletionFunction: bashCompletionFunction,
 		PersistentPreRunE:      options.preRun,
@@ -57,20 +68,10 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", os.Getenv("KUBECONFIG"), "Path to the config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 
-	cmd.AddCommand(newCmdCompletion(&cmd))
-	cmd.AddCommand(newCmdVersion())
-	cmd.AddCommand(newCmdRun(&options))
-	cmd.AddCommand(newCmdGet(&options))
-	cmd.AddCommand(newCmdDelete(&options))
-	cmd.AddCommand(newCmdInstall(&options))
-	cmd.AddCommand(newCmdLog(&options))
-	cmd.AddCommand(newCmdKit(&options))
-	cmd.AddCommand(newCmdReset(&options))
-	cmd.AddCommand(newCmdDescribe(&options))
-	cmd.AddCommand(newCmdRebuild(&options))
-	cmd.AddCommand(newCmdOperator())
-	cmd.AddCommand(newCmdBuilder(&options))
+	return &cmd
+}
 
+func kamelPostAddCommandInit(cmd cobra.Command) (*cobra.Command, error) {
 	if err := bindPFlagsHierarchy(&cmd); err != nil {
 		return nil, err
 	}
@@ -96,6 +97,24 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	}
 
 	return &cmd, nil
+}
+
+func addKamelSubcommands(cmd cobra.Command, options RootCmdOptions) *cobra.Command {
+	cmd.AddCommand(newCmdCompletion(&cmd))
+	cmd.AddCommand(newCmdVersion())
+	cmd.AddCommand(cmdOnly(newCmdRun(&options)))
+	cmd.AddCommand(cmdOnly(newCmdGet(&options)))
+	cmd.AddCommand(cmdOnly(newCmdDelete(&options)))
+	cmd.AddCommand(cmdOnly(newCmdInstall(&options)))
+	cmd.AddCommand(cmdOnly(newCmdLog(&options)))
+	cmd.AddCommand(newCmdKit(&options))
+	cmd.AddCommand(cmdOnly(newCmdReset(&options)))
+	cmd.AddCommand(newCmdDescribe(&options))
+	cmd.AddCommand(cmdOnly(newCmdRebuild(&options)))
+	cmd.AddCommand(newCmdOperator())
+	cmd.AddCommand(cmdOnly(newCmdBuilder(&options)))
+
+	return &cmd
 }
 
 func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {

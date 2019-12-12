@@ -29,7 +29,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-func newCmdRebuild(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdOptions) {
 	options := rebuildCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -41,7 +41,7 @@ func newCmdRebuild(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:    options.rebuild,
 	}
 
-	return &cmd
+	return &cmd, &options
 }
 
 type rebuildCmdOptions struct {

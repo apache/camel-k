@@ -44,20 +44,20 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := installCmdOptions{
+func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdOptions) {
+	options := installCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
 		Use:     "install",
 		Short:   "Installs Camel K on a Kubernetes cluster",
 		Long:    `Installs Camel K on a Kubernetes or OpenShift cluster.`,
-		PreRunE: impl.decode,
+		PreRunE: options.decode,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := impl.validate(cmd, args); err != nil {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := impl.install(cmd, args); err != nil {
+			if err := options.install(cmd, args); err != nil {
 				return err
 			}
 			return nil
@@ -107,7 +107,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	)
 
-	return &cmd
+	return &cmd, &options
 }
 
 type installCmdOptions struct {

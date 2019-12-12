@@ -29,8 +29,8 @@ import (
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := kitDeleteCommand{
+func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDeleteCommandOptions) {
+	options := kitDeleteCommandOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
@@ -38,12 +38,12 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:     "delete",
 		Short:   "Delete an Integration Kit",
 		Long:    `Delete an Integration Kit.`,
-		PreRunE: decode(&impl),
+		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
-			if err := impl.validate(args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(args); err != nil {
+			if err := options.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -53,15 +53,15 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	cmd.Flags().Bool("all", false, "Delete all integration Kits")
 
-	return &cmd
+	return &cmd, &options
 }
 
-type kitDeleteCommand struct {
+type kitDeleteCommandOptions struct {
 	*RootCmdOptions
 	All bool `mapstructure:"all"`
 }
 
-func (command *kitDeleteCommand) validate(args []string) error {
+func (command *kitDeleteCommandOptions) validate(args []string) error {
 	if command.All && len(args) > 0 {
 		return errors.New("invalid combination: both all flag and named Kits are set")
 	}
@@ -72,7 +72,7 @@ func (command *kitDeleteCommand) validate(args []string) error {
 	return nil
 }
 
-func (command *kitDeleteCommand) run(args []string) error {
+func (command *kitDeleteCommandOptions) run(args []string) error {
 	names := args
 
 	c, err := command.GetCmdClient()
@@ -104,7 +104,7 @@ func (command *kitDeleteCommand) run(args []string) error {
 	return nil
 }
 
-func (command *kitDeleteCommand) delete(name string) error {
+func (command *kitDeleteCommandOptions) delete(name string) error {
 	ctx := v1alpha1.NewIntegrationKit(command.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,

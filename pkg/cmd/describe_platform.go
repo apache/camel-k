@@ -28,8 +28,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := &describePlatformCommand{
+func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describePlatformCommandOptions) {
+	options := describePlatformCommandOptions{
 		rootCmdOptions,
 	}
 
@@ -37,12 +37,12 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:     "platform",
 		Short:   "Describe an Integration Platform",
 		Long:    `Describe an Integration Platform.`,
-		PreRunE: decode(impl),
+		PreRunE: decode(options),
 		RunE: func(_ *cobra.Command, args []string) error {
-			if err := impl.validate(args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(args); err != nil {
+			if err := options.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -50,21 +50,21 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	return &cmd
+	return &cmd, &options
 }
 
-type describePlatformCommand struct {
+type describePlatformCommandOptions struct {
 	*RootCmdOptions
 }
 
-func (command *describePlatformCommand) validate(args []string) error {
+func (command *describePlatformCommandOptions) validate(args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("accepts at least 1 arg, received %d", len(args))
 	}
 	return nil
 }
 
-func (command *describePlatformCommand) run(args []string) error {
+func (command *describePlatformCommandOptions) run(args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (command *describePlatformCommand) run(args []string) error {
 	return nil
 }
 
-func (command *describePlatformCommand) describeIntegrationPlatform(platform v1alpha1.IntegrationPlatform) string {
+func (command *describePlatformCommandOptions) describeIntegrationPlatform(platform v1alpha1.IntegrationPlatform) string {
 	return indentedwriter.IndentedString(func(out io.Writer) {
 		w := indentedwriter.NewWriter(out)
 		describeObjectMeta(w, platform.ObjectMeta)

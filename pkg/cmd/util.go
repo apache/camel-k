@@ -183,3 +183,7 @@ func stringToSliceHookFunc(comma rune) mapstructure.DecodeHookFunc {
 		return csvReader.Read()
 	}
 }
+
+func cmdOnly(cmd *cobra.Command, options interface{}) *cobra.Command {
+	return cmd
+}

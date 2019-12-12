@@ -31,19 +31,19 @@ import (
 )
 
 // newCmdDelete --
-func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := deleteCmdOptions{
+func newCmdDelete(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deleteCmdOptions) {
+	options := deleteCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
 		Use:     "delete [integration1] [integration2] ...",
 		Short:   "Delete integrations deployed on Kubernetes",
-		PreRunE: decode(&impl),
+		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
-			if err := impl.validate(args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(args); err != nil {
+			if err := options.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -53,7 +53,7 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	cmd.Flags().Bool("all", false, "Delete all integrations")
 
-	return &cmd
+	return &cmd, &options
 }
 
 type deleteCmdOptions struct {

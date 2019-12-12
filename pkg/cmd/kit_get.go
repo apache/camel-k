@@ -28,8 +28,8 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := kitGetCommand{
+func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetCommandOptions) {
+	options := kitGetCommandOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
@@ -37,12 +37,12 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:     "get",
 		Short:   "Get defined Integration Kit",
 		Long:    `Get defined Integration Kit.`,
-		PreRunE: decode(&impl),
+		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := impl.validate(cmd, args); err != nil {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := impl.run(cmd); err != nil {
+			if err := options.run(cmd); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -54,21 +54,21 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().Bool(v1alpha1.IntegrationKitTypeExternal, true, "Includes external Kits")
 	cmd.Flags().Bool(v1alpha1.IntegrationKitTypePlatform, true, "Includes platform Kits")
 
-	return &cmd
+	return &cmd, &options
 }
 
-type kitGetCommand struct {
+type kitGetCommandOptions struct {
 	*RootCmdOptions
 	User     bool `mapstructure:"user"`
 	External bool `mapstructure:"external"`
 	Platform bool `mapstructure:"platform"`
 }
 
-func (command *kitGetCommand) validate(cmd *cobra.Command, args []string) error {
+func (command *kitGetCommandOptions) validate(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (command *kitGetCommand) run(cmd *cobra.Command) error {
+func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
 	kitList := v1alpha1.NewIntegrationKitList()
 	c, err := command.GetCmdClient()
 	if err != nil {
