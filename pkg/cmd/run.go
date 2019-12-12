@@ -53,7 +53,7 @@ var (
 	traitConfigRegexp = regexp.MustCompile(`^([a-z-]+)((?:\.[a-z-]+)+)=(.*)$`)
 )
 
-func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -91,7 +91,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	// completion support
 	configureKnownCompletions(&cmd)
 
-	return &cmd
+	return &cmd, &options
 }
 
 type runCmdOptions struct {

@@ -28,9 +28,9 @@ func newCmdKit(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Long:  `Configure an Integration Kit.`,
 	}
 
-	cmd.AddCommand(newKitCreateCmd(rootCmdOptions))
-	cmd.AddCommand(newKitDeleteCmd(rootCmdOptions))
-	cmd.AddCommand(newKitGetCmd(rootCmdOptions))
+	cmd.AddCommand(cmdOnly(newKitCreateCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newKitDeleteCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newKitGetCmd(rootCmdOptions)))
 
 	return &cmd
 }

@@ -34,7 +34,7 @@ type getCmdOptions struct {
 	*RootCmdOptions
 }
 
-func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdGet(rootCmdOptions *RootCmdOptions) (*cobra.Command, *getCmdOptions) {
 	options := getCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -46,7 +46,7 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		RunE:    options.run,
 	}
 
-	return &cmd
+	return &cmd, &options
 }
 
 func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {

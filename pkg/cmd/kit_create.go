@@ -33,8 +33,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := &kitCreateCommand{
+func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreateCommandOptions) {
+	options := kitCreateCommandOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
@@ -42,9 +42,9 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:     "create <name>",
 		Short:   "Create an Integration Kit",
 		Long:    `Create an Integration Kit.`,
-		Args:    impl.validateArgs,
-		PreRunE: decode(impl),
-		RunE:    impl.run,
+		Args:    options.validateArgs,
+		PreRunE: decode(options),
+		RunE:    options.run,
 	}
 
 	cmd.Flags().String("image", "", "Image used to create the kit")
@@ -58,10 +58,10 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	// completion support
 	configureKnownCompletions(&cmd)
 
-	return &cmd
+	return &cmd, &options
 }
 
-type kitCreateCommand struct {
+type kitCreateCommandOptions struct {
 	*RootCmdOptions
 
 	Image        string   `mapstructure:"image"`
@@ -73,7 +73,7 @@ type kitCreateCommand struct {
 	Traits       []string `mapstructure:"traits"`
 }
 
-func (command *kitCreateCommand) validateArgs(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommandOptions) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("create expects a single name argument")
 	}
@@ -81,7 +81,7 @@ func (command *kitCreateCommand) validateArgs(_ *cobra.Command, args []string) e
 	return nil
 }
 
-func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -201,7 +201,7 @@ func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (*kitCreateCommand) configureTrait(ctx *v1alpha1.IntegrationKit, config string) error {
+func (*kitCreateCommandOptions) configureTrait(ctx *v1alpha1.IntegrationKit, config string) error {
 	if ctx.Spec.Traits == nil {
 		ctx.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
 	}

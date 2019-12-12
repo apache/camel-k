@@ -29,7 +29,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-func newCmdReset(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptions) {
 	options := resetCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -44,7 +44,7 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().Bool("skip-kits", false, "Do not delete the integration kits")
 	cmd.Flags().Bool("skip-integrations", false, "Do not delete the integrations")
 
-	return &cmd
+	return &cmd, &options
 }
 
 type resetCmdOptions struct {

@@ -28,8 +28,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := &describeKitCommand{
+func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describeKitCommandOptions) {
+	options := describeKitCommandOptions{
 		rootCmdOptions,
 	}
 
@@ -37,12 +37,12 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Use:     "kit",
 		Short:   "Describe an Integration Kit",
 		Long:    `Describe an Integration Kit.`,
-		PreRunE: decode(impl),
+		PreRunE: decode(options),
 		RunE: func(_ *cobra.Command, args []string) error {
-			if err := impl.validate(args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(args); err != nil {
+			if err := options.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -50,21 +50,21 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	return &cmd
+	return &cmd, &options
 }
 
-type describeKitCommand struct {
+type describeKitCommandOptions struct {
 	*RootCmdOptions
 }
 
-func (command *describeKitCommand) validate(args []string) error {
+func (command *describeKitCommandOptions) validate(args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("accepts at least 1 arg, received %d", len(args))
 	}
 	return nil
 }
 
-func (command *describeKitCommand) run(args []string) error {
+func (command *describeKitCommandOptions) run(args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (command *describeKitCommand) run(args []string) error {
 	return nil
 }
 
-func (command *describeKitCommand) describeIntegrationKit(kit v1alpha1.IntegrationKit) string {
+func (command *describeKitCommandOptions) describeIntegrationKit(kit v1alpha1.IntegrationKit) string {
 	return indentedwriter.IndentedString(func(out io.Writer) {
 		w := indentedwriter.NewWriter(out)
 

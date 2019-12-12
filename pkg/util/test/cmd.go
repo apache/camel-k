@@ -15,36 +15,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package test
 
 import (
-	"github.com/apache/camel-k/pkg/cmd/builder"
+	"bytes"
 	"github.com/spf13/cobra"
 )
 
-func newCmdBuilder(rootCmdOptions *RootCmdOptions) (*cobra.Command, *builderCmdOptions) {
-	options := builderCmdOptions{
-		RootCmdOptions: rootCmdOptions,
-	}
-	cmd := cobra.Command{
-		Use:     "builder",
-		Short:   "Run the Camel K builder",
-		Long:    `Run the Camel K builder`,
-		Hidden:  true,
-		PreRunE: decode(&options),
-		Run:     options.run,
-	}
+func EmptyRun(*cobra.Command, []string) {}
 
-	cmd.Flags().String("build-name", "", "The name of the build resource")
-
-	return &cmd, &options
+func ArbitraryArgs(cmd *cobra.Command, args []string) error {
+	return nil
 }
 
-type builderCmdOptions struct {
-	*RootCmdOptions
-	BuildName string `mapstructure:"build-name"`
+func ExecuteCommand(root *cobra.Command, args ...string) (output string, err error) {
+	_, output, err = ExecuteCommandC(root, args...)
+	return output, err
 }
 
-func (o *builderCmdOptions) run(_ *cobra.Command, _ []string) {
-	builder.Run(o.Namespace, o.BuildName)
+func ExecuteCommandC(root *cobra.Command, args ...string) (c *cobra.Command, output string, err error) {
+	buf := new(bytes.Buffer)
+	root.SetOut(buf)
+	root.SetErr(buf)
+	root.SetArgs(args)
+
+	c, err = root.ExecuteC()
+
+	return c, buf.String(), err
 }

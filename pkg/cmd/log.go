@@ -27,7 +27,7 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newCmdLog(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdLog(rootCmdOptions *RootCmdOptions) (*cobra.Command, *logCmdOptions) {
 	options := logCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -44,7 +44,7 @@ func newCmdLog(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	// completion support
 	configureKnownCompletions(&cmd)
 
-	return &cmd
+	return &cmd, &options
 }
 
 type logCmdOptions struct {
