@@ -1,9 +1,13 @@
 # Saga example
 This example is from [camel-saga-quickstart](https://github.com/nicolaferraro/camel-saga-quickstart/) and could work with the camel-k.
 
-* Start the lra-coordinator
+* Start the lra-coordinator by using the openshift
 ```
 oc create -f lra-coordinator.yaml
+```
+* Or start the lra-coordinator by using the kubernetes
+```
+kubectl create -f lra-coordiantor-kub.yaml
 ```
 * Start the three demo services
 ```
