@@ -97,10 +97,10 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 		p.Status.Profile = DetermineBestProfile(ctx, c, p)
 	}
 	if p.Status.Build.CamelVersion == "" {
-		p.Status.Build.CamelVersion = defaults.CamelVersionConstraint
+		p.Status.Build.CamelVersion = defaults.DefaultCamelVersion
 	}
 	if p.Status.Build.RuntimeVersion == "" {
-		p.Status.Build.RuntimeVersion = defaults.RuntimeVersionConstraint
+		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	}
 	if p.Status.Build.BaseImage == "" {
 		p.Status.Build.BaseImage = defaults.BaseImage
