@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package defaults
 
 // ***********************
@@ -27,26 +28,14 @@ const (
 	// DefaultCamelVersion --
 	DefaultCamelVersion = "3.0.0-RC3"
 
-	// CamelVersionConstraint --
-	CamelVersionConstraint = ">=3.0.0-RC3"
-
 	// DefaultRuntimeVersion --
 	DefaultRuntimeVersion = "1.0.7"
-
-	// RuntimeVersionConstraint --
-	RuntimeVersionConstraint = ">=1.0.7"
 
 	// DefaultCamelQuarkusVersion --
 	DefaultCamelQuarkusVersion = "0.3.1"
 
-	// CamelQuarkusVersionConstraint --
-	CamelQuarkusVersionConstraint = ">=0.3.1"
-
 	// DefaultQuarkusVersion --
 	DefaultQuarkusVersion = "0.27.0"
-
-	// QuarkusVersionConstraint --
-	QuarkusVersionConstraint = ">=0.27.0"
 
 	// KanikoVersion --
 	KanikoVersion = "0.9.0"

@@ -17,13 +17,9 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-M5-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M3
 RUNTIME_VERSION := 1.0.7
-RUNTIME_VERSION_CONSTRAINT := >=1.0.7
 CAMEL_VERSION := 3.0.0-RC3
-CAMEL_VERSION_CONSTRAINT := >=3.0.0-RC3
 CAMEL_QUARKUS_VERSION := 0.3.1
-CAMEL_QUARKUS_VERSION_CONSTRAINT := >=0.3.1
 QUARKUS_VERSION := 0.27.0
-QUARKUS_VERSION_CONSTRAINT := >=0.27.0
 KANIKO_VERSION := 0.9.0
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
 LOCAL_REPOSITORY := /tmp/artifacts/m2
@@ -72,6 +68,7 @@ codegen:
 	@echo "/*" > $(VERSIONFILE)
 	@echo "$$LICENSE_HEADER" >> $(VERSIONFILE)
 	@echo "*/" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
 	@echo "package defaults" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "// ***********************" >> $(VERSIONFILE)
@@ -85,26 +82,14 @@ codegen:
 	@echo "  // DefaultCamelVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultCamelVersion = \"$(CAMEL_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // CamelVersionConstraint -- " >> $(VERSIONFILE)
-	@echo "  CamelVersionConstraint = \"$(CAMEL_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // RuntimeVersionConstraint -- " >> $(VERSIONFILE)
-	@echo "  RuntimeVersionConstraint = \"$(RUNTIME_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultCamelQuarkusVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultCamelQuarkusVersion = \"$(CAMEL_QUARKUS_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // CamelQuarkusVersionConstraint -- " >> $(VERSIONFILE)
-	@echo "  CamelQuarkusVersionConstraint = \"$(CAMEL_QUARKUS_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultQuarkusVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultQuarkusVersion = \"$(QUARKUS_VERSION)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // QuarkusVersionConstraint -- " >> $(VERSIONFILE)
-	@echo "  QuarkusVersionConstraint = \"$(QUARKUS_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
 	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)
