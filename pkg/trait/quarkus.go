@@ -205,7 +205,7 @@ func (t *quarkusTrait) determineQuarkusVersion(e *Environment) string {
 		e.Platform.Status.Build.RuntimeProvider.Quarkus.QuarkusVersion != "" {
 		return e.Platform.Status.Build.RuntimeProvider.Quarkus.QuarkusVersion
 	}
-	return defaults.QuarkusVersionConstraint
+	return defaults.DefaultQuarkusVersion
 }
 
 func (t *quarkusTrait) determineCamelQuarkusVersion(e *Environment) string {
@@ -224,5 +224,5 @@ func (t *quarkusTrait) determineCamelQuarkusVersion(e *Environment) string {
 		e.Platform.Status.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion != "" {
 		return e.Platform.Status.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion
 	}
-	return defaults.CamelQuarkusVersionConstraint
+	return defaults.DefaultCamelQuarkusVersion
 }
