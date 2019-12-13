@@ -19,6 +19,7 @@ package kubernetes
 
 import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -347,4 +348,22 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 		}
 	}
 	return nil
+}
+
+func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonitor)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*monitoringv1.ServiceMonitor); ok {
+			visitor(conv)
+		}
+	})
+}
+
+func (c *Collection) GetServiceMonitor(filter func(*monitoringv1.ServiceMonitor) bool) *monitoringv1.ServiceMonitor {
+	var retValue *monitoringv1.ServiceMonitor
+	c.VisitServiceMonitor(func(serviceMonitor *monitoringv1.ServiceMonitor) {
+		if filter(serviceMonitor) {
+			retValue = serviceMonitor
+		}
+	})
+	return retValue
 }
