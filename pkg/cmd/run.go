@@ -125,7 +125,7 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	}
 
 	for _, fileName := range args {
-		if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
+		if !isRemoteHTTPFile(fileName) {
 			if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
 				return errors.Wrap(err, "file "+fileName+" does not exist")
 			} else if err != nil {
@@ -265,23 +265,27 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integratio
 
 func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error {
 	for _, s := range sources {
-		changes, err := sync.File(o.Context, s)
-		if err != nil {
-			return err
-		}
-		go func() {
-			for {
-				select {
-				case <-o.Context.Done():
-					return
-				case <-changes:
-					_, err := o.updateIntegrationCode(c, sources)
-					if err != nil {
-						fmt.Println("Unable to sync integration: ", err.Error())
+		if !isRemoteHTTPFile(s) {
+			changes, err := sync.File(o.Context, s)
+			if err != nil {
+				return err
+			}
+			go func() {
+				for {
+					select {
+					case <-o.Context.Done():
+						return
+					case <-changes:
+						_, err := o.updateIntegrationCode(c, sources)
+						if err != nil {
+							fmt.Println("Unable to sync integration: ", err.Error())
+						}
 					}
 				}
-			}
-		}()
+			}()
+		} else {
+			fmt.Printf("WARNING: the following URL will not be watched for changes: %s\n", s)
+		}
 	}
 
 	return nil
@@ -457,7 +461,7 @@ func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
 	var content []byte
 	var err error
 
-	if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
+	if !isRemoteHTTPFile(fileName) {
 		content, err = ioutil.ReadFile(fileName)
 		if err != nil {
 			return "", err
@@ -522,4 +526,8 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 	}
 	integration.Spec.Traits[traitID] = spec
 	return nil
+}
+
+func isRemoteHTTPFile(fileName string) bool {
+	return strings.HasPrefix(fileName, "http://") || strings.HasPrefix(fileName, "https://")
 }
