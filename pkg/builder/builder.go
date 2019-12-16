@@ -51,24 +51,24 @@ func New(c client.Client) Builder {
 func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 	result := v1alpha1.BuildStatus{}
 
-	// create tmp path
-	buildDir := build.BuildDir
-	if buildDir == "" {
-		buildDir = os.TempDir()
-	}
-	builderPath, err := ioutil.TempDir(buildDir, "builder-")
-	if err != nil {
-		log.Error(err, "Unexpected error while creating a temporary dir")
+	var buildDir string
+	if build.BuildDir == "" {
+		tmpDir, err := ioutil.TempDir(os.TempDir(), "builder-")
+		if err != nil {
+			log.Error(err, "Unexpected error while creating a temporary dir")
 
-		result.Phase = v1alpha1.BuildPhaseFailed
-		result.Error = err.Error()
+			result.Phase = v1alpha1.BuildPhaseFailed
+			result.Error = err.Error()
+		}
+		buildDir = tmpDir
+		defer os.RemoveAll(buildDir)
+	} else {
+		buildDir = build.BuildDir
 	}
-
-	defer os.RemoveAll(builderPath)
 
 	c := Context{
 		Client:    b.client,
-		Path:      builderPath,
+		Path:      buildDir,
 		Namespace: build.Meta.Namespace,
 		Build:     build,
 		BaseImage: build.BaseImage,

@@ -297,7 +297,7 @@ func packager(ctx *Context, selector artifactsSelector) error {
 		return err
 	}
 
-	tarFileName := path.Join(ctx.Build.BuildDir, "package", ctx.Build.Meta.Name)
+	tarFileName := path.Join(ctx.Path, "package", "occi.tar")
 	tarFileDir := path.Dir(tarFileName)
 
 	err = os.MkdirAll(tarFileDir, 0777)

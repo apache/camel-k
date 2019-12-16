@@ -141,7 +141,7 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1alpha
 			} else {
 				action.operatorImage = operatorImage
 			}
-			action.addCamelTaskToPod(build, task.Builder, pod)
+			action.addBuilderTaskToPod(build, task.Builder, pod)
 		} else if task.Kaniko != nil {
 			action.addKanikoTaskToPod(task.Kaniko, pod)
 		}
@@ -154,7 +154,7 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1alpha
 	return pod, nil
 }
 
-func (action *schedulePodAction) addCamelTaskToPod(build *v1alpha1.Build, task *v1alpha1.BuilderTask, pod *corev1.Pod) {
+func (action *schedulePodAction) addBuilderTaskToPod(build *v1alpha1.Build, task *v1alpha1.BuilderTask, pod *corev1.Pod) {
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
 		Name:            task.Name,
 		Image:           action.operatorImage,
