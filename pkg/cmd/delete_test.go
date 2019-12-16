@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:deadcode,unused
 func addTestDeleteCmd(options RootCmdOptions, rootCmd *cobra.Command) *deleteCmdOptions {
 	//add a testing version of delete Command
 	deleteCmd, deleteCmdOptions := newCmdDelete(&options)

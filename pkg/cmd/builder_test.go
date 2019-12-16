@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:deadcode,unused
 func addTestBuilderCmd(options RootCmdOptions, rootCmd *cobra.Command) *builderCmdOptions {
 	//add a testing version of builder Command
 	builderCmd, builderCmdOptions := newCmdBuilder(&options)
