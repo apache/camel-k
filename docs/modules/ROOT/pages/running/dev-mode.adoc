@@ -21,23 +21,32 @@ The console follows automatically all redeploys of the integration.
 Here's an example of the output:
 
 ```
-[nferraro@localhost camel-k]$ kamel run examples/Sample.java --dev
+$ kamel run examples/Sample.java --dev
 integration "sample" created
-integration "sample" in phase Building
+integration "sample" in phase Initialization
+integration "sample" in phase Building Kit
 integration "sample" in phase Deploying
 integration "sample" in phase Running
-[1] Monitoring pod sample-776db787c4-zjhfr[1] Starting the Java application using /opt/run-java/run-java.sh ...
-[1] exec java -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=9779:/opt/prometheus/prometheus-config.yml -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:+ExitOnOutOfMemoryError -cp .:/deployments/* org.apache.camel.k.jvm.Application
-[1] [INFO ] 2018-09-20 21:24:35.953 [main] Application - Routes: file:/etc/camel/conf/Sample.java
-[1] [INFO ] 2018-09-20 21:24:35.955 [main] Application - Language: java
-[1] [INFO ] 2018-09-20 21:24:35.956 [main] Application - Locations: file:/etc/camel/conf/application.properties
-[1] [INFO ] 2018-09-20 21:24:36.506 [main] DefaultCamelContext - Apache Camel 2.22.1 (CamelContext: camel-1) is starting
-[1] [INFO ] 2018-09-20 21:24:36.578 [main] ManagedManagementStrategy - JMX is enabled
-[1] [INFO ] 2018-09-20 21:24:36.680 [main] DefaultTypeConverter - Type converters loaded (core: 195, classpath: 0)
-[1] [INFO ] 2018-09-20 21:24:36.777 [main] DefaultCamelContext - StreamCaching is not in use. If using streams then its recommended to enable stream caching. See more details at http://camel.apache.org/stream-caching.html
-[1] [INFO ] 2018-09-20 21:24:36.817 [main] DefaultCamelContext - Route: route1 started and consuming from: timer://tick
-[1] [INFO ] 2018-09-20 21:24:36.818 [main] DefaultCamelContext - Total 1 routes, of which 1 are started
-[1] [INFO ] 2018-09-20 21:24:36.820 [main] DefaultCamelContext - Apache Camel 2.22.1 (CamelContext: camel-1) started in 0.314 seconds
+[1] Monitoring pod sample-56fb69c989-42gmw[1] Starting the Java application using /opt/run-java/run-java.sh ...
+[1] exec java -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:+ExitOnOutOfMemoryError -cp ./resources:/etc/camel/conf:/etc/camel/resources:/etc/camel/sources/i-source-000:dependencies/com.sun.xml.bind.jaxb-core-2.3.0.1.jar:dependencies/com.sun.xml.bind.jaxb-impl-2.3.0.jar:dependencies/commons-io.commons-io-2.6.jar:dependencies/javax.xml.bind.jaxb-api-2.3.0.jar:dependencies/org.apache.camel.camel-api-3.0.0.jar:dependencies/org.apache.camel.camel-base-3.0.0.jar:dependencies/org.apache.camel.camel-core-engine-3.0.0.jar:dependencies/org.apache.camel.camel-endpointdsl-3.0.0.jar:dependencies/org.apache.camel.camel-jaxp-3.0.0.jar:dependencies/org.apache.camel.camel-main-3.0.0.jar:dependencies/org.apache.camel.camel-management-api-3.0.0.jar:dependencies/org.apache.camel.camel-support-3.0.0.jar:dependencies/org.apache.camel.camel-timer-3.0.0.jar:dependencies/org.apache.camel.camel-util-3.0.0.jar:dependencies/org.apache.camel.camel-util-json-3.0.0.jar:dependencies/org.apache.camel.k.camel-k-loader-java-1.0.8.jar:dependencies/org.apache.camel.k.camel-k-runtime-core-1.0.8.jar:dependencies/org.apache.camel.k.camel-k-runtime-main-1.0.8.jar:dependencies/org.apache.camel.spi-annotations-3.0.0.jar:dependencies/org.apache.commons.commons-lang3-3.9.jar:dependencies/org.apache.logging.log4j.log4j-api-2.12.1.jar:dependencies/org.apache.logging.log4j.log4j-core-2.12.1.jar:dependencies/org.apache.logging.log4j.log4j-slf4j-impl-2.12.1.jar:dependencies/org.jooq.joor-java-8-0.9.12.jar:dependencies/org.slf4j.slf4j-api-1.7.29.jar org.apache.camel.k.main.Application
+[1] OpenJDK 64-Bit Server VM warning: If the number of processors is expected to increase from one, then you should configure the number of parallel GC threads appropriately using -XX:ParallelGCThreads=N
+[1] 2019-12-16 11:33:42.916 INFO  [main] ApplicationRuntime - Add listener: org.apache.camel.k.listener.ContextConfigurer@12b0404f
+[1] 2019-12-16 11:33:42.919 INFO  [main] ApplicationRuntime - Add listener: org.apache.camel.k.listener.RoutesConfigurer@4313f5bc
+[1] 2019-12-16 11:33:42.920 INFO  [main] ApplicationRuntime - Add listener: org.apache.camel.k.listener.RoutesDumper@2b6faea6
+[1] 2019-12-16 11:33:42.934 INFO  [main] RuntimeSupport - Looking up loader for language: java
+[1] 2019-12-16 11:33:42.939 INFO  [main] RuntimeSupport - Found loader org.apache.camel.k.loader.java.JavaSourceLoader@3c419631 for language java from service definition
+[1] 2019-12-16 11:33:43.644 INFO  [main] RoutesConfigurer - Loading routes from: file:/etc/camel/sources/i-source-000/Sample.java?language=java
+[1] 2019-12-16 11:33:43.644 INFO  [main] ApplicationRuntime - Listener org.apache.camel.k.listener.RoutesConfigurer@4313f5bc executed in phase ConfigureRoutes
+[1] 2019-12-16 11:33:43.658 INFO  [main] BaseMainSupport - Using properties from: file:/etc/camel/conf/application.properties
+[1] 2019-12-16 11:33:43.917 INFO  [main] ApplicationRuntime - Listener org.apache.camel.k.listener.ContextConfigurer@12b0404f executed in phase ConfigureContext
+[1] 2019-12-16 11:33:43.918 INFO  [main] DefaultCamelContext - Apache Camel 3.0.0 (CamelContext: camel-k) is starting
+[1] 2019-12-16 11:33:43.919 INFO  [main] DefaultManagementStrategy - JMX is disabled
+[1] 2019-12-16 11:33:44.099 INFO  [main] DefaultCamelContext - StreamCaching is not in use. If using streams then its recommended to enable stream caching. See more details at http://camel.apache.org/stream-caching.html
+[1] 2019-12-16 11:33:44.109 INFO  [main] DefaultCamelContext - Route: route1 started and consuming from: timer://tick
+[1] 2019-12-16 11:33:44.116 INFO  [main] DefaultCamelContext - Total 1 routes, of which 1 are started
+[1] 2019-12-16 11:33:44.119 INFO  [main] DefaultCamelContext - Apache Camel 3.0.0 (CamelContext: camel-k) started in 0.199 seconds
+[1] 2019-12-16 11:33:44.123 INFO  [main] ApplicationRuntime - Listener org.apache.camel.k.listener.RoutesDumper@2b6faea6 executed in phase Started
+[1] 2019-12-16 11:33:45.127 INFO  [Camel (camel-k) thread #1 - timer://tick] route1 - Hello Camel K!
 
 ```
 
