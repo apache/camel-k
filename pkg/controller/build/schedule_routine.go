@@ -19,7 +19,10 @@ package build
 
 import (
 	"context"
+	"fmt"
 	"sync"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -51,8 +54,7 @@ func (action *scheduleRoutineAction) Name() string {
 
 // CanHandle tells whether this action can handle the build
 func (action *scheduleRoutineAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseScheduling &&
-		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyRoutine
+	return build.Status.Phase == v1alpha1.BuildPhaseScheduling
 }
 
 // Handle handles the builds
@@ -88,25 +90,56 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 		return nil, err
 	}
 
-	// Start the build
-	progress := action.builder.Build(build.Spec)
-	// And follow the build progress asynchronously to avoid blocking the reconcile loop
+	// Start the build asynchronously to avoid blocking the reconcile loop
 	go func() {
-		for status := range progress {
-			target := build.DeepCopy()
-			target.Status = status
-			// Copy the failure field from the build to persist recovery state
-			target.Status.Failure = build.Status.Failure
-			// Patch the build status with the current progress
-			err := action.client.Status().Patch(ctx, target, client.MergeFrom(build))
-			if err != nil {
-				action.L.Errorf(err, "Error while updating build status: %s", build.Name)
+		defer action.routines.Delete(build.Name)
+
+		status := v1alpha1.BuildStatus{
+			Phase:     v1alpha1.BuildPhaseRunning,
+			StartedAt: metav1.Now(),
+		}
+		if err := action.updateBuildStatus(ctx, build, status); err != nil {
+			return
+		}
+
+		for i, task := range build.Spec.Tasks {
+			if task.Builder == nil {
+				status := v1alpha1.BuildStatus{
+					// Error the build directly as we know recovery won't work over ill-defined tasks
+					Phase: v1alpha1.BuildPhaseError,
+					Error: fmt.Sprintf("task cannot be executed using the routine strategy: %s", task.GetName()),
+				}
+				if err := action.updateBuildStatus(ctx, build, status); err != nil {
+					break
+				}
+			} else {
+				status := action.builder.Run(*task.Builder)
+				if i == len(build.Spec.Tasks)-1 {
+					status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
+				}
+				if err := action.updateBuildStatus(ctx, build, status); err != nil {
+					break
+				}
 			}
-			build.Status = target.Status
 		}
 	}()
 
 	action.routines.Store(build.Name, true)
 
 	return nil, nil
+}
+
+func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, build *v1alpha1.Build, status v1alpha1.BuildStatus) error {
+	target := build.DeepCopy()
+	target.Status = status
+	// Copy the failure field from the build to persist recovery state
+	target.Status.Failure = build.Status.Failure
+	// Patch the build status with the current progress
+	err := action.client.Status().Patch(ctx, target, client.MergeFrom(build))
+	if err != nil {
+		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
+		return err
+	}
+	build.Status = target.Status
+	return nil
 }

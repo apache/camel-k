@@ -53,27 +53,15 @@ func TestFailure(t *testing.T) {
 
 	RegisterSteps(steps)
 
-	r := v1alpha1.BuildSpec{
+	r := v1alpha1.BuilderTask{
 		Steps: StepIDsFor(
 			steps.Step1,
 			steps.Step2,
 		),
 		RuntimeVersion: catalog.RuntimeVersion,
-		Platform: v1alpha1.IntegrationPlatformSpec{
-			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: catalog.Version,
-			},
-		},
+		CamelVersion:   catalog.Version,
 	}
 
-	progress := b.Build(r)
-
-	status := make([]v1alpha1.BuildStatus, 0)
-	for s := range progress {
-		status = append(status, s)
-	}
-
-	assert.Len(t, status, 2)
-	assert.Equal(t, v1alpha1.BuildPhaseRunning, status[0].Phase)
-	assert.Equal(t, v1alpha1.BuildPhaseFailed, status[1].Phase)
+	status := b.Run(r)
+	assert.Equal(t, v1alpha1.BuildPhaseFailed, status.Phase)
 }

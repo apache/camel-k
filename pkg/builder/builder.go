@@ -24,8 +24,6 @@ import (
 	"sort"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/cancellable"
@@ -49,18 +47,9 @@ func New(c client.Client) Builder {
 	return &m
 }
 
-// Build --
-func (b *defaultBuilder) Build(build v1alpha1.BuildSpec) <-chan v1alpha1.BuildStatus {
-	channel := make(chan v1alpha1.BuildStatus)
-	go b.build(build, channel)
-	return channel
-}
-
-func (b *defaultBuilder) build(build v1alpha1.BuildSpec, channel chan<- v1alpha1.BuildStatus) {
+// Run --
+func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 	result := v1alpha1.BuildStatus{}
-	result.Phase = v1alpha1.BuildPhaseRunning
-	result.StartedAt = metav1.Now()
-	channel <- result
 
 	// create tmp path
 	buildDir := build.BuildDir
@@ -82,21 +71,15 @@ func (b *defaultBuilder) build(build v1alpha1.BuildSpec, channel chan<- v1alpha1
 		Path:      builderPath,
 		Namespace: build.Meta.Namespace,
 		Build:     build,
-		Image:     build.Platform.Build.BaseImage,
-	}
-
-	if build.Image != "" {
-		c.Image = build.Image
+		BaseImage: build.BaseImage,
 	}
 
 	// base image is mandatory
-	if c.Image == "" {
+	if c.BaseImage == "" {
 		result.Phase = v1alpha1.BuildPhaseFailed
 		result.Image = ""
 		result.Error = "no base image defined"
 	}
-
-	c.BaseImage = c.Image
 
 	// Add sources
 	for _, data := range build.Sources {
@@ -121,10 +104,7 @@ func (b *defaultBuilder) build(build v1alpha1.BuildSpec, channel chan<- v1alpha1
 	}
 
 	if result.Phase == v1alpha1.BuildPhaseFailed {
-		result.Duration = metav1.Now().Sub(result.StartedAt.Time).String()
-		channel <- result
-		close(channel)
-		return
+		return result
 	}
 
 	steps := make([]Step, 0)
@@ -154,7 +134,7 @@ func (b *defaultBuilder) build(build v1alpha1.BuildSpec, channel chan<- v1alpha1
 			l := b.log.WithValues(
 				"step", step.ID(),
 				"phase", step.Phase(),
-				"kit", build.Meta.Name,
+				"task", build.Name,
 			)
 
 			l.Infof("executing step")
@@ -170,10 +150,7 @@ func (b *defaultBuilder) build(build v1alpha1.BuildSpec, channel chan<- v1alpha1
 		}
 	}
 
-	result.Duration = metav1.Now().Sub(result.StartedAt.Time).String()
-
 	if result.Phase != v1alpha1.BuildPhaseInterrupted {
-		result.Phase = v1alpha1.BuildPhaseSucceeded
 		result.BaseImage = c.BaseImage
 		result.Image = c.Image
 
@@ -185,17 +162,15 @@ func (b *defaultBuilder) build(build v1alpha1.BuildSpec, channel chan<- v1alpha1
 		result.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
 		result.Artifacts = append(result.Artifacts, c.Artifacts...)
 
-		b.log.Infof("build request %s executed in %s", build.Meta.Name, result.Duration)
 		b.log.Infof("dependencies: %s", build.Dependencies)
 		b.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
 		b.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
-		b.log.Infof("requested image: %s", build.Image)
+		b.log.Infof("requested image: %s", build.BaseImage)
 		b.log.Infof("base image: %s", c.BaseImage)
 		b.log.Infof("resolved image: %s", c.Image)
 	} else {
-		b.log.Infof("build request %s interrupted after %s", build.Meta.Name, result.Duration)
+		b.log.Infof("build task %s interrupted", build.Name)
 	}
 
-	channel <- result
-	close(channel)
+	return result
 }

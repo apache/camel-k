@@ -45,7 +45,7 @@ const (
 
 // Builder --
 type Builder interface {
-	Build(build v1alpha1.BuildSpec) <-chan v1alpha1.BuildStatus
+	Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus
 }
 
 // Step --
@@ -101,7 +101,7 @@ type Context struct {
 	client.Client
 	C                 cancellable.Context
 	Catalog           *camel.RuntimeCatalog
-	Build             v1alpha1.BuildSpec
+	Build             v1alpha1.BuilderTask
 	BaseImage         string
 	Image             string
 	Error             error
@@ -120,16 +120,7 @@ type Context struct {
 
 // HasRequiredImage --
 func (c *Context) HasRequiredImage() bool {
-	return c.Build.Image != ""
-}
-
-// GetImage --
-func (c *Context) GetImage() string {
-	if c.Build.Image != "" {
-		return c.Build.Image
-	}
-
-	return c.Image
+	return c.Build.BaseImage != ""
 }
 
 type publishedImage struct {

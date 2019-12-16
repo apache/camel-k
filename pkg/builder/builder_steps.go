@@ -109,7 +109,7 @@ func registerStep(steps ...Step) {
 }
 
 func generateProjectSettings(ctx *Context) error {
-	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Platform.Build.Maven.Settings)
+	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.Settings)
 	if err != nil {
 		return err
 	}
@@ -283,7 +283,7 @@ func incrementalPackager(ctx *Context) error {
 			}
 
 			ctx.BaseImage = bestImage.Image
-			ctx.Image = bestImage.Image
+			//ctx.Image = bestImage.Image
 			ctx.SelectedArtifacts = selectedArtifacts
 		}
 
@@ -297,7 +297,7 @@ func packager(ctx *Context, selector artifactsSelector) error {
 		return err
 	}
 
-	tarFileName := path.Join(ctx.Path, "package", "occi.tar")
+	tarFileName := path.Join(ctx.Build.BuildDir, "package", ctx.Build.Meta.Name)
 	tarFileDir := path.Dir(tarFileName)
 
 	err = os.MkdirAll(tarFileDir, 0777)

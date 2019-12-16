@@ -58,7 +58,7 @@ func loadCamelCatalog(ctx *builder.Context) error {
 
 func generateProject(ctx *builder.Context) error {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
-	p.Properties = ctx.Build.Platform.Build.Properties
+	p.Properties = ctx.Build.Properties
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)
 
@@ -86,8 +86,8 @@ func generateProject(ctx *builder.Context) error {
 func computeDependencies(ctx *builder.Context) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
 	mc.SettingsContent = ctx.Maven.SettingsData
-	mc.LocalRepository = ctx.Build.Platform.Build.Maven.LocalRepository
-	mc.Timeout = ctx.Build.Platform.Build.Maven.GetTimeout().Duration
+	mc.LocalRepository = ctx.Build.Maven.LocalRepository
+	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.RuntimeVersion)
 
 	if err := maven.Run(mc); err != nil {

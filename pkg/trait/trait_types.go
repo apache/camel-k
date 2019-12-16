@@ -33,7 +33,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
@@ -142,8 +141,7 @@ type Environment struct {
 	Resources      *kubernetes.Collection
 	PostActions    []func(*Environment) error
 	PostProcessors []func(*Environment) error
-	Steps          []builder.Step
-	BuildDir       string
+	BuildTasks     []v1alpha1.Task
 	ExecutedTraits []Trait
 	EnvVars        []corev1.EnvVar
 	Classpath      *strset.Set

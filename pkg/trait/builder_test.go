@@ -28,7 +28,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -52,7 +51,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
-			assert.Empty(t, e.Steps)
+			assert.Empty(t, e.BuildTasks)
 		})
 	}
 }
@@ -73,7 +72,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
-			assert.Empty(t, e.Steps)
+			assert.Empty(t, e.BuildTasks)
 		})
 	}
 }
@@ -85,11 +84,12 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
-	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 8)
+	assert.NotEmpty(t, env.BuildTasks)
+	assert.Len(t, env.BuildTasks, 1)
+	assert.NotNil(t, env.BuildTasks[0].Builder)
 	assert.Condition(t, func() bool {
-		for _, s := range env.Steps {
-			if s == s2i.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
+		for _, s := range env.BuildTasks[0].Builder.Steps {
+			if s == s2i.Steps.Publisher.ID() {
 				return true
 			}
 		}
@@ -105,17 +105,19 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
-	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 8)
+	assert.NotEmpty(t, env.BuildTasks)
+	assert.Len(t, env.BuildTasks, 2)
+	assert.NotNil(t, env.BuildTasks[0].Builder)
 	assert.Condition(t, func() bool {
-		for _, s := range env.Steps {
-			if s == kaniko.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
+		for _, s := range env.BuildTasks[0].Builder.Steps {
+			if s == kaniko.Steps.Publisher.ID() {
 				return true
 			}
 		}
 
 		return false
 	})
+	assert.NotNil(t, env.BuildTasks[1].Kaniko)
 }
 
 func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy v1alpha1.IntegrationPlatformBuildPublishStrategy) *Environment {
@@ -124,6 +126,7 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		panic(err)
 	}
 
+	kanikoCache := false
 	res := &Environment{
 		C:            context.TODO(),
 		CamelCatalog: c,
@@ -146,9 +149,10 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 			Spec: v1alpha1.IntegrationPlatformSpec{
 				Cluster: cluster,
 				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: strategy,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
-					CamelVersion:    defaults.DefaultCamelVersion,
+					PublishStrategy:  strategy,
+					Registry:         v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+					CamelVersion:     defaults.DefaultCamelVersion,
+					KanikoBuildCache: &kanikoCache,
 				},
 			},
 		},

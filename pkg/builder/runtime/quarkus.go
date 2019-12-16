@@ -59,7 +59,7 @@ func loadCamelQuarkusCatalog(ctx *builder.Context) error {
 
 func generateQuarkusProject(ctx *builder.Context) error {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
-	p.Properties = ctx.Build.Platform.Build.Properties
+	p.Properties = ctx.Build.Properties
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
@@ -106,8 +106,8 @@ func generateQuarkusProject(ctx *builder.Context) error {
 func computeQuarkusDependencies(ctx *builder.Context) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
 	mc.SettingsContent = ctx.Maven.SettingsData
-	mc.LocalRepository = ctx.Build.Platform.Build.Maven.LocalRepository
-	mc.Timeout = ctx.Build.Platform.Build.Maven.GetTimeout().Duration
+	mc.LocalRepository = ctx.Build.Maven.LocalRepository
+	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
 	// Build the project
 	mc.AddArgument("package")

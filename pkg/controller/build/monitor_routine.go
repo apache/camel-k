@@ -43,9 +43,7 @@ func (action *monitorRoutineAction) Name() string {
 
 // CanHandle tells whether this action can handle the build
 func (action *monitorRoutineAction) CanHandle(build *v1alpha1.Build) bool {
-	return (build.Status.Phase == v1alpha1.BuildPhasePending ||
-		build.Status.Phase == v1alpha1.BuildPhaseRunning) &&
-		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyRoutine
+	return build.Status.Phase == v1alpha1.BuildPhasePending || build.Status.Phase == v1alpha1.BuildPhaseRunning
 }
 
 // Handle handles the builds
