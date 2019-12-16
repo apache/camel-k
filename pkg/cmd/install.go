@@ -89,7 +89,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
 	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
-	cmd.Flags().Bool("kaniko-build-cache", true, "To enable or disable the Kaniko Cache in building phase")
+	cmd.Flags().Bool("kaniko-build-cache", false, "To enable or disable the Kaniko cache")
 	cmd.Flags().String("http-proxy-secret", "", "Configure the source of the secret holding HTTP proxy server details "+
 		"(HTTP_PROXY|HTTPS_PROXY|NO_PROXY)")
 

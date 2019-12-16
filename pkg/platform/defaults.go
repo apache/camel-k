@@ -172,8 +172,10 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 	}
 
 	if p.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.KanikoBuildCache == nil {
-		// Default to using Kaniko cache warmer
-		defaultKanikoBuildCache := true
+		// Default to disabling Kaniko cache warmer
+		// Using the cache warmer pod seems unreliable with the current Kaniko version
+		// and requires relying on a persistent volume.
+		defaultKanikoBuildCache := false
 		p.Status.Build.KanikoBuildCache = &defaultKanikoBuildCache
 		if verbose {
 			log.Log.Infof("Kaniko cache set to %t", *p.Status.Build.KanikoBuildCache)
