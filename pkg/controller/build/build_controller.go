@@ -176,7 +176,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	var actions []Action
 
-	switch pl.Spec.Build.BuildStrategy {
+	switch pl.Status.Build.BuildStrategy {
 	case v1alpha1.IntegrationPlatformBuildStrategyPod:
 		actions = []Action{
 			NewInitializePodAction(),
