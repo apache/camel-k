@@ -20,6 +20,7 @@ package cmd
 import (
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"testing"
 )
 
 func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {
@@ -31,4 +32,24 @@ func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOption
 	runCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(runCmd)
 	return runCmdOptions
+}
+
+func TestRunPropertyFlag(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--property", "key1=value,othervalue", "--property", "key2=value2")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(runCmdOptions.Properties) != 2 {
+		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elemtns\n", 2, len(runCmdOptions.Properties))
+	}
+	if runCmdOptions.Properties[0] != "key1=value,othervalue" || runCmdOptions.Properties[1] != "key2=value2" {
+		t.Fatalf("Properties expected to be: \n %v\nGot:\n %v\n", "[key1=value,othervalue key2=value2]", runCmdOptions.Properties)
+	}
 }
