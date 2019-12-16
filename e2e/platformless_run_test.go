@@ -22,6 +22,7 @@ limitations under the License.
 package e2e
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -32,10 +33,11 @@ import (
 )
 
 func TestPlatformlessRun(t *testing.T) {
+	needsStagingRepo := os.Getenv("STAGING_RUNTIME_REPO") != ""
 	ocp, err := openshift.IsOpenShift(testClient)
 	assert.Nil(t, err)
-	if !ocp {
-		t.Skip("This test is for OpenShift only")
+	if needsStagingRepo || !ocp {
+		t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")
 		return
 	}
 
