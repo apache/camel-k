@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:deadcode,unused
 func addTestKitCreateCmd(options RootCmdOptions, rootCmd *cobra.Command) *kitCreateCommandOptions {
 	//add a testing version of kitCreate Command
 	kitCreateCmd, kitCreateCmdOptions := newKitCreateCmd(&options)

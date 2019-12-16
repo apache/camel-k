@@ -18,9 +18,10 @@ limitations under the License.
 package cmd
 
 import (
+	"testing"
+
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
-	"testing"
 )
 
 func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {

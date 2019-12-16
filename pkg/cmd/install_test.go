@@ -18,15 +18,17 @@ limitations under the License.
 package cmd
 
 import (
+	"testing"
+
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
-	"testing"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 )
 
+//nolint:deadcode,unused
 func addTestInstallCmd(options RootCmdOptions, rootCmd *cobra.Command) *installCmdOptions {
 	//add a testing version of install Command
 	installCmd, installOptions := newCmdInstall(&options)
