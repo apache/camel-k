@@ -56,7 +56,7 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 	switch key {
 	case "rest":
 		meta.Dependencies.Add("camel:rest")
-	case "hystrix":
+	case "circuitBreaker":
 		meta.Dependencies.Add("camel:hystrix")
 	}
 
