@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
@@ -42,7 +41,7 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 			if err := impl.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := impl.run(); err != nil {
+			if err := impl.run(cmd); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -68,7 +67,7 @@ func (command *kitGetCommand) validate(cmd *cobra.Command, args []string) error 
 	return nil
 }
 
-func (command *kitGetCommand) run() error {
+func (command *kitGetCommand) run(cmd *cobra.Command) error {
 	kitList := v1alpha1.NewIntegrationKitList()
 	c, err := command.GetCmdClient()
 	if err != nil {
@@ -78,7 +77,7 @@ func (command *kitGetCommand) run() error {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
+	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
 	for _, ctx := range kitList.Items {
 		t := ctx.Labels["camel.apache.org/kit.type"]

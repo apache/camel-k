@@ -156,7 +156,7 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
+func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -225,7 +225,7 @@ func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev {
-		err = k8slog.Print(o.Context, c, integration)
+		err = k8slog.Print(o.Context, c, integration, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}

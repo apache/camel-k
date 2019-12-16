@@ -20,7 +20,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -184,7 +183,7 @@ func newCmdCompletionBash(root *cobra.Command) *cobra.Command {
 		Short: "Generates bash completion scripts",
 		Long:  bashCompletionCmdLongDescription,
 		Run: func(_ *cobra.Command, _ []string) {
-			err := root.GenBashCompletion(os.Stdout)
+			err := root.GenBashCompletion(root.OutOrStdout())
 			if err != nil {
 				fmt.Print(err.Error())
 			}
