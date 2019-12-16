@@ -118,7 +118,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Name: "camel-k-builder",
 				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: e.Platform.Spec.Build.PersistentVolumeClaim,
+						ClaimName: e.Platform.Status.Build.PersistentVolumeClaim,
 					},
 				},
 			})
