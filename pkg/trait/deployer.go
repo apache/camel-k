@@ -18,20 +18,15 @@ limitations under the License.
 package trait
 
 import (
-	"reflect"
-
 	"github.com/pkg/errors"
 
-	jsonpatch "github.com/evanphx/json-patch"
-
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/json"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 // The deployer trait can be used to explicitly select the kind of high level resource that
@@ -87,15 +82,15 @@ func (t *deployerTrait) Apply(e *Environment) error {
 					return err
 				}
 
-				patch, err := positiveMergePatch(object, resource)
+				p, err := patch.PositiveMergePatch(object, resource)
 				if err != nil {
 					return err
-				} else if len(patch) == 0 {
+				} else if len(p) == 0 {
 					// Avoid triggering a patch request for nothing
 					continue
 				}
 
-				err = env.Client.Patch(env.C, resource, client.ConstantPatch(types.MergePatchType, patch))
+				err = env.Client.Patch(env.C, resource, client.ConstantPatch(types.MergePatchType, p))
 				if err != nil {
 					return errors.Wrap(err, "error during patch resource")
 				}
@@ -115,68 +110,4 @@ func (t *deployerTrait) IsPlatformTrait() bool {
 // RequiresIntegrationPlatform overrides base class method
 func (t *deployerTrait) RequiresIntegrationPlatform() bool {
 	return false
-}
-
-func positiveMergePatch(source runtime.Object, target runtime.Object) ([]byte, error) {
-	sourceJSON, err := json.Marshal(source)
-	if err != nil {
-		return nil, err
-	}
-
-	targetJSON, err := json.Marshal(target)
-	if err != nil {
-		return nil, err
-	}
-
-	mergePatch, err := jsonpatch.CreateMergePatch(sourceJSON, targetJSON)
-	if err != nil {
-		return nil, err
-	}
-
-	var positivePatch map[string]interface{}
-	err = json.Unmarshal(mergePatch, &positivePatch)
-	if err != nil {
-		return nil, err
-	}
-
-	// The following is a work-around to remove null fields from the JSON merge patch,
-	// so that values defaulted by controllers server-side are not deleted.
-	// It's generally acceptable as these values are orthogonal to the values managed
-	// by the traits.
-	removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
-
-	// Return an empty patch if no keys remain
-	if len(positivePatch) == 0 {
-		return make([]byte, 0), nil
-	}
-
-	return json.Marshal(positivePatch)
-}
-
-func removeNilValues(v reflect.Value, parent reflect.Value) {
-	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
-		v = v.Elem()
-	}
-	switch v.Kind() {
-	case reflect.Array, reflect.Slice:
-		for i := 0; i < v.Len(); i++ {
-			removeNilValues(v.Index(i), v)
-		}
-	case reflect.Map:
-		for _, k := range v.MapKeys() {
-			switch c := v.MapIndex(k); {
-			case !c.IsValid():
-				// Skip keys previously deleted
-				continue
-			case c.IsNil(), c.Elem().Kind() == reflect.Map && len(c.Elem().MapKeys()) == 0:
-				v.SetMapIndex(k, reflect.Value{})
-			default:
-				removeNilValues(c, v)
-			}
-		}
-		// Back process the parent map in case it has been emptied so that it's deleted as well
-		if len(v.MapKeys()) == 0 && parent.Kind() == reflect.Map {
-			removeNilValues(parent, reflect.Value{})
-		}
-	}
 }

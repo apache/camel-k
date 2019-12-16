@@ -19,6 +19,8 @@ package s2i
 
 import (
 	"io/ioutil"
+	"os"
+	"path"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -117,6 +119,9 @@ func publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "cannot fully read tar file "+ctx.Archive)
 	}
 
+	baseDir, _ := path.Split(ctx.Archive)
+	defer os.RemoveAll(baseDir)
+
 	restClient, err := customclient.GetClientFor(ctx.Client, "build.openshift.io", "v1")
 	if err != nil {
 		return err
@@ -156,7 +161,7 @@ func publisher(ctx *builder.Context) error {
 			}
 		}
 		return false, nil
-	}, ctx.Build.Platform.Build.GetTimeout().Duration)
+	}, ctx.Build.Timeout.Duration)
 
 	if err != nil {
 		return err

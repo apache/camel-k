@@ -21,17 +21,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/pkg/errors"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // NewBuildAction creates a new build request handling action for the kit
@@ -84,23 +83,15 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1alph
 
 		build = &v1alpha1.Build{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: "camel.apache.org/v1alpha1",
-				Kind:       "Build",
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+				Kind:       v1alpha1.BuildKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: kit.Namespace,
 				Name:      kit.Name,
 			},
 			Spec: v1alpha1.BuildSpec{
-				Meta:            kit.ObjectMeta,
-				CamelVersion:    env.CamelCatalog.Version,
-				RuntimeVersion:  env.CamelCatalog.RuntimeVersion,
-				RuntimeProvider: env.CamelCatalog.RuntimeProvider,
-				Platform:        env.Platform.Status.IntegrationPlatformSpec,
-				Dependencies:    kit.Spec.Dependencies,
-				// TODO: sort for easy read
-				Steps:    builder.StepIDsFor(env.Steps...),
-				BuildDir: env.BuildDir,
+				Tasks: env.BuildTasks,
 			},
 		}
 
@@ -142,7 +133,7 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1
 		// if not there is a chance that the kit has been modified by the user
 		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
 			return nil, fmt.Errorf("found kit %s not in the expected phase (expectd=%s, found=%s)",
-				build.Spec.Meta.Name,
+				kit.Name,
 				string(v1alpha1.IntegrationKitPhaseBuildRunning),
 				string(kit.Status.Phase),
 			)
@@ -168,7 +159,7 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1alpha1
 		// if not there is a chance that the kit has been modified by the user
 		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseBuildRunning {
 			return nil, fmt.Errorf("found kit %s not the an expected phase (expectd=%s, found=%s)",
-				build.Spec.Meta.Name,
+				kit.Name,
 				string(v1alpha1.IntegrationKitPhaseBuildRunning),
 				string(kit.Status.Phase),
 			)

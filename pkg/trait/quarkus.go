@@ -26,6 +26,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
@@ -142,11 +143,11 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 	return nil
 }
 
-func (t *quarkusTrait) addBuildSteps(e *Environment) {
-	e.Steps = append(e.Steps, runtime.QuarkusSteps...)
+func (t *quarkusTrait) addBuildSteps(task *v1alpha1.BuilderTask) {
+	task.Steps = append(task.Steps, builder.StepIDsFor(runtime.QuarkusSteps...)...)
 }
 
-func (t *quarkusTrait) addClasspath(e *Environment) {
+func (t *quarkusTrait) addClasspath(_ *Environment) {
 	// No-op as we rely on the Quarkus runner
 }
 

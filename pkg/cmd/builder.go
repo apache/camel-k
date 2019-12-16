@@ -36,6 +36,7 @@ func newCmdBuilder(rootCmdOptions *RootCmdOptions) (*cobra.Command, *builderCmdO
 	}
 
 	cmd.Flags().String("build-name", "", "The name of the build resource")
+	cmd.Flags().String("task-name", "", "The name of task to execute")
 
 	return &cmd, &options
 }
@@ -43,8 +44,9 @@ func newCmdBuilder(rootCmdOptions *RootCmdOptions) (*cobra.Command, *builderCmdO
 type builderCmdOptions struct {
 	*RootCmdOptions
 	BuildName string `mapstructure:"build-name"`
+	TaskName  string `mapstructure:"task-name"`
 }
 
 func (o *builderCmdOptions) run(_ *cobra.Command, _ []string) {
-	builder.Run(o.Namespace, o.BuildName)
+	builder.Run(o.Namespace, o.BuildName, o.TaskName)
 }

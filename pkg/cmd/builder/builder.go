@@ -21,10 +21,12 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"reflect"
 	"runtime"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/pkg/errors"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,6 +39,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logger "github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 var log = logger.WithName("builder")
@@ -47,8 +50,8 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Version: %v", defaults.Version))
 }
 
-// Run creates a build resource in the specified namespace
-func Run(namespace string, buildName string) {
+// Run a build resource in the specified namespace
+func Run(namespace string, buildName string, taskName string) {
 	logf.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = false
 	}))
@@ -61,33 +64,39 @@ func Run(namespace string, buildName string) {
 
 	ctx := cancellable.NewContext()
 
-	build := &v1alpha1.Build{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      buildName,
-		},
-	}
-
+	build := &v1alpha1.Build{}
 	exitOnError(
-		c.Get(ctx, types.NamespacedName{Namespace: build.Namespace, Name: build.Name}, build),
+		c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: buildName}, build),
 	)
 
-	progress := builder.New(c).Build(build.Spec)
-	for status := range progress {
-		target := build.DeepCopy()
-		target.Status = status
-		// Copy the failure field from the build to persist recovery state
-		target.Status.Failure = build.Status.Failure
-		// Patch the build status with the current progress
-		exitOnError(c.Status().Patch(ctx, target, controller.MergeFrom(build)))
-		build.Status = target.Status
+	var task *v1alpha1.BuilderTask
+	for _, t := range build.Spec.Tasks {
+		if t.Builder != nil && t.Builder.Name == taskName {
+			task = t.Builder
+		}
+	}
+	if task == nil {
+		exitOnError(errors.Errorf("No task of type [%s] with name [%s] in build [%s/%s]",
+			reflect.TypeOf(v1alpha1.BuilderTask{}).Name(), taskName, namespace, buildName))
 	}
 
+	status := builder.New(c).Run(*task)
+	target := build.DeepCopy()
+	target.Status = status
+	// Copy the failure field from the build to persist recovery state
+	target.Status.Failure = build.Status.Failure
+	// Patch the build status with the result
+	p, err := patch.PositiveMergePatch(build, target)
+	exitOnError(err)
+	exitOnError(c.Status().Patch(ctx, target, controller.ConstantPatch(types.MergePatchType, p)))
+	build.Status = target.Status
+
 	switch build.Status.Phase {
-	case v1alpha1.BuildPhaseSucceeded:
-		os.Exit(0)
-	default:
+	case v1alpha1.BuildPhaseFailed:
+		log.Error(nil, build.Status.Error)
 		os.Exit(1)
+	default:
+		os.Exit(0)
 	}
 }
 

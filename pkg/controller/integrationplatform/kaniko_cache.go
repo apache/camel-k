@@ -21,6 +21,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,8 +31,6 @@ import (
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
-
-	"github.com/pkg/errors"
 )
 
 func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
@@ -80,7 +80,7 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      "camel-k-builder",
-							MountPath: "/workspace",
+							MountPath: kaniko.BuildDir,
 						},
 					},
 				},

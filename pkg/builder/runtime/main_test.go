@@ -34,14 +34,9 @@ func TestNewProject(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
+		Build: v1alpha1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
 			Dependencies: []string{
 				"camel-k:runtime-main",
 				"bom:my.company/my-artifact-1/1.0.0",
@@ -97,14 +92,9 @@ func TestGenerateJvmProject(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
+		Build: v1alpha1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
 			Dependencies: []string{
 				"camel-k:runtime-main",
 			},
@@ -154,14 +144,9 @@ func TestGenerateGroovyProject(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
+		Build: v1alpha1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
 			Dependencies: []string{
 				"camel-k:runtime-main",
 				"camel-k:loader-groovy",
@@ -215,14 +200,9 @@ func TestSanitizeDependencies(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuildSpec{
+		Build: v1alpha1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-				},
-			},
 			Dependencies: []string{
 				"camel:undertow",
 				"mvn:org.apache.camel/camel-core/2.18.0",

@@ -134,7 +134,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	ctx := context.TODO()
 
-	// Fetch the Integration instance
+	// Fetch the Build instance
 	var instance v1alpha1.Build
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
@@ -151,8 +151,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	target := instance.DeepCopy()
 	targetLog := rlog.ForBuild(target)
 
+	pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
 	if target.Status.Phase == v1alpha1.BuildPhaseNone || target.Status.Phase == v1alpha1.BuildPhaseWaitingForPlatform {
-		pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
 		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1alpha1.BuildPhaseWaitingForPlatform
 		} else {
@@ -174,15 +174,25 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		return reconcile.Result{}, err
 	}
 
-	actions := []Action{
-		NewInitializeRoutineAction(),
-		NewInitializePodAction(),
-		NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
-		NewSchedulePodAction(r.reader),
-		NewMonitorRoutineAction(&r.routines),
-		NewMonitorPodAction(),
-		NewErrorRecoveryAction(),
-		NewErrorAction(),
+	var actions []Action
+
+	switch pl.Spec.Build.BuildStrategy {
+	case v1alpha1.IntegrationPlatformBuildStrategyPod:
+		actions = []Action{
+			NewInitializePodAction(),
+			NewSchedulePodAction(r.reader),
+			NewMonitorPodAction(),
+			NewErrorRecoveryAction(),
+			NewErrorAction(),
+		}
+	case v1alpha1.IntegrationPlatformBuildStrategyRoutine:
+		actions = []Action{
+			NewInitializeRoutineAction(),
+			NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
+			NewMonitorRoutineAction(&r.routines),
+			NewErrorRecoveryAction(),
+			NewErrorAction(),
+		}
 	}
 
 	for _, a := range actions {
@@ -219,7 +229,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 	}
 
-	// Requeue scheduling build so that it re-enters the build working queue
+	// Requeue scheduling (resp. failed) build so that it re-enters the build (resp. recovery) working queue
 	if target.Status.Phase == v1alpha1.BuildPhaseScheduling || target.Status.Phase == v1alpha1.BuildPhaseFailed {
 		return reconcile.Result{
 			RequeueAfter: 5 * time.Second,

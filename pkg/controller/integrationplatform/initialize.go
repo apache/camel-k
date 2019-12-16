@@ -70,15 +70,13 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 	}
 
 	if platform.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
-		// Create the persistent volume claim used to coordinate build pod output
-		// with Kaniko cache and build input
-		action.L.Info("Create persistent volume claim")
-		err := createPersistentVolumeClaim(ctx, action.client, platform)
-		if err != nil {
-			return nil, err
-		}
-
 		if platform.Status.Build.IsKanikoCacheEnabled() {
+			// Create the persistent volume claim used by the Kaniko cache
+			action.L.Info("Create persistent volume claim")
+			err := createPersistentVolumeClaim(ctx, action.client, platform)
+			if err != nil {
+				return nil, err
+			}
 			// Create the Kaniko warmer pod that caches the base image into the Camel K builder volume
 			action.L.Info("Create Kaniko cache warmer pod")
 			err = createKanikoCacheWarmerPod(ctx, action.client, platform)

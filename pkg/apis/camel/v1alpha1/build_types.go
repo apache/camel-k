@@ -29,17 +29,52 @@ import (
 type BuildSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	Meta            metav1.ObjectMeta       `json:"meta,omitempty"`
-	Image           string                  `json:"image,omitempty"`
-	Steps           []string                `json:"steps,omitempty"`
-	CamelVersion    string                  `json:"camelVersion,omitempty"`
-	RuntimeVersion  string                  `json:"runtimeVersion,omitempty"`
-	RuntimeProvider *RuntimeProvider        `json:"runtimeProvider,omitempty"`
-	Platform        IntegrationPlatformSpec `json:"platform,omitempty"`
-	Sources         []SourceSpec            `json:"sources,omitempty"`
-	Resources       []ResourceSpec          `json:"resources,omitempty"`
-	Dependencies    []string                `json:"dependencies,omitempty"`
-	BuildDir        string                  `json:"buildDir,omitempty"`
+	Tasks []Task `json:"tasks,omitempty"`
+}
+
+type Task struct {
+	Builder *BuilderTask `json:"builder,omitempty"`
+	Kaniko  *KanikoTask  `json:"kaniko,omitempty"`
+}
+
+// BaseTask
+type BaseTask struct {
+	Name         string               `json:"name,omitempty"`
+	Affinity     *corev1.Affinity     `json:"affinity,omitempty"`
+	Volumes      []corev1.Volume      `json:"volumes,omitempty"`
+	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
+}
+
+// ImageTask
+type ImageTask struct {
+	BaseTask `json:",inline"`
+	Image    string          `json:"image,omitempty"`
+	Args     []string        `json:"args,omitempty"`
+	Env      []corev1.EnvVar `json:"env,omitempty"`
+}
+
+// KanikoTask
+type KanikoTask struct {
+	ImageTask  `json:",inline"`
+	BuiltImage string `json:"builtImage,omitempty"`
+}
+
+// BuilderTask
+type BuilderTask struct {
+	BaseTask        `json:",inline"`
+	Meta            metav1.ObjectMeta `json:"meta,omitempty"`
+	BaseImage       string            `json:"baseImage,omitempty"`
+	CamelVersion    string            `json:"camelVersion,omitempty"`
+	RuntimeVersion  string            `json:"runtimeVersion,omitempty"`
+	RuntimeProvider *RuntimeProvider  `json:"runtimeProvider,omitempty"`
+	Sources         []SourceSpec      `json:"sources,omitempty"`
+	Resources       []ResourceSpec    `json:"resources,omitempty"`
+	Dependencies    []string          `json:"dependencies,omitempty"`
+	Steps           []string          `json:"steps,omitempty"`
+	Maven           MavenSpec         `json:"maven,omitempty"`
+	BuildDir        string            `json:"buildDir,omitempty"`
+	Properties      map[string]string `json:"properties,omitempty"`
+	Timeout         metav1.Duration   `json:"timeout,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build
@@ -53,7 +88,6 @@ type BuildStatus struct {
 	StartedAt  metav1.Time      `json:"startedAt,omitempty"`
 	Platform   string           `json:"platform,omitempty"`
 	Conditions []BuildCondition `json:"conditions,omitempty"`
-
 	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
 	// https://github.com/OAI/OpenAPI-Specification/issues/845
 	Duration string `json:"duration,omitempty"`

@@ -76,20 +76,16 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		Catalog:   catalog,
 		Client:    c,
 		Namespace: "ns",
-		Build: v1alpha1.BuildSpec{
+		Build: v1alpha1.BuilderTask{
 			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-					Maven: v1alpha1.MavenSpec{
-						Settings: v1alpha1.ValueSource{
-							ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: "maven-settings",
-								},
-								Key: "settings.xml",
-							},
+			CamelVersion:   catalog.Version,
+			Maven: v1alpha1.MavenSpec{
+				Settings: v1alpha1.ValueSource{
+					ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: "maven-settings",
 						},
+						Key: "settings.xml",
 					},
 				},
 			},
@@ -128,20 +124,16 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		Catalog:   catalog,
 		Client:    c,
 		Namespace: "ns",
-		Build: v1alpha1.BuildSpec{
+		Build: v1alpha1.BuilderTask{
 			RuntimeVersion: catalog.RuntimeVersion,
-			Platform: v1alpha1.IntegrationPlatformSpec{
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					CamelVersion: catalog.Version,
-					Maven: v1alpha1.MavenSpec{
-						Settings: v1alpha1.ValueSource{
-							SecretKeyRef: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: "maven-settings",
-								},
-								Key: "settings.xml",
-							},
+			CamelVersion:   catalog.Version,
+			Maven: v1alpha1.MavenSpec{
+				Settings: v1alpha1.ValueSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: "maven-settings",
 						},
+						Key: "settings.xml",
 					},
 				},
 			},
