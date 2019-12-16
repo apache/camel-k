@@ -96,6 +96,10 @@ func newTestClient() (client.Client, error) {
 }
 
 func kamel(args ...string) *cobra.Command {
+	return kamelWithContext(testContext, args...)
+}
+
+func kamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 	var c *cobra.Command
 	var err error
 
@@ -121,7 +125,7 @@ func kamel(args ...string) *cobra.Command {
 			},
 		}
 	} else {
-		c, err = cmd.NewKamelCommand(testContext)
+		c, err = cmd.NewKamelCommand(ctx)
 	}
 	if err != nil {
 		panic(err)

@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"text/tabwriter"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,7 +48,7 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	return &cmd
 }
 
-func (o *getCmdOptions) run(_ *cobra.Command, args []string) error {
+func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -78,7 +77,7 @@ func (o *getCmdOptions) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
+	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tKIT")
 	for _, integration := range integrationList.Items {
 		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), integration.Status.Kit)

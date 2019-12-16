@@ -58,7 +58,7 @@ func (o *logCmdOptions) validate(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *logCmdOptions) run(_ *cobra.Command, args []string) error {
+func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (o *logCmdOptions) run(_ *cobra.Command, args []string) error {
 	if err := c.Get(o.Context, key, &integration); err != nil {
 		return err
 	}
-	if err := k8slog.Print(o.Context, c, &integration); err != nil {
+	if err := k8slog.Print(o.Context, c, &integration, cmd.OutOrStdout()); err != nil {
 		return err
 	}
 
