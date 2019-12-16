@@ -5,9 +5,15 @@ An integration written in Groovy looks very similar to a Java one except it can 
 [source,groovy]
 ----
 from('timer:tick')
-    .process { it.in.body = 'Hello Camel K!' }
+    .process({ it.in.body = 'Hello Camel K!' } as Processor)
     .to('log:info')
 ----
+
+You can run it with the standard command:
+
+```
+kamel run example.groovy
+```
 
 == Configuring the Application
 
