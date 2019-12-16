@@ -4135,7 +4135,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:1.0.0-M5-SNAPSHOT
+          image: docker.io/apache/camel-k:1.0.0-RC1-SNAPSHOT
           command:
           - kamel
           - operator

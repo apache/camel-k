@@ -18,5 +18,5 @@
 packageName: camel-k
 channels:
 - name: alpha
-  currentCSV: camel-k-operator.v1.0.0-m5-snapshot
+  currentCSV: camel-k-operator.v1.0.0-rc1-snapshot
 defaultChannel: alpha
