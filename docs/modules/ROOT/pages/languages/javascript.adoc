@@ -5,12 +5,14 @@ An integration written in JavaScript looks very similar to a Java one:
 [source,js]
 .hello.js
 ----
+const Processor = Java.extend(Java.type("org.apache.camel.Processor"));
+
 function proc(e) {
     e.getIn().setBody('Hello Camel K!')
 }
 
 from('timer:tick')
-    .process(proc)
+    .process(new Processor(proc))
     .to('log:info')
 ----
 
