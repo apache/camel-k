@@ -5,7 +5,7 @@ An integration written in Groovy looks very similar to a Java one except it can 
 [source,groovy]
 ----
 from('timer:tick')
-    .process({ it.in.body = 'Hello Camel K!' } as Processor)
+    .process { it.in.body = 'Hello Camel K!' }
     .to('log:info')
 ----
 
