@@ -18,9 +18,11 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 	"testing"
 )
@@ -79,5 +81,77 @@ func TestLoadFromEnvVar(t *testing.T) {
 	}
 	if runCmdOptions.EnvVars[0] != "VAR1=value,\"othervalue\"" || runCmdOptions.EnvVars[1] != "VAR2=value2" {
 		t.Fatalf("EnvVars expected to be: \n %v\nGot:\n %v\n", "[VAR1=value,\"othervalue\" VAR=value2]", runCmdOptions.EnvVars)
+	}
+}
+
+func TestLoadFromFile(t *testing.T) {
+	//shows how to include a "," character inside a property value see VAR1 value
+	var propertiesFile = []byte(`kamel.run.envs: "VAR1=value,""othervalue""",VAR2=value2`)
+	viper.SetConfigType("properties")
+	viper.ReadConfig(bytes.NewReader(propertiesFile))
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(runCmdOptions.EnvVars) != 2 {
+		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elemtns\n", 2, len(runCmdOptions.EnvVars))
+	}
+	if runCmdOptions.EnvVars[0] != "VAR1=value,\"othervalue\"" || runCmdOptions.EnvVars[1] != "VAR2=value2" {
+		t.Fatalf("EnvVars expected to be: \n %v\nGot:\n %v\n", "[VAR1=value,\"othervalue\" VAR=value2]", runCmdOptions.EnvVars)
+	}
+}
+
+func TestPrecedenceEnvVarOverFile(t *testing.T) {
+	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
+	var propertiesFile = []byte(`kamel.run.envs: VAR2=file`)
+	viper.SetConfigType("properties")
+	viper.ReadConfig(bytes.NewReader(propertiesFile))
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(runCmdOptions.EnvVars) != 1 {
+		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elements\n", 1, len(runCmdOptions.EnvVars))
+	}
+	if runCmdOptions.EnvVars[0] != "VAR1=envVar" {
+		t.Fatalf("EnvVars expected to be: \n %v\nGot:\n %v\n", "VAR1=envVar", runCmdOptions.EnvVars)
+	}
+}
+
+func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
+	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
+	var propertiesFile = []byte(`kamel.run.envs: VAR2=file`)
+	viper.SetConfigType("properties")
+	viper.ReadConfig(bytes.NewReader(propertiesFile))
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--env", "VAR3=commandLine")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(runCmdOptions.EnvVars) != 1 {
+		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elements\n", 1, len(runCmdOptions.EnvVars))
+	}
+	if runCmdOptions.EnvVars[0] != "VAR3=commandLine" {
+		t.Fatalf("EnvVars expected to be: \n %v\nGot:\n %v\n", "VAR3=commandLine", runCmdOptions.EnvVars)
 	}
 }
