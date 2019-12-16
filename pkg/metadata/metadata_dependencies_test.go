@@ -238,7 +238,7 @@ func TestHystrixDependency(t *testing.T) {
 			Name: "Request.groovy",
 			Content: `
 			    from("http:test")
-					.hystrix()
+					.circuitBreaker()
 						.to("log:end")
 					.onFallback()
 						.to("log:fallback")
@@ -352,12 +352,12 @@ func TestXMLHystrixDependency(t *testing.T) {
 			Name: "routes.xml",
 			Content: `
 			<from uri="direct:ciao" />
-			<hystrix>
+			<circuitBreaker>
 				<to uri="log:info" />
 				<onFallback>
 					<to uri="kafka:topic" />
 				</onFallback>
-			</hystrix>
+			</circuitBreaker>
 		`,
 		},
 		Language: v1alpha1.LanguageXML,
@@ -457,11 +457,11 @@ const yamlWithRest = `
         - to: "log:info"
         - to: "direct:hello"
 `
-const yamlWithHystrix = `
+const yamlWithCircuitBreaker = `
 - from:
     uri: "direct:start"
     steps:
-        - hystrix:
+        - circuitBreaker:
             todo: "not implemented"
 `
 
@@ -514,7 +514,7 @@ func TestYAMLHystrixDependency(t *testing.T) {
 
 		DataSpec: v1alpha1.DataSpec{
 			Name:    "routes.yaml",
-			Content: yamlWithHystrix,
+			Content: yamlWithCircuitBreaker,
 		},
 		Language: v1alpha1.LanguageYaml,
 	}

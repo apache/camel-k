@@ -44,7 +44,7 @@ var (
 		main: map[string]string{
 			`.*JsonLibrary\.Jackson.*`:                         "camel:jackson",
 			`.*\.json\(\).*`:                                   "camel:jackson",
-			`.*\.hystrix\(\).*`:                                "camel:hystrix",
+			`.*\.circuitBreaker\(\).*`:                         "camel:hystrix",
 			`.*restConfiguration\(\).*`:                        "camel:rest",
 			`.*rest\(("[a-zA-Z0-9-/]+")*\).*`:                  "camel:rest",
 			`^\s*rest\s*{.*`:                                   "camel:rest",

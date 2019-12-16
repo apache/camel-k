@@ -45,7 +45,7 @@ func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error 
 			switch se.Name.Local {
 			case "rest", "restConfiguration":
 				meta.Dependencies.Add("camel:rest")
-			case "hystrix":
+			case "circuitBreaker":
 				meta.Dependencies.Add("camel:hystrix")
 			case "simple":
 				meta.Dependencies.Add("camel:bean")
