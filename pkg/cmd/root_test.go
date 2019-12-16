@@ -34,8 +34,10 @@ func kamelTestPostAddCommandInit(rootCmd *cobra.Command) *cobra.Command {
 }
 
 func kamelTestPreAddCommandInit() (RootCmdOptions, *cobra.Command) {
+	fakeClient, _ := test.NewFakeClient()
 	options := RootCmdOptions{
 		Context: context.Background(),
+		_client: fakeClient,
 	}
 	rootCmd := kamelPreAddCommandInit(options)
 	rootCmd.Run = test.EmptyRun
