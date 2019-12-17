@@ -297,7 +297,6 @@ func incrementalPackager(ctx *Context) error {
 			}
 
 			ctx.BaseImage = bestImage.Image
-			//ctx.Image = bestImage.Image
 			ctx.SelectedArtifacts = selectedArtifacts
 		}
 

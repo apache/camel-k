@@ -120,7 +120,7 @@ type Context struct {
 
 // HasRequiredImage --
 func (c *Context) HasRequiredImage() bool {
-	return c.Build.BaseImage != ""
+	return c.Build.Image != ""
 }
 
 type publishedImage struct {
