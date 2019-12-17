@@ -61,7 +61,7 @@ func publisher(ctx *builder.Context) error {
 					SourceStrategy: &buildv1.SourceBuildStrategy{
 						From: corev1.ObjectReference{
 							Kind: "DockerImage",
-							Name: ctx.Image,
+							Name: ctx.BaseImage,
 						},
 					},
 				},
