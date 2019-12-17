@@ -134,6 +134,7 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 			l := b.log.WithValues(
 				"step", step.ID(),
 				"phase", step.Phase(),
+				"name", build.Meta.Name,
 				"task", build.Name,
 			)
 
