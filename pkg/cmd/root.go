@@ -119,7 +119,12 @@ func addKamelSubcommands(cmd cobra.Command, options RootCmdOptions) *cobra.Comma
 
 func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 	if command.Namespace == "" {
-		current, err := client.GetCurrentNamespace(command.KubeConfig)
+		var current string
+		client, err := command.GetCmdClient()
+		if err != nil {
+			return errors.Wrap(err, "cannot get command client")
+		}
+		current, err = client.GetCurrentNamespace(command.KubeConfig)
 		if err != nil {
 			return errors.Wrap(err, "cannot get current namespace")
 		}
