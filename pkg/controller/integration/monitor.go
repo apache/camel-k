@@ -57,6 +57,9 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 
 		integration.Status.Digest = hash
 		integration.Status.Phase = v1alpha1.IntegrationPhaseInitialization
+		if integration.Spec.Profile != v1alpha1.TraitProfile("") {
+			integration.Status.Profile = integration.Spec.Profile
+		}
 		integration.Status.Version = defaults.Version
 
 		return integration, nil

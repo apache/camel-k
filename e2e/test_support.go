@@ -246,6 +246,36 @@ func integrationVersion(ns string, name string) func() string {
 	}
 }
 
+func integrationProfile(ns string, name string) func() v1alpha1.TraitProfile {
+	return func() v1alpha1.TraitProfile {
+		it := integration(ns, name)()
+		if it == nil {
+			return ""
+		}
+		return it.Status.Profile
+	}
+}
+
+func integrationPhase(ns string, name string) func() v1alpha1.IntegrationPhase {
+	return func() v1alpha1.IntegrationPhase {
+		it := integration(ns, name)()
+		if it == nil {
+			return ""
+		}
+		return it.Status.Phase
+	}
+}
+
+func integrationSpecProfile(ns string, name string) func() v1alpha1.TraitProfile {
+	return func() v1alpha1.TraitProfile {
+		it := integration(ns, name)()
+		if it == nil {
+			return ""
+		}
+		return it.Spec.Profile
+	}
+}
+
 func setIntegrationVersion(ns string, name string, version string) error {
 	it := integration(ns, name)()
 	if it == nil {
@@ -253,6 +283,15 @@ func setIntegrationVersion(ns string, name string, version string) error {
 	}
 	it.Status.Version = version
 	return testClient.Status().Update(testContext, it)
+}
+
+func updateIntegration(ns string, name string, upd func(it *v1alpha1.Integration)) error {
+	it := integration(ns, name)()
+	if it == nil {
+		return fmt.Errorf("no integration named %s found", name)
+	}
+	upd(it)
+	return testClient.Update(testContext, it)
 }
 
 func kits(ns string) func() []v1alpha1.IntegrationKit {
@@ -399,6 +438,26 @@ func platformVersion(ns string) func() string {
 			return ""
 		}
 		return p.Status.Version
+	}
+}
+
+func platformPhase(ns string) func() v1alpha1.IntegrationPlatformPhase {
+	return func() v1alpha1.IntegrationPlatformPhase {
+		p := platform(ns)()
+		if p == nil {
+			return ""
+		}
+		return p.Status.Phase
+	}
+}
+
+func platformProfile(ns string) func() v1alpha1.TraitProfile {
+	return func() v1alpha1.TraitProfile {
+		p := platform(ns)()
+		if p == nil {
+			return ""
+		}
+		return p.Status.Profile
 	}
 }
 

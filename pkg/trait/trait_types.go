@@ -209,8 +209,13 @@ func (e *Environment) InPhase(c v1alpha1.IntegrationKitPhase, i v1alpha1.Integra
 // next looking at the IntegrationKit.Spec
 // and lastly the Platform Profile
 func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
-	if e.Integration != nil && e.Integration.Spec.Profile != "" {
-		return e.Integration.Spec.Profile
+	if e.Integration != nil {
+		if e.Integration.Status.Profile != "" {
+			return e.Integration.Status.Profile
+		}
+		if e.Integration.Spec.Profile != "" {
+			return e.Integration.Spec.Profile
+		}
 	}
 
 	if e.IntegrationKit != nil && e.IntegrationKit.Spec.Profile != "" {
