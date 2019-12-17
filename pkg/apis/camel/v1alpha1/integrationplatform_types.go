@@ -75,9 +75,9 @@ type IntegrationPlatformCluster string
 
 const (
 	// IntegrationPlatformClusterOpenShift is used when targeting a OpenShift cluster
-	IntegrationPlatformClusterOpenShift = "OpenShift"
+	IntegrationPlatformClusterOpenShift IntegrationPlatformCluster = "OpenShift"
 	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster
-	IntegrationPlatformClusterKubernetes = "Kubernetes"
+	IntegrationPlatformClusterKubernetes IntegrationPlatformCluster = "Kubernetes"
 )
 
 // AllIntegrationPlatformClusters --
@@ -88,11 +88,11 @@ type TraitProfile string
 
 const (
 	// TraitProfileOpenShift is used by default on OpenShift clusters
-	TraitProfileOpenShift = "OpenShift"
+	TraitProfileOpenShift TraitProfile = "OpenShift"
 	// TraitProfileKubernetes is used by default on Kubernetes clusters
-	TraitProfileKubernetes = "Kubernetes"
+	TraitProfileKubernetes TraitProfile = "Kubernetes"
 	// TraitProfileKnative is used by default on OpenShift/Kubernetes clusters powered by Knative
-	TraitProfileKnative = "Knative"
+	TraitProfileKnative TraitProfile = "Knative"
 	// DefaultTraitProfile is the trait profile used as default when no other profile is set
 	DefaultTraitProfile = TraitProfileKubernetes
 )
