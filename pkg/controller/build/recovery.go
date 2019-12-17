@@ -21,10 +21,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/jpillora/backoff"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/jpillora/backoff"
 )
 
 // NewErrorRecoveryAction creates a new error recovering handling action for the build
@@ -63,11 +64,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 				AttemptMax: 5,
 			},
 		}
-	}
-
-	err := action.client.Status().Update(ctx, build)
-	if err != nil {
-		return nil, err
+		return build, nil
 	}
 
 	if build.Status.Failure.Recovery.Attempt >= build.Status.Failure.Recovery.AttemptMax {
