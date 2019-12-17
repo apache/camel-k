@@ -23,11 +23,13 @@ import (
 	"sync"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
@@ -143,8 +145,13 @@ func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, buil
 	target.Status = status
 	// Copy the failure field from the build to persist recovery state
 	target.Status.Failure = build.Status.Failure
-	// Patch the build status with the current progress
-	err := action.client.Status().Patch(ctx, target, client.MergeFrom(build))
+	// Patch the build status with the result
+	p, err := patch.PositiveMergePatch(build, target)
+	if err != nil {
+		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
+		return err
+	}
+	err = action.client.Status().Patch(ctx, target, client.ConstantPatch(types.MergePatchType, p))
 	if err != nil {
 		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
 		return err
