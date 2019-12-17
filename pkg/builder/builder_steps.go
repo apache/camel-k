@@ -43,6 +43,7 @@ func init() {
 }
 
 type steps struct {
+	CleanBuildDir           Step
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
@@ -52,6 +53,10 @@ type steps struct {
 
 // Steps --
 var Steps = steps{
+	CleanBuildDir: NewStep(
+		ProjectGenerationPhase-1,
+		cleanBuildDir,
+	),
 	GenerateProjectSettings: NewStep(
 		ProjectGenerationPhase+1,
 		generateProjectSettings,
@@ -76,6 +81,7 @@ var Steps = steps{
 
 // DefaultSteps --
 var DefaultSteps = []Step{
+	Steps.CleanBuildDir,
 	Steps.GenerateProjectSettings,
 	Steps.InjectDependencies,
 	Steps.SanitizeDependencies,
@@ -106,6 +112,14 @@ func registerStep(steps ...Step) {
 		}
 		stepsByID[step.ID()] = step
 	}
+}
+
+func cleanBuildDir(ctx *Context) error {
+	if ctx.Build.BuildDir == "" {
+		return nil
+	}
+
+	return os.RemoveAll(ctx.Build.BuildDir)
 }
 
 func generateProjectSettings(ctx *Context) error {
