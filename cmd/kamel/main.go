@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/pkg/cmd"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
 )
 
 func main() {
