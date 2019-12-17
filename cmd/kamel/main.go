@@ -28,8 +28,8 @@ import (
 	_ "github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/cmd"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func main() {
