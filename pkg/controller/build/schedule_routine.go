@@ -91,42 +91,51 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	}
 
 	// Start the build asynchronously to avoid blocking the reconcile loop
-	go func() {
-		defer action.routines.Delete(build.Name)
-
-		status := v1alpha1.BuildStatus{
-			Phase:     v1alpha1.BuildPhaseRunning,
-			StartedAt: metav1.Now(),
-		}
-		if err := action.updateBuildStatus(ctx, build, status); err != nil {
-			return
-		}
-
-		for i, task := range build.Spec.Tasks {
-			if task.Builder == nil {
-				status := v1alpha1.BuildStatus{
-					// Error the build directly as we know recovery won't work over ill-defined tasks
-					Phase: v1alpha1.BuildPhaseError,
-					Error: fmt.Sprintf("task cannot be executed using the routine strategy: %s", task.GetName()),
-				}
-				if err := action.updateBuildStatus(ctx, build, status); err != nil {
-					break
-				}
-			} else {
-				status := action.builder.Run(*task.Builder)
-				if i == len(build.Spec.Tasks)-1 {
-					status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
-				}
-				if err := action.updateBuildStatus(ctx, build, status); err != nil {
-					break
-				}
-			}
-		}
-	}()
-
 	action.routines.Store(build.Name, true)
 
+	go action.runBuild(ctx, build)
+
 	return nil, nil
+}
+
+func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1alpha1.Build) {
+	defer action.routines.Delete(build.Name)
+
+	status := v1alpha1.BuildStatus{
+		Phase:     v1alpha1.BuildPhaseRunning,
+		StartedAt: metav1.Now(),
+	}
+	if err := action.updateBuildStatus(ctx, build, status); err != nil {
+		return
+	}
+
+	for i, task := range build.Spec.Tasks {
+		if task.Builder == nil {
+			status := v1alpha1.BuildStatus{
+				// Error the build directly as we know recovery won't work over ill-defined tasks
+				Phase: v1alpha1.BuildPhaseError,
+				Error: fmt.Sprintf("task cannot be executed using the routine strategy: %s",
+					task.GetName()),
+				Duration: metav1.Now().Sub(build.Status.StartedAt.Time).String(),
+			}
+			_ = action.updateBuildStatus(ctx, build, status)
+			break
+		}
+
+		status := action.builder.Run(*task.Builder)
+		lastTask := i == len(build.Spec.Tasks)-1
+		taskFailed := status.Phase == v1alpha1.BuildPhaseFailed
+		if lastTask || taskFailed {
+			status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
+		}
+		if lastTask && !taskFailed {
+			status.Phase = v1alpha1.BuildPhaseSucceeded
+		}
+		err := action.updateBuildStatus(ctx, build, status)
+		if err != nil || taskFailed {
+			break
+		}
+	}
 }
 
 func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, build *v1alpha1.Build, status v1alpha1.BuildStatus) error {
