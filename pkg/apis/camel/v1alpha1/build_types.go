@@ -63,6 +63,7 @@ type KanikoTask struct {
 type BuilderTask struct {
 	BaseTask        `json:",inline"`
 	Meta            metav1.ObjectMeta `json:"meta,omitempty"`
+	Image           string            `json:"image,omitempty"`
 	BaseImage       string            `json:"baseImage,omitempty"`
 	CamelVersion    string            `json:"camelVersion,omitempty"`
 	RuntimeVersion  string            `json:"runtimeVersion,omitempty"`

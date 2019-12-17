@@ -74,6 +74,10 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 		BaseImage: build.BaseImage,
 	}
 
+	if build.Image != "" {
+		c.BaseImage = build.Image
+	}
+
 	// base image is mandatory
 	if c.BaseImage == "" {
 		result.Phase = v1alpha1.BuildPhaseFailed
@@ -166,8 +170,8 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 		b.log.Infof("dependencies: %s", build.Dependencies)
 		b.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
 		b.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
-		b.log.Infof("requested image: %s", build.BaseImage)
-		b.log.Infof("base image: %s", c.BaseImage)
+		b.log.Infof("base image: %s", build.BaseImage)
+		b.log.Infof("resolved base image: %s", c.BaseImage)
 		b.log.Infof("resolved image: %s", c.Image)
 	} else {
 		b.log.Infof("build task %s interrupted", build.Name)
