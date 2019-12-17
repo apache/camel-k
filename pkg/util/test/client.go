@@ -61,3 +61,7 @@ func (c *FakeClient) GetScheme() *runtime.Scheme {
 func (c *FakeClient) GetConfig() *rest.Config {
 	return nil
 }
+
+func (c *FakeClient) GetCurrentNamespace(kubeConfig string) (string, error) {
+	return "", nil
+}

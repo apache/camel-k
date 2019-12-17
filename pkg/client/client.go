@@ -53,6 +53,7 @@ type Client interface {
 	kubernetes.Interface
 	GetScheme() *runtime.Scheme
 	GetConfig() *rest.Config
+	GetCurrentNamespace(kubeConfig string) (string, error)
 }
 
 // Injectable identifies objects that can receive a Client
@@ -78,6 +79,10 @@ func (c *defaultClient) GetScheme() *runtime.Scheme {
 
 func (c *defaultClient) GetConfig() *rest.Config {
 	return c.config
+}
+
+func (c *defaultClient) GetCurrentNamespace(kubeConfig string) (string, error) {
+	return GetCurrentNamespace(kubeConfig)
 }
 
 // NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster
