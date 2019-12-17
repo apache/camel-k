@@ -49,10 +49,10 @@ func (action *monitorRoutineAction) CanHandle(build *v1alpha1.Build) bool {
 // Handle handles the builds
 func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
 	// Check the build routine
-	if _, ok := action.routines.Load(build.Name); !ok {
-		// and reschedule the build if it's missing. This can happen when the operator
-		// stops abruptly and restarts.
-		build.Status.Phase = v1alpha1.BuildPhaseScheduling
+	if _, ok := action.routines.Load(build.Name); !ok && build.Status.Phase != v1alpha1.BuildPhaseFailed {
+		// and recover the build if it's missing. This can happen when the operator
+		// stops abruptly and restarts or the build status update fails.
+		build.Status.Phase = v1alpha1.BuildPhaseFailed
 
 		return build, nil
 	}
