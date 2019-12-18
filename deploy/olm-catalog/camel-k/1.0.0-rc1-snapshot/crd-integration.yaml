@@ -24,9 +24,18 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   subresources:
     status: {}
+    scale:
+      specReplicasPath: .spec.replicas
+      statusReplicasPath: .status.replicas
   names:
     kind: Integration
     listKind: IntegrationList
@@ -37,9 +46,13 @@ spec:
   additionalPrinterColumns:
     - name: Phase
       type: string
-      description: The Integration phase
+      description: The integration phase
       JSONPath: .status.phase
     - name: Kit
       type: string
-      description: The IntegrationKit to use
+      description: The integration kit
       JSONPath: .status.kit
+    - name: Replicas
+      type: integer
+      description: The number of pods
+      JSONPath: .status.replicas
