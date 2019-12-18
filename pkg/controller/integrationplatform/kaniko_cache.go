@@ -58,13 +58,13 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					Name:  "warm-kaniko-cache",
 					Image: fmt.Sprintf("gcr.io/kaniko-project/warmer:v%s", defaults.KanikoVersion),
 					Args: []string{
-						"--cache-dir=/workspace/cache",
+						"--cache-dir=" + kaniko.CacheDir,
 						"--image=" + platform.Status.Build.BaseImage,
 					},
 					VolumeMounts: []corev1.VolumeMount{
 						{
-							Name:      "camel-k-builder",
-							MountPath: kaniko.BuildDir,
+							Name:      "kaniko-cache",
+							MountPath: kaniko.CacheDir,
 						},
 					},
 				},
@@ -76,11 +76,11 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					Image:           "busybox",
 					ImagePullPolicy: corev1.PullIfNotPresent,
 					Command:         []string{"/bin/sh", "-c"},
-					Args:            []string{"mkdir -p /workspace/cache && chmod -R a+rwx /workspace"},
+					Args:            []string{"mkdir -p " + kaniko.CacheDir + "&& chmod -R a+rwx " + kaniko.CacheDir},
 					VolumeMounts: []corev1.VolumeMount{
 						{
-							Name:      "camel-k-builder",
-							MountPath: kaniko.BuildDir,
+							Name:      "kaniko-cache",
+							MountPath: kaniko.CacheDir,
 						},
 					},
 				},
@@ -88,7 +88,7 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 			RestartPolicy: corev1.RestartPolicyOnFailure,
 			Volumes: []corev1.Volume{
 				{
-					Name: "camel-k-builder",
+					Name: "kaniko-cache",
 					VolumeSource: corev1.VolumeSource{
 						PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
 							ClaimName: platform.Status.Build.PersistentVolumeClaim,
