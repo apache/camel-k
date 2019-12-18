@@ -18,8 +18,8 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	v1 "k8s.io/api/core/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -54,7 +54,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 		return false, nil
 	}
 
@@ -63,11 +63,11 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 			secret := e.Platform.Status.Build.Registry.Secret
 			if secret != "" {
 				key := client.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
-				obj := v1.Secret{}
+				obj := corev1.Secret{}
 				if err := t.client.Get(t.ctx, key, &obj); err != nil {
 					return false, err
 				}
-				if obj.Type == v1.SecretTypeDockerConfigJson {
+				if obj.Type == corev1.SecretTypeDockerConfigJson {
 					t.SecretName = secret
 				}
 			}
@@ -78,8 +78,8 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {
-	e.Resources.VisitPodSpec(func(p *v1.PodSpec) {
-		p.ImagePullSecrets = append(p.ImagePullSecrets, v1.LocalObjectReference{
+	e.Resources.VisitPodSpec(func(p *corev1.PodSpec) {
+		p.ImagePullSecrets = append(p.ImagePullSecrets, corev1.LocalObjectReference{
 			Name: t.SecretName,
 		})
 	})

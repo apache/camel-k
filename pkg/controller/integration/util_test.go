@@ -23,7 +23,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
@@ -31,64 +31,64 @@ import (
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 	c, err := test.NewFakeClient(
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationKitSpec{
+			Spec: v1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseError,
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseError,
 			},
 		},
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationKitSpec{
+			Spec: v1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
 	)
 
 	assert.Nil(t, err)
 
-	i, err := LookupKitForIntegration(context.TODO(), c, &v1alpha1.Integration{
+	i, err := LookupKitForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       v1alpha1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "my-integration",
 		},
-		Status: v1alpha1.IntegrationStatus{
+		Status: v1.IntegrationStatus{
 			Dependencies: []string{
 				"camel-core",
 				"camel-irc",
@@ -107,24 +107,24 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		// Should be discarded because it contains both of the required traits but one
 		// contains a different configuration value
 		//
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationKitSpec{
+			Spec: v1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"knative": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -137,32 +137,32 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
 		//
 		// Should be discarded because it contains a subset of the required traits but
 		// with different configuration value
 		//
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationKitSpec{
+			Spec: v1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"knative": {
 						Configuration: map[string]string{
 							"enabled": "false",
@@ -170,32 +170,32 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
 		//
 		// Should be discarded because it contains both of the required traits but
 		// also an additional one
 		//
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-3",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationKitSpec{
+			Spec: v1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"knative": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -213,32 +213,32 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
 		//
 		// Should NOT be discarded because it contains a subset of the required traits and
 		// same configuration values
 		//
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-4",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Spec: v1alpha1.IntegrationKitSpec{
+			Spec: v1.IntegrationKitSpec{
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"knative": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -246,25 +246,25 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
 	)
 
 	assert.Nil(t, err)
 
-	i, err := LookupKitForIntegration(context.TODO(), c, &v1alpha1.Integration{
+	i, err := LookupKitForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       v1alpha1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "my-integration",
 		},
-		Spec: v1alpha1.IntegrationSpec{
-			Traits: map[string]v1alpha1.TraitSpec{
+		Spec: v1.IntegrationSpec{
+			Traits: map[string]v1.TraitSpec{
 				"knative": {
 					Configuration: map[string]string{
 						"enabled": "true",
@@ -277,7 +277,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				},
 			},
 		},
-		Status: v1alpha1.IntegrationStatus{
+		Status: v1.IntegrationStatus{
 			Dependencies: []string{
 				"camel-core",
 				"camel-irc",

@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -44,20 +44,20 @@ func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *initializeAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bool {
-	return platform.Status.Phase == "" || platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseDuplicate
+func (action *initializeAction) CanHandle(platform *v1.IntegrationPlatform) bool {
+	return platform.Status.Phase == "" || platform.Status.Phase == v1.IntegrationPlatformPhaseDuplicate
 }
 
-func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
+func (action *initializeAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	duplicate, err := action.isDuplicate(ctx, platform)
 	if err != nil {
 		return nil, err
 	}
 	if duplicate {
 		// another platform already present in the namespace
-		if platform.Status.Phase != v1alpha1.IntegrationPlatformPhaseDuplicate {
+		if platform.Status.Phase != v1.IntegrationPlatformPhaseDuplicate {
 			platform := platform.DeepCopy()
-			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseDuplicate
+			platform.Status.Phase = v1.IntegrationPlatformPhaseDuplicate
 
 			return platform, nil
 		}
@@ -69,7 +69,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 		return nil, err
 	}
 
-	if platform.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+	if platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
 		if platform.Status.Build.IsKanikoCacheEnabled() {
 			// Create the persistent volume claim used by the Kaniko cache
 			action.L.Info("Create persistent volume claim")
@@ -83,20 +83,20 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1alpha1.I
 			if err != nil {
 				return nil, err
 			}
-			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseWarming
+			platform.Status.Phase = v1.IntegrationPlatformPhaseWarming
 		} else {
 			// Skip the warmer pod creation
-			platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+			platform.Status.Phase = v1.IntegrationPlatformPhaseCreating
 		}
 	} else {
-		platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+		platform.Status.Phase = v1.IntegrationPlatformPhaseCreating
 	}
 	platform.Status.Version = defaults.Version
 
 	return platform, nil
 }
 
-func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v1alpha1.IntegrationPlatform) (bool, error) {
+func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v1.IntegrationPlatform) (bool, error) {
 	platforms, err := platformutil.ListPlatforms(ctx, action.client, thisPlatform.Namespace)
 	if err != nil {
 		return false, err
@@ -111,7 +111,7 @@ func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v
 	return false, nil
 }
 
-func createPersistentVolumeClaim(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
+func createPersistentVolumeClaim(ctx context.Context, client client.Client, platform *v1.IntegrationPlatform) error {
 	volumeSize, err := resource.ParseQuantity("1Gi")
 	if err != nil {
 		return err

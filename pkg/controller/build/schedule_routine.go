@@ -27,7 +27,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/patch"
 )
@@ -55,17 +55,17 @@ func (action *scheduleRoutineAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *scheduleRoutineAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseScheduling
+func (action *scheduleRoutineAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseScheduling
 }
 
 // Handle handles the builds
-func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	// Enter critical section
 	action.lock.Lock()
 	defer action.lock.Unlock()
 
-	builds := &v1alpha1.BuildList{}
+	builds := &v1.BuildList{}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
 	err := action.reader.List(ctx, builds, client.InNamespace(build.Namespace))
@@ -76,7 +76,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
 	for _, b := range builds.Items {
-		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
+		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
 			// Let's requeue the build in case one is already running
 			return nil, nil
 		}
@@ -85,7 +85,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	// Transition the build to pending state
 	// This must be done in the critical section rather than delegated to the controller
 	target := build.DeepCopy()
-	target.Status.Phase = v1alpha1.BuildPhasePending
+	target.Status.Phase = v1.BuildPhasePending
 	action.L.Info("Build state transition", "phase", target.Status.Phase)
 	err = action.client.Status().Update(ctx, target)
 	if err != nil {
@@ -100,11 +100,11 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1
 	return nil, nil
 }
 
-func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1alpha1.Build) {
+func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Build) {
 	defer action.routines.Delete(build.Name)
 
-	status := v1alpha1.BuildStatus{
-		Phase:     v1alpha1.BuildPhaseRunning,
+	status := v1.BuildStatus{
+		Phase:     v1.BuildPhaseRunning,
 		StartedAt: metav1.Now(),
 	}
 	if err := action.updateBuildStatus(ctx, build, status); err != nil {
@@ -113,9 +113,9 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1alph
 
 	for i, task := range build.Spec.Tasks {
 		if task.Builder == nil {
-			status := v1alpha1.BuildStatus{
+			status := v1.BuildStatus{
 				// Error the build directly as we know recovery won't work over ill-defined tasks
-				Phase: v1alpha1.BuildPhaseError,
+				Phase: v1.BuildPhaseError,
 				Error: fmt.Sprintf("task cannot be executed using the routine strategy: %s",
 					task.GetName()),
 				Duration: metav1.Now().Sub(build.Status.StartedAt.Time).String(),
@@ -126,12 +126,12 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1alph
 
 		status := action.builder.Run(*task.Builder)
 		lastTask := i == len(build.Spec.Tasks)-1
-		taskFailed := status.Phase == v1alpha1.BuildPhaseFailed
+		taskFailed := status.Phase == v1.BuildPhaseFailed
 		if lastTask || taskFailed {
 			status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
 		}
 		if lastTask && !taskFailed {
-			status.Phase = v1alpha1.BuildPhaseSucceeded
+			status.Phase = v1.BuildPhaseSucceeded
 		}
 		err := action.updateBuildStatus(ctx, build, status)
 		if err != nil || taskFailed {
@@ -140,7 +140,7 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1alph
 	}
 }
 
-func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, build *v1alpha1.Build, status v1alpha1.BuildStatus) error {
+func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, build *v1.Build, status v1.BuildStatus) error {
 	target := build.DeepCopy()
 	target.Status = status
 	// Copy the failure field from the build to persist recovery state

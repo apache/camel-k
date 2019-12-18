@@ -262,7 +262,7 @@ metadata:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
   name: camel-catalog-3.0.0-1.0.8
@@ -3185,7 +3185,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
   name: camel-catalog-quarkus-1.0.0-m1-1.0.8
@@ -3883,7 +3883,13 @@ spec:
     shortNames:
       - cc
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: false
+    - name: v1
+      served: true
+      storage: true
   subresources:
     status: {}
   additionalPrinterColumns:
@@ -3926,7 +3932,13 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: false
+    - name: v1
+      served: true
+      storage: true
   subresources:
     status: {}
   names:
@@ -3979,7 +3991,13 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: false
+    - name: v1
+      served: true
+      storage: true
   subresources:
     status: {}
   names:
@@ -4024,7 +4042,13 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+        storage: false
+    - name: v1
+      served: true
+      storage: true
   subresources:
     status: {}
     scale:
@@ -4036,7 +4060,7 @@ spec:
     plural: integrations
     singular: integration
     shortNames:
-    - it
+      - it
   additionalPrinterColumns:
     - name: Phase
       type: string
@@ -4071,7 +4095,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
   name: example
@@ -4808,7 +4832,7 @@ metadata:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationPlatform
 metadata:
   name: camel-k
@@ -4835,7 +4859,7 @@ metadata:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: groovy
@@ -4868,7 +4892,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: java
@@ -4901,7 +4925,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: js
@@ -4934,7 +4958,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: knative
@@ -4967,7 +4991,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: kotlin
@@ -5000,7 +5024,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: main
@@ -5032,7 +5056,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: xml
@@ -5065,7 +5089,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: yaml

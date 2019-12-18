@@ -22,30 +22,30 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestCollectConfigurationValues(t *testing.T) {
 	e := Environment{
-		Integration: &v1alpha1.Integration{
-			Spec: v1alpha1.IntegrationSpec{
-				Configuration: []v1alpha1.ConfigurationSpec{
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "configmap", Value: "my-cm-integration"},
 					{Type: "env", Value: "my-env-integration"},
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Spec: v1alpha1.IntegrationKitSpec{
-				Configuration: []v1alpha1.ConfigurationSpec{
+		IntegrationKit: &v1.IntegrationKit{
+			Spec: v1.IntegrationKitSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "configmap", Value: "my-cm-kit"},
 					{Type: "property", Value: "my-p-kit"},
 				},
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Configuration: []v1alpha1.ConfigurationSpec{
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "configmap", Value: "my-cm-platform"},
 					{Type: "secret", Value: "my-secret-platform"},
 					{Type: "property", Value: "my-p-platform"},
@@ -64,25 +64,25 @@ func TestCollectConfigurationValues(t *testing.T) {
 
 func TestCollectConfigurationPairs(t *testing.T) {
 	e := Environment{
-		Integration: &v1alpha1.Integration{
-			Spec: v1alpha1.IntegrationSpec{
-				Configuration: []v1alpha1.ConfigurationSpec{
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "property", Value: "p1=integration"},
 					{Type: "property", Value: "p4=integration"},
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Spec: v1alpha1.IntegrationKitSpec{
-				Configuration: []v1alpha1.ConfigurationSpec{
+		IntegrationKit: &v1.IntegrationKit{
+			Spec: v1.IntegrationKitSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "property", Value: "p1=kit"},
 					{Type: "property", Value: "p2=kit"},
 				},
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Configuration: []v1alpha1.ConfigurationSpec{
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "property", Value: "p1=platform"},
 					{Type: "property", Value: "p2=platform"},
 					{Type: "property", Value: "p3=platform"},

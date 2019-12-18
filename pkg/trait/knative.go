@@ -21,13 +21,13 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
@@ -88,7 +88,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -196,7 +196,7 @@ func (t *knativeTrait) Apply(e *Environment) error {
 func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEnvironment) error {
 	// Sources
 	err := t.ifServiceMissingDo(e, env, t.ChannelSources, knativeapi.CamelServiceTypeChannel, knativeapi.CamelEndpointKindSource,
-		func(ref *v1.ObjectReference, loc *url.URL, serviceURI string) error {
+		func(ref *corev1.ObjectReference, loc *url.URL, serviceURI string) error {
 			meta := map[string]string{
 				knativeapi.CamelMetaServicePath:       "/",
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
@@ -226,7 +226,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 
 	// Sinks
 	err = t.ifServiceMissingDo(e, env, t.ChannelSinks, knativeapi.CamelServiceTypeChannel, knativeapi.CamelEndpointKindSink,
-		func(ref *v1.ObjectReference, loc *url.URL, serviceURI string) error {
+		func(ref *corev1.ObjectReference, loc *url.URL, serviceURI string) error {
 			svc, err := knativeapi.BuildCamelServiceDefinition(ref.Name, knativeapi.CamelEndpointKindSink,
 				knativeapi.CamelServiceTypeChannel, *loc, ref.APIVersion, ref.Kind)
 			if err != nil {
@@ -242,7 +242,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 	return nil
 }
 
-func (t *knativeTrait) createSubscription(e *Environment, ref *v1.ObjectReference) error {
+func (t *knativeTrait) createSubscription(e *Environment, ref *corev1.ObjectReference) error {
 	sub := knativeutil.CreateSubscription(*ref, e.Integration.Name)
 	e.Resources.Add(sub)
 	return nil
@@ -277,7 +277,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 
 	// Sinks
 	err := t.ifServiceMissingDo(e, env, t.EndpointSinks, knativeapi.CamelServiceTypeEndpoint, knativeapi.CamelEndpointKindSink,
-		func(ref *v1.ObjectReference, loc *url.URL, serviceURI string) error {
+		func(ref *corev1.ObjectReference, loc *url.URL, serviceURI string) error {
 			svc, err := knativeapi.BuildCamelServiceDefinition(ref.Name, knativeapi.CamelEndpointKindSink,
 				knativeapi.CamelServiceTypeEndpoint, *loc, ref.APIVersion, ref.Kind)
 			if err != nil {
@@ -296,7 +296,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvironment) error {
 	// Sources
 	err := t.withServiceDo(false, e, env, t.EventSources, knativeapi.CamelServiceTypeEvent, knativeapi.CamelEndpointKindSource,
-		func(ref *v1.ObjectReference, loc *url.URL, serviceURI string) error {
+		func(ref *corev1.ObjectReference, loc *url.URL, serviceURI string) error {
 			// Iterate over all, without skipping duplicates
 			eventType := knativeutil.ExtractEventType(serviceURI)
 			t.createTrigger(e, ref, eventType)
@@ -324,7 +324,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 
 	// Sinks
 	err = t.ifServiceMissingDo(e, env, t.EventSinks, knativeapi.CamelServiceTypeEvent, knativeapi.CamelEndpointKindSink,
-		func(ref *v1.ObjectReference, loc *url.URL, serviceURI string) error {
+		func(ref *corev1.ObjectReference, loc *url.URL, serviceURI string) error {
 			svc, err := knativeapi.BuildCamelServiceDefinition(ref.Name, knativeapi.CamelEndpointKindSink,
 				knativeapi.CamelServiceTypeEvent, *loc, ref.APIVersion, ref.Kind)
 			if err != nil {
@@ -340,7 +340,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 	return nil
 }
 
-func (t *knativeTrait) createTrigger(e *Environment, ref *v1.ObjectReference, eventType string) {
+func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference, eventType string) {
 	// TODO extend to additional filters too, to filter them at source and not at destination
 	found := e.Resources.HasKnativeTrigger(func(trigger *eventing.Trigger) bool {
 		return trigger.Spec.Broker == ref.Name &&
@@ -360,7 +360,7 @@ func (t *knativeTrait) ifServiceMissingDo(
 	serviceURIsAsString string,
 	serviceType knativeapi.CamelServiceType,
 	endpointKind knativeapi.CamelEndpointKind,
-	gen func(ref *v1.ObjectReference, url *url.URL, serviceURI string) error) error {
+	gen func(ref *corev1.ObjectReference, url *url.URL, serviceURI string) error) error {
 	return t.withServiceDo(true, e, env, serviceURIsAsString, serviceType, endpointKind, gen)
 }
 
@@ -371,7 +371,7 @@ func (t *knativeTrait) withServiceDo(
 	serviceURIsAsString string,
 	serviceType knativeapi.CamelServiceType,
 	endpointKind knativeapi.CamelEndpointKind,
-	gen func(ref *v1.ObjectReference, url *url.URL, serviceURI string) error) error {
+	gen func(ref *corev1.ObjectReference, url *url.URL, serviceURI string) error) error {
 
 	serviceURIs := t.extractServices(serviceURIsAsString, serviceType)
 	for _, serviceURI := range serviceURIs {

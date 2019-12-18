@@ -20,7 +20,7 @@ package integrationplatform
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	platformutils "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -38,11 +38,11 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bool {
-	return platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady
+func (action *monitorAction) CanHandle(platform *v1.IntegrationPlatform) bool {
+	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady
 }
 
-func (action *monitorAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
+func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	// Just track the version of the operator in the platform resource
 	if platform.Status.Version != defaults.Version {
 		platform.Status.Version = defaults.Version

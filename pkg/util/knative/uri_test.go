@@ -20,7 +20,7 @@ package knative
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	"github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )

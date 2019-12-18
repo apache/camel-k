@@ -20,7 +20,7 @@ package build
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -34,10 +34,10 @@ type Action interface {
 	Name() string
 
 	// returns true if the action can handle the build
-	CanHandle(build *v1alpha1.Build) bool
+	CanHandle(build *v1.Build) bool
 
 	// executes the handling function
-	Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error)
+	Handle(ctx context.Context, build *v1.Build) (*v1.Build, error)
 }
 
 type baseAction struct {

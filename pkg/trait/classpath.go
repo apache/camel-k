@@ -27,7 +27,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
@@ -49,8 +49,8 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseRunning), nil
+	return e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *classpathTrait) Apply(e *Environment) error {
@@ -58,7 +58,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 
 	if kit == nil && e.Integration.Status.Kit != "" {
 		name := e.Integration.Status.Kit
-		k := v1alpha1.NewIntegrationKit(e.Integration.Namespace, name)
+		k := v1.NewIntegrationKit(e.Integration.Namespace, name)
 		key := k8sclient.ObjectKey{
 			Namespace: e.Integration.Namespace,
 			Name:      name,
@@ -91,7 +91,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		}
 	}
 
-	if kit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypeExternal {
+	if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypeExternal {
 		//
 		// In case of an external created kit, we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have

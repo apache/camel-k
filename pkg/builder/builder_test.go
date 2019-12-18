@@ -23,7 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/test"
 )
@@ -53,7 +53,7 @@ func TestFailure(t *testing.T) {
 
 	RegisterSteps(steps)
 
-	r := v1alpha1.BuilderTask{
+	r := v1.BuilderTask{
 		Steps: StepIDsFor(
 			steps.Step1,
 			steps.Step2,
@@ -63,5 +63,5 @@ func TestFailure(t *testing.T) {
 	}
 
 	status := b.Run(r)
-	assert.Equal(t, v1alpha1.BuildPhaseFailed, status.Phase)
+	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
 }

@@ -18,7 +18,7 @@ limitations under the License.
 package builder
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // StepIDsFor --
@@ -30,7 +30,7 @@ func StepIDsFor(steps ...Step) []string {
 	return IDs
 }
 
-func artifactIDs(artifacts []v1alpha1.Artifact) []string {
+func artifactIDs(artifacts []v1.Artifact) []string {
 	result := make([]string, 0, len(artifacts))
 
 	for _, a := range artifacts {

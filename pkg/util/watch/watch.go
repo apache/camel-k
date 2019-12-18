@@ -23,7 +23,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,8 +33,8 @@ import (
 //
 // HandleIntegrationStateChanges watches a integration resource and invoke the given handler when its status changes.
 //
-//     err := watch.HandleIntegrationStateChanges(ctx, integration, func(i *v1alpha1.Integration) bool {
-//         if i.Status.Phase == v1alpha1.IntegrationPhaseRunning {
+//     err := watch.HandleIntegrationStateChanges(ctx, integration, func(i *v1.Integration) bool {
+//         if i.Status.Phase == v1.IntegrationPhaseRunning {
 //			    return false
 //		    }
 //
@@ -43,8 +43,8 @@ import (
 //
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
 //
-func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.Integration,
-	handler func(integration *v1alpha1.Integration) bool) (*v1alpha1.IntegrationPhase, error) {
+func HandleIntegrationStateChanges(ctx context.Context, integration *v1.Integration,
+	handler func(integration *v1.Integration) bool) (*v1.IntegrationPhase, error) {
 	dynamicClient, err := customclient.GetDefaultDynamicClientFor("integrations", integration.Namespace)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.In
 	defer watcher.Stop()
 	events := watcher.ResultChan()
 
-	var lastObservedState *v1alpha1.IntegrationPhase
+	var lastObservedState *v1.IntegrationPhase
 
 	for {
 		select {
@@ -99,8 +99,8 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.In
 //
 // HandlePlatformStateChanges watches a platform resource and invoke the given handler when its status changes.
 //
-//     err := watch.HandlePlatformStateChanges(ctx, platform, func(i *v1alpha1.IntegrationPlatform) bool {
-//         if i.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+//     err := watch.HandlePlatformStateChanges(ctx, platform, func(i *v1.IntegrationPlatform) bool {
+//         if i.Status.Phase == v1.IntegrationPlatformPhaseReady {
 //			    return false
 //		    }
 //
@@ -109,7 +109,7 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1alpha1.In
 //
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
 //
-func HandlePlatformStateChanges(ctx context.Context, platform *v1alpha1.IntegrationPlatform, handler func(platform *v1alpha1.IntegrationPlatform) bool) error {
+func HandlePlatformStateChanges(ctx context.Context, platform *v1.IntegrationPlatform, handler func(platform *v1.IntegrationPlatform) bool) error {
 	dynamicClient, err := customclient.GetDefaultDynamicClientFor("integrationplatforms", platform.Namespace)
 	if err != nil {
 		return err
@@ -124,7 +124,7 @@ func HandlePlatformStateChanges(ctx context.Context, platform *v1alpha1.Integrat
 	defer watcher.Stop()
 	events := watcher.ResultChan()
 
-	var lastObservedState *v1alpha1.IntegrationPlatformPhase
+	var lastObservedState *v1.IntegrationPlatformPhase
 
 	for {
 		select {

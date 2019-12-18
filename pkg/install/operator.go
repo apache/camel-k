@@ -22,13 +22,13 @@ import (
 	"errors"
 	"strings"
 
-	v1 "k8s.io/api/apps/v1"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/rbac/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/knative"
@@ -53,7 +53,7 @@ func Operator(ctx context.Context, c client.Client, cfg OperatorConfiguration) e
 func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection) error {
 	customizer := func(o runtime.Object) runtime.Object {
 		if cfg.CustomImage != "" {
-			if d, ok := o.(*v1.Deployment); ok {
+			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					d.Spec.Template.Spec.Containers[0].Image = cfg.CustomImage
 				}
@@ -61,7 +61,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		}
 
 		if cfg.Global {
-			if d, ok := o.(*v1.Deployment); ok {
+			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					// Make the operator watch all namespaces
 					envvar.SetVal(&d.Spec.Template.Spec.Containers[0].Env, "WATCH_NAMESPACE", "")
@@ -154,13 +154,13 @@ func installKnative(ctx context.Context, c client.Client, namespace string, cust
 
 // Platform installs the platform custom resource
 // nolint: lll
-func Platform(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec) (*v1alpha1.IntegrationPlatform, error) {
+func Platform(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1.IntegrationPlatformRegistrySpec) (*v1.IntegrationPlatform, error) {
 	return PlatformOrCollect(ctx, c, clusterType, namespace, registry, nil)
 }
 
 // PlatformOrCollect --
 // nolint: lll
-func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
+func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1.IntegrationPlatform, error) {
 	isOpenshift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	if err != nil {
 		return nil, err
 	}
-	pl := platformObject.(*v1alpha1.IntegrationPlatform)
+	pl := platformObject.(*v1.IntegrationPlatform)
 
 	if !isOpenshift {
 		pl.Spec.Build.Registry = registry

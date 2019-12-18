@@ -24,7 +24,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
@@ -35,12 +35,12 @@ func TestDebugTraitApplicability(t *testing.T) {
 
 	env := Environment{
 		CamelCatalog: catalog,
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Traits: map[string]v1.TraitSpec{
 					"debug": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -58,7 +58,7 @@ func TestDebugTraitApplicability(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, enabled)
 
-	env.Integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	env.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
 	enabled, err = trait.Configure(&env)
 	assert.Nil(t, err)
@@ -67,12 +67,12 @@ func TestDebugTraitApplicability(t *testing.T) {
 
 func TestApplyDebugTrait(t *testing.T) {
 	environment := Environment{
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Traits: map[string]v1.TraitSpec{
 					"debug": {
 						Configuration: map[string]string{
 							"enabled": "true",

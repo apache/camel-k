@@ -21,7 +21,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -57,7 +57,7 @@ func TestApplyGarbageCollectorTraitDoesSucceed(t *testing.T) {
 
 func TestApplyGarbageCollectorTraitDuringInitializationPhaseSkipPostActions(t *testing.T) {
 	gcTrait, environment := createNominalGarbageCollectorTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseInitialization
+	environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	err := gcTrait.Apply(environment)
 
@@ -73,12 +73,12 @@ func createNominalGarbageCollectorTest() (*garbageCollectorTrait, *Environment) 
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "integration-name",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseRunning,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
 			},
 		},
 	}

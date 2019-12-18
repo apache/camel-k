@@ -18,7 +18,7 @@ limitations under the License.
 package source
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 )
 
@@ -28,7 +28,7 @@ type JavaSourceInspector struct {
 }
 
 // Extract --
-func (i JavaSourceInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
+func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	from := util.FindAllDistinctStringSubmatch(
 		source.Content,
 		doubleQuotedFrom,

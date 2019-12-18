@@ -20,7 +20,7 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 
@@ -40,8 +40,8 @@ func TestOwner(t *testing.T) {
 }
 
 func SetUpOwnerEnvironment(t *testing.T) *Environment {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
-	env.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"owner": {
 			Configuration: map[string]string{
 				"target-labels":      "com.mycompany/mylabel1",

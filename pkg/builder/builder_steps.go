@@ -29,7 +29,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -289,7 +289,7 @@ func incrementalPackager(ctx *Context) error {
 
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
-			selectedArtifacts := make([]v1alpha1.Artifact, 0)
+			selectedArtifacts := make([]v1.Artifact, 0)
 			for _, entry := range ctx.Artifacts {
 				if _, isCommon := commonLibs[entry.ID]; !isCommon {
 					selectedArtifacts = append(selectedArtifacts, entry)
@@ -360,7 +360,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 		options = append(options, controller.MatchingSelector{Selector: selector})
 	}
 
-	list := v1alpha1.NewIntegrationKitList()
+	list := v1.NewIntegrationKitList()
 	err := context.Client.List(context.C, &list, options...)
 	if err != nil {
 		return nil, err
@@ -370,7 +370,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 	for _, item := range list.Items {
 		kit := item
 
-		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady {
+		if kit.Status.Phase != v1.IntegrationKitPhaseReady {
 			continue
 		}
 		if kit.Status.CamelVersion != context.Catalog.Version {
@@ -390,10 +390,10 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 			continue
 		}
 
-		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady || kit.Labels == nil {
+		if kit.Status.Phase != v1.IntegrationKitPhaseReady || kit.Labels == nil {
 			continue
 		}
-		if kitType, present := kit.Labels["camel.apache.org/kit.type"]; !present || kitType != v1alpha1.IntegrationKitTypePlatform {
+		if kitType, present := kit.Labels["camel.apache.org/kit.type"]; !present || kitType != v1.IntegrationKitTypePlatform {
 			continue
 		}
 
@@ -406,7 +406,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 	return images, nil
 }
 
-func findBestImage(images []publishedImage, artifacts []v1alpha1.Artifact) (publishedImage, map[string]bool) {
+func findBestImage(images []publishedImage, artifacts []v1.Artifact) (publishedImage, map[string]bool) {
 	var bestImage publishedImage
 
 	if len(images) == 0 {

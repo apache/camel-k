@@ -28,7 +28,7 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -40,25 +40,25 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 	env := Environment{
 		Catalog:      NewEnvironmentTestCatalog(),
 		CamelCatalog: catalog,
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Traits: map[string]v1.TraitSpec{
 					"istio": {
 						Configuration: make(map[string]string),
 					},
 				},
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
+		Platform: &v1.IntegrationPlatform{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 			},
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Profile: v1alpha1.TraitProfileKnative,
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Profile: v1.TraitProfileKnative,
 			},
 		},
 		EnvVars:   make([]corev1.EnvVar, 0),

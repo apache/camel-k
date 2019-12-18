@@ -27,7 +27,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -39,10 +39,10 @@ import (
 
 // DeleteIntegration --
 func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
-	integration := v1alpha1.Integration{
+	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       v1alpha1.IntegrationKind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,

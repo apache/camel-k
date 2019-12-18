@@ -27,19 +27,19 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 var allowedLookupLabels = map[string]bool{
-	v1alpha1.IntegrationKitTypePlatform: true,
-	v1alpha1.IntegrationKitTypeExternal: true,
+	v1.IntegrationKitTypePlatform: true,
+	v1.IntegrationKitTypeExternal: true,
 }
 
 // LookupKitForIntegration --
-func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1alpha1.Integration) (*v1alpha1.IntegrationKit, error) {
+func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1.Integration) (*v1.IntegrationKit, error) {
 	if integration.Status.Kit != "" {
 		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.Kit, integration.Namespace)
 		if err != nil {
@@ -63,7 +63,7 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 		options = append(options, controller.MatchingSelector{Selector: selector})
 	}
 
-	kits := v1alpha1.NewIntegrationKitList()
+	kits := v1.NewIntegrationKitList()
 	if err := c.List(ctx, &kits, options...); err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 	for _, kit := range kits.Items {
 		kit := kit // pin
 
-		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
+		if kit.Status.Phase == v1.IntegrationKitPhaseError {
 			continue
 		}
 		if kit.Status.CamelVersion != integration.Status.CamelVersion {
@@ -128,7 +128,7 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 }
 
 // HasMatchingTraits compare traits defined on kit against those defined on integration.
-func HasMatchingTraits(kit *v1alpha1.IntegrationKit, integration *v1alpha1.Integration) bool {
+func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) bool {
 	for kitTraitName, kitTraitConf := range kit.Spec.Traits {
 		iTraitConf, ok := integration.Spec.Traits[kitTraitName]
 		if !ok {

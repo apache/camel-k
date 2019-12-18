@@ -25,7 +25,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetCommandOptions) {
@@ -50,9 +50,9 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetComman
 		},
 	}
 
-	cmd.Flags().Bool(v1alpha1.IntegrationKitTypeUser, true, "Includes user Kits")
-	cmd.Flags().Bool(v1alpha1.IntegrationKitTypeExternal, true, "Includes external Kits")
-	cmd.Flags().Bool(v1alpha1.IntegrationKitTypePlatform, true, "Includes platform Kits")
+	cmd.Flags().Bool(v1.IntegrationKitTypeUser, true, "Includes user Kits")
+	cmd.Flags().Bool(v1.IntegrationKitTypeExternal, true, "Includes external Kits")
+	cmd.Flags().Bool(v1.IntegrationKitTypePlatform, true, "Includes platform Kits")
 
 	return &cmd, &options
 }
@@ -69,7 +69,7 @@ func (command *kitGetCommandOptions) validate(cmd *cobra.Command, args []string)
 }
 
 func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
-	kitList := v1alpha1.NewIntegrationKitList()
+	kitList := v1.NewIntegrationKitList()
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -82,9 +82,9 @@ func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
 	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
 	for _, ctx := range kitList.Items {
 		t := ctx.Labels["camel.apache.org/kit.type"]
-		u := command.User && t == v1alpha1.IntegrationKitTypeUser
-		e := command.External && t == v1alpha1.IntegrationKitTypeExternal
-		p := command.Platform && t == v1alpha1.IntegrationKitTypePlatform
+		u := command.User && t == v1.IntegrationKitTypeUser
+		e := command.External && t == v1.IntegrationKitTypeExternal
+		p := command.Platform && t == v1.IntegrationKitTypePlatform
 
 		if u || e || p {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, string(ctx.Status.Phase), t, ctx.Status.Image)

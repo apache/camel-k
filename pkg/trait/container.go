@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -82,7 +82,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -189,9 +189,9 @@ func (t *containerTrait) configureService(e *Environment) {
 	}
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionServiceAvailable,
+		v1.IntegrationConditionServiceAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionServiceAvailableReason,
+		v1.IntegrationConditionServiceAvailableReason,
 
 		// service -> container
 		fmt.Sprintf("%s(%s/%d) -> %s(%s/%d)",
@@ -203,7 +203,7 @@ func (t *containerTrait) configureService(e *Environment) {
 	service.Spec.Ports = append(service.Spec.Ports, servicePort)
 
 	// Mark the service as a user service
-	service.Labels["camel.apache.org/service.type"] = v1alpha1.ServiceTypeUser
+	service.Labels["camel.apache.org/service.type"] = v1.ServiceTypeUser
 }
 
 func (t *containerTrait) configureResources(_ *Environment, container *corev1.Container) {

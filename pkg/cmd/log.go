@@ -20,7 +20,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,10 +64,10 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	integration := v1alpha1.Integration{
+	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       v1alpha1.IntegrationKind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: o.Namespace,

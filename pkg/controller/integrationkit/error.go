@@ -20,7 +20,7 @@ package integrationkit
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/digest"
 )
 
@@ -37,11 +37,11 @@ func (action *errorAction) Name() string {
 	return "error"
 }
 
-func (action *errorAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
-	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseError
+func (action *errorAction) CanHandle(kit *v1.IntegrationKit) bool {
+	return kit.Status.Phase == v1.IntegrationKitPhaseError
 }
 
-func (action *errorAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
+func (action *errorAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
 	hash, err := digest.ComputeForIntegrationKit(kit)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (action *errorAction) Handle(ctx context.Context, kit *v1alpha1.Integration
 		action.L.Info("IntegrationKit needs a rebuild")
 
 		kit.Status.Digest = hash
-		kit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
+		kit.Status.Phase = v1.IntegrationKitPhaseInitialization
 
 		return kit, nil
 	}

@@ -25,7 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -76,11 +76,11 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		Catalog:   catalog,
 		Client:    c,
 		Namespace: "ns",
-		Build: v1alpha1.BuilderTask{
+		Build: v1.BuilderTask{
 			RuntimeVersion: catalog.RuntimeVersion,
 			CamelVersion:   catalog.Version,
-			Maven: v1alpha1.MavenSpec{
-				Settings: v1alpha1.ValueSource{
+			Maven: v1.MavenSpec{
+				Settings: v1.ValueSource{
 					ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: "maven-settings",
@@ -124,11 +124,11 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		Catalog:   catalog,
 		Client:    c,
 		Namespace: "ns",
-		Build: v1alpha1.BuilderTask{
+		Build: v1.BuilderTask{
 			RuntimeVersion: catalog.RuntimeVersion,
 			CamelVersion:   catalog.Version,
-			Maven: v1alpha1.MavenSpec{
-				Settings: v1alpha1.ValueSource{
+			Maven: v1.MavenSpec{
+				Settings: v1.ValueSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: "maven-settings",
@@ -151,39 +151,39 @@ func TestListPublishedImages(t *testing.T) {
 	assert.Nil(t, err)
 
 	c, err := test.NewFakeClient(
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase:          v1alpha1.IntegrationKitPhaseError,
+			Status: v1.IntegrationKitStatus{
+				Phase:          v1.IntegrationKitPhaseError,
 				Image:          "image-1",
 				CamelVersion:   catalog.Version,
 				RuntimeVersion: catalog.RuntimeVersion,
 			},
 		},
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
 				},
 			},
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase:          v1alpha1.IntegrationKitPhaseReady,
+			Status: v1.IntegrationKitStatus{
+				Phase:          v1.IntegrationKitPhaseReady,
 				Image:          "image-2",
 				CamelVersion:   catalog.Version,
 				RuntimeVersion: catalog.RuntimeVersion,

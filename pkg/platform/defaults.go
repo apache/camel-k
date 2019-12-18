@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -30,12 +30,12 @@ import (
 	"github.com/apache/camel-k/pkg/util/openshift"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
 // Defaults are set in the status->appliedConfiguration fields, not in the spec.
-func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.IntegrationPlatform, verbose bool) error {
+func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	// Reset the state to initial values
 	p.ResyncStatusFullConfig()
 
@@ -47,17 +47,17 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 		case err != nil:
 			return err
 		case isOpenShift:
-			p.Status.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+			p.Status.Cluster = v1.IntegrationPlatformClusterOpenShift
 		default:
-			p.Status.Cluster = v1alpha1.IntegrationPlatformClusterKubernetes
+			p.Status.Cluster = v1.IntegrationPlatformClusterKubernetes
 		}
 	}
 
 	if p.Status.Build.PublishStrategy == "" {
-		if p.Status.Cluster == v1alpha1.IntegrationPlatformClusterOpenShift {
-			p.Status.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyS2I
+		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
+			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
-			p.Status.Build.PublishStrategy = v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko
+			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyKaniko
 		}
 	}
 
@@ -65,13 +65,13 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 		// If the operator is global, a global build strategy should be used
 		if IsCurrentOperatorGlobal() {
 			// The only global strategy we have for now
-			p.Status.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
 		} else {
-			if p.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
+			if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
 				// The build output has to be shared with Kaniko via a persistent volume
-				p.Status.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
+				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
 			} else {
-				p.Status.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
+				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
 			}
 		}
 	}
@@ -81,7 +81,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 		return err
 	}
 
-	if verbose && p.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.Registry.Address == "" {
+	if verbose && p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.Registry.Address == "" {
 		log.Log.Info("No registry specified for publishing images")
 	}
 
@@ -92,7 +92,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 	return nil
 }
 
-func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.IntegrationPlatform, verbose bool) error {
+func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.CamelVersion == "" {
 		p.Status.Build.CamelVersion = defaults.DefaultCamelVersion
 	}
@@ -116,12 +116,12 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetTimeout().Duration, d)
 		}
 
-		p.Status.Build.Timeout = &v1.Duration{
+		p.Status.Build.Timeout = &metav1.Duration{
 			Duration: d,
 		}
 	}
 	if p.Status.Build.GetTimeout().Duration == 0 {
-		p.Status.Build.Timeout = &v1.Duration{
+		p.Status.Build.Timeout = &metav1.Duration{
 			Duration: 5 * time.Minute,
 		}
 	}
@@ -133,13 +133,13 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 			log.Log.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.Maven.GetTimeout().Duration, d)
 		}
 
-		p.Status.Build.Maven.Timeout = &v1.Duration{
+		p.Status.Build.Maven.Timeout = &metav1.Duration{
 			Duration: d,
 		}
 	}
 	if p.Status.Build.Maven.GetTimeout().Duration == 0 {
 		n := p.Status.Build.GetTimeout().Duration.Seconds() * 0.75
-		p.Status.Build.Maven.Timeout = &v1.Duration{
+		p.Status.Build.Maven.Timeout = &metav1.Duration{
 			Duration: (time.Duration(n) * time.Second).Truncate(time.Second),
 		}
 	}
@@ -171,7 +171,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 		}
 	}
 
-	if p.Status.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.KanikoBuildCache == nil {
+	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.KanikoBuildCache == nil {
 		// Default to disabling Kaniko cache warmer
 		// Using the cache warmer pod seems unreliable with the current Kaniko version
 		// and requires relying on a persistent volume.
@@ -194,7 +194,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integ
 	return nil
 }
 
-func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, p *v1alpha1.IntegrationPlatform, settings maven.Settings) error {
+func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform, settings maven.Settings) error {
 	cm, err := maven.CreateSettingsConfigMap(p.Namespace, p.Name, settings)
 	if err != nil {
 		return err

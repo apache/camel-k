@@ -24,7 +24,7 @@ package e2e
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,7 +35,7 @@ func TestBackwardCompatibility(t *testing.T) {
 	withNewTestNamespace(t, func(ns string) {
 
 		data := `
-apiVersion: ` + v1alpha1.SchemeGroupVersion.String() + `
+apiVersion: ` + v1.SchemeGroupVersion.String() + `
 kind: Integration
 metadata:
   name: example
@@ -54,14 +54,14 @@ status:
 		err = testClient.Create(testContext, obj)
 		assert.Nil(t, err)
 
-		integration := v1alpha1.NewIntegration(ns, "example")
+		integration := v1.NewIntegration(ns, "example")
 		key, err := client.ObjectKeyFromObject(&integration)
 		assert.Nil(t, err)
 
 		unstr := unstructured.Unstructured{
 			Object: map[string]interface{}{
 				"kind":       "Integration",
-				"apiVersion": v1alpha1.SchemeGroupVersion.String(),
+				"apiVersion": v1.SchemeGroupVersion.String(),
 			},
 		}
 		err = testClient.Get(testContext, key, &unstr)

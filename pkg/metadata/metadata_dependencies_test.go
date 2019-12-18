@@ -22,13 +22,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 func TestDependenciesJavaSource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			    from("telegram:bots/cippa").to("log:stash");
@@ -38,7 +38,7 @@ func TestDependenciesJavaSource(t *testing.T) {
                     + "?delay={{twitterDelayMs}}");
 			`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -50,8 +50,8 @@ func TestDependenciesJavaSource(t *testing.T) {
 }
 
 func TestDependenciesJavaScript(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "source.js",
 			Content: `
 			    from('telegram:bots/cippa').to("log:stash");
@@ -60,7 +60,7 @@ func TestDependenciesJavaScript(t *testing.T) {
 			    '"'
 		    `,
 		},
-		Language: v1alpha1.LanguageJavaScript,
+		Language: v1.LanguageJavaScript,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -72,8 +72,8 @@ func TestDependenciesJavaScript(t *testing.T) {
 }
 
 func TestDependenciesGroovy(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "source.groovy",
 			Content: `
 			    from('telegram:bots/cippa').to("log:stash");
@@ -84,7 +84,7 @@ func TestDependenciesGroovy(t *testing.T) {
 			    '"
 		    `,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -96,8 +96,8 @@ func TestDependenciesGroovy(t *testing.T) {
 }
 
 func TestDependencies(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			    from("http:test").to("log:end");
@@ -105,7 +105,7 @@ func TestDependencies(t *testing.T) {
 			    from("twitter-timeline:test").to("mock:end");
 		    `,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -117,8 +117,8 @@ func TestDependencies(t *testing.T) {
 }
 
 func TestDependenciesQuarkus(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			    from("http:test").to("log:end");
@@ -126,7 +126,7 @@ func TestDependenciesQuarkus(t *testing.T) {
 			    from("twitter-timeline:test").to("mock:end");
 		    `,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.QuarkusCatalog()
@@ -144,14 +144,14 @@ func TestDependenciesQuarkus(t *testing.T) {
 }
 
 func TestJacksonDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			    from("http:test").unmarshal().json(JsonLibrary.Jackson).to("log:end");
 		    `,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -163,8 +163,8 @@ func TestJacksonDependency(t *testing.T) {
 }
 
 func TestJacksonImplicitDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
 			    from("http:test")
@@ -172,7 +172,7 @@ func TestJacksonImplicitDependency(t *testing.T) {
 					.to("log:end")
 		    `,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -184,8 +184,8 @@ func TestJacksonImplicitDependency(t *testing.T) {
 }
 
 func TestLanguageDependencies(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Languages.java",
 			Content: `
 				from("direct:start")
@@ -199,7 +199,7 @@ func TestLanguageDependencies(t *testing.T) {
 				.split().xtokenize("/ns:foo/bar", new Namespaces("ns", "http://foo/bar"));
 			`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -211,8 +211,8 @@ func TestLanguageDependencies(t *testing.T) {
 }
 
 func TestLanguageDependenciesTransformExpression(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Languages.java",
 			Content: `
 				from("direct:start")
@@ -222,7 +222,7 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 				.transform(jsonpath("$.foo"))
 			`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -233,8 +233,8 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 }
 
 func TestHystrixDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
 			    from("http:test")
@@ -244,7 +244,7 @@ func TestHystrixDependency(t *testing.T) {
 						.to("log:fallback")
 		    `,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -256,8 +256,8 @@ func TestHystrixDependency(t *testing.T) {
 }
 
 func TestRestDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
                 rest()
@@ -267,7 +267,7 @@ func TestRestDependency(t *testing.T) {
                     .to("log:info")
 		    `,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -279,8 +279,8 @@ func TestRestDependency(t *testing.T) {
 }
 
 func TestRestWithPathDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
                 rest("/test")
@@ -290,7 +290,7 @@ func TestRestWithPathDependency(t *testing.T) {
                     .to("log:info")
 		    `,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -302,8 +302,8 @@ func TestRestWithPathDependency(t *testing.T) {
 }
 
 func TestRestConfigurationDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
                 restConfiguration()
@@ -312,7 +312,7 @@ func TestRestConfigurationDependency(t *testing.T) {
                     .to("log:info")
 		    `,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -324,8 +324,8 @@ func TestRestConfigurationDependency(t *testing.T) {
 }
 
 func TestRestClosureDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
                 rest {
@@ -334,7 +334,7 @@ func TestRestClosureDependency(t *testing.T) {
                     .to("log:info")
 		    `,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -346,9 +346,9 @@ func TestRestClosureDependency(t *testing.T) {
 }
 
 func TestXMLHystrixDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
+	code := v1.SourceSpec{
 
-		DataSpec: v1alpha1.DataSpec{
+		DataSpec: v1.DataSpec{
 			Name: "routes.xml",
 			Content: `
 			<from uri="direct:ciao" />
@@ -360,7 +360,7 @@ func TestXMLHystrixDependency(t *testing.T) {
 			</circuitBreaker>
 		`,
 		},
-		Language: v1alpha1.LanguageXML,
+		Language: v1.LanguageXML,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -372,9 +372,9 @@ func TestXMLHystrixDependency(t *testing.T) {
 }
 
 func TestXMLRestDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
+	code := v1.SourceSpec{
 
-		DataSpec: v1alpha1.DataSpec{
+		DataSpec: v1.DataSpec{
 			Name: "routes.xml",
 			Content: `
 			<rest path="/say">
@@ -390,7 +390,7 @@ func TestXMLRestDependency(t *testing.T) {
 		    </rest>
 		`,
 		},
-		Language: v1alpha1.LanguageXML,
+		Language: v1.LanguageXML,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -402,8 +402,8 @@ func TestXMLRestDependency(t *testing.T) {
 }
 
 func TestXMLLanguageDependencies(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "routes.xml",
 			Content: `
                <from uri="direct:start" />
@@ -439,7 +439,7 @@ func TestXMLLanguageDependencies(t *testing.T) {
                </split>
           `,
 		},
-		Language: v1alpha1.LanguageXML,
+		Language: v1.LanguageXML,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -492,13 +492,13 @@ const yamlWithLanguages = `
 `
 
 func TestYAMLRestDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
+	code := v1.SourceSpec{
 
-		DataSpec: v1alpha1.DataSpec{
+		DataSpec: v1.DataSpec{
 			Name:    "routes.yaml",
 			Content: yamlWithRest,
 		},
-		Language: v1alpha1.LanguageYaml,
+		Language: v1.LanguageYaml,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -510,13 +510,13 @@ func TestYAMLRestDependency(t *testing.T) {
 }
 
 func TestYAMLHystrixDependency(t *testing.T) {
-	code := v1alpha1.SourceSpec{
+	code := v1.SourceSpec{
 
-		DataSpec: v1alpha1.DataSpec{
+		DataSpec: v1.DataSpec{
 			Name:    "routes.yaml",
 			Content: yamlWithCircuitBreaker,
 		},
-		Language: v1alpha1.LanguageYaml,
+		Language: v1.LanguageYaml,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -528,12 +528,12 @@ func TestYAMLHystrixDependency(t *testing.T) {
 }
 
 func TestYAMLLanguageDependencies(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name:    "routes.yaml",
 			Content: yamlWithLanguages,
 		},
-		Language: v1alpha1.LanguageYaml,
+		Language: v1.LanguageYaml,
 	}
 
 	catalog, err := camel.DefaultCatalog()

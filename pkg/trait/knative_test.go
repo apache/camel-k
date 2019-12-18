@@ -34,8 +34,8 @@ import (
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -52,19 +52,19 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
 				Namespace: "ns",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Profile:   v1alpha1.TraitProfileKnative,
-				Sources:   []v1alpha1.SourceSpec{},
-				Resources: []v1alpha1.ResourceSpec{},
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Profile:   v1.TraitProfileKnative,
+				Sources:   []v1.SourceSpec{},
+				Resources: []v1.ResourceSpec{},
+				Traits: map[string]v1.TraitSpec{
 					"knative": {
 						Configuration: map[string]string{
 							"enabled":          "true",
@@ -78,19 +78,19 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
-				Profile: v1alpha1.TraitProfileKnative,
+				Profile: v1.TraitProfileKnative,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -152,19 +152,19 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
 				Namespace: "ns",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKnative,
-				Sources: []v1alpha1.SourceSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name: "route.java",
 							Content: `
 								public class CartoonMessagesMover extends RouteBuilder {
@@ -175,11 +175,11 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 								}
 							`,
 						},
-						Language: v1alpha1.LanguageJavaSource,
+						Language: v1.LanguageJavaSource,
 					},
 				},
-				Resources: []v1alpha1.ResourceSpec{},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Resources: []v1.ResourceSpec{},
+				Traits: map[string]v1.TraitSpec{
 					"knative": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -188,19 +188,19 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
-				Profile: v1alpha1.TraitProfileKnative,
+				Profile: v1.TraitProfileKnative,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),

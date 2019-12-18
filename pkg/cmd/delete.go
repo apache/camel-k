@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
@@ -92,10 +92,10 @@ func (command *deleteCmdOptions) run(args []string) error {
 			}
 		}
 	} else if command.DeleteAll {
-		integrationList := v1alpha1.IntegrationList{
+		integrationList := v1.IntegrationList{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKind,
 			},
 		}
 

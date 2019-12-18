@@ -38,7 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 )
 
@@ -69,10 +69,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationKit
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationKit{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegrationKit := e.ObjectOld.(*v1alpha1.IntegrationKit)
-			newIntegrationKit := e.ObjectNew.(*v1alpha1.IntegrationKit)
+			oldIntegrationKit := e.ObjectOld.(*v1.IntegrationKit)
+			newIntegrationKit := e.ObjectNew.(*v1.IntegrationKit)
 			// Ignore updates to the integration kit status in which case metadata.Generation
 			// does not change, or except when the integration kit phase changes as it's used
 			// to transition from one phase to another
@@ -89,15 +89,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to secondary resource Builds and requeue the owner IntegrationKit
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}},
+	err = c.Watch(&source.Kind{Type: &v1.Build{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &v1alpha1.IntegrationKit{},
+			OwnerType:    &v1.IntegrationKit{},
 		},
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild := e.ObjectOld.(*v1alpha1.Build)
-				newBuild := e.ObjectNew.(*v1alpha1.Build)
+				oldBuild := e.ObjectOld.(*v1.Build)
+				newBuild := e.ObjectNew.(*v1.Build)
 				// Ignore updates to the build CR except when the build phase changes
 				// as it's used to transition the integration kit from one phase
 				// to another during the image build
@@ -110,13 +110,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integrationkits that are in phase waiting for platform
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			platform := a.Object.(*v1alpha1.IntegrationPlatform)
+			platform := a.Object.(*v1.IntegrationPlatform)
 			var requests []reconcile.Request
 
-			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
-				list := &v1alpha1.IntegrationKitList{}
+			if platform.Status.Phase == v1.IntegrationPlatformPhaseReady {
+				list := &v1.IntegrationKitList{}
 
 				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(platform.Namespace)); err != nil {
 					log.Error(err, "Failed to retrieve integrationkit list")
@@ -124,7 +124,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				}
 
 				for _, kit := range list.Items {
-					if kit.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform {
+					if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 						log.Infof("Platform %s ready, wake-up integrationkit: %s", platform.Name, kit.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
@@ -167,7 +167,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 
 	ctx := context.TODO()
 
-	var instance v1alpha1.IntegrationKit
+	var instance v1.IntegrationKit
 
 	// Fetch the IntegrationKit instance
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
@@ -184,17 +184,17 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationKit(target)
 
-	if target.Status.Phase == v1alpha1.IntegrationKitPhaseNone || target.Status.Phase == v1alpha1.IntegrationKitPhaseWaitingForPlatform {
+	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 		pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
-		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1alpha1.IntegrationKitPhaseWaitingForPlatform
+		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+			target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 		} else {
-			target.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
+			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
 			if err != nil {
-				target.Status.SetErrorCondition(v1alpha1.IntegrationKitConditionPlatformAvailable, v1alpha1.IntegrationKitConditionPlatformAvailableReason, err)
+				target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
 			}
 
 			if pl != nil {
@@ -249,7 +249,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileIntegrationKit) update(ctx context.Context, base *v1alpha1.IntegrationKit, target *v1alpha1.IntegrationKit) (reconcile.Result, error) {
+func (r *ReconcileIntegrationKit) update(ctx context.Context, base *v1.IntegrationKit, target *v1.IntegrationKit) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegrationKit(target)
 	if err != nil {
 		return reconcile.Result{}, err

@@ -24,7 +24,7 @@ import (
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // The Istio trait allows to configure properties related to the Istio service mesh,
@@ -53,7 +53,7 @@ func newIstioTrait() *istioTrait {
 
 func (t *istioTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && *t.Enabled {
-		return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning), nil
+		return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 	}
 
 	return false, nil

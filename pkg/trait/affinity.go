@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // Allows to constrain which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node,
@@ -66,7 +66,7 @@ func (t *affinityTrait) Configure(e *Environment) (bool, error) {
 		return false, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *affinityTrait) Apply(e *Environment) (err error) {

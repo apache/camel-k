@@ -27,7 +27,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 type getCmdOptions struct {
@@ -55,9 +55,9 @@ func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	integrationList := v1alpha1.IntegrationList{
+	integrationList := v1.IntegrationList{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       "Integration",
 		},
 	}

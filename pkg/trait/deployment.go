@@ -22,7 +22,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
@@ -43,31 +43,31 @@ func newDeploymentTrait() *deploymentTrait {
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionDeploymentAvailable,
+			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionDeploymentAvailableReason,
+			v1.IntegrationConditionDeploymentAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
-		condition := e.Integration.Status.GetCondition(v1alpha1.IntegrationConditionDeploymentAvailable)
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable)
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil
 	}
 
 	enabled := false
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 		//
 		// Don't deploy when a different strategy is needed (e.g. Knative)
 		//
 		strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
 		if err != nil {
 			e.Integration.Status.SetErrorCondition(
-				v1alpha1.IntegrationConditionDeploymentAvailable,
-				v1alpha1.IntegrationConditionDeploymentAvailableReason,
+				v1.IntegrationConditionDeploymentAvailable,
+				v1.IntegrationConditionDeploymentAvailableReason,
 				err,
 			)
 
@@ -75,8 +75,8 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		}
 
 		enabled = strategy == ControllerStrategyDeployment
-	} else if e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseReady) &&
-		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingKit, v1alpha1.IntegrationPhaseResolvingKit) {
+	} else if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) &&
+		e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseResolvingKit) {
 		enabled = true
 	}
 
@@ -91,19 +91,19 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
-	if e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseReady) &&
-		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingKit, v1alpha1.IntegrationPhaseResolvingKit) {
+	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) &&
+		e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseResolvingKit) {
 		e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
 			// trigger integration deploy
-			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+			e.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 			return nil
 		})
 
 		return nil
 	}
 
-	if e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseRunning) {
+	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
 		maps := e.ComputeConfigMaps()
 		deployment := t.getDeploymentFor(e)
 
@@ -111,13 +111,13 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 		e.Resources.Add(deployment)
 
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionDeploymentAvailable,
+			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionTrue,
-			v1alpha1.IntegrationConditionDeploymentAvailableReason,
+			v1.IntegrationConditionDeploymentAvailableReason,
 			deployment.Name,
 		)
 
-		if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+		if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
 			// Reconcile the deployment replicas
 			replicas := e.Integration.Spec.Replicas
 			// Deployment replicas defaults to 1, so we avoid forcing

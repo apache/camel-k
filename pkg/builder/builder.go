@@ -24,7 +24,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -48,8 +48,8 @@ func New(c client.Client) Builder {
 }
 
 // Run --
-func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
-	result := v1alpha1.BuildStatus{}
+func (b *defaultBuilder) Run(build v1.BuilderTask) v1.BuildStatus {
+	result := v1.BuildStatus{}
 
 	var buildDir string
 	if build.BuildDir == "" {
@@ -57,7 +57,7 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 		if err != nil {
 			log.Error(err, "Unexpected error while creating a temporary dir")
 
-			result.Phase = v1alpha1.BuildPhaseFailed
+			result.Phase = v1.BuildPhaseFailed
 			result.Error = err.Error()
 		}
 		buildDir = tmpDir
@@ -80,7 +80,7 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 
 	// base image is mandatory
 	if c.BaseImage == "" {
-		result.Phase = v1alpha1.BuildPhaseFailed
+		result.Phase = v1.BuildPhaseFailed
 		result.Image = ""
 		result.Error = "no base image defined"
 	}
@@ -107,7 +107,7 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 		})
 	}
 
-	if result.Phase == v1alpha1.BuildPhaseFailed {
+	if result.Phase == v1.BuildPhaseFailed {
 		return result
 	}
 
@@ -127,13 +127,13 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 
 	b.log.Infof("steps: %v", steps)
 	for _, step := range steps {
-		if c.Error != nil || result.Phase == v1alpha1.BuildPhaseInterrupted {
+		if c.Error != nil || result.Phase == v1.BuildPhaseInterrupted {
 			break
 		}
 
 		select {
 		case <-b.ctx.Done():
-			result.Phase = v1alpha1.BuildPhaseInterrupted
+			result.Phase = v1.BuildPhaseInterrupted
 		default:
 			l := b.log.WithValues(
 				"step", step.ID(),
@@ -155,16 +155,16 @@ func (b *defaultBuilder) Run(build v1alpha1.BuilderTask) v1alpha1.BuildStatus {
 		}
 	}
 
-	if result.Phase != v1alpha1.BuildPhaseInterrupted {
+	if result.Phase != v1.BuildPhaseInterrupted {
 		result.BaseImage = c.BaseImage
 		result.Image = c.Image
 
 		if c.Error != nil {
 			result.Error = c.Error.Error()
-			result.Phase = v1alpha1.BuildPhaseFailed
+			result.Phase = v1.BuildPhaseFailed
 		}
 
-		result.Artifacts = make([]v1alpha1.Artifact, 0, len(c.Artifacts))
+		result.Artifacts = make([]v1.Artifact, 0, len(c.Artifacts))
 		result.Artifacts = append(result.Artifacts, c.Artifacts...)
 
 		b.log.Infof("dependencies: %s", build.Dependencies)

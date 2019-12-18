@@ -24,7 +24,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -50,7 +50,7 @@ func TestConfigureJolokiaTraitInRightPhaseDoesSucceed(t *testing.T) {
 
 func TestConfigureJolokiaTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
 	configured, err := trait.Configure(environment)
 
@@ -70,7 +70,7 @@ func TestConfigureJolokiaTraitWithUnparseableOptionsDoesNotSucceed(t *testing.T)
 
 func TestConfigureJolokiaTraitForOpenShiftProfileShouldSetDefaultHttpsJolokiaOptions(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
-	environment.IntegrationKit.Spec.Profile = v1alpha1.TraitProfileOpenShift
+	environment.IntegrationKit.Spec.Profile = v1.TraitProfileOpenShift
 
 	configured, err := trait.Configure(environment)
 
@@ -85,7 +85,7 @@ func TestConfigureJolokiaTraitForOpenShiftProfileShouldSetDefaultHttpsJolokiaOpt
 
 func TestConfigureJolokiaTraitWithOptionsShouldPreventDefaultJolokiaOptions(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
-	environment.IntegrationKit.Spec.Profile = v1alpha1.TraitProfileOpenShift
+	environment.IntegrationKit.Spec.Profile = v1.TraitProfileOpenShift
 	options := "host=explicit-host," +
 		"discoveryEnabled=true," +
 		"protocol=http," +
@@ -129,7 +129,7 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1alpha1.IntegrationConditionJolokiaAvailable, condition.Type)
+	assert.Equal(t, v1.IntegrationConditionJolokiaAvailable, condition.Type)
 	assert.Equal(t, corev1.ConditionTrue, condition.Status)
 }
 
@@ -142,7 +142,7 @@ func TestApplyJolokiaTraitWithoutContainerShouldReportJolokiaUnavailable(t *test
 	assert.Nil(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1alpha1.IntegrationConditionJolokiaAvailable, condition.Type)
+	assert.Equal(t, v1.IntegrationConditionJolokiaAvailable, condition.Type)
 	assert.Equal(t, corev1.ConditionFalse, condition.Status)
 }
 
@@ -294,14 +294,14 @@ func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Spec: v1alpha1.IntegrationKitSpec{
-				Profile: v1alpha1.TraitProfileKubernetes,
+		IntegrationKit: &v1.IntegrationKit{
+			Spec: v1.IntegrationKitSpec{
+				Profile: v1.TraitProfileKubernetes,
 			},
 		},
 		Resources: kubernetes.NewCollection(

@@ -21,7 +21,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
@@ -68,43 +68,43 @@ var (
 
 // Inspector --
 type Inspector interface {
-	Extract(v1alpha1.SourceSpec, *Metadata) error
+	Extract(v1.SourceSpec, *Metadata) error
 }
 
 // InspectorForLanguage --
-func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1alpha1.Language) Inspector {
+func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) Inspector {
 	switch language {
-	case v1alpha1.LanguageJavaSource:
+	case v1.LanguageJavaSource:
 		return &JavaSourceInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},
 		}
-	case v1alpha1.LanguageXML:
+	case v1.LanguageXML:
 		return &XMLInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},
 		}
-	case v1alpha1.LanguageGroovy:
+	case v1.LanguageGroovy:
 		return &GroovyInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},
 		}
-	case v1alpha1.LanguageJavaScript:
+	case v1.LanguageJavaScript:
 		return &JavaScriptInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},
 		}
-	case v1alpha1.LanguageKotlin:
+	case v1.LanguageKotlin:
 		return &KotlinInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},
 		}
-	case v1alpha1.LanguageYaml:
+	case v1.LanguageYaml:
 		return &YAMLInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
@@ -118,12 +118,12 @@ type baseInspector struct {
 	catalog *camel.RuntimeCatalog
 }
 
-func (i baseInspector) Extract(v1alpha1.SourceSpec, *Metadata) error {
+func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 	return nil
 }
 
 // discoverDependencies returns a list of dependencies required by the given source code
-func (i *baseInspector) discoverDependencies(source v1alpha1.SourceSpec, meta *Metadata) {
+func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
 
 	for _, uri := range uris {

@@ -24,7 +24,7 @@ import (
 
 	"github.com/go-logr/logr"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // Log --
@@ -91,7 +91,7 @@ func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
 }
 
 // ForBuild --
-func (l Logger) ForBuild(target *v1alpha1.Build) Logger {
+func (l Logger) ForBuild(target *v1.Build) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,
@@ -101,7 +101,7 @@ func (l Logger) ForBuild(target *v1alpha1.Build) Logger {
 }
 
 // ForIntegration --
-func (l Logger) ForIntegration(target *v1alpha1.Integration) Logger {
+func (l Logger) ForIntegration(target *v1.Integration) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,
@@ -111,7 +111,7 @@ func (l Logger) ForIntegration(target *v1alpha1.Integration) Logger {
 }
 
 // ForIntegrationKit --
-func (l Logger) ForIntegrationKit(target *v1alpha1.IntegrationKit) Logger {
+func (l Logger) ForIntegrationKit(target *v1.IntegrationKit) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,
@@ -121,7 +121,7 @@ func (l Logger) ForIntegrationKit(target *v1alpha1.IntegrationKit) Logger {
 }
 
 // ForIntegrationPlatform --
-func (l Logger) ForIntegrationPlatform(target *v1alpha1.IntegrationPlatform) Logger {
+func (l Logger) ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,
@@ -147,17 +147,17 @@ func WithValues(keysAndValues ...interface{}) Logger {
 }
 
 // ForIntegration --
-func ForIntegration(target *v1alpha1.Integration) Logger {
+func ForIntegration(target *v1.Integration) Logger {
 	return Log.ForIntegration(target)
 }
 
 // ForIntegrationKit --
-func ForIntegrationKit(target *v1alpha1.IntegrationKit) Logger {
+func ForIntegrationKit(target *v1.IntegrationKit) Logger {
 	return Log.ForIntegrationKit(target)
 }
 
 // ForIntegrationPlatform --
-func ForIntegrationPlatform(target *v1alpha1.IntegrationPlatform) Logger {
+func ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 	return Log.ForIntegrationPlatform(target)
 }
 

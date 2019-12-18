@@ -21,7 +21,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 )
@@ -45,7 +45,7 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
 }
 
 func (t *dependenciesTrait) Apply(e *Environment) error {
@@ -86,17 +86,17 @@ func addDefaultRuntimeDependencies(e *Environment) {
 		meta := metadata.Extract(e.CamelCatalog, s)
 
 		switch s.InferLanguage() {
-		case v1alpha1.LanguageGroovy:
+		case v1.LanguageGroovy:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-groovy")
-		case v1alpha1.LanguageKotlin:
+		case v1.LanguageKotlin:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-kotlin")
-		case v1alpha1.LanguageYaml:
+		case v1.LanguageYaml:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-yaml")
-		case v1alpha1.LanguageXML:
+		case v1.LanguageXML:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
-		case v1alpha1.LanguageJavaScript:
+		case v1.LanguageJavaScript:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
-		case v1alpha1.LanguageJavaSource:
+		case v1.LanguageJavaSource:
 			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
 		}
 

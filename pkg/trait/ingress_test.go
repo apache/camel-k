@@ -21,7 +21,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
 
@@ -56,7 +56,7 @@ func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 
 func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseError
+	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
 	configured, err := ingressTrait.Configure(environment)
 
@@ -163,12 +163,12 @@ func createNominalIngressTest() (*ingressTrait, *Environment) {
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "integration-name",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
 		Resources: kubernetes.NewCollection(
@@ -182,7 +182,7 @@ func createNominalIngressTest() (*ingressTrait, *Environment) {
 					Namespace: "namespace",
 					Labels: map[string]string{
 						"camel.apache.org/integration":  "integration-name",
-						"camel.apache.org/service.type": v1alpha1.ServiceTypeUser,
+						"camel.apache.org/service.type": v1.ServiceTypeUser,
 					},
 				},
 				Spec: corev1.ServiceSpec{

@@ -25,7 +25,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 )
 
@@ -54,7 +54,7 @@ func (o *rebuildCmdOptions) rebuild(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	var integrations []v1alpha1.Integration
+	var integrations []v1.Integration
 	if len(args) == 0 {
 		if integrations, err = o.listAllIntegrations(c); err != nil {
 			return err
@@ -73,18 +73,18 @@ func (o *rebuildCmdOptions) rebuild(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1alpha1.Integration, error) {
-	list := v1alpha1.NewIntegrationList()
+func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1.Integration, error) {
+	list := v1.NewIntegrationList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
 	}
 	return list.Items, nil
 }
 
-func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]v1alpha1.Integration, error) {
-	ints := make([]v1alpha1.Integration, 0, len(names))
+func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]v1.Integration, error) {
+	ints := make([]v1.Integration, 0, len(names))
 	for _, n := range names {
-		it := v1alpha1.NewIntegration(o.Namespace, n)
+		it := v1.NewIntegration(o.Namespace, n)
 		key := k8sclient.ObjectKey{
 			Name:      n,
 			Namespace: o.Namespace,
@@ -97,10 +97,10 @@ func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]
 	return ints, nil
 }
 
-func (o *rebuildCmdOptions) rebuildIntegrations(c k8sclient.StatusClient, integrations []v1alpha1.Integration) error {
+func (o *rebuildCmdOptions) rebuildIntegrations(c k8sclient.StatusClient, integrations []v1.Integration) error {
 	for _, i := range integrations {
 		it := i
-		it.Status = v1alpha1.IntegrationStatus{}
+		it.Status = v1.IntegrationStatus{}
 		if err := c.Status().Update(o.Context, &it); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("could not rebuild integration %s in namespace %s", it.Name, o.Namespace))
 		}

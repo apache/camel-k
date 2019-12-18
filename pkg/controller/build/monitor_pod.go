@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewMonitorPodAction creates a new monitor action for scheduled pod
@@ -41,12 +41,12 @@ func (action *monitorPodAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *monitorPodAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhasePending || build.Status.Phase == v1alpha1.BuildPhaseRunning
+func (action *monitorPodAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning
 }
 
 // Handle handles the builds
-func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	pod, err := getBuilderPod(ctx, action.client, build)
 	if err != nil {
 		return nil, err
@@ -54,18 +54,18 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Buil
 
 	switch {
 	case pod == nil:
-		build.Status.Phase = v1alpha1.BuildPhaseScheduling
+		build.Status.Phase = v1.BuildPhaseScheduling
 
 	// Pod remains in pending phase when init containers execute
 	case pod.Status.Phase == corev1.PodPending && action.isPodScheduled(pod),
 		pod.Status.Phase == corev1.PodRunning:
-		build.Status.Phase = v1alpha1.BuildPhaseRunning
+		build.Status.Phase = v1.BuildPhaseRunning
 		if build.Status.StartedAt.Time.IsZero() {
 			build.Status.StartedAt = metav1.Now()
 		}
 
 	case pod.Status.Phase == corev1.PodSucceeded:
-		build.Status.Phase = v1alpha1.BuildPhaseSucceeded
+		build.Status.Phase = v1.BuildPhaseSucceeded
 		build.Status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
 		for _, task := range build.Spec.Tasks {
 			if task.Kaniko != nil {
@@ -75,7 +75,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1alpha1.Buil
 		}
 
 	case pod.Status.Phase == corev1.PodFailed:
-		build.Status.Phase = v1alpha1.BuildPhaseFailed
+		build.Status.Phase = v1.BuildPhaseFailed
 		build.Status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
 	}
 

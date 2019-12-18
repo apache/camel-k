@@ -23,7 +23,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -44,7 +44,7 @@ func addTestInstallCmd(options RootCmdOptions, rootCmd *cobra.Command) *installC
 
 func TestDecodeMavenSettings(t *testing.T) {
 	var err error
-	var val v1alpha1.ValueSource
+	var val v1.ValueSource
 
 	//
 	// ConfigMap

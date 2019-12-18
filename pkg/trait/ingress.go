@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -54,15 +54,15 @@ func newIngressTrait() *ingressTrait {
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionIngressNotAvailableReason,
+			v1.IntegrationConditionIngressNotAvailableReason,
 			"explicitly disabled",
 		)
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -73,9 +73,9 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 
 		if !enabled {
 			e.Integration.Status.SetCondition(
-				v1alpha1.IntegrationConditionExposureAvailable,
+				v1.IntegrationConditionExposureAvailable,
 				corev1.ConditionFalse,
-				v1alpha1.IntegrationConditionIngressNotAvailableReason,
+				v1.IntegrationConditionIngressNotAvailableReason,
 				"no host or service defined",
 			)
 
@@ -85,9 +85,9 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 
 	if t.Host == "" {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionIngressNotAvailableReason,
+			v1.IntegrationConditionIngressNotAvailableReason,
 			"no host defined",
 		)
 
@@ -134,9 +134,9 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		ingress.Spec.Backend.ServicePort.String())
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionExposureAvailable,
+		v1.IntegrationConditionExposureAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionIngressAvailableReason,
+		v1.IntegrationConditionIngressAvailableReason,
 		message,
 	)
 

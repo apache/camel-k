@@ -25,7 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/rs/xid"
@@ -33,11 +33,11 @@ import (
 )
 
 func TestWarm_Succeeded(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
-	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -68,11 +68,11 @@ func TestWarm_Succeeded(t *testing.T) {
 }
 
 func TestWarm_Failing(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
-	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -103,11 +103,11 @@ func TestWarm_Failing(t *testing.T) {
 }
 
 func TestWarm_WarmingUp(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
-	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{

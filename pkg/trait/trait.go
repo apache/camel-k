@@ -22,7 +22,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -31,7 +31,7 @@ import (
 )
 
 // Apply --
-func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integration, kit *v1alpha1.IntegrationKit) (*Environment, error) {
+func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	environment, err := newEnvironment(ctx, c, integration, kit)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integrati
 }
 
 // newEnvironment creates a Environment from the given data
-func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.Integration, kit *v1alpha1.IntegrationKit) (*Environment, error) {
+func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	if integration == nil && ctx == nil {
 		return nil, errors.New("neither integration nor kit are set")
 	}

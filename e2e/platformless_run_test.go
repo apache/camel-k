@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestPlatformlessRun(t *testing.T) {
@@ -49,12 +49,12 @@ func TestPlatformlessRun(t *testing.T) {
 		Eventually(deletePlatform(ns)).Should(BeTrue())
 
 		Expect(kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
-		Eventually(integrationPodPhase(ns, "yaml"), 5*time.Minute).Should(Equal(v1.PodRunning))
+		Eventually(integrationPodPhase(ns, "yaml"), 5*time.Minute).Should(Equal(corev1.PodRunning))
 		Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
 
 		// Platform should be recreated
 		Eventually(platform(ns)).ShouldNot(BeNil())
-		Eventually(platformProfile(ns)).Should(Equal(v1alpha1.TraitProfile("")))
+		Eventually(platformProfile(ns)).Should(Equal(v1.TraitProfile("")))
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }

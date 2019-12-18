@@ -20,7 +20,7 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 )
 
@@ -39,13 +39,13 @@ func (action *platformSetupAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the integration
-func (action *platformSetupAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseNone ||
-		integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform
+func (action *platformSetupAction) CanHandle(integration *v1.Integration) bool {
+	return integration.Status.Phase == v1.IntegrationPhaseNone ||
+		integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform
 }
 
 // Handle handles the integrations
-func (action *platformSetupAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
+func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		return nil, err
 	}

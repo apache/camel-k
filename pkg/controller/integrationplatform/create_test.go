@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -33,11 +33,11 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
-	ip.Spec.Profile = v1alpha1.TraitProfileOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
@@ -53,7 +53,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	list := v1alpha1.NewCamelCatalogList()
+	list := v1.NewCamelCatalogList()
 	err = c.List(context.TODO(), &list, k8sclient.InNamespace(ip.Namespace))
 
 	assert.Nil(t, err)

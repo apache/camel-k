@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 
 	corev1 "k8s.io/api/core/v1"
@@ -64,7 +64,7 @@ func newPrometheusTrait() *prometheusTrait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
@@ -77,9 +77,9 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	container := e.Resources.GetContainerByName(containerName)
 	if container == nil {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionPrometheusAvailable,
+			v1.IntegrationConditionPrometheusAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionContainerNotAvailableReason,
+			v1.IntegrationConditionContainerNotAvailableReason,
 			"",
 		)
 		return nil
@@ -92,10 +92,10 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	condition := v1alpha1.IntegrationCondition{
-		Type:   v1alpha1.IntegrationConditionPrometheusAvailable,
+	condition := v1.IntegrationCondition{
+		Type:   v1.IntegrationConditionPrometheusAvailable,
 		Status: corev1.ConditionTrue,
-		Reason: v1alpha1.IntegrationConditionPrometheusAvailableReason,
+		Reason: v1.IntegrationConditionPrometheusAvailableReason,
 	}
 
 	// Configure the Prometheus Java agent
@@ -138,7 +138,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		}
 	} else {
 		condition.Status = corev1.ConditionFalse
-		condition.Reason = v1alpha1.IntegrationConditionServiceNotAvailableReason
+		condition.Reason = v1.IntegrationConditionServiceNotAvailableReason
 	}
 
 	e.Integration.Status.SetConditions(condition)

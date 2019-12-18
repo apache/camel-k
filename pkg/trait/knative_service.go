@@ -25,7 +25,7 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -86,27 +86,27 @@ func newKnativeServiceTrait() *knativeServiceTrait {
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
-		condition := e.Integration.Status.GetCondition(v1alpha1.IntegrationConditionKnativeServiceAvailable)
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil
-	} else if !e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+	} else if !e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
 		return false, nil
 	}
 
 	if e.Resources.GetDeploymentForIntegration(e.Integration) != nil {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			"controller strategy: "+ControllerStrategyDeployment,
 		)
 
@@ -117,8 +117,8 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
 	if err != nil {
 		e.Integration.Status.SetErrorCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			v1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			err,
 		)
 
@@ -126,9 +126,9 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	}
 	if strategy != ControllerStrategyKnativeService {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			"controller strategy: "+string(strategy),
 		)
 
@@ -141,8 +141,8 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
 			if err != nil {
 				e.Integration.Status.SetErrorCondition(
-					v1alpha1.IntegrationConditionKnativeServiceAvailable,
-					v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+					v1.IntegrationConditionKnativeServiceAvailable,
+					v1.IntegrationConditionKnativeServiceNotAvailableReason,
 					err,
 				)
 
@@ -173,13 +173,13 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 	e.Resources.Add(ksvc)
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionKnativeServiceAvailable,
+		v1.IntegrationConditionKnativeServiceAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionKnativeServiceAvailableReason,
+		v1.IntegrationConditionKnativeServiceAvailableReason,
 		ksvc.Name,
 	)
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseRunning) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
 		replicas := e.Integration.Spec.Replicas
 
 		isUpdateRequired := false

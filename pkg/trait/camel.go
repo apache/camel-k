@@ -25,7 +25,7 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
@@ -113,7 +113,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, ru
 			// sanitize catalog name
 			catalogName := "camel-catalog-" + strings.ToLower(camelVersion+"-"+runtimeVersion)
 
-			cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
+			cx := v1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
 			cx.Labels = make(map[string]string)
 			cx.Labels["app"] = "camel-k"
 			cx.Labels["camel.apache.org/catalog.version"] = camelVersion

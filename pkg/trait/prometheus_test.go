@@ -21,7 +21,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -45,7 +45,7 @@ func TestConfigurePrometheusTraitInRightPhaseDoesSucceed(t *testing.T) {
 
 func TestConfigurePrometheusTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseResolvingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
 
 	configured, err := trait.Configure(environment)
 
@@ -82,7 +82,7 @@ func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1alpha1.IntegrationConditionPrometheusAvailable, condition.Type)
+	assert.Equal(t, v1.IntegrationConditionPrometheusAvailable, condition.Type)
 	assert.Equal(t, corev1.ConditionTrue, condition.Status)
 }
 
@@ -96,7 +96,7 @@ func TestApplyPrometheusTraitWithoutContainerDoesNotSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1alpha1.IntegrationConditionPrometheusAvailable, condition.Type)
+	assert.Equal(t, v1.IntegrationConditionPrometheusAvailable, condition.Type)
 	assert.Equal(t, corev1.ConditionFalse, condition.Status)
 }
 
@@ -126,7 +126,7 @@ func TestApplyPrometheusTraitWithServiceDoesNotSucceed(t *testing.T) {
 				Namespace: "namespace",
 				Labels: map[string]string{
 					"camel.apache.org/integration":  "integration-name",
-					"camel.apache.org/service.type": v1alpha1.ServiceTypeUser,
+					"camel.apache.org/service.type": v1.ServiceTypeUser,
 				},
 			},
 			Spec: corev1.ServiceSpec{
@@ -143,7 +143,7 @@ func TestApplyPrometheusTraitWithServiceDoesNotSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1alpha1.IntegrationConditionServiceNotAvailableReason, condition.Reason)
+	assert.Equal(t, v1.IntegrationConditionServiceNotAvailableReason, condition.Reason)
 	assert.Equal(t, corev1.ConditionFalse, condition.Status)
 }
 
@@ -185,13 +185,13 @@ func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "integration-namespace",
 				Name:      "integration-name",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
 		Resources: kubernetes.NewCollection(

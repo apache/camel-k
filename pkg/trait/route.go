@@ -27,7 +27,7 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // The Route trait can be used to configure the creation of OpenShift routes for the integration.
@@ -78,25 +78,25 @@ func newRouteTrait() *routeTrait {
 func (t *routeTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionRouteNotAvailableReason,
+			v1.IntegrationConditionRouteNotAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
 	t.service = e.Resources.GetUserServiceForIntegration(e.Integration)
 	if t.service == nil {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionRouteNotAvailableReason,
+			v1.IntegrationConditionRouteNotAvailableReason,
 			"no target service found",
 		)
 
@@ -156,9 +156,9 @@ func (t *routeTrait) Apply(e *Environment) error {
 	}
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionExposureAvailable,
+		v1.IntegrationConditionExposureAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionRouteAvailableReason,
+		v1.IntegrationConditionRouteAvailableReason,
 		message,
 	)
 

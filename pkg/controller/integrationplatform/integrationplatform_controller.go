@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 )
 
@@ -64,10 +64,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegrationPlatform := e.ObjectOld.(*v1alpha1.IntegrationPlatform)
-			newIntegrationPlatform := e.ObjectNew.(*v1alpha1.IntegrationPlatform)
+			oldIntegrationPlatform := e.ObjectOld.(*v1.IntegrationPlatform)
+			newIntegrationPlatform := e.ObjectNew.(*v1.IntegrationPlatform)
 			// Ignore updates to the integration platform status in which case metadata.Generation
 			// does not change, or except when the integration platform phase changes as it's used
 			// to transition from one phase to another
@@ -108,7 +108,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 	ctx := context.TODO()
 
 	// Fetch the IntegrationPlatform instance
-	var instance v1alpha1.IntegrationPlatform
+	var instance v1.IntegrationPlatform
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
@@ -130,7 +130,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		NewMonitorAction(),
 	}
 
-	var targetPhase v1alpha1.IntegrationPlatformPhase
+	var targetPhase v1.IntegrationPlatformPhase
 	var err error
 
 	target := instance.DeepCopy()
@@ -172,7 +172,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		}
 	}
 
-	if targetPhase == v1alpha1.IntegrationPlatformPhaseReady {
+	if targetPhase == v1.IntegrationPlatformPhaseReady {
 		return reconcile.Result{}, nil
 	}
 

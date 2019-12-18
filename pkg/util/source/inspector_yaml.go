@@ -20,7 +20,7 @@ package source
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	yaml2 "gopkg.in/yaml.v2"
 )
 
@@ -30,7 +30,7 @@ type YAMLInspector struct {
 }
 
 // Extract --
-func (inspector YAMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
+func (inspector YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	definitions := make([]map[string]interface{}, 0)
 
 	if err := yaml2.Unmarshal([]byte(source.Content), &definitions); err != nil {

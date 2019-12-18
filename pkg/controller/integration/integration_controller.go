@@ -34,7 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -72,10 +72,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Integration
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegration := e.ObjectOld.(*v1alpha1.Integration)
-			newIntegration := e.ObjectNew.(*v1alpha1.Integration)
+			oldIntegration := e.ObjectOld.(*v1.Integration)
+			newIntegration := e.ObjectNew.(*v1.Integration)
 			// Ignore updates to the integration status in which case metadata.Generation does not change,
 			// or except when the integration phase changes as it's used to transition from one phase
 			// to another
@@ -94,13 +94,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for IntegrationKit phase transitioning to ready or error and
 	// enqueue requests for any integrations that are in phase waiting for
 	// kit
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationKit{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			kit := a.Object.(*v1alpha1.IntegrationKit)
+			kit := a.Object.(*v1.IntegrationKit)
 			var requests []reconcile.Request
 
-			if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady || kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
-				list := &v1alpha1.IntegrationList{}
+			if kit.Status.Phase == v1.IntegrationKitPhaseReady || kit.Status.Phase == v1.IntegrationKitPhaseError {
+				list := &v1.IntegrationList{}
 
 				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(kit.Namespace)); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
@@ -108,7 +108,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				}
 
 				for _, integration := range list.Items {
-					if integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingKit {
+					if integration.Status.Phase == v1.IntegrationPhaseBuildingKit {
 						log.Infof("Kit %s ready, wake-up integration: %s", kit.Name, integration.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
@@ -129,13 +129,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integrations that are in phase waiting for platform
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			platform := a.Object.(*v1alpha1.IntegrationPlatform)
+			platform := a.Object.(*v1.IntegrationPlatform)
 			var requests []reconcile.Request
 
-			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
-				list := &v1alpha1.IntegrationList{}
+			if platform.Status.Phase == v1.IntegrationPlatformPhaseReady {
+				list := &v1.IntegrationList{}
 
 				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(platform.Namespace)); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
@@ -143,7 +143,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				}
 
 				for _, integration := range list.Items {
-					if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
+					if integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform {
 						log.Infof("Platform %s ready, wake-up integration: %s", platform.Name, integration.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
@@ -222,7 +222,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	ctx := context.TODO()
 
 	// Fetch the Integration instance
-	var instance v1alpha1.Integration
+	var instance v1.Integration
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if k8serrors.IsNotFound(err) {
@@ -282,7 +282,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileIntegration) update(ctx context.Context, base *v1alpha1.Integration, target *v1alpha1.Integration) (reconcile.Result, error) {
+func (r *ReconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegration(target)
 	if err != nil {
 		return reconcile.Result{}, err

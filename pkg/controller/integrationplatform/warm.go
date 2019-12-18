@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewWarmAction returns a action that creates resources needed by the platform
@@ -41,11 +41,11 @@ func (action *warmAction) Name() string {
 	return "warm"
 }
 
-func (action *warmAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bool {
-	return platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseWarming
+func (action *warmAction) CanHandle(platform *v1.IntegrationPlatform) bool {
+	return platform.Status.Phase == v1.IntegrationPlatformPhaseWarming
 }
 
-func (action *warmAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
+func (action *warmAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	// Check Kaniko warmer pod status
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -66,7 +66,7 @@ func (action *warmAction) Handle(ctx context.Context, platform *v1alpha1.Integra
 	switch pod.Status.Phase {
 	case corev1.PodSucceeded:
 		action.L.Info("Kaniko cache successfully warmed up")
-		platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseCreating
+		platform.Status.Phase = v1.IntegrationPlatformPhaseCreating
 		return platform, nil
 	case corev1.PodFailed:
 		return nil, errors.New("failed to warm up Kaniko cache")

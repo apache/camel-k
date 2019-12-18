@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/pkg/platform"
 
@@ -253,7 +253,7 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 func computeCamelDependencies() string {
 	catalog, err := camel.DefaultCatalog()
 	if err != nil || catalog == nil {
-		catalog = camel.NewRuntimeCatalog(v1alpha1.CamelCatalog{}.Spec)
+		catalog = camel.NewRuntimeCatalog(v1.CamelCatalog{}.Spec)
 	}
 
 	results := make([]string, 0, len(catalog.Artifacts))

@@ -24,7 +24,7 @@ package e2e
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client/clientset/versioned"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,23 +38,23 @@ func TestClientFunctionalities(t *testing.T) {
 		camel, err := versioned.NewForConfig(cfg)
 		assert.Nil(t, err)
 
-		lst, err := camel.CamelV1alpha1().Integrations(ns).List(metav1.ListOptions{})
+		lst, err := camel.CamelV1().Integrations(ns).List(metav1.ListOptions{})
 		assert.Nil(t, err)
 		assert.Empty(t, lst.Items)
 
-		integration, err := camel.CamelV1alpha1().Integrations(ns).Create(&v1alpha1.Integration{
+		integration, err := camel.CamelV1().Integrations(ns).Create(&v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "dummy",
 			},
 		})
 		assert.Nil(t, err)
 
-		lst, err = camel.CamelV1alpha1().Integrations(ns).List(metav1.ListOptions{})
+		lst, err = camel.CamelV1().Integrations(ns).List(metav1.ListOptions{})
 		assert.Nil(t, err)
 		assert.NotEmpty(t, lst.Items)
 		assert.Equal(t, lst.Items[0].Name, integration.Name)
 
-		err = camel.CamelV1alpha1().Integrations(ns).Delete("dummy", nil)
+		err = camel.CamelV1().Integrations(ns).Delete("dummy", nil)
 		assert.Nil(t, err)
 	})
 }

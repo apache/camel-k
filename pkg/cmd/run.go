@@ -31,7 +31,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/gzip"
 	"github.com/apache/camel-k/pkg/trait"
@@ -207,7 +207,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			if integrationPhase == nil || *integrationPhase == v1alpha1.IntegrationPhaseRunning || *integrationPhase == v1alpha1.IntegrationPhaseError {
+			if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseRunning || *integrationPhase == v1.IntegrationPhaseError {
 				break
 			}
 
@@ -240,20 +240,20 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) (*v1alpha1.IntegrationPhase, error) {
-	handler := func(i *v1alpha1.Integration) bool {
+func (o *runCmdOptions) waitForIntegrationReady(integration *v1.Integration) (*v1.IntegrationPhase, error) {
+	handler := func(i *v1.Integration) bool {
 		//
 		// TODO when we add health checks, we should Wait until they are passed
 		//
 		if i.Status.Phase != "" {
 			fmt.Println("integration \""+integration.Name+"\" in phase", i.Status.Phase)
 
-			if i.Status.Phase == v1alpha1.IntegrationPhaseRunning {
+			if i.Status.Phase == v1.IntegrationPhaseRunning {
 				// TODO display some error info when available in the status
 				return false
 			}
 
-			if i.Status.Phase == v1alpha1.IntegrationPhaseError {
+			if i.Status.Phase == v1.IntegrationPhaseError {
 				fmt.Println("integration deployment failed")
 				return false
 			}
@@ -293,12 +293,12 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error
 	return nil
 }
 
-func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v1alpha1.Integration, error) {
+func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v1.Integration, error) {
 	return o.updateIntegrationCode(c, sources)
 }
 
 //nolint: gocyclo
-func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1alpha1.Integration, error) {
+func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
 
 	name := ""
@@ -313,21 +313,21 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		return nil, errors.New("unable to determine integration name")
 	}
 
-	integration := v1alpha1.Integration{
+	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       v1alpha1.IntegrationKind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 		},
-		Spec: v1alpha1.IntegrationSpec{
+		Spec: v1.IntegrationSpec{
 			Dependencies:  make([]string, 0, len(o.Dependencies)),
 			Kit:           o.IntegrationKit,
-			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+			Configuration: make([]v1.ConfigurationSpec, 0),
 			Repositories:  o.Repositories,
-			Profile:       v1alpha1.TraitProfileByName(o.Profile),
+			Profile:       v1.TraitProfileByName(o.Profile),
 		},
 	}
 
@@ -337,8 +337,8 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			return nil, err
 		}
 
-		integration.Spec.AddSources(v1alpha1.SourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		integration.Spec.AddSources(v1.SourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        path.Base(source),
 				Content:     data,
 				Compression: o.Compression,
@@ -352,13 +352,13 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			return nil, err
 		}
 
-		integration.Spec.AddResources(v1alpha1.ResourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		integration.Spec.AddResources(v1.ResourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        path.Base(resource),
 				Content:     data,
 				Compression: o.Compression,
 			},
-			Type: v1alpha1.ResourceTypeData,
+			Type: v1.ResourceTypeData,
 		})
 	}
 
@@ -368,13 +368,13 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			return nil, err
 		}
 
-		integration.Spec.AddResources(v1alpha1.ResourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		integration.Spec.AddResources(v1.ResourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        path.Base(resource),
 				Content:     data,
 				Compression: o.Compression,
 			},
-			Type: v1alpha1.ResourceTypeOpenAPI,
+			Type: v1.ResourceTypeOpenAPI,
 		})
 	}
 
@@ -495,9 +495,9 @@ func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
 	return string(content), nil
 }
 
-func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config string) error {
+func (*runCmdOptions) configureTrait(integration *v1.Integration, config string) error {
 	if integration.Spec.Traits == nil {
-		integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+		integration.Spec.Traits = make(map[string]v1.TraitSpec)
 	}
 
 	parts := traitConfigRegexp.FindStringSubmatch(config)
@@ -510,7 +510,7 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 
 	spec, ok := integration.Spec.Traits[traitID]
 	if !ok {
-		spec = v1alpha1.TraitSpec{
+		spec = v1.TraitSpec{
 			Configuration: make(map[string]string),
 		}
 	}

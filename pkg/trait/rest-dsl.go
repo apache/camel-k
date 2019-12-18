@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/gzip"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -60,8 +60,8 @@ func (t *restDslTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	for _, resource := range e.Integration.Spec.Resources {
-		if resource.Type == v1alpha1.ResourceTypeOpenAPI {
-			return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization), nil
+		if resource.Type == v1.ResourceTypeOpenAPI {
+			return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
 		}
 	}
 
@@ -82,7 +82,7 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	defer os.RemoveAll(tmpDir)
 
 	for i, resource := range e.Integration.Spec.Resources {
-		if resource.Type != v1alpha1.ResourceTypeOpenAPI {
+		if resource.Type != v1.ResourceTypeOpenAPI {
 			continue
 		}
 
@@ -148,7 +148,7 @@ func (t *restDslTrait) Apply(e *Environment) error {
 
 		generatedContentName := fmt.Sprintf("%s-openapi-%03d", e.Integration.Name, i)
 		generatedSourceName := strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml"
-		generatedSources := make([]v1alpha1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
+		generatedSources := make([]v1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
 
 		if e.Integration.Status.GeneratedSources != nil {
 			//
@@ -164,13 +164,13 @@ func (t *restDslTrait) Apply(e *Environment) error {
 		//
 		// Add an additional source that references the config map
 		//
-		generatedSources = append(generatedSources, v1alpha1.SourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		generatedSources = append(generatedSources, v1.SourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        generatedSourceName,
 				ContentRef:  generatedContentName,
 				Compression: resource.Compression,
 			},
-			Language: v1alpha1.LanguageXML,
+			Language: v1.LanguageXML,
 		})
 
 		//
@@ -189,11 +189,11 @@ func (t *restDslTrait) Apply(e *Environment) error {
 					"camel.apache.org/integration": e.Integration.Name,
 				},
 				Annotations: map[string]string{
-					"camel.apache.org/source.language":    string(v1alpha1.LanguageXML),
+					"camel.apache.org/source.language":    string(v1.LanguageXML),
 					"camel.apache.org/source.name":        resource.Name,
 					"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
 					"camel.apache.org/source.generated":   "true",
-					"camel.apache.org/source.type":        string(v1alpha1.ResourceTypeOpenAPI),
+					"camel.apache.org/source.type":        string(v1.ResourceTypeOpenAPI),
 				},
 			},
 			Data: map[string]string{
