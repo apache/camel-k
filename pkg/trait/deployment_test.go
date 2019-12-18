@@ -21,7 +21,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -48,12 +48,12 @@ func TestConfigureDisabledDeploymentTraitDoesNotSucceed(t *testing.T) {
 func TestConfigureDeploymentTraitWhileIntegrationIsRuningDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
 	environment.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionDeploymentAvailable,
+		v1.IntegrationConditionDeploymentAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionDeploymentAvailableReason,
+		v1.IntegrationConditionDeploymentAvailableReason,
 		"deployment-name",
 	)
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
 	configured, err := deploymentTrait.Configure(environment)
 
@@ -73,7 +73,7 @@ func TestConfigureDeploymentTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDeploymentTraitWhileBuildingKitDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
 	configured, err := deploymentTrait.Configure(environment)
 
@@ -84,8 +84,8 @@ func TestConfigureDeploymentTraitWhileBuildingKitDoesSucceed(t *testing.T) {
 
 func TestConfigureDeploymentTraitWhileWaitingPlatformDoesNotSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
-	environment.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseWaitingForPlatform
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 
 	configured, err := deploymentTrait.Configure(environment)
 
@@ -95,7 +95,7 @@ func TestConfigureDeploymentTraitWhileWaitingPlatformDoesNotSucceed(t *testing.T
 
 func TestApplyDeploymentTraitWhileResolvingKitDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseResolvingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
 
 	err := deploymentTrait.Apply(environment)
 
@@ -119,13 +119,13 @@ func TestApplyDeploymentTraitWhileDeployingIntegrationDoesSucceed(t *testing.T) 
 
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 1)
-	assert.Equal(t, v1alpha1.IntegrationConditionDeploymentAvailable, conditions[0].Type)
+	assert.Equal(t, v1.IntegrationConditionDeploymentAvailable, conditions[0].Type)
 	assert.Equal(t, "integration-name", conditions[0].Message)
 }
 
 func TestApplyDeploymentTraitWhileRunningIntegrationDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
 	err := deploymentTrait.Apply(environment)
 
@@ -172,29 +172,29 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "integration-name",
 			},
-			Spec: v1alpha1.IntegrationSpec{
+			Spec: v1.IntegrationSpec{
 				Replicas: &replicas,
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
+		Platform: &v1.IntegrationPlatform{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "namespace",
 			},
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Profile: v1alpha1.TraitProfileKnative,
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Profile: v1.TraitProfileKnative,
 			},
 		},
 		Resources: kubernetes.NewCollection(),

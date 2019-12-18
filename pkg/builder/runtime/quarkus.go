@@ -27,7 +27,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -138,7 +138,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 		return err
 	}
 
-	cp := make(map[string][]v1alpha1.Artifact)
+	cp := make(map[string][]v1.Artifact)
 	err = yaml2.Unmarshal(content, &cp)
 	if err != nil {
 		return err
@@ -158,7 +158,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 			continue
 		}
 
-		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
+		ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
 			ID:       gav.GroupID + ":" + gav.ArtifactID + ":" + gav.Type + ":" + gav.Version,
 			Location: location,
 			Target:   path.Join("lib", fileName),
@@ -166,7 +166,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	}
 
 	runner := "camel-k-integration-" + defaults.Version + "-runner.jar"
-	ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
+	ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
 		ID:       runner,
 		Location: path.Join(mc.Path, "target", runner),
 		Target:   runner,

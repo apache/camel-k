@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/fatih/structs"
@@ -142,9 +142,9 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 //
 // Traits may depend on the result of previously executed ones,
 // so care must be taken while changing the lists order.
-func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
+func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 	switch profile {
-	case v1alpha1.TraitProfileOpenShift:
+	case v1.TraitProfileOpenShift:
 		return []Trait{
 			c.tPlatform,
 			c.tCamel,
@@ -169,7 +169,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tIstio,
 			c.tOwner,
 		}
-	case v1alpha1.TraitProfileKubernetes:
+	case v1.TraitProfileKubernetes:
 		return []Trait{
 			c.tPlatform,
 			c.tCamel,
@@ -194,7 +194,7 @@ func (c *Catalog) TraitsForProfile(profile v1alpha1.TraitProfile) []Trait {
 			c.tIstio,
 			c.tOwner,
 		}
-	case v1alpha1.TraitProfileKnative:
+	case v1.TraitProfileKnative:
 		return []Trait{
 			c.tPlatform,
 			c.tCamel,
@@ -298,7 +298,7 @@ func (c *Catalog) configure(env *Environment) error {
 	return nil
 }
 
-func (c *Catalog) configureTraits(traits map[string]v1alpha1.TraitSpec) error {
+func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
 	for id, traitSpec := range traits {
 		catTrait := c.GetTrait(id)
 		if catTrait != nil {

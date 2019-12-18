@@ -24,13 +24,13 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
+func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
@@ -99,7 +99,7 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 
 // ComputeForIntegrationKit a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegrationKit(kit *v1alpha1.IntegrationKit) (string, error) {
+func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
@@ -136,7 +136,7 @@ func sortedStringMapKeys(m map[string]string) []string {
 	return res
 }
 
-func sortedTraitSpecMapKeys(m map[string]v1alpha1.TraitSpec) []string {
+func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
 	res := make([]string, 0, len(m))
 	for k := range m {
 		res = append(res, k)

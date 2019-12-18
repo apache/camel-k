@@ -35,7 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
@@ -70,11 +70,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Build
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForObject{},
+	err = c.Watch(&source.Kind{Type: &v1.Build{}}, &handler.EnqueueRequestForObject{},
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild := e.ObjectOld.(*v1alpha1.Build)
-				newBuild := e.ObjectNew.(*v1alpha1.Build)
+				oldBuild := e.ObjectOld.(*v1.Build)
+				newBuild := e.ObjectNew.(*v1.Build)
 				// Ignore updates to the build status in which case metadata.Generation does not change,
 				// or except when the build phase changes as it's used to transition from one phase
 				// to another
@@ -90,7 +90,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	err = c.Watch(&source.Kind{Type: &corev1.Pod{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &v1alpha1.Build{},
+			OwnerType:    &v1.Build{},
 		},
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -135,7 +135,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	ctx := context.TODO()
 
 	// Fetch the Build instance
-	var instance v1alpha1.Build
+	var instance v1.Build
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
@@ -152,16 +152,16 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	targetLog := rlog.ForBuild(target)
 
 	pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
-	if target.Status.Phase == v1alpha1.BuildPhaseNone || target.Status.Phase == v1alpha1.BuildPhaseWaitingForPlatform {
-		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1alpha1.BuildPhaseWaitingForPlatform
+	if target.Status.Phase == v1.BuildPhaseNone || target.Status.Phase == v1.BuildPhaseWaitingForPlatform {
+		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+			target.Status.Phase = v1.BuildPhaseWaitingForPlatform
 		} else {
-			target.Status.Phase = v1alpha1.BuildPhaseInitialization
+			target.Status.Phase = v1.BuildPhaseInitialization
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
 			if err != nil {
-				target.Status.SetErrorCondition(v1alpha1.BuildConditionPlatformAvailable, v1alpha1.BuildConditionPlatformAvailableReason, err)
+				target.Status.SetErrorCondition(v1.BuildConditionPlatformAvailable, v1.BuildConditionPlatformAvailableReason, err)
 			}
 
 			if pl != nil {
@@ -177,7 +177,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	var actions []Action
 
 	switch pl.Status.Build.BuildStrategy {
-	case v1alpha1.IntegrationPlatformBuildStrategyPod:
+	case v1.IntegrationPlatformBuildStrategyPod:
 		actions = []Action{
 			NewInitializePodAction(),
 			NewSchedulePodAction(r.reader),
@@ -185,7 +185,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 			NewErrorRecoveryAction(),
 			NewErrorAction(),
 		}
-	case v1alpha1.IntegrationPlatformBuildStrategyRoutine:
+	case v1.IntegrationPlatformBuildStrategyRoutine:
 		actions = []Action{
 			NewInitializeRoutineAction(),
 			NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
@@ -230,7 +230,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 
 	// Requeue scheduling (resp. failed) build so that it re-enters the build (resp. recovery) working queue
-	if target.Status.Phase == v1alpha1.BuildPhaseScheduling || target.Status.Phase == v1alpha1.BuildPhaseFailed {
+	if target.Status.Phase == v1.BuildPhaseScheduling || target.Status.Phase == v1.BuildPhaseFailed {
 		return reconcile.Result{
 			RequeueAfter: 5 * time.Second,
 		}, nil
@@ -239,7 +239,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBuild) update(ctx context.Context, base *v1alpha1.Build, target *v1alpha1.Build) (reconcile.Result, error) {
+func (r *ReconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) (reconcile.Result, error) {
 	err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err

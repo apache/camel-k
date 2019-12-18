@@ -33,7 +33,7 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/e2e/util"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
 	"github.com/apache/camel-k/pkg/install"
@@ -46,7 +46,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -152,7 +152,7 @@ func integrationLogs(ns string, name string) func() string {
 			containerName = pod.Spec.Containers[0].Name
 		}
 		tail := int64(100)
-		logOptions := v1.PodLogOptions{
+		logOptions := corev1.PodLogOptions{
 			Follow:    false,
 			Container: containerName,
 			TailLines: &tail,
@@ -177,8 +177,8 @@ func integrationLogs(ns string, name string) func() string {
 	}
 }
 
-func integrationPodPhase(ns string, name string) func() v1.PodPhase {
-	return func() v1.PodPhase {
+func integrationPodPhase(ns string, name string) func() corev1.PodPhase {
+	return func() corev1.PodPhase {
 		pod := integrationPod(ns, name)()
 		if pod == nil {
 			return ""
@@ -197,9 +197,9 @@ func integrationPodImage(ns string, name string) func() string {
 	}
 }
 
-func integrationPod(ns string, name string) func() *v1.Pod {
-	return func() *v1.Pod {
-		lst := v1.PodList{
+func integrationPod(ns string, name string) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -220,9 +220,9 @@ func integrationPod(ns string, name string) func() *v1.Pod {
 	}
 }
 
-func integration(ns string, name string) func() *v1alpha1.Integration {
-	return func() *v1alpha1.Integration {
-		it := v1alpha1.NewIntegration(ns, name)
+func integration(ns string, name string) func() *v1.Integration {
+	return func() *v1.Integration {
+		it := v1.NewIntegration(ns, name)
 		key := k8sclient.ObjectKey{
 			Namespace: ns,
 			Name:      name,
@@ -246,8 +246,8 @@ func integrationVersion(ns string, name string) func() string {
 	}
 }
 
-func integrationProfile(ns string, name string) func() v1alpha1.TraitProfile {
-	return func() v1alpha1.TraitProfile {
+func integrationProfile(ns string, name string) func() v1.TraitProfile {
+	return func() v1.TraitProfile {
 		it := integration(ns, name)()
 		if it == nil {
 			return ""
@@ -256,8 +256,8 @@ func integrationProfile(ns string, name string) func() v1alpha1.TraitProfile {
 	}
 }
 
-func integrationPhase(ns string, name string) func() v1alpha1.IntegrationPhase {
-	return func() v1alpha1.IntegrationPhase {
+func integrationPhase(ns string, name string) func() v1.IntegrationPhase {
+	return func() v1.IntegrationPhase {
 		it := integration(ns, name)()
 		if it == nil {
 			return ""
@@ -266,8 +266,8 @@ func integrationPhase(ns string, name string) func() v1alpha1.IntegrationPhase {
 	}
 }
 
-func integrationSpecProfile(ns string, name string) func() v1alpha1.TraitProfile {
-	return func() v1alpha1.TraitProfile {
+func integrationSpecProfile(ns string, name string) func() v1.TraitProfile {
+	return func() v1.TraitProfile {
 		it := integration(ns, name)()
 		if it == nil {
 			return ""
@@ -285,7 +285,7 @@ func setIntegrationVersion(ns string, name string, version string) error {
 	return testClient.Status().Update(testContext, it)
 }
 
-func updateIntegration(ns string, name string, upd func(it *v1alpha1.Integration)) error {
+func updateIntegration(ns string, name string, upd func(it *v1.Integration)) error {
 	it := integration(ns, name)()
 	if it == nil {
 		return fmt.Errorf("no integration named %s found", name)
@@ -294,9 +294,9 @@ func updateIntegration(ns string, name string, upd func(it *v1alpha1.Integration
 	return testClient.Update(testContext, it)
 }
 
-func kits(ns string) func() []v1alpha1.IntegrationKit {
-	return func() []v1alpha1.IntegrationKit {
-		lst := v1alpha1.NewIntegrationKitList()
+func kits(ns string) func() []v1.IntegrationKit {
+	return func() []v1.IntegrationKit {
+		lst := v1.NewIntegrationKitList()
 		if err := testClient.List(testContext, &lst, k8sclient.InNamespace(ns)); err != nil {
 			panic(err)
 		}
@@ -339,8 +339,8 @@ func operatorImage(ns string) func() string {
 	}
 }
 
-func operatorPodPhase(ns string) func() v1.PodPhase {
-	return func() v1.PodPhase {
+func operatorPodPhase(ns string) func() corev1.PodPhase {
+	return func() corev1.PodPhase {
 		pod := operatorPod(ns)()
 		if pod == nil {
 			return ""
@@ -349,9 +349,9 @@ func operatorPodPhase(ns string) func() v1.PodPhase {
 	}
 }
 
-func configmap(ns string, name string) func() *v1.ConfigMap {
-	return func() *v1.ConfigMap {
-		cm := v1.ConfigMap{
+func configmap(ns string, name string) func() *corev1.ConfigMap {
+	return func() *corev1.ConfigMap {
+		cm := corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "ConfigMap",
 				APIVersion: metav1.SchemeGroupVersion.String(),
@@ -375,9 +375,9 @@ func configmap(ns string, name string) func() *v1.ConfigMap {
 	}
 }
 
-func build(ns string, name string) func() *v1alpha1.Build {
-	return func() *v1alpha1.Build {
-		build := v1alpha1.NewBuild(ns, name)
+func build(ns string, name string) func() *v1.Build {
+	return func() *v1.Build {
+		build := v1.NewBuild(ns, name)
 		key := k8sclient.ObjectKey{
 			Namespace: ns,
 			Name:      name,
@@ -392,9 +392,9 @@ func build(ns string, name string) func() *v1alpha1.Build {
 	}
 }
 
-func platform(ns string) func() *v1alpha1.IntegrationPlatform {
-	return func() *v1alpha1.IntegrationPlatform {
-		lst := v1alpha1.NewIntegrationPlatformList()
+func platform(ns string) func() *v1.IntegrationPlatform {
+	return func() *v1.IntegrationPlatform {
+		lst := v1.NewIntegrationPlatformList()
 		if err := testClient.List(testContext, &lst, k8sclient.InNamespace(ns)); err != nil {
 			panic(err)
 		}
@@ -441,8 +441,8 @@ func platformVersion(ns string) func() string {
 	}
 }
 
-func platformPhase(ns string) func() v1alpha1.IntegrationPlatformPhase {
-	return func() v1alpha1.IntegrationPlatformPhase {
+func platformPhase(ns string) func() v1.IntegrationPlatformPhase {
+	return func() v1.IntegrationPlatformPhase {
 		p := platform(ns)()
 		if p == nil {
 			return ""
@@ -451,8 +451,8 @@ func platformPhase(ns string) func() v1alpha1.IntegrationPlatformPhase {
 	}
 }
 
-func platformProfile(ns string) func() v1alpha1.TraitProfile {
-	return func() v1alpha1.TraitProfile {
+func platformProfile(ns string) func() v1.TraitProfile {
+	return func() v1.TraitProfile {
 		p := platform(ns)()
 		if p == nil {
 			return ""
@@ -461,9 +461,9 @@ func platformProfile(ns string) func() v1alpha1.TraitProfile {
 	}
 }
 
-func operatorPod(ns string) func() *v1.Pod {
-	return func() *v1.Pod {
-		lst := v1.PodList{
+func operatorPod(ns string) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -558,7 +558,7 @@ func createKamelPod(ns string, name string, command ...string) error {
 	for _, hook := range kamelHooks {
 		args = hook(args)
 	}
-	pod := v1.Pod{
+	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
 			APIVersion: v1.SchemeGroupVersion.String(),
@@ -567,10 +567,10 @@ func createKamelPod(ns string, name string, command ...string) error {
 			Namespace: ns,
 			Name:      name,
 		},
-		Spec: v1.PodSpec{
+		Spec: corev1.PodSpec{
 			ServiceAccountName: "camel-k-operator",
-			RestartPolicy:      v1.RestartPolicyNever,
-			Containers: []v1.Container{
+			RestartPolicy:      corev1.RestartPolicyNever,
+			Containers: []corev1.Container{
 				{
 					Name:    "kamel-runner",
 					Image:   testImageName + ":" + testImageVersion,
@@ -608,7 +608,7 @@ func createKnativeChannel(ns string, name string) func() error {
 
 func numPods(ns string) func() int {
 	return func() int {
-		lst := v1.PodList{
+		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -654,7 +654,7 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 }
 
 func deleteKnativeBroker(ns metav1.Object) {
-	nsRef := v1.Namespace{
+	nsRef := corev1.Namespace{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       "Namespace",
@@ -738,7 +738,7 @@ func newTestNamespace(injectKnativeBroker bool) metav1.Object {
 			},
 		}
 	} else {
-		obj = &v1.Namespace{
+		obj = &corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
 				Kind:       "Namespace",

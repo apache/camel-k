@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	yaml2 "gopkg.in/yaml.v2"
 )
@@ -113,13 +113,13 @@ func GetSecret(context context.Context, client k8sclient.Reader, name string, na
 }
 
 // GetIntegrationPlatform --
-func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1alpha1.IntegrationPlatform, error) {
+func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewIntegrationPlatform(namespace, name)
+	answer := v1.NewIntegrationPlatform(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -129,13 +129,13 @@ func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, na
 }
 
 // GetIntegrationKit --
-func GetIntegrationKit(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1alpha1.IntegrationKit, error) {
+func GetIntegrationKit(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewIntegrationKit(namespace, name)
+	answer := v1.NewIntegrationKit(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -145,13 +145,13 @@ func GetIntegrationKit(context context.Context, client k8sclient.Reader, name st
 }
 
 // GetIntegration --
-func GetIntegration(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1alpha1.Integration, error) {
+func GetIntegration(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.Integration, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewIntegration(namespace, name)
+	answer := v1.NewIntegration(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -161,13 +161,13 @@ func GetIntegration(context context.Context, client k8sclient.Reader, name strin
 }
 
 // GetBuild --
-func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.Build, error) {
+func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1.Build, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewBuild(namespace, name)
+	answer := v1.NewBuild(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -230,7 +230,7 @@ func GetConfigMapRefValue(ctx context.Context, client k8sclient.Reader, namespac
 }
 
 // ResolveValueSource --
-func ResolveValueSource(ctx context.Context, client k8sclient.Reader, namespace string, valueSource *v1alpha1.ValueSource) (string, error) {
+func ResolveValueSource(ctx context.Context, client k8sclient.Reader, namespace string, valueSource *v1.ValueSource) (string, error) {
 	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
 		return "", fmt.Errorf("value source has bot config map and secret configured")
 	}

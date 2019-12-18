@@ -20,7 +20,7 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -39,11 +39,11 @@ func (action *deployAction) Name() string {
 	return "deploy"
 }
 
-func (action *deployAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseDeploying
+func (action *deployAction) CanHandle(integration *v1.Integration) bool {
+	return integration.Status.Phase == v1.IntegrationPhaseDeploying
 }
 
-func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
+func (action *deployAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	if integration.Status.Kit == "" {
 		return nil, errors.Errorf("no kit set on integration %s", integration.Name)
 	}
@@ -58,7 +58,7 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1alpha1.In
 		return nil, err
 	}
 
-	integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	integration.Status.Phase = v1.IntegrationPhaseRunning
 
 	return integration, nil
 }

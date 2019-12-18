@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -95,16 +95,16 @@ func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace stri
 			return nil
 		}
 		// Don't recreate integration kits, platforms, etc
-		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationKindKind {
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationKindKind {
 			return nil
 		}
-		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.IntegrationPlatformKind {
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationPlatformKind {
 			return nil
 		}
-		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.CamelCatalogKind {
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1.CamelCatalogKind {
 			return nil
 		}
-		if obj.GetObjectKind().GroupVersionKind().Kind == v1alpha1.BuildKind {
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1.BuildKind {
 			return nil
 		}
 		if obj.GetObjectKind().GroupVersionKind().Kind == "PersistentVolumeClaim" {
@@ -119,7 +119,7 @@ func isOpenShift(c kube.Interface, clusterType string) (bool, error) {
 	var res bool
 	var err error
 	if clusterType != "" {
-		res = strings.EqualFold(clusterType, string(v1alpha1.IntegrationPlatformClusterOpenShift))
+		res = strings.EqualFold(clusterType, string(v1.IntegrationPlatformClusterOpenShift))
 	} else {
 		res, err = openshift.IsOpenShift(c)
 		if err != nil {

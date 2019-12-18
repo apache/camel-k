@@ -20,26 +20,26 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPullSecret(t *testing.T) {
 	e := &Environment{}
-	e.Integration = &v1alpha1.Integration{
-		Status: v1alpha1.IntegrationStatus{
-			Phase: v1alpha1.IntegrationPhaseDeploying,
+	e.Integration = &v1.Integration{
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseDeploying,
 		},
 	}
 
 	deployment := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
-			Template: v1.PodTemplateSpec{
-				Spec: v1.PodSpec{},
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
 			},
 		},
 	}
@@ -53,22 +53,22 @@ func TestPullSecret(t *testing.T) {
 
 	err = trait.Apply(e)
 	assert.Nil(t, err)
-	assert.Contains(t, deployment.Spec.Template.Spec.ImagePullSecrets, v1.LocalObjectReference{Name: "xxxy"})
+	assert.Contains(t, deployment.Spec.Template.Spec.ImagePullSecrets, corev1.LocalObjectReference{Name: "xxxy"})
 }
 
 func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 	e := &Environment{}
-	e.Integration = &v1alpha1.Integration{
-		Status: v1alpha1.IntegrationStatus{
-			Phase: v1alpha1.IntegrationPhaseDeploying,
+	e.Integration = &v1.Integration{
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseDeploying,
 		},
 	}
-	e.Platform = &v1alpha1.IntegrationPlatform{}
+	e.Platform = &v1.IntegrationPlatform{}
 
 	deployment := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
-			Template: v1.PodTemplateSpec{
-				Spec: v1.PodSpec{},
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
 			},
 		},
 	}

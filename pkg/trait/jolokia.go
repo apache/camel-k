@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 
 	corev1 "k8s.io/api/core/v1"
@@ -88,7 +88,7 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 	setDefaultJolokiaOption(options, &t.DiscoveryEnabled, "discoveryEnabled", false)
 
 	// Configure HTTPS by default for OpenShift
-	if e.DetermineProfile() == v1alpha1.TraitProfileOpenShift {
+	if e.DetermineProfile() == v1.TraitProfileOpenShift {
 		setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
 		setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
 		setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
@@ -96,7 +96,7 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *jolokiaTrait) Apply(e *Environment) (err error) {
@@ -109,9 +109,9 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	container := e.Resources.GetContainerByName(containerName)
 	if container == nil {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionJolokiaAvailable,
+			v1.IntegrationConditionJolokiaAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionContainerNotAvailableReason,
+			v1.IntegrationConditionContainerNotAvailableReason,
 			"",
 		)
 		return nil
@@ -160,9 +160,9 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	}
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionJolokiaAvailable,
+		v1.IntegrationConditionJolokiaAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionJolokiaAvailableReason,
+		v1.IntegrationConditionJolokiaAvailableReason,
 		fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort),
 	)
 

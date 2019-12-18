@@ -23,14 +23,14 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/camel"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 var restIndicator = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
 var xmlRestIndicator = regexp.MustCompile(`.*<\s*rest\s+[^>]*>.*`)
 
 // requiresHTTPService returns true if the integration needs to expose itself through HTTP
-func requiresHTTPService(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSpec, fromURIs []string) bool {
+func requiresHTTPService(catalog *camel.RuntimeCatalog, source v1.SourceSpec, fromURIs []string) bool {
 	if hasRestIndicator(source) {
 		return true
 	}
@@ -38,9 +38,9 @@ func requiresHTTPService(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSp
 }
 
 // hasOnlyPassiveEndpoints returns true if the integration has no endpoint that needs to remain always active
-func hasOnlyPassiveEndpoints(catalog *camel.RuntimeCatalog, _ v1alpha1.SourceSpec, fromURIs []string) bool {
+func hasOnlyPassiveEndpoints(catalog *camel.RuntimeCatalog, _ v1.SourceSpec, fromURIs []string) bool {
 	passivePlusHTTP := make(map[string]bool)
-	catalog.VisitSchemes(func(id string, scheme v1alpha1.CamelScheme) bool {
+	catalog.VisitSchemes(func(id string, scheme v1.CamelScheme) bool {
 		if scheme.HTTP || scheme.Passive {
 			passivePlusHTTP[id] = true
 		}
@@ -87,14 +87,14 @@ func getURIPrefix(uri string) string {
 	return ""
 }
 
-func hasRestIndicator(source v1alpha1.SourceSpec) bool {
+func hasRestIndicator(source v1.SourceSpec) bool {
 	pat := getRestIndicatorRegexpsForLanguage(source.InferLanguage())
 	return pat.MatchString(source.Content)
 }
 
-func getRestIndicatorRegexpsForLanguage(language v1alpha1.Language) *regexp.Regexp {
+func getRestIndicatorRegexpsForLanguage(language v1.Language) *regexp.Regexp {
 	switch language {
-	case v1alpha1.LanguageXML:
+	case v1.LanguageXML:
 		return xmlRestIndicator
 	default:
 		return restIndicator

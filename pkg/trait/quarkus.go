@@ -25,7 +25,7 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -83,7 +83,7 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 	camelQuarkusVersion := t.determineCamelQuarkusVersion(e)
 	quarkusVersion := t.determineQuarkusVersion(e)
 
-	catalog, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, v1alpha1.QuarkusRuntimeProvider{
+	catalog, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, v1.QuarkusRuntimeProvider{
 		CamelQuarkusVersion: camelQuarkusVersion,
 		QuarkusVersion:      quarkusVersion,
 	})
@@ -119,7 +119,7 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 			// sanitize catalog name
 			catalogName := "camel-catalog-quarkus-" + strings.ToLower(camelVersion+"-"+runtimeVersion)
 
-			cx := v1alpha1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
+			cx := v1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
 			cx.Labels = make(map[string]string)
 			cx.Labels["app"] = "camel-k"
 			cx.Labels["camel.apache.org/catalog.version"] = camelVersion
@@ -145,7 +145,7 @@ func (t *quarkusTrait) loadOrCreateCatalog(e *Environment, camelVersion string, 
 	return nil
 }
 
-func (t *quarkusTrait) addBuildSteps(task *v1alpha1.BuilderTask) {
+func (t *quarkusTrait) addBuildSteps(task *v1.BuilderTask) {
 	task.Steps = append(task.Steps, builder.StepIDsFor(runtime.QuarkusSteps...)...)
 }
 
@@ -161,17 +161,17 @@ func (t *quarkusTrait) addRuntimeDependencies(e *Environment) error {
 		lang := s.InferLanguage()
 
 		switch {
-		case lang == v1alpha1.LanguageYaml:
+		case lang == v1.LanguageYaml:
 			addRuntimeDependency("camel-k-quarkus-loader-yaml", dependencies)
-		case lang == v1alpha1.LanguageXML:
+		case lang == v1.LanguageXML:
 			addRuntimeDependency("camel-k-quarkus-loader-xml", dependencies)
-		case lang == v1alpha1.LanguageJavaScript:
+		case lang == v1.LanguageJavaScript:
 			addRuntimeDependency("camel-k-quarkus-loader-js", dependencies)
-		case lang == v1alpha1.LanguageGroovy && !t.Native:
+		case lang == v1.LanguageGroovy && !t.Native:
 			addRuntimeDependency("camel-k-quarkus-loader-groovy", dependencies)
-		case lang == v1alpha1.LanguageKotlin && !t.Native:
+		case lang == v1.LanguageKotlin && !t.Native:
 			addRuntimeDependency("camel-k-quarkus-loader-kotlin", dependencies)
-		case lang == v1alpha1.LanguageJavaSource && !t.Native:
+		case lang == v1.LanguageJavaSource && !t.Native:
 			addRuntimeDependency("camel-k-quarkus-loader-java", dependencies)
 		default:
 			return fmt.Errorf("unsupported language for Quarkus runtime: %s (native=%t)", lang, t.Native)

@@ -18,7 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -104,7 +104,7 @@ func (c *Collection) GetDeployment(filter func(*appsv1.Deployment) bool) *appsv1
 }
 
 // GetDeploymentForIntegration returns a Deployment for the given integration
-func (c *Collection) GetDeploymentForIntegration(integration *v1alpha1.Integration) *appsv1.Deployment {
+func (c *Collection) GetDeploymentForIntegration(integration *v1.Integration) *appsv1.Deployment {
 	if integration == nil {
 		return nil
 	}
@@ -188,19 +188,19 @@ func (c *Collection) GetService(filter func(*corev1.Service) bool) *corev1.Servi
 }
 
 // GetUserServiceForIntegration returns a user Service for the given integration
-func (c *Collection) GetUserServiceForIntegration(integration *v1alpha1.Integration) *corev1.Service {
+func (c *Collection) GetUserServiceForIntegration(integration *v1.Integration) *corev1.Service {
 	if integration == nil {
 		return nil
 	}
 	return c.GetService(func(s *corev1.Service) bool {
 		return s.ObjectMeta.Labels != nil &&
 			s.ObjectMeta.Labels["camel.apache.org/integration"] == integration.Name &&
-			s.ObjectMeta.Labels["camel.apache.org/service.type"] == v1alpha1.ServiceTypeUser
+			s.ObjectMeta.Labels["camel.apache.org/service.type"] == v1.ServiceTypeUser
 	})
 }
 
 // GetServiceForIntegration returns a user Service for the given integration
-func (c *Collection) GetServiceForIntegration(integration *v1alpha1.Integration) *corev1.Service {
+func (c *Collection) GetServiceForIntegration(integration *v1.Integration) *corev1.Service {
 	if integration == nil {
 		return nil
 	}

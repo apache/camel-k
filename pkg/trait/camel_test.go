@@ -23,7 +23,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -78,7 +78,7 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{
-			CamelCatalogSpec: v1alpha1.CamelCatalogSpec{
+			CamelCatalogSpec: v1.CamelCatalogSpec{
 				Version:        "1.23.0",
 				RuntimeVersion: "0.0.1",
 			},
@@ -86,16 +86,16 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 		Catalog: NewEnvironmentTestCatalog(),
 		C:       context.TODO(),
 		Client:  client,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "namespace",
 			},
-			Status: v1alpha1.IntegrationStatus{
+			Status: v1.IntegrationStatus{
 				CamelVersion:   "1.23.0",
 				RuntimeVersion: "0.0.1",
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{},
+		IntegrationKit: &v1.IntegrationKit{},
 	}
 
 	return trait, environment

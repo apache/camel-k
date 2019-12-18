@@ -20,7 +20,7 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -33,24 +33,24 @@ func TestRestDslTraitApplicability(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, enabled)
 
-	e.Integration = &v1alpha1.Integration{
-		Status: v1alpha1.IntegrationStatus{
-			Phase: v1alpha1.IntegrationPhaseNone,
+	e.Integration = &v1.Integration{
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseNone,
 		},
 	}
 	enabled, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
 
-	resource := v1alpha1.ResourceSpec{
-		Type: v1alpha1.ResourceTypeOpenAPI,
+	resource := v1.ResourceSpec{
+		Type: v1.ResourceTypeOpenAPI,
 	}
 	e.Integration.Spec.Resources = append(e.Integration.Spec.Resources, resource)
 	enabled, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
 
-	e.Integration.Status.Phase = v1alpha1.IntegrationPhaseInitialization
+	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 	enabled, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)

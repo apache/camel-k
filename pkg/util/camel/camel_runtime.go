@@ -25,7 +25,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/controller"
 )
@@ -40,13 +40,13 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 		requirement, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
 		selector := labels.NewSelector().Add(*requirement)
 		options = append(options, controller.MatchingSelector{Selector: selector})
-	} else if _, ok := provider.(v1alpha1.QuarkusRuntimeProvider); ok {
+	} else if _, ok := provider.(v1.QuarkusRuntimeProvider); ok {
 		options = append(options, k8sclient.MatchingLabels{
 			"camel.apache.org/runtime.provider": "quarkus",
 		})
 	}
 
-	list := v1alpha1.NewCamelCatalogList()
+	list := v1.NewCamelCatalogList()
 	err := client.List(ctx, &list, options...)
 	if err != nil {
 		return nil, err

@@ -19,14 +19,14 @@ package camel
 
 import (
 	"github.com/Masterminds/semver"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // CatalogVersion --
 type CatalogVersion struct {
 	Version        *semver.Version
 	RuntimeVersion *semver.Version
-	Catalog        *v1alpha1.CamelCatalog
+	Catalog        *v1.CamelCatalog
 }
 
 // CatalogVersionCollection --

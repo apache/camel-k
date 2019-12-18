@@ -21,7 +21,7 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // XMLInspector --
@@ -30,7 +30,7 @@ type XMLInspector struct {
 }
 
 // Extract --
-func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
+func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)
 

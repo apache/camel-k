@@ -26,7 +26,7 @@ import (
 
 	yaml2 "gopkg.in/yaml.v2"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -100,7 +100,7 @@ func computeDependencies(ctx *builder.Context) error {
 		return err
 	}
 
-	cp := make(map[string][]v1alpha1.Artifact)
+	cp := make(map[string][]v1.Artifact)
 	err = yaml2.Unmarshal(content, &cp)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func computeDependencies(ctx *builder.Context) error {
 			return nil
 		}
 
-		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
+		ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
 			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),

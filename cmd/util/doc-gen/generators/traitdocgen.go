@@ -29,7 +29,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"k8s.io/gengo/args"
 	"k8s.io/gengo/generator"
@@ -343,7 +343,7 @@ func determineProfiles(traitID string) (profiles []string) {
 	defer cancel()
 
 	catalog := trait.NewCatalog(ctx, nil)
-	for _, p := range v1alpha1.AllTraitProfiles {
+	for _, p := range v1.AllTraitProfiles {
 		traits := catalog.TraitsForProfile(p)
 		for _, t := range traits {
 			if string(t.ID()) == traitID {

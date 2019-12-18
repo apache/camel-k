@@ -22,7 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -34,7 +34,7 @@ func TestNewProject(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuilderTask{
+		Build: v1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Dependencies: []string{
@@ -92,7 +92,7 @@ func TestGenerateJvmProject(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuilderTask{
+		Build: v1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Dependencies: []string{
@@ -144,7 +144,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuilderTask{
+		Build: v1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Dependencies: []string{
@@ -200,7 +200,7 @@ func TestSanitizeDependencies(t *testing.T) {
 
 	ctx := builder.Context{
 		Catalog: catalog,
-		Build: v1alpha1.BuilderTask{
+		Build: v1.BuilderTask{
 			CamelVersion:   catalog.Version,
 			RuntimeVersion: catalog.RuntimeVersion,
 			Dependencies: []string{

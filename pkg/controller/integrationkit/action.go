@@ -20,7 +20,7 @@ package integrationkit
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -34,10 +34,10 @@ type Action interface {
 	Name() string
 
 	// returns true if the action can handle the integration kit
-	CanHandle(kit *v1alpha1.IntegrationKit) bool
+	CanHandle(kit *v1.IntegrationKit) bool
 
 	// executes the handling function
-	Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error)
+	Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error)
 }
 
 type baseAction struct {

@@ -145,7 +145,7 @@ func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
 
 // IsCRDInstalled check if the given CRD kind is installed
 func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, error) {
-	lst, err := c.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
+	lst, err := c.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1")
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {

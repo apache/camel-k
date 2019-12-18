@@ -27,7 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -37,8 +37,8 @@ import (
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, v1alpha1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
 	}
 
 	for _, e := range environments {
@@ -58,13 +58,13 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 
 func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, v1alpha1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
 	}
 
 	for _, e := range environments {
 		e := e // pin
-		e.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
+		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseInitialization
 
 		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
@@ -78,7 +78,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 }
 
 func TestS2IBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, v1alpha1.IntegrationPlatformBuildPublishStrategyS2I)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I)
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -99,7 +99,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -120,7 +120,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.NotNil(t, env.BuildTasks[1].Kaniko)
 }
 
-func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy v1alpha1.IntegrationPlatformBuildPublishStrategy) *Environment {
+func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -131,26 +131,26 @@ func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy 
 		C:            context.TODO(),
 		CamelCatalog: c,
 		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
 				Namespace: "ns",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseBuildSubmitted,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseBuildSubmitted,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy:  strategy,
-					Registry:         v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+					Registry:         v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 					CamelVersion:     defaults.DefaultCamelVersion,
 					KanikoBuildCache: &kanikoCache,
 				},

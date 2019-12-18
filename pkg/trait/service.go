@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
@@ -55,16 +55,16 @@ func (t *serviceTrait) isEnabled() bool {
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	if !t.isEnabled() {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionServiceAvailable,
+			v1.IntegrationConditionServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionServiceNotAvailableReason,
+			v1.IntegrationConditionServiceNotAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -72,9 +72,9 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
 		if err != nil {
 			e.Integration.Status.SetCondition(
-				v1alpha1.IntegrationConditionServiceAvailable,
+				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
-				v1alpha1.IntegrationConditionServiceNotAvailableReason,
+				v1.IntegrationConditionServiceNotAvailableReason,
 				err.Error(),
 			)
 
@@ -84,9 +84,9 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		meta := metadata.ExtractAll(e.CamelCatalog, sources)
 		if !meta.RequiresHTTPService {
 			e.Integration.Status.SetCondition(
-				v1alpha1.IntegrationConditionServiceAvailable,
+				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
-				v1alpha1.IntegrationConditionServiceNotAvailableReason,
+				v1.IntegrationConditionServiceNotAvailableReason,
 				"no http service required",
 			)
 

@@ -25,7 +25,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewErrorRecoveryAction creates a new error recovering handling action for the build
@@ -50,16 +50,16 @@ func (action *errorRecoveryAction) Name() string {
 	return "error-recovery"
 }
 
-func (action *errorRecoveryAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseFailed
+func (action *errorRecoveryAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseFailed
 }
 
-func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	if build.Status.Failure == nil {
-		build.Status.Failure = &v1alpha1.Failure{
+		build.Status.Failure = &v1.Failure{
 			Reason: build.Status.Error,
 			Time:   metav1.Now(),
-			Recovery: v1alpha1.FailureRecovery{
+			Recovery: v1.FailureRecovery{
 				Attempt:    0,
 				AttemptMax: 5,
 			},
@@ -68,7 +68,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 	}
 
 	if build.Status.Failure.Recovery.Attempt >= build.Status.Failure.Recovery.AttemptMax {
-		build.Status.Phase = v1alpha1.BuildPhaseError
+		build.Status.Phase = v1.BuildPhaseError
 		return build, nil
 	}
 
@@ -84,7 +84,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1alpha1.B
 		return nil, nil
 	}
 
-	build.Status.Phase = v1alpha1.BuildPhaseInitialization
+	build.Status.Phase = v1.BuildPhaseInitialization
 	build.Status.Failure.Recovery.Attempt++
 	build.Status.Failure.Recovery.AttemptTime = metav1.Now()
 

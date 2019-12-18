@@ -22,13 +22,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 func TestJava1(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
 			import org.apache.camel.builder.RouteBuilder;
@@ -43,7 +43,7 @@ func TestJava1(t *testing.T) {
 			}
 		`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -58,8 +58,8 @@ func TestJava1(t *testing.T) {
 }
 
 func TestJava2(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
 			import org.apache.camel.builder.RouteBuilder;
@@ -80,7 +80,7 @@ func TestJava2(t *testing.T) {
 			}
 		`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -97,8 +97,8 @@ func TestJava2(t *testing.T) {
 }
 
 func TestGroovy1(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
 			
@@ -112,7 +112,7 @@ func TestGroovy1(t *testing.T) {
 				.to('uri:3')
 		`,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -130,8 +130,8 @@ func TestGroovy1(t *testing.T) {
 }
 
 func TestGroovy2(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `			
 			rest().get("/")
@@ -142,7 +142,7 @@ func TestGroovy2(t *testing.T) {
 						.toF( "f:%s", "2")
 		`,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -160,8 +160,8 @@ func TestGroovy2(t *testing.T) {
 }
 
 func TestXml1(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
 			<routes>
@@ -177,7 +177,7 @@ func TestXml1(t *testing.T) {
 			</routes>
 		`,
 		},
-		Language: v1alpha1.LanguageXML,
+		Language: v1.LanguageXML,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -194,8 +194,8 @@ func TestXml1(t *testing.T) {
 }
 
 func TestKotlin1(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
 			
@@ -211,7 +211,7 @@ func TestKotlin1(t *testing.T) {
 				.toF("uri:%s", 5)
 		`,
 		},
-		Language: v1alpha1.LanguageKotlin,
+		Language: v1.LanguageKotlin,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -231,8 +231,8 @@ func TestKotlin1(t *testing.T) {
 }
 
 func TestJavascript1(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
 			
@@ -242,7 +242,7 @@ func TestJavascript1(t *testing.T) {
 				.toF("uri:%s", "3") 
 		`,
 		},
-		Language: v1alpha1.LanguageJavaScript,
+		Language: v1.LanguageJavaScript,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -273,12 +273,12 @@ const yaml = `
 `
 
 func TestJYaml(t *testing.T) {
-	source := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name:    "test",
 			Content: yaml,
 		},
-		Language: v1alpha1.LanguageYaml,
+		Language: v1.LanguageYaml,
 	}
 
 	catalog, err := camel.DefaultCatalog()

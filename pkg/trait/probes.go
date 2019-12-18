@@ -21,7 +21,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
@@ -74,9 +74,9 @@ func newProbesTrait() *probesTrait {
 func (t *probesTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && *t.Enabled {
 		return e.IntegrationInPhase(
-			v1alpha1.IntegrationPhaseInitialization,
-			v1alpha1.IntegrationPhaseDeploying,
-			v1alpha1.IntegrationPhaseRunning,
+			v1.IntegrationPhaseInitialization,
+			v1.IntegrationPhaseDeploying,
+			v1.IntegrationPhaseRunning,
 		), nil
 	}
 
@@ -84,7 +84,7 @@ func (t *probesTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *probesTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-health")
 
 		// sort the dependencies to get always the same list if they don't change
@@ -96,15 +96,15 @@ func (t *probesTrait) Apply(e *Environment) error {
 			//       have a dedicated servlet trait and maybe an option to create a dedicated
 			//       server for management stuffs like health
 			//
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.enabled=true"},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindHost=" + t.BindHost},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindPort=" + strconv.Itoa(t.BindPort)},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.health.enabled=true"},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.health.path=" + t.Path},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.enabled=true"},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindHost=" + t.BindHost},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindPort=" + strconv.Itoa(t.BindPort)},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.health.enabled=true"},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.health.path=" + t.Path},
 		)
 	}
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying, v1alpha1.IntegrationPhaseRunning) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 			if len(deployment.Spec.Template.Spec.Containers) != 1 {
 				return

@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -41,7 +41,7 @@ const (
 )
 
 func TestOpenShiftTraits(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
 	res := processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
@@ -58,7 +58,7 @@ func TestOpenShiftTraits(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.NotNil(t, env.GetTrait("service"))
@@ -79,9 +79,9 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Integration.Spec.Traits["service"] = v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Integration.Spec.Traits["service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"port": "7071",
 		},
@@ -95,9 +95,9 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Integration.Spec.Traits["service"] = v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Integration.Spec.Traits["service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled": "false",
 			"port":    "7071",
@@ -112,7 +112,7 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 }
 
 func TestKubernetesTraits(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.Nil(t, env.GetTrait("service"))
@@ -127,7 +127,7 @@ func TestKubernetesTraits(t *testing.T) {
 }
 
 func TestKubernetesTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.NotNil(t, env.GetTrait("service"))
@@ -145,9 +145,9 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 }
 
 func TestTraitDecode(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	svcTrait := v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "")
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	svcTrait := v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled": "false",
 			"port":    "7071",
@@ -166,10 +166,10 @@ func TestTraitDecode(t *testing.T) {
 }
 
 func TestTraitHierarchyDecode(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "")
 
-	env.Platform.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Platform.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+	env.Platform.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Platform.Spec.Traits["knative-service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled":            "false",
 			"min-scale":          "1",
@@ -179,16 +179,16 @@ func TestTraitHierarchyDecode(t *testing.T) {
 	}
 	env.Platform.ResyncStatusFullConfig()
 
-	env.IntegrationKit.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.IntegrationKit.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+	env.IntegrationKit.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.IntegrationKit.Spec.Traits["knative-service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled":   "true",
 			"min-scale": "5",
 		},
 	}
 
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Integration.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Integration.Spec.Traits["knative-service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"max-scale": "20",
 		},
@@ -221,15 +221,15 @@ func TestTraitHierarchyDecode(t *testing.T) {
 
 func TestConfigureVolumesAndMounts(t *testing.T) {
 	env := Environment{
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeploymentName,
 				Namespace: "ns",
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Resources: []v1alpha1.ResourceSpec{
+			Spec: v1.IntegrationSpec{
+				Resources: []v1.ResourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:       "res1.txt",
 							ContentRef: "my-cm1",
 							ContentKey: "my-key1",
@@ -238,27 +238,27 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 						MountPath: "/etc/m1",
 					},
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:       "res2.txt",
 							ContentRef: "my-cm2",
 						},
 						Type: "data",
 					},
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:       "res3.txt",
 							ContentKey: "my-key3",
 						},
 						Type: "data",
 					},
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name: "res4.txt",
 						},
 						Type: "data",
 					},
 				},
-				Configuration: []v1alpha1.ConfigurationSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{
 						Type:  "configmap",
 						Value: "test-configmap",
@@ -430,40 +430,40 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	return env.Resources
 }
 
-func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, script string) *Environment {
+func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script string) *Environment {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeploymentName,
 				Namespace: "ns",
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Sources: []v1alpha1.SourceSpec{
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:    "file.groovy",
 							Content: script,
 						},
-						Language: v1alpha1.LanguageGroovy,
+						Language: v1.LanguageGroovy,
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
 			},
 		},

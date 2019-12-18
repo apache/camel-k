@@ -20,7 +20,7 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
@@ -43,12 +43,12 @@ func (action *initializeAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the integration
-func (action *initializeAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseInitialization
+func (action *initializeAction) CanHandle(integration *v1.Integration) bool {
+	return integration.Status.Phase == v1.IntegrationPhaseInitialization
 }
 
 // Handle handles the integrations
-func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
+func (action *initializeAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		return nil, err
 	}
@@ -58,9 +58,9 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 		return nil, err
 	}
 
-	kit := v1alpha1.NewIntegrationKit(integration.Namespace, integration.Spec.Kit)
+	kit := v1.NewIntegrationKit(integration.Namespace, integration.Spec.Kit)
 
-	integration.Status.Phase = v1alpha1.IntegrationPhaseBuildingKit
+	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 	integration.SetIntegrationKit(&kit)
 	integration.Status.Profile = determineBestProfile(ctx, action.client, integration, pl)
 	integration.Status.Version = defaults.Version
@@ -69,7 +69,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1alpha
 }
 
 // DetermineBestProfile tries to detect the best trait profile for the integration
-func determineBestProfile(ctx context.Context, c client.Client, integration *v1alpha1.Integration, p *v1alpha1.IntegrationPlatform) v1alpha1.TraitProfile {
+func determineBestProfile(ctx context.Context, c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) v1.TraitProfile {
 	if integration.Spec.Profile != "" {
 		return integration.Spec.Profile
 	}
@@ -82,7 +82,7 @@ func determineBestProfile(ctx context.Context, c client.Client, integration *v1a
 		return p.Status.Profile
 	}
 	if knative.IsEnabledInNamespace(ctx, c, p.Namespace) {
-		return v1alpha1.TraitProfileKnative
+		return v1.TraitProfileKnative
 	}
 	return platform.GetProfile(p)
 }

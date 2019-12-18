@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/rs/xid"
@@ -40,12 +40,12 @@ func (action *buildKitAction) Name() string {
 	return "build-kit"
 }
 
-func (action *buildKitAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingKit ||
-		integration.Status.Phase == v1alpha1.IntegrationPhaseResolvingKit
+func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
+	return integration.Status.Phase == v1.IntegrationPhaseBuildingKit ||
+		integration.Status.Phase == v1.IntegrationPhaseResolvingKit
 }
 
-func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
+func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	kit, err := LookupKitForIntegration(ctx, action.client, integration)
 	if err != nil {
 		//TODO: we may need to add a wait strategy, i.e give up after some time
@@ -53,7 +53,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 	}
 
 	if kit != nil {
-		if kit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
+		if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
 			// This is a platform kit and as it is auto generated it may get
 			// out of sync if the integration that has generated it, has been
 			// amended to add/remove dependencies
@@ -67,21 +67,21 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 				// We need to re-generate a kit or search for a new one that
 				// satisfies integrations needs so let's remove the association
 				// with a kit
-				integration.SetIntegrationKit(&v1alpha1.IntegrationKit{})
+				integration.SetIntegrationKit(&v1.IntegrationKit{})
 
 				return integration, nil
 			}
 		}
 
-		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
+		if kit.Status.Phase == v1.IntegrationKitPhaseError {
 			integration.Status.Image = kit.Status.Image
-			integration.Status.Phase = v1alpha1.IntegrationPhaseError
+			integration.Status.Phase = v1.IntegrationPhaseError
 			integration.SetIntegrationKit(kit)
 
 			return integration, nil
 		}
 
-		if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady {
+		if kit.Status.Phase == v1.IntegrationKitPhaseReady {
 			integration.Status.Image = kit.Status.Image
 			integration.SetIntegrationKit(kit)
 
@@ -102,13 +102,13 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 	}
 
 	platformKitName := fmt.Sprintf("kit-%s", xid.New())
-	platformKit := v1alpha1.NewIntegrationKit(integration.Namespace, platformKitName)
+	platformKit := v1.NewIntegrationKit(integration.Namespace, platformKitName)
 
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
 	platformKit.Labels = map[string]string{
-		"camel.apache.org/kit.type":               v1alpha1.IntegrationKitTypePlatform,
-		"camel.apache.org/kit.created.by.kind":    v1alpha1.IntegrationKind,
+		"camel.apache.org/kit.type":               v1.IntegrationKitTypePlatform,
+		"camel.apache.org/kit.created.by.kind":    v1.IntegrationKind,
 		"camel.apache.org/kit.created.by.name":    integration.Name,
 		"camel.apache.org/kit.created.by.version": integration.ResourceVersion,
 	}
@@ -118,7 +118,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 	}
 
 	// Set the kit to have the same characteristics as the integrations
-	platformKit.Spec = v1alpha1.IntegrationKitSpec{
+	platformKit.Spec = v1.IntegrationKitSpec{
 		Dependencies: integration.Status.Dependencies,
 		Repositories: integration.Spec.Repositories,
 		Traits:       action.filterKitTraits(ctx, integration.Spec.Traits),
@@ -135,12 +135,12 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1alpha1.
 	return integration, nil
 }
 
-func (action *buildKitAction) filterKitTraits(ctx context.Context, in map[string]v1alpha1.TraitSpec) map[string]v1alpha1.TraitSpec {
+func (action *buildKitAction) filterKitTraits(ctx context.Context, in map[string]v1.TraitSpec) map[string]v1.TraitSpec {
 	if len(in) == 0 {
 		return in
 	}
 	catalog := trait.NewCatalog(ctx, action.client)
-	out := make(map[string]v1alpha1.TraitSpec)
+	out := make(map[string]v1.TraitSpec)
 	for name, conf := range in {
 		t := catalog.GetTrait(name)
 		if t != nil && !t.InfluencesKit() {

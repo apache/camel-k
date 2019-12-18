@@ -38,7 +38,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	util "github.com/apache/camel-k/pkg/util/controller"
 )
 
@@ -83,16 +83,16 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	return e.IntegrationInPhase(
-			v1alpha1.IntegrationPhaseInitialization,
-			v1alpha1.IntegrationPhaseDeploying,
-			v1alpha1.IntegrationPhaseRunning),
+			v1.IntegrationPhaseInitialization,
+			v1.IntegrationPhaseDeploying,
+			v1.IntegrationPhaseRunning),
 		nil
 }
 
 func (t *garbageCollectorTrait) Apply(e *Environment) error {
 	switch e.Integration.Status.Phase {
 
-	case v1alpha1.IntegrationPhaseRunning:
+	case v1.IntegrationPhaseRunning:
 		// Register a post action that deletes the existing resources that are labelled
 		// with the previous integration generations.
 		// TODO: this should be refined so that it's run when all the replicas for the newer generation

@@ -21,7 +21,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewMonitorRoutineAction creates a new monitor action for scheduled routine
@@ -42,17 +42,17 @@ func (action *monitorRoutineAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *monitorRoutineAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhasePending || build.Status.Phase == v1alpha1.BuildPhaseRunning
+func (action *monitorRoutineAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning
 }
 
 // Handle handles the builds
-func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	// Check the build routine
-	if _, ok := action.routines.Load(build.Name); !ok && build.Status.Phase != v1alpha1.BuildPhaseFailed {
+	if _, ok := action.routines.Load(build.Name); !ok && build.Status.Phase != v1.BuildPhaseFailed {
 		// and recover the build if it's missing. This can happen when the operator
 		// stops abruptly and restarts or the build status update fails.
-		build.Status.Phase = v1alpha1.BuildPhaseFailed
+		build.Status.Phase = v1.BuildPhaseFailed
 
 		return build, nil
 	}

@@ -24,7 +24,7 @@ GO111MODULE=on
 echo "Generating Go client code..."
 
 go run k8s.io/code-generator/cmd/client-gen \
-	--input=camel/v1alpha1 \
+	--input=camel/v1 \
 	--go-header-file=$rootdir/script/headers/default.txt \
 	--clientset-name "versioned"  \
 	--input-base=github.com/apache/camel-k/pkg/apis \
@@ -33,7 +33,7 @@ go run k8s.io/code-generator/cmd/client-gen \
 
 
 go run k8s.io/code-generator/cmd/lister-gen \
-	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1alpha1 \
+	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1 \
 	--go-header-file=$rootdir/script/headers/default.txt \
 	--output-base=$rootdir \
 	--output-package=github.com/apache/camel-k/pkg/client/listers
@@ -41,7 +41,7 @@ go run k8s.io/code-generator/cmd/lister-gen \
 go run k8s.io/code-generator/cmd/informer-gen \
     --versioned-clientset-package=github.com/apache/camel-k/pkg/client/clientset/versioned \
 	--listers-package=github.com/apache/camel-k/pkg/client/listers \
-	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1alpha1 \
+	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1 \
 	--go-header-file=$rootdir/script/headers/default.txt \
 	--output-base=$rootdir \
 	--output-package=github.com/apache/camel-k/pkg/client/informers

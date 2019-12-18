@@ -32,7 +32,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
@@ -135,13 +135,13 @@ type Environment struct {
 	Catalog        *Catalog
 	C              context.Context
 	Client         client.Client
-	Platform       *v1alpha1.IntegrationPlatform
-	IntegrationKit *v1alpha1.IntegrationKit
-	Integration    *v1alpha1.Integration
+	Platform       *v1.IntegrationPlatform
+	IntegrationKit *v1.IntegrationKit
+	Integration    *v1.Integration
 	Resources      *kubernetes.Collection
 	PostActions    []func(*Environment) error
 	PostProcessors []func(*Environment) error
-	BuildTasks     []v1alpha1.Task
+	BuildTasks     []v1.Task
 	ExecutedTraits []Trait
 	EnvVars        []corev1.EnvVar
 	Classpath      *strset.Set
@@ -168,7 +168,7 @@ func (e *Environment) GetTrait(id ID) Trait {
 }
 
 // IntegrationInPhase --
-func (e *Environment) IntegrationInPhase(phases ...v1alpha1.IntegrationPhase) bool {
+func (e *Environment) IntegrationInPhase(phases ...v1.IntegrationPhase) bool {
 	if e.Integration == nil {
 		return false
 	}
@@ -183,7 +183,7 @@ func (e *Environment) IntegrationInPhase(phases ...v1alpha1.IntegrationPhase) bo
 }
 
 // IntegrationKitInPhase --
-func (e *Environment) IntegrationKitInPhase(phases ...v1alpha1.IntegrationKitPhase) bool {
+func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bool {
 	if e.IntegrationKit == nil {
 		return false
 	}
@@ -198,7 +198,7 @@ func (e *Environment) IntegrationKitInPhase(phases ...v1alpha1.IntegrationKitPha
 }
 
 // InPhase --
-func (e *Environment) InPhase(c v1alpha1.IntegrationKitPhase, i v1alpha1.IntegrationPhase) bool {
+func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) bool {
 	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
 }
 
@@ -206,7 +206,7 @@ func (e *Environment) InPhase(c v1alpha1.IntegrationKitPhase, i v1alpha1.Integra
 // First looking at the Integration.Spec for a Profile,
 // next looking at the IntegrationKit.Spec
 // and lastly the Platform Profile
-func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
+func (e *Environment) DetermineProfile() v1.TraitProfile {
 	if e.Integration != nil {
 		if e.Integration.Status.Profile != "" {
 			return e.Integration.Status.Profile
@@ -224,12 +224,12 @@ func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
 		return platform.GetProfile(e.Platform)
 	}
 
-	return v1alpha1.DefaultTraitProfile
+	return v1.DefaultTraitProfile
 }
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration
 func (e *Environment) DetermineControllerStrategy(ctx context.Context, c controller.Reader) (ControllerStrategy, error) {
-	if e.DetermineProfile() != v1alpha1.TraitProfileKnative {
+	if e.DetermineProfile() != v1.TraitProfileKnative {
 		return ControllerStrategyDeployment, nil
 	}
 
@@ -243,7 +243,7 @@ func (e *Environment) DetermineControllerStrategy(ctx context.Context, c control
 		}
 	}
 
-	var sources []v1alpha1.SourceSpec
+	var sources []v1.SourceSpec
 	var err error
 	if sources, err = kubernetes.ResolveIntegrationSources(ctx, c, e.Integration, e.Resources); err != nil {
 		return "", err
@@ -338,7 +338,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	}
 
 	for i, r := range e.Integration.Spec.Resources {
-		if r.Type != v1alpha1.ResourceTypeData {
+		if r.Type != v1.ResourceTypeData {
 			continue
 		}
 		if r.ContentRef != "" {
@@ -451,7 +451,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	}
 
 	for i, r := range e.Integration.Spec.Resources {
-		if r.Type != v1alpha1.ResourceTypeData {
+		if r.Type != v1.ResourceTypeData {
 			continue
 		}
 

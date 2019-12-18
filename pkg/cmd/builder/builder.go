@@ -33,7 +33,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/cancellable"
@@ -64,12 +64,12 @@ func Run(namespace string, buildName string, taskName string) {
 
 	ctx := cancellable.NewContext()
 
-	build := &v1alpha1.Build{}
+	build := &v1.Build{}
 	exitOnError(
 		c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: buildName}, build),
 	)
 
-	var task *v1alpha1.BuilderTask
+	var task *v1.BuilderTask
 	for _, t := range build.Spec.Tasks {
 		if t.Builder != nil && t.Builder.Name == taskName {
 			task = t.Builder
@@ -77,7 +77,7 @@ func Run(namespace string, buildName string, taskName string) {
 	}
 	if task == nil {
 		exitOnError(errors.Errorf("No task of type [%s] with name [%s] in build [%s/%s]",
-			reflect.TypeOf(v1alpha1.BuilderTask{}).Name(), taskName, namespace, buildName))
+			reflect.TypeOf(v1.BuilderTask{}).Name(), taskName, namespace, buildName))
 	}
 
 	status := builder.New(c).Run(*task)
@@ -92,7 +92,7 @@ func Run(namespace string, buildName string, taskName string) {
 	build.Status = target.Status
 
 	switch build.Status.Phase {
-	case v1alpha1.BuildPhaseFailed:
+	case v1.BuildPhaseFailed:
 		log.Error(nil, build.Status.Error)
 		os.Exit(1)
 	default:

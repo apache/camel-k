@@ -22,17 +22,17 @@ import (
 
 	"github.com/Masterminds/semver"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-func findBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtimeVersion string, provider interface{}) (*RuntimeCatalog, error) {
+func findBestMatch(catalogs []v1.CamelCatalog, camelVersion string, runtimeVersion string, provider interface{}) (*RuntimeCatalog, error) {
 	// TODO: generic exact matching logic independent of the runtime provider
 	for _, catalog := range catalogs {
 		if catalog.Spec.Version == camelVersion && catalog.Spec.RuntimeVersion == runtimeVersion {
 			if provider == nil && catalog.Spec.RuntimeProvider == nil {
 				return NewRuntimeCatalog(catalog.Spec), nil
-			} else if provider, ok := provider.(v1alpha1.QuarkusRuntimeProvider); ok &&
+			} else if provider, ok := provider.(v1.QuarkusRuntimeProvider); ok &&
 				catalog.Spec.RuntimeProvider != nil && catalog.Spec.RuntimeProvider.Quarkus != nil &&
 				provider == *catalog.Spec.RuntimeProvider.Quarkus {
 				return NewRuntimeCatalog(catalog.Spec), nil
@@ -49,7 +49,7 @@ func findBestMatch(catalogs []v1alpha1.CamelCatalog, camelVersion string, runtim
 	cc := newCatalogVersionCollection(catalogs)
 
 	switch provider := provider.(type) {
-	case v1alpha1.QuarkusRuntimeProvider:
+	case v1.QuarkusRuntimeProvider:
 		qc := newSemVerConstraint(provider.QuarkusVersion)
 		cqc := newSemVerConstraint(provider.CamelQuarkusVersion)
 		if qc == nil || cqc == nil {
@@ -99,7 +99,7 @@ func newSemVerConstraint(versionConstraint string) *semver.Constraints {
 	return constraint
 }
 
-func newCatalogVersionCollection(catalogs []v1alpha1.CamelCatalog) CatalogVersionCollection {
+func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionCollection {
 	versions := make([]CatalogVersion, 0, len(catalogs))
 
 	for i := range catalogs {

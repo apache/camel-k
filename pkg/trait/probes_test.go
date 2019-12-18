@@ -20,7 +20,7 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/stretchr/testify/assert"
@@ -32,9 +32,9 @@ import (
 
 func TestProbesDeps(t *testing.T) {
 	e := Environment{
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseInitialization,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
 			},
 		},
 	}
@@ -69,9 +69,9 @@ func TestProbesOnDeployment(t *testing.T) {
 
 	e := Environment{
 		Resources: kubernetes.NewCollection(&target),
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
 	}
@@ -119,9 +119,9 @@ func TestProbesOnKnativeService(t *testing.T) {
 
 	e := Environment{
 		Resources: kubernetes.NewCollection(&target),
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
 	}

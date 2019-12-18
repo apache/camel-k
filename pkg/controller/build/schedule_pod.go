@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -54,17 +54,17 @@ func (action *schedulePodAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *schedulePodAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseScheduling
+func (action *schedulePodAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseScheduling
 }
 
 // Handle handles the builds
-func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *schedulePodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	// Enter critical section
 	action.lock.Lock()
 	defer action.lock.Unlock()
 
-	builds := &v1alpha1.BuildList{}
+	builds := &v1.BuildList{}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
 	err := action.reader.List(ctx, builds, client.InNamespace(build.Namespace))
@@ -75,7 +75,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
 	for _, b := range builds.Items {
-		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
+		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
 			// Let's requeue the build in case one is already running
 			return nil, nil
 		}
@@ -104,12 +104,12 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 		}
 	}
 
-	build.Status.Phase = v1alpha1.BuildPhasePending
+	build.Status.Phase = v1.BuildPhasePending
 
 	return build, nil
 }
 
-func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1alpha1.Build) (*corev1.Pod, error) {
+func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Build) (*corev1.Pod, error) {
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -154,7 +154,7 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1alpha
 	return pod, nil
 }
 
-func (action *schedulePodAction) addBuilderTaskToPod(build *v1alpha1.Build, task *v1alpha1.BuilderTask, pod *corev1.Pod) {
+func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.BuilderTask, pod *corev1.Pod) {
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
 		Name:            task.Name,
 		Image:           action.operatorImage,
@@ -175,7 +175,7 @@ func (action *schedulePodAction) addBuilderTaskToPod(build *v1alpha1.Build, task
 	action.addBaseTaskToPod(&task.BaseTask, pod)
 }
 
-func (action *schedulePodAction) addKanikoTaskToPod(task *v1alpha1.KanikoTask, pod *corev1.Pod) {
+func (action *schedulePodAction) addKanikoTaskToPod(task *v1.KanikoTask, pod *corev1.Pod) {
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
 		Name:            task.Name,
 		Image:           task.Image,
@@ -188,7 +188,7 @@ func (action *schedulePodAction) addKanikoTaskToPod(task *v1alpha1.KanikoTask, p
 	action.addBaseTaskToPod(&task.BaseTask, pod)
 }
 
-func (action *schedulePodAction) addBaseTaskToPod(task *v1alpha1.BaseTask, pod *corev1.Pod) {
+func (action *schedulePodAction) addBaseTaskToPod(task *v1.BaseTask, pod *corev1.Pod) {
 	pod.Spec.Volumes = append(pod.Spec.Volumes, task.Volumes...)
 
 	if task.Affinity != nil {

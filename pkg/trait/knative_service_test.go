@@ -28,7 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -49,42 +49,42 @@ func TestKnativeService(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,
 				Namespace: KnativeServiceTestNamespace,
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKnative,
-				Sources: []v1alpha1.SourceSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
 							Content:     `from("undertow:test").log("hello")`,
 							Compression: true,
 						},
-						Language: v1alpha1.LanguageJavaScript,
+						Language: v1.LanguageJavaScript,
 					},
 				},
-				Resources: []v1alpha1.ResourceSpec{
+				Resources: []v1.ResourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:        "my-resource.txt",
 							Content:     "",
 							Compression: false,
 						},
-						Type: v1alpha1.ResourceTypeData,
+						Type: v1.ResourceTypeData,
 					},
 				},
-				Configuration: []v1alpha1.ConfigurationSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "configmap", Value: "my-cm"},
 					{Type: "secret", Value: "my-secret"},
 					{Type: "property", Value: "my-property=my-property-value"},
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"knative-service": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -93,17 +93,17 @@ func TestKnativeService(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
@@ -189,18 +189,18 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,
 				Namespace: KnativeServiceTestNamespace,
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKnative,
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Traits: map[string]v1.TraitSpec{
 					"deployer": {
 						Configuration: map[string]string{
 							"kind": "knative-service",
@@ -220,17 +220,17 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},

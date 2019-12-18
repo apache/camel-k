@@ -21,8 +21,8 @@ package fake
 
 import (
 	clientset "github.com/apache/camel-k/pkg/client/clientset/versioned"
-	camelv1alpha1 "github.com/apache/camel-k/pkg/client/clientset/versioned/typed/camel/v1alpha1"
-	fakecamelv1alpha1 "github.com/apache/camel-k/pkg/client/clientset/versioned/typed/camel/v1alpha1/fake"
+	camelv1 "github.com/apache/camel-k/pkg/client/clientset/versioned/typed/camel/v1"
+	fakecamelv1 "github.com/apache/camel-k/pkg/client/clientset/versioned/typed/camel/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -77,7 +77,7 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 
 var _ clientset.Interface = &Clientset{}
 
-// CamelV1alpha1 retrieves the CamelV1alpha1Client
-func (c *Clientset) CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface {
-	return &fakecamelv1alpha1.FakeCamelV1alpha1{Fake: &c.Fake}
+// CamelV1 retrieves the CamelV1Client
+func (c *Clientset) CamelV1() camelv1.CamelV1Interface {
+	return &fakecamelv1.FakeCamelV1{Fake: &c.Fake}
 }

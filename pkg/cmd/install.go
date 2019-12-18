@@ -30,7 +30,7 @@ import (
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -135,7 +135,7 @@ type installCmdOptions struct {
 	TraitProfile      string   `mapstructure:"trait-profile"`
 	HTTPProxySecret   string   `mapstructure:"http-proxy-secret"`
 
-	registry     v1alpha1.IntegrationPlatformRegistrySpec
+	registry     v1.IntegrationPlatformRegistrySpec
 	registryAuth registry.Auth
 }
 
@@ -232,10 +232,10 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 		}
 		if o.BuildStrategy != "" {
 			switch s := o.BuildStrategy; s {
-			case v1alpha1.IntegrationPlatformBuildStrategyPod:
-				platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyPod
-			case v1alpha1.IntegrationPlatformBuildStrategyRoutine:
-				platform.Spec.Build.BuildStrategy = v1alpha1.IntegrationPlatformBuildStrategyRoutine
+			case v1.IntegrationPlatformBuildStrategyPod:
+				platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
+			case v1.IntegrationPlatformBuildStrategyRoutine:
+				platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
 			default:
 				return fmt.Errorf("unknown build strategy: %s", s)
 			}
@@ -251,7 +251,7 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			}
 		}
 		if o.TraitProfile != "" {
-			platform.Spec.Profile = v1alpha1.TraitProfileByName(o.TraitProfile)
+			platform.Spec.Profile = v1.TraitProfileByName(o.TraitProfile)
 		}
 
 		if len(o.MavenRepositories) > 0 {
@@ -273,7 +273,7 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 		}
 
 		if o.ClusterType != "" {
-			for _, c := range v1alpha1.AllIntegrationPlatformClusters {
+			for _, c := range v1.AllIntegrationPlatformClusters {
 				if strings.EqualFold(string(c), o.ClusterType) {
 					platform.Spec.Cluster = c
 				}
@@ -346,17 +346,17 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 	return nil
 }
 
-func (o *installCmdOptions) waitForPlatformReady(platform *v1alpha1.IntegrationPlatform) error {
-	handler := func(i *v1alpha1.IntegrationPlatform) bool {
+func (o *installCmdOptions) waitForPlatformReady(platform *v1.IntegrationPlatform) error {
+	handler := func(i *v1.IntegrationPlatform) bool {
 		if i.Status.Phase != "" {
 			fmt.Println("platform \""+platform.Name+"\" in phase", i.Status.Phase)
 
-			if i.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
+			if i.Status.Phase == v1.IntegrationPlatformPhaseReady {
 				// TODO display some error info when available in the status
 				return false
 			}
 
-			if i.Status.Phase == v1alpha1.IntegrationPlatformPhaseError {
+			if i.Status.Phase == v1.IntegrationPlatformPhaseError {
 				fmt.Println("platform installation failed")
 				return false
 			}
@@ -405,8 +405,8 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	}
 
 	if o.TraitProfile != "" {
-		tp := v1alpha1.TraitProfileByName(o.TraitProfile)
-		if tp == v1alpha1.TraitProfile("") {
+		tp := v1.TraitProfileByName(o.TraitProfile)
+		if tp == v1.TraitProfile("") {
 			err := fmt.Errorf("unknown trait profile %s", o.TraitProfile)
 			result = multierr.Append(result, err)
 		}
@@ -431,7 +431,7 @@ func errorIfKitIsNotAvailable(schema *runtime.Scheme, kit string) error {
 		if kind.Kind != "IntegrationKit" {
 			continue
 		}
-		integrationKit := resource.(*v1alpha1.IntegrationKit)
+		integrationKit := resource.(*v1.IntegrationKit)
 		if integrationKit.Name == kit {
 			return nil
 		}
@@ -439,7 +439,7 @@ func errorIfKitIsNotAvailable(schema *runtime.Scheme, kit string) error {
 	return errors.Errorf("Unknown kit '%s'", kit)
 }
 
-func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
+func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
 	sub := make([]string, 0)
 	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
 	hits := rex.FindAllStringSubmatch(mavenSettings, -1)
@@ -458,7 +458,7 @@ func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
 		}
 
 		if sub[0] == "configmap" {
-			return v1alpha1.ValueSource{
+			return v1.ValueSource{
 				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: sub[1],
@@ -468,7 +468,7 @@ func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
 			}, nil
 		}
 		if sub[0] == "secret" {
-			return v1alpha1.ValueSource{
+			return v1.ValueSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: sub[1],
@@ -479,5 +479,5 @@ func decodeMavenSettings(mavenSettings string) (v1alpha1.ValueSource, error) {
 		}
 	}
 
-	return v1alpha1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
+	return v1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
 }

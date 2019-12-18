@@ -28,7 +28,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/runtime"
@@ -58,12 +58,12 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseBuildSubmitted), nil
+	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted), nil
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
 	builderTask := t.builderTask(e)
-	e.BuildTasks = append(e.BuildTasks, v1alpha1.Task{Builder: builderTask})
+	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
 
 	if platform.SupportsKanikoPublishStrategy(e.Platform) {
 		kanikoTask, err := t.kanikoTask(e)
@@ -139,7 +139,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			})
 		}
 
-		e.BuildTasks = append(e.BuildTasks, v1alpha1.Task{Kaniko: kanikoTask})
+		e.BuildTasks = append(e.BuildTasks, v1.Task{Kaniko: kanikoTask})
 	}
 
 	return nil
@@ -155,9 +155,9 @@ func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
-func (t *builderTrait) builderTask(e *Environment) *v1alpha1.BuilderTask {
-	task := &v1alpha1.BuilderTask{
-		BaseTask: v1alpha1.BaseTask{
+func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
+	task := &v1.BuilderTask{
+		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
 		Meta:            e.IntegrationKit.ObjectMeta,
@@ -194,7 +194,7 @@ func (t *builderTrait) builderTask(e *Environment) *v1alpha1.BuilderTask {
 	return task
 }
 
-func (t *builderTrait) kanikoTask(e *Environment) (*v1alpha1.KanikoTask, error) {
+func (t *builderTrait) kanikoTask(e *Environment) (*v1.KanikoTask, error) {
 	organization := e.Platform.Status.Build.Registry.Organization
 	if organization == "" {
 		organization = e.Platform.Namespace
@@ -296,9 +296,9 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1alpha1.KanikoTask, error) 
 		})
 	}
 
-	return &v1alpha1.KanikoTask{
-		ImageTask: v1alpha1.ImageTask{
-			BaseTask: v1alpha1.BaseTask{
+	return &v1.KanikoTask{
+		ImageTask: v1.ImageTask{
+			BaseTask: v1.BaseTask{
 				Name:         "kaniko",
 				Volumes:      volumes,
 				VolumeMounts: volumeMounts,

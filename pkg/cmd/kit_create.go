@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -98,7 +98,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		}
 	}
 
-	ctx := v1alpha1.NewIntegrationKit(command.Namespace, args[0])
+	ctx := v1.NewIntegrationKit(command.Namespace, args[0])
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
@@ -107,19 +107,19 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		// the integration kit already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if ctx.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
+		if ctx.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
 			fmt.Printf("integration kit \"%s\" is not editable\n", ctx.Name)
 			return nil
 		}
 	}
 
-	ctx = v1alpha1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
+	ctx = v1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
 	ctx.Labels = map[string]string{
-		"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypeUser,
+		"camel.apache.org/kit.type": v1.IntegrationKitTypeUser,
 	}
-	ctx.Spec = v1alpha1.IntegrationKitSpec{
+	ctx.Spec = v1.IntegrationKitSpec{
 		Dependencies:  make([]string, 0, len(command.Dependencies)),
-		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+		Configuration: make([]v1.ConfigurationSpec, 0),
 		Repositories:  command.Repositories,
 	}
 
@@ -129,7 +129,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		// is be marked as external as the information about the classpath
 		// is missing so it cannot be used as base for other Kits
 		//
-		ctx.Labels["camel.apache.org/kit.type"] = v1alpha1.IntegrationKitTypeExternal
+		ctx.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
 
 		//
 		// Set the Image to be used by the kit
@@ -150,19 +150,19 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	}
 
 	for _, item := range command.Properties {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "property",
 			Value: item,
 		})
 	}
 	for _, item := range command.Configmaps {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "configmap",
 			Value: item,
 		})
 	}
 	for _, item := range command.Secrets {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "secret",
 			Value: item,
 		})
@@ -201,9 +201,9 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	return nil
 }
 
-func (*kitCreateCommandOptions) configureTrait(ctx *v1alpha1.IntegrationKit, config string) error {
+func (*kitCreateCommandOptions) configureTrait(ctx *v1.IntegrationKit, config string) error {
 	if ctx.Spec.Traits == nil {
-		ctx.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+		ctx.Spec.Traits = make(map[string]v1.TraitSpec)
 	}
 
 	parts := traitConfigRegexp.FindStringSubmatch(config)
@@ -216,7 +216,7 @@ func (*kitCreateCommandOptions) configureTrait(ctx *v1alpha1.IntegrationKit, con
 
 	spec, ok := ctx.Spec.Traits[traitID]
 	if !ok {
-		spec = v1alpha1.TraitSpec{
+		spec = v1.TraitSpec{
 			Configuration: make(map[string]string),
 		}
 	}

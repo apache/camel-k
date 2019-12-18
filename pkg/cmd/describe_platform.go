@@ -23,7 +23,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -70,7 +70,7 @@ func (command *describePlatformCommandOptions) run(args []string) error {
 		return err
 	}
 
-	platform := v1alpha1.NewIntegrationPlatform(command.Namespace, args[0])
+	platform := v1.NewIntegrationPlatform(command.Namespace, args[0])
 	platformKey := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
@@ -85,7 +85,7 @@ func (command *describePlatformCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *describePlatformCommandOptions) describeIntegrationPlatform(platform v1alpha1.IntegrationPlatform) string {
+func (command *describePlatformCommandOptions) describeIntegrationPlatform(platform v1.IntegrationPlatform) string {
 	return indentedwriter.IndentedString(func(out io.Writer) {
 		w := indentedwriter.NewWriter(out)
 		describeObjectMeta(w, platform.ObjectMeta)
@@ -110,18 +110,18 @@ func (command *describePlatformCommandOptions) describeIntegrationPlatform(platf
 	})
 }
 
-func getPlatformBaseImage(spec v1alpha1.IntegrationPlatformSpec) string {
+func getPlatformBaseImage(spec v1.IntegrationPlatformSpec) string {
 	return spec.Build.BaseImage
 }
 
-func getPlatformCamelVersion(spec v1alpha1.IntegrationPlatformSpec) string {
+func getPlatformCamelVersion(spec v1.IntegrationPlatformSpec) string {
 	return spec.Build.CamelVersion
 }
 
-func getPlatformMavenLocalRepository(spec v1alpha1.IntegrationPlatformSpec) string {
+func getPlatformMavenLocalRepository(spec v1.IntegrationPlatformSpec) string {
 	return spec.Build.Maven.LocalRepository
 }
 
-func getPlatformPublishStrategy(spec v1alpha1.IntegrationPlatformSpec) string {
+func getPlatformPublishStrategy(spec v1.IntegrationPlatformSpec) string {
 	return string(spec.Build.PublishStrategy)
 }

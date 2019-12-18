@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"regexp"
 
-	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	v1 "k8s.io/api/core/v1"
 )
 

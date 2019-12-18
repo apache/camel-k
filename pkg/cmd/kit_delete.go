@@ -23,7 +23,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
@@ -81,7 +81,7 @@ func (command *kitDeleteCommandOptions) run(args []string) error {
 	}
 
 	if command.All {
-		kitList := v1alpha1.NewIntegrationKitList()
+		kitList := v1.NewIntegrationKitList()
 		if err := c.List(command.Context, &kitList, k8sclient.InNamespace(command.Namespace)); err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func (command *kitDeleteCommandOptions) run(args []string) error {
 		names = make([]string, 0, len(kitList.Items))
 		for _, item := range kitList.Items {
 			// only include non platform Kits
-			if item.Labels["camel.apache.org/kit.type"] != v1alpha1.IntegrationKitTypePlatform {
+			if item.Labels["camel.apache.org/kit.type"] != v1.IntegrationKitTypePlatform {
 				names = append(names, item.Name)
 			}
 		}
@@ -105,7 +105,7 @@ func (command *kitDeleteCommandOptions) run(args []string) error {
 }
 
 func (command *kitDeleteCommandOptions) delete(name string) error {
-	ctx := v1alpha1.NewIntegrationKit(command.Namespace, name)
+	ctx := v1.NewIntegrationKit(command.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      name,
@@ -129,7 +129,7 @@ func (command *kitDeleteCommandOptions) delete(name string) error {
 
 	// check that it is not a platform one which is supposed to be "read only"
 	// thus not managed by the end user
-	if ctx.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
+	if ctx.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
 		// skip platform Kits while deleting all Kits
 		if command.All {
 			return nil

@@ -20,27 +20,27 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestPlatformTraitChangeStatus(t *testing.T) {
 
 	table := []struct {
 		name         string
-		initialPhase v1alpha1.IntegrationPhase
+		initialPhase v1.IntegrationPhase
 	}{
 		{
 			name:         "Setup from [none]",
-			initialPhase: v1alpha1.IntegrationPhaseNone,
+			initialPhase: v1.IntegrationPhaseNone,
 		},
 		{
 			name:         "Setup from WaitingForPlatform",
-			initialPhase: v1alpha1.IntegrationPhaseWaitingForPlatform,
+			initialPhase: v1.IntegrationPhaseWaitingForPlatform,
 		},
 	}
 
@@ -49,8 +49,8 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 		t.Run(input.name, func(t *testing.T) {
 			e := Environment{
 				Resources: kubernetes.NewCollection(),
-				Integration: &v1alpha1.Integration{
-					Status: v1alpha1.IntegrationStatus{
+				Integration: &v1.Integration{
+					Status: v1.IntegrationStatus{
 						Phase: input.initialPhase,
 					},
 				},
@@ -71,7 +71,7 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			err = trait.Apply(&e)
 			assert.Nil(t, err)
 
-			assert.Equal(t, v1alpha1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
+			assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 			assert.Empty(t, e.Resources.Items())
 		})
 	}
@@ -80,13 +80,13 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	e := Environment{
 		Resources: kubernetes.NewCollection(),
-		Integration: &v1alpha1.Integration{
-			ObjectMeta: v1.ObjectMeta{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns1",
 				Name:      "xx",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseNone,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseNone,
 			},
 		},
 	}
@@ -106,9 +106,9 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	err = trait.Apply(&e)
 	assert.Nil(t, err)
 
-	assert.Equal(t, v1alpha1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
+	assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 	assert.Equal(t, 1, len(e.Resources.Items()))
-	defPlatform := v1alpha1.NewIntegrationPlatform("ns1", platform.DefaultPlatformName)
+	defPlatform := v1.NewIntegrationPlatform("ns1", platform.DefaultPlatformName)
 	defPlatform.Labels = map[string]string{"camel.apache.org/platform.generated": True}
 	assert.Contains(t, e.Resources.Items(), &defPlatform)
 }
@@ -117,18 +117,18 @@ func TestPlatformTraitExisting(t *testing.T) {
 
 	table := []struct {
 		name          string
-		platformPhase v1alpha1.IntegrationPlatformPhase
-		expectedPhase v1alpha1.IntegrationPhase
+		platformPhase v1.IntegrationPlatformPhase
+		expectedPhase v1.IntegrationPhase
 	}{
 		{
 			name:          "Wait existing",
 			platformPhase: "",
-			expectedPhase: v1alpha1.IntegrationPhaseWaitingForPlatform,
+			expectedPhase: v1.IntegrationPhaseWaitingForPlatform,
 		},
 		{
 			name:          "Move state",
-			platformPhase: v1alpha1.IntegrationPlatformPhaseReady,
-			expectedPhase: v1alpha1.IntegrationPhaseInitialization,
+			platformPhase: v1.IntegrationPlatformPhaseReady,
+			expectedPhase: v1.IntegrationPhaseInitialization,
 		},
 	}
 
@@ -137,13 +137,13 @@ func TestPlatformTraitExisting(t *testing.T) {
 		t.Run(input.name, func(t *testing.T) {
 			e := Environment{
 				Resources: kubernetes.NewCollection(),
-				Integration: &v1alpha1.Integration{
-					ObjectMeta: v1.ObjectMeta{
+				Integration: &v1.Integration{
+					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "ns1",
 						Name:      "xx",
 					},
-					Status: v1alpha1.IntegrationStatus{
-						Phase: v1alpha1.IntegrationPhaseNone,
+					Status: v1.IntegrationStatus{
+						Phase: v1.IntegrationPhaseNone,
 					},
 				},
 			}
@@ -153,7 +153,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 			trait.CreateDefault = &createPlatform
 
 			var err error
-			existingPlatform := v1alpha1.NewIntegrationPlatform("ns1", "existing")
+			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")
 			existingPlatform.Status.Phase = input.platformPhase
 			trait.client, err = test.NewFakeClient(&existingPlatform)
 			assert.Nil(t, err)

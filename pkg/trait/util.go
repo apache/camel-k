@@ -28,7 +28,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/scylladb/go-set/strset"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,13 +37,13 @@ import (
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
 
 // GetIntegrationKit retrieves the kit set on the integration
-func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1alpha1.Integration) (*v1alpha1.IntegrationKit, error) {
+func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {
 	if integration.Status.Kit == "" {
 		return nil, nil
 	}
 
 	name := integration.Status.Kit
-	kit := v1alpha1.NewIntegrationKit(integration.Namespace, name)
+	kit := v1.NewIntegrationKit(integration.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Namespace: integration.Namespace,
 		Name:      name,
@@ -53,7 +53,7 @@ func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1alph
 }
 
 // CollectConfigurationValues --
-func CollectConfigurationValues(configurationType string, configurable ...v1alpha1.Configurable) []string {
+func CollectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
 	result := strset.New()
 
 	for _, c := range configurable {
@@ -79,7 +79,7 @@ func CollectConfigurationValues(configurationType string, configurable ...v1alph
 }
 
 // CollectConfigurationPairs --
-func CollectConfigurationPairs(configurationType string, configurable ...v1alpha1.Configurable) map[string]string {
+func CollectConfigurationPairs(configurationType string, configurable ...v1.Configurable) map[string]string {
 	result := make(map[string]string)
 
 	for _, c := range configurable {
@@ -149,7 +149,7 @@ func FilterTransferableAnnotations(annotations map[string]string) map[string]str
 	return res
 }
 
-func decodeTraitSpec(in *v1alpha1.TraitSpec, target interface{}) error {
+func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
 	md := mapstructure.Metadata{}
 
 	decoder, err := mapstructure.NewDecoder(

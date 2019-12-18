@@ -26,16 +26,16 @@ import (
 	"reflect"
 
 	"github.com/alecthomas/jsonschema"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 )
 
 func main() {
 	sources := []interface{}{
-		v1alpha1.Integration{},
-		v1alpha1.IntegrationKit{},
-		//v1alpha1.IntegrationPlatform{},
-		v1alpha1.CamelCatalog{},
+		v1.Integration{},
+		v1.IntegrationKit{},
+		//v1.IntegrationPlatform{},
+		v1.CamelCatalog{},
 	}
 
 	var out string

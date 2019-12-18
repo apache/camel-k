@@ -23,7 +23,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
@@ -42,11 +42,11 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseRunning
+func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
+	return integration.Status.Phase == v1.IntegrationPhaseRunning
 }
 
-func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
+func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	hash, err := digest.ComputeForIntegration(integration)
 	if err != nil {
 		return nil, err
@@ -56,8 +56,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 		action.L.Info("Integration needs a rebuild")
 
 		integration.Status.Digest = hash
-		integration.Status.Phase = v1alpha1.IntegrationPhaseInitialization
-		if integration.Spec.Profile != v1alpha1.TraitProfile("") {
+		integration.Status.Phase = v1.IntegrationPhaseInitialization
+		if integration.Spec.Profile != v1.TraitProfile("") {
 			integration.Status.Profile = integration.Spec.Profile
 		}
 		integration.Status.Version = defaults.Version

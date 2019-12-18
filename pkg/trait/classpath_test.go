@@ -28,7 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -46,7 +46,7 @@ func TestConfigureClasspathTraitInRightPhasesDoesSucceed(t *testing.T) {
 
 func TestConfigureClasspathTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalClasspathTest()
-	environment.Integration.Status.Phase = v1alpha1.IntegrationPhaseError
+	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
 	configured, err := trait.Configure(environment)
 	assert.Nil(t, err)
@@ -55,7 +55,7 @@ func TestConfigureClasspathTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing
 
 func TestConfigureClasspathTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalClasspathTest()
-	environment.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseWaitingForPlatform
+	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 
 	configured, err := trait.Configure(environment)
 	assert.Nil(t, err)
@@ -84,7 +84,7 @@ func TestApplyClasspathTraitPlaftormIntegrationKitLazyInstantiation(t *testing.T
 }
 
 func TestApplyClasspathTraitExternalIntegrationKitLazyInstantiation(t *testing.T) {
-	trait, environment := createClasspathTestWithKitType(v1alpha1.IntegrationKitTypeExternal)
+	trait, environment := createClasspathTestWithKitType(v1.IntegrationKitTypeExternal)
 	environment.IntegrationKit = nil
 	environment.Integration.Namespace = "kit-namespace"
 	environment.Integration.Status.Kit = "kit-name"
@@ -97,7 +97,7 @@ func TestApplyClasspathTraitExternalIntegrationKitLazyInstantiation(t *testing.T
 
 func TestApplyClasspathTraitWithIntegrationKitStatusArtifact(t *testing.T) {
 	trait, environment := createNominalClasspathTest()
-	environment.IntegrationKit.Status.Artifacts = []v1alpha1.Artifact{{ID: "", Location: "", Target: "/dep/target"}}
+	environment.IntegrationKit.Status.Artifacts = []v1.Artifact{{ID: "", Location: "", Target: "/dep/target"}}
 
 	err := trait.Apply(environment)
 
@@ -185,16 +185,16 @@ func TestApplyClasspathTraitWithNominalIntegrationKit(t *testing.T) {
 }
 
 func createNominalClasspathTest() (*classpathTrait, *Environment) {
-	return createClasspathTestWithKitType(v1alpha1.IntegrationKitTypePlatform)
+	return createClasspathTestWithKitType(v1.IntegrationKitTypePlatform)
 }
 
 func createClasspathTestWithKitType(kitType string) (*classpathTrait, *Environment) {
 
 	client, _ := test.NewFakeClient(
-		&v1alpha1.IntegrationKit{
+		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-				Kind:       v1alpha1.IntegrationKindKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKindKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "kit-namespace",
@@ -214,14 +214,14 @@ func createClasspathTestWithKitType(kitType string) (*classpathTrait, *Environme
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
 		Resources: kubernetes.NewCollection(),

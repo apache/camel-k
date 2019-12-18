@@ -18,7 +18,7 @@ limitations under the License.
 package knative
 
 import (
-	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1/knative"
+	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/util"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"

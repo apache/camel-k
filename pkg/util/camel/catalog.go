@@ -29,7 +29,7 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -42,18 +42,18 @@ func DefaultCatalog() (*RuntimeCatalog, error) {
 
 // QuarkusCatalog --
 func QuarkusCatalog() (*RuntimeCatalog, error) {
-	return catalogForRuntimeProvider(v1alpha1.QuarkusRuntimeProvider{
+	return catalogForRuntimeProvider(v1.QuarkusRuntimeProvider{
 		CamelQuarkusVersion: defaults.DefaultCamelQuarkusVersion,
 		QuarkusVersion:      defaults.DefaultQuarkusVersion,
 	})
 }
 
 func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
-	catalogs := make([]v1alpha1.CamelCatalog, 0)
+	catalogs := make([]v1.CamelCatalog, 0)
 
 	for name, content := range deploy.Resources {
 		if strings.HasPrefix(name, "camel-catalog-") {
-			var c v1alpha1.CamelCatalog
+			var c v1.CamelCatalog
 			if err := yaml2.Unmarshal([]byte(content), &c); err != nil {
 				return nil, err
 			}
@@ -66,13 +66,13 @@ func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
 }
 
 // GenerateCatalog --
-func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec,
+func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1.MavenSpec,
 	camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
 	return GenerateCatalogWithProvider(ctx, client, namespace, mvn, camelVersion, runtimeVersion, "", []maven.Dependency{})
 }
 
 // GenerateCatalogWithProvider --
-func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1alpha1.MavenSpec,
+func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1.MavenSpec,
 	camelVersion string, runtimeVersion string, providerName string, providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
@@ -115,7 +115,7 @@ func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, n
 		return nil, err
 	}
 
-	catalog := v1alpha1.CamelCatalog{}
+	catalog := v1.CamelCatalog{}
 	if err := yaml2.Unmarshal(content, &catalog); err != nil {
 		return nil, err
 	}

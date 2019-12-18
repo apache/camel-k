@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -50,7 +50,7 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseNone, v1alpha1.IntegrationPhaseWaitingForPlatform) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseNone, v1.IntegrationPhaseWaitingForPlatform) {
 		return false, nil
 	}
 
@@ -72,15 +72,15 @@ func (t *platformTrait) Apply(e *Environment) error {
 	initial := e.Integration.DeepCopy()
 
 	pl, err := t.getOrCreatePlatform(e)
-	if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
+	if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
 	} else {
-		e.Integration.Status.Phase = v1alpha1.IntegrationPhaseInitialization
+		e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 	}
 
 	if initial.Status.Phase != e.Integration.Status.Phase {
 		if err != nil {
-			e.Integration.Status.SetErrorCondition(v1alpha1.IntegrationConditionPlatformAvailable, v1alpha1.IntegrationConditionPlatformAvailableReason, err)
+			e.Integration.Status.SetErrorCondition(v1.IntegrationConditionPlatformAvailable, v1.IntegrationConditionPlatformAvailableReason, err)
 		}
 
 		if pl != nil {
@@ -91,7 +91,7 @@ func (t *platformTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1alpha1.IntegrationPlatform, error) {
+func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
 	pl, err := platform.GetOrLookupAny(t.ctx, t.client, e.Integration.Namespace, e.Integration.Status.Platform)
 	if err != nil && k8serrors.IsNotFound(err) {
 		if t.CreateDefault != nil && *t.CreateDefault {
@@ -99,7 +99,7 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1alpha1.Integrati
 			if platformName == "" {
 				platformName = platform.DefaultPlatformName
 			}
-			defaultPlatform := v1alpha1.NewIntegrationPlatform(e.Integration.Namespace, platformName)
+			defaultPlatform := v1.NewIntegrationPlatform(e.Integration.Namespace, platformName)
 			if defaultPlatform.Labels == nil {
 				defaultPlatform.Labels = make(map[string]string)
 			}

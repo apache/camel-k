@@ -22,7 +22,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
 	"github.com/spf13/cobra"
@@ -77,7 +77,7 @@ func (command *describeIntegrationCommandOptions) run(args []string) error {
 		return err
 	}
 
-	ctx := v1alpha1.NewIntegration(command.Namespace, args[0])
+	ctx := v1.NewIntegration(command.Namespace, args[0])
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
@@ -92,7 +92,7 @@ func (command *describeIntegrationCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *describeIntegrationCommandOptions) describeIntegration(i v1alpha1.Integration) string {
+func (command *describeIntegrationCommandOptions) describeIntegration(i v1.Integration) string {
 	return indentedwriter.IndentedString(func(out io.Writer) {
 		w := indentedwriter.NewWriter(out)
 
