@@ -40,7 +40,7 @@ func TestPlatformUpgrade(t *testing.T) {
 		Eventually(operatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
-		Expect(setPlatformVersion(ns, "an.older.one")).Should(BeNil())
+		Eventually(setPlatformVersion(ns, "an.older.one")).Should(BeNil())
 		Eventually(platformVersion(ns)).Should(Equal("an.older.one"))
 
 		// Scale the operator up

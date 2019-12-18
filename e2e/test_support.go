@@ -422,13 +422,15 @@ func deletePlatform(ns string) func() bool {
 	}
 }
 
-func setPlatformVersion(ns string, version string) error {
-	p := platform(ns)()
-	if p == nil {
-		return errors.New("no platform found")
+func setPlatformVersion(ns string, version string) func()error {
+	return func() error {
+		p := platform(ns)()
+		if p == nil {
+			return errors.New("no platform found")
+		}
+		p.Status.Version = version
+		return testClient.Status().Update(testContext, p)
 	}
-	p.Status.Version = version
-	return testClient.Status().Update(testContext, p)
 }
 
 func platformVersion(ns string) func() string {
