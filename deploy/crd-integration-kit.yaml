@@ -25,12 +25,12 @@ spec:
   group: camel.apache.org
   scope: Namespaced
   versions:
-    - name: v1alpha1
-      served: true
-      storage: false
-    - name: v1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   subresources:
     status: {}
   names:
