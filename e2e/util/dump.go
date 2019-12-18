@@ -23,6 +23,8 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/client/clientset/versioned"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -32,12 +34,30 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 
 	t.Logf("-------------------- start dumping namespace %s --------------------\n", ns)
 
+	camelClient, err := versioned.NewForConfig(c.GetConfig())
+	if err != nil {
+		return err
+	}
+	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d platforms:\n", len(pls.Items))
+	for _, p := range pls.Items {
+		ref := p
+		pdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
 	lst, err := c.CoreV1().Pods(ns).List(metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
 
-	t.Logf("Found %d pods:\n", len(lst.Items))
+	t.Logf("\nFound %d pods:\n", len(lst.Items))
 	for _, pod := range lst.Items {
 		t.Logf("name=%s\n", pod.Name)
 		dumpConditions("  ", pod.Status.Conditions, t)
