@@ -34,7 +34,7 @@ install:
 env:
   global:
     - OPENSHIFT_VERSION=3.11.0
-    - OPENSHIFT_COMMIT=0cbc58b117403b9d9169dbafdfac59ef104bb997
+    - OPENSHIFT_COMMIT=0cbc58b
     - MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
 services:
