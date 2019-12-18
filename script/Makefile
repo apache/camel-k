@@ -166,6 +166,10 @@ dep:
 lint:
 	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE)
 
+lint-fix:
+	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE) --fix
+
+
 check-licenses:
 	./script/check_licenses.sh
 

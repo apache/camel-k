@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"

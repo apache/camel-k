@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/rs/xid"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
 

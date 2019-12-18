@@ -20,7 +20,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

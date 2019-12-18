@@ -20,7 +20,7 @@ package camel
 import (
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewRuntimeCatalog --

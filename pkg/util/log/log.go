@@ -20,11 +20,9 @@ package log
 import (
 	"fmt"
 
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/go-logr/logr"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // Log --
