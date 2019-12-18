@@ -37,6 +37,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
+const builderDir = "/builder"
+
 // The builder trait is internally used to determine the best strategy to
 // build and configure IntegrationKits.
 //
@@ -68,9 +70,18 @@ func (t *builderTrait) Apply(e *Environment) error {
 		if err != nil {
 			return err
 		}
-		mount := corev1.VolumeMount{Name: "camel-k-builder", MountPath: kaniko.BuildDir}
+
+		mount := corev1.VolumeMount{Name: "camel-k-builder", MountPath: builderDir}
 		builderTask.VolumeMounts = append(builderTask.VolumeMounts, mount)
 		kanikoTask.VolumeMounts = append(kanikoTask.VolumeMounts, mount)
+
+		// Use an emptyDir volume to coordinate the Camel Maven build and the Kaniko image build
+		builderTask.Volumes = append(builderTask.Volumes, corev1.Volume{
+			Name: "camel-k-builder",
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
 
 		if e.Platform.Status.Build.IsKanikoCacheEnabled() {
 			// Co-locate with the Kaniko warmer pod for sharing the host path volume as the current
@@ -113,22 +124,18 @@ func (t *builderTrait) Apply(e *Environment) error {
 					},
 				},
 			}
-			// Use the PVC used to warm the Kaniko cache to coordinate the Camel Maven build and the Kaniko image build
-			builderTask.Volumes = append(builderTask.Volumes, corev1.Volume{
-				Name: "camel-k-builder",
+			// Mount the PV used to warm the Kaniko cache into the Kaniko image build
+			kanikoTask.Volumes = append(kanikoTask.Volumes, corev1.Volume{
+				Name: "kaniko-cache",
 				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
 						ClaimName: e.Platform.Status.Build.PersistentVolumeClaim,
 					},
 				},
 			})
-		} else {
-			// Use an emptyDir volume to coordinate the Camel Maven build and the Kaniko image build
-			builderTask.Volumes = append(builderTask.Volumes, corev1.Volume{
-				Name: "camel-k-builder",
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
+			kanikoTask.VolumeMounts = append(kanikoTask.VolumeMounts, corev1.VolumeMount{
+				Name:      "kaniko-cache",
+				MountPath: kaniko.CacheDir,
 			})
 		}
 
@@ -158,8 +165,8 @@ func (t *builderTrait) builderTask(e *Environment) *v1alpha1.BuilderTask {
 		CamelVersion:    e.CamelCatalog.Version,
 		RuntimeVersion:  e.CamelCatalog.RuntimeVersion,
 		RuntimeProvider: e.CamelCatalog.RuntimeProvider,
-		//Sources:		 e.Integration.Spec.Sources,
-		//Resources:     e.Integration.Spec.Resources,
+		//Sources:         e.Integration.Spec.Sources,
+		//Resources:       e.Integration.Spec.Resources,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		//TODO: sort steps for easier read
 		Steps:      builder.StepIDsFor(builder.DefaultSteps...),
@@ -172,7 +179,7 @@ func (t *builderTrait) builderTask(e *Environment) *v1alpha1.BuilderTask {
 		task.Steps = append(task.Steps, builder.StepIDsFor(s2i.S2iSteps...)...)
 	} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
 		task.Steps = append(task.Steps, builder.StepIDsFor(kaniko.KanikoSteps...)...)
-		task.BuildDir = path.Join(kaniko.BuildDir, e.IntegrationKit.Name)
+		task.BuildDir = path.Join(builderDir, e.IntegrationKit.Name)
 	}
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
@@ -197,10 +204,10 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1alpha1.KanikoTask, error) 
 	env := make([]corev1.EnvVar, 0)
 	baseArgs := []string{
 		"--dockerfile=Dockerfile",
-		"--context=" + path.Join(kaniko.BuildDir, e.IntegrationKit.Name, "package", "context"),
+		"--context=" + path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
 		"--destination=" + image,
 		"--cache=" + strconv.FormatBool(e.Platform.Status.Build.IsKanikoCacheEnabled()),
-		"--cache-dir=" + path.Join(kaniko.BuildDir, "cache"),
+		"--cache-dir=" + kaniko.CacheDir,
 	}
 
 	args := make([]string, 0, len(baseArgs))

@@ -42,5 +42,5 @@ var KanikoSteps = []builder.Step{
 	Steps.Publisher,
 }
 
-// BuildDir is the directory where to build artifacts (shared with the Kaniko pod)
-var BuildDir = "/workspace"
+// CacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod)
+const CacheDir = "/kaniko/cache"
