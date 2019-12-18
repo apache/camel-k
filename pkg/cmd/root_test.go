@@ -28,20 +28,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-func kamelTestPostAddCommandInit(rootCmd *cobra.Command) *cobra.Command {
-	rootCmd, _ = kamelPostAddCommandInit(*rootCmd)
-	return rootCmd
+func kamelTestPostAddCommandInit(t *testing.T, rootCmd *cobra.Command) {
+	err := kamelPostAddCommandInit(rootCmd)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 }
 
-func kamelTestPreAddCommandInit() (RootCmdOptions, *cobra.Command) {
+func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
 	fakeClient, _ := test.NewFakeClient()
 	options := RootCmdOptions{
 		Context: context.Background(),
 		_client: fakeClient,
 	}
-	rootCmd := kamelPreAddCommandInit(options)
+	rootCmd := kamelPreAddCommandInit(&options)
 	rootCmd.Run = test.EmptyRun
-	return options, rootCmd
+	return &options, rootCmd
 }
 
 func TestLoadFromCommandLine(t *testing.T) {
@@ -49,7 +51,7 @@ func TestLoadFromCommandLine(t *testing.T) {
 
 	runCmdOptions := addTestRunCmd(options, rootCmd)
 
-	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
 
 	const VAR2 = "VAR2=value2"
 	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--env", "VAR1=value,othervalue", "--env", VAR2)
@@ -73,7 +75,7 @@ func TestLoadFromEnvVar(t *testing.T) {
 
 	runCmdOptions := addTestRunCmd(options, rootCmd)
 
-	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
 
 	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
 	if err != nil {
@@ -97,7 +99,7 @@ func TestLoadFromFile(t *testing.T) {
 
 	runCmdOptions := addTestRunCmd(options, rootCmd)
 
-	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
 
 	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
 	if err != nil {
@@ -121,7 +123,7 @@ func TestPrecedenceEnvVarOverFile(t *testing.T) {
 
 	runCmdOptions := addTestRunCmd(options, rootCmd)
 
-	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
 
 	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
 	if err != nil {
@@ -145,7 +147,7 @@ func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
 
 	runCmdOptions := addTestRunCmd(options, rootCmd)
 
-	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
 
 	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--env", "VAR3=commandLine")
 	if err != nil {
