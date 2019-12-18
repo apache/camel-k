@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name: Kind Integration Tests PR
+name: KinD Integration Tests PR
 
 on:
   pull_request:
