@@ -24,9 +24,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {
+func addTestRunCmd(options *RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {
 	//add a testing version of run Command
-	runCmd, runCmdOptions := newCmdRun(&options)
+	runCmd, runCmdOptions := newCmdRun(options)
 	runCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
@@ -40,7 +40,7 @@ func TestRunPropertyFlag(t *testing.T) {
 
 	runCmdOptions := addTestRunCmd(options, rootCmd)
 
-	rootCmd = kamelTestPostAddCommandInit(rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
 
 	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--property", "key1=value,othervalue", "--property", "key2=value2")
 	if err != nil {
