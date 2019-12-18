@@ -3814,7 +3814,13 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   names:
     kind: Build
     listKind: BuildList
@@ -3884,12 +3890,12 @@ spec:
       - cc
   scope: Namespaced
   versions:
-    - name: v1alpha1
-      served: true
-      storage: false
-    - name: v1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   subresources:
     status: {}
   additionalPrinterColumns:
@@ -3933,12 +3939,12 @@ spec:
   group: camel.apache.org
   scope: Namespaced
   versions:
-    - name: v1alpha1
-      served: true
-      storage: false
-    - name: v1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   subresources:
     status: {}
   names:
@@ -3992,12 +3998,12 @@ spec:
   group: camel.apache.org
   scope: Namespaced
   versions:
-    - name: v1alpha1
-      served: true
-      storage: false
-    - name: v1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   subresources:
     status: {}
   names:
@@ -4043,12 +4049,12 @@ spec:
   group: camel.apache.org
   scope: Namespaced
   versions:
-    - name: v1alpha1
-      served: true
-        storage: false
-    - name: v1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   subresources:
     status: {}
     scale:
@@ -4060,7 +4066,7 @@ spec:
     plural: integrations
     singular: integration
     shortNames:
-      - it
+    - it
   additionalPrinterColumns:
     - name: Phase
       type: string
