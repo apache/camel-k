@@ -59,10 +59,20 @@ func loadCamelQuarkusCatalog(ctx *builder.Context) error {
 
 func generateQuarkusProject(ctx *builder.Context) error {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
-	p.Properties = ctx.Build.Properties
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
+
+	p.Properties = make(map[string]string)
+	for k, v := range ctx.Build.Properties {
+		p.Properties[k] = v
+	}
+
+	// camel-quarkus doe routes discovery at startup but we don't want
+	// this to happen as routes are loaded at runtime and looking for
+	// routes at build time may try to load camel-k-runtime routes builder
+	// proxies which in some case may fail
+	p.Properties["quarkus.camel.main.routes-discovery.enabled"] = "false"
 
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,

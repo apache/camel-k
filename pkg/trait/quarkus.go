@@ -47,6 +47,8 @@ type quarkusTrait struct {
 	QuarkusVersion string `property:"quarkus-version"`
 	// The Camel-Quarkus version to use for the integration
 	CamelQuarkusVersion string `property:"camel-quarkus-version"`
+	// The Quarkus runtime type (reserved for future use)
+	Native bool `property:"native"`
 }
 
 func newQuarkusTrait() *quarkusTrait {
@@ -156,16 +158,23 @@ func (t *quarkusTrait) addRuntimeDependencies(e *Environment) error {
 
 	for _, s := range e.Integration.Sources() {
 		meta := metadata.Extract(e.CamelCatalog, s)
+		lang := s.InferLanguage()
 
-		switch language := s.InferLanguage(); language {
-		case v1alpha1.LanguageYaml:
+		switch {
+		case lang == v1alpha1.LanguageYaml:
 			addRuntimeDependency("camel-k-quarkus-loader-yaml", dependencies)
-		case v1alpha1.LanguageXML:
+		case lang == v1alpha1.LanguageXML:
 			addRuntimeDependency("camel-k-quarkus-loader-xml", dependencies)
-		case v1alpha1.LanguageJavaScript:
+		case lang == v1alpha1.LanguageJavaScript:
 			addRuntimeDependency("camel-k-quarkus-loader-js", dependencies)
+		case lang == v1alpha1.LanguageGroovy && !t.Native:
+			addRuntimeDependency("camel-k-quarkus-loader-groovy", dependencies)
+		case lang == v1alpha1.LanguageKotlin && !t.Native:
+			addRuntimeDependency("camel-k-quarkus-loader-kotlin", dependencies)
+		case lang == v1alpha1.LanguageJavaSource && !t.Native:
+			addRuntimeDependency("camel-k-quarkus-loader-java", dependencies)
 		default:
-			return fmt.Errorf("unsupported language for Quarkus runtime: %s", language)
+			return fmt.Errorf("unsupported language for Quarkus runtime: %s (native=%t)", lang, t.Native)
 		}
 
 		if strings.HasPrefix(s.Loader, "knative-source") {
