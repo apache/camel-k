@@ -24,7 +24,13 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1
+    served: true
+    storage: true
   names:
     kind: Build
     listKind: BuildList
@@ -38,6 +44,10 @@ spec:
       description: The build phase
       JSONPath: .status.phase
     - name: Age
+      type: date
+      description: The time at which the build was created
+      JSONPath: .metadata.creationTimestamp
+    - name: Started
       type: date
       description: The time at which the build was last (re-)started
       JSONPath: .status.startedAt
