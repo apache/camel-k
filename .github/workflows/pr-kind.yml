@@ -1,0 +1,98 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Kind Integration Tests PR
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Info
+      run: |
+        ls -lart
+    - name: Set Up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Set Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13.x
+    - name: Get KinD (Kubernetes in Docker)
+      uses: engineerd/setup-kind@v0.1.0
+      with:
+        version: v0.6.1
+        skipClusterCreation: "true"
+    - name: Start KinD Cluster with Internal Registry
+      run: |
+        CLUSTER_NAME="kind"
+        REGISTRY_CONTAINER_NAME='kind-registry'
+        REGISTRY_PORT='5000'
+        docker run -d -p "${REGISTRY_PORT}:5000" --restart=always --name "${REGISTRY_CONTAINER_NAME}" registry:2
+        REGISTRY_IP=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}")
+        cat <<EOF | kind create cluster --config=-
+        kind: Cluster
+        apiVersion: kind.x-k8s.io/v1alpha4
+        containerdConfigPatches:
+        - |-
+          [plugins."io.containerd.grpc.v1.cri".registry.mirrors."${REGISTRY_IP}:${REGISTRY_PORT}"]
+            endpoint = ["http://${REGISTRY_IP}:${REGISTRY_PORT}"]
+        EOF
+        for node in $(kind get nodes --name ${CLUSTER_NAME}); do
+          docker exec "${node}" sh -c "echo $(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}") registry >> /etc/hosts"
+        done
+    - name: Info
+      run: |
+        kubectl cluster-info
+        kubectl describe nodes
+    - name: Run IT
+      run: |
+        # Compute registry parameters
+        CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
+        echo "Using registry ${CAMEL_K_REGISTRY}:5000"
+
+        echo "Build project"
+        make build-kamel
+        echo "Adding maven artifacts to the image context"
+        make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
+        echo "Copying binary file to docker dir"
+        mkdir -p ./build/_output/bin
+        cp ./kamel ./build/_output/bin/
+        echo "Building the images"
+        export LOCAL_IMAGE=localhost:5000/apache/camel-k:$(make version)
+        export IMAGE=${CAMEL_K_REGISTRY}:5000/apache/camel-k:$(make version)
+        docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
+        docker push ${LOCAL_IMAGE}
+        echo "installing camel k cluster resources"
+        ./kamel install --cluster-setup
+
+        # Then run integration tests
+        export KAMEL_INSTALL_REGISTRY=${CAMEL_K_REGISTRY}:5000
+        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+        export KAMEL_INSTALL_OPERATOR_IMAGE=${IMAGE}
+        export CAMEL_K_TEST_IMAGE_NAME=${CAMEL_K_REGISTRY}:5000/apache/camel-k
+        export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
+        make test-integration
