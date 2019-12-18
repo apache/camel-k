@@ -165,7 +165,9 @@ func (t *garbageCollectorTrait) deleteAllOf(gvks map[schema.GroupVersionKind]str
 			client.PropagationPolicy(metav1.DeletePropagationBackground),
 		)
 		if err != nil {
-			t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resources: %v", gvk)
+			if !k8serrors.IsForbidden(err) {
+				t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resources: %v", gvk)
+			}
 		} else {
 			t.L.ForIntegration(e.Integration).Debugf("child resources deleted: %v", gvk)
 		}

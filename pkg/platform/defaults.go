@@ -93,9 +93,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1alpha1.Integra
 }
 
 func setPlatformDefaults(ctx context.Context, c client.Client, p *v1alpha1.IntegrationPlatform, verbose bool) error {
-	if p.Status.Profile == "" {
-		p.Status.Profile = DetermineBestProfile(ctx, c, p)
-	}
 	if p.Status.Build.CamelVersion == "" {
 		p.Status.Build.CamelVersion = defaults.DefaultCamelVersion
 	}

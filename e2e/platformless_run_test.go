@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -53,6 +54,7 @@ func TestPlatformlessRun(t *testing.T) {
 
 		// Platform should be recreated
 		Eventually(platform(ns)).ShouldNot(BeNil())
+		Eventually(platformProfile(ns)).Should(Equal(v1alpha1.TraitProfile("")))
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }

@@ -44,6 +44,7 @@ type IntegrationStatus struct {
 	Digest           string                 `json:"digest,omitempty"`
 	Image            string                 `json:"image,omitempty"`
 	Dependencies     []string               `json:"dependencies,omitempty"`
+	Profile          TraitProfile           `json:"profile,omitempty"`
 	Kit              string                 `json:"kit,omitempty"`
 	Platform         string                 `json:"platform,omitempty"`
 	GeneratedSources []SourceSpec           `json:"generatedSources,omitempty"`

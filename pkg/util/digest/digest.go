@@ -40,6 +40,10 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 	if _, err := hash.Write([]byte(integration.Spec.Kit)); err != nil {
 		return "", err
 	}
+	// Profile is relevant
+	if _, err := hash.Write([]byte(integration.Spec.Profile)); err != nil {
+		return "", err
+	}
 
 	// Integration code
 	for _, s := range integration.Spec.Sources {
