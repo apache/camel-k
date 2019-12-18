@@ -20,7 +20,7 @@ package source
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	yaml2 "gopkg.in/yaml.v2"
 )
 

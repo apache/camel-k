@@ -24,7 +24,7 @@ import (
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // The Istio trait allows to configure properties related to the Istio service mesh,

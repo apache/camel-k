@@ -18,7 +18,7 @@ limitations under the License.
 package builder
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // StepIDsFor --

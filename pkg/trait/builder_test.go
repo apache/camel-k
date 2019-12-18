@@ -27,7 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/util/camel"

@@ -30,7 +30,7 @@ import (
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis"
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"

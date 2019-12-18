@@ -28,7 +28,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/scylladb/go-set/strset"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"

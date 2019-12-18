@@ -21,7 +21,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/envvar"

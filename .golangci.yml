@@ -33,6 +33,7 @@ issues:
   exclude-rules:
     - path: pkg/client/clientset
       linters:
+        - stylecheck
         - golint
         - deadcode
         - lll
@@ -41,6 +42,7 @@ issues:
         - unused
     - path: pkg/client/informers
       linters:
+        - stylecheck
         - golint
         - deadcode
         - lll
@@ -49,6 +51,7 @@ issues:
         - unused
     - path: pkg/client/listers
       linters:
+        - stylecheck
         - golint
         - deadcode
         - lll

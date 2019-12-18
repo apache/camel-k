@@ -23,7 +23,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )

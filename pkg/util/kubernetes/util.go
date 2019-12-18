@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	yaml2 "gopkg.in/yaml.v2"
 )

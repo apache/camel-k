@@ -29,7 +29,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"k8s.io/gengo/args"
 	"k8s.io/gengo/generator"
