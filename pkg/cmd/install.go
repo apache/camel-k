@@ -140,7 +140,7 @@ type installCmdOptions struct {
 }
 
 // nolint: gocyclo
-func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
+func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	var collection *kubernetes.Collection
 	if o.OutputFormat != "" {
 		collection = kubernetes.NewCollection()
@@ -280,7 +280,8 @@ func (o *installCmdOptions) install(_ *cobra.Command, _ []string) error {
 			}
 		}
 
-		if !o.KanikoBuildCache {
+		kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")
+		if kanikoBuildCacheFlag.Changed {
 			platform.Spec.Build.KanikoBuildCache = &o.KanikoBuildCache
 		}
 
