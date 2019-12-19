@@ -243,7 +243,7 @@ metadata:
     app: "camel-k"
 
 `
-	Resources["camel-catalog-3.0.0-1.0.8.yaml"] =
+	Resources["camel-catalog-3.0.0-1.0.9.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -265,15 +265,15 @@ metadata:
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-1.0.8
+  name: camel-catalog-3.0.0-1.0.9
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0
     camel.apache.org/catalog.loader.version: 3.0.0
-    camel.apache.org/runtime.version: 1.0.8
+    camel.apache.org/runtime.version: 1.0.9
 spec:
   version: 3.0.0
-  runtimeVersion: 1.0.8
+  runtimeVersion: 1.0.9
   artifacts:
     camel-activemq:
       groupId: org.apache.camel
@@ -3166,7 +3166,7 @@ spec:
       - org.apache.camel.component.zookeepermaster.MasterComponent
 
 `
-	Resources["camel-catalog-quarkus-1.0.0-M1-1.0.8.yaml"] =
+	Resources["camel-catalog-quarkus-1.0.0-M1-1.0.9.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -3188,16 +3188,16 @@ spec:
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-quarkus-1.0.0-m1-1.0.8
+  name: camel-catalog-quarkus-1.0.0-m1-1.0.9
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0
     camel.apache.org/catalog.loader.version: 3.0.0
-    camel.apache.org/runtime.version: 1.0.8
+    camel.apache.org/runtime.version: 1.0.9
     camel.apache.org/runtime.provider: quarkus
 spec:
   version: 3.0.0
-  runtimeVersion: 1.0.8
+  runtimeVersion: 1.0.9
   runtimeProvider:
     quarkus:
       camelQuarkusVersion: 1.0.0-M1

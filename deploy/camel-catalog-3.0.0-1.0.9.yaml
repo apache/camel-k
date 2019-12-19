@@ -18,15 +18,15 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-1.0.8
+  name: camel-catalog-3.0.0-1.0.9
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.0.0
     camel.apache.org/catalog.loader.version: 3.0.0
-    camel.apache.org/runtime.version: 1.0.8
+    camel.apache.org/runtime.version: 1.0.9
 spec:
   version: 3.0.0
-  runtimeVersion: 1.0.8
+  runtimeVersion: 1.0.9
   artifacts:
     camel-activemq:
       groupId: org.apache.camel

@@ -29,7 +29,7 @@ const (
 	DefaultCamelVersion = "3.0.0"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.0.8"
+	DefaultRuntimeVersion = "1.0.9"
 
 	// DefaultCamelQuarkusVersion --
 	DefaultCamelQuarkusVersion = "1.0.0-M1"
@@ -38,7 +38,7 @@ const (
 	DefaultQuarkusVersion = "1.0.1.Final"
 
 	// KanikoVersion --
-	KanikoVersion = "0.9.0"
+	KanikoVersion = "0.14.0"
 
 	// BaseImage --
 	BaseImage = "fabric8/s2i-java:3.0-java8"
