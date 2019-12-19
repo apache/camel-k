@@ -65,11 +65,13 @@ func TestRunChannelComboGetToPost(t *testing.T) {
 		Expect(kamel("run", "-n", ns, "files/knativegetpost1.groovy").Execute()).Should(BeNil())
 		Eventually(integrationPodPhase(ns, "knativegetpost2"), 10*time.Minute).Should(Equal(v1.PodRunning))
 		Eventually(integrationPodPhase(ns, "knativegetpost1"), 10*time.Minute).Should(Equal(v1.PodRunning))
-		Eventually(integrationLogs(ns, "knativech2"), 5*time.Minute).Should(ContainSubstring(`Received ""`))
+		Eventually(integrationLogs(ns, "knativegetpost2"), 5*time.Minute).Should(ContainSubstring(`Received ""`))
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
 
+/*
+// FIXME: uncomment when https://github.com/apache/camel-k-runtime/issues/69 is resolved
 func TestRunMultiChannelChain(t *testing.T) {
 	withNewTestNamespace(t, func(ns string) {
 		Expect(createKnativeChannel(ns, "messages")()).Should(BeNil())
@@ -86,11 +88,11 @@ func TestRunMultiChannelChain(t *testing.T) {
 		Eventually(integrationLogs(ns, "knativemultihop3"), 5*time.Minute).Should(ContainSubstring(`From words: transformed message`))
 		Eventually(integrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: word`))
 		Eventually(integrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From words: message`))
-		// FIXME: uncomment next test when https://github.com/apache/camel-k-runtime/issues/69 is resolved
-		// Eventually(integrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: transformed message`))
+		Eventually(integrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: transformed message`))
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
+*/
 
 func TestRunBroker(t *testing.T) {
 	withNewTestNamespaceWithKnativeBroker(t, func(ns string) {
