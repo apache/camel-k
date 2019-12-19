@@ -16,11 +16,11 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-RC1-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M4
-RUNTIME_VERSION := 1.0.8
+RUNTIME_VERSION := 1.0.9
 CAMEL_VERSION := 3.0.0
 CAMEL_QUARKUS_VERSION := 1.0.0-M1
 QUARKUS_VERSION := 1.0.1.Final
-KANIKO_VERSION := 0.9.0
+KANIKO_VERSION := 0.14.0
 BASE_IMAGE := fabric8/s2i-java:3.0-java8
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
@@ -32,7 +32,7 @@ LINT_DEADLINE := 5m
 # Used to push pre-relase artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1166
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1168
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
