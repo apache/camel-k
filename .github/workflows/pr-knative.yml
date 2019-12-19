@@ -1,0 +1,186 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Knative Integration Tests PR
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Info
+      run: |
+        ls -lart
+    - name: Set Up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Set Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13.x
+    - name: Get KinD (Kubernetes in Docker)
+      uses: engineerd/setup-kind@v0.1.0
+      with:
+        version: v0.6.1
+        skipClusterCreation: "true"
+    - name: Start KinD Cluster with Internal Registry
+      run: |
+        CLUSTER_NAME="kind"
+        REGISTRY_CONTAINER_NAME='kind-registry'
+        REGISTRY_PORT='5000'
+        docker run -d -p "${REGISTRY_PORT}:5000" --restart=always --name "${REGISTRY_CONTAINER_NAME}" registry:2
+        REGISTRY_IP=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}")
+        cat <<EOF | kind create cluster --config=-
+        kind: Cluster
+        apiVersion: kind.x-k8s.io/v1alpha4
+        containerdConfigPatches:
+        - |-
+          [plugins."io.containerd.grpc.v1.cri".registry.mirrors."${REGISTRY_IP}:${REGISTRY_PORT}"]
+            endpoint = ["http://${REGISTRY_IP}:${REGISTRY_PORT}"]
+        EOF
+        for node in $(kind get nodes --name ${CLUSTER_NAME}); do
+          docker exec "${node}" sh -c "echo $(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}") registry >> /etc/hosts"
+        done
+    - name: Info
+      run: |
+        kubectl cluster-info
+        kubectl describe nodes
+    - name: Install Helm
+      run: |
+        mkdir helm-temp && cd helm-temp
+        curl -o helm-v3.0.2-linux-amd64.tar.gz https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz
+        tar -zxvf helm-v3.0.2-linux-amd64.tar.gz
+        sudo mv linux-amd64/helm /usr/local/bin/helm
+    - name: Install Istio
+      run: |
+        mkdir istio-temp && cd istio-temp
+        export ISTIO_VERSION=1.3.5
+        curl -L https://git.io/getLatestIstio | sh -
+        cd istio-${ISTIO_VERSION}
+
+        for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
+
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: istio-system
+          labels:
+            istio-injection: disabled
+        EOF
+
+        # A lighter template, with just pilot/gateway.
+        # Based on install/kubernetes/helm/istio/values-istio-minimal.yaml
+        helm template --namespace=istio-system \
+          --set prometheus.enabled=false \
+          --set mixer.enabled=false \
+          --set mixer.policy.enabled=false \
+          --set mixer.telemetry.enabled=false \
+          `# Pilot doesn't need a sidecar.` \
+          --set pilot.sidecar=false \
+          --set pilot.resources.requests.memory=128Mi \
+          `# Disable galley (and things requiring galley).` \
+          --set galley.enabled=false \
+          --set global.useMCP=false \
+          `# Disable security / policy.` \
+          --set security.enabled=false \
+          --set global.disablePolicyChecks=true \
+          `# Disable sidecar injection.` \
+          --set sidecarInjectorWebhook.enabled=false \
+          --set global.proxy.autoInject=disabled \
+          --set global.omitSidecarInjectorConfigMap=true \
+          --set gateways.istio-ingressgateway.autoscaleMin=1 \
+          --set gateways.istio-ingressgateway.autoscaleMax=2 \
+          `# Set pilot trace sampling to 100%` \
+          --set pilot.traceSampling=100 \
+          install/kubernetes/helm/istio \
+          > ./istio-lean.yaml
+
+      kubectl apply -f istio-lean.yaml
+
+      # Add the extra gateway.
+      helm template --namespace=istio-system \
+        --set gateways.custom-gateway.autoscaleMin=1 \
+        --set gateways.custom-gateway.autoscaleMax=2 \
+        --set gateways.custom-gateway.cpu.targetAverageUtilization=60 \
+        --set gateways.custom-gateway.labels.app='cluster-local-gateway' \
+        --set gateways.custom-gateway.labels.istio='cluster-local-gateway' \
+        --set gateways.custom-gateway.type='ClusterIP' \
+        --set gateways.istio-ingressgateway.enabled=false \
+        --set gateways.istio-egressgateway.enabled=false \
+        --set gateways.istio-ilbgateway.enabled=false \
+        install/kubernetes/helm/istio \
+        -f install/kubernetes/helm/istio/example-values/values-istio-gateways.yaml \
+        | sed -e "s/custom-gateway/cluster-local-gateway/g" -e "s/customgateway/clusterlocalgateway/g" \
+        > ./istio-local-gateway.yaml
+
+      kubectl apply -f istio-local-gateway.yaml
+
+      while [ "$(kubectl get pod -n istio-system -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in istio-system"; sleep 1; done
+
+    - name: Install Knative
+      run: |
+
+        kubectl apply --selector knative.dev/crd-install=true \
+          --filename https://github.com/knative/serving/releases/download/v0.11.0/serving.yaml \
+          --filename https://github.com/knative/eventing/releases/download/v0.11.0/release.yaml \
+          --filename https://github.com/knative/serving/releases/download/v0.11.0/monitoring.yaml
+
+        kubectl apply --filename https://github.com/knative/serving/releases/download/v0.11.0/serving.yaml \
+          --filename https://github.com/knative/eventing/releases/download/v0.11.0/release.yaml \
+          --filename https://github.com/knative/serving/releases/download/v0.11.0/monitoring.yaml
+
+        while [ "$(kubectl get pod -n knative-serving -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-serving"; sleep 1; done
+        while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; sleep 1; done
+
+    - name: Run IT
+      run: |
+        # Compute registry parameters
+        CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
+        echo "Using registry ${CAMEL_K_REGISTRY}:5000"
+
+        echo "Build project"
+        make build-kamel
+        echo "Adding maven artifacts to the image context"
+        make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
+        echo "Copying binary file to docker dir"
+        mkdir -p ./build/_output/bin
+        cp ./kamel ./build/_output/bin/
+        echo "Building the images"
+        export LOCAL_IMAGE=localhost:5000/apache/camel-k:$(make version)
+        export IMAGE=${CAMEL_K_REGISTRY}:5000/apache/camel-k:$(make version)
+        docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
+        docker push ${LOCAL_IMAGE}
+        echo "installing camel k cluster resources"
+        ./kamel install --cluster-setup
+
+        # Then run integration tests
+        export KAMEL_INSTALL_REGISTRY=${CAMEL_K_REGISTRY}:5000
+        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+        export KAMEL_INSTALL_OPERATOR_IMAGE=${IMAGE}
+        export CAMEL_K_TEST_IMAGE_NAME=${CAMEL_K_REGISTRY}:5000/apache/camel-k
+        export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
+        make test-knative
