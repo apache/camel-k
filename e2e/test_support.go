@@ -486,10 +486,10 @@ func operatorPod(ns string) func() *corev1.Pod {
 	}
 }
 
-func operatorTryPodForceKill(ns string) {
+func operatorTryPodForceKill(ns string, timeSeconds int) {
 	pod := operatorPod(ns)()
 	if pod != nil {
-		if err := testClient.Delete(testContext, pod, k8sclient.GracePeriodSeconds(0)); err != nil {
+		if err := testClient.Delete(testContext, pod, k8sclient.GracePeriodSeconds(timeSeconds)); err != nil {
 			log.Error(err, "cannot forcefully kill the pod")
 		}
 	}
@@ -526,7 +526,7 @@ func scaleOperator(ns string, replicas int32) func() error {
 
 		if replicas == 0 {
 			// speedup scale down by killing the pod
-			operatorTryPodForceKill(ns)
+			operatorTryPodForceKill(ns, 10)
 		}
 		return nil
 	}
