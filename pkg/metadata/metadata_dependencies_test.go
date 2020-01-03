@@ -31,6 +31,8 @@ func TestDependenciesJavaSource(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
+			    import org.apache.camel.component.activemq.ActiveMQComponent;
+
 			    from("telegram:bots/cippa").to("log:stash");
 			    from("timer:tick").to("amqp:queue");
 			    from("ine:xistent").to("amqp:queue");
@@ -46,7 +48,7 @@ func TestDependenciesJavaSource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:activemq", "camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies.List())
 }
 
 func TestDependenciesJavaScript(t *testing.T) {
@@ -54,6 +56,8 @@ func TestDependenciesJavaScript(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "source.js",
 			Content: `
+			    var component = Java.type("org.apache.camel.component.activemq.ActiveMQComponent");
+
 			    from('telegram:bots/cippa').to("log:stash");
 			    from('timer:tick').to("amqp:queue");
 			    from("ine:xistent").to("amqp:queue");
@@ -68,7 +72,7 @@ func TestDependenciesJavaScript(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:amqp", "camel:log", "camel:telegram", "camel:timer"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:activemq", "camel:amqp", "camel:log", "camel:telegram", "camel:timer"}, meta.Dependencies.List())
 }
 
 func TestDependenciesGroovy(t *testing.T) {
@@ -76,6 +80,8 @@ func TestDependenciesGroovy(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "source.groovy",
 			Content: `
+			    import org.apache.camel.component.activemq.ActiveMQComponent;
+
 			    from('telegram:bots/cippa').to("log:stash");
 			    from('timer:tick').to("amqp:queue");
 			    from("ine:xistent").to("amqp:queue");
@@ -92,7 +98,7 @@ func TestDependenciesGroovy(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:activemq", "camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies.List())
 }
 
 func TestDependencies(t *testing.T) {
@@ -121,6 +127,8 @@ func TestDependenciesQuarkus(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
+			    import org.apache.camel.component.timer.TimerComponent;
+
 			    from("http:test").to("log:end");
 			    from("https4:test").to("log:end");
 			    from("twitter-timeline:test").to("mock:end");
@@ -138,6 +146,7 @@ func TestDependenciesQuarkus(t *testing.T) {
 	assert.ElementsMatch(t,
 		[]string{
 			"camel-quarkus:log",
+			"camel-quarkus:timer",
 			"camel-quarkus:twitter",
 		},
 		meta.Dependencies.List())

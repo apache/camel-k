@@ -275,6 +275,11 @@ func (in *CamelArtifact) DeepCopyInto(out *CamelArtifact) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.JavaTypes != nil {
+		in, out := &in.JavaTypes, &out.JavaTypes
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

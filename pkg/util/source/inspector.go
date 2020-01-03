@@ -36,6 +36,7 @@ var (
 	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	languageRegexp   = regexp.MustCompile(`language\s*\(\s*["|']([a-zA-Z0-9-]+[^"|']+)["|']\s*,.*\)`)
+	camelTypeRegexp  = regexp.MustCompile(`.*(org.apache.camel.*Component|DataFormat|Language)`)
 
 	sourceDependencies = struct {
 		main    map[string]string
@@ -149,6 +150,14 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 	for _, match := range languageRegexp.FindAllStringSubmatch(source.Content, -1) {
 		if len(match) > 1 {
 			if dependency, ok := i.catalog.GetLanguageDependency(match[1]); ok {
+				meta.Dependencies.Add(dependency)
+			}
+		}
+	}
+
+	for _, match := range camelTypeRegexp.FindAllStringSubmatch(source.Content, -1) {
+		if len(match) > 1 {
+			if dependency, ok := i.catalog.GetJavaTypeDependency(match[1]); ok {
 				meta.Dependencies.Add(dependency)
 			}
 		}

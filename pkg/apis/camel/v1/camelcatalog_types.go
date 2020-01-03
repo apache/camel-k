@@ -49,6 +49,7 @@ type CamelArtifact struct {
 	Languages               []string        `json:"languages,omitempty" yaml:"languages,omitempty"`
 	DataFormats             []string        `json:"dataformats,omitempty" yaml:"dataformats,omitempty"`
 	Dependencies            []CamelArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+	JavaTypes               []string        `json:"javaTypes,omitempty" yaml:"javaTypes,omitempty"`
 }
 
 // CamelCatalogSpec defines the desired state of CamelCatalog
