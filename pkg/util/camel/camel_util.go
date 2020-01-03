@@ -19,6 +19,7 @@ package camel
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/Masterminds/semver"
 
@@ -129,4 +130,11 @@ func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionColle
 	)
 
 	return answer
+}
+
+func getDependency(artifact v1.CamelArtifact, runtimeProvider *v1.RuntimeProvider) string {
+	if runtimeProvider != nil && runtimeProvider.Quarkus != nil {
+		return strings.Replace(artifact.ArtifactID, "camel-quarkus-", "camel-quarkus:", 1)
+	}
+	return strings.Replace(artifact.ArtifactID, "camel-", "camel:", 1)
 }

@@ -30,6 +30,7 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 	catalog.artifactByScheme = make(map[string]string)
 	catalog.schemesByID = make(map[string]v1.CamelScheme)
 	catalog.languageDependencies = make(map[string]string)
+	catalog.javaTypeDependencies = make(map[string]string)
 
 	for id, artifact := range catalog.Artifacts {
 		for _, scheme := range artifact.Schemes {
@@ -40,11 +41,13 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 		for _, language := range artifact.Languages {
 			// Skip languages in common dependencies since they are always available to integrations
 			if artifact.ArtifactID != "camel-base" {
-				if catalog.RuntimeProvider != nil && catalog.RuntimeProvider.Quarkus != nil {
-					catalog.languageDependencies[language] = strings.Replace(artifact.ArtifactID, "camel-quarkus-", "camel-quarkus:", 1)
-				} else {
-					catalog.languageDependencies[language] = strings.Replace(artifact.ArtifactID, "camel-", "camel:", 1)
-				}
+				catalog.languageDependencies[language] = getDependency(artifact, catalog.RuntimeProvider)
+			}
+		}
+		for _, javaType := range artifact.JavaTypes {
+			// Skip types in common dependencies since they are always available to integrations
+			if artifact.ArtifactID != "camel-base" {
+				catalog.javaTypeDependencies[javaType] = getDependency(artifact, catalog.RuntimeProvider)
 			}
 		}
 	}
@@ -59,6 +62,7 @@ type RuntimeCatalog struct {
 	artifactByScheme     map[string]string
 	schemesByID          map[string]v1.CamelScheme
 	languageDependencies map[string]string
+	javaTypeDependencies map[string]string
 }
 
 // HasArtifact --
@@ -92,6 +96,12 @@ func (c *RuntimeCatalog) GetScheme(id string) (v1.CamelScheme, bool) {
 func (c *RuntimeCatalog) GetLanguageDependency(language string) (string, bool) {
 	language, ok := c.languageDependencies[language]
 	return language, ok
+}
+
+// GetJavaTypeDependency returns the maven dependency for the given type name
+func (c *RuntimeCatalog) GetJavaTypeDependency(camelType string) (string, bool) {
+	javaType, ok := c.javaTypeDependencies[camelType]
+	return javaType, ok
 }
 
 // VisitArtifacts --
