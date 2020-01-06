@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -59,7 +60,7 @@ type describeKitCommandOptions struct {
 
 func (command *describeKitCommandOptions) validate(args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("accepts at least 1 arg, received %d", len(args))
+		return errors.New("describe expects a kit name argument")
 	}
 	return nil
 }

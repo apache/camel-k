@@ -120,7 +120,7 @@ type runCmdOptions struct {
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		return errors.New("accepts at least 1 arg, received 0")
+		return errors.New("run expects at least 1 argument, received 0")
 	}
 	if len(args) > 1 && o.IntegrationName == "" {
 		return errors.New("integration name is mandatory when using multiple sources")
@@ -207,8 +207,11 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseRunning || *integrationPhase == v1.IntegrationPhaseError {
+			if *integrationPhase == v1.IntegrationPhaseRunning {
+				fmt.Println("Running")
 				break
+			} else if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseError {
+				return fmt.Errorf("integration \"%s\" deployment failed", integration.Name)
 			}
 
 			// The integration watch timed out so recreate it using the latest integration resource version
@@ -254,7 +257,6 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1.Integration) (*v
 			}
 
 			if i.Status.Phase == v1.IntegrationPhaseError {
-				fmt.Println("integration deployment failed")
 				return false
 			}
 		}

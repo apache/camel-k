@@ -63,6 +63,7 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 		Use:                    "kamel",
 		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
 		Long:                   kamelCommandLongDescription,
+		SilenceUsage:           true,
 	}
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", os.Getenv("KUBECONFIG"), "Path to the config file to use for CLI requests")

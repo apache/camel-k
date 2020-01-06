@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -66,7 +67,7 @@ type describeIntegrationCommandOptions struct {
 
 func (command *describeIntegrationCommandOptions) validate(args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("accepts at least 1 arg, received %d", len(args))
+		return errors.New("describe expects an integration name argument")
 	}
 	return nil
 }
