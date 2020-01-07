@@ -207,11 +207,11 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			if *integrationPhase == v1.IntegrationPhaseRunning {
+			if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseError {
+				return fmt.Errorf("integration \"%s\" deployment failed", integration.Name)
+			} else if *integrationPhase == v1.IntegrationPhaseRunning {
 				fmt.Println("Running")
 				break
-			} else if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseError {
-				return fmt.Errorf("integration \"%s\" deployment failed", integration.Name)
 			}
 
 			// The integration watch timed out so recreate it using the latest integration resource version
