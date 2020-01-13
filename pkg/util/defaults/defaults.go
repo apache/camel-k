@@ -29,7 +29,7 @@ const (
 	DefaultCamelVersion = "3.0.0"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.0.9"
+	DefaultRuntimeVersion = "1.0.10"
 
 	// DefaultCamelQuarkusVersion --
 	DefaultCamelQuarkusVersion = "1.0.0-M1"

@@ -22,16 +22,20 @@ import (
 	"regexp"
 
 	knativev1 "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
+	uriutils "github.com/apache/camel-k/pkg/util/uri"
 	v1 "k8s.io/api/core/v1"
 )
 
 var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint|event)/([A-Za-z0-9.-]+)(?:[/?].*|$)`)
 var plainNameRegexp = regexp.MustCompile(`^[A-Za-z0-9.-]+$`)
 var queryExtractorRegexp = `^[^?]+\?(?:|.*[&])%s=([^&]+)(?:[&].*|$)`
-var apiVersionRegexp = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "apiVersion"))
-var kindRegexp = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "kind"))
-var brokerNameRegexp = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "brokerName"))
-var brokerAPIVersion = regexp.MustCompile(fmt.Sprintf(queryExtractorRegexp, "brokerApiVersion"))
+
+const (
+	paramAPIVersion       = "apiVersion"
+	paramKind             = "kind"
+	paramBrokerName       = "brokerName"
+	paramBrokerAPIVersion = "brokerApiVersion"
+)
 
 // FilterURIs returns all Knative URIs of the given type from a slice
 func FilterURIs(uris []string, kind knativev1.CamelServiceType) []string {
@@ -55,11 +59,11 @@ func NormalizeToURI(kind knativev1.CamelServiceType, uriOrString string) string 
 // ExtractObjectReference returns a reference to the object described in the Knative URI
 func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 	if isKnativeURI(knativev1.CamelServiceTypeEvent, uri) {
-		name := matchOrEmpty(brokerNameRegexp, 1, uri)
+		name := uriutils.GetQueryParameter(uri, paramBrokerName)
 		if name == "" {
 			name = "default"
 		}
-		apiVersion := matchOrEmpty(brokerAPIVersion, 1, uri)
+		apiVersion := uriutils.GetQueryParameter(uri, paramBrokerAPIVersion)
 		return v1.ObjectReference{
 			Name:       name,
 			APIVersion: apiVersion,
@@ -70,8 +74,8 @@ func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 	if name == "" {
 		return v1.ObjectReference{}, fmt.Errorf("cannot find name in uri %s", uri)
 	}
-	apiVersion := matchOrEmpty(apiVersionRegexp, 1, uri)
-	kind := matchOrEmpty(kindRegexp, 1, uri)
+	apiVersion := uriutils.GetQueryParameter(uri, paramAPIVersion)
+	kind := uriutils.GetQueryParameter(uri, paramKind)
 	return v1.ObjectReference{
 		Name:       name,
 		APIVersion: apiVersion,

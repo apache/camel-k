@@ -46,6 +46,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -203,6 +204,29 @@ func integrationPod(ns string, name string) func() *corev1.Pod {
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
 				APIVersion: v1.SchemeGroupVersion.String(),
+			},
+		}
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
+				"camel.apache.org/integration": name,
+			})
+		if err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return &lst.Items[0]
+	}
+}
+
+func integrationCronJob(ns string, name string) func() *v1beta1.CronJob {
+	return func() *v1beta1.CronJob {
+		lst := v1beta1.CronJobList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "CronJob",
+				APIVersion: v1beta1.SchemeGroupVersion.String(),
 			},
 		}
 		err := testClient.List(testContext, &lst,

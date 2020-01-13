@@ -60,6 +60,11 @@
             <artifactId>camel-k-runtime-knative</artifactId>
             <version>${runtime.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-runtime-cron</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.camel.k</groupId>

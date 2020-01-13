@@ -38,6 +38,7 @@ type Catalog struct {
 	tDebug            Trait
 	tDependencies     Trait
 	tDeployer         Trait
+	tCron             Trait
 	tDeployment       Trait
 	tGarbageCollector Trait
 	tKnativeService   Trait
@@ -71,6 +72,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tKnative:          newKnativeTrait(),
 		tDependencies:     newDependenciesTrait(),
 		tDeployer:         newDeployerTrait(),
+		tCron:             newCronTrait(),
 		tDeployment:       newDeploymentTrait(),
 		tGarbageCollector: newGarbageCollectorTrait(),
 		tKnativeService:   newKnativeServiceTrait(),
@@ -111,6 +113,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tKnative,
 		c.tDependencies,
 		c.tDeployer,
+		c.tCron,
 		c.tDeployment,
 		c.tGarbageCollector,
 		c.tKnativeService,
@@ -150,6 +153,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tCamel,
 			c.tDebug,
 			c.tRestDsl,
+			c.tCron,
 			c.tDependencies,
 			c.tBuilder,
 			c.tQuarkus,
@@ -180,6 +184,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
+			c.tCron,
 			c.tDeployment,
 			c.tGarbageCollector,
 			c.tAffinity,
@@ -206,6 +211,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
+			c.tCron,
 			c.tDeployment,
 			c.tGarbageCollector,
 			c.tAffinity,
@@ -229,6 +235,7 @@ func (c *Catalog) apply(environment *Environment) error {
 		return err
 	}
 	traits := c.traitsFor(environment)
+	environment.ConfiguredTraits = traits
 
 	applicable := false
 	for _, trait := range traits {

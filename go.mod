@@ -15,6 +15,7 @@ require (
 	github.com/google/go-containerregistry v0.0.0-20190206233756-dbc4da98389f // indirect
 	github.com/google/uuid v1.1.1
 	github.com/jpillora/backoff v0.0.0-20170918002102-8eab2debe79d
+	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/onsi/gomega v1.7.0
