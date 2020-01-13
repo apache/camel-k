@@ -92,7 +92,6 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
 		setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
 		setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
-		setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", "cn=system:master-proxy")
 		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
 	}
 
@@ -136,7 +135,16 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 
 	// Then add explicitly set trait configuration properties
 	addToJolokiaOptions(options, "caCert", t.CaCert)
-	addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
+	if options["clientPrincipal"] == "" && t.ClientPrincipal == nil && e.DetermineProfile() == v1.TraitProfileOpenShift {
+		// TODO: simplify when trait array options are supported
+		// Master API proxy for OpenShift 3
+		addToJolokiaOptions(options, "clientPrincipal.1", "cn=system:master-proxy")
+		// Default Hawtio and Fuse consoles for OpenShift 4
+		addToJolokiaOptions(options, "clientPrincipal.2", "cn=hawtio-online.hawtio.svc")
+		addToJolokiaOptions(options, "clientPrincipal.3", "cn=fuse-console.fuse.svc")
+	} else {
+		addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
+	}
 	addToJolokiaOptions(options, "discoveryEnabled", t.DiscoveryEnabled)
 	addToJolokiaOptions(options, "extendedClientCheck", t.ExtendedClientCheck)
 	addToJolokiaOptions(options, "host", t.Host)
@@ -210,6 +218,10 @@ func addToJolokiaOptions(options map[string]string, key string, value interface{
 	case *string:
 		if v != nil {
 			options[key] = *v
+		}
+	case string:
+		if v != "" {
+			options[key] = v
 		}
 	}
 }
