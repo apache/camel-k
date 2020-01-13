@@ -16,9 +16,9 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/jpillora/backoff v0.0.0-20170918002102-8eab2debe79d
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/onsi/gomega v1.5.0
+	github.com/onsi/gomega v1.7.0
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
-	github.com/operator-framework/operator-sdk v0.13.0
+	github.com/operator-framework/operator-sdk v0.14.0
 	github.com/pkg/errors v0.8.1
 	github.com/radovskyb/watcher v1.0.6
 	github.com/rs/xid v1.2.1
@@ -43,7 +43,7 @@ require (
 
 // Pinned to kubernetes 1.16.2:
 // - Knative 0.9.0 requires 1.15.3
-// - Operator SDK 0.13.0 requires 1.16.2
+// - Operator SDK 0.14.0 requires 1.16.2
 replace (
 	k8s.io/api => k8s.io/api v0.0.0-20191016110408-35e52d86657a
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20191016113550-5357c4baaf65
@@ -67,3 +67,5 @@ replace (
 	k8s.io/metrics => k8s.io/metrics v0.0.0-20191016113814-3b1a734dba6e
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.0.0-20191016112829-06bb3c9d77c9
 )
+
+replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
