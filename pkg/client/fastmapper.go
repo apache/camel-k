@@ -34,6 +34,7 @@ var FastMapperAllowedAPIGroups = map[string]bool{
 	"":                          true, // core APIs
 	"apiextensions.k8s.io":      true,
 	"apps":                      true,
+	"batch":                     true,
 	"camel.apache.org":          true,
 	"rbac.authorization.k8s.io": true,
 	"console.openshift.io":      true, // OpenShift console resources

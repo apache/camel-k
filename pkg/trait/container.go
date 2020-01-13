@@ -24,6 +24,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -150,6 +151,19 @@ func (t *containerTrait) Apply(e *Environment) error {
 		)
 
 		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
+	})
+
+	e.Resources.VisitCronJob(func(cron *v1beta1.CronJob) {
+		for _, envVar := range e.EnvVars {
+			envvar.SetVar(&container.Env, envVar)
+		}
+
+		e.ConfigureVolumesAndMounts(
+			&cron.Spec.JobTemplate.Spec.Template.Spec.Volumes,
+			&container.VolumeMounts,
+		)
+
+		cron.Spec.JobTemplate.Spec.Template.Spec.Containers = append(cron.Spec.JobTemplate.Spec.Template.Spec.Containers, container)
 	})
 
 	if t.Expose != nil && *t.Expose {

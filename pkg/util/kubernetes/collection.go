@@ -22,6 +22,7 @@ import (
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -240,6 +241,15 @@ func (c *Collection) GetRoute(filter func(*routev1.Route) bool) *routev1.Route {
 	return retValue
 }
 
+// VisitCronJob executes the visitor function on all CronJob resources
+func (c *Collection) VisitCronJob(visitor func(*v1beta1.CronJob)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*v1beta1.CronJob); ok {
+			visitor(conv)
+		}
+	})
+}
+
 // VisitKnativeService executes the visitor function on all Knative serving Service resources
 func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
 	c.Visit(func(res runtime.Object) {
@@ -304,6 +314,12 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 			visitor(cntref)
 		}
 	})
+	c.VisitCronJob(func(c *v1beta1.CronJob) {
+		for idx := range c.Spec.JobTemplate.Spec.Template.Spec.Containers {
+			cntref := &c.Spec.JobTemplate.Spec.Template.Spec.Containers[idx]
+			visitor(cntref)
+		}
+	})
 }
 
 // VisitPodSpec executes the visitor function on all PodSpec inside deployments or other resources
@@ -313,6 +329,9 @@ func (c *Collection) VisitPodSpec(visitor func(container *corev1.PodSpec)) {
 	})
 	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
 		visitor(&cs.Template.Spec.PodSpec)
+	})
+	c.VisitCronJob(func(d *v1beta1.CronJob) {
+		visitor(&d.Spec.JobTemplate.Spec.Template.Spec)
 	})
 }
 

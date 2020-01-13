@@ -130,21 +130,22 @@ func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
 
 // A Environment provides the context where the trait is executed
 type Environment struct {
-	CamelCatalog   *camel.RuntimeCatalog
-	RuntimeVersion string
-	Catalog        *Catalog
-	C              context.Context
-	Client         client.Client
-	Platform       *v1.IntegrationPlatform
-	IntegrationKit *v1.IntegrationKit
-	Integration    *v1.Integration
-	Resources      *kubernetes.Collection
-	PostActions    []func(*Environment) error
-	PostProcessors []func(*Environment) error
-	BuildTasks     []v1.Task
-	ExecutedTraits []Trait
-	EnvVars        []corev1.EnvVar
-	Classpath      *strset.Set
+	CamelCatalog     *camel.RuntimeCatalog
+	RuntimeVersion   string
+	Catalog          *Catalog
+	C                context.Context
+	Client           client.Client
+	Platform         *v1.IntegrationPlatform
+	IntegrationKit   *v1.IntegrationKit
+	Integration      *v1.Integration
+	Resources        *kubernetes.Collection
+	PostActions      []func(*Environment) error
+	PostProcessors   []func(*Environment) error
+	BuildTasks       []v1.Task
+	ConfiguredTraits []Trait
+	ExecutedTraits   []Trait
+	EnvVars          []corev1.EnvVar
+	Classpath        *strset.Set
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -154,11 +155,23 @@ type ControllerStrategy string
 const (
 	ControllerStrategyDeployment     = "deployment"
 	ControllerStrategyKnativeService = "knative-service"
+	ControllerStrategyCronJob        = "cron-job"
 )
 
 // GetTrait --
 func (e *Environment) GetTrait(id ID) Trait {
 	for _, t := range e.ExecutedTraits {
+		if t.ID() == id {
+			return t
+		}
+	}
+
+	return nil
+}
+
+// GetConfiguredTrait --
+func (e *Environment) GetConfiguredTrait(id ID) Trait {
+	for _, t := range e.ConfiguredTraits {
 		if t.ID() == id {
 			return t
 		}
@@ -229,17 +242,15 @@ func (e *Environment) DetermineProfile() v1.TraitProfile {
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration
 func (e *Environment) DetermineControllerStrategy(ctx context.Context, c controller.Reader) (ControllerStrategy, error) {
-	if e.DetermineProfile() != v1.TraitProfileKnative {
-		return ControllerStrategyDeployment, nil
-	}
-
-	trait := e.GetTrait("deployer")
-	if trait != nil {
-		deployerTrait := trait.(*deployerTrait)
+	dt := e.GetTrait("deployer")
+	if dt != nil {
+		deployerTrait := dt.(*deployerTrait)
 		if deployerTrait.Kind == ControllerStrategyDeployment {
 			return ControllerStrategyDeployment, nil
 		} else if deployerTrait.Kind == ControllerStrategyKnativeService {
 			return ControllerStrategyKnativeService, nil
+		} else if deployerTrait.Kind == ControllerStrategyCronJob {
+			return ControllerStrategyCronJob, nil
 		}
 	}
 
@@ -249,13 +260,25 @@ func (e *Environment) DetermineControllerStrategy(ctx context.Context, c control
 		return "", err
 	}
 
-	// In Knative profile: use knative service only if needed
-	meta := metadata.ExtractAll(e.CamelCatalog, sources)
-	if !meta.RequiresHTTPService {
-		return ControllerStrategyDeployment, nil
+	if e.DetermineProfile() == v1.TraitProfileKnative {
+		// In Knative profile: use knative service only if needed
+		meta := metadata.ExtractAll(e.CamelCatalog, sources)
+		if meta.RequiresHTTPService {
+			return ControllerStrategyKnativeService, nil
+		}
 	}
 
-	return ControllerStrategyKnativeService, nil
+	ct := e.GetConfiguredTrait("cron")
+	if ct != nil {
+		cronTrait := ct.(*cronTrait)
+		if isApplicable, err := cronTrait.CanCreateController(e); err != nil {
+			return "", err
+		} else if isApplicable {
+			return ControllerStrategyCronJob, nil
+		}
+	}
+
+	return ControllerStrategyDeployment, nil
 }
 
 // DetermineNamespace --
