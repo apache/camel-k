@@ -22,10 +22,11 @@ import (
 	"strconv"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/envvar"
-
 	corev1 "k8s.io/api/core/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 // The Jolokia trait activates and configures the Jolokia Java agent.
@@ -78,6 +79,10 @@ func newJolokiaTrait() *jolokiaTrait {
 	}
 }
 
+func (t *jolokiaTrait) isEnabled() bool {
+	return t.Enabled != nil && *t.Enabled
+}
+
 func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 	options, err := parseCsvMap(t.Options)
 	if err != nil {
@@ -95,10 +100,22 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInPhase(
+		v1.IntegrationPhaseInitialization,
+		v1.IntegrationPhaseDeploying,
+		v1.IntegrationPhaseRunning,
+	), nil
 }
 
 func (t *jolokiaTrait) Apply(e *Environment) (err error) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		if t.isEnabled() {
+			// Add Camel management dependency
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+		}
+		return nil
+	}
+
 	containerName := defaultContainerName
 	dt := e.Catalog.GetTrait(containerTraitID)
 	if dt != nil {
@@ -116,7 +133,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	if t.Enabled == nil || !*t.Enabled {
+	if !t.isEnabled() {
 		// Deactivate the Jolokia Java agent
 		// Note: the AB_JOLOKIA_OFF environment variable acts as an option flag
 		envvar.SetVal(&container.Env, "AB_JOLOKIA_OFF", "true")
