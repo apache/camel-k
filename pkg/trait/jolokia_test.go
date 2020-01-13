@@ -77,9 +77,8 @@ func TestConfigureJolokiaTraitForOpenShiftProfileShouldSetDefaultHttpsJolokiaOpt
 	assert.Nil(t, err)
 	assert.True(t, configured)
 	assert.Equal(t, *trait.Protocol, "https")
-	assert.Equal(t, *trait.CaCert, "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+	assert.Equal(t, *trait.CaCert, "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
 	assert.Equal(t, *trait.ExtendedClientCheck, true)
-	assert.Equal(t, *trait.ClientPrincipal, "cn=system:master-proxy")
 	assert.Equal(t, *trait.UseSslClientAuthentication, true)
 }
 
