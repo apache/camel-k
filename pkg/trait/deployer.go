@@ -35,9 +35,11 @@ import (
 // +camel-k:trait=deployer
 type deployerTrait struct {
 	BaseTrait `property:",squash"`
-	// Allows to explicitly select the desired deployment kind between `deployment` or `knative-service` when creating the resources for running the integration.
+	// Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service` when creating the resources for running the integration.
 	Kind string `property:"kind"`
 }
+
+var _ ControllerStrategySelector = &deployerTrait{}
 
 func newDeployerTrait() *deployerTrait {
 	return &deployerTrait{
@@ -100,6 +102,21 @@ func (t *deployerTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return nil, nil
+	}
+	if t.Kind != "" {
+		strategy := ControllerStrategy(t.Kind)
+		return &strategy, nil
+	}
+	return nil, nil
+}
+
+func (t *deployerTrait) ControllerStrategySelectorOrder() int {
+	return 0
 }
 
 // IsPlatformTrait overrides base class method

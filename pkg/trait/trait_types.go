@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -34,7 +35,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -126,6 +126,16 @@ func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
 	return true
 }
 
+/* ControllerStrategySelector */
+
+// ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
+type ControllerStrategySelector interface {
+	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
+	SelectControllerStrategy(*Environment) (*ControllerStrategy, error)
+	// ControllerStrategySelectorOrder returns the order (priority) of the controller strategy selector
+	ControllerStrategySelectorOrder() int
+}
+
 /* Environment */
 
 // A Environment provides the context where the trait is executed
@@ -153,9 +163,11 @@ type ControllerStrategy string
 
 // List of controller strategies
 const (
-	ControllerStrategyDeployment     = "deployment"
-	ControllerStrategyKnativeService = "knative-service"
-	ControllerStrategyCronJob        = "cron-job"
+	ControllerStrategyDeployment     ControllerStrategy = "deployment"
+	ControllerStrategyKnativeService ControllerStrategy = "knative-service"
+	ControllerStrategyCronJob        ControllerStrategy = "cron-job"
+
+	DefaultControllerStrategy ControllerStrategy = ControllerStrategyDeployment
 )
 
 // GetTrait --
@@ -242,43 +254,28 @@ func (e *Environment) DetermineProfile() v1.TraitProfile {
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration
 func (e *Environment) DetermineControllerStrategy(ctx context.Context, c controller.Reader) (ControllerStrategy, error) {
-	dt := e.GetTrait("deployer")
-	if dt != nil {
-		deployerTrait := dt.(*deployerTrait)
-		if deployerTrait.Kind == ControllerStrategyDeployment {
-			return ControllerStrategyDeployment, nil
-		} else if deployerTrait.Kind == ControllerStrategyKnativeService {
-			return ControllerStrategyKnativeService, nil
-		} else if deployerTrait.Kind == ControllerStrategyCronJob {
-			return ControllerStrategyCronJob, nil
+	defaultStrategy := DefaultControllerStrategy
+	for _, creator := range e.getControllerStrategyChoosers() {
+		if strategy, err := creator.SelectControllerStrategy(e); err != nil {
+			return defaultStrategy, err
+		} else if strategy != nil {
+			return *strategy, nil
 		}
 	}
 
-	var sources []v1.SourceSpec
-	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(ctx, c, e.Integration, e.Resources); err != nil {
-		return "", err
-	}
+	return defaultStrategy, nil
+}
 
-	if e.DetermineProfile() == v1.TraitProfileKnative {
-		// In Knative profile: use knative service only if needed
-		meta := metadata.ExtractAll(e.CamelCatalog, sources)
-		if meta.RequiresHTTPService {
-			return ControllerStrategyKnativeService, nil
+func (e *Environment) getControllerStrategyChoosers() (res []ControllerStrategySelector) {
+	for _, t := range e.ConfiguredTraits {
+		if cc, ok := t.(ControllerStrategySelector); ok {
+			res = append(res, cc)
 		}
 	}
-
-	ct := e.GetConfiguredTrait("cron")
-	if ct != nil {
-		cronTrait := ct.(*cronTrait)
-		if isApplicable, err := cronTrait.CanCreateController(e); err != nil {
-			return "", err
-		} else if isApplicable {
-			return ControllerStrategyCronJob, nil
-		}
-	}
-
-	return ControllerStrategyDeployment, nil
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].ControllerStrategySelectorOrder() < res[j].ControllerStrategySelectorOrder()
+	})
+	return res
 }
 
 // DetermineNamespace --

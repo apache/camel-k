@@ -77,6 +77,8 @@ type knativeServiceTrait struct {
 	deployer deployerTrait
 }
 
+var _ ControllerStrategySelector = &knativeServiceTrait{}
+
 func newKnativeServiceTrait() *knativeServiceTrait {
 	return &knativeServiceTrait{
 		BaseTrait: newBaseTrait("knative-service"),
@@ -107,7 +109,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			"controller strategy: "+ControllerStrategyDeployment,
+			"controller strategy: "+string(ControllerStrategyDeployment),
 		)
 
 		// A controller is already present for the integration
@@ -230,6 +232,32 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
+	knativeServiceStrategy := ControllerStrategyKnativeService
+	if t.Enabled != nil {
+		if *t.Enabled {
+			return &knativeServiceStrategy, nil
+		}
+		return nil, nil
+	}
+
+	var sources []v1.SourceSpec
+	var err error
+	if sources, err = kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources); err != nil {
+		return nil, err
+	}
+
+	meta := metadata.ExtractAll(e.CamelCatalog, sources)
+	if meta.RequiresHTTPService {
+		return &knativeServiceStrategy, nil
+	}
+	return nil, nil
+}
+
+func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
+	return 100
 }
 
 func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
