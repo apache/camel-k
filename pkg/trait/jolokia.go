@@ -44,7 +44,7 @@ type jolokiaTrait struct {
 	// The principal which must be given in a client certificate to allow access to the Jolokia endpoint,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `clientPrincipal=cn=system:master-proxy` for OpenShift).
-	ClientPrincipal *string `property:"client-principal"`
+	ClientPrincipal []string `property:"client-principal"`
 	// Listen for multicast requests (default `false`)
 	DiscoveryEnabled *bool `property:"discovery-enabled"`
 	// Mandate the client certificate contains a client flag in the extended key usage section,
@@ -90,6 +90,11 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		return false, err
 	}
 
+	if len(t.ClientPrincipal) == 1 {
+		// Work-around the lack of proper support for multi-valued trait options from the CLI
+		t.ClientPrincipal = strings.Split(t.ClientPrincipal[0], ",")
+	}
+
 	setDefaultJolokiaOption(options, &t.Host, "host", "*")
 	setDefaultJolokiaOption(options, &t.DiscoveryEnabled, "discoveryEnabled", false)
 
@@ -99,6 +104,13 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
 		setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
 		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
+		setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", []string{
+			// Master API proxy for OpenShift 3
+			"cn=system:master-proxy",
+			// Default Hawtio and Fuse consoles for OpenShift 4
+			"cn=hawtio-online.hawtio.svc",
+			"cn=fuse-console.fuse.svc",
+		})
 	}
 
 	return e.IntegrationInPhase(
@@ -153,16 +165,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 
 	// Then add explicitly set trait configuration properties
 	addToJolokiaOptions(options, "caCert", t.CaCert)
-	if options["clientPrincipal"] == "" && t.ClientPrincipal == nil && e.DetermineProfile() == v1.TraitProfileOpenShift {
-		// TODO: simplify when trait array options are supported
-		// Master API proxy for OpenShift 3
-		addToJolokiaOptions(options, "clientPrincipal.1", "cn=system:master-proxy")
-		// Default Hawtio and Fuse consoles for OpenShift 4
-		addToJolokiaOptions(options, "clientPrincipal.2", "cn=hawtio-online.hawtio.svc")
-		addToJolokiaOptions(options, "clientPrincipal.3", "cn=fuse-console.fuse.svc")
-	} else {
-		addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
-	}
+	addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
 	addToJolokiaOptions(options, "discoveryEnabled", t.DiscoveryEnabled)
 	addToJolokiaOptions(options, "extendedClientCheck", t.ExtendedClientCheck)
 	addToJolokiaOptions(options, "host", t.Host)
@@ -227,6 +230,10 @@ func setDefaultJolokiaOption(options map[string]string, option interface{}, key 
 			v := value.(string)
 			*o = &v
 		}
+	case *[]string:
+		if len(*o) == 0 {
+			*o = value.([]string)
+		}
 	}
 }
 
@@ -249,6 +256,14 @@ func addToJolokiaOptions(options map[string]string, key string, value interface{
 	case string:
 		if v != "" {
 			options[key] = v
+		}
+	case []string:
+		if len(v) == 1 {
+			options[key] = v[0]
+		} else {
+			for i, vi := range v {
+				options[key+"."+strconv.Itoa(i+1)] = vi
+			}
 		}
 	}
 }
