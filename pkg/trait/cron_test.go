@@ -183,8 +183,9 @@ func TestCronFromURI(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.uri, func(t *testing.T) {
-			uris := []string{test.uri, test.uri2, test.uri3}
+		thetest := test
+		t.Run(thetest.uri, func(t *testing.T) {
+			uris := []string{thetest.uri, thetest.uri2, thetest.uri3}
 			filtered := make([]string, 0, len(uris))
 			for _, uri := range uris {
 				if uri != "" {
@@ -197,13 +198,13 @@ func TestCronFromURI(t *testing.T) {
 			if res != nil {
 				gotCron = res.schedule
 			}
-			assert.Equal(t, gotCron, test.cron)
+			assert.Equal(t, gotCron, thetest.cron)
 
 			gotComponents := ""
 			if res != nil {
 				gotComponents = strings.Join(res.components, ",")
 			}
-			assert.Equal(t, gotComponents, test.components)
+			assert.Equal(t, gotComponents, thetest.components)
 		})
 	}
 }
