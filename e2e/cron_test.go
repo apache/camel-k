@@ -42,6 +42,15 @@ func TestRunCronExample(t *testing.T) {
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
+		t.Run("cron-timer", func(t *testing.T) {
+			RegisterTestingT(t)
+
+			Expect(kamel("run", "-n", ns, "files/cron-timer.groovy").Execute()).Should(BeNil())
+			Eventually(integrationCronJob(ns, "cron-timer"), 5*time.Minute).ShouldNot(BeNil())
+			Eventually(integrationLogs(ns, "cron-timer"), 5*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
 		t.Run("cron-fallback", func(t *testing.T) {
 			RegisterTestingT(t)
 
