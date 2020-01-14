@@ -34,6 +34,8 @@ type deploymentTrait struct {
 	deployer  deployerTrait
 }
 
+var _ ControllerStrategySelector = &deploymentTrait{}
+
 func newDeploymentTrait() *deploymentTrait {
 	return &deploymentTrait{
 		BaseTrait: newBaseTrait("deployment"),
@@ -88,6 +90,18 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	return enabled, nil
+}
+
+func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return nil, nil
+	}
+	deploymentStrategy := ControllerStrategyDeployment
+	return &deploymentStrategy, nil
+}
+
+func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
+	return 10000
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {

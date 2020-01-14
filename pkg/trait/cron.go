@@ -61,6 +61,8 @@ type cronTrait struct {
 	deployer deployerTrait
 }
 
+var _ ControllerStrategySelector = &cronTrait{}
+
 // cronInfo contains information about cron schedules present in the code
 type cronInfo struct {
 	components []string
@@ -229,22 +231,29 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 	return &cronjob
 }
 
-// CanCreateController can be used to check if a CronJob can be generated given the integration and trait settings
-func (t *cronTrait) CanCreateController(e *Environment) (bool, error) {
+// SelectControllerStrategy can be used to check if a CronJob can be generated given the integration and trait settings
+func (t *cronTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
+	cronStrategy := ControllerStrategyCronJob
 	if t.Enabled != nil && !*t.Enabled {
-		return false, nil
+		return nil, nil
 	}
 	if t.Fallback != nil && *t.Fallback {
-		return false, nil
+		return nil, nil
 	}
 	if t.Schedule != "" {
-		return true, nil
+		return &cronStrategy, nil
 	}
 	if t.Auto == nil || *t.Auto {
 		globalCron, err := t.getGlobalCron(e)
-		return err == nil && globalCron != nil, err
+		if err == nil && globalCron != nil {
+			return &cronStrategy, nil
+		}
 	}
-	return false, nil
+	return nil, nil
+}
+
+func (t *cronTrait) ControllerStrategySelectorOrder() int {
+	return 1000
 }
 
 // Gathering cron information
