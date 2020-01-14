@@ -32,10 +32,10 @@ const (
 	DefaultRuntimeVersion = "1.0.10"
 
 	// DefaultCamelQuarkusVersion --
-	DefaultCamelQuarkusVersion = "1.0.0-M1"
+	DefaultCamelQuarkusVersion = "1.0.0-M2"
 
 	// DefaultQuarkusVersion --
-	DefaultQuarkusVersion = "1.0.1.Final"
+	DefaultQuarkusVersion = "1.1.0.Final"
 
 	// KanikoVersion --
 	KanikoVersion = "0.14.0"
