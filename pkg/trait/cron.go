@@ -37,6 +37,18 @@ import (
 
 // The Cron trait can be used to customize the behaviour of periodic timer/cron based integrations.
 //
+// While normally an integration requires a pod to be always up and running, some periodic tasks, such as batch jobs,
+// require to be activated at specific hours of the day or with a periodic delay of minutes.
+// For such tasks, the cron trait can materialize the integration as a Kubernetes CronJob instead of a standard deployment,
+// in order to save resources when the integration does not need to be executed.
+//
+// Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
+//
+// The rules for using a Kubernetes CronJob are the following:
+// - `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=1m`.
+// - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
+//   `cron:tab?schedule=0/2+*+*+*+?` or `quartz:trigger?cron=0+0/2+*+*+*+?`.
+//
 // +camel-k:trait=cron
 type cronTrait struct {
 	BaseTrait `property:",squash"`
