@@ -28,7 +28,6 @@ import (
 
 var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint|event)/([A-Za-z0-9.-]+)(?:[/?].*|$)`)
 var plainNameRegexp = regexp.MustCompile(`^[A-Za-z0-9.-]+$`)
-var queryExtractorRegexp = `^[^?]+\?(?:|.*[&])%s=([^&]+)(?:[&].*|$)`
 
 const (
 	paramAPIVersion       = "apiVersion"

@@ -81,9 +81,10 @@ func TestQueryParameter(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.uri, func(t *testing.T) {
-			param := GetQueryParameter(test.uri, test.param)
-			assert.Equal(t, test.expected, param)
+		thetest := test
+		t.Run(thetest.uri, func(t *testing.T) {
+			param := GetQueryParameter(thetest.uri, thetest.param)
+			assert.Equal(t, thetest.expected, param)
 		})
 	}
 
