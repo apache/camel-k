@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -172,9 +173,18 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	addToJolokiaOptions(options, "useSslClientAuthentication", t.UseSslClientAuthentication)
 
 	// Lastly set the AB_JOLOKIA_OPTS environment variable from the fabric8/s2i-java base image
-	optionValues := make([]string, 0, len(options))
-	for k, v := range options {
-		optionValues = append(optionValues, k+"="+v)
+	// Options must be sorted so that the environment variable value is consistent over iterations,
+	// otherwise the value changes which results in triggering a new deployment.
+	optionKeys := make([]string, len(options))
+	i := 0
+	for k := range options {
+		optionKeys[i] = k
+		i++
+	}
+	sort.Strings(optionKeys)
+	optionValues := make([]string, len(options))
+	for i, k := range optionKeys {
+		optionValues[i] = k + "=" + options[k]
 	}
 	envvar.SetVal(&container.Env, "AB_JOLOKIA_OPTS", strings.Join(optionValues, ","))
 
