@@ -24,6 +24,7 @@ import (
 	"os/signal"
 	"path"
 	"regexp"
+	"sort"
 	"syscall"
 
 	"github.com/scylladb/go-set/strset"
@@ -195,4 +196,15 @@ func FileExists(name string) (bool, error) {
 // MarshalBytes --
 type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)
+}
+
+func SortedStringMapKeys(m map[string]string) []string {
+	res := make([]string, len(m))
+	i := 0
+	for k := range m {
+		res[i] = k
+		i++
+	}
+	sort.Strings(res)
+	return res
 }
