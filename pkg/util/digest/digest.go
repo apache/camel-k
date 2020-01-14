@@ -20,11 +20,10 @@ package digest
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"math/rand"
 	"sort"
-	"strconv"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -81,7 +80,7 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 			return "", err
 		}
 		spec := integration.Spec.Traits[name]
-		for _, prop := range sortedStringMapKeys(spec.Configuration) {
+		for _, prop := range util.SortedStringMapKeys(spec.Configuration) {
 			val := spec.Configuration[prop]
 			if _, err := hash.Write([]byte(prop + "=" + val + ",")); err != nil {
 				return "", err
@@ -122,24 +121,12 @@ func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	return digest, nil
 }
 
-// Random --
-func Random() string {
-	return "v" + strconv.FormatInt(rand.Int63(), 10)
-}
-
-func sortedStringMapKeys(m map[string]string) []string {
-	res := make([]string, 0, len(m))
-	for k := range m {
-		res = append(res, k)
-	}
-	sort.Strings(res)
-	return res
-}
-
 func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
-	res := make([]string, 0, len(m))
+	res := make([]string, len(m))
+	i := 0
 	for k := range m {
-		res = append(res, k)
+		res[i] = k
+		i++
 	}
 	sort.Strings(res)
 	return res
