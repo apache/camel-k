@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/rs/xid"
-	"github.com/scylladb/go-set/strset"
 	"github.com/stretchr/testify/assert"
 
 	routev1 "github.com/openshift/api/route/v1"
@@ -68,7 +67,6 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
-		Classpath:      strset.New(),
 		Resources: kubernetes.NewCollection(
 			&corev1.Service{
 				TypeMeta: metav1.TypeMeta{

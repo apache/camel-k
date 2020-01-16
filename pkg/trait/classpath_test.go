@@ -71,41 +71,6 @@ func TestConfigureClasspathDisabledTraitDoesNotSucceed(t *testing.T) {
 	assert.False(t, configured)
 }
 
-func TestApplyClasspathTraitPlaftormIntegrationKitLazyInstantiation(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
-	environment.IntegrationKit = nil
-	environment.Integration.Namespace = "kit-namespace"
-	environment.Integration.Status.Kit = "kit-name"
-
-	err := trait.Apply(environment)
-
-	assert.Nil(t, err)
-	assert.Equal(t, strset.New("/etc/camel/resources", "./resources"), environment.Classpath)
-}
-
-func TestApplyClasspathTraitExternalIntegrationKitLazyInstantiation(t *testing.T) {
-	trait, environment := createClasspathTestWithKitType(v1.IntegrationKitTypeExternal)
-	environment.IntegrationKit = nil
-	environment.Integration.Namespace = "kit-namespace"
-	environment.Integration.Status.Kit = "kit-name"
-
-	err := trait.Apply(environment)
-
-	assert.Nil(t, err)
-	assert.Equal(t, strset.New("/etc/camel/resources", "./resources", "/deployments/dependencies/*"), environment.Classpath)
-}
-
-func TestApplyClasspathTraitWithIntegrationKitStatusArtifact(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
-	environment.IntegrationKit.Status.Artifacts = []v1.Artifact{{ID: "", Location: "", Target: "/dep/target"}}
-
-	err := trait.Apply(environment)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, environment.Classpath)
-	assert.Equal(t, strset.New("/etc/camel/resources", "./resources", "/dep/target"), environment.Classpath)
-}
-
 func TestApplyClasspathTraitWithDeploymentResource(t *testing.T) {
 	trait, environment := createNominalClasspathTest()
 
@@ -132,12 +97,11 @@ func TestApplyClasspathTraitWithDeploymentResource(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	cp := environment.Classpath.List()
+	assert.Nil(t, err)
+
+	cp := strset.New("/etc/camel/resources", "./resources", "/mount/path").List()
 	sort.Strings(cp)
 
-	assert.Nil(t, err)
-	assert.NotNil(t, environment.Classpath)
-	assert.Equal(t, strset.New("/etc/camel/resources", "./resources", "/mount/path"), environment.Classpath)
 	assert.Len(t, d.Spec.Template.Spec.Containers[0].Env, 1)
 	assert.Equal(t, "JAVA_CLASSPATH", d.Spec.Template.Spec.Containers[0].Env[0].Name)
 	assert.Equal(t, strings.Join(cp, ":"), d.Spec.Template.Spec.Containers[0].Env[0].Value)
@@ -163,25 +127,14 @@ func TestApplyClasspathTraitWithKNativeResource(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	cp := environment.Classpath.List()
+	assert.Nil(t, err)
+
+	cp := strset.New("/etc/camel/resources", "./resources", "/mount/path").List()
 	sort.Strings(cp)
 
-	assert.Nil(t, err)
-	assert.NotNil(t, environment.Classpath)
-	assert.ElementsMatch(t, []string{"/etc/camel/resources", "./resources", "/mount/path"}, cp)
 	assert.Len(t, s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env, 1)
 	assert.Equal(t, "JAVA_CLASSPATH", s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env[0].Name)
 	assert.Equal(t, strings.Join(cp, ":"), s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env[0].Value)
-}
-
-func TestApplyClasspathTraitWithNominalIntegrationKit(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
-
-	err := trait.Apply(environment)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, environment.Classpath)
-	assert.Equal(t, strset.New("/etc/camel/resources", "./resources"), environment.Classpath)
 }
 
 func createNominalClasspathTest() (*classpathTrait, *Environment) {
@@ -189,7 +142,6 @@ func createNominalClasspathTest() (*classpathTrait, *Environment) {
 }
 
 func createClasspathTestWithKitType(kitType string) (*classpathTrait, *Environment) {
-
 	client, _ := test.NewFakeClient(
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{

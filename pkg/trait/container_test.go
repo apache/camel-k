@@ -21,7 +21,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/scylladb/go-set/strset"
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
@@ -70,7 +69,6 @@ func TestContainerWithDefaults(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
@@ -133,7 +131,6 @@ func TestContainerWithCustomName(t *testing.T) {
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
