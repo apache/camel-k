@@ -25,8 +25,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/scylladb/go-set/strset"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
@@ -155,7 +153,6 @@ type Environment struct {
 	ConfiguredTraits []Trait
 	ExecutedTraits   []Trait
 	EnvVars          []corev1.EnvVar
-	Classpath        *strset.Set
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -173,17 +170,6 @@ const (
 // GetTrait --
 func (e *Environment) GetTrait(id ID) Trait {
 	for _, t := range e.ExecutedTraits {
-		if t.ID() == id {
-			return t
-		}
-	}
-
-	return nil
-}
-
-// GetConfiguredTrait --
-func (e *Environment) GetConfiguredTrait(id ID) Trait {
-	for _, t := range e.ConfiguredTraits {
 		if t.ID() == id {
 			return t
 		}

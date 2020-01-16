@@ -75,19 +75,17 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		return fmt.Errorf("unable to find integration kit %s", e.Integration.Status.Kit)
 	}
 
-	if e.Classpath == nil {
-		e.Classpath = strset.New()
-	}
+	classpath := strset.New()
 
-	e.Classpath.Add("/etc/camel/resources")
-	e.Classpath.Add("./resources")
+	classpath.Add("/etc/camel/resources")
+	classpath.Add("./resources")
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
 	if quarkus.isEnabled() {
 		quarkus.addClasspath(e)
 	} else {
 		for _, artifact := range kit.Status.Artifacts {
-			e.Classpath.Add(artifact.Target)
+			classpath.Add(artifact.Target)
 		}
 	}
 
@@ -97,7 +95,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account
 		//
-		e.Classpath.Add("/deployments/dependencies/*")
+		classpath.Add("/deployments/dependencies/*")
 	}
 
 	containerName := defaultContainerName
@@ -109,10 +107,10 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	container := e.Resources.GetContainerByName(containerName)
 	if container != nil {
 		for _, m := range container.VolumeMounts {
-			e.Classpath.Add(m.MountPath)
+			classpath.Add(m.MountPath)
 		}
 
-		items := e.Classpath.List()
+		items := classpath.List()
 
 		// keep classpath sorted
 		sort.Strings(items)
