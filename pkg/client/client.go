@@ -20,9 +20,9 @@ package client
 import (
 	"io/ioutil"
 	"os"
-	"os/user"
 	"path/filepath"
 
+	user "github.com/mitchellh/go-homedir"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -169,11 +169,11 @@ func initialize(kubeconfig string) {
 }
 
 func getDefaultKubeConfigFile() (string, error) {
-	usr, err := user.Current()
+	dir, err := user.Dir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(usr.HomeDir, ".kube", "config"), nil
+	return filepath.Join(dir, ".kube", "config"), nil
 }
 
 // GetCurrentNamespace --
@@ -225,24 +225,18 @@ func shouldUseContainerMode() (bool, error) {
 		return false, nil
 	}
 	// Use container mode only when the kubeConfigFile does not exist and the container namespace file is present
-	userUnknown := false
 	configFile, err := getDefaultKubeConfigFile()
 	if err != nil {
-		_, userUnknown = err.(user.UnknownUserIdError)
-		if !userUnknown {
-			return false, err
-		}
+		return false, err
 	}
 	configFilePresent := true
-	if !userUnknown {
-		_, err := os.Stat(configFile)
-		if err != nil && os.IsNotExist(err) {
-			configFilePresent = false
-		} else if err != nil {
-			return false, err
-		}
+	_, err = os.Stat(configFile)
+	if err != nil && os.IsNotExist(err) {
+		configFilePresent = false
+	} else if err != nil {
+		return false, err
 	}
-	if userUnknown || !configFilePresent {
+	if !configFilePresent {
 		_, err := os.Stat(inContainerNamespaceFile)
 		if os.IsNotExist(err) {
 			return false, nil

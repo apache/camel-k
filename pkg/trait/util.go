@@ -20,11 +20,11 @@ package trait
 import (
 	"context"
 	"fmt"
-	"os/user"
 	"reflect"
 	"regexp"
 	"strings"
 
+	user "github.com/mitchellh/go-homedir"
 	"github.com/mitchellh/mapstructure"
 	"github.com/scylladb/go-set/strset"
 
@@ -169,11 +169,11 @@ func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
 }
 
 func mustHomeDir() string {
-	usr, err := user.Current()
+	dir, err := user.Dir()
 	if err != nil {
 		panic(err)
 	}
-	return usr.HomeDir
+	return dir
 }
 
 func toHostDir(host string) string {
