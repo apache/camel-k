@@ -3814,13 +3814,14 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
+  version: v1
   versions:
-  - name: v1alpha1
-    served: true
-    storage: false
   - name: v1
     served: true
     storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   names:
     kind: Build
     listKind: BuildList
@@ -3889,13 +3890,14 @@ spec:
     shortNames:
       - cc
   scope: Namespaced
+  version: v1
   versions:
-  - name: v1alpha1
-    served: true
-    storage: false
   - name: v1
     served: true
     storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
   additionalPrinterColumns:
@@ -3938,13 +3940,14 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
+  version: v1
   versions:
-  - name: v1alpha1
-    served: true
-    storage: false
   - name: v1
     served: true
     storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
   names:
@@ -3997,13 +4000,14 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
+  version: v1
   versions:
-  - name: v1alpha1
-    served: true
-    storage: false
   - name: v1
     served: true
     storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
   names:
@@ -4048,13 +4052,14 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
+  version: v1
   versions:
-  - name: v1alpha1
-    served: true
-    storage: false
   - name: v1
     served: true
     storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
     scale:
