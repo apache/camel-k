@@ -21,14 +21,14 @@ metadata:
   annotations:
     alm-examples: |-
       [{
-        "apiVersion": "camel.apache.org/v1alpha1",
+        "apiVersion": "camel.apache.org/v1",
         "kind": "IntegrationPlatform",
         "metadata": {
           "name": "example"
         }
       },
       {
-        "apiVersion": "camel.apache.org/v1alpha1",
+        "apiVersion": "camel.apache.org/v1",
         "kind": "Integration",
         "metadata": {
           "name": "example"
@@ -43,21 +43,21 @@ metadata:
         }
       },
       {
-        "apiVersion": "camel.apache.org/v1alpha1",
+        "apiVersion": "camel.apache.org/v1",
         "kind": "IntegrationKit",
         "metadata": {
           "name": "example"
         }
       },
       {
-        "apiVersion": "camel.apache.org/v1alpha1",
+        "apiVersion": "camel.apache.org/v1",
         "kind": "CamelCatalog",
         "metadata": {
           "name": "example"
         }
       },
       {
-        "apiVersion": "camel.apache.org/v1alpha1",
+        "apiVersion": "camel.apache.org/v1",
         "kind": "Build",
         "metadata": {
           "name": "example"
@@ -82,27 +82,27 @@ spec:
       displayName: Build
       kind: Build
       name: builds.camel.apache.org
-      version: v1alpha1
+      version: v1
     - description: A Camel catalog
       displayName: Camel Catalog
       kind: CamelCatalog
       name: camelcatalogs.camel.apache.org
-      version: v1alpha1
+      version: v1
     - description: A Camel K integration
       displayName: Integration
       kind: Integration
       name: integrations.camel.apache.org
-      version: v1alpha1
+      version: v1
     - description: A Camel K integration kit
       displayName: Integration Kit
       kind: IntegrationKit
       name: integrationkits.camel.apache.org
-      version: v1alpha1
+      version: v1
     - description: A Camel K integration platform
       displayName: Integration Platform
       kind: IntegrationPlatform
       name: integrationplatforms.camel.apache.org
-      version: v1alpha1
+      version: v1
   description: |
     Apache Camel K
     ==============
@@ -113,7 +113,7 @@ spec:
 
     To start using Camel K, install the operator and then create the following `IntegrationPlatform`:
     ```
-    apiVersion: camel.apache.org/v1alpha1
+    apiVersion: camel.apache.org/v1
     kind: IntegrationPlatform
     metadata:
       name: camel-k
@@ -125,7 +125,7 @@ spec:
 
     After the initial setup, you can run a Camel integration on the cluster by creating an example `Integration`:
     ```
-    apiVersion: camel.apache.org/v1alpha1
+    apiVersion: camel.apache.org/v1
     kind: Integration
     metadata:
       name: example
