@@ -108,21 +108,26 @@ func (t *classpathTrait) Apply(e *Environment) error {
 
 	container := e.Resources.GetContainerByName(containerName)
 	if container != nil {
+		// Add mounted resources to the class path
 		for _, m := range container.VolumeMounts {
 			classpath.Add(m.MountPath)
 		}
 		items := classpath.List()
-		// keep classpath sorted
+		// Keep class path sorted so that it's consistent over reconciliation cycles
 		sort.Strings(items)
 
 		container.Args = append(container.Args, "-cp", strings.Join(items, ":"))
 
+		// Add main Class or JAR
 		quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
 		if quarkus.isEnabled() {
 			container.Args = append(container.Args, "-jar", "camel-k-integration-"+defaults.Version+"-runner.jar")
 		} else {
 			container.Args = append(container.Args, defaultMainClass)
 		}
+
+		// Set the container working directory
+		container.WorkingDir = "/deployments"
 	}
 
 	return nil
