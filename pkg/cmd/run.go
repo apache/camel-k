@@ -189,8 +189,9 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			err := DeleteIntegration(o.Context, c, integration.Name, integration.Namespace)
 			if err != nil {
 				fmt.Println(err)
+				os.Exit(1)
 			}
-			os.Exit(1)
+			os.Exit(0)
 		}()
 	}
 
