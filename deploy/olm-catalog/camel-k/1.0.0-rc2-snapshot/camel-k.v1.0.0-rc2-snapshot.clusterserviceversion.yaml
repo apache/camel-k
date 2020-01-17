@@ -25,7 +25,8 @@ metadata:
         "kind": "IntegrationPlatform",
         "metadata": {
           "name": "example"
-        }
+        },
+        "spec": {}
       },
       {
         "apiVersion": "camel.apache.org/v1",
@@ -47,21 +48,24 @@ metadata:
         "kind": "IntegrationKit",
         "metadata": {
           "name": "example"
-        }
+        },
+        "spec": {}
       },
       {
         "apiVersion": "camel.apache.org/v1",
         "kind": "CamelCatalog",
         "metadata": {
           "name": "example"
-        }
+        },
+        "spec": {}
       },
       {
         "apiVersion": "camel.apache.org/v1",
         "kind": "Build",
         "metadata": {
           "name": "example"
-        }
+        },
+        "spec": {}
       }]
     capabilities: Basic Install
     categories: Integration & Delivery
