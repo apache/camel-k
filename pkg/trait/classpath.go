@@ -28,6 +28,11 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
+)
+
+const (
+	defaultMainClass = "org.apache.camel.k.main.Application"
 )
 
 // The Classpath trait is used internally to configure the classpath of the final integration.
@@ -111,6 +116,13 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		sort.Strings(items)
 
 		container.Args = append(container.Args, "-cp", strings.Join(items, ":"))
+
+		quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+		if quarkus.isEnabled() {
+			container.Args = append(container.Args, "-jar", "camel-k-integration-"+defaults.Version+"-runner.jar")
+		} else {
+			container.Args = append(container.Args, defaultMainClass)
+		}
 	}
 
 	return nil

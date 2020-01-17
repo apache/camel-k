@@ -20,7 +20,6 @@ package trait
 import (
 	"context"
 	"sort"
-	"strings"
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -102,9 +101,11 @@ func TestApplyClasspathTraitWithDeploymentResource(t *testing.T) {
 	cp := strset.New("/etc/camel/resources", "./resources", "/mount/path").List()
 	sort.Strings(cp)
 
-	assert.Len(t, d.Spec.Template.Spec.Containers[0].Env, 1)
-	assert.Equal(t, "JAVA_CLASSPATH", d.Spec.Template.Spec.Containers[0].Env[0].Name)
-	assert.Equal(t, strings.Join(cp, ":"), d.Spec.Template.Spec.Containers[0].Env[0].Value)
+	assert.Equal(t, d.Spec.Template.Spec.Containers[0].Args, []string{
+		"-cp",
+		"./resources:/etc/camel/resources:/mount/path",
+		"org.apache.camel.k.main.Application",
+	})
 }
 
 func TestApplyClasspathTraitWithKNativeResource(t *testing.T) {
@@ -132,9 +133,11 @@ func TestApplyClasspathTraitWithKNativeResource(t *testing.T) {
 	cp := strset.New("/etc/camel/resources", "./resources", "/mount/path").List()
 	sort.Strings(cp)
 
-	assert.Len(t, s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env, 1)
-	assert.Equal(t, "JAVA_CLASSPATH", s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env[0].Name)
-	assert.Equal(t, strings.Join(cp, ":"), s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env[0].Value)
+	assert.Equal(t, s.Spec.Template.Spec.Containers[0].Args, []string{
+		"-cp",
+		"./resources:/etc/camel/resources:/mount/path",
+		"org.apache.camel.k.main.Application",
+	})
 }
 
 func createNominalClasspathTest() (*classpathTrait, *Environment) {

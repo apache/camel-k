@@ -24,7 +24,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -105,14 +104,6 @@ func TestQuarkusTraitAddRuntimeDependenciesWithouSourceDoesNothing(t *testing.T)
 
 	assert.Nil(t, err)
 	assert.Len(t, environment.Integration.Status.Dependencies, 0)
-}
-
-func TestQuarkusTraitAddContainerEnvironmentShouldSucceed(t *testing.T) {
-	quarkusTrait, environment := createNominalQuarkusTest()
-
-	quarkusTrait.addContainerEnvironment(environment)
-
-	assert.NotNil(t, envvar.Get(environment.EnvVars, envVarAppJAR))
 }
 
 func TestQuarkusTraitAddRuntimeDependencyShouldSucceed(t *testing.T) {

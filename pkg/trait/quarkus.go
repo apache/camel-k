@@ -32,7 +32,6 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
@@ -189,10 +188,6 @@ func (t *quarkusTrait) addRuntimeDependencies(e *Environment) error {
 		}
 	}
 	return nil
-}
-
-func (t *quarkusTrait) addContainerEnvironment(e *Environment) {
-	envvar.SetVal(&e.EnvVars, envVarAppJAR, "camel-k-integration-"+defaults.Version+"-runner.jar")
 }
 
 func addRuntimeDependency(dependency string, dependencies *[]string) {
