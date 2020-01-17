@@ -21,14 +21,16 @@ import (
 	"fmt"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 const (
@@ -99,9 +101,10 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 func (t *containerTrait) Apply(e *Environment) error {
 	container := corev1.Container{
-		Name:  t.Name,
-		Image: e.Integration.Status.Image,
-		Env:   make([]corev1.EnvVar, 0),
+		Name:    t.Name,
+		Image:   e.Integration.Status.Image,
+		Env:     make([]corev1.EnvVar, 0),
+		Command: []string{"java"},
 	}
 
 	// combine Environment of integration with platform, kit, integration
