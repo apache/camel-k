@@ -28,7 +28,6 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 // The Classpath trait is used internally to configure the classpath of the final integration.
@@ -90,11 +89,9 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	}
 
 	if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypeExternal {
-		//
 		// In case of an external created kit, we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account
-		//
 		classpath.Add("/deployments/dependencies/*")
 	}
 
@@ -109,13 +106,11 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		for _, m := range container.VolumeMounts {
 			classpath.Add(m.MountPath)
 		}
-
 		items := classpath.List()
-
 		// keep classpath sorted
 		sort.Strings(items)
 
-		envvar.SetVal(&container.Env, "JAVA_CLASSPATH", strings.Join(items, ":"))
+		container.Args = append(container.Args, "-cp", strings.Join(items, ":"))
 	}
 
 	return nil
