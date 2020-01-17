@@ -172,7 +172,6 @@ func TestKnativeService(t *testing.T) {
 		}
 	})
 
-	test.EnvVarExists(t, spec.Containers[0].Env, "JAVA_CLASSPATH")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_ROUTES", "file:/etc/camel/sources/i-source-000/routes.js?language=js&compression=true")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
