@@ -41,7 +41,7 @@ const (
 	KanikoVersion = "0.14.0"
 
 	// BaseImage --
-	BaseImage = "fabric8/s2i-java:3.0-java8"
+	BaseImage = "adoptopenjdk/openjdk8:slim"
 
 	// LocalRepository --
 	LocalRepository = "/tmp/artifacts/m2"
