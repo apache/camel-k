@@ -45,6 +45,8 @@ const builderDir = "/builder"
 // +camel-k:trait=builder
 type builderTrait struct {
 	BaseTrait `property:",squash"`
+	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
+	Verbose bool `property:"verbose"`
 }
 
 func newBuilderTrait() *builderTrait {
@@ -212,6 +214,10 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.KanikoTask, error) {
 
 	args := make([]string, 0, len(baseArgs))
 	args = append(args, baseArgs...)
+
+	if t.Verbose {
+		args = append(args, "-v=debug")
+	}
 
 	if e.Platform.Status.Build.Registry.Insecure {
 		args = append(args, "--insecure")
