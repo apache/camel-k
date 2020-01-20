@@ -33,7 +33,7 @@ applicable when `protocol` is `https` and `use-ssl-client-authentication` is `tr
 (default `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` for OpenShift).
 
 | jolokia.client-principal
-| string
+| []string
 | The principal which must be given in a client certificate to allow access to the Jolokia endpoint,
 applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 (default `clientPrincipal=cn=system:master-proxy` for OpenShift).
