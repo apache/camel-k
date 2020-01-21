@@ -26,7 +26,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 // The Jolokia trait activates and configures the Jolokia Java agent.
@@ -84,9 +83,41 @@ func (t *jolokiaTrait) isEnabled() bool {
 }
 
 func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
+	return t.isEnabled() && e.IntegrationInPhase(
+		v1.IntegrationPhaseInitialization,
+		v1.IntegrationPhaseDeploying,
+		v1.IntegrationPhaseRunning,
+	), nil
+}
+
+func (t *jolokiaTrait) Apply(e *Environment) (err error) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		if t.isEnabled() {
+			// Add Camel management dependency
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+			// And Jolokia agent
+			// TODO: We may want to make the Jolokia version configurable
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia/jolokia-jvm:jar:agent:1.6.2")
+		}
+		return nil
+	}
+
+	container := e.getIntegrationContainer()
+	if container == nil {
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionJolokiaAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionContainerNotAvailableReason,
+			"",
+		)
+		return nil
+	}
+
+	// Configure the Jolokia Java agent
+	// Populate first with the extra options
 	options, err := parseCsvMap(t.Options)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if len(t.ClientPrincipal) == 1 {
@@ -112,50 +143,6 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 		})
 	}
 
-	return e.IntegrationInPhase(
-		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
-}
-
-func (t *jolokiaTrait) Apply(e *Environment) (err error) {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if t.isEnabled() {
-			// Add Camel management dependency
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
-		}
-		return nil
-	}
-
-	container := e.getIntegrationContainer()
-	if container == nil {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionJolokiaAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionContainerNotAvailableReason,
-			"",
-		)
-		return nil
-	}
-
-	if !t.isEnabled() {
-		// Deactivate the Jolokia Java agent
-		// Note: the AB_JOLOKIA_OFF environment variable acts as an option flag
-		envvar.SetVal(&container.Env, "AB_JOLOKIA_OFF", "true")
-		return nil
-	}
-
-	// Need to set it explicitly as it default to true
-	envvar.SetVal(&container.Env, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
-
-	// Configure the Jolokia Java agent
-	// Populate first with the extra options
-	options, err := parseCsvMap(t.Options)
-	if err != nil {
-		return err
-	}
-
 	// Then add explicitly set trait configuration properties
 	addToJolokiaOptions(options, "caCert", t.CaCert)
 	addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
@@ -168,14 +155,14 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	addToJolokiaOptions(options, "user", t.User)
 	addToJolokiaOptions(options, "useSslClientAuthentication", t.UseSslClientAuthentication)
 
-	// Lastly set the AB_JOLOKIA_OPTS environment variable from the fabric8/s2i-java base image
 	// Options must be sorted so that the environment variable value is consistent over iterations,
 	// otherwise the value changes which results in triggering a new deployment.
 	optionValues := make([]string, len(options))
 	for i, k := range util.SortedStringMapKeys(options) {
 		optionValues[i] = k + "=" + options[k]
 	}
-	envvar.SetVal(&container.Env, "AB_JOLOKIA_OPTS", strings.Join(optionValues, ","))
+
+	container.Args = append(container.Args, "-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar="+strings.Join(optionValues, ","))
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",

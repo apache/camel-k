@@ -21,34 +21,16 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestConfigureJolokiaTraitInRightPhaseDoesSucceed(t *testing.T) {
-	trait, environment := createNominalJolokiaTest()
-
-	configured, err := trait.Configure(environment)
-
-	assert.Nil(t, err)
-	assert.True(t, configured)
-	assert.Equal(t, *trait.Host, "*")
-	assert.Equal(t, *trait.DiscoveryEnabled, false)
-	assert.Nil(t, trait.Protocol)
-	assert.Nil(t, trait.CaCert)
-	assert.Nil(t, trait.ExtendedClientCheck)
-	assert.Nil(t, trait.ClientPrincipal)
-	assert.Nil(t, trait.UseSslClientAuthentication)
-}
-
-func TestConfigureJolokiaTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
+func TestConfigureJolokiaTraitInRunningPhaseDoesSucceed(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
@@ -58,68 +40,50 @@ func TestConfigureJolokiaTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	assert.True(t, configured)
 }
 
-func TestConfigureJolokiaTraitWithUnparseableOptionsDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalJolokiaTest()
-	options := "unparseable csv"
-	trait.Options = &options
-
-	configured, err := trait.Configure(environment)
-	assert.NotNil(t, err)
-	assert.False(t, configured)
-}
-
-func TestConfigureJolokiaTraitForOpenShiftProfileShouldSetDefaultHttpsJolokiaOptions(t *testing.T) {
-	trait, environment := createNominalJolokiaTest()
-	environment.IntegrationKit.Spec.Profile = v1.TraitProfileOpenShift
-
-	configured, err := trait.Configure(environment)
-
-	assert.Nil(t, err)
-	assert.True(t, configured)
-	assert.Equal(t, *trait.Protocol, "https")
-	assert.Equal(t, *trait.CaCert, "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
-	assert.Equal(t, *trait.ExtendedClientCheck, true)
-	assert.Equal(t, *trait.UseSslClientAuthentication, true)
-}
-
-func TestConfigureJolokiaTraitWithOptionsShouldPreventDefaultJolokiaOptions(t *testing.T) {
-	trait, environment := createNominalJolokiaTest()
-	environment.IntegrationKit.Spec.Profile = v1.TraitProfileOpenShift
-	options := "host=explicit-host," +
-		"discoveryEnabled=true," +
-		"protocol=http," +
-		"caCert=.cacert," +
-		"extendedClientCheck=false," +
-		"clientPrincipal=cn:any," +
-		"useSslClientAuthentication=false"
-	trait.Options = &options
-
-	configured, err := trait.Configure(environment)
-
-	assert.Nil(t, err)
-	assert.True(t, configured)
-	assert.Nil(t, trait.Host)
-	assert.Nil(t, trait.DiscoveryEnabled)
-	assert.Nil(t, trait.Protocol)
-	assert.Nil(t, trait.CaCert)
-	assert.Nil(t, trait.ExtendedClientCheck)
-	assert.Nil(t, trait.ClientPrincipal)
-	assert.Nil(t, trait.UseSslClientAuthentication)
-}
-
 func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
 
 	err := trait.Apply(environment)
 
+	assert.Nil(t, err)
+
 	container := environment.Resources.GetContainerByName(defaultContainerName)
+	assert.NotNil(t, container)
+
+	assert.Equal(t, container.Args, []string{
+		"-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar=discoveryEnabled=false,host=*,port=8778",
+	})
+
+	assert.Len(t, container.Ports, 1)
+	containerPort := container.Ports[0]
+	assert.Equal(t, "jolokia", containerPort.Name)
+	assert.Equal(t, int32(8778), containerPort.ContainerPort)
+	assert.Equal(t, corev1.ProtocolTCP, containerPort.Protocol)
+
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+	condition := environment.Integration.Status.Conditions[0]
+	assert.Equal(t, v1.IntegrationConditionJolokiaAvailable, condition.Type)
+	assert.Equal(t, corev1.ConditionTrue, condition.Status)
+}
+
+func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
+	trait, environment := createNominalJolokiaTest()
+	environment.IntegrationKit.Spec.Profile = v1.TraitProfileOpenShift
+
+	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
-	test.EnvVarHasValue(t, container.Env, "AB_JOLOKIA_AUTH_OPENSHIFT", "false")
-	test.EnvVarHasValue(t, container.Env, "AB_JOLOKIA_OPTS", "port=8778")
-	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
+	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
+
+	assert.Equal(t, container.Args, []string{
+		"-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar=caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt," +
+			"clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc," +
+			"clientPrincipal.3=cn=fuse-console.fuse.svc,discoveryEnabled=false,extendedClientCheck=true," +
+			"host=*,port=8778,protocol=https,useSslClientAuthentication=true",
+	})
+
 	assert.Len(t, container.Ports, 1)
 	containerPort := container.Ports[0]
 	assert.Equal(t, "jolokia", containerPort.Name)
@@ -158,13 +122,15 @@ func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 
 	err := trait.Apply(environment)
 
+	assert.Nil(t, err)
+
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 
-	assert.Nil(t, err)
-	ev := envvar.Get(container.Env, "AB_JOLOKIA_OPTS")
-	assert.NotNil(t, ev)
-	assert.Contains(t, ev.Value, "port=8778", "host=explicit-host", "discoveryEnabled=true", "protocol=http", "caCert=.cacert")
-	assert.Contains(t, ev.Value, "extendedClientCheck=false", "clientPrincipal=cn:any", "useSslClientAuthentication=false")
+	assert.Equal(t, container.Args, []string{
+		"-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar=caCert=.cacert,clientPrincipal=cn:any," +
+			"discoveryEnabled=true,extendedClientCheck=false,host=explicit-host,port=8778,protocol=http," +
+			"useSslClientAuthentication=false",
+	})
 }
 
 func TestApplyJolokiaTraitWithUnparseableOptionShouldReturnError(t *testing.T) {
@@ -175,18 +141,6 @@ func TestApplyJolokiaTraitWithUnparseableOptionShouldReturnError(t *testing.T) {
 	err := trait.Apply(environment)
 
 	assert.NotNil(t, err)
-}
-
-func TestApplyDisabledJolokiaTraitShouldNotSucceed(t *testing.T) {
-	trait, environment := createNominalJolokiaTest()
-	trait.Enabled = new(bool)
-
-	err := trait.Apply(environment)
-
-	container := environment.Resources.GetContainerByName(defaultContainerName)
-
-	assert.Nil(t, err)
-	test.EnvVarHasValue(t, container.Env, "AB_JOLOKIA_OFF", "true")
 }
 
 func TestSetDefaultJolokiaOptionShoudlNotOverrideOptionsMap(t *testing.T) {
