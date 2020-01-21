@@ -85,9 +85,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 	classpath.Add("./resources")
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	if quarkus.isEnabled() {
-		quarkus.addClasspath(e)
-	} else {
+	if !quarkus.isEnabled() {
 		for _, artifact := range kit.Status.Artifacts {
 			classpath.Add(artifact.Target)
 		}
@@ -100,13 +98,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		classpath.Add("/deployments/dependencies/*")
 	}
 
-	containerName := defaultContainerName
-	dt := e.Catalog.GetTrait(containerTraitID)
-	if dt != nil {
-		containerName = dt.(*containerTrait).Name
-	}
-
-	container := e.Resources.GetContainerByName(containerName)
+	container := e.getIntegrationContainer()
 	if container != nil {
 		// Add mounted resources to the class path
 		for _, m := range container.VolumeMounts {

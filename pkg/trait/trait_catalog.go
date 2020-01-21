@@ -151,7 +151,6 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 		return []Trait{
 			c.tPlatform,
 			c.tCamel,
-			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
 			c.tBuilder,
@@ -167,6 +166,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
+			c.tDebug,
 			c.tClasspath,
 			c.tProbes,
 			c.tRoute,
@@ -177,7 +177,6 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 		return []Trait{
 			c.tPlatform,
 			c.tCamel,
-			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
 			c.tBuilder,
@@ -193,6 +192,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
+			c.tDebug,
 			c.tClasspath,
 			c.tProbes,
 			c.tIngress,
@@ -203,7 +203,6 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 		return []Trait{
 			c.tPlatform,
 			c.tCamel,
-			c.tDebug,
 			c.tRestDsl,
 			c.tKnative,
 			c.tDependencies,
@@ -220,6 +219,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
+			c.tDebug,
 			c.tClasspath,
 			c.tProbes,
 			c.tIstio,

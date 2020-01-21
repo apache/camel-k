@@ -18,14 +18,13 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 // The Debug trait can be used to enable debugging on the integration container,
 // so that a remote debugger can be attached.
-//
-// Enabling the trait will inject the `JAVA_DEBUG` environment variable into the integration container.
 //
 // +camel-k:trait=debug
 type debugTrait struct {
@@ -47,8 +46,13 @@ func (t *debugTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *debugTrait) Apply(e *Environment) error {
-	// this is all that's needed as long as the base image is `fabric8/s2i-java` look into builder/builder.go
-	envvar.SetVal(&e.EnvVars, "JAVA_DEBUG", True)
+	container := e.getIntegrationContainer()
+	if container == nil {
+		return fmt.Errorf("unable to find integration container")
+	}
+
+	// TODO: Add options to configure debugging agent
+	container.Args = append(container.Args, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
 
 	return nil
 }

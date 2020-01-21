@@ -148,10 +148,6 @@ func (t *quarkusTrait) addBuildSteps(task *v1.BuilderTask) {
 	task.Steps = append(task.Steps, builder.StepIDsFor(runtime.QuarkusSteps...)...)
 }
 
-func (t *quarkusTrait) addClasspath(_ *Environment) {
-	// No-op as we rely on the Quarkus runner
-}
-
 func (t *quarkusTrait) addRuntimeDependencies(e *Environment) error {
 	dependencies := &e.Integration.Status.Dependencies
 

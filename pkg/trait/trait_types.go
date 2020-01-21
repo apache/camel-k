@@ -613,3 +613,13 @@ func (e *Environment) CollectConfigurationValues(configurationType string) []str
 func (e *Environment) CollectConfigurationPairs(configurationType string) map[string]string {
 	return CollectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
+
+func (e *Environment) getIntegrationContainer() *corev1.Container {
+	containerName := defaultContainerName
+	dt := e.Catalog.GetTrait(containerTraitID)
+	if dt != nil {
+		containerName = dt.(*containerTrait).Name
+	}
+
+	return e.Resources.GetContainerByName(containerName)
+}
