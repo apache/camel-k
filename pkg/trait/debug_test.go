@@ -18,15 +18,17 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestDebugTraitApplicability(t *testing.T) {
@@ -49,7 +51,6 @@ func TestDebugTraitApplicability(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make([]corev1.EnvVar, 0),
 	}
 
 	trait := newDebugTrait()
@@ -67,6 +68,7 @@ func TestDebugTraitApplicability(t *testing.T) {
 
 func TestApplyDebugTrait(t *testing.T) {
 	environment := Environment{
+		Catalog: NewCatalog(context.TODO(), nil),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
@@ -81,12 +83,29 @@ func TestApplyDebugTrait(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make([]corev1.EnvVar, 0),
+		Resources: kubernetes.NewCollection(),
 	}
+
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
 
 	trait := newDebugTrait()
 
 	assert.Nil(t, trait.Apply(&environment))
-	assert.NotNil(t, envvar.Get(environment.EnvVars, "JAVA_DEBUG"))
-	assert.Equal(t, True, envvar.Get(environment.EnvVars, "JAVA_DEBUG").Value)
+	assert.Equal(t, d.Spec.Template.Spec.Containers[0].Args, []string{
+		"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+	})
 }

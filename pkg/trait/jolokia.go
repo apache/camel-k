@@ -128,13 +128,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	containerName := defaultContainerName
-	dt := e.Catalog.GetTrait(containerTraitID)
-	if dt != nil {
-		containerName = dt.(*containerTrait).Name
-	}
-
-	container := e.Resources.GetContainerByName(containerName)
+	container := e.getIntegrationContainer()
 	if container == nil {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionJolokiaAvailable,
