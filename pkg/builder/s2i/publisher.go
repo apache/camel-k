@@ -22,6 +22,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,11 +37,17 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-
-	"github.com/pkg/errors"
 )
 
 func publisher(ctx *builder.Context) error {
+	// We may want to unify the Dockerfile between build strategies, i.e., between Kaniko and S2I
+	// #nosec G202
+	dockerfile := `
+		FROM ` + ctx.BaseImage + `
+		ADD . /deployments
+		USER 1000
+	`
+
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: buildv1.GroupVersion.String(),
@@ -55,15 +63,11 @@ func publisher(ctx *builder.Context) error {
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
 				Source: buildv1.BuildSource{
-					Type: buildv1.BuildSourceBinary,
+					Type:       buildv1.BuildSourceBinary,
+					Dockerfile: &dockerfile,
 				},
 				Strategy: buildv1.BuildStrategy{
-					SourceStrategy: &buildv1.SourceBuildStrategy{
-						From: corev1.ObjectReference{
-							Kind: "DockerImage",
-							Name: ctx.BaseImage,
-						},
-					},
+					DockerStrategy: &buildv1.DockerBuildStrategy{},
 				},
 				Output: buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
