@@ -98,6 +98,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 
+	// save
+	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
+
 	// completion support
 	configureBashAnnotationForFlag(
 		&cmd,
@@ -119,6 +122,7 @@ type installCmdOptions struct {
 	ExampleSetup      bool     `mapstructure:"example"`
 	Global            bool     `mapstructure:"global"`
 	KanikoBuildCache  bool     `mapstructure:"kaniko-build-cache"`
+	Save              bool     `mapstructure:"save"`
 	ClusterType       string   `mapstructure:"cluster-type"`
 	OutputFormat      string   `mapstructure:"output"`
 	CamelVersion      string   `mapstructure:"camel-version"`
@@ -321,6 +325,12 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 	if collection != nil {
 		return o.printOutput(collection)
+	}
+
+	if o.Save {
+		if err := saveDefaultConfig(cobraCmd, "kamel.install", "kamel.install"); err != nil {
+			return err
+		}
 	}
 
 	return nil

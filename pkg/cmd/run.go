@@ -40,10 +40,8 @@ import (
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -63,7 +61,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 		Short:   "Run a integration on Kubernetes",
 		Long:    `Deploys and execute a integration pod on Kubernetes.`,
 		Args:    options.validateArgs,
-		PreRunE: decode(&options),
+		PreRunE: options.decode,
 		RunE:    options.run,
 	}
 
@@ -88,6 +86,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 
+	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
+
 	// completion support
 	configureKnownCompletions(&cmd)
 
@@ -101,6 +101,7 @@ type runCmdOptions struct {
 	Logs            bool     `mapstructure:"logs"`
 	Sync            bool     `mapstructure:"sync"`
 	Dev             bool     `mapstructure:"dev"`
+	Save            bool     `mapstructure:"save"`
 	IntegrationKit  string   `mapstructure:"kit"`
 	IntegrationName string   `mapstructure:"name"`
 	Profile         string   `mapstructure:"profile"`
@@ -116,6 +117,23 @@ type runCmdOptions struct {
 	LoggingLevels   []string `mapstructure:"logging-levels"`
 	Volumes         []string `mapstructure:"volumes"`
 	EnvVars         []string `mapstructure:"envs"`
+}
+
+func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
+	pathToRoot := pathToRoot(cmd)
+	if err := decodeKey(o, pathToRoot); err != nil {
+		return err
+	}
+
+	name := o.GetIntegrationName(args)
+	if name != "" {
+		secondaryPath := pathToRoot + ".integration." + name
+		if err := decodeKey(o, secondaryPath); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
@@ -241,6 +259,17 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// Let's add a Wait point, otherwise the script terminates
 		<-o.Context.Done()
 	}
+
+	if o.Save {
+		name := o.GetIntegrationName(args)
+		if name != "" {
+			key := fmt.Sprintf("kamel.run.integration.%s", name)
+			if err := saveDefaultConfig(cmd, "kamel.run", key); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -304,13 +333,7 @@ func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v
 func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
 
-	name := ""
-	if o.IntegrationName != "" {
-		name = o.IntegrationName
-		name = kubernetes.SanitizeName(name)
-	} else if len(sources) == 1 {
-		name = kubernetes.SanitizeName(sources[0])
-	}
+	name := o.GetIntegrationName(sources)
 
 	if name == "" {
 		return nil, errors.New("unable to determine integration name")
@@ -460,6 +483,17 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		fmt.Printf("integration \"%s\" updated\n", name)
 	}
 	return &integration, nil
+}
+
+func (o *runCmdOptions) GetIntegrationName(sources []string) string {
+	name := ""
+	if o.IntegrationName != "" {
+		name = o.IntegrationName
+		name = kubernetes.SanitizeName(name)
+	} else if len(sources) == 1 {
+		name = kubernetes.SanitizeName(sources[0])
+	}
+	return name
 }
 
 func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
