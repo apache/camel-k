@@ -58,3 +58,12 @@ issues:
         - unparam
         - varcheck
         - unused
+    - path: deploy/resources.go
+      linters:
+        - stylecheck
+        - golint
+        - deadcode
+        - lll
+        - unparam
+        - varcheck
+        - unused
