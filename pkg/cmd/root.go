@@ -50,6 +50,11 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	var err error
 	cmd := kamelPreAddCommandInit(&options)
 	addKamelSubcommands(cmd, &options)
+
+	if err := addHelpSubCommands(cmd, &options); err != nil {
+		return cmd, err
+	}
+
 	err = kamelPostAddCommandInit(cmd)
 
 	return cmd, err
@@ -114,6 +119,26 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdRebuild(options)))
 	cmd.AddCommand(newCmdOperator())
 	cmd.AddCommand(cmdOnly(newCmdBuilder(options)))
+}
+
+func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
+	cmd.InitDefaultHelpCmd()
+
+	var helpCmd *cobra.Command
+	for _, c := range cmd.Commands() {
+		if c.Name() == "help" {
+			helpCmd = c
+			break
+		}
+	}
+
+	if helpCmd == nil {
+		return errors.New("could not find any configured help command")
+	}
+
+	helpCmd.AddCommand(cmdOnly(newTraitHelpCmd(options)))
+
+	return nil
 }
 
 func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {

@@ -1,0 +1,219 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package cmd
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"reflect"
+	"strings"
+
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
+
+	"github.com/fatih/structs"
+	"gopkg.in/yaml.v2"
+
+	"github.com/apache/camel-k/pkg/trait"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/spf13/cobra"
+)
+
+func newTraitHelpCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *traitHelpCommandOptions) {
+	options := traitHelpCommandOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
+
+	cmd := cobra.Command{
+		Use:     "trait",
+		Short:   "Trait help information",
+		Long:    `Displays help information for traits in a specified output format.`,
+		PreRunE: decode(&options),
+		RunE: func(_ *cobra.Command, args []string) error {
+			if err := options.validate(args); err != nil {
+				return err
+			}
+			return options.run(args)
+		},
+	}
+
+	cmd.Flags().Bool("all", false, "Include all traits")
+	cmd.Flags().StringP("output", "o", "", "Output format. One of json, yaml")
+
+	return &cmd, &options
+}
+
+type traitHelpCommandOptions struct {
+	*RootCmdOptions
+	IncludeAll   bool   `mapstructure:"all"`
+	OutputFormat string `mapstructure:"output"`
+}
+
+type traitDescription struct {
+	Name       trait.ID                   `json:"name" yaml:"name"`
+	Platform   bool                       `json:"platform" yaml:"platform"`
+	Profiles   []string                   `json:"profiles" yaml:"profiles"`
+	Properties []traitPropertyDescription `json:"properties" yaml:"properties"`
+}
+
+type traitPropertyDescription struct {
+	Name         string      `json:"name" yaml:"name"`
+	TypeName     string      `json:"type" yaml:"type"`
+	DefaultValue interface{} `json:"defaultValue,omitempty" yaml:"defaultValue,omitempty"`
+}
+
+func (command *traitHelpCommandOptions) validate(args []string) error {
+	if command.IncludeAll && len(args) > 0 {
+		return errors.New("invalid combination: both all flag and a named trait is set")
+	}
+	if !command.IncludeAll && len(args) == 0 {
+		return errors.New("invalid combination: neither all flag nor a named trait is set")
+	}
+	return nil
+}
+
+func (command *traitHelpCommandOptions) run(args []string) error {
+	var traitDescriptions []*traitDescription
+	var catalog = trait.NewCatalog(command.Context, nil)
+
+	for _, tp := range v1.AllTraitProfiles {
+		traits := catalog.TraitsForProfile(tp)
+		for _, t := range traits {
+			if len(args) == 1 && trait.ID(args[0]) != t.ID() {
+				continue
+			}
+
+			td := findTraitDescription(t.ID(), traitDescriptions)
+			if td == nil {
+				td = &traitDescription{
+					Name:     t.ID(),
+					Platform: t.IsPlatformTrait(),
+					Profiles: make([]string, 0),
+				}
+				computeTraitProperties(structs.Fields(t), &td.Properties)
+				traitDescriptions = append(traitDescriptions, td)
+			}
+			td.addProfile(string(tp))
+		}
+	}
+
+	if len(args) == 1 && len(traitDescriptions) == 0 {
+		return fmt.Errorf("no trait named '%s' exists", args[0])
+	}
+
+	switch strings.ToUpper(command.OutputFormat) {
+	case "JSON":
+		res, err := json.Marshal(traitDescriptions)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(res))
+	case "YAML":
+		res, err := yaml.Marshal(traitDescriptions)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(res))
+	default:
+		fmt.Println(outputTraits(traitDescriptions))
+	}
+
+	return nil
+}
+
+func (td *traitDescription) addProfile(tp string) {
+	for _, p := range td.Profiles {
+		if p == tp {
+			return
+		}
+	}
+	td.Profiles = append(td.Profiles, tp)
+}
+
+func findTraitDescription(id trait.ID, traitDescriptions []*traitDescription) *traitDescription {
+	for _, td := range traitDescriptions {
+		if td.Name == id {
+			return td
+		}
+	}
+	return nil
+}
+
+func computeTraitProperties(fields []*structs.Field, properties *[]traitPropertyDescription) {
+	for _, f := range fields {
+		if f.IsEmbedded() && f.IsExported() && f.Kind() == reflect.Struct {
+			computeTraitProperties(f.Fields(), properties)
+		}
+
+		if !f.IsExported() || f.IsEmbedded() {
+			continue
+		}
+
+		property := f.Tag("property")
+		if property == "" {
+			continue
+		}
+
+		tp := traitPropertyDescription{}
+		tp.Name = property
+
+		switch f.Kind() {
+		case reflect.Ptr:
+			tp.TypeName = reflect.TypeOf(f.Value()).Elem().String()
+		case reflect.Slice:
+			tp.TypeName = fmt.Sprintf("slice:%s", reflect.TypeOf(f.Value()).Elem().String())
+		default:
+			tp.TypeName = f.Kind().String()
+		}
+
+		if f.IsZero() {
+			if tp.TypeName == "bool" {
+				tp.DefaultValue = false
+			} else {
+				tp.DefaultValue = nil
+			}
+		} else {
+			tp.DefaultValue = f.Value()
+		}
+
+		*properties = append(*properties, tp)
+	}
+}
+
+func outputTraits(descriptions []*traitDescription) string {
+	return indentedwriter.IndentedString(func(out io.Writer) {
+		w := indentedwriter.NewWriter(out)
+
+		for _, td := range descriptions {
+			w.Write(0, "Name:\t%s\n", td.Name)
+			w.Write(0, "Profiles:\t%s\n", strings.Join(td.Profiles, ","))
+			w.Write(0, "Platform:\t%t\n", td.Platform)
+			w.Write(0, "Properties:\n")
+			for _, p := range td.Properties {
+				w.Write(1, "%s:\n", p.Name)
+				w.Write(2, "Type:\t%s\n", p.TypeName)
+				if p.DefaultValue != nil {
+					w.Write(2, "Default Value:\t%v\n", p.DefaultValue)
+				}
+			}
+			w.Writeln(0, "")
+		}
+	})
+}
