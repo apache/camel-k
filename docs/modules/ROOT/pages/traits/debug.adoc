@@ -4,8 +4,6 @@
 The Debug trait can be used to enable debugging on the integration container,
 so that a remote debugger can be attached.
 
-Enabling the trait will inject the `JAVA_DEBUG` environment variable into the integration container.
-
 
 This trait is available in the following profiles: **Kubernetes, Knative, OpenShift**.
 
