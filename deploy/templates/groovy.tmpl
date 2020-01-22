@@ -1,0 +1,8 @@
+// camel-k: language=groovy
+
+// Write your routes here, for example:
+from('timer:groovy?period=1s')
+    .routeId('groovy')
+    .setBody()
+      .simple('Hello Camel K from ${routeId}')
+    .to('log:info')

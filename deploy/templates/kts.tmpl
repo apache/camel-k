@@ -1,0 +1,8 @@
+// camel-k: language=kotlin
+
+// Write your routes here, for example:
+from("timer:kotlin?period=1s")
+  .routeId("kotlin")
+  .setBody()
+    .simple("Hello Camel K from \${routeId}")
+  .to("log:info")

@@ -29,11 +29,7 @@ import (
 func MakeTempCopy(t *testing.T, fileName string) string {
 	_, simpleName := path.Split(fileName)
 	var err error
-	var tmpDir string
-	if tmpDir, err = ioutil.TempDir("", "camel-k-"); err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
+	tmpDir := MakeTempDir(t)
 	tmpFileName := path.Join(tmpDir, simpleName)
 	var content []byte
 	if content, err = ioutil.ReadFile(fileName); err != nil {
@@ -59,4 +55,16 @@ func ReplaceInFile(t *testing.T, fileName string, old, new string) {
 		t.Error(err)
 		t.FailNow()
 	}
+}
+
+// MakeTempDir --
+func MakeTempDir(t *testing.T) string {
+	var tmpDir string
+	var err error
+	if tmpDir, err = ioutil.TempDir("", "camel-k-"); err != nil {
+		t.Error(err)
+		t.FailNow()
+		return ""
+	}
+	return tmpDir
 }

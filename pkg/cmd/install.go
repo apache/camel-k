@@ -432,8 +432,9 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 }
 
 func errorIfKitIsNotAvailable(schema *runtime.Scheme, kit string) error {
-	for _, resource := range deploy.Resources {
-		resource, err := kubernetes.LoadResourceFromYaml(schema, resource)
+	for _, name := range deploy.Resources("/") {
+		resourceData := deploy.ResourceAsString(name)
+		resource, err := kubernetes.LoadResourceFromYaml(schema, resourceData)
 		if err != nil {
 			// Not one of our registered schemas
 			continue
