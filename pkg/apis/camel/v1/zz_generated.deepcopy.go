@@ -1057,6 +1057,11 @@ func (in *IntegrationStatus) DeepCopyInto(out *IntegrationStatus) {
 		*out = make([]SourceSpec, len(*in))
 		copy(*out, *in)
 	}
+	if in.GeneratedResources != nil {
+		in, out := &in.GeneratedResources, &out.GeneratedResources
+		*out = make([]ResourceSpec, len(*in))
+		copy(*out, *in)
+	}
 	if in.Failure != nil {
 		in, out := &in.Failure, &out.Failure
 		*out = new(Failure)

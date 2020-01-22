@@ -50,11 +50,20 @@ func NewIntegrationList() IntegrationList {
 
 // Sources return a new slice containing all the sources associated to the integration
 func (in *Integration) Sources() []SourceSpec {
-	allSources := make([]SourceSpec, 0, len(in.Spec.Sources)+len(in.Status.GeneratedSources))
-	allSources = append(allSources, in.Spec.Sources...)
-	allSources = append(allSources, in.Status.GeneratedSources...)
+	sources := make([]SourceSpec, 0, len(in.Spec.Sources)+len(in.Status.GeneratedSources))
+	sources = append(sources, in.Spec.Sources...)
+	sources = append(sources, in.Status.GeneratedSources...)
 
-	return allSources
+	return sources
+}
+
+// Resources return a new slice containing all the resources associated to the integration
+func (in *Integration) Resources() []ResourceSpec {
+	resources := make([]ResourceSpec, 0, len(in.Spec.Resources)+len(in.Status.GeneratedResources))
+	resources = append(resources, in.Spec.Resources...)
+	resources = append(resources, in.Status.GeneratedResources...)
+
+	return resources
 }
 
 // AddSource --
