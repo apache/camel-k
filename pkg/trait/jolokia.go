@@ -37,11 +37,11 @@ type jolokiaTrait struct {
 	BaseTrait `property:",squash"`
 	// The PEM encoded CA certification file path, used to verify client certificates,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
-	// (default `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` for OpenShift).
+	// (default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).
 	CaCert *string `property:"ca-cert"`
-	// The principal which must be given in a client certificate to allow access to the Jolokia endpoint,
+	// The principal(s) which must be given in a client certificate to allow access to the Jolokia endpoint,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
-	// (default `clientPrincipal=cn=system:master-proxy` for OpenShift).
+	// (default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc` and `cn=fuse-console.fuse.svc` for OpenShift).
 	ClientPrincipal []string `property:"client-principal"`
 	// Listen for multicast requests (default `false`)
 	DiscoveryEnabled *bool `property:"discovery-enabled"`
@@ -69,8 +69,6 @@ type jolokiaTrait struct {
 	Options *string `property:"options"`
 }
 
-// The Jolokia trait must be executed prior to the deployment trait
-// as it mutates environment variables
 func newJolokiaTrait() *jolokiaTrait {
 	return &jolokiaTrait{
 		BaseTrait: newBaseTrait("jolokia"),
@@ -78,12 +76,8 @@ func newJolokiaTrait() *jolokiaTrait {
 	}
 }
 
-func (t *jolokiaTrait) isEnabled() bool {
-	return t.Enabled != nil && *t.Enabled
-}
-
 func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
-	return t.isEnabled() && e.IntegrationInPhase(
+	return t.Enabled != nil && *t.Enabled && e.IntegrationInPhase(
 		v1.IntegrationPhaseInitialization,
 		v1.IntegrationPhaseDeploying,
 		v1.IntegrationPhaseRunning,
@@ -92,13 +86,10 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 
 func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if t.isEnabled() {
-			// Add Camel management dependency
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
-			// And Jolokia agent
-			// TODO: We may want to make the Jolokia version configurable
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia/jolokia-jvm:jar:agent:1.6.2")
-		}
+		// Add the Camel management and Jolokia agent dependencies
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+		// TODO: We may want to make the Jolokia version configurable
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia/jolokia-jvm:jar:agent:1.6.2")
 		return nil
 	}
 
@@ -113,8 +104,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	// Configure the Jolokia Java agent
-	// Populate first with the extra options
+	// Configure the Jolokia Java agent, first with the extra options
 	options, err := parseCsvMap(t.Options)
 	if err != nil {
 		return err
