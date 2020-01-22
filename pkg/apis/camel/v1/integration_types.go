@@ -40,22 +40,23 @@ type IntegrationSpec struct {
 
 // IntegrationStatus defines the observed state of Integration
 type IntegrationStatus struct {
-	Phase            IntegrationPhase       `json:"phase,omitempty"`
-	Digest           string                 `json:"digest,omitempty"`
-	Image            string                 `json:"image,omitempty"`
-	Dependencies     []string               `json:"dependencies,omitempty"`
-	Profile          TraitProfile           `json:"profile,omitempty"`
-	Kit              string                 `json:"kit,omitempty"`
-	Platform         string                 `json:"platform,omitempty"`
-	GeneratedSources []SourceSpec           `json:"generatedSources,omitempty"`
-	Failure          *Failure               `json:"failure,omitempty"`
-	CamelVersion     string                 `json:"camelVersion,omitempty"`
-	RuntimeVersion   string                 `json:"runtimeVersion,omitempty"`
-	RuntimeProvider  *RuntimeProvider       `json:"runtimeProvider,omitempty"`
-	Configuration    []ConfigurationSpec    `json:"configuration,omitempty"`
-	Conditions       []IntegrationCondition `json:"conditions,omitempty"`
-	Version          string                 `json:"version,omitempty"`
-	Replicas         *int32                 `json:"replicas,omitempty"`
+	Phase              IntegrationPhase       `json:"phase,omitempty"`
+	Digest             string                 `json:"digest,omitempty"`
+	Image              string                 `json:"image,omitempty"`
+	Dependencies       []string               `json:"dependencies,omitempty"`
+	Profile            TraitProfile           `json:"profile,omitempty"`
+	Kit                string                 `json:"kit,omitempty"`
+	Platform           string                 `json:"platform,omitempty"`
+	GeneratedSources   []SourceSpec           `json:"generatedSources,omitempty"`
+	GeneratedResources []ResourceSpec         `json:"generatedResources,omitempty"`
+	Failure            *Failure               `json:"failure,omitempty"`
+	CamelVersion       string                 `json:"camelVersion,omitempty"`
+	RuntimeVersion     string                 `json:"runtimeVersion,omitempty"`
+	RuntimeProvider    *RuntimeProvider       `json:"runtimeProvider,omitempty"`
+	Configuration      []ConfigurationSpec    `json:"configuration,omitempty"`
+	Conditions         []IntegrationCondition `json:"conditions,omitempty"`
+	Version            string                 `json:"version,omitempty"`
+	Replicas           *int32                 `json:"replicas,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -456,7 +456,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		})
 	}
 
-	for i, r := range e.Integration.Spec.Resources {
+	for i, r := range e.Integration.Resources() {
 		if r.Type != v1.ResourceTypeData {
 			continue
 		}
