@@ -51,10 +51,10 @@ func QuarkusCatalog() (*RuntimeCatalog, error) {
 func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
 	catalogs := make([]v1.CamelCatalog, 0)
 
-	for name, content := range deploy.Resources {
+	for _, name := range deploy.Resources("/") {
 		if strings.HasPrefix(name, "camel-catalog-") {
 			var c v1.CamelCatalog
-			if err := yaml2.Unmarshal([]byte(content), &c); err != nil {
+			if err := yaml2.Unmarshal(deploy.Resource(name), &c); err != nil {
 				return nil, err
 			}
 

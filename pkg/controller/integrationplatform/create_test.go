@@ -59,7 +59,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, list.Items)
 
-	for k := range deploy.Resources {
+	for _, k := range deploy.Resources("/") {
 		if strings.HasPrefix(k, "camel-catalog-") {
 			found := false
 

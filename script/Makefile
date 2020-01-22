@@ -117,7 +117,7 @@ generate-doc:
 generate-deepcopy:
 	operator-sdk generate k8s
 
-build: build-kamel build-compile-integration-tests
+build: build-vfs build-kamel build-compile-integration-tests
 
 test: build
 	go test ./...
@@ -131,11 +131,13 @@ test-knative: build
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
-build-resources:
+build-resources: build-vfs
 	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pmain -Dcatalog.file=camel-catalog-$(CAMEL_VERSION)-$(RUNTIME_VERSION).yaml
 	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pquarkus -Dcatalog.runtime=quarkus -Dcamel-quarkus.version=$(CAMEL_QUARKUS_VERSION) -Dcatalog.file=camel-catalog-quarkus-$(CAMEL_QUARKUS_VERSION)-$(RUNTIME_VERSION).yaml
-	./script/embed_resources.sh deploy
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
+
+build-vfs:
+	./script/embed_resources.sh deploy
 
 build-olm:
 	./script/build_olm.sh $(VERSION)
@@ -230,4 +232,4 @@ install-minikube:
 release-notes:
 	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-vfs

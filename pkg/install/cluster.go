@@ -160,7 +160,7 @@ func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, er
 }
 
 func installCRD(ctx context.Context, c client.Client, kind string, resourceName string, collection *kubernetes.Collection) error {
-	crd := []byte(deploy.Resources[resourceName])
+	crd := deploy.Resource(resourceName)
 	if collection != nil {
 		unstr, err := kubernetes.LoadRawResourceFromYaml(string(crd))
 		if err != nil {
@@ -226,7 +226,7 @@ func IsClusterRoleInstalled(ctx context.Context, c client.Client) (bool, error) 
 }
 
 func installClusterRole(ctx context.Context, c client.Client, collection *kubernetes.Collection) error {
-	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.Resources["user-cluster-role.yaml"])
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString("/user-cluster-role.yaml"))
 	if err != nil {
 		return err
 	}

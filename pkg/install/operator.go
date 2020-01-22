@@ -165,7 +165,7 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	if err != nil {
 		return nil, err
 	}
-	platformObject, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.Resources["platform-cr.yaml"])
+	platformObject, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString("platform-cr.yaml"))
 	if err != nil {
 		return nil, err
 	}
