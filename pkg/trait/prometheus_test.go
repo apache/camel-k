@@ -21,10 +21,6 @@ import (
 	"context"
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/stretchr/testify/assert"
 
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
@@ -32,6 +28,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestConfigurePrometheusTraitInRightPhaseDoesSucceed(t *testing.T) {
@@ -62,7 +61,11 @@ func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
-	test.EnvVarHasValue(t, container.Env, "AB_PROMETHEUS_PORT", "9779")
+
+	assert.Equal(t, container.Args, []string{
+		"-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar=9779:/etc/prometheus/prometheus-jmx-exporter.yaml",
+	})
+
 	ports := container.Ports
 	assert.Len(t, ports, 1)
 	assert.Equal(t, "prometheus", ports[0].Name)
@@ -145,19 +148,6 @@ func TestApplyPrometheusTraitWithServiceDoesNotSucceed(t *testing.T) {
 	condition := environment.Integration.Status.Conditions[0]
 	assert.Equal(t, v1.IntegrationConditionServiceNotAvailableReason, condition.Reason)
 	assert.Equal(t, corev1.ConditionFalse, condition.Status)
-}
-
-func TestApplyDisabledPrometheusTraitShouldDeactivateJavaAgent(t *testing.T) {
-	trait, environment := createNominalPrometheusTest()
-	trait.Enabled = new(bool)
-
-	err := trait.Apply(environment)
-
-	assert.Nil(t, err)
-
-	container := environment.Resources.GetContainerByName(defaultContainerName)
-	assert.NotNil(t, container)
-	test.EnvVarHasValue(t, container.Env, "AB_PROMETHEUS_OFF", "true")
 }
 
 func TestPrometheusTraitGetServiceMonitor(t *testing.T) {
