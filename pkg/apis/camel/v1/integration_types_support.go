@@ -108,6 +108,26 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 	in.Dependencies = append(in.Dependencies, newDep)
 }
 
+// AddOrReplaceGeneratedResources --
+func (in *IntegrationStatus) AddOrReplaceGeneratedResources(resources ...ResourceSpec) {
+	newResources := make([]ResourceSpec, 0)
+	for _, resource := range resources {
+		replaced := false
+		for i, r := range in.GeneratedResources {
+			if r.Name == resource.Name {
+				in.GeneratedResources[i] = resource
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			newResources = append(newResources, resource)
+		}
+	}
+
+	in.GeneratedResources = append(in.GeneratedResources, newResources...)
+}
+
 // Configurations --
 func (in *IntegrationSpec) Configurations() []ConfigurationSpec {
 	if in == nil {

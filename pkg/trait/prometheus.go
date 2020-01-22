@@ -19,24 +19,27 @@ package trait
 
 import (
 	"fmt"
+	"path"
 	"strconv"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/envvar"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
+
+	"github.com/apache/camel-k/deploy"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Prometheus trait exposes the integration with a `Service` and a `ServiceMonitor` resources
-// so that the Prometheus endpoint can be scraped.
+// The Prometheus trait configures the Prometheus JMX exporter and exposes the integration with a `Service`
+// and a `ServiceMonitor` resources so that the Prometheus endpoint can be scraped.
 //
-// WARNING: Creating the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
-// custom resource definition to be installed. You can set `service-monitor` to `false` for the Prometheus trait to work without
-// the Prometheus operator.
+// WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
+//custom resource definition to be installed.
+// You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator.
 //
 // It's disabled by default.
 //
@@ -51,10 +54,12 @@ type prometheusTrait struct {
 	ServiceMonitorLabels string `property:"service-monitor-labels"`
 }
 
-const prometheusPortName = "prometheus"
+const (
+	prometheusJmxExporterConfigFileName  = "prometheus-jmx-exporter.yaml"
+	prometheusJmxExporterConfigMountPath = "/etc/prometheus"
+	prometheusPortName                   = "prometheus"
+)
 
-// The Prometheus trait must be executed prior to the deployment trait
-// as it mutates environment variables
 func newPrometheusTrait() *prometheusTrait {
 	return &prometheusTrait{
 		BaseTrait:      newBaseTrait("prometheus"),
@@ -64,10 +69,35 @@ func newPrometheusTrait() *prometheusTrait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return t.Enabled != nil && *t.Enabled && e.IntegrationInPhase(
+		v1.IntegrationPhaseInitialization,
+		v1.IntegrationPhaseDeploying,
+		v1.IntegrationPhaseRunning,
+	), nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		// Add the Camel management and Prometheus agent dependencies
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+		// TODO: We may want to make the Prometheus version configurable
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.prometheus.jmx/jmx_prometheus_javaagent:0.3.1")
+
+		// Add the default Prometheus JMX exporter configuration
+		// TODO: Support user-provided configuration
+		configMap := t.getJmxExporterConfigMap(e)
+		e.Resources.Add(configMap)
+		e.Integration.Status.AddOrReplaceGeneratedResources(v1.ResourceSpec{
+			Type: v1.ResourceTypeData,
+			DataSpec: v1.DataSpec{
+				Name:       prometheusJmxExporterConfigFileName,
+				ContentRef: configMap.Name,
+			},
+			MountPath: prometheusJmxExporterConfigMountPath,
+		})
+		return nil
+	}
+
 	container := e.getIntegrationContainer()
 	if container == nil {
 		e.Integration.Status.SetCondition(
@@ -79,13 +109,6 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	if t.Enabled == nil || !*t.Enabled {
-		// Deactivate the Prometheus Java agent
-		// Note: the AB_PROMETHEUS_OFF environment variable acts as an option flag
-		envvar.SetVal(&container.Env, "AB_PROMETHEUS_OFF", "true")
-		return nil
-	}
-
 	condition := v1.IntegrationCondition{
 		Type:   v1.IntegrationConditionPrometheusAvailable,
 		Status: corev1.ConditionTrue,
@@ -93,7 +116,8 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	}
 
 	// Configure the Prometheus Java agent
-	envvar.SetVal(&container.Env, "AB_PROMETHEUS_PORT", strconv.Itoa(t.Port))
+	options := []string{strconv.Itoa(t.Port), path.Join(prometheusJmxExporterConfigMountPath, prometheusJmxExporterConfigFileName)}
+	container.Args = append(container.Args, "-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar="+strings.Join(options, ":"))
 
 	// Add the container port
 	containerPort := t.getContainerPort()
@@ -190,4 +214,23 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 		},
 	}
 	return &smt, nil
+}
+
+func (t *prometheusTrait) getJmxExporterConfigMap(e *Environment) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      e.Integration.Name + "-prometheus",
+			Namespace: e.Integration.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
+		},
+		Data: map[string]string{
+			"content": deploy.Resources["prometheus-jmx-exporter.yaml"],
+		},
+	}
 }
