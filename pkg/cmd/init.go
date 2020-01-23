@@ -37,7 +37,7 @@ func newCmdInit(rootCmdOptions *RootCmdOptions) (*cobra.Command, *initCmdOptions
 		Use:     "init",
 		Short:   "Initialize empty Camel K files",
 		Long:    `Initialize empty Camel K integrations and other resources.`,
-		PreRunE: decode(options),
+		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err
