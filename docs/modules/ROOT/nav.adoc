@@ -21,7 +21,6 @@
 ** xref:traits/camel.adoc[Camel]
 ** xref:traits/container.adoc[Container]
 ** xref:traits/cron.adoc[Cron]
-** xref:traits/debug.adoc[Debug]
 ** xref:traits/dependencies.adoc[Dependencies]
 ** xref:traits/deployer.adoc[Deployer]
 ** xref:traits/deployment.adoc[Deployment]
