@@ -21,7 +21,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
@@ -29,22 +29,37 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+// The Probes trait allows to configure Liveness and Readiness probes on the integration container.
+//
+// +camel-k:trait=probes
 type probesTrait struct {
 	BaseTrait `property:",squash"`
-
-	BindHost                  string `property:"bind-host"`
-	BindPort                  int    `property:"bind-port"`
-	Path                      string `property:"path"`
-	LivenessInitialDelay      int32  `property:"liveness-initial-delay"`
-	LivenessTimeout           int32  `property:"liveness-timeout"`
-	LivenessPeriod            int32  `property:"liveness-period"`
-	LivenessSuccessThreshold  int32  `property:"liveness-success-threshold"`
-	LivenessFailureThreshold  int32  `property:"liveness-failure-threshold"`
-	ReadinessInitialDelay     int32  `property:"readiness-initial-delay"`
-	ReadinessTimeout          int32  `property:"readiness-timeout"`
-	ReadinessPeriod           int32  `property:"readiness-period"`
-	ReadinessSuccessThreshold int32  `property:"readiness-success-threshold"`
-	ReadinessFailureThreshold int32  `property:"readiness-failure-threshold"`
+	// Configures the host on which the probe is exposed (default `0.0.0.0`).
+	BindHost string `property:"bind-host"`
+	// Configures the port on which the probe is exposed (default `8080`).
+	BindPort int `property:"bind-port"`
+	// Path to access on the probe ( default `/health`).
+	Path string `property:"path"`
+	// Number of seconds after the container has started before liveness probes are initiated.
+	LivenessInitialDelay int32 `property:"liveness-initial-delay"`
+	// Number of seconds after which the probe times out. Applies to the liveness probe.
+	LivenessTimeout int32 `property:"liveness-timeout"`
+	// How often to perform the probe. Applies to the liveness probe.
+	LivenessPeriod int32 `property:"liveness-period"`
+	// Minimum consecutive successes for the probe to be considered successful after having failed. Applies to the liveness probe.
+	LivenessSuccessThreshold int32 `property:"liveness-success-threshold"`
+	// Minimum consecutive failures for the probe to be considered failed after having succeeded. Applies to the liveness probe.
+	LivenessFailureThreshold int32 `property:"liveness-failure-threshold"`
+	// Number of seconds after the container has started before readiness probes are initiated.
+	ReadinessInitialDelay int32 `property:"readiness-initial-delay"`
+	// Number of seconds after which the probe times out. Applies to the readiness probe.
+	ReadinessTimeout int32 `property:"readiness-timeout"`
+	// How often to perform the probe. Applies to the readiness probe.
+	ReadinessPeriod int32 `property:"readiness-period"`
+	// Minimum consecutive successes for the probe to be considered successful after having failed. Applies to the readiness probe.
+	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold"`
+	// Minimum consecutive failures for the probe to be considered failed after having succeeded. Applies to the readiness probe.
+	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold"`
 }
 
 func newProbesTrait() *probesTrait {
@@ -58,14 +73,18 @@ func newProbesTrait() *probesTrait {
 
 func (t *probesTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && *t.Enabled {
-		return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) || e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+		return e.IntegrationInPhase(
+			v1.IntegrationPhaseInitialization,
+			v1.IntegrationPhaseDeploying,
+			v1.IntegrationPhaseRunning,
+		), nil
 	}
 
 	return false, nil
 }
 
 func (t *probesTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-health")
 
 		// sort the dependencies to get always the same list if they don't change
@@ -77,15 +96,15 @@ func (t *probesTrait) Apply(e *Environment) error {
 			//       have a dedicated servlet trait and maybe an option to create a dedicated
 			//       server for management stuffs like health
 			//
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.enabled=true"},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindHost=" + t.BindHost},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindPort=" + strconv.Itoa(t.BindPort)},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.health.enabled=true"},
-			v1alpha1.ConfigurationSpec{Type: "property", Value: "customizer.health.path=" + t.Path},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.enabled=true"},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindHost=" + t.BindHost},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindPort=" + strconv.Itoa(t.BindPort)},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.health.enabled=true"},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.health.path=" + t.Path},
 		)
 	}
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 			if len(deployment.Spec.Template.Spec.Containers) != 1 {
 				return

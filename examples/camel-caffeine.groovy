@@ -1,3 +1,4 @@
+// camel-k: language=groovy
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,17 +17,15 @@
  */
 
 //
-// To run this integrations use:
+// To run this integration use:
 //
-//     kamel run --runtime groovy examples/camel-caffeine.groovy
+//     kamel run groovy examples/camel-caffeine.groovy
 //
 
 import com.github.benmanes.caffeine.cache.Caffeine
 
-context {
-    registry {
-        caffeineCache = Caffeine.newBuilder().recordStats().build()
-    }
+beans {
+    caffeineCache = Caffeine.newBuilder().recordStats().build()
 }
 
 from('timer:tick')

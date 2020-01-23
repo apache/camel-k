@@ -18,11 +18,12 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
 	"github.com/spf13/cobra"
@@ -30,9 +31,9 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describeIntegrationCommandOptions) {
 
-	impl := &describeIntegrationCommand{
+	options := describeIntegrationCommandOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
@@ -41,11 +42,12 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Aliases: []string{"it"},
 		Short:   "Describe an Integration",
 		Long:    `Describe an Integration.`,
+		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
-			if err := impl.validate(args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(args); err != nil {
+			if err := options.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -53,30 +55,30 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&impl.showSourceContent, "show-source-content", false, "Print source content")
+	cmd.Flags().BoolVar(&options.showSourceContent, "show-source-content", false, "Print source content")
 
-	return &cmd
+	return &cmd, &options
 }
 
-type describeIntegrationCommand struct {
+type describeIntegrationCommandOptions struct {
 	*RootCmdOptions
-	showSourceContent bool
+	showSourceContent bool `mapstructure:"show-source-content"`
 }
 
-func (command *describeIntegrationCommand) validate(args []string) error {
+func (command *describeIntegrationCommandOptions) validate(args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("accepts at least 1 arg, received %d", len(args))
+		return errors.New("describe expects an integration name argument")
 	}
 	return nil
 }
 
-func (command *describeIntegrationCommand) run(args []string) error {
+func (command *describeIntegrationCommandOptions) run(args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
-	ctx := v1alpha1.NewIntegration(command.Namespace, args[0])
+	ctx := v1.NewIntegration(command.Namespace, args[0])
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
@@ -91,7 +93,7 @@ func (command *describeIntegrationCommand) run(args []string) error {
 	return nil
 }
 
-func (command *describeIntegrationCommand) describeIntegration(i v1alpha1.Integration) string {
+func (command *describeIntegrationCommandOptions) describeIntegration(i v1.Integration) string {
 	return indentedwriter.IndentedString(func(out io.Writer) {
 		w := indentedwriter.NewWriter(out)
 

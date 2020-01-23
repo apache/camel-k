@@ -14,31 +14,32 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.0.0-M2-SNAPSHOT
-RUNTIME_VERSION := 1.0.0
-CAMEL_VERSION := 3.0.0-M4
-CAMEL_VERSION_CONSTRAINT := >=3.0.0-M4
-BASE_IMAGE := fabric8/s2i-java:3.0-java8
+VERSION := 1.0.0-RC2-SNAPSHOT
+LAST_RELEASED_VERSION := 1.0.0-M4
+RUNTIME_VERSION := 1.0.10
+CAMEL_VERSION := 3.0.0
+CAMEL_QUARKUS_VERSION := 1.0.0-M2
+QUARKUS_VERSION := 1.1.0.Final
+KANIKO_VERSION := 0.14.0
+BASE_IMAGE := adoptopenjdk/openjdk8:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
-GO_PATH := $(shell go env GOPATH)
 LINT_GOGC := 10
-LINT_DEADLINE := 5m
-
-# For signing binary artifacts
-GPG_PASS := $(GPG_PASS)
+LINT_DEADLINE := 10m
 
 # Used to push pre-relase artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
+
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1171
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
 PACKAGE_ARTIFACTS_STRATEGY := copy
 
-GOLDFLAGS += -X main.GitCommit=$(GIT_COMMIT)
-GOFLAGS = -ldflags "$(GOLDFLAGS)" -gcflags=-trimpath=$(GO_PATH) -asmflags=-trimpath=$(GO_PATH)
+GOLDFLAGS += -X github.com/apache/camel-k/pkg/cmd/operator.GitCommit=$(GIT_COMMIT)
+GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
 
 define LICENSE_HEADER
 Licensed to the Apache Software Foundation (ASF) under one or more
@@ -47,9 +48,9 @@ this work for additional information regarding copyright ownership.
 The ASF licenses this file to You under the Apache License, Version 2.0
 (the "License"); you may not use this file except in compliance with
 the License.  You may obtain a copy of the License at
- 
+
    http://www.apache.org/licenses/LICENSE-2.0
- 
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,6 +68,7 @@ codegen:
 	@echo "/*" > $(VERSIONFILE)
 	@echo "$$LICENSE_HEADER" >> $(VERSIONFILE)
 	@echo "*/" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
 	@echo "package defaults" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "// ***********************" >> $(VERSIONFILE)
@@ -77,11 +79,20 @@ codegen:
 	@echo "  // Version -- " >> $(VERSIONFILE)
 	@echo "  Version = \"$(VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // CamelVersionConstraint -- " >> $(VERSIONFILE)
-	@echo "  CamelVersionConstraint = \"$(CAMEL_VERSION_CONSTRAINT)\"" >> $(VERSIONFILE)
+	@echo "  // DefaultCamelVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultCamelVersion = \"$(CAMEL_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // RuntimeVersion -- " >> $(VERSIONFILE)
-	@echo "  RuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultCamelQuarkusVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultCamelQuarkusVersion = \"$(CAMEL_QUARKUS_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultQuarkusVersion -- " >> $(VERSIONFILE)
+	@echo "  DefaultQuarkusVersion = \"$(QUARKUS_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
+	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // BaseImage -- " >> $(VERSIONFILE)
 	@echo "  BaseImage = \"$(BASE_IMAGE)\"" >> $(VERSIONFILE)
@@ -95,31 +106,34 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate:
+generate: generate-deepcopy generate-client generate-doc
+
+generate-client:
+	./script/gen_client.sh
+
+generate-doc:
+	./script/gen_doc.sh
+
+generate-deepcopy:
 	operator-sdk generate k8s
 
-build: build-operator build-kamel build-builder build-compile-integration-tests
+build: build-kamel build-compile-integration-tests
 
 test: build
 	go test ./...
 
 test-integration: build
-	go test -timeout 30m -v ./e2e/... -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=integration
 
 test-knative: build
-	go test -timeout 30m -v ./e2e/... -tags=knative
-
-build-operator:
-	go build $(GOFLAGS) -o camel-k ./cmd/manager/*.go
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=knative
 
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
-build-builder:
-	env GOOS=linux go build -o builder ./cmd/builder/*.go
-
 build-resources:
-	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION)
+	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pmain -Dcatalog.file=camel-catalog-$(CAMEL_VERSION)-$(RUNTIME_VERSION).yaml
+	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pquarkus -Dcatalog.runtime=quarkus -Dcamel-quarkus.version=$(CAMEL_QUARKUS_VERSION) -Dcatalog.file=camel-catalog-quarkus-$(CAMEL_QUARKUS_VERSION)-$(RUNTIME_VERSION).yaml
 	./script/embed_resources.sh deploy
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
@@ -130,18 +144,13 @@ build-compile-integration-tests:
 	go test -c -tags="integration knative" ./e2e/*.go
 
 clean:
-	# go clean fails if modules support are turned on as it tries to 
-	# resolve modules, if module support is turned off, it does not
-	# care about modules and simply deletes bits.
+	# disable gomodules when executing go clean:
 	#
-	# For more info:
-	#
-	#   https://github.com/golang/go/commit/9238a8ffe12b6eb44aab12de1b861c0f045da8b7
+	#    https://github.com/golang/go/issues/31002
 	#
 	GO111MODULE=off go clean
 	rm -f camel-k
 	rm -f kamel
-	rm -f builder
 	rm -f *.test
 	rm -rf build/_maven_output
 	rm -rf build/_output
@@ -157,17 +166,32 @@ dep:
 lint:
 	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE)
 
+lint-fix:
+	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE) --fix
+
+
+check-licenses:
+	./script/check_licenses.sh
+
 images: test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
-	cp builder build/_output/bin
-	operator-sdk build $(IMAGE_NAME):$(VERSION)
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
+	cp kamel build/_output/bin
+endif
+	operator-sdk build --image-builder docker $(IMAGE_NAME):$(VERSION)
 
 images-dev: test package-artifacts
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
-	cp builder build/_output/bin
-	operator-sdk build $(IMAGE_NAME):$(VERSION)
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
+	cp kamel build/_output/bin
+endif
+	operator-sdk build --image-builder docker $(IMAGE_NAME):$(VERSION)
 
 images-push:
 	docker push $(IMAGE_NAME):$(VERSION)
@@ -183,24 +207,27 @@ git-tag:
 	./script/git_tag.sh $(VERSION) $(RELEASE_GIT_REMOTE)
 
 cross-compile:
-	./script/cross_compile.sh $(VERSION) $(GPG_PASS)
+	./script/cross_compile.sh $(VERSION) '$(GOFLAGS)'
 
 package-examples:
 	./script/package_examples.sh $(VERSION)
 
 package-artifacts:
-	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY)
+	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY) $(STAGING_RUNTIME_REPO)
 
 unsnapshot-olm:
 	./script/unsnapshot_olm.sh
 
-release: clean codegen set-version build-resources unsnapshot-olm build images images-push cross-compile package-examples git-tag
+release: clean codegen set-version build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
 
-release-staging: clean codegen set-version build-resources unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
+release-staging: clean codegen set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
 
 install-minishift:
 	./script/install_minishift.sh
 install-minikube:
 	./script/install_minikube.sh
 
-.PHONY: build build-operator build-kamel build-resources build-builder build-olm unsnapshot-olm dep codegen images images-dec images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag
+release-notes:
+	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
+
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc

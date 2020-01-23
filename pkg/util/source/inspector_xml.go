@@ -21,7 +21,7 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // XMLInspector --
@@ -30,7 +30,7 @@ type XMLInspector struct {
 }
 
 // Extract --
-func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error {
+func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)
 
@@ -45,8 +45,18 @@ func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error 
 			switch se.Name.Local {
 			case "rest", "restConfiguration":
 				meta.Dependencies.Add("camel:rest")
-			case "hystrix":
+			case "circuitBreaker":
 				meta.Dependencies.Add("camel:hystrix")
+			case "simple":
+				meta.Dependencies.Add("camel:bean")
+			case "language":
+				for _, a := range se.Attr {
+					if a.Name.Local == "language" {
+						if dependency, ok := i.catalog.GetLanguageDependency(a.Value); ok {
+							meta.Dependencies.Add(dependency)
+						}
+					}
+				}
 			case "from", "fromF":
 				for _, a := range se.Attr {
 					if a.Name.Local == "uri" {
@@ -59,6 +69,10 @@ func (i XMLInspector) Extract(source v1alpha1.SourceSpec, meta *Metadata) error 
 						meta.ToURIs = append(meta.ToURIs, a.Value)
 					}
 				}
+			}
+
+			if dependency, ok := i.catalog.GetLanguageDependency(se.Name.Local); ok {
+				meta.Dependencies.Add(dependency)
 			}
 		}
 	}

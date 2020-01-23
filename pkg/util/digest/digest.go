@@ -20,16 +20,16 @@ package digest
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"math/rand"
-	"strconv"
+	"sort"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
+func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
@@ -37,6 +37,10 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 	}
 	// Integration Kit is relevant
 	if _, err := hash.Write([]byte(integration.Spec.Kit)); err != nil {
+		return "", err
+	}
+	// Profile is relevant
+	if _, err := hash.Write([]byte(integration.Spec.Profile)); err != nil {
 		return "", err
 	}
 
@@ -70,6 +74,23 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 		}
 	}
 
+	// Integration traits
+	for _, name := range sortedTraitSpecMapKeys(integration.Spec.Traits) {
+		if _, err := hash.Write([]byte(name + "[")); err != nil {
+			return "", err
+		}
+		spec := integration.Spec.Traits[name]
+		for _, prop := range util.SortedStringMapKeys(spec.Configuration) {
+			val := spec.Configuration[prop]
+			if _, err := hash.Write([]byte(prop + "=" + val + ",")); err != nil {
+				return "", err
+			}
+		}
+		if _, err := hash.Write([]byte("]")); err != nil {
+			return "", err
+		}
+	}
+
 	// Add a letter at the beginning and use URL safe encoding
 	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
 	return digest, nil
@@ -77,7 +98,7 @@ func ComputeForIntegration(integration *v1alpha1.Integration) (string, error) {
 
 // ComputeForIntegrationKit a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag
-func ComputeForIntegrationKit(kit *v1alpha1.IntegrationKit) (string, error) {
+func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
@@ -100,7 +121,13 @@ func ComputeForIntegrationKit(kit *v1alpha1.IntegrationKit) (string, error) {
 	return digest, nil
 }
 
-// Random --
-func Random() string {
-	return "v" + strconv.FormatInt(rand.Int63(), 10)
+func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
+	res := make([]string, len(m))
+	i := 0
+	for k := range m {
+		res[i] = k
+		i++
+	}
+	sort.Strings(res)
+	return res
 }

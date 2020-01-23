@@ -20,15 +20,15 @@ package metadata
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 func TestHttpJavaSource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			from("telegram:bots/cippa").to("log:stash");
@@ -36,10 +36,10 @@ func TestHttpJavaSource(t *testing.T) {
 			from("ine:xistent").to("log:stash");
 		`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -49,9 +49,9 @@ func TestHttpJavaSource(t *testing.T) {
 }
 
 func TestHttpOnlyJavaSource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
+	code := v1.SourceSpec{
 
-		DataSpec: v1alpha1.DataSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			from("direct:bots/cippa").to("log:stash");
@@ -59,10 +59,10 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 			from("seda:path").to("log:stash");
 		`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -72,18 +72,18 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 }
 
 func TestHttpOnlyJavaSourceRest(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			from("direct:bots/cippa").to("log:stash");
 			rest().get("").to("log:stash");
 		`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -93,18 +93,18 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 }
 
 func TestHttpOnlyJavaSourceRest2(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
 			from("vm:bots/cippa").to("log:stash");
 			rest( ).get("").to("log:stash");
 		`,
 		},
-		Language: v1alpha1.LanguageJavaSource,
+		Language: v1.LanguageJavaSource,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -114,8 +114,8 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 }
 
 func TestNoHttpGroovySource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
 			from('direct:bots/cippa').to("log:stash");
@@ -123,10 +123,10 @@ func TestNoHttpGroovySource(t *testing.T) {
 			from('seda:path').to("log:stash");
 		`,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -136,8 +136,8 @@ func TestNoHttpGroovySource(t *testing.T) {
 }
 
 func TestHttpOnlyGroovySource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
 			Content: `
 			from('direct:bots/cippa').to("log:stash");
@@ -145,10 +145,10 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 			from('seda:path').to("log:stash");
 		`,
 		},
-		Language: v1alpha1.LanguageGroovy,
+		Language: v1.LanguageGroovy,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -158,8 +158,8 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 }
 
 func TestHttpXMLSource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
-		DataSpec: v1alpha1.DataSpec{
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
 			Name: "routes.xml",
 			Content: `
 			<from uri="telegram:ciao" />
@@ -167,10 +167,10 @@ func TestHttpXMLSource(t *testing.T) {
 			</rest>
 		`,
 		},
-		Language: v1alpha1.LanguageXML,
+		Language: v1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -180,9 +180,9 @@ func TestHttpXMLSource(t *testing.T) {
 }
 
 func TestHttpOnlyXMLSource(t *testing.T) {
-	code := v1alpha1.SourceSpec{
+	code := v1.SourceSpec{
 
-		DataSpec: v1alpha1.DataSpec{
+		DataSpec: v1.DataSpec{
 			Name: "routes.xml",
 			Content: `
 			<from uri="direct:ciao" />
@@ -190,10 +190,10 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 			</rest>
 		`,
 		},
-		Language: v1alpha1.LanguageXML,
+		Language: v1.LanguageXML,
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
@@ -203,9 +203,9 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 }
 
 func TestMultilangHTTPOnlySource(t *testing.T) {
-	codes := []v1alpha1.SourceSpec{
+	codes := []v1.SourceSpec{
 		{
-			DataSpec: v1alpha1.DataSpec{
+			DataSpec: v1.DataSpec{
 				Name: "routes.xml",
 				Content: `
 				<from uri="direct:ciao" />
@@ -213,21 +213,21 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 				</rest>
 			`,
 			},
-			Language: v1alpha1.LanguageXML,
+			Language: v1.LanguageXML,
 		},
 		{
 
-			DataSpec: v1alpha1.DataSpec{
+			DataSpec: v1.DataSpec{
 				Name: "routes2.groovy",
 				Content: `
 				from('seda:in').to('seda:out')
 			`,
 			},
-			Language: v1alpha1.LanguageGroovy,
+			Language: v1.LanguageGroovy,
 		},
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := ExtractAll(catalog, codes)
@@ -237,10 +237,10 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 }
 
 func TestMultilangHTTPSource(t *testing.T) {
-	codes := []v1alpha1.SourceSpec{
+	codes := []v1.SourceSpec{
 		{
 
-			DataSpec: v1alpha1.DataSpec{
+			DataSpec: v1.DataSpec{
 				Name: "routes.xml",
 				Content: `
 				<from uri="direct:ciao" />
@@ -248,22 +248,22 @@ func TestMultilangHTTPSource(t *testing.T) {
 				</rest>
 			`,
 			},
-			Language: v1alpha1.LanguageXML,
+			Language: v1.LanguageXML,
 		},
 		{
 
-			DataSpec: v1alpha1.DataSpec{
+			DataSpec: v1.DataSpec{
 				Name: "routes2.groovy",
 				Content: `
 				from('seda:in').to('seda:out')
 				from('timer:tick').to('log:info')
 			`,
 			},
-			Language: v1alpha1.LanguageGroovy,
+			Language: v1.LanguageGroovy,
 		},
 	}
 
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	meta := ExtractAll(catalog, codes)

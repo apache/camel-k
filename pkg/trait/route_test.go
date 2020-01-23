@@ -22,54 +22,51 @@ import (
 	"testing"
 
 	"github.com/rs/xid"
-
-	"github.com/scylladb/go-set/strset"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/stretchr/testify/assert"
 
 	routev1 "github.com/openshift/api/route/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func createTestRouteEnvironment(t *testing.T, name string) *Environment {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	return &Environment{
+	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: "test-ns",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{},
+			Spec: v1.IntegrationSpec{},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
-		Classpath:      strset.New(),
 		Resources: kubernetes.NewCollection(
 			&corev1.Service{
 				TypeMeta: metav1.TypeMeta{
@@ -81,7 +78,7 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 					Namespace: "test-ns",
 					Labels: map[string]string{
 						"camel.apache.org/integration":  name,
-						"camel.apache.org/service.type": v1alpha1.ServiceTypeUser,
+						"camel.apache.org/service.type": v1.ServiceTypeUser,
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -93,6 +90,8 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 			},
 		),
 	}
+	res.Platform.ResyncStatusFullConfig()
+	return res
 }
 
 func TestRoute_Default(t *testing.T) {
@@ -104,8 +103,8 @@ func TestRoute_Default(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("container")))
-	assert.NotNil(t, environment.GetTrait(ID("route")))
+	assert.NotNil(t, environment.GetTrait("container"))
+	assert.NotNil(t, environment.GetTrait("route"))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
 		return r.ObjectMeta.Name == name
@@ -120,7 +119,7 @@ func TestRoute_Default(t *testing.T) {
 func TestRoute_Disabled(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
-	environment.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"route": {
 			Configuration: map[string]string{
 				"enabled": "false",
@@ -133,7 +132,7 @@ func TestRoute_Disabled(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.Nil(t, environment.GetTrait(ID("route")))
+	assert.Nil(t, environment.GetTrait("route"))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
 		return r.ObjectMeta.Name == name
@@ -147,7 +146,7 @@ func TestRoute_TLS(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"route": {
 			Configuration: map[string]string{
 				"tls-termination": string(routev1.TLSTerminationEdge),
@@ -159,7 +158,7 @@ func TestRoute_TLS(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("route")))
+	assert.NotNil(t, environment.GetTrait("route"))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
 		return r.ObjectMeta.Name == name
@@ -173,7 +172,7 @@ func TestRoute_TLS(t *testing.T) {
 func TestRoute_WithCustomServicePort(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
-	environment.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		containerTraitID: {
 			Configuration: map[string]string{
 				"service-port-name": "my-port",
@@ -186,8 +185,8 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("container")))
-	assert.NotNil(t, environment.GetTrait(ID("route")))
+	assert.NotNil(t, environment.GetTrait("container"))
+	assert.NotNil(t, environment.GetTrait("route"))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
 		return r.ObjectMeta.Name == name

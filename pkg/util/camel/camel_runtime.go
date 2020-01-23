@@ -19,46 +19,40 @@ package camel
 
 import (
 	"context"
-	"sync"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/controller"
 )
 
-// NewRuntime --
-func NewRuntime() Runtime {
-	return Runtime{
-		catalogs: make(map[string]RuntimeCatalog),
-	}
-}
-
-// Runtime --
-type Runtime struct {
-	catalogs map[string]RuntimeCatalog
-	lock     sync.Mutex
-}
-
 // LoadCatalog --
-func (r *Runtime) LoadCatalog(ctx context.Context, client client.Client, namespace string, version string) (*RuntimeCatalog, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
-	if c, ok := r.catalogs[version]; ok {
-		return &c, nil
+func LoadCatalog(ctx context.Context, client client.Client, namespace string, camelVersion string, runtimeVersion string, provider interface{}) (*RuntimeCatalog, error) {
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(namespace),
 	}
 
-	var catalog *RuntimeCatalog
-	var err error
+	if provider == nil {
+		requirement, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
+		selector := labels.NewSelector().Add(*requirement)
+		options = append(options, controller.MatchingSelector{Selector: selector})
+	} else if _, ok := provider.(v1.QuarkusRuntimeProvider); ok {
+		options = append(options, k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.provider": "quarkus",
+		})
+	}
 
-	list := v1alpha1.NewCamelCatalogList()
-	err = client.List(ctx, &k8sclient.ListOptions{Namespace: namespace}, &list)
+	list := v1.NewCamelCatalogList()
+	err := client.List(ctx, &list, options...)
 	if err != nil {
 		return nil, err
 	}
 
-	catalog, err = FindBestMatch(version, list.Items)
+	catalog, err := findBestMatch(list.Items, camelVersion, runtimeVersion, provider)
 	if err != nil {
 		return nil, err
 	}

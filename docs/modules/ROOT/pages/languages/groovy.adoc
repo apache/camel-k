@@ -1,6 +1,6 @@
 = Writing Integrations in Groovy
 
-An integration written in Groovy looks very similar to a Java one except it can leverages Groovy's language enhancements over Java:
+An integration written in Groovy looks very similar to a Java one except it can leverages Groovy's language enhancements over Java such as closures:
 
 [source,groovy]
 ----
@@ -9,73 +9,60 @@ from('timer:tick')
     .to('log:info')
 ----
 
-Camel K extends the Camel Java DSL making it easier to configure the context in which the integration runs using the top level _context_ block
+You can run it with the standard command:
+
+```
+kamel run example.groovy
+```
+
+== Configuring the Application
+
+Camel K extends the Camel Java DSL making it easier to configure Camel's behavior using the top level _camel_ block
 
 [source,groovy]
 ----
-context {
-  // configure the context here
+camel {
+  // configure camel here
 }
 ----
 
-At the moment the enhanced DSL provides a way to bind items to the registry, to configure the components the context creates and some improvements over the REST DSL.
+The _camel_ block allows to configure the following Camel features:
 
-== Registry Configuration
-
-The registry is accessible using the _registry_ block inside the _context_ one:
-
+- **Components**
++
 [source,groovy]
 ----
-context {
-    registry {
-      bind "my-cache", Caffeine.newBuilder().build() // <1>
-      bind "my-processor", processor { // <2>
-         it.in.body = 'Hello Camel K!'
-      }
-      bind "my-predicate", predicate { // <3>
-         it.in.body != null
-      }
-    }
-}
-----
-<1> bind a bean to the context
-<2> define a custom processor to be used later in the routes by ref
-<3> define a custom predicate to be used later in the routes by ref
-
-
-== Components Configuration
-
-Components can be configured within the _components_ block inside the _context_ one:
-
-[source,groovy]
-----
-context {
+camel {
     components {
-        'seda' { // <1>
+        seda { // <1>
             queueSize = 1234
             concurrentConsumers = 12
         }
 
-        'log' { // <2>
+        log { // <2>
             exchangeFormatter = {
                 'body ==> ' + it.in.body
             } as org.apache.camel.spi.ExchangeFormatter
+        }
+        
+        mySeda(SedaComponent) { // <3>
+            queueSize = 4321
+            concurrentConsumers = 21
         }
     }
 }
 ----
 <1> configure the properties of the component whit name _seda_
 <2> configure the properties of the component whit name _log_
-
+<3> creates and configure a component of type `SedaComponent` whose name is _mySeda_
++
 Setting the property _exchangeFormatter_ looks a little ugly as you have to declare the type of your closure. For demonstration purpose we have created a Groovy extension module that simplify configuring the _exchangeFormatter_ so you can rewrite your DSL as
-
++
 [source,groovy]
 ----
-context {
+camel {
     components {
-        ...
-
-        'log' {
+        log {
             formatter {
                 'body ==> ' + it.in.body
             }
@@ -83,15 +70,93 @@ context {
     }
 }
 ----
-
++
 which is much better.
-
++
 [TIP]
 ====
 You can provide your custom extensions by packaging them in a dependency you declare for your integration.
 ====
 
-== Rest Endpoints
+- **Languages **
++
+[source,groovy]
+----
+camel {
+    languages {
+        language("bean") { // <1>
+            beanType = String.class
+            method = "toUpperCase"
+        }
+        myBean(BeanLanguage) { // <2>
+            beanType = String.class
+            method = "toLowerCase"
+        }
+        simple { // <3>
+        }
+    }
+}
+----
+<1> configure the properties of the language whit name _bean_
+<2> creates and configure a language of type `BeanLanguage` whose name is _myBean_
+<3> configure the properties of the language whit name _simple_
+
+- **DataFormats**
++
+[source,groovy]
+----
+camel {
+    dataFormats {
+        dataFormat("json-jackson") { // <1>
+            unmarshalType = Map.class
+            prettyPrint = true
+        }
+        myJackson(JacksonDataFormat) { // <2>
+            unmarshalType = String.class
+            prettyPrint = false
+        }
+        csv { // <3>
+        }
+    }
+}
+----
+<1> configure the properties of the data format whit name _json-jackson_
+<2> creates and configure a data format of type `JacksonDataFormat` whose name is _myJackson_
+<3> configure the properties of the data format whit name _csv_
+
+
+== Beans
+
+Beans can be bound to the _registry_ using a dedicated _bean DSL_ :
+
+[source,groovy]
+----
+beans {
+    myCache = Caffeine.newBuilder().build() // <1>
+
+    myProcessor = processor { // <2>
+        it.in.body = 'Hello Camel K!'
+    }
+
+    myPredicate = predicate { // <3>
+        it.in.body != null
+    }
+
+    dataSource(org.apache.commons.dbcp2.BasicDataSource) { //<4>
+        driverClassName = "org.h2.Driver"
+        url = "jdbc:h2:mem:camel"
+        username = "sa"
+        password = ""
+    }
+}
+----
+<1> define a bean
+<2> define a custom processor
+<3> define a custom predicate
+<4> define a custom bean with name `dataSource` and type `org.apache.commons.dbcp2.BasicDataSource`
+
+
+== Rest Support
 
 Integrations's REST endpoints can be configured using the top level _rest_ block:
 
@@ -103,10 +168,22 @@ rest {
         port '9192'
     }
 
-    path('/my/path') { // <2>
-        // standard Rest DSL
+    path('/my/path') {
+        get('/get') { // <2>
+            consumes 'application/json'
+            produces 'application/json'
+            to 'direct:get'
+        }
+    }
+
+    post { // <3>
+        path '/post'
+        consumes 'application/json'
+        produces 'application/json'
+        to 'direct:post'
     }
 }
 ----
 <1> Configure the rest engine
-<2> Configure the rest endpoint for the base path '/my/path'
+<2> Configure the behavior of the method GET for the path '/my/path/get' and invoke the endpoint 'direct:get'
+<3> Configure the behavior of the method POST for the path '/post' and invoke the endpoint 'direct:post'

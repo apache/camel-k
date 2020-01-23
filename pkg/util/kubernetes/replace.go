@@ -21,13 +21,14 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/client"
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	routev1 "github.com/openshift/api/route/v1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -60,6 +61,8 @@ func ReplaceResource(ctx context.Context, c client.Client, res runtime.Object) e
 		mapRequiredServiceData(existing, res)
 		mapRequiredRouteData(existing, res)
 		mapRequiredKnativeData(existing, res)
+		mapRequiredKnativeServiceV1Beta1Data(existing, res)
+		mapRequiredKnativeServiceV1Data(existing, res)
 		err = c.Update(ctx, res)
 	}
 	if err != nil {
@@ -93,9 +96,41 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 }
 
 func mapRequiredKnativeData(from runtime.Object, to runtime.Object) {
-	if fromC, ok := from.(*eventing.Subscription); ok {
-		if toC, ok := to.(*eventing.Subscription); ok {
+	if fromC, ok := from.(*messaging.Subscription); ok {
+		if toC, ok := to.(*messaging.Subscription); ok {
 			toC.Spec.DeprecatedGeneration = fromC.Spec.DeprecatedGeneration
+		}
+	}
+}
+
+func mapRequiredKnativeServiceV1Beta1Data(from runtime.Object, to runtime.Object) {
+	if fromC, ok := from.(*serving.Service); ok {
+		if toC, ok := to.(*serving.Service); ok {
+			if toC.ObjectMeta.Annotations == nil {
+				toC.ObjectMeta.Annotations = make(map[string]string)
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/creator"] = v
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"] = v
+			}
+		}
+	}
+}
+
+func mapRequiredKnativeServiceV1Data(from runtime.Object, to runtime.Object) {
+	if fromC, ok := from.(*serving.Service); ok {
+		if toC, ok := to.(*serving.Service); ok {
+			if toC.ObjectMeta.Annotations == nil {
+				toC.ObjectMeta.Annotations = make(map[string]string)
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/creator"] = v
+			}
+			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
+				toC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"] = v
+			}
 		}
 	}
 }

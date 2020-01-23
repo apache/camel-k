@@ -36,13 +36,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// SetupClusterwideResources --
-func SetupClusterwideResources(ctx context.Context, clientProvider client.Provider) error {
-	return SetupClusterwideResourcesOrCollect(ctx, clientProvider, nil)
-}
-
-// SetupClusterwideResourcesOrCollect --
-func SetupClusterwideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection) error {
+// SetupClusterWideResourcesOrCollect --
+func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection) error {
 	// Get a client to install the CRD
 	c, err := clientProvider.Get()
 	if err != nil {
@@ -84,6 +79,12 @@ func SetupClusterwideResourcesOrCollect(ctx context.Context, clientProvider clie
 		if err != nil {
 			return err
 		}
+	}
+
+	// Install OpenShift Console download links if possible
+	err = installOpenShiftConsoleDownloadLink(ctx, c)
+	if err != nil {
+		return err
 	}
 
 	// Wait for all CRDs to be installed before proceeding
@@ -144,7 +145,7 @@ func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
 
 // IsCRDInstalled check if the given CRD kind is installed
 func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, error) {
-	lst, err := c.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1alpha1")
+	lst, err := c.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1")
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {

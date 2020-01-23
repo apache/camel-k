@@ -14,22 +14,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package integration
 
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/platform"
-
-	"github.com/apache/camel-k/pkg/util/digest"
-
-	"k8s.io/apimachinery/pkg/api/errors"
+	appsv1 "k8s.io/api/apps/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -38,8 +34,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -75,10 +72,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Integration
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegration := e.ObjectOld.(*v1alpha1.Integration)
-			newIntegration := e.ObjectNew.(*v1alpha1.Integration)
+			oldIntegration := e.ObjectOld.(*v1.Integration)
+			newIntegration := e.ObjectNew.(*v1.Integration)
 			// Ignore updates to the integration status in which case metadata.Generation does not change,
 			// or except when the integration phase changes as it's used to transition from one phase
 			// to another
@@ -94,46 +91,24 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to secondary resource Builds and requeue the owner IntegrationKit
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &v1alpha1.Integration{},
-		},
-		predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild := e.ObjectOld.(*v1alpha1.Build)
-				newBuild := e.ObjectNew.(*v1alpha1.Build)
-				// Ignore updates to the build CR except when the build phase changes
-				// as it's used to transition the integration from one phase to another
-				// during image build
-				return oldBuild.Status.Phase != newBuild.Status.Phase
-			},
-		},
-	)
-
-	if err != nil {
-		return err
-	}
-
 	// Watch for IntegrationKit phase transitioning to ready or error and
 	// enqueue requests for any integrations that are in phase waiting for
 	// kit
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationKit{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			kit := a.Object.(*v1alpha1.IntegrationKit)
+			kit := a.Object.(*v1.IntegrationKit)
 			var requests []reconcile.Request
 
-			if kit.Status.Phase == v1alpha1.IntegrationKitPhaseReady || kit.Status.Phase == v1alpha1.IntegrationKitPhaseError {
-				list := &v1alpha1.IntegrationList{}
+			if kit.Status.Phase == v1.IntegrationKitPhaseReady || kit.Status.Phase == v1.IntegrationKitPhaseError {
+				list := &v1.IntegrationList{}
 
-				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: kit.Namespace}, list); err != nil {
+				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(kit.Namespace)); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}
 
 				for _, integration := range list.Items {
-					if integration.Status.Phase == v1alpha1.IntegrationPhaseBuildingKit {
+					if integration.Status.Phase == v1.IntegrationPhaseBuildingKit {
 						log.Infof("Kit %s ready, wake-up integration: %s", kit.Name, integration.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
@@ -148,28 +123,27 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return requests
 		}),
 	})
-
 	if err != nil {
 		return err
 	}
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integrations that are in phase waiting for platform
-	err = c.Watch(&source.Kind{Type: &v1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			platform := a.Object.(*v1alpha1.IntegrationPlatform)
+			platform := a.Object.(*v1.IntegrationPlatform)
 			var requests []reconcile.Request
 
-			if platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseReady {
-				list := &v1alpha1.IntegrationList{}
+			if platform.Status.Phase == v1.IntegrationPlatformPhaseReady {
+				list := &v1.IntegrationList{}
 
-				if err := mgr.GetClient().List(context.TODO(), &k8sclient.ListOptions{Namespace: platform.Namespace}, list); err != nil {
+				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(platform.Namespace)); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}
 
 				for _, integration := range list.Items {
-					if integration.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
+					if integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform {
 						log.Infof("Platform %s ready, wake-up integration: %s", platform.Name, integration.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
@@ -184,7 +158,41 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return requests
 		}),
 	})
+	if err != nil {
+		return err
+	}
 
+	// Watch for ReplicaSet to reconcile replicas to the integration status. We cannot use
+	// the EnqueueRequestForOwner handler as the owner depends on the deployment strategy,
+	// either regular deployment or Knative service. In any case, the integration is not the
+	// direct owner of the ReplicaSet.
+	err = c.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+			rs := a.Object.(*appsv1.ReplicaSet)
+			var requests []reconcile.Request
+
+			labels := rs.GetLabels()
+			integrationName, ok := labels["camel.apache.org/integration"]
+			if ok {
+				requests = append(requests, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Namespace: rs.Namespace,
+						Name:      integrationName,
+					},
+				})
+			}
+
+			return requests
+		}),
+	}, predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldReplicaSet := e.ObjectOld.(*appsv1.ReplicaSet)
+			newReplicaSet := e.ObjectNew.(*appsv1.ReplicaSet)
+			// Ignore updates to the ReplicaSet other than the replicas ones,
+			// that are used to reconcile the integration replicas.
+			return oldReplicaSet.Status.Replicas != newReplicaSet.Status.Replicas
+		},
+	})
 	if err != nil {
 		return err
 	}
@@ -214,10 +222,10 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	ctx := context.TODO()
 
 	// Fetch the Integration instance
-	var instance v1alpha1.Integration
+	var instance v1.Integration
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
@@ -230,41 +238,13 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
-	// Delete phase
-	if target.GetDeletionTimestamp() != nil {
-		target.Status.Phase = v1alpha1.IntegrationPhaseDeleting
-	}
-
-	if target.Status.Phase == v1alpha1.IntegrationPhaseNone || target.Status.Phase == v1alpha1.IntegrationPhaseWaitingForPlatform {
-		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
-		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1alpha1.IntegrationPhaseWaitingForPlatform
-		} else {
-			target.Status.Phase = v1alpha1.IntegrationPhaseInitialization
-		}
-
-		if instance.Status.Phase != target.Status.Phase {
-			if err != nil {
-				target.Status.SetErrorCondition(v1alpha1.IntegrationConditionPlatformAvailable, v1alpha1.IntegrationConditionPlatformAvailableReason, err)
-			}
-
-			if pl != nil {
-				target.SetIntegrationPlatform(pl)
-			}
-
-			return r.update(ctx, targetLog, target)
-		}
-
-		return reconcile.Result{}, err
-	}
-
 	actions := []Action{
+		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		NewBuildKitAction(),
 		NewDeployAction(),
 		NewMonitorAction(),
 		NewErrorAction(),
-		NewDeleteAction(),
 	}
 
 	for _, a := range actions {
@@ -280,7 +260,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+				if r, err := r.update(ctx, &instance, newTarget); err != nil {
 					return r, err
 				}
 
@@ -302,8 +282,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	return reconcile.Result{}, nil
 }
 
-// Update --
-func (r *ReconcileIntegration) update(ctx context.Context, log log.Logger, target *v1alpha1.Integration) (reconcile.Result, error) {
+func (r *ReconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegration(target)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -311,16 +290,7 @@ func (r *ReconcileIntegration) update(ctx context.Context, log log.Logger, targe
 
 	target.Status.Digest = dgst
 
-	err = r.client.Status().Update(ctx, target)
-	if err != nil {
-		if k8serrors.IsConflict(err) {
-			log.Error(err, "conflict")
-
-			return reconcile.Result{
-				Requeue: true,
-			}, nil
-		}
-	}
+	err = r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err
 }

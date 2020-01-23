@@ -19,29 +19,30 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"text/tabwriter"
+
+	"github.com/spf13/cobra"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/spf13/cobra"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := kitGetCommand{
+func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetCommandOptions) {
+	options := kitGetCommandOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:   "get",
-		Short: "Get defined Integration Kit",
-		Long:  `Get defined Integration Kit.`,
+		Use:     "get",
+		Short:   "Get defined Integration Kit",
+		Long:    `Get defined Integration Kit.`,
+		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := impl.validate(cmd, args); err != nil {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := impl.run(); err != nil {
+			if err := options.run(cmd); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -49,42 +50,41 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&impl.user, v1alpha1.IntegrationKitTypeUser, true, "Includes user kits")
-	cmd.Flags().BoolVar(&impl.external, v1alpha1.IntegrationKitTypeExternal, true, "Includes external kits")
-	cmd.Flags().BoolVar(&impl.platform, v1alpha1.IntegrationKitTypePlatform, true, "Includes platform kits")
+	cmd.Flags().Bool(v1.IntegrationKitTypeUser, true, "Includes user Kits")
+	cmd.Flags().Bool(v1.IntegrationKitTypeExternal, true, "Includes external Kits")
+	cmd.Flags().Bool(v1.IntegrationKitTypePlatform, true, "Includes platform Kits")
 
-	return &cmd
+	return &cmd, &options
 }
 
-type kitGetCommand struct {
+type kitGetCommandOptions struct {
 	*RootCmdOptions
-	user     bool
-	external bool
-	platform bool
+	User     bool `mapstructure:"user"`
+	External bool `mapstructure:"external"`
+	Platform bool `mapstructure:"platform"`
 }
 
-func (command *kitGetCommand) validate(cmd *cobra.Command, args []string) error {
+func (command *kitGetCommandOptions) validate(cmd *cobra.Command, args []string) error {
 	return nil
-
 }
 
-func (command *kitGetCommand) run() error {
-	kitList := v1alpha1.NewIntegrationKitList()
+func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
+	kitList := v1.NewIntegrationKitList()
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
-	if err := c.List(command.Context, &k8sclient.ListOptions{Namespace: command.Namespace}, &kitList); err != nil {
+	if err := c.List(command.Context, &kitList, k8sclient.InNamespace(command.Namespace)); err != nil {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
+	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
 	for _, ctx := range kitList.Items {
 		t := ctx.Labels["camel.apache.org/kit.type"]
-		u := command.user && t == v1alpha1.IntegrationKitTypeUser
-		e := command.external && t == v1alpha1.IntegrationKitTypeExternal
-		p := command.platform && t == v1alpha1.IntegrationKitTypePlatform
+		u := command.User && t == v1.IntegrationKitTypeUser
+		e := command.External && t == v1.IntegrationKitTypeExternal
+		p := command.Platform && t == v1.IntegrationKitTypePlatform
 
 		if u || e || p {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, string(ctx.Status.Phase), t, ctx.Status.Image)

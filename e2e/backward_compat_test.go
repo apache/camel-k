@@ -24,20 +24,21 @@ package e2e
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func TestBackwardCompatibility(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 
 		data := `
-apiVersion: ` + v1alpha1.SchemeGroupVersion.String() + `
+apiVersion: ` + v1.SchemeGroupVersion.String() + `
 kind: Integration
 metadata:
   name: example
@@ -56,14 +57,14 @@ status:
 		err = testClient.Create(testContext, obj)
 		assert.Nil(t, err)
 
-		integration := v1alpha1.NewIntegration(ns, "example")
+		integration := v1.NewIntegration(ns, "example")
 		key, err := client.ObjectKeyFromObject(&integration)
 		assert.Nil(t, err)
 
 		unstr := unstructured.Unstructured{
 			Object: map[string]interface{}{
 				"kind":       "Integration",
-				"apiVersion": v1alpha1.SchemeGroupVersion.String(),
+				"apiVersion": v1.SchemeGroupVersion.String(),
 			},
 		}
 		err = testClient.Get(testContext, key, &unstr)
@@ -72,6 +73,44 @@ status:
 		assert.NotNil(t, spec)
 		attr := spec.(map[string]interface{})["thisDoesNotBelongToSpec"]
 		assert.Equal(t, "hi", attr)
+
+		err = testClient.Get(testContext, key, &integration)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(integration.Spec.Sources))
+		assert.Equal(t, "hello.groovy", integration.Spec.Sources[0].Name)
+	})
+}
+
+func TestV1Alpha1Compatibility(t *testing.T) {
+	withNewTestNamespace(t, func(ns string) {
+
+		data := `
+apiVersion: camel.apache.org/v1alpha1
+kind: Integration
+metadata:
+  name: example
+  namespace: ` + ns + `
+spec:
+  sources:
+  - name: hello.groovy
+`
+
+		obj, err := kubernetes.LoadRawResourceFromYaml(data)
+		assert.Nil(t, err)
+		dynClient, err := dynamic.NewForConfig(testClient.GetConfig())
+		assert.Nil(t, err)
+
+		obj, err = dynClient.Resource(schema.GroupVersionResource{
+			Group: "camel.apache.org",
+			// Using old v1alpha1 version for testing
+			Version:  "v1alpha1",
+			Resource: "integrations",
+		}).Namespace(ns).Create(obj.(*unstructured.Unstructured), metav1.CreateOptions{})
+		assert.Nil(t, err)
+
+		integration := v1.NewIntegration(ns, "example")
+		key, err := client.ObjectKeyFromObject(&integration)
+		assert.Nil(t, err)
 
 		err = testClient.Get(testContext, key, &integration)
 		assert.Nil(t, err)

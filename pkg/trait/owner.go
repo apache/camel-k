@@ -20,23 +20,23 @@ package trait
 import (
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/finalizer"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
-	"github.com/pkg/errors"
-
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-// ownerTrait ensures that all created resources belong to the integration being created
-// and transfers annotations and labels on the integration onto these owned resources being created
+// The Owner trait ensures that all created resources belong to the integration being created
+// and transfers annotations and labels on the integration onto these owned resources.
+//
+// +camel-k:trait=owner
 type ownerTrait struct {
 	BaseTrait `property:",squash"`
-
+	// The annotations to be transferred (A comma-separated list of label keys)
 	TargetAnnotations string `property:"target-annotations"`
-	TargetLabels      string `property:"target-labels"`
+	// The labels to be transferred (A comma-separated list of label keys)
+	TargetLabels string `property:"target-labels"`
 }
 
 func newOwnerTrait() *ownerTrait {
@@ -54,7 +54,7 @@ func (t *ownerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *ownerTrait) Apply(e *Environment) error {
@@ -79,30 +79,18 @@ func (t *ownerTrait) Apply(e *Environment) error {
 		}
 	}
 
-	ok, err := finalizer.Exists(e.Integration, finalizer.CamelIntegrationFinalizer)
-	if err != nil {
-		return errors.Wrap(err, "failed to read finalizer"+finalizer.CamelIntegrationFinalizer)
-	}
-
 	e.Resources.VisitMetaObject(func(res metav1.Object) {
-		//
-		// do not add owner reference if the finalizer is set
-		// so resources are not automatically deleted by k8s
-		// when owner is deleted
-		//
-		if !ok {
-			references := []metav1.OwnerReference{
-				{
-					APIVersion:         e.Integration.APIVersion,
-					Kind:               e.Integration.Kind,
-					Name:               e.Integration.Name,
-					UID:                e.Integration.UID,
-					Controller:         &controller,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
-			}
-			res.SetOwnerReferences(references)
+		references := []metav1.OwnerReference{
+			{
+				APIVersion:         e.Integration.APIVersion,
+				Kind:               e.Integration.Kind,
+				Name:               e.Integration.Name,
+				UID:                e.Integration.UID,
+				Controller:         &controller,
+				BlockOwnerDeletion: &blockOwnerDeletion,
+			},
 		}
+		res.SetOwnerReferences(references)
 
 		// Transfer annotations
 		t.propagateLabelAndAnnotations(res, targetLabels, targetAnnotations)
@@ -113,10 +101,15 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	})
 
 	e.Resources.VisitKnativeService(func(service *serving.Service) {
-		t.propagateLabelAndAnnotations(service.Spec.ConfigurationSpec.GetTemplate(), targetLabels, targetAnnotations)
+		t.propagateLabelAndAnnotations(&service.Spec.ConfigurationSpec.Template, targetLabels, targetAnnotations)
 	})
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *ownerTrait) IsPlatformTrait() bool {
+	return true
 }
 
 func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabels map[string]string, targetAnnotations map[string]string) {

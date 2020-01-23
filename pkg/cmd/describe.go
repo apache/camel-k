@@ -23,7 +23,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,7 +50,7 @@ func describeObjectMeta(w *indentedwriter.Writer, om metav1.ObjectMeta) {
 	w.Write(0, "Creation Timestamp:\t%s\n", om.CreationTimestamp.Format(time.RFC1123Z))
 }
 
-func describeTraits(w *indentedwriter.Writer, traits map[string]v1alpha1.TraitSpec) {
+func describeTraits(w *indentedwriter.Writer, traits map[string]v1.TraitSpec) {
 	if len(traits) > 0 {
 		w.Write(0, "Traits:\n")
 
@@ -71,9 +71,9 @@ func newCmdDescribe(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		Long:  `Describe a Camel K resource.`,
 	}
 
-	cmd.AddCommand(newDescribeKitCmd(rootCmdOptions))
-	cmd.AddCommand(newDescribeIntegrationCmd(rootCmdOptions))
-	cmd.AddCommand(newDescribePlatformCmd(rootCmdOptions))
+	cmd.AddCommand(cmdOnly(newDescribeKitCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newDescribeIntegrationCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newDescribePlatformCmd(rootCmdOptions)))
 
 	return &cmd
 }

@@ -34,13 +34,15 @@ spec:
       labels:
         name: camel-k-operator
         camel.apache.org/component: operator
+        app: "camel-k"
     spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:1.0.0-M2-SNAPSHOT
+          image: docker.io/apache/camel-k:1.0.0-RC2-SNAPSHOT
           command:
-          - camel-k
+          - kamel
+          - operator
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE

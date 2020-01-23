@@ -21,13 +21,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
-	catalog, err := DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	assert.Equal(t, "3.0.0-M4", catalog.Version)
+	assert.Equal(t, defaults.DefaultCamelVersion, catalog.Version)
 
 	artifact := catalog.GetArtifactByScheme("knative")
 	assert.Equal(t, 1, len(artifact.Schemes))

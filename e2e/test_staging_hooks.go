@@ -21,15 +21,35 @@ limitations under the License.
 
 package e2e
 
+import (
+	"fmt"
+	"os"
+)
+
 func init() {
-	// this hook can be used to test a released version of the operator, e.g. the staging version during a voting period
+	// Let's use the STAGING_RUNTIME_REPO if available
+	runtimeRepo := os.Getenv("STAGING_RUNTIME_REPO")
+	if runtimeRepo != "" {
+		kamelHooks = append(kamelHooks, func(cmd []string) []string {
+			if len(cmd) > 0 && cmd[0] == "install" {
+				cmd = append(cmd, fmt.Sprintf("--maven-repository=%s", runtimeRepo))
+			}
+			return cmd
+		})
+	}
+
+	// this hook can be also used to test a released version of the operator, e.g. the staging version during a voting period
 	// Uncomment the following lines and change references to enable the hook
-	kamelHooks = append(kamelHooks, func(cmd []string) []string {
-		//if len(cmd) > 0 && cmd[0] == "install" {
-		//	cmd = append(cmd, "--operator-image=docker.io/camelk/camel-k:1.0.0-M1")
-		//	cmd = append(cmd, "--maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-1145")
-		//}
-		return cmd
-	})
+
+	//testImageName = "docker.io/camelk/camel-k"
+	//testImageVersion = "1.0.0-M2"
+
+	//kamelHooks = append(kamelHooks, func(cmd []string) []string {
+	//	if len(cmd) > 0 && cmd[0] == "install" {
+	//		cmd = append(cmd, "--operator-image=docker.io/camelk/camel-k:1.0.0-M2")
+	//		cmd = append(cmd, "--maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-1156")
+	//	}
+	//	return cmd
+	//})
 
 }

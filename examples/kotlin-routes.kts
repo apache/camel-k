@@ -1,3 +1,4 @@
+// camel-k: language=kotlin
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,13 +17,9 @@
  */
 
 //
-// To run this integrations use:
+// To run this integration use:
 //
-//     kamel run --runtime kotlin examples/kotlin-routes.kts
-//
-// Or leveraging runtime detection
-//
-//     kamel run examples/kotlin-routes.kts
+//     kamel run kotlin examples/kotlin-routes.kts
 //
 
 val rnd = java.util.Random()

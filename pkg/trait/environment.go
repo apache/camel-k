@@ -18,11 +18,15 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
+// The environment trait is used internally to inject standard environment variables in the integration container,
+// such as `NAMESPACE`, `POD_NAME` and others.
+//
+// +camel-k:trait=environment
 type environmentTrait struct {
 	BaseTrait     `property:",squash"`
 	ContainerMeta bool `property:"container-meta"`
@@ -34,20 +38,19 @@ const (
 	envVarCamelKVersion        = "CAMEL_K_VERSION"
 	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
 	envVarCamelVersion         = "CAMEL_VERSION"
-	envVarMainClass            = "JAVA_MAIN_CLASS"
-	defaultMainClass           = "org.apache.camel.k.main.Application"
 )
 
 func newEnvironmentTrait() *environmentTrait {
 	return &environmentTrait{
-		BaseTrait:     newBaseTrait("environment"),
+		BaseTrait: newBaseTrait("environment"),
+		// Enable injection of NAMESPACE and POD_NAME environment variables.
 		ContainerMeta: true,
 	}
 }
 
 func (t *environmentTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled == nil || *t.Enabled {
-		return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+		return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 	}
 
 	return false, nil
@@ -63,7 +66,10 @@ func (t *environmentTrait) Apply(e *Environment) error {
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
 	}
 
-	envvar.SetVal(&e.EnvVars, envVarMainClass, defaultMainClass)
-
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *environmentTrait) IsPlatformTrait() bool {
+	return true
 }

@@ -159,7 +159,6 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 			}
 		}
 	}()
-
 }
 
 func (s *SelectorScraper) listPods() (*corev1.PodList, error) {

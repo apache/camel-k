@@ -20,14 +20,31 @@ package cmd
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/spf13/cobra"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 )
 
+//nolint:deadcode,unused
+func addTestInstallCmd(options RootCmdOptions, rootCmd *cobra.Command) *installCmdOptions {
+	//add a testing version of install Command
+	installCmd, installOptions := newCmdInstall(&options)
+	installCmd.RunE = func(c *cobra.Command, args []string) error {
+		return nil
+	}
+	installCmd.Args = test.ArbitraryArgs
+	rootCmd.AddCommand(installCmd)
+	return installOptions
+}
+
+//TODO: add a proper command flags test, take inspiration by run_test.go
+
 func TestDecodeMavenSettings(t *testing.T) {
 	var err error
-	var val v1alpha1.ValueSource
+	var val v1.ValueSource
 
 	//
 	// ConfigMap

@@ -19,7 +19,10 @@ package s2i
 
 import (
 	"io/ioutil"
-	"regexp"
+	"os"
+	"path"
+
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -34,36 +37,37 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-
-	"github.com/pkg/errors"
-)
-
-const (
-	openShiftDockerRegistryHost = "docker-registry.default.svc"
 )
 
 func publisher(ctx *builder.Context) error {
+	// We may want to unify the Dockerfile between build strategies, i.e., between Kaniko and S2I
+	// #nosec G202
+	dockerfile := `
+		FROM ` + ctx.BaseImage + `
+		ADD . /deployments
+		USER 1000
+	`
+
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: buildv1.SchemeGroupVersion.String(),
+			APIVersion: buildv1.GroupVersion.String(),
 			Kind:       "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "camel-k-" + ctx.Build.Meta.Name,
 			Namespace: ctx.Namespace,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
 		},
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
 				Source: buildv1.BuildSource{
-					Type: buildv1.BuildSourceBinary,
+					Type:       buildv1.BuildSourceBinary,
+					Dockerfile: &dockerfile,
 				},
 				Strategy: buildv1.BuildStrategy{
-					SourceStrategy: &buildv1.SourceBuildStrategy{
-						From: corev1.ObjectReference{
-							Kind: "DockerImage",
-							Name: ctx.Image,
-						},
-					},
+					DockerStrategy: &buildv1.DockerBuildStrategy{},
 				},
 				Output: buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
@@ -87,12 +91,15 @@ func publisher(ctx *builder.Context) error {
 
 	is := imagev1.ImageStream{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: imagev1.SchemeGroupVersion.String(),
+			APIVersion: imagev1.GroupVersion.String(),
 			Kind:       "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "camel-k-" + ctx.Build.Meta.Name,
 			Namespace: ctx.Namespace,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
 		},
 		Spec: imagev1.ImageStreamSpec{
 			LookupPolicy: imagev1.ImageLookupPolicy{
@@ -115,6 +122,9 @@ func publisher(ctx *builder.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "cannot fully read tar file "+ctx.Archive)
 	}
+
+	baseDir, _ := path.Split(ctx.Archive)
+	defer os.RemoveAll(baseDir)
 
 	restClient, err := customclient.GetClientFor(ctx.Client, "build.openshift.io", "v1")
 	if err != nil {
@@ -155,7 +165,7 @@ func publisher(ctx *builder.Context) error {
 			}
 		}
 		return false, nil
-	}, ctx.Build.Platform.Build.Timeout.Duration)
+	}, ctx.Build.Timeout.Duration)
 
 	if err != nil {
 		return err
@@ -177,15 +187,4 @@ func publisher(ctx *builder.Context) error {
 	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Meta.ResourceVersion
 
 	return nil
-}
-
-//nolint: unparam
-func replaceHost(ctx *builder.Context) error {
-	ctx.PublicImage = getImageWithOpenShiftHost(ctx.Image)
-	return nil
-}
-
-func getImageWithOpenShiftHost(image string) string {
-	pattern := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+([:/].*)`)
-	return pattern.ReplaceAllString(image, openShiftDockerRegistryHost+"$1")
 }

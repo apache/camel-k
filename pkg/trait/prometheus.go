@@ -19,30 +19,47 @@ package trait
 
 import (
 	"fmt"
+	"path"
 	"strconv"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/envvar"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
+
+	"github.com/apache/camel-k/deploy"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
+// The Prometheus trait configures the Prometheus JMX exporter and exposes the integration with a `Service`
+// and a `ServiceMonitor` resources so that the Prometheus endpoint can be scraped.
+//
+// WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
+//custom resource definition to be installed.
+// You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator.
+//
+// It's disabled by default.
+//
+// +camel-k:trait=prometheus
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
-
-	Port                 int    `property:"port"`
-	ServiceMonitor       bool   `property:"service-monitor"`
+	// The Prometheus endpoint port (default `9778`).
+	Port int `property:"port"`
+	// Whether a `ServiceMonitor` resource is created (default `true`).
+	ServiceMonitor bool `property:"service-monitor"`
+	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 	ServiceMonitorLabels string `property:"service-monitor-labels"`
 }
 
-const prometheusPortName = "prometheus"
+const (
+	prometheusJmxExporterConfigFileName  = "prometheus-jmx-exporter.yaml"
+	prometheusJmxExporterConfigMountPath = "/etc/prometheus"
+	prometheusPortName                   = "prometheus"
+)
 
-// The Prometheus trait must be executed prior to the deployment trait
-// as it mutates environment variables
 func newPrometheusTrait() *prometheusTrait {
 	return &prometheusTrait{
 		BaseTrait:      newBaseTrait("prometheus"),
@@ -52,98 +69,118 @@ func newPrometheusTrait() *prometheusTrait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return t.Enabled != nil && *t.Enabled && e.IntegrationInPhase(
+		v1.IntegrationPhaseInitialization,
+		v1.IntegrationPhaseDeploying,
+		v1.IntegrationPhaseRunning,
+	), nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
-	if t.Enabled == nil || !*t.Enabled {
-		// Deactivate the Prometheus Java agent
-		// Note: the AB_PROMETHEUS_OFF environment variable acts as an option flag
-		envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_OFF", "true")
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		// Add the Camel management and Prometheus agent dependencies
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+		// TODO: We may want to make the Prometheus version configurable
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.prometheus.jmx/jmx_prometheus_javaagent:0.3.1")
+
+		// Add the default Prometheus JMX exporter configuration
+		// TODO: Support user-provided configuration
+		configMap := t.getJmxExporterConfigMap(e)
+		e.Resources.Add(configMap)
+		e.Integration.Status.AddOrReplaceGeneratedResources(v1.ResourceSpec{
+			Type: v1.ResourceTypeData,
+			DataSpec: v1.DataSpec{
+				Name:       prometheusJmxExporterConfigFileName,
+				ContentRef: configMap.Name,
+			},
+			MountPath: prometheusJmxExporterConfigMountPath,
+		})
 		return nil
 	}
 
-	// Configure the Prometheus Java agent
-	envvar.SetVal(&e.EnvVars, "AB_PROMETHEUS_PORT", strconv.Itoa(t.Port))
+	container := e.getIntegrationContainer()
+	if container == nil {
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionPrometheusAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionContainerNotAvailableReason,
+			"",
+		)
+		return nil
+	}
 
-	service, servicePort := t.configureServicePort(e)
-	container, containerPort := t.configureContainerPort(e)
-
-	condition := v1alpha1.IntegrationCondition{
-		Type:   v1alpha1.IntegrationConditionPrometheusAvailable,
+	condition := v1.IntegrationCondition{
+		Type:   v1.IntegrationConditionPrometheusAvailable,
 		Status: corev1.ConditionTrue,
-		Reason: v1alpha1.IntegrationConditionPrometheusAvailableReason,
+		Reason: v1.IntegrationConditionPrometheusAvailableReason,
 	}
 
-	if servicePort != nil {
+	// Configure the Prometheus Java agent
+	options := []string{strconv.Itoa(t.Port), path.Join(prometheusJmxExporterConfigMountPath, prometheusJmxExporterConfigFileName)}
+	container.Args = append(container.Args, "-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar="+strings.Join(options, ":"))
+
+	// Add the container port
+	containerPort := t.getContainerPort()
+	container.Ports = append(container.Ports, *containerPort)
+	condition.Message = fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
+
+	// Retrieve the service or create a new one if the service trait is enabled
+	serviceEnabled := false
+	service := e.Resources.GetServiceForIntegration(e.Integration)
+	if service == nil {
+		trait := e.Catalog.GetTrait(serviceTraitID)
+		if serviceTrait, ok := trait.(*serviceTrait); ok {
+			serviceEnabled = serviceTrait.isEnabled()
+		}
+		if serviceEnabled {
+			// add a new service if not already created
+			service = getServiceFor(e)
+			e.Resources.Add(service)
+		}
+	}
+
+	// Add the service port and service monitor resource
+	// A better strategy may be needed when the Knative profile is active
+	if serviceEnabled {
+		servicePort := t.getServicePort()
 		service.Spec.Ports = append(service.Spec.Ports, *servicePort)
-		condition.Message = fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port)
-	} else {
-		condition.Status = corev1.ConditionFalse
-		condition.Reason = v1alpha1.IntegrationConditionServiceNotAvailableReason
-	}
+		condition.Message = fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port) + condition.Message
 
-	if containerPort != nil {
-		container.Ports = append(container.Ports, *containerPort)
-		condition.Message += fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
+		// Add the ServiceMonitor resource
+		if t.ServiceMonitor {
+			smt, err := t.getServiceMonitorFor(e)
+			if err != nil {
+				return err
+			}
+			e.Resources.Add(smt)
+		}
 	} else {
 		condition.Status = corev1.ConditionFalse
-		condition.Reason = v1alpha1.IntegrationConditionContainerNotAvailableReason
+		condition.Reason = v1.IntegrationConditionServiceNotAvailableReason
 	}
 
 	e.Integration.Status.SetConditions(condition)
 
-	if condition.Status == corev1.ConditionFalse {
-		return nil
-	}
-
-	if t.ServiceMonitor {
-		// Add the ServiceMonitor resource
-		smt, err := t.getServiceMonitorFor(e)
-		if err != nil {
-			return err
-		}
-		e.Resources.Add(smt)
-	}
-
 	return nil
 }
 
-func (t *prometheusTrait) configureContainerPort(e *Environment) (*corev1.Container, *corev1.ContainerPort) {
-	containerName := defaultContainerName
-	dt := e.Catalog.GetTrait(containerTraitID)
-	if dt != nil {
-		containerName = dt.(*containerTrait).Name
-	}
-
-	container := e.Resources.GetContainerByName(containerName)
-	if container == nil {
-		return nil, nil
-	}
-
+func (t *prometheusTrait) getContainerPort() *corev1.ContainerPort {
 	containerPort := corev1.ContainerPort{
 		Name:          prometheusPortName,
 		ContainerPort: int32(t.Port),
 		Protocol:      corev1.ProtocolTCP,
 	}
-
-	return container, &containerPort
+	return &containerPort
 }
 
-func (t *prometheusTrait) configureServicePort(e *Environment) (*corev1.Service, *corev1.ServicePort) {
-	service := e.Resources.GetServiceForIntegration(e.Integration)
-	if service == nil {
-		return nil, nil
-	}
-
+func (t *prometheusTrait) getServicePort() *corev1.ServicePort {
 	servicePort := corev1.ServicePort{
 		Name:       prometheusPortName,
 		Port:       int32(t.Port),
 		Protocol:   corev1.ProtocolTCP,
 		TargetPort: intstr.FromString(prometheusPortName),
 	}
-
-	return service, &servicePort
+	return &servicePort
 }
 
 func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.ServiceMonitor, error) {
@@ -171,10 +208,29 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 			},
 			Endpoints: []monitoringv1.Endpoint{
 				{
-					Port: "prometheus",
+					Port: prometheusPortName,
 				},
 			},
 		},
 	}
 	return &smt, nil
+}
+
+func (t *prometheusTrait) getJmxExporterConfigMap(e *Environment) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      e.Integration.Name + "-prometheus",
+			Namespace: e.Integration.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
+		},
+		Data: map[string]string{
+			"content": deploy.Resources["prometheus-jmx-exporter.yaml"],
+		},
+	}
 }

@@ -9,9 +9,17 @@ To setup the environment you need to execute the following command once (and eve
 yarn install
 ```
 
+== Local development
+
+To build the local copy of the website and preview it, execute:
+
+```
+yarn dev
+```
+
 == Build the Documentation Website
 
-To generate the documentation website, execute:
+To generate the documentation website from the remote repository branch, execute:
 
 ```
 yarn build
@@ -21,10 +29,4 @@ To preview it in the local browser, execute:
 
 ```
 yarn preview
-```
-
-To both build and preview, execute:
-
-```
-yarn dev
 ```

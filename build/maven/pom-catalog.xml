@@ -21,42 +21,115 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.camel.k</groupId>
     <artifactId>camel-k-catalog-generator</artifactId>
     <version>1.0.0</version>
 
-    <build>
-        <defaultGoal>generate-resources</defaultGoal>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.camel.k</groupId>
-                <artifactId>camel-k-maven-plugin</artifactId>
-                <version>${runtime.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-catalog</id>
-                        <goals>
-                            <goal>generate-catalog</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.camel</groupId>
-                        <artifactId>camel-catalog</artifactId>
-                        <version>${catalog.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
+    <profiles>
+        <profile>
+            <id>main</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <defaultGoal>generate-resources</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.camel.k</groupId>
+                        <artifactId>camel-k-maven-plugin</artifactId>
+                        <version>${runtime.version}</version>
+                        <executions>
+                            <execution>
+                                <id>generate-catalog</id>
+                                <goals>
+                                    <goal>generate-catalog</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.camel</groupId>
+                                <artifactId>camel-catalog</artifactId>
+                                <version>${camel.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>quarkus</id>
+            <build>
+                <defaultGoal>generate-resources</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.camel.k</groupId>
+                        <artifactId>camel-k-maven-plugin</artifactId>
+                        <version>${runtime.version}</version>
+                        <executions>
+                            <execution>
+                                <id>generate-catalog</id>
+                                <goals>
+                                    <goal>generate-catalog</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <!-- The Camel dependency version is driven by Camel Quarkus -->
+                            <dependency>
+                                <groupId>org.apache.camel.quarkus</groupId>
+                                <artifactId>camel-catalog-quarkus</artifactId>
+                                <version>${camel-quarkus.version}</version>
+                            </dependency>
+                            <!-- This is required to retrieve the Quarkus dependency version -->
+                            <dependency>
+                                <groupId>org.apache.camel.quarkus</groupId>
+                                <artifactId>camel-quarkus-core</artifactId>
+                                <version>${camel-quarkus.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>staging</id>
+            <activation>
+                <property>
+                    <name>staging.repo</name>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>staging</id>
+                    <url>${staging.repo}</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>staging</id>
+                    <url>${staging.repo}</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
 
     <repositories>
         <repository>
             <id>apache.snapshots</id>
-            <name>Apache Development Snapshot Repository</name>
             <url>https://repository.apache.org/content/repositories/snapshots/</url>
             <releases>
                 <enabled>false</enabled>
@@ -80,7 +153,6 @@
     <pluginRepositories>
         <pluginRepository>
             <id>apache.snapshots</id>
-            <name>Apache Development Snapshot Repository</name>
             <url>https://repository.apache.org/content/repositories/snapshots/</url>
             <releases>
                 <enabled>false</enabled>

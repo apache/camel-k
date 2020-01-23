@@ -18,29 +18,31 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/envvar"
-	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestDebugTraitApplicability(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	env := Environment{
 		CamelCatalog: catalog,
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Traits: map[string]v1.TraitSpec{
 					"debug": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -49,7 +51,6 @@ func TestDebugTraitApplicability(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make([]corev1.EnvVar, 0),
 	}
 
 	trait := newDebugTrait()
@@ -58,7 +59,7 @@ func TestDebugTraitApplicability(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, enabled)
 
-	env.Integration.Status.Phase = v1alpha1.IntegrationPhaseRunning
+	env.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
 	enabled, err = trait.Configure(&env)
 	assert.Nil(t, err)
@@ -67,12 +68,13 @@ func TestDebugTraitApplicability(t *testing.T) {
 
 func TestApplyDebugTrait(t *testing.T) {
 	environment := Environment{
-		Integration: &v1alpha1.Integration{
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+		Catalog: NewCatalog(context.TODO(), nil),
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Traits: map[string]v1.TraitSpec{
 					"debug": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -81,12 +83,29 @@ func TestApplyDebugTrait(t *testing.T) {
 				},
 			},
 		},
-		EnvVars: make([]corev1.EnvVar, 0),
+		Resources: kubernetes.NewCollection(),
 	}
+
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
 
 	trait := newDebugTrait()
 
 	assert.Nil(t, trait.Apply(&environment))
-	assert.NotNil(t, envvar.Get(environment.EnvVars, "JAVA_DEBUG"))
-	assert.Equal(t, True, envvar.Get(environment.EnvVars, "JAVA_DEBUG").Value)
+	assert.Equal(t, d.Spec.Template.Spec.Containers[0].Args, []string{
+		"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+	})
 }

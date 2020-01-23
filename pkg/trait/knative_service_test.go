@@ -21,18 +21,17 @@ import (
 	"context"
 	"testing"
 
-	"github.com/scylladb/go-set/strset"
+	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
-
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -41,7 +40,7 @@ const (
 )
 
 func TestKnativeService(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -49,42 +48,42 @@ func TestKnativeService(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,
 				Namespace: KnativeServiceTestNamespace,
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKnative,
-				Sources: []v1alpha1.SourceSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
 							Content:     `from("undertow:test").log("hello")`,
 							Compression: true,
 						},
-						Language: v1alpha1.LanguageJavaScript,
+						Language: v1.LanguageJavaScript,
 					},
 				},
-				Resources: []v1alpha1.ResourceSpec{
+				Resources: []v1.ResourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:        "my-resource.txt",
 							Content:     "",
 							Compression: false,
 						},
-						Type: v1alpha1.ResourceTypeData,
+						Type: v1.ResourceTypeData,
 					},
 				},
-				Configuration: []v1alpha1.ConfigurationSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{Type: "configmap", Value: "my-cm"},
 					{Type: "secret", Value: "my-secret"},
 					{Type: "property", Value: "my-property=my-property-value"},
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"knative-service": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -93,31 +92,31 @@ func TestKnativeService(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("knative")))
+	assert.NotNil(t, environment.GetTrait("knative"))
 	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
 	assert.Equal(t, 4, environment.Resources.Size())
 
@@ -127,7 +126,7 @@ func TestKnativeService(t *testing.T) {
 
 	assert.NotNil(t, s)
 
-	spec := s.Spec.ConfigurationSpec.GetTemplate().Spec
+	spec := s.Spec.ConfigurationSpec.Template.Spec
 
 	assert.Len(t, spec.Containers[0].VolumeMounts, 5)
 	assert.Len(t, spec.Volumes, 5)
@@ -173,14 +172,13 @@ func TestKnativeService(t *testing.T) {
 		}
 	})
 
-	test.EnvVarExists(t, spec.Containers[0].Env, "JAVA_CLASSPATH")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_ROUTES", "file:/etc/camel/sources/i-source-000/routes.js?language=js&compression=true")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 }
 
 func TestKnativeServiceWithCustomContainerName(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -188,18 +186,18 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,
 				Namespace: KnativeServiceTestNamespace,
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKnative,
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Traits: map[string]v1.TraitSpec{
 					"deployer": {
 						Configuration: map[string]string{
 							"kind": "knative-service",
@@ -219,32 +217,32 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("knative-service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("knative-service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName
@@ -254,6 +252,6 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	assert.Equal(
 		t,
 		environment.Integration.Spec.Traits["container"].Configuration["name"],
-		s.Spec.ConfigurationSpec.GetTemplate().Spec.Containers[0].Name,
+		s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Name,
 	)
 }

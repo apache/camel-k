@@ -20,34 +20,37 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
-func newCmdReset(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptions) {
 	options := resetCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "reset",
-		Short: "Reset the Camel K installation",
-		Long:  `Reset the Camel K installation by deleting everything except current platform configuration.`,
-		Run:   options.reset,
+		Use:     "reset",
+		Short:   "Reset the Camel K installation",
+		Long:    `Reset the Camel K installation by deleting everything except current platform configuration.`,
+		PreRunE: decode(&options),
+		Run:     options.reset,
 	}
 
-	cmd.Flags().BoolVar(&options.SkipKits, "skip-kits", false, "Do not delete the integration kits")
-	cmd.Flags().BoolVar(&options.SkipIntegrations, "skip-integrations", false, "Do not delete the integrations")
+	cmd.Flags().Bool("skip-kits", false, "Do not delete the integration kits")
+	cmd.Flags().Bool("skip-integrations", false, "Do not delete the integrations")
 
-	return &cmd
+	return &cmd, &options
 }
 
 type resetCmdOptions struct {
 	*RootCmdOptions
-	SkipKits         bool
-	SkipIntegrations bool
+	SkipKits         bool `mapstructure:"skip-kits"`
+	SkipIntegrations bool `mapstructure:"skip-integrations"`
 }
 
 func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
@@ -71,7 +74,7 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 			fmt.Print(err)
 			return
 		}
-		fmt.Printf("%d integration kits deleted from namespace %s\n", n, o.Namespace)
+		fmt.Printf("%d integration Kits deleted from namespace %s\n", n, o.Namespace)
 	}
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
@@ -83,8 +86,8 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 }
 
 func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
-	list := v1alpha1.NewIntegrationList()
-	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
+	list := v1.NewIntegrationList()
+	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
@@ -97,9 +100,9 @@ func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 }
 
 func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error) {
-	list := v1alpha1.NewIntegrationKitList()
-	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
-		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration kits from namespace %s", o.Namespace))
+	list := v1.NewIntegrationKitList()
+	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
+		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration Kits from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		kit := i
@@ -111,8 +114,8 @@ func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error)
 }
 
 func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
-	list := v1alpha1.NewIntegrationPlatformList()
-	if err := c.List(o.Context, &k8sclient.ListOptions{Namespace: o.Namespace}, &list); err != nil {
+	list := v1.NewIntegrationPlatformList()
+	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", o.Namespace))
 	}
 	if len(list.Items) > 1 {
@@ -122,6 +125,6 @@ func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 	}
 	platform := list.Items[0]
 	// Let's reset the status
-	platform.Status = v1alpha1.IntegrationPlatformStatus{}
+	platform.Status = v1.IntegrationPlatformStatus{}
 	return c.Status().Update(o.Context, &platform)
 }

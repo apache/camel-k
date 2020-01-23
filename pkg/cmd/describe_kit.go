@@ -18,31 +18,32 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-
-	impl := &describeKitCommand{
+func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describeKitCommandOptions) {
+	options := describeKitCommandOptions{
 		rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:   "kit",
-		Short: "Describe an Integration Kit",
-		Long:  `Describe an Integration Kit.`,
+		Use:     "kit",
+		Short:   "Describe an Integration Kit",
+		Long:    `Describe an Integration Kit.`,
+		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
-			if err := impl.validate(args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := impl.run(args); err != nil {
+			if err := options.run(args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -50,27 +51,27 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	}
 
-	return &cmd
+	return &cmd, &options
 }
 
-type describeKitCommand struct {
+type describeKitCommandOptions struct {
 	*RootCmdOptions
 }
 
-func (command *describeKitCommand) validate(args []string) error {
+func (command *describeKitCommandOptions) validate(args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("accepts at least 1 arg, received %d", len(args))
+		return errors.New("describe expects a kit name argument")
 	}
 	return nil
 }
 
-func (command *describeKitCommand) run(args []string) error {
+func (command *describeKitCommandOptions) run(args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
-	kit := v1alpha1.NewIntegrationKit(command.Namespace, args[0])
+	kit := v1.NewIntegrationKit(command.Namespace, args[0])
 	kitKey := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
@@ -85,7 +86,7 @@ func (command *describeKitCommand) run(args []string) error {
 	return nil
 }
 
-func (command *describeKitCommand) describeIntegrationKit(kit v1alpha1.IntegrationKit) string {
+func (command *describeKitCommandOptions) describeIntegrationKit(kit v1.IntegrationKit) string {
 	return indentedwriter.IndentedString(func(out io.Writer) {
 		w := indentedwriter.NewWriter(out)
 

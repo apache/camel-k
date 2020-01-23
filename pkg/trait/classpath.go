@@ -22,15 +22,22 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
+const (
+	defaultMainClass = "org.apache.camel.k.main.Application"
+)
+
+// The Classpath trait is used internally to configure the classpath of the final integration.
+//
+// +camel-k:trait=classpath
 type classpathTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -46,7 +53,8 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying), nil
+	return e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *classpathTrait) Apply(e *Environment) error {
@@ -54,7 +62,7 @@ func (t *classpathTrait) Apply(e *Environment) error {
 
 	if kit == nil && e.Integration.Status.Kit != "" {
 		name := e.Integration.Status.Kit
-		k := v1alpha1.NewIntegrationKit(e.Integration.Namespace, name)
+		k := v1.NewIntegrationKit(e.Integration.Namespace, name)
 		key := k8sclient.ObjectKey{
 			Namespace: e.Integration.Namespace,
 			Name:      name,
@@ -71,45 +79,53 @@ func (t *classpathTrait) Apply(e *Environment) error {
 		return fmt.Errorf("unable to find integration kit %s", e.Integration.Status.Kit)
 	}
 
-	if e.Classpath == nil {
-		e.Classpath = strset.New()
+	classpath := strset.New()
+
+	classpath.Add("/etc/camel/resources")
+	classpath.Add("./resources")
+
+	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+	if !quarkus.isEnabled() {
+		for _, artifact := range kit.Status.Artifacts {
+			classpath.Add(artifact.Target)
+		}
 	}
 
-	e.Classpath.Add("/etc/camel/resources")
-	e.Classpath.Add("./resources")
-
-	for _, artifact := range kit.Status.Artifacts {
-		e.Classpath.Add(artifact.Target)
-	}
-
-	if kit.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypeExternal {
-		//
+	if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypeExternal {
 		// In case of an external created kit, we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account
-		//
-		e.Classpath.Add("/deployments/dependencies/*")
+		classpath.Add("/deployments/dependencies/*")
 	}
 
-	containerName := defaultContainerName
-	dt := e.Catalog.GetTrait(containerTraitID)
-	if dt != nil {
-		containerName = dt.(*containerTrait).Name
-	}
-
-	container := e.Resources.GetContainerByName(containerName)
+	container := e.getIntegrationContainer()
 	if container != nil {
+		// Add mounted resources to the class path
 		for _, m := range container.VolumeMounts {
-			e.Classpath.Add(m.MountPath)
+			classpath.Add(m.MountPath)
 		}
-
-		items := e.Classpath.List()
-
-		// keep classpath sorted
+		items := classpath.List()
+		// Keep class path sorted so that it's consistent over reconciliation cycles
 		sort.Strings(items)
 
-		envvar.SetVal(&container.Env, "JAVA_CLASSPATH", strings.Join(items, ":"))
+		container.Args = append(container.Args, "-cp", strings.Join(items, ":"))
+
+		// Add main Class or JAR
+		quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+		if quarkus.isEnabled() {
+			container.Args = append(container.Args, "-jar", "camel-k-integration-"+defaults.Version+"-runner.jar")
+		} else {
+			container.Args = append(container.Args, defaultMainClass)
+		}
+
+		// Set the container working directory
+		container.WorkingDir = "/deployments"
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *classpathTrait) IsPlatformTrait() bool {
+	return true
 }

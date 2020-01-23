@@ -21,22 +21,49 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
-	routev1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	routev1 "github.com/openshift/api/route/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+// The Route trait can be used to configure the creation of OpenShift routes for the integration.
+//
+// +camel-k:trait=route
 type routeTrait struct {
-	BaseTrait                        `property:",squash"`
-	Host                             string `property:"host"`
-	TLSTermination                   string `property:"tls-termination"`
-	TLSCertificate                   string `property:"tls-certificate"`
-	TLSKey                           string `property:"tls-key"`
-	TLSCACertificate                 string `property:"tls-ca-certificate"`
-	TLSDestinationCACertificate      string `property:"tls-destination-ca-certificate"`
+	BaseTrait `property:",squash"`
+	// To configure the host exposed by the route.
+	Host string `property:"host"`
+	// The TLS termination type, like `edge`, `passthrough` or `reencrypt`.
+	//
+	// Refer to the OpenShift documentation for additional information.
+	TLSTermination string `property:"tls-termination"`
+	// The TLS certificate contents.
+	//
+	// Refer to the OpenShift documentation for additional information.
+	TLSCertificate string `property:"tls-certificate"`
+	// The TLS certificate key contents.
+	//
+	// Refer to the OpenShift documentation for additional information.
+	TLSKey string `property:"tls-key"`
+	// The TLS cert authority certificate contents.
+	//
+	// Refer to the OpenShift documentation for additional information.
+	TLSCACertificate string `property:"tls-ca-certificate"`
+	// The destination CA certificate provides the contents of the ca certificate of the final destination.  When using reencrypt
+	// termination this file should be provided in order to have routers use it for health checks on the secure connection.
+	// If this field is not specified, the router may provide its own destination CA and perform hostname validation using
+	// the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically
+	// verify.
+	//
+	// Refer to the OpenShift documentation for additional information.
+	TLSDestinationCACertificate string `property:"tls-destination-ca-certificate"`
+	// To configure how to deal with insecure traffic, e.g. `Allow`, `Disable` or `Redirect` traffic.
+	//
+	// Refer to the OpenShift documentation for additional information.
 	TLSInsecureEdgeTerminationPolicy string `property:"tls-insecure-edge-termination-policy"`
 
 	service *corev1.Service
@@ -51,25 +78,25 @@ func newRouteTrait() *routeTrait {
 func (t *routeTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionRouteNotAvailableReason,
+			v1.IntegrationConditionRouteNotAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
 	t.service = e.Resources.GetUserServiceForIntegration(e.Integration)
 	if t.service == nil {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionRouteNotAvailableReason,
+			v1.IntegrationConditionRouteNotAvailableReason,
 			"no target service found",
 		)
 
@@ -89,11 +116,14 @@ func (t *routeTrait) Apply(e *Environment) error {
 	route := routev1.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
-			APIVersion: routev1.SchemeGroupVersion.String(),
+			APIVersion: routev1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      t.service.Name,
 			Namespace: t.service.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
 		},
 		Spec: routev1.RouteSpec{
 			Port: &routev1.RoutePort{
@@ -126,9 +156,9 @@ func (t *routeTrait) Apply(e *Environment) error {
 	}
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionExposureAvailable,
+		v1.IntegrationConditionExposureAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionRouteAvailableReason,
+		v1.IntegrationConditionRouteAvailableReason,
 		message,
 	)
 

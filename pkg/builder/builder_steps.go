@@ -19,23 +19,21 @@ package builder
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/controller"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/tar"
-
-	yaml2 "gopkg.in/yaml.v2"
-
-	"github.com/pkg/errors"
 )
 
 var stepsByID = make(map[string]Step)
@@ -45,20 +43,19 @@ func init() {
 }
 
 type steps struct {
-	GenerateProject         Step
+	CleanBuildDir           Step
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
-	ComputeDependencies     Step
 	StandardPackager        Step
 	IncrementalPackager     Step
 }
 
 // Steps --
 var Steps = steps{
-	GenerateProject: NewStep(
-		ProjectGenerationPhase,
-		generateProject,
+	CleanBuildDir: NewStep(
+		ProjectGenerationPhase-1,
+		cleanBuildDir,
 	),
 	GenerateProjectSettings: NewStep(
 		ProjectGenerationPhase+1,
@@ -72,10 +69,6 @@ var Steps = steps{
 		ProjectGenerationPhase+3,
 		sanitizeDependencies,
 	),
-	ComputeDependencies: NewStep(
-		ProjectBuildPhase,
-		computeDependencies,
-	),
 	StandardPackager: NewStep(
 		ApplicationPackagePhase,
 		standardPackager,
@@ -84,6 +77,15 @@ var Steps = steps{
 		ApplicationPackagePhase,
 		incrementalPackager,
 	),
+}
+
+// DefaultSteps --
+var DefaultSteps = []Step{
+	Steps.CleanBuildDir,
+	Steps.GenerateProjectSettings,
+	Steps.InjectDependencies,
+	Steps.SanitizeDependencies,
+	Steps.IncrementalPackager,
 }
 
 // RegisterSteps --
@@ -112,17 +114,46 @@ func registerStep(steps ...Step) {
 	}
 }
 
-// generateProject --
-func generateProject(ctx *Context) error {
-	p, err := NewMavenProject(ctx)
+func cleanBuildDir(ctx *Context) error {
+	if ctx.Build.BuildDir == "" {
+		return nil
+	}
+
+	return os.RemoveAll(ctx.Build.BuildDir)
+}
+
+func generateProjectSettings(ctx *Context) error {
+	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.Settings)
 	if err != nil {
 		return err
 	}
+	if val != "" {
+		ctx.Maven.SettingsData = []byte(val)
+	}
 
-	ctx.Maven.Project = p
+	return nil
+}
 
+func injectDependencies(ctx *Context) error {
+	// Add dependencies from build
 	for _, d := range ctx.Build.Dependencies {
 		switch {
+		case strings.HasPrefix(d, "bom:"):
+			mid := strings.TrimPrefix(d, "bom:")
+			gav := strings.Replace(mid, "/", ":", -1)
+
+			d, err := maven.ParseGAV(gav)
+			if err != nil {
+				return err
+			}
+
+			ctx.Maven.Project.DependencyManagement.Dependencies = append(ctx.Maven.Project.DependencyManagement.Dependencies, maven.Dependency{
+				GroupID:    d.GroupID,
+				ArtifactID: d.ArtifactID,
+				Version:    d.Version,
+				Type:       "pom",
+				Scope:      "import",
+			})
 		case strings.HasPrefix(d, "camel:"):
 			artifactID := strings.TrimPrefix(d, "camel:")
 
@@ -139,38 +170,25 @@ func generateProject(ctx *Context) error {
 			}
 
 			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
+		case strings.HasPrefix(d, "camel-quarkus:"):
+			artifactID := strings.TrimPrefix(d, "camel-quarkus:")
+
+			if !strings.HasPrefix(artifactID, "camel-quarkus-") {
+				artifactID = "camel-quarkus-" + artifactID
+			}
+
+			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
 
 			ctx.Maven.Project.AddEncodedDependencyGAV(gav)
-		case strings.HasPrefix(d, "bom:"):
-			// no-op
 		default:
 			return fmt.Errorf("unknown dependency type: %s", d)
 		}
 	}
 
-	return nil
-}
-
-// generateProjectSettings --
-func generateProjectSettings(ctx *Context) error {
-	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Platform.Build.Maven.Settings)
-	if err != nil {
-		return err
-	}
-	if val != "" {
-		ctx.Maven.SettingsData = []byte(val)
-	}
-
-	return nil
-}
-
-func injectDependencies(ctx *Context) error {
-	//
 	// Add dependencies from catalog
-	//
 	deps := make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
 	copy(deps, ctx.Maven.Project.Dependencies)
 
@@ -195,9 +213,8 @@ func injectDependencies(ctx *Context) error {
 			}
 		}
 	}
-	//
-	// post process dependencies
-	//
+
+	// Post process dependencies
 	deps = make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
 	copy(deps, ctx.Maven.Project.Dependencies)
 
@@ -226,13 +243,13 @@ func sanitizeDependencies(ctx *Context) error {
 	for i := 0; i < len(ctx.Maven.Project.Dependencies); i++ {
 		dep := ctx.Maven.Project.Dependencies[i]
 
+		// It may be externalized into runtime provider specific steps
 		switch dep.GroupID {
 		case "org.apache.camel":
-			//
-			// Remove the version so we force using the one configured by the bom
-			//
-			ctx.Maven.Project.Dependencies[i].Version = ""
+			fallthrough
 		case "org.apache.camel.k":
+			fallthrough
+		case "org.apache.camel.quarkus":
 			//
 			// Remove the version so we force using the one configured by the bom
 			//
@@ -243,49 +260,7 @@ func sanitizeDependencies(ctx *Context) error {
 	return nil
 }
 
-func computeDependencies(ctx *Context) error {
-	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
-	mc.SettingsContent = ctx.Maven.SettingsData
-	mc.LocalRepository = ctx.Build.Platform.Build.LocalRepository
-	mc.Timeout = ctx.Build.Platform.Build.Maven.Timeout.Duration
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Build.RuntimeVersion)
-
-	if err := maven.Run(mc); err != nil {
-		return errors.Wrap(err, "failure while determining classpath")
-	}
-
-	dependencies := path.Join(mc.Path, "target", "dependencies.yaml")
-	content, err := ioutil.ReadFile(dependencies)
-	if err != nil {
-		return err
-	}
-
-	cp := make(map[string][]v1alpha1.Artifact)
-	err = yaml2.Unmarshal(content, &cp)
-	if err != nil {
-		return err
-	}
-
-	for _, e := range cp["dependencies"] {
-		_, fileName := path.Split(e.Location)
-
-		gav, err := maven.ParseGAV(e.ID)
-		if err != nil {
-			return nil
-		}
-
-		ctx.Artifacts = append(ctx.Artifacts, v1alpha1.Artifact{
-			ID:       e.ID,
-			Location: e.Location,
-			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
-		})
-	}
-
-	return nil
-}
-
-// ArtifactsSelector --
-type ArtifactsSelector func(ctx *Context) error
+type artifactsSelector func(ctx *Context) error
 
 func standardPackager(ctx *Context) error {
 	return packager(ctx, func(ctx *Context) error {
@@ -314,7 +289,7 @@ func incrementalPackager(ctx *Context) error {
 
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
-			selectedArtifacts := make([]v1alpha1.Artifact, 0)
+			selectedArtifacts := make([]v1.Artifact, 0)
 			for _, entry := range ctx.Artifacts {
 				if _, isCommon := commonLibs[entry.ID]; !isCommon {
 					selectedArtifacts = append(selectedArtifacts, entry)
@@ -322,7 +297,6 @@ func incrementalPackager(ctx *Context) error {
 			}
 
 			ctx.BaseImage = bestImage.Image
-			ctx.Image = bestImage.Image
 			ctx.SelectedArtifacts = selectedArtifacts
 		}
 
@@ -330,8 +304,7 @@ func incrementalPackager(ctx *Context) error {
 	})
 }
 
-// ClassPathPackager --
-func packager(ctx *Context, selector ArtifactsSelector) error {
+func packager(ctx *Context, selector artifactsSelector) error {
 	err := selector(ctx)
 	if err != nil {
 		return err
@@ -373,9 +346,22 @@ func packager(ctx *Context, selector ArtifactsSelector) error {
 }
 
 func listPublishedImages(context *Context) ([]publishedImage, error) {
-	list := v1alpha1.NewIntegrationKitList()
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(context.Namespace),
+	}
 
-	err := context.Client.List(context.C, &k8sclient.ListOptions{Namespace: context.Namespace}, &list)
+	if context.Catalog.RuntimeProvider != nil && context.Catalog.RuntimeProvider.Quarkus != nil {
+		options = append(options, k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.provider": "quarkus",
+		})
+	} else {
+		provider, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
+		selector := labels.NewSelector().Add(*provider)
+		options = append(options, controller.MatchingSelector{Selector: selector})
+	}
+
+	list := v1.NewIntegrationKitList()
+	err := context.Client.List(context.C, &list, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -384,19 +370,30 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 	for _, item := range list.Items {
 		kit := item
 
-		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady {
+		if kit.Status.Phase != v1.IntegrationKitPhaseReady {
 			continue
 		}
 		if kit.Status.CamelVersion != context.Catalog.Version {
 			continue
 		}
-		if kit.Status.RuntimeVersion != context.Build.RuntimeVersion {
+		if kit.Status.RuntimeVersion != context.Catalog.RuntimeVersion {
 			continue
 		}
-		if kit.Status.Phase != v1alpha1.IntegrationKitPhaseReady || kit.Labels == nil {
+
+		// TODO: should ideally be made generic from the runtime providers
+		if kit.Status.RuntimeProvider == nil && context.Catalog.RuntimeProvider != nil ||
+			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider == nil ||
+			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider != nil &&
+				(kit.Status.RuntimeProvider.Quarkus != nil && context.Catalog.RuntimeProvider.Quarkus == nil ||
+					kit.Status.RuntimeProvider.Quarkus == nil && context.Catalog.RuntimeProvider.Quarkus != nil ||
+					*kit.Status.RuntimeProvider.Quarkus != *context.Catalog.RuntimeProvider.Quarkus) {
 			continue
 		}
-		if ctxType, present := kit.Labels["camel.apache.org/kit.type"]; !present || ctxType != v1alpha1.IntegrationKitTypePlatform {
+
+		if kit.Status.Phase != v1.IntegrationKitPhaseReady || kit.Labels == nil {
+			continue
+		}
+		if kitType, present := kit.Labels["camel.apache.org/kit.type"]; !present || kitType != v1.IntegrationKitTypePlatform {
 			continue
 		}
 
@@ -409,7 +406,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 	return images, nil
 }
 
-func findBestImage(images []publishedImage, artifacts []v1alpha1.Artifact) (publishedImage, map[string]bool) {
+func findBestImage(images []publishedImage, artifacts []v1.Artifact) (publishedImage, map[string]bool) {
 	var bestImage publishedImage
 
 	if len(images) == 0 {

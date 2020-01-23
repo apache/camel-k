@@ -1,3 +1,4 @@
+// camel-k: language=groovy
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,16 +19,12 @@
 import java.util.concurrent.ThreadLocalRandom
 
 //
-// To run this integrations use:
-//
-//     kamel run --runtime groovy examples/routes.groovy
-//
-// Or leveraging runtime detection
+// To run this integration use:
 //
 //     kamel run examples/routes.groovy
 //
 
-context {
+camel {
 
     //
     // configure components
@@ -39,17 +36,16 @@ context {
             }
         }
     }
-
-    //
-    // configure registry
-    //
-    registry {
-        myProcessor = processor {
-            it.in.headers['RandomValue'] = ThreadLocalRandom.current().nextInt()
-        }
-    }
 }
 
+//
+// configure beans
+//
+beans {
+    myProcessor = processor {
+        it.in.headers['RandomValue'] = ThreadLocalRandom.current().nextInt()
+    }
+}
 
 from('timer:groovy?period=1s')
     .routeId('groovy')

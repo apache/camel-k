@@ -22,75 +22,150 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func TestFindBestMatch(t *testing.T) {
-	catalogs := []v1alpha1.CamelCatalog{
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.0"},
-		},
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1"},
-		},
+func TestFindBestMatch_Camel(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
 	}
 
-	c, err := FindBestMatch("~2.23.x", catalogs)
+	c, err := findBestMatch(catalogs, "~2.23.x", "1.0.0", nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "2.23.1", c.Version)
 }
 
-func TestFindExactSemVerMatch(t *testing.T) {
-	catalogs := []v1alpha1.CamelCatalog{
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.0"},
-		},
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1"},
-		},
+func TestFindBestMatch_Runtime(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.1"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
 	}
 
-	c, err := FindBestMatch("2.23.0", catalogs)
+	c, err := findBestMatch(catalogs, "2.23.0", "~1.0.x", nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	assert.Equal(t, "2.23.0", c.Version)
+	assert.Equal(t, "1.0.1", c.RuntimeVersion)
+}
+
+func TestFindBestMatch(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.1"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
+	}
+
+	c, err := findBestMatch(catalogs, "~2.23.x", "~1.0.x", nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	assert.Equal(t, "2.23.1", c.Version)
+	assert.Equal(t, "1.0.1", c.RuntimeVersion)
+}
+
+func TestFindExactSemVerMatch_Camel(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
+	}
+
+	c, err := findBestMatch(catalogs, "2.23.0", "1.0.0", nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "2.23.0", c.Version)
 }
 
-func TestFindExactMatch(t *testing.T) {
-	catalogs := []v1alpha1.CamelCatalog{
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1"},
-		},
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1-tag-00001"},
-		},
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1-tag-00002"},
-		},
+func TestFindExactSemVerMatch_Runtime(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.1"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
 	}
 
-	c, err := FindBestMatch("2.23.1-tag-00001", catalogs)
+	c, err := findBestMatch(catalogs, "2.23.0", "1.0.0", nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	assert.Equal(t, "2.23.0", c.Version)
+	assert.Equal(t, "1.0.0", c.RuntimeVersion)
+}
+
+func TestFindExactMatch_Camel(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1-tag-00001", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1-tag-00002", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
+	}
+
+	c, err := findBestMatch(catalogs, "2.23.1-tag-00001", "1.0.0", nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "2.23.1-tag-00001", c.Version)
 }
 
-func TestFindRangeMatch(t *testing.T) {
-	catalogs := []v1alpha1.CamelCatalog{
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.0"},
-		},
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.1"},
-		},
-		{
-			Spec: v1alpha1.CamelCatalogSpec{Version: "2.23.2"},
-		},
+func TestFindExactMatch_Runtime(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1-tag-00001", RuntimeVersion: "1.0.1"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1-tag-00002", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
 	}
 
-	c, err := FindBestMatch(">= 2.23.0, < 2.23.2", catalogs)
+	c, err := findBestMatch(catalogs, "2.23.1-tag-00001", "1.0.1", nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	assert.Equal(t, "2.23.1-tag-00001", c.Version)
+	assert.Equal(t, "1.0.1", c.RuntimeVersion)
+}
+
+func TestFindRangeMatch_Camel(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.2", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
+	}
+
+	c, err := findBestMatch(catalogs, ">= 2.23.0, < 2.23.2", "1.0.0", nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "2.23.1", c.Version)
+}
+
+func TestFindRangeMatch_Runtime(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.2", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.2"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
+	}
+
+	c, err := findBestMatch(catalogs, "2.23.0", "> 1.0.1, < 1.0.3", nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	assert.Equal(t, "2.23.0", c.Version)
+	assert.Equal(t, "1.0.2", c.RuntimeVersion)
+}
+
+func TestFindRangeMatch(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.2", RuntimeVersion: "1.0.0"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.0", RuntimeVersion: "1.0.2"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.23.1", RuntimeVersion: "1.0.2"}},
+		{Spec: v1.CamelCatalogSpec{Version: "2.22.1", RuntimeVersion: "1.0.0"}},
+	}
+
+	c, err := findBestMatch(catalogs, ">= 2.23.0, < 2.23.2", "> 1.0.1, < 1.0.3", nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	assert.Equal(t, "2.23.1", c.Version)
+	assert.Equal(t, "1.0.2", c.RuntimeVersion)
 }

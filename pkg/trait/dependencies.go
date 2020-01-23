@@ -19,12 +19,17 @@ package trait
 
 import (
 	"sort"
+	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 )
 
+// The Dependencies trait is internally used to automatically add runtime dependencies based on the
+// integration that the user wants to run.
+//
+// +camel-k:trait=dependencies
 type dependenciesTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -40,46 +45,71 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
 }
 
 func (t *dependenciesTrait) Apply(e *Environment) error {
-	dependencies := make([]string, 0)
 	if e.Integration.Spec.Dependencies != nil {
+		dependencies := make([]string, 0)
 		for _, dep := range e.Integration.Spec.Dependencies {
 			util.StringSliceUniqueAdd(&dependencies, dep)
+			e.Integration.Status.Dependencies = dependencies
 		}
+	} else {
+		e.Integration.Status.Dependencies = make([]string, 0)
 	}
+
+	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+	if quarkus.isEnabled() {
+		err := quarkus.addRuntimeDependencies(e)
+		if err != nil {
+			return err
+		}
+	} else {
+		addDefaultRuntimeDependencies(e)
+	}
+
+	// sort the dependencies to get always the same list if they don't change
+	sort.Strings(e.Integration.Status.Dependencies)
+	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *dependenciesTrait) IsPlatformTrait() bool {
+	return true
+}
+
+func addDefaultRuntimeDependencies(e *Environment) {
+	dependencies := &e.Integration.Status.Dependencies
+
 	for _, s := range e.Integration.Sources() {
 		meta := metadata.Extract(e.CamelCatalog, s)
 
 		switch s.InferLanguage() {
-		case v1alpha1.LanguageGroovy:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-groovy")
-		case v1alpha1.LanguageKotlin:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-kotlin")
-		case v1alpha1.LanguageYaml:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-yaml")
-		case v1alpha1.LanguageXML:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
-		case v1alpha1.LanguageJavaScript:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
-		case v1alpha1.LanguageJavaClass:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
-		case v1alpha1.LanguageJavaSource:
-			util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
+		case v1.LanguageGroovy:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-groovy")
+		case v1.LanguageKotlin:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-kotlin")
+		case v1.LanguageYaml:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-yaml")
+		case v1.LanguageXML:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
+		case v1.LanguageJavaScript:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
+		case v1.LanguageJavaSource:
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
+		}
+
+		if strings.HasPrefix(s.Loader, "knative-source") {
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-knative")
+			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
 		}
 
 		// main required by default
-		util.StringSliceUniqueAdd(&dependencies, "mvn:org.apache.camel.k/camel-k-runtime-main")
+		util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-runtime-main")
 
 		for _, d := range meta.Dependencies.List() {
-			util.StringSliceUniqueAdd(&dependencies, d)
+			util.StringSliceUniqueAdd(dependencies, d)
 		}
 	}
-
-	// sort the dependencies to get always the same list if they don't change
-	sort.Strings(dependencies)
-	e.Integration.Status.Dependencies = dependencies
-	return nil
 }

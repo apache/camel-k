@@ -19,19 +19,21 @@ package integrationplatform
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/client"
-
-	"github.com/pkg/errors"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platform *v1alpha1.IntegrationPlatform) error {
+func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platform *v1.IntegrationPlatform) error {
 	// The pod will be scheduled to nodes that are selected by the persistent volume
 	// node affinity spec, if any, as provisioned by the persistent volume claim storage
 	// class provisioner.
@@ -46,20 +48,23 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: platform.Namespace,
 			Name:      platform.Name + "-cache",
+			Labels: map[string]string{
+				"camel.apache.org/component": "kaniko-warmer",
+			},
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{
 					Name:  "warm-kaniko-cache",
-					Image: "gcr.io/kaniko-project/warmer:v0.9.0",
+					Image: fmt.Sprintf("gcr.io/kaniko-project/warmer:v%s", defaults.KanikoVersion),
 					Args: []string{
-						"--cache-dir=/workspace/cache",
-						"--image=" + platform.Spec.Build.BaseImage,
+						"--cache-dir=" + kaniko.CacheDir,
+						"--image=" + platform.Status.Build.BaseImage,
 					},
 					VolumeMounts: []corev1.VolumeMount{
 						{
-							Name:      "camel-k-builder",
-							MountPath: kaniko.BuildDir,
+							Name:      "kaniko-cache",
+							MountPath: kaniko.CacheDir,
 						},
 					},
 				},
@@ -70,43 +75,23 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					Name:            "create-kaniko-cache",
 					Image:           "busybox",
 					ImagePullPolicy: corev1.PullIfNotPresent,
-					Command: []string{
-						"mkdir",
-						"-p",
-						"/workspace/cache",
-					},
+					Command:         []string{"/bin/sh", "-c"},
+					Args:            []string{"mkdir -p " + kaniko.CacheDir + "&& chmod -R a+rwx " + kaniko.CacheDir},
 					VolumeMounts: []corev1.VolumeMount{
 						{
-							Name:      "camel-k-builder",
-							MountPath: "/workspace",
+							Name:      "kaniko-cache",
+							MountPath: kaniko.CacheDir,
 						},
 					},
 				},
 			},
-			RestartPolicy: corev1.RestartPolicyNever,
+			RestartPolicy: corev1.RestartPolicyOnFailure,
 			Volumes: []corev1.Volume{
 				{
-					Name: "camel-k-builder",
+					Name: "kaniko-cache",
 					VolumeSource: corev1.VolumeSource{
 						PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-							ClaimName: platform.Spec.Build.PersistentVolumeClaim,
-						},
-					},
-				},
-			},
-			// Co-locate with the builder pod for sharing the host path volume as the current
-			// persistent volume claim uses the default storage class which is likely relying
-			// on the host path provisioner.
-			Affinity: &corev1.Affinity{
-				PodAffinity: &corev1.PodAffinity{
-					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-						{
-							LabelSelector: &metav1.LabelSelector{
-								MatchLabels: map[string]string{
-									"camel.apache.org/component": "operator",
-								},
-							},
-							TopologyKey: "kubernetes.io/hostname",
+							ClaimName: platform.Status.Build.PersistentVolumeClaim,
 						},
 					},
 				},

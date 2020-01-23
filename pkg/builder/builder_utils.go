@@ -18,12 +18,7 @@ limitations under the License.
 package builder
 
 import (
-	"strings"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/maven"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // StepIDsFor --
@@ -35,7 +30,7 @@ func StepIDsFor(steps ...Step) []string {
 	return IDs
 }
 
-func artifactIDs(artifacts []v1alpha1.Artifact) []string {
+func artifactIDs(artifacts []v1.Artifact) []string {
 	result := make([]string, 0, len(artifacts))
 
 	for _, a := range artifacts {
@@ -43,64 +38,4 @@ func artifactIDs(artifacts []v1alpha1.Artifact) []string {
 	}
 
 	return result
-}
-
-// NewMavenProject --
-func NewMavenProject(ctx *Context) (maven.Project, error) {
-	//
-	// Catalog
-	//
-	if ctx.Catalog == nil {
-		c, err := camel.Catalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Platform.Build.CamelVersion)
-		if err != nil {
-			return maven.Project{}, err
-		}
-
-		ctx.Catalog = c
-	}
-
-	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
-	p.Properties = ctx.Build.Platform.Build.Properties
-	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
-	p.Dependencies = make([]maven.Dependency, 0)
-
-	//
-	// DependencyManagement
-	//
-	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel",
-		ArtifactID: "camel-bom",
-		Version:    ctx.Catalog.Version,
-		Type:       "pom",
-		Scope:      "import",
-	})
-	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
-		GroupID:    "org.apache.camel.k",
-		ArtifactID: "camel-k-runtime-bom",
-		Version:    ctx.Build.RuntimeVersion,
-		Type:       "pom",
-		Scope:      "import",
-	})
-
-	for _, d := range ctx.Build.Dependencies {
-		if strings.HasPrefix(d, "bom:") {
-			mid := strings.TrimPrefix(d, "bom:")
-			gav := strings.Replace(mid, "/", ":", -1)
-
-			d, err := maven.ParseGAV(gav)
-			if err != nil {
-				return maven.Project{}, err
-			}
-
-			p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
-				GroupID:    d.GroupID,
-				ArtifactID: d.ArtifactID,
-				Version:    d.Version,
-				Type:       "pom",
-				Scope:      "import",
-			})
-		}
-	}
-
-	return p, nil
 }

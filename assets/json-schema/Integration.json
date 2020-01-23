@@ -59,35 +59,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Initializer": {
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Initializers": {
-      "required": [
-        "pending"
-      ],
-      "properties": {
-        "pending": {
-          "items": {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "$ref": "#/definitions/Initializer"
-          },
-          "type": "array"
-        },
-        "result": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/Status"
-        }
-      },
+    "FieldsV1": {
       "additionalProperties": false,
       "type": "object"
     },
@@ -129,10 +101,6 @@
         "generation": {
           "type": "integer"
         },
-        "initializers": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/Initializers"
-        },
         "kind": {
           "type": "string"
         },
@@ -143,6 +111,13 @@
             }
           },
           "type": "object"
+        },
+        "managedFields": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/ManagedFieldsEntry"
+          },
+          "type": "array"
         },
         "name": {
           "type": "string"
@@ -315,11 +290,46 @@
         "platform": {
           "type": "string"
         },
+        "profile": {
+          "type": "string"
+        },
+        "replicas": {
+          "type": "integer"
+        },
+        "runtimeProvider": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/RuntimeProvider"
+        },
         "runtimeVersion": {
           "type": "string"
         },
         "version": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ManagedFieldsEntry": {
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "fieldsType": {
+          "type": "string"
+        },
+        "fieldsV1": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/FieldsV1"
+        },
+        "manager": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "time": {
+          "$ref": "#/definitions/Time"
         }
       },
       "additionalProperties": false,
@@ -355,6 +365,18 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "QuarkusRuntimeProvider": {
+      "properties": {
+        "camelQuarkusVersion": {
+          "type": "string"
+        },
+        "quarkusVersion": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "ResourceSpec": {
       "properties": {
         "compression": {
@@ -382,6 +404,16 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "RuntimeProvider": {
+      "properties": {
+        "quarkus": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/QuarkusRuntimeProvider"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "SourceSpec": {
       "properties": {
         "compression": {
@@ -399,87 +431,10 @@
         "language": {
           "type": "string"
         },
-        "name": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Status": {
-      "properties": {
-        "apiVersion": {
-          "type": "string"
-        },
-        "code": {
-          "type": "integer"
-        },
-        "continue": {
-          "type": "string"
-        },
-        "details": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/StatusDetails"
-        },
-        "kind": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "reason": {
-          "type": "string"
-        },
-        "resourceVersion": {
-          "type": "string"
-        },
-        "selfLink": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "StatusCause": {
-      "properties": {
-        "field": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "reason": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "StatusDetails": {
-      "properties": {
-        "causes": {
-          "items": {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "$ref": "#/definitions/StatusCause"
-          },
-          "type": "array"
-        },
-        "group": {
-          "type": "string"
-        },
-        "kind": {
+        "loader": {
           "type": "string"
         },
         "name": {
-          "type": "string"
-        },
-        "retryAfterSeconds": {
-          "type": "integer"
-        },
-        "uid": {
           "type": "string"
         }
       },

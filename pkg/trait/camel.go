@@ -19,25 +19,24 @@ package trait
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path"
-	"regexp"
+	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/pkg/errors"
 
-	yaml2 "gopkg.in/yaml.v2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
+// The Camel trait can be used to configure versions of Apache Camel and related libraries.
+//
+// +camel-k:trait=camel
 type camelTrait struct {
-	BaseTrait      `property:",squash"`
-	Version        string `property:"version"`
+	BaseTrait `property:",squash"`
+	// The camel version to use for the integration. It overrides the default version set in the Integration Platform.
+	Version string `property:"version"`
+	// The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
 	RuntimeVersion string `property:"runtime-version"`
 }
 
@@ -56,158 +55,116 @@ func (t *camelTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
-	ns := e.DetermineNamespace()
-	if ns == "" {
-		return errors.New("unable to determine namespace")
-	}
-
-	cv := e.DetermineCamelVersion()
-	rv := e.DetermineRuntimeVersion()
-
-	if t.Version != "" {
-		cv = t.Version
-	}
-	if t.RuntimeVersion != "" {
-		rv = t.RuntimeVersion
-	}
+	cv := t.determineCamelVersion(e)
+	rv := t.determineRuntimeVersion(e)
 
 	if e.CamelCatalog == nil {
-		c, err := camel.Catalog(e.C, e.Client, ns, cv)
-		if err != nil {
-			return err
-		}
-		if c == nil {
-			// if the catalog is not found in the cluster, try to create it if the
-			// required version is not set using semver constraints
-			matched, err := regexp.MatchString(`^(\d+)\.(\d+)\.([\w-\.]+)$`, cv)
+		quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
+		if quarkus.isEnabled() {
+			err := quarkus.loadOrCreateCatalog(e, cv, rv)
 			if err != nil {
 				return err
 			}
-			if matched {
-				c, err = t.GenerateCatalog(e, cv)
-				if err != nil {
-					return err
-				}
-
-				cx := v1alpha1.NewCamelCatalogWithSpecs(ns, "camel-catalog-"+cv, c.CamelCatalogSpec)
-				cx.Labels = make(map[string]string)
-				cx.Labels["app"] = "camel-k"
-				cx.Labels["camel.apache.org/catalog.version"] = cv
-				cx.Labels["camel.apache.org/catalog.loader.version"] = cv
-				cx.Labels["camel.apache.org/catalog.generated"] = True
-
-				err = e.Client.Create(e.C, &cx)
-				if err != nil && !k8serrors.IsAlreadyExists(err) {
-					return err
-				}
+		} else {
+			err := t.loadOrCreateCatalog(e, cv, rv)
+			if err != nil {
+				return err
 			}
 		}
-
-		if c == nil {
-			return fmt.Errorf("unable to find catalog for: %s", cv)
-		}
-
-		e.CamelCatalog = c
 	}
 
 	e.RuntimeVersion = rv
 
 	if e.Integration != nil {
 		e.Integration.Status.CamelVersion = e.CamelCatalog.Version
-		e.Integration.Status.RuntimeVersion = rv
+		e.Integration.Status.RuntimeVersion = e.CamelCatalog.RuntimeVersion
+		e.Integration.Status.RuntimeProvider = e.CamelCatalog.RuntimeProvider
 	}
 	if e.IntegrationKit != nil {
 		e.IntegrationKit.Status.CamelVersion = e.CamelCatalog.Version
-		e.IntegrationKit.Status.RuntimeVersion = rv
+		e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.RuntimeVersion
+		e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.RuntimeProvider
 	}
 
 	return nil
 }
 
-// GenerateCatalog --
-func (t *camelTrait) GenerateCatalog(e *Environment, version string) (*camel.RuntimeCatalog, error) {
-	root := os.TempDir()
-	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
-	if err != nil {
-		return nil, err
-	}
-
-	defer os.RemoveAll(tmpDir)
-
-	if err := os.MkdirAll(tmpDir, os.ModePerm); err != nil {
-		return nil, err
-	}
-
-	project, err := t.GenerateMavenProject(version)
-	if err != nil {
-		return nil, err
-	}
-
-	mc := maven.NewContext(tmpDir, project)
-	mc.LocalRepository = e.Platform.Spec.Build.LocalRepository
-	mc.Timeout = e.Platform.Spec.Build.Maven.Timeout.Duration
-	mc.AddSystemProperty("catalog.path", tmpDir)
-	mc.AddSystemProperty("catalog.file", "catalog.yaml")
-
+func (t *camelTrait) loadOrCreateCatalog(e *Environment, camelVersion string, runtimeVersion string) error {
 	ns := e.DetermineNamespace()
 	if ns == "" {
-		return nil, errors.New("unable to determine namespace")
+		return errors.New("unable to determine namespace")
 	}
 
-	settings, err := kubernetes.ResolveValueSource(e.C, e.Client, ns, &e.Platform.Spec.Build.Maven.Settings)
+	catalog, err := camel.LoadCatalog(e.C, e.Client, ns, camelVersion, runtimeVersion, nil)
 	if err != nil {
-		return nil, err
-	}
-	if settings != "" {
-		mc.SettingsContent = []byte(settings)
+		return err
 	}
 
-	err = maven.Run(mc)
-	if err != nil {
-		return nil, err
+	if catalog == nil {
+		// if the catalog is not found in the cluster, try to create it if
+		// the required versions (camel and runtime) are not expressed as
+		// semver constraints
+		if exactVersionRegexp.MatchString(camelVersion) && exactVersionRegexp.MatchString(runtimeVersion) {
+			catalog, err = camel.GenerateCatalog(e.C, e.Client, ns, e.Platform.Status.Build.Maven, camelVersion, runtimeVersion)
+			if err != nil {
+				return err
+			}
+
+			// sanitize catalog name
+			catalogName := "camel-catalog-" + strings.ToLower(camelVersion+"-"+runtimeVersion)
+
+			cx := v1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
+			cx.Labels = make(map[string]string)
+			cx.Labels["app"] = "camel-k"
+			cx.Labels["camel.apache.org/catalog.version"] = camelVersion
+			cx.Labels["camel.apache.org/catalog.loader.version"] = camelVersion
+			cx.Labels["camel.apache.org/runtime.version"] = runtimeVersion
+			cx.Labels["camel.apache.org/catalog.generated"] = True
+
+			err = e.Client.Create(e.C, &cx)
+			if err != nil && !k8serrors.IsAlreadyExists(err) {
+				return err
+			}
+		}
 	}
 
-	content, err := ioutil.ReadFile(path.Join(tmpDir, "catalog.yaml"))
-	if err != nil {
-		return nil, err
+	if catalog == nil {
+		return fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s",
+			camelVersion, runtimeVersion)
 	}
 
-	catalog := v1alpha1.CamelCatalog{}
-	if err := yaml2.Unmarshal(content, &catalog); err != nil {
-		return nil, err
-	}
+	e.CamelCatalog = catalog
 
-	return camel.NewRuntimeCatalog(catalog.Spec), nil
+	return nil
 }
 
-// GenerateCatalogMavenProject --
-func (t *camelTrait) GenerateMavenProject(version string) (maven.Project, error) {
-	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
-	p.Build = &maven.Build{
-		DefaultGoal: "generate-resources",
-		Plugins: []maven.Plugin{
-			{
-				GroupID:    "org.apache.camel.k",
-				ArtifactID: "camel-k-maven-plugin",
-				Version:    defaults.RuntimeVersion,
-				Executions: []maven.Execution{
-					{
-						ID: "generate-catalog",
-						Goals: []string{
-							"generate-catalog",
-						},
-					},
-				},
-				Dependencies: []maven.Dependency{
-					{
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-catalog",
-						Version:    version,
-					},
-				},
-			},
-		},
+func (t *camelTrait) determineCamelVersion(e *Environment) string {
+	if t.Version != "" {
+		return t.Version
 	}
+	if e.Integration != nil && e.Integration.Status.CamelVersion != "" {
+		return e.Integration.Status.CamelVersion
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.CamelVersion != "" {
+		return e.IntegrationKit.Status.CamelVersion
+	}
+	return e.Platform.Status.Build.CamelVersion
+}
 
-	return p, nil
+func (t *camelTrait) determineRuntimeVersion(e *Environment) string {
+	if t.RuntimeVersion != "" {
+		return t.RuntimeVersion
+	}
+	if e.Integration != nil && e.Integration.Status.RuntimeVersion != "" {
+		return e.Integration.Status.RuntimeVersion
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
+		return e.IntegrationKit.Status.RuntimeVersion
+	}
+	return e.Platform.Status.Build.RuntimeVersion
+}
+
+// IsPlatformTrait overrides base class method
+func (t *camelTrait) IsPlatformTrait() bool {
+	return true
 }

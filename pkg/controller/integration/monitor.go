@@ -20,7 +20,11 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
 )
@@ -38,11 +42,11 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(integration *v1alpha1.Integration) bool {
-	return integration.Status.Phase == v1alpha1.IntegrationPhaseRunning
+func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
+	return integration.Status.Phase == v1.IntegrationPhaseRunning
 }
 
-func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.Integration) (*v1alpha1.Integration, error) {
+func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	hash, err := digest.ComputeForIntegration(integration)
 	if err != nil {
 		return nil, err
@@ -52,12 +56,50 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1alpha1.I
 		action.L.Info("Integration needs a rebuild")
 
 		integration.Status.Digest = hash
-		integration.Status.Phase = v1alpha1.IntegrationPhaseInitialization
+		integration.Status.Phase = v1.IntegrationPhaseInitialization
+		if integration.Spec.Profile != v1.TraitProfile("") {
+			integration.Status.Profile = integration.Spec.Profile
+		}
 		integration.Status.Version = defaults.Version
 
 		return integration, nil
 	}
 
-	// TODO check also if deployment matches (e.g. replicas)
-	return nil, nil
+	// Run traits that are enabled for the running phase
+	_, err = trait.Apply(ctx, action.client, integration, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check replicas
+	replicaSets := &appsv1.ReplicaSetList{}
+	err = action.client.List(ctx, replicaSets,
+		k8sclient.InNamespace(integration.Namespace),
+		k8sclient.MatchingLabels{
+			"camel.apache.org/integration": integration.Name,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	// And update the scale status accordingly
+	if len(replicaSets.Items) > 0 {
+		replicaSet := findLatestReplicaSet(replicaSets)
+		replicas := replicaSet.Status.Replicas
+		if integration.Status.Replicas == nil || replicas != *integration.Status.Replicas {
+			integration.Status.Replicas = &replicas
+		}
+	}
+
+	return integration, nil
+}
+
+func findLatestReplicaSet(list *appsv1.ReplicaSetList) *appsv1.ReplicaSet {
+	latest := list.Items[0]
+	for i, rs := range list.Items[1:] {
+		if latest.CreationTimestamp.Before(&rs.CreationTimestamp) {
+			latest = list.Items[i+1]
+		}
+	}
+	return &latest
 }

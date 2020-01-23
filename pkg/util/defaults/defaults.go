@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package defaults
 
 // ***********************
@@ -22,16 +23,25 @@ package defaults
 
 const (
 	// Version --
-	Version = "1.0.0-M2-SNAPSHOT"
+	Version = "1.0.0-RC2-SNAPSHOT"
 
-	// CamelVersionConstraint --
-	CamelVersionConstraint = ">=3.0.0-M4"
+	// DefaultCamelVersion --
+	DefaultCamelVersion = "3.0.0"
 
-	// RuntimeVersion --
-	RuntimeVersion = "1.0.0"
+	// DefaultRuntimeVersion --
+	DefaultRuntimeVersion = "1.0.10"
+
+	// DefaultCamelQuarkusVersion --
+	DefaultCamelQuarkusVersion = "1.0.0-M2"
+
+	// DefaultQuarkusVersion --
+	DefaultQuarkusVersion = "1.1.0.Final"
+
+	// KanikoVersion --
+	KanikoVersion = "0.14.0"
 
 	// BaseImage --
-	BaseImage = "fabric8/s2i-java:3.0-java8"
+	BaseImage = "adoptopenjdk/openjdk8:slim"
 
 	// LocalRepository --
 	LocalRepository = "/tmp/artifacts/m2"

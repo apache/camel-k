@@ -1,0 +1,42 @@
+[[configuring-registry]]
+= Configuring Registry
+
+Every Camel K installation needs a container registry that that will be used to host integration container images.
+
+A **default registry** is present in all the following supported installations:
+
+* **OpenShift**: all OpenShift installations (including Minishift, CRC and real clusters) provide an internal container registry that is used for the S2I (source to image)
+  feature. Camel K is able to leverage that registry.
+* **Minikube**: Minikube comes with a "registry addon" that can be enabled upon installation (see xref:installation/minikube.adoc[install guide for Minikube ]). Camel K automatically detects the address of the registry and configures
+  it on the `IntegrationPlatform` when using the CLI (on `kamel install`).
+
+Other platforms do not provide a default container registry and need to be configured accordingly.
+
+Registry configuration can be set upon installation using command:
+
+[source,bash]
+----
+kamel install --registry registry-host.io --organization your-user-id-or-org --registry-secret the-push-kubernetes-secret-name
+----
+
+Alternatively, the same settings can be set in the `.spec.build.registry` section of the `IntegrationPlatform` resource.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: IntegrationPlatform
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k
+spec:
+  build:
+    registry:
+      address: registry-host.io
+      organization: your-user-id-or-org
+      secret: the-push-kubernetes-secret-name
+----
+
+Additional information on setting up registries can be found in the registry specific sub-section.
+
+NOTE: if your repository is not listed in any sub-section, you can try setting it up using the xref:installation/registry/dockerhub.adoc[instructions for Docker Hub].

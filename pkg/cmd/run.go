@@ -31,9 +31,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/apache/camel-k/pkg/util/finalizer"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/gzip"
 	"github.com/apache/camel-k/pkg/trait"
@@ -53,83 +51,101 @@ var (
 	traitConfigRegexp = regexp.MustCompile(`^([a-z-]+)((?:\.[a-z-]+)+)=(.*)$`)
 )
 
-func newCmdRun(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:   "run [file to run]",
-		Short: "Run a integration on Kubernetes",
-		Long:  `Deploys and execute a integration pod on Kubernetes.`,
-		Args:  options.validateArgs,
-		RunE:  options.run,
+		Use:     "run [file to run]",
+		Short:   "Run a integration on Kubernetes",
+		Long:    `Deploys and execute a integration pod on Kubernetes.`,
+		Args:    options.validateArgs,
+		PreRunE: options.decode,
+		RunE:    options.run,
 	}
 
-	cmd.Flags().StringVar(&options.IntegrationName, "name", "", "The integration name")
-	cmd.Flags().StringSliceVarP(&options.Dependencies, "dependency", "d", nil, "The integration dependency")
-	cmd.Flags().BoolVarP(&options.Wait, "wait", "w", false, "Waits for the integration to be running")
-	cmd.Flags().StringVarP(&options.IntegrationKit, "kit", "k", "", "The kit used to run the integration")
-	cmd.Flags().StringArrayVarP(&options.Properties, "property", "p", nil, "Add a camel property")
-	cmd.Flags().StringSliceVar(&options.ConfigMaps, "configmap", nil, "Add a ConfigMap")
-	cmd.Flags().StringSliceVar(&options.Secrets, "secret", nil, "Add a Secret")
-	cmd.Flags().StringSliceVar(&options.Repositories, "repository", nil, "Add a maven repository")
-	cmd.Flags().BoolVar(&options.Logs, "logs", false, "Print integration logs")
-	cmd.Flags().BoolVar(&options.Sync, "sync", false, "Synchronize the local source file with the cluster, republishing at each change")
-	cmd.Flags().BoolVar(&options.Dev, "dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
-	cmd.Flags().StringVar(&options.Profile, "profile", "", "Trait profile used for deployment")
-	cmd.Flags().StringSliceVarP(&options.Traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
-	cmd.Flags().StringSliceVar(&options.LoggingLevels, "logging-level", nil, "Configure the logging level. "+
-		"E.g. \"--logging-level org.apache.camel=DEBUG\"")
-	cmd.Flags().StringVarP(&options.OutputFormat, "output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().BoolVar(&options.Compression, "compression", false, "Enable store source as a compressed binary blob")
-	cmd.Flags().StringSliceVar(&options.Resources, "resource", nil, "Add a resource")
-	cmd.Flags().StringSliceVar(&options.OpenAPIs, "open-api", nil, "Add an OpenAPI v2 spec")
-	cmd.Flags().StringVar(&options.DeletionPolicy, "deletion-policy", "owner", "Policy used to cleanup child resources, default owner")
-	cmd.Flags().StringSliceVarP(&options.Volumes, "volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
-	cmd.Flags().StringSliceVarP(&options.EnvVars, "env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
+	cmd.Flags().String("name", "", "The integration name")
+	cmd.Flags().StringArrayP("dependency", "d", nil, "The integration dependency")
+	cmd.Flags().BoolP("wait", "w", false, "Waits for the integration to be running")
+	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
+	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
+	cmd.Flags().StringArray("secret", nil, "Add a Secret")
+	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
+	cmd.Flags().Bool("logs", false, "Print integration logs")
+	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
+	cmd.Flags().Bool("dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
+	cmd.Flags().String("profile", "", "Trait profile used for deployment")
+	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
+	cmd.Flags().StringArray("logging-level", nil, "Configure the logging level. e.g. \"--logging-level org.apache.camel=DEBUG\"")
+	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().Bool("compression", false, "Enable store source as a compressed binary blob")
+	cmd.Flags().StringArray("resource", nil, "Add a resource")
+	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
+	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
+	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
+
+	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
 	// completion support
 	configureKnownCompletions(&cmd)
 
-	return &cmd
+	return &cmd, &options
 }
 
 type runCmdOptions struct {
 	*RootCmdOptions
-	Compression     bool
-	Wait            bool
-	Logs            bool
-	Sync            bool
-	Dev             bool
-	DeletionPolicy  string
-	IntegrationKit  string
-	IntegrationName string
-	Profile         string
-	OutputFormat    string
-	Resources       []string
-	OpenAPIs        []string
-	Dependencies    []string
-	Properties      []string
-	ConfigMaps      []string
-	Secrets         []string
-	Repositories    []string
-	Traits          []string
-	LoggingLevels   []string
-	Volumes         []string
-	EnvVars         []string
+	Compression     bool     `mapstructure:"compression"`
+	Wait            bool     `mapstructure:"wait"`
+	Logs            bool     `mapstructure:"logs"`
+	Sync            bool     `mapstructure:"sync"`
+	Dev             bool     `mapstructure:"dev"`
+	Save            bool     `mapstructure:"save"`
+	IntegrationKit  string   `mapstructure:"kit"`
+	IntegrationName string   `mapstructure:"name"`
+	Profile         string   `mapstructure:"profile"`
+	OutputFormat    string   `mapstructure:"output"`
+	Resources       []string `mapstructure:"resources"`
+	OpenAPIs        []string `mapstructure:"open-apis"`
+	Dependencies    []string `mapstructure:"dependencies"`
+	Properties      []string `mapstructure:"properties"`
+	ConfigMaps      []string `mapstructure:"configmaps"`
+	Secrets         []string `mapstructure:"secrets"`
+	Repositories    []string `mapstructure:"maven-repositories"`
+	Traits          []string `mapstructure:"traits"`
+	LoggingLevels   []string `mapstructure:"logging-levels"`
+	Volumes         []string `mapstructure:"volumes"`
+	EnvVars         []string `mapstructure:"envs"`
+}
+
+func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
+	pathToRoot := pathToRoot(cmd)
+	if err := decodeKey(o, pathToRoot); err != nil {
+		return err
+	}
+
+	name := o.GetIntegrationName(args)
+	if name != "" {
+		secondaryPath := pathToRoot + ".integration." + name
+		if err := decodeKey(o, secondaryPath); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		return errors.New("accepts at least 1 arg, received 0")
+		return errors.New("run expects at least 1 argument, received 0")
 	}
 	if len(args) > 1 && o.IntegrationName == "" {
 		return errors.New("integration name is mandatory when using multiple sources")
 	}
 
 	for _, fileName := range args {
-		if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
+		if !isRemoteHTTPFile(fileName) {
 			if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
 				return errors.Wrap(err, "file "+fileName+" does not exist")
 			} else if err != nil {
@@ -160,7 +176,7 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
+func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -191,8 +207,9 @@ func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
 			err := DeleteIntegration(o.Context, c, integration.Name, integration.Namespace)
 			if err != nil {
 				fmt.Println(err)
+				os.Exit(1)
 			}
-			os.Exit(1)
+			os.Exit(0)
 		}()
 	}
 
@@ -203,40 +220,73 @@ func (o *runCmdOptions) run(_ *cobra.Command, args []string) error {
 		}
 	}
 	if o.Wait || o.Dev {
-		err = o.waitForIntegrationReady(integration)
-		if err != nil {
-			return err
+		for {
+			integrationPhase, err := o.waitForIntegrationReady(integration)
+			if err != nil {
+				return err
+			}
+
+			if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseError {
+				return fmt.Errorf("integration \"%s\" deployment failed", integration.Name)
+			} else if *integrationPhase == v1.IntegrationPhaseRunning {
+				fmt.Println("Running")
+				break
+			}
+
+			// The integration watch timed out so recreate it using the latest integration resource version
+			clone := integration.DeepCopy()
+			var key k8sclient.ObjectKey
+			key, err = k8sclient.ObjectKeyFromObject(clone)
+			if err != nil {
+				return err
+			}
+			err = c.Get(o.Context, key, clone)
+			if err != nil {
+				return err
+			}
+
+			integration.ObjectMeta.ResourceVersion = clone.ObjectMeta.ResourceVersion
 		}
 	}
 	if o.Logs || o.Dev {
-		err = k8slog.Print(o.Context, c, integration)
+		err = k8slog.Print(o.Context, c, integration, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
 	}
 
 	if o.Sync && !o.Logs && !o.Dev {
-		// Let's add a wait point, otherwise the script terminates
+		// Let's add a Wait point, otherwise the script terminates
 		<-o.Context.Done()
 	}
+
+	if o.Save {
+		name := o.GetIntegrationName(args)
+		if name != "" {
+			key := fmt.Sprintf("kamel.run.integration.%s", name)
+			if err := saveDefaultConfig(cmd, "kamel.run", key); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
-func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integration) error {
-	handler := func(i *v1alpha1.Integration) bool {
+func (o *runCmdOptions) waitForIntegrationReady(integration *v1.Integration) (*v1.IntegrationPhase, error) {
+	handler := func(i *v1.Integration) bool {
 		//
-		// TODO when we add health checks, we should wait until they are passed
+		// TODO when we add health checks, we should Wait until they are passed
 		//
 		if i.Status.Phase != "" {
 			fmt.Println("integration \""+integration.Name+"\" in phase", i.Status.Phase)
 
-			if i.Status.Phase == v1alpha1.IntegrationPhaseRunning {
+			if i.Status.Phase == v1.IntegrationPhaseRunning {
 				// TODO display some error info when available in the status
 				return false
 			}
 
-			if i.Status.Phase == v1alpha1.IntegrationPhaseError {
-				fmt.Println("integration deployment failed")
+			if i.Status.Phase == v1.IntegrationPhaseError {
 				return false
 			}
 		}
@@ -249,63 +299,61 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1alpha1.Integratio
 
 func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error {
 	for _, s := range sources {
-		changes, err := sync.File(o.Context, s)
-		if err != nil {
-			return err
-		}
-		go func() {
-			for {
-				select {
-				case <-o.Context.Done():
-					return
-				case <-changes:
-					_, err := o.updateIntegrationCode(c, sources)
-					if err != nil {
-						fmt.Println("Unable to sync integration: ", err.Error())
+		if !isRemoteHTTPFile(s) {
+			changes, err := sync.File(o.Context, s)
+			if err != nil {
+				return err
+			}
+			go func() {
+				for {
+					select {
+					case <-o.Context.Done():
+						return
+					case <-changes:
+						_, err := o.updateIntegrationCode(c, sources)
+						if err != nil {
+							fmt.Println("Unable to sync integration: ", err.Error())
+						}
 					}
 				}
-			}
-		}()
+			}()
+		} else {
+			fmt.Printf("WARNING: the following URL will not be watched for changes: %s\n", s)
+		}
 	}
 
 	return nil
 }
 
-func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v1alpha1.Integration, error) {
+func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v1.Integration, error) {
 	return o.updateIntegrationCode(c, sources)
 }
 
 //nolint: gocyclo
-func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1alpha1.Integration, error) {
+func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
 
-	name := ""
-	if o.IntegrationName != "" {
-		name = o.IntegrationName
-		name = kubernetes.SanitizeName(name)
-	} else if len(sources) == 1 {
-		name = kubernetes.SanitizeName(sources[0])
-	}
+	name := o.GetIntegrationName(sources)
 
 	if name == "" {
 		return nil, errors.New("unable to determine integration name")
 	}
 
-	integration := v1alpha1.Integration{
+	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       v1alpha1.IntegrationKind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 		},
-		Spec: v1alpha1.IntegrationSpec{
+		Spec: v1.IntegrationSpec{
 			Dependencies:  make([]string, 0, len(o.Dependencies)),
 			Kit:           o.IntegrationKit,
-			Configuration: make([]v1alpha1.ConfigurationSpec, 0),
+			Configuration: make([]v1.ConfigurationSpec, 0),
 			Repositories:  o.Repositories,
-			Profile:       v1alpha1.TraitProfileByName(o.Profile),
+			Profile:       v1.TraitProfileByName(o.Profile),
 		},
 	}
 
@@ -315,8 +363,8 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			return nil, err
 		}
 
-		integration.Spec.AddSources(v1alpha1.SourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		integration.Spec.AddSources(v1.SourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        path.Base(source),
 				Content:     data,
 				Compression: o.Compression,
@@ -330,13 +378,13 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			return nil, err
 		}
 
-		integration.Spec.AddResources(v1alpha1.ResourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		integration.Spec.AddResources(v1.ResourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        path.Base(resource),
 				Content:     data,
 				Compression: o.Compression,
 			},
-			Type: v1alpha1.ResourceTypeData,
+			Type: v1.ResourceTypeData,
 		})
 	}
 
@@ -346,20 +394,14 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			return nil, err
 		}
 
-		integration.Spec.AddResources(v1alpha1.ResourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		integration.Spec.AddResources(v1.ResourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        path.Base(resource),
 				Content:     data,
 				Compression: o.Compression,
 			},
-			Type: v1alpha1.ResourceTypeOpenAPI,
+			Type: v1.ResourceTypeOpenAPI,
 		})
-	}
-
-	if o.DeletionPolicy == "label" {
-		integration.Finalizers = []string{
-			finalizer.CamelIntegrationFinalizer,
-		}
 	}
 
 	for _, item := range o.Dependencies {
@@ -443,11 +485,22 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	return &integration, nil
 }
 
+func (o *runCmdOptions) GetIntegrationName(sources []string) string {
+	name := ""
+	if o.IntegrationName != "" {
+		name = o.IntegrationName
+		name = kubernetes.SanitizeName(name)
+	} else if len(sources) == 1 {
+		name = kubernetes.SanitizeName(sources[0])
+	}
+	return name
+}
+
 func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
 	var content []byte
 	var err error
 
-	if !strings.HasPrefix(fileName, "http://") && !strings.HasPrefix(fileName, "https://") {
+	if !isRemoteHTTPFile(fileName) {
 		content, err = ioutil.ReadFile(fileName)
 		if err != nil {
 			return "", err
@@ -479,9 +532,9 @@ func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
 	return string(content), nil
 }
 
-func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config string) error {
+func (*runCmdOptions) configureTrait(integration *v1.Integration, config string) error {
 	if integration.Spec.Traits == nil {
-		integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+		integration.Spec.Traits = make(map[string]v1.TraitSpec)
 	}
 
 	parts := traitConfigRegexp.FindStringSubmatch(config)
@@ -494,7 +547,7 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 
 	spec, ok := integration.Spec.Traits[traitID]
 	if !ok {
-		spec = v1alpha1.TraitSpec{
+		spec = v1.TraitSpec{
 			Configuration: make(map[string]string),
 		}
 	}
@@ -512,4 +565,8 @@ func (*runCmdOptions) configureTrait(integration *v1alpha1.Integration, config s
 	}
 	integration.Spec.Traits[traitID] = spec
 	return nil
+}
+
+func isRemoteHTTPFile(fileName string) bool {
+	return strings.HasPrefix(fileName, "http://") || strings.HasPrefix(fileName, "https://")
 }

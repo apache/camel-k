@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -30,10 +30,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// The Ingress trait can be used to expose the service associated with the integration
+// to the outside world with a Kubernetes Ingress.
+//
+// It's enabled by default whenever a Service is added to the integration (through the `service` trait).
+//
+// +camel-k:trait=ingress
 type ingressTrait struct {
 	BaseTrait `property:",squash"`
-	Host      string `property:"host"`
-	Auto      *bool  `property:"auto"`
+	// **Required**. To configure the host exposed by the ingress.
+	Host string `property:"host"`
+	// To automatically add an ingress whenever the integration uses a HTTP endpoint consumer.
+	Auto *bool `property:"auto"`
 }
 
 func newIngressTrait() *ingressTrait {
@@ -46,15 +54,15 @@ func newIngressTrait() *ingressTrait {
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionIngressNotAvailableReason,
+			v1.IntegrationConditionIngressNotAvailableReason,
 			"explicitly disabled",
 		)
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -65,9 +73,9 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 
 		if !enabled {
 			e.Integration.Status.SetCondition(
-				v1alpha1.IntegrationConditionExposureAvailable,
+				v1.IntegrationConditionExposureAvailable,
 				corev1.ConditionFalse,
-				v1alpha1.IntegrationConditionIngressNotAvailableReason,
+				v1.IntegrationConditionIngressNotAvailableReason,
 				"no host or service defined",
 			)
 
@@ -77,9 +85,9 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 
 	if t.Host == "" {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionExposureAvailable,
+			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionIngressNotAvailableReason,
+			v1.IntegrationConditionIngressNotAvailableReason,
 			"no host defined",
 		)
 
@@ -126,9 +134,9 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		ingress.Spec.Backend.ServicePort.String())
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionExposureAvailable,
+		v1.IntegrationConditionExposureAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionIngressAvailableReason,
+		v1.IntegrationConditionIngressAvailableReason,
 		message,
 	)
 

@@ -21,76 +21,74 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/stretchr/testify/assert"
-
-	"github.com/scylladb/go-set/strset"
 )
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, v1alpha1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
 	}
 
 	for _, e := range environments {
 		e := e // pin
 		e.IntegrationKit = nil
 
-		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
+		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
-			assert.Nil(t, e.GetTrait(ID("builder")))
-			assert.Empty(t, e.Steps)
+			assert.Nil(t, e.GetTrait("builder"))
+			assert.Empty(t, e.BuildTasks)
 		})
 	}
 }
 
 func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, v1alpha1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
 	}
 
 	for _, e := range environments {
 		e := e // pin
-		e.IntegrationKit.Status.Phase = v1alpha1.IntegrationKitPhaseInitialization
+		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseInitialization
 
-		t.Run(string(e.Platform.Spec.Cluster), func(t *testing.T) {
+		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
 			err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
-			assert.Nil(t, e.GetTrait(ID("builder")))
-			assert.Empty(t, e.Steps)
+			assert.Nil(t, e.GetTrait("builder"))
+			assert.Empty(t, e.BuildTasks)
 		})
 	}
 }
 
 func TestS2IBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterOpenShift, v1alpha1.IntegrationPlatformBuildPublishStrategyS2I)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I)
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("builder")))
-	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 7)
+	assert.NotNil(t, env.GetTrait("builder"))
+	assert.NotEmpty(t, env.BuildTasks)
+	assert.Len(t, env.BuildTasks, 1)
+	assert.NotNil(t, env.BuildTasks[0].Builder)
 	assert.Condition(t, func() bool {
-		for _, s := range env.Steps {
-			if s == s2i.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
+		for _, s := range env.BuildTasks[0].Builder.Steps {
+			if s == s2i.Steps.Publisher.ID() {
 				return true
 			}
 		}
@@ -100,64 +98,71 @@ func TestS2IBuilderTrait(t *testing.T) {
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1alpha1.IntegrationPlatformClusterKubernetes, v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("builder")))
-	assert.NotEmpty(t, env.Steps)
-	assert.Len(t, env.Steps, 7)
+	assert.NotNil(t, env.GetTrait("builder"))
+	assert.NotEmpty(t, env.BuildTasks)
+	assert.Len(t, env.BuildTasks, 2)
+	assert.NotNil(t, env.BuildTasks[0].Builder)
 	assert.Condition(t, func() bool {
-		for _, s := range env.Steps {
-			if s == kaniko.Steps.Publisher && s.Phase() == builder.ApplicationPublishPhase {
+		for _, s := range env.BuildTasks[0].Builder.Steps {
+			if s == kaniko.Steps.Publisher.ID() {
 				return true
 			}
 		}
 
 		return false
 	})
+	assert.NotNil(t, env.BuildTasks[1].Kaniko)
 }
 
-func createBuilderTestEnv(cluster v1alpha1.IntegrationPlatformCluster, strategy v1alpha1.IntegrationPlatformBuildPublishStrategy) *Environment {
-	c, err := test.DefaultCatalog()
+func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {
+	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
 	}
 
-	return &Environment{
+	kanikoCache := false
+	res := &Environment{
 		C:            context.TODO(),
 		CamelCatalog: c,
 		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
 				Namespace: "ns",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseBuildSubmitted,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseBuildSubmitted,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: strategy,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
-					CamelVersion:    defaults.CamelVersionConstraint,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy:  strategy,
+					Registry:         v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+					CamelVersion:     defaults.DefaultCamelVersion,
+					KanikoBuildCache: &kanikoCache,
 				},
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
+
+	res.Platform.ResyncStatusFullConfig()
+
+	return res
 }
 
 func NewBuilderTestCatalog() *Catalog {

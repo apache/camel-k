@@ -21,17 +21,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/scylladb/go-set/strset"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/stretchr/testify/assert"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -40,7 +38,7 @@ const (
 )
 
 func TestServiceWithDefaults(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -48,27 +46,27 @@ func TestServiceWithDefaults(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
 				Namespace: "ns",
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKubernetes,
-				Sources: []v1alpha1.SourceSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Sources: []v1.SourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
 							Content:     `from("undertow:test").log("hello")`,
 							Compression: true,
 						},
-						Language: v1alpha1.LanguageJavaScript,
+						Language: v1.LanguageJavaScript,
 					},
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"service": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -78,33 +76,33 @@ func TestServiceWithDefaults(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
 		return service.Name == ServiceTestName
@@ -128,7 +126,7 @@ func TestServiceWithDefaults(t *testing.T) {
 }
 
 func TestService(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -136,27 +134,27 @@ func TestService(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
 				Namespace: ServiceTestNamespace,
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKubernetes,
-				Sources: []v1alpha1.SourceSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Sources: []v1.SourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
 							Content:     `from("undertow:test").log("hello")`,
 							Compression: true,
 						},
-						Language: v1alpha1.LanguageJavaScript,
+						Language: v1.LanguageJavaScript,
 					},
 				},
-				Traits: map[string]v1alpha1.TraitSpec{
+				Traits: map[string]v1.TraitSpec{
 					"service": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -176,33 +174,33 @@ func TestService(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	s := environment.Resources.GetService(func(service *corev1.Service) bool {
 		return service.Name == ServiceTestName
@@ -226,7 +224,7 @@ func TestService(t *testing.T) {
 }
 
 func TestServiceWithCustomContainerName(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
@@ -234,17 +232,17 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
 				Namespace: ServiceTestNamespace,
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Profile: v1alpha1.TraitProfileKubernetes,
-				Traits: map[string]v1alpha1.TraitSpec{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Traits: map[string]v1.TraitSpec{
 					"service": {
 						Configuration: map[string]string{
 							"enabled": "true",
@@ -259,33 +257,33 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 				},
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
-				Cluster: v1alpha1.IntegrationPlatformClusterOpenShift,
-				Build: v1alpha1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1alpha1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1alpha1.IntegrationPlatformRegistrySpec{Address: "registry"},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 				},
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
+	environment.Platform.ResyncStatusFullConfig()
 
 	err = traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(ID("deployment")))
-	assert.NotNil(t, environment.GetTrait(ID("service")))
-	assert.NotNil(t, environment.GetTrait(ID("container")))
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("service"))
+	assert.NotNil(t, environment.GetTrait("container"))
 
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
 	assert.NotNil(t, d)

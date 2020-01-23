@@ -19,16 +19,21 @@ package build
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(reader k8sclient.Reader, b builder.Builder, r *sync.Map) Action {
+func NewScheduleRoutineAction(reader client.Reader, b builder.Builder, r *sync.Map) Action {
 	return &scheduleRoutineAction{
 		reader:   reader,
 		builder:  b,
@@ -39,7 +44,7 @@ func NewScheduleRoutineAction(reader k8sclient.Reader, b builder.Builder, r *syn
 type scheduleRoutineAction struct {
 	baseAction
 	lock     sync.Mutex
-	reader   k8sclient.Reader
+	reader   client.Reader
 	builder  builder.Builder
 	routines *sync.Map
 }
@@ -50,64 +55,107 @@ func (action *scheduleRoutineAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *scheduleRoutineAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseScheduling &&
-		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyRoutine
+func (action *scheduleRoutineAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseScheduling
 }
 
 // Handle handles the builds
-func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	// Enter critical section
 	action.lock.Lock()
 	defer action.lock.Unlock()
 
-	builds := &v1alpha1.BuildList{}
-	options := &k8sclient.ListOptions{Namespace: build.Namespace}
+	builds := &v1.BuildList{}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
-	err := action.reader.List(ctx, options, builds)
+	err := action.reader.List(ctx, builds, client.InNamespace(build.Namespace))
 	if err != nil {
 		return nil, err
 	}
 
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
-	hasScheduledBuild := false
 	for _, b := range builds.Items {
-		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
-			hasScheduledBuild = true
-			break
+		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
+			// Let's requeue the build in case one is already running
+			return nil, nil
 		}
 	}
 
-	if hasScheduledBuild {
-		// Let's requeue the build in case one is already running
-		return nil, nil
-	}
-
-	// Transition the build to running state
+	// Transition the build to pending state
+	// This must be done in the critical section rather than delegated to the controller
 	target := build.DeepCopy()
-	target.Status.Phase = v1alpha1.BuildPhaseRunning
+	target.Status.Phase = v1.BuildPhasePending
 	action.L.Info("Build state transition", "phase", target.Status.Phase)
 	err = action.client.Status().Update(ctx, target)
 	if err != nil {
 		return nil, err
 	}
 
-	// and run it asynchronously to avoid blocking the reconcile loop
+	// Start the build asynchronously to avoid blocking the reconcile loop
 	action.routines.Store(build.Name, true)
-	go action.build(ctx, build)
+
+	go action.runBuild(ctx, build)
 
 	return nil, nil
 }
 
-func (action *scheduleRoutineAction) build(ctx context.Context, build *v1alpha1.Build) {
+func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Build) {
 	defer action.routines.Delete(build.Name)
 
-	status := action.builder.Build(build.Spec)
-
-	err := UpdateBuildStatus(ctx, build, status, action.client, action.L)
-	if err != nil {
-		action.L.Errorf(err, "Error while running build: %s", build.Name)
+	status := v1.BuildStatus{
+		Phase:     v1.BuildPhaseRunning,
+		StartedAt: metav1.Now(),
 	}
+	if err := action.updateBuildStatus(ctx, build, status); err != nil {
+		return
+	}
+
+	for i, task := range build.Spec.Tasks {
+		if task.Builder == nil {
+			status := v1.BuildStatus{
+				// Error the build directly as we know recovery won't work over ill-defined tasks
+				Phase: v1.BuildPhaseError,
+				Error: fmt.Sprintf("task cannot be executed using the routine strategy: %s",
+					task.GetName()),
+				Duration: metav1.Now().Sub(build.Status.StartedAt.Time).String(),
+			}
+			_ = action.updateBuildStatus(ctx, build, status)
+			break
+		}
+
+		status := action.builder.Run(*task.Builder)
+		lastTask := i == len(build.Spec.Tasks)-1
+		taskFailed := status.Phase == v1.BuildPhaseFailed
+		if lastTask || taskFailed {
+			status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
+		}
+		if lastTask && !taskFailed {
+			status.Phase = v1.BuildPhaseSucceeded
+		}
+		err := action.updateBuildStatus(ctx, build, status)
+		if err != nil || taskFailed {
+			break
+		}
+	}
+}
+
+func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, build *v1.Build, status v1.BuildStatus) error {
+	target := build.DeepCopy()
+	target.Status = status
+	// Copy the failure field from the build to persist recovery state
+	target.Status.Failure = build.Status.Failure
+	// Patch the build status with the result
+	p, err := patch.PositiveMergePatch(build, target)
+	if err != nil {
+		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
+		return err
+	}
+	err = action.client.Status().Patch(ctx, target, client.ConstantPatch(types.MergePatchType, p))
+	if err != nil {
+		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
+		return err
+	}
+	build.Status = target.Status
+	return nil
 }

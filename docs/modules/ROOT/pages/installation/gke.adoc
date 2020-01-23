@@ -26,39 +26,9 @@ kubectl create clusterrolebinding user-cluster-admin-binding --clusterrole=clust
 
 The command above is needed to make sure your user is able to delegate some permissions to Camel K service accounts.
 
-Users of *GKE* are expected to use the `gcr.io` registry to push and pull images.
-In order to push images to `gcr.io`, you need to provide a valid key to Camel K.
-The best way to obtain a valid key is from the web console:
-
-- Go to https://console.cloud.google.com
-- Make sure the project where you created the Kubernetes cluster is selected in the drop-down list
-- To avoid confusion, it's suggested to use the "English" language in preferences of the Google Cloud console
-- Select "IAM & admin" from the navigation menu, then "Service accounts"
-- Create a new service account specifying the following id: **"camel-k-builder"**
-- You'll be asked to select a role. It's important to select the **"Storage Admin" role** from the "Storage" menu
-- Finish creating the service account
-- From the action menu of the service account you've created, **create a key** using the JSON format
-
-A `.json` file with the key will be downloaded to your machine. You need to store that key in a Kubernetes secret.
-
-It's **important** to rename the file you've just downloaded to `kaniko-secret.json` (make sure you write it correctly).
-After the renaming, execute the following command to create the secret:
-
-```
-kubectl create secret generic kaniko-secret --from-file=kaniko-secret.json
-```
-
-You're ready to install Camel K. You need to get the *kamel* CLI tool the from https://github.com/apache/camel-k/releases[release page]
+You can now get the *kamel* CLI tool the from https://github.com/apache/camel-k/releases[release page]
 and put it on your system path.
 
-You should now execute the following command to install cluster resources and the operator (in the current namespace):
+The last thing to do is to xref:installation/registry/gcr.adoc[configure gcr.io as registry] to host your integration image.
 
-```
-kamel install --registry gcr.io --organization <<your-project-id>> --registry-secret kaniko-secret
-```
-
-Use the project id that you've annotated when executing the first connection string.
-
-NOTE: the project id is **NOT** the cluster id!
-
-You're now ready to play with Camel K!
+After doing that, you'll be ready to play with Camel K. Enjoy!

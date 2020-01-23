@@ -18,16 +18,23 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+// The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
+// the integration will run in the cluster.
+//
+// +camel-k:trait=deployment
 type deploymentTrait struct {
 	BaseTrait `property:",squash"`
 	deployer  deployerTrait
 }
+
+var _ ControllerStrategySelector = &deploymentTrait{}
 
 func newDeploymentTrait() *deploymentTrait {
 	return &deploymentTrait{
@@ -38,26 +45,31 @@ func newDeploymentTrait() *deploymentTrait {
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionDeploymentAvailable,
+			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionDeploymentAvailableReason,
+			v1.IntegrationConditionDeploymentAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable)
+		return condition != nil && condition.Status == corev1.ConditionTrue, nil
+	}
+
 	enabled := false
 
-	if e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 		//
 		// Don't deploy when a different strategy is needed (e.g. Knative)
 		//
 		strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
 		if err != nil {
 			e.Integration.Status.SetErrorCondition(
-				v1alpha1.IntegrationConditionDeploymentAvailable,
-				v1alpha1.IntegrationConditionDeploymentAvailableReason,
+				v1.IntegrationConditionDeploymentAvailable,
+				v1.IntegrationConditionDeploymentAvailableReason,
 				err,
 			)
 
@@ -65,8 +77,8 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		}
 
 		enabled = strategy == ControllerStrategyDeployment
-	} else if e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseReady) &&
-		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingKit, v1alpha1.IntegrationPhaseResolvingKit) {
+	} else if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) &&
+		e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseResolvingKit) {
 		enabled = true
 	}
 
@@ -80,35 +92,65 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 	return enabled, nil
 }
 
-func (t *deploymentTrait) Apply(e *Environment) error {
-	if e.IntegrationKitInPhase(v1alpha1.IntegrationKitPhaseReady) &&
-		e.IntegrationInPhase(v1alpha1.IntegrationPhaseBuildingKit, v1alpha1.IntegrationPhaseResolvingKit) {
+func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
+	if t.Enabled != nil && !*t.Enabled {
+		return nil, nil
+	}
+	deploymentStrategy := ControllerStrategyDeployment
+	return &deploymentStrategy, nil
+}
 
+func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
+	return 10000
+}
+
+func (t *deploymentTrait) Apply(e *Environment) error {
+	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) &&
+		e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseResolvingKit) {
 		e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
 			// trigger integration deploy
-			e.Integration.Status.Phase = v1alpha1.IntegrationPhaseDeploying
+			e.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 			return nil
 		})
 
 		return nil
 	}
 
-	if e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
 		maps := e.ComputeConfigMaps()
-		depl := t.getDeploymentFor(e)
+		deployment := t.getDeploymentFor(e)
 
 		e.Resources.AddAll(maps)
-		e.Resources.Add(depl)
+		e.Resources.Add(deployment)
 
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionDeploymentAvailable,
+			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionTrue,
-			v1alpha1.IntegrationConditionDeploymentAvailableReason,
-			depl.Name,
+			v1.IntegrationConditionDeploymentAvailableReason,
+			deployment.Name,
 		)
+
+		if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+			// Reconcile the deployment replicas
+			replicas := e.Integration.Spec.Replicas
+			// Deployment replicas defaults to 1, so we avoid forcing
+			// an update to nil that will result to another update cycle
+			// back to that default value by the Deployment controller.
+			if replicas == nil {
+				one := int32(1)
+				replicas = &one
+			}
+			deployment.Spec.Replicas = replicas
+		}
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *deploymentTrait) IsPlatformTrait() bool {
+	return true
 }
 
 // **********************************

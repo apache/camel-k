@@ -18,39 +18,53 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
+// (or integrations) in the same namespace.
+//
+// It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
+//
+// +camel-k:trait=service
 type serviceTrait struct {
 	BaseTrait `property:",squash"`
-	Auto      *bool `property:"auto"`
+	// To automatically detect from the code if a Service needs to be created.
+	Auto *bool `property:"auto"`
 }
 
-const httpPortName = "http"
+const (
+	serviceTraitID = "service"
+	httpPortName   = "http"
+)
 
 func newServiceTrait() *serviceTrait {
 	return &serviceTrait{
-		BaseTrait: newBaseTrait("service"),
+		BaseTrait: newBaseTrait(serviceTraitID),
 	}
 }
 
+func (t *serviceTrait) isEnabled() bool {
+	return t.Enabled == nil || *t.Enabled
+}
+
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if !t.isEnabled() {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionServiceAvailable,
+			v1.IntegrationConditionServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionServiceNotAvailableReason,
+			v1.IntegrationConditionServiceNotAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -58,9 +72,9 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
 		if err != nil {
 			e.Integration.Status.SetCondition(
-				v1alpha1.IntegrationConditionServiceAvailable,
+				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
-				v1alpha1.IntegrationConditionServiceNotAvailableReason,
+				v1.IntegrationConditionServiceNotAvailableReason,
 				err.Error(),
 			)
 
@@ -70,9 +84,9 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		meta := metadata.ExtractAll(e.CamelCatalog, sources)
 		if !meta.RequiresHTTPService {
 			e.Integration.Status.SetCondition(
-				v1alpha1.IntegrationConditionServiceAvailable,
+				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
-				v1alpha1.IntegrationConditionServiceNotAvailableReason,
+				v1.IntegrationConditionServiceNotAvailableReason,
 				"no http service required",
 			)
 
@@ -83,32 +97,34 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	return true, nil
 }
 
-func (t *serviceTrait) Apply(e *Environment) (err error) {
+func (t *serviceTrait) Apply(e *Environment) error {
 	svc := e.Resources.GetServiceForIntegration(e.Integration)
+	// add a new service if not already created
 	if svc == nil {
-		svc := corev1.Service{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Service",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      e.Integration.Name,
-				Namespace: e.Integration.Namespace,
-				Labels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
-				},
-			},
-			Spec: corev1.ServiceSpec{
-				Ports: []corev1.ServicePort{},
-				Selector: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
-				},
-			},
-		}
-
-		// add a new service if not already created
-		e.Resources.Add(&svc)
+		svc = getServiceFor(e)
 	}
-
+	e.Resources.Add(svc)
 	return nil
+}
+
+func getServiceFor(e *Environment) *corev1.Service {
+	return &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      e.Integration.Name,
+			Namespace: e.Integration.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{},
+			Selector: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
+		},
+	}
 }

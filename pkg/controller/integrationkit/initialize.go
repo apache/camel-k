@@ -20,7 +20,7 @@ package integrationkit
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -38,11 +38,11 @@ func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *initializeAction) CanHandle(kit *v1alpha1.IntegrationKit) bool {
-	return kit.Status.Phase == v1alpha1.IntegrationKitPhaseInitialization
+func (action *initializeAction) CanHandle(kit *v1.IntegrationKit) bool {
+	return kit.Status.Phase == v1.IntegrationKitPhaseInitialization
 }
 
-func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.IntegrationKit) (*v1alpha1.IntegrationKit, error) {
+func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
 	_, err := trait.Apply(ctx, action.client, nil, kit)
 	if err != nil {
 		return nil, err
@@ -50,11 +50,11 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1alpha1.Integr
 
 	if kit.Spec.Image == "" {
 		// by default the kit should be built
-		kit.Status.Phase = v1alpha1.IntegrationKitPhaseBuildSubmitted
+		kit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
 	} else {
 		// but in case it has been created from an image, mark the
 		// kit as ready
-		kit.Status.Phase = v1alpha1.IntegrationKitPhaseReady
+		kit.Status.Phase = v1.IntegrationKitPhaseReady
 
 		// and set the image to be used
 		kit.Status.Image = kit.Spec.Image

@@ -15,7 +15,8 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-packageName: camel-k
 channels:
-- name: alpha
-  currentCSV: camel-k-operator.v1.0.0-M2-SNAPSHOT
+- currentCSV: camel-k-operator.v1.0.0-rc2-snapshot
+  name: alpha
+defaultChannel: alpha
+packageName: camel-k

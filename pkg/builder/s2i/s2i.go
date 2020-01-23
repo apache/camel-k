@@ -26,8 +26,7 @@ func init() {
 }
 
 type steps struct {
-	Publisher   builder.Step
-	ReplaceHost builder.Step
+	Publisher builder.Step
 }
 
 // Steps --
@@ -36,19 +35,9 @@ var Steps = steps{
 		builder.ApplicationPublishPhase,
 		publisher,
 	),
-	ReplaceHost: builder.NewStep(
-		builder.ApplicationPublishPhase+1,
-		replaceHost,
-	),
 }
 
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.Steps.GenerateProject,
-	builder.Steps.GenerateProjectSettings,
-	builder.Steps.InjectDependencies,
-	builder.Steps.SanitizeDependencies,
-	builder.Steps.ComputeDependencies,
-	builder.Steps.IncrementalPackager,
+// S2iSteps --
+var S2iSteps = []builder.Step{
 	Steps.Publisher,
 }

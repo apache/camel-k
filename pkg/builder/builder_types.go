@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
@@ -45,7 +45,7 @@ const (
 
 // Builder --
 type Builder interface {
-	Build(build v1alpha1.BuildSpec) v1alpha1.BuildStatus
+	Run(build v1.BuilderTask) v1.BuildStatus
 }
 
 // Step --
@@ -101,15 +101,14 @@ type Context struct {
 	client.Client
 	C                 cancellable.Context
 	Catalog           *camel.RuntimeCatalog
-	Build             v1alpha1.BuildSpec
+	Build             v1.BuilderTask
 	BaseImage         string
 	Image             string
-	PublicImage       string
 	Error             error
 	Namespace         string
 	Path              string
-	Artifacts         []v1alpha1.Artifact
-	SelectedArtifacts []v1alpha1.Artifact
+	Artifacts         []v1.Artifact
+	SelectedArtifacts []v1.Artifact
 	Archive           string
 	Resources         []Resource
 
@@ -124,17 +123,8 @@ func (c *Context) HasRequiredImage() bool {
 	return c.Build.Image != ""
 }
 
-// GetImage --
-func (c *Context) GetImage() string {
-	if c.Build.Image != "" {
-		return c.Build.Image
-	}
-
-	return c.Image
-}
-
 type publishedImage struct {
 	Image        string
-	Artifacts    []v1alpha1.Artifact
+	Artifacts    []v1.Artifact
 	Dependencies []string
 }

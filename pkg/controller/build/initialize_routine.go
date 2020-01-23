@@ -20,7 +20,7 @@ package build
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewInitializeRoutineAction creates a new initialize action
@@ -38,14 +38,13 @@ func (action *initializeRoutineAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *initializeRoutineAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseInitialization &&
-		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyRoutine
+func (action *initializeRoutineAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseInitialization
 }
 
 // Handle handles the builds
-func (action *initializeRoutineAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
-	build.Status.Phase = v1alpha1.BuildPhaseScheduling
+func (action *initializeRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
+	build.Status.Phase = v1.BuildPhaseScheduling
 
 	return build, nil
 }

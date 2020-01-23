@@ -21,11 +21,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/stretchr/testify/assert"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 type errorTestSteps struct {
@@ -34,7 +34,7 @@ type errorTestSteps struct {
 }
 
 func TestFailure(t *testing.T) {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	c, err := test.NewFakeClient()
@@ -53,21 +53,15 @@ func TestFailure(t *testing.T) {
 
 	RegisterSteps(steps)
 
-	r := v1alpha1.BuildSpec{
+	r := v1.BuilderTask{
 		Steps: StepIDsFor(
 			steps.Step1,
 			steps.Step2,
 		),
-		RuntimeVersion: defaults.RuntimeVersion,
-		Platform: v1alpha1.IntegrationPlatformSpec{
-			Build: v1alpha1.IntegrationPlatformBuildSpec{
-				CamelVersion: catalog.Version,
-			},
-		},
+		RuntimeVersion: catalog.RuntimeVersion,
+		CamelVersion:   catalog.Version,
 	}
 
-	result := b.Build(r)
-
-	assert.NotNil(t, result)
-	assert.Equal(t, v1alpha1.BuildPhaseFailed, result.Phase)
+	status := b.Run(r)
+	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
 }

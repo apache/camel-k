@@ -21,18 +21,17 @@ import (
 	"context"
 	"testing"
 
-	"github.com/scylladb/go-set/strset"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
 
 	routev1 "github.com/openshift/api/route/v1"
-	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -41,14 +40,14 @@ const (
 )
 
 func TestOpenShiftTraits(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
 	res := processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.Nil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.Nil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))
@@ -58,12 +57,12 @@ func TestOpenShiftTraits(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.NotNil(t, env.GetTrait(ID("service")))
-	assert.NotNil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.NotNil(t, env.GetTrait("service"))
+	assert.NotNil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))
@@ -79,45 +78,45 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Integration.Spec.Traits["service"] = v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Integration.Spec.Traits["service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"port": "7071",
 		},
 	}
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("service")))
-	assert.NotNil(t, env.GetTrait(ID("route")))
+	assert.NotNil(t, env.GetTrait("service"))
+	assert.NotNil(t, env.GetTrait("route"))
 	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
 		return svc.Name == TestDeploymentName && svc.Spec.Ports[0].TargetPort.StrVal == "http"
 	}))
 }
 
 func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Integration.Spec.Traits["service"] = v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Integration.Spec.Traits["service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled": "false",
 			"port":    "7071",
 		},
 	}
 	res := processTestEnv(t, env)
-	assert.Nil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route"))) // No route without service
+	assert.Nil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route")) // No route without service
 	assert.Nil(t, res.GetService(func(svc *corev1.Service) bool {
 		return true
 	}))
 }
 
 func TestKubernetesTraits(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.Nil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.Nil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))
@@ -127,12 +126,12 @@ func TestKubernetesTraits(t *testing.T) {
 }
 
 func TestKubernetesTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
 	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait(ID("deployment")))
-	assert.NotNil(t, env.GetTrait(ID("service")))
-	assert.Nil(t, env.GetTrait(ID("route")))
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("deployment"))
+	assert.NotNil(t, env.GetTrait("service"))
+	assert.Nil(t, env.GetTrait("route"))
+	assert.NotNil(t, env.GetTrait("owner"))
 	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Name == TestProperties
 	}))
@@ -145,9 +144,9 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 }
 
 func TestTraitDecode(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "")
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	svcTrait := v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "")
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	svcTrait := v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled": "false",
 			"port":    "7071",
@@ -166,10 +165,10 @@ func TestTraitDecode(t *testing.T) {
 }
 
 func TestTraitHierarchyDecode(t *testing.T) {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "")
 
-	env.Platform.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Platform.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+	env.Platform.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Platform.Spec.Traits["knative-service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled":            "false",
 			"min-scale":          "1",
@@ -177,17 +176,18 @@ func TestTraitHierarchyDecode(t *testing.T) {
 			"autoscaling-target": "15",
 		},
 	}
+	env.Platform.ResyncStatusFullConfig()
 
-	env.IntegrationKit.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.IntegrationKit.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+	env.IntegrationKit.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.IntegrationKit.Spec.Traits["knative-service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"enabled":   "true",
 			"min-scale": "5",
 		},
 	}
 
-	env.Integration.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
-	env.Integration.Spec.Traits["knative-service"] = v1alpha1.TraitSpec{
+	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
+	env.Integration.Spec.Traits["knative-service"] = v1.TraitSpec{
 		Configuration: map[string]string{
 			"max-scale": "20",
 		},
@@ -220,15 +220,15 @@ func TestTraitHierarchyDecode(t *testing.T) {
 
 func TestConfigureVolumesAndMounts(t *testing.T) {
 	env := Environment{
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeploymentName,
 				Namespace: "ns",
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Resources: []v1alpha1.ResourceSpec{
+			Spec: v1.IntegrationSpec{
+				Resources: []v1.ResourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:       "res1.txt",
 							ContentRef: "my-cm1",
 							ContentKey: "my-key1",
@@ -237,27 +237,27 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 						MountPath: "/etc/m1",
 					},
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:       "res2.txt",
 							ContentRef: "my-cm2",
 						},
 						Type: "data",
 					},
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:       "res3.txt",
 							ContentKey: "my-key3",
 						},
 						Type: "data",
 					},
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name: "res4.txt",
 						},
 						Type: "data",
 					},
 				},
-				Configuration: []v1alpha1.ConfigurationSpec{
+				Configuration: []v1.ConfigurationSpec{
 					{
 						Type:  "configmap",
 						Value: "test-configmap",
@@ -361,6 +361,45 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 	assert.Equal(t, "/foo/bar", m.MountPath)
 }
 
+func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
+	c := NewTraitTestCatalog()
+	buildTraits := []string{"builder", "quarkus"}
+
+	for _, trait := range c.allTraits() {
+		if trait.InfluencesKit() {
+			assert.Contains(t, buildTraits, string(trait.ID()))
+		} else {
+			assert.NotContains(t, buildTraits, trait.ID())
+		}
+	}
+}
+
+func TestOnlySomeTraitsArePlatform(t *testing.T) {
+	c := NewTraitTestCatalog()
+	platformTraits := []string{"builder", "camel", "classpath", "container", "dependencies", "deployer", "deployment", "environment", "rest-dsl", "owner", "platform"}
+
+	for _, trait := range c.allTraits() {
+		if trait.IsPlatformTrait() {
+			assert.Contains(t, platformTraits, string(trait.ID()))
+		} else {
+			assert.NotContains(t, platformTraits, trait.ID())
+		}
+	}
+}
+
+func TestOnlySomeTraitsDoNotRequireIntegrationPlatform(t *testing.T) {
+	c := NewTraitTestCatalog()
+	doNotRequirePlatformTraits := []string{"deployer", "platform"}
+
+	for _, trait := range c.allTraits() {
+		if !trait.RequiresIntegrationPlatform() {
+			assert.Contains(t, doNotRequirePlatformTraits, string(trait.ID()))
+		} else {
+			assert.NotContains(t, doNotRequirePlatformTraits, trait.ID())
+		}
+	}
+}
+
 func findVolume(vols []corev1.Volume, condition func(corev1.Volume) bool) *corev1.Volume {
 	for _, v := range vols {
 		v := v
@@ -390,48 +429,49 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	return env.Resources
 }
 
-func createTestEnv(t *testing.T, cluster v1alpha1.IntegrationPlatformCluster, script string) *Environment {
-	catalog, err := test.DefaultCatalog()
+func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script string) *Environment {
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	return &Environment{
+	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1alpha1.Integration{
+		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeploymentName,
 				Namespace: "ns",
 			},
-			Spec: v1alpha1.IntegrationSpec{
-				Sources: []v1alpha1.SourceSpec{
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
 					{
-						DataSpec: v1alpha1.DataSpec{
+						DataSpec: v1.DataSpec{
 							Name:    "file.groovy",
 							Content: script,
 						},
-						Language: v1alpha1.LanguageGroovy,
+						Language: v1.LanguageGroovy,
 					},
 				},
 			},
-			Status: v1alpha1.IntegrationStatus{
-				Phase: v1alpha1.IntegrationPhaseDeploying,
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1alpha1.IntegrationKit{
-			Status: v1alpha1.IntegrationKitStatus{
-				Phase: v1alpha1.IntegrationKitPhaseReady,
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1alpha1.IntegrationPlatform{
-			Spec: v1alpha1.IntegrationPlatformSpec{
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
-		Classpath:      strset.New(),
 	}
+	res.Platform.ResyncStatusFullConfig()
+	return res
 }
 
 func NewTraitTestCatalog() *Catalog {

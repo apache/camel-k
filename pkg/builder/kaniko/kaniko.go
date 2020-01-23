@@ -37,16 +37,10 @@ var Steps = steps{
 	),
 }
 
-// DefaultSteps --
-var DefaultSteps = []builder.Step{
-	builder.Steps.GenerateProject,
-	builder.Steps.GenerateProjectSettings,
-	builder.Steps.InjectDependencies,
-	builder.Steps.SanitizeDependencies,
-	builder.Steps.ComputeDependencies,
-	builder.Steps.IncrementalPackager,
+// KanikoSteps --
+var KanikoSteps = []builder.Step{
 	Steps.Publisher,
 }
 
-// BuildDir is the directory where to build artifacts (shared with the Kaniko pod)
-var BuildDir = "/workspace"
+// CacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod)
+const CacheDir = "/kaniko/cache"

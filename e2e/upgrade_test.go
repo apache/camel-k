@@ -31,8 +31,7 @@ import (
 )
 
 func TestPlatformUpgrade(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 		Eventually(platformVersion(ns)).Should(Equal(defaults.Version))
 
@@ -41,7 +40,7 @@ func TestPlatformUpgrade(t *testing.T) {
 		Eventually(operatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
-		Expect(setPlatformVersion(ns, "an.older.one")).Should(BeNil())
+		Eventually(setPlatformVersion(ns, "an.older.one")).Should(BeNil())
 		Eventually(platformVersion(ns)).Should(Equal("an.older.one"))
 
 		// Scale the operator up
@@ -54,8 +53,7 @@ func TestPlatformUpgrade(t *testing.T) {
 }
 
 func TestIntegrationUpgrade(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 		Eventually(platformVersion(ns)).Should(Equal(defaults.Version))
 

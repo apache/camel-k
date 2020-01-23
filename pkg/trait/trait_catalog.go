@@ -19,10 +19,11 @@ package trait
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/fatih/structs"
@@ -31,11 +32,13 @@ import (
 // Catalog collects all information about traits in one place
 type Catalog struct {
 	L                 log.Logger
+	tPlatform         Trait
 	tAffinity         Trait
 	tCamel            Trait
 	tDebug            Trait
 	tDependencies     Trait
 	tDeployer         Trait
+	tCron             Trait
 	tDeployment       Trait
 	tGarbageCollector Trait
 	tKnativeService   Trait
@@ -52,13 +55,16 @@ type Catalog struct {
 	tClasspath        Trait
 	tRestDsl          Trait
 	tProbes           Trait
+	tQuarkus          Trait
 	tContainer        Trait
+	tPullSecret       Trait
 }
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	catalog := Catalog{
 		L:                 log.Log.WithName("trait"),
+		tPlatform:         newPlatformTrait(),
 		tAffinity:         newAffinityTrait(),
 		tCamel:            newCamelTrait(),
 		tDebug:            newDebugTrait(),
@@ -66,6 +72,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tKnative:          newKnativeTrait(),
 		tDependencies:     newDependenciesTrait(),
 		tDeployer:         newDeployerTrait(),
+		tCron:             newCronTrait(),
 		tDeployment:       newDeploymentTrait(),
 		tGarbageCollector: newGarbageCollectorTrait(),
 		tKnativeService:   newKnativeServiceTrait(),
@@ -80,7 +87,9 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tEnvironment:      newEnvironmentTrait(),
 		tClasspath:        newClasspathTrait(),
 		tProbes:           newProbesTrait(),
+		tQuarkus:          newQuarkusTrait(),
 		tContainer:        newContainerTrait(),
+		tPullSecret:       newPullSecretTrait(),
 	}
 
 	for _, t := range catalog.allTraits() {
@@ -96,6 +105,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 
 func (c *Catalog) allTraits() []Trait {
 	return []Trait{
+		c.tPlatform,
 		c.tAffinity,
 		c.tCamel,
 		c.tDebug,
@@ -103,6 +113,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tKnative,
 		c.tDependencies,
 		c.tDeployer,
+		c.tCron,
 		c.tDeployment,
 		c.tGarbageCollector,
 		c.tKnativeService,
@@ -117,73 +128,98 @@ func (c *Catalog) allTraits() []Trait {
 		c.tEnvironment,
 		c.tClasspath,
 		c.tProbes,
+		c.tQuarkus,
 		c.tContainer,
+		c.tPullSecret,
 	}
 }
 
 // Traits may depend on the result of previously executed ones,
 // so care must be taken while changing the lists order.
 func (c *Catalog) traitsFor(environment *Environment) []Trait {
-	switch environment.DetermineProfile() {
-	case v1alpha1.TraitProfileOpenShift:
+	profile := environment.DetermineProfile()
+	return c.TraitsForProfile(profile)
+}
+
+// TraitsForProfile returns all traits associated with a given profile.
+//
+// Traits may depend on the result of previously executed ones,
+// so care must be taken while changing the lists order.
+func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
+	switch profile {
+	case v1.TraitProfileOpenShift:
 		return []Trait{
+			c.tPlatform,
 			c.tCamel,
-			c.tGarbageCollector,
-			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
 			c.tBuilder,
+			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
+			c.tCron,
 			c.tDeployment,
+			c.tGarbageCollector,
 			c.tAffinity,
 			c.tService,
 			c.tContainer,
+			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
+			c.tDebug,
 			c.tClasspath,
 			c.tProbes,
 			c.tRoute,
 			c.tIstio,
 			c.tOwner,
 		}
-	case v1alpha1.TraitProfileKubernetes:
+	case v1.TraitProfileKubernetes:
 		return []Trait{
+			c.tPlatform,
 			c.tCamel,
-			c.tGarbageCollector,
-			c.tDebug,
 			c.tRestDsl,
 			c.tDependencies,
 			c.tBuilder,
+			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
+			c.tCron,
 			c.tDeployment,
+			c.tGarbageCollector,
 			c.tAffinity,
 			c.tService,
 			c.tContainer,
+			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
+			c.tDebug,
 			c.tClasspath,
 			c.tProbes,
 			c.tIngress,
 			c.tIstio,
 			c.tOwner,
 		}
-	case v1alpha1.TraitProfileKnative:
+	case v1.TraitProfileKnative:
 		return []Trait{
+			c.tPlatform,
 			c.tCamel,
-			c.tGarbageCollector,
-			c.tDebug,
 			c.tRestDsl,
 			c.tKnative,
 			c.tDependencies,
 			c.tBuilder,
+			c.tQuarkus,
 			c.tEnvironment,
 			c.tDeployer,
+			c.tCron,
 			c.tDeployment,
+			c.tGarbageCollector,
 			c.tAffinity,
 			c.tKnativeService,
 			c.tContainer,
+			c.tPullSecret,
+			c.tJolokia,
+			c.tPrometheus,
+			c.tDebug,
 			c.tClasspath,
 			c.tProbes,
 			c.tIstio,
@@ -199,8 +235,15 @@ func (c *Catalog) apply(environment *Environment) error {
 		return err
 	}
 	traits := c.traitsFor(environment)
+	environment.ConfiguredTraits = traits
 
+	applicable := false
 	for _, trait := range traits {
+		if environment.Platform == nil && trait.RequiresIntegrationPlatform() {
+			c.L.Debug("Skipping trait because of missing integration platform: %s", trait.ID())
+			continue
+		}
+		applicable = true
 		enabled, err := trait.Configure(environment)
 		if err != nil {
 			return err
@@ -216,6 +259,10 @@ func (c *Catalog) apply(environment *Environment) error {
 
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
 		}
+	}
+
+	if !applicable && environment.Platform == nil {
+		return errors.New("no trait can be executed because of no integration platform found")
 	}
 
 	for _, processor := range environment.PostProcessors {
@@ -239,8 +286,8 @@ func (c *Catalog) GetTrait(id string) Trait {
 }
 
 func (c *Catalog) configure(env *Environment) error {
-	if env.Platform != nil && env.Platform.Spec.Traits != nil {
-		if err := c.configureTraits(env.Platform.Spec.Traits); err != nil {
+	if env.Platform != nil && env.Platform.Status.Traits != nil {
+		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
 			return err
 		}
 	}
@@ -258,7 +305,7 @@ func (c *Catalog) configure(env *Environment) error {
 	return nil
 }
 
-func (c *Catalog) configureTraits(traits map[string]v1alpha1.TraitSpec) error {
+func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
 	for id, traitSpec := range traits {
 		catTrait := c.GetTrait(id)
 		if catTrait != nil {

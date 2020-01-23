@@ -20,7 +20,7 @@ package build
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewErrorAction creates a new error action for scheduled routine
@@ -38,11 +38,11 @@ func (action *errorAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *errorAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseError
+func (action *errorAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseError
 }
 
 // Handle handles the builds
-func (action *errorAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *errorAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	return nil, nil
 }

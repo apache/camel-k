@@ -19,13 +19,15 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"os"
 	"time"
 
+	_ "github.com/apache/camel-k/pkg/builder/kaniko"
+	_ "github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/cmd"
 
+	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
@@ -46,8 +48,6 @@ func main() {
 
 func exitOnError(err error) {
 	if err != nil {
-		fmt.Println("Error:", err)
-
 		os.Exit(1)
 	}
 }

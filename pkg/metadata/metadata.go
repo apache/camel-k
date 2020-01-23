@@ -20,7 +20,7 @@ package metadata
 import (
 	"github.com/scylladb/go-set/strset"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/gzip"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -29,7 +29,7 @@ import (
 )
 
 // ExtractAll returns metadata information from all listed source codes
-func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1alpha1.SourceSpec) IntegrationMetadata {
+func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec) IntegrationMetadata {
 	// neutral metadata
 	meta := NewIntegrationMetadata()
 	meta.PassiveEndpoints = true
@@ -64,7 +64,7 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 }
 
 // Extract returns metadata information from the source code
-func Extract(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSpec) IntegrationMetadata {
+func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) IntegrationMetadata {
 	var err error
 	source, err = uncompress(source)
 	if err != nil {
@@ -85,7 +85,7 @@ func Extract(catalog *camel.RuntimeCatalog, source v1alpha1.SourceSpec) Integrat
 }
 
 // Each --
-func Each(catalog *camel.RuntimeCatalog, sources []v1alpha1.SourceSpec, consumer func(int, IntegrationMetadata) bool) {
+func Each(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, consumer func(int, IntegrationMetadata) bool) {
 	for i, s := range sources {
 		meta := Extract(catalog, s)
 
@@ -95,7 +95,7 @@ func Each(catalog *camel.RuntimeCatalog, sources []v1alpha1.SourceSpec, consumer
 	}
 }
 
-func uncompress(spec v1alpha1.SourceSpec) (v1alpha1.SourceSpec, error) {
+func uncompress(spec v1.SourceSpec) (v1.SourceSpec, error) {
 	if spec.Compression {
 		data := []byte(spec.Content)
 		var uncompressed []byte

@@ -20,12 +20,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
-	"github.com/apache/camel-k/pkg/util/test"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/pkg/platform"
 
@@ -186,7 +183,7 @@ func newCmdCompletionBash(root *cobra.Command) *cobra.Command {
 		Short: "Generates bash completion scripts",
 		Long:  bashCompletionCmdLongDescription,
 		Run: func(_ *cobra.Command, _ []string) {
-			err := root.GenBashCompletion(os.Stdout)
+			err := root.GenBashCompletion(root.OutOrStdout())
 			if err != nil {
 				fmt.Print(err.Error())
 			}
@@ -254,9 +251,9 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 }
 
 func computeCamelDependencies() string {
-	catalog, err := test.DefaultCatalog()
+	catalog, err := camel.DefaultCatalog()
 	if err != nil || catalog == nil {
-		catalog = camel.NewRuntimeCatalog(v1alpha1.CamelCatalog{}.Spec)
+		catalog = camel.NewRuntimeCatalog(v1.CamelCatalog{}.Spec)
 	}
 
 	results := make([]string, 0, len(catalog.Artifacts))

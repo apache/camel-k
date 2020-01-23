@@ -19,56 +19,67 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"text/tabwriter"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 type getCmdOptions struct {
 	*RootCmdOptions
 }
 
-func newCmdGet(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdGet(rootCmdOptions *RootCmdOptions) (*cobra.Command, *getCmdOptions) {
 	options := getCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "get",
-		Short: "Get all integrations deployed on Kubernetes",
-		Long:  `Get the status of all integrations deployed on on Kubernetes.`,
-		RunE:  options.run,
+		Use:     "get [integration]",
+		Short:   "Get integrations deployed on Kubernetes",
+		Long:    `Get the status of integrations deployed on on Kubernetes.`,
+		PreRunE: decode(&options),
+		RunE:    options.run,
 	}
 
-	return &cmd
+	return &cmd, &options
 }
 
-func (o *getCmdOptions) run(_ *cobra.Command, _ []string) error {
+func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
-	integrationList := v1alpha1.IntegrationList{
+	integrationList := v1.IntegrationList{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       "Integration",
 		},
 	}
 
 	namespace := o.Namespace
 
-	err = c.List(o.Context, &k8sclient.ListOptions{Namespace: namespace}, &integrationList)
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(namespace),
+	}
+	if len(args) == 1 {
+		options = append(options, k8sclient.MatchingFields{
+			"metadata.name": args[0],
+		})
+	}
+
+	err = c.List(o.Context, &integrationList, options...)
 	if err != nil {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
-	fmt.Fprintln(w, "NAME\tPHASE\tCONTEXT")
+	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 8, 1, '\t', 0)
+	fmt.Fprintln(w, "NAME\tPHASE\tKIT")
 	for _, integration := range integrationList.Items {
 		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), integration.Status.Kit)
 	}

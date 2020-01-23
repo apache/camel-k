@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package build
 
 import (
@@ -21,10 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/apache/camel-k/pkg/platform"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,10 +35,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/platform"
 )
 
 // Add creates a new Build Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -49,33 +48,17 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
-	reconciler, err := newReconciler(mgr, c)
-	if err != nil {
-		return err
-	}
-	return add(mgr, reconciler)
+	return add(mgr, newReconciler(mgr, c))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager, c client.Client) (reconcile.Reconciler, error) {
-	// Non-caching client to be used whenever caching may cause race conditions,
-	// like in the builds scheduling critical section.
-	// TODO: to be replaced with Manager.GetAPIReader() as soon as it's available, see:
-	// https://github.com/kubernetes-sigs/controller-runtime/pull/327
-	clientOptions := k8sclient.Options{
-		Scheme: mgr.GetScheme(),
-	}
-	reader, err := k8sclient.New(mgr.GetConfig(), clientOptions)
-	if err != nil {
-		return nil, err
-	}
-
+func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileBuild{
 		client:  c,
-		reader:  reader,
+		reader:  mgr.GetAPIReader(),
 		scheme:  mgr.GetScheme(),
 		builder: builder.New(c),
-	}, nil
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -87,11 +70,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Build
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Build{}}, &handler.EnqueueRequestForObject{},
+	err = c.Watch(&source.Kind{Type: &v1.Build{}}, &handler.EnqueueRequestForObject{},
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild := e.ObjectOld.(*v1alpha1.Build)
-				newBuild := e.ObjectNew.(*v1alpha1.Build)
+				oldBuild := e.ObjectOld.(*v1.Build)
+				newBuild := e.ObjectNew.(*v1.Build)
 				// Ignore updates to the build status in which case metadata.Generation does not change,
 				// or except when the build phase changes as it's used to transition from one phase
 				// to another
@@ -107,7 +90,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	err = c.Watch(&source.Kind{Type: &corev1.Pod{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &v1alpha1.Build{},
+			OwnerType:    &v1.Build{},
 		},
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -131,7 +114,9 @@ var _ reconcile.Reconciler = &ReconcileBuild{}
 type ReconcileBuild struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client   client.Client
+	client client.Client
+	// Non-caching client to be used whenever caching may cause race conditions,
+	// like in the builds scheduling critical section
 	reader   k8sclient.Reader
 	scheme   *runtime.Scheme
 	builder  builder.Builder
@@ -149,8 +134,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	ctx := context.TODO()
 
-	// Fetch the Integration instance
-	var instance v1alpha1.Build
+	// Fetch the Build instance
+	var instance v1.Build
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
@@ -166,38 +151,48 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	target := instance.DeepCopy()
 	targetLog := rlog.ForBuild(target)
 
-	if target.Status.Phase == v1alpha1.BuildPhaseNone || target.Status.Phase == v1alpha1.BuildPhaseWaitingForPlatform {
-		pl, err := platform.GetOrLookup(ctx, r.client, target.Namespace, target.Status.Platform)
-		if err != nil || pl.Status.Phase != v1alpha1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1alpha1.BuildPhaseWaitingForPlatform
+	pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
+	if target.Status.Phase == v1.BuildPhaseNone || target.Status.Phase == v1.BuildPhaseWaitingForPlatform {
+		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+			target.Status.Phase = v1.BuildPhaseWaitingForPlatform
 		} else {
-			target.Status.Phase = v1alpha1.BuildPhaseInitialization
+			target.Status.Phase = v1.BuildPhaseInitialization
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
 			if err != nil {
-				target.Status.SetErrorCondition(v1alpha1.BuildConditionPlatformAvailable, v1alpha1.BuildConditionPlatformAvailableReason, err)
+				target.Status.SetErrorCondition(v1.BuildConditionPlatformAvailable, v1.BuildConditionPlatformAvailableReason, err)
 			}
 
 			if pl != nil {
 				target.SetIntegrationPlatform(pl)
 			}
 
-			return r.update(ctx, targetLog, target)
+			return r.update(ctx, &instance, target)
 		}
 
 		return reconcile.Result{}, err
 	}
 
-	actions := []Action{
-		NewInitializeRoutineAction(),
-		NewInitializePodAction(),
-		NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
-		NewSchedulePodAction(r.reader),
-		NewMonitorRoutineAction(&r.routines),
-		NewMonitorPodAction(),
-		NewErrorRecoveryAction(),
-		NewErrorAction(),
+	var actions []Action
+
+	switch pl.Status.Build.BuildStrategy {
+	case v1.IntegrationPlatformBuildStrategyPod:
+		actions = []Action{
+			NewInitializePodAction(),
+			NewSchedulePodAction(r.reader),
+			NewMonitorPodAction(),
+			NewErrorRecoveryAction(),
+			NewErrorAction(),
+		}
+	case v1.IntegrationPlatformBuildStrategyRoutine:
+		actions = []Action{
+			NewInitializeRoutineAction(),
+			NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
+			NewMonitorRoutineAction(&r.routines),
+			NewErrorRecoveryAction(),
+			NewErrorAction(),
+		}
 	}
 
 	for _, a := range actions {
@@ -213,7 +208,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, targetLog, newTarget); err != nil {
+				if r, err := r.update(ctx, &instance, newTarget); err != nil {
 					return r, err
 				}
 
@@ -234,8 +229,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 	}
 
-	// Requeue scheduling build so that it re-enters the build working queue
-	if target.Status.Phase == v1alpha1.BuildPhaseScheduling || target.Status.Phase == v1alpha1.BuildPhaseFailed {
+	// Requeue scheduling (resp. failed) build so that it re-enters the build (resp. recovery) working queue
+	if target.Status.Phase == v1.BuildPhaseScheduling || target.Status.Phase == v1.BuildPhaseFailed {
 		return reconcile.Result{
 			RequeueAfter: 5 * time.Second,
 		}, nil
@@ -244,18 +239,8 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	return reconcile.Result{}, nil
 }
 
-// Update --
-func (r *ReconcileBuild) update(ctx context.Context, log log.Logger, target *v1alpha1.Build) (reconcile.Result, error) {
-	err := r.client.Status().Update(ctx, target)
-	if err != nil {
-		if k8serrors.IsConflict(err) {
-			log.Error(err, "conflict")
-
-			return reconcile.Result{
-				Requeue: true,
-			}, nil
-		}
-	}
+func (r *ReconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) (reconcile.Result, error) {
+	err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err
 }

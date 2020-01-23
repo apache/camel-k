@@ -69,7 +69,6 @@ func SetVar(vars *[]corev1.EnvVar, newEnvVar corev1.EnvVar) {
 			from := *newEnvVar.ValueFrom
 			envVar.ValueFrom = &from
 		}
-
 	} else {
 		*vars = append(*vars, newEnvVar)
 	}

@@ -22,19 +22,18 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"k8s.io/client-go/kubernetes"
 )
 
 // Print prints integrations logs to the stdout
-func Print(ctx context.Context, client kubernetes.Interface, integration *v1alpha1.Integration) error {
+func Print(ctx context.Context, client kubernetes.Interface, integration *v1.Integration, out io.Writer) error {
 	scraper := NewSelectorScraper(client, integration.Namespace, integration.Name, "camel.apache.org/integration="+integration.Name)
 	reader := scraper.Start(ctx)
 
-	if _, err := io.Copy(os.Stdout, ioutil.NopCloser(reader)); err != nil {
+	if _, err := io.Copy(out, ioutil.NopCloser(reader)); err != nil {
 		fmt.Println(err.Error())
 	}
 

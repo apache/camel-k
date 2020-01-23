@@ -1,0 +1,105 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package util
+
+import (
+	"bufio"
+	"fmt"
+	"testing"
+
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/client/clientset/versioned"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// Dump prints all information about the given namespace to debug errors
+func Dump(c client.Client, ns string, t *testing.T) error {
+
+	t.Logf("-------------------- start dumping namespace %s --------------------\n", ns)
+
+	camelClient, err := versioned.NewForConfig(c.GetConfig())
+	if err != nil {
+		return err
+	}
+	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d platforms:\n", len(pls.Items))
+	for _, p := range pls.Items {
+		ref := p
+		pdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	lst, err := c.CoreV1().Pods(ns).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	t.Logf("\nFound %d pods:\n", len(lst.Items))
+	for _, pod := range lst.Items {
+		t.Logf("name=%s\n", pod.Name)
+		dumpConditions("  ", pod.Status.Conditions, t)
+		t.Logf("  logs:\n")
+		for _, container := range pod.Spec.Containers {
+			pad := "    "
+			t.Logf("%s%s\n", pad, container.Name)
+			err := dumpLogs(c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, t)
+			if err != nil {
+				t.Logf("%sERROR while reading the logs: %v\n", pad, err)
+			}
+		}
+	}
+
+	t.Logf("-------------------- end dumping namespace %s --------------------\n", ns)
+	return nil
+}
+
+func dumpConditions(prefix string, conditions []v1.PodCondition, t *testing.T) {
+	for _, cond := range conditions {
+		t.Logf("%scondition type=%s, status=%s, reason=%s, message=%q\n", prefix, cond.Type, cond.Status, cond.Reason, cond.Message)
+	}
+}
+
+func dumpLogs(c client.Client, prefix string, ns string, name string, container string, t *testing.T) error {
+	lines := int64(50)
+	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{
+		Container: container,
+		TailLines: &lines,
+	}).Stream()
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+	scanner := bufio.NewScanner(stream)
+	printed := false
+	for scanner.Scan() {
+		printed = true
+		t.Logf("%s%s\n", prefix, scanner.Text())
+	}
+	if !printed {
+		t.Logf("%s[no logs available]\n", prefix)
+	}
+	return nil
+}

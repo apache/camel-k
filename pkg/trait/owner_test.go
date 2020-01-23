@@ -20,8 +20,7 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/finalizer"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 
@@ -29,32 +28,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestOwnerWithFinalizer(t *testing.T) {
-	env := SetUpOwnerEnvironment(t)
-	env.Integration.Finalizers = []string{finalizer.CamelIntegrationFinalizer}
-
-	processTestEnv(t, env)
-
-	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("owner")))
-
-	ValidateOwnerResources(t, env, false)
-}
-
-func TestOwnerWithoutFinalizer(t *testing.T) {
+func TestOwner(t *testing.T) {
 	env := SetUpOwnerEnvironment(t)
 
 	processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
-	assert.NotNil(t, env.GetTrait(ID("owner")))
+	assert.NotNil(t, env.GetTrait("owner"))
 
 	ValidateOwnerResources(t, env, true)
 }
 
 func SetUpOwnerEnvironment(t *testing.T) *Environment {
-	env := createTestEnv(t, v1alpha1.IntegrationPlatformClusterOpenShift, "camel:core")
-	env.Integration.Spec.Traits = map[string]v1alpha1.TraitSpec{
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"owner": {
 			Configuration: map[string]string{
 				"target-labels":      "com.mycompany/mylabel1",

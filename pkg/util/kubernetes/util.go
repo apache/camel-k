@@ -20,23 +20,16 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/labels"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-
-	yaml2 "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
+	yaml2 "gopkg.in/yaml.v2"
 )
 
 // ToJSON --
@@ -120,13 +113,13 @@ func GetSecret(context context.Context, client k8sclient.Reader, name string, na
 }
 
 // GetIntegrationPlatform --
-func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1alpha1.IntegrationPlatform, error) {
+func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewIntegrationPlatform(namespace, name)
+	answer := v1.NewIntegrationPlatform(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -136,13 +129,13 @@ func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, na
 }
 
 // GetIntegrationKit --
-func GetIntegrationKit(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1alpha1.IntegrationKit, error) {
+func GetIntegrationKit(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewIntegrationKit(namespace, name)
+	answer := v1.NewIntegrationKit(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -152,13 +145,13 @@ func GetIntegrationKit(context context.Context, client k8sclient.Reader, name st
 }
 
 // GetIntegration --
-func GetIntegration(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1alpha1.Integration, error) {
+func GetIntegration(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.Integration, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewIntegration(namespace, name)
+	answer := v1.NewIntegration(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -168,13 +161,13 @@ func GetIntegration(context context.Context, client k8sclient.Reader, name strin
 }
 
 // GetBuild --
-func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1alpha1.Build, error) {
+func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1.Build, error) {
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
 
-	answer := v1alpha1.NewBuild(namespace, name)
+	answer := v1.NewBuild(namespace, name)
 
 	if err := client.Get(context, key, &answer); err != nil {
 		return nil, err
@@ -208,69 +201,6 @@ func GetService(context context.Context, client k8sclient.Reader, name string, n
 	return &answer, nil
 }
 
-// GetDiscoveryTypes --
-func GetDiscoveryTypes(client client.Client) ([]metav1.TypeMeta, error) {
-	resources, err := client.Discovery().ServerPreferredNamespacedResources()
-	if err != nil {
-		return nil, err
-	}
-
-	types := make([]metav1.TypeMeta, 0)
-	for _, resource := range resources {
-		for _, r := range resource.APIResources {
-			types = append(types, metav1.TypeMeta{
-				Kind:       r.Kind,
-				APIVersion: resource.GroupVersion,
-			})
-		}
-	}
-
-	return types, nil
-}
-
-// LookUpResources --
-func LookUpResources(ctx context.Context, client client.Client, namespace string, selectors []string) ([]unstructured.Unstructured, error) {
-	types, err := GetDiscoveryTypes(client)
-	if err != nil {
-		return nil, err
-	}
-
-	selector, err := labels.Parse(strings.Join(selectors, ","))
-	if err != nil {
-		return nil, err
-	}
-
-	res := make([]unstructured.Unstructured, 0)
-
-	for _, t := range types {
-		options := k8sclient.ListOptions{
-			Namespace:     namespace,
-			LabelSelector: selector,
-			Raw: &metav1.ListOptions{
-				TypeMeta: t,
-			},
-		}
-		list := unstructured.UnstructuredList{
-			Object: map[string]interface{}{
-				"apiVersion": t.APIVersion,
-				"kind":       t.Kind,
-			},
-		}
-		if err := client.List(ctx, &options, &list); err != nil {
-			if k8serrors.IsNotFound(err) ||
-				k8serrors.IsForbidden(err) ||
-				k8serrors.IsMethodNotSupported(err) ||
-				k8serrors.IsServiceUnavailable(err) {
-				continue
-			}
-			return nil, err
-		}
-
-		res = append(res, list.Items...)
-	}
-	return res, nil
-}
-
 // GetSecretRefValue returns the value of a secret in the supplied namespace --
 func GetSecretRefValue(ctx context.Context, client k8sclient.Reader, namespace string, selector *corev1.SecretKeySelector) (string, error) {
 	secret, err := GetSecret(ctx, client, selector.Name, namespace)
@@ -283,7 +213,6 @@ func GetSecretRefValue(ctx context.Context, client k8sclient.Reader, namespace s
 	}
 
 	return "", fmt.Errorf("key %s not found in secret %s", selector.Key, selector.Name)
-
 }
 
 // GetConfigMapRefValue returns the value of a configmap in the supplied namespace
@@ -301,7 +230,7 @@ func GetConfigMapRefValue(ctx context.Context, client k8sclient.Reader, namespac
 }
 
 // ResolveValueSource --
-func ResolveValueSource(ctx context.Context, client k8sclient.Reader, namespace string, valueSource *v1alpha1.ValueSource) (string, error) {
+func ResolveValueSource(ctx context.Context, client k8sclient.Reader, namespace string, valueSource *v1.ValueSource) (string, error) {
 	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
 		return "", fmt.Errorf("value source has bot config map and secret configured")
 	}

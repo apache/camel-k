@@ -2,12 +2,14 @@
 /vendor
 
 # Binary files
-/camel-k
 /kamel
-/builder
+/license-check
 
 # Released Packages
 *.tar.gz
+
+# Release Notes
+/release-notes.md
 
 # Unuseful file
 /deploy/operator.yaml

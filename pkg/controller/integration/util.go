@@ -20,22 +20,26 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	"github.com/pkg/errors"
 
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/controller"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 var allowedLookupLabels = map[string]bool{
-	v1alpha1.IntegrationKitTypePlatform: true,
-	v1alpha1.IntegrationKitTypeExternal: true,
+	v1.IntegrationKitTypePlatform: true,
+	v1.IntegrationKitTypeExternal: true,
 }
 
 // LookupKitForIntegration --
-func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1alpha1.Integration) (*v1alpha1.IntegrationKit, error) {
+func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1.Integration) (*v1.IntegrationKit, error) {
 	if integration.Status.Kit != "" {
 		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.Kit, integration.Namespace)
 		if err != nil {
@@ -45,30 +49,54 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 		return kit, nil
 	}
 
-	ctxList := v1alpha1.NewIntegrationKitList()
-	if err := c.List(ctx, &k8sclient.ListOptions{Namespace: integration.Namespace}, &ctxList); err != nil {
+	options := []k8sclient.ListOption{
+		k8sclient.InNamespace(integration.Namespace),
+	}
+
+	if integration.Status.RuntimeProvider != nil && integration.Status.RuntimeProvider.Quarkus != nil {
+		options = append(options, k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.provider": "quarkus",
+		})
+	} else {
+		provider, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
+		selector := labels.NewSelector().Add(*provider)
+		options = append(options, controller.MatchingSelector{Selector: selector})
+	}
+
+	kits := v1.NewIntegrationKitList()
+	if err := c.List(ctx, &kits, options...); err != nil {
 		return nil, err
 	}
 
-	for _, ctx := range ctxList.Items {
-		ctx := ctx // pin
+	for _, kit := range kits.Items {
+		kit := kit // pin
 
-		if ctx.Status.Phase == v1alpha1.IntegrationKitPhaseError {
+		if kit.Status.Phase == v1.IntegrationKitPhaseError {
 			continue
 		}
-		if ctx.Status.CamelVersion != integration.Status.CamelVersion {
+		if kit.Status.CamelVersion != integration.Status.CamelVersion {
 			continue
 		}
-		if ctx.Status.RuntimeVersion != integration.Status.RuntimeVersion {
+		if kit.Status.RuntimeVersion != integration.Status.RuntimeVersion {
 			continue
 		}
-		if ctx.Status.Version != integration.Status.Version {
+		if kit.Status.Version != integration.Status.Version {
 			continue
 		}
 
-		if allowed, ok := allowedLookupLabels[ctx.Labels["camel.apache.org/kit.type"]]; ok && allowed {
+		// TODO: should ideally be made generic from the runtime providers
+		if integration.Status.RuntimeProvider == nil && kit.Status.RuntimeProvider != nil ||
+			integration.Status.RuntimeProvider != nil && kit.Status.RuntimeProvider == nil ||
+			integration.Status.RuntimeProvider != nil && kit.Status.RuntimeProvider != nil &&
+				(integration.Status.RuntimeProvider.Quarkus != nil && kit.Status.RuntimeProvider.Quarkus == nil ||
+					integration.Status.RuntimeProvider.Quarkus == nil && kit.Status.RuntimeProvider.Quarkus != nil ||
+					*integration.Status.RuntimeProvider.Quarkus != *kit.Status.RuntimeProvider.Quarkus) {
+			continue
+		}
+
+		if allowed, ok := allowedLookupLabels[kit.Labels["camel.apache.org/kit.type"]]; ok && allowed {
 			ideps := len(integration.Status.Dependencies)
-			cdeps := len(ctx.Spec.Dependencies)
+			cdeps := len(kit.Spec.Dependencies)
 
 			if ideps != cdeps {
 				continue
@@ -86,12 +114,12 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 			// A kit can be used only if it contains a subset of the traits and related configurations
 			// declared on integration.
 			//
-			if !HasMatchingTraits(&ctx, integration) {
+			if !HasMatchingTraits(&kit, integration) {
 				continue
 			}
 
-			if util.StringSliceContains(ctx.Spec.Dependencies, integration.Status.Dependencies) {
-				return &ctx, nil
+			if util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
+				return &kit, nil
 			}
 		}
 	}
@@ -100,15 +128,15 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 }
 
 // HasMatchingTraits compare traits defined on kit against those defined on integration.
-func HasMatchingTraits(kit *v1alpha1.IntegrationKit, integration *v1alpha1.Integration) bool {
-	for ctxTraitName, ctxTraitConf := range kit.Spec.Traits {
-		iTraitConf, ok := integration.Spec.Traits[ctxTraitName]
+func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) bool {
+	for kitTraitName, kitTraitConf := range kit.Spec.Traits {
+		iTraitConf, ok := integration.Spec.Traits[kitTraitName]
 		if !ok {
 			// skip it because trait configured on kit is not defined on integration.
 			return false
 		}
 
-		for ck, cv := range ctxTraitConf.Configuration {
+		for ck, cv := range kitTraitConf.Configuration {
 			iv, ok := iTraitConf.Configuration[ck]
 
 			if !ok {

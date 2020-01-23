@@ -18,14 +18,16 @@ limitations under the License.
 package kubernetes
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"k8s.io/apimachinery/pkg/runtime"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // A Collection is a container of Kubernetes resources
@@ -34,12 +36,12 @@ type Collection struct {
 }
 
 // NewCollection creates a new empty collection
-func NewCollection(objcts ...runtime.Object) *Collection {
+func NewCollection(objects ...runtime.Object) *Collection {
 	collection := Collection{
-		items: make([]runtime.Object, 0, len(objcts)),
+		items: make([]runtime.Object, 0, len(objects)),
 	}
 
-	collection.items = append(collection.items, objcts...)
+	collection.items = append(collection.items, objects...)
 
 	return &collection
 }
@@ -103,7 +105,7 @@ func (c *Collection) GetDeployment(filter func(*appsv1.Deployment) bool) *appsv1
 }
 
 // GetDeploymentForIntegration returns a Deployment for the given integration
-func (c *Collection) GetDeploymentForIntegration(integration *v1alpha1.Integration) *appsv1.Deployment {
+func (c *Collection) GetDeploymentForIntegration(integration *v1.Integration) *appsv1.Deployment {
 	if integration == nil {
 		return nil
 	}
@@ -187,19 +189,19 @@ func (c *Collection) GetService(filter func(*corev1.Service) bool) *corev1.Servi
 }
 
 // GetUserServiceForIntegration returns a user Service for the given integration
-func (c *Collection) GetUserServiceForIntegration(integration *v1alpha1.Integration) *corev1.Service {
+func (c *Collection) GetUserServiceForIntegration(integration *v1.Integration) *corev1.Service {
 	if integration == nil {
 		return nil
 	}
 	return c.GetService(func(s *corev1.Service) bool {
 		return s.ObjectMeta.Labels != nil &&
 			s.ObjectMeta.Labels["camel.apache.org/integration"] == integration.Name &&
-			s.ObjectMeta.Labels["camel.apache.org/service.type"] == v1alpha1.ServiceTypeUser
+			s.ObjectMeta.Labels["camel.apache.org/service.type"] == v1.ServiceTypeUser
 	})
 }
 
 // GetServiceForIntegration returns a user Service for the given integration
-func (c *Collection) GetServiceForIntegration(integration *v1alpha1.Integration) *corev1.Service {
+func (c *Collection) GetServiceForIntegration(integration *v1.Integration) *corev1.Service {
 	if integration == nil {
 		return nil
 	}
@@ -239,6 +241,15 @@ func (c *Collection) GetRoute(filter func(*routev1.Route) bool) *routev1.Route {
 	return retValue
 }
 
+// VisitCronJob executes the visitor function on all CronJob resources
+func (c *Collection) VisitCronJob(visitor func(*v1beta1.CronJob)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*v1beta1.CronJob); ok {
+			visitor(conv)
+		}
+	})
+}
+
 // VisitKnativeService executes the visitor function on all Knative serving Service resources
 func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
 	c.Visit(func(res runtime.Object) {
@@ -246,6 +257,27 @@ func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
 			visitor(conv)
 		}
 	})
+}
+
+// VisitKnativeTrigger executes the visitor function on all Knative eventing Trigger resources
+func (c *Collection) VisitKnativeTrigger(visitor func(trigger *eventing.Trigger)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*eventing.Trigger); ok {
+			visitor(conv)
+		}
+	})
+}
+
+// HasKnativeTrigger returns true if a Knative trigger respecting filter is found
+func (c *Collection) HasKnativeTrigger(filter func(trigger *eventing.Trigger) bool) bool {
+	var retValue *bool
+	c.VisitKnativeTrigger(func(re *eventing.Trigger) {
+		if filter(re) {
+			found := true
+			retValue = &found
+		}
+	})
+	return retValue != nil && *retValue
 }
 
 // GetContainer --
@@ -277,10 +309,29 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 		}
 	})
 	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
-		for id := range cs.GetTemplate().Spec.Containers {
-			cntref := &cs.GetTemplate().Spec.Containers[id]
+		for id := range cs.Template.Spec.Containers {
+			cntref := &cs.Template.Spec.Containers[id]
 			visitor(cntref)
 		}
+	})
+	c.VisitCronJob(func(c *v1beta1.CronJob) {
+		for idx := range c.Spec.JobTemplate.Spec.Template.Spec.Containers {
+			cntref := &c.Spec.JobTemplate.Spec.Template.Spec.Containers[idx]
+			visitor(cntref)
+		}
+	})
+}
+
+// VisitPodSpec executes the visitor function on all PodSpec inside deployments or other resources
+func (c *Collection) VisitPodSpec(visitor func(container *corev1.PodSpec)) {
+	c.VisitDeployment(func(d *appsv1.Deployment) {
+		visitor(&d.Spec.Template.Spec)
+	})
+	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
+		visitor(&cs.Template.Spec.PodSpec)
+	})
+	c.VisitCronJob(func(d *v1beta1.CronJob) {
+		visitor(&d.Spec.JobTemplate.Spec.Template.Spec)
 	})
 }
 
@@ -316,4 +367,22 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 		}
 	}
 	return nil
+}
+
+func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonitor)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*monitoringv1.ServiceMonitor); ok {
+			visitor(conv)
+		}
+	})
+}
+
+func (c *Collection) GetServiceMonitor(filter func(*monitoringv1.ServiceMonitor) bool) *monitoringv1.ServiceMonitor {
+	var retValue *monitoringv1.ServiceMonitor
+	c.VisitServiceMonitor(func(serviceMonitor *monitoringv1.ServiceMonitor) {
+		if filter(serviceMonitor) {
+			retValue = serviceMonitor
+		}
+	})
+	return retValue
 }

@@ -22,9 +22,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/rs/xid"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -34,13 +35,16 @@ import (
 )
 
 func TestTimeouts_Default(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
+
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
@@ -50,29 +54,32 @@ func TestTimeouts_Default(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Spec.Build.Timeout.Duration.Seconds() * 0.75
+	n := answer.Status.Build.GetTimeout().Duration.Seconds() * 0.75
 	d := (time.Duration(n) * time.Second).Truncate(time.Second)
 
-	assert.Equal(t, d, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.Equal(t, d, answer.Status.Build.Maven.GetTimeout().Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)
 }
 
 func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	timeout, err := time.ParseDuration("1m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Timeout = metav1.Duration{
+	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: timeout,
 	}
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -81,36 +88,39 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Spec.Build.Timeout.Duration.Seconds() * 0.75
+	n := answer.Status.Build.GetTimeout().Duration.Seconds() * 0.75
 	d := (time.Duration(n) * time.Second).Truncate(time.Second)
 
-	assert.Equal(t, d, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 1*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.Equal(t, d, answer.Status.Build.Maven.GetTimeout().Duration)
+	assert.Equal(t, 1*time.Minute, answer.Status.Build.GetTimeout().Duration)
 }
 
 func TestTimeouts_Truncated(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = xid.New().String()
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	bt, err := time.ParseDuration("5m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Timeout = metav1.Duration{
+	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: bt,
 	}
 
 	mt, err := time.ParseDuration("2m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Maven.Timeout = metav1.Duration{
+	ip.Spec.Build.Maven.Timeout = &metav1.Duration{
 		Duration: mt,
 	}
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -119,19 +129,22 @@ func TestTimeouts_Truncated(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, 2*time.Minute, answer.Spec.Build.Maven.Timeout.Duration)
-	assert.Equal(t, 5*time.Minute, answer.Spec.Build.Timeout.Duration)
+	assert.Equal(t, 2*time.Minute, answer.Status.Build.Maven.GetTimeout().Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)
 }
 
 func TestDefaultMavenSettingsApplied(t *testing.T) {
-	ip := v1alpha1.IntegrationPlatform{}
+	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = "test-platform"
-	ip.Spec.Cluster = v1alpha1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Cluster = v1.IntegrationPlatformClusterOpenShift
+	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
+	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
@@ -140,7 +153,8 @@ func TestDefaultMavenSettingsApplied(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.NotNil(t, answer.Spec.Build.Maven.Settings.ConfigMapKeyRef)
-	assert.Equal(t, "test-platform-maven-settings", answer.Spec.Build.Maven.Settings.ConfigMapKeyRef.Name)
-	assert.Equal(t, "settings.xml", answer.Spec.Build.Maven.Settings.ConfigMapKeyRef.Key)
+	assert.NotNil(t, answer.Status.Build.Maven.Settings.ConfigMapKeyRef)
+	assert.Nil(t, answer.Spec.Build.Maven.Settings.ConfigMapKeyRef)
+	assert.Equal(t, "test-platform-maven-settings", answer.Status.Build.Maven.Settings.ConfigMapKeyRef.Name)
+	assert.Equal(t, "settings.xml", answer.Status.Build.Maven.Settings.ConfigMapKeyRef.Key)
 }

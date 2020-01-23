@@ -20,13 +20,16 @@ package build
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/install"
 	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/install"
 )
 
 // NewInitializePodAction creates a new initialize action
@@ -44,13 +47,12 @@ func (action *initializePodAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *initializePodAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseInitialization &&
-		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyPod
+func (action *initializePodAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseInitialization
 }
 
 // Handle handles the builds
-func (action *initializePodAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	// Ensure service account is present
 	// TODO: maybe this should be done by the platform trait ??
 	if err := action.ensureServiceAccount(ctx, build); err != nil {
@@ -67,12 +69,12 @@ func (action *initializePodAction) Handle(ctx context.Context, build *v1alpha1.B
 		return nil, err
 	}
 
-	build.Status.Phase = v1alpha1.BuildPhaseScheduling
+	build.Status.Phase = v1.BuildPhaseScheduling
 
 	return build, nil
 }
 
-func (action *initializePodAction) ensureServiceAccount(ctx context.Context, build *v1alpha1.Build) error {
+func (action *initializePodAction) ensureServiceAccount(ctx context.Context, build *v1.Build) error {
 	sa := corev1.ServiceAccount{}
 	saKey := k8sclient.ObjectKey{
 		Name:      "camel-k-builder",
@@ -86,4 +88,41 @@ func (action *initializePodAction) ensureServiceAccount(ctx context.Context, bui
 	}
 
 	return err
+}
+
+func deleteBuilderPod(ctx context.Context, client k8sclient.Writer, build *v1.Build) error {
+	pod := corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: build.Namespace,
+			Name:      buildPodName(build),
+		},
+	}
+
+	err := client.Delete(ctx, &pod)
+	if err != nil && k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	return err
+}
+
+func getBuilderPod(ctx context.Context, client k8sclient.Reader, build *v1.Build) (*corev1.Pod, error) {
+	pod := corev1.Pod{}
+	err := client.Get(ctx, k8sclient.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
+	if err != nil && k8serrors.IsNotFound(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &pod, nil
+}
+
+func buildPodName(build *v1.Build) string {
+	return "camel-k-" + build.Name + "-builder"
 }

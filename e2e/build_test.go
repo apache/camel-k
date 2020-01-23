@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 )
 
@@ -57,17 +57,16 @@ func TestKitYAMLFullBuild(t *testing.T) {
 	doNamedKitFullBuild(t, "yaml")
 }
 
-func TestKitHealthFullBuild(t *testing.T) {
+func TestKitKnativeFullBuild(t *testing.T) {
 	doNamedKitFullBuild(t, "knative")
 }
 
 func doNamedKitFullBuild(t *testing.T, name string) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--kit", name).Execute()).Should(BeNil())
 		Eventually(build(ns, name)).ShouldNot(BeNil())
-		Eventually(func() v1alpha1.BuildPhase {
+		Eventually(func() v1.BuildPhase {
 			return build(ns, name)().Status.Phase
-		}, 5*time.Minute).Should(Equal(v1alpha1.BuildPhaseSucceeded))
+		}, 5*time.Minute).Should(Equal(v1.BuildPhaseSucceeded))
 	})
 }

@@ -21,14 +21,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ResolveSources --
-func ResolveSources(elements []v1alpha1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1alpha1.SourceSpec, error) {
+func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.SourceSpec, error) {
 	for i := 0; i < len(elements); i++ {
 		r := &elements[i]
 
@@ -41,7 +41,7 @@ func ResolveSources(elements []v1alpha1.SourceSpec, mapLookup func(string) (*cor
 }
 
 // ResolveResource --
-func ResolveResource(elements []v1alpha1.ResourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1alpha1.ResourceSpec, error) {
+func ResolveResource(elements []v1.ResourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.ResourceSpec, error) {
 	for i := 0; i < len(elements); i++ {
 		r := &elements[i]
 
@@ -54,7 +54,7 @@ func ResolveResource(elements []v1alpha1.ResourceSpec, mapLookup func(string) (*
 }
 
 // Resolve --
-func Resolve(data *v1alpha1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error)) error {
+func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error)) error {
 	// if it is a reference, get the content from the
 	// referenced ConfigMap
 	if data.ContentRef != "" {
@@ -82,8 +82,8 @@ func Resolve(data *v1alpha1.DataSpec, mapLookup func(string) (*corev1.ConfigMap,
 func ResolveIntegrationSources(
 	context context.Context,
 	client controller.Reader,
-	integration *v1alpha1.Integration,
-	resources *Collection) ([]v1alpha1.SourceSpec, error) {
+	integration *v1.Integration,
+	resources *Collection) ([]v1.SourceSpec, error) {
 
 	if integration == nil {
 		return nil, nil
@@ -109,8 +109,8 @@ func ResolveIntegrationSources(
 func ResolveIntegrationResources(
 	context context.Context,
 	client controller.Reader,
-	integration *v1alpha1.Integration,
-	resources *Collection) ([]v1alpha1.ResourceSpec, error) {
+	integration *v1.Integration,
+	resources *Collection) ([]v1.ResourceSpec, error) {
 
 	if integration == nil {
 		return nil, nil

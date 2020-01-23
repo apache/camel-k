@@ -17,27 +17,34 @@
 
 location=$(dirname $0)
 
-if [ "$#" -ne 2 ]; then
-    echo "usage: $0 version strategy"
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    echo "usage: $0 version strategy [staging.repo]"
     exit 1
 fi
 
 version=$1
 strategy=$2
+staging_repo=$3
 
 cd ${location}/..
 
 if [ "$strategy" = "copy" ]; then
     ./mvnw \
+        -V \
+        --no-transfer-progress \
         -f build/maven/pom-runtime.xml \
         -DoutputDirectory=$PWD/build/_maven_output \
-        -Druntime.version=$1 \
+        -Druntime.version=$version \
+        -Dstaging.repo=$staging_repo \
         dependency:copy-dependencies
 elif [ "$strategy" = "download" ]; then
     ./mvnw \
+        -V \
+        --no-transfer-progress \
         -f build/maven/pom-runtime.xml \
         -Dmaven.repo.local=$PWD/build/_maven_output \
-        -Druntime.version=$1 \
+        -Druntime.version=$version \
+        -Dstaging.repo=$staging_repo \
         install
 else
     echo "unknown strategy: $strategy"

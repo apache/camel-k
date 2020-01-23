@@ -26,16 +26,28 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+// Allows to constrain which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node,
+// or with inter-pod affinity and anti-affinity, based on labels on pods that are already running on the nodes.
+//
+//It’s disabled by default.
+//
+// +camel-k:trait=affinity
 type affinityTrait struct {
 	BaseTrait `property:",squash"`
-
-	PodAffinity           bool   `property:"pod-affinity"`
-	PodAntiAffinity       bool   `property:"pod-anti-affinity"`
-	NodeAffinityLabels    string `property:"node-affinity-labels"`
-	PodAffinityLabels     string `property:"pod-affinity-labels"`
+	// Always co-locates multiple replicas of the integration in the same node (default *false*).
+	PodAffinity bool `property:"pod-affinity"`
+	// Never co-locates multiple replicas of the integration in the same node (default *false*).
+	PodAntiAffinity bool `property:"pod-anti-affinity"`
+	// Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
+	NodeAffinityLabels string `property:"node-affinity-labels"`
+	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
+	// integration pod(s) should be co-located with.
+	PodAffinityLabels string `property:"pod-affinity-labels"`
+	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
+	// integration pod(s) should not be co-located with.
 	PodAntiAffinityLabels string `property:"pod-anti-affinity-labels"`
 }
 
@@ -54,7 +66,7 @@ func (t *affinityTrait) Configure(e *Environment) (bool, error) {
 		return false, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
-	return e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *affinityTrait) Apply(e *Environment) (err error) {

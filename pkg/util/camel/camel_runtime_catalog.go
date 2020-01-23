@@ -20,21 +20,35 @@ package camel
 import (
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // NewRuntimeCatalog --
-func NewRuntimeCatalog(spec v1alpha1.CamelCatalogSpec) *RuntimeCatalog {
+func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 	catalog := RuntimeCatalog{}
 	catalog.CamelCatalogSpec = spec
 	catalog.artifactByScheme = make(map[string]string)
-	catalog.schemesByID = make(map[string]v1alpha1.CamelScheme)
+	catalog.schemesByID = make(map[string]v1.CamelScheme)
+	catalog.languageDependencies = make(map[string]string)
+	catalog.javaTypeDependencies = make(map[string]string)
 
 	for id, artifact := range catalog.Artifacts {
 		for _, scheme := range artifact.Schemes {
 			scheme := scheme
 			catalog.artifactByScheme[scheme.ID] = id
 			catalog.schemesByID[scheme.ID] = scheme
+		}
+		for _, language := range artifact.Languages {
+			// Skip languages in common dependencies since they are always available to integrations
+			if artifact.ArtifactID != "camel-base" {
+				catalog.languageDependencies[language] = getDependency(artifact, catalog.RuntimeProvider)
+			}
+		}
+		for _, javaType := range artifact.JavaTypes {
+			// Skip types in common dependencies since they are always available to integrations
+			if artifact.ArtifactID != "camel-base" {
+				catalog.javaTypeDependencies[javaType] = getDependency(artifact, catalog.RuntimeProvider)
+			}
 		}
 	}
 
@@ -43,10 +57,12 @@ func NewRuntimeCatalog(spec v1alpha1.CamelCatalogSpec) *RuntimeCatalog {
 
 // RuntimeCatalog --
 type RuntimeCatalog struct {
-	v1alpha1.CamelCatalogSpec
+	v1.CamelCatalogSpec
 
-	artifactByScheme map[string]string
-	schemesByID      map[string]v1alpha1.CamelScheme
+	artifactByScheme     map[string]string
+	schemesByID          map[string]v1.CamelScheme
+	languageDependencies map[string]string
+	javaTypeDependencies map[string]string
 }
 
 // HasArtifact --
@@ -61,7 +77,7 @@ func (c *RuntimeCatalog) HasArtifact(artifact string) bool {
 }
 
 // GetArtifactByScheme returns the artifact corresponding to the given component scheme
-func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1alpha1.CamelArtifact {
+func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1.CamelArtifact {
 	if id, ok := c.artifactByScheme[scheme]; ok {
 		if artifact, present := c.Artifacts[id]; present {
 			return &artifact
@@ -71,13 +87,25 @@ func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1alpha1.CamelArtif
 }
 
 // GetScheme returns the scheme definition for the given scheme id
-func (c *RuntimeCatalog) GetScheme(id string) (v1alpha1.CamelScheme, bool) {
+func (c *RuntimeCatalog) GetScheme(id string) (v1.CamelScheme, bool) {
 	scheme, ok := c.schemesByID[id]
 	return scheme, ok
 }
 
+// GetLanguageDependency returns the maven dependency for the given language name
+func (c *RuntimeCatalog) GetLanguageDependency(language string) (string, bool) {
+	language, ok := c.languageDependencies[language]
+	return language, ok
+}
+
+// GetJavaTypeDependency returns the maven dependency for the given type name
+func (c *RuntimeCatalog) GetJavaTypeDependency(camelType string) (string, bool) {
+	javaType, ok := c.javaTypeDependencies[camelType]
+	return javaType, ok
+}
+
 // VisitArtifacts --
-func (c *RuntimeCatalog) VisitArtifacts(visitor func(string, v1alpha1.CamelArtifact) bool) {
+func (c *RuntimeCatalog) VisitArtifacts(visitor func(string, v1.CamelArtifact) bool) {
 	for id, artifact := range c.Artifacts {
 		if !visitor(id, artifact) {
 			break
@@ -86,7 +114,7 @@ func (c *RuntimeCatalog) VisitArtifacts(visitor func(string, v1alpha1.CamelArtif
 }
 
 // VisitSchemes --
-func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1alpha1.CamelScheme) bool) {
+func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1.CamelScheme) bool) {
 	for id, scheme := range c.schemesByID {
 		if !visitor(id, scheme) {
 			break

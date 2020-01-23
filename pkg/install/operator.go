@@ -22,19 +22,18 @@ import (
 	"errors"
 	"strings"
 
-	v1 "k8s.io/api/apps/v1"
-	v1beta1 "k8s.io/api/rbac/v1beta1"
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/rbac/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minishift"
-	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 // OperatorConfiguration --
@@ -42,6 +41,7 @@ type OperatorConfiguration struct {
 	CustomImage string
 	Namespace   string
 	Global      bool
+	ClusterType string
 }
 
 // Operator installs the operator resources in the given namespace
@@ -53,7 +53,7 @@ func Operator(ctx context.Context, c client.Client, cfg OperatorConfiguration) e
 func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection) error {
 	customizer := func(o runtime.Object) runtime.Object {
 		if cfg.CustomImage != "" {
-			if d, ok := o.(*v1.Deployment); ok {
+			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					d.Spec.Template.Spec.Containers[0].Image = cfg.CustomImage
 				}
@@ -61,7 +61,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		}
 
 		if cfg.Global {
-			if d, ok := o.(*v1.Deployment); ok {
+			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					// Make the operator watch all namespaces
 					envvar.SetVal(&d.Spec.Template.Spec.Containers[0].Env, "WATCH_NAMESPACE", "")
@@ -103,7 +103,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return o
 	}
 
-	isOpenshift, err := openshift.IsOpenShift(c)
+	isOpenshift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return err
 	}
 	if isKnative {
-		return installKnative(ctx, c, cfg.Namespace, collection)
+		return installKnative(ctx, c, cfg.Namespace, customizer, collection)
 	}
 	return nil
 }
@@ -145,22 +145,23 @@ func installKubernetes(ctx context.Context, c client.Client, namespace string, c
 	)
 }
 
-func installKnative(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, IdentityResourceCustomizer,
+func installKnative(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
 		"operator-role-knative.yaml",
 		"operator-role-binding-knative.yaml",
 	)
 }
 
 // Platform installs the platform custom resource
-func Platform(ctx context.Context, c client.Client, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec) (*v1alpha1.IntegrationPlatform, error) {
-	return PlatformOrCollect(ctx, c, namespace, registry, nil)
+// nolint: lll
+func Platform(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1.IntegrationPlatformRegistrySpec) (*v1.IntegrationPlatform, error) {
+	return PlatformOrCollect(ctx, c, clusterType, namespace, registry, nil)
 }
 
 // PlatformOrCollect --
 // nolint: lll
-func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, registry v1alpha1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1alpha1.IntegrationPlatform, error) {
-	isOpenshift, err := openshift.IsOpenShift(c)
+func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1.IntegrationPlatform, error) {
+	isOpenshift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
 	}
@@ -168,10 +169,9 @@ func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, r
 	if err != nil {
 		return nil, err
 	}
-	pl := platformObject.(*v1alpha1.IntegrationPlatform)
+	pl := platformObject.(*v1.IntegrationPlatform)
 
 	if !isOpenshift {
-
 		pl.Spec.Build.Registry = registry
 
 		// Kubernetes only (Minikube)
@@ -189,14 +189,6 @@ func PlatformOrCollect(ctx context.Context, c client.Client, namespace string, r
 			pl.Spec.Build.Registry.Address = *minikubeRegistry
 			pl.Spec.Build.Registry.Insecure = true
 		}
-	}
-
-	var knativeInstalled bool
-	if knativeInstalled, err = knative.IsInstalled(ctx, c); err != nil {
-		return nil, err
-	}
-	if knativeInstalled {
-		pl.Spec.Profile = v1alpha1.TraitProfileKnative
 	}
 
 	return pl, nil

@@ -20,7 +20,7 @@ package integrationplatform
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -34,10 +34,10 @@ type Action interface {
 	Name() string
 
 	// returns true if the action can handle the integration platform
-	CanHandle(platform *v1alpha1.IntegrationPlatform) bool
+	CanHandle(platform *v1.IntegrationPlatform) bool
 
 	// executes the handling function
-	Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error)
+	Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error)
 }
 
 type baseAction struct {

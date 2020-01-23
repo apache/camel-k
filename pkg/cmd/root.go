@@ -20,23 +20,25 @@ package cmd
 import (
 	"context"
 	"os"
+	"strings"
+
+	"github.com/spf13/viper"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
-const kamelCommandLongDescription = `Apache Camel K is a lightweight integration framework
-built from Apache Camel that runs natively on Kubernetes and is
-specifically designed for serverless and microservice architectures.
+const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless
+superpowers.
 `
 
 // RootCmdOptions --
 type RootCmdOptions struct {
-	Context    context.Context
-	_client    client.Client
-	KubeConfig string
-	Namespace  string
+	Context    context.Context `mapstructure:"-"`
+	_client    client.Client   `mapstructure:"-"`
+	KubeConfig string          `mapstructure:"kube-config"`
+	Namespace  string          `mapstructure:"namespace"`
 }
 
 // NewKamelCommand --
@@ -44,36 +46,85 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	options := RootCmdOptions{
 		Context: ctx,
 	}
+
+	var err error
+	cmd := kamelPreAddCommandInit(&options)
+	addKamelSubcommands(cmd, &options)
+	err = kamelPostAddCommandInit(cmd)
+
+	return cmd, err
+}
+
+func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
+
 	var cmd = cobra.Command{
 		BashCompletionFunction: bashCompletionFunction,
 		PersistentPreRunE:      options.preRun,
 		Use:                    "kamel",
 		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
 		Long:                   kamelCommandLongDescription,
+		SilenceUsage:           true,
 	}
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", os.Getenv("KUBECONFIG"), "Path to the config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 
-	cmd.AddCommand(newCmdCompletion(&cmd))
-	cmd.AddCommand(newCmdVersion())
-	cmd.AddCommand(newCmdRun(&options))
-	cmd.AddCommand(newCmdGet(&options))
-	cmd.AddCommand(newCmdDelete(&options))
-	cmd.AddCommand(newCmdInstall(&options))
-	cmd.AddCommand(newCmdUninstall(&options))
-	cmd.AddCommand(newCmdLog(&options))
-	cmd.AddCommand(newCmdKit(&options))
-	cmd.AddCommand(newCmdReset(&options))
-	cmd.AddCommand(newCmdDescribe(&options))
-	cmd.AddCommand(newCmdRebuild(&options))
+	return &cmd
+}
 
-	return &cmd, nil
+func kamelPostAddCommandInit(cmd *cobra.Command) error {
+	if err := bindPFlagsHierarchy(cmd); err != nil {
+		return err
+	}
+
+	configName := os.Getenv("KAMEL_CONFIG_NAME")
+	if configName == "" {
+		configName = "kamel-config"
+	}
+
+	viper.SetConfigName(configName)
+	viper.AddConfigPath(".")
+	viper.AddConfigPath(".kamel")
+	viper.AddConfigPath("$HOME/.kamel")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(
+		".", "_",
+		"-", "_",
+	))
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
+	cmd.AddCommand(newCmdCompletion(cmd))
+	cmd.AddCommand(newCmdVersion())
+	cmd.AddCommand(cmdOnly(newCmdRun(options)))
+	cmd.AddCommand(cmdOnly(newCmdGet(options)))
+	cmd.AddCommand(cmdOnly(newCmdDelete(options)))
+	cmd.AddCommand(cmdOnly(newCmdInstall(options)))
+	cmd.AddCommand(cmdOnly(newCmdLog(options)))
+	cmd.AddCommand(newCmdKit(options))
+	cmd.AddCommand(cmdOnly(newCmdReset(options)))
+	cmd.AddCommand(newCmdDescribe(options))
+	cmd.AddCommand(cmdOnly(newCmdRebuild(options)))
+	cmd.AddCommand(newCmdOperator())
+	cmd.AddCommand(cmdOnly(newCmdBuilder(options)))
 }
 
 func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 	if command.Namespace == "" {
-		current, err := client.GetCurrentNamespace(command.KubeConfig)
+		var current string
+		client, err := command.GetCmdClient()
+		if err != nil {
+			return errors.Wrap(err, "cannot get command client")
+		}
+		current, err = client.GetCurrentNamespace(command.KubeConfig)
 		if err != nil {
 			return errors.Wrap(err, "cannot get current namespace")
 		}

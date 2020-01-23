@@ -20,14 +20,14 @@ package trait
 import (
 	"strconv"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/metadata"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	servingbeta "github.com/knative/serving/pkg/apis/serving/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -38,16 +38,46 @@ const (
 	knativeServingMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
 )
 
+// The Knative Service trait allows to configure options when running the integration as Knative service instead of
+// a standard Kubernetes Deployment.
+//
+// Running integrations as Knative Services adds auto-scaling (and scaling-to-zero) features, but those features
+// are only meaningful when the routes use a HTTP endpoint consumer.
+//
+// +camel-k:trait=knative-service
 type knativeServiceTrait struct {
 	BaseTrait `property:",squash"`
-	Class     string `property:"autoscaling-class"`
-	Metric    string `property:"autoscaling-metric"`
-	Target    *int   `property:"autoscaling-target"`
-	MinScale  *int   `property:"min-scale"`
-	MaxScale  *int   `property:"max-scale"`
-	Auto      *bool  `property:"auto"`
-	deployer  deployerTrait
+	// Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev` autoscaling).
+	//
+	// Refer to the Knative documentation for more information.
+	Class string `property:"autoscaling-class"`
+	// Configures the Knative autoscaling metric property (e.g. to set `concurrency` based or `cpu` based autoscaling).
+	//
+	// Refer to the Knative documentation for more information.
+	Metric string `property:"autoscaling-metric"`
+	// Sets the allowed concurrency level or CPU percentage (depending on the autoscaling metric) for each Pod.
+	//
+	// Refer to the Knative documentation for more information.
+	Target *int `property:"autoscaling-target"`
+	// The minimum number of Pods that should be running at any time for the integration. It's **zero** by default, meaning that
+	// the integration is scaled down to zero when not used for a configured amount of time.
+	//
+	// Refer to the Knative documentation for more information.
+	MinScale *int `property:"min-scale"`
+	// An upper bound for the number of Pods that can be running in parallel for the integration.
+	// Knative has its own cap value that depends on the installation.
+	//
+	// Refer to the Knative documentation for more information.
+	MaxScale *int `property:"max-scale"`
+	// Automatically deploy the integration as Knative service when all conditions hold:
+	//
+	// * Integration is using the Knative profile
+	// * All routes are either starting from a HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
+	Auto     *bool `property:"auto"`
+	deployer deployerTrait
 }
+
+var _ ControllerStrategySelector = &knativeServiceTrait{}
 
 func newKnativeServiceTrait() *knativeServiceTrait {
 	return &knativeServiceTrait{
@@ -58,25 +88,28 @@ func newKnativeServiceTrait() *knativeServiceTrait {
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			"explicitly disabled",
 		)
 
 		return false, nil
 	}
 
-	if !e.InPhase(v1alpha1.IntegrationKitPhaseReady, v1alpha1.IntegrationPhaseDeploying) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
+		return condition != nil && condition.Status == corev1.ConditionTrue, nil
+	} else if !e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
 		return false, nil
 	}
 
 	if e.Resources.GetDeploymentForIntegration(e.Integration) != nil {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
-			"controller strategy: "+ControllerStrategyDeployment,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
+			"controller strategy: "+string(ControllerStrategyDeployment),
 		)
 
 		// A controller is already present for the integration
@@ -86,8 +119,8 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
 	if err != nil {
 		e.Integration.Status.SetErrorCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			v1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			err,
 		)
 
@@ -95,9 +128,9 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	}
 	if strategy != ControllerStrategyKnativeService {
 		e.Integration.Status.SetCondition(
-			v1alpha1.IntegrationConditionKnativeServiceAvailable,
+			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
-			v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			"controller strategy: "+string(strategy),
 		)
 
@@ -110,8 +143,8 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			sources, err := kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources)
 			if err != nil {
 				e.Integration.Status.SetErrorCondition(
-					v1alpha1.IntegrationConditionKnativeServiceAvailable,
-					v1alpha1.IntegrationConditionKnativeServiceNotAvailableReason,
+					v1.IntegrationConditionKnativeServiceAvailable,
+					v1.IntegrationConditionKnativeServiceNotAvailableReason,
 					err,
 				)
 
@@ -142,13 +175,89 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 	e.Resources.Add(ksvc)
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionDeploymentAvailable,
+		v1.IntegrationConditionKnativeServiceAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionKnativeServiceAvailableReason,
+		v1.IntegrationConditionKnativeServiceAvailableReason,
 		ksvc.Name,
 	)
 
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+		replicas := e.Integration.Spec.Replicas
+
+		isUpdateRequired := false
+		minScale, ok := ksvc.Spec.Template.Annotations[knativeServingMinScaleAnnotation]
+		if ok {
+			min, err := strconv.Atoi(minScale)
+			if err != nil {
+				return err
+			}
+			if replicas == nil || min != int(*replicas) {
+				isUpdateRequired = true
+			}
+		} else if replicas != nil {
+			isUpdateRequired = true
+		}
+
+		maxScale, ok := ksvc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation]
+		if ok {
+			max, err := strconv.Atoi(maxScale)
+			if err != nil {
+				return err
+			}
+			if replicas == nil || max != int(*replicas) {
+				isUpdateRequired = true
+			}
+		} else if replicas != nil {
+			isUpdateRequired = true
+		}
+
+		if isUpdateRequired {
+			if replicas == nil {
+				if t.MinScale != nil && *t.MinScale > 0 {
+					ksvc.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
+				} else {
+					delete(ksvc.Spec.Template.Annotations, knativeServingMinScaleAnnotation)
+				}
+				if t.MaxScale != nil && *t.MaxScale > 0 {
+					ksvc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
+				} else {
+					delete(ksvc.Spec.Template.Annotations, knativeServingMaxScaleAnnotation)
+				}
+			} else {
+				scale := strconv.Itoa(int(*replicas))
+				ksvc.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = scale
+				ksvc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = scale
+			}
+		}
+	}
+
 	return nil
+}
+
+func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
+	knativeServiceStrategy := ControllerStrategyKnativeService
+	if t.Enabled != nil {
+		if *t.Enabled {
+			return &knativeServiceStrategy, nil
+		}
+		return nil, nil
+	}
+
+	var sources []v1.SourceSpec
+	var err error
+	if sources, err = kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources); err != nil {
+		return nil, err
+	}
+
+	meta := metadata.ExtractAll(e.CamelCatalog, sources)
+	if meta.RequiresHTTPService {
+		return &knativeServiceStrategy, nil
+	}
+	return nil, nil
+}
+
+func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
+	return 100
 }
 
 func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
@@ -200,16 +309,14 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 		},
 		Spec: serving.ServiceSpec{
 			ConfigurationSpec: serving.ConfigurationSpec{
-				Template: &serving.RevisionTemplateSpec{
+				Template: serving.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels:      labels,
 						Annotations: annotations,
 					},
 					Spec: serving.RevisionSpec{
-						RevisionSpec: servingbeta.RevisionSpec{
-							PodSpec: corev1.PodSpec{
-								ServiceAccountName: e.Integration.Spec.ServiceAccountName,
-							},
+						PodSpec: corev1.PodSpec{
+							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
 						},
 					},
 				},

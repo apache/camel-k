@@ -4,10 +4,16 @@ An integration written in Kotlin looks very similar to a Java one except it can 
 
 [source,kotlin]
 ----
-from('timer:tick')
-    .process { e -> e.getIn().body = 'Hello Camel K!' }
-    .to('log:info');
+from("timer:tick")
+    .process { e -> e.getIn().body = "Hello Camel K!" }
+    .to("log:info")
 ----
+
+You can run it with the standard command:
+
+```
+kamel run example.kts
+```
 
 Camel K extends the Camel Java DSL making it easier to configure the context in which the integration runs using the top level _context_ block
 

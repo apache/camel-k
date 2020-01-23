@@ -1,3 +1,4 @@
+// camel-k: language=js
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
 // this work for additional information regarding copyright ownership.
@@ -28,10 +29,3 @@ rest('/say/hello')
     .get()
         .route()
         .transform().constant("Hello World");
-
-from('timer:js?period=1s')
-    .routeId('js')
-    .setBody()
-        .constant('Hello Camel K')
-    .process(e => e.getIn().setHeader('RandomValue', Math.floor((Math.random() * 100) + 1)))
-    .to('log:info?showHeaders=true')

@@ -15,12 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Channel
+apiVersion: messaging.knative.dev/v1alpha1
+kind: InMemoryChannel
 metadata:
   name: messages
-spec:
-  provisioner:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: in-memory

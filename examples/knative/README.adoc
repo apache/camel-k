@@ -121,7 +121,7 @@ from('knative:channel/words')
   .to('slack:#camel-k-tests')
 
 
-context {
+camel {
   components {
     slack {
       webhookUrl '<put-here-your-slack-incoming-webhook-url>'

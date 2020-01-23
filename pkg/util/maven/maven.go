@@ -90,7 +90,6 @@ func Run(ctx Context) error {
 	}
 
 	args := make([]string, 0)
-	args = append(args, ctx.AdditionalArguments...)
 	args = append(args, "--batch-mode")
 
 	if ctx.LocalRepository == "" {
@@ -109,6 +108,8 @@ func Run(ctx Context) error {
 		args = append(args, "--settings", settingsPath)
 	}
 
+	args = append(args, ctx.AdditionalArguments...)
+
 	timeout := ctx.Timeout
 	if timeout == 0 {
 		timeout = math.MaxInt64
@@ -120,7 +121,11 @@ func Run(ctx Context) error {
 	cmd := exec.CommandContext(c, mvnCmd, args...)
 	cmd.Dir = ctx.Path
 	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+	if ctx.Stdout != nil {
+		cmd.Stdout = ctx.Stdout
+	} else {
+		cmd.Stdout = os.Stdout
+	}
 
 	Log.WithValues("timeout", timeout.String()).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
@@ -138,8 +143,6 @@ func ParseGAV(gav string) (Dependency, error) {
 	dep := Dependency{}
 	rex := regexp.MustCompile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?(:([^: ]+))?")
 	res := rex.FindStringSubmatch(gav)
-
-	fmt.Println(res, len(res))
 
 	if res == nil || len(res) < 9 {
 		return Dependency{}, errors.New("GAV must match <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')")

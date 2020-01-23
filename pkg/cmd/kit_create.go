@@ -20,69 +20,68 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
-
 	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/spf13/cobra"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newKitCreateCmd(rootCmdOptions *RootCmdOptions) *cobra.Command {
-	impl := &kitCreateCommand{
+func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreateCommandOptions) {
+	options := kitCreateCommandOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:   "create",
-		Short: "Create an Integration Kit",
-		Long:  `Create an Integration Kit.`,
-		Args:  impl.validateArgs,
-		RunE:  impl.run,
+		Use:     "create <name>",
+		Short:   "Create an Integration Kit",
+		Long:    `Create an Integration Kit.`,
+		Args:    options.validateArgs,
+		PreRunE: decode(&options),
+		RunE:    options.run,
 	}
 
-	cmd.Flags().StringVar(&impl.image, "image", "", "Image used to create the kit")
-	cmd.Flags().StringSliceVarP(&impl.dependencies, "dependency", "d", nil, "Add a dependency")
-	cmd.Flags().StringSliceVarP(&impl.properties, "property", "p", nil, "Add a camel property")
-	cmd.Flags().StringSliceVar(&impl.configmaps, "configmap", nil, "Add a ConfigMap")
-	cmd.Flags().StringSliceVar(&impl.secrets, "secret", nil, "Add a Secret")
-	cmd.Flags().StringSliceVar(&impl.repositories, "repository", nil, "Add a maven repository")
-	cmd.Flags().StringSliceVarP(&impl.traits, "trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
+	cmd.Flags().String("image", "", "Image used to create the kit")
+	cmd.Flags().StringArrayP("dependency", "d", nil, "Add a dependency")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
+	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
+	cmd.Flags().StringArray("secret", nil, "Add a Secret")
+	cmd.Flags().StringArray("repository", nil, "Add a maven repository")
+	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 
 	// completion support
 	configureKnownCompletions(&cmd)
 
-	return &cmd
+	return &cmd, &options
 }
 
-type kitCreateCommand struct {
+type kitCreateCommandOptions struct {
 	*RootCmdOptions
 
-	image        string
-	dependencies []string
-	properties   []string
-	configmaps   []string
-	secrets      []string
-	repositories []string
-	traits       []string
+	Image        string   `mapstructure:"image"`
+	Dependencies []string `mapstructure:"dependencies"`
+	Properties   []string `mapstructure:"properties"`
+	Configmaps   []string `mapstructure:"configmaps"`
+	Secrets      []string `mapstructure:"secrets"`
+	Repositories []string `mapstructure:"repositories"`
+	Traits       []string `mapstructure:"traits"`
 }
 
-func (command *kitCreateCommand) validateArgs(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommandOptions) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("accepts 1 arg, received " + strconv.Itoa(len(args)))
+		return errors.New("create expects a single name argument")
 	}
 
 	return nil
 }
 
-func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -90,7 +89,7 @@ func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 
 	catalog := trait.NewCatalog(command.Context, c)
 	tp := catalog.ComputeTraitsProperties()
-	for _, t := range command.traits {
+	for _, t := range command.Traits {
 		kv := strings.SplitN(t, "=", 2)
 
 		if !util.StringSliceExists(tp, kv[0]) {
@@ -99,7 +98,7 @@ func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	ctx := v1alpha1.NewIntegrationKit(command.Namespace, args[0])
+	ctx := v1.NewIntegrationKit(command.Namespace, args[0])
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
@@ -108,65 +107,67 @@ func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 		// the integration kit already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if ctx.Labels["camel.apache.org/kit.type"] == v1alpha1.IntegrationKitTypePlatform {
+		if ctx.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
 			fmt.Printf("integration kit \"%s\" is not editable\n", ctx.Name)
 			return nil
 		}
 	}
 
-	ctx = v1alpha1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
+	ctx = v1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
 	ctx.Labels = map[string]string{
-		"camel.apache.org/kit.type": v1alpha1.IntegrationKitTypeUser,
+		"camel.apache.org/kit.type": v1.IntegrationKitTypeUser,
 	}
-	ctx.Spec = v1alpha1.IntegrationKitSpec{
-		Dependencies:  make([]string, 0, len(command.dependencies)),
-		Configuration: make([]v1alpha1.ConfigurationSpec, 0),
-		Repositories:  command.repositories,
+	ctx.Spec = v1.IntegrationKitSpec{
+		Dependencies:  make([]string, 0, len(command.Dependencies)),
+		Configuration: make([]v1.ConfigurationSpec, 0),
+		Repositories:  command.Repositories,
 	}
 
-	if command.image != "" {
+	if command.Image != "" {
 		//
-		// if the image is set, the kit do not require any build but
+		// if the Image is set, the kit do not require any build but
 		// is be marked as external as the information about the classpath
-		// is missing so it cannot be used as base for other kits
+		// is missing so it cannot be used as base for other Kits
 		//
-		ctx.Labels["camel.apache.org/kit.type"] = v1alpha1.IntegrationKitTypeExternal
+		ctx.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
 
 		//
-		// Set the image to be used by the kit
+		// Set the Image to be used by the kit
 		//
-		ctx.Spec.Image = command.image
+		ctx.Spec.Image = command.Image
 	}
-	for _, item := range command.dependencies {
+	for _, item := range command.Dependencies {
 		switch {
 		case strings.HasPrefix(item, "mvn:"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
 		case strings.HasPrefix(item, "file:"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
+		case strings.HasPrefix(item, "camel-quarkus-"):
+			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel-quarkus:"+strings.TrimPrefix(item, "camel-quarkus-"))
 		case strings.HasPrefix(item, "camel-"):
 			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
 	}
 
-	for _, item := range command.properties {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+	for _, item := range command.Properties {
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "property",
 			Value: item,
 		})
 	}
-	for _, item := range command.configmaps {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+	for _, item := range command.Configmaps {
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "configmap",
 			Value: item,
 		})
 	}
-	for _, item := range command.secrets {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1alpha1.ConfigurationSpec{
+	for _, item := range command.Secrets {
+		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "secret",
 			Value: item,
 		})
 	}
-	for _, item := range command.traits {
+	for _, item := range command.Traits {
 		if err := command.configureTrait(&ctx, item); err != nil {
 			return nil
 		}
@@ -200,9 +201,9 @@ func (command *kitCreateCommand) run(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (*kitCreateCommand) configureTrait(ctx *v1alpha1.IntegrationKit, config string) error {
+func (*kitCreateCommandOptions) configureTrait(ctx *v1.IntegrationKit, config string) error {
 	if ctx.Spec.Traits == nil {
-		ctx.Spec.Traits = make(map[string]v1alpha1.TraitSpec)
+		ctx.Spec.Traits = make(map[string]v1.TraitSpec)
 	}
 
 	parts := traitConfigRegexp.FindStringSubmatch(config)
@@ -215,7 +216,7 @@ func (*kitCreateCommand) configureTrait(ctx *v1alpha1.IntegrationKit, config str
 
 	spec, ok := ctx.Spec.Traits[traitID]
 	if !ok {
-		spec = v1alpha1.TraitSpec{
+		spec = v1.TraitSpec{
 			Configuration: make(map[string]string),
 		}
 	}

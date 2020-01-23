@@ -1,3 +1,4 @@
+// camel-k: language=js
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
 // this work for additional information regarding copyright ownership.
@@ -18,6 +19,8 @@
 //
 //     kamel run examples/routes.js
 //
+const org_apache_camel_Processor = Java.type("org.apache.camel.Processor");
+const Processor = Java.extend(org_apache_camel_Processor);
 
 l = components.get('log');
 l.setExchangeFormatter(e => {
@@ -28,7 +31,7 @@ from('timer:js?period=1s')
     .routeId('js')
     .setBody()
         .simple('Hello Camel K')
-    .process(e => {
+    .process(new Processor(e => {
         e.getIn().setHeader('RandomValue', Math.floor((Math.random() * 100) + 1))
-    })
+    }))
     .to('log:info');

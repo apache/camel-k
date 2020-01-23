@@ -21,21 +21,21 @@ import (
 	"context"
 	"sync"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/pkg/errors"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // NewSchedulePodAction creates a new schedule action
-func NewSchedulePodAction(reader k8sclient.Reader) Action {
+func NewSchedulePodAction(reader client.Reader) Action {
 	return &schedulePodAction{
 		reader: reader,
 	}
@@ -43,8 +43,9 @@ func NewSchedulePodAction(reader k8sclient.Reader) Action {
 
 type schedulePodAction struct {
 	baseAction
-	lock   sync.Mutex
-	reader k8sclient.Reader
+	lock          sync.Mutex
+	reader        client.Reader
+	operatorImage string
 }
 
 // Name returns a common name of the action
@@ -53,22 +54,20 @@ func (action *schedulePodAction) Name() string {
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *schedulePodAction) CanHandle(build *v1alpha1.Build) bool {
-	return build.Status.Phase == v1alpha1.BuildPhaseScheduling &&
-		build.Spec.Platform.Build.BuildStrategy == v1alpha1.IntegrationPlatformBuildStrategyPod
+func (action *schedulePodAction) CanHandle(build *v1.Build) bool {
+	return build.Status.Phase == v1.BuildPhaseScheduling
 }
 
 // Handle handles the builds
-func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Build) (*v1alpha1.Build, error) {
+func (action *schedulePodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	// Enter critical section
 	action.lock.Lock()
 	defer action.lock.Unlock()
 
-	builds := &v1alpha1.BuildList{}
-	options := &k8sclient.ListOptions{Namespace: build.Namespace}
+	builds := &v1.BuildList{}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
-	err := action.reader.List(ctx, options, builds)
+	err := action.reader.List(ctx, builds, client.InNamespace(build.Namespace))
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +75,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
 	for _, b := range builds.Items {
-		if b.Status.Phase == v1alpha1.BuildPhasePending || b.Status.Phase == v1alpha1.BuildPhaseRunning {
+		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
 			// Let's requeue the build in case one is already running
 			return nil, nil
 		}
@@ -88,15 +87,12 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 	}
 
 	if pod == nil {
-		// Try to get operator image name before starting the build
-		operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
+		// We may want to explicitly manage build priority as opposed to relying on
+		// the reconcile loop to handle the queuing
+		pod, err = action.newBuildPod(ctx, build)
 		if err != nil {
 			return nil, err
 		}
-
-		// We may want to explicitly manage build priority as opposed to relying on
-		// the reconcile loop to handle the queuing
-		pod = newBuildPod(build, operatorImage)
 
 		// Set the Build instance as the owner and controller
 		if err := controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
@@ -108,16 +104,12 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1alpha1.Bui
 		}
 	}
 
-	build.Status.Phase = v1alpha1.BuildPhasePending
+	build.Status.Phase = v1.BuildPhasePending
 
 	return build, nil
 }
 
-func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
-	builderImage := operatorImage
-	if builderImage == "" {
-		builderImage = defaults.ImageName + ":" + defaults.Version
-	}
+func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Build) (*corev1.Pod, error) {
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -125,69 +117,82 @@ func newBuildPod(build *v1alpha1.Build, operatorImage string) *corev1.Pod {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: build.Namespace,
-			Name:      buildPodName(build.Spec.Meta),
+			Name:      buildPodName(build),
 			Labels: map[string]string{
-				"camel.apache.org/build": build.Name,
+				"camel.apache.org/build":     build.Name,
+				"camel.apache.org/component": "builder",
 			},
 		},
 		Spec: corev1.PodSpec{
 			ServiceAccountName: "camel-k-builder",
-			Containers: []corev1.Container{
-				{
-					Name:            "builder",
-					Image:           builderImage,
-					ImagePullPolicy: "IfNotPresent",
-					Args: []string{
-						"camel-k-builder",
-						build.Namespace,
-						build.Name,
-					},
-				},
-			},
-			RestartPolicy: corev1.RestartPolicyNever,
+			RestartPolicy:      corev1.RestartPolicyNever,
 		},
 	}
 
-	if build.Spec.Platform.Build.PublishStrategy == v1alpha1.IntegrationPlatformBuildPublishStrategyKaniko {
-		// Mount persistent volume used to coordinate build output with Kaniko cache and image build input
-		pod.Spec.Volumes = []corev1.Volume{
-			{
-				Name: "camel-k-builder",
-				VolumeSource: corev1.VolumeSource{
-					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: build.Spec.Platform.Build.PersistentVolumeClaim,
-					},
-				},
-			},
-		}
-		pod.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
-			{
-				Name:      "camel-k-builder",
-				MountPath: build.Spec.BuildDir,
-			},
-		}
-
-		// Use affinity only when the operator is present in the namespaced
-		if build.Namespace == platform.GetOperatorNamespace() {
-			// Co-locate with the builder pod for sharing the host path volume as the current
-			// persistent volume claim uses the default storage class which is likely relying
-			// on the host path provisioner.
-			pod.Spec.Affinity = &corev1.Affinity{
-				PodAffinity: &corev1.PodAffinity{
-					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-						{
-							LabelSelector: &metav1.LabelSelector{
-								MatchLabels: map[string]string{
-									"camel.apache.org/component": "operator",
-								},
-							},
-							TopologyKey: "kubernetes.io/hostname",
-						},
-					},
-				},
+	for _, task := range build.Spec.Tasks {
+		if task.Builder != nil {
+			// TODO: Move the retrieval of the operator image into the controller
+			operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
+			if err != nil {
+				return nil, err
 			}
+			if operatorImage == "" {
+				action.operatorImage = defaults.ImageName + ":" + defaults.Version
+			} else {
+				action.operatorImage = operatorImage
+			}
+			action.addBuilderTaskToPod(build, task.Builder, pod)
+		} else if task.Kaniko != nil {
+			action.addKanikoTaskToPod(task.Kaniko, pod)
 		}
 	}
 
-	return pod
+	// Make sure there is one container defined
+	pod.Spec.Containers = pod.Spec.InitContainers[len(pod.Spec.InitContainers)-1 : len(pod.Spec.InitContainers)]
+	pod.Spec.InitContainers = pod.Spec.InitContainers[:len(pod.Spec.InitContainers)-1]
+
+	return pod, nil
+}
+
+func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.BuilderTask, pod *corev1.Pod) {
+	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
+		Name:            task.Name,
+		Image:           action.operatorImage,
+		ImagePullPolicy: "IfNotPresent",
+		Command: []string{
+			"kamel",
+			"builder",
+			"--namespace",
+			pod.Namespace,
+			"--build-name",
+			build.Name,
+			"--task-name",
+			task.Name,
+		},
+		VolumeMounts: task.VolumeMounts,
+	})
+
+	action.addBaseTaskToPod(&task.BaseTask, pod)
+}
+
+func (action *schedulePodAction) addKanikoTaskToPod(task *v1.KanikoTask, pod *corev1.Pod) {
+	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
+		Name:            task.Name,
+		Image:           task.Image,
+		ImagePullPolicy: "IfNotPresent",
+		Args:            task.Args,
+		Env:             task.Env,
+		VolumeMounts:    task.VolumeMounts,
+	})
+
+	action.addBaseTaskToPod(&task.BaseTask, pod)
+}
+
+func (action *schedulePodAction) addBaseTaskToPod(task *v1.BaseTask, pod *corev1.Pod) {
+	pod.Spec.Volumes = append(pod.Spec.Volumes, task.Volumes...)
+
+	if task.Affinity != nil {
+		// We may want to handle possible conflicts
+		pod.Spec.Affinity = task.Affinity
+	}
 }

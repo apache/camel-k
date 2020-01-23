@@ -12,7 +12,7 @@
   "scripts": {
     "preview": "cd public && lite-server",
     "build": "yarn antora --stacktrace site.yml",
-    "dev": "yarn build && yarn preview",
+    "dev": "yarn antora --stacktrace site-dev.yml && yarn preview",
     "checks": "yarn antora --generator @antora/xref-validator site.yml"
   }
 }

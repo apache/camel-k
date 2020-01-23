@@ -30,8 +30,7 @@ import (
 )
 
 func TestRunSimpleExamples(t *testing.T) {
-	withNewTestNamespace(func(ns string) {
-		RegisterTestingT(t)
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		t.Run("run java", func(t *testing.T) {
@@ -78,6 +77,15 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
 			Eventually(integrationPodPhase(ns, "yaml"), 5*time.Minute).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
+		t.Run("run yaml Quarkus", func(t *testing.T) {
+			RegisterTestingT(t)
+			Expect(kamel("run", "-n", ns, "files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
+			Eventually(integrationPodPhase(ns, "yaml"), 5*time.Minute).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("running on Quarkus"))
 			Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})

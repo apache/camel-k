@@ -27,18 +27,19 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/gzip"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
+// The Rest DSL trait is internally used to allow creating integrations from a OpenAPI specs.
+//
+// +camel-k:trait=rest-dsl
 type restDslTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -59,8 +60,8 @@ func (t *restDslTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	for _, resource := range e.Integration.Spec.Resources {
-		if resource.Type == v1alpha1.ResourceTypeOpenAPI {
-			return e.IntegrationInPhase(v1alpha1.IntegrationPhaseInitialization), nil
+		if resource.Type == v1.ResourceTypeOpenAPI {
+			return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
 		}
 	}
 
@@ -81,7 +82,7 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	defer os.RemoveAll(tmpDir)
 
 	for i, resource := range e.Integration.Spec.Resources {
-		if resource.Type != v1alpha1.ResourceTypeOpenAPI {
+		if resource.Type != v1.ResourceTypeOpenAPI {
 			continue
 		}
 
@@ -113,12 +114,12 @@ func (t *restDslTrait) Apply(e *Environment) error {
 		}
 
 		mc := maven.NewContext(tmpDir, project)
-		mc.LocalRepository = e.Platform.Spec.Build.LocalRepository
-		mc.Timeout = e.Platform.Spec.Build.Maven.Timeout.Duration
+		mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
+		mc.Timeout = e.Platform.Status.Build.Maven.GetTimeout().Duration
 		mc.AddArgument("-Dopenapi.spec=" + in)
 		mc.AddArgument("-Ddsl.out=" + out)
 
-		settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Spec.Build.Maven.Settings)
+		settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Status.Build.Maven.Settings)
 		if err != nil {
 			return err
 		}
@@ -147,7 +148,7 @@ func (t *restDslTrait) Apply(e *Environment) error {
 
 		generatedContentName := fmt.Sprintf("%s-openapi-%03d", e.Integration.Name, i)
 		generatedSourceName := strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml"
-		generatedSources := make([]v1alpha1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
+		generatedSources := make([]v1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
 
 		if e.Integration.Status.GeneratedSources != nil {
 			//
@@ -163,13 +164,13 @@ func (t *restDslTrait) Apply(e *Environment) error {
 		//
 		// Add an additional source that references the config map
 		//
-		generatedSources = append(generatedSources, v1alpha1.SourceSpec{
-			DataSpec: v1alpha1.DataSpec{
+		generatedSources = append(generatedSources, v1.SourceSpec{
+			DataSpec: v1.DataSpec{
 				Name:        generatedSourceName,
 				ContentRef:  generatedContentName,
 				Compression: resource.Compression,
 			},
-			Language: v1alpha1.LanguageXML,
+			Language: v1.LanguageXML,
 		})
 
 		//
@@ -188,11 +189,11 @@ func (t *restDslTrait) Apply(e *Environment) error {
 					"camel.apache.org/integration": e.Integration.Name,
 				},
 				Annotations: map[string]string{
-					"camel.apache.org/source.language":    string(v1alpha1.LanguageXML),
+					"camel.apache.org/source.language":    string(v1.LanguageXML),
 					"camel.apache.org/source.name":        resource.Name,
 					"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
 					"camel.apache.org/source.generated":   "true",
-					"camel.apache.org/source.type":        string(v1alpha1.ResourceTypeOpenAPI),
+					"camel.apache.org/source.type":        string(v1.ResourceTypeOpenAPI),
 				},
 			},
 			Data: map[string]string{
@@ -207,6 +208,11 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	return nil
 }
 
+// IsPlatformTrait overrides base class method
+func (t *restDslTrait) IsPlatformTrait() bool {
+	return true
+}
+
 func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, error) {
 	if e.CamelCatalog == nil {
 		return maven.Project{}, errors.New("unknown camel catalog")
@@ -219,7 +225,7 @@ func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, erro
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-maven-plugin",
-				Version:    e.RuntimeVersion,
+				Version:    e.CamelCatalog.RuntimeVersion,
 				Executions: []maven.Execution{
 					{
 						Phase: "generate-resources",

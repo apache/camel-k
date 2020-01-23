@@ -24,7 +24,7 @@ import (
 
 	"github.com/apache/camel-k/deploy"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/install"
 )
 
@@ -41,11 +41,11 @@ func (action *createAction) Name() string {
 	return "create"
 }
 
-func (action *createAction) CanHandle(platform *v1alpha1.IntegrationPlatform) bool {
-	return platform.Status.Phase == v1alpha1.IntegrationPlatformPhaseCreating
+func (action *createAction) CanHandle(platform *v1.IntegrationPlatform) bool {
+	return platform.Status.Phase == v1.IntegrationPlatformPhaseCreating
 }
 
-func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.IntegrationPlatform) (*v1alpha1.IntegrationPlatform, error) {
+func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	for k := range deploy.Resources {
 		if strings.HasPrefix(k, "camel-catalog-") {
 			action.L.Infof("Installing camel catalog: %s", k)
@@ -56,10 +56,10 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		}
 	}
 
-	if l := len(platform.Spec.Resources.Kits); l > 0 {
+	if l := len(platform.Status.Resources.Kits); l > 0 {
 		res := make([]string, 0, l)
 
-		for _, c := range platform.Spec.Resources.Kits {
+		for _, c := range platform.Status.Resources.Kits {
 			//
 			// Assuming that if the resource ends with a yaml extension, the full
 			// resource name is provided
@@ -80,7 +80,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1alpha1.Integ
 		}
 	}
 
-	platform.Status.Phase = v1alpha1.IntegrationPlatformPhaseReady
+	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 
 	return platform, nil
 }

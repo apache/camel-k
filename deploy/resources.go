@@ -19,13 +19,28 @@ limitations under the License.
 
 package deploy
 
-var Resources map[string]string
-
 func init() {
 	Resources = make(map[string]string)
 
 	Resources["builder-role-binding.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -43,6 +58,23 @@ roleRef:
 `
 	Resources["builder-role-kubernetes.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -74,6 +106,7 @@ rules:
   resources:
   - events
   - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -82,6 +115,23 @@ rules:
 `
 	Resources["builder-role-openshift.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -112,6 +162,8 @@ rules:
   - ""
   resources:
   - events
+  - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -164,6 +216,23 @@ rules:
 `
 	Resources["builder-service-account.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -172,7 +241,7 @@ metadata:
     app: "camel-k"
 
 `
-	Resources["camel-catalog-3.0.0-M4.yaml"] =
+	Resources["camel-catalog-3.0.0-1.0.10.yaml"] =
 		`
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -191,16 +260,18 @@ metadata:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.0.0-m4
+  name: camel-catalog-3.0.0-1.0.10
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.0.0-M4
-    camel.apache.org/catalog.loader.version: 3.0.0-M4
+    camel.apache.org/catalog.version: 3.0.0
+    camel.apache.org/catalog.loader.version: 3.0.0
+    camel.apache.org/runtime.version: 1.0.10
 spec:
-  version: 3.0.0-M4
+  version: 3.0.0
+  runtimeVersion: 1.0.10
   artifacts:
     camel-activemq:
       groupId: org.apache.camel
@@ -209,6 +280,8 @@ spec:
       - id: activemq
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.activemq.ActiveMQComponent
     camel-ahc:
       groupId: org.apache.camel
       artifactId: camel-ahc
@@ -216,6 +289,8 @@ spec:
       - id: ahc
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ahc.AhcComponent
     camel-ahc-ws:
       groupId: org.apache.camel
       artifactId: camel-ahc-ws
@@ -226,6 +301,8 @@ spec:
       - id: ahc-wss
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ahc.ws.WsComponent
     camel-amqp:
       groupId: org.apache.camel
       artifactId: camel-amqp
@@ -233,6 +310,15 @@ spec:
       - id: amqp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.amqp.AMQPComponent
+    camel-any23:
+      groupId: org.apache.camel
+      artifactId: camel-any23
+      dataformats:
+      - any23
+      javaTypes:
+      - org.apache.camel.dataformat.any23.Any23DataFormat
     camel-apns:
       groupId: org.apache.camel
       artifactId: camel-apns
@@ -240,6 +326,8 @@ spec:
       - id: apns
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.apns.ApnsComponent
     camel-as2:
       groupId: org.apache.camel
       artifactId: camel-as2
@@ -247,11 +335,15 @@ spec:
       - id: as2
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.as2.AS2Component
     camel-asn1:
       groupId: org.apache.camel
       artifactId: camel-asn1
       dataformats:
       - asn1
+      javaTypes:
+      - org.apache.camel.dataformat.asn1.ASN1DataFormat
     camel-asterisk:
       groupId: org.apache.camel
       artifactId: camel-asterisk
@@ -259,6 +351,8 @@ spec:
       - id: asterisk
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.asterisk.AsteriskComponent
     camel-atmos:
       groupId: org.apache.camel
       artifactId: camel-atmos
@@ -266,6 +360,8 @@ spec:
       - id: atmos
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.atmos.AtmosComponent
     camel-atmosphere-websocket:
       groupId: org.apache.camel
       artifactId: camel-atmosphere-websocket
@@ -273,6 +369,8 @@ spec:
       - id: atmosphere-websocket
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.atmosphere.websocket.WebsocketComponent
     camel-atom:
       groupId: org.apache.camel
       artifactId: camel-atom
@@ -280,6 +378,8 @@ spec:
       - id: atom
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.atom.AtomComponent
     camel-atomix:
       groupId: org.apache.camel
       artifactId: camel-atomix
@@ -302,6 +402,13 @@ spec:
       - id: atomix-value
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.atomix.client.map.AtomixMapComponent
+      - org.apache.camel.component.atomix.client.messaging.AtomixMessagingComponent
+      - org.apache.camel.component.atomix.client.multimap.AtomixMultiMapComponent
+      - org.apache.camel.component.atomix.client.queue.AtomixQueueComponent
+      - org.apache.camel.component.atomix.client.set.AtomixSetComponent
+      - org.apache.camel.component.atomix.client.value.AtomixValueComponent
     camel-avro:
       groupId: org.apache.camel
       artifactId: camel-avro
@@ -311,6 +418,9 @@ spec:
         passive: false
       dataformats:
       - avro
+      javaTypes:
+      - org.apache.camel.component.avro.AvroComponent
+      - org.apache.camel.dataformat.avro.AvroDataFormat
     camel-aws-cw:
       groupId: org.apache.camel
       artifactId: camel-aws-cw
@@ -318,6 +428,8 @@ spec:
       - id: aws-cw
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.cw.CwComponent
     camel-aws-ddb:
       groupId: org.apache.camel
       artifactId: camel-aws-ddb
@@ -328,6 +440,9 @@ spec:
       - id: aws-ddbstream
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ddb.DdbComponent
+      - org.apache.camel.component.aws.ddbstream.DdbStreamComponent
     camel-aws-ec2:
       groupId: org.apache.camel
       artifactId: camel-aws-ec2
@@ -335,6 +450,8 @@ spec:
       - id: aws-ec2
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ec2.EC2Component
     camel-aws-ecs:
       groupId: org.apache.camel
       artifactId: camel-aws-ecs
@@ -342,6 +459,8 @@ spec:
       - id: aws-ecs
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ecs.ECSComponent
     camel-aws-eks:
       groupId: org.apache.camel
       artifactId: camel-aws-eks
@@ -349,6 +468,8 @@ spec:
       - id: aws-eks
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.eks.EKSComponent
     camel-aws-iam:
       groupId: org.apache.camel
       artifactId: camel-aws-iam
@@ -356,6 +477,8 @@ spec:
       - id: aws-iam
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.iam.IAMComponent
     camel-aws-kinesis:
       groupId: org.apache.camel
       artifactId: camel-aws-kinesis
@@ -366,6 +489,9 @@ spec:
       - id: aws-kinesis-firehose
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.kinesis.KinesisComponent
+      - org.apache.camel.component.aws.firehose.KinesisFirehoseComponent
     camel-aws-kms:
       groupId: org.apache.camel
       artifactId: camel-aws-kms
@@ -373,6 +499,8 @@ spec:
       - id: aws-kms
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.kms.KMSComponent
     camel-aws-lambda:
       groupId: org.apache.camel
       artifactId: camel-aws-lambda
@@ -380,6 +508,8 @@ spec:
       - id: aws-lambda
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.lambda.LambdaComponent
     camel-aws-mq:
       groupId: org.apache.camel
       artifactId: camel-aws-mq
@@ -387,6 +517,8 @@ spec:
       - id: aws-mq
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.mq.MQComponent
     camel-aws-msk:
       groupId: org.apache.camel
       artifactId: camel-aws-msk
@@ -394,6 +526,8 @@ spec:
       - id: aws-msk
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.msk.MSKComponent
     camel-aws-s3:
       groupId: org.apache.camel
       artifactId: camel-aws-s3
@@ -401,6 +535,8 @@ spec:
       - id: aws-s3
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.s3.S3Component
     camel-aws-sdb:
       groupId: org.apache.camel
       artifactId: camel-aws-sdb
@@ -408,6 +544,8 @@ spec:
       - id: aws-sdb
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sdb.SdbComponent
     camel-aws-ses:
       groupId: org.apache.camel
       artifactId: camel-aws-ses
@@ -415,6 +553,8 @@ spec:
       - id: aws-ses
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ses.SesComponent
     camel-aws-sns:
       groupId: org.apache.camel
       artifactId: camel-aws-sns
@@ -422,6 +562,8 @@ spec:
       - id: aws-sns
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sns.SnsComponent
     camel-aws-sqs:
       groupId: org.apache.camel
       artifactId: camel-aws-sqs
@@ -429,6 +571,8 @@ spec:
       - id: aws-sqs
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sqs.SqsComponent
     camel-aws-swf:
       groupId: org.apache.camel
       artifactId: camel-aws-swf
@@ -436,6 +580,17 @@ spec:
       - id: aws-swf
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.swf.SWFComponent
+    camel-aws-translate:
+      groupId: org.apache.camel
+      artifactId: camel-aws-translate
+      schemes:
+      - id: aws-translate
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.translate.TranslateComponent
     camel-azure:
       groupId: org.apache.camel
       artifactId: camel-azure
@@ -446,11 +601,16 @@ spec:
       - id: azure-queue
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.blob.BlobServiceComponent
+      - org.apache.camel.component.azure.queue.QueueServiceComponent
     camel-barcode:
       groupId: org.apache.camel
       artifactId: camel-barcode
       dataformats:
       - barcode
+      javaTypes:
+      - org.apache.camel.dataformat.barcode.BarcodeDataFormat
     camel-base:
       groupId: org.apache.camel
       artifactId: camel-base
@@ -462,11 +622,21 @@ spec:
       - ref
       - simple
       - tokenize
+      javaTypes:
+      - org.apache.camel.language.constant.ConstantLanguage
+      - org.apache.camel.language.property.ExchangePropertyLanguage
+      - org.apache.camel.language.simple.FileLanguage
+      - org.apache.camel.language.header.HeaderLanguage
+      - org.apache.camel.language.ref.RefLanguage
+      - org.apache.camel.language.simple.SimpleLanguage
+      - org.apache.camel.language.tokenizer.TokenizeLanguage
     camel-base64:
       groupId: org.apache.camel
       artifactId: camel-base64
       dataformats:
       - base64
+      javaTypes:
+      - org.apache.camel.dataformat.base64.Base64DataFormat
     camel-bean:
       groupId: org.apache.camel
       artifactId: camel-bean
@@ -479,6 +649,10 @@ spec:
         passive: true
       languages:
       - bean
+      javaTypes:
+      - org.apache.camel.component.bean.BeanComponent
+      - org.apache.camel.component.beanclass.ClassComponent
+      - org.apache.camel.language.bean.BeanLanguage
     camel-bean-validator:
       groupId: org.apache.camel
       artifactId: camel-bean-validator
@@ -486,11 +660,15 @@ spec:
       - id: bean-validator
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.bean.validator.BeanValidatorComponent
     camel-beanio:
       groupId: org.apache.camel
       artifactId: camel-beanio
       dataformats:
       - beanio
+      javaTypes:
+      - org.apache.camel.dataformat.beanio.BeanIODataFormat
     camel-beanstalk:
       groupId: org.apache.camel
       artifactId: camel-beanstalk
@@ -498,6 +676,8 @@ spec:
       - id: beanstalk
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.beanstalk.BeanstalkComponent
     camel-bindy:
       groupId: org.apache.camel
       artifactId: camel-bindy
@@ -505,6 +685,10 @@ spec:
       - bindy-csv
       - bindy-fixed
       - bindy-kvp
+      javaTypes:
+      - org.apache.camel.dataformat.bindy.csv.BindyCsvDataFormat
+      - org.apache.camel.dataformat.bindy.fixed.BindyFixedLengthDataFormat
+      - org.apache.camel.dataformat.bindy.kvp.BindyKeyValuePairDataFormat
     camel-bonita:
       groupId: org.apache.camel
       artifactId: camel-bonita
@@ -512,11 +696,8 @@ spec:
       - id: bonita
         http: false
         passive: false
-    camel-boon:
-      groupId: org.apache.camel
-      artifactId: camel-boon
-      dataformats:
-      - boon
+      javaTypes:
+      - org.apache.camel.component.bonita.BonitaComponent
     camel-box:
       groupId: org.apache.camel
       artifactId: camel-box
@@ -524,6 +705,8 @@ spec:
       - id: box
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.box.BoxComponent
     camel-braintree:
       groupId: org.apache.camel
       artifactId: camel-braintree
@@ -531,6 +714,8 @@ spec:
       - id: braintree
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.braintree.BraintreeComponent
     camel-browse:
       groupId: org.apache.camel
       artifactId: camel-browse
@@ -538,6 +723,8 @@ spec:
       - id: browse
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.browse.BrowseComponent
     camel-caffeine:
       groupId: org.apache.camel
       artifactId: camel-caffeine
@@ -548,6 +735,9 @@ spec:
       - id: caffeine-loadcache
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.caffeine.cache.CaffeineCacheComponent
+      - org.apache.camel.component.caffeine.load.CaffeineLoadCacheComponent
     camel-cassandraql:
       groupId: org.apache.camel
       artifactId: camel-cassandraql
@@ -555,11 +745,15 @@ spec:
       - id: cql
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.cassandra.CassandraComponent
     camel-cbor:
       groupId: org.apache.camel
       artifactId: camel-cbor
       dataformats:
       - cbor
+      javaTypes:
+      - org.apache.camel.component.cbor.CBORDataFormat
     camel-chatscript:
       groupId: org.apache.camel
       artifactId: camel-chatscript
@@ -567,6 +761,8 @@ spec:
       - id: chatscript
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.chatscript.ChatScriptComponent
     camel-chunk:
       groupId: org.apache.camel
       artifactId: camel-chunk
@@ -574,6 +770,8 @@ spec:
       - id: chunk
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.chunk.ChunkComponent
     camel-cm-sms:
       groupId: org.apache.camel
       artifactId: camel-cm-sms
@@ -581,6 +779,8 @@ spec:
       - id: cm-sms
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.cm.CMComponent
     camel-cmis:
       groupId: org.apache.camel
       artifactId: camel-cmis
@@ -588,6 +788,8 @@ spec:
       - id: cmis
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.cmis.CMISComponent
     camel-coap:
       groupId: org.apache.camel
       artifactId: camel-coap
@@ -604,6 +806,8 @@ spec:
       - id: coaps+tcp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.coap.CoAPComponent
     camel-cometd:
       groupId: org.apache.camel
       artifactId: camel-cometd
@@ -614,6 +818,8 @@ spec:
       - id: cometds
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.cometd.CometdComponent
     camel-consul:
       groupId: org.apache.camel
       artifactId: camel-consul
@@ -621,6 +827,8 @@ spec:
       - id: consul
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.consul.ConsulComponent
     camel-controlbus:
       groupId: org.apache.camel
       artifactId: camel-controlbus
@@ -628,6 +836,8 @@ spec:
       - id: controlbus
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.controlbus.ControlBusComponent
     camel-corda:
       groupId: org.apache.camel
       artifactId: camel-corda
@@ -635,6 +845,8 @@ spec:
       - id: corda
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.corda.CordaComponent
     camel-couchbase:
       groupId: org.apache.camel
       artifactId: camel-couchbase
@@ -642,6 +854,8 @@ spec:
       - id: couchbase
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.couchbase.CouchbaseComponent
     camel-couchdb:
       groupId: org.apache.camel
       artifactId: camel-couchdb
@@ -649,6 +863,8 @@ spec:
       - id: couchdb
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.couchdb.CouchDbComponent
     camel-crypto:
       groupId: org.apache.camel
       artifactId: camel-crypto
@@ -659,6 +875,10 @@ spec:
       dataformats:
       - crypto
       - pgp
+      javaTypes:
+      - org.apache.camel.component.crypto.DigitalSignatureComponent
+      - org.apache.camel.converter.crypto.CryptoDataFormat
+      - org.apache.camel.converter.crypto.PGPDataFormat
     camel-crypto-cms:
       groupId: org.apache.camel
       artifactId: camel-crypto-cms
@@ -666,11 +886,15 @@ spec:
       - id: crypto-cms
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.crypto.cms.CryptoCmsComponent
     camel-csv:
       groupId: org.apache.camel
       artifactId: camel-csv
       dataformats:
       - csv
+      javaTypes:
+      - org.apache.camel.dataformat.csv.CsvDataFormat
     camel-cxf:
       groupId: org.apache.camel
       artifactId: camel-cxf
@@ -681,6 +905,9 @@ spec:
       - id: cxfrs
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.cxf.CxfComponent
+      - org.apache.camel.component.cxf.jaxrs.CxfRsComponent
     camel-dataformat:
       groupId: org.apache.camel
       artifactId: camel-dataformat
@@ -688,6 +915,8 @@ spec:
       - id: dataformat
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.dataformat.DataFormatComponent
     camel-dataset:
       groupId: org.apache.camel
       artifactId: camel-dataset
@@ -698,6 +927,45 @@ spec:
       - id: dataset-test
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.dataset.DataSetComponent
+      - org.apache.camel.component.dataset.DataSetTestComponent
+    camel-debezium-mongodb:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-mongodb
+      schemes:
+      - id: debezium-mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumMongodbComponent
+    camel-debezium-mysql:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-mysql
+      schemes:
+      - id: debezium-mysql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumMySqlComponent
+    camel-debezium-postgres:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-postgres
+      schemes:
+      - id: debezium-postgres
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumPostgresComponent
+    camel-debezium-sqlserver:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-sqlserver
+      schemes:
+      - id: debezium-sqlserver
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumSqlserverComponent
     camel-digitalocean:
       groupId: org.apache.camel
       artifactId: camel-digitalocean
@@ -705,6 +973,8 @@ spec:
       - id: digitalocean
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.digitalocean.DigitalOceanComponent
     camel-direct:
       groupId: org.apache.camel
       artifactId: camel-direct
@@ -712,6 +982,8 @@ spec:
       - id: direct
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.direct.DirectComponent
     camel-directvm:
       groupId: org.apache.camel
       artifactId: camel-directvm
@@ -719,6 +991,8 @@ spec:
       - id: direct-vm
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.directvm.DirectVmComponent
     camel-disruptor:
       groupId: org.apache.camel
       artifactId: camel-disruptor
@@ -729,6 +1003,9 @@ spec:
       - id: disruptor-vm
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.disruptor.DisruptorComponent
+      - org.apache.camel.component.disruptor.vm.DisruptorVmComponent
     camel-dns:
       groupId: org.apache.camel
       artifactId: camel-dns
@@ -736,6 +1013,8 @@ spec:
       - id: dns
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.dns.DnsComponent
     camel-docker:
       groupId: org.apache.camel
       artifactId: camel-docker
@@ -743,6 +1022,8 @@ spec:
       - id: docker
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.docker.DockerComponent
     camel-dozer:
       groupId: org.apache.camel
       artifactId: camel-dozer
@@ -750,6 +1031,8 @@ spec:
       - id: dozer
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.dozer.DozerComponent
     camel-drill:
       groupId: org.apache.camel
       artifactId: camel-drill
@@ -757,6 +1040,8 @@ spec:
       - id: drill
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.drill.DrillComponent
     camel-dropbox:
       groupId: org.apache.camel
       artifactId: camel-dropbox
@@ -764,6 +1049,8 @@ spec:
       - id: dropbox
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.dropbox.DropboxComponent
     camel-ehcache:
       groupId: org.apache.camel
       artifactId: camel-ehcache
@@ -771,13 +1058,8 @@ spec:
       - id: ehcache
         http: false
         passive: false
-    camel-ejb:
-      groupId: org.apache.camel
-      artifactId: camel-ejb
-      schemes:
-      - id: ejb
-        http: false
-        passive: false
+      javaTypes:
+      - org.apache.camel.component.ehcache.EhcacheComponent
     camel-elasticsearch-rest:
       groupId: org.apache.camel
       artifactId: camel-elasticsearch-rest
@@ -785,6 +1067,8 @@ spec:
       - id: elasticsearch-rest
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.elasticsearch.ElasticsearchComponent
     camel-elsql:
       groupId: org.apache.camel
       artifactId: camel-elsql
@@ -792,6 +1076,8 @@ spec:
       - id: elsql
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.elsql.ElsqlComponent
     camel-etcd:
       groupId: org.apache.camel
       artifactId: camel-etcd
@@ -799,6 +1085,8 @@ spec:
       - id: etcd
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.etcd.EtcdComponent
     camel-eventadmin:
       groupId: org.apache.camel
       artifactId: camel-eventadmin
@@ -806,6 +1094,8 @@ spec:
       - id: eventadmin
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.eventadmin.EventAdminComponent
     camel-exec:
       groupId: org.apache.camel
       artifactId: camel-exec
@@ -813,6 +1103,8 @@ spec:
       - id: exec
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.exec.ExecComponent
     camel-facebook:
       groupId: org.apache.camel
       artifactId: camel-facebook
@@ -820,11 +1112,15 @@ spec:
       - id: facebook
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.facebook.FacebookComponent
     camel-fastjson:
       groupId: org.apache.camel
       artifactId: camel-fastjson
       dataformats:
       - json-fastjson
+      javaTypes:
+      - org.apache.camel.component.fastjson.FastjsonDataFormat
     camel-fhir:
       groupId: org.apache.camel
       artifactId: camel-fhir
@@ -835,6 +1131,10 @@ spec:
       dataformats:
       - fhirJson
       - fhirXml
+      javaTypes:
+      - org.apache.camel.component.fhir.FhirComponent
+      - org.apache.camel.component.fhir.FhirJsonDataFormat
+      - org.apache.camel.component.fhir.FhirXmlDataFormat
     camel-file:
       groupId: org.apache.camel
       artifactId: camel-file
@@ -842,6 +1142,17 @@ spec:
       - id: file
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.file.FileComponent
+    camel-file-watch:
+      groupId: org.apache.camel
+      artifactId: camel-file-watch
+      schemes:
+      - id: file-watch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.watch.FileWatchComponent
     camel-flatpack:
       groupId: org.apache.camel
       artifactId: camel-flatpack
@@ -851,6 +1162,9 @@ spec:
         passive: false
       dataformats:
       - flatpack
+      javaTypes:
+      - org.apache.camel.component.flatpack.FlatpackComponent
+      - org.apache.camel.dataformat.flatpack.FlatpackDataFormat
     camel-flink:
       groupId: org.apache.camel
       artifactId: camel-flink
@@ -858,6 +1172,8 @@ spec:
       - id: flink
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.flink.FlinkComponent
     camel-fop:
       groupId: org.apache.camel
       artifactId: camel-fop
@@ -865,6 +1181,8 @@ spec:
       - id: fop
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.fop.FopComponent
     camel-freemarker:
       groupId: org.apache.camel
       artifactId: camel-freemarker
@@ -872,6 +1190,8 @@ spec:
       - id: freemarker
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.freemarker.FreemarkerComponent
     camel-ftp:
       groupId: org.apache.camel
       artifactId: camel-ftp
@@ -885,6 +1205,10 @@ spec:
       - id: sftp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.file.remote.FtpComponent
+      - org.apache.camel.component.file.remote.FtpsComponent
+      - org.apache.camel.component.file.remote.SftpComponent
     camel-ganglia:
       groupId: org.apache.camel
       artifactId: camel-ganglia
@@ -892,6 +1216,8 @@ spec:
       - id: ganglia
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ganglia.GangliaComponent
     camel-geocoder:
       groupId: org.apache.camel
       artifactId: camel-geocoder
@@ -899,6 +1225,8 @@ spec:
       - id: geocoder
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.geocoder.GeoCoderComponent
     camel-git:
       groupId: org.apache.camel
       artifactId: camel-git
@@ -906,6 +1234,8 @@ spec:
       - id: git
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.git.GitComponent
     camel-github:
       groupId: org.apache.camel
       artifactId: camel-github
@@ -913,6 +1243,8 @@ spec:
       - id: github
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.github.GitHubComponent
     camel-google-bigquery:
       groupId: org.apache.camel
       artifactId: camel-google-bigquery
@@ -923,6 +1255,9 @@ spec:
       - id: google-bigquery-sql
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.google.bigquery.GoogleBigQueryComponent
+      - org.apache.camel.component.google.bigquery.sql.GoogleBigQuerySQLComponent
     camel-google-calendar:
       groupId: org.apache.camel
       artifactId: camel-google-calendar
@@ -933,6 +1268,9 @@ spec:
       - id: google-calendar-stream
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.google.calendar.GoogleCalendarComponent
+      - org.apache.camel.component.google.calendar.stream.GoogleCalendarStreamComponent
     camel-google-drive:
       groupId: org.apache.camel
       artifactId: camel-google-drive
@@ -940,6 +1278,8 @@ spec:
       - id: google-drive
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.google.drive.GoogleDriveComponent
     camel-google-mail:
       groupId: org.apache.camel
       artifactId: camel-google-mail
@@ -950,6 +1290,9 @@ spec:
       - id: google-mail-stream
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.google.mail.GoogleMailComponent
+      - org.apache.camel.component.google.mail.stream.GoogleMailStreamComponent
     camel-google-pubsub:
       groupId: org.apache.camel
       artifactId: camel-google-pubsub
@@ -957,6 +1300,8 @@ spec:
       - id: google-pubsub
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.google.pubsub.GooglePubsubComponent
     camel-google-sheets:
       groupId: org.apache.camel
       artifactId: camel-google-sheets
@@ -967,6 +1312,9 @@ spec:
       - id: google-sheets-stream
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.google.sheets.GoogleSheetsComponent
+      - org.apache.camel.component.google.sheets.stream.GoogleSheetsStreamComponent
     camel-gora:
       groupId: org.apache.camel
       artifactId: camel-gora
@@ -974,6 +1322,8 @@ spec:
       - id: gora
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.gora.GoraComponent
     camel-grape:
       groupId: org.apache.camel
       artifactId: camel-grape
@@ -981,16 +1331,31 @@ spec:
       - id: grape
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.grape.GrapeComponent
+    camel-graphql:
+      groupId: org.apache.camel
+      artifactId: camel-graphql
+      schemes:
+      - id: graphql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.graphql.GraphqlComponent
     camel-grok:
       groupId: org.apache.camel
       artifactId: camel-grok
       dataformats:
       - grok
+      javaTypes:
+      - org.apache.camel.component.grok.GrokDataFormat
     camel-groovy:
       groupId: org.apache.camel
       artifactId: camel-groovy
       languages:
       - groovy
+      javaTypes:
+      - org.apache.camel.language.groovy.GroovyLanguage
     camel-grpc:
       groupId: org.apache.camel
       artifactId: camel-grpc
@@ -998,11 +1363,15 @@ spec:
       - id: grpc
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.grpc.GrpcComponent
     camel-gson:
       groupId: org.apache.camel
       artifactId: camel-gson
       dataformats:
       - json-gson
+      javaTypes:
+      - org.apache.camel.component.gson.GsonDataFormat
     camel-guava-eventbus:
       groupId: org.apache.camel
       artifactId: camel-guava-eventbus
@@ -1010,6 +1379,8 @@ spec:
       - id: guava-eventbus
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.guava.eventbus.GuavaEventBusComponent
     camel-hazelcast:
       groupId: org.apache.camel
       artifactId: camel-hazelcast
@@ -1047,6 +1418,18 @@ spec:
       - id: hazelcast-topic
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.hazelcast.atomicnumber.HazelcastAtomicnumberComponent
+      - org.apache.camel.component.hazelcast.instance.HazelcastInstanceComponent
+      - org.apache.camel.component.hazelcast.list.HazelcastListComponent
+      - org.apache.camel.component.hazelcast.map.HazelcastMapComponent
+      - org.apache.camel.component.hazelcast.multimap.HazelcastMultimapComponent
+      - org.apache.camel.component.hazelcast.queue.HazelcastQueueComponent
+      - org.apache.camel.component.hazelcast.replicatedmap.HazelcastReplicatedmapComponent
+      - org.apache.camel.component.hazelcast.ringbuffer.HazelcastRingbufferComponent
+      - org.apache.camel.component.hazelcast.seda.HazelcastSedaComponent
+      - org.apache.camel.component.hazelcast.set.HazelcastSetComponent
+      - org.apache.camel.component.hazelcast.topic.HazelcastTopicComponent
     camel-hbase:
       groupId: org.apache.camel
       artifactId: camel-hbase
@@ -1054,16 +1437,17 @@ spec:
       - id: hbase
         http: false
         passive: false
-    camel-hdfs2:
+      javaTypes:
+      - org.apache.camel.component.hbase.HBaseComponent
+    camel-hdfs:
       groupId: org.apache.camel
-      artifactId: camel-hdfs2
+      artifactId: camel-hdfs
       schemes:
       - id: hdfs
         http: false
         passive: false
-      - id: hdfs2
-        http: false
-        passive: false
+      javaTypes:
+      - org.apache.camel.component.hdfs.HdfsComponent
     camel-hipchat:
       groupId: org.apache.camel
       artifactId: camel-hipchat
@@ -1071,6 +1455,8 @@ spec:
       - id: hipchat
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.hipchat.HipchatComponent
     camel-hl7:
       groupId: org.apache.camel
       artifactId: camel-hl7
@@ -1078,17 +1464,14 @@ spec:
       - hl7terser
       dataformats:
       - hl7
-    camel-http4:
+      javaTypes:
+      - org.apache.camel.component.hl7.Hl7TerserLanguage
+      - org.apache.camel.component.hl7.HL7DataFormat
+    camel-http:
       groupId: org.apache.camel
-      artifactId: camel-http4
+      artifactId: camel-http
       schemes:
       - id: http
-        http: false
-        passive: false
-      - id: http4
-        http: false
-        passive: false
-      - id: https4
         http: false
         passive: false
       - id: https
@@ -1097,11 +1480,15 @@ spec:
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-file
+      javaTypes:
+      - org.apache.camel.component.http.HttpComponent
     camel-ical:
       groupId: org.apache.camel
       artifactId: camel-ical
       dataformats:
       - ical
+      javaTypes:
+      - org.apache.camel.component.ical.ICalDataFormat
     camel-iec60870:
       groupId: org.apache.camel
       artifactId: camel-iec60870
@@ -1112,6 +1499,9 @@ spec:
       - id: iec60870-server
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.iec60870.client.ClientComponent
+      - org.apache.camel.component.iec60870.server.ServerComponent
     camel-ignite:
       groupId: org.apache.camel
       artifactId: camel-ignite
@@ -1137,6 +1527,14 @@ spec:
       - id: ignite-set
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ignite.cache.IgniteCacheComponent
+      - org.apache.camel.component.ignite.compute.IgniteComputeComponent
+      - org.apache.camel.component.ignite.events.IgniteEventsComponent
+      - org.apache.camel.component.ignite.idgen.IgniteIdGenComponent
+      - org.apache.camel.component.ignite.messaging.IgniteMessagingComponent
+      - org.apache.camel.component.ignite.queue.IgniteQueueComponent
+      - org.apache.camel.component.ignite.set.IgniteSetComponent
     camel-infinispan:
       groupId: org.apache.camel
       artifactId: camel-infinispan
@@ -1144,6 +1542,8 @@ spec:
       - id: infinispan
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.infinispan.InfinispanComponent
     camel-influxdb:
       groupId: org.apache.camel
       artifactId: camel-influxdb
@@ -1151,6 +1551,8 @@ spec:
       - id: influxdb
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.influxdb.InfluxDbComponent
     camel-iota:
       groupId: org.apache.camel
       artifactId: camel-iota
@@ -1158,6 +1560,8 @@ spec:
       - id: iota
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.iota.IOTAComponent
     camel-ipfs:
       groupId: org.apache.camel
       artifactId: camel-ipfs
@@ -1165,6 +1569,8 @@ spec:
       - id: ipfs
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ipfs.IPFSComponent
     camel-irc:
       groupId: org.apache.camel
       artifactId: camel-irc
@@ -1172,6 +1578,8 @@ spec:
       - id: irc
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.irc.IrcComponent
     camel-ironmq:
       groupId: org.apache.camel
       artifactId: camel-ironmq
@@ -1179,26 +1587,36 @@ spec:
       - id: ironmq
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ironmq.IronMQComponent
     camel-jackson:
       groupId: org.apache.camel
       artifactId: camel-jackson
       dataformats:
       - json-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.JacksonDataFormat
     camel-jacksonxml:
       groupId: org.apache.camel
       artifactId: camel-jacksonxml
       dataformats:
       - jacksonxml
+      javaTypes:
+      - org.apache.camel.component.jacksonxml.JacksonXMLDataFormat
     camel-jaxb:
       groupId: org.apache.camel
       artifactId: camel-jaxb
       dataformats:
       - jaxb
+      javaTypes:
+      - org.apache.camel.converter.jaxb.JaxbDataFormat
     camel-jaxp:
       groupId: org.apache.camel
       artifactId: camel-jaxp
       languages:
       - xtokenize
+      javaTypes:
+      - org.apache.camel.language.xtokenizer.XMLTokenizeLanguage
     camel-jbpm:
       groupId: org.apache.camel
       artifactId: camel-jbpm
@@ -1206,6 +1624,8 @@ spec:
       - id: jbpm
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jbpm.JBPMComponent
     camel-jcache:
       groupId: org.apache.camel
       artifactId: camel-jcache
@@ -1213,6 +1633,8 @@ spec:
       - id: jcache
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jcache.JCacheComponent
     camel-jclouds:
       groupId: org.apache.camel
       artifactId: camel-jclouds
@@ -1220,6 +1642,8 @@ spec:
       - id: jclouds
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jclouds.JcloudsComponent
     camel-jcr:
       groupId: org.apache.camel
       artifactId: camel-jcr
@@ -1227,6 +1651,8 @@ spec:
       - id: jcr
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jcr.JcrComponent
     camel-jdbc:
       groupId: org.apache.camel
       artifactId: camel-jdbc
@@ -1234,6 +1660,8 @@ spec:
       - id: jdbc
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jdbc.JdbcComponent
     camel-jetty:
       groupId: org.apache.camel
       artifactId: camel-jetty
@@ -1241,6 +1669,8 @@ spec:
       - id: jetty
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jetty9.JettyHttpComponent9
     camel-jgroups:
       groupId: org.apache.camel
       artifactId: camel-jgroups
@@ -1248,6 +1678,8 @@ spec:
       - id: jgroups
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jgroups.JGroupsComponent
     camel-jgroups-raft:
       groupId: org.apache.camel
       artifactId: camel-jgroups-raft
@@ -1255,6 +1687,8 @@ spec:
       - id: jgroups-raft
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jgroups.raft.JGroupsRaftComponent
     camel-jing:
       groupId: org.apache.camel
       artifactId: camel-jing
@@ -1262,6 +1696,8 @@ spec:
       - id: jing
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.validator.jing.JingComponent
     camel-jira:
       groupId: org.apache.camel
       artifactId: camel-jira
@@ -1269,6 +1705,8 @@ spec:
       - id: jira
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jira.JiraComponent
     camel-jms:
       groupId: org.apache.camel
       artifactId: camel-jms
@@ -1276,6 +1714,8 @@ spec:
       - id: jms
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jms.JmsComponent
     camel-jmx:
       groupId: org.apache.camel
       artifactId: camel-jmx
@@ -1283,11 +1723,15 @@ spec:
       - id: jmx
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jmx.JMXComponent
     camel-johnzon:
       groupId: org.apache.camel
       artifactId: camel-johnzon
       dataformats:
       - json-johnzon
+      javaTypes:
+      - org.apache.camel.component.johnzon.JohnzonDataFormat
     camel-jolt:
       groupId: org.apache.camel
       artifactId: camel-jolt
@@ -1295,6 +1739,8 @@ spec:
       - id: jolt
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jolt.JoltComponent
     camel-jooq:
       groupId: org.apache.camel
       artifactId: camel-jooq
@@ -1302,6 +1748,8 @@ spec:
       - id: jooq
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jooq.JooqComponent
     camel-jpa:
       groupId: org.apache.camel
       artifactId: camel-jpa
@@ -1309,6 +1757,8 @@ spec:
       - id: jpa
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jpa.JpaComponent
     camel-jsch:
       groupId: org.apache.camel
       artifactId: camel-jsch
@@ -1316,6 +1766,8 @@ spec:
       - id: scp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.scp.ScpComponent
     camel-json-validator:
       groupId: org.apache.camel
       artifactId: camel-json-validator
@@ -1323,16 +1775,22 @@ spec:
       - id: json-validator
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jsonvalidator.JsonValidatorComponent
     camel-jsonapi:
       groupId: org.apache.camel
       artifactId: camel-jsonapi
       dataformats:
       - jsonApi
+      javaTypes:
+      - org.apache.camel.component.jsonapi.JsonApiDataFormat
     camel-jsonpath:
       groupId: org.apache.camel
       artifactId: camel-jsonpath
       languages:
       - jsonpath
+      javaTypes:
+      - org.apache.camel.jsonpath.JsonPathLanguage
     camel-jt400:
       groupId: org.apache.camel
       artifactId: camel-jt400
@@ -1340,38 +1798,40 @@ spec:
       - id: jt400
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.jt400.Jt400Component
     camel-k-loader-groovy:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-groovy
-      version: 1.0.0
       dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
       - groupId: org.apache.camel
         artifactId: camel-groovy
     camel-k-loader-java:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-java
-      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
     camel-k-loader-js:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-js
-      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-knative
     camel-k-loader-kotlin:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-kotlin
-      version: 1.0.0
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
     camel-k-loader-xml:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-xml
-      version: 1.0.0
-    camel-k-runtime-groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-groovy
-      version: 1.0.0
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-groovy
-      - groupId: org.apache.camel
-        artifactId: camel-groovy
     camel-k-runtime-health:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-health
@@ -1380,68 +1840,42 @@ spec:
         artifactId: camel-servlet
       - groupId: org.apache.camel.k
         artifactId: camel-k-runtime-servlet
-    camel-k-runtime-jvm:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-jvm
-      version: 1.0.0
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-runtime-main
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-js
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-xml
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-java
-      - groupId: org.apache.camel
-        artifactId: camel-core-engine
-      - groupId: org.apache.camel
-        artifactId: camel-main
-      - groupId: org.apache.camel
-        artifactId: camel-properties
     camel-k-runtime-knative:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-knative
       dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
       - groupId: org.apache.camel.k
         artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
       - groupId: org.apache.camel.k
         artifactId: camel-knative
       - groupId: org.apache.camel.k
         artifactId: camel-knative-http
-      - groupId: org.apache.camel
-        artifactId: camel-netty4-http
-    camel-k-runtime-kotlin:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-kotlin
-      version: 1.0.0
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-kotlin
     camel-k-runtime-main:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
-      version: 1.0.0
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-core-engine
       - groupId: org.apache.camel
         artifactId: camel-main
-      - groupId: org.apache.camel
-        artifactId: camel-properties
     camel-k-runtime-servlet:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-servlet
       dependencies:
       - groupId: org.apache.camel
         artifactId: camel-servlet
-    camel-k-runtime-yaml:
+    camel-k-runtime-webhook:
       groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-yaml
-      version: 1.0.0
+      artifactId: camel-k-runtime-webhook
       dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel
+        artifactId: camel-webhook
     camel-kafka:
       groupId: org.apache.camel
       artifactId: camel-kafka
@@ -1449,17 +1883,22 @@ spec:
       - id: kafka
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.kafka.KafkaComponent
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
-      version: 1.0.0
       schemes:
       - id: knative
         http: true
         passive: false
       dependencies:
       - groupId: org.apache.camel
-        artifactId: camel-netty4-http
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
     camel-kubernetes:
       groupId: org.apache.camel
       artifactId: camel-kubernetes
@@ -1512,6 +1951,32 @@ spec:
       - id: openshift-builds
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.kubernetes.config_maps.KubernetesConfigMapsComponent
+      - org.apache.camel.component.kubernetes.deployments.KubernetesDeploymentsComponent
+      - org.apache.camel.component.kubernetes.hpa.KubernetesHPAComponent
+      - org.apache.camel.component.kubernetes.job.KubernetesJobComponent
+      - org.apache.camel.component.kubernetes.namespaces.KubernetesNamespacesComponent
+      - org.apache.camel.component.kubernetes.nodes.KubernetesNodesComponent
+      - org.apache.camel.component.kubernetes.persistent_volumes.KubernetesPersistentVolumesComponent
+      - org.apache.camel.component.kubernetes.persistent_volumes_claims.KubernetesPersistentVolumesClaimsComponent
+      - org.apache.camel.component.kubernetes.pods.KubernetesPodsComponent
+      - org.apache.camel.component.kubernetes.replication_controllers.KubernetesReplicationControllersComponent
+      - org.apache.camel.component.kubernetes.resources_quota.KubernetesResourcesQuotaComponent
+      - org.apache.camel.component.kubernetes.secrets.KubernetesSecretsComponent
+      - org.apache.camel.component.kubernetes.service_accounts.KubernetesServiceAccountsComponent
+      - org.apache.camel.component.kubernetes.services.KubernetesServicesComponent
+      - org.apache.camel.component.openshift.build_configs.OpenshiftBuildConfigsComponent
+      - org.apache.camel.component.openshift.builds.OpenshiftBuildsComponent
+    camel-kudu:
+      groupId: org.apache.camel
+      artifactId: camel-kudu
+      schemes:
+      - id: kudu
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kudu.KuduComponent
     camel-language:
       groupId: org.apache.camel
       artifactId: camel-language
@@ -1519,6 +1984,8 @@ spec:
       - id: language
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.language.LanguageComponent
     camel-ldap:
       groupId: org.apache.camel
       artifactId: camel-ldap
@@ -1526,6 +1993,8 @@ spec:
       - id: ldap
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ldap.LdapComponent
     camel-ldif:
       groupId: org.apache.camel
       artifactId: camel-ldif
@@ -1533,13 +2002,8 @@ spec:
       - id: ldif
         http: false
         passive: false
-    camel-linkedin:
-      groupId: org.apache.camel
-      artifactId: camel-linkedin
-      schemes:
-      - id: linkedin
-        http: false
-        passive: false
+      javaTypes:
+      - org.apache.camel.component.ldif.LdifComponent
     camel-log:
       groupId: org.apache.camel
       artifactId: camel-log
@@ -1547,6 +2011,8 @@ spec:
       - id: log
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.log.LogComponent
     camel-lucene:
       groupId: org.apache.camel
       artifactId: camel-lucene
@@ -1554,6 +2020,8 @@ spec:
       - id: lucene
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.lucene.LuceneComponent
     camel-lumberjack:
       groupId: org.apache.camel
       artifactId: camel-lumberjack
@@ -1561,11 +2029,15 @@ spec:
       - id: lumberjack
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.lumberjack.LumberjackComponent
     camel-lzf:
       groupId: org.apache.camel
       artifactId: camel-lzf
       dataformats:
       - lzf
+      javaTypes:
+      - org.apache.camel.dataformat.lzf.LZFDataFormat
     camel-mail:
       groupId: org.apache.camel
       artifactId: camel-mail
@@ -1590,6 +2062,9 @@ spec:
         passive: false
       dataformats:
       - mime-multipart
+      javaTypes:
+      - org.apache.camel.component.mail.MailComponent
+      - org.apache.camel.dataformat.mime.multipart.MimeMultipartDataFormat
     camel-master:
       groupId: org.apache.camel
       artifactId: camel-master
@@ -1597,6 +2072,8 @@ spec:
       - id: master
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.master.MasterComponent
     camel-metrics:
       groupId: org.apache.camel
       artifactId: camel-metrics
@@ -1604,6 +2081,8 @@ spec:
       - id: metrics
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.metrics.MetricsComponent
     camel-micrometer:
       groupId: org.apache.camel
       artifactId: camel-micrometer
@@ -1611,6 +2090,17 @@ spec:
       - id: micrometer
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.micrometer.MicrometerComponent
+    camel-microprofile-metrics:
+      groupId: org.apache.camel
+      artifactId: camel-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.microprofile.metrics.MicroProfileMetricsComponent
     camel-milo:
       groupId: org.apache.camel
       artifactId: camel-milo
@@ -1621,16 +2111,18 @@ spec:
       - id: milo-server
         http: false
         passive: false
-    camel-mina2:
+      javaTypes:
+      - org.apache.camel.component.milo.client.MiloClientComponent
+      - org.apache.camel.component.milo.server.MiloServerComponent
+    camel-mina:
       groupId: org.apache.camel
-      artifactId: camel-mina2
+      artifactId: camel-mina
       schemes:
       - id: mina
         http: false
         passive: false
-      - id: mina2
-        http: false
-        passive: false
+      javaTypes:
+      - org.apache.camel.component.mina.MinaComponent
     camel-mllp:
       groupId: org.apache.camel
       artifactId: camel-mllp
@@ -1638,6 +2130,8 @@ spec:
       - id: mllp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.mllp.MllpComponent
     camel-mock:
       groupId: org.apache.camel
       artifactId: camel-mock
@@ -1645,6 +2139,17 @@ spec:
       - id: mock
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.mock.MockComponent
+    camel-mongodb:
+      groupId: org.apache.camel
+      artifactId: camel-mongodb
+      schemes:
+      - id: mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.MongoDbComponent
     camel-mongodb-gridfs:
       groupId: org.apache.camel
       artifactId: camel-mongodb-gridfs
@@ -1652,20 +2157,8 @@ spec:
       - id: mongodb-gridfs
         http: false
         passive: false
-    camel-mongodb3:
-      groupId: org.apache.camel
-      artifactId: camel-mongodb3
-      schemes:
-      - id: mongodb3
-        http: false
-        passive: false
-    camel-mqtt:
-      groupId: org.apache.camel
-      artifactId: camel-mqtt
-      schemes:
-      - id: mqtt
-        http: false
-        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.gridfs.GridFsComponent
     camel-msv:
       groupId: org.apache.camel
       artifactId: camel-msv
@@ -1673,6 +2166,8 @@ spec:
       - id: msv
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.validator.msv.MsvComponent
     camel-mustache:
       groupId: org.apache.camel
       artifactId: camel-mustache
@@ -1680,6 +2175,8 @@ spec:
       - id: mustache
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.mustache.MustacheComponent
     camel-mvel:
       groupId: org.apache.camel
       artifactId: camel-mvel
@@ -1689,6 +2186,9 @@ spec:
         passive: false
       languages:
       - mvel
+      javaTypes:
+      - org.apache.camel.component.mvel.MvelComponent
+      - org.apache.camel.language.mvel.MvelLanguage
     camel-mybatis:
       groupId: org.apache.camel
       artifactId: camel-mybatis
@@ -1699,6 +2199,9 @@ spec:
       - id: mybatis-bean
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.mybatis.MyBatisComponent
+      - org.apache.camel.component.mybatis.MyBatisBeanComponent
     camel-nagios:
       groupId: org.apache.camel
       artifactId: camel-nagios
@@ -1706,6 +2209,8 @@ spec:
       - id: nagios
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.nagios.NagiosComponent
     camel-nats:
       groupId: org.apache.camel
       artifactId: camel-nats
@@ -1713,26 +2218,35 @@ spec:
       - id: nats
         http: false
         passive: false
-    camel-netty4:
+      javaTypes:
+      - org.apache.camel.component.nats.NatsComponent
+    camel-netty:
       groupId: org.apache.camel
-      artifactId: camel-netty4
+      artifactId: camel-netty
       schemes:
       - id: netty
         http: false
         passive: false
-      - id: netty4
-        http: false
-        passive: false
-    camel-netty4-http:
+      javaTypes:
+      - org.apache.camel.component.netty.NettyComponent
+    camel-netty-http:
       groupId: org.apache.camel
-      artifactId: camel-netty4-http
+      artifactId: camel-netty-http
       schemes:
       - id: netty-http
         http: true
         passive: false
-      - id: netty4-http
-        http: true
+      javaTypes:
+      - org.apache.camel.component.netty.http.NettyHttpComponent
+    camel-nitrite:
+      groupId: org.apache.camel
+      artifactId: camel-nitrite
+      schemes:
+      - id: nitrite
+        http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.nitrite.NitriteComponent
     camel-nsq:
       groupId: org.apache.camel
       artifactId: camel-nsq
@@ -1740,11 +2254,15 @@ spec:
       - id: nsq
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.nsq.NsqComponent
     camel-ognl:
       groupId: org.apache.camel
       artifactId: camel-ognl
       languages:
       - ognl
+      javaTypes:
+      - org.apache.camel.language.ognl.OgnlLanguage
     camel-olingo2:
       groupId: org.apache.camel
       artifactId: camel-olingo2
@@ -1752,6 +2270,8 @@ spec:
       - id: olingo2
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.olingo2.Olingo2Component
     camel-olingo4:
       groupId: org.apache.camel
       artifactId: camel-olingo4
@@ -1759,6 +2279,8 @@ spec:
       - id: olingo4
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.olingo4.Olingo4Component
     camel-openstack:
       groupId: org.apache.camel
       artifactId: camel-openstack
@@ -1781,6 +2303,13 @@ spec:
       - id: openstack-swift
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.openstack.cinder.CinderComponent
+      - org.apache.camel.component.openstack.glance.GlanceComponent
+      - org.apache.camel.component.openstack.keystone.KeystoneComponent
+      - org.apache.camel.component.openstack.neutron.NeutronComponent
+      - org.apache.camel.component.openstack.nova.NovaComponent
+      - org.apache.camel.component.openstack.swift.SwiftComponent
     camel-optaplanner:
       groupId: org.apache.camel
       artifactId: camel-optaplanner
@@ -1788,6 +2317,8 @@ spec:
       - id: optaplanner
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.optaplanner.OptaPlannerComponent
     camel-paho:
       groupId: org.apache.camel
       artifactId: camel-paho
@@ -1795,6 +2326,8 @@ spec:
       - id: paho
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.paho.PahoComponent
     camel-paxlogging:
       groupId: org.apache.camel
       artifactId: camel-paxlogging
@@ -1802,6 +2335,8 @@ spec:
       - id: paxlogging
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.paxlogging.PaxLoggingComponent
     camel-pdf:
       groupId: org.apache.camel
       artifactId: camel-pdf
@@ -1809,6 +2344,8 @@ spec:
       - id: pdf
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.pdf.PdfComponent
     camel-pg-replication-slot:
       groupId: org.apache.camel
       artifactId: camel-pg-replication-slot
@@ -1816,6 +2353,8 @@ spec:
       - id: pg-replication-slot
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.pg.replication.slot.PgReplicationSlotComponent
     camel-pgevent:
       groupId: org.apache.camel
       artifactId: camel-pgevent
@@ -1823,6 +2362,17 @@ spec:
       - id: pgevent
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.pgevent.PgEventComponent
+    camel-platform-http:
+      groupId: org.apache.camel
+      artifactId: camel-platform-http
+      schemes:
+      - id: platform-http
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.platform.http.PlatformHttpComponent
     camel-printer:
       groupId: org.apache.camel
       artifactId: camel-printer
@@ -1830,18 +2380,15 @@ spec:
       - id: lpr
         http: false
         passive: false
-    camel-properties:
-      groupId: org.apache.camel
-      artifactId: camel-properties
-      schemes:
-      - id: properties
-        http: false
-        passive: true
+      javaTypes:
+      - org.apache.camel.component.printer.PrinterComponent
     camel-protobuf:
       groupId: org.apache.camel
       artifactId: camel-protobuf
       dataformats:
       - protobuf
+      javaTypes:
+      - org.apache.camel.dataformat.protobuf.ProtobufDataFormat
     camel-pubnub:
       groupId: org.apache.camel
       artifactId: camel-pubnub
@@ -1849,6 +2396,8 @@ spec:
       - id: pubnub
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.pubnub.PubNubComponent
     camel-pulsar:
       groupId: org.apache.camel
       artifactId: camel-pulsar
@@ -1856,13 +2405,17 @@ spec:
       - id: pulsar
         http: false
         passive: false
-    camel-quartz2:
+      javaTypes:
+      - org.apache.camel.component.pulsar.PulsarComponent
+    camel-quartz:
       groupId: org.apache.camel
-      artifactId: camel-quartz2
+      artifactId: camel-quartz
       schemes:
-      - id: quartz2
+      - id: quartz
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.quartz.QuartzComponent
     camel-quickfix:
       groupId: org.apache.camel
       artifactId: camel-quickfix
@@ -1870,6 +2423,8 @@ spec:
       - id: quickfix
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.quickfixj.QuickfixjComponent
     camel-rabbitmq:
       groupId: org.apache.camel
       artifactId: camel-rabbitmq
@@ -1877,6 +2432,8 @@ spec:
       - id: rabbitmq
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.rabbitmq.RabbitMQComponent
     camel-reactive-streams:
       groupId: org.apache.camel
       artifactId: camel-reactive-streams
@@ -1884,6 +2441,8 @@ spec:
       - id: reactive-streams
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.reactive.streams.ReactiveStreamsComponent
     camel-ref:
       groupId: org.apache.camel
       artifactId: camel-ref
@@ -1891,6 +2450,8 @@ spec:
       - id: ref
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.ref.RefComponent
     camel-rest:
       groupId: org.apache.camel
       artifactId: camel-rest
@@ -1901,6 +2462,9 @@ spec:
       - id: rest-api
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.RestComponent
+      - org.apache.camel.component.rest.RestApiComponent
     camel-rest-swagger:
       groupId: org.apache.camel
       artifactId: camel-rest-swagger
@@ -1908,13 +2472,17 @@ spec:
       - id: rest-swagger
         http: false
         passive: false
-    camel-restlet:
+      javaTypes:
+      - org.apache.camel.component.rest.swagger.RestSwaggerComponent
+    camel-robotframework:
       groupId: org.apache.camel
-      artifactId: camel-restlet
+      artifactId: camel-robotframework
       schemes:
-      - id: restlet
-        http: true
+      - id: robotframework
+        http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.robotframework.RobotFrameworkComponent
     camel-rss:
       groupId: org.apache.camel
       artifactId: camel-rss
@@ -1924,6 +2492,9 @@ spec:
         passive: false
       dataformats:
       - rss
+      javaTypes:
+      - org.apache.camel.component.rss.RssComponent
+      - org.apache.camel.dataformat.rss.RssDataFormat
     camel-saga:
       groupId: org.apache.camel
       artifactId: camel-saga
@@ -1931,6 +2502,8 @@ spec:
       - id: saga
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.saga.SagaComponent
     camel-salesforce:
       groupId: org.apache.camel
       artifactId: camel-salesforce
@@ -1938,6 +2511,8 @@ spec:
       - id: salesforce
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.salesforce.SalesforceComponent
     camel-sap-netweaver:
       groupId: org.apache.camel
       artifactId: camel-sap-netweaver
@@ -1945,6 +2520,8 @@ spec:
       - id: sap-netweaver
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.sap.netweaver.NetWeaverComponent
     camel-saxon:
       groupId: org.apache.camel
       artifactId: camel-saxon
@@ -1954,6 +2531,9 @@ spec:
         passive: false
       languages:
       - xquery
+      javaTypes:
+      - org.apache.camel.component.xquery.XQueryComponent
+      - org.apache.camel.language.xquery.XQueryLanguage
     camel-scheduler:
       groupId: org.apache.camel
       artifactId: camel-scheduler
@@ -1961,6 +2541,8 @@ spec:
       - id: scheduler
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.scheduler.SchedulerComponent
     camel-schematron:
       groupId: org.apache.camel
       artifactId: camel-schematron
@@ -1968,6 +2550,8 @@ spec:
       - id: schematron
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.schematron.SchematronComponent
     camel-seda:
       groupId: org.apache.camel
       artifactId: camel-seda
@@ -1975,6 +2559,8 @@ spec:
       - id: seda
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.seda.SedaComponent
     camel-service:
       groupId: org.apache.camel
       artifactId: camel-service
@@ -1982,6 +2568,8 @@ spec:
       - id: service
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.service.ServiceComponent
     camel-servicenow:
       groupId: org.apache.camel
       artifactId: camel-servicenow
@@ -1989,6 +2577,8 @@ spec:
       - id: servicenow
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.servicenow.ServiceNowComponent
     camel-servlet:
       groupId: org.apache.camel
       artifactId: camel-servlet
@@ -1996,6 +2586,8 @@ spec:
       - id: servlet
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.servlet.ServletComponent
     camel-sip:
       groupId: org.apache.camel
       artifactId: camel-sip
@@ -2006,6 +2598,8 @@ spec:
       - id: sips
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.sip.SipComponent
     camel-sjms:
       groupId: org.apache.camel
       artifactId: camel-sjms
@@ -2016,6 +2610,9 @@ spec:
       - id: sjms-batch
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms.SjmsComponent
+      - org.apache.camel.component.sjms.batch.SjmsBatchComponent
     camel-sjms2:
       groupId: org.apache.camel
       artifactId: camel-sjms2
@@ -2023,6 +2620,8 @@ spec:
       - id: sjms2
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms2.Sjms2Component
     camel-slack:
       groupId: org.apache.camel
       artifactId: camel-slack
@@ -2030,6 +2629,8 @@ spec:
       - id: slack
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.slack.SlackComponent
     camel-smpp:
       groupId: org.apache.camel
       artifactId: camel-smpp
@@ -2040,11 +2641,15 @@ spec:
       - id: smpps
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.smpp.SmppComponent
     camel-snakeyaml:
       groupId: org.apache.camel
       artifactId: camel-snakeyaml
       dataformats:
       - yaml-snakeyaml
+      javaTypes:
+      - org.apache.camel.component.snakeyaml.SnakeYAMLDataFormat
     camel-snmp:
       groupId: org.apache.camel
       artifactId: camel-snmp
@@ -2052,11 +2657,15 @@ spec:
       - id: snmp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.snmp.SnmpComponent
     camel-soap:
       groupId: org.apache.camel
       artifactId: camel-soap
       dataformats:
       - soapjaxb
+      javaTypes:
+      - org.apache.camel.dataformat.soap.SoapJaxbDataFormat
     camel-solr:
       groupId: org.apache.camel
       artifactId: camel-solr
@@ -2070,6 +2679,8 @@ spec:
       - id: solrCloud
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.solr.SolrComponent
     camel-soroush:
       groupId: org.apache.camel
       artifactId: camel-soroush
@@ -2077,6 +2688,8 @@ spec:
       - id: soroush
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.soroushbot.component.SoroushBotComponent
     camel-spark:
       groupId: org.apache.camel
       artifactId: camel-spark
@@ -2084,6 +2697,8 @@ spec:
       - id: spark
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.spark.SparkComponent
     camel-spark-rest:
       groupId: org.apache.camel
       artifactId: camel-spark-rest
@@ -2091,6 +2706,8 @@ spec:
       - id: spark-rest
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.sparkrest.SparkComponent
     camel-splunk:
       groupId: org.apache.camel
       artifactId: camel-splunk
@@ -2098,6 +2715,8 @@ spec:
       - id: splunk
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.splunk.SplunkComponent
     camel-spring:
       groupId: org.apache.camel
       artifactId: camel-spring
@@ -2107,6 +2726,9 @@ spec:
         passive: false
       languages:
       - spel
+      javaTypes:
+      - org.apache.camel.component.event.EventComponent
+      - org.apache.camel.language.spel.SpelLanguage
     camel-spring-batch:
       groupId: org.apache.camel
       artifactId: camel-spring-batch
@@ -2114,6 +2736,8 @@ spec:
       - id: spring-batch
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.spring.batch.SpringBatchComponent
     camel-spring-integration:
       groupId: org.apache.camel
       artifactId: camel-spring-integration
@@ -2121,6 +2745,8 @@ spec:
       - id: spring-integration
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.spring.integration.SpringIntegrationComponent
     camel-spring-ldap:
       groupId: org.apache.camel
       artifactId: camel-spring-ldap
@@ -2128,6 +2754,8 @@ spec:
       - id: spring-ldap
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.springldap.SpringLdapComponent
     camel-spring-redis:
       groupId: org.apache.camel
       artifactId: camel-spring-redis
@@ -2135,6 +2763,8 @@ spec:
       - id: spring-redis
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.redis.RedisComponent
     camel-spring-ws:
       groupId: org.apache.camel
       artifactId: camel-spring-ws
@@ -2142,6 +2772,8 @@ spec:
       - id: spring-ws
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.spring.ws.SpringWebserviceComponent
     camel-sql:
       groupId: org.apache.camel
       artifactId: camel-sql
@@ -2152,6 +2784,9 @@ spec:
       - id: sql-stored
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.sql.SqlComponent
+      - org.apache.camel.component.sql.stored.SqlStoredComponent
     camel-ssh:
       groupId: org.apache.camel
       artifactId: camel-ssh
@@ -2159,6 +2794,8 @@ spec:
       - id: ssh
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.ssh.SshComponent
     camel-stax:
       groupId: org.apache.camel
       artifactId: camel-stax
@@ -2166,6 +2803,8 @@ spec:
       - id: stax
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.stax.StAXComponent
     camel-stomp:
       groupId: org.apache.camel
       artifactId: camel-stomp
@@ -2173,6 +2812,8 @@ spec:
       - id: stomp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.stomp.StompComponent
     camel-stream:
       groupId: org.apache.camel
       artifactId: camel-stream
@@ -2180,6 +2821,8 @@ spec:
       - id: stream
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.stream.StreamComponent
     camel-stringtemplate:
       groupId: org.apache.camel
       artifactId: camel-stringtemplate
@@ -2187,6 +2830,8 @@ spec:
       - id: string-template
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.stringtemplate.StringTemplateComponent
     camel-stub:
       groupId: org.apache.camel
       artifactId: camel-stub
@@ -2194,21 +2839,29 @@ spec:
       - id: stub
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.stub.StubComponent
     camel-syslog:
       groupId: org.apache.camel
       artifactId: camel-syslog
       dataformats:
       - syslog
+      javaTypes:
+      - org.apache.camel.component.syslog.SyslogDataFormat
     camel-tagsoup:
       groupId: org.apache.camel
       artifactId: camel-tagsoup
       dataformats:
       - tidyMarkup
+      javaTypes:
+      - org.apache.camel.dataformat.tagsoup.TidyMarkupDataFormat
     camel-tarfile:
       groupId: org.apache.camel
       artifactId: camel-tarfile
       dataformats:
       - tarfile
+      javaTypes:
+      - org.apache.camel.dataformat.tarfile.TarFileDataFormat
     camel-telegram:
       groupId: org.apache.camel
       artifactId: camel-telegram
@@ -2216,6 +2869,8 @@ spec:
       - id: telegram
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.telegram.TelegramComponent
     camel-thrift:
       groupId: org.apache.camel
       artifactId: camel-thrift
@@ -2225,6 +2880,9 @@ spec:
         passive: false
       dataformats:
       - thrift
+      javaTypes:
+      - org.apache.camel.component.thrift.ThriftComponent
+      - org.apache.camel.dataformat.thrift.ThriftDataFormat
     camel-tika:
       groupId: org.apache.camel
       artifactId: camel-tika
@@ -2232,6 +2890,8 @@ spec:
       - id: tika
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.tika.TikaComponent
     camel-timer:
       groupId: org.apache.camel
       artifactId: camel-timer
@@ -2239,6 +2899,8 @@ spec:
       - id: timer
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.timer.TimerComponent
     camel-twilio:
       groupId: org.apache.camel
       artifactId: camel-twilio
@@ -2246,6 +2908,8 @@ spec:
       - id: twilio
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.twilio.TwilioComponent
     camel-twitter:
       groupId: org.apache.camel
       artifactId: camel-twitter
@@ -2256,12 +2920,13 @@ spec:
       - id: twitter-search
         http: false
         passive: false
-      - id: twitter-streaming
-        http: false
-        passive: false
       - id: twitter-timeline
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.twitter.directmessage.TwitterDirectMessageComponent
+      - org.apache.camel.component.twitter.search.TwitterSearchComponent
+      - org.apache.camel.component.twitter.timeline.TwitterTimelineComponent
     camel-undertow:
       groupId: org.apache.camel
       artifactId: camel-undertow
@@ -2269,6 +2934,8 @@ spec:
       - id: undertow
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.undertow.UndertowComponent
     camel-univocity-parsers:
       groupId: org.apache.camel
       artifactId: camel-univocity-parsers
@@ -2276,6 +2943,10 @@ spec:
       - univocity-csv
       - univocity-fixed
       - univocity-tsv
+      javaTypes:
+      - org.apache.camel.dataformat.univocity.UniVocityCsvDataFormat
+      - org.apache.camel.dataformat.univocity.UniVocityFixedWidthDataFormat
+      - org.apache.camel.dataformat.univocity.UniVocityTsvDataFormat
     camel-validator:
       groupId: org.apache.camel
       artifactId: camel-validator
@@ -2283,6 +2954,8 @@ spec:
       - id: validator
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.validator.ValidatorComponent
     camel-velocity:
       groupId: org.apache.camel
       artifactId: camel-velocity
@@ -2290,6 +2963,8 @@ spec:
       - id: velocity
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.velocity.VelocityComponent
     camel-vertx:
       groupId: org.apache.camel
       artifactId: camel-vertx
@@ -2297,6 +2972,8 @@ spec:
       - id: vertx
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.VertxComponent
     camel-vm:
       groupId: org.apache.camel
       artifactId: camel-vm
@@ -2304,6 +2981,8 @@ spec:
       - id: vm
         http: false
         passive: true
+      javaTypes:
+      - org.apache.camel.component.vm.VmComponent
     camel-weather:
       groupId: org.apache.camel
       artifactId: camel-weather
@@ -2311,6 +2990,8 @@ spec:
       - id: weather
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.weather.WeatherComponent
     camel-web3j:
       groupId: org.apache.camel
       artifactId: camel-web3j
@@ -2318,13 +2999,17 @@ spec:
       - id: web3j
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.web3j.Web3jComponent
     camel-webhook:
       groupId: org.apache.camel
       artifactId: camel-webhook
       schemes:
       - id: webhook
-        http: false
+        http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.webhook.WebhookComponent
     camel-websocket:
       groupId: org.apache.camel
       artifactId: camel-websocket
@@ -2332,6 +3017,8 @@ spec:
       - id: websocket
         http: true
         passive: false
+      javaTypes:
+      - org.apache.camel.component.websocket.WebsocketComponent
     camel-websocket-jsr356:
       groupId: org.apache.camel
       artifactId: camel-websocket-jsr356
@@ -2339,6 +3026,8 @@ spec:
       - id: websocket-jsr356
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.websocket.jsr356.JSR356WebSocketComponent
     camel-wordpress:
       groupId: org.apache.camel
       artifactId: camel-wordpress
@@ -2346,6 +3035,8 @@ spec:
       - id: wordpress
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.wordpress.WordpressComponent
     camel-xchange:
       groupId: org.apache.camel
       artifactId: camel-xchange
@@ -2353,6 +3044,17 @@ spec:
       - id: xchange
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.xchange.XChangeComponent
+    camel-xj:
+      groupId: org.apache.camel
+      artifactId: camel-xj
+      schemes:
+      - id: xj
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xj.XJComponent
     camel-xmlsecurity:
       groupId: org.apache.camel
       artifactId: camel-xmlsecurity
@@ -2362,6 +3064,9 @@ spec:
         passive: false
       dataformats:
       - secureXML
+      javaTypes:
+      - org.apache.camel.component.xmlsecurity.XmlSignatureComponent
+      - org.apache.camel.dataformat.xmlsecurity.XMLSecurityDataFormat
     camel-xmpp:
       groupId: org.apache.camel
       artifactId: camel-xmpp
@@ -2369,11 +3074,15 @@ spec:
       - id: xmpp
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.xmpp.XmppComponent
     camel-xpath:
       groupId: org.apache.camel
       artifactId: camel-xpath
       languages:
       - xpath
+      javaTypes:
+      - org.apache.camel.language.xpath.XPathLanguage
     camel-xslt:
       groupId: org.apache.camel
       artifactId: camel-xslt
@@ -2381,12 +3090,26 @@ spec:
       - id: xslt
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.XsltComponent
+    camel-xslt-saxon:
+      groupId: org.apache.camel
+      artifactId: camel-xslt-saxon
+      schemes:
+      - id: xslt-saxon
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.saxon.XsltSaxonComponent
     camel-xstream:
       groupId: org.apache.camel
       artifactId: camel-xstream
       dataformats:
       - json-xstream
       - xstream
+      javaTypes:
+      - org.apache.camel.dataformat.xstream.JsonDataFormat
+      - org.apache.camel.dataformat.xstream.XStreamDataFormat
     camel-yammer:
       groupId: org.apache.camel
       artifactId: camel-yammer
@@ -2394,6 +3117,8 @@ spec:
       - id: yammer
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.yammer.YammerComponent
     camel-zendesk:
       groupId: org.apache.camel
       artifactId: camel-zendesk
@@ -2401,17 +3126,24 @@ spec:
       - id: zendesk
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.zendesk.ZendeskComponent
     camel-zip-deflater:
       groupId: org.apache.camel
       artifactId: camel-zip-deflater
       dataformats:
       - gzipdeflater
       - zipdeflater
+      javaTypes:
+      - org.apache.camel.dataformat.deflater.GzipDeflaterDataFormat
+      - org.apache.camel.dataformat.deflater.ZipDeflaterDataFormat
     camel-zipfile:
       groupId: org.apache.camel
       artifactId: camel-zipfile
       dataformats:
       - zipfile
+      javaTypes:
+      - org.apache.camel.dataformat.zipfile.ZipFileDataFormat
     camel-zookeeper:
       groupId: org.apache.camel
       artifactId: camel-zookeeper
@@ -2419,6 +3151,8 @@ spec:
       - id: zookeeper
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.zookeeper.ZooKeeperComponent
     camel-zookeeper-master:
       groupId: org.apache.camel
       artifactId: camel-zookeeper-master
@@ -2426,7 +3160,4854 @@ spec:
       - id: zookeeper-master
         http: false
         passive: false
+      javaTypes:
+      - org.apache.camel.component.zookeepermaster.MasterComponent
 
+`
+	Resources["camel-catalog-3.0.0-1.0.9.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1
+kind: CamelCatalog
+metadata:
+  name: camel-catalog-3.0.0-1.0.9
+  labels:
+    app: camel-k
+    camel.apache.org/catalog.version: 3.0.0
+    camel.apache.org/catalog.loader.version: 3.0.0
+    camel.apache.org/runtime.version: 1.0.9
+spec:
+  version: 3.0.0
+  runtimeVersion: 1.0.9
+  artifacts:
+    camel-activemq:
+      groupId: org.apache.camel
+      artifactId: camel-activemq
+      schemes:
+      - id: activemq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.activemq.ActiveMQComponent
+    camel-ahc:
+      groupId: org.apache.camel
+      artifactId: camel-ahc
+      schemes:
+      - id: ahc
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ahc.AhcComponent
+    camel-ahc-ws:
+      groupId: org.apache.camel
+      artifactId: camel-ahc-ws
+      schemes:
+      - id: ahc-ws
+        http: true
+        passive: false
+      - id: ahc-wss
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ahc.ws.WsComponent
+    camel-amqp:
+      groupId: org.apache.camel
+      artifactId: camel-amqp
+      schemes:
+      - id: amqp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.amqp.AMQPComponent
+    camel-any23:
+      groupId: org.apache.camel
+      artifactId: camel-any23
+      dataformats:
+      - any23
+      javaTypes:
+      - org.apache.camel.dataformat.any23.Any23DataFormat
+    camel-apns:
+      groupId: org.apache.camel
+      artifactId: camel-apns
+      schemes:
+      - id: apns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.apns.ApnsComponent
+    camel-as2:
+      groupId: org.apache.camel
+      artifactId: camel-as2
+      schemes:
+      - id: as2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.as2.AS2Component
+    camel-asn1:
+      groupId: org.apache.camel
+      artifactId: camel-asn1
+      dataformats:
+      - asn1
+      javaTypes:
+      - org.apache.camel.dataformat.asn1.ASN1DataFormat
+    camel-asterisk:
+      groupId: org.apache.camel
+      artifactId: camel-asterisk
+      schemes:
+      - id: asterisk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.asterisk.AsteriskComponent
+    camel-atmos:
+      groupId: org.apache.camel
+      artifactId: camel-atmos
+      schemes:
+      - id: atmos
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atmos.AtmosComponent
+    camel-atmosphere-websocket:
+      groupId: org.apache.camel
+      artifactId: camel-atmosphere-websocket
+      schemes:
+      - id: atmosphere-websocket
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atmosphere.websocket.WebsocketComponent
+    camel-atom:
+      groupId: org.apache.camel
+      artifactId: camel-atom
+      schemes:
+      - id: atom
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atom.AtomComponent
+    camel-atomix:
+      groupId: org.apache.camel
+      artifactId: camel-atomix
+      schemes:
+      - id: atomix-map
+        http: false
+        passive: false
+      - id: atomix-messaging
+        http: false
+        passive: false
+      - id: atomix-multimap
+        http: false
+        passive: false
+      - id: atomix-queue
+        http: false
+        passive: false
+      - id: atomix-set
+        http: false
+        passive: false
+      - id: atomix-value
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atomix.client.map.AtomixMapComponent
+      - org.apache.camel.component.atomix.client.messaging.AtomixMessagingComponent
+      - org.apache.camel.component.atomix.client.multimap.AtomixMultiMapComponent
+      - org.apache.camel.component.atomix.client.queue.AtomixQueueComponent
+      - org.apache.camel.component.atomix.client.set.AtomixSetComponent
+      - org.apache.camel.component.atomix.client.value.AtomixValueComponent
+    camel-avro:
+      groupId: org.apache.camel
+      artifactId: camel-avro
+      schemes:
+      - id: avro
+        http: false
+        passive: false
+      dataformats:
+      - avro
+      javaTypes:
+      - org.apache.camel.component.avro.AvroComponent
+      - org.apache.camel.dataformat.avro.AvroDataFormat
+    camel-aws-cw:
+      groupId: org.apache.camel
+      artifactId: camel-aws-cw
+      schemes:
+      - id: aws-cw
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.cw.CwComponent
+    camel-aws-ddb:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ddb
+      schemes:
+      - id: aws-ddb
+        http: false
+        passive: false
+      - id: aws-ddbstream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ddb.DdbComponent
+      - org.apache.camel.component.aws.ddbstream.DdbStreamComponent
+    camel-aws-ec2:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ec2
+      schemes:
+      - id: aws-ec2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ec2.EC2Component
+    camel-aws-ecs:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ecs
+      schemes:
+      - id: aws-ecs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ecs.ECSComponent
+    camel-aws-eks:
+      groupId: org.apache.camel
+      artifactId: camel-aws-eks
+      schemes:
+      - id: aws-eks
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.eks.EKSComponent
+    camel-aws-iam:
+      groupId: org.apache.camel
+      artifactId: camel-aws-iam
+      schemes:
+      - id: aws-iam
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.iam.IAMComponent
+    camel-aws-kinesis:
+      groupId: org.apache.camel
+      artifactId: camel-aws-kinesis
+      schemes:
+      - id: aws-kinesis
+        http: false
+        passive: false
+      - id: aws-kinesis-firehose
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.kinesis.KinesisComponent
+      - org.apache.camel.component.aws.firehose.KinesisFirehoseComponent
+    camel-aws-kms:
+      groupId: org.apache.camel
+      artifactId: camel-aws-kms
+      schemes:
+      - id: aws-kms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.kms.KMSComponent
+    camel-aws-lambda:
+      groupId: org.apache.camel
+      artifactId: camel-aws-lambda
+      schemes:
+      - id: aws-lambda
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.lambda.LambdaComponent
+    camel-aws-mq:
+      groupId: org.apache.camel
+      artifactId: camel-aws-mq
+      schemes:
+      - id: aws-mq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.mq.MQComponent
+    camel-aws-msk:
+      groupId: org.apache.camel
+      artifactId: camel-aws-msk
+      schemes:
+      - id: aws-msk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.msk.MSKComponent
+    camel-aws-s3:
+      groupId: org.apache.camel
+      artifactId: camel-aws-s3
+      schemes:
+      - id: aws-s3
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.s3.S3Component
+    camel-aws-sdb:
+      groupId: org.apache.camel
+      artifactId: camel-aws-sdb
+      schemes:
+      - id: aws-sdb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sdb.SdbComponent
+    camel-aws-ses:
+      groupId: org.apache.camel
+      artifactId: camel-aws-ses
+      schemes:
+      - id: aws-ses
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ses.SesComponent
+    camel-aws-sns:
+      groupId: org.apache.camel
+      artifactId: camel-aws-sns
+      schemes:
+      - id: aws-sns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sns.SnsComponent
+    camel-aws-sqs:
+      groupId: org.apache.camel
+      artifactId: camel-aws-sqs
+      schemes:
+      - id: aws-sqs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sqs.SqsComponent
+    camel-aws-swf:
+      groupId: org.apache.camel
+      artifactId: camel-aws-swf
+      schemes:
+      - id: aws-swf
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.swf.SWFComponent
+    camel-aws-translate:
+      groupId: org.apache.camel
+      artifactId: camel-aws-translate
+      schemes:
+      - id: aws-translate
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.translate.TranslateComponent
+    camel-azure:
+      groupId: org.apache.camel
+      artifactId: camel-azure
+      schemes:
+      - id: azure-blob
+        http: false
+        passive: false
+      - id: azure-queue
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.blob.BlobServiceComponent
+      - org.apache.camel.component.azure.queue.QueueServiceComponent
+    camel-barcode:
+      groupId: org.apache.camel
+      artifactId: camel-barcode
+      dataformats:
+      - barcode
+      javaTypes:
+      - org.apache.camel.dataformat.barcode.BarcodeDataFormat
+    camel-base:
+      groupId: org.apache.camel
+      artifactId: camel-base
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+      javaTypes:
+      - org.apache.camel.language.constant.ConstantLanguage
+      - org.apache.camel.language.property.ExchangePropertyLanguage
+      - org.apache.camel.language.simple.FileLanguage
+      - org.apache.camel.language.header.HeaderLanguage
+      - org.apache.camel.language.ref.RefLanguage
+      - org.apache.camel.language.simple.SimpleLanguage
+      - org.apache.camel.language.tokenizer.TokenizeLanguage
+    camel-base64:
+      groupId: org.apache.camel
+      artifactId: camel-base64
+      dataformats:
+      - base64
+      javaTypes:
+      - org.apache.camel.dataformat.base64.Base64DataFormat
+    camel-bean:
+      groupId: org.apache.camel
+      artifactId: camel-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
+      javaTypes:
+      - org.apache.camel.component.bean.BeanComponent
+      - org.apache.camel.component.beanclass.ClassComponent
+      - org.apache.camel.language.bean.BeanLanguage
+    camel-bean-validator:
+      groupId: org.apache.camel
+      artifactId: camel-bean-validator
+      schemes:
+      - id: bean-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.bean.validator.BeanValidatorComponent
+    camel-beanio:
+      groupId: org.apache.camel
+      artifactId: camel-beanio
+      dataformats:
+      - beanio
+      javaTypes:
+      - org.apache.camel.dataformat.beanio.BeanIODataFormat
+    camel-beanstalk:
+      groupId: org.apache.camel
+      artifactId: camel-beanstalk
+      schemes:
+      - id: beanstalk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.beanstalk.BeanstalkComponent
+    camel-bindy:
+      groupId: org.apache.camel
+      artifactId: camel-bindy
+      dataformats:
+      - bindy-csv
+      - bindy-fixed
+      - bindy-kvp
+      javaTypes:
+      - org.apache.camel.dataformat.bindy.csv.BindyCsvDataFormat
+      - org.apache.camel.dataformat.bindy.fixed.BindyFixedLengthDataFormat
+      - org.apache.camel.dataformat.bindy.kvp.BindyKeyValuePairDataFormat
+    camel-bonita:
+      groupId: org.apache.camel
+      artifactId: camel-bonita
+      schemes:
+      - id: bonita
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.bonita.BonitaComponent
+    camel-box:
+      groupId: org.apache.camel
+      artifactId: camel-box
+      schemes:
+      - id: box
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.box.BoxComponent
+    camel-braintree:
+      groupId: org.apache.camel
+      artifactId: camel-braintree
+      schemes:
+      - id: braintree
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.braintree.BraintreeComponent
+    camel-browse:
+      groupId: org.apache.camel
+      artifactId: camel-browse
+      schemes:
+      - id: browse
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.browse.BrowseComponent
+    camel-caffeine:
+      groupId: org.apache.camel
+      artifactId: camel-caffeine
+      schemes:
+      - id: caffeine-cache
+        http: false
+        passive: false
+      - id: caffeine-loadcache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.caffeine.cache.CaffeineCacheComponent
+      - org.apache.camel.component.caffeine.load.CaffeineLoadCacheComponent
+    camel-cassandraql:
+      groupId: org.apache.camel
+      artifactId: camel-cassandraql
+      schemes:
+      - id: cql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cassandra.CassandraComponent
+    camel-cbor:
+      groupId: org.apache.camel
+      artifactId: camel-cbor
+      dataformats:
+      - cbor
+      javaTypes:
+      - org.apache.camel.component.cbor.CBORDataFormat
+    camel-chatscript:
+      groupId: org.apache.camel
+      artifactId: camel-chatscript
+      schemes:
+      - id: chatscript
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.chatscript.ChatScriptComponent
+    camel-chunk:
+      groupId: org.apache.camel
+      artifactId: camel-chunk
+      schemes:
+      - id: chunk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.chunk.ChunkComponent
+    camel-cm-sms:
+      groupId: org.apache.camel
+      artifactId: camel-cm-sms
+      schemes:
+      - id: cm-sms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cm.CMComponent
+    camel-cmis:
+      groupId: org.apache.camel
+      artifactId: camel-cmis
+      schemes:
+      - id: cmis
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cmis.CMISComponent
+    camel-coap:
+      groupId: org.apache.camel
+      artifactId: camel-coap
+      schemes:
+      - id: coap
+        http: false
+        passive: false
+      - id: coaps
+        http: false
+        passive: false
+      - id: coap+tcp
+        http: false
+        passive: false
+      - id: coaps+tcp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.coap.CoAPComponent
+    camel-cometd:
+      groupId: org.apache.camel
+      artifactId: camel-cometd
+      schemes:
+      - id: cometd
+        http: false
+        passive: false
+      - id: cometds
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cometd.CometdComponent
+    camel-consul:
+      groupId: org.apache.camel
+      artifactId: camel-consul
+      schemes:
+      - id: consul
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.consul.ConsulComponent
+    camel-controlbus:
+      groupId: org.apache.camel
+      artifactId: camel-controlbus
+      schemes:
+      - id: controlbus
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.controlbus.ControlBusComponent
+    camel-corda:
+      groupId: org.apache.camel
+      artifactId: camel-corda
+      schemes:
+      - id: corda
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.corda.CordaComponent
+    camel-couchbase:
+      groupId: org.apache.camel
+      artifactId: camel-couchbase
+      schemes:
+      - id: couchbase
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.couchbase.CouchbaseComponent
+    camel-couchdb:
+      groupId: org.apache.camel
+      artifactId: camel-couchdb
+      schemes:
+      - id: couchdb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.couchdb.CouchDbComponent
+    camel-crypto:
+      groupId: org.apache.camel
+      artifactId: camel-crypto
+      schemes:
+      - id: crypto
+        http: false
+        passive: false
+      dataformats:
+      - crypto
+      - pgp
+      javaTypes:
+      - org.apache.camel.component.crypto.DigitalSignatureComponent
+      - org.apache.camel.converter.crypto.CryptoDataFormat
+      - org.apache.camel.converter.crypto.PGPDataFormat
+    camel-crypto-cms:
+      groupId: org.apache.camel
+      artifactId: camel-crypto-cms
+      schemes:
+      - id: crypto-cms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.crypto.cms.CryptoCmsComponent
+    camel-csv:
+      groupId: org.apache.camel
+      artifactId: camel-csv
+      dataformats:
+      - csv
+      javaTypes:
+      - org.apache.camel.dataformat.csv.CsvDataFormat
+    camel-cxf:
+      groupId: org.apache.camel
+      artifactId: camel-cxf
+      schemes:
+      - id: cxf
+        http: true
+        passive: false
+      - id: cxfrs
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cxf.CxfComponent
+      - org.apache.camel.component.cxf.jaxrs.CxfRsComponent
+    camel-dataformat:
+      groupId: org.apache.camel
+      artifactId: camel-dataformat
+      schemes:
+      - id: dataformat
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.dataformat.DataFormatComponent
+    camel-dataset:
+      groupId: org.apache.camel
+      artifactId: camel-dataset
+      schemes:
+      - id: dataset
+        http: false
+        passive: true
+      - id: dataset-test
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dataset.DataSetComponent
+      - org.apache.camel.component.dataset.DataSetTestComponent
+    camel-debezium-mongodb:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-mongodb
+      schemes:
+      - id: debezium-mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumMongodbComponent
+    camel-debezium-mysql:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-mysql
+      schemes:
+      - id: debezium-mysql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumMySqlComponent
+    camel-debezium-postgres:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-postgres
+      schemes:
+      - id: debezium-postgres
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumPostgresComponent
+    camel-debezium-sqlserver:
+      groupId: org.apache.camel
+      artifactId: camel-debezium-sqlserver
+      schemes:
+      - id: debezium-sqlserver
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumSqlserverComponent
+    camel-digitalocean:
+      groupId: org.apache.camel
+      artifactId: camel-digitalocean
+      schemes:
+      - id: digitalocean
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.digitalocean.DigitalOceanComponent
+    camel-direct:
+      groupId: org.apache.camel
+      artifactId: camel-direct
+      schemes:
+      - id: direct
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.direct.DirectComponent
+    camel-directvm:
+      groupId: org.apache.camel
+      artifactId: camel-directvm
+      schemes:
+      - id: direct-vm
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.directvm.DirectVmComponent
+    camel-disruptor:
+      groupId: org.apache.camel
+      artifactId: camel-disruptor
+      schemes:
+      - id: disruptor
+        http: false
+        passive: false
+      - id: disruptor-vm
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.disruptor.DisruptorComponent
+      - org.apache.camel.component.disruptor.vm.DisruptorVmComponent
+    camel-dns:
+      groupId: org.apache.camel
+      artifactId: camel-dns
+      schemes:
+      - id: dns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dns.DnsComponent
+    camel-docker:
+      groupId: org.apache.camel
+      artifactId: camel-docker
+      schemes:
+      - id: docker
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.docker.DockerComponent
+    camel-dozer:
+      groupId: org.apache.camel
+      artifactId: camel-dozer
+      schemes:
+      - id: dozer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dozer.DozerComponent
+    camel-drill:
+      groupId: org.apache.camel
+      artifactId: camel-drill
+      schemes:
+      - id: drill
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.drill.DrillComponent
+    camel-dropbox:
+      groupId: org.apache.camel
+      artifactId: camel-dropbox
+      schemes:
+      - id: dropbox
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dropbox.DropboxComponent
+    camel-ehcache:
+      groupId: org.apache.camel
+      artifactId: camel-ehcache
+      schemes:
+      - id: ehcache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ehcache.EhcacheComponent
+    camel-elasticsearch-rest:
+      groupId: org.apache.camel
+      artifactId: camel-elasticsearch-rest
+      schemes:
+      - id: elasticsearch-rest
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.elasticsearch.ElasticsearchComponent
+    camel-elsql:
+      groupId: org.apache.camel
+      artifactId: camel-elsql
+      schemes:
+      - id: elsql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.elsql.ElsqlComponent
+    camel-etcd:
+      groupId: org.apache.camel
+      artifactId: camel-etcd
+      schemes:
+      - id: etcd
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.etcd.EtcdComponent
+    camel-eventadmin:
+      groupId: org.apache.camel
+      artifactId: camel-eventadmin
+      schemes:
+      - id: eventadmin
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.eventadmin.EventAdminComponent
+    camel-exec:
+      groupId: org.apache.camel
+      artifactId: camel-exec
+      schemes:
+      - id: exec
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.exec.ExecComponent
+    camel-facebook:
+      groupId: org.apache.camel
+      artifactId: camel-facebook
+      schemes:
+      - id: facebook
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.facebook.FacebookComponent
+    camel-fastjson:
+      groupId: org.apache.camel
+      artifactId: camel-fastjson
+      dataformats:
+      - json-fastjson
+      javaTypes:
+      - org.apache.camel.component.fastjson.FastjsonDataFormat
+    camel-fhir:
+      groupId: org.apache.camel
+      artifactId: camel-fhir
+      schemes:
+      - id: fhir
+        http: false
+        passive: false
+      dataformats:
+      - fhirJson
+      - fhirXml
+      javaTypes:
+      - org.apache.camel.component.fhir.FhirComponent
+      - org.apache.camel.component.fhir.FhirJsonDataFormat
+      - org.apache.camel.component.fhir.FhirXmlDataFormat
+    camel-file:
+      groupId: org.apache.camel
+      artifactId: camel-file
+      schemes:
+      - id: file
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.FileComponent
+    camel-file-watch:
+      groupId: org.apache.camel
+      artifactId: camel-file-watch
+      schemes:
+      - id: file-watch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.watch.FileWatchComponent
+    camel-flatpack:
+      groupId: org.apache.camel
+      artifactId: camel-flatpack
+      schemes:
+      - id: flatpack
+        http: false
+        passive: false
+      dataformats:
+      - flatpack
+      javaTypes:
+      - org.apache.camel.component.flatpack.FlatpackComponent
+      - org.apache.camel.dataformat.flatpack.FlatpackDataFormat
+    camel-flink:
+      groupId: org.apache.camel
+      artifactId: camel-flink
+      schemes:
+      - id: flink
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.flink.FlinkComponent
+    camel-fop:
+      groupId: org.apache.camel
+      artifactId: camel-fop
+      schemes:
+      - id: fop
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.fop.FopComponent
+    camel-freemarker:
+      groupId: org.apache.camel
+      artifactId: camel-freemarker
+      schemes:
+      - id: freemarker
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.freemarker.FreemarkerComponent
+    camel-ftp:
+      groupId: org.apache.camel
+      artifactId: camel-ftp
+      schemes:
+      - id: ftp
+        http: false
+        passive: false
+      - id: ftps
+        http: false
+        passive: false
+      - id: sftp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.remote.FtpComponent
+      - org.apache.camel.component.file.remote.FtpsComponent
+      - org.apache.camel.component.file.remote.SftpComponent
+    camel-ganglia:
+      groupId: org.apache.camel
+      artifactId: camel-ganglia
+      schemes:
+      - id: ganglia
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ganglia.GangliaComponent
+    camel-geocoder:
+      groupId: org.apache.camel
+      artifactId: camel-geocoder
+      schemes:
+      - id: geocoder
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.geocoder.GeoCoderComponent
+    camel-git:
+      groupId: org.apache.camel
+      artifactId: camel-git
+      schemes:
+      - id: git
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.git.GitComponent
+    camel-github:
+      groupId: org.apache.camel
+      artifactId: camel-github
+      schemes:
+      - id: github
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.github.GitHubComponent
+    camel-google-bigquery:
+      groupId: org.apache.camel
+      artifactId: camel-google-bigquery
+      schemes:
+      - id: google-bigquery
+        http: false
+        passive: false
+      - id: google-bigquery-sql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.bigquery.GoogleBigQueryComponent
+      - org.apache.camel.component.google.bigquery.sql.GoogleBigQuerySQLComponent
+    camel-google-calendar:
+      groupId: org.apache.camel
+      artifactId: camel-google-calendar
+      schemes:
+      - id: google-calendar
+        http: false
+        passive: false
+      - id: google-calendar-stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.calendar.GoogleCalendarComponent
+      - org.apache.camel.component.google.calendar.stream.GoogleCalendarStreamComponent
+    camel-google-drive:
+      groupId: org.apache.camel
+      artifactId: camel-google-drive
+      schemes:
+      - id: google-drive
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.drive.GoogleDriveComponent
+    camel-google-mail:
+      groupId: org.apache.camel
+      artifactId: camel-google-mail
+      schemes:
+      - id: google-mail
+        http: false
+        passive: false
+      - id: google-mail-stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.mail.GoogleMailComponent
+      - org.apache.camel.component.google.mail.stream.GoogleMailStreamComponent
+    camel-google-pubsub:
+      groupId: org.apache.camel
+      artifactId: camel-google-pubsub
+      schemes:
+      - id: google-pubsub
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.pubsub.GooglePubsubComponent
+    camel-google-sheets:
+      groupId: org.apache.camel
+      artifactId: camel-google-sheets
+      schemes:
+      - id: google-sheets
+        http: false
+        passive: false
+      - id: google-sheets-stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.sheets.GoogleSheetsComponent
+      - org.apache.camel.component.google.sheets.stream.GoogleSheetsStreamComponent
+    camel-gora:
+      groupId: org.apache.camel
+      artifactId: camel-gora
+      schemes:
+      - id: gora
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.gora.GoraComponent
+    camel-grape:
+      groupId: org.apache.camel
+      artifactId: camel-grape
+      schemes:
+      - id: grape
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.grape.GrapeComponent
+    camel-graphql:
+      groupId: org.apache.camel
+      artifactId: camel-graphql
+      schemes:
+      - id: graphql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.graphql.GraphqlComponent
+    camel-grok:
+      groupId: org.apache.camel
+      artifactId: camel-grok
+      dataformats:
+      - grok
+      javaTypes:
+      - org.apache.camel.component.grok.GrokDataFormat
+    camel-groovy:
+      groupId: org.apache.camel
+      artifactId: camel-groovy
+      languages:
+      - groovy
+      javaTypes:
+      - org.apache.camel.language.groovy.GroovyLanguage
+    camel-grpc:
+      groupId: org.apache.camel
+      artifactId: camel-grpc
+      schemes:
+      - id: grpc
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.grpc.GrpcComponent
+    camel-gson:
+      groupId: org.apache.camel
+      artifactId: camel-gson
+      dataformats:
+      - json-gson
+      javaTypes:
+      - org.apache.camel.component.gson.GsonDataFormat
+    camel-guava-eventbus:
+      groupId: org.apache.camel
+      artifactId: camel-guava-eventbus
+      schemes:
+      - id: guava-eventbus
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.guava.eventbus.GuavaEventBusComponent
+    camel-hazelcast:
+      groupId: org.apache.camel
+      artifactId: camel-hazelcast
+      schemes:
+      - id: hazelcast-atomicvalue
+        http: false
+        passive: false
+      - id: hazelcast-instance
+        http: false
+        passive: false
+      - id: hazelcast-list
+        http: false
+        passive: false
+      - id: hazelcast-map
+        http: false
+        passive: false
+      - id: hazelcast-multimap
+        http: false
+        passive: false
+      - id: hazelcast-queue
+        http: false
+        passive: false
+      - id: hazelcast-replicatedmap
+        http: false
+        passive: false
+      - id: hazelcast-ringbuffer
+        http: false
+        passive: false
+      - id: hazelcast-seda
+        http: false
+        passive: false
+      - id: hazelcast-set
+        http: false
+        passive: false
+      - id: hazelcast-topic
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hazelcast.atomicnumber.HazelcastAtomicnumberComponent
+      - org.apache.camel.component.hazelcast.instance.HazelcastInstanceComponent
+      - org.apache.camel.component.hazelcast.list.HazelcastListComponent
+      - org.apache.camel.component.hazelcast.map.HazelcastMapComponent
+      - org.apache.camel.component.hazelcast.multimap.HazelcastMultimapComponent
+      - org.apache.camel.component.hazelcast.queue.HazelcastQueueComponent
+      - org.apache.camel.component.hazelcast.replicatedmap.HazelcastReplicatedmapComponent
+      - org.apache.camel.component.hazelcast.ringbuffer.HazelcastRingbufferComponent
+      - org.apache.camel.component.hazelcast.seda.HazelcastSedaComponent
+      - org.apache.camel.component.hazelcast.set.HazelcastSetComponent
+      - org.apache.camel.component.hazelcast.topic.HazelcastTopicComponent
+    camel-hbase:
+      groupId: org.apache.camel
+      artifactId: camel-hbase
+      schemes:
+      - id: hbase
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hbase.HBaseComponent
+    camel-hdfs:
+      groupId: org.apache.camel
+      artifactId: camel-hdfs
+      schemes:
+      - id: hdfs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hdfs.HdfsComponent
+    camel-hipchat:
+      groupId: org.apache.camel
+      artifactId: camel-hipchat
+      schemes:
+      - id: hipchat
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hipchat.HipchatComponent
+    camel-hl7:
+      groupId: org.apache.camel
+      artifactId: camel-hl7
+      languages:
+      - hl7terser
+      dataformats:
+      - hl7
+      javaTypes:
+      - org.apache.camel.component.hl7.Hl7TerserLanguage
+      - org.apache.camel.component.hl7.HL7DataFormat
+    camel-http:
+      groupId: org.apache.camel
+      artifactId: camel-http
+      schemes:
+      - id: http
+        http: false
+        passive: false
+      - id: https
+        http: false
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-file
+      javaTypes:
+      - org.apache.camel.component.http.HttpComponent
+    camel-ical:
+      groupId: org.apache.camel
+      artifactId: camel-ical
+      dataformats:
+      - ical
+      javaTypes:
+      - org.apache.camel.component.ical.ICalDataFormat
+    camel-iec60870:
+      groupId: org.apache.camel
+      artifactId: camel-iec60870
+      schemes:
+      - id: iec60870-client
+        http: false
+        passive: false
+      - id: iec60870-server
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.iec60870.client.ClientComponent
+      - org.apache.camel.component.iec60870.server.ServerComponent
+    camel-ignite:
+      groupId: org.apache.camel
+      artifactId: camel-ignite
+      schemes:
+      - id: ignite-cache
+        http: false
+        passive: false
+      - id: ignite-compute
+        http: false
+        passive: false
+      - id: ignite-events
+        http: false
+        passive: false
+      - id: ignite-idgen
+        http: false
+        passive: false
+      - id: ignite-messaging
+        http: false
+        passive: false
+      - id: ignite-queue
+        http: false
+        passive: false
+      - id: ignite-set
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ignite.cache.IgniteCacheComponent
+      - org.apache.camel.component.ignite.compute.IgniteComputeComponent
+      - org.apache.camel.component.ignite.events.IgniteEventsComponent
+      - org.apache.camel.component.ignite.idgen.IgniteIdGenComponent
+      - org.apache.camel.component.ignite.messaging.IgniteMessagingComponent
+      - org.apache.camel.component.ignite.queue.IgniteQueueComponent
+      - org.apache.camel.component.ignite.set.IgniteSetComponent
+    camel-infinispan:
+      groupId: org.apache.camel
+      artifactId: camel-infinispan
+      schemes:
+      - id: infinispan
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.infinispan.InfinispanComponent
+    camel-influxdb:
+      groupId: org.apache.camel
+      artifactId: camel-influxdb
+      schemes:
+      - id: influxdb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.influxdb.InfluxDbComponent
+    camel-iota:
+      groupId: org.apache.camel
+      artifactId: camel-iota
+      schemes:
+      - id: iota
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.iota.IOTAComponent
+    camel-ipfs:
+      groupId: org.apache.camel
+      artifactId: camel-ipfs
+      schemes:
+      - id: ipfs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ipfs.IPFSComponent
+    camel-irc:
+      groupId: org.apache.camel
+      artifactId: camel-irc
+      schemes:
+      - id: irc
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.irc.IrcComponent
+    camel-ironmq:
+      groupId: org.apache.camel
+      artifactId: camel-ironmq
+      schemes:
+      - id: ironmq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ironmq.IronMQComponent
+    camel-jackson:
+      groupId: org.apache.camel
+      artifactId: camel-jackson
+      dataformats:
+      - json-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.JacksonDataFormat
+    camel-jacksonxml:
+      groupId: org.apache.camel
+      artifactId: camel-jacksonxml
+      dataformats:
+      - jacksonxml
+      javaTypes:
+      - org.apache.camel.component.jacksonxml.JacksonXMLDataFormat
+    camel-jaxb:
+      groupId: org.apache.camel
+      artifactId: camel-jaxb
+      dataformats:
+      - jaxb
+      javaTypes:
+      - org.apache.camel.converter.jaxb.JaxbDataFormat
+    camel-jaxp:
+      groupId: org.apache.camel
+      artifactId: camel-jaxp
+      languages:
+      - xtokenize
+      javaTypes:
+      - org.apache.camel.language.xtokenizer.XMLTokenizeLanguage
+    camel-jbpm:
+      groupId: org.apache.camel
+      artifactId: camel-jbpm
+      schemes:
+      - id: jbpm
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jbpm.JBPMComponent
+    camel-jcache:
+      groupId: org.apache.camel
+      artifactId: camel-jcache
+      schemes:
+      - id: jcache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jcache.JCacheComponent
+    camel-jclouds:
+      groupId: org.apache.camel
+      artifactId: camel-jclouds
+      schemes:
+      - id: jclouds
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jclouds.JcloudsComponent
+    camel-jcr:
+      groupId: org.apache.camel
+      artifactId: camel-jcr
+      schemes:
+      - id: jcr
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jcr.JcrComponent
+    camel-jdbc:
+      groupId: org.apache.camel
+      artifactId: camel-jdbc
+      schemes:
+      - id: jdbc
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jdbc.JdbcComponent
+    camel-jetty:
+      groupId: org.apache.camel
+      artifactId: camel-jetty
+      schemes:
+      - id: jetty
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jetty9.JettyHttpComponent9
+    camel-jgroups:
+      groupId: org.apache.camel
+      artifactId: camel-jgroups
+      schemes:
+      - id: jgroups
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jgroups.JGroupsComponent
+    camel-jgroups-raft:
+      groupId: org.apache.camel
+      artifactId: camel-jgroups-raft
+      schemes:
+      - id: jgroups-raft
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jgroups.raft.JGroupsRaftComponent
+    camel-jing:
+      groupId: org.apache.camel
+      artifactId: camel-jing
+      schemes:
+      - id: jing
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.validator.jing.JingComponent
+    camel-jira:
+      groupId: org.apache.camel
+      artifactId: camel-jira
+      schemes:
+      - id: jira
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jira.JiraComponent
+    camel-jms:
+      groupId: org.apache.camel
+      artifactId: camel-jms
+      schemes:
+      - id: jms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jms.JmsComponent
+    camel-jmx:
+      groupId: org.apache.camel
+      artifactId: camel-jmx
+      schemes:
+      - id: jmx
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jmx.JMXComponent
+    camel-johnzon:
+      groupId: org.apache.camel
+      artifactId: camel-johnzon
+      dataformats:
+      - json-johnzon
+      javaTypes:
+      - org.apache.camel.component.johnzon.JohnzonDataFormat
+    camel-jolt:
+      groupId: org.apache.camel
+      artifactId: camel-jolt
+      schemes:
+      - id: jolt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jolt.JoltComponent
+    camel-jooq:
+      groupId: org.apache.camel
+      artifactId: camel-jooq
+      schemes:
+      - id: jooq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jooq.JooqComponent
+    camel-jpa:
+      groupId: org.apache.camel
+      artifactId: camel-jpa
+      schemes:
+      - id: jpa
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jpa.JpaComponent
+    camel-jsch:
+      groupId: org.apache.camel
+      artifactId: camel-jsch
+      schemes:
+      - id: scp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.scp.ScpComponent
+    camel-json-validator:
+      groupId: org.apache.camel
+      artifactId: camel-json-validator
+      schemes:
+      - id: json-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jsonvalidator.JsonValidatorComponent
+    camel-jsonapi:
+      groupId: org.apache.camel
+      artifactId: camel-jsonapi
+      dataformats:
+      - jsonApi
+      javaTypes:
+      - org.apache.camel.component.jsonapi.JsonApiDataFormat
+    camel-jsonpath:
+      groupId: org.apache.camel
+      artifactId: camel-jsonpath
+      languages:
+      - jsonpath
+      javaTypes:
+      - org.apache.camel.jsonpath.JsonPathLanguage
+    camel-jt400:
+      groupId: org.apache.camel
+      artifactId: camel-jt400
+      schemes:
+      - id: jt400
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jt400.Jt400Component
+    camel-k-loader-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-loader-java:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-java
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-js:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-js
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-knative
+    camel-k-loader-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-kotlin
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-xml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-xml
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-servlet
+    camel-k-runtime-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-knative
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-k-runtime-main:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-main
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+    camel-k-runtime-webhook:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-webhook
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-webhook
+    camel-kafka:
+      groupId: org.apache.camel
+      artifactId: camel-kafka
+      schemes:
+      - id: kafka
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kafka.KafkaComponent
+    camel-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-kubernetes:
+      groupId: org.apache.camel
+      artifactId: camel-kubernetes
+      schemes:
+      - id: kubernetes-config-maps
+        http: false
+        passive: false
+      - id: kubernetes-deployments
+        http: false
+        passive: false
+      - id: kubernetes-hpa
+        http: false
+        passive: false
+      - id: kubernetes-job
+        http: false
+        passive: false
+      - id: kubernetes-namespaces
+        http: false
+        passive: false
+      - id: kubernetes-nodes
+        http: false
+        passive: false
+      - id: kubernetes-persistent-volumes
+        http: false
+        passive: false
+      - id: kubernetes-persistent-volumes-claims
+        http: false
+        passive: false
+      - id: kubernetes-pods
+        http: false
+        passive: false
+      - id: kubernetes-replication-controllers
+        http: false
+        passive: false
+      - id: kubernetes-resources-quota
+        http: false
+        passive: false
+      - id: kubernetes-secrets
+        http: false
+        passive: false
+      - id: kubernetes-service-accounts
+        http: false
+        passive: false
+      - id: kubernetes-services
+        http: false
+        passive: false
+      - id: openshift-build-configs
+        http: false
+        passive: false
+      - id: openshift-builds
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kubernetes.config_maps.KubernetesConfigMapsComponent
+      - org.apache.camel.component.kubernetes.deployments.KubernetesDeploymentsComponent
+      - org.apache.camel.component.kubernetes.hpa.KubernetesHPAComponent
+      - org.apache.camel.component.kubernetes.job.KubernetesJobComponent
+      - org.apache.camel.component.kubernetes.namespaces.KubernetesNamespacesComponent
+      - org.apache.camel.component.kubernetes.nodes.KubernetesNodesComponent
+      - org.apache.camel.component.kubernetes.persistent_volumes.KubernetesPersistentVolumesComponent
+      - org.apache.camel.component.kubernetes.persistent_volumes_claims.KubernetesPersistentVolumesClaimsComponent
+      - org.apache.camel.component.kubernetes.pods.KubernetesPodsComponent
+      - org.apache.camel.component.kubernetes.replication_controllers.KubernetesReplicationControllersComponent
+      - org.apache.camel.component.kubernetes.resources_quota.KubernetesResourcesQuotaComponent
+      - org.apache.camel.component.kubernetes.secrets.KubernetesSecretsComponent
+      - org.apache.camel.component.kubernetes.service_accounts.KubernetesServiceAccountsComponent
+      - org.apache.camel.component.kubernetes.services.KubernetesServicesComponent
+      - org.apache.camel.component.openshift.build_configs.OpenshiftBuildConfigsComponent
+      - org.apache.camel.component.openshift.builds.OpenshiftBuildsComponent
+    camel-kudu:
+      groupId: org.apache.camel
+      artifactId: camel-kudu
+      schemes:
+      - id: kudu
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kudu.KuduComponent
+    camel-language:
+      groupId: org.apache.camel
+      artifactId: camel-language
+      schemes:
+      - id: language
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.language.LanguageComponent
+    camel-ldap:
+      groupId: org.apache.camel
+      artifactId: camel-ldap
+      schemes:
+      - id: ldap
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ldap.LdapComponent
+    camel-ldif:
+      groupId: org.apache.camel
+      artifactId: camel-ldif
+      schemes:
+      - id: ldif
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ldif.LdifComponent
+    camel-log:
+      groupId: org.apache.camel
+      artifactId: camel-log
+      schemes:
+      - id: log
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.log.LogComponent
+    camel-lucene:
+      groupId: org.apache.camel
+      artifactId: camel-lucene
+      schemes:
+      - id: lucene
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.lucene.LuceneComponent
+    camel-lumberjack:
+      groupId: org.apache.camel
+      artifactId: camel-lumberjack
+      schemes:
+      - id: lumberjack
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.lumberjack.LumberjackComponent
+    camel-lzf:
+      groupId: org.apache.camel
+      artifactId: camel-lzf
+      dataformats:
+      - lzf
+      javaTypes:
+      - org.apache.camel.dataformat.lzf.LZFDataFormat
+    camel-mail:
+      groupId: org.apache.camel
+      artifactId: camel-mail
+      schemes:
+      - id: imap
+        http: false
+        passive: false
+      - id: imaps
+        http: false
+        passive: false
+      - id: pop3
+        http: false
+        passive: false
+      - id: pop3s
+        http: false
+        passive: false
+      - id: smtp
+        http: false
+        passive: false
+      - id: smtps
+        http: false
+        passive: false
+      dataformats:
+      - mime-multipart
+      javaTypes:
+      - org.apache.camel.component.mail.MailComponent
+      - org.apache.camel.dataformat.mime.multipart.MimeMultipartDataFormat
+    camel-master:
+      groupId: org.apache.camel
+      artifactId: camel-master
+      schemes:
+      - id: master
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.master.MasterComponent
+    camel-metrics:
+      groupId: org.apache.camel
+      artifactId: camel-metrics
+      schemes:
+      - id: metrics
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.metrics.MetricsComponent
+    camel-micrometer:
+      groupId: org.apache.camel
+      artifactId: camel-micrometer
+      schemes:
+      - id: micrometer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.micrometer.MicrometerComponent
+    camel-microprofile-metrics:
+      groupId: org.apache.camel
+      artifactId: camel-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.microprofile.metrics.MicroProfileMetricsComponent
+    camel-milo:
+      groupId: org.apache.camel
+      artifactId: camel-milo
+      schemes:
+      - id: milo-client
+        http: false
+        passive: false
+      - id: milo-server
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.milo.client.MiloClientComponent
+      - org.apache.camel.component.milo.server.MiloServerComponent
+    camel-mina:
+      groupId: org.apache.camel
+      artifactId: camel-mina
+      schemes:
+      - id: mina
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mina.MinaComponent
+    camel-mllp:
+      groupId: org.apache.camel
+      artifactId: camel-mllp
+      schemes:
+      - id: mllp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mllp.MllpComponent
+    camel-mock:
+      groupId: org.apache.camel
+      artifactId: camel-mock
+      schemes:
+      - id: mock
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.mock.MockComponent
+    camel-mongodb:
+      groupId: org.apache.camel
+      artifactId: camel-mongodb
+      schemes:
+      - id: mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.MongoDbComponent
+    camel-mongodb-gridfs:
+      groupId: org.apache.camel
+      artifactId: camel-mongodb-gridfs
+      schemes:
+      - id: mongodb-gridfs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.gridfs.GridFsComponent
+    camel-msv:
+      groupId: org.apache.camel
+      artifactId: camel-msv
+      schemes:
+      - id: msv
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.validator.msv.MsvComponent
+    camel-mustache:
+      groupId: org.apache.camel
+      artifactId: camel-mustache
+      schemes:
+      - id: mustache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mustache.MustacheComponent
+    camel-mvel:
+      groupId: org.apache.camel
+      artifactId: camel-mvel
+      schemes:
+      - id: mvel
+        http: false
+        passive: false
+      languages:
+      - mvel
+      javaTypes:
+      - org.apache.camel.component.mvel.MvelComponent
+      - org.apache.camel.language.mvel.MvelLanguage
+    camel-mybatis:
+      groupId: org.apache.camel
+      artifactId: camel-mybatis
+      schemes:
+      - id: mybatis
+        http: false
+        passive: false
+      - id: mybatis-bean
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mybatis.MyBatisComponent
+      - org.apache.camel.component.mybatis.MyBatisBeanComponent
+    camel-nagios:
+      groupId: org.apache.camel
+      artifactId: camel-nagios
+      schemes:
+      - id: nagios
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nagios.NagiosComponent
+    camel-nats:
+      groupId: org.apache.camel
+      artifactId: camel-nats
+      schemes:
+      - id: nats
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nats.NatsComponent
+    camel-netty:
+      groupId: org.apache.camel
+      artifactId: camel-netty
+      schemes:
+      - id: netty
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.NettyComponent
+    camel-netty-http:
+      groupId: org.apache.camel
+      artifactId: camel-netty-http
+      schemes:
+      - id: netty-http
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.http.NettyHttpComponent
+    camel-nitrite:
+      groupId: org.apache.camel
+      artifactId: camel-nitrite
+      schemes:
+      - id: nitrite
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nitrite.NitriteComponent
+    camel-nsq:
+      groupId: org.apache.camel
+      artifactId: camel-nsq
+      schemes:
+      - id: nsq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nsq.NsqComponent
+    camel-ognl:
+      groupId: org.apache.camel
+      artifactId: camel-ognl
+      languages:
+      - ognl
+      javaTypes:
+      - org.apache.camel.language.ognl.OgnlLanguage
+    camel-olingo2:
+      groupId: org.apache.camel
+      artifactId: camel-olingo2
+      schemes:
+      - id: olingo2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.olingo2.Olingo2Component
+    camel-olingo4:
+      groupId: org.apache.camel
+      artifactId: camel-olingo4
+      schemes:
+      - id: olingo4
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.olingo4.Olingo4Component
+    camel-openstack:
+      groupId: org.apache.camel
+      artifactId: camel-openstack
+      schemes:
+      - id: openstack-cinder
+        http: false
+        passive: false
+      - id: openstack-glance
+        http: false
+        passive: false
+      - id: openstack-keystone
+        http: false
+        passive: false
+      - id: openstack-neutron
+        http: false
+        passive: false
+      - id: openstack-nova
+        http: false
+        passive: false
+      - id: openstack-swift
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.openstack.cinder.CinderComponent
+      - org.apache.camel.component.openstack.glance.GlanceComponent
+      - org.apache.camel.component.openstack.keystone.KeystoneComponent
+      - org.apache.camel.component.openstack.neutron.NeutronComponent
+      - org.apache.camel.component.openstack.nova.NovaComponent
+      - org.apache.camel.component.openstack.swift.SwiftComponent
+    camel-optaplanner:
+      groupId: org.apache.camel
+      artifactId: camel-optaplanner
+      schemes:
+      - id: optaplanner
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.optaplanner.OptaPlannerComponent
+    camel-paho:
+      groupId: org.apache.camel
+      artifactId: camel-paho
+      schemes:
+      - id: paho
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.paho.PahoComponent
+    camel-paxlogging:
+      groupId: org.apache.camel
+      artifactId: camel-paxlogging
+      schemes:
+      - id: paxlogging
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.paxlogging.PaxLoggingComponent
+    camel-pdf:
+      groupId: org.apache.camel
+      artifactId: camel-pdf
+      schemes:
+      - id: pdf
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pdf.PdfComponent
+    camel-pg-replication-slot:
+      groupId: org.apache.camel
+      artifactId: camel-pg-replication-slot
+      schemes:
+      - id: pg-replication-slot
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pg.replication.slot.PgReplicationSlotComponent
+    camel-pgevent:
+      groupId: org.apache.camel
+      artifactId: camel-pgevent
+      schemes:
+      - id: pgevent
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pgevent.PgEventComponent
+    camel-platform-http:
+      groupId: org.apache.camel
+      artifactId: camel-platform-http
+      schemes:
+      - id: platform-http
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.platform.http.PlatformHttpComponent
+    camel-printer:
+      groupId: org.apache.camel
+      artifactId: camel-printer
+      schemes:
+      - id: lpr
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.printer.PrinterComponent
+    camel-protobuf:
+      groupId: org.apache.camel
+      artifactId: camel-protobuf
+      dataformats:
+      - protobuf
+      javaTypes:
+      - org.apache.camel.dataformat.protobuf.ProtobufDataFormat
+    camel-pubnub:
+      groupId: org.apache.camel
+      artifactId: camel-pubnub
+      schemes:
+      - id: pubnub
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pubnub.PubNubComponent
+    camel-pulsar:
+      groupId: org.apache.camel
+      artifactId: camel-pulsar
+      schemes:
+      - id: pulsar
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pulsar.PulsarComponent
+    camel-quartz:
+      groupId: org.apache.camel
+      artifactId: camel-quartz
+      schemes:
+      - id: quartz
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.quartz.QuartzComponent
+    camel-quickfix:
+      groupId: org.apache.camel
+      artifactId: camel-quickfix
+      schemes:
+      - id: quickfix
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.quickfixj.QuickfixjComponent
+    camel-rabbitmq:
+      groupId: org.apache.camel
+      artifactId: camel-rabbitmq
+      schemes:
+      - id: rabbitmq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rabbitmq.RabbitMQComponent
+    camel-reactive-streams:
+      groupId: org.apache.camel
+      artifactId: camel-reactive-streams
+      schemes:
+      - id: reactive-streams
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.reactive.streams.ReactiveStreamsComponent
+    camel-ref:
+      groupId: org.apache.camel
+      artifactId: camel-ref
+      schemes:
+      - id: ref
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.ref.RefComponent
+    camel-rest:
+      groupId: org.apache.camel
+      artifactId: camel-rest
+      schemes:
+      - id: rest
+        http: true
+        passive: false
+      - id: rest-api
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.RestComponent
+      - org.apache.camel.component.rest.RestApiComponent
+    camel-rest-swagger:
+      groupId: org.apache.camel
+      artifactId: camel-rest-swagger
+      schemes:
+      - id: rest-swagger
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.swagger.RestSwaggerComponent
+    camel-robotframework:
+      groupId: org.apache.camel
+      artifactId: camel-robotframework
+      schemes:
+      - id: robotframework
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.robotframework.RobotFrameworkComponent
+    camel-rss:
+      groupId: org.apache.camel
+      artifactId: camel-rss
+      schemes:
+      - id: rss
+        http: false
+        passive: false
+      dataformats:
+      - rss
+      javaTypes:
+      - org.apache.camel.component.rss.RssComponent
+      - org.apache.camel.dataformat.rss.RssDataFormat
+    camel-saga:
+      groupId: org.apache.camel
+      artifactId: camel-saga
+      schemes:
+      - id: saga
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.saga.SagaComponent
+    camel-salesforce:
+      groupId: org.apache.camel
+      artifactId: camel-salesforce
+      schemes:
+      - id: salesforce
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.salesforce.SalesforceComponent
+    camel-sap-netweaver:
+      groupId: org.apache.camel
+      artifactId: camel-sap-netweaver
+      schemes:
+      - id: sap-netweaver
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sap.netweaver.NetWeaverComponent
+    camel-saxon:
+      groupId: org.apache.camel
+      artifactId: camel-saxon
+      schemes:
+      - id: xquery
+        http: false
+        passive: false
+      languages:
+      - xquery
+      javaTypes:
+      - org.apache.camel.component.xquery.XQueryComponent
+      - org.apache.camel.language.xquery.XQueryLanguage
+    camel-scheduler:
+      groupId: org.apache.camel
+      artifactId: camel-scheduler
+      schemes:
+      - id: scheduler
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.scheduler.SchedulerComponent
+    camel-schematron:
+      groupId: org.apache.camel
+      artifactId: camel-schematron
+      schemes:
+      - id: schematron
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.schematron.SchematronComponent
+    camel-seda:
+      groupId: org.apache.camel
+      artifactId: camel-seda
+      schemes:
+      - id: seda
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.seda.SedaComponent
+    camel-service:
+      groupId: org.apache.camel
+      artifactId: camel-service
+      schemes:
+      - id: service
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.service.ServiceComponent
+    camel-servicenow:
+      groupId: org.apache.camel
+      artifactId: camel-servicenow
+      schemes:
+      - id: servicenow
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.servicenow.ServiceNowComponent
+    camel-servlet:
+      groupId: org.apache.camel
+      artifactId: camel-servlet
+      schemes:
+      - id: servlet
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.servlet.ServletComponent
+    camel-sip:
+      groupId: org.apache.camel
+      artifactId: camel-sip
+      schemes:
+      - id: sip
+        http: false
+        passive: false
+      - id: sips
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sip.SipComponent
+    camel-sjms:
+      groupId: org.apache.camel
+      artifactId: camel-sjms
+      schemes:
+      - id: sjms
+        http: false
+        passive: false
+      - id: sjms-batch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms.SjmsComponent
+      - org.apache.camel.component.sjms.batch.SjmsBatchComponent
+    camel-sjms2:
+      groupId: org.apache.camel
+      artifactId: camel-sjms2
+      schemes:
+      - id: sjms2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms2.Sjms2Component
+    camel-slack:
+      groupId: org.apache.camel
+      artifactId: camel-slack
+      schemes:
+      - id: slack
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.slack.SlackComponent
+    camel-smpp:
+      groupId: org.apache.camel
+      artifactId: camel-smpp
+      schemes:
+      - id: smpp
+        http: false
+        passive: false
+      - id: smpps
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.smpp.SmppComponent
+    camel-snakeyaml:
+      groupId: org.apache.camel
+      artifactId: camel-snakeyaml
+      dataformats:
+      - yaml-snakeyaml
+      javaTypes:
+      - org.apache.camel.component.snakeyaml.SnakeYAMLDataFormat
+    camel-snmp:
+      groupId: org.apache.camel
+      artifactId: camel-snmp
+      schemes:
+      - id: snmp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.snmp.SnmpComponent
+    camel-soap:
+      groupId: org.apache.camel
+      artifactId: camel-soap
+      dataformats:
+      - soapjaxb
+      javaTypes:
+      - org.apache.camel.dataformat.soap.SoapJaxbDataFormat
+    camel-solr:
+      groupId: org.apache.camel
+      artifactId: camel-solr
+      schemes:
+      - id: solr
+        http: false
+        passive: false
+      - id: solrs
+        http: false
+        passive: false
+      - id: solrCloud
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.solr.SolrComponent
+    camel-soroush:
+      groupId: org.apache.camel
+      artifactId: camel-soroush
+      schemes:
+      - id: soroush
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.soroushbot.component.SoroushBotComponent
+    camel-spark:
+      groupId: org.apache.camel
+      artifactId: camel-spark
+      schemes:
+      - id: spark
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.spark.SparkComponent
+    camel-spark-rest:
+      groupId: org.apache.camel
+      artifactId: camel-spark-rest
+      schemes:
+      - id: spark-rest
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sparkrest.SparkComponent
+    camel-splunk:
+      groupId: org.apache.camel
+      artifactId: camel-splunk
+      schemes:
+      - id: splunk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.splunk.SplunkComponent
+    camel-spring:
+      groupId: org.apache.camel
+      artifactId: camel-spring
+      schemes:
+      - id: spring-event
+        http: false
+        passive: false
+      languages:
+      - spel
+      javaTypes:
+      - org.apache.camel.component.event.EventComponent
+      - org.apache.camel.language.spel.SpelLanguage
+    camel-spring-batch:
+      groupId: org.apache.camel
+      artifactId: camel-spring-batch
+      schemes:
+      - id: spring-batch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.spring.batch.SpringBatchComponent
+    camel-spring-integration:
+      groupId: org.apache.camel
+      artifactId: camel-spring-integration
+      schemes:
+      - id: spring-integration
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.spring.integration.SpringIntegrationComponent
+    camel-spring-ldap:
+      groupId: org.apache.camel
+      artifactId: camel-spring-ldap
+      schemes:
+      - id: spring-ldap
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.springldap.SpringLdapComponent
+    camel-spring-redis:
+      groupId: org.apache.camel
+      artifactId: camel-spring-redis
+      schemes:
+      - id: spring-redis
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.redis.RedisComponent
+    camel-spring-ws:
+      groupId: org.apache.camel
+      artifactId: camel-spring-ws
+      schemes:
+      - id: spring-ws
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.spring.ws.SpringWebserviceComponent
+    camel-sql:
+      groupId: org.apache.camel
+      artifactId: camel-sql
+      schemes:
+      - id: sql
+        http: false
+        passive: false
+      - id: sql-stored
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sql.SqlComponent
+      - org.apache.camel.component.sql.stored.SqlStoredComponent
+    camel-ssh:
+      groupId: org.apache.camel
+      artifactId: camel-ssh
+      schemes:
+      - id: ssh
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ssh.SshComponent
+    camel-stax:
+      groupId: org.apache.camel
+      artifactId: camel-stax
+      schemes:
+      - id: stax
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stax.StAXComponent
+    camel-stomp:
+      groupId: org.apache.camel
+      artifactId: camel-stomp
+      schemes:
+      - id: stomp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stomp.StompComponent
+    camel-stream:
+      groupId: org.apache.camel
+      artifactId: camel-stream
+      schemes:
+      - id: stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stream.StreamComponent
+    camel-stringtemplate:
+      groupId: org.apache.camel
+      artifactId: camel-stringtemplate
+      schemes:
+      - id: string-template
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stringtemplate.StringTemplateComponent
+    camel-stub:
+      groupId: org.apache.camel
+      artifactId: camel-stub
+      schemes:
+      - id: stub
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.stub.StubComponent
+    camel-syslog:
+      groupId: org.apache.camel
+      artifactId: camel-syslog
+      dataformats:
+      - syslog
+      javaTypes:
+      - org.apache.camel.component.syslog.SyslogDataFormat
+    camel-tagsoup:
+      groupId: org.apache.camel
+      artifactId: camel-tagsoup
+      dataformats:
+      - tidyMarkup
+      javaTypes:
+      - org.apache.camel.dataformat.tagsoup.TidyMarkupDataFormat
+    camel-tarfile:
+      groupId: org.apache.camel
+      artifactId: camel-tarfile
+      dataformats:
+      - tarfile
+      javaTypes:
+      - org.apache.camel.dataformat.tarfile.TarFileDataFormat
+    camel-telegram:
+      groupId: org.apache.camel
+      artifactId: camel-telegram
+      schemes:
+      - id: telegram
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.telegram.TelegramComponent
+    camel-thrift:
+      groupId: org.apache.camel
+      artifactId: camel-thrift
+      schemes:
+      - id: thrift
+        http: false
+        passive: false
+      dataformats:
+      - thrift
+      javaTypes:
+      - org.apache.camel.component.thrift.ThriftComponent
+      - org.apache.camel.dataformat.thrift.ThriftDataFormat
+    camel-tika:
+      groupId: org.apache.camel
+      artifactId: camel-tika
+      schemes:
+      - id: tika
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.tika.TikaComponent
+    camel-timer:
+      groupId: org.apache.camel
+      artifactId: camel-timer
+      schemes:
+      - id: timer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.timer.TimerComponent
+    camel-twilio:
+      groupId: org.apache.camel
+      artifactId: camel-twilio
+      schemes:
+      - id: twilio
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.twilio.TwilioComponent
+    camel-twitter:
+      groupId: org.apache.camel
+      artifactId: camel-twitter
+      schemes:
+      - id: twitter-directmessage
+        http: false
+        passive: false
+      - id: twitter-search
+        http: false
+        passive: false
+      - id: twitter-timeline
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.twitter.directmessage.TwitterDirectMessageComponent
+      - org.apache.camel.component.twitter.search.TwitterSearchComponent
+      - org.apache.camel.component.twitter.timeline.TwitterTimelineComponent
+    camel-undertow:
+      groupId: org.apache.camel
+      artifactId: camel-undertow
+      schemes:
+      - id: undertow
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.undertow.UndertowComponent
+    camel-univocity-parsers:
+      groupId: org.apache.camel
+      artifactId: camel-univocity-parsers
+      dataformats:
+      - univocity-csv
+      - univocity-fixed
+      - univocity-tsv
+      javaTypes:
+      - org.apache.camel.dataformat.univocity.UniVocityCsvDataFormat
+      - org.apache.camel.dataformat.univocity.UniVocityFixedWidthDataFormat
+      - org.apache.camel.dataformat.univocity.UniVocityTsvDataFormat
+    camel-validator:
+      groupId: org.apache.camel
+      artifactId: camel-validator
+      schemes:
+      - id: validator
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.validator.ValidatorComponent
+    camel-velocity:
+      groupId: org.apache.camel
+      artifactId: camel-velocity
+      schemes:
+      - id: velocity
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.velocity.VelocityComponent
+    camel-vertx:
+      groupId: org.apache.camel
+      artifactId: camel-vertx
+      schemes:
+      - id: vertx
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.VertxComponent
+    camel-vm:
+      groupId: org.apache.camel
+      artifactId: camel-vm
+      schemes:
+      - id: vm
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.vm.VmComponent
+    camel-weather:
+      groupId: org.apache.camel
+      artifactId: camel-weather
+      schemes:
+      - id: weather
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.weather.WeatherComponent
+    camel-web3j:
+      groupId: org.apache.camel
+      artifactId: camel-web3j
+      schemes:
+      - id: web3j
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.web3j.Web3jComponent
+    camel-webhook:
+      groupId: org.apache.camel
+      artifactId: camel-webhook
+      schemes:
+      - id: webhook
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.webhook.WebhookComponent
+    camel-websocket:
+      groupId: org.apache.camel
+      artifactId: camel-websocket
+      schemes:
+      - id: websocket
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.websocket.WebsocketComponent
+    camel-websocket-jsr356:
+      groupId: org.apache.camel
+      artifactId: camel-websocket-jsr356
+      schemes:
+      - id: websocket-jsr356
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.websocket.jsr356.JSR356WebSocketComponent
+    camel-wordpress:
+      groupId: org.apache.camel
+      artifactId: camel-wordpress
+      schemes:
+      - id: wordpress
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.wordpress.WordpressComponent
+    camel-xchange:
+      groupId: org.apache.camel
+      artifactId: camel-xchange
+      schemes:
+      - id: xchange
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xchange.XChangeComponent
+    camel-xj:
+      groupId: org.apache.camel
+      artifactId: camel-xj
+      schemes:
+      - id: xj
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xj.XJComponent
+    camel-xmlsecurity:
+      groupId: org.apache.camel
+      artifactId: camel-xmlsecurity
+      schemes:
+      - id: xmlsecurity
+        http: false
+        passive: false
+      dataformats:
+      - secureXML
+      javaTypes:
+      - org.apache.camel.component.xmlsecurity.XmlSignatureComponent
+      - org.apache.camel.dataformat.xmlsecurity.XMLSecurityDataFormat
+    camel-xmpp:
+      groupId: org.apache.camel
+      artifactId: camel-xmpp
+      schemes:
+      - id: xmpp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xmpp.XmppComponent
+    camel-xpath:
+      groupId: org.apache.camel
+      artifactId: camel-xpath
+      languages:
+      - xpath
+      javaTypes:
+      - org.apache.camel.language.xpath.XPathLanguage
+    camel-xslt:
+      groupId: org.apache.camel
+      artifactId: camel-xslt
+      schemes:
+      - id: xslt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.XsltComponent
+    camel-xslt-saxon:
+      groupId: org.apache.camel
+      artifactId: camel-xslt-saxon
+      schemes:
+      - id: xslt-saxon
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.saxon.XsltSaxonComponent
+    camel-xstream:
+      groupId: org.apache.camel
+      artifactId: camel-xstream
+      dataformats:
+      - json-xstream
+      - xstream
+      javaTypes:
+      - org.apache.camel.dataformat.xstream.JsonDataFormat
+      - org.apache.camel.dataformat.xstream.XStreamDataFormat
+    camel-yammer:
+      groupId: org.apache.camel
+      artifactId: camel-yammer
+      schemes:
+      - id: yammer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.yammer.YammerComponent
+    camel-zendesk:
+      groupId: org.apache.camel
+      artifactId: camel-zendesk
+      schemes:
+      - id: zendesk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.zendesk.ZendeskComponent
+    camel-zip-deflater:
+      groupId: org.apache.camel
+      artifactId: camel-zip-deflater
+      dataformats:
+      - gzipdeflater
+      - zipdeflater
+      javaTypes:
+      - org.apache.camel.dataformat.deflater.GzipDeflaterDataFormat
+      - org.apache.camel.dataformat.deflater.ZipDeflaterDataFormat
+    camel-zipfile:
+      groupId: org.apache.camel
+      artifactId: camel-zipfile
+      dataformats:
+      - zipfile
+      javaTypes:
+      - org.apache.camel.dataformat.zipfile.ZipFileDataFormat
+    camel-zookeeper:
+      groupId: org.apache.camel
+      artifactId: camel-zookeeper
+      schemes:
+      - id: zookeeper
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.zookeeper.ZooKeeperComponent
+    camel-zookeeper-master:
+      groupId: org.apache.camel
+      artifactId: camel-zookeeper-master
+      schemes:
+      - id: zookeeper-master
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.zookeepermaster.MasterComponent
+
+`
+	Resources["camel-catalog-quarkus-1.0.0-M1-1.0.10.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1
+kind: CamelCatalog
+metadata:
+  name: camel-catalog-quarkus-1.0.0-m1-1.0.10
+  labels:
+    app: camel-k
+    camel.apache.org/catalog.version: 3.0.0
+    camel.apache.org/catalog.loader.version: 3.0.0
+    camel.apache.org/runtime.version: 1.0.10
+    camel.apache.org/runtime.provider: quarkus
+spec:
+  version: 3.0.0
+  runtimeVersion: 1.0.10
+  runtimeProvider:
+    quarkus:
+      camelQuarkusVersion: 1.0.0-M1
+      quarkusVersion: 1.0.1.Final
+  artifacts:
+    camel-k-loader-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-loader-java:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-java
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-js:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-js
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-knative
+    camel-k-loader-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-kotlin
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-xml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-xml
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-servlet
+    camel-k-runtime-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-knative
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-k-runtime-main:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-main
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+    camel-k-runtime-webhook:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-webhook
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-webhook
+    camel-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-quarkus-aws-ecs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-ecs
+      schemes:
+      - id: aws-ecs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ecs.ECSComponent
+    camel-quarkus-aws-eks:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-eks
+      schemes:
+      - id: aws-eks
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.eks.EKSComponent
+    camel-quarkus-aws-kms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-kms
+      schemes:
+      - id: aws-kms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.kms.KMSComponent
+    camel-quarkus-aws-s3:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-s3
+      schemes:
+      - id: aws-s3
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.s3.S3Component
+    camel-quarkus-aws-sns:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sns
+      schemes:
+      - id: aws-sns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sns.SnsComponent
+    camel-quarkus-aws-sqs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sqs
+      schemes:
+      - id: aws-sqs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sqs.SqsComponent
+    camel-quarkus-base64:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-base64
+      dataformats:
+      - base64
+      javaTypes:
+      - org.apache.camel.dataformat.base64.Base64DataFormat
+    camel-quarkus-bean:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
+      javaTypes:
+      - org.apache.camel.component.bean.BeanComponent
+      - org.apache.camel.component.beanclass.ClassComponent
+      - org.apache.camel.language.bean.BeanLanguage
+    camel-quarkus-bean-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean-validator
+      schemes:
+      - id: bean-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.bean.validator.BeanValidatorComponent
+    camel-quarkus-controlbus:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-controlbus
+      schemes:
+      - id: controlbus
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.controlbus.ControlBusComponent
+    camel-quarkus-core:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-core
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+      javaTypes:
+      - org.apache.camel.language.constant.ConstantLanguage
+      - org.apache.camel.language.property.ExchangePropertyLanguage
+      - org.apache.camel.language.simple.FileLanguage
+      - org.apache.camel.language.header.HeaderLanguage
+      - org.apache.camel.language.ref.RefLanguage
+      - org.apache.camel.language.simple.SimpleLanguage
+      - org.apache.camel.language.tokenizer.TokenizeLanguage
+    camel-quarkus-csv:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-csv
+      dataformats:
+      - csv
+      javaTypes:
+      - org.apache.camel.dataformat.csv.CsvDataFormat
+    camel-quarkus-dataformat:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dataformat
+      schemes:
+      - id: dataformat
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.dataformat.DataFormatComponent
+    camel-quarkus-direct:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-direct
+      schemes:
+      - id: direct
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.direct.DirectComponent
+    camel-quarkus-dozer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dozer
+      schemes:
+      - id: dozer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dozer.DozerComponent
+    camel-quarkus-exec:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-exec
+      schemes:
+      - id: exec
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.exec.ExecComponent
+    camel-quarkus-fhir:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-fhir
+      schemes:
+      - id: fhir
+        http: false
+        passive: false
+      dataformats:
+      - fhirJson
+      - fhirXml
+      javaTypes:
+      - org.apache.camel.component.fhir.FhirComponent
+      - org.apache.camel.component.fhir.FhirJsonDataFormat
+      - org.apache.camel.component.fhir.FhirXmlDataFormat
+    camel-quarkus-file:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-file
+      schemes:
+      - id: file
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.FileComponent
+    camel-quarkus-ftp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ftp
+      schemes:
+      - id: ftp
+        http: false
+        passive: false
+      - id: ftps
+        http: false
+        passive: false
+      - id: sftp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.remote.FtpComponent
+      - org.apache.camel.component.file.remote.FtpsComponent
+      - org.apache.camel.component.file.remote.SftpComponent
+    camel-quarkus-infinispan:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-infinispan
+      schemes:
+      - id: infinispan
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.infinispan.InfinispanComponent
+    camel-quarkus-jackson:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson
+      dataformats:
+      - json-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.JacksonDataFormat
+    camel-quarkus-jdbc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jdbc
+      schemes:
+      - id: jdbc
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jdbc.JdbcComponent
+    camel-quarkus-kafka:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kafka
+      schemes:
+      - id: kafka
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kafka.KafkaComponent
+    camel-quarkus-log:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-log
+      schemes:
+      - id: log
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.log.LogComponent
+    camel-quarkus-mail:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mail
+      schemes:
+      - id: imap
+        http: false
+        passive: false
+      - id: imaps
+        http: false
+        passive: false
+      - id: pop3
+        http: false
+        passive: false
+      - id: pop3s
+        http: false
+        passive: false
+      - id: smtp
+        http: false
+        passive: false
+      - id: smtps
+        http: false
+        passive: false
+      dataformats:
+      - mime-multipart
+      javaTypes:
+      - org.apache.camel.component.mail.MailComponent
+      - org.apache.camel.dataformat.mime.multipart.MimeMultipartDataFormat
+    camel-quarkus-microprofile-metrics:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.microprofile.metrics.MicroProfileMetricsComponent
+    camel-quarkus-mongodb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mongodb
+      schemes:
+      - id: mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.MongoDbComponent
+    camel-quarkus-netty:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty
+      schemes:
+      - id: netty
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.NettyComponent
+    camel-quarkus-netty-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty-http
+      schemes:
+      - id: netty-http
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.http.NettyHttpComponent
+    camel-quarkus-paho:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-paho
+      schemes:
+      - id: paho
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.paho.PahoComponent
+    camel-quarkus-pdf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pdf
+      schemes:
+      - id: pdf
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pdf.PdfComponent
+    camel-quarkus-platform-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-platform-http
+      schemes:
+      - id: platform-http
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.platform.http.PlatformHttpComponent
+    camel-quarkus-rest:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rest
+      schemes:
+      - id: rest
+        http: true
+        passive: false
+      - id: rest-api
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.RestComponent
+      - org.apache.camel.component.rest.RestApiComponent
+    camel-quarkus-salesforce:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-salesforce
+      schemes:
+      - id: salesforce
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.salesforce.SalesforceComponent
+    camel-quarkus-scheduler:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-scheduler
+      schemes:
+      - id: scheduler
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.scheduler.SchedulerComponent
+    camel-quarkus-seda:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-seda
+      schemes:
+      - id: seda
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.seda.SedaComponent
+    camel-quarkus-servlet:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-servlet
+      schemes:
+      - id: servlet
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.servlet.ServletComponent
+    camel-quarkus-sjms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms
+      schemes:
+      - id: sjms
+        http: false
+        passive: false
+      - id: sjms-batch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms.SjmsComponent
+      - org.apache.camel.component.sjms.batch.SjmsBatchComponent
+    camel-quarkus-sjms2:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms2
+      schemes:
+      - id: sjms2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms2.Sjms2Component
+    camel-quarkus-slack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-slack
+      schemes:
+      - id: slack
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.slack.SlackComponent
+    camel-quarkus-snakeyaml:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-snakeyaml
+      dataformats:
+      - yaml-snakeyaml
+      javaTypes:
+      - org.apache.camel.component.snakeyaml.SnakeYAMLDataFormat
+    camel-quarkus-tagsoup:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tagsoup
+      dataformats:
+      - tidyMarkup
+      javaTypes:
+      - org.apache.camel.dataformat.tagsoup.TidyMarkupDataFormat
+    camel-quarkus-tarfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tarfile
+      dataformats:
+      - tarfile
+      javaTypes:
+      - org.apache.camel.dataformat.tarfile.TarFileDataFormat
+    camel-quarkus-timer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-timer
+      schemes:
+      - id: timer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.timer.TimerComponent
+    camel-quarkus-twitter:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-twitter
+      schemes:
+      - id: twitter-directmessage
+        http: false
+        passive: false
+      - id: twitter-search
+        http: false
+        passive: false
+      - id: twitter-timeline
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.twitter.directmessage.TwitterDirectMessageComponent
+      - org.apache.camel.component.twitter.search.TwitterSearchComponent
+      - org.apache.camel.component.twitter.timeline.TwitterTimelineComponent
+    camel-quarkus-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-validator
+      schemes:
+      - id: validator
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.validator.ValidatorComponent
+    camel-quarkus-vm:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vm
+      schemes:
+      - id: vm
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.vm.VmComponent
+    camel-quarkus-xslt:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xslt
+      schemes:
+      - id: xslt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.XsltComponent
+    camel-quarkus-zipfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zipfile
+      dataformats:
+      - zipfile
+      javaTypes:
+      - org.apache.camel.dataformat.zipfile.ZipFileDataFormat
+
+`
+	Resources["camel-catalog-quarkus-1.0.0-M1-1.0.9.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1
+kind: CamelCatalog
+metadata:
+  name: camel-catalog-quarkus-1.0.0-m1-1.0.9
+  labels:
+    app: camel-k
+    camel.apache.org/catalog.version: 3.0.0
+    camel.apache.org/catalog.loader.version: 3.0.0
+    camel.apache.org/runtime.version: 1.0.9
+    camel.apache.org/runtime.provider: quarkus
+spec:
+  version: 3.0.0
+  runtimeVersion: 1.0.9
+  runtimeProvider:
+    quarkus:
+      camelQuarkusVersion: 1.0.0-M1
+      quarkusVersion: 1.0.1.Final
+  artifacts:
+    camel-k-loader-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-loader-java:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-java
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-js:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-js
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-knative
+    camel-k-loader-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-kotlin
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-xml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-xml
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-servlet
+    camel-k-runtime-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-knative
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-k-runtime-main:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-main
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+    camel-k-runtime-webhook:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-webhook
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-webhook
+    camel-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-quarkus-aws-ecs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-ecs
+      schemes:
+      - id: aws-ecs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ecs.ECSComponent
+    camel-quarkus-aws-eks:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-eks
+      schemes:
+      - id: aws-eks
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.eks.EKSComponent
+    camel-quarkus-aws-kms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-kms
+      schemes:
+      - id: aws-kms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.kms.KMSComponent
+    camel-quarkus-aws-s3:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-s3
+      schemes:
+      - id: aws-s3
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.s3.S3Component
+    camel-quarkus-aws-sns:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sns
+      schemes:
+      - id: aws-sns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sns.SnsComponent
+    camel-quarkus-aws-sqs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sqs
+      schemes:
+      - id: aws-sqs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sqs.SqsComponent
+    camel-quarkus-base64:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-base64
+      dataformats:
+      - base64
+      javaTypes:
+      - org.apache.camel.dataformat.base64.Base64DataFormat
+    camel-quarkus-bean:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
+      javaTypes:
+      - org.apache.camel.component.bean.BeanComponent
+      - org.apache.camel.component.beanclass.ClassComponent
+      - org.apache.camel.language.bean.BeanLanguage
+    camel-quarkus-bean-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean-validator
+      schemes:
+      - id: bean-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.bean.validator.BeanValidatorComponent
+    camel-quarkus-controlbus:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-controlbus
+      schemes:
+      - id: controlbus
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.controlbus.ControlBusComponent
+    camel-quarkus-core:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-core
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+      javaTypes:
+      - org.apache.camel.language.constant.ConstantLanguage
+      - org.apache.camel.language.property.ExchangePropertyLanguage
+      - org.apache.camel.language.simple.FileLanguage
+      - org.apache.camel.language.header.HeaderLanguage
+      - org.apache.camel.language.ref.RefLanguage
+      - org.apache.camel.language.simple.SimpleLanguage
+      - org.apache.camel.language.tokenizer.TokenizeLanguage
+    camel-quarkus-csv:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-csv
+      dataformats:
+      - csv
+      javaTypes:
+      - org.apache.camel.dataformat.csv.CsvDataFormat
+    camel-quarkus-dataformat:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dataformat
+      schemes:
+      - id: dataformat
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.dataformat.DataFormatComponent
+    camel-quarkus-direct:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-direct
+      schemes:
+      - id: direct
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.direct.DirectComponent
+    camel-quarkus-dozer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dozer
+      schemes:
+      - id: dozer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dozer.DozerComponent
+    camel-quarkus-exec:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-exec
+      schemes:
+      - id: exec
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.exec.ExecComponent
+    camel-quarkus-fhir:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-fhir
+      schemes:
+      - id: fhir
+        http: false
+        passive: false
+      dataformats:
+      - fhirJson
+      - fhirXml
+      javaTypes:
+      - org.apache.camel.component.fhir.FhirComponent
+      - org.apache.camel.component.fhir.FhirJsonDataFormat
+      - org.apache.camel.component.fhir.FhirXmlDataFormat
+    camel-quarkus-file:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-file
+      schemes:
+      - id: file
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.FileComponent
+    camel-quarkus-ftp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ftp
+      schemes:
+      - id: ftp
+        http: false
+        passive: false
+      - id: ftps
+        http: false
+        passive: false
+      - id: sftp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.remote.FtpComponent
+      - org.apache.camel.component.file.remote.FtpsComponent
+      - org.apache.camel.component.file.remote.SftpComponent
+    camel-quarkus-infinispan:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-infinispan
+      schemes:
+      - id: infinispan
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.infinispan.InfinispanComponent
+    camel-quarkus-jackson:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson
+      dataformats:
+      - json-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.JacksonDataFormat
+    camel-quarkus-jdbc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jdbc
+      schemes:
+      - id: jdbc
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jdbc.JdbcComponent
+    camel-quarkus-kafka:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kafka
+      schemes:
+      - id: kafka
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kafka.KafkaComponent
+    camel-quarkus-log:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-log
+      schemes:
+      - id: log
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.log.LogComponent
+    camel-quarkus-mail:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mail
+      schemes:
+      - id: imap
+        http: false
+        passive: false
+      - id: imaps
+        http: false
+        passive: false
+      - id: pop3
+        http: false
+        passive: false
+      - id: pop3s
+        http: false
+        passive: false
+      - id: smtp
+        http: false
+        passive: false
+      - id: smtps
+        http: false
+        passive: false
+      dataformats:
+      - mime-multipart
+      javaTypes:
+      - org.apache.camel.component.mail.MailComponent
+      - org.apache.camel.dataformat.mime.multipart.MimeMultipartDataFormat
+    camel-quarkus-microprofile-metrics:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.microprofile.metrics.MicroProfileMetricsComponent
+    camel-quarkus-mongodb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mongodb
+      schemes:
+      - id: mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.MongoDbComponent
+    camel-quarkus-netty:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty
+      schemes:
+      - id: netty
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.NettyComponent
+    camel-quarkus-netty-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty-http
+      schemes:
+      - id: netty-http
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.http.NettyHttpComponent
+    camel-quarkus-paho:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-paho
+      schemes:
+      - id: paho
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.paho.PahoComponent
+    camel-quarkus-pdf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pdf
+      schemes:
+      - id: pdf
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pdf.PdfComponent
+    camel-quarkus-platform-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-platform-http
+      schemes:
+      - id: platform-http
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.platform.http.PlatformHttpComponent
+    camel-quarkus-rest:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rest
+      schemes:
+      - id: rest
+        http: true
+        passive: false
+      - id: rest-api
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.RestComponent
+      - org.apache.camel.component.rest.RestApiComponent
+    camel-quarkus-salesforce:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-salesforce
+      schemes:
+      - id: salesforce
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.salesforce.SalesforceComponent
+    camel-quarkus-scheduler:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-scheduler
+      schemes:
+      - id: scheduler
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.scheduler.SchedulerComponent
+    camel-quarkus-seda:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-seda
+      schemes:
+      - id: seda
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.seda.SedaComponent
+    camel-quarkus-servlet:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-servlet
+      schemes:
+      - id: servlet
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.servlet.ServletComponent
+    camel-quarkus-sjms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms
+      schemes:
+      - id: sjms
+        http: false
+        passive: false
+      - id: sjms-batch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms.SjmsComponent
+      - org.apache.camel.component.sjms.batch.SjmsBatchComponent
+    camel-quarkus-sjms2:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms2
+      schemes:
+      - id: sjms2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms2.Sjms2Component
+    camel-quarkus-slack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-slack
+      schemes:
+      - id: slack
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.slack.SlackComponent
+    camel-quarkus-snakeyaml:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-snakeyaml
+      dataformats:
+      - yaml-snakeyaml
+      javaTypes:
+      - org.apache.camel.component.snakeyaml.SnakeYAMLDataFormat
+    camel-quarkus-tagsoup:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tagsoup
+      dataformats:
+      - tidyMarkup
+      javaTypes:
+      - org.apache.camel.dataformat.tagsoup.TidyMarkupDataFormat
+    camel-quarkus-tarfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tarfile
+      dataformats:
+      - tarfile
+      javaTypes:
+      - org.apache.camel.dataformat.tarfile.TarFileDataFormat
+    camel-quarkus-timer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-timer
+      schemes:
+      - id: timer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.timer.TimerComponent
+    camel-quarkus-twitter:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-twitter
+      schemes:
+      - id: twitter-directmessage
+        http: false
+        passive: false
+      - id: twitter-search
+        http: false
+        passive: false
+      - id: twitter-timeline
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.twitter.directmessage.TwitterDirectMessageComponent
+      - org.apache.camel.component.twitter.search.TwitterSearchComponent
+      - org.apache.camel.component.twitter.timeline.TwitterTimelineComponent
+    camel-quarkus-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-validator
+      schemes:
+      - id: validator
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.validator.ValidatorComponent
+    camel-quarkus-vm:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vm
+      schemes:
+      - id: vm
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.vm.VmComponent
+    camel-quarkus-xslt:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xslt
+      schemes:
+      - id: xslt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.XsltComponent
+    camel-quarkus-zipfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zipfile
+      dataformats:
+      - zipfile
+      javaTypes:
+      - org.apache.camel.dataformat.zipfile.ZipFileDataFormat
+
+`
+	Resources["camel-catalog-quarkus-1.0.0-M2-1.0.10.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1
+kind: CamelCatalog
+metadata:
+  name: camel-catalog-quarkus-1.0.0-m2-1.0.10
+  labels:
+    app: camel-k
+    camel.apache.org/catalog.version: 3.0.0
+    camel.apache.org/catalog.loader.version: 3.0.0
+    camel.apache.org/runtime.version: 1.0.10
+    camel.apache.org/runtime.provider: quarkus
+spec:
+  version: 3.0.0
+  runtimeVersion: 1.0.10
+  runtimeProvider:
+    quarkus:
+      camelQuarkusVersion: 1.0.0-M2
+      quarkusVersion: 1.1.0.Final
+  artifacts:
+    camel-k-loader-groovy:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+      - groupId: org.apache.camel
+        artifactId: camel-groovy
+    camel-k-loader-java:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-java
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-js:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-js
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-knative
+    camel-k-loader-kotlin:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-kotlin
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-endpointdsl
+    camel-k-loader-xml:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-xml
+    camel-k-runtime-health:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-health
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-runtime-servlet
+    camel-k-runtime-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-knative
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-yaml
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-loader-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-k-runtime-main:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-main
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-core-engine
+      - groupId: org.apache.camel
+        artifactId: camel-main
+    camel-k-runtime-servlet:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-servlet
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-servlet
+    camel-k-runtime-webhook:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-runtime-webhook
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-webhook
+    camel-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel
+        artifactId: camel-cloud
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-api
+      - groupId: org.apache.camel.k
+        artifactId: camel-knative-http
+    camel-quarkus-aws-ecs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-ecs
+      schemes:
+      - id: aws-ecs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.ecs.ECSComponent
+    camel-quarkus-aws-eks:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-eks
+      schemes:
+      - id: aws-eks
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.eks.EKSComponent
+    camel-quarkus-aws-iam:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-iam
+      schemes:
+      - id: aws-iam
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.iam.IAMComponent
+    camel-quarkus-aws-kms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-kms
+      schemes:
+      - id: aws-kms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.kms.KMSComponent
+    camel-quarkus-aws-s3:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-s3
+      schemes:
+      - id: aws-s3
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.s3.S3Component
+    camel-quarkus-aws-sns:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sns
+      schemes:
+      - id: aws-sns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sns.SnsComponent
+    camel-quarkus-aws-sqs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-sqs
+      schemes:
+      - id: aws-sqs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.sqs.SqsComponent
+    camel-quarkus-base64:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-base64
+      dataformats:
+      - base64
+      javaTypes:
+      - org.apache.camel.dataformat.base64.Base64DataFormat
+    camel-quarkus-bean:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
+      javaTypes:
+      - org.apache.camel.component.bean.BeanComponent
+      - org.apache.camel.component.beanclass.ClassComponent
+      - org.apache.camel.language.bean.BeanLanguage
+    camel-quarkus-bean-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean-validator
+      schemes:
+      - id: bean-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.bean.validator.BeanValidatorComponent
+    camel-quarkus-controlbus:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-controlbus
+      schemes:
+      - id: controlbus
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.controlbus.ControlBusComponent
+    camel-quarkus-core:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-core
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+      javaTypes:
+      - org.apache.camel.language.constant.ConstantLanguage
+      - org.apache.camel.language.property.ExchangePropertyLanguage
+      - org.apache.camel.language.simple.FileLanguage
+      - org.apache.camel.language.header.HeaderLanguage
+      - org.apache.camel.language.ref.RefLanguage
+      - org.apache.camel.language.simple.SimpleLanguage
+      - org.apache.camel.language.tokenizer.TokenizeLanguage
+    camel-quarkus-csv:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-csv
+      dataformats:
+      - csv
+      javaTypes:
+      - org.apache.camel.dataformat.csv.CsvDataFormat
+    camel-quarkus-dataformat:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dataformat
+      schemes:
+      - id: dataformat
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.dataformat.DataFormatComponent
+    camel-quarkus-direct:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-direct
+      schemes:
+      - id: direct
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.direct.DirectComponent
+    camel-quarkus-dozer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dozer
+      schemes:
+      - id: dozer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dozer.DozerComponent
+    camel-quarkus-exec:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-exec
+      schemes:
+      - id: exec
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.exec.ExecComponent
+    camel-quarkus-fhir:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-fhir
+      schemes:
+      - id: fhir
+        http: false
+        passive: false
+      dataformats:
+      - fhirJson
+      - fhirXml
+      javaTypes:
+      - org.apache.camel.component.fhir.FhirComponent
+      - org.apache.camel.component.fhir.FhirJsonDataFormat
+      - org.apache.camel.component.fhir.FhirXmlDataFormat
+    camel-quarkus-file:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-file
+      schemes:
+      - id: file
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.FileComponent
+    camel-quarkus-ftp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ftp
+      schemes:
+      - id: ftp
+        http: false
+        passive: false
+      - id: ftps
+        http: false
+        passive: false
+      - id: sftp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.remote.FtpComponent
+      - org.apache.camel.component.file.remote.FtpsComponent
+      - org.apache.camel.component.file.remote.SftpComponent
+    camel-quarkus-infinispan:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-infinispan
+      schemes:
+      - id: infinispan
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.infinispan.InfinispanComponent
+    camel-quarkus-jackson:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson
+      dataformats:
+      - json-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.JacksonDataFormat
+    camel-quarkus-jdbc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jdbc
+      schemes:
+      - id: jdbc
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jdbc.JdbcComponent
+    camel-quarkus-kafka:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kafka
+      schemes:
+      - id: kafka
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kafka.KafkaComponent
+    camel-quarkus-log:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-log
+      schemes:
+      - id: log
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.log.LogComponent
+    camel-quarkus-mail:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mail
+      schemes:
+      - id: imap
+        http: false
+        passive: false
+      - id: imaps
+        http: false
+        passive: false
+      - id: pop3
+        http: false
+        passive: false
+      - id: pop3s
+        http: false
+        passive: false
+      - id: smtp
+        http: false
+        passive: false
+      - id: smtps
+        http: false
+        passive: false
+      dataformats:
+      - mime-multipart
+      javaTypes:
+      - org.apache.camel.component.mail.MailComponent
+      - org.apache.camel.dataformat.mime.multipart.MimeMultipartDataFormat
+    camel-quarkus-microprofile-metrics:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.microprofile.metrics.MicroProfileMetricsComponent
+    camel-quarkus-mongodb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mongodb
+      schemes:
+      - id: mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.MongoDbComponent
+    camel-quarkus-netty:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty
+      schemes:
+      - id: netty
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.NettyComponent
+    camel-quarkus-netty-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty-http
+      schemes:
+      - id: netty-http
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.http.NettyHttpComponent
+    camel-quarkus-paho:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-paho
+      schemes:
+      - id: paho
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.paho.PahoComponent
+    camel-quarkus-pdf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pdf
+      schemes:
+      - id: pdf
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pdf.PdfComponent
+    camel-quarkus-platform-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-platform-http
+      schemes:
+      - id: platform-http
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.platform.http.PlatformHttpComponent
+    camel-quarkus-rest:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rest
+      schemes:
+      - id: rest
+        http: true
+        passive: false
+      - id: rest-api
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.RestComponent
+      - org.apache.camel.component.rest.RestApiComponent
+    camel-quarkus-salesforce:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-salesforce
+      schemes:
+      - id: salesforce
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.salesforce.SalesforceComponent
+    camel-quarkus-scheduler:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-scheduler
+      schemes:
+      - id: scheduler
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.scheduler.SchedulerComponent
+    camel-quarkus-seda:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-seda
+      schemes:
+      - id: seda
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.seda.SedaComponent
+    camel-quarkus-servlet:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-servlet
+      schemes:
+      - id: servlet
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.servlet.ServletComponent
+    camel-quarkus-sjms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms
+      schemes:
+      - id: sjms
+        http: false
+        passive: false
+      - id: sjms-batch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms.SjmsComponent
+      - org.apache.camel.component.sjms.batch.SjmsBatchComponent
+    camel-quarkus-sjms2:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms2
+      schemes:
+      - id: sjms2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms2.Sjms2Component
+    camel-quarkus-slack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-slack
+      schemes:
+      - id: slack
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.slack.SlackComponent
+    camel-quarkus-snakeyaml:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-snakeyaml
+      dataformats:
+      - yaml-snakeyaml
+      javaTypes:
+      - org.apache.camel.component.snakeyaml.SnakeYAMLDataFormat
+    camel-quarkus-sql:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sql
+      schemes:
+      - id: sql
+        http: false
+        passive: false
+      - id: sql-stored
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sql.SqlComponent
+      - org.apache.camel.component.sql.stored.SqlStoredComponent
+    camel-quarkus-tagsoup:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tagsoup
+      dataformats:
+      - tidyMarkup
+      javaTypes:
+      - org.apache.camel.dataformat.tagsoup.TidyMarkupDataFormat
+    camel-quarkus-tarfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tarfile
+      dataformats:
+      - tarfile
+      javaTypes:
+      - org.apache.camel.dataformat.tarfile.TarFileDataFormat
+    camel-quarkus-timer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-timer
+      schemes:
+      - id: timer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.timer.TimerComponent
+    camel-quarkus-twitter:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-twitter
+      schemes:
+      - id: twitter-directmessage
+        http: false
+        passive: false
+      - id: twitter-search
+        http: false
+        passive: false
+      - id: twitter-timeline
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.twitter.directmessage.TwitterDirectMessageComponent
+      - org.apache.camel.component.twitter.search.TwitterSearchComponent
+      - org.apache.camel.component.twitter.timeline.TwitterTimelineComponent
+    camel-quarkus-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-validator
+      schemes:
+      - id: validator
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.validator.ValidatorComponent
+    camel-quarkus-vm:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vm
+      schemes:
+      - id: vm
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.vm.VmComponent
+    camel-quarkus-xslt:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xslt
+      schemes:
+      - id: xslt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.XsltComponent
+    camel-quarkus-zipfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zipfile
+      dataformats:
+      - zipfile
+      javaTypes:
+      - org.apache.camel.dataformat.zipfile.ZipFileDataFormat
+
+`
+	Resources["cr-example.yaml"] =
+		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: example
+spec:
+  sources:
+  - content: |-
+      // This is Camel K Groovy example route
+
+      rnd = new Random()
+
+      from('timer:groovy?period=1s')
+          .routeId('groovy')
+          .setBody()
+              .constant('Hello Camel K!')
+          .process {
+              it.in.headers['RandomValue'] = rnd.nextInt()
+          }
+          .to('log:info?showHeaders=true')
+    name: routes.groovy
 `
 	Resources["crd-build.yaml"] =
 		`
@@ -2456,7 +8037,14 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   names:
     kind: Build
     listKind: BuildList
@@ -2470,6 +8058,10 @@ spec:
       description: The build phase
       JSONPath: .status.phase
     - name: Age
+      type: date
+      description: The time at which the build was created
+      JSONPath: .metadata.creationTimestamp
+    - name: Started
       type: date
       description: The time at which the build was last (re-)started
       JSONPath: .status.startedAt
@@ -2521,14 +8113,25 @@ spec:
     shortNames:
       - cc
   scope: Namespaced
-  version: v1alpha1
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
   additionalPrinterColumns:
-    - name: Version
+    - name: Camel Version
       type: string
-      description: The Catalog version
+      description: The Camel version
       JSONPath: .spec.version
+    - name: Runtime Version
+      type: string
+      description: The Camel K Runtime version
+      JSONPath: .spec.runtimeVersion
 
 
 `
@@ -2560,7 +8163,14 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
   names:
@@ -2613,7 +8223,14 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
   names:
@@ -2658,9 +8275,19 @@ metadata:
 spec:
   group: camel.apache.org
   scope: Namespaced
-  version: v1alpha1
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+  - name: v1alpha1
+    served: true
+    storage: false
   subresources:
     status: {}
+    scale:
+      specReplicasPath: .spec.replicas
+      statusReplicasPath: .status.replicas
   names:
     kind: Integration
     listKind: IntegrationList
@@ -2671,53 +8298,17 @@ spec:
   additionalPrinterColumns:
     - name: Phase
       type: string
-      description: The Integration phase
+      description: The integration phase
       JSONPath: .status.phase
     - name: Kit
       type: string
-      description: The IntegrationKit to use
+      description: The integration kit
       JSONPath: .status.kit
+    - name: Replicas
+      type: integer
+      description: The number of pods
+      JSONPath: .status.replicas
 
-`
-	Resources["cr-example.yaml"] =
-		`
-# ---------------------------------------------------------------------------
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ---------------------------------------------------------------------------
-
-apiVersion: camel.apache.org/v1alpha1
-kind: Integration
-metadata:
-  name: example
-spec:
-  sources:
-  - content: |-
-      // This is Camel K Groovy example route
-
-      rnd = new Random()
-
-      from('timer:groovy?period=1s')
-          .routeId('groovy')
-          .setBody()
-              .constant('Hello Camel K!')
-          .process {
-              it.in.headers['RandomValue'] = rnd.nextInt()
-          }
-          .to('log:info?showHeaders=true')
-    name: routes.groovy
 `
 	Resources["operator-deployment.yaml"] =
 		`
@@ -2757,13 +8348,15 @@ spec:
       labels:
         name: camel-k-operator
         camel.apache.org/component: operator
+        app: "camel-k"
     spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:1.0.0-M2-SNAPSHOT
+          image: docker.io/apache/camel-k:1.0.0-RC2-SNAPSHOT
           command:
-          - camel-k
+          - kamel
+          - operator
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
@@ -2892,6 +8485,7 @@ rules:
   - watch
 - apiGroups:
   - eventing.knative.dev
+  - messaging.knative.dev
   resources:
   - "*"
   verbs:
@@ -2994,6 +8588,19 @@ rules:
   - update
   - watch
 - apiGroups:
+  - batch
+  resources:
+  - cronjobs
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - apps
   attributeRestrictions: null
   resources:
@@ -3019,6 +8626,23 @@ rules:
 `
 	Resources["operator-role-olm.yaml"] =
 		`
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -3079,6 +8703,19 @@ rules:
   - deployments
   - replicasets
   - statefulsets
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - cronjobs
   verbs:
   - create
   - delete
@@ -3190,6 +8827,7 @@ rules:
   - watch
 - apiGroups:
   - eventing.knative.dev
+  - messaging.knative.dev
   resources:
   - "*"
   verbs:
@@ -3282,6 +8920,19 @@ rules:
   - deployments
   - replicasets
   - statefulsets
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - cronjobs
   verbs:
   - create
   - delete
@@ -3414,7 +9065,7 @@ metadata:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationPlatform
 metadata:
   name: camel-k
@@ -3441,7 +9092,7 @@ metadata:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: groovy
@@ -3474,7 +9125,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: java
@@ -3507,7 +9158,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: js
@@ -3540,7 +9191,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: knative
@@ -3573,7 +9224,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: kotlin
@@ -3606,7 +9257,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: main
@@ -3638,7 +9289,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: xml
@@ -3671,7 +9322,7 @@ spec:
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationKit
 metadata:
   name: yaml
@@ -3684,6 +9335,595 @@ spec:
   dependencies:
     - mvn:org.apache.camel.k/camel-k-runtime-main
     - mvn:org.apache.camel.k/camel-k-loader-yaml
+`
+	Resources["prometheus-jmx-exporter.yaml"] =
+		`
+startDelaySecs: 5
+ssl: false
+blacklistObjectNames: ["java.lang:*"]
+rules:
+  # Context level
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>ExchangesCompleted'
+    name: org.apache.camel.ExchangesCompleted
+    help: Exchanges Completed
+    type: COUNTER
+    labels:
+      context: $1
+      type: context
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>ExchangesFailed'
+    name: org.apache.camel.ExchangesFailed
+    help: Exchanges Failed
+    type: COUNTER
+    labels:
+      context: $1
+      type: context
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>ExchangesInflight'
+    name: org.apache.camel.ExchangesInflight
+    help: Exchanges Inflight
+    type: COUNTER
+    labels:
+      context: $1
+      type: context
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>ExchangesTotal'
+    name: org.apache.camel.ExchangesTotal
+    help: Exchanges Total
+    type: COUNTER
+    labels:
+      context: $1
+      type: context
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>ExchangesTotal'
+    name: org.apache.camel.ExchangesTotal
+    help: Exchanges Total
+    type: COUNTER
+    labels:
+      context: $1
+      type: context
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>FailuresHandled'
+    name: org.apache.camel.FailuresHandled
+    help: Failures Handled
+    labels:
+      context: $1
+      type: context
+    type: COUNTER
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>ExternalRedeliveries'
+    name: org.apache.camel.ExternalRedeliveries
+    help: External Redeliveries
+    labels:
+      context: $1
+      type: context
+    type: COUNTER
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>MaxProcessingTime'
+    name: org.apache.camel.MaxProcessingTime
+    help: Maximum Processing Time
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>MeanProcessingTime'
+    name: org.apache.camel.MeanProcessingTime
+    help: Mean Processing Time
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>MinProcessingTime'
+    name: org.apache.camel.MinProcessingTime
+    help: Minimum Processing Time
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>LastProcessingTime'
+    name: org.apache.camel.LastProcessingTime
+    help: Last Processing Time
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>DeltaProcessingTime'
+    name: org.apache.camel.DeltaProcessingTime
+    help: Delta Processing Time
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>Redeliveries'
+    name: org.apache.camel.Redeliveries
+    help: Redeliveries
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=context, name="([^"]+)"><>TotalProcessingTime'
+    name: org.apache.camel.TotalProcessingTime
+    help: Total Processing Time
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=consumers, name="([^"]+)"><>InflightExchanges'
+    name: org.apache.camel.InflightExchanges
+    help: Inflight Exchanges
+    labels:
+      context: $1
+      type: context
+    type: GAUGE
+
+
+  # Route level
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>ExchangesCompleted'
+    name: org.apache.camel.ExchangesCompleted
+    help: Exchanges Completed
+    type: COUNTER
+    labels:
+      context: $1
+      route: $2
+      type: routes
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>ExchangesFailed'
+    name: org.apache.camel.ExchangesFailed
+    help: Exchanges Failed
+    type: COUNTER
+    labels:
+      context: $1
+      route: $2
+      type: routes
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>ExchangesInflight'
+    name: org.apache.camel.ExchangesInflight
+    help: Exchanges Inflight
+    type: COUNTER
+    labels:
+      context: $1
+      route: $2
+      type: routes
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>ExchangesTotal'
+    name: org.apache.camel.ExchangesTotal
+    help: Exchanges Total
+    type: COUNTER
+    labels:
+      context: $1
+      route: $2
+      type: routes
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>ExchangesTotal'
+    name: org.apache.camel.ExchangesTotal
+    help: Exchanges Total
+    type: COUNTER
+    labels:
+      context: $1
+      route: $2
+      type: routes
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>FailuresHandled'
+    name: org.apache.camel.FailuresHandled
+    help: Failures Handled
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: COUNTER
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>ExternalRedeliveries'
+    name: org.apache.camel.ExternalRedeliveries
+    help: External Redeliveries
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: COUNTER
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>MaxProcessingTime'
+    name: org.apache.camel.MaxProcessingTime
+    help: Maximum Processing Time
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>MeanProcessingTime'
+    name: org.apache.camel.MeanProcessingTime
+    help: Mean Processing Time
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>MinProcessingTime'
+    name: org.apache.camel.MinProcessingTime
+    help: Minimum Processing Time
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>LastProcessingTime'
+    name: org.apache.camel.LastProcessingTime
+    help: Last Processing Time
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>DeltaProcessingTime'
+    name: org.apache.camel.DeltaProcessingTime
+    help: Delta Processing Time
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>Redeliveries'
+    name: org.apache.camel.Redeliveries
+    help: Redeliveries
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>TotalProcessingTime'
+    name: org.apache.camel.TotalProcessingTime
+    help: Total Processing Time
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=routes, name="([^"]+)"><>InflightExchanges'
+    name: org.apache.camel.InflightExchanges
+    help: Inflight Exchanges
+    labels:
+      context: $1
+      route: $2
+      type: routes
+    type: GAUGE
+
+  # Processor level
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>ExchangesCompleted'
+    name: org.apache.camel.ExchangesCompleted
+    help: Exchanges Completed
+    type: COUNTER
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>ExchangesFailed'
+    name: org.apache.camel.ExchangesFailed
+    help: Exchanges Failed
+    type: COUNTER
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>ExchangesInflight'
+    name: org.apache.camel.ExchangesInflight
+    help: Exchanges Inflight
+    type: COUNTER
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>ExchangesTotal'
+    name: org.apache.camel.ExchangesTotal
+    help: Exchanges Total
+    type: COUNTER
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>ExchangesTotal'
+    name: org.apache.camel.ExchangesTotal
+    help: Exchanges Total
+    type: COUNTER
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>FailuresHandled'
+    name: org.apache.camel.FailuresHandled
+    help: Failures Handled
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: COUNTER
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>ExternalRedeliveries'
+    name: org.apache.camel.ExternalRedeliveries
+    help: External Redeliveries
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: COUNTER
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>MaxProcessingTime'
+    name: org.apache.camel.MaxProcessingTime
+    help: Maximum Processing Time
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>MeanProcessingTime'
+    name: org.apache.camel.MeanProcessingTime
+    help: Mean Processing Time
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>MinProcessingTime'
+    name: org.apache.camel.MinProcessingTime
+    help: Minimum Processing Time
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>LastProcessingTime'
+    name: org.apache.camel.LastProcessingTime
+    help: Last Processing Time
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>DeltaProcessingTime'
+    name: org.apache.camel.DeltaProcessingTime
+    help: Delta Processing Time
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>Redeliveries'
+    name: org.apache.camel.Redeliveries
+    help: Redeliveries
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>TotalProcessingTime'
+    name: org.apache.camel.TotalProcessingTime
+    help: Total Processing Time
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=processors, name="([^"]+)"><>InflightExchanges'
+    name: org.apache.camel.InflightExchanges
+    help: Inflight Exchanges
+    labels:
+      context: $1
+      processor: $2
+      type: processors
+    type: COUNTER
+
+  # Consumers
+  - pattern: 'org.apache.camel<context=([^,]+), type=consumers, name="([^"]+)"><>InflightExchanges'
+    name: org.apache.camel.InflightExchanges
+    help: Inflight Exchanges
+    labels:
+      context: $1
+      consumer: $2
+      type: consumers
+    type: GAUGE
+
+  # Services
+  - pattern: 'org.apache.camel<context=([^,]+), type=services, name="([^"]+)"><>MaxDuration'
+    name: org.apache.camel.MaxDuration
+    help: Maximum Duration
+    labels:
+      context: $1
+      service: $2
+      type: services
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=services, name="([^"]+)"><>MeanDuration'
+    name: org.apache.camel.MeanDuration
+    help: Mean Duration
+    labels:
+      context: $1
+      service: $2
+      type: services
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=services, name="([^"]+)"><>MinDuration'
+    name: org.apache.camel.MinDuration
+    help: Minimum Duration
+    labels:
+      context: $1
+      service: $2
+      type: services
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=services, name="([^"]+)"><>TotalDuration'
+    name: org.apache.camel.TotalDuration
+    help: Total Duration
+    labels:
+      context: $1
+      service: $2
+      type: services
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=services, name="([^"]+)"><>ThreadsBlocked'
+    name: org.apache.camel.ThreadsBlocked
+    help: Threads Blocked
+    labels:
+      context: $1
+      service: $2
+      type: services
+    type: GAUGE
+  - pattern: 'org.apache.camel<context=([^,]+), type=services, name="([^"]+)"><>ThreadsInterrupted'
+    name: org.apache.camel.ThreadsInterrupted
+    help: Threads Interrupted
+    labels:
+      context: $1
+      service: $2
+      type: services
+    type: GAUGE
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>NumLogicalRuntimeFaults'
+    name: org.apache.cxf.NumLogicalRuntimeFaults
+    help: Number of logical runtime faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>NumLogicalRuntimeFaults'
+    name: org.apache.cxf.NumLogicalRuntimeFaults
+    help: Number of logical runtime faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>AvgResponseTime'
+    name: org.apache.cxf.AvgResponseTime
+    help: Average Response Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>AvgResponseTime'
+    name: org.apache.cxf.AvgResponseTime
+    help: Average Response Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>NumInvocations'
+    name: org.apache.cxf.NumInvocations
+    help: Number of invocations
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>NumInvocations'
+    name: org.apache.cxf.NumInvocations
+    help: Number of invocations
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>MaxResponseTime'
+    name: org.apache.cxf.MaxResponseTime
+    help: Maximum Response Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>MaxResponseTime'
+    name: org.apache.cxf.MaxResponseTime
+    help: Maximum Response Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>MinResponseTime'
+    name: org.apache.cxf.MinResponseTime
+    help: Minimum Response Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>MinResponseTime'
+    name: org.apache.cxf.MinResponseTime
+    help: Minimum Response Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>TotalHandlingTime'
+    name: org.apache.cxf.TotalHandlingTime
+    help: Total Handling Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>TotalHandlingTime'
+    name: org.apache.cxf.TotalHandlingTime
+    help: Total Handling Time
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>NumRuntimeFaults'
+    name: org.apache.cxf.NumRuntimeFaults
+    help: Number of runtime faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>NumRuntimeFaults'
+    name: org.apache.cxf.NumRuntimeFaults
+    help: Number of runtime faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>NumUnCheckedApplicationFaults'
+    name: org.apache.cxf.NumUnCheckedApplicationFaults
+    help: Number of unchecked application faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>NumUnCheckedApplicationFaults'
+    name: org.apache.cxf.NumUnCheckedApplicationFaults
+    help: Number of unchecked application faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+), operation=([^,]+)><>NumCheckedApplicationFaults'
+    name: org.apache.cxf.NumCheckedApplicationFaults
+    help: Number of checked application faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
+      operation: $5
+  - pattern: 'org.apache.cxf<bus.id=([^,]+), type=([^,]+), service=([^,]+), port=([^,]+)><>NumCheckedApplicationFaults'
+    name: org.apache.cxf.NumCheckedApplicationFaults
+    help: Number of checked application faults
+    type: GAUGE
+    labels:
+      bus.id: $1
+      type: $2
+      service: $3
+      port: $4
 `
 	Resources["user-cluster-role.yaml"] =
 		`
@@ -3721,3 +9961,5 @@ rules:
 `
 
 }
+
+var Resources map[string]string

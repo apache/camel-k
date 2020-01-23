@@ -22,16 +22,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	"github.com/pkg/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // Apply --
-func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integration, kit *v1alpha1.IntegrationKit) (*Environment, error) {
+func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	environment, err := newEnvironment(ctx, c, integration, kit)
 	if err != nil {
 		return nil, err
@@ -47,13 +47,6 @@ func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integrati
 		return nil, errors.Wrap(err, "error during trait customization")
 	}
 
-	// replace resources created by the trait
-	if environment.Resources != nil {
-		if err := kubernetes.ReplaceResources(ctx, c, environment.Resources.Items()); err != nil {
-			return nil, errors.Wrap(err, "error during replace resource")
-		}
-	}
-
 	// execute post actions registered by traits
 	for _, postAction := range environment.PostActions {
 		err := postAction(environment)
@@ -66,7 +59,7 @@ func Apply(ctx context.Context, c client.Client, integration *v1alpha1.Integrati
 }
 
 // newEnvironment creates a Environment from the given data
-func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.Integration, kit *v1alpha1.IntegrationKit) (*Environment, error) {
+func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	if integration == nil && ctx == nil {
 		return nil, errors.New("neither integration nor kit are set")
 	}
@@ -79,7 +72,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1alpha1.
 	}
 
 	pl, err := platform.GetCurrentPlatform(ctx, c, namespace)
-	if err != nil {
+	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}
 

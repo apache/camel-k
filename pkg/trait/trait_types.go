@@ -21,10 +21,9 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/scylladb/go-set/strset"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,10 +31,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/builder"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -66,6 +63,15 @@ type Trait interface {
 
 	// Apply executes a customization of the Environment
 	Apply(environment *Environment) error
+
+	// InfluencesKit determines if the trait has any influence on Integration Kits
+	InfluencesKit() bool
+
+	// IsPlatformTrait marks all fundamental traits that allow the platform to work
+	IsPlatformTrait() bool
+
+	// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
+	RequiresIntegrationPlatform() bool
 }
 
 /* Base trait */
@@ -79,7 +85,8 @@ func newBaseTrait(id string) BaseTrait {
 
 // BaseTrait is the root trait with noop implementations for hooks
 type BaseTrait struct {
-	id      ID
+	id ID
+	// Can be used to enable or disable a trait. All traits share this common property.
 	Enabled *bool `property:"enabled"`
 	client  client.Client
 	ctx     context.Context
@@ -101,26 +108,51 @@ func (trait *BaseTrait) InjectContext(ctx context.Context) {
 	trait.ctx = ctx
 }
 
+// InfluencesKit determines if the trait has any influence on Integration Kits
+func (trait *BaseTrait) InfluencesKit() bool {
+	return false
+}
+
+// IsPlatformTrait marks all fundamental traits that allow the platform to work.
+func (trait *BaseTrait) IsPlatformTrait() bool {
+	return false
+}
+
+// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
+func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
+	// All traits require a platform by default
+	return true
+}
+
+/* ControllerStrategySelector */
+
+// ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
+type ControllerStrategySelector interface {
+	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
+	SelectControllerStrategy(*Environment) (*ControllerStrategy, error)
+	// ControllerStrategySelectorOrder returns the order (priority) of the controller strategy selector
+	ControllerStrategySelectorOrder() int
+}
+
 /* Environment */
 
 // A Environment provides the context where the trait is executed
 type Environment struct {
-	CamelCatalog   *camel.RuntimeCatalog
-	RuntimeVersion string
-	Catalog        *Catalog
-	C              context.Context
-	Client         client.Client
-	Platform       *v1alpha1.IntegrationPlatform
-	IntegrationKit *v1alpha1.IntegrationKit
-	Integration    *v1alpha1.Integration
-	Resources      *kubernetes.Collection
-	PostActions    []func(*Environment) error
-	PostProcessors []func(*Environment) error
-	Steps          []builder.Step
-	BuildDir       string
-	ExecutedTraits []Trait
-	EnvVars        []corev1.EnvVar
-	Classpath      *strset.Set
+	CamelCatalog     *camel.RuntimeCatalog
+	RuntimeVersion   string
+	Catalog          *Catalog
+	C                context.Context
+	Client           client.Client
+	Platform         *v1.IntegrationPlatform
+	IntegrationKit   *v1.IntegrationKit
+	Integration      *v1.Integration
+	Resources        *kubernetes.Collection
+	PostActions      []func(*Environment) error
+	PostProcessors   []func(*Environment) error
+	BuildTasks       []v1.Task
+	ConfiguredTraits []Trait
+	ExecutedTraits   []Trait
+	EnvVars          []corev1.EnvVar
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -128,8 +160,11 @@ type ControllerStrategy string
 
 // List of controller strategies
 const (
-	ControllerStrategyDeployment     = "deployment"
-	ControllerStrategyKnativeService = "knative-service"
+	ControllerStrategyDeployment     ControllerStrategy = "deployment"
+	ControllerStrategyKnativeService ControllerStrategy = "knative-service"
+	ControllerStrategyCronJob        ControllerStrategy = "cron-job"
+
+	DefaultControllerStrategy ControllerStrategy = ControllerStrategyDeployment
 )
 
 // GetTrait --
@@ -144,7 +179,7 @@ func (e *Environment) GetTrait(id ID) Trait {
 }
 
 // IntegrationInPhase --
-func (e *Environment) IntegrationInPhase(phases ...v1alpha1.IntegrationPhase) bool {
+func (e *Environment) IntegrationInPhase(phases ...v1.IntegrationPhase) bool {
 	if e.Integration == nil {
 		return false
 	}
@@ -159,7 +194,7 @@ func (e *Environment) IntegrationInPhase(phases ...v1alpha1.IntegrationPhase) bo
 }
 
 // IntegrationKitInPhase --
-func (e *Environment) IntegrationKitInPhase(phases ...v1alpha1.IntegrationKitPhase) bool {
+func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bool {
 	if e.IntegrationKit == nil {
 		return false
 	}
@@ -174,7 +209,7 @@ func (e *Environment) IntegrationKitInPhase(phases ...v1alpha1.IntegrationKitPha
 }
 
 // InPhase --
-func (e *Environment) InPhase(c v1alpha1.IntegrationKitPhase, i v1alpha1.IntegrationPhase) bool {
+func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) bool {
 	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
 }
 
@@ -182,81 +217,51 @@ func (e *Environment) InPhase(c v1alpha1.IntegrationKitPhase, i v1alpha1.Integra
 // First looking at the Integration.Spec for a Profile,
 // next looking at the IntegrationKit.Spec
 // and lastly the Platform Profile
-func (e *Environment) DetermineProfile() v1alpha1.TraitProfile {
-	if e.Integration != nil && e.Integration.Spec.Profile != "" {
-		return e.Integration.Spec.Profile
+func (e *Environment) DetermineProfile() v1.TraitProfile {
+	if e.Integration != nil {
+		if e.Integration.Status.Profile != "" {
+			return e.Integration.Status.Profile
+		}
+		if e.Integration.Spec.Profile != "" {
+			return e.Integration.Spec.Profile
+		}
 	}
 
 	if e.IntegrationKit != nil && e.IntegrationKit.Spec.Profile != "" {
 		return e.IntegrationKit.Spec.Profile
 	}
 
-	return platform.GetProfile(e.Platform)
+	if e.Platform != nil {
+		return platform.GetProfile(e.Platform)
+	}
+
+	return v1.DefaultTraitProfile
 }
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration
 func (e *Environment) DetermineControllerStrategy(ctx context.Context, c controller.Reader) (ControllerStrategy, error) {
-	if e.DetermineProfile() != v1alpha1.TraitProfileKnative {
-		return ControllerStrategyDeployment, nil
-	}
-
-	trait := e.GetTrait("deployer")
-	if trait != nil {
-		deployerTrait := trait.(*deployerTrait)
-		if deployerTrait.Kind == ControllerStrategyDeployment {
-			return ControllerStrategyDeployment, nil
-		} else if deployerTrait.Kind == ControllerStrategyKnativeService {
-			return ControllerStrategyKnativeService, nil
+	defaultStrategy := DefaultControllerStrategy
+	for _, creator := range e.getControllerStrategyChoosers() {
+		if strategy, err := creator.SelectControllerStrategy(e); err != nil {
+			return defaultStrategy, err
+		} else if strategy != nil {
+			return *strategy, nil
 		}
 	}
 
-	var sources []v1alpha1.SourceSpec
-	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(ctx, c, e.Integration, e.Resources); err != nil {
-		return "", err
-	}
-
-	// In Knative profile: use knative service only if needed
-	meta := metadata.ExtractAll(e.CamelCatalog, sources)
-	if !meta.RequiresHTTPService {
-		return ControllerStrategyDeployment, nil
-	}
-
-	return ControllerStrategyKnativeService, nil
+	return defaultStrategy, nil
 }
 
-// DetermineCamelVersion --
-func (e *Environment) DetermineCamelVersion() string {
-	var version string
-
-	if e.Integration != nil {
-		version = e.Integration.Status.CamelVersion
+func (e *Environment) getControllerStrategyChoosers() (res []ControllerStrategySelector) {
+	for _, t := range e.ConfiguredTraits {
+		if cc, ok := t.(ControllerStrategySelector); ok {
+			res = append(res, cc)
+		}
 	}
-	if e.IntegrationKit != nil && version == "" {
-		version = e.IntegrationKit.Status.CamelVersion
-	}
-	if version == "" {
-		version = e.Platform.Spec.Build.CamelVersion
-	}
-
-	return version
-}
-
-// DetermineRuntimeVersion --
-func (e *Environment) DetermineRuntimeVersion() string {
-	var version string
-
-	if e.Integration != nil {
-		version = e.Integration.Status.RuntimeVersion
-	}
-	if e.IntegrationKit != nil && version == "" {
-		version = e.IntegrationKit.Status.RuntimeVersion
-	}
-	if version == "" {
-		version = e.Platform.Spec.Build.RuntimeVersion
-	}
-
-	return version
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].ControllerStrategySelectorOrder() < res[j].ControllerStrategySelectorOrder()
+	})
+	return res
 }
 
 // DetermineNamespace --
@@ -325,6 +330,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 				},
 				Annotations: map[string]string{
 					"camel.apache.org/source.language":    string(s.InferLanguage()),
+					"camel.apache.org/source.loader":      s.Loader,
 					"camel.apache.org/source.name":        s.Name,
 					"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
 				},
@@ -338,7 +344,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	}
 
 	for i, r := range e.Integration.Spec.Resources {
-		if r.Type != v1alpha1.ResourceTypeData {
+		if r.Type != v1.ResourceTypeData {
 			continue
 		}
 		if r.ContentRef != "" {
@@ -394,6 +400,9 @@ func (e *Environment) ComputeSourcesURI() []string {
 		if s.InferLanguage() != "" {
 			params = append(params, "language="+string(s.InferLanguage()))
 		}
+		if s.Loader != "" {
+			params = append(params, "loader="+s.Loader)
+		}
 		if s.Compression {
 			params = append(params, "compression=true")
 		}
@@ -410,7 +419,6 @@ func (e *Environment) ComputeSourcesURI() []string {
 
 // ConfigureVolumesAndMounts --
 func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
-
 	//
 	// Volumes :: Sources
 	//
@@ -448,8 +456,8 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		})
 	}
 
-	for i, r := range e.Integration.Spec.Resources {
-		if r.Type != v1alpha1.ResourceTypeData {
+	for i, r := range e.Integration.Resources() {
+		if r.Type != v1.ResourceTypeData {
 			continue
 		}
 
@@ -604,4 +612,14 @@ func (e *Environment) CollectConfigurationValues(configurationType string) []str
 // CollectConfigurationPairs --
 func (e *Environment) CollectConfigurationPairs(configurationType string) map[string]string {
 	return CollectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
+}
+
+func (e *Environment) getIntegrationContainer() *corev1.Container {
+	containerName := defaultContainerName
+	dt := e.Catalog.GetTrait(containerTraitID)
+	if dt != nil {
+		containerName = dt.(*containerTrait).Name
+	}
+
+	return e.Resources.GetContainerByName(containerName)
 }

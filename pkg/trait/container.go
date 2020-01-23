@@ -21,13 +21,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/envvar"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 const (
@@ -35,20 +38,35 @@ const (
 	containerTraitID     = "container"
 )
 
+// The Container trait can be used to configure properties of the container where the integration will run.
+//
+// It also provides configuration for Services associated to the container.
+//
+// +camel-k:trait=container
 type containerTrait struct {
 	BaseTrait `property:",squash"`
 
-	Auto            *bool  `property:"auto"`
-	RequestCPU      string `property:"request-cpu"`
-	RequestMemory   string `property:"request-memory"`
-	LimitCPU        string `property:"limit-cpu"`
-	LimitMemory     string `property:"limit-memory"`
-	Expose          *bool  `property:"expose"`
-	Port            int    `property:"port"`
-	PortName        string `property:"port-name"`
-	ServicePort     int    `property:"service-port"`
+	Auto *bool `property:"auto"`
+	// The minimum amount of CPU required.
+	RequestCPU string `property:"request-cpu"`
+	// The minimum amount of memory required.
+	RequestMemory string `property:"request-memory"`
+	// The maximum amount of CPU required.
+	LimitCPU string `property:"limit-cpu"`
+	// The maximum amount of memory required.
+	LimitMemory string `property:"limit-memory"`
+	// Can be used to enable/disable exposure via kubernetes Service.
+	Expose *bool `property:"expose"`
+	// To configure a different port exposed by the container (default `8080`).
+	Port int `property:"port"`
+	// To configure a different port name for the port exposed by the container (default `http`).
+	PortName string `property:"port-name"`
+	// To configure under which service port the container port is to be exposed (default `80`).
+	ServicePort int `property:"service-port"`
+	// To configure under which service port name the container port is to be exposed (default `http`).
 	ServicePortName string `property:"service-port-name"`
-	Name            string `property:"name"`
+	// The main container name. It's named `integration` by default.
+	Name string `property:"name"`
 }
 
 func newContainerTrait() *containerTrait {
@@ -67,7 +85,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1alpha1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -83,9 +101,10 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 func (t *containerTrait) Apply(e *Environment) error {
 	container := corev1.Container{
-		Name:  t.Name,
-		Image: e.Integration.Status.Image,
-		Env:   make([]corev1.EnvVar, 0),
+		Name:    t.Name,
+		Image:   e.Integration.Status.Image,
+		Env:     make([]corev1.EnvVar, 0),
+		Command: []string{"java"},
 	}
 
 	// combine Environment of integration with platform, kit, integration
@@ -130,11 +149,24 @@ func (t *containerTrait) Apply(e *Environment) error {
 		}
 
 		e.ConfigureVolumesAndMounts(
-			&service.Spec.ConfigurationSpec.GetTemplate().Spec.Volumes,
+			&service.Spec.ConfigurationSpec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
 
-		service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers = append(service.Spec.ConfigurationSpec.GetTemplate().Spec.Containers, container)
+		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
+	})
+
+	e.Resources.VisitCronJob(func(cron *v1beta1.CronJob) {
+		for _, envVar := range e.EnvVars {
+			envvar.SetVar(&container.Env, envVar)
+		}
+
+		e.ConfigureVolumesAndMounts(
+			&cron.Spec.JobTemplate.Spec.Template.Spec.Volumes,
+			&container.VolumeMounts,
+		)
+
+		cron.Spec.JobTemplate.Spec.Template.Spec.Containers = append(cron.Spec.JobTemplate.Spec.Template.Spec.Containers, container)
 	})
 
 	if t.Expose != nil && *t.Expose {
@@ -142,6 +174,11 @@ func (t *containerTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *containerTrait) IsPlatformTrait() bool {
+	return true
 }
 
 func (t *containerTrait) configureService(e *Environment) {
@@ -169,9 +206,9 @@ func (t *containerTrait) configureService(e *Environment) {
 	}
 
 	e.Integration.Status.SetCondition(
-		v1alpha1.IntegrationConditionServiceAvailable,
+		v1.IntegrationConditionServiceAvailable,
 		corev1.ConditionTrue,
-		v1alpha1.IntegrationConditionServiceAvailableReason,
+		v1.IntegrationConditionServiceAvailableReason,
 
 		// service -> container
 		fmt.Sprintf("%s(%s/%d) -> %s(%s/%d)",
@@ -183,7 +220,7 @@ func (t *containerTrait) configureService(e *Environment) {
 	service.Spec.Ports = append(service.Spec.Ports, servicePort)
 
 	// Mark the service as a user service
-	service.Labels["camel.apache.org/service.type"] = v1alpha1.ServiceTypeUser
+	service.Labels["camel.apache.org/service.type"] = v1.ServiceTypeUser
 }
 
 func (t *containerTrait) configureResources(_ *Environment, container *corev1.Container) {

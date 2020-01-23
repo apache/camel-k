@@ -18,32 +18,33 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"errors"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func newCmdLog(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdLog(rootCmdOptions *RootCmdOptions) (*cobra.Command, *logCmdOptions) {
 	options := logCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:   "log integration",
-		Short: "Print the logs of an integration",
-		Long:  `Print the logs of an integration.`,
-		Args:  options.validate,
-		RunE:  options.run,
+		Use:     "log integration",
+		Short:   "Print the logs of an integration",
+		Long:    `Print the logs of an integration.`,
+		Args:    options.validate,
+		PreRunE: decode(&options),
+		RunE:    options.run,
 	}
 
 	// completion support
 	configureKnownCompletions(&cmd)
 
-	return &cmd
+	return &cmd, &options
 }
 
 type logCmdOptions struct {
@@ -52,21 +53,21 @@ type logCmdOptions struct {
 
 func (o *logCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("accepts 1 arg, received %d", len(args))
+		return errors.New("log expects an integration name argument")
 	}
 
 	return nil
 }
 
-func (o *logCmdOptions) run(_ *cobra.Command, args []string) error {
+func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
 	}
-	integration := v1alpha1.Integration{
+	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       v1alpha1.IntegrationKind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: o.Namespace,
@@ -81,11 +82,11 @@ func (o *logCmdOptions) run(_ *cobra.Command, args []string) error {
 	if err := c.Get(o.Context, key, &integration); err != nil {
 		return err
 	}
-	if err := k8slog.Print(o.Context, c, &integration); err != nil {
+	if err := k8slog.Print(o.Context, c, &integration, cmd.OutOrStdout()); err != nil {
 		return err
 	}
 
-	// Let's add a wait point, otherwise the script terminates
+	// Let's add a Wait point, otherwise the script terminates
 	<-o.Context.Done()
 
 	return nil

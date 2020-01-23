@@ -21,15 +21,10 @@ import (
 	"context"
 	"time"
 
-	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-
-	"github.com/apache/camel-k/pkg/client"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -37,6 +32,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
 // Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -66,10 +64,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(&source.Kind{Type: &camelv1alpha1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegrationPlatform := e.ObjectOld.(*camelv1alpha1.IntegrationPlatform)
-			newIntegrationPlatform := e.ObjectNew.(*camelv1alpha1.IntegrationPlatform)
+			oldIntegrationPlatform := e.ObjectOld.(*v1.IntegrationPlatform)
+			newIntegrationPlatform := e.ObjectNew.(*v1.IntegrationPlatform)
 			// Ignore updates to the integration platform status in which case metadata.Generation
 			// does not change, or except when the integration platform phase changes as it's used
 			// to transition from one phase to another
@@ -110,7 +108,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 	ctx := context.TODO()
 
 	// Fetch the IntegrationPlatform instance
-	var instance camelv1alpha1.IntegrationPlatform
+	var instance v1.IntegrationPlatform
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
@@ -132,7 +130,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		NewMonitorAction(),
 	}
 
-	var targetPhase camelv1alpha1.IntegrationPlatformPhase
+	var targetPhase v1.IntegrationPlatformPhase
 	var err error
 
 	target := instance.DeepCopy()
@@ -153,14 +151,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 			}
 
 			if target != nil {
-				if err := r.client.Status().Update(ctx, target); err != nil {
-					if k8serrors.IsConflict(err) {
-						targetLog.Error(err, "conflict")
-						return reconcile.Result{
-							Requeue: true,
-						}, nil
-					}
-
+				if err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(&instance)); err != nil {
 					return reconcile.Result{}, err
 				}
 
@@ -181,7 +172,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 		}
 	}
 
-	if targetPhase == camelv1alpha1.IntegrationPlatformPhaseReady {
+	if targetPhase == v1.IntegrationPlatformPhaseReady {
 		return reconcile.Result{}, nil
 	}
 
@@ -189,5 +180,4 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 	return reconcile.Result{
 		RequeueAfter: 5 * time.Second,
 	}, nil
-
 }

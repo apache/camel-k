@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"time"
 )
 
@@ -109,6 +110,7 @@ type Context struct {
 	AdditionalEntries   map[string]interface{}
 	Timeout             time.Duration
 	LocalRepository     string
+	Stdout              io.Writer
 }
 
 // AddEntry --
