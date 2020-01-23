@@ -52,7 +52,7 @@ type Catalog struct {
 	tBuilder          Trait
 	tIstio            Trait
 	tEnvironment      Trait
-	tClasspath        Trait
+	tJvm              Trait
 	tRestDsl          Trait
 	tProbes           Trait
 	tQuarkus          Trait
@@ -85,7 +85,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tBuilder:          newBuilderTrait(),
 		tIstio:            newIstioTrait(),
 		tEnvironment:      newEnvironmentTrait(),
-		tClasspath:        newClasspathTrait(),
+		tJvm:              newJvmTrait(),
 		tProbes:           newProbesTrait(),
 		tQuarkus:          newQuarkusTrait(),
 		tContainer:        newContainerTrait(),
@@ -126,7 +126,7 @@ func (c *Catalog) allTraits() []Trait {
 		c.tBuilder,
 		c.tIstio,
 		c.tEnvironment,
-		c.tClasspath,
+		c.tJvm,
 		c.tProbes,
 		c.tQuarkus,
 		c.tContainer,
@@ -167,7 +167,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tJolokia,
 			c.tPrometheus,
 			c.tDebug,
-			c.tClasspath,
+			c.tJvm,
 			c.tProbes,
 			c.tRoute,
 			c.tIstio,
@@ -193,7 +193,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tJolokia,
 			c.tPrometheus,
 			c.tDebug,
-			c.tClasspath,
+			c.tJvm,
 			c.tProbes,
 			c.tIngress,
 			c.tIstio,
@@ -220,7 +220,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tJolokia,
 			c.tPrometheus,
 			c.tDebug,
-			c.tClasspath,
+			c.tJvm,
 			c.tProbes,
 			c.tIstio,
 			c.tOwner,

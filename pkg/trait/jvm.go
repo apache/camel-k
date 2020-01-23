@@ -35,20 +35,20 @@ const (
 	defaultMainClass = "org.apache.camel.k.main.Application"
 )
 
-// The Classpath trait is used internally to configure the classpath of the final integration.
+// The JVM trait is used to configure the JVM that runs the integration.
 //
-// +camel-k:trait=classpath
-type classpathTrait struct {
+// +camel-k:trait=jvm
+type jvmTrait struct {
 	BaseTrait `property:",squash"`
 }
 
-func newClasspathTrait() *classpathTrait {
-	return &classpathTrait{
-		BaseTrait: newBaseTrait("classpath"),
+func newJvmTrait() *jvmTrait {
+	return &jvmTrait{
+		BaseTrait: newBaseTrait("jvm"),
 	}
 }
 
-func (t *classpathTrait) Configure(e *Environment) (bool, error) {
+func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
 	}
@@ -57,7 +57,7 @@ func (t *classpathTrait) Configure(e *Environment) (bool, error) {
 		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
 }
 
-func (t *classpathTrait) Apply(e *Environment) error {
+func (t *jvmTrait) Apply(e *Environment) error {
 	kit := e.IntegrationKit
 
 	if kit == nil && e.Integration.Status.Kit != "" {
@@ -126,6 +126,6 @@ func (t *classpathTrait) Apply(e *Environment) error {
 }
 
 // IsPlatformTrait overrides base class method
-func (t *classpathTrait) IsPlatformTrait() bool {
+func (t *jvmTrait) IsPlatformTrait() bool {
 	return true
 }
