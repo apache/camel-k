@@ -34,7 +34,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKindKind,
+				Kind:       v1.IntegrationKitKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
@@ -56,7 +56,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKindKind,
+				Kind:       v1.IntegrationKitKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
@@ -110,7 +110,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKindKind,
+				Kind:       v1.IntegrationKitKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
@@ -148,7 +148,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKindKind,
+				Kind:       v1.IntegrationKitKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
@@ -181,7 +181,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKindKind,
+				Kind:       v1.IntegrationKitKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
@@ -224,7 +224,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKindKind,
+				Kind:       v1.IntegrationKitKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "ns",
