@@ -35,7 +35,6 @@ type Catalog struct {
 	tPlatform         Trait
 	tAffinity         Trait
 	tCamel            Trait
-	tDebug            Trait
 	tDependencies     Trait
 	tDeployer         Trait
 	tCron             Trait
@@ -67,7 +66,6 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		tPlatform:         newPlatformTrait(),
 		tAffinity:         newAffinityTrait(),
 		tCamel:            newCamelTrait(),
-		tDebug:            newDebugTrait(),
 		tRestDsl:          newRestDslTrait(),
 		tKnative:          newKnativeTrait(),
 		tDependencies:     newDependenciesTrait(),
@@ -108,7 +106,6 @@ func (c *Catalog) allTraits() []Trait {
 		c.tPlatform,
 		c.tAffinity,
 		c.tCamel,
-		c.tDebug,
 		c.tRestDsl,
 		c.tKnative,
 		c.tDependencies,
@@ -166,7 +163,6 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
-			c.tDebug,
 			c.tJvm,
 			c.tProbes,
 			c.tRoute,
@@ -192,7 +188,6 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
-			c.tDebug,
 			c.tJvm,
 			c.tProbes,
 			c.tIngress,
@@ -219,7 +214,6 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 			c.tPullSecret,
 			c.tJolokia,
 			c.tPrometheus,
-			c.tDebug,
 			c.tJvm,
 			c.tProbes,
 			c.tIstio,

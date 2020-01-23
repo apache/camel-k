@@ -39,7 +39,6 @@ See the trait description pages for more information on a specific trait:
 * xref:traits/camel.adoc[Camel Trait]
 * xref:traits/container.adoc[Container Trait]
 * xref:traits/cron.adoc[Cron Trait]
-* xref:traits/debug.adoc[Debug Trait]
 * xref:traits/dependencies.adoc[Dependencies Trait]
 * xref:traits/deployer.adoc[Deployer Trait]
 * xref:traits/deployment.adoc[Deployment Trait]

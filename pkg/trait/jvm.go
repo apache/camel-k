@@ -40,7 +40,8 @@ const (
 // +camel-k:trait=jvm
 type jvmTrait struct {
 	BaseTrait `property:",squash"`
-
+	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
+	Debug bool `property:"debug"`
 	// A comma-separated list of JVM options
 	Options *string `property:"options"`
 }
@@ -106,6 +107,11 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		// Set the container command and working directory
 		container.Command = []string{"java"}
 		container.WorkingDir = "/deployments"
+
+		if t.Debug {
+			// TODO: Add options to configure debugging agent
+			container.Args = append(container.Args, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
+		}
 
 		// Add JVM options
 		if t.Options != nil {
