@@ -38,7 +38,7 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *de
 		Use:     "platform",
 		Short:   "Describe an Integration Platform",
 		Long:    `Describe an Integration Platform.`,
-		PreRunE: decode(options),
+		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err

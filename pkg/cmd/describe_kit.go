@@ -38,7 +38,7 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describ
 		Use:     "kit",
 		Short:   "Describe an Integration Kit",
 		Long:    `Describe an Integration Kit.`,
-		PreRunE: decode(options),
+		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
