@@ -30,6 +30,14 @@ The following configuration options are available:
 | bool
 | Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
 
+| jvm.debug-suspend
+| bool
+| Suspends the target JVM immediately before the main class is loaded
+
+| jvm.debug-address
+| string
+| Transport address at which to listen for the newly launched JVM
+
 | jvm.options
 | string
 | A comma-separated list of JVM options
