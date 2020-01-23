@@ -43,7 +43,7 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreate
 		Short:   "Create an Integration Kit",
 		Long:    `Create an Integration Kit.`,
 		Args:    options.validateArgs,
-		PreRunE: decode(options),
+		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
 
