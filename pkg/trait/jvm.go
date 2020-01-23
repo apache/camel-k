@@ -100,6 +100,10 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	container := e.getIntegrationContainer()
 	if container != nil {
+		// Set the container command and working directory
+		container.Command = []string{"java"}
+		container.WorkingDir = "/deployments"
+
 		// Add mounted resources to the class path
 		for _, m := range container.VolumeMounts {
 			classpath.Add(m.MountPath)
@@ -117,9 +121,6 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		} else {
 			container.Args = append(container.Args, defaultMainClass)
 		}
-
-		// Set the container working directory
-		container.WorkingDir = "/deployments"
 	}
 
 	return nil

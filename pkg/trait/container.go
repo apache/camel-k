@@ -101,10 +101,9 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 func (t *containerTrait) Apply(e *Environment) error {
 	container := corev1.Container{
-		Name:    t.Name,
-		Image:   e.Integration.Status.Image,
-		Env:     make([]corev1.EnvVar, 0),
-		Command: []string{"java"},
+		Name:  t.Name,
+		Image: e.Integration.Status.Image,
+		Env:   make([]corev1.EnvVar, 0),
 	}
 
 	// combine Environment of integration with platform, kit, integration
