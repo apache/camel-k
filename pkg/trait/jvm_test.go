@@ -22,29 +22,30 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/scylladb/go-set/strset"
+	"github.com/stretchr/testify/assert"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/scylladb/go-set/strset"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestConfigureClasspathTraitInRightPhasesDoesSucceed(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
+func TestConfigureJvmTraitInRightPhasesDoesSucceed(t *testing.T) {
+	trait, environment := createNominalJvmTest()
 
 	configured, err := trait.Configure(environment)
 	assert.Nil(t, err)
 	assert.True(t, configured)
 }
 
-func TestConfigureClasspathTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
+func TestConfigureJvmTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing.T) {
+	trait, environment := createNominalJvmTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
 	configured, err := trait.Configure(environment)
@@ -52,8 +53,8 @@ func TestConfigureClasspathTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing
 	assert.False(t, configured)
 }
 
-func TestConfigureClasspathTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
+func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T) {
+	trait, environment := createNominalJvmTest()
 	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 
 	configured, err := trait.Configure(environment)
@@ -61,8 +62,8 @@ func TestConfigureClasspathTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *test
 	assert.False(t, configured)
 }
 
-func TestConfigureClasspathDisabledTraitDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
+func TestConfigureJvmDisabledTraitDoesNotSucceed(t *testing.T) {
+	trait, environment := createNominalJvmTest()
 	trait.Enabled = new(bool)
 
 	configured, err := trait.Configure(environment)
@@ -70,8 +71,8 @@ func TestConfigureClasspathDisabledTraitDoesNotSucceed(t *testing.T) {
 	assert.False(t, configured)
 }
 
-func TestApplyClasspathTraitWithDeploymentResource(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
+func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
+	trait, environment := createNominalJvmTest()
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -108,8 +109,8 @@ func TestApplyClasspathTraitWithDeploymentResource(t *testing.T) {
 	})
 }
 
-func TestApplyClasspathTraitWithKNativeResource(t *testing.T) {
-	trait, environment := createNominalClasspathTest()
+func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
+	trait, environment := createNominalJvmTest()
 
 	s := serving.Service{}
 	s.Spec.ConfigurationSpec.Template = serving.RevisionTemplateSpec{}
@@ -140,11 +141,11 @@ func TestApplyClasspathTraitWithKNativeResource(t *testing.T) {
 	})
 }
 
-func createNominalClasspathTest() (*classpathTrait, *Environment) {
-	return createClasspathTestWithKitType(v1.IntegrationKitTypePlatform)
+func createNominalJvmTest() (*jvmTrait, *Environment) {
+	return createJvmTestWithKitType(v1.IntegrationKitTypePlatform)
 }
 
-func createClasspathTestWithKitType(kitType string) (*classpathTrait, *Environment) {
+func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
 	client, _ := test.NewFakeClient(
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -161,7 +162,7 @@ func createClasspathTestWithKitType(kitType string) (*classpathTrait, *Environme
 		},
 	)
 
-	trait := newClasspathTrait()
+	trait := newJvmTrait()
 	enabled := true
 	trait.Enabled = &enabled
 	trait.ctx = context.TODO()
