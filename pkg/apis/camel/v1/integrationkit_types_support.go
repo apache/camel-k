@@ -27,7 +27,7 @@ func NewIntegrationKit(namespace string, name string) IntegrationKit {
 	return IntegrationKit{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationKindKind,
+			Kind:       IntegrationKitKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -41,7 +41,7 @@ func NewIntegrationKitList() IntegrationKitList {
 	return IntegrationKitList{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationKindKind,
+			Kind:       IntegrationKitKind,
 		},
 	}
 }

@@ -79,8 +79,8 @@ type IntegrationKitPhase string
 type IntegrationKitConditionType string
 
 const (
-	// IntegrationKindKind --
-	IntegrationKindKind string = "IntegrationKit"
+	// IntegrationKitKind --
+	IntegrationKitKind string = "IntegrationKit"
 
 	// IntegrationKitTypePlatform --
 	IntegrationKitTypePlatform = "platform"

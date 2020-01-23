@@ -95,7 +95,7 @@ func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace stri
 			return nil
 		}
 		// Don't recreate integration kits, platforms, etc
-		if obj.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationKindKind {
+		if obj.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationKitKind {
 			return nil
 		}
 		if obj.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationPlatformKind {
