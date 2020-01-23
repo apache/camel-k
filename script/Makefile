@@ -27,7 +27,7 @@ IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 LINT_GOGC := 10
-LINT_DEADLINE := 5m
+LINT_DEADLINE := 10m
 
 # Used to push pre-relase artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k

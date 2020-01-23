@@ -210,7 +210,11 @@ func writeFields(t *types.Type, traitID string, content *[]string) {
 	res = append(res, adocConfigurationMarkerStart, "== Configuration", "")
 	res = append(res, "Trait properties can be specified when running any integration with the CLI:")
 	res = append(res, "```")
-	res = append(res, fmt.Sprintf("kamel run --trait %s.[key]=[value] integration.groovy", traitID))
+	if len(t.Members) > 1 {
+		res = append(res, fmt.Sprintf("kamel run --trait %s.[key]=[value] --trait %s.[key2]=[value2] integration.groovy", traitID, traitID))
+	} else {
+		res = append(res, fmt.Sprintf("kamel run --trait %s.[key]=[value] integration.groovy", traitID))
+	}
 	res = append(res, "```")
 	res = append(res, "The following configuration options are available:", "")
 	res = append(res, "[cols=\"2,1,5a\"]", "|===")
