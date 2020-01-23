@@ -141,6 +141,41 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 	})
 }
 
+func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
+	trait, environment := createNominalJvmTest()
+	trait.Debug = true
+	trait.DebugSuspend = true
+
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									MountPath: "/mount/path",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
+
+	err := trait.Apply(environment)
+
+	assert.Nil(t, err)
+
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args,
+		"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005",
+	)
+}
+
 func createNominalJvmTest() (*jvmTrait, *Environment) {
 	return createJvmTestWithKitType(v1.IntegrationKitTypePlatform)
 }

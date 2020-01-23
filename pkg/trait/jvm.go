@@ -42,6 +42,10 @@ type jvmTrait struct {
 	BaseTrait `property:",squash"`
 	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
 	Debug bool `property:"debug"`
+	// Suspends the target JVM immediately before the main class is loaded
+	DebugSuspend bool `property:"debug-suspend"`
+	// Transport address at which to listen for the newly launched JVM
+	DebugAddress string `property:"debug-address"`
 	// A comma-separated list of JVM options
 	Options *string `property:"options"`
 }
@@ -49,6 +53,8 @@ type jvmTrait struct {
 func newJvmTrait() *jvmTrait {
 	return &jvmTrait{
 		BaseTrait: newBaseTrait("jvm"),
+		// To be defaulted to "*:5005" when upgrading the default base image to JDK9+
+		DebugAddress: "5005",
 	}
 }
 
@@ -108,9 +114,15 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		container.Command = []string{"java"}
 		container.WorkingDir = "/deployments"
 
+		// Remote debugging
 		if t.Debug {
-			// TODO: Add options to configure debugging agent
-			container.Args = append(container.Args, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
+			suspend := "n"
+			if t.DebugSuspend {
+				suspend = "y"
+			}
+			container.Args = append(container.Args,
+				fmt.Sprintf("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%s",
+					suspend, t.DebugAddress))
 		}
 
 		// Add JVM options
