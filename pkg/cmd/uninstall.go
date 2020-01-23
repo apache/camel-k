@@ -29,7 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func newCmdUninstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstallCmdOptions) {
 	options := uninstallCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
@@ -48,6 +48,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.Flags().BoolVar(&options.skipClusterRoles, "skip-cluster-roles", false, "Do not uninstall the Camel-K Cluster Roles in the current namespace")
 	cmd.Flags().BoolVar(&options.skipIntegrationPlatform, "skip-integration-platform", false, "Do not uninstall the Camel-K Integration Platform in the current namespace")
 	cmd.Flags().BoolVar(&options.skipIntegrationPlatform, "skip-service-accounts", false, "Do not uninstall the Camel-K Service Accounts in the current namespace")
+	cmd.Flags().BoolVar(&options.skipConfigMaps, "skip-config-maps", false, "Do not uninstall the Camel-K Config Maps in the current namespace")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -58,7 +59,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) *cobra.Command {
 		},
 	)
 
-	return &cmd
+	return &cmd, &options
 }
 
 type uninstallCmdOptions struct {
@@ -70,6 +71,7 @@ type uninstallCmdOptions struct {
 	skipClusterRoles        bool
 	skipIntegrationPlatform bool
 	skipServiceAccounts     bool
+	skipConfigMaps          bool
 }
 
 var defaultListOptions = metav1.ListOptions{
@@ -158,6 +160,13 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) err
 			return err
 		}
 		fmt.Printf("Camel-K Service Accounts removed from namespace %s\n", o.Namespace)
+	}
+
+	if !o.skipConfigMaps {
+		if err := o.uninstallConfigMaps(c); err != nil {
+			return err
+		}
+		fmt.Printf("Camel-K Config Maps removed from namespace %s\n", o.Namespace)
 	}
 
 	return nil
@@ -267,6 +276,24 @@ func (o *uninstallCmdOptions) uninstallIntegrationPlatform() error {
 
 	for _, integrationPlatform := range integrationPlatforms.Items {
 		err := api.Delete(integrationPlatform.GetName(), &metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallConfigMaps(c client.Client) error {
+	api := c.CoreV1()
+
+	configMapsList, err := api.ConfigMaps(o.Namespace).List(defaultListOptions)
+	if err != nil {
+		return err
+	}
+
+	for _, configMap := range configMapsList.Items {
+		err := api.ConfigMaps(o.Namespace).Delete(configMap.Name, &metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
