@@ -40,6 +40,9 @@ const (
 // +camel-k:trait=jvm
 type jvmTrait struct {
 	BaseTrait `property:",squash"`
+
+	// A comma-separated list of JVM options
+	Options *string `property:"options"`
 }
 
 func newJvmTrait() *jvmTrait {
@@ -103,6 +106,11 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		// Set the container command and working directory
 		container.Command = []string{"java"}
 		container.WorkingDir = "/deployments"
+
+		// Add JVM options
+		if t.Options != nil {
+			container.Args = append(container.Args, strings.Split(*t.Options, ",")...)
+		}
 
 		// Add mounted resources to the class path
 		for _, m := range container.VolumeMounts {
