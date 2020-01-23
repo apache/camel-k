@@ -20,7 +20,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/onsi/gomega v1.7.0
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
-	github.com/operator-framework/operator-sdk v0.14.0
+	github.com/operator-framework/operator-sdk v0.15.0
 	github.com/pkg/errors v0.8.1
 	github.com/radovskyb/watcher v1.0.6
 	github.com/rs/xid v1.2.1
