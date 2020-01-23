@@ -78,11 +78,12 @@ func kamelPostAddCommandInit(cmd *cobra.Command) error {
 	}
 
 	configName := os.Getenv("KAMEL_CONFIG_NAME")
-	if configName != "" {
-		configName = "config"
+	if configName == "" {
+		configName = "kamel-config"
 	}
 
 	viper.SetConfigName(configName)
+	viper.AddConfigPath(".")
 	viper.AddConfigPath(".kamel")
 	viper.AddConfigPath("$HOME/.kamel")
 	viper.AutomaticEnv()

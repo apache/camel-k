@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/config"
 	"github.com/mitchellh/mapstructure"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -156,6 +157,36 @@ func decode(target interface{}) func(*cobra.Command, []string) error {
 
 		return nil
 	}
+}
+
+func saveDefaultConfig(cmd *cobra.Command, from string, to string) error {
+	settings := viper.AllSettings()
+	cfg, err := config.LoadDefault()
+	if err != nil {
+		return err
+	}
+	cfg.Delete(to)
+	cfg.Set(settings, from, to, func(s string) bool {
+		if s == "save" {
+			return false
+		}
+		pl := p.NewClient()
+		f := cmd.Flag(s)
+		if f == nil {
+			// may be a plural flag, let's lookup the singular version to check if changed
+			cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+				if pl.Plural(flag.Name) == s {
+					f = flag
+				}
+			})
+		}
+
+		return f != nil && f.Changed
+	})
+	if err := cfg.WriteDefault(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func stringToSliceHookFunc(comma rune) mapstructure.DecodeHookFunc {
