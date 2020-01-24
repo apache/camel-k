@@ -22,8 +22,13 @@ import (
 	"sort"
 	"strings"
 
+	"gopkg.in/inf.v0"
+
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
+
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -125,9 +130,30 @@ func (t *jvmTrait) Apply(e *Environment) error {
 					suspend, t.DebugAddress))
 		}
 
+		hasHeapSizeOption := false
 		// Add JVM options
 		if t.Options != nil {
+			hasHeapSizeOption = strings.Contains(*t.Options, "-Xmx") ||
+				strings.Contains(*t.Options, "-XX:MaxHeapSize") ||
+				strings.Contains(*t.Options, "-XX:MinRAMPercentage") ||
+				strings.Contains(*t.Options, "-XX:MaxRAMPercentage")
+
 			container.Args = append(container.Args, strings.Split(*t.Options, ",")...)
+		}
+
+		// Tune JVM maximum heap size based on the container memory limit, if any.
+		// This is configured off-container, thus is limited to explicit user configuration.
+		// We may want to inject a wrapper script into the container image, so that it can
+		// be performed in-container, based on CGroups memory resource control files.
+		if memory, hasLimit := container.Resources.Limits[corev1.ResourceMemory]; !hasHeapSizeOption && hasLimit {
+			// Simple heuristic that caps the maximum heap size to 50% of the memory limit
+			percentage := int64(50)
+			// Unless the memory limit is lower than 300M, in which case we leave more room for the non-heap memory
+			if resource.NewScaledQuantity(300, 6).Cmp(memory) > 0 {
+				percentage = 25
+			}
+			memory.AsDec().Mul(memory.AsDec(), inf.NewDec(percentage, 2))
+			container.Args = append(container.Args, fmt.Sprintf("-Xmx%dM", memory.ScaledValue(resource.Mega)))
 		}
 
 		// Add mounted resources to the class path
