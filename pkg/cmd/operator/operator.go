@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/pkg/client"
-	camellog "github.com/apache/camel-k/pkg/util/log"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"
 	"github.com/operator-framework/operator-sdk/pkg/ready"
@@ -111,7 +110,7 @@ func Run() {
 		os.Exit(1)
 	}
 	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(camellog.WithName("events").Infof)
+	//eventBroadcaster.StartLogging(camellog.WithName("events").Infof)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
 
 	// Create a new Cmd to provide shared dependencies and start components

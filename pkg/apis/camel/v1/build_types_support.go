@@ -142,3 +142,44 @@ func (in *BuildStatus) RemoveCondition(condType BuildConditionType) {
 
 	in.Conditions = newConditions
 }
+
+var _ ResourceCondition = BuildCondition{}
+
+// GetConditions --
+func (in *BuildStatus) GetConditions() []ResourceCondition {
+	res := make([]ResourceCondition, 0, len(in.Conditions))
+	for _, c := range in.Conditions {
+		res = append(res, c)
+	}
+	return res
+}
+
+// GetType --
+func (c BuildCondition) GetType() string {
+	return string(c.Type)
+}
+
+// GetStatus --
+func (c BuildCondition) GetStatus() corev1.ConditionStatus {
+	return c.Status
+}
+
+// GetLastUpdateTime --
+func (c BuildCondition) GetLastUpdateTime() metav1.Time {
+	return c.LastUpdateTime
+}
+
+// GetLastTransitionTime --
+func (c BuildCondition) GetLastTransitionTime() metav1.Time {
+	return c.LastTransitionTime
+}
+
+// GetReason --
+func (c BuildCondition) GetReason() string {
+	return c.Reason
+}
+
+// GetMessage --
+func (c BuildCondition) GetMessage() string {
+	return c.Message
+}

@@ -22,9 +22,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/apache/camel-k/pkg/events"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -54,10 +56,11 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileBuild{
-		client:  c,
-		reader:  mgr.GetAPIReader(),
-		scheme:  mgr.GetScheme(),
-		builder: builder.New(c),
+		client:   c,
+		reader:   mgr.GetAPIReader(),
+		scheme:   mgr.GetScheme(),
+		builder:  builder.New(c),
+		recorder: mgr.GetEventRecorderFor("camel-k-build-controller"),
 	}
 }
 
@@ -121,6 +124,7 @@ type ReconcileBuild struct {
 	scheme   *runtime.Scheme
 	builder  builder.Builder
 	routines sync.Map
+	recorder record.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a Build object and makes changes based on the state read
@@ -204,12 +208,14 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
+				events.NotifyBuildError(r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, &instance, newTarget); err != nil {
-					return r, err
+				if res, err := r.update(ctx, &instance, newTarget); err != nil {
+					events.NotifyBuildError(r.recorder, &instance, newTarget, err)
+					return res, err
 				}
 
 				if newTarget.Status.Phase != target.Status.Phase {
@@ -225,6 +231,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 			// handle one action at time so the resource
 			// is always at its latest state
+			events.NotifyBuildUpdated(r.recorder, &instance, newTarget)
 			break
 		}
 	}

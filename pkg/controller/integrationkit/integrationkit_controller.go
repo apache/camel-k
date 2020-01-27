@@ -20,7 +20,9 @@ package integrationkit
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/events"
 	"github.com/apache/camel-k/pkg/platform"
+	"k8s.io/client-go/tools/record"
 
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -55,8 +57,9 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileIntegrationKit{
-		client: c,
-		scheme: mgr.GetScheme(),
+		client:   c,
+		scheme:   mgr.GetScheme(),
+		recorder: mgr.GetEventRecorderFor("camel-k-integration-kit-controller"),
 	}
 }
 
@@ -152,8 +155,9 @@ var _ reconcile.Reconciler = &ReconcileIntegrationKit{}
 type ReconcileIntegrationKit struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client   client.Client
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a IntegrationKit object and makes changes based on the state read
@@ -223,12 +227,14 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
+				events.NotifyIntegrationKitError(r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, &instance, newTarget); err != nil {
-					return r, err
+				if res, err := r.update(ctx, &instance, newTarget); err != nil {
+					events.NotifyIntegrationKitError(r.recorder, &instance, newTarget, err)
+					return res, err
 				}
 
 				if newTarget.Status.Phase != target.Status.Phase {
@@ -242,6 +248,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 
 			// handle one action at time so the resource
 			// is always at its latest state
+			events.NotifyIntegrationKitUpdated(r.recorder, &instance, newTarget)
 			break
 		}
 	}

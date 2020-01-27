@@ -202,3 +202,44 @@ func (m MavenSpec) GetTimeout() metav1.Duration {
 	}
 	return *m.Timeout
 }
+
+var _ ResourceCondition = IntegrationPlatformCondition{}
+
+// GetConditions --
+func (in *IntegrationPlatformStatus) GetConditions() []ResourceCondition {
+	res := make([]ResourceCondition, 0, len(in.Conditions))
+	for _, c := range in.Conditions {
+		res = append(res, c)
+	}
+	return res
+}
+
+// GetType --
+func (c IntegrationPlatformCondition) GetType() string {
+	return string(c.Type)
+}
+
+// GetStatus --
+func (c IntegrationPlatformCondition) GetStatus() corev1.ConditionStatus {
+	return c.Status
+}
+
+// GetLastUpdateTime --
+func (c IntegrationPlatformCondition) GetLastUpdateTime() metav1.Time {
+	return c.LastUpdateTime
+}
+
+// GetLastTransitionTime --
+func (c IntegrationPlatformCondition) GetLastTransitionTime() metav1.Time {
+	return c.LastTransitionTime
+}
+
+// GetReason --
+func (c IntegrationPlatformCondition) GetReason() string {
+	return c.Reason
+}
+
+// GetMessage --
+func (c IntegrationPlatformCondition) GetMessage() string {
+	return c.Message
+}

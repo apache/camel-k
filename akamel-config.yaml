@@ -1,3 +1,0 @@
-kamel:
-  install:
-    maven-repositories: '[https://repository.apache.org/content/repositories/orgapachecamel-1171]'
