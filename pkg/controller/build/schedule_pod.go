@@ -21,6 +21,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -128,6 +129,8 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 			RestartPolicy:      corev1.RestartPolicyNever,
 		},
 	}
+
+	pod.Labels = kubernetes.MergeCamelCreatorLabels(build.Labels, pod.Labels)
 
 	for _, task := range build.Spec.Tasks {
 		if task.Builder != nil {

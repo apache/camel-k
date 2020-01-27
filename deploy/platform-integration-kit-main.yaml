@@ -21,8 +21,8 @@ metadata:
   name: main
   labels:
     app: "camel-k"
-    camel.apache.org/kit.created.by.kind: Operator
-    camel.apache.org/kit.created.by.name: camel-k-operator
+    camel.apache.org/created.by.kind: Operator
+    camel.apache.org/created.by.name: camel-k-operator
     camel.apache.org/kit.type: platform
 spec:
   dependencies:

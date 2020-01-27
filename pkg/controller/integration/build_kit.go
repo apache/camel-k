@@ -107,10 +107,10 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
 	platformKit.Labels = map[string]string{
-		"camel.apache.org/kit.type":               v1.IntegrationKitTypePlatform,
-		"camel.apache.org/kit.created.by.kind":    v1.IntegrationKind,
-		"camel.apache.org/kit.created.by.name":    integration.Name,
-		"camel.apache.org/kit.created.by.version": integration.ResourceVersion,
+		"camel.apache.org/kit.type":           v1.IntegrationKitTypePlatform,
+		"camel.apache.org/created.by.kind":    v1.IntegrationKind,
+		"camel.apache.org/created.by.name":    integration.Name,
+		"camel.apache.org/created.by.version": integration.ResourceVersion,
 		"camel.apache.org/runtime.version":        integration.Status.RuntimeVersion,
 		"camel.apache.org/runtime.provider":       string(integration.Status.RuntimeProvider),
 	}

@@ -208,13 +208,13 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
-				events.NotifyBuildError(r.recorder, &instance, newTarget, err)
+				events.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
 			}
 
 			if newTarget != nil {
 				if res, err := r.update(ctx, &instance, newTarget); err != nil {
-					events.NotifyBuildError(r.recorder, &instance, newTarget, err)
+					events.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
 					return res, err
 				}
 
@@ -231,7 +231,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 			// handle one action at time so the resource
 			// is always at its latest state
-			events.NotifyBuildUpdated(r.recorder, &instance, newTarget)
+			events.NotifyBuildUpdated(ctx, r.client, r.recorder, &instance, newTarget)
 			break
 		}
 	}

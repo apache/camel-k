@@ -18,12 +18,17 @@ limitations under the License.
 package events
 
 import (
+	"context"
 	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/log"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
+	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -54,10 +59,13 @@ const (
 	ReasonBuildConditionChanged = "BuildConditionChanged"
 	// ReasonBuildError --
 	ReasonBuildError = "BuildError"
+
+	// ReasonRelatedObjectChanged --
+	ReasonRelatedObjectChanged = "ReasonRelatedObjectChanged"
 )
 
 // NotifyIntegrationError automatically generates error events when the integration reconcile cycle phase has an error
-func NotifyIntegrationError(recorder record.EventRecorder, old, new *v1.Integration, err error) {
+func NotifyIntegrationError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.Integration, err error) {
 	it := old
 	if new != nil {
 		it = new
@@ -69,7 +77,7 @@ func NotifyIntegrationError(recorder record.EventRecorder, old, new *v1.Integrat
 }
 
 // NotifyIntegrationUpdated automatically generates events when the integration changes
-func NotifyIntegrationUpdated(recorder record.EventRecorder, old, new *v1.Integration) {
+func NotifyIntegrationUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.Integration) {
 	if new == nil {
 		return
 	}
@@ -79,14 +87,14 @@ func NotifyIntegrationUpdated(recorder record.EventRecorder, old, new *v1.Integr
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(recorder, new, oldPhase, string(new.Status.Phase), "Integration", new.Name, ReasonIntegrationPhaseUpdated)
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration", new.Name, ReasonIntegrationPhaseUpdated)
 	if new.Status.Phase != v1.IntegrationPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration", new.Name, ReasonIntegrationConditionChanged)
 	}
 }
 
 // NotifyIntegrationKitUpdated automatically generates events when an integration kit changes
-func NotifyIntegrationKitUpdated(recorder record.EventRecorder, old, new *v1.IntegrationKit) {
+func NotifyIntegrationKitUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.IntegrationKit) {
 	if new == nil {
 		return
 	}
@@ -96,14 +104,14 @@ func NotifyIntegrationKitUpdated(recorder record.EventRecorder, old, new *v1.Int
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(recorder, new, oldPhase, string(new.Status.Phase), "Integration Kit", new.Name, ReasonIntegrationKitPhaseUpdated)
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Kit", new.Name, ReasonIntegrationKitPhaseUpdated)
 	if new.Status.Phase != v1.IntegrationKitPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration Kit", new.Name, ReasonIntegrationKitConditionChanged)
 	}
 }
 
 // NotifyIntegrationKitError automatically generates error events when the integration kit reconcile cycle phase has an error
-func NotifyIntegrationKitError(recorder record.EventRecorder, old, new *v1.IntegrationKit, err error) {
+func NotifyIntegrationKitError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.IntegrationKit, err error) {
 	kit := old
 	if new != nil {
 		kit = new
@@ -115,7 +123,7 @@ func NotifyIntegrationKitError(recorder record.EventRecorder, old, new *v1.Integ
 }
 
 // NotifyIntegrationPlatformUpdated automatically generates events when an integration platform changes
-func NotifyIntegrationPlatformUpdated(recorder record.EventRecorder, old, new *v1.IntegrationPlatform) {
+func NotifyIntegrationPlatformUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.IntegrationPlatform) {
 	if new == nil {
 		return
 	}
@@ -125,14 +133,14 @@ func NotifyIntegrationPlatformUpdated(recorder record.EventRecorder, old, new *v
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(recorder, new, oldPhase, string(new.Status.Phase), "Integration Platform", new.Name, ReasonIntegrationPlatformPhaseUpdated)
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Platform", new.Name, ReasonIntegrationPlatformPhaseUpdated)
 	if new.Status.Phase != v1.IntegrationPlatformPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration Platform", new.Name, ReasonIntegrationPlatformConditionChanged)
 	}
 }
 
 // NotifyIntegrationPlatformError automatically generates error events when the integration Platform reconcile cycle phase has an error
-func NotifyIntegrationPlatformError(recorder record.EventRecorder, old, new *v1.IntegrationPlatform, err error) {
+func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.IntegrationPlatform, err error) {
 	p := old
 	if new != nil {
 		p = new
@@ -144,7 +152,7 @@ func NotifyIntegrationPlatformError(recorder record.EventRecorder, old, new *v1.
 }
 
 // NotifyBuildUpdated automatically generates events when a build changes
-func NotifyBuildUpdated(recorder record.EventRecorder, old, new *v1.Build) {
+func NotifyBuildUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.Build) {
 	if new == nil {
 		return
 	}
@@ -154,14 +162,14 @@ func NotifyBuildUpdated(recorder record.EventRecorder, old, new *v1.Build) {
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(recorder, new, oldPhase, string(new.Status.Phase), "Build", new.Name, ReasonBuildPhaseUpdated)
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Build", new.Name, ReasonBuildPhaseUpdated)
 	if new.Status.Phase != v1.BuildPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Build", new.Name, ReasonBuildConditionChanged)
 	}
 }
 
 // NotifyBuildError automatically generates error events when the build reconcile cycle phase has an error
-func NotifyBuildError(recorder record.EventRecorder, old, new *v1.Build, err error) {
+func NotifyBuildError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1.Build, err error) {
 	p := old
 	if new != nil {
 		p = new
@@ -172,7 +180,7 @@ func NotifyBuildError(recorder record.EventRecorder, old, new *v1.Build, err err
 	recorder.Eventf(p, corev1.EventTypeWarning, ReasonBuildError, "Cannot reconcile Build %s: %v", p.Name, err)
 }
 
-func notifyIfPhaseUpdated(recorder record.EventRecorder, new runtime.Object, oldPhase, newPhase string, resourceType, name, reason string) {
+func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, new runtime.Object, oldPhase, newPhase string, resourceType, name, reason string) {
 	// Update information about phase changes
 	if oldPhase != newPhase {
 		phase := newPhase
@@ -180,6 +188,10 @@ func notifyIfPhaseUpdated(recorder record.EventRecorder, new runtime.Object, old
 			phase = "[none]"
 		}
 		recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s %s in phase %s", resourceType, name, phase)
+
+		if creatorRef, creator := getCreatorObject(ctx, c, new); creatorRef != nil && creator != nil {
+			recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s %s dependent resource %s (%s) changed phase to %s", creatorRef.Kind, creatorRef.Name, name, resourceType, phase)
+		}
 	}
 }
 
@@ -211,4 +223,22 @@ func getCommonChangedConditions(old, new []v1.ResourceCondition) (res []v1.Resou
 		}
 	}
 	return res
+}
+
+func getCreatorObject(ctx context.Context, c client.Client, obj runtime.Object) (ref *corev1.ObjectReference, creator runtime.Object) {
+	if ref := kubernetes.GetCamelCreator(obj); ref != nil {
+		if ref.Kind == "Integration" {
+			it := v1.NewIntegration(ref.Namespace, ref.Name)
+			key := runtimeclient.ObjectKey{
+				Namespace: ref.Namespace,
+				Name:      ref.Name,
+			}
+			if err := c.Get(ctx, key, &it); err != nil {
+				log.Infof("Cannot get information about the Integration creating resource %v: %v", ref, err)
+				return nil, nil
+			}
+			return ref, &it
+		}
+	}
+	return nil, nil
 }

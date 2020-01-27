@@ -71,6 +71,8 @@ func publisher(ctx *builder.Context) error {
 		},
 	}
 
+	bc.Labels = kubernetes.MergeCamelCreatorLabels(ctx.Build.Meta.Labels, bc.Labels)
+
 	err := ctx.Client.Delete(ctx.C, &bc)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "cannot delete build config")
@@ -99,6 +101,8 @@ func publisher(ctx *builder.Context) error {
 			},
 		},
 	}
+
+	is.Labels = kubernetes.MergeCamelCreatorLabels(ctx.Build.Meta.Labels, is.Labels)
 
 	err = ctx.Client.Delete(ctx.C, &is)
 	if err != nil && !apierrors.IsNotFound(err) {
