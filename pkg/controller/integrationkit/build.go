@@ -90,6 +90,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: kit.Namespace,
 				Name:      kit.Name,
+				Labels:    kubernetes.FilterCamelCreatorLabels(kit.Labels),
 			},
 			Spec: v1.BuildSpec{
 				Tasks: env.BuildTasks,

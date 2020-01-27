@@ -151,13 +151,13 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
-				events.NotifyIntegrationPlatformError(r.recorder, &instance, target, err)
+				events.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
 				return reconcile.Result{}, err
 			}
 
 			if target != nil {
 				if err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(&instance)); err != nil {
-					events.NotifyIntegrationPlatformError(r.recorder, &instance, target, err)
+					events.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
 				}
 
@@ -174,7 +174,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 			// handle one action at time so the resource
 			// is always at its latest state
-			events.NotifyIntegrationPlatformUpdated(r.recorder, &instance, target)
+			events.NotifyIntegrationPlatformUpdated(ctx, r.client, r.recorder, &instance, target)
 			break
 		}
 	}

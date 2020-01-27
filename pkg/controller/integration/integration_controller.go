@@ -260,13 +260,13 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
-				events.NotifyIntegrationError(r.recorder, &instance, newTarget, err)
+				events.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
 			}
 
 			if newTarget != nil {
 				if res, err := r.update(ctx, &instance, newTarget); err != nil {
-					events.NotifyIntegrationError(r.recorder, &instance, newTarget, err)
+					events.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
 					return res, err
 				}
 
@@ -281,7 +281,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 			// handle one action at time so the resource
 			// is always at its latest state
-			events.NotifyIntegrationUpdated(r.recorder, &instance, newTarget)
+			events.NotifyIntegrationUpdated(ctx, r.client, r.recorder, &instance, newTarget)
 			break
 		}
 	}
