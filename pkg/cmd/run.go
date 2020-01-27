@@ -43,6 +43,7 @@ import (
 	"github.com/magiconair/properties"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -245,7 +246,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 	if o.Wait || o.Dev {
 		for {
-			integrationPhase, err := o.waitForIntegrationReady(integration)
+			integrationPhase, err := o.waitForIntegrationReady(cmd, integration)
 			if err != nil {
 				return err
 			}
@@ -253,7 +254,6 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseError {
 				return fmt.Errorf("integration \"%s\" deployment failed", integration.Name)
 			} else if *integrationPhase == v1.IntegrationPhaseRunning {
-				fmt.Println("Running")
 				break
 			}
 
@@ -297,26 +297,22 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) waitForIntegrationReady(integration *v1.Integration) (*v1.IntegrationPhase, error) {
+func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration *v1.Integration) (*v1.IntegrationPhase, error) {
 	handler := func(i *v1.Integration) bool {
 		//
 		// TODO when we add health checks, we should Wait until they are passed
 		//
-		if i.Status.Phase != "" {
-			fmt.Println("integration \""+integration.Name+"\" in phase", i.Status.Phase)
-
-			if i.Status.Phase == v1.IntegrationPhaseRunning {
-				// TODO display some error info when available in the status
-				return false
-			}
-
-			if i.Status.Phase == v1.IntegrationPhaseError {
-				return false
-			}
+		if i.Status.Phase == v1.IntegrationPhaseRunning || i.Status.Phase == v1.IntegrationPhaseError {
+			return false
 		}
 
 		return true
 	}
+
+	go watch.HandleIntegrationEvents(o.Context, integration, func(event *corev1.Event) bool {
+		fmt.Fprintln(cmd.OutOrStdout(), event.Message)
+		return true
+	})
 
 	return watch.HandleIntegrationStateChanges(o.Context, integration, handler)
 }

@@ -21,7 +21,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/apache/camel-k/pkg/events"
+	camelevent "github.com/apache/camel-k/pkg/event"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -151,13 +151,13 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
-				events.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
+				camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
 				return reconcile.Result{}, err
 			}
 
 			if target != nil {
 				if err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(&instance)); err != nil {
-					events.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
+					camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
 				}
 
@@ -174,7 +174,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 			// handle one action at time so the resource
 			// is always at its latest state
-			events.NotifyIntegrationPlatformUpdated(ctx, r.client, r.recorder, &instance, target)
+			camelevent.NotifyIntegrationPlatformUpdated(ctx, r.client, r.recorder, &instance, target)
 			break
 		}
 	}
