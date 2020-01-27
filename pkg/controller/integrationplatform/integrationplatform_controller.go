@@ -21,8 +21,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/apache/camel-k/pkg/events"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -52,6 +54,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileIntegrationPlatform{
 		client: c,
 		scheme: mgr.GetScheme(),
+		recorder: mgr.GetEventRecorderFor("camel-k-integration-platform-controller"),
 	}
 }
 
@@ -92,8 +95,9 @@ var _ reconcile.Reconciler = &ReconcileIntegrationPlatform{}
 type ReconcileIntegrationPlatform struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client   client.Client
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a IntegrationPlatform object and makes changes based
@@ -147,11 +151,13 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
+				events.NotifyIntegrationPlatformError(r.recorder, &instance, target, err)
 				return reconcile.Result{}, err
 			}
 
 			if target != nil {
 				if err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(&instance)); err != nil {
+					events.NotifyIntegrationPlatformError(r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
 				}
 
@@ -168,6 +174,7 @@ func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (rec
 
 			// handle one action at time so the resource
 			// is always at its latest state
+			events.NotifyIntegrationPlatformUpdated(r.recorder, &instance, target)
 			break
 		}
 	}

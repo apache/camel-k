@@ -99,3 +99,13 @@ const (
 	// ServiceTypeUser --
 	ServiceTypeUser = "user"
 )
+
+// ResourceCondition is a common type for all conditions
+type ResourceCondition interface {
+	GetType() string
+	GetStatus() corev1.ConditionStatus
+	GetLastUpdateTime() metav1.Time
+	GetLastTransitionTime() metav1.Time
+	GetReason() string
+	GetMessage() string
+}

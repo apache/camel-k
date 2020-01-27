@@ -156,6 +156,8 @@ const (
 	// IntegrationPlatformKind --
 	IntegrationPlatformKind string = "IntegrationPlatform"
 
+	// IntegrationPlatformPhaseNone --
+	IntegrationPlatformPhaseNone IntegrationPlatformPhase = ""
 	// IntegrationPlatformPhaseCreating --
 	IntegrationPlatformPhaseCreating IntegrationPlatformPhase = "Creating"
 	// IntegrationPlatformPhaseWarming --

@@ -299,3 +299,44 @@ func (in *IntegrationStatus) RemoveCondition(condType IntegrationConditionType) 
 
 	in.Conditions = newConditions
 }
+
+var _ ResourceCondition = IntegrationCondition{}
+
+// GetConditions --
+func (in *IntegrationStatus) GetConditions() []ResourceCondition {
+	res := make([]ResourceCondition, 0, len(in.Conditions))
+	for _, c := range in.Conditions {
+		res = append(res, c)
+	}
+	return res
+}
+
+// GetType --
+func (c IntegrationCondition) GetType() string {
+	return string(c.Type)
+}
+
+// GetStatus --
+func (c IntegrationCondition) GetStatus() corev1.ConditionStatus {
+	return c.Status
+}
+
+// GetLastUpdateTime --
+func (c IntegrationCondition) GetLastUpdateTime() metav1.Time {
+	return c.LastUpdateTime
+}
+
+// GetLastTransitionTime --
+func (c IntegrationCondition) GetLastTransitionTime() metav1.Time {
+	return c.LastTransitionTime
+}
+
+// GetReason --
+func (c IntegrationCondition) GetReason() string {
+	return c.Reason
+}
+
+// GetMessage --
+func (c IntegrationCondition) GetMessage() string {
+	return c.Message
+}
