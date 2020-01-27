@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/apache/camel-k/pkg/events"
+	camelevent "github.com/apache/camel-k/pkg/event"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -208,13 +208,13 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
-				events.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
+				camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
 			}
 
 			if newTarget != nil {
 				if res, err := r.update(ctx, &instance, newTarget); err != nil {
-					events.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
+					camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
 					return res, err
 				}
 
@@ -231,7 +231,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 			// handle one action at time so the resource
 			// is always at its latest state
-			events.NotifyBuildUpdated(ctx, r.client, r.recorder, &instance, newTarget)
+			camelevent.NotifyBuildUpdated(ctx, r.client, r.recorder, &instance, newTarget)
 			break
 		}
 	}

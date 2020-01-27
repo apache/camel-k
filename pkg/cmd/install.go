@@ -366,7 +366,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		if collection == nil {
 			if o.Wait {
-				err = o.waitForPlatformReady(platform)
+				err = o.waitForPlatformReady(cobraCmd, platform)
 				if err != nil {
 					return err
 				}
@@ -418,24 +418,19 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 	return nil
 }
 
-func (o *installCmdOptions) waitForPlatformReady(platform *v1.IntegrationPlatform) error {
+func (o *installCmdOptions) waitForPlatformReady(cmd *cobra.Command, platform *v1.IntegrationPlatform) error {
 	handler := func(i *v1.IntegrationPlatform) bool {
-		if i.Status.Phase != "" {
-			fmt.Println("platform \""+platform.Name+"\" in phase", i.Status.Phase)
-
-			if i.Status.Phase == v1.IntegrationPlatformPhaseReady {
-				// TODO display some error info when available in the status
-				return false
-			}
-
-			if i.Status.Phase == v1.IntegrationPlatformPhaseError {
-				fmt.Println("platform installation failed")
-				return false
-			}
+		if i.Status.Phase == v1.IntegrationPlatformPhaseReady || i.Status.Phase == v1.IntegrationPlatformPhaseError {
+			return false
 		}
 
 		return true
 	}
+
+	go watch.HandleIntegrationPlatformEvents(o.Context, platform, func(event *corev1.Event) bool {
+		fmt.Fprintln(cmd.OutOrStdout(), event.Message)
+		return true
+	})
 
 	return watch.HandlePlatformStateChanges(o.Context, platform, handler)
 }
