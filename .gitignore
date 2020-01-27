@@ -5,6 +5,9 @@
 /kamel
 /license-check
 
+# Config files
+/kamel-config.yaml
+
 # Released Packages
 *.tar.gz
 

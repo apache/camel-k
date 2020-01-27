@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -119,7 +121,7 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionTrue,
 			v1.IntegrationConditionDeploymentAvailableReason,
-			deployment.Name,
+			fmt.Sprintf("deployment name is %s", deployment.Name),
 		)
 
 		if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {

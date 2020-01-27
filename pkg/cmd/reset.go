@@ -78,7 +78,7 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 	}
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 

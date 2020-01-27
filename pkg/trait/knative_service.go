@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -114,7 +115,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			"controller strategy: "+string(ControllerStrategyDeployment),
+			fmt.Sprintf("different controller strategy chosen (%s)", string(ControllerStrategyDeployment)),
 		)
 
 		// A controller is already present for the integration
@@ -183,7 +184,7 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 		v1.IntegrationConditionKnativeServiceAvailable,
 		corev1.ConditionTrue,
 		v1.IntegrationConditionKnativeServiceAvailableReason,
-		ksvc.Name,
+		fmt.Sprintf("Knative service name is %s", ksvc.Name),
 	)
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {

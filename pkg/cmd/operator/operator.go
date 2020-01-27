@@ -26,10 +26,14 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/apache/camel-k/pkg/client"
+	camellog "github.com/apache/camel-k/pkg/util/log"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"
 	"github.com/operator-framework/operator-sdk/pkg/ready"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/tools/record"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -43,6 +47,8 @@ import (
 )
 
 var log = logf.Log.WithName("cmd")
+
+// GitCommit --
 var GitCommit string
 
 func printVersion() {
@@ -98,8 +104,21 @@ func Run() {
 	}
 	defer r.Unset() // nolint: errcheck
 
+	// Configure an event broadcaster
+	c, err := client.NewClient(false)
+	if err != nil {
+		log.Error(err, "cannot initialize client")
+		os.Exit(1)
+	}
+	eventBroadcaster := record.NewBroadcaster()
+	eventBroadcaster.StartLogging(camellog.WithName("events").Infof)
+	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
+
 	// Create a new Cmd to provide shared dependencies and start components
-	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
+	mgr, err := manager.New(cfg, manager.Options{
+		Namespace:        namespace,
+		EventBroadcaster: eventBroadcaster,
+	})
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)
