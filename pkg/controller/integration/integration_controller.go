@@ -20,10 +20,12 @@ package integration
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/events"
 	appsv1 "k8s.io/api/apps/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -58,8 +60,9 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return &ReconcileIntegration{
-		client: c,
-		scheme: mgr.GetScheme(),
+		client:   c,
+		scheme:   mgr.GetScheme(),
+		recorder: mgr.GetEventRecorderFor("camel-k-integration-controller"),
 	}
 }
 
@@ -206,8 +209,9 @@ var _ reconcile.Reconciler = &ReconcileIntegration{}
 type ReconcileIntegration struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client   client.Client
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a Integration object and makes changes based on the state read
@@ -256,12 +260,14 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
+				events.NotifyIntegrationError(r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
 			}
 
 			if newTarget != nil {
-				if r, err := r.update(ctx, &instance, newTarget); err != nil {
-					return r, err
+				if res, err := r.update(ctx, &instance, newTarget); err != nil {
+					events.NotifyIntegrationError(r.recorder, &instance, newTarget, err)
+					return res, err
 				}
 
 				if newTarget.Status.Phase != target.Status.Phase {
@@ -275,6 +281,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 
 			// handle one action at time so the resource
 			// is always at its latest state
+			events.NotifyIntegrationUpdated(r.recorder, &instance, newTarget)
 			break
 		}
 	}

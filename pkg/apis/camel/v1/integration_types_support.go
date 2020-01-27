@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -209,12 +210,17 @@ func (in *Integration) SetIntegrationPlatform(platform *IntegrationPlatform) {
 // SetIntegrationKit --
 func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 	cs := corev1.ConditionTrue
-
+	message := kit.Name
 	if kit.Status.Phase != IntegrationKitPhaseReady {
 		cs = corev1.ConditionFalse
+		if kit.Status.Phase == IntegrationKitPhaseNone {
+			message = fmt.Sprintf("creating a new integration kit")
+		} else {
+			message = fmt.Sprintf("integration kit %s is in state %q", kit.Name, kit.Status.Phase)
+		}
 	}
 
-	in.Status.SetCondition(IntegrationConditionKitAvailable, cs, IntegrationConditionKitAvailableReason, kit.Name)
+	in.Status.SetCondition(IntegrationConditionKitAvailable, cs, IntegrationConditionKitAvailableReason, message)
 	in.Status.Kit = kit.Name
 	in.Status.Image = kit.Status.Image
 }

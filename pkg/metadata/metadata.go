@@ -21,8 +21,8 @@ import (
 	"github.com/scylladb/go-set/strset"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/gzip"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/log"
 
 	src "github.com/apache/camel-k/pkg/util/source"
