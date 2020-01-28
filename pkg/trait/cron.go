@@ -115,6 +115,13 @@ func newCronTrait() Trait {
 
 func (t *cronTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionCronJobAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionCronJobNotAvailableReason,
+			"explicitly disabled",
+		)
+
 		return false, nil
 	}
 
@@ -125,6 +132,11 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 	if t.Auto == nil || *t.Auto {
 		globalCron, err := t.getGlobalCron(e)
 		if err != nil {
+			e.Integration.Status.SetErrorCondition(
+				v1.IntegrationConditionCronJobAvailable,
+				v1.IntegrationConditionCronJobNotAvailableReason,
+				err,
+			)
 			return false, err
 		}
 
@@ -177,6 +189,12 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 		return false, err
 	}
 	if strategy != ControllerStrategyCronJob {
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionCronJobAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionCronJobNotAvailableReason,
+			"controller strategy: "+string(strategy),
+		)
 		return false, nil
 	}
 
@@ -197,6 +215,13 @@ func (t *cronTrait) Apply(e *Environment) error {
 
 			e.Resources.AddAll(maps)
 			e.Resources.Add(cronJob)
+
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionCronJobAvailable,
+				corev1.ConditionTrue,
+				v1.IntegrationConditionCronJobAvailableReason,
+				fmt.Sprintf("CronJob name is %s", cronJob.Name),
+			)
 
 			envvar.SetVal(&e.EnvVars, "CAMEL_K_CRON_OVERRIDE", t.Components)
 		}
