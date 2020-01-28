@@ -87,10 +87,10 @@ func NotifyIntegrationUpdated(ctx context.Context, c client.Client, recorder rec
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration", new.Name, ReasonIntegrationPhaseUpdated)
 	if new.Status.Phase != v1.IntegrationPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration", new.Name, ReasonIntegrationConditionChanged)
 	}
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration", new.Name, ReasonIntegrationPhaseUpdated)
 }
 
 // NotifyIntegrationKitUpdated automatically generates events when an integration kit changes
@@ -104,10 +104,10 @@ func NotifyIntegrationKitUpdated(ctx context.Context, c client.Client, recorder 
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Kit", new.Name, ReasonIntegrationKitPhaseUpdated)
 	if new.Status.Phase != v1.IntegrationKitPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration Kit", new.Name, ReasonIntegrationKitConditionChanged)
 	}
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Kit", new.Name, ReasonIntegrationKitPhaseUpdated)
 }
 
 // NotifyIntegrationKitError automatically generates error events when the integration kit reconcile cycle phase has an error
@@ -133,10 +133,10 @@ func NotifyIntegrationPlatformUpdated(ctx context.Context, c client.Client, reco
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Platform", new.Name, ReasonIntegrationPlatformPhaseUpdated)
 	if new.Status.Phase != v1.IntegrationPlatformPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration Platform", new.Name, ReasonIntegrationPlatformConditionChanged)
 	}
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Platform", new.Name, ReasonIntegrationPlatformPhaseUpdated)
 }
 
 // NotifyIntegrationPlatformError automatically generates error events when the integration Platform reconcile cycle phase has an error
@@ -162,10 +162,10 @@ func NotifyBuildUpdated(ctx context.Context, c client.Client, recorder record.Ev
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Build", new.Name, ReasonBuildPhaseUpdated)
 	if new.Status.Phase != v1.BuildPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Build", new.Name, ReasonBuildConditionChanged)
 	}
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Build", new.Name, ReasonBuildPhaseUpdated)
 }
 
 // NotifyBuildError automatically generates error events when the build reconcile cycle phase has an error
