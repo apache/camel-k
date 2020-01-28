@@ -115,7 +115,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			fmt.Sprintf("different controller strategy chosen (%s)", string(ControllerStrategyDeployment)),
+			fmt.Sprintf("different controller strategy used (%s)", string(ControllerStrategyDeployment)),
 		)
 
 		// A controller is already present for the integration
@@ -137,7 +137,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			"controller strategy: "+string(strategy),
+			fmt.Sprintf("different controller strategy used (%s)", string(strategy)),
 		)
 
 		return false, nil
