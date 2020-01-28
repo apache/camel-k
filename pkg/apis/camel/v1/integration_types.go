@@ -180,6 +180,8 @@ const (
 	IntegrationConditionServiceAvailable IntegrationConditionType = "ServiceAvailable"
 	// IntegrationConditionKnativeServiceAvailable --
 	IntegrationConditionKnativeServiceAvailable IntegrationConditionType = "KnativeServiceAvailable"
+	// IntegrationConditionCronJobAvailable --
+	IntegrationConditionCronJobAvailable IntegrationConditionType = "CronJobAvailable"
 	// IntegrationConditionExposureAvailable --
 	IntegrationConditionExposureAvailable IntegrationConditionType = "ExposureAvailable"
 	// IntegrationConditionPrometheusAvailable --
@@ -213,6 +215,10 @@ const (
 	IntegrationConditionKnativeServiceAvailableReason string = "KnativeServiceAvailable"
 	// IntegrationConditionKnativeServiceNotAvailableReason --
 	IntegrationConditionKnativeServiceNotAvailableReason string = "KnativeServiceNotAvailable"
+	// IntegrationConditionCronJobAvailableReason --
+	IntegrationConditionCronJobAvailableReason string = "CronJobAvailableReason"
+	// IntegrationConditionCronJobNotAvailableReason --
+	IntegrationConditionCronJobNotAvailableReason string = "CronJobNotAvailableReason"
 	// IntegrationConditionPrometheusAvailableReason --
 	IntegrationConditionPrometheusAvailableReason string = "PrometheusAvailable"
 	// IntegrationConditionJolokiaAvailableReason --

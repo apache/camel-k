@@ -44,10 +44,18 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - events
   - configmaps
   - secrets
   verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
   - get
   - list
   - watch
