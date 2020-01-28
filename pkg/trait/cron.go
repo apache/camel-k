@@ -180,21 +180,36 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 
 	// Fallback strategy can be implemented in any other controller
 	if t.Fallback != nil && *t.Fallback {
+		if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionCronJobAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionCronJobNotAvailableReason,
+				"fallback strategy selected",
+			)
+		}
 		return true, nil
 	}
 
 	// CronJob strategy requires common schedule
 	strategy, err := e.DetermineControllerStrategy(t.Ctx, t.Client)
 	if err != nil {
+		e.Integration.Status.SetErrorCondition(
+			v1.IntegrationConditionCronJobAvailable,
+			v1.IntegrationConditionCronJobNotAvailableReason,
+			err,
+		)
 		return false, err
 	}
 	if strategy != ControllerStrategyCronJob {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionCronJobAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionCronJobNotAvailableReason,
-			"controller strategy: "+string(strategy),
-		)
+		if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionCronJobAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionCronJobNotAvailableReason,
+				fmt.Sprintf("different controller strategy used (%s)", string(strategy)),
+			)
+		}
 		return false, nil
 	}
 
