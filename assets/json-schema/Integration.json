@@ -272,6 +272,12 @@
           "$schema": "http://json-schema.org/draft-04/schema#",
           "$ref": "#/definitions/Failure"
         },
+        "generatedResources": {
+          "items": {
+            "$ref": "#/definitions/ResourceSpec"
+          },
+          "type": "array"
+        },
         "generatedSources": {
           "items": {
             "$ref": "#/definitions/SourceSpec"
