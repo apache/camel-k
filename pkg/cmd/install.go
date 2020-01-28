@@ -418,6 +418,7 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 	return nil
 }
 
+// nolint:errcheck
 func (o *installCmdOptions) waitForPlatformReady(cmd *cobra.Command, platform *v1.IntegrationPlatform) error {
 	handler := func(i *v1.IntegrationPlatform) bool {
 		if i.Status.Phase == v1.IntegrationPlatformPhaseReady || i.Status.Phase == v1.IntegrationPlatformPhaseError {

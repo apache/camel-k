@@ -297,6 +297,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// nolint:errcheck
 func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration *v1.Integration) (*v1.IntegrationPhase, error) {
 	handler := func(i *v1.Integration) bool {
 		//

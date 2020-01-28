@@ -180,6 +180,7 @@ func NotifyBuildError(ctx context.Context, c client.Client, recorder record.Even
 	recorder.Eventf(p, corev1.EventTypeWarning, ReasonBuildError, "Cannot reconcile Build %s: %v", p.Name, err)
 }
 
+// nolint:lll
 func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, new runtime.Object, oldPhase, newPhase string, resourceType, name, reason string) {
 	// Update information about phase changes
 	if oldPhase != newPhase {
