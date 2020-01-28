@@ -230,7 +230,7 @@ func (t *prometheusTrait) getJmxExporterConfigMap(e *Environment) *corev1.Config
 			},
 		},
 		Data: map[string]string{
-			"content": deploy.Resources["prometheus-jmx-exporter.yaml"],
+			"content": deploy.ResourceAsString("/prometheus-jmx-exporter.yaml"),
 		},
 	}
 }

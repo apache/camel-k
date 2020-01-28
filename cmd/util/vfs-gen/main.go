@@ -26,6 +26,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/shurcooL/httpfs/filter"
 	"github.com/shurcooL/vfsgen"
@@ -70,7 +71,9 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	var fs http.FileSystem = http.Dir(dirName)
+	var fs http.FileSystem = modTimeFS{
+		fs: http.Dir(dirName),
+	}
 	fs = filter.Skip(fs, filter.FilesWithExtensions(".go"))
 	fs = filter.Skip(fs, func(path string, fi os.FileInfo) bool {
 		for _, ex := range exclusions {
@@ -119,4 +122,37 @@ limitations under the License.
 		log.Fatalln(err)
 	}
 
+}
+
+// modTimeFS wraps http.FileSystem to set mod time to 0 for all files
+type modTimeFS struct {
+	fs http.FileSystem
+}
+
+func (fs modTimeFS) Open(name string) (http.File, error) {
+	f, err := fs.fs.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	return modTimeFile{f}, nil
+}
+
+type modTimeFile struct {
+	http.File
+}
+
+func (f modTimeFile) Stat() (os.FileInfo, error) {
+	fi, err := f.File.Stat()
+	if err != nil {
+		return nil, err
+	}
+	return modTimeFileInfo{fi}, nil
+}
+
+type modTimeFileInfo struct {
+	os.FileInfo
+}
+
+func (modTimeFileInfo) ModTime() time.Time {
+	return time.Time{}
 }
