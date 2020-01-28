@@ -159,7 +159,6 @@ func HandleIntegrationEvents(ctx context.Context, integration *v1.Integration,
 	}
 }
 
-
 //
 // HandlePlatformStateChanges watches a platform resource and invoke the given handler when its status changes.
 //
