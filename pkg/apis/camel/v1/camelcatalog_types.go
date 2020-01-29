@@ -36,10 +36,8 @@ type CamelArtifactExclusion struct {
 
 // CamelArtifactDependency represent a maven's dependency
 type CamelArtifactDependency struct {
-	GroupID    string                   `json:"groupId" yaml:"groupId"`
-	ArtifactID string                   `json:"artifactId" yaml:"artifactId"`
-	Version    string                   `json:"version,omitempty" yaml:"version,omitempty"`
-	Exclusions []CamelArtifactExclusion `json:"exclusions,omitempty" yaml:"exclusions,omitempty"`
+	MavenArtifact `json:",inline" yaml:",inline"`
+	Exclusions    []CamelArtifactExclusion `json:"exclusions,omitempty" yaml:"exclusions,omitempty"`
 }
 
 // CamelArtifact --
@@ -52,12 +50,18 @@ type CamelArtifact struct {
 	JavaTypes               []string        `json:"javaTypes,omitempty" yaml:"javaTypes,omitempty"`
 }
 
+// CamelLoader --
+type CamelLoader struct {
+	MavenArtifact `json:",inline" yaml:",inline"`
+	Languages     []string        `json:"languages,omitempty" yaml:"languages,omitempty"`
+	Dependencies  []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+}
+
 // CamelCatalogSpec defines the desired state of CamelCatalog
 type CamelCatalogSpec struct {
-	Version         string                   `json:"version" yaml:"version"`
-	RuntimeVersion  string                   `json:"runtimeVersion" yaml:"runtimeVersion"`
-	RuntimeProvider *RuntimeProvider         `json:"runtimeProvider,omitempty" yaml:"runtimeProvider"`
-	Artifacts       map[string]CamelArtifact `json:"artifacts" yaml:"artifacts"`
+	Runtime   RuntimeSpec              `json:"runtime" yaml:"runtime"`
+	Artifacts map[string]CamelArtifact `json:"artifacts" yaml:"artifacts"`
+	Loaders   map[string]CamelLoader   `json:"loaders" yaml:"loaders"`
 }
 
 // CamelCatalogStatus defines the observed state of CamelCatalog
@@ -85,9 +89,17 @@ type CamelCatalogList struct {
 	Items           []CamelCatalog `json:"items"`
 }
 
+// RuntimeProvider --
+type RuntimeProvider string
+
 const (
 	// CamelCatalogKind --
 	CamelCatalogKind string = "CamelCatalog"
+
+	// RuntimeProviderMain --
+	RuntimeProviderMain RuntimeProvider = "main"
+	// RuntimeProviderQuarkus --
+	RuntimeProviderQuarkus RuntimeProvider = "quarkus"
 )
 
 func init() {

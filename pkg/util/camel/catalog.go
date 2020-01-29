@@ -37,18 +37,15 @@ import (
 
 // DefaultCatalog --
 func DefaultCatalog() (*RuntimeCatalog, error) {
-	return catalogForRuntimeProvider(nil)
+	return catalogForRuntimeProvider(v1.RuntimeProviderMain)
 }
 
 // QuarkusCatalog --
 func QuarkusCatalog() (*RuntimeCatalog, error) {
-	return catalogForRuntimeProvider(v1.QuarkusRuntimeProvider{
-		CamelQuarkusVersion: defaults.DefaultCamelQuarkusVersion,
-		QuarkusVersion:      defaults.DefaultQuarkusVersion,
-	})
+	return catalogForRuntimeProvider(v1.RuntimeProviderQuarkus)
 }
 
-func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
+func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, error) {
 	catalogs := make([]v1.CamelCatalog, 0)
 
 	for _, name := range deploy.Resources("/") {
@@ -62,18 +59,22 @@ func catalogForRuntimeProvider(provider interface{}) (*RuntimeCatalog, error) {
 		}
 	}
 
-	return findBestMatch(catalogs, defaults.DefaultCamelVersion, defaults.DefaultRuntimeVersion, provider)
+	return findBestMatch(catalogs, v1.RuntimeSpec{
+		Version:  defaults.DefaultRuntimeVersion,
+		Provider: provider,
+		Metadata: make(map[string]string),
+	})
 }
 
 // GenerateCatalog --
-func GenerateCatalog(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1.MavenSpec,
-	camelVersion string, runtimeVersion string) (*RuntimeCatalog, error) {
-	return GenerateCatalogWithProvider(ctx, client, namespace, mvn, camelVersion, runtimeVersion, "", []maven.Dependency{})
-}
+func GenerateCatalog(
+	ctx context.Context,
+	client k8sclient.Reader,
+	namespace string,
+	mvn v1.MavenSpec,
+	runtime v1.RuntimeSpec,
+	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 
-// GenerateCatalogWithProvider --
-func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, namespace string, mvn v1.MavenSpec,
-	camelVersion string, runtimeVersion string, providerName string, providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
 	if err != nil {
@@ -86,16 +87,14 @@ func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, n
 		return nil, err
 	}
 
-	project := generateMavenProject(camelVersion, runtimeVersion, providerDependencies)
+	project := generateMavenProject(runtime.Version, providerDependencies)
 
 	mc := maven.NewContext(tmpDir, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.GetTimeout().Duration
 	mc.AddSystemProperty("catalog.path", tmpDir)
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
-	if providerName != "" {
-		mc.AddSystemProperty("catalog.runtime", providerName)
-	}
+	mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))
 
 	settings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
 	if err != nil {
@@ -123,7 +122,7 @@ func GenerateCatalogWithProvider(ctx context.Context, client k8sclient.Reader, n
 	return NewRuntimeCatalog(catalog.Spec), nil
 }
 
-func generateMavenProject(camelVersion string, runtimeVersion string, providerDependencies []maven.Dependency) maven.Project {
+func generateMavenProject(runtimeVersion string, providerDependencies []maven.Dependency) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
 
 	plugin := maven.Plugin{
@@ -136,13 +135,6 @@ func generateMavenProject(camelVersion string, runtimeVersion string, providerDe
 				Goals: []string{
 					"generate-catalog",
 				},
-			},
-		},
-		Dependencies: []maven.Dependency{
-			{
-				GroupID:    "org.apache.camel",
-				ArtifactID: "camel-catalog",
-				Version:    camelVersion,
 			},
 		},
 	}

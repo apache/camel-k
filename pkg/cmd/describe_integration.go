@@ -100,7 +100,7 @@ func (command *describeIntegrationCommandOptions) describeIntegration(i v1.Integ
 		describeObjectMeta(w, i.ObjectMeta)
 
 		w.Write(0, "Phase:\t%s\n", i.Status.Phase)
-		w.Write(0, "Camel Version:\t%s\n", i.Status.CamelVersion)
+		w.Write(0, "Runtime Version:\t%s\n", i.Status.RuntimeVersion)
 		w.Write(0, "Kit:\t%s\n", i.Status.Kit)
 		w.Write(0, "Image:\t%s\n", i.Status.Image)
 		w.Write(0, "Version:\t%s\n", i.Status.Version)

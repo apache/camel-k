@@ -32,6 +32,9 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
   <groupId>org.apache.camel.k.integration</groupId>
   <artifactId>camel-k-integration</artifactId>
   <version>1.0.0</version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>

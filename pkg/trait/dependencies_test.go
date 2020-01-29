@@ -209,7 +209,7 @@ func TestIntegrationCustomLoader(t *testing.T) {
 							Content: "- from:\n    uri: direct:foo\n    steps:\n    - to: log:bar",
 						},
 						Language: v1.LanguageYaml,
-						Loader:   "knative-source-yaml",
+						Loader:   "knative-source",
 					},
 				},
 			},

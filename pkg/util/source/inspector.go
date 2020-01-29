@@ -135,7 +135,7 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 	}
 
 	var additionalDependencies map[string]string
-	if i.catalog.RuntimeProvider != nil && i.catalog.RuntimeProvider.Quarkus != nil {
+	if i.catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
 		additionalDependencies = sourceDependencies.quarkus
 	} else {
 		additionalDependencies = sourceDependencies.main

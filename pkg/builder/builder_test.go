@@ -58,8 +58,7 @@ func TestFailure(t *testing.T) {
 			steps.Step1,
 			steps.Step2,
 		),
-		RuntimeVersion: catalog.RuntimeVersion,
-		CamelVersion:   catalog.Version,
+		Runtime: catalog.Runtime,
 	}
 
 	status := b.Run(r)

@@ -25,17 +25,8 @@ const (
 	// Version --
 	Version = "1.0.0-RC2-SNAPSHOT"
 
-	// DefaultCamelVersion --
-	DefaultCamelVersion = "3.0.0"
-
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.0.10"
-
-	// DefaultCamelQuarkusVersion --
-	DefaultCamelQuarkusVersion = "1.0.0-M2"
-
-	// DefaultQuarkusVersion --
-	DefaultQuarkusVersion = "1.1.0.Final"
+	DefaultRuntimeVersion = "1.1.0-SNAPSHOT"
 
 	// KanikoVersion --
 	KanikoVersion = "0.14.0"

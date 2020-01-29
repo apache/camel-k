@@ -35,8 +35,7 @@ func TestNewProject(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1.BuilderTask{
-			CamelVersion:   catalog.Version,
-			RuntimeVersion: catalog.RuntimeVersion,
+			Runtime: catalog.Runtime,
 			Dependencies: []string{
 				"camel-k:runtime-main",
 				"bom:my.company/my-artifact-1/1.0.0",
@@ -57,14 +56,14 @@ func TestNewProject(t *testing.T) {
 			{
 				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-bom",
-				Version:    ctx.Catalog.Version,
+				Version:    ctx.Catalog.Runtime.Metadata["camel.version"],
 				Type:       "pom",
 				Scope:      "import",
 			},
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-runtime-bom",
-				Version:    catalog.RuntimeVersion,
+				Version:    ctx.Catalog.Runtime.Version,
 				Type:       "pom",
 				Scope:      "import",
 			},
@@ -93,8 +92,7 @@ func TestGenerateJvmProject(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1.BuilderTask{
-			CamelVersion:   catalog.Version,
-			RuntimeVersion: catalog.RuntimeVersion,
+			Runtime: catalog.Runtime,
 			Dependencies: []string{
 				"camel-k:runtime-main",
 			},
@@ -113,14 +111,14 @@ func TestGenerateJvmProject(t *testing.T) {
 			{
 				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-bom",
-				Version:    catalog.Version,
+				Version:    ctx.Catalog.Runtime.Metadata["camel.version"],
 				Type:       "pom",
 				Scope:      "import",
 			},
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-runtime-bom",
-				Version:    catalog.RuntimeVersion,
+				Version:    ctx.Catalog.Runtime.Version,
 				Type:       "pom",
 				Scope:      "import",
 			},
@@ -132,8 +130,6 @@ func TestGenerateJvmProject(t *testing.T) {
 		ctx.Maven.Project.Dependencies,
 		[]maven.Dependency{
 			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-runtime-main"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-core-engine"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-main"},
 		},
 	)
 }
@@ -145,8 +141,7 @@ func TestGenerateGroovyProject(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1.BuilderTask{
-			CamelVersion:   catalog.Version,
-			RuntimeVersion: catalog.RuntimeVersion,
+			Runtime: catalog.Runtime,
 			Dependencies: []string{
 				"camel-k:runtime-main",
 				"camel-k:loader-groovy",
@@ -166,14 +161,14 @@ func TestGenerateGroovyProject(t *testing.T) {
 			{
 				GroupID:    "org.apache.camel",
 				ArtifactID: "camel-bom",
-				Version:    catalog.Version,
+				Version:    ctx.Catalog.Runtime.Metadata["camel.version"],
 				Type:       "pom",
 				Scope:      "import",
 			},
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-runtime-bom",
-				Version:    catalog.RuntimeVersion,
+				Version:    ctx.Catalog.Runtime.Version,
 				Type:       "pom",
 				Scope:      "import",
 			},
@@ -186,10 +181,6 @@ func TestGenerateGroovyProject(t *testing.T) {
 		[]maven.Dependency{
 			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-runtime-main"},
 			{GroupID: "org.apache.camel.k", ArtifactID: "camel-k-loader-groovy"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-core-engine"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-main"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-groovy"},
-			{GroupID: "org.apache.camel", ArtifactID: "camel-endpointdsl"},
 		},
 	)
 }
@@ -201,8 +192,7 @@ func TestSanitizeDependencies(t *testing.T) {
 	ctx := builder.Context{
 		Catalog: catalog,
 		Build: v1.BuilderTask{
-			CamelVersion:   catalog.Version,
-			RuntimeVersion: catalog.RuntimeVersion,
+			Runtime: catalog.Runtime,
 			Dependencies: []string{
 				"camel:undertow",
 				"mvn:org.apache.camel/camel-core/2.18.0",

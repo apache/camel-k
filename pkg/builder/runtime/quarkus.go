@@ -20,7 +20,6 @@ package runtime
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -38,18 +37,20 @@ import (
 var QuarkusSteps = []builder.Step{
 	Steps.LoadCamelQuarkusCatalog,
 	Steps.GenerateQuarkusProject,
+	Steps.BuildQuarkusRunner,
 	Steps.ComputeQuarkusDependencies,
 }
 
 func loadCamelQuarkusCatalog(ctx *builder.Context) error {
-	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, ctx.Build.RuntimeProvider.Quarkus)
+	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.Runtime)
 	if err != nil {
 		return err
 	}
 
 	if catalog == nil {
-		return fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s, camel-quarkus=%s, quarkus=%s",
-			ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, ctx.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion, ctx.Build.RuntimeProvider.Quarkus.QuarkusVersion)
+		return fmt.Errorf("unable to find catalog matching version requirement: runtime=%s, provider=%s",
+			ctx.Build.Runtime.Version,
+			ctx.Build.Runtime.Provider)
 	}
 
 	ctx.Catalog = catalog
@@ -63,10 +64,8 @@ func generateQuarkusProject(ctx *builder.Context) error {
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
 
-	p.Properties = make(map[string]string)
-	for k, v := range ctx.Build.Properties {
-		p.Properties[k] = v
-	}
+	// Add all the properties from the build configuration
+	p.Properties.AddAll(ctx.Build.Properties)
 
 	// camel-quarkus doe routes discovery at startup but we don't want
 	// this to happen as routes are loaded at runtime and looking for
@@ -79,14 +78,14 @@ func generateQuarkusProject(ctx *builder.Context) error {
 		maven.Dependency{
 			GroupID:    "org.apache.camel.quarkus",
 			ArtifactID: "camel-quarkus-bom",
-			Version:    ctx.Build.RuntimeProvider.Quarkus.CamelQuarkusVersion,
+			Version:    ctx.Build.Runtime.Metadata["camel-quarkus.version"],
 			Type:       "pom",
 			Scope:      "import",
 		},
 		maven.Dependency{
 			GroupID:    "org.apache.camel.k",
 			ArtifactID: "camel-k-runtime-bom",
-			Version:    ctx.Build.RuntimeVersion,
+			Version:    ctx.Build.Runtime.Version,
 			Type:       "pom",
 			Scope:      "import",
 		},
@@ -97,7 +96,7 @@ func generateQuarkusProject(ctx *builder.Context) error {
 		maven.Plugin{
 			GroupID:    "io.quarkus",
 			ArtifactID: "quarkus-maven-plugin",
-			Version:    ctx.Build.RuntimeProvider.Quarkus.QuarkusVersion,
+			Version:    ctx.Build.Runtime.Metadata["quarkus.version"],
 			Executions: []maven.Execution{
 				{
 					Goals: []string{
@@ -113,7 +112,7 @@ func generateQuarkusProject(ctx *builder.Context) error {
 	return nil
 }
 
-func computeQuarkusDependencies(ctx *builder.Context) error {
+func buildQuarkusRunner(ctx *builder.Context) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
@@ -125,9 +124,17 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 		return errors.Wrap(err, "failure while building project")
 	}
 
+	return nil
+}
+
+func computeQuarkusDependencies(ctx *builder.Context) error {
+	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
+	mc.SettingsContent = ctx.Maven.SettingsData
+	mc.LocalRepository = ctx.Build.Maven.LocalRepository
+	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
+
 	// Retrieve the runtime dependencies
-	mc.AdditionalArguments = nil
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.RuntimeVersion)
+	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.Runtime.Version)
 	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while determining classpath")
 	}
@@ -145,23 +152,17 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	}
 
 	for _, e := range cp["dependencies"] {
+		_, fileName := path.Split(e.Location)
+
 		gav, err := maven.ParseGAV(e.ID)
 		if err != nil {
-			return nil
-		}
-
-		fileName := gav.GroupID + "." + gav.ArtifactID + "-" + gav.Version + "." + gav.Type
-		location := path.Join(mc.Path, "target", "lib", fileName)
-		_, err = os.Stat(location)
-		// We check that the dependency actually exists in the lib directory
-		if os.IsNotExist(err) {
-			continue
+			return err
 		}
 
 		ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
-			ID:       gav.GroupID + ":" + gav.ArtifactID + ":" + gav.Type + ":" + gav.Version,
-			Location: location,
-			Target:   path.Join("lib", fileName),
+			ID:       e.ID,
+			Location: e.Location,
+			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
 		})
 	}
 
@@ -169,7 +170,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
 		ID:       runner,
 		Location: path.Join(mc.Path, "target", runner),
-		Target:   runner,
+		Target:   path.Join("dependencies", runner),
 	})
 
 	return nil

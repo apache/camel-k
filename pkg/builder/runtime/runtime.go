@@ -34,9 +34,11 @@ type steps struct {
 	// Quarkus
 	LoadCamelQuarkusCatalog    builder.Step
 	GenerateQuarkusProject     builder.Step
+	BuildQuarkusRunner         builder.Step
 	ComputeQuarkusDependencies builder.Step
 }
 
+// Steps --
 var Steps = steps{
 	// Main
 	LoadCamelCatalog: builder.NewStep(
@@ -60,8 +62,12 @@ var Steps = steps{
 		builder.ProjectGenerationPhase,
 		generateQuarkusProject,
 	),
-	ComputeQuarkusDependencies: builder.NewStep(
+	BuildQuarkusRunner: builder.NewStep(
 		builder.ProjectBuildPhase,
+		buildQuarkusRunner,
+	),
+	ComputeQuarkusDependencies: builder.NewStep(
+		builder.ProjectBuildPhase+1,
 		computeQuarkusDependencies,
 	),
 }

@@ -19,6 +19,7 @@ package controller
 
 import (
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -32,4 +33,13 @@ func (s MatchingSelector) ApplyToList(opts *client.ListOptions) {
 
 func (s MatchingSelector) ApplyToDeleteAllOf(opts *client.DeleteAllOfOptions) {
 	opts.LabelSelector = s.Selector
+}
+
+func NewLabelSelector(key string, op selection.Operator, values []string) MatchingSelector {
+	provider, _ := labels.NewRequirement(key, op, values)
+	selector := labels.NewSelector().Add(*provider)
+
+	return MatchingSelector{
+		Selector: selector,
+	}
 }

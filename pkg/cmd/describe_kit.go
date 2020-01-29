@@ -93,7 +93,7 @@ func (command *describeKitCommandOptions) describeIntegrationKit(kit v1.Integrat
 		describeObjectMeta(w, kit.ObjectMeta)
 
 		w.Write(0, "Phase:\t%s\n", kit.Status.Phase)
-		w.Write(0, "Camel Version:\t%s\n", kit.Status.CamelVersion)
+		w.Write(0, "Runtime Version:\t%s\n", kit.Status.RuntimeVersion)
 		w.Write(0, "Image:\t%s\n", kit.Status.Image)
 		w.Write(0, "Version:\t%s\n", kit.Status.Version)
 

@@ -111,10 +111,8 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		"camel.apache.org/kit.created.by.kind":    v1.IntegrationKind,
 		"camel.apache.org/kit.created.by.name":    integration.Name,
 		"camel.apache.org/kit.created.by.version": integration.ResourceVersion,
-	}
-
-	if integration.Status.RuntimeProvider != nil && integration.Status.RuntimeProvider.Quarkus != nil {
-		platformKit.Labels["camel.apache.org/runtime.provider"] = "quarkus"
+		"camel.apache.org/runtime.version":        integration.Status.RuntimeVersion,
+		"camel.apache.org/runtime.provider":       string(integration.Status.RuntimeProvider),
 	}
 
 	// Set the kit to have the same characteristics as the integrations

@@ -77,8 +77,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		Client:    c,
 		Namespace: "ns",
 		Build: v1.BuilderTask{
-			RuntimeVersion: catalog.RuntimeVersion,
-			CamelVersion:   catalog.Version,
+			Runtime: catalog.Runtime,
 			Maven: v1.MavenSpec{
 				Settings: v1.ValueSource{
 					ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
@@ -125,8 +124,7 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		Client:    c,
 		Namespace: "ns",
 		Build: v1.BuilderTask{
-			RuntimeVersion: catalog.RuntimeVersion,
-			CamelVersion:   catalog.Version,
+			Runtime: catalog.Runtime,
 			Maven: v1.MavenSpec{
 				Settings: v1.ValueSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
@@ -160,14 +158,16 @@ func TestListPublishedImages(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type":         v1.IntegrationKitTypePlatform,
+					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
+					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
-				Phase:          v1.IntegrationKitPhaseError,
-				Image:          "image-1",
-				CamelVersion:   catalog.Version,
-				RuntimeVersion: catalog.RuntimeVersion,
+				Phase:           v1.IntegrationKitPhaseError,
+				Image:           "image-1",
+				RuntimeVersion:  catalog.Runtime.Version,
+				RuntimeProvider: catalog.Runtime.Provider,
 			},
 		},
 		&v1.IntegrationKit{
@@ -179,14 +179,16 @@ func TestListPublishedImages(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
+					"camel.apache.org/kit.type":         v1.IntegrationKitTypePlatform,
+					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
+					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
-				Phase:          v1.IntegrationKitPhaseReady,
-				Image:          "image-2",
-				CamelVersion:   catalog.Version,
-				RuntimeVersion: catalog.RuntimeVersion,
+				Phase:           v1.IntegrationKitPhaseReady,
+				Image:           "image-2",
+				RuntimeVersion:  catalog.Runtime.Version,
+				RuntimeProvider: catalog.Runtime.Provider,
 			},
 		},
 	)

@@ -93,9 +93,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 }
 
 func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
-	if p.Status.Build.CamelVersion == "" {
-		p.Status.Build.CamelVersion = defaults.DefaultCamelVersion
-	}
 	if p.Status.Build.RuntimeVersion == "" {
 		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	}
@@ -183,7 +180,6 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 	}
 
 	if verbose {
-		log.Log.Infof("CamelVersion set to %s", p.Status.Build.CamelVersion)
 		log.Log.Infof("RuntimeVersion set to %s", p.Status.Build.RuntimeVersion)
 		log.Log.Infof("BaseImage set to %s", p.Status.Build.BaseImage)
 		log.Log.Infof("LocalRepository set to %s", p.Status.Build.Maven.LocalRepository)

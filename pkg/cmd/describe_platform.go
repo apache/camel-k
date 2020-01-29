@@ -93,7 +93,7 @@ func (command *describePlatformCommandOptions) describeIntegrationPlatform(platf
 		w.Write(0, "Phase:\t%s\n", platform.Status.Phase)
 		w.Write(0, "Version:\t%s\n", platform.Status.Version)
 		w.Write(0, "Base Image:\t%s\n", platform.GetActualValue(getPlatformBaseImage))
-		w.Write(0, "Camel Version:\t%s\n", platform.GetActualValue(getPlatformCamelVersion))
+		w.Write(0, "Runtime Version:\t%s\n", platform.GetActualValue(getPlatformRuntimeVersion))
 		w.Write(0, "Local Repository:\t%s\n", platform.GetActualValue(getPlatformMavenLocalRepository))
 		w.Write(0, "Publish Strategy:\t%s\n", platform.GetActualValue(getPlatformPublishStrategy))
 
@@ -115,8 +115,8 @@ func getPlatformBaseImage(spec v1.IntegrationPlatformSpec) string {
 	return spec.Build.BaseImage
 }
 
-func getPlatformCamelVersion(spec v1.IntegrationPlatformSpec) string {
-	return spec.Build.CamelVersion
+func getPlatformRuntimeVersion(spec v1.IntegrationPlatformSpec) string {
+	return spec.Build.RuntimeVersion
 }
 
 func getPlatformMavenLocalRepository(spec v1.IntegrationPlatformSpec) string {
