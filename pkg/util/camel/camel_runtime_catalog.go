@@ -41,13 +41,13 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 		for _, language := range artifact.Languages {
 			// Skip languages in common dependencies since they are always available to integrations
 			if artifact.ArtifactID != "camel-base" {
-				catalog.languageDependencies[language] = getDependency(artifact, catalog.RuntimeProvider)
+				catalog.languageDependencies[language] = getDependency(artifact, catalog.Runtime.Provider)
 			}
 		}
 		for _, javaType := range artifact.JavaTypes {
 			// Skip types in common dependencies since they are always available to integrations
 			if artifact.ArtifactID != "camel-base" {
-				catalog.javaTypeDependencies[javaType] = getDependency(artifact, catalog.RuntimeProvider)
+				catalog.javaTypeDependencies[javaType] = getDependency(artifact, catalog.Runtime.Provider)
 			}
 		}
 	}

@@ -104,9 +104,8 @@ var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnativ
 type IntegrationPlatformBuildSpec struct {
 	BuildStrategy         IntegrationPlatformBuildStrategy        `json:"buildStrategy,omitempty"`
 	PublishStrategy       IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
-	CamelVersion          string                                  `json:"camelVersion,omitempty"`
 	RuntimeVersion        string                                  `json:"runtimeVersion,omitempty"`
-	RuntimeProvider       *RuntimeProvider                        `json:"runtimeProvider,omitempty"`
+	RuntimeProvider       RuntimeProvider                         `json:"runtimeProvider,omitempty"`
 	BaseImage             string                                  `json:"baseImage,omitempty"`
 	Properties            map[string]string                       `json:"properties,omitempty"`
 	Registry              IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`

@@ -50,9 +50,8 @@ type IntegrationStatus struct {
 	GeneratedSources   []SourceSpec           `json:"generatedSources,omitempty"`
 	GeneratedResources []ResourceSpec         `json:"generatedResources,omitempty"`
 	Failure            *Failure               `json:"failure,omitempty"`
-	CamelVersion       string                 `json:"camelVersion,omitempty"`
 	RuntimeVersion     string                 `json:"runtimeVersion,omitempty"`
-	RuntimeProvider    *RuntimeProvider       `json:"runtimeProvider,omitempty"`
+	RuntimeProvider    RuntimeProvider        `json:"runtimeProvider,omitempty"`
 	Configuration      []ConfigurationSpec    `json:"configuration,omitempty"`
 	Conditions         []IntegrationCondition `json:"conditions,omitempty"`
 	Version            string                 `json:"version,omitempty"`

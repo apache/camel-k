@@ -20,30 +20,19 @@ package camel
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/controller"
 )
 
 // LoadCatalog --
-func LoadCatalog(ctx context.Context, client client.Client, namespace string, camelVersion string, runtimeVersion string, provider interface{}) (*RuntimeCatalog, error) {
+func LoadCatalog(ctx context.Context, client client.Client, namespace string, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
 	options := []k8sclient.ListOption{
 		k8sclient.InNamespace(namespace),
-	}
-
-	if provider == nil {
-		requirement, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
-		selector := labels.NewSelector().Add(*requirement)
-		options = append(options, controller.MatchingSelector{Selector: selector})
-	} else if _, ok := provider.(v1.QuarkusRuntimeProvider); ok {
-		options = append(options, k8sclient.MatchingLabels{
-			"camel.apache.org/runtime.provider": "quarkus",
-		})
+		k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.provider": string(runtime.Provider),
+		},
 	}
 
 	list := v1.NewCamelCatalogList()
@@ -52,7 +41,7 @@ func LoadCatalog(ctx context.Context, client client.Client, namespace string, ca
 		return nil, err
 	}
 
-	catalog, err := findBestMatch(list.Items, camelVersion, runtimeVersion, provider)
+	catalog, err := findBestMatch(list.Items, runtime)
 	if err != nil {
 		return nil, err
 	}

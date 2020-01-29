@@ -43,7 +43,7 @@ func TestConfigureDisabledCamelTraitFails(t *testing.T) {
 	trait.Enabled = new(bool)
 
 	configured, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	assert.False(t, configured)
 }
 
@@ -53,20 +53,19 @@ func TestApplyCamelTraitSucceeds(t *testing.T) {
 	err := trait.Apply(environment)
 	assert.Nil(t, err)
 	assert.Equal(t, "0.0.1", environment.RuntimeVersion)
-	assert.Equal(t, "1.23.0", environment.Integration.Status.CamelVersion)
 	assert.Equal(t, "0.0.1", environment.Integration.Status.RuntimeVersion)
-	assert.Equal(t, "1.23.0", environment.IntegrationKit.Status.CamelVersion)
 	assert.Equal(t, "0.0.1", environment.IntegrationKit.Status.RuntimeVersion)
 }
 
 func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *testing.T) {
 	trait, environment := createNominalCamelTest()
 	environment.CamelCatalog = nil
-	environment.Integration.Status.CamelVersion = "Unmatchable version"
+	environment.Integration.Status.RuntimeVersion = "Unmatchable version"
+	environment.Integration.Status.RuntimeProvider = v1.RuntimeProviderMain
 
 	err := trait.Apply(environment)
 	assert.NotNil(t, err)
-	assert.Equal(t, "unable to find catalog matching version requirement: camel=Unmatchable version, runtime=0.0.1", err.Error())
+	assert.Equal(t, "unable to find catalog matching version requirement: runtime=Unmatchable version, provider=main", err.Error())
 }
 
 func createNominalCamelTest() (*camelTrait, *Environment) {
@@ -79,8 +78,10 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{
 			CamelCatalogSpec: v1.CamelCatalogSpec{
-				Version:        "1.23.0",
-				RuntimeVersion: "0.0.1",
+				Runtime: v1.RuntimeSpec{
+					Version:  "0.0.1",
+					Provider: v1.RuntimeProviderMain,
+				},
 			},
 		},
 		Catalog: NewEnvironmentTestCatalog(),
@@ -91,7 +92,6 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 				Namespace: "namespace",
 			},
 			Status: v1.IntegrationStatus{
-				CamelVersion:   "1.23.0",
 				RuntimeVersion: "0.0.1",
 			},
 		},

@@ -20,23 +20,18 @@ package integration
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"github.com/apache/camel-k/pkg/util/controller"
 
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+
+	"github.com/pkg/errors"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
-
-var allowedLookupLabels = map[string]bool{
-	v1.IntegrationKitTypePlatform: true,
-	v1.IntegrationKitTypeExternal: true,
-}
 
 // LookupKitForIntegration --
 func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1.Integration) (*v1.IntegrationKit, error) {
@@ -51,16 +46,14 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 
 	options := []k8sclient.ListOption{
 		k8sclient.InNamespace(integration.Namespace),
-	}
-
-	if integration.Status.RuntimeProvider != nil && integration.Status.RuntimeProvider.Quarkus != nil {
-		options = append(options, k8sclient.MatchingLabels{
-			"camel.apache.org/runtime.provider": "quarkus",
-		})
-	} else {
-		provider, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
-		selector := labels.NewSelector().Add(*provider)
-		options = append(options, controller.MatchingSelector{Selector: selector})
+		k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.version":  integration.Status.RuntimeVersion,
+			"camel.apache.org/runtime.provider": string(integration.Status.RuntimeProvider),
+		},
+		controller.NewLabelSelector("camel.apache.org/kit.type", selection.In, []string{
+			v1.IntegrationKitTypePlatform,
+			v1.IntegrationKitTypeExternal,
+		}),
 	}
 
 	kits := v1.NewIntegrationKitList()
@@ -74,53 +67,46 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 		if kit.Status.Phase == v1.IntegrationKitPhaseError {
 			continue
 		}
-		if kit.Status.CamelVersion != integration.Status.CamelVersion {
-			continue
-		}
-		if kit.Status.RuntimeVersion != integration.Status.RuntimeVersion {
-			continue
-		}
+
+		/*
+			TODO: moved to label selector
+			if kit.Status.RuntimeVersion != integration.Status.RuntimeVersion {
+				continue
+			}
+			if kit.Status.RuntimeProvider != integration.Status.RuntimeProvider {
+				continue
+			}
+		*/
+
 		if kit.Status.Version != integration.Status.Version {
 			continue
 		}
 
-		// TODO: should ideally be made generic from the runtime providers
-		if integration.Status.RuntimeProvider == nil && kit.Status.RuntimeProvider != nil ||
-			integration.Status.RuntimeProvider != nil && kit.Status.RuntimeProvider == nil ||
-			integration.Status.RuntimeProvider != nil && kit.Status.RuntimeProvider != nil &&
-				(integration.Status.RuntimeProvider.Quarkus != nil && kit.Status.RuntimeProvider.Quarkus == nil ||
-					integration.Status.RuntimeProvider.Quarkus == nil && kit.Status.RuntimeProvider.Quarkus != nil ||
-					*integration.Status.RuntimeProvider.Quarkus != *kit.Status.RuntimeProvider.Quarkus) {
+		ideps := len(integration.Status.Dependencies)
+		cdeps := len(kit.Spec.Dependencies)
+
+		if ideps != cdeps {
 			continue
 		}
 
-		if allowed, ok := allowedLookupLabels[kit.Labels["camel.apache.org/kit.type"]]; ok && allowed {
-			ideps := len(integration.Status.Dependencies)
-			cdeps := len(kit.Spec.Dependencies)
+		//
+		// When a platform kit is created it inherits the traits from the integrations and as
+		// some traits may influence the build thus the artifacts present on the container image,
+		// we need to take traits into account when looking up for compatible kits.
+		//
+		// It could also happen that an integration is updated and a trait is modified, if we do
+		// not include traits in the lookup, we may use a kit that does not have all the
+		// characteristics required by the integration.
+		//
+		// A kit can be used only if it contains a subset of the traits and related configurations
+		// declared on integration.
+		//
+		if !HasMatchingTraits(&kit, integration) {
+			continue
+		}
 
-			if ideps != cdeps {
-				continue
-			}
-
-			//
-			// When a platform kit is created it inherits the traits from the integrations and as
-			// some traits may influence the build thus the artifacts present on the container image,
-			// we need to take traits into account when looking up for compatible kits.
-			//
-			// It could also happen that an integration is updated and a trait is modified, if we do
-			// not include traits in the lookup, we may use a kit that does not have all the
-			// characteristics required by the integration.
-			//
-			// A kit can be used only if it contains a subset of the traits and related configurations
-			// declared on integration.
-			//
-			if !HasMatchingTraits(&kit, integration) {
-				continue
-			}
-
-			if util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
-				return &kit, nil
-			}
+		if util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
+			return &kit, nil
 		}
 	}
 

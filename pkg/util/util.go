@@ -193,11 +193,12 @@ func FileExists(name string) (bool, error) {
 	return !info.IsDir(), err
 }
 
-// MarshalBytes --
+// BytesMarshaller --
 type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)
 }
 
+// SortedStringMapKeys --
 func SortedStringMapKeys(m map[string]string) []string {
 	res := make([]string, len(m))
 	i := 0

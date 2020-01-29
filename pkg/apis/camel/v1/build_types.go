@@ -62,21 +62,19 @@ type KanikoTask struct {
 
 // BuilderTask --
 type BuilderTask struct {
-	BaseTask        `json:",inline"`
-	Meta            metav1.ObjectMeta `json:"meta,omitempty"`
-	Image           string            `json:"image,omitempty"`
-	BaseImage       string            `json:"baseImage,omitempty"`
-	CamelVersion    string            `json:"camelVersion,omitempty"`
-	RuntimeVersion  string            `json:"runtimeVersion,omitempty"`
-	RuntimeProvider *RuntimeProvider  `json:"runtimeProvider,omitempty"`
-	Sources         []SourceSpec      `json:"sources,omitempty"`
-	Resources       []ResourceSpec    `json:"resources,omitempty"`
-	Dependencies    []string          `json:"dependencies,omitempty"`
-	Steps           []string          `json:"steps,omitempty"`
-	Maven           MavenSpec         `json:"maven,omitempty"`
-	BuildDir        string            `json:"buildDir,omitempty"`
-	Properties      map[string]string `json:"properties,omitempty"`
-	Timeout         metav1.Duration   `json:"timeout,omitempty"`
+	BaseTask     `json:",inline"`
+	Meta         metav1.ObjectMeta `json:"meta,omitempty"`
+	Image        string            `json:"image,omitempty"`
+	BaseImage    string            `json:"baseImage,omitempty"`
+	Runtime      RuntimeSpec       `json:"runtime,omitempty"`
+	Sources      []SourceSpec      `json:"sources,omitempty"`
+	Resources    []ResourceSpec    `json:"resources,omitempty"`
+	Dependencies []string          `json:"dependencies,omitempty"`
+	Steps        []string          `json:"steps,omitempty"`
+	Maven        MavenSpec         `json:"maven,omitempty"`
+	BuildDir     string            `json:"buildDir,omitempty"`
+	Properties   map[string]string `json:"properties,omitempty"`
+	Timeout      metav1.Duration   `json:"timeout,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build

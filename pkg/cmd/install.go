@@ -125,7 +125,6 @@ type installCmdOptions struct {
 	Save              bool     `mapstructure:"save"`
 	ClusterType       string   `mapstructure:"cluster-type"`
 	OutputFormat      string   `mapstructure:"output"`
-	CamelVersion      string   `mapstructure:"camel-version"`
 	RuntimeVersion    string   `mapstructure:"runtime-version"`
 	BaseImage         string   `mapstructure:"base-image"`
 	OperatorImage     string   `mapstructure:"operator-image"`
@@ -224,9 +223,6 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 		if o.LocalRepository != "" {
 			platform.Spec.Build.Maven.LocalRepository = o.LocalRepository
-		}
-		if o.CamelVersion != "" {
-			platform.Spec.Build.CamelVersion = o.CamelVersion
 		}
 		if o.RuntimeVersion != "" {
 			platform.Spec.Build.RuntimeVersion = o.RuntimeVersion

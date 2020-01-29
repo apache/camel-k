@@ -22,7 +22,7 @@ import (
 	"sort"
 	"strings"
 
-	"gopkg.in/inf.v0"
+	inf "gopkg.in/inf.v0"
 
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
@@ -33,11 +33,6 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/defaults"
-)
-
-const (
-	defaultMainClass = "org.apache.camel.k.main.Application"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -99,11 +94,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	classpath.Add("/etc/camel/resources")
 	classpath.Add("./resources")
 
-	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	if !quarkus.isEnabled() {
-		for _, artifact := range kit.Status.Artifacts {
-			classpath.Add(artifact.Target)
-		}
+	for _, artifact := range kit.Status.Artifacts {
+		classpath.Add(artifact.Target)
 	}
 
 	if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypeExternal {
@@ -165,14 +157,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		sort.Strings(items)
 
 		container.Args = append(container.Args, "-cp", strings.Join(items, ":"))
-
-		// Add main Class or JAR
-		quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-		if quarkus.isEnabled() {
-			container.Args = append(container.Args, "-jar", "camel-k-integration-"+defaults.Version+"-runner.jar")
-		} else {
-			container.Args = append(container.Args, defaultMainClass)
-		}
+		container.Args = append(container.Args, e.CamelCatalog.Runtime.ApplicationClass)
 	}
 
 	return nil

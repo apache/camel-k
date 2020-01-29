@@ -40,6 +40,8 @@ func NewProjectWithGAV(group string, artifact string, version string) Project {
 	p.GroupID = group
 	p.ArtifactID = artifact
 	p.Version = version
+	p.Properties = make(map[string]string)
+	p.Properties["project.build.sourceEncoding"] = "UTF-8"
 
 	return p
 }

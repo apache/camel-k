@@ -18,11 +18,14 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"sort"
-	"strings"
+
+	"github.com/apache/camel-k/pkg/metadata"
+
+	"github.com/scylladb/go-set/strset"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 )
 
@@ -50,66 +53,58 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
 
 func (t *dependenciesTrait) Apply(e *Environment) error {
 	if e.Integration.Spec.Dependencies != nil {
-		dependencies := make([]string, 0)
-		for _, dep := range e.Integration.Spec.Dependencies {
-			util.StringSliceUniqueAdd(&dependencies, dep)
-			e.Integration.Status.Dependencies = dependencies
-		}
+		e.Integration.Status.Dependencies = strset.New(e.Integration.Spec.Dependencies...).List()
 	} else {
 		e.Integration.Status.Dependencies = make([]string, 0)
 	}
 
-	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	if quarkus.isEnabled() {
-		err := quarkus.addRuntimeDependencies(e)
-		if err != nil {
-			return err
-		}
-	} else {
-		addDefaultRuntimeDependencies(e)
+	dependencies := strset.New()
+
+	// add runtime specific dependencies
+	for _, d := range e.CamelCatalog.Runtime.Dependencies {
+		dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
 	}
+
+	for _, s := range e.Integration.Sources() {
+		meta := metadata.Extract(e.CamelCatalog, s)
+		lang := s.InferLanguage()
+
+		// add auto-detected dependencies
+		dependencies.Merge(meta.Dependencies)
+
+		for loader, v := range e.CamelCatalog.Loaders {
+			// add loader specific dependencies
+			if s.Loader != "" && s.Loader == loader {
+				dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
+
+				for _, d := range v.Dependencies {
+					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+				}
+			}
+			// add language specific dependencies
+			if util.StringSliceExists(v.Languages, string(lang)) {
+				dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
+
+				for _, d := range v.Dependencies {
+					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+				}
+			}
+		}
+	}
+
+	// add dependencies back to integration
+	dependencies.Each(func(item string) bool {
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, item)
+		return true
+	})
 
 	// sort the dependencies to get always the same list if they don't change
 	sort.Strings(e.Integration.Status.Dependencies)
+
 	return nil
 }
 
 // IsPlatformTrait overrides base class method
 func (t *dependenciesTrait) IsPlatformTrait() bool {
 	return true
-}
-
-func addDefaultRuntimeDependencies(e *Environment) {
-	dependencies := &e.Integration.Status.Dependencies
-
-	for _, s := range e.Integration.Sources() {
-		meta := metadata.Extract(e.CamelCatalog, s)
-
-		switch s.InferLanguage() {
-		case v1.LanguageGroovy:
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-groovy")
-		case v1.LanguageKotlin:
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-kotlin")
-		case v1.LanguageYaml:
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-yaml")
-		case v1.LanguageXML:
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-xml")
-		case v1.LanguageJavaScript:
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-js")
-		case v1.LanguageJavaSource:
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-java")
-		}
-
-		if strings.HasPrefix(s.Loader, "knative-source") {
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-loader-knative")
-			util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
-		}
-
-		// main required by default
-		util.StringSliceUniqueAdd(dependencies, "mvn:org.apache.camel.k/camel-k-runtime-main")
-
-		for _, d := range meta.Dependencies.List() {
-			util.StringSliceUniqueAdd(dependencies, d)
-		}
-	}
 }

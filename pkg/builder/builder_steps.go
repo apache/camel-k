@@ -24,13 +24,12 @@ import (
 	"reflect"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/labels"
+	"github.com/apache/camel-k/pkg/util/controller"
 	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/tar"
@@ -348,16 +347,13 @@ func packager(ctx *Context, selector artifactsSelector) error {
 func listPublishedImages(context *Context) ([]publishedImage, error) {
 	options := []k8sclient.ListOption{
 		k8sclient.InNamespace(context.Namespace),
-	}
-
-	if context.Catalog.RuntimeProvider != nil && context.Catalog.RuntimeProvider.Quarkus != nil {
-		options = append(options, k8sclient.MatchingLabels{
-			"camel.apache.org/runtime.provider": "quarkus",
-		})
-	} else {
-		provider, _ := labels.NewRequirement("camel.apache.org/runtime.provider", selection.DoesNotExist, []string{})
-		selector := labels.NewSelector().Add(*provider)
-		options = append(options, controller.MatchingSelector{Selector: selector})
+		k8sclient.MatchingLabels{
+			"camel.apache.org/runtime.version":  context.Catalog.Runtime.Version,
+			"camel.apache.org/runtime.provider": string(context.Catalog.Runtime.Provider),
+		},
+		controller.NewLabelSelector("camel.apache.org/kit.type", selection.Equals, []string{
+			v1.IntegrationKitTypePlatform,
+		}),
 	}
 
 	list := v1.NewIntegrationKitList()
@@ -373,27 +369,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 		if kit.Status.Phase != v1.IntegrationKitPhaseReady {
 			continue
 		}
-		if kit.Status.CamelVersion != context.Catalog.Version {
-			continue
-		}
-		if kit.Status.RuntimeVersion != context.Catalog.RuntimeVersion {
-			continue
-		}
-
-		// TODO: should ideally be made generic from the runtime providers
-		if kit.Status.RuntimeProvider == nil && context.Catalog.RuntimeProvider != nil ||
-			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider == nil ||
-			kit.Status.RuntimeProvider != nil && context.Catalog.RuntimeProvider != nil &&
-				(kit.Status.RuntimeProvider.Quarkus != nil && context.Catalog.RuntimeProvider.Quarkus == nil ||
-					kit.Status.RuntimeProvider.Quarkus == nil && context.Catalog.RuntimeProvider.Quarkus != nil ||
-					*kit.Status.RuntimeProvider.Quarkus != *context.Catalog.RuntimeProvider.Quarkus) {
-			continue
-		}
-
-		if kit.Status.Phase != v1.IntegrationKitPhaseReady || kit.Labels == nil {
-			continue
-		}
-		if kitType, present := kit.Labels["camel.apache.org/kit.type"]; !present || kitType != v1.IntegrationKitTypePlatform {
+		if kit.Status.Phase != v1.IntegrationKitPhaseReady {
 			continue
 		}
 

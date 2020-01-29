@@ -24,7 +24,6 @@ import (
 
 // CatalogVersion --
 type CatalogVersion struct {
-	Version        *semver.Version
 	RuntimeVersion *semver.Version
 	Catalog        *v1.CamelCatalog
 }
@@ -41,13 +40,6 @@ func (c CatalogVersionCollection) Len() int {
 // Less is needed for the sort interface to compare two CatalogVersion objects on the
 // slice. If checks if one is less than the other.
 func (c CatalogVersionCollection) Less(i, j int) bool {
-	if c[i].Version.LessThan(c[j].Version) {
-		return true
-	}
-	if c[i].Version.GreaterThan(c[j].Version) {
-		return false
-	}
-
 	return c[i].RuntimeVersion.LessThan(c[j].RuntimeVersion)
 }
 

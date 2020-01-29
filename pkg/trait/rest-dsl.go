@@ -225,20 +225,13 @@ func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, erro
 			{
 				GroupID:    "org.apache.camel.k",
 				ArtifactID: "camel-k-maven-plugin",
-				Version:    e.CamelCatalog.RuntimeVersion,
+				Version:    e.CamelCatalog.Runtime.Version,
 				Executions: []maven.Execution{
 					{
 						Phase: "generate-resources",
 						Goals: []string{
 							"generate-rest-xml",
 						},
-					},
-				},
-				Dependencies: []maven.Dependency{
-					{
-						GroupID:    "org.apache.camel",
-						ArtifactID: "camel-swagger-rest-dsl-generator",
-						Version:    e.CamelCatalog.Version,
 					},
 				},
 			},

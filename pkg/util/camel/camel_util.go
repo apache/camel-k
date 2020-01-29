@@ -27,59 +27,22 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-func findBestMatch(catalogs []v1.CamelCatalog, camelVersion string, runtimeVersion string, provider interface{}) (*RuntimeCatalog, error) {
-	// TODO: generic exact matching logic independent of the runtime provider
+func findBestMatch(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
 	for _, catalog := range catalogs {
-		if catalog.Spec.Version == camelVersion && catalog.Spec.RuntimeVersion == runtimeVersion {
-			if provider == nil && catalog.Spec.RuntimeProvider == nil {
-				return NewRuntimeCatalog(catalog.Spec), nil
-			} else if provider, ok := provider.(v1.QuarkusRuntimeProvider); ok &&
-				catalog.Spec.RuntimeProvider != nil && catalog.Spec.RuntimeProvider.Quarkus != nil &&
-				provider == *catalog.Spec.RuntimeProvider.Quarkus {
-				return NewRuntimeCatalog(catalog.Spec), nil
-			}
+		if catalog.Spec.Runtime.Version == runtime.Version && catalog.Spec.Runtime.Provider == runtime.Provider {
+			return NewRuntimeCatalog(catalog.Spec), nil
 		}
 	}
 
-	vc := newSemVerConstraint(camelVersion)
-	rc := newSemVerConstraint(runtimeVersion)
-	if vc == nil || rc == nil {
+	rc := newSemVerConstraint(runtime.Version)
+	if rc == nil {
 		return nil, nil
 	}
 
 	cc := newCatalogVersionCollection(catalogs)
-
-	switch provider := provider.(type) {
-	case v1.QuarkusRuntimeProvider:
-		qc := newSemVerConstraint(provider.QuarkusVersion)
-		cqc := newSemVerConstraint(provider.CamelQuarkusVersion)
-		if qc == nil || cqc == nil {
-			return nil, nil
-		}
-		for _, c := range cc {
-			if c.Catalog.Spec.RuntimeProvider == nil || c.Catalog.Spec.RuntimeProvider.Quarkus == nil {
-				continue
-			}
-			qv, err := semver.NewVersion(c.Catalog.Spec.RuntimeProvider.Quarkus.QuarkusVersion)
-			if err != nil {
-				log.Debugf("Invalid semver version (quarkus) %s", qv)
-				continue
-			}
-			cqv, err := semver.NewVersion(c.Catalog.Spec.RuntimeProvider.Quarkus.CamelQuarkusVersion)
-			if err != nil {
-				log.Debugf("Invalid semver version (camel quarkus) %s", cqv)
-				continue
-			}
-			if vc.Check(c.Version) && rc.Check(c.RuntimeVersion) && qc.Check(qv) && cqc.Check(cqv) {
-				return NewRuntimeCatalog(c.Catalog.Spec), nil
-			}
-		}
-
-	default:
-		for _, c := range cc {
-			if vc.Check(c.Version) && rc.Check(c.RuntimeVersion) {
-				return NewRuntimeCatalog(c.Catalog.Spec), nil
-			}
+	for _, c := range cc {
+		if rc.Check(c.RuntimeVersion) {
+			return NewRuntimeCatalog(c.Catalog.Spec), nil
 		}
 	}
 
@@ -104,20 +67,13 @@ func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionColle
 	versions := make([]CatalogVersion, 0, len(catalogs))
 
 	for i := range catalogs {
-		cv, err := semver.NewVersion(catalogs[i].Spec.Version)
-		if err != nil {
-			log.Debugf("Invalid semver version (camel) %s", cv)
-			continue
-		}
-
-		rv, err := semver.NewVersion(catalogs[i].Spec.RuntimeVersion)
+		rv, err := semver.NewVersion(catalogs[i].Spec.Runtime.Version)
 		if err != nil {
 			log.Debugf("Invalid semver version (runtime) %s", rv)
 			continue
 		}
 
 		versions = append(versions, CatalogVersion{
-			Version:        cv,
 			RuntimeVersion: rv,
 			Catalog:        &catalogs[i],
 		})
@@ -132,8 +88,8 @@ func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionColle
 	return answer
 }
 
-func getDependency(artifact v1.CamelArtifact, runtimeProvider *v1.RuntimeProvider) string {
-	if runtimeProvider != nil && runtimeProvider.Quarkus != nil {
+func getDependency(artifact v1.CamelArtifact, runtimeProvider v1.RuntimeProvider) string {
+	if runtimeProvider == v1.RuntimeProviderQuarkus {
 		return strings.Replace(artifact.ArtifactID, "camel-quarkus-", "camel-quarkus:", 1)
 	}
 	return strings.Replace(artifact.ArtifactID, "camel-", "camel:", 1)

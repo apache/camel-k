@@ -107,7 +107,7 @@ func TestDependencies(t *testing.T) {
 			Name: "Request.java",
 			Content: `
 			    from("http:test").to("log:end");
-			    from("https4:test").to("log:end");
+			    from("https:test").to("log:end");
 			    from("twitter-timeline:test").to("mock:end");
 		    `,
 		},
@@ -119,7 +119,14 @@ func TestDependencies(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:log", "camel:mock", "camel:twitter"}, meta.Dependencies.List())
+	assert.ElementsMatch(t,
+		[]string{
+			"camel:http",
+			"camel:log",
+			"camel:mock",
+			"camel:twitter",
+		},
+		meta.Dependencies.List())
 }
 
 func TestDependenciesQuarkus(t *testing.T) {
@@ -130,7 +137,7 @@ func TestDependenciesQuarkus(t *testing.T) {
 			    import org.apache.camel.component.timer.TimerComponent;
 
 			    from("http:test").to("log:end");
-			    from("https4:test").to("log:end");
+			    from("https:test").to("log:end");
 			    from("twitter-timeline:test").to("mock:end");
 		    `,
 		},
@@ -145,6 +152,7 @@ func TestDependenciesQuarkus(t *testing.T) {
 
 	assert.ElementsMatch(t,
 		[]string{
+			"camel-quarkus:http",
 			"camel-quarkus:log",
 			"camel-quarkus:timer",
 			"camel-quarkus:twitter",

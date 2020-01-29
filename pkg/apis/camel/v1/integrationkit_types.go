@@ -42,9 +42,8 @@ type IntegrationKitStatus struct {
 	Digest          string                    `json:"digest,omitempty"`
 	Artifacts       []Artifact                `json:"artifacts,omitempty"`
 	Failure         *Failure                  `json:"failure,omitempty"`
-	CamelVersion    string                    `json:"camelVersion,omitempty"`
 	RuntimeVersion  string                    `json:"runtimeVersion,omitempty"`
-	RuntimeProvider *RuntimeProvider          `json:"runtimeProvider,omitempty"`
+	RuntimeProvider RuntimeProvider           `json:"runtimeProvider,omitempty"`
 	Platform        string                    `json:"platform,omitempty"`
 	Conditions      []IntegrationKitCondition `json:"conditions,omitempty"`
 	Version         string                    `json:"version,omitempty"`

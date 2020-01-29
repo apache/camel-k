@@ -16,9 +16,7 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-RC2-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M4
-RUNTIME_VERSION := 1.0.10
-CAMEL_VERSION := 3.0.0
-CAMEL_QUARKUS_VERSION := 1.0.0-M2
+RUNTIME_VERSION := 1.1.0-SNAPSHOT
 QUARKUS_VERSION := 1.1.0.Final
 KANIKO_VERSION := 0.14.0
 BASE_IMAGE := adoptopenjdk/openjdk8:slim
@@ -79,17 +77,10 @@ codegen:
 	@echo "  // Version -- " >> $(VERSIONFILE)
 	@echo "  Version = \"$(VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // DefaultCamelVersion -- " >> $(VERSIONFILE)
-	@echo "  DefaultCamelVersion = \"$(CAMEL_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // DefaultCamelQuarkusVersion -- " >> $(VERSIONFILE)
-	@echo "  DefaultCamelQuarkusVersion = \"$(CAMEL_QUARKUS_VERSION)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // DefaultQuarkusVersion -- " >> $(VERSIONFILE)
-	@echo "  DefaultQuarkusVersion = \"$(QUARKUS_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
 	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)
@@ -132,11 +123,11 @@ build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
 build-resources: build-vfs
-	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pmain -Dcatalog.file=camel-catalog-$(CAMEL_VERSION)-$(RUNTIME_VERSION).yaml
-	./script/build_catalog.sh $(CAMEL_VERSION) $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Pquarkus -Dcatalog.runtime=quarkus -Dcamel-quarkus.version=$(CAMEL_QUARKUS_VERSION) -Dcatalog.file=camel-catalog-quarkus-$(CAMEL_QUARKUS_VERSION)-$(RUNTIME_VERSION).yaml
 	go run cmd/util/json-schema-gen/jsonschemagen.go --out=./assets/json-schema
 
 build-vfs:
+	./script/build_catalog.sh $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-main.yaml
+	./script/build_catalog.sh $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-quarkus.yaml -Dcatalog.runtime=quarkus
 	./script/embed_resources.sh deploy
 
 build-olm:

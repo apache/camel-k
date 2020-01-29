@@ -41,14 +41,15 @@ var MainSteps = []builder.Step{
 }
 
 func loadCamelCatalog(ctx *builder.Context) error {
-	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.CamelVersion, ctx.Build.RuntimeVersion, nil)
+	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.Runtime)
 	if err != nil {
 		return err
 	}
 
 	if catalog == nil {
-		return fmt.Errorf("unable to find catalog matching version requirement: camel=%s, runtime=%s",
-			ctx.Build.CamelVersion, ctx.Build.RuntimeVersion)
+		return fmt.Errorf("unable to find catalog matching version requirement: runtime=%s, provider=%s",
+			ctx.Build.Runtime.Version,
+			ctx.Build.Runtime.Provider)
 	}
 
 	ctx.Catalog = catalog
@@ -58,22 +59,24 @@ func loadCamelCatalog(ctx *builder.Context) error {
 
 func generateProject(ctx *builder.Context) error {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
-	p.Properties = ctx.Build.Properties
-	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
-	p.Dependencies = make([]maven.Dependency, 0)
 
-	// DependencyManagement
+	// Add all the properties from the build configuration
+	p.Properties.AddAll(ctx.Build.Properties)
+
+	p.Dependencies = make([]maven.Dependency, 0)
+	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
+
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel",
 		ArtifactID: "camel-bom",
-		Version:    ctx.Build.CamelVersion,
+		Version:    ctx.Build.Runtime.Metadata["camel.version"],
 		Type:       "pom",
 		Scope:      "import",
 	})
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-bom",
-		Version:    ctx.Build.RuntimeVersion,
+		Version:    ctx.Build.Runtime.Version,
 		Type:       "pom",
 		Scope:      "import",
 	})
@@ -88,7 +91,7 @@ func computeDependencies(ctx *builder.Context) error {
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.RuntimeVersion)
+	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.Runtime.Version)
 
 	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while determining classpath")

@@ -22,6 +22,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	"github.com/scylladb/go-set/strset"
 	"github.com/stretchr/testify/assert"
 
@@ -181,6 +183,8 @@ func createNominalJvmTest() (*jvmTrait, *Environment) {
 }
 
 func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
+	catalog, _ := camel.DefaultCatalog()
+
 	client, _ := test.NewFakeClient(
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -204,7 +208,8 @@ func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
 	trait.client = client
 
 	environment := &Environment{
-		Catalog: NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(context.TODO(), nil),
+		CamelCatalog: catalog,
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,

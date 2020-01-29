@@ -71,6 +71,13 @@ type propertiesEntry struct {
 	Value   string `xml:",chardata"`
 }
 
+// AddAll --
+func (m Properties) AddAll(properties map[string]string) {
+	for k, v := range properties {
+		m[k] = v
+	}
+}
+
 // MarshalXML --
 func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if len(m) == 0 {

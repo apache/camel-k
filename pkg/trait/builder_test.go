@@ -150,7 +150,8 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy:  strategy,
 					Registry:         v1.IntegrationPlatformRegistrySpec{Address: "registry"},
-					CamelVersion:     defaults.DefaultCamelVersion,
+					RuntimeVersion:   defaults.DefaultRuntimeVersion,
+					RuntimeProvider:  v1.RuntimeProviderMain,
 					KanikoBuildCache: &kanikoCache,
 				},
 			},

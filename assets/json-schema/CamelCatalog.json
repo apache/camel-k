@@ -167,9 +167,9 @@
     },
     "CamelCatalogSpec": {
       "required": [
-        "version",
-        "runtimeVersion",
-        "artifacts"
+        "runtime",
+        "artifacts",
+        "loaders"
       ],
       "properties": {
         "artifacts": {
@@ -181,21 +181,55 @@
           },
           "type": "object"
         },
-        "runtimeProvider": {
+        "loaders": {
+          "patternProperties": {
+            ".*": {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$ref": "#/definitions/CamelLoader"
+            }
+          },
+          "type": "object"
+        },
+        "runtime": {
           "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/RuntimeProvider"
-        },
-        "runtimeVersion": {
-          "type": "string"
-        },
-        "version": {
-          "type": "string"
+          "$ref": "#/definitions/RuntimeSpec"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
     "CamelCatalogStatus": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CamelLoader": {
+      "required": [
+        "groupId",
+        "artifactId"
+      ],
+      "properties": {
+        "artifactId": {
+          "type": "string"
+        },
+        "dependencies": {
+          "items": {
+            "$ref": "#/definitions/MavenArtifact"
+          },
+          "type": "array"
+        },
+        "groupId": {
+          "type": "string"
+        },
+        "languages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },
@@ -248,6 +282,25 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "MavenArtifact": {
+      "required": [
+        "groupId",
+        "artifactId"
+      ],
+      "properties": {
+        "artifactId": {
+          "type": "string"
+        },
+        "groupId": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "OwnerReference": {
       "required": [
         "apiVersion",
@@ -278,23 +331,37 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "QuarkusRuntimeProvider": {
+    "RuntimeSpec": {
+      "required": [
+        "version",
+        "provider",
+        "applicationClass",
+        "dependencies"
+      ],
       "properties": {
-        "camelQuarkusVersion": {
+        "applicationClass": {
           "type": "string"
         },
-        "quarkusVersion": {
+        "dependencies": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/MavenArtifact"
+          },
+          "type": "array"
+        },
+        "metadata": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "provider": {
           "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "RuntimeProvider": {
-      "properties": {
-        "quarkus": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "$ref": "#/definitions/QuarkusRuntimeProvider"
+        },
+        "version": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
