@@ -40,6 +40,7 @@ import (
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
+	"github.com/magiconair/properties"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -85,6 +86,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
+	cmd.Flags().StringArrayP("property-file", "", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -117,6 +119,7 @@ type runCmdOptions struct {
 	LoggingLevels   []string `mapstructure:"logging-levels"`
 	Volumes         []string `mapstructure:"volumes"`
 	EnvVars         []string `mapstructure:"envs"`
+	PropertyFiles   []string `mapstructure:"property-files"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -170,6 +173,16 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 		volumeConfig := strings.Split(volume, ":")
 		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 || len(strings.TrimSpace(volumeConfig[1])) == 0 {
 			return fmt.Errorf("volume '%s' is invalid, it should be in the format: pvcname:/container/path", volume)
+		}
+	}
+
+	for _, fileName := range o.PropertyFiles {
+		if file, err := os.Stat(fileName); err != nil {
+			return errors.Wrapf(err, "unable to access property file %s", fileName)
+		} else if file.IsDir() {
+			return fmt.Errorf("property file %s is a directory", fileName)
+		} else if !strings.HasSuffix(fileName, ".properties") {
+			return fmt.Errorf("supported property files must have a .properties extension: %s", fileName)
 		}
 	}
 
@@ -298,7 +311,13 @@ func (o *runCmdOptions) waitForIntegrationReady(integration *v1.Integration) (*v
 }
 
 func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error {
-	for _, s := range sources {
+	// Let's watch all relevant files when in dev mode
+	var files []string
+	files = append(files, sources...)
+	files = append(files, o.Resources...)
+	files = append(files, o.PropertyFiles...)
+
+	for _, s := range files {
 		if !isRemoteHTTPFile(s) {
 			changes, err := sync.File(o.Context, s)
 			if err != nil {
@@ -406,6 +425,11 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 
 	for _, item := range o.Dependencies {
 		integration.Spec.AddDependency(item)
+	}
+	for _, pf := range o.PropertyFiles {
+		if err := addPropertyFile(pf, &integration.Spec); err != nil {
+			return nil, err
+		}
 	}
 	for _, item := range o.Properties {
 		integration.Spec.AddConfiguration("property", item)
@@ -569,4 +593,37 @@ func (*runCmdOptions) configureTrait(integration *v1.Integration, config string)
 
 func isRemoteHTTPFile(fileName string) bool {
 	return strings.HasPrefix(fileName, "http://") || strings.HasPrefix(fileName, "https://")
+}
+
+func addPropertyFile(fileName string, spec *v1.IntegrationSpec) error {
+	props, err := loadPropertyFile(fileName)
+	if err != nil {
+		return err
+	}
+	for _, k := range props.Keys() {
+		v, _ := props.Get(k)
+		spec.AddConfiguration(
+			"property",
+			escapePropertyFileItem(k)+"="+escapePropertyFileItem(v),
+		)
+	}
+	return nil
+}
+
+func loadPropertyFile(fileName string) (*properties.Properties, error) {
+	file, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return nil, err
+	}
+	p, err := properties.Load(file, properties.UTF8)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func escapePropertyFileItem(item string) string {
+	item = strings.ReplaceAll(item, `=`, `\=`)
+	item = strings.ReplaceAll(item, `:`, `\:`)
+	return item
 }
