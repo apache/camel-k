@@ -54,6 +54,9 @@ func newCmdCompletionZsh(root *cobra.Command) *cobra.Command {
 				fmt.Print(err.Error())
 			}
 		},
+		Annotations: map[string]string{
+			offlineCommandLabel: "true",
+		},
 	}
 }
 

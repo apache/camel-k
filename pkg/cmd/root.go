@@ -143,7 +143,7 @@ func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
 }
 
 func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
-	if command.Namespace == "" {
+	if command.Namespace == "" && !isOfflineCommand(cmd) {
 		var current string
 		client, err := command.GetCmdClient()
 		if err != nil {

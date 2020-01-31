@@ -52,6 +52,9 @@ func newTraitHelpCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *traitHelp
 			}
 			return options.run(args)
 		},
+		Annotations: map[string]string{
+			offlineCommandLabel: "true",
+		},
 	}
 
 	cmd.Flags().Bool("all", false, "Include all traits")
