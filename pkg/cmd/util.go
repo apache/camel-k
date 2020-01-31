@@ -38,6 +38,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	offlineCommandLabel = "camel.apache.org/cmd.offline"
+)
+
 // DeleteIntegration --
 func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
 	integration := v1.Integration{
@@ -217,4 +221,8 @@ func stringToSliceHookFunc(comma rune) mapstructure.DecodeHookFunc {
 
 func cmdOnly(cmd *cobra.Command, options interface{}) *cobra.Command {
 	return cmd
+}
+
+func isOfflineCommand(cmd *cobra.Command) bool {
+	return cmd.Annotations[offlineCommandLabel] == "true"
 }

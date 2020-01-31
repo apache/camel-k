@@ -1,3 +1,7 @@
+// +build integration
+
+// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
+
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -15,26 +19,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package e2e
 
 import (
-	"fmt"
+	"testing"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-
-	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
-func newCmdVersion() *cobra.Command {
-	return &cobra.Command{
-		Use:   "version",
-		Short: "Display client version",
-		Long:  `Display Camel K client version.`,
-		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println("Camel K Client " + defaults.Version)
-		},
-		Annotations: map[string]string{
-			offlineCommandLabel: "true",
-		},
-	}
+func TestKamelVersionWorksOffline(t *testing.T) {
+	assert.Nil(t, kamel("version", "--config", "non-existent-kubeconfig-file").Execute())
+}
+
+func TestKamelHelpTraitWorksOffline(t *testing.T) {
+	assert.Nil(t, kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file").Execute())
+}
+
+func TestKamelCompletionWorksOffline(t *testing.T) {
+	assert.Nil(t, kamel("completion", "bash", "--config", "non-existent-kubeconfig-file").Execute())
+	assert.Nil(t, kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file").Execute())
 }
