@@ -359,7 +359,7 @@ spec:
         - apiGroups:
           - serving.knative.dev
           resources:
-          - '*'
+          - services
           verbs:
           - create
           - delete
