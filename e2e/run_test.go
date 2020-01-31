@@ -45,6 +45,14 @@ func TestRunSimpleExamples(t *testing.T) {
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
+		t.Run("run java with properties", func(t *testing.T) {
+			RegisterTestingT(t)
+			Expect(kamel("run", "-n", ns, "files/Prop.java", "--property-file", "files/prop.properties").Execute()).Should(BeNil())
+			Eventually(integrationPodPhase(ns, "prop"), 5*time.Minute).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "prop"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
 		t.Run("run xml", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/xml.xml").Execute()).Should(BeNil())
@@ -98,7 +106,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			t.Run("init run "+string(lang), func(t *testing.T) {
 				RegisterTestingT(t)
 				dir := util.MakeTempDir(t)
-				itName := fmt.Sprintf("init%s", string(lang)) // e.g. initjava
+				itName := fmt.Sprintf("init%s", string(lang))          // e.g. initjava
 				fileName := fmt.Sprintf("%s.%s", itName, string(lang)) // e.g. initjava.java
 				file := path.Join(dir, fileName)
 				Expect(kamel("init", file).Execute()).Should(BeNil())

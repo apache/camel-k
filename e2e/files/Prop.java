@@ -21,8 +21,7 @@ public class Java extends RouteBuilder {
   @Override
   public void configure() throws Exception {
 	  from("timer:tick")
-	  .setHeader("m").constant("string!")
-	  .setBody().simple("Magic${header.m}")
+	  .setBody().simple("Magic{{myproperty}}")
       .log("${body}");
   }
 }

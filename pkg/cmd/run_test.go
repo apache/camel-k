@@ -18,10 +18,14 @@ limitations under the License.
 package cmd
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
 func addTestRunCmd(options *RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {
@@ -48,9 +52,34 @@ func TestRunPropertyFlag(t *testing.T) {
 	}
 
 	if len(runCmdOptions.Properties) != 2 {
-		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elemtns\n", 2, len(runCmdOptions.Properties))
+		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elements\n", 2, len(runCmdOptions.Properties))
 	}
 	if runCmdOptions.Properties[0] != "key1=value,othervalue" || runCmdOptions.Properties[1] != "key2=value2" {
 		t.Fatalf("Properties expected to be: \n %v\nGot:\n %v\n", "[key1=value,othervalue key2=value2]", runCmdOptions.Properties)
 	}
+}
+
+func TestRunPropertyFileFlag(t *testing.T) {
+	var tmpFile *os.File
+	var err error
+	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+		t.Error(err)
+	}
+	assert.Nil(t, tmpFile.Close())
+
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`
+a=b
+c\=d=e
+d=c\=e
+#ignore=me
+f=g\:h
+`), 0777))
+
+	spec := v1.IntegrationSpec{}
+	assert.Nil(t, addPropertyFile(tmpFile.Name(), &spec))
+	assert.Equal(t, 4, len(spec.Configuration))
+	assert.Equal(t, `a=b`, spec.Configuration[0].Value)
+	assert.Equal(t, `c\=d=e`, spec.Configuration[1].Value)
+	assert.Equal(t, `d=c\=e`, spec.Configuration[2].Value)
+	assert.Equal(t, `f=g\:h`, spec.Configuration[3].Value)
 }
