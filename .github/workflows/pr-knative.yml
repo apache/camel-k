@@ -103,6 +103,10 @@ jobs:
         export IMAGE=${CAMEL_K_REGISTRY}:5000/apache/camel-k:$(make version)
         docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
         docker push ${LOCAL_IMAGE}
+
+        # Make the Apache Snapshots repository enabled by efault
+        export KAMEL_INSTALL_MAVEN_REPOSITORIES=https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots
+        
         echo "installing camel k cluster resources"
         ./kamel install --cluster-setup
 
