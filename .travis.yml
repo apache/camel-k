@@ -41,12 +41,9 @@ services:
   - docker
 
 before_script:
-  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b . v1.20.0
-  - ./golangci-lint config path
-  - ./golangci-lint --version
+  - true
 
 script:
-  - GOGC=20 ./golangci-lint run --verbose --deadline 10m --config .golangci.yml || travis_terminate 1;
   - ./script/travis_build.sh
 
 cache:
