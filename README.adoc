@@ -358,7 +358,7 @@ kamel run examples/dns.js
 === Traits
 
 The details of how the integration is mapped into Kubernetes resources can be *customized using traits*.
-More information is provided in the https://camel.apache.org/camel-k/latest/traits.html[traits section].
+More information is provided in the https://camel.apache.org/camel-k/latest/traits/traits.html[traits section].
 
 === Monitoring the Status
 
