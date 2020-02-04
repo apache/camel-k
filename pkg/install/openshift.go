@@ -22,6 +22,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/Masterminds/semver"
+
+	authorization "k8s.io/api/authorization/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,8 +33,6 @@ import (
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
-
-	"github.com/Masterminds/semver"
 )
 
 const (
@@ -46,6 +47,29 @@ func installOpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) e
 	if err != nil {
 		return err
 	} else if !ok {
+		return nil
+	}
+
+	// Check for permission to create the ConsoleCLIDownload resource
+	sar := &authorization.SelfSubjectAccessReview{
+		Spec: authorization.SelfSubjectAccessReviewSpec{
+			ResourceAttributes: &authorization.ResourceAttributes{
+				Group:    "console.openshift.io",
+				Resource: "consoleclidownloads",
+				Name:     kamelCliDownloadName,
+				Verb:     "create",
+			},
+		},
+	}
+
+	sar, err = c.AuthorizationV1().SelfSubjectAccessReviews().Create(sar)
+	if err != nil {
+		if errors.IsForbidden(err) {
+			// Let's just skip the ConsoleCLIDownload resource creation
+			return nil
+		}
+		return err
+	} else if !sar.Status.Allowed {
 		return nil
 	}
 
@@ -77,6 +101,10 @@ func installOpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) e
 			// Else delete the older version
 			err = c.Delete(ctx, existing)
 			if err != nil {
+				if errors.IsForbidden(err) {
+					// Let's just skip the ConsoleCLIDownload resource creation
+					return nil
+				}
 				return err
 			}
 		}
