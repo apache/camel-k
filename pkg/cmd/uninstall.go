@@ -47,7 +47,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().BoolVar(&options.skipRoles, "skip-roles", false, "Do not uninstall the Camel-K Roles in the current namespace")
 	cmd.Flags().BoolVar(&options.skipClusterRoles, "skip-cluster-roles", false, "Do not uninstall the Camel-K Cluster Roles in the current namespace")
 	cmd.Flags().BoolVar(&options.skipIntegrationPlatform, "skip-integration-platform", false, "Do not uninstall the Camel-K Integration Platform in the current namespace")
-	cmd.Flags().BoolVar(&options.skipIntegrationPlatform, "skip-service-accounts", false, "Do not uninstall the Camel-K Service Accounts in the current namespace")
+	cmd.Flags().BoolVar(&options.skipServiceAccounts, "skip-service-accounts", false, "Do not uninstall the Camel-K Service Accounts in the current namespace")
 	cmd.Flags().BoolVar(&options.skipConfigMaps, "skip-config-maps", false, "Do not uninstall the Camel-K Config Maps in the current namespace")
 
 	// completion support
@@ -264,7 +264,7 @@ func (o *uninstallCmdOptions) uninstallServiceAccounts(c client.Client) error {
 }
 
 func (o *uninstallCmdOptions) uninstallIntegrationPlatform() error {
-	api, err := customclient.GetDefaultDynamicClientFor("integrations", o.Namespace)
+	api, err := customclient.GetDefaultDynamicClientFor("integrationplatforms", o.Namespace)
 	if err != nil {
 		return err
 	}

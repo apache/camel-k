@@ -26,6 +26,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"os"
 	"os/exec"
 	"strings"
@@ -378,7 +379,7 @@ func configmap(ns string, name string) func() *corev1.ConfigMap {
 		cm := corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "ConfigMap",
-				APIVersion: metav1.SchemeGroupVersion.String(),
+				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
@@ -553,6 +554,98 @@ func scaleOperator(ns string, replicas int32) func() error {
 			operatorTryPodForceKill(ns, 10)
 		}
 		return nil
+	}
+}
+
+func role(ns string) func() *rbacv1.Role {
+	return func() *rbacv1.Role {
+		lst := rbacv1.RoleList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Role",
+				APIVersion: rbacv1.SchemeGroupVersion.String(),
+			},
+		}
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
+				"app": "camel-k",
+			})
+		if err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return &lst.Items[0]
+	}
+}
+
+func rolebinding(ns string) func() *rbacv1.RoleBinding {
+	return func() *rbacv1.RoleBinding {
+		lst := rbacv1.RoleBindingList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "RoleBinding",
+				APIVersion: metav1.SchemeGroupVersion.String(),
+			},
+		}
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
+				"app": "camel-k",
+			})
+		if err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return &lst.Items[0]
+	}
+}
+
+func clusterrole(ns string) func() *rbacv1.ClusterRole {
+	return func() *rbacv1.ClusterRole {
+		lst := rbacv1.ClusterRoleList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ClusterRole",
+				APIVersion:  rbacv1.SchemeGroupVersion.String(),
+			},
+		}
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
+				"app": "camel-k",
+			})
+		if err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return &lst.Items[0]
+	}
+}
+
+func serviceaccount(ns, name string) func() *corev1.ServiceAccount {
+	return func() *corev1.ServiceAccount {
+		lst := corev1.ServiceAccountList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ServiceAccount",
+				APIVersion:  corev1.SchemeGroupVersion.String(),
+			},
+		}
+		err := testClient.List(testContext, &lst,
+			k8sclient.InNamespace(ns),
+			k8sclient.MatchingLabels{
+				"app": "camel-k",
+			})
+		if err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return &lst.Items[0]
 	}
 }
 
