@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/apache/camel-k/pkg/util/test"
 	"testing"
+
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestLogsAlias(t *testing.T) {

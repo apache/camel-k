@@ -34,6 +34,7 @@ require (
 	github.com/stoewer/go-strcase v1.0.2
 	github.com/stretchr/testify v1.4.0
 	go.uber.org/multierr v1.1.0
+	golang.org/x/tools v0.0.0-20200204230316-67a4523381ef // indirect
 	gopkg.in/inf.v0 v0.9.1
 	gopkg.in/yaml.v2 v2.2.4
 	k8s.io/api v0.0.0
