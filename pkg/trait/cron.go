@@ -23,16 +23,17 @@ import (
 	"strconv"
 	"strings"
 
+	batchv1 "k8s.io/api/batch/v1"
+	"k8s.io/api/batch/v1beta1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/uri"
-	batchv1 "k8s.io/api/batch/v1"
-	"k8s.io/api/batch/v1beta1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // The Cron trait can be used to customize the behaviour of periodic timer/cron based integrations.
@@ -60,7 +61,7 @@ type cronTrait struct {
 	// activated (it's present in the `org.apache.camel.k:camel-k-runtime-cron` library).
 	//
 	// Supported components are currently: `cron`, `timer` and `quartz`.
-	Components string `property:"schedule"`
+	Components string `property:"components"`
 	// Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integration
 	// as Kubernetes CronJob.
 	Fallback *bool `property:"fallback"`
@@ -81,7 +82,7 @@ type cronInfo struct {
 	schedule   string
 }
 
-// cronExtractor extracts cron informatino from a Camel URI
+// cronExtractor extracts cron information from a Camel URI
 type cronExtractor func(string) *cronInfo
 
 const (
