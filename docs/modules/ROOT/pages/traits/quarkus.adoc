@@ -26,14 +26,6 @@ The following configuration options are available:
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
 
-| quarkus.quarkus-version
-| string
-| The Quarkus version to use for the integration
-
-| quarkus.camel-quarkus-version
-| string
-| The Camel-Quarkus version to use for the integration
-
 | quarkus.native
 | bool
 | The Quarkus runtime type (reserved for future use)
