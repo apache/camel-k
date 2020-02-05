@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"k8s.io/client-go/kubernetes"
@@ -129,6 +130,9 @@ func (o *uninstallCmdOptions) uninstallOperator(c client.Client) error {
 func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) error {
 	if !o.skipCrd {
 		if err := o.uninstallCrd(c); err != nil {
+			if k8serrors.IsForbidden(err) {
+				return createActionNotAuthorizedError()
+			}
 			return err
 		}
 		fmt.Printf("Camel-K Custom Resource Definitions removed from namespace %s\n", o.Namespace)
@@ -150,6 +154,9 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) err
 
 	if !o.skipClusterRoles {
 		if err := o.uninstallClusterRoles(c); err != nil {
+			if k8serrors.IsForbidden(err) {
+				return createActionNotAuthorizedError()
+			}
 			return err
 		}
 		fmt.Printf("Camel-K Cluster Roles removed from namespace %s\n", o.Namespace)
@@ -184,7 +191,7 @@ func (o *uninstallCmdOptions) uninstallCrd(c kubernetes.Interface) error {
 		Resource("customresourcedefinitions").
 		Do()
 
-	if result.Error() != nil && !k8serrors.IsAlreadyExists(result.Error()) {
+	if result.Error() != nil {
 		return result.Error()
 	}
 
@@ -300,4 +307,10 @@ func (o *uninstallCmdOptions) uninstallConfigMaps(c client.Client) error {
 	}
 
 	return nil
+}
+
+func createActionNotAuthorizedError() error {
+	fmt.Println("Current user is not authorized to remove cluster-wide objects like custom resource definitions or cluster roles")
+	msg := `login as cluster-admin and execute "kamel uninstall" or use flags "--skip-crd --skip-cluster-roles"`
+	return errors.New(msg)
 }
