@@ -4,7 +4,8 @@
 The Prometheus trait configures the Prometheus JMX exporter and exposes the integration with a `Service`
 and a `ServiceMonitor` resources so that the Prometheus endpoint can be scraped.
 
-WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator] custom resource definition to be installed.
+WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
+custom resource definition to be installed.
 You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator.
 
 It's disabled by default.

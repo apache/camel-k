@@ -38,7 +38,7 @@ from('timer:groovy?period=1m') // Setting the period e.g. to '1s' restores the d
 
 Trait properties can be specified when running any integration with the CLI:
 ```
-kamel run --trait cron.[key]=[value] integration.groovy
+kamel run --trait cron.[key]=[value] --trait cron.[key2]=[value2] integration.groovy
 ```
 The following configuration options are available:
 
@@ -55,7 +55,7 @@ The following configuration options are available:
 | The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 mechanism to work correctly.
 
-| cron.schedule
+| cron.components
 | string
 | A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
 A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
