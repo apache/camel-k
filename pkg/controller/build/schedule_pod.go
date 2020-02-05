@@ -158,7 +158,7 @@ func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.B
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
 		Name:            task.Name,
 		Image:           action.operatorImage,
-		ImagePullPolicy: "IfNotPresent",
+		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command: []string{
 			"kamel",
 			"builder",
@@ -179,7 +179,7 @@ func (action *schedulePodAction) addKanikoTaskToPod(task *v1.KanikoTask, pod *co
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
 		Name:            task.Name,
 		Image:           task.Image,
-		ImagePullPolicy: "IfNotPresent",
+		ImagePullPolicy: corev1.PullIfNotPresent,
 		Args:            task.Args,
 		Env:             task.Env,
 		VolumeMounts:    task.VolumeMounts,
