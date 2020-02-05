@@ -18,7 +18,7 @@ VERSION := 1.0.0-RC2-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M4
 RUNTIME_VERSION := 1.1.0-SNAPSHOT
 QUARKUS_VERSION := 1.1.0.Final
-KANIKO_VERSION := 0.14.0
+KANIKO_VERSION := 0.17.1
 BASE_IMAGE := adoptopenjdk/openjdk8:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
@@ -27,7 +27,7 @@ GIT_COMMIT := $(shell git rev-list -1 HEAD)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
 
-# Used to push pre-relase artifacts
+# Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
 STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1171

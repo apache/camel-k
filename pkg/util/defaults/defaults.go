@@ -29,7 +29,7 @@ const (
 	DefaultRuntimeVersion = "1.1.0-SNAPSHOT"
 
 	// KanikoVersion --
-	KanikoVersion = "0.14.0"
+	KanikoVersion = "0.17.1"
 
 	// BaseImage --
 	BaseImage = "adoptopenjdk/openjdk8:slim"
