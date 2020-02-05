@@ -77,8 +77,6 @@ jobs:
         TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
       run: |
         # Compute registry parameters
-        echo "xx${TEST_DOCKER_HUB_USERNAME}xx"
-        echo "yy${NON_EXISTENT}yy"
         CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
         echo "Using registry ${CAMEL_K_REGISTRY}:5000"
         echo "Build project"

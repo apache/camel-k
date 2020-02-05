@@ -36,6 +36,7 @@ func TestRunDevMode(t *testing.T) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		t.Run("run yaml dev mode", func(t *testing.T) {
+			RegisterTestingT(t)
 			ctx, cancel := context.WithCancel(testContext)
 			defer cancel()
 			piper, pipew := io.Pipe()
@@ -59,6 +60,7 @@ func TestRunDevMode(t *testing.T) {
 		})
 
 		t.Run("run yaml remote dev mode", func(t *testing.T) {
+			RegisterTestingT(t)
 			ctx, cancel := context.WithCancel(testContext)
 			defer cancel()
 			piper, pipew := io.Pipe()
