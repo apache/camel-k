@@ -15,10 +15,13 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: KinD Integration Tests PR
+name: kubernetes
 
 on:
   pull_request:
+    branches:
+      - master
+  push:
     branches:
       - master
 

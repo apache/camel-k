@@ -15,33 +15,31 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: Build PR
+name: validate
 
-on:
+on: 
   pull_request:
+    branches: 
+      - master
+  push:
     branches:
       - master
 jobs:
   build:
-    strategy:
-      matrix:
-        # TODO: test an all the supported OS
-        # [ubuntu-latest, macos-latest, windows-latest]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-    - name: Install Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13.x
-    - name: Checkout code
-      uses: actions/checkout@v1
-    - name: Cache modules
-      uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    - name: Test
-      run: make
+      - name: Check out code
+        uses: actions/checkout@v1
+      - name: Cache modules
+        uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Lint
+        run: |
+          curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b . v1.20.1
+          ./golangci-lint config path
+          ./golangci-lint --version
+          GOGC=20 ./golangci-lint run --verbose --deadline 15m --config .golangci.yml
