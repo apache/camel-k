@@ -38,6 +38,7 @@ var FastMapperAllowedAPIGroups = map[string]bool{
 	"camel.apache.org":          true,
 	"rbac.authorization.k8s.io": true,
 	"console.openshift.io":      true, // OpenShift console resources
+	"operators.coreos.com":      true, // Operator SDK OLM
 }
 
 // newFastDiscoveryRESTMapper comes from https://github.com/kubernetes-sigs/controller-runtime/pull/592.
