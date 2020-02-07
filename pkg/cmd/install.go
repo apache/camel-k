@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/olm"
 	"github.com/apache/camel-k/pkg/util/registry"
 	"go.uber.org/multierr"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -93,6 +94,16 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("http-proxy-secret", "", "Configure the source of the secret holding HTTP proxy server details "+
 		"(HTTP_PROXY|HTTPS_PROXY|NO_PROXY)")
 
+	// olm
+	cmd.Flags().Bool("olm", true, "Try to install everything via OLM (Operator Lifecycle Manager) if available")
+	cmd.Flags().String("olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
+	cmd.Flags().String("olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
+	cmd.Flags().String("olm-channel", olm.DefaultChannel, "Name of the Camel K channel in the OLM source or marketplace")
+	cmd.Flags().String("olm-source", olm.DefaultSource, "Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)")
+	cmd.Flags().String("olm-source-namespace", olm.DefaultSourceNamespace, "Namespace where the OLM source is available")
+	cmd.Flags().String("olm-starting-csv", olm.DefaultStartingCSV, "Allow to install a specific version from the operator source instead of latest available from the channel")
+	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the operator (used in combination with the --global flag)")
+
 	// maven settings
 	cmd.Flags().String("local-repository", "", "Location of the local maven repository")
 	cmd.Flags().String("maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
@@ -123,6 +134,7 @@ type installCmdOptions struct {
 	Global            bool     `mapstructure:"global"`
 	KanikoBuildCache  bool     `mapstructure:"kaniko-build-cache"`
 	Save              bool     `mapstructure:"save"`
+	Olm               bool    `mapstructure:"olm"`
 	ClusterType       string   `mapstructure:"cluster-type"`
 	OutputFormat      string   `mapstructure:"output"`
 	RuntimeVersion    string   `mapstructure:"runtime-version"`
@@ -140,6 +152,7 @@ type installCmdOptions struct {
 
 	registry     v1.IntegrationPlatformRegistrySpec
 	registryAuth registry.Auth
+	olmOptions   olm.Options
 }
 
 // nolint: gocyclo
@@ -149,13 +162,36 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		collection = kubernetes.NewCollection()
 	}
 
-	if !o.SkipClusterSetup {
-		// Let's use a client provider during cluster installation, to eliminate the problem of CRD object caching
-		clientProvider := client.Provider{Get: o.NewCmdClient}
+	// Let's use a client provider during cluster installation, to eliminate the problem of CRD object caching
+	clientProvider := client.Provider{Get: o.NewCmdClient}
 
+	installViaOLM := false
+	if o.Olm {
+		var err error
+		var olmClient client.Client
+		if olmClient, err = clientProvider.Get(); err != nil {
+			return err
+		}
+		if installViaOLM, err = olm.IsAvailable(o.Context, olmClient); err != nil {
+			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
+		}
+
+		if installViaOLM {
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available in the cluster");
+			if err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection); err != nil {
+				return err
+			}
+		}
+
+		if err = install.WaitForAllCRDInstallation(o.Context, clientProvider, 90 * time.Second); err != nil {
+			return err
+		}
+	}
+
+	if !o.SkipClusterSetup && !installViaOLM {
 		err := install.SetupClusterWideResourcesOrCollect(o.Context, clientProvider, collection)
 		if err != nil && k8serrors.IsForbidden(err) {
-			fmt.Println("Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
 
 			meg := `please login as cluster-admin and execute "kamel install --cluster-setup" to install cluster-wide resources (one-time operation)`
 			return errors.New(meg)
@@ -166,7 +202,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 	if o.ClusterSetupOnly {
 		if collection == nil {
-			fmt.Println("Camel K cluster setup completed successfully")
+			fmt.Fprintln(cobraCmd.OutOrStdout(),"Camel K cluster setup completed successfully")
 		}
 	} else {
 		c, err := o.GetCmdClient()
@@ -176,7 +212,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		namespace := o.Namespace
 
-		if !o.SkipOperatorSetup {
+		if !o.SkipOperatorSetup && !installViaOLM {
 			cfg := install.OperatorConfiguration{
 				CustomImage: o.OperatorImage,
 				Namespace:   namespace,
@@ -187,8 +223,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			if err != nil {
 				return err
 			}
-		} else {
-			fmt.Println("Camel K operator installation skipped")
+		} else if o.SkipOperatorSetup {
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K operator installation skipped")
 		}
 
 		generatedSecretName := ""
@@ -288,8 +324,9 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		platform.Spec.Resources.Kits = o.Kits
 
 		// Do not create an integration platform in global mode as platforms are expected
-		// to be created in other namespaces
-		if !o.Global {
+		// to be created in other namespaces.
+		// In OLM mode, the operator is installed in an external namespace, so it's ok to install the platform locally.
+		if !o.Global || installViaOLM {
 			err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
 			if err != nil {
 				return err
@@ -311,10 +348,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				}
 			}
 
+			strategy := ""
+			if installViaOLM {
+				strategy = "via OLM subscription"
+			}
 			if o.Global {
-				fmt.Println("Camel K installed in namespace", namespace, "(global mode)")
+				fmt.Println("Camel K installed in namespace", namespace, strategy, "(global mode)")
 			} else {
-				fmt.Println("Camel K installed in namespace", namespace)
+				fmt.Println("Camel K installed in namespace", namespace, strategy)
 			}
 		}
 	}
@@ -388,6 +429,14 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	o.registryAuth.Username = viper.GetString(path + ".registry-auth-username")
 	o.registryAuth.Password = viper.GetString(path + ".registry-auth-password")
 	o.registryAuth.Server = viper.GetString(path + ".registry-auth-server")
+
+	o.olmOptions.OperatorName = viper.GetString(path + ".olm-operator-name")
+	o.olmOptions.Package = viper.GetString(path + ".olm-package")
+	o.olmOptions.Channel = viper.GetString(path + ".olm-channel")
+	o.olmOptions.Source = viper.GetString(path + ".olm-source")
+	o.olmOptions.SourceNamespace = viper.GetString(path + ".olm-source-namespace")
+	o.olmOptions.StartingCSV = viper.GetString(path + ".olm-starting-csv")
+	o.olmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
 
 	return nil
 }
