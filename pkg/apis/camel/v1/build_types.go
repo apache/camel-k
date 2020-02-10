@@ -50,6 +50,7 @@ type BaseTask struct {
 type ImageTask struct {
 	BaseTask `json:",inline"`
 	Image    string          `json:"image,omitempty"`
+	Command  []string        `json:"command,omitempty"`
 	Args     []string        `json:"args,omitempty"`
 	Env      []corev1.EnvVar `json:"env,omitempty"`
 }

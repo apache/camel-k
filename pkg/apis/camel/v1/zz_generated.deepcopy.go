@@ -549,6 +549,11 @@ func (in *FailureRecovery) DeepCopy() *FailureRecovery {
 func (in *ImageTask) DeepCopyInto(out *ImageTask) {
 	*out = *in
 	in.BaseTask.DeepCopyInto(&out.BaseTask)
+	if in.Command != nil {
+		in, out := &in.Command, &out.Command
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Args != nil {
 		in, out := &in.Args, &out.Args
 		*out = make([]string, len(*in))
