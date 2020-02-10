@@ -25,6 +25,7 @@ if [ "$#" -ge 1 ]; then
     -f ${rootdir}/build/maven/pom-catalog.xml \
     -Dcatalog.path=${rootdir}/deploy \
     -Druntime.version=$runtimeVersion \
+    -B \
     "$@"
 else
   echo "usage: $0 runtime.version catalog.runtime [staging.repo]"
