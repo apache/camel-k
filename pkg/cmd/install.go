@@ -200,10 +200,10 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			if !installed {
 				fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM resources are already available: skipping installation")
 			}
-		}
 
-		if err = install.WaitForAllCRDInstallation(o.Context, clientProvider, 90*time.Second); err != nil {
-			return err
+			if err = install.WaitForAllCRDInstallation(o.Context, clientProvider, 90*time.Second); err != nil {
+				return err
+			}
 		}
 	}
 
