@@ -68,8 +68,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		build.Status.Phase = v1.BuildPhaseSucceeded
 		build.Status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
 		for _, task := range build.Spec.Tasks {
-			if task.Kaniko != nil {
-				build.Status.Image = task.Kaniko.BuiltImage
+			if task.Image != nil {
+				build.Status.Image = task.Image.BuiltImage
 				break
 			}
 		}

@@ -142,8 +142,8 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 				action.operatorImage = operatorImage
 			}
 			action.addBuilderTaskToPod(build, task.Builder, pod)
-		} else if task.Kaniko != nil {
-			action.addKanikoTaskToPod(task.Kaniko, pod)
+		} else if task.Image != nil {
+			action.addImageTaskToPod(task.Image, pod)
 		}
 	}
 
@@ -175,13 +175,15 @@ func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.B
 	action.addBaseTaskToPod(&task.BaseTask, pod)
 }
 
-func (action *schedulePodAction) addKanikoTaskToPod(task *v1.KanikoTask, pod *corev1.Pod) {
+func (action *schedulePodAction) addImageTaskToPod(task *v1.ImageTask, pod *corev1.Pod) {
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
 		Name:            task.Name,
 		Image:           task.Image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
+		Command:         task.Command,
 		Args:            task.Args,
 		Env:             task.Env,
+		WorkingDir:      task.WorkingDir,
 		VolumeMounts:    task.VolumeMounts,
 	})
 

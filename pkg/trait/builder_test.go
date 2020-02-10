@@ -116,7 +116,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 
 		return false
 	})
-	assert.NotNil(t, env.BuildTasks[1].Kaniko)
+	assert.NotNil(t, env.BuildTasks[1].Image)
 }
 
 func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {

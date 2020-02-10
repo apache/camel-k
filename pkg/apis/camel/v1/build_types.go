@@ -35,7 +35,7 @@ type BuildSpec struct {
 // Task --
 type Task struct {
 	Builder *BuilderTask `json:"builder,omitempty"`
-	Kaniko  *KanikoTask  `json:"kaniko,omitempty"`
+	Image   *ImageTask   `json:"image,omitempty"`
 }
 
 // BaseTask --
@@ -46,8 +46,8 @@ type BaseTask struct {
 	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
 }
 
-// ImageTask --
-type ImageTask struct {
+// ContainerTask --
+type ContainerTask struct {
 	BaseTask   `json:",inline"`
 	Image      string          `json:"image,omitempty"`
 	Command    []string        `json:"command,omitempty"`
@@ -56,10 +56,10 @@ type ImageTask struct {
 	WorkingDir string          `json:"workingDir,omitempty"`
 }
 
-// KanikoTask --
-type KanikoTask struct {
-	ImageTask  `json:",inline"`
-	BuiltImage string `json:"builtImage,omitempty"`
+// ImageTask --
+type ImageTask struct {
+	ContainerTask `json:",inline"`
+	BuiltImage    string `json:"builtImage,omitempty"`
 }
 
 // BuilderTask --
