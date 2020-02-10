@@ -18,9 +18,10 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/util/olm"
+	"github.com/pkg/errors"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/apache/camel-k/pkg/client"
@@ -39,7 +40,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 		Use:   "uninstall",
 		Short: "Uninstall Camel K from a Kubernetes cluster",
 		Long:  `Uninstalls Camel K from a Kubernetes or OpenShift cluster.`,
-		Run:   options.uninstall,
+		RunE:  options.uninstall,
 	}
 
 	cmd.Flags().BoolVar(&options.skipOperator, "skip-operator", false, "Do not uninstall the Camel-K Operator in the current namespace")
@@ -50,6 +51,11 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().BoolVar(&options.skipIntegrationPlatform, "skip-integration-platform", false, "Do not uninstall the Camel-K Integration Platform in the current namespace")
 	cmd.Flags().BoolVar(&options.skipServiceAccounts, "skip-service-accounts", false, "Do not uninstall the Camel-K Service Accounts in the current namespace")
 	cmd.Flags().BoolVar(&options.skipConfigMaps, "skip-config-maps", false, "Do not uninstall the Camel-K Config Maps in the current namespace")
+	cmd.Flags().BoolVar(&options.global, "global", false, "Indicates that a global installation is going to be uninstalled (affects OLM)")
+	cmd.Flags().BoolVar(&options.olmEnabled, "olm", true, "Try to uninstall via OLM (Operator Lifecycle Manager) if available")
+	cmd.Flags().StringVar(&options.olmOptions.OperatorName, "olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
+	cmd.Flags().StringVar(&options.olmOptions.Package, "olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
+	cmd.Flags().StringVar(&options.olmOptions.GlobalNamespace, "olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the operator (used in combination with the --global flag)")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -73,6 +79,10 @@ type uninstallCmdOptions struct {
 	skipIntegrationPlatform bool
 	skipServiceAccounts     bool
 	skipConfigMaps          bool
+	olmEnabled              bool
+	global                  bool
+
+	olmOptions olm.Options
 }
 
 var defaultListOptions = metav1.ListOptions{
@@ -80,33 +90,53 @@ var defaultListOptions = metav1.ListOptions{
 }
 
 // nolint: gocyclo
-func (o *uninstallCmdOptions) uninstall(_ *cobra.Command, _ []string) {
+func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
-		return
+		return err
+	}
+
+	uninstallViaOLM := false
+	if o.olmEnabled {
+		var err error
+		if uninstallViaOLM, err = olm.IsAvailable(o.Context, c, o.Namespace); err != nil {
+			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
+		}
+
+		if uninstallViaOLM {
+			fmt.Fprintln(cmd.OutOrStdout(), "OLM is available in the cluster")
+			if err = olm.Uninstall(o.Context, c, o.Namespace, o.global, o.olmOptions); err != nil {
+				return err
+			}
+			where := fmt.Sprintf("from namespace %s", o.Namespace)
+			if o.global {
+				where = "globally"
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "Camel-K OLM service removed %s\n", where)
+		}
 	}
 
 	if !o.skipIntegrationPlatform {
 		if err = o.uninstallIntegrationPlatform(); err != nil {
-			fmt.Print(err)
-			return
+			return err
 		}
-		fmt.Printf("Camel-K Integration Platform removed from namespace %s\n", o.Namespace)
+		fmt.Fprintf(cmd.OutOrStdout(), "Camel-K Integration Platform removed from namespace %s\n", o.Namespace)
 	}
 
-	if err = o.uninstallClusterWideResources(c); err != nil {
-		fmt.Print(err)
-		return
-	}
-	fmt.Printf("Camel-K Cluster Wide Resources removed from namespace %s\n", o.Namespace)
-
-	if !o.skipOperator {
-		if err = o.uninstallOperator(c); err != nil {
-			fmt.Print(err)
-			return
+	if !uninstallViaOLM {
+		if err = o.uninstallClusterWideResources(c); err != nil {
+			return err
 		}
-		fmt.Printf("Camel-K Operator removed from namespace %s\n", o.Namespace)
+		fmt.Fprintf(cmd.OutOrStdout(), "Camel-K Cluster Wide Resources removed from namespace %s\n", o.Namespace)
+
+		if !o.skipOperator {
+			if err = o.uninstallOperator(c); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "Camel-K Operator removed from namespace %s\n", o.Namespace)
+		}
 	}
+	return nil
 }
 
 func (o *uninstallCmdOptions) uninstallOperator(c client.Client) error {

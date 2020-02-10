@@ -134,7 +134,7 @@ type installCmdOptions struct {
 	Global            bool     `mapstructure:"global"`
 	KanikoBuildCache  bool     `mapstructure:"kaniko-build-cache"`
 	Save              bool     `mapstructure:"save"`
-	Olm               bool    `mapstructure:"olm"`
+	Olm               bool     `mapstructure:"olm"`
 	ClusterType       string   `mapstructure:"cluster-type"`
 	OutputFormat      string   `mapstructure:"output"`
 	RuntimeVersion    string   `mapstructure:"runtime-version"`
@@ -172,18 +172,22 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if olmClient, err = clientProvider.Get(); err != nil {
 			return err
 		}
-		if installViaOLM, err = olm.IsAvailable(o.Context, olmClient); err != nil {
+		if installViaOLM, err = olm.IsAvailable(o.Context, olmClient, o.Namespace); err != nil {
 			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
 		}
 
 		if installViaOLM {
-			fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available in the cluster");
-			if err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection); err != nil {
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available in the cluster")
+			var installed bool
+			if installed, err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection); err != nil {
 				return err
+			}
+			if !installed {
+				fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM resources are already available: skipping installation")
 			}
 		}
 
-		if err = install.WaitForAllCRDInstallation(o.Context, clientProvider, 90 * time.Second); err != nil {
+		if err = install.WaitForAllCRDInstallation(o.Context, clientProvider, 90*time.Second); err != nil {
 			return err
 		}
 	}
@@ -202,7 +206,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 	if o.ClusterSetupOnly {
 		if collection == nil {
-			fmt.Fprintln(cobraCmd.OutOrStdout(),"Camel K cluster setup completed successfully")
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K cluster setup completed successfully")
 		}
 	} else {
 		c, err := o.GetCmdClient()

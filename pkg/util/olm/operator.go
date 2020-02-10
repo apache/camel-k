@@ -19,11 +19,14 @@ package olm
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	olmv1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1"
 	olmv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
+	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -54,13 +57,13 @@ var DefaultGlobalNamespace = "openshift-operators"
 
 // Options contains information about an operator in OLM
 type Options struct {
-	OperatorName        string
-	Package             string
-	Channel             string
-	Source              string
-	SourceNamespace     string
-	StartingCSV         string
-	GlobalNamespace     string
+	OperatorName    string
+	Package         string
+	Channel         string
+	Source          string
+	SourceNamespace string
+	StartingCSV     string
+	GlobalNamespace string
 }
 
 // IsOperatorInstalled tells if a OLM CSV or a Subscription is already installed in the namespace
@@ -83,13 +86,13 @@ func IsOperatorInstalled(ctx context.Context, client client.Client, namespace st
 }
 
 // Install creates a subscription for the OLM package
-func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection) error {
+func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection) (bool, error) {
 	options = fillDefaults(options)
 	if installed, err := IsOperatorInstalled(ctx, client, namespace, global, options); err != nil {
-		return err
+		return false, err
 	} else if installed {
 		// Already installed
-		return nil
+		return false, nil
 	}
 
 	targetNamespace := namespace
@@ -113,9 +116,38 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 	}
 	if collection != nil {
 		collection.Add(&sub)
-		return nil
+	} else {
+		if err := client.Create(ctx, &sub); err != nil {
+			return false, err
+		}
 	}
-	return client.Create(ctx, &sub)
+
+	if !global {
+		group, err := findOperatorGroup(ctx, client, namespace, options)
+		if err != nil {
+			return false, err
+		}
+		if group == nil {
+			group = &olmv1.OperatorGroup{
+				ObjectMeta: v1.ObjectMeta{
+					Namespace:    namespace,
+					GenerateName: fmt.Sprintf("%s-", namespace),
+				},
+				Spec: olmv1.OperatorGroupSpec{
+					TargetNamespaces: []string{namespace},
+				},
+			}
+			if collection != nil {
+				collection.Add(group)
+			} else {
+				if err := client.Create(ctx, group); err != nil {
+					return false, errors.Wrap(err, fmt.Sprintf("namespace %s has no operator group defined and current user is not able to create it. " +
+						"Make sure you have the right roles to install operators from OLM", namespace))
+				}
+			}
+		}
+	}
+	return true, nil
 }
 
 // Uninstall removes CSV and subscription from the namespace
@@ -172,6 +204,19 @@ func findCSV(ctx context.Context, client client.Client, namespace string, option
 			return &item, nil
 		}
 	}
+	return nil, nil
+}
+
+func findOperatorGroup(ctx context.Context, client client.Client, namespace string, options Options) (*olmv1.OperatorGroup, error) {
+	opGroupList := olmv1.OperatorGroupList{}
+	if err := client.List(ctx, &opGroupList, runtime.InNamespace(namespace)); err != nil {
+		return nil, err
+	}
+
+	if len(opGroupList.Items) > 0 {
+		return &opGroupList.Items[0], nil
+	}
+
 	return nil, nil
 }
 
