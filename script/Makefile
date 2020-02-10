@@ -36,6 +36,16 @@ STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgap
 # or "download" them from Apache Snapshots and Maven Central
 PACKAGE_ARTIFACTS_STRATEGY := copy
 
+# OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
+#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultOperatorName=camel-k-operator
+#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultPackage=camel-k
+#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultChannel=alpha
+#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultSource=community-operators
+#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultSourceNamespace=openshift-marketplace
+#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultStartingCSV=
+#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
+
+# Build
 GOLDFLAGS += -X github.com/apache/camel-k/pkg/cmd/operator.GitCommit=$(GIT_COMMIT)
 GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
 
