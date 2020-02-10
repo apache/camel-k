@@ -55,7 +55,8 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().BoolVar(&options.olmEnabled, "olm", true, "Try to uninstall via OLM (Operator Lifecycle Manager) if available")
 	cmd.Flags().StringVar(&options.olmOptions.OperatorName, "olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
 	cmd.Flags().StringVar(&options.olmOptions.Package, "olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
-	cmd.Flags().StringVar(&options.olmOptions.GlobalNamespace, "olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the operator (used in combination with the --global flag)")
+	cmd.Flags().StringVar(&options.olmOptions.GlobalNamespace, "olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines "+
+		"global scope for the operator (used in combination with the --global flag)")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -99,7 +100,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	uninstallViaOLM := false
 	if o.olmEnabled {
 		var err error
-		if uninstallViaOLM, err = olm.IsAvailable(o.Context, c, o.Namespace); err != nil {
+		if uninstallViaOLM, err = olm.IsAPIAvailable(o.Context, c, o.Namespace); err != nil {
 			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
 		}
 

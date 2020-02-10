@@ -20,7 +20,6 @@ package olm
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/client"
 	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	olmv1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1"
 	olmv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
@@ -29,10 +28,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// IsAvailable returns true if we are connected to a cluster with OLM installed
+// IsAPIAvailable returns true if we are connected to a cluster with OLM installed
 //
 // This method should not be called from the operator, as it might require permissions that are not available.
-func IsAvailable(ctx context.Context, c client.Client, namespace string) (bool, error) {
+func IsAPIAvailable(ctx context.Context, c kubernetes.Interface, namespace string) (bool, error) {
 	// check some Knative APIs
 	for _, api := range getOLMGroupVersions() {
 		if installed, err := isAvailable(c, api); err != nil {

@@ -135,6 +135,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 	return true, nil
 }
 
+// nolint:unparam
 func checkPermission(client client.Client, group, resource, namespace, name, verb string) (bool, error) {
 	sarReview := &authorizationv1.SelfSubjectAccessReview{
 		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
@@ -191,10 +192,8 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 	}
 	if collection != nil {
 		collection.Add(&sub)
-	} else {
-		if err := client.Create(ctx, &sub); err != nil {
-			return false, err
-		}
+	} else if err := client.Create(ctx, &sub); err != nil {
+		return false, err
 	}
 
 	if !global {
@@ -214,11 +213,10 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 			}
 			if collection != nil {
 				collection.Add(group)
-			} else {
-				if err := client.Create(ctx, group); err != nil {
-					return false, errors.Wrap(err, fmt.Sprintf("namespace %s has no operator group defined and current user is not able to create it. "+
-						"Make sure you have the right roles to install operators from OLM", namespace))
-				}
+			} else if err := client.Create(ctx, group); err != nil {
+				return false, errors.Wrap(err, fmt.Sprintf("namespace %s has no operator group defined and "+
+					"current user is not able to create it. "+
+					"Make sure you have the right roles to install operators from OLM", namespace))
 			}
 		}
 	}
@@ -282,6 +280,7 @@ func findCSV(ctx context.Context, client client.Client, namespace string, option
 	return nil, nil
 }
 
+// nolint:unparam
 func findOperatorGroup(ctx context.Context, client client.Client, namespace string, options Options) (*olmv1.OperatorGroup, error) {
 	opGroupList := olmv1.OperatorGroupList{}
 	if err := client.List(ctx, &opGroupList, runtime.InNamespace(namespace)); err != nil {
