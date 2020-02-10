@@ -130,7 +130,6 @@ type IntegrationPlatformBuildStrategy string
 const (
 	// IntegrationPlatformBuildStrategyRoutine performs the build in a routine
 	IntegrationPlatformBuildStrategyRoutine = "routine"
-
 	// IntegrationPlatformBuildStrategyPod performs the build in a pod
 	IntegrationPlatformBuildStrategyPod = "pod"
 )
@@ -139,11 +138,12 @@ const (
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
-	// IntegrationPlatformBuildPublishStrategyS2I performs a OpenShift binary S2I build
-	IntegrationPlatformBuildPublishStrategyS2I = "S2I"
-
-	// IntegrationPlatformBuildPublishStrategyKaniko performs
+	// IntegrationPlatformBuildPublishStrategyBuildah
+	IntegrationPlatformBuildPublishStrategyBuildah = "Buildah"
+	// IntegrationPlatformBuildPublishStrategyKaniko
 	IntegrationPlatformBuildPublishStrategyKaniko = "Kaniko"
+	// IntegrationPlatformBuildPublishStrategyS2I
+	IntegrationPlatformBuildPublishStrategyS2I = "S2I"
 )
 
 // IntegrationPlatformPhase --

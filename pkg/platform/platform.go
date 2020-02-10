@@ -110,13 +110,3 @@ func GetProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	}
 	return ""
 }
-
-// SupportsS2iPublishStrategy --
-func SupportsS2iPublishStrategy(p *v1.IntegrationPlatform) bool {
-	return p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I
-}
-
-// SupportsKanikoPublishStrategy --
-func SupportsKanikoPublishStrategy(p *v1.IntegrationPlatform) bool {
-	return p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.Registry.Address != ""
-}

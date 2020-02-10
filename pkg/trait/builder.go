@@ -33,7 +33,6 @@ import (
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -55,6 +54,16 @@ func newBuilderTrait() *builderTrait {
 	}
 }
 
+// IsPlatformTrait overrides base class method
+func (t *builderTrait) IsPlatformTrait() bool {
+	return true
+}
+
+// InfluencesKit overrides base class method
+func (t *builderTrait) InfluencesKit() bool {
+	return true
+}
+
 func (t *builderTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
@@ -67,23 +76,21 @@ func (t *builderTrait) Apply(e *Environment) error {
 	builderTask := t.builderTask(e)
 	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
 
-	if platform.SupportsKanikoPublishStrategy(e.Platform) {
-		kanikoTask, err := t.kanikoTask(e)
+	switch e.Platform.Status.Build.PublishStrategy {
+
+	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
+		imageTask, err := t.buildahTask(e)
 		if err != nil {
 			return err
 		}
+		t.addVolumeMounts(builderTask, imageTask)
+		e.BuildTasks = append(e.BuildTasks, v1.Task{Image: imageTask})
 
-		mount := corev1.VolumeMount{Name: "camel-k-builder", MountPath: builderDir}
-		builderTask.VolumeMounts = append(builderTask.VolumeMounts, mount)
-		kanikoTask.VolumeMounts = append(kanikoTask.VolumeMounts, mount)
-
-		// Use an emptyDir volume to coordinate the Camel Maven build and the Kaniko image build
-		builderTask.Volumes = append(builderTask.Volumes, corev1.Volume{
-			Name: "camel-k-builder",
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		})
+	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
+		imageTask, err := t.kanikoTask(e)
+		if err != nil {
+			return err
+		}
 
 		if e.Platform.Status.Build.IsKanikoCacheEnabled() {
 			// Co-locate with the Kaniko warmer pod for sharing the host path volume as the current
@@ -109,7 +116,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			}
 
 			// Use node affinity with the Kaniko warmer pod node name
-			kanikoTask.Affinity = &corev1.Affinity{
+			imageTask.Affinity = &corev1.Affinity{
 				NodeAffinity: &corev1.NodeAffinity{
 					RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
 						NodeSelectorTerms: []corev1.NodeSelectorTerm{
@@ -127,7 +134,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				},
 			}
 			// Mount the PV used to warm the Kaniko cache into the Kaniko image build
-			kanikoTask.Volumes = append(kanikoTask.Volumes, corev1.Volume{
+			imageTask.Volumes = append(imageTask.Volumes, corev1.Volume{
 				Name: "kaniko-cache",
 				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
@@ -135,26 +142,31 @@ func (t *builderTrait) Apply(e *Environment) error {
 					},
 				},
 			})
-			kanikoTask.VolumeMounts = append(kanikoTask.VolumeMounts, corev1.VolumeMount{
+			imageTask.VolumeMounts = append(imageTask.VolumeMounts, corev1.VolumeMount{
 				Name:      "kaniko-cache",
 				MountPath: kaniko.CacheDir,
 			})
 		}
 
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Image: kanikoTask})
+		t.addVolumeMounts(builderTask, imageTask)
+		e.BuildTasks = append(e.BuildTasks, v1.Task{Image: imageTask})
 	}
 
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
-func (t *builderTrait) IsPlatformTrait() bool {
-	return true
-}
+func (t *builderTrait) addVolumeMounts(builderTask *v1.BuilderTask, imageTask *v1.ImageTask) {
+	mount := corev1.VolumeMount{Name: "camel-k-builder", MountPath: builderDir}
+	builderTask.VolumeMounts = append(builderTask.VolumeMounts, mount)
+	imageTask.VolumeMounts = append(imageTask.VolumeMounts, mount)
 
-// InfluencesKit overrides base class method
-func (t *builderTrait) InfluencesKit() bool {
-	return true
+	// Use an emptyDir volume to coordinate the Maven build and the image build
+	builderTask.Volumes = append(builderTask.Volumes, corev1.Volume{
+		Name: "camel-k-builder",
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	})
 }
 
 func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
@@ -175,11 +187,13 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 		Maven:      e.Platform.Status.Build.Maven,
 	}
 
-	if platform.SupportsS2iPublishStrategy(e.Platform) {
-		task.Steps = append(task.Steps, builder.StepIDsFor(s2i.S2iSteps...)...)
-	} else if platform.SupportsKanikoPublishStrategy(e.Platform) {
+	switch e.Platform.Status.Build.PublishStrategy {
+	case v1.IntegrationPlatformBuildPublishStrategyBuildah, v1.IntegrationPlatformBuildPublishStrategyKaniko:
 		task.Steps = append(task.Steps, builder.StepIDsFor(kaniko.KanikoSteps...)...)
 		task.BuildDir = path.Join(builderDir, e.IntegrationKit.Name)
+
+	case v1.IntegrationPlatformBuildPublishStrategyS2I:
+		task.Steps = append(task.Steps, builder.StepIDsFor(s2i.S2iSteps...)...)
 	}
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
@@ -194,14 +208,31 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 	return task
 }
 
+func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
+	image := getImageName(e)
+
+	args := []string{"buildah bud --storage-driver=vfs -f Dockerfile -t " + image + " . " +
+		"&& buildah push --tls-verify=false --storage-driver=vfs " + image + " docker://" + image}
+
+	return &v1.ImageTask{
+		ContainerTask: v1.ContainerTask{
+			BaseTask: v1.BaseTask{
+				Name: "buildah",
+			},
+			Image:      fmt.Sprintf("quay.io/buildah/stable:%s", "latest"),
+			Command:    []string{"/bin/sh", "-c"},
+			Args:       args,
+			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
+		},
+		BuiltImage: image,
+	}, nil
+}
+
 func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
-	organization := e.Platform.Status.Build.Registry.Organization
-	if organization == "" {
-		organization = e.Platform.Namespace
-	}
-	image := e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
+	image := getImageName(e)
 
 	env := make([]corev1.EnvVar, 0)
+
 	baseArgs := []string{
 		"--dockerfile=Dockerfile",
 		"--context=" + path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
@@ -355,4 +386,12 @@ func getSecretKind(e *Environment) (secretKind, error) {
 		}
 	}
 	return secretKind{}, errors.New("unsupported secret type for registry authentication")
+}
+
+func getImageName(e *Environment) string {
+	organization := e.Platform.Status.Build.Registry.Organization
+	if organization == "" {
+		organization = e.Platform.Namespace
+	}
+	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
 }
