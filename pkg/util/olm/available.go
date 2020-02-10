@@ -20,7 +20,9 @@ package olm
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/client"
 	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
+	olmv1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1"
 	olmv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -30,7 +32,7 @@ import (
 // IsAvailable returns true if we are connected to a cluster with OLM installed
 //
 // This method should not be called from the operator, as it might require permissions that are not available.
-func IsAvailable(ctx context.Context, c kubernetes.Interface) (bool, error) {
+func IsAvailable(ctx context.Context, c client.Client, namespace string) (bool, error) {
 	// check some Knative APIs
 	for _, api := range getOLMGroupVersions() {
 		if installed, err := isAvailable(c, api); err != nil {
@@ -39,6 +41,7 @@ func IsAvailable(ctx context.Context, c kubernetes.Interface) (bool, error) {
 			return true, nil
 		}
 	}
+
 	return false, nil
 }
 
@@ -55,5 +58,6 @@ func isAvailable(c kubernetes.Interface, api schema.GroupVersion) (bool, error) 
 func getOLMGroupVersions() []schema.GroupVersion {
 	return []schema.GroupVersion{
 		olmv1alpha1.SchemeGroupVersion,
+		olmv1.SchemeGroupVersion,
 	}
 }
