@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"path"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -211,8 +212,29 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 	image := getImageName(e)
 
-	args := []string{"buildah bud --storage-driver=vfs -f Dockerfile -t " + image + " . " +
-		"&& buildah push --tls-verify=false --storage-driver=vfs " + image + " docker://" + image}
+	bud := []string{
+		"buildah",
+		"bud",
+		"--storage-driver=vfs",
+		"-f",
+		"Dockerfile",
+		"-t",
+		image,
+		".",
+	}
+
+	push := []string{
+		"buildah",
+		"push",
+		"--storage-driver=vfs",
+		image,
+		"docker://" + image,
+	}
+
+	if e.Platform.Status.Build.Registry.Insecure {
+		bud = append(bud[:2], append([]string{"--tls-verify=false"}, bud[2:]...)...)
+		push = append(push[:2], append([]string{"--tls-verify=false"}, push[2:]...)...)
+	}
 
 	return &v1.ImageTask{
 		ContainerTask: v1.ContainerTask{
@@ -221,7 +243,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			},
 			Image:      fmt.Sprintf("quay.io/buildah/stable:%s", "latest"),
 			Command:    []string{"/bin/sh", "-c"},
-			Args:       args,
+			Args:       []string{strings.Join(bud, " ") + " && " + strings.Join(push, " ")},
 			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
 		},
 		BuiltImage: image,
