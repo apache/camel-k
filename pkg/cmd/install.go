@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -172,8 +173,20 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if olmClient, err = clientProvider.Get(); err != nil {
 			return err
 		}
-		if installViaOLM, err = olm.IsAvailable(o.Context, olmClient, o.Namespace); err != nil {
+		var olmAvailable bool
+		if olmAvailable, err = olm.IsAvailable(o.Context, olmClient, o.Namespace); err != nil {
 			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
+		}
+
+		if olmAvailable {
+			if installViaOLM, err = olm.HasPermissionToInstall(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions); err != nil {
+				return errors.Wrap(err, "error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check")
+			}
+			if !installViaOLM {
+				fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available but current user has not enough permissions to create the operator. " +
+					"You can either ask your administrator to provide permissions (preferred) or run the install command with the `--olm=false` flag.")
+				os.Exit(1)
+			}
 		}
 
 		if installViaOLM {
