@@ -28,6 +28,9 @@ const (
 	// DefaultRuntimeVersion --
 	DefaultRuntimeVersion = "1.1.0-SNAPSHOT"
 
+	// BuildahVersion --
+	BuildahVersion = "1.12.0"
+
 	// KanikoVersion --
 	KanikoVersion = "0.17.1"
 

@@ -246,7 +246,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
 			},
-			Image:      fmt.Sprintf("quay.io/buildah/stable:%s", "latest"),
+			Image:      fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
 			Command:    []string{"/bin/sh", "-c"},
 			Args:       []string{strings.Join(bud, " ") + " && " + strings.Join(push, " ")},
 			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),

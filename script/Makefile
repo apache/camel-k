@@ -18,6 +18,7 @@ VERSION := 1.0.0-RC2-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-M4
 RUNTIME_VERSION := 1.1.0-SNAPSHOT
 QUARKUS_VERSION := 1.1.0.Final
+BUILDAH_VERSION := 1.12.0
 KANIKO_VERSION := 0.17.1
 BASE_IMAGE := adoptopenjdk/openjdk8:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
@@ -87,10 +88,11 @@ codegen:
 	@echo "  // Version -- " >> $(VERSIONFILE)
 	@echo "  Version = \"$(VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
+	@echo "  // BuildahVersion -- " >> $(VERSIONFILE)
+	@echo "  BuildahVersion = \"$(BUILDAH_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
 	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)
