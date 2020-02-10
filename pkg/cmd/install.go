@@ -102,8 +102,10 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("olm-channel", olm.DefaultChannel, "Name of the Camel K channel in the OLM source or marketplace")
 	cmd.Flags().String("olm-source", olm.DefaultSource, "Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)")
 	cmd.Flags().String("olm-source-namespace", olm.DefaultSourceNamespace, "Namespace where the OLM source is available")
-	cmd.Flags().String("olm-starting-csv", olm.DefaultStartingCSV, "Allow to install a specific version from the operator source instead of latest available from the channel")
-	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the operator (used in combination with the --global flag)")
+	cmd.Flags().String("olm-starting-csv", olm.DefaultStartingCSV, "Allow to install a specific version from the operator source instead of latest available "+
+		"from the channel")
+	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the "+
+		"operator (used in combination with the --global flag)")
 
 	// maven settings
 	cmd.Flags().String("local-repository", "", "Location of the local maven repository")
@@ -174,7 +176,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			return err
 		}
 		var olmAvailable bool
-		if olmAvailable, err = olm.IsAvailable(o.Context, olmClient, o.Namespace); err != nil {
+		if olmAvailable, err = olm.IsAPIAvailable(o.Context, olmClient, o.Namespace); err != nil {
 			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
 		}
 
@@ -183,7 +185,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				return errors.Wrap(err, "error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check")
 			}
 			if !installViaOLM {
-				fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available but current user has not enough permissions to create the operator. " +
+				fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available but current user has not enough permissions to create the operator. "+
 					"You can either ask your administrator to provide permissions (preferred) or run the install command with the `--olm=false` flag.")
 				os.Exit(1)
 			}
