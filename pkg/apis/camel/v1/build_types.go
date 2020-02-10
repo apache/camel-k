@@ -48,11 +48,12 @@ type BaseTask struct {
 
 // ImageTask --
 type ImageTask struct {
-	BaseTask `json:",inline"`
-	Image    string          `json:"image,omitempty"`
-	Command  []string        `json:"command,omitempty"`
-	Args     []string        `json:"args,omitempty"`
-	Env      []corev1.EnvVar `json:"env,omitempty"`
+	BaseTask   `json:",inline"`
+	Image      string          `json:"image,omitempty"`
+	Command    []string        `json:"command,omitempty"`
+	Args       []string        `json:"args,omitempty"`
+	Env        []corev1.EnvVar `json:"env,omitempty"`
+	WorkingDir string          `json:"workingDir,omitempty"`
 }
 
 // KanikoTask --
