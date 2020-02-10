@@ -26,8 +26,8 @@ import (
 func (t *Task) GetName() string {
 	if t.Builder != nil {
 		return t.Builder.Name
-	} else if t.Kaniko != nil {
-		return t.Kaniko.Name
+	} else if t.Image != nil {
+		return t.Image.Name
 	}
 	return ""
 }

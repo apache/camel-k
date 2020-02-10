@@ -141,7 +141,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			})
 		}
 
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Kaniko: kanikoTask})
+		e.BuildTasks = append(e.BuildTasks, v1.Task{Image: kanikoTask})
 	}
 
 	return nil
@@ -194,7 +194,7 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 	return task
 }
 
-func (t *builderTrait) kanikoTask(e *Environment) (*v1.KanikoTask, error) {
+func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 	organization := e.Platform.Status.Build.Registry.Organization
 	if organization == "" {
 		organization = e.Platform.Namespace
@@ -300,8 +300,8 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.KanikoTask, error) {
 		})
 	}
 
-	return &v1.KanikoTask{
-		ImageTask: v1.ImageTask{
+	return &v1.ImageTask{
+		ContainerTask: v1.ContainerTask{
 			BaseTask: v1.BaseTask{
 				Name:         "kaniko",
 				Volumes:      volumes,
