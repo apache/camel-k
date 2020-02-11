@@ -42,6 +42,29 @@ import (
 // True --
 const True = "true"
 
+var (
+	// BasePath --
+	BasePath = "/etc/camel"
+
+	// ConfPath --
+	ConfPath = path.Join(BasePath, "conf")
+
+	// ConfdPath --
+	ConfdPath = path.Join(BasePath, "conf.d")
+
+	// SourcesMountPath --
+	SourcesMountPath = path.Join(BasePath, "sources")
+
+	// ResourcesMountPath --
+	ResourcesMountPath = path.Join(BasePath, "resources")
+
+	// ConfigMapsMountPath --
+	ConfigMapsMountPath = path.Join(ConfdPath, "_configmaps")
+
+	// SecretsMountPath --
+	SecretsMountPath = path.Join(ConfdPath, "_secrets")
+)
+
 // Identifiable represent an identifiable type
 type Identifiable interface {
 	ID() ID
@@ -389,8 +412,7 @@ func (e *Environment) ComputeSourcesURI() []string {
 	paths := make([]string, 0, len(sources))
 
 	for i, s := range sources {
-		root := "/etc/camel/sources"
-		root = path.Join(root, fmt.Sprintf("i-source-%03d", i))
+		root := path.Join(SourcesMountPath, fmt.Sprintf("i-source-%03d", i))
 
 		srcName := strings.TrimPrefix(s.Name, "/")
 		src := path.Join(root, srcName)
@@ -427,7 +449,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
 		refName := fmt.Sprintf("i-source-%03d", i)
 		resName := strings.TrimPrefix(s.Name, "/")
-		resPath := path.Join("/etc/camel/sources", refName)
+		resPath := path.Join(SourcesMountPath, refName)
 
 		if s.ContentRef != "" {
 			cmName = s.ContentRef
@@ -465,7 +487,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := fmt.Sprintf("i-resource-%03d", i)
 		resName := strings.TrimPrefix(r.Name, "/")
 		cmKey := "content"
-		resPath := path.Join("/etc/camel/resources", refName)
+		resPath := path.Join(ResourcesMountPath, refName)
 
 		if r.ContentRef != "" {
 			cmName = r.ContentRef
@@ -523,7 +545,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 	*mnts = append(*mnts, corev1.VolumeMount{
 		Name:      "integration-properties",
-		MountPath: "/etc/camel/conf",
+		MountPath: ConfPath,
 	})
 
 	//
@@ -532,7 +554,6 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 	for _, cmName := range e.CollectConfigurationValues("configmap") {
 		refName := kubernetes.SanitizeLabel(cmName)
-		fileName := "integration-cm-" + strings.ToLower(cmName)
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
@@ -547,7 +568,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join("/etc/camel/conf.d", fileName),
+			MountPath: path.Join(ConfigMapsMountPath, strings.ToLower(cmName)),
 		})
 	}
 
@@ -557,7 +578,6 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 	for _, secretName := range e.CollectConfigurationValues("secret") {
 		refName := kubernetes.SanitizeLabel(secretName)
-		fileName := "integration-secret-" + strings.ToLower(secretName)
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
@@ -570,7 +590,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join("/etc/camel/conf.d", fileName),
+			MountPath: path.Join(SecretsMountPath, strings.ToLower(secretName)),
 		})
 	}
 
