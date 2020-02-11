@@ -34,7 +34,6 @@ import (
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis/duck"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -56,7 +55,7 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 				Kind:       channelReference.Kind,
 				Name:       channelReference.Name,
 			},
-			Subscriber: &apisv1alpha1.Destination{
+			Subscriber: &duckv1.Destination{
 				Ref: &corev1.ObjectReference{
 					APIVersion: serving.SchemeGroupVersion.String(),
 					Kind:       "Service",
@@ -87,7 +86,7 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 				},
 			},
 			Broker: brokerReference.Name,
-			Subscriber: &apisv1alpha1.Destination{
+			Subscriber: duckv1.Destination{
 				Ref: &corev1.ObjectReference{
 					APIVersion: serving.SchemeGroupVersion.String(),
 					Kind:       "Service",
