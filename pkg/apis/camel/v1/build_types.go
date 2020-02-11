@@ -83,6 +83,7 @@ type BuilderTask struct {
 type BuildStatus struct {
 	Phase      BuildPhase       `json:"phase,omitempty"`
 	Image      string           `json:"image,omitempty"`
+	Digest     string           `json:"digest,omitempty"`
 	BaseImage  string           `json:"baseImage,omitempty"`
 	Artifacts  []Artifact       `json:"artifacts,omitempty"`
 	Error      string           `json:"error,omitempty"`
