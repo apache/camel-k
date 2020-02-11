@@ -3,8 +3,10 @@ module github.com/apache/camel-k
 go 1.13
 
 require (
+	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
-	contrib.go.opencensus.io/exporter/stackdriver v0.12.2 // indirect
+	// required by knative 0.12
+	contrib.go.opencensus.io/exporter/stackdriver v0.12.9-0.20191108183826-59d068f8d8ff
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/jsonschema v0.0.0-20190122210438-a6952de1bbe6
 	github.com/coreos/prometheus-operator v0.34.0
@@ -41,15 +43,15 @@ require (
 	k8s.io/apimachinery v0.0.0
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20191010091904-7fa3014cb28f
-	knative.dev/eventing v0.10.0
-	knative.dev/pkg v0.0.0-20191107185656-884d50f09454
-	knative.dev/serving v0.10.0
+	knative.dev/eventing v0.12.0
+	knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
+	knative.dev/serving v0.12.1
 	sigs.k8s.io/controller-runtime v0.4.0
 )
 
 // Pinned to kubernetes 1.16.2:
-// - Knative 0.9.0 requires 1.15.3
-// - Operator SDK 0.14.0 requires 1.16.2
+// - Knative 0.12.0 requires 1.16.4
+// - Operator SDK 0.15.0 requires 1.16.2
 replace (
 	k8s.io/api => k8s.io/api v0.0.0-20191016110408-35e52d86657a
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20191016113550-5357c4baaf65
