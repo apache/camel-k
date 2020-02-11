@@ -24,7 +24,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.camel.k</groupId>
-    <artifactId>camel-k-catalog-generator</artifactId>
+    <artifactId>camel-k-runtime-builder</artifactId>
     <version>1.0.0</version>
 
     <dependencies>
@@ -98,51 +98,111 @@
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-runtime-quarkus</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-yaml</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-knative</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-xml</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-js</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-java</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-groovy</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-kotlin</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-core</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-knative</artifactId>
             <version>${runtime.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- loaders -->
