@@ -208,9 +208,6 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 		}
 	}
 
-	// Resolve registry host names when used
-	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
-
 	cronjob := v1beta1.CronJob{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "CronJob",

@@ -274,9 +274,6 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 		}
 	}
 
-	// Resolve registry host names when used
-	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
-
 	//
 	// Set Knative Scaling behavior
 	//
