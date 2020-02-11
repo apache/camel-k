@@ -168,9 +168,6 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		}
 	}
 
-	// Resolve registry host names when used
-	annotations["alpha.image.policy.openshift.io/resolve-names"] = "*"
-
 	deployment := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",

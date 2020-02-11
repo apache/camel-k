@@ -18,6 +18,7 @@ limitations under the License.
 package s2i
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -154,9 +155,13 @@ func publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "cannot unmarshal instantiated binary response")
 	}
 
+	var sha string
 	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &ocbuild, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*buildv1.Build); ok {
 			if val.Status.Phase == buildv1.BuildPhaseComplete {
+				if val.Status.Output.To != nil {
+					sha = val.Status.Output.To.ImageDigest
+				}
 				return true, nil
 			} else if val.Status.Phase == buildv1.BuildPhaseCancelled ||
 				val.Status.Phase == buildv1.BuildPhaseFailed ||
@@ -184,7 +189,14 @@ func publisher(ctx *builder.Context) error {
 		return errors.New("dockerImageRepository not available in ImageStream")
 	}
 
-	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Meta.ResourceVersion
+	var image string
+	if sha != "" {
+		image = fmt.Sprintf("%s@%s", is.Status.DockerImageRepository, sha)
+	} else {
+		// fallback to using tag
+		image = fmt.Sprintf("%s:%s", is.Status.DockerImageRepository, ctx.Build.Meta.ResourceVersion)
+	}
+	ctx.Image = image
 
 	return nil
 }
