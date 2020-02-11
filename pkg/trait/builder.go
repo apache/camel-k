@@ -241,6 +241,8 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		push = append(push[:2], append([]string{"--tls-verify=false"}, push[2:]...)...)
 	}
 
+	env := proxySecretEnvVars(e)
+
 	return &v1.ImageTask{
 		ContainerTask: v1.ContainerTask{
 			BaseTask: v1.BaseTask{
@@ -249,6 +251,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			Image:      fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
 			Command:    []string{"/bin/sh", "-c"},
 			Args:       []string{strings.Join(bud, " ") + " && " + strings.Join(push, " ")},
+			Env:        env,
 			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
 		},
 		BuiltImage: image,
@@ -257,8 +260,6 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 
 func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 	image := getImageName(e)
-
-	env := make([]corev1.EnvVar, 0)
 
 	baseArgs := []string{
 		"--dockerfile=Dockerfile",
@@ -279,6 +280,8 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 		args = append(args, "--insecure")
 		args = append(args, "--insecure-pull")
 	}
+
+	env := make([]corev1.EnvVar, 0)
 
 	volumes := make([]corev1.Volume, 0)
 	volumeMounts := make([]corev1.VolumeMount, 0)
@@ -318,45 +321,7 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 		args = baseArgs
 	}
 
-	if e.Platform.Status.Build.HTTPProxySecret != "" {
-		optional := true
-		env = append(env, corev1.EnvVar{
-			Name: "HTTP_PROXY",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: e.Platform.Status.Build.HTTPProxySecret,
-					},
-					Key:      "HTTP_PROXY",
-					Optional: &optional,
-				},
-			},
-		})
-		env = append(env, corev1.EnvVar{
-			Name: "HTTPS_PROXY",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: e.Platform.Status.Build.HTTPProxySecret,
-					},
-					Key:      "HTTPS_PROXY",
-					Optional: &optional,
-				},
-			},
-		})
-		env = append(env, corev1.EnvVar{
-			Name: "NO_PROXY",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: e.Platform.Status.Build.HTTPProxySecret,
-					},
-					Key:      "NO_PROXY",
-					Optional: &optional,
-				},
-			},
-		})
-	}
+	env = append(env, proxySecretEnvVars(e)...)
 
 	return &v1.ImageTask{
 		ContainerTask: v1.ContainerTask{
@@ -400,6 +365,34 @@ var (
 
 	allSecretKinds = []secretKind{secretKindGCR, secretKindPlainDocker, secretKindStandardDocker}
 )
+
+func proxySecretEnvVars(e *Environment) []corev1.EnvVar {
+	if e.Platform.Status.Build.HTTPProxySecret == "" {
+		return []corev1.EnvVar{}
+	}
+
+	return []corev1.EnvVar{
+		proxySecretEnvVar("HTTP_PROXY", e.Platform.Status.Build.HTTPProxySecret),
+		proxySecretEnvVar("HTTPS_PROXY", e.Platform.Status.Build.HTTPProxySecret),
+		proxySecretEnvVar("NO_PROXY", e.Platform.Status.Build.HTTPProxySecret),
+	}
+}
+
+func proxySecretEnvVar(name string, secret string) corev1.EnvVar {
+	optional := true
+	return corev1.EnvVar{
+		Name: name,
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: secret,
+				},
+				Key:      name,
+				Optional: &optional,
+			},
+		},
+	}
+}
 
 func getSecretKind(e *Environment) (secretKind, error) {
 	secret := corev1.Secret{}
