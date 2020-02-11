@@ -9,6 +9,7 @@ Users of Camel K can instantly run integration code written in Camel DSL on thei
 
 Just write a _helloworld.groovy_ integration file with the following content:
 
+{% include copy-clipboard.html %}
 ```groovy
 from('timer:tick?period=3s')
   .setBody().constant('Hello world from Camel K')
@@ -17,6 +18,7 @@ from('timer:tick?period=3s')
 
 You can then execute the following command:
 
+{% include copy-clipboard.html %}
 ```
 kamel run helloworld.groovy
 ```
