@@ -73,6 +73,8 @@ func TestDefaultEnvironment(t *testing.T) {
 	ns := false
 	name := false
 	ck := false
+	cms := false
+	secrets := false
 
 	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
@@ -85,12 +87,20 @@ func TestDefaultEnvironment(t *testing.T) {
 			if e.Name == envVarCamelKVersion {
 				ck = true
 			}
+			if e.Name == envVarMountPathConfigMaps {
+				cms = true
+			}
+			if e.Name == envVarMountPathSecrets {
+				secrets = true
+			}
 		}
 	})
 
 	assert.True(t, ns)
 	assert.True(t, name)
 	assert.True(t, ck)
+	assert.True(t, cms)
+	assert.True(t, secrets)
 }
 
 func TestEnabledContainerMetaDataEnvVars(t *testing.T) {

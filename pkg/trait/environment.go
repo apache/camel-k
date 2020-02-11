@@ -37,6 +37,15 @@ const (
 	envVarPodName              = "POD_NAME"
 	envVarCamelKVersion        = "CAMEL_K_VERSION"
 	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
+	envVarMountPathConfigMaps  = "CAMEL_K_MOUNT_PATH_CONFIGMAPS"
+
+	// Disabling gosec linter as it may triggers:
+	//
+	//   pkg/trait/environment.go:41: G101: Potential hardcoded credentials (gosec)
+	//	   envVarMountPathSecrets     = "CAMEL_K_MOUNT_PATH_SECRETS"
+	//
+	// nolint: gosec
+	envVarMountPathSecrets = "CAMEL_K_MOUNT_PATH_SECRETS"
 )
 
 func newEnvironmentTrait() *environmentTrait {
@@ -58,6 +67,8 @@ func (t *environmentTrait) Configure(e *Environment) (bool, error) {
 func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, defaults.Version)
 	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
+	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, ConfigMapsMountPath)
+	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, SecretsMountPath)
 
 	if t.ContainerMeta {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")

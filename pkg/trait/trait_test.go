@@ -19,6 +19,7 @@ package trait
 
 import (
 	"context"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -339,7 +340,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 
 	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-configmap" })
 	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/conf.d/integration-cm-test-configmap", m.MountPath)
+	assert.Equal(t, path.Join(ConfigMapsMountPath, "test-configmap"), m.MountPath)
 
 	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "test-secret" })
 	assert.NotNil(t, v)
@@ -348,7 +349,7 @@ func TestConfigureVolumesAndMounts(t *testing.T) {
 
 	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-secret" })
 	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/conf.d/integration-secret-test-secret", m.MountPath)
+	assert.Equal(t, path.Join(SecretsMountPath, "test-secret"), m.MountPath)
 
 	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "testvolume-data" })
 	assert.NotNil(t, v)
