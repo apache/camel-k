@@ -35,7 +35,7 @@ spec:
       args:
         - "run"
         - "--wait"
-        - "${inputs.params.file}" //<2>
+        - "$(inputs.params.file)" //<2>
 ----
 
 TIP: Tekton Pipelines 0.6+ support also the $() syntax for variable substitution
