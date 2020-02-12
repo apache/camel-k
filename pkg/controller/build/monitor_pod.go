@@ -19,7 +19,6 @@ package build
 
 import (
 	"context"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -77,7 +76,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		// Reconcile image digest from build container status if available
 		for _, container := range pod.Status.ContainerStatuses {
 			if container.Name == "buildah" {
-				build.Status.Digest = strings.TrimSuffix(container.State.Terminated.Message, "\n")
+				build.Status.Digest = container.State.Terminated.Message
 				break
 			}
 		}
