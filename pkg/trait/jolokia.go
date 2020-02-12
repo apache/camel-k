@@ -69,9 +69,9 @@ type jolokiaTrait struct {
 	Options *string `property:"options"`
 }
 
-func newJolokiaTrait() *jolokiaTrait {
+func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
-		BaseTrait: newBaseTrait("jolokia"),
+		BaseTrait: NewBaseTrait("jolokia", 1800),
 		Port:      8778,
 	}
 }

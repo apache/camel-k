@@ -76,7 +76,7 @@ func TestApplyDeployerTraitInResolvingKitPhaseSkipPostActions(t *testing.T) {
 }
 
 func createNominalDeployerTest() (*deployerTrait, *Environment) {
-	trait := newDeployerTrait()
+	trait := newDeployerTrait().(*deployerTrait)
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),

@@ -39,9 +39,9 @@ type platformTrait struct {
 	Auto *bool `property:"auto"`
 }
 
-func newPlatformTrait() *platformTrait {
+func newPlatformTrait() Trait {
 	return &platformTrait{
-		BaseTrait: newBaseTrait("platform"),
+		BaseTrait: NewBaseTrait("platform", 100),
 	}
 }
 

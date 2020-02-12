@@ -69,10 +69,15 @@ type routeTrait struct {
 	service *corev1.Service
 }
 
-func newRouteTrait() *routeTrait {
+func newRouteTrait() Trait {
 	return &routeTrait{
-		BaseTrait: newBaseTrait("route"),
+		BaseTrait: NewBaseTrait("route", 2200),
 	}
+}
+
+// IsAllowedInProfile overrides default
+func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
+	return profile == v1.TraitProfileOpenShift
 }
 
 func (t *routeTrait) Configure(e *Environment) (bool, error) {

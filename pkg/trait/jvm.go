@@ -50,9 +50,9 @@ type jvmTrait struct {
 	Options *string `property:"options"`
 }
 
-func newJvmTrait() *jvmTrait {
+func newJvmTrait() Trait {
 	return &jvmTrait{
-		BaseTrait: newBaseTrait("jvm"),
+		BaseTrait: NewBaseTrait("jvm", 2000),
 		// To be defaulted to "*:5005" when upgrading the default base image to JDK9+
 		DebugAddress: "5005",
 	}

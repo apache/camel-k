@@ -75,12 +75,17 @@ const (
 	knativeHistoryHeader = "ce-knativehistory"
 )
 
-func newKnativeTrait() *knativeTrait {
+func newKnativeTrait() Trait {
 	t := &knativeTrait{
-		BaseTrait: newBaseTrait("knative"),
+		BaseTrait: NewBaseTrait("knative", 400),
 	}
 
 	return t
+}
+
+// IsAllowedInProfile overrides default
+func (t *knativeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
+	return profile == v1.TraitProfileKnative
 }
 
 func (t *knativeTrait) Configure(e *Environment) (bool, error) {

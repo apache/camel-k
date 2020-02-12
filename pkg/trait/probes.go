@@ -62,9 +62,9 @@ type probesTrait struct {
 	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold"`
 }
 
-func newProbesTrait() *probesTrait {
+func newProbesTrait() Trait {
 	return &probesTrait{
-		BaseTrait: newBaseTrait("probes"),
+		BaseTrait: NewBaseTrait("probes", 2100),
 		BindHost:  "0.0.0.0",
 		BindPort:  8081,
 		Path:      "/health",

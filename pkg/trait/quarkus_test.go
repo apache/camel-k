@@ -67,7 +67,7 @@ func TestQuarkusTraitAddBuildStepsShouldSucceed(t *testing.T) {
 }
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
-	trait := newQuarkusTrait()
+	trait := newQuarkusTrait().(*quarkusTrait)
 	enabled := true
 	trait.Enabled = &enabled
 

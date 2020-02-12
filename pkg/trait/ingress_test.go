@@ -155,7 +155,7 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 }
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {
-	trait := newIngressTrait()
+	trait := newIngressTrait().(*ingressTrait)
 	enabled := true
 	trait.Enabled = &enabled
 	trait.Auto = new(bool)

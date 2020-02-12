@@ -44,9 +44,9 @@ const (
 	istioOutboundIPRangesAnnotation = "traffic.sidecar.istio.io/includeOutboundIPRanges"
 )
 
-func newIstioTrait() *istioTrait {
+func newIstioTrait() Trait {
 	return &istioTrait{
-		BaseTrait: newBaseTrait("istio"),
+		BaseTrait: NewBaseTrait("istio", 2300),
 		Allow:     "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
 	}
 }

@@ -45,7 +45,7 @@ func TestPullSecret(t *testing.T) {
 	}
 	e.Resources = kubernetes.NewCollection(&deployment)
 
-	trait := newPullSecretTrait()
+	trait := newPullSecretTrait().(*pullSecretTrait)
 	trait.SecretName = "xxxy"
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)

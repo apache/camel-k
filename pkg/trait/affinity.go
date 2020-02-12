@@ -51,9 +51,9 @@ type affinityTrait struct {
 	PodAntiAffinityLabels string `property:"pod-anti-affinity-labels"`
 }
 
-func newAffinityTrait() *affinityTrait {
+func newAffinityTrait() Trait {
 	return &affinityTrait{
-		BaseTrait: newBaseTrait("affinity"),
+		BaseTrait: NewBaseTrait("affinity", 1300),
 	}
 }
 

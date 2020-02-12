@@ -125,7 +125,7 @@ func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 }
 
 func createNominalAffinityTest() (*affinityTrait, *Environment, *appsv1.Deployment) {
-	trait := newAffinityTrait()
+	trait := newAffinityTrait().(*affinityTrait)
 	enabled := true
 	trait.Enabled = &enabled
 

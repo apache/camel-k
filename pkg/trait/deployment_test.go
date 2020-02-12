@@ -137,7 +137,7 @@ func TestApplyDeploymentTraitWhileRunningIntegrationDoesSucceed(t *testing.T) {
 }
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
-	trait := newDeploymentTrait()
+	trait := newDeploymentTrait().(*deploymentTrait)
 	enabled := true
 	trait.Enabled = &enabled
 	trait.client, _ = test.NewFakeClient(&appsv1.Deployment{

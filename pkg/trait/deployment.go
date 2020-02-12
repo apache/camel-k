@@ -36,9 +36,9 @@ type deploymentTrait struct {
 
 var _ ControllerStrategySelector = &deploymentTrait{}
 
-func newDeploymentTrait() *deploymentTrait {
+func newDeploymentTrait() Trait {
 	return &deploymentTrait{
-		BaseTrait: newBaseTrait("deployment"),
+		BaseTrait: NewBaseTrait("deployment", 1100),
 	}
 }
 

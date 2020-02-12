@@ -42,10 +42,16 @@ const (
 	httpPortName   = "http"
 )
 
-func newServiceTrait() *serviceTrait {
+func newServiceTrait() Trait {
 	return &serviceTrait{
-		BaseTrait: newBaseTrait(serviceTraitID),
+		BaseTrait: NewBaseTrait(serviceTraitID, 1500),
 	}
+}
+
+// IsAllowedInProfile overrides default
+func (t *serviceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
+	return profile == v1.TraitProfileKubernetes ||
+		profile == v1.TraitProfileOpenShift
 }
 
 func (t *serviceTrait) isEnabled() bool {

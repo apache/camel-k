@@ -201,7 +201,7 @@ func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
 		},
 	)
 
-	trait := newJvmTrait()
+	trait := newJvmTrait().(*jvmTrait)
 	enabled := true
 	trait.Enabled = &enabled
 	trait.ctx = context.TODO()

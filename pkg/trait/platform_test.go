@@ -56,7 +56,7 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 				},
 			}
 
-			trait := newPlatformTrait()
+			trait := newPlatformTrait().(*platformTrait)
 			createPlatform := false
 			trait.CreateDefault = &createPlatform
 
@@ -91,7 +91,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 		},
 	}
 
-	trait := newPlatformTrait()
+	trait := newPlatformTrait().(*platformTrait)
 	createPlatform := true
 	trait.CreateDefault = &createPlatform
 
@@ -148,7 +148,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 				},
 			}
 
-			trait := newPlatformTrait()
+			trait := newPlatformTrait().(*platformTrait)
 			createPlatform := true
 			trait.CreateDefault = &createPlatform
 

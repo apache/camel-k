@@ -44,11 +44,16 @@ type ingressTrait struct {
 	Auto *bool `property:"auto"`
 }
 
-func newIngressTrait() *ingressTrait {
+func newIngressTrait() Trait {
 	return &ingressTrait{
-		BaseTrait: newBaseTrait("ingress"),
+		BaseTrait: NewBaseTrait("ingress", 2400),
 		Host:      "",
 	}
+}
+
+// IsAllowedInProfile overrides default
+func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
+	return profile == v1.TraitProfileKubernetes
 }
 
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {

@@ -107,9 +107,9 @@ var (
 	}
 )
 
-func newCronTrait() *cronTrait {
+func newCronTrait() Trait {
 	return &cronTrait{
-		BaseTrait: newBaseTrait("cron"),
+		BaseTrait: NewBaseTrait("cron", 1000),
 	}
 }
 

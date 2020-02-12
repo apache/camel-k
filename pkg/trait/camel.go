@@ -39,9 +39,9 @@ type camelTrait struct {
 	RuntimeVersion string `property:"runtime-version"`
 }
 
-func newCamelTrait() *camelTrait {
+func newCamelTrait() Trait {
 	return &camelTrait{
-		BaseTrait: newBaseTrait("camel"),
+		BaseTrait: NewBaseTrait("camel", 200),
 	}
 }
 

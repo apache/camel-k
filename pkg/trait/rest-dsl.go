@@ -44,9 +44,9 @@ type restDslTrait struct {
 	BaseTrait `property:",squash"`
 }
 
-func newRestDslTrait() *restDslTrait {
+func newRestDslTrait() Trait {
 	return &restDslTrait{
-		BaseTrait: newBaseTrait("rest-dsl"),
+		BaseTrait: NewBaseTrait("rest-dsl", 300),
 	}
 }
 
