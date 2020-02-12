@@ -38,7 +38,6 @@ spec:
         - "$(inputs.params.file)" //<2>
 ----
 
-TIP: Tekton Pipelines 0.6+ support also the $() syntax for variable substitution
 
 <1> The base image for the step is `apache/camel-k:1.0.0-M2`
 <2> It executes command `kamel run --wait ${inputs.params.file}`, with file to run received as parameter
