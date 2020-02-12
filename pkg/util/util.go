@@ -20,18 +20,16 @@ package util
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
+	"io"
 	"os"
-	"os/signal"
 	"path"
 	"regexp"
 	"sort"
-	"syscall"
-
-	"github.com/scylladb/go-set/strset"
-
-	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pkg/errors"
+
+	"github.com/scylladb/go-set/strset"
 )
 
 // StringSliceJoin --
@@ -90,21 +88,6 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	return true
 }
 
-// WaitForSignal --
-func WaitForSignal(sig chan os.Signal, exit func(int)) {
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGPIPE)
-	go func() {
-		s := <-sig
-		switch s {
-		case syscall.SIGINT, syscall.SIGTERM:
-			exit(130) // Ctrl+c
-		case syscall.SIGPIPE:
-			exit(0)
-		}
-		exit(1)
-	}()
-}
-
 // EncodeXML --
 func EncodeXML(content interface{}) ([]byte, error) {
 	w := &bytes.Buffer{}
@@ -119,6 +102,37 @@ func EncodeXML(content interface{}) ([]byte, error) {
 	}
 
 	return w.Bytes(), nil
+}
+
+// CopyFile --
+func CopyFile(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	err = os.MkdirAll(path.Dir(dst), 0777)
+	if err != nil {
+		return 0, err
+	}
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }
 
 // WriteFileWithContent --
@@ -154,19 +168,7 @@ func WriteFileWithBytesMarshallerContent(buildDir string, relativePath string, c
 	return WriteFileWithContent(buildDir, relativePath, data)
 }
 
-// LookupEnvVar --
-func LookupEnvVar(vars []corev1.EnvVar, name string) *corev1.EnvVar {
-	for _, e := range vars {
-		if e.Name == name {
-			ev := e
-			return &ev
-		}
-	}
-
-	return nil
-}
-
-// FindAllDistinctStringSubmatch ..
+// FindAllDistinctStringSubmatch --
 func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
 	submatchs := strset.New()
 

@@ -19,6 +19,7 @@ package builder
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"reflect"
@@ -30,9 +31,9 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/pkg/util/tar"
 )
 
 var stepsByID = make(map[string]Step)
@@ -309,37 +310,37 @@ func packager(ctx *Context, selector artifactsSelector) error {
 		return err
 	}
 
-	tarFileName := path.Join(ctx.Path, "package", "occi.tar")
-	tarFileDir := path.Dir(tarFileName)
+	contextDir := path.Join(ctx.Path, "context")
 
-	err = os.MkdirAll(tarFileDir, 0777)
+	err = os.MkdirAll(contextDir, 0777)
 	if err != nil {
 		return err
 	}
-
-	tarAppender, err := tar.NewAppender(tarFileName)
-	if err != nil {
-		return err
-	}
-	defer tarAppender.Close()
 
 	for _, entry := range ctx.SelectedArtifacts {
-		_, tarFileName := path.Split(entry.Target)
-		tarFilePath := path.Dir(entry.Target)
-
-		_, err = tarAppender.AddFileWithName(tarFileName, entry.Location, tarFilePath)
+		_, err := util.CopyFile(entry.Location, path.Join(contextDir, entry.Target))
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, entry := range ctx.Resources {
-		if err := tarAppender.AddData(entry.Content, entry.Target); err != nil {
-			return err
+		filePath, fileName := path.Split(entry.Target)
+		if err := util.WriteFileWithContent(path.Join(contextDir, filePath), fileName, entry.Content); err != nil {
+			return nil
 		}
 	}
 
-	ctx.Archive = tarFileName
+	// #nosec G202
+	dockerFileContent := []byte(`
+		FROM ` + ctx.BaseImage + `
+		ADD . /deployments
+	`)
+
+	err = ioutil.WriteFile(path.Join(/*ctx.Path*/contextDir, "Dockerfile"), dockerFileContent, 0777)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
