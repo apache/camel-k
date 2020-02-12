@@ -22,15 +22,16 @@ import (
 	"fmt"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
@@ -57,7 +58,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
-			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyKaniko
+			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyBuildah
 		}
 	}
 
@@ -67,8 +68,8 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 			// The only global strategy we have for now
 			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
 		} else {
-			if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
-				// The build output has to be shared with Kaniko via a persistent volume
+			if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah {
+				// The build output has to be shared via a volume
 				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
 			} else {
 				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
@@ -81,7 +82,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if verbose && p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.Registry.Address == "" {
+	if verbose && p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Build.Registry.Address == "" {
 		log.Log.Info("No registry specified for publishing images")
 	}
 
