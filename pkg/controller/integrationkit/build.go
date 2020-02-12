@@ -20,6 +20,7 @@ package integrationkit
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -141,6 +142,20 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1.Integ
 
 		kit.Status.BaseImage = build.Status.BaseImage
 		kit.Status.Image = build.Status.Image
+
+		// Address the image by repository digest instead of tag if possible
+		if build.Status.Digest != "" {
+			image := kit.Status.Image
+			i := strings.LastIndex(image, ":")
+			if i > 0 {
+				image = image[:i]
+			}
+			kit.Status.Image = fmt.Sprintf("%s@%s", image, build.Status.Digest)
+		} else {
+			// otherwise rely on repository tag
+			kit.Status.Image = build.Status.Image
+		}
+
 		kit.Status.Phase = v1.IntegrationKitPhaseReady
 		kit.Status.Artifacts = make([]v1.Artifact, 0, len(build.Status.Artifacts))
 
