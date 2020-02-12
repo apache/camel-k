@@ -23,15 +23,13 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/apache/camel-k/addons"
 	_ "github.com/apache/camel-k/pkg/builder/kaniko"
 	_ "github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/cmd"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
-	// List of addons that we want to include
-	_ "github.com/apache/camel-k/addons/master"
 )
 
 func main() {

@@ -50,6 +50,7 @@ See the trait description pages for more information on a specific trait:
 * xref:traits/jvm.adoc[Jvm Trait]
 * xref:traits/knative-service.adoc[Knative Service Trait]
 * xref:traits/knative.adoc[Knative Trait]
+* xref:traits/master.adoc[Master Trait]
 * xref:traits/owner.adoc[Owner Trait]
 * xref:traits/platform.adoc[Platform Trait]
 * xref:traits/probes.adoc[Probes Trait]

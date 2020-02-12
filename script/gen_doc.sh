@@ -21,4 +21,4 @@ rootdir=$location/..
 echo "Generating traits documentation..."
 
 cd $rootdir
-go run ./cmd/util/doc-gen --input-dirs ./pkg/trait
+go run ./cmd/util/doc-gen --input-dirs ./pkg/trait --input-dirs ./addons/...

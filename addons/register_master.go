@@ -15,10 +15,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package master
+package addons
 
-import "github.com/apache/camel-k/pkg/trait"
+import (
+	"github.com/apache/camel-k/addons/master"
+	"github.com/apache/camel-k/pkg/trait"
+)
 
 func init() {
-	trait.AddToTraits(newMasterTrait)
+	trait.AddToTraits(master.NewMasterTrait)
 }
