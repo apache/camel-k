@@ -31,7 +31,7 @@ type masterTrait struct {
 	trait.BaseTrait `property:",squash"`
 }
 
-func newMasterTrait() trait.Trait {
+func NewMasterTrait() trait.Trait {
 	return &masterTrait{
 		BaseTrait: trait.NewBaseTrait("master", 2500),
 	}

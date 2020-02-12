@@ -32,6 +32,7 @@
 ** xref:traits/jvm.adoc[Jvm]
 ** xref:traits/knative-service.adoc[Knative Service]
 ** xref:traits/knative.adoc[Knative]
+** xref:traits/master.adoc[Master]
 ** xref:traits/owner.adoc[Owner]
 ** xref:traits/platform.adoc[Platform]
 ** xref:traits/probes.adoc[Probes]
