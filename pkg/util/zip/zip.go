@@ -15,45 +15,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tar
+package zip
 
 import (
+	"archive/zip"
 	"io"
-	"io/ioutil"
 	"os"
-	"path"
-
-	tarutils "archive/tar"
+	"path/filepath"
+	"strings"
 )
 
-// Extract --
-func Extract(source string, destinationBase string) error {
-	file, err := os.Open(source)
+func Directory(pathToZip, destinationPath string) error {
+	destinationFile, err := os.Create(destinationPath)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	reader := tarutils.NewReader(file)
-	for {
-		header, err := reader.Next()
-		if err == io.EOF {
-			break
+	myZip := zip.NewWriter(destinationFile)
+	err = filepath.Walk(pathToZip, func(filePath string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
 		}
 		if err != nil {
 			return err
 		}
-		targetName := path.Join(destinationBase, header.Name)
-		targetDir, _ := path.Split(targetName)
-		if err := os.MkdirAll(targetDir, 0777); err != nil {
-			return err
-		}
-		buffer, err := ioutil.ReadAll(reader)
+		relPath := strings.TrimPrefix(filePath, pathToZip)
+		zipFile, err := myZip.Create(relPath)
 		if err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(targetName, buffer, os.FileMode(header.Mode)); err != nil {
+		fsFile, err := os.Open(filePath)
+		if err != nil {
 			return err
 		}
+		_, err = io.Copy(zipFile, fsFile)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	err = myZip.Close()
+	if err != nil {
+		return err
 	}
 	return nil
 }

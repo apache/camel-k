@@ -190,7 +190,6 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 
 	switch e.Platform.Status.Build.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah, v1.IntegrationPlatformBuildPublishStrategyKaniko:
-		task.Steps = append(task.Steps, builder.StepIDsFor(kaniko.KanikoSteps...)...)
 		task.BuildDir = path.Join(builderDir, e.IntegrationKit.Name)
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
@@ -253,7 +252,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			Command:    []string{"/bin/sh", "-c"},
 			Args:       []string{strings.Join(bud, " ") + " && " + strings.Join(push, " ")},
 			Env:        env,
-			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
+			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "context"),
 		},
 		BuiltImage: image,
 	}, nil
@@ -264,7 +263,7 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 
 	baseArgs := []string{
 		"--dockerfile=Dockerfile",
-		"--context=" + path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
+		"--context=" + path.Join(builderDir, e.IntegrationKit.Name, "context"),
 		"--destination=" + image,
 		"--cache=" + strconv.FormatBool(e.Platform.Status.Build.IsKanikoCacheEnabled()),
 		"--cache-dir=" + kaniko.CacheDir,

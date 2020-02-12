@@ -110,7 +110,6 @@ type Context struct {
 	Path              string
 	Artifacts         []v1.Artifact
 	SelectedArtifacts []v1.Artifact
-	Archive           string
 	Resources         []Resource
 
 	Maven struct {

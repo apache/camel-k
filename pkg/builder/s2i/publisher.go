@@ -37,6 +37,7 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
+	"github.com/apache/camel-k/pkg/util/zip"
 )
 
 func publisher(ctx *builder.Context) error {
@@ -118,13 +119,18 @@ func publisher(ctx *builder.Context) error {
 		return errors.Wrap(err, "cannot create image stream")
 	}
 
-	resource, err := ioutil.ReadFile(ctx.Archive)
+	archive := path.Join(ctx.Path, "archive.zip")
+	err = zip.Directory(path.Join(ctx.Path, "context"), archive)
 	if err != nil {
-		return errors.Wrap(err, "cannot fully read tar file "+ctx.Archive)
+		return errors.Wrap(err, "cannot zip context directory")
 	}
 
-	baseDir, _ := path.Split(ctx.Archive)
-	defer os.RemoveAll(baseDir)
+	resource, err := ioutil.ReadFile(archive)
+	if err != nil {
+		return errors.Wrap(err, "cannot fully read zip file "+archive)
+	}
+
+	defer os.RemoveAll(ctx.Path)
 
 	restClient, err := customclient.GetClientFor(ctx.Client, "build.openshift.io", "v1")
 	if err != nil {

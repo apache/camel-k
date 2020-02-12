@@ -17,30 +17,5 @@ limitations under the License.
 
 package kaniko
 
-import (
-	"github.com/apache/camel-k/pkg/builder"
-)
-
-func init() {
-	builder.RegisterSteps(Steps)
-}
-
-type steps struct {
-	Publisher builder.Step
-}
-
-// Steps --
-var Steps = steps{
-	Publisher: builder.NewStep(
-		builder.ApplicationPublishPhase,
-		publisher,
-	),
-}
-
-// KanikoSteps --
-var KanikoSteps = []builder.Step{
-	Steps.Publisher,
-}
-
 // CacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod)
 const CacheDir = "/kaniko/cache"
