@@ -63,7 +63,7 @@ spec:
       args:
         - "run"
         - "--wait"
-        - "${inputs.params.file}"
+        - "$(inputs.params.file)"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
