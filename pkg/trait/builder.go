@@ -227,19 +227,9 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		"buildah",
 		"push",
 		"--storage-driver=vfs",
+		"--digestfile=/dev/termination-log",
 		image,
 		"docker://" + image,
-	}
-
-	digest := []string{
-		"buildah",
-		"images",
-		"--storage-driver=vfs",
-		"--format",
-		"'{{.Digest}}'",
-		image,
-		">",
-		"/dev/termination-log",
 	}
 
 	if t.Verbose {
@@ -259,12 +249,9 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
 			},
-			Image:   fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
-			Command: []string{"/bin/sh", "-c"},
-			Args: []string{
-				strings.Join(bud, " ") +
-					" && " + strings.Join(push, " ") +
-					" && " + strings.Join(digest, " ")},
+			Image:      fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
+			Command:    []string{"/bin/sh", "-c"},
+			Args:       []string{strings.Join(bud, " ") + " && " + strings.Join(push, " ")},
 			Env:        env,
 			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "package", "context"),
 		},
