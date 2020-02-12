@@ -15,42 +15,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package trait
 
-import (
-	"context"
-	"math/rand"
-	"os"
-	"time"
+// Factory is a generic factory for a trait
+type Factory = func()Trait
 
-	_ "github.com/apache/camel-k/pkg/builder/kaniko"
-	_ "github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/cmd"
+// FactoryList contains the default list of trait Factory
+var FactoryList []Factory
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
-	// List of addons that we want to include
-	_ "github.com/apache/camel-k/addons/master"
-)
-
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// Cancel ctx as soon as main returns
-	defer cancel()
-
-	rootCmd, err := cmd.NewKamelCommand(ctx)
-	exitOnError(err)
-
-	err = rootCmd.Execute()
-	exitOnError(err)
-}
-
-func exitOnError(err error) {
-	if err != nil {
-		os.Exit(1)
-	}
+// AddToTraits registers a trait Factory
+func AddToTraits(factory Factory) {
+	FactoryList = append(FactoryList, factory)
 }

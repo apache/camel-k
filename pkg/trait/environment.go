@@ -48,9 +48,9 @@ const (
 	envVarMountPathSecrets = "CAMEL_K_MOUNT_PATH_SECRETS"
 )
 
-func newEnvironmentTrait() *environmentTrait {
+func newEnvironmentTrait() Trait {
 	return &environmentTrait{
-		BaseTrait: newBaseTrait("environment"),
+		BaseTrait: NewBaseTrait("environment", 800),
 		// Enable injection of NAMESPACE and POD_NAME environment variables.
 		ContainerMeta: true,
 	}

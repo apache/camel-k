@@ -95,14 +95,22 @@ type Trait interface {
 
 	// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
 	RequiresIntegrationPlatform() bool
+
+	// IsAllowedInProfile tels if the trait supports the given profile
+	IsAllowedInProfile(v1.TraitProfile) bool
+
+	// Order is the order in which the trait should be executed in the normal flow
+	Order() int
 }
 
 /* Base trait */
 
-func newBaseTrait(id string) BaseTrait {
+// NewBaseTrait --
+func NewBaseTrait(id string, order int) BaseTrait {
 	return BaseTrait{
-		id: ID(id),
-		L:  log.Log.WithName("traits").WithValues("trait", id),
+		id:    ID(id),
+		order: order,
+		L:     log.Log.WithName("traits").WithValues("trait", id),
 	}
 }
 
@@ -113,6 +121,7 @@ type BaseTrait struct {
 	Enabled *bool `property:"enabled"`
 	client  client.Client
 	ctx     context.Context
+	order   int
 	L       log.Logger
 }
 
@@ -145,6 +154,16 @@ func (trait *BaseTrait) IsPlatformTrait() bool {
 func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
 	// All traits require a platform by default
 	return true
+}
+
+// IsAllowedInProfile returns true for any profile by default
+func (trait *BaseTrait) IsAllowedInProfile(v1.TraitProfile) bool {
+	return true
+}
+
+// Order contains the order value provided during initialization
+func (trait *BaseTrait) Order() int {
+	return trait.order
 }
 
 /* ControllerStrategySelector */

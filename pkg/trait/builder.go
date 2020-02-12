@@ -49,9 +49,9 @@ type builderTrait struct {
 	Verbose bool `property:"verbose"`
 }
 
-func newBuilderTrait() *builderTrait {
+func newBuilderTrait() Trait {
 	return &builderTrait{
-		BaseTrait: newBaseTrait("builder"),
+		BaseTrait: NewBaseTrait("builder", 600),
 	}
 }
 

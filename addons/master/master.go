@@ -15,42 +15,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package master
 
 import (
-	"context"
-	"math/rand"
-	"os"
-	"time"
-
-	_ "github.com/apache/camel-k/pkg/builder/kaniko"
-	_ "github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/cmd"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
-	// List of addons that we want to include
-	_ "github.com/apache/camel-k/addons/master"
+	"github.com/apache/camel-k/pkg/trait"
 )
 
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// Cancel ctx as soon as main returns
-	defer cancel()
-
-	rootCmd, err := cmd.NewKamelCommand(ctx)
-	exitOnError(err)
-
-	err = rootCmd.Execute()
-	exitOnError(err)
+// The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doing
+// leader election and starting *master* routes only on certain instances.
+//
+// It's activated automatically when using the master endpoint in a route, e.g. `from("master:telegram:bots")...`.
+//
+// +camel-k:trait=master
+type masterTrait struct {
+	trait.BaseTrait `property:",squash"`
 }
 
-func exitOnError(err error) {
-	if err != nil {
-		os.Exit(1)
+func newMasterTrait() trait.Trait {
+	return &masterTrait{
+		BaseTrait: trait.NewBaseTrait("master", 2500),
 	}
+}
+
+func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
+	return false, nil
+}
+
+func (t *masterTrait) Apply(e *trait.Environment) error {
+
+	return nil
 }

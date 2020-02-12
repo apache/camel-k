@@ -66,9 +66,9 @@ type garbageCollectorTrait struct {
 	DiscoveryCache *discoveryCacheType `property:"discovery-cache"`
 }
 
-func newGarbageCollectorTrait() *garbageCollectorTrait {
+func newGarbageCollectorTrait() Trait {
 	return &garbageCollectorTrait{
-		BaseTrait: newBaseTrait("gc"),
+		BaseTrait: NewBaseTrait("gc", 1200),
 	}
 }
 

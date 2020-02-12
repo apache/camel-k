@@ -67,7 +67,7 @@ func TestApplyGarbageCollectorTraitDuringInitializationPhaseSkipPostActions(t *t
 }
 
 func createNominalGarbageCollectorTest() (*garbageCollectorTrait, *Environment) {
-	trait := newGarbageCollectorTrait()
+	trait := newGarbageCollectorTrait().(*garbageCollectorTrait)
 	enabled := true
 	trait.Enabled = &enabled
 

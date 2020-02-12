@@ -69,9 +69,9 @@ type containerTrait struct {
 	Name string `property:"name"`
 }
 
-func newContainerTrait() *containerTrait {
+func newContainerTrait() Trait {
 	return &containerTrait{
-		BaseTrait:       newBaseTrait(containerTraitID),
+		BaseTrait:       NewBaseTrait(containerTraitID, 1600),
 		Port:            8080,
 		PortName:        httpPortName,
 		ServicePort:     80,

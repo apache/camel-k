@@ -37,9 +37,9 @@ type dependenciesTrait struct {
 	BaseTrait `property:",squash"`
 }
 
-func newDependenciesTrait() *dependenciesTrait {
+func newDependenciesTrait() Trait {
 	return &dependenciesTrait{
-		BaseTrait: newBaseTrait("dependencies"),
+		BaseTrait: NewBaseTrait("dependencies", 500),
 	}
 }
 

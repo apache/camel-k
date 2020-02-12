@@ -39,9 +39,9 @@ type ownerTrait struct {
 	TargetLabels string `property:"target-labels"`
 }
 
-func newOwnerTrait() *ownerTrait {
+func newOwnerTrait() Trait {
 	return &ownerTrait{
-		BaseTrait: newBaseTrait("owner"),
+		BaseTrait: NewBaseTrait("owner", 2600),
 	}
 }
 

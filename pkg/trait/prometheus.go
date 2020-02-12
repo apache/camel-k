@@ -60,9 +60,9 @@ const (
 	prometheusPortName                   = "prometheus"
 )
 
-func newPrometheusTrait() *prometheusTrait {
+func newPrometheusTrait() Trait {
 	return &prometheusTrait{
-		BaseTrait:      newBaseTrait("prometheus"),
+		BaseTrait:      NewBaseTrait("prometheus", 1900),
 		Port:           9779,
 		ServiceMonitor: true,
 	}

@@ -241,7 +241,7 @@ func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {
 }
 
 func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
-	trait := newJolokiaTrait()
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	enabled := true
 	trait.Enabled = &enabled
 

@@ -79,10 +79,15 @@ type knativeServiceTrait struct {
 
 var _ ControllerStrategySelector = &knativeServiceTrait{}
 
-func newKnativeServiceTrait() *knativeServiceTrait {
+func newKnativeServiceTrait() Trait {
 	return &knativeServiceTrait{
-		BaseTrait: newBaseTrait("knative-service"),
+		BaseTrait: NewBaseTrait("knative-service", 1400),
 	}
+}
+
+// IsAllowedInProfile overrides default
+func (t *knativeServiceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
+	return profile == v1.TraitProfileKnative
 }
 
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {

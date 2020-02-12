@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -31,63 +32,26 @@ import (
 
 // Catalog collects all information about traits in one place
 type Catalog struct {
-	L                 log.Logger
-	tPlatform         Trait
-	tAffinity         Trait
-	tCamel            Trait
-	tDependencies     Trait
-	tDeployer         Trait
-	tCron             Trait
-	tDeployment       Trait
-	tGarbageCollector Trait
-	tKnativeService   Trait
-	tKnative          Trait
-	tService          Trait
-	tRoute            Trait
-	tIngress          Trait
-	tJolokia          Trait
-	tPrometheus       Trait
-	tOwner            Trait
-	tBuilder          Trait
-	tIstio            Trait
-	tEnvironment      Trait
-	tJvm              Trait
-	tRestDsl          Trait
-	tProbes           Trait
-	tQuarkus          Trait
-	tContainer        Trait
-	tPullSecret       Trait
+	L      log.Logger
+	traits []Trait
 }
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
+	var traitList []Trait
+	for _, factory := range FactoryList {
+		traitList = append(traitList, factory())
+	}
+	sort.Slice(traitList, func(i, j int) bool {
+		if traitList[i].Order() != traitList[j].Order() {
+			return traitList[i].Order() < traitList[j].Order()
+		}
+		return string(traitList[i].ID()) < string(traitList[j].ID())
+	})
+
 	catalog := Catalog{
-		L:                 log.Log.WithName("trait"),
-		tPlatform:         newPlatformTrait(),
-		tAffinity:         newAffinityTrait(),
-		tCamel:            newCamelTrait(),
-		tRestDsl:          newRestDslTrait(),
-		tKnative:          newKnativeTrait(),
-		tDependencies:     newDependenciesTrait(),
-		tDeployer:         newDeployerTrait(),
-		tCron:             newCronTrait(),
-		tDeployment:       newDeploymentTrait(),
-		tGarbageCollector: newGarbageCollectorTrait(),
-		tKnativeService:   newKnativeServiceTrait(),
-		tService:          newServiceTrait(),
-		tRoute:            newRouteTrait(),
-		tIngress:          newIngressTrait(),
-		tJolokia:          newJolokiaTrait(),
-		tPrometheus:       newPrometheusTrait(),
-		tOwner:            newOwnerTrait(),
-		tBuilder:          newBuilderTrait(),
-		tIstio:            newIstioTrait(),
-		tEnvironment:      newEnvironmentTrait(),
-		tJvm:              newJvmTrait(),
-		tProbes:           newProbesTrait(),
-		tQuarkus:          newQuarkusTrait(),
-		tContainer:        newContainerTrait(),
-		tPullSecret:       newPullSecretTrait(),
+		L:      log.Log.WithName("trait"),
+		traits: traitList,
 	}
 
 	for _, t := range catalog.allTraits() {
@@ -102,33 +66,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 }
 
 func (c *Catalog) allTraits() []Trait {
-	return []Trait{
-		c.tPlatform,
-		c.tAffinity,
-		c.tCamel,
-		c.tRestDsl,
-		c.tKnative,
-		c.tDependencies,
-		c.tDeployer,
-		c.tCron,
-		c.tDeployment,
-		c.tGarbageCollector,
-		c.tKnativeService,
-		c.tService,
-		c.tRoute,
-		c.tIngress,
-		c.tJolokia,
-		c.tPrometheus,
-		c.tOwner,
-		c.tBuilder,
-		c.tIstio,
-		c.tEnvironment,
-		c.tJvm,
-		c.tProbes,
-		c.tQuarkus,
-		c.tContainer,
-		c.tPullSecret,
-	}
+	return append([]Trait(nil), c.traits...)
 }
 
 // Traits may depend on the result of previously executed ones,
@@ -143,85 +81,13 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 // Traits may depend on the result of previously executed ones,
 // so care must be taken while changing the lists order.
 func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
-	switch profile {
-	case v1.TraitProfileOpenShift:
-		return []Trait{
-			c.tPlatform,
-			c.tCamel,
-			c.tRestDsl,
-			c.tDependencies,
-			c.tBuilder,
-			c.tQuarkus,
-			c.tEnvironment,
-			c.tDeployer,
-			c.tCron,
-			c.tDeployment,
-			c.tGarbageCollector,
-			c.tAffinity,
-			c.tService,
-			c.tContainer,
-			c.tPullSecret,
-			c.tJolokia,
-			c.tPrometheus,
-			c.tJvm,
-			c.tProbes,
-			c.tRoute,
-			c.tIstio,
-			c.tOwner,
-		}
-	case v1.TraitProfileKubernetes:
-		return []Trait{
-			c.tPlatform,
-			c.tCamel,
-			c.tRestDsl,
-			c.tDependencies,
-			c.tBuilder,
-			c.tQuarkus,
-			c.tEnvironment,
-			c.tDeployer,
-			c.tCron,
-			c.tDeployment,
-			c.tGarbageCollector,
-			c.tAffinity,
-			c.tService,
-			c.tContainer,
-			c.tPullSecret,
-			c.tJolokia,
-			c.tPrometheus,
-			c.tJvm,
-			c.tProbes,
-			c.tIngress,
-			c.tIstio,
-			c.tOwner,
-		}
-	case v1.TraitProfileKnative:
-		return []Trait{
-			c.tPlatform,
-			c.tCamel,
-			c.tRestDsl,
-			c.tKnative,
-			c.tDependencies,
-			c.tBuilder,
-			c.tQuarkus,
-			c.tEnvironment,
-			c.tDeployer,
-			c.tCron,
-			c.tDeployment,
-			c.tGarbageCollector,
-			c.tAffinity,
-			c.tKnativeService,
-			c.tContainer,
-			c.tPullSecret,
-			c.tJolokia,
-			c.tPrometheus,
-			c.tJvm,
-			c.tProbes,
-			c.tIstio,
-			c.tOwner,
+	var res []Trait
+	for _, t := range c.allTraits() {
+		if t.IsAllowedInProfile(profile) {
+			res = append(res, t)
 		}
 	}
-
-	return nil
+	return res
 }
 
 func (c *Catalog) apply(environment *Environment) error {

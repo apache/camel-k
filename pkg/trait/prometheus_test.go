@@ -169,7 +169,7 @@ func TestPrometheusTraitGetServiceMonitor(t *testing.T) {
 }
 
 func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
-	trait := newPrometheusTrait()
+	trait := newPrometheusTrait().(*prometheusTrait)
 	enabled := true
 	trait.Enabled = &enabled
 

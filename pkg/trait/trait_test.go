@@ -156,7 +156,7 @@ func TestTraitDecode(t *testing.T) {
 	}
 	env.Integration.Spec.Traits["service"] = svcTrait
 
-	ctr := newContainerTrait()
+	ctr := newContainerTrait().(*containerTrait)
 	err := decodeTraitSpec(&svcTrait, ctr)
 
 	assert.Nil(t, err)

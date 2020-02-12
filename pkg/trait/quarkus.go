@@ -34,9 +34,9 @@ type quarkusTrait struct {
 	Native bool `property:"native"`
 }
 
-func newQuarkusTrait() *quarkusTrait {
+func newQuarkusTrait() Trait {
 	return &quarkusTrait{
-		BaseTrait: newBaseTrait("quarkus"),
+		BaseTrait: NewBaseTrait("quarkus", 700),
 	}
 }
 

@@ -43,9 +43,9 @@ type pullSecretTrait struct {
 	Auto *bool `property:"auto"`
 }
 
-func newPullSecretTrait() *pullSecretTrait {
+func newPullSecretTrait() Trait {
 	return &pullSecretTrait{
-		BaseTrait: newBaseTrait("pull-secret"),
+		BaseTrait: NewBaseTrait("pull-secret", 1700),
 	}
 }
 

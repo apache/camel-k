@@ -41,7 +41,7 @@ func TestProbesDeps(t *testing.T) {
 
 	enabled := true
 
-	tr := newProbesTrait()
+	tr := newProbesTrait().(*probesTrait)
 	tr.Enabled = &enabled
 	tr.BindPort = 9191
 
@@ -78,7 +78,7 @@ func TestProbesOnDeployment(t *testing.T) {
 
 	enabled := true
 
-	tr := newProbesTrait()
+	tr := newProbesTrait().(*probesTrait)
 	tr.Enabled = &enabled
 	tr.BindPort = 9191
 	tr.LivenessTimeout = 1234
@@ -128,7 +128,7 @@ func TestProbesOnKnativeService(t *testing.T) {
 
 	enabled := true
 
-	tr := newProbesTrait()
+	tr := newProbesTrait().(*probesTrait)
 	tr.Enabled = &enabled
 	tr.BindPort = 9191
 	tr.ReadinessTimeout = 4321
