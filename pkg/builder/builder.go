@@ -158,6 +158,7 @@ func (b *defaultBuilder) Run(build v1.BuilderTask) v1.BuildStatus {
 	if result.Phase != v1.BuildPhaseInterrupted {
 		result.BaseImage = c.BaseImage
 		result.Image = c.Image
+		result.Digest = c.Digest
 
 		if c.Error != nil {
 			result.Error = c.Error.Error()

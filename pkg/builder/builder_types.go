@@ -104,6 +104,7 @@ type Context struct {
 	Build             v1.BuilderTask
 	BaseImage         string
 	Image             string
+	Digest            string
 	Error             error
 	Namespace         string
 	Path              string
