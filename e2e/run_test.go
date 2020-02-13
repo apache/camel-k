@@ -95,10 +95,10 @@ func TestRunSimpleExamples(t *testing.T) {
 
 		t.Run("run yaml Quarkus", func(t *testing.T) {
 			RegisterTestingT(t)
-			Expect(kamel("run", "-n", ns, "files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "yaml"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("running on Quarkus"))
-			Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Expect(kamel("run", "-n", ns, "--name", "yaml-quarkus", "files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
+			Eventually(integrationPodPhase(ns, "yaml-quarkus"), 5*time.Minute).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "yaml-quarkus"), 1*time.Minute).Should(ContainSubstring("running on Quarkus"))
+			Eventually(integrationLogs(ns, "yaml-quarkus"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
