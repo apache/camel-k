@@ -47,8 +47,8 @@ type steps struct {
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
-	StandardPackager        Step
-	IncrementalPackager     Step
+	StandardImageContext    Step
+	IncrementalImageContext Step
 }
 
 // Steps --
@@ -69,13 +69,13 @@ var Steps = steps{
 		ProjectGenerationPhase+3,
 		sanitizeDependencies,
 	),
-	StandardPackager: NewStep(
+	StandardImageContext: NewStep(
 		ApplicationPackagePhase,
-		standardPackager,
+		standardImageContext,
 	),
-	IncrementalPackager: NewStep(
+	IncrementalImageContext: NewStep(
 		ApplicationPackagePhase,
-		incrementalPackager,
+		incrementalImageContext,
 	),
 }
 
@@ -85,7 +85,7 @@ var DefaultSteps = []Step{
 	Steps.GenerateProjectSettings,
 	Steps.InjectDependencies,
 	Steps.SanitizeDependencies,
-	Steps.IncrementalPackager,
+	Steps.IncrementalImageContext,
 }
 
 // RegisterSteps --
@@ -262,21 +262,21 @@ func sanitizeDependencies(ctx *Context) error {
 
 type artifactsSelector func(ctx *Context) error
 
-func standardPackager(ctx *Context) error {
-	return packager(ctx, func(ctx *Context) error {
+func standardImageContext(ctx *Context) error {
+	return imageContext(ctx, func(ctx *Context) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
 		return nil
 	})
 }
 
-func incrementalPackager(ctx *Context) error {
+func incrementalImageContext(ctx *Context) error {
 	if ctx.HasRequiredImage() {
 		//
 		// If the build requires a specific image, don't try to determine the
 		// base image using artifact so just use the standard packages
 		//
-		return standardPackager(ctx)
+		return standardImageContext(ctx)
 	}
 
 	images, err := listPublishedImages(ctx)
@@ -284,7 +284,7 @@ func incrementalPackager(ctx *Context) error {
 		return err
 	}
 
-	return packager(ctx, func(ctx *Context) error {
+	return imageContext(ctx, func(ctx *Context) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
@@ -304,7 +304,7 @@ func incrementalPackager(ctx *Context) error {
 	})
 }
 
-func packager(ctx *Context, selector artifactsSelector) error {
+func imageContext(ctx *Context, selector artifactsSelector) error {
 	err := selector(ctx)
 	if err != nil {
 		return err
@@ -337,7 +337,7 @@ func packager(ctx *Context, selector artifactsSelector) error {
 		ADD . /deployments
 	`)
 
-	err = ioutil.WriteFile(path.Join(/*ctx.Path*/contextDir, "Dockerfile"), dockerFileContent, 0777)
+	err = ioutil.WriteFile(path.Join( /*ctx.Path*/ contextDir, "Dockerfile"), dockerFileContent, 0777)
 	if err != nil {
 		return err
 	}
@@ -410,8 +410,7 @@ func findBestImage(images []publishedImage, artifacts []v1.Artifact) (publishedI
 		surplus := len(image.Artifacts) - numCommonLibs
 
 		if numCommonLibs != len(image.Artifacts) && surplus >= numCommonLibs/3 {
-			// Heuristic approach: if there are too many unrelated libraries, just use
-			// the base image
+			// Heuristic approach: if there are too many unrelated libraries, just use the base image
 			continue
 		}
 
