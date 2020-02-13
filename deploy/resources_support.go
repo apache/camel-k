@@ -18,8 +18,10 @@ limitations under the License.
 package deploy
 
 import (
+	"bytes"
 	"io/ioutil"
 	"strings"
+	"text/template"
 
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -49,6 +51,24 @@ func Resource(name string) []byte {
 		return nil
 	}
 	return data
+}
+
+// TemplateResource loads a file resource as go template and processes it using the given parameters
+func TemplateResource(name string, params interface{}) (string, error) {
+	rawData := ResourceAsString(name)
+	if rawData == "" {
+		return "", nil
+	}
+	tmpl, err := template.New(name).Parse(rawData)
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, params); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 // Resources lists all file names in the given path (starts with '/')

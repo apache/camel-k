@@ -140,7 +140,7 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	trait := newDeploymentTrait().(*deploymentTrait)
 	enabled := true
 	trait.Enabled = &enabled
-	trait.client, _ = test.NewFakeClient(&appsv1.Deployment{
+	trait.Client, _ = test.NewFakeClient(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "integration-name",
 			Namespace: "namespace",

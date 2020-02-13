@@ -64,7 +64,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 			if secret != "" {
 				key := client.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
 				obj := corev1.Secret{}
-				if err := t.client.Get(t.ctx, key, &obj); err != nil {
+				if err := t.Client.Get(t.Ctx, key, &obj); err != nil {
 					return false, err
 				}
 				if obj.Type == corev1.SecretTypeDockerConfigJson {

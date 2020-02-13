@@ -172,7 +172,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	// CronJob strategy requires common schedule
-	strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
+	strategy, err := e.DetermineControllerStrategy(t.Ctx, t.Client)
 	if err != nil {
 		return false, err
 	}
@@ -326,7 +326,7 @@ func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
 func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
 	var sources []v1.SourceSpec
 	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(t.ctx, t.client, e.Integration, e.Resources); err != nil {
+	if sources, err = kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources); err != nil {
 		return nil, err
 	}
 	meta := metadata.ExtractAll(e.CamelCatalog, sources)
