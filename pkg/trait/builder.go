@@ -236,17 +236,29 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		push = append(push[:2], append([]string{"--log-level=debug"}, push[2:]...)...)
 	}
 
-	if e.Platform.Status.Build.Registry.Insecure {
+	env := make([]corev1.EnvVar, 0)
+	volumes := make([]corev1.Volume, 0)
+	volumeMounts := make([]corev1.VolumeMount, 0)
+
+	if e.Platform.Status.Build.Registry.Secret != "" {
+		secret, err := getRegistrySecretFor(e, buildahRegistrySecrets)
+		if err != nil {
+			return nil, err
+		}
+		mountRegistrySecret(e.Platform.Status.Build.Registry.Secret, secret, &volumes, &volumeMounts, &env)
+	} else if e.Platform.Status.Build.Registry.Insecure {
 		bud = append(bud[:2], append([]string{"--tls-verify=false"}, bud[2:]...)...)
 		push = append(push[:2], append([]string{"--tls-verify=false"}, push[2:]...)...)
 	}
 
-	env := proxySecretEnvVars(e)
+	env = append(env, proxySecretEnvVars(e)...)
 
 	return &v1.ImageTask{
 		ContainerTask: v1.ContainerTask{
 			BaseTask: v1.BaseTask{
-				Name: "buildah",
+				Name:         "buildah",
+				Volumes:      volumes,
+				VolumeMounts: volumeMounts,
 			},
 			Image:      fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
 			Command:    []string{"/bin/sh", "-c"},
@@ -261,7 +273,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 	image := getImageName(e)
 
-	baseArgs := []string{
+	args := []string{
 		"--dockerfile=Dockerfile",
 		"--context=" + path.Join(builderDir, e.IntegrationKit.Name, "context"),
 		"--destination=" + image,
@@ -269,56 +281,23 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 		"--cache-dir=" + kaniko.CacheDir,
 	}
 
-	args := make([]string, 0, len(baseArgs))
-	args = append(args, baseArgs...)
-
 	if t.Verbose {
 		args = append(args, "-v=debug")
 	}
 
-	if e.Platform.Status.Build.Registry.Insecure {
-		args = append(args, "--insecure")
-		args = append(args, "--insecure-pull")
-	}
-
 	env := make([]corev1.EnvVar, 0)
-
 	volumes := make([]corev1.Volume, 0)
 	volumeMounts := make([]corev1.VolumeMount, 0)
 
 	if e.Platform.Status.Build.Registry.Secret != "" {
-		secretKind, err := getSecretKind(e)
+		secret, err := getRegistrySecretFor(e, kanikoRegistrySecrets)
 		if err != nil {
 			return nil, err
 		}
-
-		volumes = append(volumes, corev1.Volume{
-			Name: "kaniko-secret",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: e.Platform.Status.Build.Registry.Secret,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  secretKind.fileName,
-							Path: secretKind.destination,
-						},
-					},
-				},
-			},
-		})
-
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "kaniko-secret",
-			MountPath: secretKind.mountPath,
-		})
-
-		if secretKind.refEnv != "" {
-			env = append(env, corev1.EnvVar{
-				Name:  secretKind.refEnv,
-				Value: path.Join(secretKind.mountPath, secretKind.destination),
-			})
-		}
-		args = baseArgs
+		mountRegistrySecret(e.Platform.Status.Build.Registry.Secret, secret, &volumes, &volumeMounts, &env)
+	} else if e.Platform.Status.Build.Registry.Insecure {
+		args = append(args, "--insecure")
+		args = append(args, "--insecure-pull")
 	}
 
 	env = append(env, proxySecretEnvVars(e)...)
@@ -338,7 +317,7 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 	}, nil
 }
 
-type secretKind struct {
+type registrySecret struct {
 	fileName    string
 	mountPath   string
 	destination string
@@ -346,24 +325,41 @@ type secretKind struct {
 }
 
 var (
-	secretKindGCR = secretKind{
+	plainDockerBuildahRegistrySecret = registrySecret{
+		fileName:    "config.json",
+		mountPath:   "/buildah/.docker",
+		destination: "config.json",
+		refEnv:      "REGISTRY_AUTH_FILE",
+	}
+
+	buildahRegistrySecrets = []registrySecret{
+		plainDockerBuildahRegistrySecret,
+	}
+)
+
+var (
+	gcrKanikoRegistrySecret = registrySecret{
 		fileName:    "kaniko-secret.json",
 		mountPath:   "/secret",
 		destination: "kaniko-secret.json",
 		refEnv:      "GOOGLE_APPLICATION_CREDENTIALS",
 	}
-	secretKindPlainDocker = secretKind{
+	plainDockerKanikoRegistrySecret = registrySecret{
 		fileName:    "config.json",
 		mountPath:   "/kaniko/.docker",
 		destination: "config.json",
 	}
-	secretKindStandardDocker = secretKind{
+	standardDockerKanikoRegistrySecret = registrySecret{
 		fileName:    corev1.DockerConfigJsonKey,
 		mountPath:   "/kaniko/.docker",
 		destination: "config.json",
 	}
 
-	allSecretKinds = []secretKind{secretKindGCR, secretKindPlainDocker, secretKindStandardDocker}
+	kanikoRegistrySecrets = []registrySecret{
+		gcrKanikoRegistrySecret,
+		plainDockerKanikoRegistrySecret,
+		standardDockerKanikoRegistrySecret,
+	}
 )
 
 func proxySecretEnvVars(e *Environment) []corev1.EnvVar {
@@ -394,18 +390,47 @@ func proxySecretEnvVar(name string, secret string) corev1.EnvVar {
 	}
 }
 
-func getSecretKind(e *Environment) (secretKind, error) {
+func getRegistrySecretFor(e *Environment, registrySecrets []registrySecret) (registrySecret, error) {
 	secret := corev1.Secret{}
 	err := e.Client.Get(e.C, client.ObjectKey{Namespace: e.Platform.Namespace, Name: e.Platform.Status.Build.Registry.Secret}, &secret)
 	if err != nil {
-		return secretKind{}, err
+		return registrySecret{}, err
 	}
-	for _, k := range allSecretKinds {
+	for _, k := range registrySecrets {
 		if _, ok := secret.Data[k.fileName]; ok {
 			return k, nil
 		}
 	}
-	return secretKind{}, errors.New("unsupported secret type for registry authentication")
+	return registrySecret{}, errors.New("unsupported secret type for registry authentication")
+}
+
+func mountRegistrySecret(name string, secret registrySecret, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount, env *[]corev1.EnvVar) {
+	*volumes = append(*volumes, corev1.Volume{
+		Name: "registry-secret",
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: name,
+				Items: []corev1.KeyToPath{
+					{
+						Key:  secret.fileName,
+						Path: secret.destination,
+					},
+				},
+			},
+		},
+	})
+
+	*volumeMounts = append(*volumeMounts, corev1.VolumeMount{
+		Name:      "registry-secret",
+		MountPath: secret.mountPath,
+	})
+
+	if secret.refEnv != "" {
+		*env = append(*env, corev1.EnvVar{
+			Name:  secret.refEnv,
+			Value: path.Join(secret.mountPath, secret.destination),
+		})
+	}
 }
 
 func getImageName(e *Environment) string {
