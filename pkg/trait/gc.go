@@ -186,7 +186,7 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 			client.InNamespace(e.Integration.Namespace),
 			util.MatchingSelector{Selector: selector},
 		}
-		if err := t.client.List(context.TODO(), &resources, options...); err != nil {
+		if err := t.Client.List(context.TODO(), &resources, options...); err != nil {
 			if !k8serrors.IsNotFound(err) && !k8serrors.IsForbidden(err) {
 				t.L.ForIntegration(e.Integration).Errorf(err, "cannot list child resources: %v", gvk)
 			}
@@ -195,7 +195,7 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 
 		for _, resource := range resources.Items {
 			r := resource
-			err := t.client.Delete(context.TODO(), &r, client.PropagationPolicy(metav1.DeletePropagationBackground))
+			err := t.Client.Delete(context.TODO(), &r, client.PropagationPolicy(metav1.DeletePropagationBackground))
 			if err != nil {
 				// The resource may have already been deleted
 				if !k8serrors.IsNotFound(err) {
@@ -257,7 +257,7 @@ func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.Disco
 		if diskCachedDiscoveryClient != nil {
 			return diskCachedDiscoveryClient, nil
 		}
-		config := t.client.GetConfig()
+		config := t.Client.GetConfig()
 		httpCacheDir := filepath.Join(mustHomeDir(), ".kube", "http-cache")
 		diskCacheDir := filepath.Join(mustHomeDir(), ".kube", "cache", "discovery", toHostDir(config.Host))
 		var err error
@@ -268,14 +268,14 @@ func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.Disco
 		if memoryCachedDiscoveryClient != nil {
 			return memoryCachedDiscoveryClient, nil
 		}
-		memoryCachedDiscoveryClient = memory.NewMemCacheClient(t.client.Discovery())
+		memoryCachedDiscoveryClient = memory.NewMemCacheClient(t.Client.Discovery())
 		return memoryCachedDiscoveryClient, nil
 
 	case disabledDiscoveryCache, "":
-		return t.client.Discovery(), nil
+		return t.Client.Discovery(), nil
 
 	default:
 		t.L.ForIntegration(e.Integration).Infof("unsupported discovery cache type: %s", *t.DiscoveryCache)
-		return t.client.Discovery(), nil
+		return t.Client.Discovery(), nil
 	}
 }

@@ -388,13 +388,13 @@ func (t *knativeTrait) withServiceDo(
 			continue
 		}
 		possibleRefs := knativeutil.FillMissingReferenceData(serviceType, ref)
-		actualRef, err := knativeutil.GetAddressableReference(t.ctx, t.client, possibleRefs, e.Integration.Namespace, ref.Name)
+		actualRef, err := knativeutil.GetAddressableReference(t.Ctx, t.Client, possibleRefs, e.Integration.Namespace, ref.Name)
 		if err != nil && k8serrors.IsNotFound(err) {
 			return errors.Errorf("cannot find %s %s", serviceType, ref.Name)
 		} else if err != nil {
 			return errors.Wrapf(err, "error looking up %s %s", serviceType, ref.Name)
 		}
-		targetURL, err := knativeutil.GetSinkURL(t.ctx, t.client, actualRef, e.Integration.Namespace)
+		targetURL, err := knativeutil.GetSinkURL(t.Ctx, t.Client, actualRef, e.Integration.Namespace)
 		if err != nil {
 			return errors.Wrapf(err, "cannot determine address of %s %s", string(serviceType), ref.Name)
 		}

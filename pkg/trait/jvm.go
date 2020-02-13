@@ -78,7 +78,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 			Name:      name,
 		}
 
-		if err := t.client.Get(t.ctx, key, &k); err != nil {
+		if err := t.Client.Get(t.Ctx, key, &k); err != nil {
 			return errors.Wrapf(err, "unable to find integration kit %s, %s", name, err)
 		}
 

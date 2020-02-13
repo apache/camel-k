@@ -108,36 +108,36 @@ type Trait interface {
 // NewBaseTrait --
 func NewBaseTrait(id string, order int) BaseTrait {
 	return BaseTrait{
-		id:    ID(id),
-		order: order,
-		L:     log.Log.WithName("traits").WithValues("trait", id),
+		TraitID:        ID(id),
+		ExecutionOrder: order,
+		L:              log.Log.WithName("traits").WithValues("trait", id),
 	}
 }
 
 // BaseTrait is the root trait with noop implementations for hooks
 type BaseTrait struct {
-	id ID
+	TraitID ID
 	// Can be used to enable or disable a trait. All traits share this common property.
-	Enabled *bool `property:"enabled"`
-	client  client.Client
-	ctx     context.Context
-	order   int
-	L       log.Logger
+	Enabled        *bool `property:"enabled"`
+	Client         client.Client
+	Ctx            context.Context
+	ExecutionOrder int
+	L              log.Logger
 }
 
 // ID returns the identifier of the trait
 func (trait *BaseTrait) ID() ID {
-	return trait.id
+	return trait.TraitID
 }
 
 // InjectClient implements client.ClientInject and allows to inject a client into the trait
 func (trait *BaseTrait) InjectClient(c client.Client) {
-	trait.client = c
+	trait.Client = c
 }
 
 // InjectContext allows to inject a context into the trait
 func (trait *BaseTrait) InjectContext(ctx context.Context) {
-	trait.ctx = ctx
+	trait.Ctx = ctx
 }
 
 // InfluencesKit determines if the trait has any influence on Integration Kits
@@ -163,7 +163,7 @@ func (trait *BaseTrait) IsAllowedInProfile(v1.TraitProfile) bool {
 
 // Order contains the order value provided during initialization
 func (trait *BaseTrait) Order() int {
-	return trait.order
+	return trait.ExecutionOrder
 }
 
 /* ControllerStrategySelector */

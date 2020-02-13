@@ -18,30 +18,180 @@ limitations under the License.
 package master
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/apache/camel-k/deploy"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/uri"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doing
 // leader election and starting *master* routes only on certain instances.
 //
-// It's activated automatically when using the master endpoint in a route, e.g. `from("master:telegram:bots")...`.
+// It's activated automatically when using the master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`.
+//
+// NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods.
+// It's recommended to use a different service account than "default" when running the integration.
 //
 // +camel-k:trait=master
 type masterTrait struct {
 	trait.BaseTrait `property:",squash"`
+	// Enables automatic configuration of the trait.
+	Auto *bool `property:"auto"`
+	// When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+	// E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+	// It's enabled by default.
+	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies"`
+	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+	Configmap string `property:"configmap"`
+	// Label that will be used to identify all pods contending the lock. Defaults to "camel.apache.org/integration".
+	LabelKey string `property:"label-key"`
+	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
+	LabelValue           string `property:"label-value"`
+	delegateDependencies []string
 }
 
+// NewMasterTrait --
 func NewMasterTrait() trait.Trait {
 	return &masterTrait{
-		BaseTrait: trait.NewBaseTrait("master", 2500),
+		BaseTrait: trait.NewBaseTrait("master", 850),
 	}
 }
 
+const (
+	masterComponent = "master"
+)
+
 func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
-	return false, nil
+	if t.Enabled != nil && !*t.Enabled {
+		return false, nil
+	}
+
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+		return false, nil
+	}
+
+	if t.Auto == nil || *t.Auto {
+		// Check if the master component has been used
+		sources, err := kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources)
+		if err != nil {
+			return false, err
+		}
+
+		meta := metadata.ExtractAll(e.CamelCatalog, sources)
+
+		if t.Enabled == nil {
+			for _, endpoint := range meta.FromURIs {
+				if uri.GetComponent(endpoint) == masterComponent {
+					enabled := true
+					t.Enabled = &enabled
+				}
+			}
+		}
+
+		if t.Enabled == nil || !*t.Enabled {
+			return false, nil
+		}
+
+		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
+			t.delegateDependencies = findAdditionalDependencies(e, meta)
+		}
+
+		if t.Configmap == "" {
+			t.Configmap = fmt.Sprintf("%s-lock", e.Integration.Name)
+		}
+
+		if t.LabelKey == "" {
+			t.LabelKey = "camel.apache.org/integration"
+		}
+
+		if t.LabelValue == "" {
+			t.LabelValue = e.Integration.Name
+		}
+	}
+
+	return t.Enabled != nil && *t.Enabled, nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {
 
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-master")
+
+		// Master sub endpoints need to be added to the list of dependencies
+		for _, dep := range t.delegateDependencies {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dep)
+		}
+
+	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+		serviceAccount := e.Integration.Spec.ServiceAccountName
+		if serviceAccount == "" {
+			serviceAccount = "default"
+		}
+
+		var templateData = struct {
+			Namespace      string
+			Name           string
+			ServiceAccount string
+		}{
+			Namespace:      e.Integration.Namespace,
+			Name:           fmt.Sprintf("%s-master", e.Integration.Name),
+			ServiceAccount: serviceAccount,
+		}
+
+		role, err := loadResource(e, "master-role.tmpl", templateData)
+		if err != nil {
+			return err
+		}
+		roleBinding, err := loadResource(e, "master-role-binding.tmpl", templateData)
+		if err != nil {
+			return err
+		}
+
+		e.Resources.Add(role)
+		e.Resources.Add(roleBinding)
+
+		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
+			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.configMapName=%s", t.Configmap)},
+			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelKey=%s", t.LabelKey)},
+			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelValue=%s", t.LabelValue)},
+		)
+	}
+
 	return nil
+}
+
+func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) (dependencies []string) {
+	for _, endpoint := range meta.FromURIs {
+		if uri.GetComponent(endpoint) == masterComponent {
+			parts := strings.Split(endpoint, ":")
+			if len(parts) > 2 {
+				// syntax "master:lockname:endpoint:..."
+				childComponent := parts[2]
+				if artifact := e.CamelCatalog.GetArtifactByScheme(childComponent); artifact != nil {
+					dependencies = append(dependencies, artifact.GetDependencyID())
+				}
+			}
+		}
+	}
+	return dependencies
+}
+
+func loadResource(e *trait.Environment, name string, params interface{}) (runtime.Object, error) {
+	data, err := deploy.TemplateResource(fmt.Sprintf("/addons/master/%s", name), params)
+	if err != nil {
+		return nil, err
+	}
+	obj, err := kubernetes.LoadResourceFromYaml(e.Client.GetScheme(), data)
+	if err != nil {
+		return nil, err
+	}
+	return obj, nil
 }

@@ -190,14 +190,7 @@ func (i *baseInspector) decodeComponent(uri string) string {
 	}
 	uriStart := uriSplit[0]
 	if component := i.catalog.GetArtifactByScheme(uriStart); component != nil {
-		artifactID := component.ArtifactID
-		if component.GroupID == "org.apache.camel" && strings.HasPrefix(artifactID, "camel-") {
-			return "camel:" + artifactID[6:]
-		}
-		if component.GroupID == "org.apache.camel.quarkus" && strings.HasPrefix(artifactID, "camel-quarkus-") {
-			return "camel-quarkus:" + artifactID[14:]
-		}
-		return "mvn:" + component.GroupID + ":" + artifactID + ":" + component.Version
+		return component.GetDependencyID()
 	}
 	return ""
 }

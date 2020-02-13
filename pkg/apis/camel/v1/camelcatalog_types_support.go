@@ -17,7 +17,11 @@ limitations under the License.
 
 package v1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	"strings"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // NewCamelCatalog --
 func NewCamelCatalog(namespace string, name string) CamelCatalog {
@@ -56,4 +60,16 @@ func NewCamelCatalogList() CamelCatalogList {
 			Kind:       CamelCatalogKind,
 		},
 	}
+}
+
+// GetDependencyID returns a Camel K recognizable maven dependency for the artifact
+func (a CamelArtifact) GetDependencyID() string {
+	artifactID := a.ArtifactID
+	if a.GroupID == "org.apache.camel" && strings.HasPrefix(artifactID, "camel-") {
+		return "camel:" + artifactID[6:]
+	}
+	if a.GroupID == "org.apache.camel.quarkus" && strings.HasPrefix(artifactID, "camel-quarkus-") {
+		return "camel-quarkus:" + artifactID[14:]
+	}
+	return "mvn:" + a.GroupID + ":" + artifactID + ":" + a.Version
 }

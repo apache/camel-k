@@ -57,7 +57,7 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 	if t.Auto == nil || !*t.Auto {
 		if e.Platform == nil && t.CreateDefault == nil {
 			// Calculate if the platform should be automatically created when missing.
-			if ocp, err := openshift.IsOpenShift(t.client); err != nil {
+			if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
 				return false, err
 			} else if ocp {
 				t.CreateDefault = &ocp
@@ -92,7 +92,7 @@ func (t *platformTrait) Apply(e *Environment) error {
 }
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
-	pl, err := platform.GetOrLookupAny(t.ctx, t.client, e.Integration.Namespace, e.Integration.Status.Platform)
+	pl, err := platform.GetOrLookupAny(t.Ctx, t.Client, e.Integration.Namespace, e.Integration.Status.Platform)
 	if err != nil && k8serrors.IsNotFound(err) {
 		if t.CreateDefault != nil && *t.CreateDefault {
 			platformName := e.Integration.Status.Platform

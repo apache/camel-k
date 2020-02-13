@@ -204,8 +204,8 @@ func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
 	trait := newJvmTrait().(*jvmTrait)
 	enabled := true
 	trait.Enabled = &enabled
-	trait.ctx = context.TODO()
-	trait.client = client
+	trait.Ctx = context.TODO()
+	trait.Client = client
 
 	environment := &Environment{
 		Catalog:      NewCatalog(context.TODO(), nil),

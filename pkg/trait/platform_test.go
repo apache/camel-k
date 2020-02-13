@@ -61,7 +61,7 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			trait.CreateDefault = &createPlatform
 
 			var err error
-			trait.client, err = test.NewFakeClient()
+			trait.Client, err = test.NewFakeClient()
 			assert.Nil(t, err)
 
 			enabled, err := trait.Configure(&e)
@@ -96,7 +96,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	trait.CreateDefault = &createPlatform
 
 	var err error
-	trait.client, err = test.NewFakeClient()
+	trait.Client, err = test.NewFakeClient()
 	assert.Nil(t, err)
 
 	enabled, err := trait.Configure(&e)
@@ -155,7 +155,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 			var err error
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")
 			existingPlatform.Status.Phase = input.platformPhase
-			trait.client, err = test.NewFakeClient(&existingPlatform)
+			trait.Client, err = test.NewFakeClient(&existingPlatform)
 			assert.Nil(t, err)
 
 			enabled, err := trait.Configure(&e)
