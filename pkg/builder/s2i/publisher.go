@@ -41,14 +41,6 @@ import (
 )
 
 func publisher(ctx *builder.Context) error {
-	// We may want to unify the Dockerfile between build strategies, i.e., between Kaniko and S2I
-	// #nosec G202
-	dockerfile := `
-		FROM ` + ctx.BaseImage + `
-		ADD . /deployments
-		USER 1000
-	`
-
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: buildv1.GroupVersion.String(),
@@ -64,8 +56,7 @@ func publisher(ctx *builder.Context) error {
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
 				Source: buildv1.BuildSource{
-					Type:       buildv1.BuildSourceBinary,
-					Dockerfile: &dockerfile,
+					Type: buildv1.BuildSourceBinary,
 				},
 				Strategy: buildv1.BuildStrategy{
 					DockerStrategy: &buildv1.DockerBuildStrategy{},

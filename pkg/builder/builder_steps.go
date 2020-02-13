@@ -332,12 +332,13 @@ func imageContext(ctx *Context, selector artifactsSelector) error {
 	}
 
 	// #nosec G202
-	dockerFileContent := []byte(`
+	dockerfile := []byte(`
 		FROM ` + ctx.BaseImage + `
 		ADD . /deployments
+		USER 1000
 	`)
 
-	err = ioutil.WriteFile(path.Join( /*ctx.Path*/ contextDir, "Dockerfile"), dockerFileContent, 0777)
+	err = ioutil.WriteFile(path.Join(contextDir, "Dockerfile"), dockerfile, 0777)
 	if err != nil {
 		return err
 	}
