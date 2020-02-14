@@ -59,29 +59,31 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil
 	}
 
-	enabled := false
+	//
+	// Don't deploy when a different strategy is needed (e.g. Knative, Cron)
+	//
+	strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
+	if err != nil {
+		e.Integration.Status.SetErrorCondition(
+			v1.IntegrationConditionDeploymentAvailable,
+			v1.IntegrationConditionDeploymentAvailableReason,
+			err,
+		)
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
-		//
-		// Don't deploy when a different strategy is needed (e.g. Knative)
-		//
-		strategy, err := e.DetermineControllerStrategy(t.ctx, t.client)
-		if err != nil {
-			e.Integration.Status.SetErrorCondition(
-				v1.IntegrationConditionDeploymentAvailable,
-				v1.IntegrationConditionDeploymentAvailableReason,
-				err,
-			)
-
-			return false, err
-		}
-
-		enabled = strategy == ControllerStrategyDeployment
-	} else if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) &&
-		e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseResolvingKit) {
-		enabled = true
+		return false, err
 	}
 
+	if strategy != ControllerStrategyDeployment {
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionDeploymentAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionDeploymentAvailableReason,
+			"controller strategy: "+string(strategy),
+		)
+		return false, nil
+	}
+
+	enabled := e.IntegrationInPhase(v1.IntegrationPhaseDeploying)
 	if enabled {
 		dt := e.Catalog.GetTrait("deployer")
 		if dt != nil {
@@ -105,17 +107,6 @@ func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
-	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) &&
-		e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseResolvingKit) {
-		e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-			// trigger integration deploy
-			e.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-			return nil
-		})
-
-		return nil
-	}
-
 	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
 		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
 		maps := e.ComputeConfigMaps()
