@@ -53,21 +53,6 @@ func TestRunSimpleExamples(t *testing.T) {
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
-		t.Run("run java with master", func(t *testing.T) {
-			RegisterTestingT(t)
-			Expect(kamel("run", "-n", ns, "files/Master.java").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "master"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "master"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
-			Eventually(configMap(ns, "master-lock"), 10*time.Second).ShouldNot(BeNil())
-			// Start a second integration with the same lock (it should not start the route)
-			Expect(kamel("run", "-n", ns, "files/Master.java", "--name", "second",
-				"-t", "master.configmap=master", "-t", "master.label-value=master").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "second"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "second"), 1*time.Minute).Should(ContainSubstring("started in"))
-			Eventually(integrationLogs(ns, "second"), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
-			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
-		})
-
 		t.Run("run xml", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/xml.xml").Execute()).Should(BeNil())

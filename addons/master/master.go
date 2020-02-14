@@ -49,11 +49,11 @@ type masterTrait struct {
 	// It's enabled by default.
 	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies"`
 	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
-	Configmap string `property:"configmap"`
+	Configmap *string `property:"configmap"`
 	// Label that will be used to identify all pods contending the lock. Defaults to "camel.apache.org/integration".
-	LabelKey string `property:"label-key"`
+	LabelKey *string `property:"label-key"`
 	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
-	LabelValue           string `property:"label-value"`
+	LabelValue           *string `property:"label-value"`
 	delegateDependencies []string
 }
 
@@ -103,16 +103,18 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 			t.delegateDependencies = findAdditionalDependencies(e, meta)
 		}
 
-		if t.Configmap == "" {
-			t.Configmap = fmt.Sprintf("%s-lock", e.Integration.Name)
+		if t.Configmap == nil {
+			val := fmt.Sprintf("%s-lock", e.Integration.Name)
+			t.Configmap = &val
 		}
 
-		if t.LabelKey == "" {
-			t.LabelKey = "camel.apache.org/integration"
+		if t.LabelKey == nil {
+			val := "camel.apache.org/integration"
+			t.LabelKey = &val
 		}
 
-		if t.LabelValue == "" {
-			t.LabelValue = e.Integration.Name
+		if t.LabelValue == nil {
+			t.LabelValue = &e.Integration.Name
 		}
 	}
 
@@ -159,10 +161,25 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 
 		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
 			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
-			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.configMapName=%s", t.Configmap)},
-			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelKey=%s", t.LabelKey)},
-			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelValue=%s", t.LabelValue)},
 		)
+
+		if t.Configmap != nil {
+			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.configMapName=%s", *t.Configmap)},
+			)
+		}
+
+		if t.LabelKey != nil {
+			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelKey=%s", *t.LabelKey)},
+			)
+		}
+
+		if t.LabelValue != nil {
+			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelValue=%s", *t.LabelValue)},
+			)
+		}
 	}
 
 	return nil
