@@ -38,7 +38,7 @@ type Catalog struct {
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog(ctx context.Context, c client.Client) *Catalog {
-	var traitList []Trait
+	var traitList = make([]Trait, 0, len(FactoryList))
 	for _, factory := range FactoryList {
 		traitList = append(traitList, factory())
 	}
