@@ -65,6 +65,12 @@ type cronTrait struct {
 	// Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integration
 	// as Kubernetes CronJob.
 	Fallback *bool `property:"fallback"`
+	// Specifies how to treat concurrent executions of a Job.
+	// Valid values are:
+	// - "Allow": allows CronJobs to run concurrently;
+	// - "Forbid" (default): forbids concurrent runs, skipping next run if previous run hasn't finished yet;
+	// - "Replace": cancels currently running job and replaces it with a new one
+	ConcurrencyPolicy string `property:"concurrency-policy"`
 	// Automatically deploy the integration as CronJob when all routes are
 	// either starting from a periodic consumer (only `cron`, `timer` and `quartz` are supported) or a passive consumer (e.g. `direct` is a passive consumer).
 	//
@@ -132,6 +138,10 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 				util.StringSliceUniqueAdd(&configuredComponents, c)
 			}
 			t.Components = strings.Join(configuredComponents, ",")
+		}
+
+		if t.ConcurrencyPolicy == "" {
+			t.ConcurrencyPolicy = string(v1beta1.ForbidConcurrent)
 		}
 
 		if t.Schedule == "" && t.Components == "" && t.Fallback == nil {
@@ -220,7 +230,8 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 			Annotations: e.Integration.Annotations,
 		},
 		Spec: v1beta1.CronJobSpec{
-			Schedule: t.Schedule,
+			Schedule:          t.Schedule,
+			ConcurrencyPolicy: v1beta1.ConcurrencyPolicy(t.ConcurrencyPolicy),
 			JobTemplate: v1beta1.JobTemplateSpec{
 				Spec: batchv1.JobSpec{
 					Template: corev1.PodTemplateSpec{
