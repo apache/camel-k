@@ -174,7 +174,7 @@ func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationM
 			parts := strings.Split(endpoint, ":")
 			if len(parts) > 2 {
 				// syntax "master:lockname:endpoint:..."
-				childComponent := parts[2]
+				childComponent := strings.ReplaceAll(parts[2], "/", "")
 				if artifact := e.CamelCatalog.GetArtifactByScheme(childComponent); artifact != nil {
 					dependencies = append(dependencies, artifact.GetDependencyID())
 				}

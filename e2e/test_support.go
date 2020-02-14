@@ -211,7 +211,7 @@ func integrationPod(ns string, name string) func() *corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
-				APIVersion: v1.SchemeGroupVersion.String(),
+				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
 		err := testClient.List(testContext, &lst,
@@ -226,6 +226,23 @@ func integrationPod(ns string, name string) func() *corev1.Pod {
 			return nil
 		}
 		return &lst.Items[0]
+	}
+}
+
+func configMap(ns string, name string) func() *corev1.ConfigMap {
+	return func() *corev1.ConfigMap {
+		cm := corev1.ConfigMap{}
+		key := k8sclient.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		err := testClient.Get(testContext, key, &cm)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			panic(err)
+		}
+		return &cm
 	}
 }
 
