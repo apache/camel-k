@@ -38,7 +38,7 @@ func TestConfigureDeployerTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDeployerTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	deployerTrait, environment := createNominalDeployerTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
 	configured, err := deployerTrait.Configure(environment)
 

@@ -52,9 +52,9 @@ func (t *deployerTrait) Configure(e *Environment) (bool, error) {
 		v1.IntegrationPhaseNone,
 		v1.IntegrationPhaseWaitingForPlatform,
 		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseDeploying,
 		v1.IntegrationPhaseBuildingKit,
 		v1.IntegrationPhaseResolvingKit,
+		v1.IntegrationPhaseDeploying,
 		v1.IntegrationPhaseRunning,
 	), nil
 }
