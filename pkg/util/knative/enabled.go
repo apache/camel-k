@@ -39,7 +39,7 @@ func IsEnabledInNamespace(ctx context.Context, c client.Client, namespace string
 		log.Infof("could not create dynamic client to check knative installation in namespace %s, got error: %v", namespace, err)
 		return false
 	}
-	for _, kgv := range KnownEndpointKinds {
+	for _, kgv := range RequiredKinds {
 		_, err = dyn.Resource(schema.GroupVersionResource{
 			Group:    kgv.Group,
 			Version:  kgv.Version,
@@ -60,7 +60,7 @@ func IsEnabledInNamespace(ctx context.Context, c client.Client, namespace string
 // This method should not be called from the operator, as it might require permissions that are not available.
 func IsInstalled(ctx context.Context, c kubernetes.Interface) (bool, error) {
 	// check some Knative APIs
-	for _, api := range getKnativeGroupVersions() {
+	for _, api := range getRequiredKnativeGroupVersions() {
 		if installed, err := isInstalled(c, api); err != nil {
 			return false, err
 		} else if installed {
@@ -80,10 +80,10 @@ func isInstalled(c kubernetes.Interface, api schema.GroupVersion) (bool, error) 
 	return true, nil
 }
 
-func getKnativeGroupVersions() []schema.GroupVersion {
+func getRequiredKnativeGroupVersions() []schema.GroupVersion {
 	apis := make(map[schema.GroupVersion]bool)
 	res := make([]schema.GroupVersion, 0)
-	for _, gvk := range KnownEndpointKinds {
+	for _, gvk := range RequiredKinds {
 		if !apis[gvk.GroupVersion()] {
 			apis[gvk.GroupVersion()] = true
 			res = append(res, gvk.GroupVersion())
