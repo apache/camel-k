@@ -139,6 +139,8 @@ func TestDependenciesQuarkus(t *testing.T) {
 			    from("http:test").to("log:end");
 			    from("https:test").to("log:end");
 			    from("twitter-timeline:test").to("mock:end");
+			    from("direct:start").circuitBreaker().hystrixConfiguration().executionTimeoutInMilliseconds(100).end()
+			    .to("direct:other").onFallback().setBody(constant("Fallback response")).end();
 		    `,
 		},
 		Language: v1.LanguageJavaSource,
@@ -156,6 +158,8 @@ func TestDependenciesQuarkus(t *testing.T) {
 			"camel-quarkus:log",
 			"camel-quarkus:timer",
 			"camel-quarkus:twitter",
+			"camel-quarkus:direct",
+			"camel-quarkus:hystrix",
 		},
 		meta.Dependencies.List())
 }
