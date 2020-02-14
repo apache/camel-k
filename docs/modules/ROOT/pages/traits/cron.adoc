@@ -68,6 +68,14 @@ Supported components are currently: `cron`, `timer` and `quartz`.
 | Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integration
 as Kubernetes CronJob.
 
+| cron.concurrency-policy
+| string
+| Specifies how to treat concurrent executions of a Job.
+Valid values are:
+- "Allow": allows CronJobs to run concurrently;
+- "Forbid" (default): forbids concurrent runs, skipping next run if previous run hasn't finished yet;
+- "Replace": cancels currently running job and replaces it with a new one
+
 | cron.auto
 | bool
 | Automatically deploy the integration as CronJob when all routes are
