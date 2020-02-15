@@ -65,7 +65,7 @@ jobs:
         sudo echo '{"insecure-registries": ["172.30.0.0/16"]}' | sudo tee /etc/docker/daemon.json > /dev/null
         sudo service docker start
 
-        DOWNLOAD_URL=https://github.com/openshift/origin/releases/download/v$OPENSHIFT_VERSION/openshift-origin-client-tools-v$OPENSHIFT_VERSION-$OPENSHIFT_COMMIT-linux-64bit.tar.gz
+        DOWNLOAD_URL=https://github.com/openshift/origin/releases/download/$OPENSHIFT_VERSION/openshift-origin-client-tools-$OPENSHIFT_VERSION-$OPENSHIFT_COMMIT-linux-64bit.tar.gz
         wget -O client.tar.gz ${DOWNLOAD_URL}
         tar xvzOf client.tar.gz > oc.bin
         sudo mv oc.bin /usr/local/bin/oc
