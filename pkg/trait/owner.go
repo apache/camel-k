@@ -41,7 +41,7 @@ type ownerTrait struct {
 
 func newOwnerTrait() Trait {
 	return &ownerTrait{
-		BaseTrait: NewBaseTrait("owner", 2600),
+		BaseTrait: NewBaseTrait("owner", 2500),
 	}
 }
 
