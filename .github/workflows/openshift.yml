@@ -128,7 +128,8 @@ jobs:
         cp ./kamel ./build/_output/bin/
 
         echo "Building the images"
-        docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
+        export IMAGE=docker.io/apache/camel-k:$(make version)
+        docker build -t "${IMAGE}" -f build/Dockerfile .
 
         # Make the Apache Snapshots repository enabled by efault
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots
