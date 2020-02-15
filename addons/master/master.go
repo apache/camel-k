@@ -60,7 +60,7 @@ type masterTrait struct {
 // NewMasterTrait --
 func NewMasterTrait() trait.Trait {
 	return &masterTrait{
-		BaseTrait: trait.NewBaseTrait("master", 850),
+		BaseTrait: trait.NewBaseTrait("master", trait.TraitOrderBeforeControllerCreation),
 	}
 }
 

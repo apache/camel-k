@@ -103,6 +103,19 @@ type Trait interface {
 	Order() int
 }
 
+// A list of named orders, useful for correctly binding addons
+const (
+	// TraitOrderBeforeControllerCreation can be used to inject configuration such as properties and environment variables
+	// into the running integration, before the actual controller is created.
+	TraitOrderBeforeControllerCreation = 850
+	// TraitOrderControllerSelection can be used if you intend to provide an alternative controller for the integration
+	// (e.g. Deployment, CronJob, ...).
+	TraitOrderControllerSelection = 950
+	// TraitOrderPostProcessResources is executed after all other traits are executed (except for important core traits such as
+	// the "owner" trait), so it can be used to post-process generated resources before their actual creation.
+	TraitOrderPostProcessResources = 2450
+)
+
 /* Base trait */
 
 // NewBaseTrait --
