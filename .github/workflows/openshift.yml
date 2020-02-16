@@ -108,13 +108,12 @@ jobs:
       run: |
         oc describe nodes
     - name: Run IT
-      # Disable registry tests as not compatible with KinD
-      #env:
-      #  TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-      #  TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-      #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
-      #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
-      #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
+      env:
+        TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
+        TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
+        TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
       run: |
         # Compute registry parameters
         echo "Build project"
