@@ -87,6 +87,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 	cmd.Flags().StringArrayP("property-file", "", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
+	cmd.Flags().StringArrayP("label", "", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -120,6 +121,7 @@ type runCmdOptions struct {
 	Volumes         []string `mapstructure:"volumes"`
 	EnvVars         []string `mapstructure:"envs"`
 	PropertyFiles   []string `mapstructure:"property-files"`
+	Labels          []string `mapstructure:"labels"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -185,6 +187,13 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 			return errors.Wrapf(err, "unable to access property file %s", fileName)
 		} else if file.IsDir() {
 			return fmt.Errorf("property file %s is a directory", fileName)
+		}
+	}
+
+	for _, label := range o.Labels {
+		parts := strings.Split(label, "=")
+		if len(parts) != 2 {
+			return fmt.Errorf(`invalid label specification %s. Expected "<labelkey>=<labelvalue>"`, label)
 		}
 	}
 
@@ -376,6 +385,16 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			Repositories:  o.Repositories,
 			Profile:       v1.TraitProfileByName(o.Profile),
 		},
+	}
+
+	for _, label := range o.Labels {
+		parts := strings.Split(label, "=")
+		if len(parts) == 2 {
+			if integration.Labels == nil {
+				integration.Labels = make(map[string]string)
+			}
+			integration.Labels[parts[0]] = parts[1]
+		}
 	}
 
 	for _, source := range sources {

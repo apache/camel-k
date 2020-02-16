@@ -17,7 +17,7 @@
 
 import org.apache.camel.builder.RouteBuilder;
 
-public class Java extends RouteBuilder {
+public class Master extends RouteBuilder {
   @Override
   public void configure() throws Exception {
 	  from("master:lock:timer:tick")

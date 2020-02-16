@@ -27,21 +27,42 @@ import (
 
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
+
+	_ "github.com/apache/camel-k/addons"
 )
 
 func TestAddons(t *testing.T) {
 	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 
-		t.Run("master addon", func(t *testing.T) {
+		t.Run("master works", func(t *testing.T) {
 			RegisterTestingT(t)
-			Expect(kamel("run", "-n", ns, "files/Master.java", "-t", `master.label-key=""`).Execute()).Should(BeNil())
+			Expect(kamel("run", "-n", ns, "files/Master.java").Execute()).Should(BeNil())
 			Eventually(integrationPodPhase(ns, "master"), 5*time.Minute).Should(Equal(v1.PodRunning))
 			Eventually(integrationLogs(ns, "master"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
 			Eventually(configMap(ns, "master-lock"), 30*time.Second).ShouldNot(BeNil())
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
+		t.Run("only one integration with master runs", func(t *testing.T) {
+			RegisterTestingT(t)
+			Expect(kamel("run", "-n", ns, "files/Master.java",
+				"--name", "first",
+				"--label", "leader-group=same",
+				"-t", "master.label-key=leader-group",
+				"-t", "master.label-value=same",
+				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
+			Eventually(integrationPodPhase(ns, "first"), 5*time.Minute).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "first"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(configMap(ns, "first-lock"), 30*time.Second).ShouldNot(BeNil())
 			// Start a second integration with the same lock (it should not start the route)
-			Expect(kamel("run", "-n", ns, "files/Master.java", "--name", "second",
-				"-t", "master.configmap=master-lock", "-t", `master.label-key=""`).Execute()).Should(BeNil())
+			Expect(kamel("run", "-n", ns, "files/Master.java",
+				"--name", "second",
+				"--label", "leader-group=same",
+				"-t", "master.label-key=leader-group",
+				"-t", "master.label-value=same",
+				"-t", "master.configmap=first-lock",
+				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
 			Eventually(integrationPodPhase(ns, "second"), 5*time.Minute).Should(Equal(v1.PodRunning))
 			Eventually(integrationLogs(ns, "second"), 1*time.Minute).Should(ContainSubstring("started in"))
 			Eventually(integrationLogs(ns, "second"), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
