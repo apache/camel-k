@@ -27,8 +27,6 @@ import (
 
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
-
-	_ "github.com/apache/camel-k/addons"
 )
 
 func TestAddons(t *testing.T) {
