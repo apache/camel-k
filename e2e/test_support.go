@@ -56,6 +56,9 @@ import (
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	// let's enable addons in all tests
+	_ "github.com/apache/camel-k/addons"
 )
 
 var testContext context.Context
