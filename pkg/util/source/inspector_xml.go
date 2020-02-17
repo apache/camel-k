@@ -44,16 +44,16 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 		if se, ok := t.(xml.StartElement); ok {
 			switch se.Name.Local {
 			case "rest", "restConfiguration":
-				meta.Dependencies.Add("camel:rest")
+				i.addDependency("camel:rest", meta)
 			case "circuitBreaker":
-				meta.Dependencies.Add("camel:hystrix")
+				i.addDependency("camel:hystrix", meta)
 			case "simple":
-				meta.Dependencies.Add("camel:bean")
+				i.addDependency("camel:bean", meta)
 			case "language":
 				for _, a := range se.Attr {
 					if a.Name.Local == "language" {
 						if dependency, ok := i.catalog.GetLanguageDependency(a.Value); ok {
-							meta.Dependencies.Add(dependency)
+							i.addDependency(dependency, meta)
 						}
 					}
 				}
@@ -72,7 +72,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 			}
 
 			if dependency, ok := i.catalog.GetLanguageDependency(se.Name.Local); ok {
-				meta.Dependencies.Add(dependency)
+				i.addDependency(dependency, meta)
 			}
 		}
 	}

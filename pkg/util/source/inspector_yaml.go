@@ -55,9 +55,9 @@ func (inspector YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) err
 func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
 	case "rest":
-		meta.Dependencies.Add("camel:rest")
+		inspector.addDependency("camel:rest", meta)
 	case "circuitBreaker":
-		meta.Dependencies.Add("camel:hystrix")
+		inspector.addDependency("camel:hystrix", meta)
 	}
 
 	var maybeURI string
@@ -71,13 +71,13 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 		}
 
 		if _, ok := t["simple"]; ok {
-			meta.Dependencies.Add("camel:bean")
+			inspector.addDependency("camel:bean", meta)
 		}
 
 		if _, ok := t["language"]; ok {
 			if s, ok := t["language"].(string); ok {
 				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
-					meta.Dependencies.Add(dependency)
+					inspector.addDependency(dependency, meta)
 				}
 			} else if m, ok := t["language"].(map[interface{}]interface{}); ok {
 				if err := inspector.parseStep("language", m, meta); err != nil {
@@ -89,7 +89,7 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 		for k := range t {
 			if s, ok := k.(string); ok {
 				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
-					meta.Dependencies.Add(dependency)
+					inspector.addDependency(dependency, meta)
 				}
 			}
 		}

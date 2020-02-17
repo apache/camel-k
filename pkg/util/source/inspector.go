@@ -27,42 +27,53 @@ import (
 )
 
 var (
-	singleQuotedFrom = regexp.MustCompile(`from\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	doubleQuotedFrom = regexp.MustCompile(`from\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
-	singleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	singleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	singleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	doubleQuotedTo   = regexp.MustCompile(`\.to\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
-	doubleQuotedToD  = regexp.MustCompile(`\.toD\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
-	doubleQuotedToF  = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
-	languageRegexp   = regexp.MustCompile(`language\s*\(\s*["|']([a-zA-Z0-9-]+[^"|']+)["|']\s*,.*\)`)
-	camelTypeRegexp  = regexp.MustCompile(`.*(org.apache.camel.*Component|DataFormat|Language)`)
+	singleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	doubleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	singleQuotedTo          = regexp.MustCompile(`\.to\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	singleQuotedToD         = regexp.MustCompile(`\.toD\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	singleQuotedToF         = regexp.MustCompile(`\.toF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	doubleQuotedTo          = regexp.MustCompile(`\.to\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	doubleQuotedToD         = regexp.MustCompile(`\.toD\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	doubleQuotedToF         = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	languageRegexp          = regexp.MustCompile(`language\s*\(\s*["|']([a-zA-Z0-9-]+[^"|']+)["|']\s*,.*\)`)
+	camelTypeRegexp         = regexp.MustCompile(`.*(org.apache.camel.*Component|DataFormat|Language)`)
+	jsonLibraryRegexp       = regexp.MustCompile(`.*JsonLibrary\.Jackson.*`)
+	jsonLanguageRegexp      = regexp.MustCompile(`.*\.json\(\).*`)
+	circuitBreakerRegexp    = regexp.MustCompile(`.*\.circuitBreaker\(\).*`)
+	restConfigurationRegexp = regexp.MustCompile(`.*restConfiguration\(\).*`)
+	restRegexp              = regexp.MustCompile(`.*rest\(("[a-zA-Z0-9-/]+")*\).*`)
+	restXMLRegexp           = regexp.MustCompile(`^\s*rest\s*{.*`)
+	groovyLanguageRegexp    = regexp.MustCompile(`.*\.groovy\s*\(.*\).*`)
+	jsonPathLanguageRegexp  = regexp.MustCompile(`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`)
+	ognlRegexp              = regexp.MustCompile(`.*\.ognl\s*\(.*\).*`)
+	mvelRegexp              = regexp.MustCompile(`.*\.mvel\s*\(.*\).*`)
+	simpleLanguageRegexp    = regexp.MustCompile(`.*\.?simple\s*\(.*\).*`)
+	xqueryRegexp            = regexp.MustCompile(`.*\.xquery\s*\(.*\).*`)
+	xpathRegexp             = regexp.MustCompile(`.*\.?xpath\s*\(.*\).*`)
+	xtokenizeRegexp         = regexp.MustCompile(`.*\.xtokenize\s*\(.*\).*`)
 
 	sourceDependencies = struct {
-		main    map[string]string
-		quarkus map[string]string
+		main    map[*regexp.Regexp]string
+		quarkus map[*regexp.Regexp]string
 	}{
-		main: map[string]string{
-			`.*JsonLibrary\.Jackson.*`:                         "camel:jackson",
-			`.*\.json\(\).*`:                                   "camel:jackson",
-			`.*\.circuitBreaker\(\).*`:                         "camel:hystrix",
-			`.*restConfiguration\(\).*`:                        "camel:rest",
-			`.*rest\(("[a-zA-Z0-9-/]+")*\).*`:                  "camel:rest",
-			`^\s*rest\s*{.*`:                                   "camel:rest",
-			`.*\.groovy\s*\(.*\).*`:                            "camel:groovy",
-			`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`: "camel:jsonpath",
-			`.*\.ognl\s*\(.*\).*`:                              "camel:ognl",
-			`.*\.mvel\s*\(.*\).*`:                              "camel:mvel",
-			`.*\.?simple\s*\(.*\).*`:                           "camel:bean",
-			`.*\.xquery\s*\(.*\).*`:                            "camel:saxon",
-			`.*\.?xpath\s*\(.*\).*`:                            "camel:xpath",
-			`.*\.xtokenize\s*\(.*\).*`:                         "camel:jaxp",
+		main: map[*regexp.Regexp]string{
+			jsonLibraryRegexp:       "camel:jackson",
+			jsonLanguageRegexp:      "camel:jackson",
+			circuitBreakerRegexp:    "camel:hystrix",
+			restConfigurationRegexp: "camel:rest",
+			restRegexp:              "camel:rest",
+			restXMLRegexp:           "camel:rest",
+			groovyLanguageRegexp:    "camel:groovy",
+			jsonPathLanguageRegexp:  "camel:jsonpath",
+			ognlRegexp:              "camel:ognl",
+			mvelRegexp:              "camel:mvel",
+			simpleLanguageRegexp:    "camel:bean",
+			xqueryRegexp:            "camel:saxon",
+			xpathRegexp:             "camel:xpath",
+			xtokenizeRegexp:         "camel:jaxp",
 		},
-		quarkus: map[string]string{
-			`.*restConfiguration\(\).*`:       "camel-quarkus:rest",
-			`.*rest\(("[a-zA-Z0-9-/]+")*\).*`: "camel-quarkus:rest",
-			`^\s*rest\s*{.*`:                  "camel-quarkus:rest",
-			`.*\.?simple\s*\(.*\).*`:          "camel-quarkus:bean",
+		quarkus: map[*regexp.Regexp]string{
+			xtokenizeRegexp: "camel-quarkus:core-xml",
 		},
 	}
 )
@@ -130,27 +141,26 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 	for _, uri := range uris {
 		candidateComp := i.decodeComponent(uri)
 		if candidateComp != "" {
-			meta.Dependencies.Add(candidateComp)
+			i.addDependency(candidateComp, meta)
 		}
 	}
 
-	var additionalDependencies map[string]string
-	if i.catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
-		additionalDependencies = sourceDependencies.quarkus
-	} else {
-		additionalDependencies = sourceDependencies.main
-	}
-	for pattern, dep := range additionalDependencies {
-		pat := regexp.MustCompile(pattern)
-		if pat.MatchString(source.Content) {
-			meta.Dependencies.Add(dep)
+	for pattern, dep := range sourceDependencies.main {
+		if i.catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
+			// Check whether quarkus has its own artifact that differs from the standard one
+			if _, ok := sourceDependencies.quarkus[pattern]; ok {
+				dep = sourceDependencies.quarkus[pattern]
+			}
+		}
+		if pattern.MatchString(source.Content) {
+			i.addDependency(dep, meta)
 		}
 	}
 
 	for _, match := range languageRegexp.FindAllStringSubmatch(source.Content, -1) {
 		if len(match) > 1 {
 			if dependency, ok := i.catalog.GetLanguageDependency(match[1]); ok {
-				meta.Dependencies.Add(dependency)
+				i.addDependency(dependency, meta)
 			}
 		}
 	}
@@ -158,10 +168,19 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 	for _, match := range camelTypeRegexp.FindAllStringSubmatch(source.Content, -1) {
 		if len(match) > 1 {
 			if dependency, ok := i.catalog.GetJavaTypeDependency(match[1]); ok {
-				meta.Dependencies.Add(dependency)
+				i.addDependency(dependency, meta)
 			}
 		}
 	}
+}
+
+func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
+	if i.catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
+		if strings.HasPrefix(dependency, "camel:") {
+			dependency = "camel-quarkus:" + strings.TrimPrefix(dependency, "camel:")
+		}
+	}
+	meta.Dependencies.Add(dependency)
 }
 
 func (i *baseInspector) decodeComponent(uri string) string {
