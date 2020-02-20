@@ -1,0 +1,8 @@
+{{/*
+Constraints
+*/}}
+{{- if (not .Values.platform.cluster) or (.Values.platform.cluster ne "OpenShift") }}
+{{ required "Field \"platform.build.registry.address\" is required when not running on OpenShift (set \"platform.cluster=OpenShift\" if you're using OpenShift instead)!" .Values.platform.build.registry.address | substr 0 0 }}
+{{- end }}
+
+Connect the world with Camel K on {{ include "camel-k.cluster" . }}!
