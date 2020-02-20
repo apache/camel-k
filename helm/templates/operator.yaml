@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: camel-k
+    camel.apache.org/component: operator
+    {{- include "camel-k.labels" . | nindent 4 }}
+  name: camel-k-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: camel-k-operator
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: camel-k
+        camel.apache.org/component: operator
+        name: camel-k-operator
+    spec:
+      containers:
+        - command:
+            - kamel
+            - operator
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OPERATOR_NAME
+              value: camel-k
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          image: {{ .Values.operator.image }}
+          imagePullPolicy: IfNotPresent
+          name: camel-k-operator
+          resources: {}
+      serviceAccountName: camel-k-operator
