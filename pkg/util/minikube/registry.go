@@ -16,7 +16,7 @@ limitations under the License.
 */
 
 // Package minishift contains utilities for Minishift deployments
-package minishift
+package minikube
 
 import (
 	"context"
@@ -33,7 +33,7 @@ const (
 	registryNamespace = "kube-system"
 )
 
-// FindRegistry returns the Minishift registry location if any
+// FindRegistry returns the Minikube addon registry location if any
 func FindRegistry(ctx context.Context, c client.Client) (*string, error) {
 	svcs := corev1.ServiceList{
 		TypeMeta: metav1.TypeMeta{
