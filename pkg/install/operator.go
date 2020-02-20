@@ -35,7 +35,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/minishift"
+	"github.com/apache/camel-k/pkg/util/minikube"
 )
 
 // OperatorConfiguration --
@@ -105,12 +105,12 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return o
 	}
 
-	isOpenshift, err := isOpenShift(c, cfg.ClusterType)
+	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
 		return err
 	}
-	if isOpenshift {
-		if err := installOpenshift(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+	if isOpenShift {
+		if err := installOpenShift(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
 	} else {
@@ -139,7 +139,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 	return nil
 }
 
-func installOpenshift(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+func installOpenShift(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-service-account.yaml",
 		"operator-role-openshift.yaml",
@@ -180,7 +180,7 @@ func Platform(ctx context.Context, c client.Client, clusterType string, namespac
 // PlatformOrCollect --
 // nolint: lll
 func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1.IntegrationPlatform, error) {
-	isOpenshift, err := isOpenShift(c, clusterType)
+	isOpenShift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
 	}
@@ -190,32 +190,27 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	}
 	pl := platformObject.(*v1.IntegrationPlatform)
 
-	if !isOpenshift {
+	if !isOpenShift {
 		pl.Spec.Build.Registry = registry
 
 		// Kubernetes only (Minikube)
 		if registry.Address == "" {
 			// This operation should be done here in the installer
 			// because the operator is not allowed to look into the "kube-system" namespace
-			minikubeRegistry, err := minishift.FindRegistry(ctx, c)
+			address, err := minikube.FindRegistry(ctx, c)
 			if err != nil {
 				return nil, err
 			}
-			if minikubeRegistry == nil {
+			if address == nil {
 				return nil, errors.New("cannot find automatically a registry where to push images")
 			}
 
-			pl.Spec.Build.Registry.Address = *minikubeRegistry
+			pl.Spec.Build.Registry.Address = *address
 			pl.Spec.Build.Registry.Insecure = true
 		}
 	}
 
 	return pl, nil
-}
-
-// Example --
-func Example(ctx context.Context, c client.Client, namespace string, force bool) error {
-	return ExampleOrCollect(ctx, c, namespace, nil, force)
 }
 
 // ExampleOrCollect --
