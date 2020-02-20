@@ -226,6 +226,9 @@ release: clean codegen set-version build-resources check-licenses unsnapshot-olm
 
 release-staging: clean codegen set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
 
+release-helm:
+	./script/release_helm.sh
+
 install-minishift:
 	./script/install_minishift.sh
 install-minikube:
@@ -234,4 +237,4 @@ install-minikube:
 release-notes:
 	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm
