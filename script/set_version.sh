@@ -33,4 +33,8 @@ do
     sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
 done
 
+# Update helm chart
+sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
+sed -i -r "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
+
 echo "Camel K version set to: $version and image name to: $image_name"
