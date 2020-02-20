@@ -32,6 +32,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"io"
 
 	"github.com/apache/camel-k/e2e/util"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -118,12 +119,18 @@ func kamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 		c = &cobra.Command{
 			DisableFlagParsing: true,
 			Run: func(cmd *cobra.Command, args []string) {
-				var out []byte
-				out, err = exec.Command(kamelBin, args...).Output()
-				// it is useful to know what is happening in case of error
+				
+				externalBin := exec.Command(kamelBin, args...)
+				var stdout io.Reader
+				stdout , err = externalBin.StdoutPipe()
 				if err != nil {
-					fmt.Println(string(out))
+					panic(err)
 				}
+				
+				externalBin.Start()
+				io.Copy(c.OutOrStdout(), stdout)
+				externalBin.Wait()
+				
 			},
 		}
 	} else {
