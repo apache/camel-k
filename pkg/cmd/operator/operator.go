@@ -27,10 +27,12 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"
 	"github.com/operator-framework/operator-sdk/pkg/ready"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
+	corev1 "k8s.io/api/core/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
 
@@ -109,9 +111,18 @@ func Run() {
 		log.Error(err, "cannot initialize client")
 		os.Exit(1)
 	}
-	eventBroadcaster := record.NewBroadcaster()
-	//eventBroadcaster.StartLogging(camellog.WithName("events").Infof)
-	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
+
+	// Configure event broadcaster
+	var eventBroadcaster record.EventBroadcaster
+	if ok, err := kubernetes.CheckPermission(c, corev1.GroupName, "events", namespace, "", "create"); err != nil {
+		log.Error(err, "cannot check permissions for configuring event broadcaster")
+	} else if !ok {
+		log.Info("Event broadcasting to Kubernetes is disabled because of missing permissions to create events")
+	} else {
+		eventBroadcaster = record.NewBroadcaster()
+		//eventBroadcaster.StartLogging(camellog.WithName("events").Infof)
+		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
+	}
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
