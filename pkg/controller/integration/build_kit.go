@@ -111,8 +111,8 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		"camel.apache.org/created.by.kind":    v1.IntegrationKind,
 		"camel.apache.org/created.by.name":    integration.Name,
 		"camel.apache.org/created.by.version": integration.ResourceVersion,
-		"camel.apache.org/runtime.version":        integration.Status.RuntimeVersion,
-		"camel.apache.org/runtime.provider":       string(integration.Status.RuntimeProvider),
+		"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
+		"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
 	}
 
 	// Set the kit to have the same characteristics as the integrations
