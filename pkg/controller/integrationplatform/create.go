@@ -49,7 +49,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 	for _, k := range deploy.Resources("/") {
 		if strings.HasPrefix(k, "camel-catalog-") {
 			action.L.Infof("Installing camel catalog: %s", k)
-			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, k)
+			err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, k)
 			if err != nil {
 				return nil, err
 			}
@@ -73,7 +73,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 
 		if len(res) > 0 {
 			action.L.Info("Installing custom platform resources")
-			err := install.Resources(ctx, action.client, platform.Namespace, install.IdentityResourceCustomizer, res...)
+			err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, res...)
 			if err != nil {
 				return nil, err
 			}
