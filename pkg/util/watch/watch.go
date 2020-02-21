@@ -50,6 +50,7 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1.Integrat
 	if err != nil {
 		return nil, err
 	}
+
 	watcher, err := dynamicClient.Watch(metav1.ListOptions{
 		FieldSelector:   "metadata.name=" + integration.Name,
 		ResourceVersion: integration.ObjectMeta.ResourceVersion,
@@ -62,6 +63,21 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1.Integrat
 	events := watcher.ResultChan()
 
 	var lastObservedState *v1.IntegrationPhase
+
+	var handlerWrapper = func(it *v1.Integration) bool {
+		if lastObservedState == nil || *lastObservedState != it.Status.Phase {
+			lastObservedState = &it.Status.Phase
+			if !handler(it) {
+				return false
+			}
+		}
+		return true
+	}
+
+	// Check completion before starting the watch
+	if !handlerWrapper(integration) {
+		return lastObservedState, nil
+	}
 
 	for {
 		select {
@@ -85,11 +101,8 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1.Integrat
 						return lastObservedState, nil
 					}
 
-					if lastObservedState == nil || *lastObservedState != copy.Status.Phase {
-						lastObservedState = &copy.Status.Phase
-						if !handler(copy) {
-							return lastObservedState, nil
-						}
+					if !handlerWrapper(copy) {
+						return lastObservedState, nil
 					}
 				}
 			}
@@ -189,6 +202,21 @@ func HandlePlatformStateChanges(ctx context.Context, platform *v1.IntegrationPla
 
 	var lastObservedState *v1.IntegrationPlatformPhase
 
+	var handlerWrapper = func(pl *v1.IntegrationPlatform) bool {
+		if lastObservedState == nil || *lastObservedState != pl.Status.Phase {
+			lastObservedState = &pl.Status.Phase
+			if !handler(pl) {
+				return false
+			}
+		}
+		return true
+	}
+
+	// Check completion before starting the watch
+	if !handlerWrapper(platform) {
+		return nil
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -211,11 +239,8 @@ func HandlePlatformStateChanges(ctx context.Context, platform *v1.IntegrationPla
 						return nil
 					}
 
-					if lastObservedState == nil || *lastObservedState != copy.Status.Phase {
-						lastObservedState = &copy.Status.Phase
-						if !handler(copy) {
-							return nil
-						}
+					if !handlerWrapper(copy) {
+						return nil
 					}
 				}
 			}
