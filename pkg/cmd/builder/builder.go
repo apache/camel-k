@@ -88,10 +88,14 @@ func Run(namespace string, buildName string, taskName string) {
 	// Patch the build status with the result
 	p, err := patch.PositiveMergePatch(build, target)
 	exitOnError(err, "cannot create merge patch")
-	exitOnError(
-		c.Status().Patch(ctx, target, controller.ConstantPatch(types.MergePatchType, p)),
-		fmt.Sprintf("\n--- patch ---\n%s\n-------------\n", string(p)),
-	)
+	if len(p) > 0 {
+		exitOnError(
+			c.Status().Patch(ctx, target, controller.ConstantPatch(types.MergePatchType, p)),
+			fmt.Sprintf("\n--- patch ---\n%s\n-------------\n", string(p)),
+		)
+	} else {
+		log.Info("Patch not applied (no difference)")
+	}
 	build.Status = target.Status
 
 	switch build.Status.Phase {

@@ -22,13 +22,9 @@ limitations under the License.
 package e2e
 
 import (
-	"fmt"
-	"path"
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/e2e/util"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
@@ -102,27 +98,5 @@ func TestRunSimpleExamples(t *testing.T) {
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
-		for _, lang := range camelv1.Languages {
-			t.Run("init run "+string(lang), func(t *testing.T) {
-				RegisterTestingT(t)
-				dir := util.MakeTempDir(t)
-				itName := fmt.Sprintf("init%s", string(lang))          // e.g. initjava
-				fileName := fmt.Sprintf("%s.%s", itName, string(lang)) // e.g. initjava.java
-				file := path.Join(dir, fileName)
-				Expect(kamel("init", file).Execute()).Should(BeNil())
-				Expect(kamel("run", "-n", ns, file).Execute()).Should(BeNil())
-				Eventually(integrationPodPhase(ns, itName), 5*time.Minute).Should(Equal(v1.PodRunning))
-				Eventually(integrationLogs(ns, itName), 1*time.Minute).Should(ContainSubstring(languageInitExpectedString(lang)))
-				Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
-			})
-		}
 	})
-}
-
-func languageInitExpectedString(lang camelv1.Language) string {
-	langDesc := string(lang)
-	if lang == camelv1.LanguageKotlin {
-		langDesc = "kotlin"
-	}
-	return fmt.Sprintf(" Hello Camel K from %s", langDesc)
 }
