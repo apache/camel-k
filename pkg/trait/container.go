@@ -139,9 +139,9 @@ func (t *containerTrait) Apply(e *Environment) error {
 			case env.ValueFrom.FieldRef != nil && env.ValueFrom.FieldRef.FieldPath == "metadata.namespace":
 				envvar.SetVar(&container.Env, corev1.EnvVar{Name: env.Name, Value: e.Integration.Namespace})
 			case env.ValueFrom.FieldRef != nil:
-				t.L.Infof("Environment variable %s uses fieldRef and cannot be set on a Knative service", env.Name)
+				t.L.Infof("Skipping environment variable %s (fieldRef)", env.Name)
 			case env.ValueFrom.ResourceFieldRef != nil:
-				t.L.Infof("Environment variable %s uses resourceFieldRef and cannot be set on a Knative service", env.Name)
+				t.L.Infof("Skipping environment variable %s (resourceFieldRef)", env.Name)
 			default:
 				envvar.SetVar(&container.Env, env)
 			}
