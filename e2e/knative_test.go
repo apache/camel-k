@@ -35,9 +35,17 @@ func TestRunServiceCombo(t *testing.T) {
 		Expect(kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
 		Expect(kamel("run", "-n", ns, "files/knative2.groovy").Execute()).Should(BeNil())
 		Eventually(integrationPodPhase(ns, "knative2"), 10*time.Minute).Should(Equal(v1.PodRunning))
+		Expect(kamel("run", "-n", ns, "files/knative3.groovy").Execute()).Should(BeNil())
+		Eventually(integrationPodPhase(ns, "knative3"), 10*time.Minute).Should(Equal(v1.PodRunning))
 		Expect(kamel("run", "-n", ns, "files/knative1.groovy").Execute()).Should(BeNil())
 		Eventually(integrationPodPhase(ns, "knative1"), 10*time.Minute).Should(Equal(v1.PodRunning))
-		Eventually(integrationLogs(ns, "knative1"), 5*time.Minute).Should(ContainSubstring("Received: Hello from knative2"))
+		// Correct logs
+		Eventually(integrationLogs(ns, "knative1"), 5*time.Minute).Should(ContainSubstring("Received from 2: Hello from knative2"))
+		Eventually(integrationLogs(ns, "knative1"), 5*time.Minute).Should(ContainSubstring("Received from 3: Hello from knative3"))
+		// Incorrect logs
+		Consistently(integrationLogs(ns, "knative1"), 10*time.Second).ShouldNot(ContainSubstring("Received from 2: Hello from knative3"))
+		Consistently(integrationLogs(ns, "knative1"), 10*time.Second).ShouldNot(ContainSubstring("Received from 3: Hello from knative2"))
+		// Cleanup
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
