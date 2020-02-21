@@ -45,12 +45,12 @@ type OperatorConfiguration struct {
 }
 
 // Operator installs the operator resources in the given namespace
-func Operator(ctx context.Context, c client.Client, cfg OperatorConfiguration) error {
-	return OperatorOrCollect(ctx, c, cfg, nil)
+func Operator(ctx context.Context, c client.Client, cfg OperatorConfiguration, force bool) error {
+	return OperatorOrCollect(ctx, c, cfg, nil, force)
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
-func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection) error {
+func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
 	customizer := func(o runtime.Object) runtime.Object {
 		if cfg.CustomImage != "" {
 			if d, ok := o.(*appsv1.Deployment); ok {
@@ -108,11 +108,11 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return err
 	}
 	if isOpenshift {
-		if err := installOpenshift(ctx, c, cfg.Namespace, customizer, collection); err != nil {
+		if err := installOpenshift(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
 	} else {
-		if err := installKubernetes(ctx, c, cfg.Namespace, customizer, collection); err != nil {
+		if err := installKubernetes(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
 	}
@@ -122,13 +122,13 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return err
 	}
 	if isKnative {
-		return installKnative(ctx, c, cfg.Namespace, customizer, collection)
+		return installKnative(ctx, c, cfg.Namespace, customizer, collection, force)
 	}
 	return nil
 }
 
-func installOpenshift(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
+func installOpenshift(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-service-account.yaml",
 		"operator-role-openshift.yaml",
 		"operator-role-binding.yaml",
@@ -136,8 +136,8 @@ func installOpenshift(ctx context.Context, c client.Client, namespace string, cu
 	)
 }
 
-func installKubernetes(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
+func installKubernetes(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-service-account.yaml",
 		"operator-role-kubernetes.yaml",
 		"operator-role-binding.yaml",
@@ -145,8 +145,8 @@ func installKubernetes(ctx context.Context, c client.Client, namespace string, c
 	)
 }
 
-func installKnative(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
+func installKnative(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-role-knative.yaml",
 		"operator-role-binding-knative.yaml",
 	)
@@ -195,13 +195,13 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 }
 
 // Example --
-func Example(ctx context.Context, c client.Client, namespace string) error {
-	return ExampleOrCollect(ctx, c, namespace, nil)
+func Example(ctx context.Context, c client.Client, namespace string, force bool) error {
+	return ExampleOrCollect(ctx, c, namespace, nil, force)
 }
 
 // ExampleOrCollect --
-func ExampleOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, IdentityResourceCustomizer,
+func ExampleOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, IdentityResourceCustomizer,
 		"cr-example.yaml",
 	)
 }

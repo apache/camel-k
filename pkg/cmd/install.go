@@ -60,6 +60,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 				return err
 			}
 			if err := options.install(cmd, args); err != nil {
+				if k8serrors.IsAlreadyExists(err) {
+					return errors.Wrap(err, "Camel K seems already installed (use the --force option to overwrite existing resources)")
+				}
 				return err
 			}
 			return nil
@@ -73,6 +76,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().Bool("example", false, "Install example integration")
 	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created.")
+	cmd.Flags().Bool("force", false, "Force replacement of configuration resources when already present.")
 
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().String("organization", "", "A organization on the Docker registry that can be used to publish images")
@@ -137,6 +141,7 @@ type installCmdOptions struct {
 	Global            bool     `mapstructure:"global"`
 	KanikoBuildCache  bool     `mapstructure:"kaniko-build-cache"`
 	Save              bool     `mapstructure:"save"`
+	Force             bool     `mapstructure:"force"`
 	Olm               bool     `mapstructure:"olm"`
 	ClusterType       string   `mapstructure:"cluster-type"`
 	OutputFormat      string   `mapstructure:"output"`
@@ -238,7 +243,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				Global:      o.Global,
 				ClusterType: o.ClusterType,
 			}
-			err = install.OperatorOrCollect(o.Context, c, cfg, collection)
+			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
 			if err != nil {
 				return err
 			}
@@ -250,7 +255,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if o.registryAuth.IsSet() {
 			regData := o.registryAuth
 			regData.Registry = o.registry.Address
-			generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace, regData, collection)
+			generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace, regData, collection, o.Force)
 			if err != nil {
 				return err
 			}
@@ -346,14 +351,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		// to be created in other namespaces.
 		// In OLM mode, the operator is installed in an external namespace, so it's ok to install the platform locally.
 		if !o.Global || installViaOLM {
-			err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, platform)
+			err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, o.Force, platform)
 			if err != nil {
 				return err
 			}
 		}
 
 		if o.ExampleSetup {
-			err = install.ExampleOrCollect(o.Context, c, namespace, collection)
+			err = install.ExampleOrCollect(o.Context, c, namespace, collection, o.Force)
 			if err != nil {
 				return err
 			}

@@ -30,7 +30,7 @@ import (
 const registrySecretName = "camel-k-registry-secret"
 
 // RegistrySecretOrCollect generates a secret from auth settings and creates it on the cluster (or appends it to the collection)
-func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace string, auth registry.Auth, collection *kubernetes.Collection) (string, error) {
+func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace string, auth registry.Auth, collection *kubernetes.Collection, force bool) (string, error) {
 	secretData, err := auth.GenerateDockerConfig()
 	if err != nil {
 		return "", err
@@ -51,7 +51,7 @@ func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace str
 		},
 	}
 
-	if err := RuntimeObjectOrCollect(ctx, c, namespace, collection, &registrySecret); err != nil {
+	if err := RuntimeObjectOrCollect(ctx, c, namespace, collection, force, &registrySecret); err != nil {
 		return "", err
 	}
 	return registrySecretName, nil
