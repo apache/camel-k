@@ -15,13 +15,5 @@
  * limitations under the License.
  */
 
-from('timer:tick')
-  .setBody().constant("")
-  .choice()
-	.when().simple('${random(0, 2)} == 0')
-	  .to('knative:endpoint/knative2')
-      .log('Received from 2: ${body}')
-	.otherwise()
-	  .to('knative:endpoint/knative3')
-      .log('Received from 3: ${body}')
-	.end()
+from('knative:endpoint/knative3')
+  .setBody().constant("Hello from knative3")
