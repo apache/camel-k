@@ -27,8 +27,6 @@ import (
 	olmv1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1"
 	olmv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
 	"github.com/pkg/errors"
-	authorizationv1 "k8s.io/api/authorization/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -89,7 +87,7 @@ func IsOperatorInstalled(ctx context.Context, client client.Client, namespace st
 
 // HasPermissionToInstall checks if the current user/serviceaccount has the right permissions to install camel k via OLM
 func HasPermissionToInstall(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
-	if ok, err := checkPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
+	if ok, err := kubernetes.CheckPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -100,7 +98,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 		targetNamespace = options.GlobalNamespace
 	}
 
-	if ok, err := checkPermission(client, olmv1alpha1.GroupName, "subscriptions", targetNamespace, options.Package, "create"); err != nil {
+	if ok, err := kubernetes.CheckPermission(client, olmv1alpha1.GroupName, "subscriptions", targetNamespace, options.Package, "create"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -113,7 +111,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 	}
 
 	if !global {
-		if ok, err := checkPermission(client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "list"); err != nil {
+		if ok, err := kubernetes.CheckPermission(client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "list"); err != nil {
 			return false, err
 		} else if !ok {
 			return false, nil
@@ -124,39 +122,13 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 			return false, err
 		}
 		if group == nil {
-			if ok, err := checkPermission(client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "create"); err != nil {
+			if ok, err := kubernetes.CheckPermission(client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "create"); err != nil {
 				return false, err
 			} else if !ok {
 				return false, nil
 			}
 		}
 
-	}
-	return true, nil
-}
-
-// nolint:unparam
-func checkPermission(client client.Client, group, resource, namespace, name, verb string) (bool, error) {
-	sarReview := &authorizationv1.SelfSubjectAccessReview{
-		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationv1.ResourceAttributes{
-				Group:     group,
-				Resource:  resource,
-				Namespace: namespace,
-				Name:      name,
-				Verb:      verb,
-			},
-		},
-	}
-
-	sar, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(sarReview)
-	if err != nil {
-		if k8serrors.IsForbidden(err) {
-			return false, nil
-		}
-		return false, err
-	} else if !sar.Status.Allowed {
-		return false, nil
 	}
 	return true, nil
 }
