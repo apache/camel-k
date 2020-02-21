@@ -303,6 +303,10 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration 
 		//
 		// TODO when we add health checks, we should Wait until they are passed
 		//
+		if i.Status.Phase != "" {
+			// TODO remove this log when we make sure that events are always created
+			fmt.Printf("progress: integration %q in phase %s\n", integration.Name, string(i.Status.Phase))
+		}
 		if i.Status.Phase == v1.IntegrationPhaseRunning || i.Status.Phase == v1.IntegrationPhaseError {
 			return false
 		}
