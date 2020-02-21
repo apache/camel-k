@@ -114,6 +114,7 @@ func Run() {
 
 	// Configure event broadcaster
 	var eventBroadcaster record.EventBroadcaster
+	// nolint: gocritic
 	if ok, err := kubernetes.CheckPermission(c, corev1.GroupName, "events", namespace, "", "create"); err != nil {
 		log.Error(err, "cannot check permissions for configuring event broadcaster")
 	} else if !ok {
