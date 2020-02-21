@@ -22,14 +22,27 @@ limitations under the License.
 package e2e
 
 import (
+	"os"
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
 
 func TestRunGlobalInstall(t *testing.T) {
+	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
+	if !forceGlobalTest {
+		ocp, err := openshift.IsOpenShift(testClient)
+		assert.Nil(t, err)
+		if ocp {
+			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
+			return
+		}
+	}
+
 	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--global").Execute()).Should(BeNil())
 

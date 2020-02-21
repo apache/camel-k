@@ -62,7 +62,10 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 		t.Logf("name=%s\n", pod.Name)
 		dumpConditions("  ", pod.Status.Conditions, t)
 		t.Logf("  logs:\n")
-		for _, container := range pod.Spec.Containers {
+		var allContainers []v1.Container
+		allContainers = append(allContainers, pod.Spec.InitContainers...)
+		allContainers = append(allContainers, pod.Spec.Containers...)
+		for _, container := range allContainers {
 			pad := "    "
 			t.Logf("%s%s\n", pad, container.Name)
 			err := dumpLogs(c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, t)
