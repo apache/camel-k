@@ -47,7 +47,8 @@ func Resources(ctx context.Context, c client.Client, namespace string, force boo
 }
 
 // ResourcesOrCollect --
-func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool, customizer ResourceCustomizer, names ...string) error {
+func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
+	force bool, customizer ResourceCustomizer, names ...string) error {
 	for _, name := range names {
 		if err := ResourceOrCollect(ctx, c, namespace, collection, force, customizer, name); err != nil {
 			return err
@@ -62,7 +63,8 @@ func Resource(ctx context.Context, c client.Client, namespace string, force bool
 }
 
 // ResourceOrCollect --
-func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool, customizer ResourceCustomizer, name string) error {
+func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
+	force bool, customizer ResourceCustomizer, name string) error {
 	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString(name))
 	if err != nil {
 		return err
