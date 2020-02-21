@@ -60,13 +60,13 @@ func Run(namespace string, buildName string, taskName string) {
 	printVersion()
 
 	c, err := client.NewClient(false)
-	exitOnError(err)
+	exitOnError(err, "")
 
 	ctx := cancellable.NewContext()
 
 	build := &v1.Build{}
 	exitOnError(
-		c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: buildName}, build),
+		c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: buildName}, build), "",
 	)
 
 	var task *v1.BuilderTask
@@ -77,7 +77,7 @@ func Run(namespace string, buildName string, taskName string) {
 	}
 	if task == nil {
 		exitOnError(errors.Errorf("No task of type [%s] with name [%s] in build [%s/%s]",
-			reflect.TypeOf(v1.BuilderTask{}).Name(), taskName, namespace, buildName))
+			reflect.TypeOf(v1.BuilderTask{}).Name(), taskName, namespace, buildName), "")
 	}
 
 	status := builder.New(c).Run(*task)
@@ -87,8 +87,11 @@ func Run(namespace string, buildName string, taskName string) {
 	target.Status.Failure = build.Status.Failure
 	// Patch the build status with the result
 	p, err := patch.PositiveMergePatch(build, target)
-	exitOnError(err)
-	exitOnError(c.Status().Patch(ctx, target, controller.ConstantPatch(types.MergePatchType, p)))
+	exitOnError(err, "cannot create merge patch")
+	exitOnError(
+		c.Status().Patch(ctx, target, controller.ConstantPatch(types.MergePatchType, p)),
+		fmt.Sprintf("\n--- patch ---\n%s\n-------------\n", string(p)),
+	)
 	build.Status = target.Status
 
 	switch build.Status.Phase {
@@ -100,9 +103,9 @@ func Run(namespace string, buildName string, taskName string) {
 	}
 }
 
-func exitOnError(err error) {
+func exitOnError(err error, msg string) {
 	if err != nil {
-		log.Error(err, "")
+		log.Error(err, msg)
 		os.Exit(1)
 	}
 }
