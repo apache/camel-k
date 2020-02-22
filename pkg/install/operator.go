@@ -25,6 +25,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/rbac/v1beta1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -126,7 +127,10 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return installKnative(ctx, c, cfg.Namespace, customizer, collection, force)
 	}
 
-	if errevt := installEvents(ctx, c, cfg.Namespace, customizer, collection); errevt != nil {
+	if errevt := installEvents(ctx, c, cfg.Namespace, customizer, collection, force); errevt != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			return err
+		}
 		fmt.Println("Warning: the operator will not be able to publish Kubernetes events. Try installing as cluster-admin to allow it to generate events.")
 	}
 
@@ -158,8 +162,8 @@ func installKnative(ctx context.Context, c client.Client, namespace string, cust
 	)
 }
 
-func installEvents(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, customizer,
+func installEvents(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-role-events.yaml",
 		"operator-role-binding-events.yaml",
 	)

@@ -48,11 +48,11 @@ func TestRunDevMode(t *testing.T) {
 			kamelRun := kamelWithContext(ctx, "run", "-n", ns, file, "--dev")
 			kamelRun.SetOut(pipew)
 
-			logScanner := util.NewLogScanner(ctx, piper, "Integration yaml in phase Running", "Magicstring!", "Magicjordan!")
+			logScanner := util.NewLogScanner(ctx, piper, `integration "yaml" in phase Running`, "Magicstring!", "Magicjordan!")
 
 			go kamelRun.Execute()
 
-			Eventually(logScanner.IsFound("Integration yaml in phase Running"), 5*time.Minute).Should(BeTrue())
+			Eventually(logScanner.IsFound(`integration "yaml" in phase Running`), 5*time.Minute).Should(BeTrue())
 			Eventually(logScanner.IsFound("Magicstring!"), 3*time.Minute).Should(BeTrue())
 			Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
 
