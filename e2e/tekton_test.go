@@ -36,7 +36,7 @@ func TestTektonLikeBehavior(t *testing.T) {
 		Expect(createOperatorRoleBinding(ns)).Should(BeNil())
 
 		Eventually(operatorPod(ns)).Should(BeNil())
-		Expect(createKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup")).Should(BeNil())
+		Expect(createKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).Should(BeNil())
 
 		Eventually(operatorPod(ns)).ShouldNot(BeNil())
 	})
