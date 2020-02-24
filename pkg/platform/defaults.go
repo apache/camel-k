@@ -23,21 +23,29 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
+const BuilderServiceAccount = "camel-k-builder"
+
 // ConfigureDefaults fills with default values all missing details about the integration platform.
-// Defaults are set in the status->appliedConfiguration fields, not in the spec.
+// Defaults are set in the status fields, not in the spec.
 func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	// Reset the state to initial values
 	p.ResyncStatusFullConfig()
@@ -84,6 +92,12 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
+	if p.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod {
+		if err := createBuilderServiceAccount(ctx, c, p); err != nil {
+			return errors.Wrap(err, "cannot ensure service account is present")
+		}
+	}
+
 	// Default to using OpenShift internal container images registry when using a strategy other than S2I
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
@@ -99,8 +113,14 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 
 		// Default to using the registry secret that's configured for the builder service account
 		if p.Status.Build.Registry.Secret == "" {
+			// Bind the required role to push images to the registry
+			err := createBuilderRegistryRoleBinding(ctx, c, p)
+			if err != nil {
+				return err
+			}
+
 			sa := corev1.ServiceAccount{}
-			err := c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: "camel-k-builder"}, &sa)
+			err = c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: BuilderServiceAccount}, &sa)
 			if err != nil {
 				return err
 			}
@@ -240,7 +260,7 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) (*corev1.ConfigMap, error) {
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-builder-ca",
+			Name:      BuilderServiceAccount + "-ca",
 			Namespace: p.Namespace,
 			Annotations: map[string]string{
 				"service.beta.openshift.io/inject-cabundle": "true",
@@ -254,4 +274,46 @@ func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p
 	}
 
 	return cm, nil
+}
+
+func createBuilderServiceAccount(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
+	sa := corev1.ServiceAccount{}
+	key := k8sclient.ObjectKey{
+		Name:      BuilderServiceAccount,
+		Namespace: p.Namespace,
+	}
+
+	err := client.Get(ctx, key, &sa)
+	if err != nil && k8serrors.IsNotFound(err) {
+		return install.BuilderServiceAccountRoles(ctx, client, p.Namespace)
+	}
+
+	return err
+}
+
+func createBuilderRegistryRoleBinding(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
+	rb := &rbacv1.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      BuilderServiceAccount + "-registry",
+			Namespace: p.Namespace,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind: "ServiceAccount",
+				Name: BuilderServiceAccount,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			Kind:     "ClusterRole",
+			APIGroup: "rbac.authorization.k8s.io",
+			Name:     "system:image-builder",
+		},
+	}
+
+	err := client.Create(ctx, rb)
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		return err
+	}
+
+	return nil
 }

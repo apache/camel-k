@@ -29,7 +29,6 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/install"
 )
 
 // NewInitializePodAction creates a new initialize action
@@ -53,12 +52,6 @@ func (action *initializePodAction) CanHandle(build *v1.Build) bool {
 
 // Handle handles the builds
 func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
-	// Ensure service account is present
-	// TODO: maybe this should be done by the platform trait ??
-	if err := action.ensureServiceAccount(ctx, build); err != nil {
-		return nil, errors.Wrap(err, "cannot ensure service account is present")
-	}
-
 	if err := deleteBuilderPod(ctx, action.client, build); err != nil {
 		return nil, errors.Wrap(err, "cannot delete build pod")
 	}
@@ -72,22 +65,6 @@ func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) 
 	build.Status.Phase = v1.BuildPhaseScheduling
 
 	return build, nil
-}
-
-func (action *initializePodAction) ensureServiceAccount(ctx context.Context, build *v1.Build) error {
-	sa := corev1.ServiceAccount{}
-	saKey := k8sclient.ObjectKey{
-		Name:      "camel-k-builder",
-		Namespace: build.Namespace,
-	}
-
-	err := action.client.Get(ctx, saKey, &sa)
-	if err != nil && k8serrors.IsNotFound(err) {
-		// Create a proper service account
-		return install.BuilderServiceAccountRoles(ctx, action.client, build.Namespace)
-	}
-
-	return err
 }
 
 func deleteBuilderPod(ctx context.Context, client k8sclient.Writer, build *v1.Build) error {
