@@ -90,6 +90,13 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		p.Status.Build.Registry.Address == "" {
 		p.Status.Build.Registry.Address = "image-registry.openshift-image-registry.svc:5000"
 
+		// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
+		cm, err := createServiceCaBundleConfigMap(ctx, c, p)
+		if err != nil {
+			return err
+		}
+		p.Status.Build.Registry.CA = cm.Name
+
 		// Default to using the registry secret that's configured for the builder service account
 		if p.Status.Build.Registry.Secret == "" {
 			sa := corev1.ServiceAccount{}
@@ -228,4 +235,23 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 	}
 
 	return nil
+}
+
+func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) (*corev1.ConfigMap, error) {
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "camel-k-builder-ca",
+			Namespace: p.Namespace,
+			Annotations: map[string]string{
+				"service.beta.openshift.io/inject-cabundle": "true",
+			},
+		},
+	}
+
+	err := client.Create(ctx, cm)
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		return nil, err
+	}
+
+	return cm, nil
 }
