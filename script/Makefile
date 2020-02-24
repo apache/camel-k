@@ -15,9 +15,9 @@
 
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-RC2-SNAPSHOT
-LAST_RELEASED_VERSION := 1.0.0-M4
-RUNTIME_VERSION := 1.1.0-SNAPSHOT
-QUARKUS_VERSION := 1.1.0.Final
+LAST_RELEASED_VERSION := 1.0.0-RC1
+RUNTIME_VERSION := 1.1.0
+QUARKUS_VERSION := 1.2.0.Final
 BUILDAH_VERSION := 1.12.0
 KANIKO_VERSION := 0.17.1
 BASE_IMAGE := adoptopenjdk/openjdk8:slim
@@ -31,7 +31,7 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1171
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1178
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
@@ -126,12 +126,12 @@ test: build
 	go test ./...
 
 test-integration: build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=integration
-	go test -timeout 30m -v ./e2e -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=integration
+	#go test -timeout 30m -v ./e2e -tags=integration
 
 test-knative: build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=knative
-	go test -timeout 30m -v ./e2e -tags=knative
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=knative
+	#go test -timeout 30m -v ./e2e -tags=knative
 
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go

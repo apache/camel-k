@@ -47,8 +47,6 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				i.addDependency("camel:rest", meta)
 			case "circuitBreaker":
 				i.addDependency("camel:hystrix", meta)
-			case "simple":
-				i.addDependency("camel:bean", meta)
 			case "language":
 				for _, a := range se.Attr {
 					if a.Name.Local == "language" {

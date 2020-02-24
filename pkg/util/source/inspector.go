@@ -47,7 +47,6 @@ var (
 	jsonPathLanguageRegexp  = regexp.MustCompile(`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`)
 	ognlRegexp              = regexp.MustCompile(`.*\.ognl\s*\(.*\).*`)
 	mvelRegexp              = regexp.MustCompile(`.*\.mvel\s*\(.*\).*`)
-	simpleLanguageRegexp    = regexp.MustCompile(`.*\.?simple\s*\(.*\).*`)
 	xqueryRegexp            = regexp.MustCompile(`.*\.xquery\s*\(.*\).*`)
 	xpathRegexp             = regexp.MustCompile(`.*\.?xpath\s*\(.*\).*`)
 	xtokenizeRegexp         = regexp.MustCompile(`.*\.xtokenize\s*\(.*\).*`)
@@ -67,7 +66,6 @@ var (
 			jsonPathLanguageRegexp:  "camel:jsonpath",
 			ognlRegexp:              "camel:ognl",
 			mvelRegexp:              "camel:mvel",
-			simpleLanguageRegexp:    "camel:bean",
 			xqueryRegexp:            "camel:saxon",
 			xpathRegexp:             "camel:xpath",
 			xtokenizeRegexp:         "camel:jaxp",
