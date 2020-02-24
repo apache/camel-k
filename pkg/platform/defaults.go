@@ -20,11 +20,13 @@ package platform
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -80,6 +82,29 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	err := setPlatformDefaults(ctx, c, p, verbose)
 	if err != nil {
 		return err
+	}
+
+	// Default to using OpenShift internal container images registry when using a strategy other than S2I
+	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
+		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
+		p.Status.Build.Registry.Address == "" {
+		p.Status.Build.Registry.Address = "image-registry.openshift-image-registry.svc:5000"
+
+		// Default to using the registry secret that's configured for the builder service account
+		if p.Status.Build.Registry.Secret == "" {
+			sa := corev1.ServiceAccount{}
+			err := c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: "camel-k-builder"}, &sa)
+			if err != nil {
+				return err
+			}
+			// We may want to read the secret keys instead of relying on the secret name scheme
+			for _, secret := range sa.Secrets {
+				if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
+					p.Status.Build.Registry.Secret = secret.Name
+					break
+				}
+			}
+		}
 	}
 
 	if verbose && p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Build.Registry.Address == "" {
