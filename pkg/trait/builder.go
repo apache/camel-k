@@ -211,6 +211,8 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 	image := getImageName(e)
 
+	auth := []string{""}
+
 	bud := []string{
 		"buildah",
 		"bud",
@@ -236,14 +238,21 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		push = append(push[:2], append([]string{"--log-level=debug"}, push[2:]...)...)
 	}
 
-	args := []string{
-		strings.Join(bud, " "),
-		strings.Join(push, " "),
-	}
-
 	env := make([]corev1.EnvVar, 0)
 	volumes := make([]corev1.Volume, 0)
 	volumeMounts := make([]corev1.VolumeMount, 0)
+
+	if e.Platform.Status.Build.Registry.CA != "" {
+		config, err := getRegistryConfigMapFor(e, buildahRegistryConfigMaps)
+		if err != nil {
+			return nil, err
+		}
+		mountRegistryConfigMap(e.Platform.Status.Build.Registry.CA, config, &volumes, &volumeMounts)
+		// This is easier to use the --cert-dir option, otherwise Buildah defaults to looking up certificates
+		//into a directory named after the registry address
+		bud = append(bud[:2], append([]string{"--cert-dir=/etc/containers/certs.d"}, bud[2:]...)...)
+		push = append(push[:2], append([]string{"--cert-dir=/etc/containers/certs.d"}, push[2:]...)...)
+	}
 
 	if e.Platform.Status.Build.Registry.Secret != "" {
 		secret, err := getRegistrySecretFor(e, buildahRegistrySecrets)
@@ -252,10 +261,9 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		}
 		if secret == plainDockerBuildahRegistrySecret {
 			// Handle old format and make it compatible with Buildah
-			auth := []string{
+			auth = []string{
 				"(echo '{ \"auths\": ' ; cat /buildah/.docker/config.json ; echo \"}\") > /tmp/.dockercfg",
 			}
-			args = append([]string{strings.Join(auth, " ")}, args...)
 			env = append(env, corev1.EnvVar{
 				Name:  "REGISTRY_AUTH_FILE",
 				Value: "/tmp/.dockercfg",
@@ -268,6 +276,12 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 	}
 
 	env = append(env, proxySecretEnvVars(e)...)
+
+	args := []string{
+		strings.Join(auth, " "),
+		strings.Join(bud, " "),
+		strings.Join(push, " "),
+	}
 
 	return &v1.ImageTask{
 		ContainerTask: v1.ContainerTask{
@@ -384,6 +398,24 @@ var (
 	}
 )
 
+type registryConfigMap struct {
+	fileName    string
+	mountPath   string
+	destination string
+}
+
+var (
+	serviceCABuildahRegistryConfigMap = registryConfigMap{
+		fileName:    "service-ca.crt",
+		mountPath:   "/etc/containers/certs.d",
+		destination: "service-ca.crt",
+	}
+
+	buildahRegistryConfigMaps = []registryConfigMap{
+		serviceCABuildahRegistryConfigMap,
+	}
+)
+
 func proxySecretEnvVars(e *Environment) []corev1.EnvVar {
 	if e.Platform.Status.Build.HTTPProxySecret == "" {
 		return []corev1.EnvVar{}
@@ -453,6 +485,44 @@ func mountRegistrySecret(name string, secret registrySecret, volumes *[]corev1.V
 			Value: path.Join(secret.mountPath, secret.destination),
 		})
 	}
+}
+
+func getRegistryConfigMapFor(e *Environment, registryConfigMaps []registryConfigMap) (registryConfigMap, error) {
+	config := corev1.ConfigMap{}
+	err := e.Client.Get(e.C, client.ObjectKey{Namespace: e.Platform.Namespace, Name: e.Platform.Status.Build.Registry.CA}, &config)
+	if err != nil {
+		return registryConfigMap{}, err
+	}
+	for _, k := range registryConfigMaps {
+		if _, ok := config.Data[k.fileName]; ok {
+			return k, nil
+		}
+	}
+	return registryConfigMap{}, errors.New("unsupported registry config map")
+}
+
+func mountRegistryConfigMap(name string, config registryConfigMap, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
+	*volumes = append(*volumes, corev1.Volume{
+		Name: "registry-config",
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: name,
+				},
+				Items: []corev1.KeyToPath{
+					{
+						Key:  config.fileName,
+						Path: config.destination,
+					},
+				},
+			},
+		},
+	})
+
+	*volumeMounts = append(*volumeMounts, corev1.VolumeMount{
+		Name:      "registry-config",
+		MountPath: config.mountPath,
+	})
 }
 
 func getImageName(e *Environment) string {

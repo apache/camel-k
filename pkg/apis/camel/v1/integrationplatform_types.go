@@ -121,6 +121,7 @@ type IntegrationPlatformRegistrySpec struct {
 	Insecure     bool   `json:"insecure,omitempty"`
 	Address      string `json:"address,omitempty"`
 	Secret       string `json:"secret,omitempty"`
+	CA           string `json:"ca,omitempty"`
 	Organization string `json:"organization,omitempty"`
 }
 
