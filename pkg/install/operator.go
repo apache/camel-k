@@ -124,7 +124,9 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return err
 	}
 	if isKnative {
-		return installKnative(ctx, c, cfg.Namespace, customizer, collection, force)
+		if err := installKnative(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+			return err
+		}
 	}
 
 	if errevt := installEvents(ctx, c, cfg.Namespace, customizer, collection, force); errevt != nil {
