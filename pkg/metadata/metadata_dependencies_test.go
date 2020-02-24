@@ -227,7 +227,7 @@ func TestLanguageDependencies(t *testing.T) {
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:saxon", "camel:xpath",
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:saxon", "camel:xpath",
 		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
 }
 
@@ -250,7 +250,7 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:xpath", "camel:jsonpath"}, meta.Dependencies.List())
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:xpath", "camel:jsonpath"}, meta.Dependencies.List())
 }
 
 func TestHystrixDependency(t *testing.T) {
@@ -467,7 +467,7 @@ func TestXMLLanguageDependencies(t *testing.T) {
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:saxon", "camel:xpath",
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:saxon", "camel:xpath",
 		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
 }
 
@@ -562,6 +562,6 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:bean", "camel:ognl", "camel:saxon", "camel:xpath",
+	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:saxon", "camel:xpath",
 		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
 }

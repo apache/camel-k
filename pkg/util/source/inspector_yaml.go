@@ -70,10 +70,6 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 			maybeURI = u.(string)
 		}
 
-		if _, ok := t["simple"]; ok {
-			inspector.addDependency("camel:bean", meta)
-		}
-
 		if _, ok := t["language"]; ok {
 			if s, ok := t["language"].(string); ok {
 				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
