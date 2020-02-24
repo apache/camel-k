@@ -211,8 +211,6 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 	image := getImageName(e)
 
-	auth := []string{""}
-
 	bud := []string{
 		"buildah",
 		"bud",
@@ -254,6 +252,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		push = append(push[:2], append([]string{"--cert-dir=/etc/containers/certs.d"}, push[2:]...)...)
 	}
 
+	var auth string
 	if e.Platform.Status.Build.Registry.Secret != "" {
 		secret, err := getRegistrySecretFor(e, buildahRegistrySecrets)
 		if err != nil {
@@ -261,9 +260,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		}
 		if secret == plainDockerBuildahRegistrySecret {
 			// Handle old format and make it compatible with Buildah
-			auth = []string{
-				"(echo '{ \"auths\": ' ; cat /buildah/.docker/config.json ; echo \"}\") > /tmp/.dockercfg",
-			}
+			auth = "(echo '{ \"auths\": ' ; cat /buildah/.docker/config.json ; echo \"}\") > /tmp/.dockercfg"
 			env = append(env, corev1.EnvVar{
 				Name:  "REGISTRY_AUTH_FILE",
 				Value: "/tmp/.dockercfg",
@@ -278,9 +275,11 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 	env = append(env, proxySecretEnvVars(e)...)
 
 	args := []string{
-		strings.Join(auth, " "),
 		strings.Join(bud, " "),
 		strings.Join(push, " "),
+	}
+	if auth != "" {
+		args = append([]string{auth}, args...)
 	}
 
 	return &v1.ImageTask{
