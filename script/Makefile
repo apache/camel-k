@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.0.0-RC2-SNAPSHOT
+VERSION := 1.0.0-RC2
 LAST_RELEASED_VERSION := 1.0.0-RC1
 RUNTIME_VERSION := 1.1.0
 QUARKUS_VERSION := 1.2.0.Final
