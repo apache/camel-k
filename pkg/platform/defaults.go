@@ -285,7 +285,7 @@ func createBuilderServiceAccount(ctx context.Context, client client.Client, p *v
 
 	err := client.Get(ctx, key, &sa)
 	if err != nil && k8serrors.IsNotFound(err) {
-		return install.BuilderServiceAccountRoles(ctx, client, p.Namespace)
+		return install.BuilderServiceAccountRoles(ctx, client, p.Namespace, p.Status.Cluster)
 	}
 
 	return err
