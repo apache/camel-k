@@ -26,12 +26,12 @@ import (
 
 // BuilderServiceAccountRoles installs the builder service account and related roles in the given namespace
 func BuilderServiceAccountRoles(ctx context.Context, c client.Client, namespace string) error {
-	isOpenshift, err := openshift.IsOpenShift(c)
+	isOpenShift, err := openshift.IsOpenShift(c)
 	if err != nil {
 		return err
 	}
-	if isOpenshift {
-		if err := installBuilderServiceAccountRolesOpenshift(ctx, c, namespace); err != nil {
+	if isOpenShift {
+		if err := installBuilderServiceAccountRolesOpenShift(ctx, c, namespace); err != nil {
 			return err
 		}
 	} else {
@@ -42,7 +42,7 @@ func BuilderServiceAccountRoles(ctx context.Context, c client.Client, namespace 
 	return nil
 }
 
-func installBuilderServiceAccountRolesOpenshift(ctx context.Context, c client.Client, namespace string) error {
+func installBuilderServiceAccountRolesOpenShift(ctx context.Context, c client.Client, namespace string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, true, IdentityResourceCustomizer,
 		"builder-service-account.yaml",
 		"builder-role-openshift.yaml",

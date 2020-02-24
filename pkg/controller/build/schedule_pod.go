@@ -21,7 +21,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -33,6 +32,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // NewSchedulePodAction creates a new schedule action
@@ -125,7 +125,7 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 			},
 		},
 		Spec: corev1.PodSpec{
-			ServiceAccountName: "camel-k-builder",
+			ServiceAccountName: platform.BuilderServiceAccount,
 			RestartPolicy:      corev1.RestartPolicyNever,
 		},
 	}
