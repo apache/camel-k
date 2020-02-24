@@ -236,6 +236,11 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		push = append(push[:2], append([]string{"--log-level=debug"}, push[2:]...)...)
 	}
 
+	args := []string{
+		strings.Join(bud, " "),
+		strings.Join(push, " "),
+	}
+
 	env := make([]corev1.EnvVar, 0)
 	volumes := make([]corev1.Volume, 0)
 	volumeMounts := make([]corev1.VolumeMount, 0)
@@ -244,6 +249,17 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		secret, err := getRegistrySecretFor(e, buildahRegistrySecrets)
 		if err != nil {
 			return nil, err
+		}
+		if secret == plainDockerBuildahRegistrySecret {
+			// Handle old format and make it compatible with Buildah
+			auth := []string{
+				"(echo '{ \"auths\": ' ; cat /buildah/.docker/config.json ; echo \"}\") > /tmp/.dockercfg",
+			}
+			args = append([]string{strings.Join(auth, " ")}, args...)
+			env = append(env, corev1.EnvVar{
+				Name:  "REGISTRY_AUTH_FILE",
+				Value: "/tmp/.dockercfg",
+			})
 		}
 		mountRegistrySecret(e.Platform.Status.Build.Registry.Secret, secret, &volumes, &volumeMounts, &env)
 	} else if e.Platform.Status.Build.Registry.Insecure {
@@ -262,7 +278,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			},
 			Image:      fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
 			Command:    []string{"/bin/sh", "-c"},
-			Args:       []string{strings.Join(bud, " ") + " && " + strings.Join(push, " ")},
+			Args:       []string{strings.Join(args, " && ")},
 			Env:        env,
 			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "context"),
 		},
@@ -326,7 +342,12 @@ type registrySecret struct {
 
 var (
 	plainDockerBuildahRegistrySecret = registrySecret{
-		fileName:    "config.json",
+		fileName:    corev1.DockerConfigKey,
+		mountPath:   "/buildah/.docker",
+		destination: "config.json",
+	}
+	standardDockerBuildahRegistrySecret = registrySecret{
+		fileName:    corev1.DockerConfigJsonKey,
 		mountPath:   "/buildah/.docker",
 		destination: "config.json",
 		refEnv:      "REGISTRY_AUTH_FILE",
@@ -334,6 +355,7 @@ var (
 
 	buildahRegistrySecrets = []registrySecret{
 		plainDockerBuildahRegistrySecret,
+		standardDockerBuildahRegistrySecret,
 	}
 )
 
