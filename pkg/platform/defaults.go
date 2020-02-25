@@ -320,8 +320,13 @@ func createBuilderRegistryRoleBinding(ctx context.Context, client client.Client,
 	}
 
 	err := client.Create(ctx, rb)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return err
+	if err != nil {
+		if k8serrors.IsForbidden(err) {
+			log.Log.Infof("Cannot grant permission to push images to the registry. "+
+				"Run 'oc policy add-role-to-user system:image-builder system:serviceaccount:%s:%s' as a system admin.", p.Namespace, BuilderServiceAccount)
+		} else if !k8serrors.IsAlreadyExists(err) {
+			return err
+		}
 	}
 
 	return nil
