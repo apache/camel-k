@@ -171,11 +171,3 @@ rules:
   - routes/custom-host
   verbs:
   - create
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterroles
-  verbs:
-  - bind
-  resourceNames:
-  - system:image-builder
