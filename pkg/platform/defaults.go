@@ -98,10 +98,27 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		}
 	}
 
-	// Default to using OpenShift internal container images registry when using a strategy other than S2I
+	err = configureRegistry(ctx, c, p)
+	if err != nil {
+		return err
+	}
+
+	if verbose && p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Build.Registry.Address == "" {
+		log.Log.Info("No registry specified for publishing images")
+	}
+
+	if verbose && p.Status.Build.Maven.GetTimeout().Duration != 0 {
+		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.Maven.GetTimeout().Duration)
+	}
+
+	return nil
+}
+
+func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
+		// Default to using OpenShift internal container images registry when using a strategy other than S2I
 		p.Status.Build.Registry.Address = "image-registry.openshift-image-registry.svc:5000"
 
 		// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
@@ -132,14 +149,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 				}
 			}
 		}
-	}
-
-	if verbose && p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Build.Registry.Address == "" {
-		log.Log.Info("No registry specified for publishing images")
-	}
-
-	if verbose && p.Status.Build.Maven.GetTimeout().Duration != 0 {
-		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.Maven.GetTimeout().Duration)
 	}
 
 	return nil
