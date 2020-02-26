@@ -97,7 +97,7 @@ func (in *IntegrationPlatform) GetActualValue(extractor func(spec IntegrationPla
 	return res
 }
 
-// ResyncStatusFullConfig copies the spec configuration into the status-fullConfig field.
+// ResyncStatusFullConfig copies the spec configuration into the status field.
 func (in *IntegrationPlatform) ResyncStatusFullConfig() {
 	cl := in.Spec.DeepCopy()
 	in.Status.IntegrationPlatformSpec = *cl
