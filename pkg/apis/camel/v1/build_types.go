@@ -48,12 +48,13 @@ type BaseTask struct {
 
 // ContainerTask --
 type ContainerTask struct {
-	BaseTask   `json:",inline"`
-	Image      string          `json:"image,omitempty"`
-	Command    []string        `json:"command,omitempty"`
-	Args       []string        `json:"args,omitempty"`
-	Env        []corev1.EnvVar `json:"env,omitempty"`
-	WorkingDir string          `json:"workingDir,omitempty"`
+	BaseTask        `json:",inline"`
+	Image           string                  `json:"image,omitempty"`
+	Command         []string                `json:"command,omitempty"`
+	Args            []string                `json:"args,omitempty"`
+	Env             []corev1.EnvVar         `json:"env,omitempty"`
+	WorkingDir      string                  `json:"workingDir,omitempty"`
+	SecurityContext *corev1.SecurityContext `json:"securityContext,omitempty"`
 }
 
 // ImageTask --
