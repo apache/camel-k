@@ -280,6 +280,20 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		args = append([]string{auth}, args...)
 	}
 
+	var sc *corev1.SecurityContext
+	if e.Platform.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
+		// This requires the builder service account to have privileged SCC on OpenShift
+		// It should be removed when Buildah fully supports unprivileged build
+		sc = &corev1.SecurityContext{
+			Capabilities: &corev1.Capabilities{
+				Add: []corev1.Capability{
+					"SETGID",
+					"SETUID",
+				},
+			},
+		}
+	}
+
 	return &v1.ImageTask{
 		ContainerTask: v1.ContainerTask{
 			BaseTask: v1.BaseTask{
@@ -287,21 +301,12 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 				Volumes:      volumes,
 				VolumeMounts: volumeMounts,
 			},
-			Image:      fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
-			Command:    []string{"/bin/sh", "-c"},
-			Args:       []string{strings.Join(args, " && ")},
-			Env:        env,
-			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "context"),
-			// This requires the builder service account to have privileged SCC on OpenShift
-			// It should be removed when Buildah fully supports unprivileged build
-			SecurityContext: &corev1.SecurityContext{
-				Capabilities: &corev1.Capabilities{
-					Add: []corev1.Capability{
-						"SETGID",
-						"SETUID",
-					},
-				},
-			},
+			Image:           fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
+			Command:         []string{"/bin/sh", "-c"},
+			Args:            []string{strings.Join(args, " && ")},
+			Env:             env,
+			WorkingDir:      path.Join(builderDir, e.IntegrationKit.Name, "context"),
+			SecurityContext: sc,
 		},
 		BuiltImage: image,
 	}, nil
