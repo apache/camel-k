@@ -70,13 +70,13 @@ metadata:
     capabilities: Basic Install
     categories: Integration & Delivery
     certified: "false"
-    containerImage: docker.io/apache/camel-k:1.0.0-RC2-SNAPSHOT
+    containerImage: docker.io/apache/camel-k:1.0.0-SNAPSHOT
     createdAt: "2019-07-26T02:45:00Z"
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes,
       with serverless superpowers.
     repository: https://github.com/apache/camel-k
     support: Camel
-  name: camel-k-operator.v1.0.0-rc2-SNAPSHOT
+  name: camel-k-operator.v1.0.0-snapshot
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -189,7 +189,7 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: docker.io/apache/camel-k:1.0.0-RC2-SNAPSHOT
+                image: docker.io/apache/camel-k:1.0.0-SNAPSHOT
                 imagePullPolicy: IfNotPresent
                 name: camel-k-operator
                 resources: {}
@@ -412,8 +412,8 @@ spec:
   minKubeVersion: 1.11.0
   provider:
     name: The Apache Software Foundation
-  replaces: camel-k-operator.v1.0.0-rc1
+  replaces: camel-k-operator.v1.0.0-rc2
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.0.0-rc2-snapshot
+  version: 1.0.0-snapshot

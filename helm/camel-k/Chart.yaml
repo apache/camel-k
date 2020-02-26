@@ -35,7 +35,7 @@ version: 0.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: 1.0.0-RC2-SNAPSHOT
+appVersion: 1.0.0-SNAPSHOT
 
 icon: https://raw.githubusercontent.com/apache/camel/master/docs/img/logo-d.svg
 home: https://camel.apache.org/camel-k/latest/
