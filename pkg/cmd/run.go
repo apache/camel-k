@@ -131,6 +131,10 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if err := o.validate(); err != nil {
+		return err
+	}
+
 	name := o.GetIntegrationName(args)
 	if name != "" {
 		secondaryPath := pathToRoot + ".integration." + name
@@ -139,15 +143,12 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	return nil
+	return o.validate()
 }
 
 func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		return errors.New("run expects at least 1 argument, received 0")
-	}
-	if len(args) > 1 && o.IntegrationName == "" {
-		return errors.New("integration name is mandatory when using multiple sources")
 	}
 
 	for _, fileName := range args {
@@ -171,6 +172,11 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 			}
 		}
 	}
+
+	return nil
+}
+
+func (o *runCmdOptions) validate() error {
 
 	for _, volume := range o.Volumes {
 		volumeConfig := strings.Split(volume, ":")
