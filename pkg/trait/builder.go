@@ -175,11 +175,9 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
-		Meta:      e.IntegrationKit.ObjectMeta,
-		BaseImage: e.Platform.Status.Build.BaseImage,
-		Runtime:   e.CamelCatalog.Runtime,
-		//Sources:         e.Integration.Spec.Sources,
-		//Resources:       e.Integration.Spec.Resources,
+		Meta:         e.IntegrationKit.ObjectMeta,
+		BaseImage:    e.Platform.Status.Build.BaseImage,
+		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		//TODO: sort steps for easier read
 		Steps:      builder.StepIDsFor(builder.DefaultSteps...),
@@ -294,6 +292,16 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			Args:       []string{strings.Join(args, " && ")},
 			Env:        env,
 			WorkingDir: path.Join(builderDir, e.IntegrationKit.Name, "context"),
+			// This requires the builder service account to have privileged SCC on OpenShift
+			// It should be removed when Buildah fully supports unprivileged build
+			SecurityContext: &corev1.SecurityContext{
+				Capabilities: &corev1.Capabilities{
+					Add: []corev1.Capability{
+						"SETGID",
+						"SETUID",
+					},
+				},
+			},
 		},
 		BuiltImage: image,
 	}, nil
