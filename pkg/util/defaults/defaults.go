@@ -29,7 +29,7 @@ const (
 	DefaultRuntimeVersion = "1.1.0"
 
 	// BuildahVersion --
-	BuildahVersion = "1.12.0"
+	BuildahVersion = "1.14.0"
 
 	// KanikoVersion --
 	KanikoVersion = "0.17.1"
