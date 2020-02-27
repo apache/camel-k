@@ -296,7 +296,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategy(o.BuildStrategy)
 		}
 		if o.BuildPublishStrategy != "" {
-			platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildStrategy)
+			platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)
 		}
 		if o.BuildTimeout != "" {
 			d, err := time.ParseDuration(o.BuildTimeout)
