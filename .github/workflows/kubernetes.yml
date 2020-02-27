@@ -30,6 +30,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    matrix:
+      publisher: ["Buildah", "Spectrum"]
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -79,6 +82,8 @@ jobs:
       #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
       #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
       #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
+      env:
+        KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ matrix.publisher }}
       run: |
         # Compute registry parameters
         CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
