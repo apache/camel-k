@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/builder/spectrum"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -192,6 +193,8 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		task.Steps = append(task.Steps, builder.StepIDsFor(s2i.S2iSteps...)...)
+	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
+		task.Steps = append(task.Steps, builder.StepIDsFor(spectrum.SpectrumSteps...)...)
 	}
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
