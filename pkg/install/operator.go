@@ -207,6 +207,10 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 
 			pl.Spec.Build.Registry.Address = *address
 			pl.Spec.Build.Registry.Insecure = true
+			if pl.Spec.Build.PublishStrategy == "" {
+				// Use spectrum in insecure dev clusters by default
+				pl.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
+			}
 		}
 	}
 
