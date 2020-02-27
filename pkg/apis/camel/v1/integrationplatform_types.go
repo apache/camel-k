@@ -139,12 +139,14 @@ const (
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
-	// IntegrationPlatformBuildPublishStrategyBuildah
+	// IntegrationPlatformBuildPublishStrategyBuildah --
 	IntegrationPlatformBuildPublishStrategyBuildah = "Buildah"
-	// IntegrationPlatformBuildPublishStrategyKaniko
+	// IntegrationPlatformBuildPublishStrategyKaniko --
 	IntegrationPlatformBuildPublishStrategyKaniko = "Kaniko"
-	// IntegrationPlatformBuildPublishStrategyS2I
+	// IntegrationPlatformBuildPublishStrategyS2I --
 	IntegrationPlatformBuildPublishStrategyS2I = "S2I"
+	// IntegrationPlatformBuildPublishStrategySpectrum --
+	IntegrationPlatformBuildPublishStrategySpectrum = "Spectrum"
 )
 
 // IntegrationPlatformPhase --

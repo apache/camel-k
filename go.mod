@@ -6,15 +6,14 @@ require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
 	// required by knative 0.12
-	contrib.go.opencensus.io/exporter/stackdriver v0.12.9-0.20191108183826-59d068f8d8ff
+	contrib.go.opencensus.io/exporter/stackdriver v0.12.9-0.20191108183826-59d068f8d8ff // indirect
 	github.com/Masterminds/semver v1.5.0
-	github.com/alecthomas/jsonschema v0.0.0-20190122210438-a6952de1bbe6
+	github.com/container-tools/spectrum v0.3.0
 	github.com/coreos/prometheus-operator v0.34.0
 	github.com/evanphx/json-patch v4.5.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v0.1.0
-	github.com/google/go-containerregistry v0.0.0-20190206233756-dbc4da98389f // indirect
 	github.com/google/uuid v1.1.1
 	github.com/jpillora/backoff v0.0.0-20170918002102-8eab2debe79d
 	github.com/magiconair/properties v1.8.1
@@ -37,11 +36,10 @@ require (
 	github.com/stoewer/go-strcase v1.0.2
 	github.com/stretchr/testify v1.4.0
 	go.uber.org/multierr v1.1.0
-	golang.org/x/tools v0.0.0-20200204230316-67a4523381ef // indirect
 	gopkg.in/inf.v0 v0.9.1
 	gopkg.in/yaml.v2 v2.2.4
-	k8s.io/api v0.0.0
-	k8s.io/apimachinery v0.0.0
+	k8s.io/api v0.17.0
+	k8s.io/apimachinery v0.17.0
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20191010091904-7fa3014cb28f
 	knative.dev/eventing v0.12.0
