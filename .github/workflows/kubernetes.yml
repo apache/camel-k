@@ -30,8 +30,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    matrix:
-      publisher: ["Buildah", "Spectrum"]
+    strategy:
+      matrix:
+        publisher: ["Buildah", "Spectrum"]
 
     steps:
     - name: Checkout code
