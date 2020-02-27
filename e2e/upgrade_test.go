@@ -60,7 +60,7 @@ func TestIntegrationUpgrade(t *testing.T) {
 		// Run an integration
 		Expect(kamel("run", "-n", ns, "files/js.js").Execute()).Should(BeNil())
 		Eventually(integrationPodPhase(ns, "js"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-		initialImage := integrationPodImage(ns, "js")()
+		initialKit := integrationKit(ns, "js")()
 
 		// Scale the operator down to zero
 		Eventually(scaleOperator(ns, 0)).Should(BeNil())
@@ -88,7 +88,7 @@ func TestIntegrationUpgrade(t *testing.T) {
 		Eventually(integrationVersion(ns, "js")).Should(Equal(defaults.Version))
 		Eventually(kitsWithVersion(ns, "an.older.one")).Should(Equal(1)) // old one is not recycled
 		Eventually(kitsWithVersion(ns, defaults.Version)).Should(Equal(1))
-		Eventually(integrationPodImage(ns, "js"), testTimeoutMedium).ShouldNot(Equal(initialImage)) // rolling deployment triggered
+		Eventually(integrationKit(ns, "js"), testTimeoutMedium).ShouldNot(Equal(initialKit))
 		Eventually(integrationPodPhase(ns, "js"), testTimeoutMedium).Should(Equal(v1.PodRunning))
 	})
 }

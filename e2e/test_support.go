@@ -358,6 +358,16 @@ func integrationSpecProfile(ns string, name string) func() v1.TraitProfile {
 	}
 }
 
+func integrationKit(ns string, name string) func() string {
+	return func() string {
+		it := integration(ns, name)()
+		if it == nil {
+			return ""
+		}
+		return it.Status.Kit
+	}
+}
+
 func setIntegrationVersion(ns string, name string, version string) error {
 	it := integration(ns, name)()
 	if it == nil {
