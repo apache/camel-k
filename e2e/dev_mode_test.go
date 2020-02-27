@@ -25,7 +25,6 @@ import (
 	"context"
 	"io"
 	"testing"
-	"time"
 
 	"github.com/apache/camel-k/e2e/util"
 	. "github.com/onsi/gomega"
@@ -52,12 +51,12 @@ func TestRunDevMode(t *testing.T) {
 
 			go kamelRun.Execute()
 
-			Eventually(logScanner.IsFound(`integration "yaml" in phase Running`), 5*time.Minute).Should(BeTrue())
-			Eventually(logScanner.IsFound("Magicstring!"), 3*time.Minute).Should(BeTrue())
+			Eventually(logScanner.IsFound(`integration "yaml" in phase Running`), testTimeoutMedium).Should(BeTrue())
+			Eventually(logScanner.IsFound("Magicstring!"), testTimeoutMedium).Should(BeTrue())
 			Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
 
 			util.ReplaceInFile(t, file, "string!", "jordan!")
-			Eventually(logScanner.IsFound("Magicjordan!"), 5*time.Minute).Should(BeTrue())
+			Eventually(logScanner.IsFound("Magicjordan!"), testTimeoutMedium).Should(BeTrue())
 		})
 
 		t.Run("run yaml remote dev mode", func(t *testing.T) {
@@ -76,7 +75,7 @@ func TestRunDevMode(t *testing.T) {
 
 			go kamelRun.Execute()
 
-			Eventually(logScanner.IsFound("Magicstring!"), 5*time.Minute).Should(BeTrue())
+			Eventually(logScanner.IsFound("Magicstring!"), testTimeoutMedium).Should(BeTrue())
 		})
 	})
 }

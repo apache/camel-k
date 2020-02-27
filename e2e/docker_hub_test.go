@@ -24,7 +24,6 @@ package e2e
 import (
 	"os"
 	"testing"
-	"time"
 
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
@@ -47,9 +46,9 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 				Execute()).Should(BeNil())
 
 			Expect(kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "groovy"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "groovy"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
-			Eventually(integrationPodImage(ns, "groovy"), 1*time.Minute).Should(HavePrefix("docker.io"))
+			Eventually(integrationPodPhase(ns, "groovy"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "groovy"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodImage(ns, "groovy"), testTimeoutShort).Should(HavePrefix("docker.io"))
 
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})

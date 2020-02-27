@@ -24,7 +24,6 @@ package e2e
 import (
 	"os"
 	"testing"
-	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -49,8 +48,8 @@ func TestPlatformlessRun(t *testing.T) {
 		Eventually(deletePlatform(ns)).Should(BeTrue())
 
 		Expect(kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
-		Eventually(integrationPodPhase(ns, "yaml"), 5*time.Minute).Should(Equal(corev1.PodRunning))
-		Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+		Eventually(integrationPodPhase(ns, "yaml"), testTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(integrationLogs(ns, "yaml"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Platform should be recreated
 		Eventually(platform(ns)).ShouldNot(BeNil())

@@ -23,7 +23,6 @@ package e2e
 
 import (
 	"testing"
-	"time"
 
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
@@ -36,65 +35,65 @@ func TestRunSimpleExamples(t *testing.T) {
 		t.Run("run java", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/Java.java").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "java"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "java"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "java"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "java"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("run java with properties", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/Prop.java", "--property-file", "files/prop.properties").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "prop"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "prop"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "prop"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "prop"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("run xml", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/xml.xml").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "xml"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "xml"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "xml"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "xml"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("run groovy", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "groovy"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "groovy"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "groovy"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "groovy"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("run js", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/js.js").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "js"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "js"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "js"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "js"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("run kotlin", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/kotlin.kts").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "kotlin"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "kotlin"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "kotlin"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "kotlin"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("run yaml", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "yaml"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "yaml"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "yaml"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "yaml"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("run yaml Quarkus", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "--name", "yaml-quarkus", "files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "yaml-quarkus"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "yaml-quarkus"), 1*time.Minute).Should(ContainSubstring("running on Quarkus"))
-			Eventually(integrationLogs(ns, "yaml-quarkus"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "yaml-quarkus"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "yaml-quarkus"), testTimeoutShort).Should(ContainSubstring("running on Quarkus"))
+			Eventually(integrationLogs(ns, "yaml-quarkus"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 

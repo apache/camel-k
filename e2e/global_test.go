@@ -24,7 +24,6 @@ package e2e
 import (
 	"os"
 	"testing"
-	"time"
 
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
@@ -51,8 +50,8 @@ func TestRunGlobalInstall(t *testing.T) {
 			Expect(kamel("install", "-n", ns2, "--skip-operator-setup", "--olm", "false").Execute()).Should(BeNil())
 
 			Expect(kamel("run", "-n", ns2, "files/Java.java").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns2, "java"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns2, "java"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns2, "java"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns2, "java"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns2).Execute()).Should(BeNil())
 		})
 

@@ -61,6 +61,10 @@ import (
 	_ "github.com/apache/camel-k/addons"
 )
 
+var testTimeoutShort = 1*time.Minute
+var testTimeoutMedium = 5*time.Minute
+var testTimeoutLong = 10*time.Minute
+
 var testContext context.Context
 var testClient client.Client
 
@@ -84,8 +88,6 @@ func init() {
 	}
 
 	// Defaults for testing
-	gomega.SetDefaultEventuallyTimeout(60 * time.Second)
-
 	imageName := os.Getenv("CAMEL_K_TEST_IMAGE_NAME")
 	if imageName != "" {
 		testImageName = imageName
@@ -94,6 +96,34 @@ func init() {
 	if imageVersion != "" {
 		testImageVersion = imageVersion
 	}
+
+	// Timeouts 
+	var duration time.Duration
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_TIMEOUT_SHORT"); ok {
+		if duration, err = time.ParseDuration(value); err == nil {
+			testTimeoutShort = duration
+		} else {
+			fmt.Printf("Can't parse CAMEL_K_TEST_TIMEOUT_SHORT. Using default value: %s", testTimeoutShort)
+		}
+	}
+
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_TIMEOUT_MEDIUM"); ok {
+		if duration, err = time.ParseDuration(value); err == nil {
+			testTimeoutMedium = duration
+		} else {
+			fmt.Printf("Can't parse CAMEL_K_TEST_TIMEOUT_MEDIUM. Using default value: %s", testTimeoutMedium)
+		}
+	}
+
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_TIMEOUT_LONG"); ok {
+		if duration, err = time.ParseDuration(value); err == nil {
+			testTimeoutLong = duration
+		} else {
+			fmt.Printf("Can't parse CAMEL_K_TEST_TIMEOUT_LONG. Using default value: %s", testTimeoutLong)
+		}
+	}
+
+	gomega.SetDefaultEventuallyTimeout(testTimeoutShort)
 
 }
 
