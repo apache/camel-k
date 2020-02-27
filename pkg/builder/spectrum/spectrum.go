@@ -37,7 +37,7 @@ var Steps = steps{
 	),
 }
 
-// S2iSteps --
+// SpectrumSteps --
 var SpectrumSteps = []builder.Step{
 	Steps.Publisher,
 }
