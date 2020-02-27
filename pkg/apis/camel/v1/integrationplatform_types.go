@@ -134,6 +134,8 @@ const (
 	// IntegrationPlatformBuildStrategyPod performs the build in a pod
 	IntegrationPlatformBuildStrategyPod IntegrationPlatformBuildStrategy = "pod"
 )
+
+// IntegrationPlatformBuildStrategies --
 var IntegrationPlatformBuildStrategies = []IntegrationPlatformBuildStrategy{
 	IntegrationPlatformBuildStrategyRoutine,
 	IntegrationPlatformBuildStrategyPod,
@@ -152,6 +154,8 @@ const (
 	// IntegrationPlatformBuildPublishStrategySpectrum --
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 )
+
+// IntegrationPlatformBuildPublishStrategies --
 var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublishStrategy{
 	IntegrationPlatformBuildPublishStrategyBuildah,
 	IntegrationPlatformBuildPublishStrategyKaniko,
