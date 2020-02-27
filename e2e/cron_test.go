@@ -23,7 +23,6 @@ package e2e
 
 import (
 	"testing"
-	"time"
 
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
@@ -37,8 +36,8 @@ func TestRunCronExample(t *testing.T) {
 			RegisterTestingT(t)
 
 			Expect(kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
-			Eventually(integrationCronJob(ns, "cron"), 5*time.Minute).ShouldNot(BeNil())
-			Eventually(integrationLogs(ns, "cron"), 5*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationCronJob(ns, "cron"), testTimeoutMedium).ShouldNot(BeNil())
+			Eventually(integrationLogs(ns, "cron"), testTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -46,8 +45,8 @@ func TestRunCronExample(t *testing.T) {
 			RegisterTestingT(t)
 
 			Expect(kamel("run", "-n", ns, "files/cron-timer.groovy").Execute()).Should(BeNil())
-			Eventually(integrationCronJob(ns, "cron-timer"), 5*time.Minute).ShouldNot(BeNil())
-			Eventually(integrationLogs(ns, "cron-timer"), 5*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationCronJob(ns, "cron-timer"), testTimeoutMedium).ShouldNot(BeNil())
+			Eventually(integrationLogs(ns, "cron-timer"), testTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -55,8 +54,8 @@ func TestRunCronExample(t *testing.T) {
 			RegisterTestingT(t)
 
 			Expect(kamel("run", "-n", ns, "files/cron-fallback.groovy").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "cron-fallback"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "cron-fallback"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "cron-fallback"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "cron-fallback"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 	})

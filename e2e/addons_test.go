@@ -36,8 +36,8 @@ func TestAddons(t *testing.T) {
 		t.Run("master works", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "files/Master.java").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "master"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "master"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "master"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "master"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(configMap(ns, "master-lock"), 30*time.Second).ShouldNot(BeNil())
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -50,8 +50,8 @@ func TestAddons(t *testing.T) {
 				"-t", "master.label-key=leader-group",
 				"-t", "master.label-value=same",
 				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "first"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "first"), 1*time.Minute).Should(ContainSubstring("Magicstring!"))
+			Eventually(integrationPodPhase(ns, "first"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "first"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(configMap(ns, "first-lock"), 30*time.Second).ShouldNot(BeNil())
 			// Start a second integration with the same lock (it should not start the route)
 			Expect(kamel("run", "-n", ns, "files/Master.java",
@@ -61,8 +61,8 @@ func TestAddons(t *testing.T) {
 				"-t", "master.label-value=same",
 				"-t", "master.configmap=first-lock",
 				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "second"), 5*time.Minute).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "second"), 1*time.Minute).Should(ContainSubstring("started in"))
+			Eventually(integrationPodPhase(ns, "second"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "second"), testTimeoutShort).Should(ContainSubstring("started in"))
 			Eventually(integrationLogs(ns, "second"), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})

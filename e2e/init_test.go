@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/apache/camel-k/e2e/util"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -46,8 +45,8 @@ func TestRunInitGeneratedExamples(t *testing.T) {
 				file := path.Join(dir, fileName)
 				Expect(kamel("init", file).Execute()).Should(BeNil())
 				Expect(kamel("run", "-n", ns, file).Execute()).Should(BeNil())
-				Eventually(integrationPodPhase(ns, itName), 5*time.Minute).Should(Equal(v1.PodRunning))
-				Eventually(integrationLogs(ns, itName), 1*time.Minute).Should(ContainSubstring(languageInitExpectedString(lang)))
+				Eventually(integrationPodPhase(ns, itName), testTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(integrationLogs(ns, itName), testTimeoutShort).Should(ContainSubstring(languageInitExpectedString(lang)))
 				Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 			})
 		}

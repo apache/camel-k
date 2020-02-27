@@ -23,7 +23,6 @@ package e2e
 
 import (
 	"testing"
-	"time"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
@@ -67,6 +66,6 @@ func doNamedKitFullBuild(t *testing.T, name string) {
 		Eventually(build(ns, name)).ShouldNot(BeNil())
 		Eventually(func() v1.BuildPhase {
 			return build(ns, name)().Status.Phase
-		}, 5*time.Minute).Should(Equal(v1.BuildPhaseSucceeded))
+		}, testTimeoutMedium).Should(Equal(v1.BuildPhaseSucceeded))
 	})
 }
