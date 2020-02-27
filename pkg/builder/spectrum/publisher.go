@@ -19,14 +19,28 @@ package spectrum
 
 import (
 	"fmt"
+	"os"
 	"path"
 
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/log"
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
 )
 
 func publisher(ctx *builder.Context) error {
+	libraryPath := path.Join(ctx.Path, "context", "dependencies")
+	_, err := os.Stat(libraryPath)
+	if err != nil && os.IsNotExist(err) {
+		// this can only indicate that there are no more libraries to add to the base image,
+		// because transitive resolution is the same even if spec differs
+		log.Infof("No new image to build, reusing existing image %s", ctx.BaseImage)
+		ctx.Image = ctx.BaseImage
+		return nil
+	} else if err != nil {
+		return err
+	}
+
 	pl, err := platform.GetCurrentPlatform(ctx.C, ctx, ctx.Namespace)
 	if err != nil {
 		return err
@@ -57,7 +71,7 @@ func publisher(ctx *builder.Context) error {
 		PushInsecure: pl.Status.Build.Registry.Insecure,
 	}
 
-	digest, err := spectrum.Build(options, path.Join(ctx.Path, "context", "dependencies")+":/deployments/dependencies")
+	digest, err := spectrum.Build(options, libraryPath+":/deployments/dependencies")
 	if err != nil {
 		return err
 	}
