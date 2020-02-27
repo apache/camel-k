@@ -93,6 +93,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
 	cmd.Flags().StringArray("kit", nil, "Add an integration kit to build at startup")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
+	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
 	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
 	cmd.Flags().Bool("kaniko-build-cache", false, "To enable or disable the Kaniko cache")
@@ -133,30 +134,31 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	Wait              bool     `mapstructure:"wait"`
-	ClusterSetupOnly  bool     `mapstructure:"cluster-setup"`
-	SkipOperatorSetup bool     `mapstructure:"skip-operator-setup"`
-	SkipClusterSetup  bool     `mapstructure:"skip-cluster-setup"`
-	ExampleSetup      bool     `mapstructure:"example"`
-	Global            bool     `mapstructure:"global"`
-	KanikoBuildCache  bool     `mapstructure:"kaniko-build-cache"`
-	Save              bool     `mapstructure:"save"`
-	Force             bool     `mapstructure:"force"`
-	Olm               bool     `mapstructure:"olm"`
-	ClusterType       string   `mapstructure:"cluster-type"`
-	OutputFormat      string   `mapstructure:"output"`
-	RuntimeVersion    string   `mapstructure:"runtime-version"`
-	BaseImage         string   `mapstructure:"base-image"`
-	OperatorImage     string   `mapstructure:"operator-image"`
-	LocalRepository   string   `mapstructure:"local-repository"`
-	BuildStrategy     string   `mapstructure:"build-strategy"`
-	BuildTimeout      string   `mapstructure:"build-timeout"`
-	MavenRepositories []string `mapstructure:"maven-repositories"`
-	MavenSettings     string   `mapstructure:"maven-settings"`
-	Properties        []string `mapstructure:"properties"`
-	Kits              []string `mapstructure:"kits"`
-	TraitProfile      string   `mapstructure:"trait-profile"`
-	HTTPProxySecret   string   `mapstructure:"http-proxy-secret"`
+	Wait                 bool     `mapstructure:"wait"`
+	ClusterSetupOnly     bool     `mapstructure:"cluster-setup"`
+	SkipOperatorSetup    bool     `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup     bool     `mapstructure:"skip-cluster-setup"`
+	ExampleSetup         bool     `mapstructure:"example"`
+	Global               bool     `mapstructure:"global"`
+	KanikoBuildCache     bool     `mapstructure:"kaniko-build-cache"`
+	Save                 bool     `mapstructure:"save"`
+	Force                bool     `mapstructure:"force"`
+	Olm                  bool     `mapstructure:"olm"`
+	ClusterType          string   `mapstructure:"cluster-type"`
+	OutputFormat         string   `mapstructure:"output"`
+	RuntimeVersion       string   `mapstructure:"runtime-version"`
+	BaseImage            string   `mapstructure:"base-image"`
+	OperatorImage        string   `mapstructure:"operator-image"`
+	LocalRepository      string   `mapstructure:"local-repository"`
+	BuildStrategy        string   `mapstructure:"build-strategy"`
+	BuildPublishStrategy string   `mapstructure:"build-publish-strategy"`
+	BuildTimeout         string   `mapstructure:"build-timeout"`
+	MavenRepositories    []string `mapstructure:"maven-repositories"`
+	MavenSettings        string   `mapstructure:"maven-settings"`
+	Properties           []string `mapstructure:"properties"`
+	Kits                 []string `mapstructure:"kits"`
+	TraitProfile         string   `mapstructure:"trait-profile"`
+	HTTPProxySecret      string   `mapstructure:"http-proxy-secret"`
 
 	registry     v1.IntegrationPlatformRegistrySpec
 	registryAuth registry.Auth
@@ -291,14 +293,10 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			platform.Spec.Build.BaseImage = o.BaseImage
 		}
 		if o.BuildStrategy != "" {
-			switch s := o.BuildStrategy; s {
-			case v1.IntegrationPlatformBuildStrategyPod:
-				platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
-			case v1.IntegrationPlatformBuildStrategyRoutine:
-				platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
-			default:
-				return fmt.Errorf("unknown build strategy: %s", s)
-			}
+			platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategy(o.BuildStrategy)
+		}
+		if o.BuildPublishStrategy != "" {
+			platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildStrategy)
 		}
 		if o.BuildTimeout != "" {
 			d, err := time.ParseDuration(o.BuildTimeout)
@@ -491,6 +489,40 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	if o.registry.Secret != "" && o.registryAuth.IsSet() {
 		err := fmt.Errorf("incompatible options combinations: you cannot set both registry-secret and registry-auth-[*] settings")
 		result = multierr.Append(result, err)
+	}
+
+	if o.BuildStrategy != "" {
+		found := false
+		for _, s := range v1.IntegrationPlatformBuildStrategies {
+			if string(s) == o.BuildStrategy {
+				found = true
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.IntegrationPlatformBuildStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", o.BuildStrategy, strings.Join(strategies, ", "))
+		}
+	}
+
+	if o.BuildPublishStrategy != "" {
+		found := false
+		for _, s := range v1.IntegrationPlatformBuildPublishStrategies {
+			if string(s) == o.BuildPublishStrategy {
+				found = true
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.IntegrationPlatformBuildPublishStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return fmt.Errorf("unknown build publish strategy: %s. One of [%s] is expected", o.BuildPublishStrategy, strings.Join(strategies, ", "))
+		}
 	}
 
 	return result

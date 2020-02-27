@@ -130,24 +130,34 @@ type IntegrationPlatformBuildStrategy string
 
 const (
 	// IntegrationPlatformBuildStrategyRoutine performs the build in a routine
-	IntegrationPlatformBuildStrategyRoutine = "routine"
+	IntegrationPlatformBuildStrategyRoutine IntegrationPlatformBuildStrategy = "routine"
 	// IntegrationPlatformBuildStrategyPod performs the build in a pod
-	IntegrationPlatformBuildStrategyPod = "pod"
+	IntegrationPlatformBuildStrategyPod IntegrationPlatformBuildStrategy = "pod"
 )
+var IntegrationPlatformBuildStrategies = []IntegrationPlatformBuildStrategy{
+	IntegrationPlatformBuildStrategyRoutine,
+	IntegrationPlatformBuildStrategyPod,
+}
 
 // IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
 	// IntegrationPlatformBuildPublishStrategyBuildah --
-	IntegrationPlatformBuildPublishStrategyBuildah = "Buildah"
+	IntegrationPlatformBuildPublishStrategyBuildah IntegrationPlatformBuildPublishStrategy = "Buildah"
 	// IntegrationPlatformBuildPublishStrategyKaniko --
-	IntegrationPlatformBuildPublishStrategyKaniko = "Kaniko"
+	IntegrationPlatformBuildPublishStrategyKaniko IntegrationPlatformBuildPublishStrategy = "Kaniko"
 	// IntegrationPlatformBuildPublishStrategyS2I --
-	IntegrationPlatformBuildPublishStrategyS2I = "S2I"
+	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum --
-	IntegrationPlatformBuildPublishStrategySpectrum = "Spectrum"
+	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 )
+var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublishStrategy{
+	IntegrationPlatformBuildPublishStrategyBuildah,
+	IntegrationPlatformBuildPublishStrategyKaniko,
+	IntegrationPlatformBuildPublishStrategyS2I,
+	IntegrationPlatformBuildPublishStrategySpectrum,
+}
 
 // IntegrationPlatformPhase --
 type IntegrationPlatformPhase string
