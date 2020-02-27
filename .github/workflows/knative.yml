@@ -30,6 +30,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    matrix:
+      publisher: ["Buildah", "Spectrum"]
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -89,6 +92,8 @@ jobs:
         while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; kubectl get pod -n knative-eventing; sleep 5; done
 
     - name: Run IT
+      env:
+        KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ matrix.publisher }}
       run: |
         # Compute registry parameters
         CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
