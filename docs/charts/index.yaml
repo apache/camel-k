@@ -24,6 +24,6 @@ entries:
     - https://github.com/apache/camel
     type: application
     urls:
-    - https://camel-k.github.io/helm/charts/camel-k-0.1.0.tgz
+    - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
 generated: "2020-02-28T08:33:33.500717761+01:00"

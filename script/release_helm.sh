@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,13 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 location=$(dirname $0)
-rootdir=$location/../
+rootdir=$(realpath $location/..)
+targetdir=$rootdir/docs/charts
+
+mkdir -p $targetdir
 
 cd $rootdir/helm
 
-mkdir -p charts
-
 helm package ./camel-k
-mv camel-k-*.tgz charts
-helm repo index charts --url https://camel-k.github.io/helm/charts
+mv camel-k-*.tgz $targetdir/
+helm repo index $targetdir --url https://apache.github.io/camel-k/charts/
