@@ -71,7 +71,7 @@ metadata:
     categories: Integration & Delivery
     certified: "false"
     containerImage: docker.io/apache/camel-k:1.0.0-RC2
-    createdAt: "2019-07-26T02:45:00Z"
+    createdAt: "2020-02-28T02:45:00Z"
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes,
       with serverless superpowers.
     repository: https://github.com/apache/camel-k
@@ -240,6 +240,7 @@ spec:
           resources:
           - events
           verbs:
+          - create
           - get
           - list
           - watch

@@ -240,6 +240,7 @@ spec:
           resources:
           - events
           verbs:
+          - create
           - get
           - list
           - watch
