@@ -23,8 +23,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -109,7 +107,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 			}
 
 			// sanitize catalog name
-			catalogName := "camel-catalog-" + strings.ToLower(runtimeVersion) + "-main"
+			catalogName := "camel-catalog-" + strings.ToLower(runtimeVersion) + "-" + string(runtime.Provider)
 
 			cx := v1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
 			cx.Labels = make(map[string]string)
@@ -119,8 +117,11 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 			cx.Labels["camel.apache.org/catalog.generated"] = True
 
 			err = e.Client.Create(e.C, &cx)
-			if err != nil && !k8serrors.IsAlreadyExists(err) {
-				return err
+			if err != nil {
+				return errors.Wrapf(err, "unable to create catalog runtime=%s, provider=%s, name=%s",
+					runtime.Version,
+					runtime.Provider,
+					catalogName)
 			}
 		}
 	}
