@@ -909,6 +909,7 @@ func newTestNamespace(injectKnativeBroker bool) metav1.Object {
 	var oc bool
 	var obj runtime.Object
 
+	brokerLabel := "knative-eventing-injection"
 	name := "test-" + uuid.New().String()
 
 	if oc, err = openshift.IsOpenShift(testClient); err != nil {
@@ -938,12 +939,29 @@ func newTestNamespace(injectKnativeBroker bool) metav1.Object {
 	if injectKnativeBroker {
 		mo := obj.(metav1.Object)
 		mo.SetLabels(map[string]string{
-			"knative-eventing-injection": "enabled",
+			brokerLabel: "enabled",
 		})
 	}
 
 	if err = testClient.Create(testContext, obj); err != nil {
 		panic(err)
+	}
+	// workaround https://github.com/openshift/origin/issues/3819
+	if injectKnativeBroker && oc {
+		// use Kubernetes API - https://access.redhat.com/solutions/2677921
+		var namespace *corev1.Namespace
+		if namespace, err = testClient.CoreV1().Namespaces().Get(name, metav1.GetOptions{}); err != nil {
+			panic(err)
+		} else {
+			if _, ok := namespace.GetLabels()[brokerLabel]; !ok {
+				namespace.SetLabels(map[string]string{
+					brokerLabel: "enabled",
+				})
+				if err = testClient.Update(testContext, namespace); err != nil {
+					panic("Unable to label project with knative-eventing-injection. This operation needs update permission on the project.")
+				}
+			}
+		}
 	}
 	return obj.(metav1.Object)
 }
