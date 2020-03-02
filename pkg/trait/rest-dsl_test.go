@@ -20,13 +20,20 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRestDslTraitApplicability(t *testing.T) {
-	e := &Environment{}
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	e := &Environment{
+		CamelCatalog: catalog,
+	}
 
 	trait := newRestDslTrait()
 	enabled, err := trait.Configure(e)
@@ -54,4 +61,54 @@ func TestRestDslTraitApplicability(t *testing.T) {
 	enabled, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+}
+
+func TestRestDslTraitDeps(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	e := &Environment{
+		CamelCatalog: catalog,
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Resources: []v1.ResourceSpec{
+					{Type: v1.ResourceTypeOpenAPI},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+	}
+
+	trait := newRestDslTrait().(*restDslTrait)
+	trait.computeDependencies(e)
+
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-rest")
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-undertow")
+}
+
+func TestRestDslTraitDepsQuarkus(t *testing.T) {
+	catalog, err := camel.QuarkusCatalog()
+	assert.Nil(t, err)
+
+	e := &Environment{
+		CamelCatalog: catalog,
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Resources: []v1.ResourceSpec{
+					{Type: v1.ResourceTypeOpenAPI},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+	}
+
+	trait := newRestDslTrait().(*restDslTrait)
+	trait.computeDependencies(e)
+
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-rest")
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-platform-http")
 }

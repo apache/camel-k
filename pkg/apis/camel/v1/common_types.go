@@ -88,11 +88,18 @@ type MavenArtifact struct {
 
 // RuntimeSpec --
 type RuntimeSpec struct {
-	Version          string            `json:"version" yaml:"version"`
-	Provider         RuntimeProvider   `json:"provider" yaml:"provider"`
-	ApplicationClass string            `json:"applicationClass" yaml:"applicationClass"`
-	Dependencies     []MavenArtifact   `json:"dependencies" yaml:"dependencies"`
-	Metadata         map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Version          string                `json:"version" yaml:"version"`
+	Provider         RuntimeProvider       `json:"provider" yaml:"provider"`
+	ApplicationClass string                `json:"applicationClass" yaml:"applicationClass"`
+	Dependencies     []MavenArtifact       `json:"dependencies" yaml:"dependencies"`
+	Metadata         map[string]string     `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Capabilities     map[string]Capability `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
+}
+
+// Capability --
+type Capability struct {
+	Dependencies []MavenArtifact   `json:"dependencies" yaml:"dependencies"`
+	Metadata     map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 }
 
 const (

@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -73,6 +74,11 @@ func newProbesTrait() Trait {
 
 func (t *probesTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && *t.Enabled {
+		// check if the runtime provides 'health' capabilities
+		if _, ok := e.CamelCatalog.Runtime.Capabilities["health"]; !ok {
+			t.L.Infof("the runtime provider %s does not declare 'health' capability", e.CamelCatalog.Runtime.Provider)
+		}
+
 		return e.IntegrationInPhase(
 			v1.IntegrationPhaseInitialization,
 			v1.IntegrationPhaseDeploying,
@@ -84,21 +90,13 @@ func (t *probesTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *probesTrait) Apply(e *Environment) error {
+	t.computeDependencies(e)
+
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-health")
-
-		// sort the dependencies to get always the same list if they don't change
-		sort.Strings(e.Integration.Status.Dependencies)
-
 		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			//
-			// TODO: At the moment the servlet engine is used only for health but we need to
-			//       have a dedicated servlet trait and maybe an option to create a dedicated
-			//       server for management stuffs like health
-			//
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.enabled=true"},
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindHost=" + t.BindHost},
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.servlet.bindPort=" + strconv.Itoa(t.BindPort)},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.inspector.enabled=true"},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.inspector.bind-host=" + t.BindHost},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.inspector.bind-port=" + strconv.Itoa(t.BindPort)},
 			v1.ConfigurationSpec{Type: "property", Value: "customizer.health.enabled=true"},
 			v1.ConfigurationSpec{Type: "property", Value: "customizer.health.path=" + t.Path},
 		)
@@ -154,4 +152,19 @@ func (t *probesTrait) newReadinessProbe() *corev1.Probe {
 	p.FailureThreshold = t.ReadinessFailureThreshold
 
 	return &p
+}
+
+func (t *probesTrait) computeDependencies(e *Environment) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		return
+	}
+
+	if capability, ok := e.CamelCatalog.Runtime.Capabilities["health"]; ok {
+		for _, dependency := range capability.Dependencies {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
+		}
+
+		// sort the dependencies to get always the same list if they don't change
+		sort.Strings(e.Integration.Status.Dependencies)
+	}
 }
