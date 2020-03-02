@@ -15,114 +15,84 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+
 apiVersion: v1
-kind: List
-items:
-- apiVersion: v1
-  kind: Service
-  metadata:
-    labels:
+kind: Service
+metadata:
+  labels:
+    app: lra-coordinator
+    template: lra-coordinator
+  name: lra-coordinator
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: lra-coordinator
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: lra-coordinator
+    template: lra-coordinator
+  name: lra-coordinator
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: lra-coordinator
+    template: lra-coordinator
+  name: lra-coordinator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
       app: lra-coordinator
-      template: lra-coordinator
-    name: lra-coordinator
-  spec:
-    ports:
-    - name: 8080-tcp
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
-    selector:
-      app: lra-coordinator
-      deploymentconfig: lra-coordinator
-    type: ClusterIP
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    labels:
-      app: lra-coordinator
-      template: lra-coordinator
-    name: lra-coordinator
-  spec:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: 200Mi
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    labels:
-      app: lra-coordinator
-      template: lra-coordinator
-    name: lra-coordinator
-  spec:
-    lookupPolicy:
-      local: true
-    tags:
-    - from:
-        kind: DockerImage
-        name: docker.io/jbosstm/lra-coordinator:5.9.4.Final
-      generation: 0
-      importPolicy: {}
-      name: "5.9.4.Final"
-      referencePolicy:
-        type: Source
-- apiVersion: v1
-  kind: DeploymentConfig
-  metadata:
-    generation: 1
-    labels:
-      app: lra-coordinator
-      template: lra-coordinator
-    name: lra-coordinator
-  spec:
-    replicas: 1
-    selector:
-      app: lra-coordinator
-      deploymentconfig: lra-coordinator
-    strategy:
-      type: Recreate
-    template:
-      metadata:
-        labels:
-          app: lra-coordinator
-          deploymentconfig: lra-coordinator
-      spec:
-        containers:
-        - imagePullPolicy: IfNotPresent
-          env:
-          - name: AB_JOLOKIA_OFF
-            value: "true"
-          livenessProbe:
-            httpGet:
-              path: /lra-coordinator
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 180
-          name: lra-coordinator
-          ports:
-          - containerPort: 8080
-            protocol: TCP
-          readinessProbe:
-            httpGet:
-              path: /lra-coordinator
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 10
-          volumeMounts:
-          - mountPath: /data
-            name: lra-coordinator-data
-        volumes:
-        - name: lra-coordinator-data
-          persistentVolumeClaim:
-            claimName: lra-coordinator
-    triggers:
-    - type: ConfigChange
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-        - lra-coordinator
-        from:
-          kind: ImageStreamTag
-          name: "lra-coordinator:5.9.4.Final"
-      type: ImageChange
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: lra-coordinator
+    spec:
+      containers:
+      - imagePullPolicy: IfNotPresent
+        env:
+        - name: AB_JOLOKIA_OFF
+          value: "true"
+        livenessProbe:
+          httpGet:
+            path: /lra-coordinator
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 180
+        name: lra-coordinator
+        image: docker.io/jbosstm/lra-coordinator:5.9.8.Final
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /lra-coordinator
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+        volumeMounts:
+        - mountPath: /data
+          name: lra-coordinator-data
+      volumes:
+      - name: lra-coordinator-data
+        persistentVolumeClaim:
+          claimName: lra-coordinator

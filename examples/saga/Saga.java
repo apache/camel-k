@@ -25,8 +25,8 @@ public class Saga extends RouteBuilder {
                 restConfiguration().port("8080");
 
 		LRASagaService service = new LRASagaService();
-		service.setCoordinatorUrl("http://lra-coordinator:8080");
-		service.setLocalParticipantUrl("http://saga:8080");
+		service.setCoordinatorUrl("http://lra-coordinator");
+		service.setLocalParticipantUrl("http://saga");
 		getContext().addService(service);
 
 		from("timer:clock?period=5000")
@@ -34,8 +34,8 @@ public class Saga extends RouteBuilder {
 			.setHeader("id", header(Exchange.TIMER_COUNTER))
 			.setHeader(Exchange.HTTP_METHOD, constant("POST"))
 			.log("Executing saga #${header.id}")
-			.to("http://train:8080/api/train/buy/seat")
-			.to("http://flight:8080/api/flight/buy");
+			.to("undertow:http://train/api/train/buy/seat")
+			.to("undertow:http://flight/api/flight/buy");
 
 	}
 }
