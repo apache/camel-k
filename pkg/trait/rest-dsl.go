@@ -24,8 +24,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,6 +62,11 @@ func (t *restDslTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	// check if the runtime provides 'rest' capabilities
+	if _, ok := e.CamelCatalog.Runtime.Capabilities["rest"]; !ok {
+		t.L.Infof("the runtime provider %s does not declare 'rest' capability", e.CamelCatalog.Runtime.Provider)
+	}
+
 	for _, resource := range e.Integration.Spec.Resources {
 		if resource.Type == v1.ResourceTypeOpenAPI {
 			return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
@@ -72,6 +80,8 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	if len(e.Integration.Spec.Resources) == 0 {
 		return nil
 	}
+
+	t.computeDependencies(e)
 
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "rest-dsl")
@@ -239,4 +249,20 @@ func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, erro
 	}
 
 	return p, nil
+}
+
+func (t *restDslTrait) computeDependencies(e *Environment) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		return
+	}
+
+	// check if the runtime provides 'rest' capabilities
+	if capability, ok := e.CamelCatalog.Runtime.Capabilities["rest"]; ok {
+		for _, dependency := range capability.Dependencies {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
+		}
+
+		// sort the dependencies to get always the same list if they don't change
+		sort.Strings(e.Integration.Status.Dependencies)
+	}
 }

@@ -52,9 +52,7 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *dependenciesTrait) Apply(e *Environment) error {
-	if e.Integration.Spec.Dependencies != nil {
-		e.Integration.Status.Dependencies = strset.New(e.Integration.Spec.Dependencies...).List()
-	} else {
+	if e.Integration.Status.Dependencies == nil {
 		e.Integration.Status.Dependencies = make([]string, 0)
 	}
 
@@ -90,6 +88,10 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 				}
 			}
 		}
+	}
+
+	for _, dependency := range e.Integration.Spec.Dependencies {
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency)
 	}
 
 	// add dependencies back to integration

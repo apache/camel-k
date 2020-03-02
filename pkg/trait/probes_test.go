@@ -20,6 +20,8 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/camel"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
@@ -31,7 +33,11 @@ import (
 )
 
 func TestProbesDeps(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
 	e := Environment{
+		CamelCatalog: catalog,
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseInitialization,
@@ -54,7 +60,38 @@ func TestProbesDeps(t *testing.T) {
 	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-health")
 }
 
+func TestProbesDepsQuarkus(t *testing.T) {
+	catalog, err := camel.QuarkusCatalog()
+	assert.Nil(t, err)
+
+	e := Environment{
+		CamelCatalog: catalog,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+	}
+
+	enabled := true
+
+	tr := newProbesTrait().(*probesTrait)
+	tr.Enabled = &enabled
+	tr.BindPort = 9191
+
+	ok, err := tr.Configure(&e)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+
+	err = tr.Apply(&e)
+	assert.Nil(t, err)
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-microprofile-health")
+}
+
 func TestProbesOnDeployment(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
 	target := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
 			Template: corev1.PodTemplateSpec{
@@ -68,7 +105,8 @@ func TestProbesOnDeployment(t *testing.T) {
 	}
 
 	e := Environment{
-		Resources: kubernetes.NewCollection(&target),
+		CamelCatalog: catalog,
+		Resources:    kubernetes.NewCollection(&target),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
@@ -99,6 +137,9 @@ func TestProbesOnDeployment(t *testing.T) {
 }
 
 func TestProbesOnKnativeService(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
 	target := serving.Service{
 		Spec: serving.ServiceSpec{
 			ConfigurationSpec: serving.ConfigurationSpec{
@@ -118,7 +159,8 @@ func TestProbesOnKnativeService(t *testing.T) {
 	}
 
 	e := Environment{
-		Resources: kubernetes.NewCollection(&target),
+		CamelCatalog: catalog,
+		Resources:    kubernetes.NewCollection(&target),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
