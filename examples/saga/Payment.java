@@ -27,8 +27,8 @@ public class Payment extends RouteBuilder {
                 restConfiguration().port("8080");
 
 		LRASagaService service = new LRASagaService();
-		service.setCoordinatorUrl("http://lra-coordinator:8080");
-		service.setLocalParticipantUrl("http://payment:8080");
+		service.setCoordinatorUrl("http://lra-coordinator");
+		service.setLocalParticipantUrl("http://payment");
 		getContext().addService(service);
 
 		rest("/api/").post("/pay")

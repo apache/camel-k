@@ -27,8 +27,8 @@ public class Flight extends RouteBuilder {
                 restConfiguration().port("8080");
 
 		LRASagaService service = new LRASagaService();
-		service.setCoordinatorUrl("http://lra-coordinator:8080");
-		service.setLocalParticipantUrl("http://flight:8080");
+		service.setCoordinatorUrl("http://lra-coordinator");
+		service.setLocalParticipantUrl("http://flight");
 		getContext().addService(service);
 
 		rest("/api").post("/flight/buy")
@@ -39,7 +39,7 @@ public class Flight extends RouteBuilder {
 				.option("id", header("id"))
 				.compensation("direct:cancelPurchase")
 			.log("Buying flight #${header.id}")
-			.to("http://payment:8080/api/pay?bridgeEndpoint=true&type=flight")
+			.to("undertow:http://payment/api/pay?bridgeEndpoint=true&type=flight")
 			.log("Payment for flight #${header.id} done");
 
 		from("direct:cancelPurchase")

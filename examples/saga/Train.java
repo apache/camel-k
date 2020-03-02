@@ -27,8 +27,8 @@ public class Train extends RouteBuilder {
                 restConfiguration().port("8080");
 
 		LRASagaService service = new LRASagaService();
-		service.setCoordinatorUrl("http://lra-coordinator:8080");
-		service.setLocalParticipantUrl("http://train:8080");
+		service.setCoordinatorUrl("http://lra-coordinator");
+		service.setLocalParticipantUrl("http://train");
 		getContext().addService(service);
 
 		rest("/api/").post("/train/buy/seat")
@@ -39,7 +39,7 @@ public class Train extends RouteBuilder {
                         .option("id", header("id"))
                         .compensation("direct:cancelPurchase")
                     .log("Buying train seat #${header.id}")
-                    .to("http://payment:8080/api/pay?bridgeEndpoint=true&type=train")
+                    .to("undertow:http://payment/api/pay?bridgeEndpoint=true&type=train")
                     .log("Payment for train #${header.id} done");
 
                from("direct:cancelPurchase")
