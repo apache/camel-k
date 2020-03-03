@@ -47,7 +47,7 @@ func TestRunGlobalInstall(t *testing.T) {
 
 		// NS2
 		withNewTestNamespace(t, func(ns2 string) {
-			Expect(kamel("install", "-n", ns2, "--skip-operator-setup", "--olm", "false").Execute()).Should(BeNil())
+			Expect(kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).Should(BeNil())
 
 			Expect(kamel("run", "-n", ns2, "files/Java.java").Execute()).Should(BeNil())
 			Eventually(integrationPodPhase(ns2, "java"), testTimeoutMedium).Should(Equal(v1.PodRunning))
