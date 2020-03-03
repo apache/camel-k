@@ -74,7 +74,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-runtime-servlet</artifactId>
+            <artifactId>camel-k-runtime-inspector</artifactId>
             <version>${runtime.version}</version>
         </dependency>
         <dependency>
@@ -301,14 +301,14 @@
             <id>staging</id>
             <activation>
                 <property>
-                    <name>staging.repo</name>
+                    <name>env.STAGING_RUNTIME_REPO</name>
                 </property>
             </activation>
 
             <repositories>
                 <repository>
                     <id>staging</id>
-                    <url>${staging.repo}</url>
+                    <url>${env.STAGING_RUNTIME_REPO}</url>
                     <releases>
                         <enabled>true</enabled>
                     </releases>
@@ -321,7 +321,7 @@
             <pluginRepositories>
                 <pluginRepository>
                     <id>staging</id>
-                    <url>${staging.repo}</url>
+                    <url>${env.STAGING_RUNTIME_REPO}</url>
                     <releases>
                         <enabled>true</enabled>
                     </releases>
