@@ -30,7 +30,7 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1178
+#STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1178
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
@@ -136,8 +136,8 @@ build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
 build-resources:
-	./script/build_catalog.sh $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-main.yaml
-	./script/build_catalog.sh $(RUNTIME_VERSION) -Dstaging.repo=$(STAGING_RUNTIME_REPO) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-quarkus.yaml -Dcatalog.runtime=quarkus
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" ./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-main.yaml
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" ./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-quarkus.yaml -Dcatalog.runtime=quarkus
 	./script/embed_resources.sh deploy
 
 build-olm:
