@@ -97,5 +97,14 @@ func TestRunSimpleExamples(t *testing.T) {
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
+		t.Run("run polyglot", func(t *testing.T) {
+			RegisterTestingT(t)
+			Expect(kamel("run", "-n", ns, "--name", "polyglot", "files/js-polyglot.js", "files/yaml-polyglot.yaml").Execute()).Should(BeNil())
+			Eventually(integrationPodPhase(ns, "polyglot"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "polyglot"), testTimeoutShort).Should(ContainSubstring("Magicpolyglot-yaml"))
+			Eventually(integrationLogs(ns, "polyglot"), testTimeoutShort).Should(ContainSubstring("Magicpolyglot-js"))
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
 	})
 }
