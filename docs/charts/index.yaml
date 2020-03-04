@@ -3,10 +3,10 @@ entries:
   camel-k:
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2020-02-28T08:33:33.502300417+01:00"
+    created: "2020-03-04T17:22:21.67309192+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
-    digest: ed438ce3f3a4fb72574c4243023ff4b1eead551689c23b332da5e3103884854e
+    digest: 3bc8c53c4d781c4b4e4aac254d291339b348c2d8b4cf24b579ceb4330a48edd5
     home: https://camel.apache.org/camel-k/latest/
     icon: https://raw.githubusercontent.com/apache/camel/master/docs/img/logo-d.svg
     keywords:
@@ -26,4 +26,4 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
-generated: "2020-02-28T08:33:33.500717761+01:00"
+generated: "2020-03-04T17:22:21.671150477+01:00"
