@@ -39,3 +39,9 @@ operation can be done *once per cluster*. So, if the `kamel install` operation f
 For Minishift, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for first-time installation.
 
 You're now ready to xref:running/running.adoc[run some integrations].
+
+[[helm]]
+== Installation via Helm
+
+Camel K is also available in Helm Hub for installation.
+Follow the instructions on the [Camel K](https://hub.helm.sh/charts/camel-k/camel-k) page for more information.
