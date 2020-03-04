@@ -37,7 +37,7 @@ version: 0.2.0
 # incremented each time you make changes to the application.
 appVersion: 1.0.0-SNAPSHOT
 
-icon: https://raw.githubusercontent.com/apache/camel/master/docs/img/logo-d.svg
+icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
 home: https://camel.apache.org/camel-k/latest/
 
 sources:

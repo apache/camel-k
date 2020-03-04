@@ -8,7 +8,7 @@ entries:
       superpowers
     digest: 3bc8c53c4d781c4b4e4aac254d291339b348c2d8b4cf24b579ceb4330a48edd5
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://raw.githubusercontent.com/apache/camel/master/docs/img/logo-d.svg
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
