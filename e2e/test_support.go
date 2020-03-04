@@ -45,6 +45,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	projectv1 "github.com/openshift/api/project/v1"
+	routev1 "github.com/openshift/api/route/v1"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
@@ -77,6 +78,7 @@ var testImageVersion = defaults.Version
 func init() {
 	// Register some resources used in e2e tests only
 	client.FastMapperAllowedAPIGroups["project.openshift.io"] = true
+	client.FastMapperAllowedAPIGroups["route.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["messaging.knative.dev"] = true
 
@@ -276,6 +278,40 @@ func configMap(ns string, name string) func() *corev1.ConfigMap {
 			panic(err)
 		}
 		return &cm
+	}
+}
+
+func service(ns string, name string) func() *corev1.Service {
+	return func() *corev1.Service {
+		svc := corev1.Service{}
+		key := k8sclient.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		err := testClient.Get(testContext, key, &svc)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			panic(err)
+		}
+		return &svc
+	}
+}
+
+func route(ns string, name string) func() *routev1.Route {
+	return func() *routev1.Route {
+		route := routev1.Route{}
+		key := k8sclient.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		err := testClient.Get(testContext, key, &route)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			panic(err)
+		}
+		return &route
 	}
 }
 
