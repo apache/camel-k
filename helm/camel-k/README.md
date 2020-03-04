@@ -16,7 +16,7 @@ Apache Camel integrations on any Kubernetes cluster.
 To install the chart, first add the Camel K repository:
 
 ```bash
-$ helm repo add camel-k https://apache.github.io/camel-k/helm/charts
+$ helm repo add camel-k https://apache.github.io/camel-k/charts
 ```
 
 If you are installing on OpenShift, Camel K can use the OpenShift internal registry to
