@@ -27,6 +27,7 @@ Installation on OpenShift can be done with command:
 ```bash
 $ helm install \
   --generate-name \
+  --set platform.cluster=OpenShift \
   camel-k/camel-k
 ```
 
@@ -45,7 +46,7 @@ Then you can install Camel K with:
 ```bash
 $ helm install \
   --generate-name \
-  --set platform.build.registry.address=${REGISTRY_ADDRESS}
+  --set platform.build.registry.address=${REGISTRY_ADDRESS} \
   --set platform.build.registry.insecure=true \
   camel-k/camel-k
 ```

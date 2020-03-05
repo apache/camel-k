@@ -62,6 +62,3 @@ Defaults
 Kubernetes
 {{- end -}}
 {{- end -}}
-elm hub
-
-
