@@ -84,14 +84,15 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 	}
 
 	env := Environment{
-		C:              ctx,
-		Platform:       pl,
-		Client:         c,
-		IntegrationKit: kit,
-		Integration:    integration,
-		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(),
-		EnvVars:        make([]corev1.EnvVar, 0),
+		C:                     ctx,
+		Platform:              pl,
+		Client:                c,
+		IntegrationKit:        kit,
+		Integration:           integration,
+		ExecutedTraits:        make([]Trait, 0),
+		Resources:             kubernetes.NewCollection(),
+		EnvVars:               make([]corev1.EnvVar, 0),
+		ApplicationProperties: make(map[string]string),
 	}
 
 	return &env, nil

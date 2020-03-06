@@ -193,21 +193,22 @@ type ControllerStrategySelector interface {
 
 // A Environment provides the context where the trait is executed
 type Environment struct {
-	CamelCatalog     *camel.RuntimeCatalog
-	RuntimeVersion   string
-	Catalog          *Catalog
-	C                context.Context
-	Client           client.Client
-	Platform         *v1.IntegrationPlatform
-	IntegrationKit   *v1.IntegrationKit
-	Integration      *v1.Integration
-	Resources        *kubernetes.Collection
-	PostActions      []func(*Environment) error
-	PostProcessors   []func(*Environment) error
-	BuildTasks       []v1.Task
-	ConfiguredTraits []Trait
-	ExecutedTraits   []Trait
-	EnvVars          []corev1.EnvVar
+	CamelCatalog          *camel.RuntimeCatalog
+	RuntimeVersion        string
+	Catalog               *Catalog
+	C                     context.Context
+	Client                client.Client
+	Platform              *v1.IntegrationPlatform
+	IntegrationKit        *v1.IntegrationKit
+	Integration           *v1.Integration
+	Resources             *kubernetes.Collection
+	PostActions           []func(*Environment) error
+	PostProcessors        []func(*Environment) error
+	BuildTasks            []v1.Task
+	ConfiguredTraits      []Trait
+	ExecutedTraits        []Trait
+	EnvVars               []corev1.EnvVar
+	ApplicationProperties map[string]string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -339,33 +340,66 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	sources := e.Integration.Sources()
 	maps := make([]runtime.Object, 0, len(sources)+1)
 
-	// combine properties of integration with kit, integration
-	// properties have the priority
-	properties := ""
+	// application properties
+	applicationProperties := ""
 
-	for key, val := range e.CollectConfigurationPairs("property") {
-		properties += fmt.Sprintf("%s=%s\n", key, val)
+	for key, val := range e.ApplicationProperties {
+		applicationProperties += fmt.Sprintf("%s=%s\n", key, val)
 	}
 
-	maps = append(
-		maps,
-		&corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      e.Integration.Name + "-properties",
-				Namespace: e.Integration.Namespace,
-				Labels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
+	if applicationProperties != "" {
+		maps = append(
+			maps,
+			&corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      e.Integration.Name + "-application-properties",
+					Namespace: e.Integration.Namespace,
+					Labels: map[string]string{
+						"camel.apache.org/integration":     e.Integration.Name,
+						"camel.apache.org/properties.type": "application",
+					},
+				},
+				Data: map[string]string{
+					"application.properties": applicationProperties,
 				},
 			},
-			Data: map[string]string{
-				"application.properties": properties,
+		)
+	}
+
+	// combine properties of integration with kit, integration
+	// properties have the priority
+	userProperties := ""
+
+	for key, val := range e.CollectConfigurationPairs("property") {
+		userProperties += fmt.Sprintf("%s=%s\n", key, val)
+	}
+
+	if userProperties != "" {
+		maps = append(
+			maps,
+			&corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      e.Integration.Name + "-user-properties",
+					Namespace: e.Integration.Namespace,
+					Labels: map[string]string{
+						"camel.apache.org/integration":     e.Integration.Name,
+						"camel.apache.org/properties.type": "user",
+					},
+				},
+				Data: map[string]string{
+					"application.properties": userProperties,
+				},
 			},
-		},
-	)
+		)
+	}
 
 	for i, s := range sources {
 		if s.ContentRef != "" {
@@ -554,31 +588,43 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		})
 	}
 
-	//
-	// Volumes :: Properties
-	//
+	if e.Resources != nil {
+		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
+			var propertiesType string
+			var mountPath string
 
-	*vols = append(*vols, corev1.Volume{
-		Name: "integration-properties",
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: e.Integration.Name + "-properties",
-				},
-				Items: []corev1.KeyToPath{
-					{
-						Key:  "application.properties",
-						Path: "application.properties",
+			switch propertiesType = configMap.Labels["camel.apache.org/properties.type"]; propertiesType {
+			case "application":
+				mountPath = ConfPath
+			case "user":
+				mountPath = ConfdPath
+			}
+
+			if propertiesType != "" {
+				*vols = append(*vols, corev1.Volume{
+					Name: propertiesType + "-properties",
+					VolumeSource: corev1.VolumeSource{
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: configMap.Name,
+							},
+							Items: []corev1.KeyToPath{
+								{
+									Key:  "application.properties",
+									Path: propertiesType + ".properties",
+								},
+							},
+						},
 					},
-				},
-			},
-		},
-	})
+				})
 
-	*mnts = append(*mnts, corev1.VolumeMount{
-		Name:      "integration-properties",
-		MountPath: ConfPath,
-	})
+				*mnts = append(*mnts, corev1.VolumeMount{
+					Name:      propertiesType + "-properties",
+					MountPath: mountPath,
+				})
+			}
+		})
+	}
 
 	//
 	// Volumes :: Additional ConfigMaps

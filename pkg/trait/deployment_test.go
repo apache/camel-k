@@ -104,13 +104,21 @@ func TestApplyDeploymentTraitWhileResolvingKitDoesNotSucceed(t *testing.T) {
 
 func TestApplyDeploymentTraitWhileDeployingIntegrationDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
+	environment.Integration.Spec.Configuration = append(environment.Integration.Spec.Configuration, v1.ConfigurationSpec{
+		Type:  "property",
+		Value: "a=b",
+	})
 
 	err := deploymentTrait.Apply(environment)
 
 	assert.Nil(t, err)
 
-	configMap := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool { return true })
-	assert.NotNil(t, configMap)
+	assert.NotNil(t, environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Labels["camel.apache.org/properties.type"] == "user"
+	}))
+	assert.Nil(t, environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Labels["camel.apache.org/properties.type"] == "application"
+	}))
 
 	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 	assert.NotNil(t, deployment)
@@ -196,7 +204,8 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 				Profile: v1.TraitProfileKnative,
 			},
 		},
-		Resources: kubernetes.NewCollection(),
+		Resources:             kubernetes.NewCollection(),
+		ApplicationProperties: make(map[string]string),
 	}
 	environment.Platform.ResyncStatusFullConfig()
 

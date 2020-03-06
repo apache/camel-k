@@ -25,14 +25,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
-	rbacv1 "k8s.io/api/rbac/v1"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
 	"time"
-	"io"
+
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+
+	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/apache/camel-k/e2e/util"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -61,9 +64,9 @@ import (
 	_ "github.com/apache/camel-k/addons"
 )
 
-var testTimeoutShort = 1*time.Minute
-var testTimeoutMedium = 5*time.Minute
-var testTimeoutLong = 10*time.Minute
+var testTimeoutShort = 1 * time.Minute
+var testTimeoutMedium = 5 * time.Minute
+var testTimeoutLong = 10 * time.Minute
 
 var testContext context.Context
 var testClient client.Client
@@ -97,7 +100,7 @@ func init() {
 		testImageVersion = imageVersion
 	}
 
-	// Timeouts 
+	// Timeouts
 	var duration time.Duration
 	if value, ok := os.LookupEnv("CAMEL_K_TEST_TIMEOUT_SHORT"); ok {
 		if duration, err = time.ParseDuration(value); err == nil {
@@ -152,18 +155,18 @@ func kamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 		c = &cobra.Command{
 			DisableFlagParsing: true,
 			Run: func(cmd *cobra.Command, args []string) {
-				
+
 				externalBin := exec.Command(kamelBin, args...)
 				var stdout io.Reader
-				stdout , err = externalBin.StdoutPipe()
+				stdout, err = externalBin.StdoutPipe()
 				if err != nil {
 					panic(err)
 				}
-				
+
 				externalBin.Start()
 				io.Copy(c.OutOrStdout(), stdout)
 				externalBin.Wait()
-				
+
 			},
 		}
 	} else {
@@ -467,6 +470,58 @@ func configmap(ns string, name string) func() *corev1.ConfigMap {
 	}
 }
 
+func knativeService(ns string, name string) func() *servingv1.Service {
+	return func() *servingv1.Service {
+		cm := servingv1.Service{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Service",
+				APIVersion: servingv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+		}
+		key := k8sclient.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		if err := testClient.Get(testContext, key, &cm); err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			log.Errorf(err, "Error while retrieving knative service %s", name)
+			return nil
+		}
+		return &cm
+	}
+}
+
+func deployment(ns string, name string) func() *appsv1.Deployment {
+	return func() *appsv1.Deployment {
+		cm := appsv1.Deployment{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Deployment",
+				APIVersion: appsv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+		}
+		key := k8sclient.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		if err := testClient.Get(testContext, key, &cm); err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			log.Errorf(err, "Error while retrieving deployment %s", name)
+			return nil
+		}
+		return &cm
+	}
+}
+
 func build(ns string, name string) func() *v1.Build {
 	return func() *v1.Build {
 		build := v1.NewBuild(ns, name)
@@ -514,7 +569,7 @@ func deletePlatform(ns string) func() bool {
 	}
 }
 
-func setPlatformVersion(ns string, version string) func()error {
+func setPlatformVersion(ns string, version string) func() error {
 	return func() error {
 		p := platform(ns)()
 		if p == nil {
@@ -675,7 +730,7 @@ func clusterrole(ns string) func() *rbacv1.ClusterRole {
 		lst := rbacv1.ClusterRoleList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "ClusterRole",
-				APIVersion:  rbacv1.SchemeGroupVersion.String(),
+				APIVersion: rbacv1.SchemeGroupVersion.String(),
 			},
 		}
 		err := testClient.List(testContext, &lst,
@@ -698,7 +753,7 @@ func serviceaccount(ns, name string) func() *corev1.ServiceAccount {
 		lst := corev1.ServiceAccountList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "ServiceAccount",
-				APIVersion:  corev1.SchemeGroupVersion.String(),
+				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
 		err := testClient.List(testContext, &lst,

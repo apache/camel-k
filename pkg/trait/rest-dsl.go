@@ -53,6 +53,11 @@ func newRestDslTrait() Trait {
 	}
 }
 
+// IsPlatformTrait overrides base class method
+func (t *restDslTrait) IsPlatformTrait() bool {
+	return true
+}
+
 func (t *restDslTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
@@ -69,7 +74,11 @@ func (t *restDslTrait) Configure(e *Environment) (bool, error) {
 
 	for _, resource := range e.Integration.Spec.Resources {
 		if resource.Type == v1.ResourceTypeOpenAPI {
-			return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
+			return e.IntegrationInPhase(
+				v1.IntegrationPhaseInitialization,
+				v1.IntegrationPhaseDeploying,
+				v1.IntegrationPhaseRunning,
+			), nil
 		}
 	}
 
@@ -81,8 +90,20 @@ func (t *restDslTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	t.computeDependencies(e)
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		t.computeDependencies(e)
+		return t.generateRestDSL(e)
+	}
 
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+		e.ApplicationProperties["camel.rest.port"] = "8080"
+		return nil
+	}
+
+	return nil
+}
+
+func (t *restDslTrait) generateRestDSL(e *Environment) error {
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "rest-dsl")
 	if err != nil {
@@ -94,6 +115,9 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	for i, resource := range e.Integration.Spec.Resources {
 		if resource.Type != v1.ResourceTypeOpenAPI {
 			continue
+		}
+		if resource.Name == "" {
+			return fmt.Errorf("no name defined for the openapi resource: %v", resource)
 		}
 
 		tmpDir = path.Join(tmpDir, strconv.Itoa(i))
@@ -110,7 +134,7 @@ func (t *restDslTrait) Apply(e *Environment) error {
 			}
 		}
 
-		in := path.Join(tmpDir, "openapi-spec.json")
+		in := path.Join(tmpDir, resource.Name)
 		out := path.Join(tmpDir, "openapi-dsl.xml")
 
 		err = ioutil.WriteFile(in, content, 0644)
@@ -218,11 +242,6 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
-func (t *restDslTrait) IsPlatformTrait() bool {
-	return true
-}
-
 func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, error) {
 	if e.CamelCatalog == nil {
 		return maven.Project{}, errors.New("unknown camel catalog")
@@ -252,10 +271,6 @@ func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, erro
 }
 
 func (t *restDslTrait) computeDependencies(e *Environment) {
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return
-	}
-
 	// check if the runtime provides 'rest' capabilities
 	if capability, ok := e.CamelCatalog.Runtime.Capabilities["rest"]; ok {
 		for _, dependency := range capability.Dependencies {
