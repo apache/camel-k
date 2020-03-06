@@ -17,10 +17,13 @@
  */
 
 //
-//  kamel run --dev --name greetings --open-api examples/greetings-api.json examples/greetings.groovy
+//  kamel run --dev --name petstore --open-api examples/petstore-api.yaml examples/petstore.groovy
 // 
 
-from('direct:greeting-api')
-    .to('log:api?showAll=true&multiline=true') 
-    .setBody()
-        .simple('Hello from ${headers.name}')
+from('direct:listPets')
+    .log('listPets')
+from('direct:createPets')
+    .log('createPets')
+from('direct:showPetById')
+    .log('showPetById')
+

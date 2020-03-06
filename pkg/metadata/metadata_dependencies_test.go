@@ -467,8 +467,19 @@ func TestXMLLanguageDependencies(t *testing.T) {
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:saxon", "camel:xpath",
-		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:ognl",
+			"camel:saxon",
+			"camel:xpath",
+			"camel:xml-jaxp",
+			"camel:jsonpath",
+			"camel:groovy",
+			"camel:mvel",
+		},
+		meta.Dependencies.List())
 }
 
 const yamlWithRest = `
@@ -562,6 +573,17 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:saxon", "camel:xpath",
-		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:ognl",
+			"camel:saxon",
+			"camel:xpath",
+			"camel:jsonpath",
+			"camel:groovy",
+			"camel:xml-jaxp",
+			"camel:mvel",
+		},
+		meta.Dependencies.List())
 }
