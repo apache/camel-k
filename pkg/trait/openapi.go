@@ -28,37 +28,37 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// The Rest DSL trait is internally used to allow creating integrations from a OpenAPI specs.
+// The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 //
-// +camel-k:trait=rest-dsl
-type restDslTrait struct {
+// +camel-k:trait=openapi
+type openAPITrait struct {
 	BaseTrait `property:",squash"`
 }
 
-func newRestDslTrait() Trait {
-	return &restDslTrait{
-		BaseTrait: NewBaseTrait("rest-dsl", 300),
+func newOpenAPITrait() Trait {
+	return &openAPITrait{
+		BaseTrait: NewBaseTrait("openapi", 300),
 	}
 }
 
 // IsPlatformTrait overrides base class method
-func (t *restDslTrait) IsPlatformTrait() bool {
+func (t *openAPITrait) IsPlatformTrait() bool {
 	return true
 }
 
-func (t *restDslTrait) Configure(e *Environment) (bool, error) {
+func (t *openAPITrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
 	}
@@ -85,7 +85,7 @@ func (t *restDslTrait) Configure(e *Environment) (bool, error) {
 	return false, nil
 }
 
-func (t *restDslTrait) Apply(e *Environment) error {
+func (t *openAPITrait) Apply(e *Environment) error {
 	if len(e.Integration.Spec.Resources) == 0 {
 		return nil
 	}
@@ -103,9 +103,9 @@ func (t *restDslTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *restDslTrait) generateRestDSL(e *Environment) error {
+func (t *openAPITrait) generateRestDSL(e *Environment) error {
 	root := os.TempDir()
-	tmpDir, err := ioutil.TempDir(root, "rest-dsl")
+	tmpDir, err := ioutil.TempDir(root, "openapi")
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func (t *restDslTrait) generateRestDSL(e *Environment) error {
 	return nil
 }
 
-func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, error) {
+func (t *openAPITrait) generateMavenProject(e *Environment) (maven.Project, error) {
 	if e.CamelCatalog == nil {
 		return maven.Project{}, errors.New("unknown camel catalog")
 	}
@@ -270,7 +270,7 @@ func (t *restDslTrait) generateMavenProject(e *Environment) (maven.Project, erro
 	return p, nil
 }
 
-func (t *restDslTrait) computeDependencies(e *Environment) {
+func (t *openAPITrait) computeDependencies(e *Environment) {
 	// check if the runtime provides 'rest' capabilities
 	if capability, ok := e.CamelCatalog.Runtime.Capabilities["rest"]; ok {
 		for _, dependency := range capability.Dependencies {
