@@ -37,7 +37,7 @@ func TestOpenAPIService(t *testing.T) {
 			"run",
 			"-n", ns,
 			"--name", "petstore",
-			"--open-api", "examples/petstore-api.yaml",
+			"--open-api", "files/petstore-api.yaml",
 			"files/petstore.groovy",
 		).Execute()).Should(BeNil())
 
@@ -64,7 +64,7 @@ func TestOpenAPIDeployment(t *testing.T) {
 			"run",
 			"-n", ns,
 			"--name", "petstore",
-			"--open-api", "examples/petstore-api.yaml",
+			"--open-api", "files/petstore-api.yaml",
 			"files/petstore.groovy",
 		).Execute()).Should(BeNil())
 
