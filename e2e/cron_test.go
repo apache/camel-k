@@ -58,5 +58,14 @@ func TestRunCronExample(t *testing.T) {
 			Eventually(integrationLogs(ns, "cron-fallback"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
+
+		t.Run("cron-fallback-quarkus", func(t *testing.T) {
+			RegisterTestingT(t)
+
+			Expect(kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
+			Eventually(integrationPodPhase(ns, "cron"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(integrationLogs(ns, "cron"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
 	})
 }

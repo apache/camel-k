@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -31,7 +32,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/uri"
 )
@@ -125,7 +125,18 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying) {
+		return false, nil
+	}
+
+	if _, ok := e.CamelCatalog.Runtime.Capabilities["cron"]; !ok {
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionCronJobAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionCronJobNotAvailableReason,
+			"the runtime provider %s does not declare 'cron' capability",
+		)
+
 		return false, nil
 	}
 
@@ -156,7 +167,14 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 			t.ConcurrencyPolicy = string(v1beta1.ForbidConcurrent)
 		}
 
-		if t.Schedule == "" && t.Components == "" && t.Fallback == nil {
+		hasQuarkus := false
+
+		qt := e.GetTrait("quarkus")
+		if qt != nil {
+			hasQuarkus = qt.(*quarkusTrait).Enabled != nil && *(qt.(*quarkusTrait).Enabled)
+		}
+
+		if (hasQuarkus || (t.Schedule == "" && t.Components == "")) && t.Fallback == nil {
 			// If there's at least a `cron` endpoint, add a fallback implementation
 			fromURIs, err := t.getSourcesFromURIs(e)
 			if err != nil {
@@ -169,10 +187,8 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 					break
 				}
 			}
-
 		}
 	}
-
 	dt := e.Catalog.GetTrait("deployer")
 	if dt != nil {
 		t.deployer = *dt.(*deployerTrait)
@@ -180,7 +196,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 
 	// Fallback strategy can be implemented in any other controller
 	if t.Fallback != nil && *t.Fallback {
-		if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
+		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionCronJobAvailable,
 				corev1.ConditionFalse,
@@ -202,7 +218,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 		return false, err
 	}
 	if strategy != ControllerStrategyCronJob {
-		if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
+		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionCronJobAvailable,
 				corev1.ConditionFalse,
@@ -217,30 +233,43 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *cronTrait) Apply(e *Environment) error {
-	if t.Fallback != nil && *t.Fallback {
-		if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		if capability, ok := e.CamelCatalog.Runtime.Capabilities["cron"]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
+			}
+
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(e.Integration.Status.Dependencies)
+		}
+
+		if t.Fallback != nil && *t.Fallback {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, genericCronComponentFallback)
 		}
-	} else {
-		if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-cron")
-		} else if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
-			cronJob := t.getCronJobFor(e)
-			maps := e.ComputeConfigMaps()
-
-			e.Resources.AddAll(maps)
-			e.Resources.Add(cronJob)
-
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionCronJobAvailable,
-				corev1.ConditionTrue,
-				v1.IntegrationConditionCronJobAvailableReason,
-				fmt.Sprintf("CronJob name is %s", cronJob.Name),
-			)
-
-			envvar.SetVal(&e.EnvVars, "CAMEL_K_CRON_OVERRIDE", t.Components)
-		}
 	}
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
+		if e.ApplicationProperties == nil {
+			e.ApplicationProperties = make(map[string]string)
+		}
+
+		e.ApplicationProperties["camel.main.duration-max-messages"] = "1"
+		e.ApplicationProperties["loader.interceptor.cron.overridable-components"] = t.Components
+		e.Interceptors = append(e.Interceptors, "cron")
+
+		cronJob := t.getCronJobFor(e)
+		maps := e.ComputeConfigMaps()
+
+		e.Resources.AddAll(maps)
+		e.Resources.Add(cronJob)
+
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionCronJobAvailable,
+			corev1.ConditionTrue,
+			v1.IntegrationConditionCronJobAvailableReason,
+			fmt.Sprintf("CronJob name is %s", cronJob.Name))
+	}
+
 	return nil
 }
 

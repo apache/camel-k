@@ -209,6 +209,7 @@ type Environment struct {
 	ExecutedTraits        []Trait
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
+	Interceptors          []string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -483,6 +484,7 @@ func (e *Environment) ComputeSourcesURI() []string {
 		srcName := strings.TrimPrefix(s.Name, "/")
 		src := path.Join(root, srcName)
 		src = "file:" + src
+		interceptors := make([]string, 0, len(s.Interceptors))
 
 		params := make([]string, 0)
 		if s.InferLanguage() != "" {
@@ -494,8 +496,15 @@ func (e *Environment) ComputeSourcesURI() []string {
 		if s.Compression {
 			params = append(params, "compression=true")
 		}
+
 		if s.Interceptors != nil {
-			params = append(params, "interceptors="+strings.Join(s.Interceptors, ","))
+			interceptors = append(interceptors, s.Interceptors...)
+		}
+		if e.Interceptors != nil {
+			interceptors = append(interceptors, e.Interceptors...)
+		}
+		if len(interceptors) > 0 {
+			params = append(params, "interceptors="+strings.Join(interceptors, ","))
 		}
 
 		if len(params) > 0 {
