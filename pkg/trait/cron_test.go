@@ -18,10 +18,21 @@ limitations under the License.
 package trait
 
 import (
+	"context"
+	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/magiconair/properties/assert"
+	"github.com/apache/camel-k/pkg/util"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	passert "github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCronFromURI(t *testing.T) {
@@ -198,13 +209,324 @@ func TestCronFromURI(t *testing.T) {
 			if res != nil {
 				gotCron = res.schedule
 			}
-			assert.Equal(t, gotCron, thetest.cron)
+			passert.Equal(t, gotCron, thetest.cron)
 
 			gotComponents := ""
 			if res != nil {
 				gotComponents = strings.Join(res.components, ",")
 			}
-			assert.Equal(t, gotComponents, thetest.components)
+			passert.Equal(t, gotComponents, thetest.components)
 		})
 	}
+}
+
+func TestCronDeps(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.java",
+							Content: `from("cron:tab?schedule=0 0/2 * * ?").to("log:test")`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Resources: []v1.ResourceSpec{},
+				Traits:    map[string]v1.TraitSpec{},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	c, err := NewFakeClient("ns")
+	assert.Nil(t, err)
+
+	tc := NewCatalog(context.TODO(), c)
+
+	err = tc.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+
+	ct := environment.GetTrait("cron").(*cronTrait)
+	assert.NotNil(t, ct)
+	assert.Nil(t, ct.Fallback)
+
+	capability, ok := environment.CamelCatalog.Runtime.Capabilities["cron"]
+	assert.True(t, ok)
+
+	for _, dependency := range capability.Dependencies {
+		assert.True(t, util.StringSliceExists(environment.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID)))
+	}
+}
+
+func TestCronDepsFallback(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.java",
+							Content: `from("cron:tab?schedule=0 0/2 * * ?").to("log:test")`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Resources: []v1.ResourceSpec{},
+				Traits: map[string]v1.TraitSpec{
+					"cron": {
+						Configuration: map[string]string{
+							"fallback": "true",
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	c, err := NewFakeClient("ns")
+	assert.Nil(t, err)
+
+	tc := NewCatalog(context.TODO(), c)
+
+	err = tc.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+
+	ct := environment.GetTrait("cron").(*cronTrait)
+	assert.NotNil(t, ct)
+	assert.NotNil(t, ct.Fallback)
+
+	capability, ok := environment.CamelCatalog.Runtime.Capabilities["cron"]
+	assert.True(t, ok)
+
+	for _, dependency := range capability.Dependencies {
+		assert.True(t, util.StringSliceExists(environment.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID)))
+	}
+
+	assert.True(t, util.StringSliceExists(environment.Integration.Status.Dependencies, genericCronComponentFallback))
+}
+
+func TestCronWithMain(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.java",
+							Content: `from("cron:tab?schedule=0 0/2 * * ?").to("log:test")`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Resources: []v1.ResourceSpec{},
+				Traits: map[string]v1.TraitSpec{
+					"quarkus": {
+						Configuration: map[string]string{
+							"enabled": "false",
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	c, err := NewFakeClient("ns")
+	assert.Nil(t, err)
+
+	tc := NewCatalog(context.TODO(), c)
+
+	err = tc.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.Nil(t, environment.GetTrait("quarkus"))
+
+	ct := environment.GetTrait("cron").(*cronTrait)
+	assert.NotNil(t, ct)
+	assert.Nil(t, ct.Fallback)
+	assert.True(t, util.StringSliceExists(environment.Interceptors, "cron"))
+}
+
+func TestCronWithQuarkus(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.java",
+							Content: `from("cron:tab?schedule=0 0/2 * * ?").to("log:test")`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Resources: []v1.ResourceSpec{},
+				Traits: map[string]v1.TraitSpec{
+					"quarkus": {
+						Configuration: map[string]string{
+							"enabled": "true",
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	c, err := NewFakeClient("ns")
+	assert.Nil(t, err)
+
+	tc := NewCatalog(context.TODO(), c)
+
+	err = tc.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("quarkus"))
+
+	ct := environment.GetTrait("cron").(*cronTrait)
+	assert.NotNil(t, ct)
+	assert.NotNil(t, ct.Fallback)
+	assert.True(t, *ct.Fallback)
+	assert.True(t, util.StringSliceExists(environment.Interceptors, "cron"))
 }
