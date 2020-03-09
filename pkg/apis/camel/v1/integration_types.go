@@ -113,6 +113,9 @@ type SourceSpec struct {
 	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
 	// interpret this source at runtime
 	Loader string `json:"loader,omitempty"`
+	// Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+	// uses to pre/post process sources
+	Interceptors []string `json:"interceptors,omitempty"`
 }
 
 // Language --

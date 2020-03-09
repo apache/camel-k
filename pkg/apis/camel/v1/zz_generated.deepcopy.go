@@ -206,7 +206,9 @@ func (in *BuilderTask) DeepCopyInto(out *BuilderTask) {
 	if in.Sources != nil {
 		in, out := &in.Sources, &out.Sources
 		*out = make([]SourceSpec, len(*in))
-		copy(*out, *in)
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.Resources != nil {
 		in, out := &in.Resources, &out.Resources
@@ -485,6 +487,13 @@ func (in *Capability) DeepCopyInto(out *Capability) {
 		in, out := &in.Dependencies, &out.Dependencies
 		*out = make([]MavenArtifact, len(*in))
 		copy(*out, *in)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -1067,7 +1076,9 @@ func (in *IntegrationSpec) DeepCopyInto(out *IntegrationSpec) {
 	if in.Sources != nil {
 		in, out := &in.Sources, &out.Sources
 		*out = make([]SourceSpec, len(*in))
-		copy(*out, *in)
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.Resources != nil {
 		in, out := &in.Resources, &out.Resources
@@ -1120,7 +1131,9 @@ func (in *IntegrationStatus) DeepCopyInto(out *IntegrationStatus) {
 	if in.GeneratedSources != nil {
 		in, out := &in.GeneratedSources, &out.GeneratedSources
 		*out = make([]SourceSpec, len(*in))
-		copy(*out, *in)
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.GeneratedResources != nil {
 		in, out := &in.GeneratedResources, &out.GeneratedResources
@@ -1256,6 +1269,11 @@ func (in *RuntimeSpec) DeepCopy() *RuntimeSpec {
 func (in *SourceSpec) DeepCopyInto(out *SourceSpec) {
 	*out = *in
 	out.DataSpec = in.DataSpec
+	if in.Interceptors != nil {
+		in, out := &in.Interceptors, &out.Interceptors
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 
