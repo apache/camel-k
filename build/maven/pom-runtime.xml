@@ -123,17 +123,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-quarkus-loader-knative</artifactId>
-            <version>${runtime.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.oracle.substratevm</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-quarkus-loader-xml</artifactId>
             <version>${runtime.version}</version>
             <exclusions>
