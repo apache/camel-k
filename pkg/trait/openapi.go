@@ -40,6 +40,15 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
+// OpenAPITraitName ---
+const OpenAPITraitName = "openapi"
+
+// CamelRestPortProperty ---
+const CamelRestPortProperty = "camel.rest.port"
+
+// CamelRestDefaultPort ---
+const CamelRestDefaultPort = "8080"
+
 // The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 //
 // +camel-k:trait=openapi
@@ -49,7 +58,7 @@ type openAPITrait struct {
 
 func newOpenAPITrait() Trait {
 	return &openAPITrait{
-		BaseTrait: NewBaseTrait("openapi", 300),
+		BaseTrait: NewBaseTrait(OpenAPITraitName, 300),
 	}
 }
 
@@ -96,7 +105,7 @@ func (t *openAPITrait) Apply(e *Environment) error {
 	}
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
-		e.ApplicationProperties["camel.rest.port"] = "8080"
+		e.ApplicationProperties[CamelRestPortProperty] = CamelRestDefaultPort
 		return nil
 	}
 
