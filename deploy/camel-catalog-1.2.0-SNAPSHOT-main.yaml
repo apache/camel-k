@@ -38,6 +38,10 @@ spec:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
     capabilities:
+      cron:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-runtime-cron
       health:
         dependencies:
         - groupId: org.apache.camel.k
@@ -3053,9 +3057,6 @@ spec:
     camel-k-loader-java:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-java
-    camel-k-loader-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-knative
     camel-k-runtime-main:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
@@ -3077,8 +3078,6 @@ spec:
       dependencies:
       - groupId: org.apache.camel.k
         artifactId: camel-k-loader-yaml
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-knative
       - groupId: org.apache.camel.k
         artifactId: camel-knative-api
       - groupId: org.apache.camel.k
@@ -3128,9 +3127,3 @@ spec:
       artifactId: camel-k-loader-java
       languages:
       - java
-    knative-source:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-knative
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-runtime-knative

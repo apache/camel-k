@@ -494,6 +494,9 @@ func (e *Environment) ComputeSourcesURI() []string {
 		if s.Compression {
 			params = append(params, "compression=true")
 		}
+		if s.Interceptors != nil {
+			params = append(params, "interceptors="+strings.Join(s.Interceptors, ","))
+		}
 
 		if len(params) > 0 {
 			src = fmt.Sprintf("%s?%s", src, strings.Join(params, "&"))

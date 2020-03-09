@@ -78,13 +78,14 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 				for _, d := range v.Dependencies {
 					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
 				}
-			}
-			// add language specific dependencies
-			if util.StringSliceExists(v.Languages, string(lang)) {
-				dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
+			} else if s.Loader == "" {
+				// add language specific dependencies
+				if util.StringSliceExists(v.Languages, string(lang)) {
+					dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
 
-				for _, d := range v.Dependencies {
-					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+					for _, d := range v.Dependencies {
+						dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+					}
 				}
 			}
 		}
