@@ -35,7 +35,7 @@ func TestRestDslTraitApplicability(t *testing.T) {
 		CamelCatalog: catalog,
 	}
 
-	trait := newRestDslTrait()
+	trait := newOpenAPITrait()
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
@@ -81,7 +81,7 @@ func TestRestDslTraitDeps(t *testing.T) {
 		},
 	}
 
-	trait := newRestDslTrait().(*restDslTrait)
+	trait := newOpenAPITrait().(*openAPITrait)
 	trait.computeDependencies(e)
 
 	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-rest")
@@ -106,7 +106,7 @@ func TestRestDslTraitDepsQuarkus(t *testing.T) {
 		},
 	}
 
-	trait := newRestDslTrait().(*restDslTrait)
+	trait := newOpenAPITrait().(*openAPITrait)
 	trait.computeDependencies(e)
 
 	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-rest")

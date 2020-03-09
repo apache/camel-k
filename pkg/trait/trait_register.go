@@ -22,7 +22,7 @@ func init() {
 	// Declaration order is not important, but let's keep them sorted for debugging.
 	AddToTraits(newPlatformTrait)
 	AddToTraits(newCamelTrait)
-	AddToTraits(newRestDslTrait)
+	AddToTraits(newOpenAPITrait)
 	AddToTraits(newKnativeTrait)
 	AddToTraits(newDependenciesTrait)
 	AddToTraits(newBuilderTrait)
