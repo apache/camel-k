@@ -41,8 +41,6 @@ func TestOpenAPIService(t *testing.T) {
 			"files/petstore.groovy",
 		).Execute()).Should(BeNil())
 
-		Eventually(integrationPodPhase(ns, "petstore"), testTimeoutLong).
-			Should(Equal(corev1.PodRunning))
 		Eventually(knativeService(ns, "petstore"), testTimeoutLong).
 			Should(Not(BeNil()))
 

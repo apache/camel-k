@@ -82,6 +82,7 @@ func init() {
 	client.FastMapperAllowedAPIGroups["project.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["messaging.knative.dev"] = true
+	client.FastMapperAllowedAPIGroups["serving.knative.dev"] = true
 
 	var err error
 	testContext = context.TODO()
@@ -472,7 +473,7 @@ func configmap(ns string, name string) func() *corev1.ConfigMap {
 
 func knativeService(ns string, name string) func() *servingv1.Service {
 	return func() *servingv1.Service {
-		cm := servingv1.Service{
+		answer := servingv1.Service{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Service",
 				APIVersion: servingv1.SchemeGroupVersion.String(),
@@ -486,19 +487,19 @@ func knativeService(ns string, name string) func() *servingv1.Service {
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := testClient.Get(testContext, key, &cm); err != nil && k8serrors.IsNotFound(err) {
+		if err := testClient.Get(testContext, key, &answer); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Errorf(err, "Error while retrieving knative service %s", name)
 			return nil
 		}
-		return &cm
+		return &answer
 	}
 }
 
 func deployment(ns string, name string) func() *appsv1.Deployment {
 	return func() *appsv1.Deployment {
-		cm := appsv1.Deployment{
+		answer := appsv1.Deployment{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Deployment",
 				APIVersion: appsv1.SchemeGroupVersion.String(),
@@ -512,13 +513,13 @@ func deployment(ns string, name string) func() *appsv1.Deployment {
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := testClient.Get(testContext, key, &cm); err != nil && k8serrors.IsNotFound(err) {
+		if err := testClient.Get(testContext, key, &answer); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Errorf(err, "Error while retrieving deployment %s", name)
 			return nil
 		}
-		return &cm
+		return &answer
 	}
 }
 
