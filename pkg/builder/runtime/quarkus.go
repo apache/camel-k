@@ -20,6 +20,7 @@ package runtime
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -117,6 +118,21 @@ func buildQuarkusRunner(ctx *builder.Context) error {
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
+
+	resourcesPath := path.Join(mc.Path, "src", "main", "resources")
+	if err := os.MkdirAll(resourcesPath, os.ModePerm); err != nil {
+		return errors.Wrap(err, "failure while creating resource folder")
+	}
+
+	// generate an empty application.properties so that there will be something in
+	// target/classes as if such directory does not exist, the quarkus maven plugin
+	// mai fail the build
+	//
+	// in the future there should be a way to provide build information from secrets,
+	// configmap, etc.
+	if _, err := os.Create(path.Join(resourcesPath, "application.properties")); err != nil {
+		return errors.Wrap(err, "failure while creating application.properties")
+	}
 
 	// Build the project
 	mc.AddArgument("package")
