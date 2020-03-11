@@ -44,7 +44,7 @@ import (
 const OpenAPITraitName = "openapi"
 
 // CamelRestPortProperty ---
-const CamelRestPortProperty = "camel.rest.port"
+const CamelRestPortProperty = "camel.context.rest-configuration.port"
 
 // CamelRestDefaultPort ---
 const CamelRestDefaultPort = "8080"
