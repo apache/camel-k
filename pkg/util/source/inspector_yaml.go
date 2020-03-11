@@ -49,6 +49,9 @@ func (inspector YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) err
 
 	inspector.discoverDependencies(source, meta)
 
+	meta.ExposesHTTPServices = meta.ExposesHTTPServices || inspector.containsHTTPURIs(meta.FromURIs)
+	meta.PassiveEndpoints = inspector.hasOnlyPassiveEndpoints(meta.FromURIs)
+
 	return nil
 }
 
@@ -56,6 +59,7 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 	switch key {
 	case "rest":
 		inspector.addDependency("camel:rest", meta)
+		meta.ExposesHTTPServices = true
 	case "circuitBreaker":
 		inspector.addDependency("camel:hystrix", meta)
 	}
@@ -126,6 +130,5 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 			meta.ToURIs = append(meta.ToURIs, maybeURI)
 		}
 	}
-
 	return nil
 }

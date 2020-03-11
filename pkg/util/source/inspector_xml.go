@@ -45,6 +45,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 			switch se.Name.Local {
 			case "rest", "restConfiguration":
 				i.addDependency("camel:rest", meta)
+				meta.ExposesHTTPServices = true
 			case "circuitBreaker":
 				i.addDependency("camel:hystrix", meta)
 			case "language":
@@ -76,6 +77,9 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	}
 
 	i.discoverDependencies(source, meta)
+
+	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
+	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
 
 	return nil
 }

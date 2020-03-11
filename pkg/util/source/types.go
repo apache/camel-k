@@ -27,4 +27,20 @@ type Metadata struct {
 	ToURIs []string
 	// All inferred dependencies required to run the integration
 	Dependencies *strset.Set
+	// ExposesHTTPServices indicates if a route defined by the source is exposed
+	// through HTTP
+	ExposesHTTPServices bool
+	// PassiveEndpoints indicates that the source contains only passive endpoints that
+	// are activated from external calls, including HTTP (useful to determine if the
+	// integration can scale to 0)
+	PassiveEndpoints bool
+}
+
+// NewMetadata --
+func NewMetadata() Metadata {
+	return Metadata{
+		FromURIs:     make([]string, 0),
+		ToURIs:       make([]string, 0),
+		Dependencies: strset.New(),
+	}
 }

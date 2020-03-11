@@ -158,7 +158,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 			}
 
 			meta := metadata.ExtractAll(e.CamelCatalog, sources)
-			if !meta.RequiresHTTPService || !meta.PassiveEndpoints {
+			if !meta.ExposesHTTPServices || !meta.PassiveEndpoints {
 				single := 1
 				t.MinScale = &single
 			}
@@ -256,7 +256,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 	}
 
 	meta := metadata.ExtractAll(e.CamelCatalog, sources)
-	if meta.RequiresHTTPService {
+	if meta.ExposesHTTPServices {
 		return &knativeServiceStrategy, nil
 	}
 	return nil, nil
