@@ -45,5 +45,8 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 
 	i.discoverDependencies(source, meta)
 
+	meta.ExposesHTTPServices = restRegexp.MatchString(source.Content) || i.containsHTTPURIs(meta.FromURIs)
+	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
+
 	return nil
 }

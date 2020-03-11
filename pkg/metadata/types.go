@@ -19,26 +19,9 @@ package metadata
 
 import (
 	"github.com/apache/camel-k/pkg/util/source"
-	"github.com/scylladb/go-set/strset"
 )
 
 // IntegrationMetadata contains aggregate metadata about all Camel routes in a integrations
 type IntegrationMetadata struct {
 	source.Metadata
-	// RequiresHTTPService indicates if the integration needs to be invoked through HTTP
-	RequiresHTTPService bool
-	// PassiveEndpoints indicates that the integration contains only passive endpoints that are activated from
-	// external calls, including HTTP (useful to determine if the integration can scale to 0)
-	PassiveEndpoints bool
-}
-
-// NewIntegrationMetadata --
-func NewIntegrationMetadata() IntegrationMetadata {
-	return IntegrationMetadata{
-		Metadata: source.Metadata{
-			FromURIs:     make([]string, 0),
-			ToURIs:       make([]string, 0),
-			Dependencies: strset.New(),
-		},
-	}
 }

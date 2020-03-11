@@ -31,17 +31,19 @@ import (
 // ExtractAll returns metadata information from all listed source codes
 func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec) IntegrationMetadata {
 	// neutral metadata
-	meta := NewIntegrationMetadata()
+	meta := src.NewMetadata()
 	meta.PassiveEndpoints = true
-	meta.RequiresHTTPService = false
+	meta.ExposesHTTPServices = false
 
 	for _, source := range sources {
-		meta = merge(meta, Extract(catalog, source))
+		meta = merge(meta, Extract(catalog, source).Metadata)
 	}
-	return meta
+	return IntegrationMetadata{
+		Metadata: meta,
+	}
 }
 
-func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
+func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 	d := strset.Union(m1.Dependencies, m2.Dependencies)
 
 	f := make([]string, 0, len(m1.FromURIs)+len(m2.FromURIs))
@@ -52,13 +54,11 @@ func merge(m1 IntegrationMetadata, m2 IntegrationMetadata) IntegrationMetadata {
 	t = append(t, m1.ToURIs...)
 	t = append(t, m2.ToURIs...)
 
-	return IntegrationMetadata{
-		Metadata: src.Metadata{
-			FromURIs:     f,
-			ToURIs:       t,
-			Dependencies: d,
-		},
-		RequiresHTTPService: m1.RequiresHTTPService || m2.RequiresHTTPService,
+	return src.Metadata{
+		FromURIs:            f,
+		ToURIs:              t,
+		Dependencies:        d,
+		ExposesHTTPServices: m1.ExposesHTTPServices || m2.ExposesHTTPServices,
 		PassiveEndpoints:    m1.PassiveEndpoints && m2.PassiveEndpoints,
 	}
 }
@@ -73,15 +73,16 @@ func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) IntegrationMet
 
 	language := source.InferLanguage()
 
-	m := NewIntegrationMetadata()
+	meta := src.NewMetadata()
+	meta.PassiveEndpoints = true
+	meta.ExposesHTTPServices = false
 
 	// TODO: handle error
-	_ = src.InspectorForLanguage(catalog, language).Extract(source, &m.Metadata)
+	_ = src.InspectorForLanguage(catalog, language).Extract(source, &meta)
 
-	m.RequiresHTTPService = requiresHTTPService(catalog, source, m.FromURIs)
-	m.PassiveEndpoints = hasOnlyPassiveEndpoints(catalog, source, m.FromURIs)
-
-	return m
+	return IntegrationMetadata{
+		Metadata: meta,
+	}
 }
 
 // Each --

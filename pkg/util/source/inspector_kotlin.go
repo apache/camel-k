@@ -45,5 +45,10 @@ func (i KotlinInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 	i.discoverDependencies(source, meta)
 
+	hasRest := restRegexp.MatchString(source.Content) || restClosureRegexp.MatchString(source.Content)
+
+	meta.ExposesHTTPServices = hasRest || i.containsHTTPURIs(meta.FromURIs)
+	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
+
 	return nil
 }

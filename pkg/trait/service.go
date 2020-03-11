@@ -88,7 +88,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		}
 
 		meta := metadata.ExtractAll(e.CamelCatalog, sources)
-		if !meta.RequiresHTTPService {
+		if !meta.ExposesHTTPServices {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,

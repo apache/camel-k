@@ -44,7 +44,7 @@ func TestHttpJavaSource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
 }
 
@@ -67,7 +67,7 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
 }
 
@@ -88,7 +88,7 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
 }
 
@@ -109,7 +109,7 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
 }
 
@@ -131,7 +131,7 @@ func TestNoHttpGroovySource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.False(t, meta.RequiresHTTPService)
+	assert.False(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
 }
 
@@ -153,7 +153,7 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
 }
 
@@ -175,7 +175,7 @@ func TestHttpXMLSource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
 }
 
@@ -198,7 +198,7 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
 }
 
@@ -232,7 +232,7 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 
 	meta := ExtractAll(catalog, codes)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
 }
 
@@ -268,6 +268,6 @@ func TestMultilangHTTPSource(t *testing.T) {
 
 	meta := ExtractAll(catalog, codes)
 
-	assert.True(t, meta.RequiresHTTPService)
+	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
 }

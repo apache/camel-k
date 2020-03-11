@@ -48,7 +48,17 @@ func TestDependenciesJavaSource(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:activemq", "camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:activemq",
+			"camel:amqp",
+			"camel:log",
+			"camel:telegram",
+			"camel:timer",
+			"camel:twitter",
+		},
+		meta.Dependencies.List())
 }
 
 func TestDependenciesJavaScript(t *testing.T) {
@@ -72,7 +82,16 @@ func TestDependenciesJavaScript(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:activemq", "camel:amqp", "camel:log", "camel:telegram", "camel:timer"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:activemq",
+			"camel:amqp",
+			"camel:log",
+			"camel:telegram",
+			"camel:timer",
+		},
+		meta.Dependencies.List())
 }
 
 func TestDependenciesGroovy(t *testing.T) {
@@ -98,7 +117,17 @@ func TestDependenciesGroovy(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:activemq", "camel:amqp", "camel:log", "camel:telegram", "camel:timer", "camel:twitter"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:activemq",
+			"camel:amqp",
+			"camel:log",
+			"camel:telegram",
+			"camel:timer",
+			"camel:twitter",
+		},
+		meta.Dependencies.List())
 }
 
 func TestDependencies(t *testing.T) {
@@ -180,7 +209,14 @@ func TestJacksonDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:jackson", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:http",
+			"camel:jackson",
+			"camel:log",
+		},
+		meta.Dependencies.List())
 }
 
 func TestJacksonImplicitDependency(t *testing.T) {
@@ -201,7 +237,14 @@ func TestJacksonImplicitDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:jackson", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:http",
+			"camel:jackson",
+			"camel:log",
+		},
+		meta.Dependencies.List())
 }
 
 func TestLanguageDependencies(t *testing.T) {
@@ -227,8 +270,19 @@ func TestLanguageDependencies(t *testing.T) {
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:saxon", "camel:xpath",
-		"camel:jsonpath", "camel:groovy", "camel:jaxp", "camel:mvel"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:ognl",
+			"camel:saxon",
+			"camel:xpath",
+			"camel:jsonpath",
+			"camel:groovy",
+			"camel:xml-jaxp",
+			"camel:mvel",
+		},
+		meta.Dependencies.List())
 }
 
 func TestLanguageDependenciesTransformExpression(t *testing.T) {
@@ -250,7 +304,15 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 	assert.Nil(t, err)
 
 	meta := Extract(catalog, code)
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:ognl", "camel:xpath", "camel:jsonpath"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:ognl",
+			"camel:xpath",
+			"camel:jsonpath",
+		},
+		meta.Dependencies.List())
 }
 
 func TestHystrixDependency(t *testing.T) {
@@ -273,7 +335,13 @@ func TestHystrixDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:hystrix", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(t,
+		[]string{
+			"camel:http",
+			"camel:hystrix",
+			"camel:log",
+		},
+		meta.Dependencies.List())
 }
 
 func TestRestDependency(t *testing.T) {
@@ -296,7 +364,16 @@ func TestRestDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:direct", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:http",
+			"camel:direct",
+			"camel:log",
+			"mvn:org.apache.camel/camel-rest",
+			"mvn:org.apache.camel/camel-undertow",
+		},
+		meta.Dependencies.List())
 }
 
 func TestRestWithPathDependency(t *testing.T) {
@@ -319,7 +396,15 @@ func TestRestWithPathDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:direct", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t, []string{
+			"camel:http",
+			"camel:direct",
+			"camel:log",
+			"mvn:org.apache.camel/camel-rest",
+			"mvn:org.apache.camel/camel-undertow",
+		},
+		meta.Dependencies.List())
 }
 
 func TestRestConfigurationDependency(t *testing.T) {
@@ -341,10 +426,17 @@ func TestRestConfigurationDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t, []string{
+			"camel:http",
+			"camel:log",
+			"mvn:org.apache.camel/camel-rest",
+			"mvn:org.apache.camel/camel-undertow",
+		},
+		meta.Dependencies.List())
 }
 
-func TestRestClosureDependency(t *testing.T) {
+func TestRestClosureDependencyGroovy(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
@@ -363,7 +455,45 @@ func TestRestClosureDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:http", "camel:rest", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:http",
+			"camel:log",
+			"mvn:org.apache.camel/camel-rest",
+			"mvn:org.apache.camel/camel-undertow",
+		},
+		meta.Dependencies.List())
+}
+
+func TestRestClosureDependencyKotlin(t *testing.T) {
+	code := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name: "Request.groovy",
+			Content: `
+                rest {
+                }
+			    from("http:test")
+                    .to("log:info")
+		    `,
+		},
+		Language: v1.LanguageKotlin,
+	}
+
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	meta := Extract(catalog, code)
+
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:http",
+			"camel:log",
+			"mvn:org.apache.camel/camel-rest",
+			"mvn:org.apache.camel/camel-undertow",
+		},
+		meta.Dependencies.List())
 }
 
 func TestXMLHystrixDependency(t *testing.T) {
@@ -389,7 +519,15 @@ func TestXMLHystrixDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:hystrix", "camel:kafka", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:hystrix",
+			"camel:kafka",
+			"camel:log",
+		},
+		meta.Dependencies.List())
 }
 
 func TestXMLRestDependency(t *testing.T) {
@@ -419,7 +557,14 @@ func TestXMLRestDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:rest", "camel:mock"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:rest",
+			"camel:mock",
+		},
+		meta.Dependencies.List())
 }
 
 func TestXMLLanguageDependencies(t *testing.T) {
@@ -556,7 +701,13 @@ func TestYAMLHystrixDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:hystrix"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:hystrix",
+		},
+		meta.Dependencies.List())
 }
 
 func TestYAMLLanguageDependencies(t *testing.T) {

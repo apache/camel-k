@@ -18,6 +18,7 @@ limitations under the License.
 package source
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -25,6 +26,8 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
+
+type catalog2deps func(*camel.RuntimeCatalog) []string
 
 var (
 	singleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
@@ -41,8 +44,8 @@ var (
 	jsonLanguageRegexp      = regexp.MustCompile(`.*\.json\(\).*`)
 	circuitBreakerRegexp    = regexp.MustCompile(`.*\.circuitBreaker\(\).*`)
 	restConfigurationRegexp = regexp.MustCompile(`.*restConfiguration\(\).*`)
-	restRegexp              = regexp.MustCompile(`.*rest\(("[a-zA-Z0-9-/]+")*\).*`)
-	restXMLRegexp           = regexp.MustCompile(`^\s*rest\s*{.*`)
+	restRegexp              = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
+	restClosureRegexp       = regexp.MustCompile(`.*rest\s*{\s*`)
 	groovyLanguageRegexp    = regexp.MustCompile(`.*\.groovy\s*\(.*\).*`)
 	jsonPathLanguageRegexp  = regexp.MustCompile(`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`)
 	ognlRegexp              = regexp.MustCompile(`.*\.ognl\s*\(.*\).*`)
@@ -51,27 +54,91 @@ var (
 	xpathRegexp             = regexp.MustCompile(`.*\.?xpath\s*\(.*\).*`)
 	xtokenizeRegexp         = regexp.MustCompile(`.*\.xtokenize\s*\(.*\).*`)
 
-	sourceDependencies = struct {
-		main    map[*regexp.Regexp]string
-		quarkus map[*regexp.Regexp]string
-	}{
-		main: map[*regexp.Regexp]string{
-			jsonLibraryRegexp:       "camel:jackson",
-			jsonLanguageRegexp:      "camel:jackson",
-			circuitBreakerRegexp:    "camel:hystrix",
-			restConfigurationRegexp: "camel:rest",
-			restRegexp:              "camel:rest",
-			restXMLRegexp:           "camel:rest",
-			groovyLanguageRegexp:    "camel:groovy",
-			jsonPathLanguageRegexp:  "camel:jsonpath",
-			ognlRegexp:              "camel:ognl",
-			mvelRegexp:              "camel:mvel",
-			xqueryRegexp:            "camel:saxon",
-			xpathRegexp:             "camel:xpath",
-			xtokenizeRegexp:         "camel:jaxp",
+	sourceDependencies = map[*regexp.Regexp]catalog2deps{
+		jsonLibraryRegexp: func(_ *camel.RuntimeCatalog) []string {
+			return []string{"camel:jackson"}
 		},
-		quarkus: map[*regexp.Regexp]string{
-			xtokenizeRegexp: "camel-quarkus:core-xml",
+		jsonLanguageRegexp: func(_ *camel.RuntimeCatalog) []string {
+			return []string{"camel:jackson"}
+		},
+		circuitBreakerRegexp: func(_ *camel.RuntimeCatalog) []string {
+			return []string{"camel:hystrix"}
+		},
+		restConfigurationRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			deps := make([]string, 0)
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+				for _, d := range c.Dependencies {
+					deps = append(deps, fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+				}
+			}
+			return deps
+		},
+		restRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			deps := make([]string, 0)
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+				for _, d := range c.Dependencies {
+					deps = append(deps, fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+				}
+			}
+			return deps
+		},
+		restClosureRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			deps := make([]string, 0)
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+				for _, d := range c.Dependencies {
+					deps = append(deps, fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+				}
+			}
+			return deps
+		},
+		groovyLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dependency, ok := catalog.GetLanguageDependency("groovy"); ok {
+				return []string{dependency}
+			}
+
+			return []string{}
+		},
+		jsonPathLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dependency, ok := catalog.GetLanguageDependency("jsonpath"); ok {
+				return []string{dependency}
+			}
+
+			return []string{}
+		},
+		ognlRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dependency, ok := catalog.GetLanguageDependency("ognl"); ok {
+				return []string{dependency}
+			}
+
+			return []string{}
+		},
+		mvelRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dependency, ok := catalog.GetLanguageDependency("mvel"); ok {
+				return []string{dependency}
+			}
+
+			return []string{}
+		},
+		xqueryRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dependency, ok := catalog.GetLanguageDependency("xquery"); ok {
+				return []string{dependency}
+			}
+
+			return []string{}
+		},
+		xpathRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dependency, ok := catalog.GetLanguageDependency("xpath"); ok {
+				return []string{dependency}
+			}
+
+			return []string{}
+		},
+		xtokenizeRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dependency, ok := catalog.GetLanguageDependency("xtokenize"); ok {
+				return []string{dependency}
+			}
+
+			return []string{}
 		},
 	}
 )
@@ -143,14 +210,12 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 		}
 	}
 
-	for pattern, dep := range sourceDependencies.main {
-		if i.catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
-			// Check whether quarkus has its own artifact that differs from the standard one
-			if _, ok := sourceDependencies.quarkus[pattern]; ok {
-				dep = sourceDependencies.quarkus[pattern]
-			}
+	for pattern, supplier := range sourceDependencies {
+		if !pattern.MatchString(source.Content) {
+			continue
 		}
-		if pattern.MatchString(source.Content) {
+
+		for _, dep := range supplier(i.catalog) {
 			i.addDependency(dep, meta)
 		}
 	}
@@ -191,4 +256,54 @@ func (i *baseInspector) decodeComponent(uri string) string {
 		return component.GetDependencyID()
 	}
 	return ""
+}
+
+// hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active
+func (i *baseInspector) hasOnlyPassiveEndpoints(fromURIs []string) bool {
+	passivePlusHTTP := make(map[string]bool)
+	i.catalog.VisitSchemes(func(id string, scheme v1.CamelScheme) bool {
+		if scheme.HTTP || scheme.Passive {
+			passivePlusHTTP[id] = true
+		}
+
+		return true
+	})
+
+	return i.containsOnlyURIsIn(fromURIs, passivePlusHTTP)
+}
+
+func (i *baseInspector) containsOnlyURIsIn(fromURI []string, allowed map[string]bool) bool {
+	for _, uri := range fromURI {
+		prefix := i.getURIPrefix(uri)
+		if enabled, ok := allowed[prefix]; !ok || !enabled {
+			return false
+		}
+	}
+	return true
+}
+
+func (i *baseInspector) getURIPrefix(uri string) string {
+	parts := strings.SplitN(uri, ":", 2)
+	if len(parts) > 0 {
+		return parts[0]
+	}
+	return ""
+}
+
+func (i *baseInspector) containsHTTPURIs(fromURI []string) bool {
+	for _, uri := range fromURI {
+		prefix := i.getURIPrefix(uri)
+		scheme, ok := i.catalog.GetScheme(prefix)
+
+		if !ok {
+			// scheme does not exists
+			continue
+		}
+
+		if scheme.HTTP {
+			return true
+		}
+	}
+
+	return false
 }
