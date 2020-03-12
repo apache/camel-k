@@ -76,7 +76,9 @@ func (c *Collection) AsKubernetesList() *corev1.List {
 
 // Add adds a resource to the collection
 func (c *Collection) Add(resource runtime.Object) {
-	c.items = append(c.items, resource)
+	if resource != nil {
+		c.items = append(c.items, resource)
+	}
 }
 
 // AddAll adds all resources to the collection
@@ -90,6 +92,17 @@ func (c *Collection) VisitDeployment(visitor func(*appsv1.Deployment)) {
 		if conv, ok := res.(*appsv1.Deployment); ok {
 			visitor(conv)
 		}
+	})
+}
+
+// VisitDeploymentE executes the visitor function on all Deployment resources
+func (c *Collection) VisitDeploymentE(visitor func(*appsv1.Deployment) error) error {
+	return c.VisitE(func(res runtime.Object) error {
+		if conv, ok := res.(*appsv1.Deployment); ok {
+			return visitor(conv)
+		}
+
+		return nil
 	})
 }
 
@@ -250,12 +263,34 @@ func (c *Collection) VisitCronJob(visitor func(*v1beta1.CronJob)) {
 	})
 }
 
+// VisitCronJobE executes the visitor function on all CronJob resources
+func (c *Collection) VisitCronJobE(visitor func(*v1beta1.CronJob) error) error {
+	return c.VisitE(func(res runtime.Object) error {
+		if conv, ok := res.(*v1beta1.CronJob); ok {
+			return visitor(conv)
+		}
+
+		return nil
+	})
+}
+
 // VisitKnativeService executes the visitor function on all Knative serving Service resources
 func (c *Collection) VisitKnativeService(visitor func(*serving.Service)) {
 	c.Visit(func(res runtime.Object) {
 		if conv, ok := res.(*serving.Service); ok {
 			visitor(conv)
 		}
+	})
+}
+
+// VisitKnativeServiceE executes the visitor function on all Knative serving Service resources
+func (c *Collection) VisitKnativeServiceE(visitor func(*serving.Service) error) error {
+	return c.VisitE(func(res runtime.Object) error {
+		if conv, ok := res.(*serving.Service); ok {
+			return visitor(conv)
+		}
+
+		return nil
 	})
 }
 
@@ -358,6 +393,18 @@ func (c *Collection) Visit(visitor func(runtime.Object)) {
 	}
 }
 
+// VisitE executes the visitor function on all resources breaking if the visitor function
+// returns an error
+func (c *Collection) VisitE(visitor func(runtime.Object) error) error {
+	for _, res := range c.items {
+		if err := visitor(res); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Remove removes the given element from the collection and returns it
 func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 	for idx, res := range c.items {
@@ -369,6 +416,7 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 	return nil
 }
 
+// VisitServiceMonitor ---
 func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonitor)) {
 	c.Visit(func(res runtime.Object) {
 		if conv, ok := res.(*monitoringv1.ServiceMonitor); ok {
@@ -377,6 +425,7 @@ func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonit
 	})
 }
 
+// GetServiceMonitor ---
 func (c *Collection) GetServiceMonitor(filter func(*monitoringv1.ServiceMonitor) bool) *monitoringv1.ServiceMonitor {
 	var retValue *monitoringv1.ServiceMonitor
 	c.VisitServiceMonitor(func(serviceMonitor *monitoringv1.ServiceMonitor) {

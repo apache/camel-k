@@ -336,11 +336,8 @@ func (e *Environment) DetermineNamespace() string {
 	return ""
 }
 
-// ComputeConfigMaps --
-func (e *Environment) ComputeConfigMaps() []runtime.Object {
-	sources := e.Integration.Sources()
-	maps := make([]runtime.Object, 0, len(sources)+1)
-
+// ComputeApplicationProperties --
+func (e *Environment) ComputeApplicationProperties() *corev1.ConfigMap {
 	// application properties
 	applicationProperties := ""
 
@@ -349,27 +346,32 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	}
 
 	if applicationProperties != "" {
-		maps = append(
-			maps,
-			&corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      e.Integration.Name + "-application-properties",
-					Namespace: e.Integration.Namespace,
-					Labels: map[string]string{
-						"camel.apache.org/integration":     e.Integration.Name,
-						"camel.apache.org/properties.type": "application",
-					},
-				},
-				Data: map[string]string{
-					"application.properties": applicationProperties,
+		return &corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      e.Integration.Name + "-application-properties",
+				Namespace: e.Integration.Namespace,
+				Labels: map[string]string{
+					"camel.apache.org/integration":     e.Integration.Name,
+					"camel.apache.org/properties.type": "application",
 				},
 			},
-		)
+			Data: map[string]string{
+				"application.properties": applicationProperties,
+			},
+		}
 	}
+
+	return nil
+}
+
+// ComputeConfigMaps --
+func (e *Environment) ComputeConfigMaps() []runtime.Object {
+	sources := e.Integration.Sources()
+	maps := make([]runtime.Object, 0, len(sources)+1)
 
 	// combine properties of integration with kit, integration
 	// properties have the priority

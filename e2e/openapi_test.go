@@ -31,7 +31,7 @@ import (
 )
 
 func TestOpenAPIService(t *testing.T) {
-	withNewTestNamespaceWithKnativeBroker(t, func(ns string) {
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKnative)).Execute()).Should(BeNil())
 		Expect(kamel(
 			"run",
@@ -56,7 +56,7 @@ func TestOpenAPIService(t *testing.T) {
 }
 
 func TestOpenAPIDeployment(t *testing.T) {
-	withNewTestNamespaceWithKnativeBroker(t, func(ns string) {
+	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKubernetes)).Execute()).Should(BeNil())
 		Expect(kamel(
 			"run",

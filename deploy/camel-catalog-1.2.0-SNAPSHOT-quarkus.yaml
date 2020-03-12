@@ -819,13 +819,9 @@ spec:
       artifactId: camel-k-runtime-knative
       dependencies:
       - groupId: org.apache.camel.k
-        artifactId: camel-k-loader-yaml
+        artifactId: camel-k-quarkus-knative
       - groupId: org.apache.camel.k
-        artifactId: camel-knative-api
-      - groupId: org.apache.camel.k
-        artifactId: camel-knative
-      - groupId: org.apache.camel.k
-        artifactId: camel-knative-http
+        artifactId: camel-k-quarkus-loader-yaml
     camel-knative:
       groupId: org.apache.camel.k
       artifactId: camel-knative
@@ -835,9 +831,7 @@ spec:
         passive: false
       dependencies:
       - groupId: org.apache.camel.k
-        artifactId: camel-knative-api
-      - groupId: org.apache.camel.k
-        artifactId: camel-knative-http
+        artifactId: camel-k-quarkus-knative
   loaders:
     yaml:
       groupId: org.apache.camel.k

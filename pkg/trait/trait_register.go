@@ -40,7 +40,6 @@ func init() {
 	AddToTraits(newJolokiaTrait)
 	AddToTraits(newPrometheusTrait)
 	AddToTraits(newJvmTrait)
-	AddToTraits(newProbesTrait)
 	AddToTraits(newRouteTrait)
 	AddToTraits(newIstioTrait)
 	AddToTraits(newIngressTrait)

@@ -19,7 +19,11 @@ package trait
 
 import (
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -35,6 +39,10 @@ import (
 
 const (
 	defaultContainerName = "integration"
+	defaultContainerPort = 8080
+	defaultServicePort   = 80
+	defaultProbePort     = 8081
+	defaultProbePath     = "/health"
 	containerTraitID     = "container"
 )
 
@@ -47,6 +55,7 @@ type containerTrait struct {
 	BaseTrait `property:",squash"`
 
 	Auto *bool `property:"auto"`
+
 	// The minimum amount of CPU required.
 	RequestCPU string `property:"request-cpu"`
 	// The minimum amount of memory required.
@@ -55,6 +64,7 @@ type containerTrait struct {
 	LimitCPU string `property:"limit-cpu"`
 	// The maximum amount of memory required.
 	LimitMemory string `property:"limit-memory"`
+
 	// Can be used to enable/disable exposure via kubernetes Service.
 	Expose *bool `property:"expose"`
 	// To configure a different port exposed by the container (default `8080`).
@@ -65,18 +75,56 @@ type containerTrait struct {
 	ServicePort int `property:"service-port"`
 	// To configure under which service port name the container port is to be exposed (default `http`).
 	ServicePortName string `property:"service-port-name"`
+
 	// The main container name. It's named `integration` by default.
 	Name string `property:"name"`
+
+	// ProbesEnabled enable/disable probes on the container (default `false`)
+	ProbesEnabled bool `property:"probes-enabled"`
+	// ProbePort configures the port on which the probes are exposed if the container is not exposed
+	// through an `http` port (default `8081`). Note that the value has no effect for Knative service
+	// as the port should be the same as the port declared by the container.
+	ProbePort int `property:"probe-port"`
+	// Path to access on the probe ( default `/health`). Note that this property is not supported
+	// on quarkus runtime and setting it will result in the integration failing to start.
+	ProbePath string `property:"probe-path"`
+	// Number of seconds after the container has started before liveness probes are initiated.
+	LivenessInitialDelay int32 `property:"liveness-initial-delay"`
+	// Number of seconds after which the probe times out. Applies to the liveness probe.
+	LivenessTimeout int32 `property:"liveness-timeout"`
+	// How often to perform the probe. Applies to the liveness probe.
+	LivenessPeriod int32 `property:"liveness-period"`
+	// Minimum consecutive successes for the probe to be considered successful after having failed.
+	// Applies to the liveness probe.
+	LivenessSuccessThreshold int32 `property:"liveness-success-threshold"`
+	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
+	// Applies to the liveness probe.
+	LivenessFailureThreshold int32 `property:"liveness-failure-threshold"`
+	// Number of seconds after the container has started before readiness probes are initiated.
+	ReadinessInitialDelay int32 `property:"readiness-initial-delay"`
+	// Number of seconds after which the probe times out. Applies to the readiness probe.
+	ReadinessTimeout int32 `property:"readiness-timeout"`
+	// How often to perform the probe. Applies to the readiness probe.
+	ReadinessPeriod int32 `property:"readiness-period"`
+	// Minimum consecutive successes for the probe to be considered successful after having failed.
+	// Applies to the readiness probe.
+	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold"`
+	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
+	// Applies to the readiness probe.
+	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold"`
 }
 
 func newContainerTrait() Trait {
 	return &containerTrait{
 		BaseTrait:       NewBaseTrait(containerTraitID, 1600),
-		Port:            8080,
+		Port:            defaultContainerPort,
 		PortName:        httpPortName,
-		ServicePort:     80,
+		ServicePort:     defaultServicePort,
 		ServicePortName: httpPortName,
 		Name:            defaultContainerName,
+		ProbesEnabled:   false,
+		ProbePort:       defaultProbePort,
+		ProbePath:       defaultProbePath,
 	}
 }
 
@@ -85,7 +133,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -100,6 +148,40 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *containerTrait) Apply(e *Environment) error {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		t.configureDependencies(e)
+	}
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+		return t.configureContainer(e)
+	}
+
+	return nil
+}
+
+// IsPlatformTrait overrides base class method
+func (t *containerTrait) IsPlatformTrait() bool {
+	return true
+}
+
+func (t *containerTrait) configureDependencies(e *Environment) {
+	if !t.ProbesEnabled {
+		return
+	}
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		if capability, ok := e.CamelCatalog.Runtime.Capabilities["health"]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
+			}
+
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(e.Integration.Status.Dependencies)
+		}
+	}
+}
+
+func (t *containerTrait) configureContainer(e *Environment) error {
 	container := corev1.Container{
 		Name:  t.Name,
 		Image: e.Integration.Status.Image,
@@ -118,7 +200,17 @@ func (t *containerTrait) Apply(e *Environment) error {
 
 	t.configureResources(e, &container)
 
-	e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+	if t.Expose != nil && *t.Expose {
+		t.configureService(e, &container)
+	}
+	if props := e.ComputeApplicationProperties(); props != nil {
+		e.Resources.Add(props)
+	}
+
+	//
+	// Deployment
+	//
+	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
@@ -128,10 +220,26 @@ func (t *containerTrait) Apply(e *Environment) error {
 			&container.VolumeMounts,
 		)
 
-		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
-	})
+		port := t.Port
+		if t.PortName != httpPortName {
+			port = t.ProbePort
+		}
 
-	e.Resources.VisitKnativeService(func(service *serving.Service) {
+		if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
+			return err
+		}
+
+		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	//
+	// Knative Service
+	//
+	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
 		for _, env := range e.EnvVars {
 			switch {
 			case env.ValueFrom == nil:
@@ -152,10 +260,22 @@ func (t *containerTrait) Apply(e *Environment) error {
 			&container.VolumeMounts,
 		)
 
-		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
-	})
+		// don't set the port on Knative service as it is not allowed.
+		if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
+			return err
+		}
 
-	e.Resources.VisitCronJob(func(cron *v1beta1.CronJob) {
+		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	//
+	// CronJob
+	//
+	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
@@ -165,29 +285,28 @@ func (t *containerTrait) Apply(e *Environment) error {
 			&container.VolumeMounts,
 		)
 
-		cron.Spec.JobTemplate.Spec.Template.Spec.Containers = append(cron.Spec.JobTemplate.Spec.Template.Spec.Containers, container)
-	})
+		port := t.Port
+		if t.PortName != httpPortName {
+			port = t.ProbePort
+		}
 
-	if t.Expose != nil && *t.Expose {
-		t.configureService(e)
+		if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
+			return err
+		}
+
+		cron.Spec.JobTemplate.Spec.Template.Spec.Containers = append(cron.Spec.JobTemplate.Spec.Template.Spec.Containers, container)
+
+		return nil
+	}); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
-func (t *containerTrait) IsPlatformTrait() bool {
-	return true
-}
-
-func (t *containerTrait) configureService(e *Environment) {
+func (t *containerTrait) configureService(e *Environment, container *corev1.Container) {
 	service := e.Resources.GetServiceForIntegration(e.Integration)
 	if service == nil {
-		return
-	}
-
-	container := e.Resources.GetContainerByName(t.Name)
-	if container == nil {
 		return
 	}
 
@@ -270,4 +389,83 @@ func (t *containerTrait) configureResources(_ *Environment, container *corev1.Co
 			container.Resources.Limits[corev1.ResourceMemory] = v
 		}
 	}
+}
+func (t *containerTrait) configureProbes(e *Environment, container *corev1.Container, port int, path string) error {
+	if !t.ProbesEnabled {
+		return nil
+	}
+
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+
+	switch e.CamelCatalog.Runtime.Provider {
+	case v1.RuntimeProviderMain:
+		e.ApplicationProperties["customizer.inspector.enabled"] = True
+		e.ApplicationProperties["customizer.inspector.bind-host"] = "0.0.0.0"
+		e.ApplicationProperties["customizer.inspector.bind-port"] = strconv.Itoa(port)
+		e.ApplicationProperties["customizer.health.enabled"] = True
+		e.ApplicationProperties["customizer.health.path"] = path
+	case v1.RuntimeProviderQuarkus:
+		// Quarkus does not offer a runtime option to change the path of the health endpoint but there
+		// is a build time property:
+		//
+		//     quarkus.smallrye-health.root-path
+		//
+		// so failing in case user tries to change the path.
+		//
+		// NOTE: we could probably be more opinionated and make the path an internal detail.
+		if path != defaultProbePath {
+			return fmt.Errorf("health check root path can't be changed at runtimme on Quarkus")
+		}
+	default:
+		return fmt.Errorf("unsupported runtime: %s", e.CamelCatalog.Runtime.Provider)
+	}
+
+	container.LivenessProbe = t.newLivenessProbe(port, path)
+	container.ReadinessProbe = t.newReadinessProbe(port, path)
+
+	return nil
+}
+
+func (t *containerTrait) newLivenessProbe(port int, path string) *corev1.Probe {
+	action := corev1.HTTPGetAction{}
+	action.Path = path
+
+	if port > 0 {
+		action.Port = intstr.FromInt(port)
+	}
+
+	p := corev1.Probe{
+		Handler: corev1.Handler{
+			HTTPGet: &action,
+		},
+	}
+
+	p.InitialDelaySeconds = t.LivenessInitialDelay
+	p.TimeoutSeconds = t.LivenessTimeout
+	p.PeriodSeconds = t.LivenessPeriod
+	p.SuccessThreshold = t.LivenessSuccessThreshold
+	p.FailureThreshold = t.LivenessFailureThreshold
+
+	return &p
+}
+
+func (t *containerTrait) newReadinessProbe(port int, path string) *corev1.Probe {
+	p := corev1.Probe{
+		Handler: corev1.Handler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Port: intstr.FromInt(port),
+				Path: path,
+			},
+		},
+	}
+
+	p.InitialDelaySeconds = t.ReadinessInitialDelay
+	p.TimeoutSeconds = t.ReadinessTimeout
+	p.PeriodSeconds = t.ReadinessPeriod
+	p.SuccessThreshold = t.ReadinessSuccessThreshold
+	p.FailureThreshold = t.ReadinessFailureThreshold
+
+	return &p
 }

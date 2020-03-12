@@ -191,6 +191,8 @@ const (
 	IntegrationConditionPrometheusAvailable IntegrationConditionType = "PrometheusAvailable"
 	// IntegrationConditionJolokiaAvailable --
 	IntegrationConditionJolokiaAvailable IntegrationConditionType = "JolokiaAvailable"
+	// IntegrationConditionProbesAvailable --
+	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
 
 	// IntegrationConditionKitAvailableReason --
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
@@ -226,6 +228,8 @@ const (
 	IntegrationConditionPrometheusAvailableReason string = "PrometheusAvailable"
 	// IntegrationConditionJolokiaAvailableReason --
 	IntegrationConditionJolokiaAvailableReason string = "JolokiaAvailable"
+	// IntegrationConditionProbesAvailableReason --
+	IntegrationConditionProbesAvailableReason string = "ProbesAvailable"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.

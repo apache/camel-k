@@ -3095,6 +3095,8 @@ spec:
       - groupId: org.apache.camel.k
         artifactId: camel-knative-api
       - groupId: org.apache.camel.k
+        artifactId: camel-knative
+      - groupId: org.apache.camel.k
         artifactId: camel-knative-http
   loaders:
     yaml:
