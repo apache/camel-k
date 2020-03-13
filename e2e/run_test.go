@@ -22,8 +22,14 @@ limitations under the License.
 package e2e
 
 import (
+	"context"
+	"fmt"
+	"io"
+	"path"
 	"testing"
 
+	"github.com/apache/camel-k/e2e/util"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
@@ -31,6 +37,21 @@ import (
 func TestRunSimpleExamples(t *testing.T) {
 	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
+
+		for _, lang := range camelv1.Languages {
+			t.Run("init run "+string(lang), func(t *testing.T) {
+				RegisterTestingT(t)
+				dir := util.MakeTempDir(t)
+				itName := fmt.Sprintf("init%s", string(lang))          // e.g. initjava
+				fileName := fmt.Sprintf("%s.%s", itName, string(lang)) // e.g. initjava.java
+				file := path.Join(dir, fileName)
+				Expect(kamel("init", file).Execute()).Should(BeNil())
+				Expect(kamel("run", "-n", ns, file).Execute()).Should(BeNil())
+				Eventually(integrationPodPhase(ns, itName), testTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(integrationLogs(ns, itName), testTimeoutShort).Should(ContainSubstring(languageInitExpectedString(lang)))
+				Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			})
+		}
 
 		t.Run("run java", func(t *testing.T) {
 			RegisterTestingT(t)
@@ -106,5 +127,60 @@ func TestRunSimpleExamples(t *testing.T) {
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
+		t.Run("run yaml dev mode", func(t *testing.T) {
+			RegisterTestingT(t)
+			ctx, cancel := context.WithCancel(testContext)
+			defer cancel()
+			piper, pipew := io.Pipe()
+			defer pipew.Close()
+			defer piper.Close()
+
+			file := util.MakeTempCopy(t, "files/yaml.yaml")
+
+			kamelRun := kamelWithContext(ctx, "run", "-n", ns, file, "--dev")
+			kamelRun.SetOut(pipew)
+
+			logScanner := util.NewLogScanner(ctx, piper, `integration "yaml" in phase Running`, "Magicstring!", "Magicjordan!")
+
+			go kamelRun.Execute()
+
+			Eventually(logScanner.IsFound(`integration "yaml" in phase Running`), testTimeoutMedium).Should(BeTrue())
+			Eventually(logScanner.IsFound("Magicstring!"), testTimeoutMedium).Should(BeTrue())
+			Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
+
+			util.ReplaceInFile(t, file, "string!", "jordan!")
+			Eventually(logScanner.IsFound("Magicjordan!"), testTimeoutMedium).Should(BeTrue())
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
+		t.Run("run yaml remote dev mode", func(t *testing.T) {
+			RegisterTestingT(t)
+			ctx, cancel := context.WithCancel(testContext)
+			defer cancel()
+			piper, pipew := io.Pipe()
+			defer pipew.Close()
+			defer piper.Close()
+
+			remoteFile := "https://github.com/apache/camel-k/raw/e80eb5353cbccf47c89a9f0a1c68ffbe3d0f1521/e2e/files/yaml.yaml"
+			kamelRun := kamelWithContext(ctx, "run", "-n", ns, remoteFile, "--dev")
+			kamelRun.SetOut(pipew)
+
+			logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
+
+			go kamelRun.Execute()
+
+			Eventually(logScanner.IsFound("Magicstring!"), testTimeoutMedium).Should(BeTrue())
+			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
 	})
+}
+
+
+func languageInitExpectedString(lang camelv1.Language) string {
+	langDesc := string(lang)
+	if lang == camelv1.LanguageKotlin {
+		langDesc = "kotlin"
+	}
+	return fmt.Sprintf(" Hello Camel K from %s", langDesc)
 }
