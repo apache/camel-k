@@ -84,7 +84,6 @@ func TestProbesDepsQuarkus(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	ctr := newTestContainerTrait()
-	ctr.ProbePort = 9191
 
 	ok, err := ctr.Configure(&env)
 	assert.Nil(t, err)
@@ -102,8 +101,10 @@ func TestProbesOnDeployment(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
+	expose := true
+
 	ctr := newTestContainerTrait()
-	ctr.ProbePort = 9191
+	ctr.Expose = &expose
 	ctr.LivenessTimeout = 1234
 
 	err := ctr.Apply(&env)
@@ -125,19 +126,21 @@ func TestProbesOnDeploymentWithNoHttpPort(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
+	probePort := 9191
+
 	ctr := newTestContainerTrait()
 	ctr.PortName = "custom"
-	ctr.ProbePort = 9191
+	ctr.ProbePort = &probePort
 	ctr.LivenessTimeout = 1234
 
 	err := ctr.Apply(&env)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(9191), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, int32(probePort), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
 	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(9191), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, int32(probePort), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
 	assert.Equal(t, int32(1234), target.Spec.Template.Spec.Containers[0].LivenessProbe.TimeoutSeconds)
 }
@@ -149,8 +152,10 @@ func TestProbesOnKnativeService(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
+	expose := true
+
 	ctr := newTestContainerTrait()
-	ctr.ProbePort = 9191
+	ctr.Expose = &expose
 	ctr.LivenessTimeout = 1234
 
 	err := ctr.Apply(&env)
@@ -172,9 +177,11 @@ func TestProbesOnKnativeServiceWithNoHttpPort(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
+	probePort := 9191
+
 	ctr := newTestContainerTrait()
 	ctr.PortName = "custom"
-	ctr.ProbePort = 9191
+	ctr.ProbePort = &probePort
 	ctr.LivenessTimeout = 1234
 
 	err := ctr.Apply(&env)

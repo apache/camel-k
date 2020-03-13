@@ -41,7 +41,6 @@ const (
 	defaultContainerName = "integration"
 	defaultContainerPort = 8080
 	defaultServicePort   = 80
-	defaultProbePort     = 8081
 	defaultProbePath     = "/health"
 	containerTraitID     = "container"
 )
@@ -81,10 +80,10 @@ type containerTrait struct {
 
 	// ProbesEnabled enable/disable probes on the container (default `false`)
 	ProbesEnabled bool `property:"probes-enabled"`
-	// ProbePort configures the port on which the probes are exposed if the container is not exposed
-	// through an `http` port (default `8081`). Note that the value has no effect for Knative service
+	// ProbePort configures the port on which the probes are exposed, by default it inhierit the
+	// value from the `http` port configured on the container. Note that the value has no effect for Knative service
 	// as the port should be the same as the port declared by the container.
-	ProbePort int `property:"probe-port"`
+	ProbePort *int `property:"probe-port"`
 	// Path to access on the probe ( default `/health`). Note that this property is not supported
 	// on quarkus runtime and setting it will result in the integration failing to start.
 	ProbePath string `property:"probe-path"`
@@ -123,7 +122,7 @@ func newContainerTrait() Trait {
 		ServicePortName: httpPortName,
 		Name:            defaultContainerName,
 		ProbesEnabled:   false,
-		ProbePort:       defaultProbePort,
+		ProbePort:       nil,
 		ProbePath:       defaultProbePath,
 	}
 }
@@ -181,6 +180,7 @@ func (t *containerTrait) configureDependencies(e *Environment) {
 	}
 }
 
+// nolint:gocyclo
 func (t *containerTrait) configureContainer(e *Environment) error {
 	container := corev1.Container{
 		Name:  t.Name,
@@ -203,31 +203,39 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	if t.Expose != nil && *t.Expose {
 		t.configureService(e, &container)
 	}
-	if props := e.ComputeApplicationProperties(); props != nil {
-		e.Resources.Add(props)
-	}
 
 	//
 	// Deployment
 	//
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
+		if t.ProbesEnabled {
+			var port int
+
+			switch {
+			case t.ProbePort != nil:
+				port = *t.ProbePort
+			case t.Expose != nil && *t.Expose && t.PortName == httpPortName:
+				port = t.Port
+			default:
+				return fmt.Errorf("unable to determine the port probes should be bound to")
+			}
+
+			if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
+				return err
+			}
+		}
+
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
+		}
+		if props := e.ComputeApplicationProperties(); props != nil {
+			e.Resources.Add(props)
 		}
 
 		e.ConfigureVolumesAndMounts(
 			&deployment.Spec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
-
-		port := t.Port
-		if t.PortName != httpPortName {
-			port = t.ProbePort
-		}
-
-		if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
-			return err
-		}
 
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
 
@@ -240,6 +248,13 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Knative Service
 	//
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
+		if t.ProbesEnabled {
+			// don't set the port on Knative service as it is not allowed.
+			if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
+				return err
+			}
+		}
+
 		for _, env := range e.EnvVars {
 			switch {
 			case env.ValueFrom == nil:
@@ -254,16 +269,14 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 				envvar.SetVar(&container.Env, env)
 			}
 		}
+		if props := e.ComputeApplicationProperties(); props != nil {
+			e.Resources.Add(props)
+		}
 
 		e.ConfigureVolumesAndMounts(
 			&service.Spec.ConfigurationSpec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
-
-		// don't set the port on Knative service as it is not allowed.
-		if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
-			return err
-		}
 
 		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
 
@@ -276,23 +289,34 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// CronJob
 	//
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
+		if t.ProbesEnabled {
+			var port int
+
+			switch {
+			case t.ProbePort != nil:
+				port = *t.ProbePort
+			case t.Expose != nil && *t.Expose && t.PortName == httpPortName:
+				port = t.Port
+			default:
+				return fmt.Errorf("unable to determine the port probes should be bound to")
+			}
+
+			if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
+				return err
+			}
+		}
+
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
+		}
+		if props := e.ComputeApplicationProperties(); props != nil {
+			e.Resources.Add(props)
 		}
 
 		e.ConfigureVolumesAndMounts(
 			&cron.Spec.JobTemplate.Spec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
-
-		port := t.Port
-		if t.PortName != httpPortName {
-			port = t.ProbePort
-		}
-
-		if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
-			return err
-		}
 
 		cron.Spec.JobTemplate.Spec.Template.Spec.Containers = append(cron.Spec.JobTemplate.Spec.Template.Spec.Containers, container)
 
@@ -391,10 +415,6 @@ func (t *containerTrait) configureResources(_ *Environment, container *corev1.Co
 	}
 }
 func (t *containerTrait) configureProbes(e *Environment, container *corev1.Container, port int, path string) error {
-	if !t.ProbesEnabled {
-		return nil
-	}
-
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
