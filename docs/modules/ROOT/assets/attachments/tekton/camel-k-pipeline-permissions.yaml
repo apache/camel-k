@@ -70,6 +70,8 @@ rules:
     resources:
       - events
     verbs:
+      - create
+      - patch
       - get
       - list
       - watch

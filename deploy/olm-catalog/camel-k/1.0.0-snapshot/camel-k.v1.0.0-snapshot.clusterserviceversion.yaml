@@ -241,6 +241,7 @@ spec:
           - events
           verbs:
           - create
+          - patch
           - get
           - list
           - watch
