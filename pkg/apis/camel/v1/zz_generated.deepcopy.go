@@ -1162,6 +1162,11 @@ func (in *IntegrationStatus) DeepCopyInto(out *IntegrationStatus) {
 		*out = new(int32)
 		**out = **in
 	}
+	if in.Capabilities != nil {
+		in, out := &in.Capabilities, &out.Capabilities
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 
