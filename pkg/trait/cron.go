@@ -20,7 +20,6 @@ package trait
 import (
 	"fmt"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -129,7 +128,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if _, ok := e.CamelCatalog.Runtime.Capabilities["cron"]; !ok {
+	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityCron]; !ok {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionCronJobAvailable,
 			corev1.ConditionFalse,
@@ -234,14 +233,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 
 func (t *cronTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if capability, ok := e.CamelCatalog.Runtime.Capabilities["cron"]; ok {
-			for _, dependency := range capability.Dependencies {
-				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
-			}
-
-			// sort the dependencies to get always the same list if they don't change
-			sort.Strings(e.Integration.Status.Dependencies)
-		}
+		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityCron)
 
 		if t.Fallback != nil && *t.Fallback {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, genericCronComponentFallback)

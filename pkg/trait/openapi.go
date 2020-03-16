@@ -24,16 +24,16 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -42,12 +42,6 @@ import (
 
 // OpenAPITraitName ---
 const OpenAPITraitName = "openapi"
-
-// CamelRestPortProperty ---
-const CamelRestPortProperty = "camel.context.rest-configuration.port"
-
-// CamelRestDefaultPort ---
-const CamelRestDefaultPort = "8080"
 
 // The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 //
@@ -77,17 +71,13 @@ func (t *openAPITrait) Configure(e *Environment) (bool, error) {
 	}
 
 	// check if the runtime provides 'rest' capabilities
-	if _, ok := e.CamelCatalog.Runtime.Capabilities["rest"]; !ok {
-		t.L.Infof("the runtime provider %s does not declare 'rest' capability", e.CamelCatalog.Runtime.Provider)
+	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityRest]; !ok {
+		return false, fmt.Errorf("the runtime provider %s does not declare 'rest' capability", e.CamelCatalog.Runtime.Provider)
 	}
 
 	for _, resource := range e.Integration.Spec.Resources {
 		if resource.Type == v1.ResourceTypeOpenAPI {
-			return e.IntegrationInPhase(
-				v1.IntegrationPhaseInitialization,
-				v1.IntegrationPhaseDeploying,
-				v1.IntegrationPhaseRunning,
-			), nil
+			return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
 		}
 	}
 
@@ -95,24 +85,8 @@ func (t *openAPITrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *openAPITrait) Apply(e *Environment) error {
-	if len(e.Integration.Spec.Resources) == 0 {
-		return nil
-	}
+	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityRest)
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		t.computeDependencies(e)
-		return t.generateRestDSL(e)
-	}
-
-	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
-		e.ApplicationProperties[CamelRestPortProperty] = CamelRestDefaultPort
-		return nil
-	}
-
-	return nil
-}
-
-func (t *openAPITrait) generateRestDSL(e *Environment) error {
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "openapi")
 	if err != nil {
@@ -277,16 +251,4 @@ func (t *openAPITrait) generateMavenProject(e *Environment) (maven.Project, erro
 	}
 
 	return p, nil
-}
-
-func (t *openAPITrait) computeDependencies(e *Environment) {
-	// check if the runtime provides 'rest' capabilities
-	if capability, ok := e.CamelCatalog.Runtime.Capabilities["rest"]; ok {
-		for _, dependency := range capability.Dependencies {
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
-		}
-
-		// sort the dependencies to get always the same list if they don't change
-		sort.Strings(e.Integration.Status.Dependencies)
-	}
 }

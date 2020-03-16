@@ -89,10 +89,22 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 				}
 			}
 		}
+
+		meta.RequiredCapabilities.Each(func(item string) bool {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
+			return true
+		})
 	}
 
 	for _, dependency := range e.Integration.Spec.Dependencies {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency)
+	}
+
+	// add runtime specific dependencies
+	for _, capability := range e.Integration.Status.Capabilities {
+		for _, dependency := range e.CamelCatalog.Runtime.CapabilityDependencies(capability) {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
+		}
 	}
 
 	// add dependencies back to integration

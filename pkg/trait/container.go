@@ -43,6 +43,18 @@ const (
 	defaultServicePort   = 80
 	defaultProbePath     = "/health"
 	containerTraitID     = "container"
+
+	// CamelRestPortProperty ---
+	CamelRestPortProperty = "camel.context.rest-configuration.port"
+	// CamelRestDefaultPort ---
+	CamelRestDefaultPort = "8080"
+
+	// CamelRestComponentProperty ---
+	CamelRestComponentProperty = "camel.context.rest-configuration.component"
+	// CamelRestDefaultComponentMain ---
+	CamelRestDefaultComponentMain = "undertow"
+	// CamelRestDefaultComponentQuarkus ---
+	CamelRestDefaultComponentQuarkus = "platform-http"
 )
 
 // The Container trait can be used to configure properties of the container where the integration will run.
@@ -169,7 +181,7 @@ func (t *containerTrait) configureDependencies(e *Environment) {
 	}
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if capability, ok := e.CamelCatalog.Runtime.Capabilities["health"]; ok {
+		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
 			for _, dependency := range capability.Dependencies {
 				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
 			}
@@ -202,6 +214,10 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 
 	if t.Expose != nil && *t.Expose {
 		t.configureService(e, &container)
+	}
+
+	if err := t.configureCapabilities(e); err != nil {
+		return err
 	}
 
 	//
@@ -414,6 +430,30 @@ func (t *containerTrait) configureResources(_ *Environment, container *corev1.Co
 		}
 	}
 }
+
+func (t *containerTrait) configureCapabilities(e *Environment) error {
+	if !util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityRest) {
+		return nil
+	}
+
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+
+	switch e.CamelCatalog.Runtime.Provider {
+	case v1.RuntimeProviderMain:
+		e.ApplicationProperties[CamelRestPortProperty] = CamelRestDefaultPort
+		e.ApplicationProperties[CamelRestComponentProperty] = CamelRestDefaultComponentMain
+	case v1.RuntimeProviderQuarkus:
+		// On quarkus, the rest endpoint is bound to the platform http service
+		e.ApplicationProperties[CamelRestComponentProperty] = CamelRestDefaultComponentQuarkus
+	default:
+		return fmt.Errorf("unsupported runtime: %s", e.CamelCatalog.Runtime.Provider)
+	}
+
+	return nil
+}
+
 func (t *containerTrait) configureProbes(e *Environment, container *corev1.Container, port int, path string) error {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)

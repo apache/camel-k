@@ -561,10 +561,11 @@ func TestXMLRestDependency(t *testing.T) {
 		t,
 		[]string{
 			"camel:direct",
-			"camel:rest",
 			"camel:mock",
 		},
 		meta.Dependencies.List())
+
+	assert.True(t, meta.RequiredCapabilities.Has("rest"))
 }
 
 func TestXMLLanguageDependencies(t *testing.T) {
@@ -683,7 +684,15 @@ func TestYAMLRestDependency(t *testing.T) {
 
 	meta := Extract(catalog, code)
 
-	assert.ElementsMatch(t, []string{"camel:direct", "camel:rest", "camel:log"}, meta.Dependencies.List())
+	assert.ElementsMatch(
+		t,
+		[]string{
+			"camel:direct",
+			"camel:log",
+		},
+		meta.Dependencies.List())
+
+	assert.True(t, meta.RequiredCapabilities.Has("rest"))
 }
 
 func TestYAMLHystrixDependency(t *testing.T) {

@@ -34,13 +34,17 @@ type Metadata struct {
 	// are activated from external calls, including HTTP (useful to determine if the
 	// integration can scale to 0)
 	PassiveEndpoints bool
+	// RequiredCapabilities lists the capabilities required by the integration
+	// to run
+	RequiredCapabilities *strset.Set
 }
 
 // NewMetadata --
 func NewMetadata() Metadata {
 	return Metadata{
-		FromURIs:     make([]string, 0),
-		ToURIs:       make([]string, 0),
-		Dependencies: strset.New(),
+		FromURIs:             make([]string, 0),
+		ToURIs:               make([]string, 0),
+		Dependencies:         strset.New(),
+		RequiredCapabilities: strset.New(),
 	}
 }
