@@ -38,3 +38,14 @@ func NewErrorFailure(err error) *Failure {
 		Time:   metav1.Now(),
 	}
 }
+
+// CapabilityDependencies ---
+func (in *RuntimeSpec) CapabilityDependencies(capability string) []MavenArtifact {
+	deps := make([]MavenArtifact, 0)
+
+	if capability, ok := in.Capabilities[capability]; ok {
+		deps = append(deps, capability.Dependencies...)
+	}
+
+	return deps
+}

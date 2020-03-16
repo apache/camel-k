@@ -105,6 +105,13 @@ type Capability struct {
 const (
 	// ServiceTypeUser --
 	ServiceTypeUser = "user"
+
+	// CapabilityRest --
+	CapabilityRest = "rest"
+	// CapabilityHealth --
+	CapabilityHealth = "health"
+	// CapabilityCron --
+	CapabilityCron = "cron"
 )
 
 // ResourceCondition is a common type for all conditions
