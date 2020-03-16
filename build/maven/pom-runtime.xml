@@ -108,6 +108,10 @@
                     <groupId>com.oracle.substratevm</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -117,6 +121,10 @@
             <exclusions>
                 <exclusion>
                     <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
@@ -130,6 +138,10 @@
                     <groupId>com.oracle.substratevm</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -139,6 +151,10 @@
             <exclusions>
                 <exclusion>
                     <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
@@ -152,6 +168,10 @@
                     <groupId>com.oracle.substratevm</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -161,6 +181,10 @@
             <exclusions>
                 <exclusion>
                     <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
@@ -174,6 +198,10 @@
                     <groupId>com.oracle.substratevm</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -185,6 +213,10 @@
                     <groupId>com.oracle.substratevm</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -194,6 +226,10 @@
             <exclusions>
                 <exclusion>
                     <groupId>com.oracle.substratevm</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.nativeimage</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
