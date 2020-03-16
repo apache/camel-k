@@ -58,8 +58,8 @@ func (inspector YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) err
 func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
 	case "rest":
-		inspector.addDependency("camel:rest", meta)
 		meta.ExposesHTTPServices = true
+		meta.RequiredCapabilities.Add(v1.CapabilityRest)
 	case "circuitBreaker":
 		inspector.addDependency("camel:hystrix", meta)
 	}

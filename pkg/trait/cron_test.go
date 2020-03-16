@@ -19,7 +19,6 @@ package trait
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -286,13 +285,7 @@ func TestCronDeps(t *testing.T) {
 	ct := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
-
-	capability, ok := environment.CamelCatalog.Runtime.Capabilities["cron"]
-	assert.True(t, ok)
-
-	for _, dependency := range capability.Dependencies {
-		assert.True(t, util.StringSliceExists(environment.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID)))
-	}
+	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
 }
 
 func TestCronDepsFallback(t *testing.T) {
@@ -367,14 +360,7 @@ func TestCronDepsFallback(t *testing.T) {
 	ct := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.NotNil(t, ct.Fallback)
-
-	capability, ok := environment.CamelCatalog.Runtime.Capabilities["cron"]
-	assert.True(t, ok)
-
-	for _, dependency := range capability.Dependencies {
-		assert.True(t, util.StringSliceExists(environment.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID)))
-	}
-
+	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
 	assert.True(t, util.StringSliceExists(environment.Integration.Status.Dependencies, genericCronComponentFallback))
 }
 

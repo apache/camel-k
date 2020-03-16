@@ -44,8 +44,8 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 		if se, ok := t.(xml.StartElement); ok {
 			switch se.Name.Local {
 			case "rest", "restConfiguration":
-				i.addDependency("camel:rest", meta)
 				meta.ExposesHTTPServices = true
+				meta.RequiredCapabilities.Add(v1.CapabilityRest)
 			case "circuitBreaker":
 				i.addDependency("camel:hystrix", meta)
 			case "language":
