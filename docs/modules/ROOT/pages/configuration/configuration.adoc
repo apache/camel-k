@@ -10,7 +10,7 @@ The syntax for properties has the form `{{my.property}}`, for example:
 [source,groovy]
 .props.groovy
 ----
-from('timer:props?period=1s')
+from('timer:props?period=1000')
     .log('{{my.message}}')
 ----
 

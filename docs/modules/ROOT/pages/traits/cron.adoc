@@ -11,7 +11,7 @@ in order to save resources when the integration does not need to be executed.
 Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
 
 The rules for using a Kubernetes CronJob are the following:
-- `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=1m`.
+- `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=60000`.
 - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
   `cron:tab?schedule=0/2+*+*+*+?` or `quartz:trigger?cron=0+0/2+*+*+*+?`.
 
@@ -27,7 +27,7 @@ The following route is materialized into a Kubernetes CronJob by the `cron` trai
 .cron.groovy
 [source,groovy]
 ----
-from('timer:groovy?period=1m') // Setting the period e.g. to '1s' restores the default behavior
+from('timer:groovy?period=60000') // Setting the period e.g. to '1000' restores the default behavior
   .setBody()
     .simple('Hello World from Camel K in a CronJob')
   .to('log:info?showAll=false')
