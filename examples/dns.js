@@ -24,7 +24,7 @@
 //     kamel run examples/dns.js
 //
 
-from('timer:dns?period=1s')
+from('timer:dns?period=1000')
     .routeId('dns')
     .setHeader('dns.domain')
         .constant('www.google.com')

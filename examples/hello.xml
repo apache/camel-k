@@ -20,7 +20,7 @@
             http://camel.apache.org/schema/spring/camel-spring.xsd">
 
     <route id="hello">
-        <from uri="timer:hello?period=3s"/>
+        <from uri="timer:hello?period=3000"/>
         <setBody>
             <constant>Hello World!!!</constant>
         </setBody>

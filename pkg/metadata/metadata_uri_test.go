@@ -101,12 +101,12 @@ func TestGroovy1(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
-			
+
 		  	from( "timer:tick")
 		    	.setBody().constant("aa")
 				.to   ('log:info?skipBodyLineSeparator=false').to(
 											'http://url' )
-  			
+
 			from("uri:2")
 		    	.setBody().constant("aa")
 				.to('uri:3')
@@ -133,7 +133,7 @@ func TestGroovy2(t *testing.T) {
 	source := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
 			Name: "test",
-			Content: `			
+			Content: `
 			rest().get("/")
 				.to   ('log:info?skipBodyLineSeparator=false').to( 'http://url' )
 						.toD('dyn:1')
@@ -166,7 +166,7 @@ func TestXml1(t *testing.T) {
 			Content: `
 			<routes>
 			    <route id="hello">
-        			<from uri="timer:hello?period=3s"/>
+        			<from uri="timer:hello?period=3000"/>
         			<setBody>
             			<constant>Hello World!!!</constant>
         			</setBody>
@@ -185,7 +185,7 @@ func TestXml1(t *testing.T) {
 
 	metadata := Extract(catalog, source)
 
-	assert.Contains(t, metadata.FromURIs, "timer:hello?period=3s")
+	assert.Contains(t, metadata.FromURIs, "timer:hello?period=3000")
 	assert.Len(t, metadata.FromURIs, 1)
 	assert.Contains(t, metadata.ToURIs, "log:info")
 	assert.Contains(t, metadata.ToURIs, "log:info2")
@@ -198,12 +198,12 @@ func TestKotlin1(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
-			
+
 		  	from( "timer:tick")
 		    	.setBody().constant("aa")
 				.to   ("log:info?skipBodyLineSeparator=false").to(
 											"http://url" )
-  			
+
 			from("uri:2")
 		    	.setBody().constant("aa")
 				.to("uri:3")
@@ -235,11 +235,11 @@ func TestJavascript1(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "test",
 			Content: `
-			
+
 			rest().get("/")
 				.to   ('log:info?skipBodyLineSeparator=false').to( 'http://url' )
 				.toD("uri:2")
-				.toF("uri:%s", "3") 
+				.toF("uri:%s", "3")
 		`,
 		},
 		Language: v1.LanguageJavaScript,
@@ -263,13 +263,13 @@ const yaml = `
     uri: "timer:tick"
     steps:
         - to: "log:info1"
-        - to: 
+        - to:
             uri: "log:info2"
         - split:
             tokenizer: 't'
             steps:
                 - to: "log:info3"
-            
+
 `
 
 func TestJYaml(t *testing.T) {

@@ -24,7 +24,7 @@
 
 val rnd = java.util.Random()
 
-from("timer:kotlin?period=1s")
+from("timer:kotlin?period=1000")
     .routeId("kotlin")
     .setBody()
         .constant("Hello Camel K!")

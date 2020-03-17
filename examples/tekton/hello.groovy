@@ -15,5 +15,5 @@
  * limitations under the License.
  */
 
-from('timer:groovy?period=1s')
+from('timer:groovy?period=1000')
   .log('Hello Camel K from Tekton pipelines')

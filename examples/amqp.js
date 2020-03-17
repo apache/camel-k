@@ -24,7 +24,7 @@ components.get('amqp')
         new org.apache.qpid.jms.JmsConnectionFactory('amqp://' + java.lang.System.getenv('BROKER_URL'))
     );
 
-from('timer:js?period=1s')
+from('timer:js?period=1000')
     .routeId('js')
     .setBody()
         .simple('Hello Camel K')

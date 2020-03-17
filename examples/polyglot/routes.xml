@@ -20,7 +20,7 @@
             http://camel.apache.org/schema/spring/camel-spring.xsd">
 
     <route id="polyglot">
-        <from uri="timer:hello?period=3s"/>
+        <from uri="timer:hello?period=3000"/>
         <process ref="javaProcessor"/>
         <process ref="groovyProcessor"/>
         <to uri="log:info?showAll=true&amp;multiline=true"/>

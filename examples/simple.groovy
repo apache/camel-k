@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-from('timer:groovy?period=1s')
+from('timer:groovy?period=1000')
     .routeId('groovy')
     .setBody()
         .simple('Hello Camel K from ${routeId}')

@@ -47,7 +47,7 @@ beans {
     }
 }
 
-from('timer:groovy?period=1s')
+from('timer:groovy?period=1000')
     .routeId('groovy')
     .setBody()
         .constant('Hello Camel K!')

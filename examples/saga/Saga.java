@@ -29,7 +29,7 @@ public class Saga extends RouteBuilder {
 		service.setLocalParticipantUrl("http://saga:8080");
 		getContext().addService(service);
 
-		from("timer:clock?period=5s")
+		from("timer:clock?period=5000")
 			.saga()
 			.setHeader("id", header(Exchange.TIMER_COUNTER))
 			.setHeader(Exchange.HTTP_METHOD, constant("POST"))
