@@ -68,43 +68,43 @@ func TestCronFromURI(t *testing.T) {
 			uri: "timer:tick?period=120001", // invalid
 		},
 		{
-			uri:        "timer:tick?period=1m",
+			uri:        "timer:tick?period=60000",
 			cron:       "0/1 * * * ?",
 			components: "timer",
 		},
 		{
-			uri:        "timer:tick?period=5m",
+			uri:        "timer:tick?period=300000",
 			cron:       "0/5 * * * ?",
 			components: "timer",
 		},
 		{
-			uri:        "timer:tick?period=10m",
+			uri:        "timer:tick?period=600000",
 			cron:       "0/10 * * * ?",
 			components: "timer",
 		},
 		{
-			uri: "timer:tick?period=61m", // invalid
+			uri: "timer:tick?period=66000", // invalid
 		},
 		{
-			uri:        "timer:tick?period=2h",
+			uri:        "timer:tick?period=7200000",
 			cron:       "0 0/2 * * ?",
 			components: "timer",
 		},
 		{
-			uri:        "timer:tick?period=2h60m",
+			uri:        "timer:tick?period=10800000",
 			cron:       "0 0/3 * * ?",
 			components: "timer",
 		},
 		{
-			uri:        "timer:tick?period=24h",
+			uri:        "timer:tick?period=86400000",
 			cron:       "0 0 * * ?",
 			components: "timer",
 		},
 		{
-			uri: "timer:tick?period=3h60s", // invalid
+			uri: "timer:tick?period=10860000", // invalid
 		},
 		{
-			uri:        "timer:tick?period=3h59m60s",
+			uri:        "timer:tick?period=14400000",
 			cron:       "0 0/4 * * ?",
 			components: "timer",
 		},
@@ -167,26 +167,26 @@ func TestCronFromURI(t *testing.T) {
 		// Mixed scenarios
 		{
 			uri:        "cron:tab?schedule=0/2 * * * ?",
-			uri2:       "timer:tick?period=2m",
+			uri2:       "timer:tick?period=120000",
 			cron:       "0/2 * * * ?",
 			components: "cron,timer",
 		},
 		{
 			uri:        "cron:tab?schedule=0 0/2 * * ?",
-			uri2:       "timer:tick?period=2h",
+			uri2:       "timer:tick?period=7200000",
 			uri3:       "quartz:trigger?cron=0 0 0/2 * * ? ?",
 			cron:       "0 0/2 * * ?",
 			components: "cron,timer,quartz",
 		},
 		{
 			uri:  "cron:tab?schedule=1 0/2 * * ?",
-			uri2: "timer:tick?period=2h",
+			uri2: "timer:tick?period=7200000",
 			uri3: "quartz:trigger?cron=0 0 0/2 * * ? ?",
 			// invalid
 		},
 		{
 			uri:  "cron:tab?schedule=0 0/2 * * ?",
-			uri2: "timer:tick?period=3h",
+			uri2: "timer:tick?period=10800000",
 			uri3: "quartz:trigger?cron=0 0 0/2 * * ? ?",
 			// invalid
 		},

@@ -96,8 +96,7 @@ const (
 )
 
 var (
-	camelTimerPeriodMillis        = regexp.MustCompile(`^[0-9]+$`)
-	camelTimerPeriodHumanReadable = regexp.MustCompile(`^(?:([0-9]+)h)?(?:([0-9]+)m)?(?:([0-9]+)s)?$`)
+	camelTimerPeriodMillis = regexp.MustCompile(`^[0-9]+$`)
 
 	supportedCamelComponents = map[string]cronExtractor{
 		"timer":  timerToCronInfo,
@@ -432,20 +431,6 @@ func timerToCronInfo(camelURI string) *cronInfo {
 	var period uint64
 	if camelTimerPeriodMillis.MatchString(periodStr) {
 		period = checkedStringToUint64(periodStr)
-	} else if camelTimerPeriodHumanReadable.MatchString(periodStr) {
-		res := camelTimerPeriodHumanReadable.FindStringSubmatch(periodStr)
-		if len(res) == 4 {
-			period = 0
-			if res[1] != "" { // hours
-				period += checkedStringToUint64(res[1]) * 3600000
-			}
-			if res[2] != "" { // minutes
-				period += checkedStringToUint64(res[2]) * 60000
-			}
-			if res[3] != "" { // seconds
-				period += checkedStringToUint64(res[3]) * 1000
-			}
-		}
 	} else {
 		return nil
 	}
