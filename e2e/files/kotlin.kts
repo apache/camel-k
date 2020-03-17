@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-from("timer:kotlin?period=1s")
+from("timer:kotlin?period=1000")
     .routeId("kotlin")
     .setHeader("m").constant("string!")
     .setBody()

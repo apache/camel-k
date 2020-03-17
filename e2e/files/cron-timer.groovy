@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-from('timer:tick?period=1m')
+from('timer:tick?period=60000')
     .routeId('groovy')
     .setHeader("m").constant("string!")
     .setBody()

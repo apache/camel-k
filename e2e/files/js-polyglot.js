@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-from('timer:js?period=1s')
+from('timer:js?period=1000')
     .routeId('js')
     .setHeader("m").constant("polyglot-js")
     .setBody()
