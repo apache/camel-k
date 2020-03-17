@@ -22,7 +22,8 @@ import org.apache.camel.Exchange;
 public class Saga extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
-                restConfiguration().port("8080");
+		// Enable rest binding
+        rest();
 
 		LRASagaService service = new LRASagaService();
 		service.setCoordinatorUrl("http://lra-coordinator");

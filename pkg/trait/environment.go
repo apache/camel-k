@@ -36,6 +36,7 @@ const (
 	envVarNamespace            = "NAMESPACE"
 	envVarPodName              = "POD_NAME"
 	envVarCamelKVersion        = "CAMEL_K_VERSION"
+	envVarCamelKIntegration    = "CAMEL_K_INTEGRATION"
 	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
 	envVarMountPathConfigMaps  = "CAMEL_K_MOUNT_PATH_CONFIGMAPS"
 
@@ -66,6 +67,9 @@ func (t *environmentTrait) Configure(e *Environment) (bool, error) {
 
 func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, defaults.Version)
+	if e.Integration != nil {
+		envvar.SetVal(&e.EnvVars, envVarCamelKIntegration, e.Integration.Name)
+	}
 	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, ConfigMapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, SecretsMountPath)
