@@ -345,7 +345,7 @@ Here's the content:
 
 ```
 // Lookup every second the 'www.google.com' domain name and log the output
-from('timer:dns?period=1s')
+from('timer:dns?period=1000')
     .routeId('dns')
     .setHeader('dns.domain')
         .constant('www.google.com')
