@@ -32,7 +32,7 @@ public class AMQPBindToRegistry extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
 
-        from("timer:js?period=1s")
+        from("timer:js?period=1000")
             .setBody()
                 .simple("Hello Camel K")
             .to("amqp:topic:example?exchangePattern=InOnly");

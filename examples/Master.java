@@ -28,7 +28,7 @@ public class Master extends RouteBuilder {
   public void configure() throws Exception {
 
       // Write your routes here, for example:
-      from("master:lock:timer:master?period=1s")
+      from("master:lock:timer:master?period=1000")
         .setBody()
           .simple("This message is printed by a single pod, even if you increase the number of replicas!")
         .to("log:info");

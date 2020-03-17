@@ -75,7 +75,7 @@ This integration will be also materialized as a Knative autoscaling service, bec
 We're going to feed this chain of functions using a timed feed like this:
 
 ```
-from('timer:clock?period=3s')
+from('timer:clock?period=3000')
   .setBody().constant("Hello World from Camel K")
   .to('knative:channel/messages')
   .log('sent message to messages channel')

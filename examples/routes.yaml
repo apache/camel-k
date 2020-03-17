@@ -18,7 +18,7 @@
 - from:
     uri: "timer:tick"
     parameters:
-      period: "5s"
+      period: "5000"
     steps:
       - set-body:
           constant: "Hello Yaml !!!"
