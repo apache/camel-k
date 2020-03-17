@@ -24,8 +24,6 @@ import org.apache.camel.Exchange;
 public class Train extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
-                restConfiguration().port("8080");
-
 		LRASagaService service = new LRASagaService();
 		service.setCoordinatorUrl("http://lra-coordinator");
 		service.setLocalParticipantUrl("http://train");
