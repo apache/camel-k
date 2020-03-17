@@ -9,7 +9,7 @@
 
 	<!-- Write your routes here, for example: -->
     <route id="xml">
-        <from uri="timer:xml?period=1s"/>
+        <from uri="timer:xml?period=1000"/>
         <setBody>
             <simple>Hello Camel K from ${routeId}</simple>
         </setBody>
