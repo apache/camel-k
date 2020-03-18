@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         publisher: ["Buildah", "Spectrum"]
-
+        #publisher: ["Buildah"]
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -59,6 +59,7 @@ jobs:
         REGISTRY_CONTAINER_NAME='kind-registry'
         REGISTRY_PORT='5000'
         docker run -d -p "${REGISTRY_PORT}:5000" --restart=always --name "${REGISTRY_CONTAINER_NAME}" registry:2
+
         REGISTRY_IP=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}")
         cat <<EOF | kind create cluster --config=-
         kind: Cluster
@@ -96,6 +97,9 @@ jobs:
       env:
         KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ matrix.publisher }}
       run: |
+        # Set the test to periodically cleanup the docker system
+        export KAMEL_TEST_CLEANUP="docker system prune -f"
+
         # Compute registry parameters
         CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
         echo "Using registry ${CAMEL_K_REGISTRY}:5000"

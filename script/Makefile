@@ -125,12 +125,12 @@ test: build
 	go test ./...
 
 test-integration: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=integration
-	#go test -timeout 30m -v ./e2e -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e -tags=integration
+	#go test -timeout 60m -v ./e2e -tags=integration
 
 test-knative: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 30m -v ./e2e -tags=knative
-	#go test -timeout 30m -v ./e2e -tags=knative
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e -tags=knative
+	#go test -timeout 60m -v ./e2e -tags=knative
 
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go

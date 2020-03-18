@@ -18,12 +18,12 @@
 name: openshift
 
 on:
-  pull_request:
-    branches:
-      - master
-  push:
-    branches:
-      - master
+#  pull_request:
+#    branches:
+#      - master
+#  push:
+#    branches:
+#      - master
 
 jobs:
   build:
@@ -82,7 +82,7 @@ jobs:
         cd /home/runner/lib/oc
 
         # Start OpenShift
-        oc cluster up --public-hostname=$IP_ADDR
+        oc cluster up --public-hostname=$IP_ADDR --enable=persistent-volumes,registry,router
         oc login -u system:admin
 
         # Wait until we have a ready node in openshift

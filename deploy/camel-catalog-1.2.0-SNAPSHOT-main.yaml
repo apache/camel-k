@@ -32,8 +32,8 @@ spec:
     applicationClass: org.apache.camel.k.main.Application
     metadata:
       camel.version: 3.1.0
-      quarkus.version: 1.3.0.Alpha2
-      camel-quarkus.version: 1.0.0-M4
+      quarkus.version: 1.3.0.Final
+      camel-quarkus.version: 1.0.0-M5
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main

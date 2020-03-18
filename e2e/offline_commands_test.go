@@ -22,6 +22,7 @@ limitations under the License.
 package e2e
 
 import (
+	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,10 +33,16 @@ func TestKamelVersionWorksOffline(t *testing.T) {
 }
 
 func TestKamelHelpTraitWorksOffline(t *testing.T) {
-	assert.Nil(t, kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file").Execute())
+	traitCmd := kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file")
+	traitCmd.SetOut(ioutil.Discard)
+	assert.Nil(t, traitCmd.Execute())
 }
 
 func TestKamelCompletionWorksOffline(t *testing.T) {
-	assert.Nil(t, kamel("completion", "bash", "--config", "non-existent-kubeconfig-file").Execute())
-	assert.Nil(t, kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file").Execute())
+	bashCmd := kamel("completion", "bash", "--config", "non-existent-kubeconfig-file")
+	bashCmd.SetOut(ioutil.Discard)
+	zshCmd := kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file")
+	zshCmd.SetOut(ioutil.Discard)
+	assert.Nil(t, bashCmd.Execute())
+	assert.Nil(t, zshCmd.Execute())
 }
