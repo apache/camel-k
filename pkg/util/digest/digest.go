@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"sort"
+	"strconv"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
@@ -114,6 +115,41 @@ func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 		if _, err := hash.Write([]byte(item.String())); err != nil {
 			return "", err
 		}
+	}
+
+	// Add a letter at the beginning and use URL safe encoding
+	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+	return digest, nil
+}
+
+// ComputeForResource returns a digest for the specific resource
+func ComputeForResource(res v1.ResourceSpec) (string, error) {
+	hash := sha256.New()
+	// Operator version is relevant
+	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
+		return "", err
+	}
+
+	if _, err := hash.Write([]byte(res.Content)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(res.Name)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(res.Type)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(res.ContentKey)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(res.ContentRef)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(res.MountPath)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(strconv.FormatBool(res.Compression))); err != nil {
+		return "", err
 	}
 
 	// Add a letter at the beginning and use URL safe encoding

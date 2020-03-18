@@ -334,6 +334,7 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error
 	files = append(files, sources...)
 	files = append(files, o.Resources...)
 	files = append(files, o.PropertyFiles...)
+	files = append(files, o.OpenAPIs...)
 
 	for _, s := range files {
 		if !isRemoteHTTPFile(s) {
