@@ -905,6 +905,7 @@ func numPods(ns string) func() int {
 func withNewTestNamespace(t *testing.T, doRun func(string)) {
 	ns := newTestNamespace(false)
 	defer deleteTestNamespace(ns)
+	defer userCleanup()
 
 	invokeUserTestCode(t, ns.GetName(), doRun)
 }
@@ -913,8 +914,25 @@ func withNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
 	ns := newTestNamespace(true)
 	defer deleteTestNamespace(ns)
 	defer deleteKnativeBroker(ns)
+	defer userCleanup()
 
 	invokeUserTestCode(t, ns.GetName(), doRun)
+}
+
+func userCleanup() {
+	userCmd := os.Getenv("KAMEL_TEST_CLEANUP")
+	if userCmd != "" {
+		fmt.Printf("Executing user cleanup command: %s\n", userCmd)
+		cmdSplit := strings.Split(userCmd, " ")
+		command := exec.Command(cmdSplit[0], cmdSplit[1:]...)
+		command.Stderr = os.Stderr
+		command.Stdout = os.Stdout
+		if err := command.Run(); err != nil {
+			fmt.Printf("An error occurred during user cleanup command execution: %v\n", err)
+		} else {
+			fmt.Printf("User cleanup command completed successfully\n")
+		}
+	}
 }
 
 func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {

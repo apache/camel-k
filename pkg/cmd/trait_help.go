@@ -46,11 +46,11 @@ func newTraitHelpCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *traitHelp
 		Short:   "Trait help information",
 		Long:    `Displays help information for traits in a specified output format.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			return options.run(args)
+			return options.run(cmd, args)
 		},
 		Annotations: map[string]string{
 			offlineCommandLabel: "true",
@@ -92,7 +92,7 @@ func (command *traitHelpCommandOptions) validate(args []string) error {
 	return nil
 }
 
-func (command *traitHelpCommandOptions) run(args []string) error {
+func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) error {
 	var traitDescriptions []*traitDescription
 	var catalog = trait.NewCatalog(command.Context, nil)
 
@@ -127,15 +127,15 @@ func (command *traitHelpCommandOptions) run(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(string(res))
+		fmt.Fprintln(cmd.OutOrStdout(), string(res))
 	case "YAML":
 		res, err := yaml.Marshal(traitDescriptions)
 		if err != nil {
 			return err
 		}
-		fmt.Println(string(res))
+		fmt.Fprintln(cmd.OutOrStdout(), string(res))
 	default:
-		fmt.Println(outputTraits(traitDescriptions))
+		fmt.Fprintln(cmd.OutOrStdout(), outputTraits(traitDescriptions))
 	}
 
 	return nil

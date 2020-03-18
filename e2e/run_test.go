@@ -22,6 +22,7 @@ limitations under the License.
 package e2e
 
 import (
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -29,6 +30,11 @@ import (
 )
 
 func TestRunSimpleExamples(t *testing.T) {
+	if os.Getenv("KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY") == "Buildah" {
+		t.Skip("Apparently this test require too much CI resources to be run with Buildah, let's save some...")
+		return
+	}
+
 	withNewTestNamespace(t, func(ns string) {
 		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
 
@@ -92,7 +98,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(kamel("run", "-n", ns, "--name", "yaml-quarkus", "files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
 			Eventually(integrationPodPhase(ns, "yaml-quarkus"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "yaml-quarkus"), testTimeoutShort).Should(ContainSubstring("running on Quarkus"))
+			Eventually(integrationLogs(ns, "yaml-quarkus"), testTimeoutShort).Should(ContainSubstring("powered by Quarkus"))
 			Eventually(integrationLogs(ns, "yaml-quarkus"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
