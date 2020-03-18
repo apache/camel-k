@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -28,6 +27,10 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/pkg/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -103,67 +106,13 @@ func (t *openAPITrait) Apply(e *Environment) error {
 			return fmt.Errorf("no name defined for the openapi resource: %v", resource)
 		}
 
-		tmpDir = path.Join(tmpDir, strconv.Itoa(i))
-		err := os.MkdirAll(tmpDir, os.ModePerm)
-		if err != nil {
-			return err
-		}
-
-		content := []byte(resource.Content)
-		if resource.Compression {
-			content, err = gzip.UncompressBase64(content)
-			if err != nil {
-				return err
-			}
-		}
-
-		in := path.Join(tmpDir, resource.Name)
-		out := path.Join(tmpDir, "openapi-dsl.xml")
-
-		err = ioutil.WriteFile(in, content, 0644)
-		if err != nil {
-			return err
-		}
-
-		project, err := t.generateMavenProject(e)
-		if err != nil {
-			return err
-		}
-
-		mc := maven.NewContext(tmpDir, project)
-		mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
-		mc.Timeout = e.Platform.Status.Build.Maven.GetTimeout().Duration
-		mc.AddArgument("-Dopenapi.spec=" + in)
-		mc.AddArgument("-Ddsl.out=" + out)
-
-		settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Status.Build.Maven.Settings)
-		if err != nil {
-			return err
-		}
-		if settings != "" {
-			mc.SettingsContent = []byte(settings)
-		}
-
-		err = maven.Run(mc)
-		if err != nil {
-			return err
-		}
-
-		content, err = ioutil.ReadFile(out)
-		if err != nil {
-			return err
-		}
-
-		if resource.Compression {
-			c, err := gzip.CompressBase64(content)
-			if err != nil {
-				return nil
-			}
-
-			content = c
-		}
-
 		generatedContentName := fmt.Sprintf("%s-openapi-%03d", e.Integration.Name, i)
+
+		// Generate configmap or reuse existing one
+		if err := t.generateOpenAPIConfigMap(e, resource, tmpDir, generatedContentName); err != nil {
+			return errors.Wrapf(err, "cannot generate configmap for openapi resource %s", resource.Name)
+		}
+
 		generatedSourceName := strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml"
 		generatedSources := make([]v1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
 
@@ -190,38 +139,141 @@ func (t *openAPITrait) Apply(e *Environment) error {
 			Language: v1.LanguageXML,
 		})
 
-		//
-		// Store the generated rest xml in a separate config map in order
-		// not to pollute the integration with generated data
-		//
-		cm := corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      generatedContentName,
-				Namespace: e.Integration.Namespace,
-				Labels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
-				},
-				Annotations: map[string]string{
-					"camel.apache.org/source.language":    string(v1.LanguageXML),
-					"camel.apache.org/source.name":        resource.Name,
-					"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
-					"camel.apache.org/source.generated":   "true",
-					"camel.apache.org/source.type":        string(v1.ResourceTypeOpenAPI),
-				},
-			},
-			Data: map[string]string{
-				"content": string(content),
-			},
-		}
-
 		e.Integration.Status.GeneratedSources = generatedSources
-		e.Resources.Add(&cm)
 	}
 
+	return nil
+}
+
+func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.ResourceSpec, tmpDir, generatedContentName string) error {
+	cm := corev1.ConfigMap{}
+	key := client.ObjectKey{
+		Namespace: e.Integration.Namespace,
+		Name:      generatedContentName,
+	}
+	err := t.Client.Get(t.Ctx, key, &cm)
+	if err != nil && k8serrors.IsNotFound(err) {
+		return t.createNewOpenAPIConfigMap(e, resource, tmpDir, generatedContentName)
+	} else if err != nil {
+		return err
+	}
+
+	// ConfigMap already present, let's check if the source has not changed
+	foundDigest := cm.Annotations["camel.apache.org/source.digest"]
+
+	// Compute the new digest
+	newDigest, err := digest.ComputeForResource(resource)
+	if err != nil {
+		return err
+	}
+
+	if foundDigest == newDigest {
+		// ConfigMap already exists and matches the source
+		// Re-adding it to update its revision
+		cm.ResourceVersion = ""
+		e.Resources.Add(&cm)
+		return nil
+	}
+	return t.createNewOpenAPIConfigMap(e, resource, tmpDir, generatedContentName)
+}
+
+func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.ResourceSpec, tmpDir, generatedContentName string) error {
+	tmpDir = path.Join(tmpDir, generatedContentName)
+	err := os.MkdirAll(tmpDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	content := []byte(resource.Content)
+	if resource.Compression {
+		content, err = gzip.UncompressBase64(content)
+		if err != nil {
+			return err
+		}
+	}
+
+	in := path.Join(tmpDir, resource.Name)
+	out := path.Join(tmpDir, "openapi-dsl.xml")
+
+	err = ioutil.WriteFile(in, content, 0644)
+	if err != nil {
+		return err
+	}
+
+	project, err := t.generateMavenProject(e)
+	if err != nil {
+		return err
+	}
+
+	mc := maven.NewContext(tmpDir, project)
+	mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
+	mc.Timeout = e.Platform.Status.Build.Maven.GetTimeout().Duration
+	mc.AddArgument("-Dopenapi.spec=" + in)
+	mc.AddArgument("-Ddsl.out=" + out)
+
+	settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Status.Build.Maven.Settings)
+	if err != nil {
+		return err
+	}
+	if settings != "" {
+		mc.SettingsContent = []byte(settings)
+	}
+
+	err = maven.Run(mc)
+	if err != nil {
+		return err
+	}
+
+	content, err = ioutil.ReadFile(out)
+	if err != nil {
+		return err
+	}
+
+	if resource.Compression {
+		c, err := gzip.CompressBase64(content)
+		if err != nil {
+			return nil
+		}
+
+		content = c
+	}
+
+	// Compute the input digest and store it along with the configmap
+	hash, err := digest.ComputeForResource(resource)
+	if err != nil {
+		return err
+	}
+
+	//
+	// Store the generated rest xml in a separate config map in order
+	// not to pollute the integration with generated data
+	//
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      generatedContentName,
+			Namespace: e.Integration.Namespace,
+			Labels: map[string]string{
+				"camel.apache.org/integration": e.Integration.Name,
+			},
+			Annotations: map[string]string{
+				"camel.apache.org/source.language":    string(v1.LanguageXML),
+				"camel.apache.org/source.name":        resource.Name,
+				"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
+				"camel.apache.org/source.generated":   "true",
+				"camel.apache.org/source.type":        string(v1.ResourceTypeOpenAPI),
+				"camel.apache.org/source.digest":      hash,
+			},
+		},
+		Data: map[string]string{
+			"content": string(content),
+		},
+	}
+
+	e.Resources.Add(&cm)
 	return nil
 }
 
