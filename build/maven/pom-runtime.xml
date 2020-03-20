@@ -327,14 +327,14 @@
             <id>staging</id>
             <activation>
                 <property>
-                    <name>env.STAGING_RUNTIME_REPO</name>
+                    <name>staging.repo</name>
                 </property>
             </activation>
 
             <repositories>
                 <repository>
                     <id>staging</id>
-                    <url>${env.STAGING_RUNTIME_REPO}</url>
+                    <url>${staging.repo}</url>
                     <releases>
                         <enabled>true</enabled>
                     </releases>
@@ -347,7 +347,7 @@
             <pluginRepositories>
                 <pluginRepository>
                     <id>staging</id>
-                    <url>${env.STAGING_RUNTIME_REPO}</url>
+                    <url>${staging.repo}</url>
                     <releases>
                         <enabled>true</enabled>
                     </releases>
