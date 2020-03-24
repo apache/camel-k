@@ -50,7 +50,7 @@ jobs:
         TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
       run: |
-        VERSION=nightly-$(date +%Y%m%d%H%M)
+        VERSION=$(make get-version | sed s/-SNAPSHOT/-nightly.$(date +%Y%m%d%H%M)/)
         echo "Using VERSION=$VERSION"
         echo "::set-env name=VERSION::$VERSION"
 
