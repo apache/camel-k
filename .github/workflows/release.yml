@@ -58,6 +58,10 @@ jobs:
         echo "Using IMAGE_NAME=$IMAGE_NAME"
         echo "::set-env name=IMAGE_NAME::$IMAGE_NAME"
 
+        MAVEN_REPOSITORY=$(make get-staging-repo)
+        echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
+        echo "::set-env name=MAVEN_REPOSITORY::$MAVEN_REPOSITORY"
+
         docker login -u $TEST_DOCKER_HUB_USERNAME -p $TEST_DOCKER_HUB_PASSWORD
 
     - name: Codegen
@@ -86,6 +90,12 @@ jobs:
         release_name: Release ${{ env.VERSION }}
         body: |
           Apache Camel K nightly build for testing (unstable).
+
+          To test it, download the client for your OS and run:
+
+          ```
+          kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
+          ```
 
         draft: false
         prerelease: true
