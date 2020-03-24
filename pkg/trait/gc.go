@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,7 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/disk"
 	"k8s.io/client-go/discovery/cached/memory"
@@ -135,43 +135,13 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
 		Add(*integration).
 		Add(*generation)
 
-	collectionGVKs, deletableGVKs, err := t.getDeletableTypes(e)
+	deletableGVKs, err := t.getDeletableTypes(e)
 	if err != nil {
 		t.L.ForIntegration(e.Integration).Errorf(err, "cannot discover GVK types")
 		return
 	}
 
-	t.deleteAllOf(collectionGVKs, e, selector)
-	// TODO: DeleteCollection is currently not supported for Service resources, so we have to keep
-	// client-side collection deletion around until it becomes supported.
 	t.deleteEachOf(deletableGVKs, e, selector)
-}
-
-func (t *garbageCollectorTrait) deleteAllOf(gvks map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
-	for gvk := range gvks {
-		err := e.Client.DeleteAllOf(context.TODO(),
-			&unstructured.Unstructured{
-				Object: map[string]interface{}{
-					"apiVersion": gvk.GroupVersion().String(),
-					"kind":       gvk.Kind,
-					"metadata": map[string]interface{}{
-						"namespace": e.Integration.Namespace,
-					},
-				},
-			},
-			// FIXME: The unstructured client doesn't take the namespace option into account
-			//controller.InNamespace(e.Integration.Namespace),
-			util.MatchingSelector{Selector: selector},
-			client.PropagationPolicy(metav1.DeletePropagationBackground),
-		)
-		if err != nil {
-			if !k8serrors.IsForbidden(err) {
-				t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resources: %v", gvk)
-			}
-		} else {
-			t.L.ForIntegration(e.Integration).Debugf("child resources deleted: %v", gvk)
-		}
-	}
 }
 
 func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
@@ -195,6 +165,9 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 
 		for _, resource := range resources.Items {
 			r := resource
+			if !t.canBeDeleted(e, r) {
+				continue
+			}
 			err := t.Client.Delete(context.TODO(), &r, client.PropagationPolicy(metav1.DeletePropagationBackground))
 			if err != nil {
 				// The resource may have already been deleted
@@ -208,25 +181,34 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 	}
 }
 
-func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, map[schema.GroupVersionKind]struct{}, error) {
+func (t *garbageCollectorTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool {
+	// Only delete direct children of the integration, otherwise we can affect the behavior of external controllers (i.e. Knative)
+	for _, o := range u.GetOwnerReferences() {
+		if o.Kind == v1.IntegrationKind && strings.HasPrefix(o.APIVersion, v1.SchemeGroupVersion.Group) && o.Name == e.Integration.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
 	// We rely on the discovery API to retrieve all the resources GVK,
 	// that results in an unbounded set that can impact garbage collection latency when scaling up.
 	discoveryClient, err := t.discoveryClient(e)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	resources, err := discoveryClient.ServerPreferredNamespacedResources()
 	// Swallow group discovery errors, e.g., Knative serving exposes
 	// an aggregated API for custom.metrics.k8s.io that requires special
 	// authentication scheme while discovering preferred resources
 	if err != nil && !discovery.IsGroupDiscoveryFailedError(err) {
-		return nil, nil, err
+		return nil, err
 	}
 
-	// We only take types that support the "delete" and "deletecollection" verbs,
+	// We only take types that support the "delete" verb,
 	// to prevents from performing queries that we know are going to return "MethodNotAllowed".
-	return groupVersionKinds(discovery.FilteredBy(discovery.SupportsAllVerbs{Verbs: []string{"deletecollection"}}, resources)),
-		groupVersionKinds(discovery.FilteredBy(supportsDeleteVerbOnly{}, resources)),
+	return groupVersionKinds(discovery.FilteredBy(discovery.SupportsAllVerbs{Verbs: []string{"delete"}}, resources)),
 		nil
 }
 
@@ -238,14 +220,6 @@ func groupVersionKinds(rls []*metav1.APIResourceList) map[schema.GroupVersionKin
 		}
 	}
 	return GVKs
-}
-
-// supportsDeleteVerbOnly is a predicate matching a resource if it supports the delete verb, but not deletecollection.
-type supportsDeleteVerbOnly struct{}
-
-func (p supportsDeleteVerbOnly) Match(groupVersion string, r *metav1.APIResource) bool {
-	verbs := sets.NewString([]string(r.Verbs)...)
-	return verbs.Has("delete") && !verbs.Has("deletecollection")
 }
 
 func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.DiscoveryInterface, error) {
