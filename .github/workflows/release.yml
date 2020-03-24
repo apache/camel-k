@@ -1,0 +1,127 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: release
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13.x
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Cache modules
+      uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    - name: Prerequisites
+      run: |
+        export OPERATOR_SDK_VERSION=v0.15.2
+        curl -L https://github.com/operator-framework/operator-sdk/releases/download/v0.15.2/operator-sdk-${OPERATOR_SDK_VERSION}-x86_64-linux-gnu -o operator-sdk
+        chmod a+x operator-sdk
+        sudo mv operator-sdk /usr/local/bin
+
+    - name: Global Env
+      env:
+        TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+      run: |
+        VERSION=nightly-$(date +%Y%m%d%H%M)
+        echo "Using VERSION=$VERSION"
+        echo "::set-env name=VERSION::$VERSION"
+
+        IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
+        echo "Using IMAGE_NAME=$IMAGE_NAME"
+        echo "::set-env name=IMAGE_NAME::$IMAGE_NAME"
+
+        docker login -u $TEST_DOCKER_HUB_USERNAME -p $TEST_DOCKER_HUB_PASSWORD
+
+    - name: Codegen
+      run: |
+        make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME codegen set-version build-resources
+
+    - name: Tag version
+      uses: anothrNick/github-tag-action@1.17.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CUSTOM_TAG: ${{ env.VERSION }}
+    - name: Build
+      run: |
+        make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME release-nightly
+
+    - name: Check
+      run: ls -l
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.VERSION }}
+        release_name: Release ${{ env.VERSION }}
+        body: |
+          Apache Camel K nightly build for testing (unstable).
+
+        draft: false
+        prerelease: true
+    - name: Upload Client Linux
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./camel-k-client-${{ env.VERSION }}-linux-64bit.tar.gz
+        asset_name: camel-k-client-${{ env.VERSION }}-linux-64bit.tar.gz
+        asset_content_type: application/tar+gzip
+    - name: Upload Client Mac
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./camel-k-client-${{ env.VERSION }}-mac-64bit.tar.gz
+        asset_name: camel-k-client-${{ env.VERSION }}-mac-64bit.tar.gz
+        asset_content_type: application/tar+gzip
+    - name: Upload Client Windows
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./camel-k-client-${{ env.VERSION }}-windows-64bit.tar.gz
+        asset_name: camel-k-client-${{ env.VERSION }}-windows-64bit.tar.gz
+        asset_content_type: application/tar+gzip
+    - name: Upload Examples
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./camel-k-examples-${{ env.VERSION }}.tar.gz
+        asset_name: camel-k-examples-${{ env.VERSION }}.tar.gz
+        asset_content_type: application/tar+gzip
