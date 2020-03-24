@@ -78,10 +78,10 @@ jobs:
         kubectl describe nodes
     - name: Install Knative
       run: |
-        kubectl apply -f https://github.com/knative/serving/releases/download/v0.10.0/serving-core.yaml
-        kubectl apply -f https://github.com/knative/eventing/releases/download/v0.10.0/release.yaml
+        kubectl apply -f https://github.com/knative/serving/releases/download/v0.13.1/serving-core.yaml
+        kubectl apply -f https://github.com/knative/eventing/releases/download/v0.13.1/eventing.yaml
 
-        kubectl apply -f https://raw.githubusercontent.com/3scale/kourier/v0.3.8/deploy/kourier-knative.yaml
+        kubectl apply -f https://raw.githubusercontent.com/3scale/kourier/v0.3.12/deploy/kourier-knative.yaml
         kubectl patch configmap/config-network \
           -n knative-serving \
           --type merge \
