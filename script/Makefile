@@ -16,10 +16,10 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.0.0-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0-RC2
-RUNTIME_VERSION := 1.2.1
+RUNTIME_VERSION := 1.3.0-SNAPSHOT
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
-BASE_IMAGE := adoptopenjdk/openjdk8:slim
+BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
 RELEASE_GIT_REMOTE := upstream

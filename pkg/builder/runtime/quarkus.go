@@ -74,6 +74,9 @@ func generateQuarkusProject(ctx *builder.Context) error {
 	// proxies which in some case may fail
 	p.Properties["quarkus.camel.main.routes-discovery.enabled"] = "false"
 
+	// disable quarkus banner ...
+	p.Properties["quarkus.banner.enabled"] = "false"
+
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
 		maven.Dependency{

@@ -43,18 +43,6 @@ const (
 	defaultServicePort   = 80
 	defaultProbePath     = "/health"
 	containerTraitID     = "container"
-
-	// CamelRestPortProperty ---
-	CamelRestPortProperty = "camel.context.rest-configuration.port"
-	// CamelRestDefaultPort ---
-	CamelRestDefaultPort = "8080"
-
-	// CamelRestComponentProperty ---
-	CamelRestComponentProperty = "camel.context.rest-configuration.component"
-	// CamelRestDefaultComponentMain ---
-	CamelRestDefaultComponentMain = "undertow"
-	// CamelRestDefaultComponentQuarkus ---
-	CamelRestDefaultComponentQuarkus = "platform-http"
 )
 
 // The Container trait can be used to configure properties of the container where the integration will run.
@@ -92,10 +80,6 @@ type containerTrait struct {
 
 	// ProbesEnabled enable/disable probes on the container (default `false`)
 	ProbesEnabled bool `property:"probes-enabled"`
-	// ProbePort configures the port on which the probes are exposed, by default it inhierit the
-	// value from the `http` port configured on the container. Note that the value has no effect for Knative service
-	// as the port should be the same as the port declared by the container.
-	ProbePort *int `property:"probe-port"`
 	// Path to access on the probe ( default `/health`). Note that this property is not supported
 	// on quarkus runtime and setting it will result in the integration failing to start.
 	ProbePath string `property:"probe-path"`
@@ -134,7 +118,6 @@ func newContainerTrait() Trait {
 		ServicePortName: httpPortName,
 		Name:            defaultContainerName,
 		ProbesEnabled:   false,
-		ProbePort:       nil,
 		ProbePath:       defaultProbePath,
 	}
 }
@@ -194,6 +177,10 @@ func (t *containerTrait) configureDependencies(e *Environment) {
 
 // nolint:gocyclo
 func (t *containerTrait) configureContainer(e *Environment) error {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+
 	container := corev1.Container{
 		Name:  t.Name,
 		Image: e.Integration.Status.Image,
@@ -215,7 +202,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	if t.Expose != nil && *t.Expose {
 		t.configureService(e, &container)
 	}
-
 	if err := t.configureCapabilities(e); err != nil {
 		return err
 	}
@@ -224,19 +210,8 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Deployment
 	//
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
-		if t.ProbesEnabled {
-			var port int
-
-			switch {
-			case t.ProbePort != nil:
-				port = *t.ProbePort
-			case t.Expose != nil && *t.Expose && t.PortName == httpPortName:
-				port = t.Port
-			default:
-				return fmt.Errorf("unable to determine the port probes should be bound to")
-			}
-
-			if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
+		if t.ProbesEnabled && t.PortName == httpPortName {
+			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
 		}
@@ -264,7 +239,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Knative Service
 	//
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		if t.ProbesEnabled {
+		if t.ProbesEnabled && t.PortName == httpPortName {
 			// don't set the port on Knative service as it is not allowed.
 			if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
 				return err
@@ -305,19 +280,8 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// CronJob
 	//
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
-		if t.ProbesEnabled {
-			var port int
-
-			switch {
-			case t.ProbePort != nil:
-				port = *t.ProbePort
-			case t.Expose != nil && *t.Expose && t.PortName == httpPortName:
-				port = t.Port
-			default:
-				return fmt.Errorf("unable to determine the port probes should be bound to")
-			}
-
-			if err := t.configureProbes(e, &container, port, t.ProbePath); err != nil {
+		if t.ProbesEnabled && t.PortName == httpPortName {
+			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
 		}
@@ -431,39 +395,48 @@ func (t *containerTrait) configureResources(_ *Environment, container *corev1.Co
 	}
 }
 
-func (t *containerTrait) configureCapabilities(e *Environment) error {
-	if !util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityRest) {
-		return nil
-	}
-
-	if e.ApplicationProperties == nil {
-		e.ApplicationProperties = make(map[string]string)
-	}
-
+func (t *containerTrait) configureHTTP(e *Environment) error {
 	switch e.CamelCatalog.Runtime.Provider {
 	case v1.RuntimeProviderMain:
-		e.ApplicationProperties[CamelRestPortProperty] = CamelRestDefaultPort
-		e.ApplicationProperties[CamelRestComponentProperty] = CamelRestDefaultComponentMain
+		e.ApplicationProperties["customizer.platform-http.enabled"] = True
+		e.ApplicationProperties["customizer.platform-http.bind-port"] = strconv.Itoa(t.Port)
 	case v1.RuntimeProviderQuarkus:
-		// On quarkus, the rest endpoint is bound to the platform http service
-		e.ApplicationProperties[CamelRestComponentProperty] = CamelRestDefaultComponentQuarkus
+		// Quarkus does not offer a runtime option to change http listening ports
+		return nil
 	default:
 		return fmt.Errorf("unsupported runtime: %s", e.CamelCatalog.Runtime.Provider)
+	}
+
+	return nil
+
+}
+
+func (t *containerTrait) configureCapabilities(e *Environment) error {
+	requiresHTTP := false
+
+	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityRest) {
+		e.ApplicationProperties["camel.context.rest-configuration.component"] = "platform-http"
+		requiresHTTP = true
+	}
+
+	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityPlatformHttp) {
+		requiresHTTP = true
+	}
+
+	if requiresHTTP {
+		return t.configureHTTP(e)
 	}
 
 	return nil
 }
 
 func (t *containerTrait) configureProbes(e *Environment, container *corev1.Container, port int, path string) error {
-	if e.ApplicationProperties == nil {
-		e.ApplicationProperties = make(map[string]string)
+	if err := t.configureHTTP(e); err != nil {
+		return nil
 	}
 
 	switch e.CamelCatalog.Runtime.Provider {
 	case v1.RuntimeProviderMain:
-		e.ApplicationProperties["customizer.inspector.enabled"] = True
-		e.ApplicationProperties["customizer.inspector.bind-host"] = "0.0.0.0"
-		e.ApplicationProperties["customizer.inspector.bind-port"] = strconv.Itoa(port)
 		e.ApplicationProperties["customizer.health.enabled"] = True
 		e.ApplicationProperties["customizer.health.path"] = path
 	case v1.RuntimeProviderQuarkus:

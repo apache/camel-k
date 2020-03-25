@@ -371,7 +371,7 @@ func TestRestDependency(t *testing.T) {
 			"camel:direct",
 			"camel:log",
 			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel/camel-undertow",
+			"mvn:org.apache.camel.k/camel-k-runtime-http",
 		},
 		meta.Dependencies.List())
 }
@@ -402,7 +402,7 @@ func TestRestWithPathDependency(t *testing.T) {
 			"camel:direct",
 			"camel:log",
 			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel/camel-undertow",
+			"mvn:org.apache.camel.k/camel-k-runtime-http",
 		},
 		meta.Dependencies.List())
 }
@@ -431,7 +431,7 @@ func TestRestConfigurationDependency(t *testing.T) {
 			"camel:http",
 			"camel:log",
 			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel/camel-undertow",
+			"mvn:org.apache.camel.k/camel-k-runtime-http",
 		},
 		meta.Dependencies.List())
 }
@@ -461,7 +461,7 @@ func TestRestClosureDependencyGroovy(t *testing.T) {
 			"camel:http",
 			"camel:log",
 			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel/camel-undertow",
+			"mvn:org.apache.camel.k/camel-k-runtime-http",
 		},
 		meta.Dependencies.List())
 }
@@ -491,7 +491,7 @@ func TestRestClosureDependencyKotlin(t *testing.T) {
 			"camel:http",
 			"camel:log",
 			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel/camel-undertow",
+			"mvn:org.apache.camel.k/camel-k-runtime-http",
 		},
 		meta.Dependencies.List())
 }

@@ -112,6 +112,8 @@ const (
 	CapabilityHealth = "health"
 	// CapabilityCron --
 	CapabilityCron = "cron"
+	// CapabilityPlatformHttp --
+	CapabilityPlatformHttp = "platform-http"
 )
 
 // ResourceCondition is a common type for all conditions

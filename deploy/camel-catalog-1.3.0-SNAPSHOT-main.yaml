@@ -18,16 +18,16 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.2.1-main
+  name: camel-catalog-1.3.0-snapshot-main
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.1.0
     camel.apache.org/catalog.loader.version: 3.1.0
-    camel.apache.org/runtime.version: 1.2.1
+    camel.apache.org/runtime.version: 1.3.0-SNAPSHOT
     camel.apache.org/runtime.provider: main
 spec:
   runtime:
-    version: 1.2.1
+    version: 1.3.0-SNAPSHOT
     provider: main
     applicationClass: org.apache.camel.k.main.Application
     metadata:
@@ -46,12 +46,16 @@ spec:
         dependencies:
         - groupId: org.apache.camel.k
           artifactId: camel-k-runtime-health
+      platform-http:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-runtime-http
       rest:
         dependencies:
         - groupId: org.apache.camel
           artifactId: camel-rest
-        - groupId: org.apache.camel
-          artifactId: camel-undertow
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-runtime-http
   artifacts:
     camel-zipfile:
       groupId: org.apache.camel
@@ -3063,9 +3067,9 @@ spec:
     camel-k-runtime-health:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-health
-    camel-k-runtime-inspector:
+    camel-k-runtime-http:
       groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-inspector
+      artifactId: camel-k-runtime-http
     camel-k-runtime-webhook:
       groupId: org.apache.camel.k
       artifactId: camel-k-runtime-webhook

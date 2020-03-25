@@ -21,6 +21,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -93,7 +95,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -171,29 +173,38 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {
-	env := knativeapi.NewCamelEnvironment()
-	if t.Configuration != "" {
-		if err := env.Deserialize(t.Configuration); err != nil {
+	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {
+		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHttp)
+	}
+	if len(t.ChannelSinks) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSinks) > 0 {
+		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHttp)
+	}
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+		env := knativeapi.NewCamelEnvironment()
+		if t.Configuration != "" {
+			if err := env.Deserialize(t.Configuration); err != nil {
+				return err
+			}
+		}
+
+		if err := t.configureChannels(e, &env); err != nil {
 			return err
 		}
-	}
+		if err := t.configureEndpoints(e, &env); err != nil {
+			return err
+		}
+		if err := t.configureEvents(e, &env); err != nil {
+			return err
+		}
 
-	if err := t.configureChannels(e, &env); err != nil {
-		return err
-	}
-	if err := t.configureEndpoints(e, &env); err != nil {
-		return err
-	}
-	if err := t.configureEvents(e, &env); err != nil {
-		return err
-	}
+		conf, err := env.Serialize()
+		if err != nil {
+			return errors.Wrap(err, "unable to fetch environment configuration")
+		}
 
-	conf, err := env.Serialize()
-	if err != nil {
-		return errors.Wrap(err, "unable to fetch environment configuration")
+		envvar.SetVal(&e.EnvVars, "CAMEL_KNATIVE_CONFIGURATION", conf)
 	}
-
-	envvar.SetVal(&e.EnvVars, "CAMEL_KNATIVE_CONFIGURATION", conf)
 
 	return nil
 }
@@ -213,8 +224,6 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			}
 			svc := knativeapi.CamelServiceDefinition{
 				Name:        ref.Name,
-				Host:        "0.0.0.0",
-				Port:        8080,
 				ServiceType: knativeapi.CamelServiceTypeChannel,
 				Metadata:    meta,
 			}
@@ -223,6 +232,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			if err := t.createSubscription(e, ref); err != nil {
 				return err
 			}
+
 			return nil
 		})
 	if err != nil {
@@ -267,8 +277,6 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 		}
 		svc := knativeapi.CamelServiceDefinition{
 			Name:        ref.Name,
-			Host:        "0.0.0.0",
-			Port:        8080,
 			ServiceType: knativeapi.CamelServiceTypeEndpoint,
 			Metadata: map[string]string{
 				knativeapi.CamelMetaServicePath:       "/",
@@ -309,8 +317,6 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 			if !env.ContainsService(ref.Name, knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, ref.APIVersion, ref.Kind) {
 				svc := knativeapi.CamelServiceDefinition{
 					Name:        ref.Name,
-					Host:        "0.0.0.0",
-					Port:        8080,
 					ServiceType: knativeapi.CamelServiceTypeEvent,
 					Metadata: map[string]string{
 						knativeapi.CamelMetaServicePath:       "/",
@@ -321,6 +327,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 				}
 				env.Services = append(env.Services, svc)
 			}
+
 			return nil
 		})
 	if err != nil {
