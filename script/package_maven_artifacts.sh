@@ -36,6 +36,7 @@ if [ "$strategy" = "copy" ]; then
         -DoutputDirectory=$PWD/build/_maven_output \
         -Druntime.version=$version \
         -Dstaging.repo=$staging_repo \
+        -Dalpn.jdk8.version="8.1.13.v20181017" \
         dependency:copy-dependencies
 elif [ "$strategy" = "download" ]; then
     ./mvnw \
@@ -45,6 +46,7 @@ elif [ "$strategy" = "download" ]; then
         -Dmaven.repo.local=$PWD/build/_maven_output \
         -Druntime.version=$version \
         -Dstaging.repo=$staging_repo \
+        -Dalpn.jdk8.version="8.1.13.v20181017" \
         install
 else
     echo "unknown strategy: $strategy"
