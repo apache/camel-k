@@ -52,6 +52,48 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
+	its, err := camelClient.CamelV1().Integrations(ns).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d integrations:\n", len(its.Items))
+	for _, integration := range its.Items {
+		ref := integration
+		pdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	iks, err := camelClient.CamelV1().IntegrationKits(ns).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d integration kits:\n", len(iks.Items))
+	for _, ik := range iks.Items {
+		ref := ik
+		pdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	cms, err := c.CoreV1().ConfigMaps(ns).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d ConfigMaps:\n", len(cms.Items))
+	for _, cm := range cms.Items {
+		ref := cm
+		pdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
 	lst, err := c.CoreV1().Pods(ns).List(metav1.ListOptions{})
 	if err != nil {
 		return err

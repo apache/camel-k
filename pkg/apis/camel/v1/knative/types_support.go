@@ -27,10 +27,12 @@ import (
 func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType,
 	serviceURL url.URL, apiVersion, kind string) (CamelServiceDefinition, error) {
 
+	port := 80
+
 	definition := CamelServiceDefinition{
 		Name:        name,
 		Host:        serviceURL.Host,
-		Port:        80,
+		Port:        &port,
 		ServiceType: serviceType,
 		Metadata: map[string]string{
 			CamelMetaEndpointKind:      string(endpointKind),
@@ -44,14 +46,12 @@ func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, se
 		if err != nil {
 			return CamelServiceDefinition{}, err
 		}
-		definition.Port = port
+		definition.Port = &port
 	}
-	path := serviceURL.Path
-	if path != "" {
-		definition.Metadata[CamelMetaServicePath] = path
-	} else {
-		definition.Metadata[CamelMetaServicePath] = "/"
+	if serviceURL.Path != "" {
+		definition.Metadata[CamelMetaServicePath] = serviceURL.Path
 	}
+
 	return definition, nil
 }
 

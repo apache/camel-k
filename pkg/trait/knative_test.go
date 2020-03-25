@@ -21,6 +21,8 @@ import (
 	"context"
 	"testing"
 
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
@@ -123,7 +125,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 
 	cSource1 := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1alpha1", "Channel")
 	assert.NotNil(t, cSource1)
-	assert.Equal(t, "0.0.0.0", cSource1.Host)
+	assert.Empty(t, cSource1.Host)
 
 	cSink1 := ne.FindService("channel-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1alpha1", "Channel")
 	assert.NotNil(t, cSink1)
@@ -131,7 +133,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 
 	eSource1 := ne.FindService("endpoint-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSource1)
-	assert.Equal(t, "0.0.0.0", eSource1.Host)
+	assert.Empty(t, eSource1.Host)
 
 	eSink1 := ne.FindService("endpoint-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSink1)
@@ -233,8 +235,158 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 
 	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, source)
-	assert.Equal(t, "0.0.0.0", source.Host)
-	assert.Equal(t, 8080, source.Port)
+	assert.Empty(t, source.Host)
+	assert.Nil(t, source.Port)
+}
+
+func TestKnativePlatformHttpConfig(t *testing.T) {
+	sources := []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "source-endpoint.groovy",
+				Content: `from('knative:endpoint/ep').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "source-channel.groovy",
+				Content: `from('knative:channel/channel-source-1').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "source-event.groovy",
+				Content: `from('knative:event/event-source-1').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+	}
+
+	for _, source := range sources {
+		t.Run(source.Name, func(t *testing.T) {
+			environment := NewFakeEnvironment(t, source)
+
+			c, err := NewFakeClient("ns")
+			assert.Nil(t, err)
+
+			tc := NewCatalog(context.TODO(), c)
+
+			err = tc.configure(&environment)
+			assert.Nil(t, err)
+
+			err = tc.apply(&environment)
+			assert.Nil(t, err)
+
+			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHttp)
+			assert.Equal(t, "true", environment.ApplicationProperties["customizer.platform-http.enabled"])
+			assert.Equal(t, "8080", environment.ApplicationProperties["customizer.platform-http.bind-port"])
+		})
+	}
+}
+
+func TestKnativePlatformHttpDepdencies(t *testing.T) {
+	sources := []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "source-endpoint.groovy",
+				Content: `from('knative:endpoint/ep').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "source-channel.groovy",
+				Content: `from('knative:channel/channel-source-1').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "source-event.groovy",
+				Content: `from('knative:event/event-source-1').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+	}
+
+	for _, source := range sources {
+		t.Run(source.Name, func(t *testing.T) {
+			environment := NewFakeEnvironment(t, source)
+			environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
+
+			c, err := NewFakeClient("ns")
+			assert.Nil(t, err)
+
+			tc := NewCatalog(context.TODO(), c)
+
+			err = tc.configure(&environment)
+			assert.Nil(t, err)
+
+			err = tc.apply(&environment)
+			assert.Nil(t, err)
+
+			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHttp)
+			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-http")
+		})
+	}
+}
+
+func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					source,
+				},
+				Resources: []v1.ResourceSpec{},
+				Traits: map[string]v1.TraitSpec{
+					"knative": {
+						Configuration: map[string]string{
+							"enabled": "true",
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	return environment
 }
 
 func NewFakeClient(namespace string) (client.Client, error) {
@@ -254,6 +406,11 @@ func NewFakeClient(namespace string) (client.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	brokerURL, err := apis.ParseURL("http://broker-default.host/")
+	if err != nil {
+		return nil, err
+	}
+
 	return test.NewFakeClient(
 		&messaging.Channel{
 			TypeMeta: metav1.TypeMeta{
@@ -304,7 +461,6 @@ func NewFakeClient(namespace string) (client.Client, error) {
 			},
 			Status: serving.ServiceStatus{
 				RouteStatusFields: serving.RouteStatusFields{
-
 					Address: &duckv1.Addressable{
 						URL: sink1URL,
 					},
@@ -324,6 +480,49 @@ func NewFakeClient(namespace string) (client.Client, error) {
 				RouteStatusFields: serving.RouteStatusFields{
 					Address: &duckv1.Addressable{
 						URL: sink2URL,
+					},
+				},
+			},
+		},
+		&eventing.Broker{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: eventing.SchemeGroupVersion.String(),
+				Kind:       "Broker",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      "default",
+			},
+			Spec: eventing.BrokerSpec{},
+			Status: eventing.BrokerStatus{
+				Address: duckv1alpha1.Addressable{
+					Addressable: duckv1beta1.Addressable{
+						URL: brokerURL,
+					},
+				},
+			},
+		},
+		&eventing.Trigger{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: eventing.SchemeGroupVersion.String(),
+				Kind:       "Trigger",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      "event-source-1",
+			},
+			Spec: eventing.TriggerSpec{
+				Filter: &eventing.TriggerFilter{
+					Attributes: &eventing.TriggerFilterAttributes{
+						"type": "event-source-1",
+					},
+				},
+				Broker: "default",
+				Subscriber: duckv1.Destination{
+					Ref: &corev1.ObjectReference{
+						APIVersion: serving.SchemeGroupVersion.String(),
+						Kind:       "Service",
+						Name:       "event-source-1",
 					},
 				},
 			},

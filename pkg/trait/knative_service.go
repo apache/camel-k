@@ -74,8 +74,7 @@ type knativeServiceTrait struct {
 	//
 	// * Integration is using the Knative profile
 	// * All routes are either starting from a HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
-	Auto     *bool `property:"auto"`
-	deployer deployerTrait
+	Auto *bool `property:"auto"`
 }
 
 var _ ControllerStrategySelector = &knativeServiceTrait{}
@@ -163,11 +162,6 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 				t.MinScale = &single
 			}
 		}
-	}
-
-	dt := e.Catalog.GetTrait("deployer")
-	if dt != nil {
-		t.deployer = *dt.(*deployerTrait)
 	}
 
 	return true, nil

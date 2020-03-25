@@ -33,9 +33,9 @@ func NewCamelEnvironment() CamelEnvironment {
 type CamelServiceDefinition struct {
 	ServiceType CamelServiceType  `json:"type"`
 	Name        string            `json:"name"`
-	Host        string            `json:"host"`
-	Port        int               `json:"port"`
-	Metadata    map[string]string `json:"metadata"`
+	Host        string            `json:"host,omitempty"`
+	Port        *int              `json:"port,omitempty"`
+	Metadata    map[string]string `json:"metadata,omitempty"`
 }
 
 // CamelEndpointKind --

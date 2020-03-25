@@ -45,11 +45,11 @@ func TestOpenAPIService(t *testing.T) {
 			Should(Not(BeNil()))
 
 		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
-			Should(ContainSubstring("Route: listPets started and consuming from: http://0.0.0.0:8080/v1/pets"))
+			Should(ContainSubstring("Route: listPets started and consuming from: platform-http:///v1/pets"))
 		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
-			Should(ContainSubstring("Route: createPets started and consuming from: http://0.0.0.0:8080/v1/pets"))
+			Should(ContainSubstring("Route: createPets started and consuming from: platform-http:///v1/pets"))
 		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
-			Should(ContainSubstring("Route: showPetById started and consuming from: http://0.0.0.0:8080/v1/pets"))
+			Should(ContainSubstring("Route: showPetById started and consuming from: platform-http:///v1/pets"))
 
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
@@ -72,11 +72,11 @@ func TestOpenAPIDeployment(t *testing.T) {
 			Should(Not(BeNil()))
 
 		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
-			Should(ContainSubstring("Route: listPets started and consuming from: http://0.0.0.0:8080/v1/pets"))
+			Should(ContainSubstring("Route: listPets started and consuming from: platform-http:///v1/pets"))
 		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
-			Should(ContainSubstring("Route: createPets started and consuming from: http://0.0.0.0:8080/v1/pets"))
+			Should(ContainSubstring("Route: createPets started and consuming from: platform-http:///v1/pets"))
 		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
-			Should(ContainSubstring("Route: showPetById started and consuming from: http://0.0.0.0:8080/v1/pets"))
+			Should(ContainSubstring("Route: showPetById started and consuming from: platform-http:///v1/pets"))
 
 		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})

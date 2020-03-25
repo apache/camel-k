@@ -25,10 +25,6 @@ import org.apache.camel.Exchange;
 public class RestDSL extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
-        restConfiguration()
-            .host("0.0.0.0")
-            .port("8080");
-
         rest()
             .get("/hello")
             .to("direct:hello");

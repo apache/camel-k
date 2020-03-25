@@ -26,7 +26,7 @@ const (
 	Version = "1.0.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.2.1"
+	DefaultRuntimeVersion = "1.3.0-SNAPSHOT"
 
 	// BuildahVersion --
 	BuildahVersion = "1.14.0"
@@ -35,7 +35,7 @@ const (
 	KanikoVersion = "0.17.1"
 
 	// BaseImage --
-	BaseImage = "adoptopenjdk/openjdk8:slim"
+	BaseImage = "adoptopenjdk/openjdk11:slim"
 
 	// LocalRepository --
 	LocalRepository = "/tmp/artifacts/m2"
