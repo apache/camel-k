@@ -69,7 +69,7 @@ jobs:
         make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME codegen set-version build-resources
 
     - name: Tag version
-      uses: anothrNick/github-tag-action@1.17.2
+      uses: anothrNick/github-tag-action@1.19.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CUSTOM_TAG: ${{ env.VERSION }}
