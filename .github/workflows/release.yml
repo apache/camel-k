@@ -18,8 +18,9 @@
 name: release
 
 on:
-  schedule:
-  - cron:  '0 0 * * *'
+  push:
+    tags:
+      - '*nightly*'
 
 jobs:
   release:
@@ -50,7 +51,7 @@ jobs:
         TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
       run: |
-        VERSION=$(make get-version | sed s/-SNAPSHOT/-nightly.$(date +%Y%m%d%H%M)/)
+        VERSION=${GITHUB_REF##*/}
         echo "Using VERSION=$VERSION"
         echo "::set-env name=VERSION::$VERSION"
 
@@ -62,22 +63,12 @@ jobs:
         echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
         echo "::set-env name=MAVEN_REPOSITORY::$MAVEN_REPOSITORY"
 
-        # GITHUB_REF is not automatically set for cron-based actions
-        GITHUB_REF=refs/heads/master
-        echo "Using GITHUB_REF=$GITHUB_REF"
-        echo "::set-env name=GITHUB_REF::$GITHUB_REF"
-
         docker login -u $TEST_DOCKER_HUB_USERNAME -p $TEST_DOCKER_HUB_PASSWORD
 
     - name: Codegen
       run: |
         make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME codegen set-version build-resources
 
-    - name: Tag version
-      uses: anothrNick/github-tag-action@1.19.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CUSTOM_TAG: ${{ env.VERSION }}
     - name: Build
       run: |
         make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME release-nightly
