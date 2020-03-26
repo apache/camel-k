@@ -62,6 +62,11 @@ jobs:
         echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
         echo "::set-env name=MAVEN_REPOSITORY::$MAVEN_REPOSITORY"
 
+        # GITHUB_REF is not automatically set for cron-based actions
+        GITHUB_REF=refs/heads/master
+        echo "Using GITHUB_REF=$GITHUB_REF"
+        echo "::set-env name=GITHUB_REF::$GITHUB_REF"
+
         docker login -u $TEST_DOCKER_HUB_USERNAME -p $TEST_DOCKER_HUB_PASSWORD
 
     - name: Codegen
