@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -263,6 +264,27 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 	err = client.Create(ctx, cm)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return err
+	} else if k8serrors.IsAlreadyExists(err) {
+		key, err := k8sclient.ObjectKeyFromObject(cm)
+		if err != nil {
+			return err
+		}
+
+		cmCopy := cm.DeepCopyObject()
+		err = client.Get(ctx, key, cmCopy)
+		if err != nil {
+			return err
+		}
+
+		p, err := patch.PositiveMergePatch(cmCopy, cm)
+		if err != nil {
+			return err
+		} else if len(p) != 0 {
+			err = client.Patch(ctx, cm, k8sclient.ConstantPatch(types.MergePatchType, p))
+			if err != nil {
+				return errors.Wrap(err, "error during patch resource")
+			}
+		}
 	}
 
 	return nil

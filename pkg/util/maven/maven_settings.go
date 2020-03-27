@@ -19,12 +19,17 @@ package maven
 
 import (
 	"encoding/xml"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+// DefaultMavenRepositories is a comma separated list of default maven repositories
+// This variable can be overridden at build time
+var DefaultMavenRepositories = "https://repo.maven.apache.org/maven2@id=central"
 
 // NewSettings --
 func NewSettings() Settings {
@@ -40,9 +45,14 @@ func NewSettings() Settings {
 func NewDefaultSettings(repositories []Repository) Settings {
 	settings := NewSettings()
 
-	if !containsMvnCentral(repositories) {
-		repository := NewRepository("https://repo.maven.apache.org/maven2@id=central")
-		repositories = append([]Repository{repository}, repositories...)
+	var additionalRepos []Repository
+	for _, defaultRepo := range getDefaultMavenRepositories() {
+		if !containsRepo(repositories, defaultRepo.ID) {
+			additionalRepos = append(additionalRepos, defaultRepo)
+		}
+	}
+	if len(additionalRepos) > 0 {
+		repositories = append(additionalRepos, repositories...)
 	}
 
 	settings.Profiles = []Profile{
@@ -86,9 +96,16 @@ func CreateSettingsConfigMap(namespace string, name string, settings Settings) (
 	return cm, nil
 }
 
-func containsMvnCentral(repositories []Repository) bool {
+func getDefaultMavenRepositories() (repos []Repository) {
+	for _, repoDesc := range strings.Split(DefaultMavenRepositories, ",") {
+		repos = append(repos, NewRepository(repoDesc))
+	}
+	return
+}
+
+func containsRepo(repositories []Repository, id string) bool {
 	for _, r := range repositories {
-		if r.ID == "central" {
+		if r.ID == id {
 			return true
 		}
 	}
