@@ -15,13 +15,23 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-operator-path: deploy/operator-deployment.yaml
-crd-cr-paths:
-  - deploy/crd-build.yaml
-  - deploy/crd-camel-catalog.yaml
-  - deploy/crd-integration.yaml
-  - deploy/crd-integration-kit.yaml
-  - deploy/crd-integration-platform.yaml
-role-paths:
-  - deploy/operator-role-olm.yaml
-  - deploy/operator-role-olm-cluster.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+rules:
+- apiGroups:
+  - console.openshift.io
+  resources:
+  - consoleclidownloads
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
