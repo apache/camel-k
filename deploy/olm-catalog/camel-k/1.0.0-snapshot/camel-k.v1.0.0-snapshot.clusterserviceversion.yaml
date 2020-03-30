@@ -154,6 +154,22 @@ spec:
     mediatype: image/svg+xml
   install:
     spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - console.openshift.io
+          resources:
+          - consoleclidownloads
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: camel-k-operator
       deployments:
       - name: camel-k-operator
         spec:
@@ -385,6 +401,14 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resourceNames:
+          - system:image-builder
+          resources:
+          - clusterroles
+          verbs:
+          - bind
         serviceAccountName: camel-k-operator
     strategy: deployment
   installModes:
