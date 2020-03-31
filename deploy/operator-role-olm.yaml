@@ -221,3 +221,16 @@ rules:
   - bind
   resourceNames:
   - system:image-builder
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
