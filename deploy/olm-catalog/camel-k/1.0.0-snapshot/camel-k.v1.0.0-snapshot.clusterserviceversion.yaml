@@ -409,6 +409,19 @@ spec:
           - clusterroles
           verbs:
           - bind
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
         serviceAccountName: camel-k-operator
     strategy: deployment
   installModes:
