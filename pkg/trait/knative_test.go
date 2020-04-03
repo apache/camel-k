@@ -264,7 +264,8 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 		},
 	}
 
-	for _, source := range sources {
+	for _, ref := range sources {
+		source := ref
 		t.Run(source.Name, func(t *testing.T) {
 			environment := NewFakeEnvironment(t, source)
 
@@ -279,7 +280,7 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 			err = tc.apply(&environment)
 			assert.Nil(t, err)
 
-			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHttp)
+			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 			assert.Equal(t, "true", environment.ApplicationProperties["customizer.platform-http.enabled"])
 			assert.Equal(t, "8080", environment.ApplicationProperties["customizer.platform-http.bind-port"])
 		})
@@ -311,7 +312,8 @@ func TestKnativePlatformHttpDepdencies(t *testing.T) {
 		},
 	}
 
-	for _, source := range sources {
+	for _, ref := range sources {
+		source := ref
 		t.Run(source.Name, func(t *testing.T) {
 			environment := NewFakeEnvironment(t, source)
 			environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
@@ -327,7 +329,7 @@ func TestKnativePlatformHttpDepdencies(t *testing.T) {
 			err = tc.apply(&environment)
 			assert.Nil(t, err)
 
-			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHttp)
+			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-http")
 		})
 	}

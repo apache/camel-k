@@ -419,7 +419,7 @@ func (t *containerTrait) configureCapabilities(e *Environment) error {
 		requiresHTTP = true
 	}
 
-	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityPlatformHttp) {
+	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP) {
 		requiresHTTP = true
 	}
 
