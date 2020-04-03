@@ -289,15 +289,14 @@ func incrementalImageContext(ctx *Context) error {
 
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
-			selectedArtifacts := make([]v1.Artifact, 0)
+			ctx.BaseImage = bestImage.Image
+			ctx.SelectedArtifacts = make([]v1.Artifact, 0)
+
 			for _, entry := range ctx.Artifacts {
 				if _, isCommon := commonLibs[entry.ID]; !isCommon {
-					selectedArtifacts = append(selectedArtifacts, entry)
+					ctx.SelectedArtifacts = append(ctx.SelectedArtifacts, entry)
 				}
 			}
-
-			ctx.BaseImage = bestImage.Image
-			ctx.SelectedArtifacts = selectedArtifacts
 		}
 
 		return nil
@@ -346,7 +345,7 @@ func imageContext(ctx *Context, selector artifactsSelector) error {
 	return nil
 }
 
-func listPublishedImages(context *Context) ([]publishedImage, error) {
+func listPublishedImages(context *Context) ([]v1.IntegrationKitStatus, error) {
 	options := []k8sclient.ListOption{
 		k8sclient.InNamespace(context.Namespace),
 		k8sclient.MatchingLabels{
@@ -364,7 +363,7 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 		return nil, err
 	}
 
-	images := make([]publishedImage, 0)
+	images := make([]v1.IntegrationKitStatus, 0)
 	for _, item := range list.Items {
 		kit := item
 
@@ -372,17 +371,13 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 			continue
 		}
 
-		images = append(images, publishedImage{
-			Image:        kit.Status.Image,
-			Artifacts:    kit.Status.Artifacts,
-			Dependencies: kit.Spec.Dependencies,
-		})
+		images = append(images, kit.Status)
 	}
 	return images, nil
 }
 
-func findBestImage(images []publishedImage, artifacts []v1.Artifact) (publishedImage, map[string]bool) {
-	var bestImage publishedImage
+func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v1.IntegrationKitStatus, map[string]bool) {
+	var bestImage v1.IntegrationKitStatus
 
 	if len(images) == 0 {
 		return bestImage, nil

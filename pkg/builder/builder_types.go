@@ -122,9 +122,3 @@ type Context struct {
 func (c *Context) HasRequiredImage() bool {
 	return c.Build.Image != ""
 }
-
-type publishedImage struct {
-	Image        string
-	Artifacts    []v1.Artifact
-	Dependencies []string
-}
