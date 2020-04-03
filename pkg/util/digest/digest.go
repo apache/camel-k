@@ -18,6 +18,7 @@ limitations under the License.
 package digest
 
 import (
+	// nolint: gosec
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
@@ -182,6 +183,7 @@ func ComputeSHA1(elem ...string) (string, error) {
 	}
 	defer f.Close()
 
+	// nolint: gosec
 	h := sha1.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return "", err
