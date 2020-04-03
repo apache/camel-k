@@ -371,9 +371,6 @@ func listPublishedImages(context *Context) ([]publishedImage, error) {
 		if kit.Status.Phase != v1.IntegrationKitPhaseReady {
 			continue
 		}
-		if kit.Status.Phase != v1.IntegrationKitPhaseReady {
-			continue
-		}
 
 		images = append(images, publishedImage{
 			Image:        kit.Status.Image,
@@ -391,9 +388,9 @@ func findBestImage(images []publishedImage, artifacts []v1.Artifact) (publishedI
 		return bestImage, nil
 	}
 
-	requiredLibs := make(map[string]bool, len(artifacts))
+	requiredLibs := make(map[string]string, len(artifacts))
 	for _, entry := range artifacts {
-		requiredLibs[entry.ID] = true
+		requiredLibs[entry.ID] = entry.Checksum
 	}
 
 	bestImageCommonLibs := make(map[string]bool)
@@ -402,7 +399,15 @@ func findBestImage(images []publishedImage, artifacts []v1.Artifact) (publishedI
 	for _, image := range images {
 		common := make(map[string]bool)
 		for _, artifact := range image.Artifacts {
-			if _, ok := requiredLibs[artifact.ID]; ok {
+			//
+			// If the Artifact's checksum is not defined we can't reliably determine if for some
+			// reason the artifact has been changed but not the ID (as example for snapshots or
+			// other generated jar) thus we do not take this artifact into account.
+			//
+			if artifact.Checksum == "" {
+				continue
+			}
+			if requiredLibs[artifact.ID] == artifact.Checksum {
 				common[artifact.ID] = true
 			}
 		}
@@ -411,7 +416,8 @@ func findBestImage(images []publishedImage, artifacts []v1.Artifact) (publishedI
 		surplus := len(image.Artifacts) - numCommonLibs
 
 		if numCommonLibs != len(image.Artifacts) && surplus >= numCommonLibs/3 {
-			// Heuristic approach: if there are too many unrelated libraries, just use the base image
+			// Heuristic approach: if there are too many unrelated libraries then this image is
+			// not suitable to be used as base image
 			continue
 		}
 

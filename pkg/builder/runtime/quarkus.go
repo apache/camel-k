@@ -23,6 +23,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/apache/camel-k/pkg/util/digest"
+
 	yaml2 "gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
@@ -178,18 +180,41 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 			return err
 		}
 
+		//
+		// Compute the checksum if it has not been computed by the camel-k-maven-plugin
+		//
+		if e.Checksum == "" {
+			chksum, err := digest.ComputeSHA1(e.Location)
+			if err != nil {
+				return err
+			}
+
+			e.Checksum = "sha1:" + chksum
+		}
+
 		ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
 			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
+			Checksum: e.Checksum,
 		})
 	}
 
 	runner := "camel-k-integration-" + defaults.Version + "-runner.jar"
+
+	//
+	// Quarkus' runner checksum need to be recomputed each time
+	//
+	runnerChecksum, err := digest.ComputeSHA1(mc.Path, "target", runner)
+	if err != nil {
+		return err
+	}
+
 	ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
 		ID:       runner,
 		Location: path.Join(mc.Path, "target", runner),
 		Target:   path.Join("dependencies", runner),
+		Checksum: "sha1:" + runnerChecksum,
 	})
 
 	return nil

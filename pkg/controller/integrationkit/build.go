@@ -166,6 +166,7 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1.Integ
 				ID:       a.ID,
 				Location: "",
 				Target:   a.Target,
+				Checksum: a.Checksum,
 			})
 		}
 

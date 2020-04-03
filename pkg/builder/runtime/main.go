@@ -22,6 +22,8 @@ import (
 	"io/ioutil"
 	"path"
 
+	"github.com/apache/camel-k/pkg/util/digest"
+
 	"github.com/pkg/errors"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -117,10 +119,23 @@ func computeDependencies(ctx *builder.Context) error {
 			return nil
 		}
 
+		//
+		// Compute the checksum if it has not been computed by the camel-k-maven-plugin
+		//
+		if e.Checksum == "" {
+			chksum, err := digest.ComputeSHA1(e.Location)
+			if err != nil {
+				return err
+			}
+
+			e.Checksum = "sha1:" + chksum
+		}
+
 		ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
 			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
+			Checksum: e.Checksum,
 		})
 	}
 
