@@ -72,12 +72,21 @@ jobs:
         for node in $(kind get nodes --name ${CLUSTER_NAME}); do
           docker exec "${node}" sh -c "echo $(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}") registry >> /etc/hosts"
         done
+    - name: Downgrade Kubectl
+      run: |
+        # It fails with version 1.18
+        sudo apt-get install -y --allow-downgrades kubectl=1.16.3-00
+
     - name: Info
       run: |
+        kubectl version
         kubectl cluster-info
         kubectl describe nodes
     - name: Install Knative
       run: |
+        kubectl apply --selector knative.dev/crd-install=true -f https://github.com/knative/serving/releases/download/v0.10.0/serving-core.yaml
+        kubectl apply --selector knative.dev/crd-install=true -f https://github.com/knative/eventing/releases/download/v0.10.0/release.yaml
+
         kubectl apply -f https://github.com/knative/serving/releases/download/v0.10.0/serving-core.yaml
         kubectl apply -f https://github.com/knative/eventing/releases/download/v0.10.0/release.yaml
 
