@@ -18,8 +18,12 @@ limitations under the License.
 package digest
 
 import (
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
+	"io"
+	"os"
+	"path"
 	"sort"
 	"strconv"
 
@@ -166,4 +170,22 @@ func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
 	}
 	sort.Strings(res)
 	return res
+}
+
+// ComputeSHA1 ---
+func ComputeSHA1(elem ...string) (string, error) {
+	file := path.Join(elem...)
+
+	f, err := os.Open(file)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := sha1.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
 }
