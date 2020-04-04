@@ -70,31 +70,11 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 	case string:
 		maybeURI = t
 	case map[interface{}]interface{}:
-		if u, ok := t["uri"]; ok {
-			maybeURI = u.(string)
-		}
-
-		if _, ok := t["language"]; ok {
-			if s, ok := t["language"].(string); ok {
-				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
-					inspector.addDependency(dependency, meta)
-				}
-			} else if m, ok := t["language"].(map[interface{}]interface{}); ok {
-				if err := inspector.parseStep("language", m, meta); err != nil {
-					return err
-				}
-			}
-		}
-
-		for k := range t {
-			if s, ok := k.(string); ok {
-				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
-					inspector.addDependency(dependency, meta)
-				}
-			}
-		}
-
-		if u, ok := t["steps"]; ok {
+		if u, ok := t["rest"]; ok {
+			return inspector.parseStep("rest", u, meta)
+		} else if u, ok := t["from"]; ok {
+			return inspector.parseStep("from", u, meta)
+		} else if u, ok := t["steps"]; ok {
 			steps := u.([]interface{})
 
 			for i := range steps {
@@ -117,6 +97,30 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 					default:
 						return fmt.Errorf("unknown key type: %v, step: %v", k, step)
 					}
+				}
+			}
+		}
+
+		if u, ok := t["uri"]; ok {
+			maybeURI = u.(string)
+		}
+
+		if _, ok := t["language"]; ok {
+			if s, ok := t["language"].(string); ok {
+				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
+					inspector.addDependency(dependency, meta)
+				}
+			} else if m, ok := t["language"].(map[interface{}]interface{}); ok {
+				if err := inspector.parseStep("language", m, meta); err != nil {
+					return err
+				}
+			}
+		}
+
+		for k := range t {
+			if s, ok := k.(string); ok {
+				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
+					inspector.addDependency(dependency, meta)
 				}
 			}
 		}
