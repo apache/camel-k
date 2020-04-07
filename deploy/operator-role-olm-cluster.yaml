@@ -35,3 +35,9 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - '*'
+  verbs:
+  - '*'
