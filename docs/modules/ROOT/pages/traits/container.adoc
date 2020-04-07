@@ -76,12 +76,6 @@ The following configuration options are available:
 | bool
 | ProbesEnabled enable/disable probes on the container (default `false`)
 
-| container.probe-port
-| int
-| ProbePort configures the port on which the probes are exposed, by default it inhierit the
-value from the `http` port configured on the container. Note that the value has no effect for Knative service
-as the port should be the same as the port declared by the container.
-
 | container.probe-path
 | string
 | Path to access on the probe ( default `/health`). Note that this property is not supported
