@@ -169,6 +169,12 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - camel.apache.org
+          resources:
+          - '*'
+          verbs:
+          - '*'
         serviceAccountName: camel-k-operator
       deployments:
       - name: camel-k-operator
@@ -401,14 +407,6 @@ spec:
           - patch
           - update
           - watch
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resourceNames:
-          - system:image-builder
-          resources:
-          - clusterroles
-          verbs:
-          - bind
         - apiGroups:
           - monitoring.coreos.com
           resources:

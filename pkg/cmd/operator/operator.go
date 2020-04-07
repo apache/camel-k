@@ -147,12 +147,9 @@ func Run() {
 	}
 
 	// Try to register the OpenShift CLI Download link if possible
-	installCtx, installCancel := context.WithTimeout(context.TODO(), 30*time.Second)
+	installCtx, installCancel := context.WithTimeout(context.TODO(), 1*time.Minute)
 	defer installCancel()
-	if err := install.OpenShiftConsoleDownloadLink(installCtx, c); err != nil {
-		log.Info("Cannot install OpenShift CLI download link: skipping.")
-		log.V(8).Info("Error while installing OpenShift CLI download link", "error", err)
-	}
+	install.OperatorStartupOptionalTools(installCtx, c, log)
 
 	// Setup all Controllers
 	if err := controller.AddToManager(mgr); err != nil {
