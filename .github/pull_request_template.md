@@ -1,7 +1,7 @@
-<!-- Description -->
-
-
-
+[ ] Make sure there is a Github issue filed for the change (before you start working on an issue). One issue should ideally be fixed by not more than one commit and the other way round, each commit should fix just one issue, without pulling in other changes.
+[ ] The pull request description should explain what the pull request does, how, and why. If the info is available in the associated issue or some other external document, a link is enough.
+[ ] Phrases like Fix # or Fixes # will auto-close the named issue upon merging the pull request. Using them is typically a good idea.
+[ ] Contributor guide is your good friend: https://camel.apache.org/camel-k/latest/developers.html
 
 <!--
 Enter your extended release note in the below block. If the PR requires
