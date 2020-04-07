@@ -203,6 +203,7 @@ type Environment struct {
 	Integration           *v1.Integration
 	Resources             *kubernetes.Collection
 	PostActions           []func(*Environment) error
+	PostStepProcessors    []func(*Environment) error
 	PostProcessors        []func(*Environment) error
 	BuildTasks            []v1.Task
 	ConfiguredTraits      []Trait

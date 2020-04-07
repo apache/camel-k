@@ -20,6 +20,7 @@ package trait
 func init() {
 	// List of default trait factories.
 	// Declaration order is not important, but let's keep them sorted for debugging.
+	AddToTraits(newInitTrait)
 	AddToTraits(newPlatformTrait)
 	AddToTraits(newCamelTrait)
 	AddToTraits(newOpenAPITrait)

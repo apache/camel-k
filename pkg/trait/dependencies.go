@@ -19,7 +19,6 @@ package trait
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/apache/camel-k/pkg/metadata"
 
@@ -57,6 +56,10 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	}
 
 	dependencies := strset.New()
+
+	if e.Integration.Spec.Dependencies != nil {
+		dependencies.Add(e.Integration.Spec.Dependencies...)
+	}
 
 	// add runtime specific dependencies
 	for _, d := range e.CamelCatalog.Runtime.Dependencies {
@@ -96,25 +99,11 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		})
 	}
 
-	for _, dependency := range e.Integration.Spec.Dependencies {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency)
-	}
-
-	// add runtime specific dependencies
-	for _, capability := range e.Integration.Status.Capabilities {
-		for _, dependency := range e.CamelCatalog.Runtime.CapabilityDependencies(capability) {
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
-		}
-	}
-
 	// add dependencies back to integration
 	dependencies.Each(func(item string) bool {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, item)
 		return true
 	})
-
-	// sort the dependencies to get always the same list if they don't change
-	sort.Strings(e.Integration.Status.Dependencies)
 
 	return nil
 }

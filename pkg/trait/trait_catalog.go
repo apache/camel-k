@@ -19,7 +19,6 @@ package trait
 
 import (
 	"context"
-	"errors"
 	"reflect"
 	"sort"
 	"strings"
@@ -28,6 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/fatih/structs"
+	"github.com/pkg/errors"
 )
 
 // Catalog collects all information about traits in one place
@@ -118,6 +118,14 @@ func (c *Catalog) apply(environment *Environment) error {
 			}
 
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
+
+			// execute post step processors
+			for _, processor := range environment.PostStepProcessors {
+				err := processor(environment)
+				if err != nil {
+					return errors.Wrap(err, "error executing post step action")
+				}
+			}
 		}
 	}
 
@@ -128,7 +136,7 @@ func (c *Catalog) apply(environment *Environment) error {
 	for _, processor := range environment.PostProcessors {
 		err := processor(environment)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "error executing post processor")
 		}
 	}
 
