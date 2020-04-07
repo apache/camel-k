@@ -33,7 +33,7 @@ The following configuration options are available:
 
 | prometheus.port
 | int
-| The Prometheus endpoint port (default `9778`).
+| The Prometheus endpoint port (default `9779`).
 
 | prometheus.service-monitor
 | bool
@@ -42,6 +42,11 @@ The following configuration options are available:
 | prometheus.service-monitor-labels
 | string
 | The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
+
+| prometheus.configmap
+| string
+| To use a custom ConfigMap containing the Prometheus exporter configuration (under the `content` ConfigMap key). When this property is left empty (default),
+Camel K generates a standard Prometheus configuration for the integration.
 
 |===
 

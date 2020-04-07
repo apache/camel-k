@@ -46,12 +46,15 @@ import (
 // +camel-k:trait=prometheus
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
-	// The Prometheus endpoint port (default `9778`).
+	// The Prometheus endpoint port (default `9779`).
 	Port int `property:"port"`
 	// Whether a `ServiceMonitor` resource is created (default `true`).
 	ServiceMonitor bool `property:"service-monitor"`
 	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 	ServiceMonitorLabels string `property:"service-monitor-labels"`
+	// To use a custom ConfigMap containing the Prometheus exporter configuration (under the `content` ConfigMap key). When this property is left empty (default),
+	// Camel K generates a standard Prometheus configuration for the integration.
+	ConfigMap string `property:"configmap"`
 }
 
 const (
@@ -83,15 +86,14 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		// TODO: We may want to make the Prometheus version configurable
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.prometheus.jmx/jmx_prometheus_javaagent:0.3.1")
 
-		// Add the default Prometheus JMX exporter configuration
-		// TODO: Support user-provided configuration
-		configMap := t.getJmxExporterConfigMap(e)
-		e.Resources.Add(configMap)
+		// Use the provided configuration or add the default Prometheus JMX exporter configuration
+		configMapName := t.getJmxExporterConfigMapOrAdd(e)
+
 		e.Integration.Status.AddOrReplaceGeneratedResources(v1.ResourceSpec{
 			Type: v1.ResourceTypeData,
 			DataSpec: v1.DataSpec{
 				Name:       prometheusJmxExporterConfigFileName,
-				ContentRef: configMap.Name,
+				ContentRef: configMapName,
 			},
 			MountPath: prometheusJmxExporterConfigMountPath,
 		})
@@ -216,14 +218,20 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 	return &smt, nil
 }
 
-func (t *prometheusTrait) getJmxExporterConfigMap(e *Environment) *corev1.ConfigMap {
-	return &corev1.ConfigMap{
+func (t *prometheusTrait) getJmxExporterConfigMapOrAdd(e *Environment) string {
+	if t.ConfigMap != "" {
+		return t.ConfigMap
+	}
+
+	// Add a default config if not specified by the user
+	defaultName := e.Integration.Name + "-prometheus"
+	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name + "-prometheus",
+			Name:      defaultName,
 			Namespace: e.Integration.Namespace,
 			Labels: map[string]string{
 				"camel.apache.org/integration": e.Integration.Name,
@@ -233,4 +241,6 @@ func (t *prometheusTrait) getJmxExporterConfigMap(e *Environment) *corev1.Config
 			"content": deploy.ResourceAsString("/prometheus-jmx-exporter.yaml"),
 		},
 	}
+	e.Resources.Add(&cm)
+	return defaultName
 }
