@@ -76,12 +76,20 @@ func TestRunREST(t *testing.T) {
 	})
 }
 
-func httpReqest(t *testing.T, url string) string {
+func httpRequest(t *testing.T, url string) string {
 	response, err := http.Get(url)
-	defer response.Body.Close()
+	defer func() {
+		if response != nil {
+			_ = response.Body.Close()
+		}
+	}()
+
 	assert.Nil(t, err)
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(response.Body)
+
+	_, err = buf.ReadFrom(response.Body)
+	assert.Nil(t, err)
+
 	return buf.String()
 }

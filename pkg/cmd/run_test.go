@@ -59,6 +59,21 @@ func TestRunPropertyFlag(t *testing.T) {
 	}
 }
 
+func TestRunWithAdditionalSourcesFlag(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--source", "additional-source1.java", "--source", "additional-source2.java")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	assert.Len(t, runCmdOptions.Sources, 2)
+}
+
 func TestRunPropertyFileFlag(t *testing.T) {
 	var tmpFile *os.File
 	var err error

@@ -59,12 +59,13 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	}
 
 	cmd := cobra.Command{
-		Use:     "run [file to run]",
-		Short:   "Run a integration on Kubernetes",
-		Long:    `Deploys and execute a integration pod on Kubernetes.`,
-		Args:    options.validateArgs,
-		PreRunE: options.decode,
-		RunE:    options.run,
+		Use:      "run [file to run]",
+		Short:    "Run a integration on Kubernetes",
+		Long:     `Deploys and execute a integration pod on Kubernetes.`,
+		Args:     options.validateArgs,
+		PreRunE:  options.decode,
+		RunE:     options.run,
+		PostRunE: options.postRun,
 	}
 
 	cmd.Flags().String("name", "", "The integration name")
@@ -89,6 +90,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 	cmd.Flags().StringArrayP("property-file", "", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
 	cmd.Flags().StringArrayP("label", "", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
+	cmd.Flags().StringArrayP("source", "", nil, "Add source file to your integration, this is added to the list fo files listed as arguments of the command")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -123,6 +125,7 @@ type runCmdOptions struct {
 	EnvVars         []string `mapstructure:"envs"`
 	PropertyFiles   []string `mapstructure:"property-files"`
 	Labels          []string `mapstructure:"labels"`
+	Sources         []string `mapstructure:"sources"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -290,6 +293,10 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		<-o.Context.Done()
 	}
 
+	return nil
+}
+
+func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 	if o.Save {
 		name := o.GetIntegrationName(args)
 		if name != "" {
@@ -405,7 +412,11 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		}
 	}
 
-	for _, source := range sources {
+	srcs := make([]string, 0, len(sources)+len(o.Sources))
+	srcs = append(srcs, sources...)
+	srcs = append(srcs, o.Sources...)
+
+	for _, source := range srcs {
 		data, err := o.loadData(source, o.Compression)
 		if err != nil {
 			return nil, err
