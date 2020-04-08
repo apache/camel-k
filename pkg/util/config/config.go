@@ -20,7 +20,10 @@ package config
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/spf13/viper"
 
 	p "github.com/gertd/go-pluralize"
 	yaml "gopkg.in/yaml.v2"
@@ -28,17 +31,25 @@ import (
 
 const (
 	// DefaultConfigLocation is the main place where the kamel config is stored
-	DefaultConfigLocation = "./kamel-config.yaml"
+	DefaultConfigLocation = ".kamel/kamel-config.yaml"
 )
 
 // KamelConfig is a helper class to manipulate kamel configuration files
 type KamelConfig struct {
-	config map[string]interface{}
+	configPath string
+	config     map[string]interface{}
 }
 
 // LoadDefault loads the kamel configuration from the default location
 func LoadDefault() (*KamelConfig, error) {
-	return LoadConfig(DefaultConfigLocation)
+	// use the same file as the one loaded by viper
+	config := viper.ConfigFileUsed()
+	if config == "" {
+		// or switch to the default one
+		config = DefaultConfigLocation
+	}
+
+	return LoadConfig(config)
 }
 
 // LoadConfig loads a kamel configuration file
@@ -46,7 +57,10 @@ func LoadConfig(file string) (*KamelConfig, error) {
 	config := make(map[string]interface{})
 	data, err := ioutil.ReadFile(file)
 	if err != nil && os.IsNotExist(err) {
-		return &KamelConfig{config: config}, nil
+		return &KamelConfig{
+			configPath: file,
+			config:     config,
+		}, nil
 	} else if err != nil {
 		return nil, err
 	}
@@ -54,7 +68,10 @@ func LoadConfig(file string) (*KamelConfig, error) {
 		return nil, err
 	}
 
-	return &KamelConfig{config: config}, nil
+	return &KamelConfig{
+		configPath: file,
+		config:     config,
+	}, nil
 }
 
 // Set allows to replace a subtree with a given config
@@ -85,7 +102,14 @@ func (c *KamelConfig) Delete(path string) {
 
 // WriteDefault writes the configuration in the default location
 func (c *KamelConfig) WriteDefault() error {
-	return c.Write(DefaultConfigLocation)
+	root := filepath.Dir(c.configPath)
+	if _, err := os.Stat(root); os.IsNotExist(err) {
+		if e := os.Mkdir(root, os.ModeDir); e != nil {
+			return e
+		}
+	}
+
+	return c.Write(c.configPath)
 }
 
 // Write writes a kamel configuration to a file
@@ -94,7 +118,7 @@ func (c *KamelConfig) Write(file string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(file, data, 0777)
+	return ioutil.WriteFile(file, data, 0644)
 }
 
 func navigate(values map[string]interface{}, prefix string, create bool) map[string]interface{} {
