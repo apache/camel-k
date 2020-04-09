@@ -25,13 +25,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// VersionVariant may be overridden at build time
+var VersionVariant = ""
+
 func newCmdVersion() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Display client version",
 		Long:  `Display Camel K client version.`,
 		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println("Camel K Client " + defaults.Version)
+			if VersionVariant != "" {
+				fmt.Printf("Camel K Client %s %s\n", VersionVariant, defaults.Version)
+			} else {
+				fmt.Printf("Camel K Client %s\n", defaults.Version)
+			}
 		},
 		Annotations: map[string]string{
 			offlineCommandLabel: "true",
