@@ -88,9 +88,9 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
-	cmd.Flags().StringArrayP("property-file", "", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
-	cmd.Flags().StringArrayP("label", "", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
-	cmd.Flags().StringArrayP("source", "", nil, "Add source file to your integration, this is added to the list fo files listed as arguments of the command")
+	cmd.Flags().StringArray("property-file", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
+	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
+	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list fo files listed as arguments of the command")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -107,7 +107,7 @@ type runCmdOptions struct {
 	Logs            bool     `mapstructure:"logs"`
 	Sync            bool     `mapstructure:"sync"`
 	Dev             bool     `mapstructure:"dev"`
-	Save            bool     `mapstructure:"save"`
+	Save            bool     `mapstructure:"save" kamel:"omitsave"`
 	IntegrationKit  string   `mapstructure:"kit"`
 	IntegrationName string   `mapstructure:"name"`
 	Profile         string   `mapstructure:"profile"`
@@ -298,12 +298,17 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 	if o.Save {
+		rootKey := pathToRoot(cmd)
 		name := o.GetIntegrationName(args)
 		if name != "" {
-			key := fmt.Sprintf("kamel.run.integration.%s", name)
-			if err := saveDefaultConfig(cmd, "kamel.run", key); err != nil {
+			key := fmt.Sprintf("%s.integration.%s", rootKey, name)
+
+			cfg, err := LoadConfiguration()
+			if err != nil {
 				return err
 			}
+
+			return cfg.WriteChangedValues(cmd, key, o)
 		}
 	}
 
