@@ -67,6 +67,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 			}
 			return nil
 		},
+		PostRunE: options.postRun,
 	}
 
 	cmd.Flags().BoolP("wait", "w", false, "Waits for the platform to be running")
@@ -141,7 +142,7 @@ type installCmdOptions struct {
 	ExampleSetup         bool     `mapstructure:"example"`
 	Global               bool     `mapstructure:"global"`
 	KanikoBuildCache     bool     `mapstructure:"kaniko-build-cache"`
-	Save                 bool     `mapstructure:"save"`
+	Save                 bool     `mapstructure:"save" kamel:"omitsave"`
 	Force                bool     `mapstructure:"force"`
 	Olm                  bool     `mapstructure:"olm"`
 	ClusterType          string   `mapstructure:"cluster-type"`
@@ -386,10 +387,17 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		return o.printOutput(collection)
 	}
 
+	return nil
+}
+
+func (o *installCmdOptions) postRun(cmd *cobra.Command, _ []string) error {
 	if o.Save {
-		if err := saveDefaultConfig(cobraCmd, "kamel.install", "kamel.install"); err != nil {
+		cfg, err := LoadConfiguration()
+		if err != nil {
 			return err
 		}
+
+		return cfg.WriteChangedValues(cmd, pathToRoot(cmd), o)
 	}
 
 	return nil
