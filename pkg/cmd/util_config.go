@@ -34,8 +34,11 @@ import (
 )
 
 const (
-	// DefaultConfigLocation is the main place where the kamel config is stored
-	DefaultConfigLocation = "kamel-config.yaml"
+	// DefaultConfigName is the default config name
+	DefaultConfigName = "kamel-config"
+
+	// DefaultConfigLocation is the main place where the kamel content is stored
+	DefaultConfigLocation = DefaultConfigName + ".yaml"
 
 	// KamelTagName ---
 	KamelTagName = "kamel"
@@ -46,38 +49,36 @@ const (
 
 // Config is a helper class to manipulate kamel configuration files
 type Config struct {
-	configPath string
-	config     map[string]interface{}
+	location string
+	content  map[string]interface{}
 }
 
 // LoadConfiguration loads a kamel configuration file
 func LoadConfiguration() (*Config, error) {
-	// use the same file as the one loaded by viper
-	cfgLocation := viper.ConfigFileUsed()
-	if cfgLocation == "" {
-		// or switch to the default one
-		cfgLocation = DefaultConfigLocation
+	config := Config{
+		location: viper.ConfigFileUsed(),
+		content:  make(map[string]interface{}),
 	}
 
-	config := make(map[string]interface{})
+	if config.location == "" {
+		config.location = DefaultConfigLocation
+	}
 
-	data, err := ioutil.ReadFile(cfgLocation)
-	if err != nil && os.IsNotExist(err) {
-		return &Config{
-			configPath: cfgLocation,
-			config:     config,
-		}, nil
-	} else if err != nil {
+	if _, err := os.Stat(config.location); os.IsNotExist(err) {
+		return &config, nil
+	}
+
+	data, err := ioutil.ReadFile(config.location)
+	if err != nil {
+		return &config, err
+	}
+
+	err = yaml.Unmarshal(data, &config.content)
+	if err != nil {
 		return nil, err
 	}
-	if err = yaml.Unmarshal(data, &config); err != nil {
-		return nil, err
-	}
 
-	return &Config{
-		configPath: cfgLocation,
-		config:     config,
-	}, nil
+	return &config, nil
 }
 
 // UpdateFromChangedValues ---
@@ -101,9 +102,9 @@ func (cfg *Config) UpdateFromChangedValues(cmd *cobra.Command, nodeID string, da
 			if !ok {
 				continue
 			}
-			tag = pl.Singular(tag)
 
-			if flag := cmd.Flag(tag); flag != nil && flag.Changed {
+			flagName := pl.Singular(tag)
+			if flag := cmd.Flag(flagName); flag != nil && flag.Changed {
 				values[tag] = val.Field(i).Interface()
 			}
 		}
@@ -114,19 +115,19 @@ func (cfg *Config) UpdateFromChangedValues(cmd *cobra.Command, nodeID string, da
 	}
 }
 
-// SetNode allows to replace a subtree with a given config
+// SetNode allows to replace a subtree with a given content
 func (cfg *Config) SetNode(nodeID string, nodeValues map[string]interface{}) {
 	cfg.Delete(nodeID)
-	node := cfg.navigate(cfg.config, nodeID, true)
+	node := cfg.navigate(cfg.content, nodeID, true)
 
 	for k, v := range nodeValues {
 		node[k] = v
 	}
 }
 
-// Delete allows to remove a sub tree from the kamel config
+// Delete allows to remove a sub tree from the kamel content
 func (cfg *Config) Delete(path string) {
-	leaf := cfg.navigate(cfg.config, path, false)
+	leaf := cfg.navigate(cfg.content, path, false)
 	for k := range leaf {
 		delete(leaf, k)
 	}
@@ -134,18 +135,18 @@ func (cfg *Config) Delete(path string) {
 
 // Write ---
 func (cfg *Config) Write() error {
-	root := filepath.Dir(cfg.configPath)
+	root := filepath.Dir(cfg.location)
 	if _, err := os.Stat(root); os.IsNotExist(err) {
-		if e := os.Mkdir(root, os.ModeDir); e != nil {
+		if e := os.MkdirAll(root, 0700); e != nil {
 			return e
 		}
 	}
 
-	data, err := yaml.Marshal(cfg.config)
+	data, err := yaml.Marshal(cfg.content)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(cfg.configPath, data, 0644)
+	return ioutil.WriteFile(cfg.location, data, 0644)
 }
 
 // WriteChangedValues ---
