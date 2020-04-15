@@ -67,12 +67,63 @@ func TestRunWithAdditionalSourcesFlag(t *testing.T) {
 	kamelTestPostAddCommandInit(t, rootCmd)
 
 	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--source", "additional-source1.java", "--source", "additional-source2.java")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
 
+	assert.Nil(t, err)
 	assert.Len(t, runCmdOptions.Sources, 2)
 }
+
+//
+// This test does work when running as single test but fails
+// otherwise as we are using a global viper instance
+//
+
+/*
+const TestKamelConfigContent = `
+kamel:
+  install:
+    olm: false
+  run:
+    integration:
+      route:
+        sources:
+        - examples/dns.js
+        - examples/Sample.java
+`
+
+func TestRunWithSavedValues(t *testing.T) {
+	dir, err := ioutil.TempDir("", "run-")
+	assert.Nil(t, err)
+
+	defer func() {
+		_ = os.RemoveAll(dir)
+	}()
+
+	assert.Nil(t, os.Setenv("KAMEL_CONFIG_PATH", dir))
+	defer func() {
+		_ = os.Unsetenv("KAMEL_CONFIG_PATH")
+	}()
+
+	assert.Nil(t, ioutil.WriteFile(path.Join(dir, "kamel-config.yaml"), []byte(TestKamelConfigContent), 0644))
+
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err = test.ExecuteCommand(rootCmd, "run", "route.java")
+
+	assert.Nil(t, err)
+	assert.Len(t, runCmdOptions.Sources, 2)
+}*/
+
+const TestPropertyFileContent = `
+a=b
+c\=d=e
+d=c\=e
+#ignore=me
+f=g\:h
+`
 
 func TestRunPropertyFileFlag(t *testing.T) {
 	var tmpFile *os.File
@@ -80,15 +131,9 @@ func TestRunPropertyFileFlag(t *testing.T) {
 	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
-	assert.Nil(t, tmpFile.Close())
 
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`
-a=b
-c\=d=e
-d=c\=e
-#ignore=me
-f=g\:h
-`), 0777))
+	assert.Nil(t, tmpFile.Close())
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0644))
 
 	spec := v1.IntegrationSpec{}
 	assert.Nil(t, addPropertyFile(tmpFile.Name(), &spec))
