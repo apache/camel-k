@@ -140,8 +140,6 @@ github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMe
 github.com/cockroachdb/cockroach-go v0.0.0-20181001143604-e0a95dfd547c/go.mod h1:XGLbWH/ujMcbPbhZq52Nv6UrCghb1yGn//133kEsvDk=
 github.com/codegangsta/negroni v1.0.0/go.mod h1:v0y3T5G7Y1UlFfyxFn/QLRU4a2EuNau2iZY63YTKWo0=
 github.com/container-storage-interface/spec v1.1.0/go.mod h1:6URME8mwIBbpVyZV93Ce5St17xBiQJQY67NDsuohiy4=
-github.com/container-tools/spectrum v0.2.0 h1:uYv/72LaqCt4GZwfCEs0B197WW3FuMiPSQcCazyLeXk=
-github.com/container-tools/spectrum v0.2.0/go.mod h1:n415mIONApBh3AzudGlBrFPNOaEB6mb2K9MZWmRLFSU=
 github.com/container-tools/spectrum v0.3.0 h1:LrgO7cTuk/V301IV1Gf+MAhqXh+YXw42mKmawe1w5PU=
 github.com/container-tools/spectrum v0.3.0/go.mod h1:n415mIONApBh3AzudGlBrFPNOaEB6mb2K9MZWmRLFSU=
 github.com/containerd/console v0.0.0-20170925154832-84eeaae905fa/go.mod h1:Tj/on1eG8kiEhd0+fhSDzsPAFESxzBBvdyEgyryXffw=
