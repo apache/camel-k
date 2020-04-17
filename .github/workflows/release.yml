@@ -26,6 +26,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+    - name: Set up JDK 11
+      uses: joschi/setup-jdk@v1
+      with:
+        java-version: openjdk11
     - name: Install Go
       uses: actions/setup-go@v1
       with:
