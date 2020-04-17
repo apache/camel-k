@@ -76,6 +76,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 		}
 	}
 
+	i.discoverCapabilities(source, meta)
 	i.discoverDependencies(source, meta)
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)

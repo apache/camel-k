@@ -30,38 +30,37 @@ type YAMLInspector struct {
 }
 
 // Extract --
-func (inspector YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
+func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	definitions := make([]map[string]interface{}, 0)
 
 	if err := yaml2.Unmarshal([]byte(source.Content), &definitions); err != nil {
 		return err
 	}
 
-	for i := range definitions {
-		definition := definitions[i]
-
+	for _, definition := range definitions {
 		for k, v := range definition {
-			if err := inspector.parseStep(k, v, meta); err != nil {
+			if err := i.parseStep(k, v, meta); err != nil {
 				return err
 			}
 		}
 	}
 
-	inspector.discoverDependencies(source, meta)
+	i.discoverCapabilities(source, meta)
+	i.discoverDependencies(source, meta)
 
-	meta.ExposesHTTPServices = meta.ExposesHTTPServices || inspector.containsHTTPURIs(meta.FromURIs)
-	meta.PassiveEndpoints = inspector.hasOnlyPassiveEndpoints(meta.FromURIs)
+	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
+	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
 
 	return nil
 }
 
-func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
+func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
 	case "rest":
 		meta.ExposesHTTPServices = true
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)
 	case "circuitBreaker":
-		inspector.addDependency("camel:hystrix", meta)
+		i.addDependency("camel:hystrix", meta)
 	}
 
 	var maybeURI string
@@ -71,14 +70,14 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 		maybeURI = t
 	case map[interface{}]interface{}:
 		if u, ok := t["rest"]; ok {
-			return inspector.parseStep("rest", u, meta)
+			return i.parseStep("rest", u, meta)
 		} else if u, ok := t["from"]; ok {
-			return inspector.parseStep("from", u, meta)
+			return i.parseStep("from", u, meta)
 		} else if u, ok := t["steps"]; ok {
 			steps := u.([]interface{})
 
-			for i := range steps {
-				step := steps[i].(map[interface{}]interface{})
+			for _, raw := range steps {
+				step := raw.(map[interface{}]interface{})
 
 				if len(step) != 1 {
 					return fmt.Errorf("unable to parse step: %v", step)
@@ -87,11 +86,11 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 				for k, v := range step {
 					switch kt := k.(type) {
 					case fmt.Stringer:
-						if err := inspector.parseStep(kt.String(), v, meta); err != nil {
+						if err := i.parseStep(kt.String(), v, meta); err != nil {
 							return err
 						}
 					case string:
-						if err := inspector.parseStep(kt, v, meta); err != nil {
+						if err := i.parseStep(kt, v, meta); err != nil {
 							return err
 						}
 					default:
@@ -107,11 +106,11 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 
 		if _, ok := t["language"]; ok {
 			if s, ok := t["language"].(string); ok {
-				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
-					inspector.addDependency(dependency, meta)
+				if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
+					i.addDependency(dependency, meta)
 				}
 			} else if m, ok := t["language"].(map[interface{}]interface{}); ok {
-				if err := inspector.parseStep("language", m, meta); err != nil {
+				if err := i.parseStep("language", m, meta); err != nil {
 					return err
 				}
 			}
@@ -119,8 +118,8 @@ func (inspector YAMLInspector) parseStep(key string, content interface{}, meta *
 
 		for k := range t {
 			if s, ok := k.(string); ok {
-				if dependency, ok := inspector.catalog.GetLanguageDependency(s); ok {
-					inspector.addDependency(dependency, meta)
+				if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
+					i.addDependency(dependency, meta)
 				}
 			}
 		}
