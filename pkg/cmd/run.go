@@ -21,15 +21,19 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"path"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/spf13/pflag"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -101,7 +105,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 }
 
 type runCmdOptions struct {
-	*RootCmdOptions
+	*RootCmdOptions `json:"-"`
 	Compression     bool     `mapstructure:"compression"`
 	Wait            bool     `mapstructure:"wait"`
 	Logs            bool     `mapstructure:"logs"`
@@ -129,6 +133,24 @@ type runCmdOptions struct {
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
+
+	// *************************************************************************
+	//
+	// WARNING: this is an hack, well a huge one
+	//
+	// When the run command runs, it performs two steps:
+	//
+	// 1. load from kamel.run
+	// 2. load from kamel.run.integration.$name
+	//
+	// the values loaded from the second steps belong to a node for which there
+	// are no flags as it is a dynamic node not known when the command hierarchy
+	// is initialized and configured so any flag value is simple ignored and the
+	// struct field takes tha value of the the persisted configuration node.
+	//
+	// *************************************************************************
+
+	// load from kamel.run (1)
 	pathToRoot := pathToRoot(cmd)
 	if err := decodeKey(o, pathToRoot); err != nil {
 		return err
@@ -138,12 +160,36 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// backup the values from values belonging to kamel.run by coping the
+	// structure by values, which in practice is done by a marshal/unmarshal
+	// to/from json.
+	bkp := runCmdOptions{}
+	if err := clone(&bkp, o); err != nil {
+		return err
+	}
+
 	name := o.GetIntegrationName(args)
 	if name != "" {
-		secondaryPath := pathToRoot + ".integration." + name
-		if err := decodeKey(o, secondaryPath); err != nil {
+		// load from kamel.run.integration.$name (2)
+		pathToRoot += ".integration." + name
+		if err := decodeKey(o, pathToRoot); err != nil {
 			return err
 		}
+
+		rdata := reflect.ValueOf(&bkp).Elem()
+		idata := reflect.ValueOf(o).Elem()
+
+		// iterate over all the flags that have been set and if so, copy the
+		// value from the backed-up structure over the new one that has been
+		// decoded from the kamel.run.integration.$name node
+		cmd.Flags().Visit(func(flag *pflag.Flag) {
+			if f, ok := fieldByMapstructureTagName(rdata, flag.Name); ok {
+				rfield := rdata.FieldByName(f.Name)
+				ifield := idata.FieldByName(f.Name)
+
+				ifield.Set(rfield)
+			}
+		})
 	}
 
 	return o.validate()

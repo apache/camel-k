@@ -20,6 +20,7 @@ package cmd
 import (
 	"context"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
@@ -194,4 +195,45 @@ func cmdOnly(cmd *cobra.Command, options interface{}) *cobra.Command {
 
 func isOfflineCommand(cmd *cobra.Command) bool {
 	return cmd.Annotations[offlineCommandLabel] == "true"
+}
+
+func clone(dst interface{}, src interface{}) error {
+	if dst == nil {
+		return fmt.Errorf("dst cannot be nil")
+	}
+	if src == nil {
+		return fmt.Errorf("src cannot be nil")
+	}
+
+	data, err := json.Marshal(src)
+	if err != nil {
+		return fmt.Errorf("unable to marshal src: %s", err)
+	}
+
+	err = json.Unmarshal(data, dst)
+	if err != nil {
+		return fmt.Errorf("unable to unmarshal into dst: %s", err)
+	}
+	return nil
+}
+
+func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.StructField, bool) {
+	pl := p.NewClient()
+
+	for i := 0; i < target.Type().NumField(); i++ {
+		f := target.Type().Field(i)
+
+		tag, ok := f.Tag.Lookup(MapstructureTagName)
+		if !ok {
+			continue
+		}
+
+		if tag == tagName {
+			return f, true
+		} else if tag == pl.Plural(tagName) {
+			return f, true
+		}
+	}
+
+	return reflect.StructField{}, false
 }
