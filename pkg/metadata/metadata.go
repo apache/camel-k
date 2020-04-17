@@ -44,8 +44,6 @@ func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec) Integrat
 }
 
 func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
-	d := strset.Union(m1.Dependencies, m2.Dependencies)
-
 	f := make([]string, 0, len(m1.FromURIs)+len(m2.FromURIs))
 	f = append(f, m1.FromURIs...)
 	f = append(f, m2.FromURIs...)
@@ -55,11 +53,12 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 	t = append(t, m2.ToURIs...)
 
 	return src.Metadata{
-		FromURIs:            f,
-		ToURIs:              t,
-		Dependencies:        d,
-		ExposesHTTPServices: m1.ExposesHTTPServices || m2.ExposesHTTPServices,
-		PassiveEndpoints:    m1.PassiveEndpoints && m2.PassiveEndpoints,
+		FromURIs:             f,
+		ToURIs:               t,
+		Dependencies:         strset.Union(m1.Dependencies, m2.Dependencies),
+		RequiredCapabilities: strset.Union(m1.RequiredCapabilities, m2.RequiredCapabilities),
+		ExposesHTTPServices:  m1.ExposesHTTPServices || m2.ExposesHTTPServices,
+		PassiveEndpoints:     m1.PassiveEndpoints && m2.PassiveEndpoints,
 	}
 }
 

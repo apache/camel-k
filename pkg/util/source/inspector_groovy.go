@@ -47,6 +47,7 @@ func (i GroovyInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	meta.FromURIs = append(meta.FromURIs, from...)
 	meta.ToURIs = append(meta.ToURIs, to...)
 
+	i.discoverCapabilities(source, meta)
 	i.discoverDependencies(source, meta)
 
 	hasRest := restRegexp.MatchString(source.Content) || restClosureRegexp.MatchString(source.Content)

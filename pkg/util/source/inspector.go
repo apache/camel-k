@@ -200,6 +200,18 @@ func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 }
 
 // discoverDependencies returns a list of dependencies required by the given source code
+func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadata) {
+	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
+
+	for _, uri := range uris {
+		switch i.getURIPrefix(uri) {
+		case "platform-http":
+			meta.RequiredCapabilities.Add(v1.CapabilityPlatformHTTP)
+		}
+	}
+}
+
+// discoverDependencies returns a list of dependencies required by the given source code
 func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
 
