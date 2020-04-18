@@ -81,8 +81,8 @@ func LoadConfiguration() (*Config, error) {
 	return &config, nil
 }
 
-// UpdateFromChangedValues ---
-func (cfg *Config) UpdateFromChangedValues(cmd *cobra.Command, nodeID string, data interface{}) {
+// Update ---
+func (cfg *Config) Update(cmd *cobra.Command, nodeID string, data interface{}, changedOnly bool) {
 	values := make(map[string]interface{})
 
 	pl := p.NewClient()
@@ -104,8 +104,10 @@ func (cfg *Config) UpdateFromChangedValues(cmd *cobra.Command, nodeID string, da
 			}
 
 			flagName := pl.Singular(tag)
-			if flag := cmd.Flag(flagName); flag != nil && flag.Changed {
-				values[tag] = val.Field(i).Interface()
+			if flag := cmd.Flag(flagName); flag != nil && (flag.Changed || !changedOnly) {
+				if !val.Field(i).IsZero() {
+					values[tag] = val.Field(i).Interface()
+				}
 			}
 		}
 	}
@@ -133,8 +135,8 @@ func (cfg *Config) Delete(path string) {
 	}
 }
 
-// Write ---
-func (cfg *Config) Write() error {
+// Save ---
+func (cfg *Config) Save() error {
 	root := filepath.Dir(cfg.location)
 	if _, err := os.Stat(root); os.IsNotExist(err) {
 		if e := os.MkdirAll(root, 0700); e != nil {
@@ -147,12 +149,6 @@ func (cfg *Config) Write() error {
 		return err
 	}
 	return ioutil.WriteFile(cfg.location, data, 0644)
-}
-
-// WriteChangedValues ---
-func (cfg *Config) WriteChangedValues(cmd *cobra.Command, nodeID string, data interface{}) error {
-	cfg.UpdateFromChangedValues(cmd, nodeID, data)
-	return cfg.Write()
 }
 
 func (cfg *Config) navigate(values map[string]interface{}, prefix string, create bool) map[string]interface{} {

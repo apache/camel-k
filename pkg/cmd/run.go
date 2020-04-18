@@ -106,30 +106,30 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 type runCmdOptions struct {
 	*RootCmdOptions `json:"-"`
-	Compression     bool     `mapstructure:"compression"`
-	Wait            bool     `mapstructure:"wait"`
-	Logs            bool     `mapstructure:"logs"`
-	Sync            bool     `mapstructure:"sync"`
-	Dev             bool     `mapstructure:"dev"`
-	Save            bool     `mapstructure:"save" kamel:"omitsave"`
-	IntegrationKit  string   `mapstructure:"kit"`
-	IntegrationName string   `mapstructure:"name"`
-	Profile         string   `mapstructure:"profile"`
-	OutputFormat    string   `mapstructure:"output"`
-	Resources       []string `mapstructure:"resources"`
-	OpenAPIs        []string `mapstructure:"open-apis"`
-	Dependencies    []string `mapstructure:"dependencies"`
-	Properties      []string `mapstructure:"properties"`
-	ConfigMaps      []string `mapstructure:"configmaps"`
-	Secrets         []string `mapstructure:"secrets"`
-	Repositories    []string `mapstructure:"maven-repositories"`
-	Traits          []string `mapstructure:"traits"`
-	LoggingLevels   []string `mapstructure:"logging-levels"`
-	Volumes         []string `mapstructure:"volumes"`
-	EnvVars         []string `mapstructure:"envs"`
-	PropertyFiles   []string `mapstructure:"property-files"`
-	Labels          []string `mapstructure:"labels"`
-	Sources         []string `mapstructure:"sources"`
+	Compression     bool     `mapstructure:"compression" yaml:",omitempty"`
+	Wait            bool     `mapstructure:"wait" yaml:",omitempty"`
+	Logs            bool     `mapstructure:"logs" yaml:",omitempty"`
+	Sync            bool     `mapstructure:"sync" yaml:",omitempty"`
+	Dev             bool     `mapstructure:"dev" yaml:",omitempty"`
+	Save            bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	IntegrationKit  string   `mapstructure:"kit" yaml:",omitempty"`
+	IntegrationName string   `mapstructure:"name" yaml:",omitempty"`
+	Profile         string   `mapstructure:"profile" yaml:",omitempty"`
+	OutputFormat    string   `mapstructure:"output" yaml:",omitempty"`
+	Resources       []string `mapstructure:"resources" yaml:",omitempty"`
+	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
+	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
+	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
+	ConfigMaps      []string `mapstructure:"configmaps" yaml:",omitempty"`
+	Secrets         []string `mapstructure:"secrets" yaml:",omitempty"`
+	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
+	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
+	LoggingLevels   []string `mapstructure:"logging-levels" yaml:",omitempty"`
+	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
+	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
+	PropertyFiles   []string `mapstructure:"property-files" yaml:",omitempty"`
+	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
+	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -211,7 +211,7 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 			// nolint: gosec
 			resp, err := http.Get(fileName)
 			if resp != nil && resp.Body != nil {
-				resp.Body.Close()
+				_ = resp.Body.Close()
 			}
 
 			if err != nil {
@@ -354,7 +354,9 @@ func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			return cfg.WriteChangedValues(cmd, key, o)
+			cfg.Update(cmd, key, o, false)
+
+			return cfg.Save()
 		}
 	}
 
