@@ -397,7 +397,9 @@ func (o *installCmdOptions) postRun(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		return cfg.WriteChangedValues(cmd, pathToRoot(cmd), o)
+		cfg.Update(cmd, pathToRoot(cmd), o, true)
+
+		return cfg.Save()
 	}
 
 	return nil
