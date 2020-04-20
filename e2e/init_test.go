@@ -26,6 +26,7 @@ import (
 	"path"
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/e2e/util"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
@@ -33,8 +34,8 @@ import (
 )
 
 func TestRunInitGeneratedExamples(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		for _, lang := range camelv1.Languages {
 			t.Run("init run "+string(lang), func(t *testing.T) {
@@ -43,11 +44,11 @@ func TestRunInitGeneratedExamples(t *testing.T) {
 				itName := fmt.Sprintf("init%s", string(lang))          // e.g. initjava
 				fileName := fmt.Sprintf("%s.%s", itName, string(lang)) // e.g. initjava.java
 				file := path.Join(dir, fileName)
-				Expect(kamel("init", file).Execute()).Should(BeNil())
-				Expect(kamel("run", "-n", ns, file).Execute()).Should(BeNil())
-				Eventually(integrationPodPhase(ns, itName), testTimeoutMedium).Should(Equal(v1.PodRunning))
-				Eventually(integrationLogs(ns, itName), testTimeoutShort).Should(ContainSubstring(languageInitExpectedString(lang)))
-				Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+				Expect(Kamel("init", file).Execute()).Should(BeNil())
+				Expect(Kamel("run", "-n", ns, file).Execute()).Should(BeNil())
+				Eventually(IntegrationPodPhase(ns, itName), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring(languageInitExpectedString(lang)))
+				Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 			})
 		}
 	})

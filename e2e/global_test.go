@@ -25,6 +25,7 @@ import (
 	"os"
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ import (
 func TestRunGlobalInstall(t *testing.T) {
 	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
 	if !forceGlobalTest {
-		ocp, err := openshift.IsOpenShift(testClient)
+		ocp, err := openshift.IsOpenShift(TestClient)
 		assert.Nil(t, err)
 		if ocp {
 			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
@@ -42,19 +43,19 @@ func TestRunGlobalInstall(t *testing.T) {
 		}
 	}
 
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns, "--global").Execute()).Should(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--global").Execute()).Should(BeNil())
 
 		// NS2
-		withNewTestNamespace(t, func(ns2 string) {
-			Expect(kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).Should(BeNil())
+		WithNewTestNamespace(t, func(ns2 string) {
+			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).Should(BeNil())
 
-			Expect(kamel("run", "-n", ns2, "files/Java.java").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns2, "java"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns2, "java"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(kamel("delete", "--all", "-n", ns2).Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns2, "files/Java.java").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationLogs(ns2, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).Should(BeNil())
 		})
 
-		Expect(kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
 	})
 }

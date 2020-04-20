@@ -24,16 +24,16 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 )
 
 func TestOpenAPIService(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKnative)).Execute()).Should(BeNil())
-		Expect(kamel(
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKnative)).Execute()).Should(BeNil())
+		Expect(Kamel(
 			"run",
 			"-n", ns,
 			"--name", "petstore",
@@ -41,24 +41,24 @@ func TestOpenAPIService(t *testing.T) {
 			"files/petstore.groovy",
 		).Execute()).Should(BeNil())
 
-		Eventually(knativeService(ns, "petstore"), testTimeoutLong).
+		Eventually(KnativeService(ns, "petstore"), TestTimeoutLong).
 			Should(Not(BeNil()))
 
-		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: listPets started and consuming from: platform-http:///v1/pets"))
-		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: createPets started and consuming from: platform-http:///v1/pets"))
-		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: showPetById started and consuming from: platform-http:///v1/pets"))
 
-		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
 
 func TestOpenAPIDeployment(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKubernetes)).Execute()).Should(BeNil())
-		Expect(kamel(
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKubernetes)).Execute()).Should(BeNil())
+		Expect(Kamel(
 			"run",
 			"-n", ns,
 			"--name", "petstore",
@@ -66,18 +66,18 @@ func TestOpenAPIDeployment(t *testing.T) {
 			"files/petstore.groovy",
 		).Execute()).Should(BeNil())
 
-		Eventually(integrationPodPhase(ns, "petstore"), testTimeoutLong).
+		Eventually(IntegrationPodPhase(ns, "petstore"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
-		Eventually(deployment(ns, "petstore"), testTimeoutLong).
+		Eventually(Deployment(ns, "petstore"), TestTimeoutLong).
 			Should(Not(BeNil()))
 
-		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: listPets started and consuming from: platform-http:///v1/pets"))
-		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: createPets started and consuming from: platform-http:///v1/pets"))
-		Eventually(integrationLogs(ns, "petstore"), testTimeoutMedium).
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: showPetById started and consuming from: platform-http:///v1/pets"))
 
-		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }

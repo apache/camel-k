@@ -25,6 +25,7 @@ import (
 	"os"
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
@@ -34,26 +35,26 @@ import (
 
 func TestPlatformlessRun(t *testing.T) {
 	needsStagingRepo := os.Getenv("STAGING_RUNTIME_REPO") != ""
-	ocp, err := openshift.IsOpenShift(testClient)
+	ocp, err := openshift.IsOpenShift(TestClient)
 	assert.Nil(t, err)
 	if needsStagingRepo || !ocp {
 		t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")
 		return
 	}
 
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		// Delete the platform from the namespace before running the integration
-		Eventually(deletePlatform(ns)).Should(BeTrue())
+		Eventually(DeletePlatform(ns)).Should(BeTrue())
 
-		Expect(kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
-		Eventually(integrationPodPhase(ns, "yaml"), testTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(integrationLogs(ns, "yaml"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
+		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Platform should be recreated
-		Eventually(platform(ns)).ShouldNot(BeNil())
-		Eventually(platformProfile(ns)).Should(Equal(v1.TraitProfile("")))
-		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(PlatformProfile(ns)).Should(Equal(v1.TraitProfile("")))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }

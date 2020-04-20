@@ -26,17 +26,18 @@ import (
 	"io"
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/e2e/util"
 	. "github.com/onsi/gomega"
 )
 
 func TestRunDevMode(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		t.Run("run yaml dev mode", func(t *testing.T) {
 			RegisterTestingT(t)
-			ctx, cancel := context.WithCancel(testContext)
+			ctx, cancel := context.WithCancel(TestContext)
 			defer cancel()
 			piper, pipew := io.Pipe()
 			defer pipew.Close()
@@ -44,38 +45,38 @@ func TestRunDevMode(t *testing.T) {
 
 			file := util.MakeTempCopy(t, "files/yaml.yaml")
 
-			kamelRun := kamelWithContext(ctx, "run", "-n", ns, file, "--dev")
+			kamelRun := KamelWithContext(ctx, "run", "-n", ns, file, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "yaml" in phase Running`, "Magicstring!", "Magicjordan!")
 
 			go kamelRun.Execute()
 
-			Eventually(logScanner.IsFound(`integration "yaml" in phase Running`), testTimeoutMedium).Should(BeTrue())
-			Eventually(logScanner.IsFound("Magicstring!"), testTimeoutMedium).Should(BeTrue())
+			Eventually(logScanner.IsFound(`integration "yaml" in phase Running`), TestTimeoutMedium).Should(BeTrue())
+			Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
 			Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
 
 			util.ReplaceInFile(t, file, "string!", "jordan!")
-			Eventually(logScanner.IsFound("Magicjordan!"), testTimeoutMedium).Should(BeTrue())
+			Eventually(logScanner.IsFound("Magicjordan!"), TestTimeoutMedium).Should(BeTrue())
 		})
 
 		t.Run("run yaml remote dev mode", func(t *testing.T) {
 			RegisterTestingT(t)
-			ctx, cancel := context.WithCancel(testContext)
+			ctx, cancel := context.WithCancel(TestContext)
 			defer cancel()
 			piper, pipew := io.Pipe()
 			defer pipew.Close()
 			defer piper.Close()
 
 			remoteFile := "https://github.com/apache/camel-k/raw/e80eb5353cbccf47c89a9f0a1c68ffbe3d0f1521/e2e/files/yaml.yaml"
-			kamelRun := kamelWithContext(ctx, "run", "-n", ns, remoteFile, "--dev")
+			kamelRun := KamelWithContext(ctx, "run", "-n", ns, remoteFile, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
 
 			go kamelRun.Execute()
 
-			Eventually(logScanner.IsFound("Magicstring!"), testTimeoutMedium).Should(BeTrue())
+			Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
 		})
 	})
 }

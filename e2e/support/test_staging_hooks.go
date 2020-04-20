@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package support
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func init() {
 	// Let's use the STAGING_RUNTIME_REPO if available
 	runtimeRepo := os.Getenv("STAGING_RUNTIME_REPO")
 	if runtimeRepo != "" {
-		kamelHooks = append(kamelHooks, func(cmd []string) []string {
+		KamelHooks = append(KamelHooks, func(cmd []string) []string {
 			if len(cmd) > 0 && cmd[0] == "install" {
 				cmd = append(cmd, fmt.Sprintf("--maven-repository=%s", runtimeRepo))
 			}
@@ -41,10 +41,10 @@ func init() {
 	// this hook can be also used to test a released version of the operator, e.g. the staging version during a voting period
 	// Uncomment the following lines and change references to enable the hook
 
-	//testImageName = "docker.io/camelk/camel-k"
-	//testImageVersion = "1.0.0-M2"
+	//TestImageName = "docker.io/camelk/camel-k"
+	//TestImageVersion = "1.0.0-M2"
 
-	//kamelHooks = append(kamelHooks, func(cmd []string) []string {
+	//KamelHooks = append(KamelHooks, func(cmd []string) []string {
 	//	if len(cmd) > 0 && cmd[0] == "install" {
 	//		cmd = append(cmd, "--operator-image=docker.io/camelk/camel-k:1.0.0-M2")
 	//		cmd = append(cmd, "--maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-1156")

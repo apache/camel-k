@@ -24,36 +24,37 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
 )
 
 func TestBasicInstallation(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 	})
 }
 
 func TestAlternativeImageInstallation(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns, "--operator-image", "x/y:latest").Execute()).Should(BeNil())
-		Eventually(operatorImage(ns)).Should(Equal("x/y:latest"))
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--operator-image", "x/y:latest").Execute()).Should(BeNil())
+		Eventually(OperatorImage(ns)).Should(Equal("x/y:latest"))
 	})
 }
 
 func TestKitMainInstallation(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns, "--kit", "main").Execute()).Should(BeNil())
-		Eventually(build(ns, "main")).ShouldNot(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--kit", "main").Execute()).Should(BeNil())
+		Eventually(Build(ns, "main")).ShouldNot(BeNil())
 	})
 }
 
 func TestMavenRepositoryInstallation(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns, "--maven-repository", "https://my.repo.org/public/").Execute()).Should(BeNil())
-		Eventually(configmap(ns, "camel-k-maven-settings")).Should(Not(BeNil()))
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--maven-repository", "https://my.repo.org/public/").Execute()).Should(BeNil())
+		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(Not(BeNil()))
 		Eventually(func() string {
-			return configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
+			return Configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
 		}).Should(ContainSubstring("https://my.repo.org/public/"))
 	})
 }
