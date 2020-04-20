@@ -15,15 +15,15 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: openshift
+name: openshift-builder
 
 on:
-#  pull_request:
-#    branches:
-#      - master
-#  push:
-#    branches:
-#      - master
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -33,9 +33,20 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Info
+    - name: Cleanup
       run: |
         ls -lart
+        echo "Initial status:"
+        df -h
+
+        echo "Cleaning up resources:"
+        sudo swapoff -a
+        sudo rm -f /swapfile
+        sudo apt clean
+        docker rmi $(docker image ls -aq)
+
+        echo "Final status:"
+        df -h
     - name: Set up JDK 11
       uses: joschi/setup-jdk@v1
       with:
@@ -108,12 +119,12 @@ jobs:
       run: |
         oc describe nodes
     - name: Run IT
-      env:
-        TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
-        TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
-        TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
+      #env:
+      #  TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+      #  TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+      #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
+      #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
+      #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
       run: |
         # Compute registry parameters
         echo "Build project"
@@ -140,4 +151,4 @@ jobs:
         oc login -u developer
 
         # Then run integration tests
-        make test-integration
+        make test-builder

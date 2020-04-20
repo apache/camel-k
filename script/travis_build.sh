@@ -84,6 +84,3 @@ oc login -u developer
 
 # Then run integration tests
 make test-integration
-
-# Test also the builder part
-make test-builder
