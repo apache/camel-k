@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: kubernetes
+name: builder
 
 on:
   pull_request:
@@ -29,6 +29,10 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        publisher: ["Buildah", "Spectrum", "Kaniko"]
 
     steps:
     - name: Checkout code
@@ -80,12 +84,11 @@ jobs:
       #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
       #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
       #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
+      env:
+        KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ matrix.publisher }}
       run: |
         # Set the test to periodically cleanup the docker system
         export KAMEL_TEST_CLEANUP="docker system prune -f"
-
-        # Using Spectrum as builder (faster)
-        export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
 
         # Compute registry parameters
         CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
@@ -115,4 +118,4 @@ jobs:
         export KAMEL_INSTALL_OPERATOR_IMAGE=${IMAGE}
         export CAMEL_K_TEST_IMAGE_NAME=${CAMEL_K_REGISTRY}:5000/apache/camel-k
         export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
-        make test-integration
+        make test-builder
