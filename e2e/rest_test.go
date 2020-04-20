@@ -22,11 +22,12 @@ limitations under the License.
 package e2e
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"testing"
-	"bytes"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -34,9 +35,9 @@ import (
 )
 
 func TestRunREST(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		var profile string
-		ocp, err := openshift.IsOpenShift(testClient)
+		ocp, err := openshift.IsOpenShift(TestClient)
 		assert.Nil(t, err)
 		if ocp {
 			profile = "OpenShift"
@@ -44,34 +45,34 @@ func TestRunREST(t *testing.T) {
 			profile = "Kubernetes"
 		}
 
-		Expect(kamel("install", "-n", ns, "--trait-profile", profile).Execute()).Should(BeNil())
-		Expect(kamel("run", "-n", ns, "files/RestConsumer.java", "-d", "camel:undertow").Execute()).Should(BeNil())
-		Eventually(integrationPodPhase(ns, "rest-consumer"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+		Expect(Kamel("install", "-n", ns, "--trait-profile", profile).Execute()).Should(BeNil())
+		Expect(Kamel("run", "-n", ns, "files/RestConsumer.java", "-d", "camel:undertow").Execute()).Should(BeNil())
+		Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 
 		t.Run("Service works", func(t *testing.T) {
 			name := "John"
-			service := service(ns, "rest-consumer")
-			Eventually(service, testTimeoutShort).ShouldNot(BeNil())
-			Expect(kamel("run", "-n", ns, "files/RestProducer.groovy", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "rest-producer"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "rest-consumer"), testTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
-			Eventually(integrationLogs(ns, "rest-producer"), testTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
+			service := Service(ns, "rest-consumer")
+			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/RestProducer.groovy", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+			Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
 		})
 
 		if ocp {
 			t.Run("Route works", func(t *testing.T) {
 				name := "Peter"
-				route := route(ns, "rest-consumer")
-				Eventually(route, testTimeoutShort).ShouldNot(BeNil())
+				route := Route(ns, "rest-consumer")
+				Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
 				response := httpReqest(t, fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name))
 				assert.Equal(t, fmt.Sprintf("%s Doe", name), response)
-				Eventually(integrationLogs(ns, "rest-consumer"), testTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+				Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
 
 			})
 		}
 
 		// Cleanup
-		Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
 

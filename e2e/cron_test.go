@@ -24,48 +24,49 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
 
 func TestRunCronExample(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		t.Run("cron", func(t *testing.T) {
 			RegisterTestingT(t)
 
-			Expect(kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
-			Eventually(integrationCronJob(ns, "cron"), testTimeoutMedium).ShouldNot(BeNil())
-			Eventually(integrationLogs(ns, "cron"), testTimeoutMedium).Should(ContainSubstring("Magicstring!"))
-			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
+			Eventually(IntegrationCronJob(ns, "cron"), TestTimeoutMedium).ShouldNot(BeNil())
+			Eventually(IntegrationLogs(ns, "cron"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("cron-timer", func(t *testing.T) {
 			RegisterTestingT(t)
 
-			Expect(kamel("run", "-n", ns, "files/cron-timer.groovy").Execute()).Should(BeNil())
-			Eventually(integrationCronJob(ns, "cron-timer"), testTimeoutMedium).ShouldNot(BeNil())
-			Eventually(integrationLogs(ns, "cron-timer"), testTimeoutMedium).Should(ContainSubstring("Magicstring!"))
-			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/cron-timer.groovy").Execute()).Should(BeNil())
+			Eventually(IntegrationCronJob(ns, "cron-timer"), TestTimeoutMedium).ShouldNot(BeNil())
+			Eventually(IntegrationLogs(ns, "cron-timer"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("cron-fallback", func(t *testing.T) {
 			RegisterTestingT(t)
 
-			Expect(kamel("run", "-n", ns, "files/cron-fallback.groovy").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "cron-fallback"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "cron-fallback"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/cron-fallback.groovy").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "cron-fallback"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationLogs(ns, "cron-fallback"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
 		t.Run("cron-fallback-quarkus", func(t *testing.T) {
 			RegisterTestingT(t)
 
-			Expect(kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "cron"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "cron"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "cron"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationLogs(ns, "cron"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 	})
 }

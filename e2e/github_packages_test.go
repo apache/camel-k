@@ -25,6 +25,7 @@ import (
 	"os"
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
@@ -36,8 +37,8 @@ func TestRunWithGithubPackagesRegistry(t *testing.T) {
 	if user == "" || pass == "" || repo == "" {
 		t.Skip("no github packages data: skipping")
 	} else {
-		withNewTestNamespace(t, func(ns string) {
-			Expect(kamel("install",
+		WithNewTestNamespace(t, func(ns string) {
+			Expect(Kamel("install",
 				"-n", ns,
 				"--registry", "docker.pkg.github.com",
 				"--organization", repo,
@@ -46,12 +47,12 @@ func TestRunWithGithubPackagesRegistry(t *testing.T) {
 				"--cluster-type", "kubernetes").
 				Execute()).Should(BeNil())
 
-			Expect(kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
-			Eventually(integrationPodPhase(ns, "groovy"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(integrationLogs(ns, "groovy"), testTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(integrationPodImage(ns, "groovy"), testTimeoutShort).Should(HavePrefix("docker.pkg.github.com"))
+			Expect(Kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodImage(ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.pkg.github.com"))
 
-			Expect(kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 	}
 

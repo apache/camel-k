@@ -24,6 +24,7 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 )
@@ -61,11 +62,11 @@ func TestKitKnativeFullBuild(t *testing.T) {
 }
 
 func doNamedKitFullBuild(t *testing.T, name string) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns, "--kit", name).Execute()).Should(BeNil())
-		Eventually(build(ns, name)).ShouldNot(BeNil())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--kit", name).Execute()).Should(BeNil())
+		Eventually(Build(ns, name)).ShouldNot(BeNil())
 		Eventually(func() v1.BuildPhase {
-			return build(ns, name)().Status.Phase
-		}, testTimeoutMedium).Should(Equal(v1.BuildPhaseSucceeded))
+			return Build(ns, name)().Status.Phase
+		}, TestTimeoutMedium).Should(Equal(v1.BuildPhaseSucceeded))
 	})
 }

@@ -24,78 +24,79 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
 )
 
 func TestBasicUninstall(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 
 		// should be completely removed on uninstall
-		Expect(kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
-		Eventually(role(ns)).Should(BeNil())
-		Eventually(rolebinding(ns)).Should(BeNil())
-		Eventually(configmap(ns, "camel-k-maven-settings")).Should(BeNil())
-		Eventually(serviceaccount(ns, "camel-k-operator")).Should(BeNil())
-		Eventually(operatorPod(ns)).Should(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
+		Eventually(Role(ns)).Should(BeNil())
+		Eventually(Rolebinding(ns)).Should(BeNil())
+		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
+		Eventually(Serviceaccount(ns, "camel-k-operator")).Should(BeNil())
+		Eventually(OperatorPod(ns)).Should(BeNil())
 	})
 }
 
 func TestUninstallSkipOperator(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except operator
-		Expect(kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-operator").Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-operator").Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 	})
 }
 
 func TestUninstallSkipRole(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except roles
-		Expect(kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-roles").Execute()).Should(BeNil())
-		Eventually(role(ns)).ShouldNot(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-roles").Execute()).Should(BeNil())
+		Eventually(Role(ns)).ShouldNot(BeNil())
 	})
 }
 
 func TestUninstallSkipRoleBinding(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except role-bindings
-		Expect(kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-role-bindings").Execute()).Should(BeNil())
-		Eventually(rolebinding(ns)).ShouldNot(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-role-bindings").Execute()).Should(BeNil())
+		Eventually(Rolebinding(ns)).ShouldNot(BeNil())
 	})
 }
 
 func TestUninstallSkipServiceAccounts(t *testing.T) {
 	//t.Skip("inconsistent test results ")
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except cluster-roles
-		Expect(kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-service-accounts").Execute()).Should(BeNil())
-		Eventually(serviceaccount(ns, "camel-k-operator")).ShouldNot(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-service-accounts").Execute()).Should(BeNil())
+		Eventually(Serviceaccount(ns, "camel-k-operator")).ShouldNot(BeNil())
 	})
 }
 
 func TestUninstallSkipIntegrationPlatform(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except cluster-roles
 		// NOTE: skip CRDs is also required in addition to skip integration platform
-		Expect(kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-integration-platform").Execute()).Should(BeNil())
-		Eventually(platform(ns)).ShouldNot(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-integration-platform").Execute()).Should(BeNil())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
 	})
 }

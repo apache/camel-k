@@ -24,6 +24,7 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ import (
 )
 
 func TestBackwardCompatibility(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 
 		data := `
 apiVersion: ` + v1.SchemeGroupVersion.String() + `
@@ -54,7 +55,7 @@ status:
 
 		obj, err := kubernetes.LoadRawResourceFromYaml(data)
 		assert.Nil(t, err)
-		err = testClient.Create(testContext, obj)
+		err = TestClient.Create(TestContext, obj)
 		assert.Nil(t, err)
 
 		integration := v1.NewIntegration(ns, "example")
@@ -67,14 +68,14 @@ status:
 				"apiVersion": v1.SchemeGroupVersion.String(),
 			},
 		}
-		err = testClient.Get(testContext, key, &unstr)
+		err = TestClient.Get(TestContext, key, &unstr)
 		assert.Nil(t, err)
 		spec := unstr.Object["spec"]
 		assert.NotNil(t, spec)
 		attr := spec.(map[string]interface{})["thisDoesNotBelongToSpec"]
 		assert.Equal(t, "hi", attr)
 
-		err = testClient.Get(testContext, key, &integration)
+		err = TestClient.Get(TestContext, key, &integration)
 		assert.Nil(t, err)
 		assert.Equal(t, 1, len(integration.Spec.Sources))
 		assert.Equal(t, "hello.groovy", integration.Spec.Sources[0].Name)
@@ -82,7 +83,7 @@ status:
 }
 
 func TestV1Alpha1Compatibility(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 
 		data := `
 apiVersion: camel.apache.org/v1alpha1
@@ -97,7 +98,7 @@ spec:
 
 		obj, err := kubernetes.LoadRawResourceFromYaml(data)
 		assert.Nil(t, err)
-		dynClient, err := dynamic.NewForConfig(testClient.GetConfig())
+		dynClient, err := dynamic.NewForConfig(TestClient.GetConfig())
 		assert.Nil(t, err)
 
 		obj, err = dynClient.Resource(schema.GroupVersionResource{
@@ -112,7 +113,7 @@ spec:
 		key, err := client.ObjectKeyFromObject(&integration)
 		assert.Nil(t, err)
 
-		err = testClient.Get(testContext, key, &integration)
+		err = TestClient.Get(TestContext, key, &integration)
 		assert.Nil(t, err)
 		assert.Equal(t, 1, len(integration.Spec.Sources))
 		assert.Equal(t, "hello.groovy", integration.Spec.Sources[0].Name)

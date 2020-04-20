@@ -25,70 +25,71 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
 
 func TestPlatformUpgrade(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(platformVersion(ns)).Should(Equal(defaults.Version))
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
 
 		// Scale the operator down to zero
-		Eventually(scaleOperator(ns, 0), 10*time.Second).Should(BeNil())
-		Eventually(operatorPod(ns)).Should(BeNil())
+		Eventually(ScaleOperator(ns, 0), 10*time.Second).Should(BeNil())
+		Eventually(OperatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
-		Eventually(setPlatformVersion(ns, "an.older.one")).Should(BeNil())
-		Eventually(platformVersion(ns)).Should(Equal("an.older.one"))
+		Eventually(SetPlatformVersion(ns, "an.older.one")).Should(BeNil())
+		Eventually(PlatformVersion(ns)).Should(Equal("an.older.one"))
 
 		// Scale the operator up
-		Eventually(scaleOperator(ns, 1)).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
+		Eventually(ScaleOperator(ns, 1)).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 
 		// Check the platform version change
-		Eventually(platformVersion(ns)).Should(Equal(defaults.Version))
+		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
 	})
 }
 
 func TestIntegrationUpgrade(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
-		Expect(kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Eventually(platformVersion(ns)).Should(Equal(defaults.Version))
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
 
 		// Run an integration
-		Expect(kamel("run", "-n", ns, "files/js.js").Execute()).Should(BeNil())
-		Eventually(integrationPodPhase(ns, "js"), testTimeoutMedium).Should(Equal(v1.PodRunning))
-		initialKit := integrationKit(ns, "js")()
+		Expect(Kamel("run", "-n", ns, "files/js.js").Execute()).Should(BeNil())
+		Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		initialKit := IntegrationKit(ns, "js")()
 
 		// Scale the operator down to zero
-		Eventually(scaleOperator(ns, 0)).Should(BeNil())
-		Eventually(operatorPod(ns)).Should(BeNil())
+		Eventually(ScaleOperator(ns, 0)).Should(BeNil())
+		Eventually(OperatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
-		Expect(setIntegrationVersion(ns, "js", "an.older.one")).Should(BeNil())
-		Expect(setAllKitsVersion(ns, "an.older.one")).Should(BeNil())
-		Eventually(integrationVersion(ns, "js")).Should(Equal("an.older.one"))
-		Eventually(kitsWithVersion(ns, "an.older.one")).Should(Equal(1))
-		Eventually(kitsWithVersion(ns, defaults.Version)).Should(Equal(0))
+		Expect(SetIntegrationVersion(ns, "js", "an.older.one")).Should(BeNil())
+		Expect(SetAllKitsVersion(ns, "an.older.one")).Should(BeNil())
+		Eventually(IntegrationVersion(ns, "js")).Should(Equal("an.older.one"))
+		Eventually(KitsWithVersion(ns, "an.older.one")).Should(Equal(1))
+		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(0))
 
 		// Scale the operator up
-		Eventually(scaleOperator(ns, 1)).Should(BeNil())
-		Eventually(operatorPod(ns)).ShouldNot(BeNil())
-		Eventually(operatorPodPhase(ns)).Should(Equal(v1.PodRunning))
+		Eventually(ScaleOperator(ns, 1)).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(OperatorPodPhase(ns)).Should(Equal(v1.PodRunning))
 
 		// No auto-update expected
-		Consistently(integrationVersion(ns, "js"), 3*time.Second).Should(Equal("an.older.one"))
+		Consistently(IntegrationVersion(ns, "js"), 3*time.Second).Should(Equal("an.older.one"))
 
 		// Clear the integration status
-		Expect(kamel("rebuild", "js", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("rebuild", "js", "-n", ns).Execute()).Should(BeNil())
 
 		// Check the integration version change
-		Eventually(integrationVersion(ns, "js")).Should(Equal(defaults.Version))
-		Eventually(kitsWithVersion(ns, "an.older.one")).Should(Equal(1)) // old one is not recycled
-		Eventually(kitsWithVersion(ns, defaults.Version)).Should(Equal(1))
-		Eventually(integrationKit(ns, "js"), testTimeoutMedium).ShouldNot(Equal(initialKit))
-		Eventually(integrationPodPhase(ns, "js"), testTimeoutMedium).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationVersion(ns, "js")).Should(Equal(defaults.Version))
+		Eventually(KitsWithVersion(ns, "an.older.one")).Should(Equal(1)) // old one is not recycled
+		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(1))
+		Eventually(IntegrationKit(ns, "js"), TestTimeoutMedium).ShouldNot(Equal(initialKit))
+		Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 	})
 }

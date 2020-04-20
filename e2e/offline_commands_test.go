@@ -25,23 +25,24 @@ import (
 	"io/ioutil"
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestKamelVersionWorksOffline(t *testing.T) {
-	assert.Nil(t, kamel("version", "--config", "non-existent-kubeconfig-file").Execute())
+	assert.Nil(t, Kamel("version", "--config", "non-existent-kubeconfig-file").Execute())
 }
 
 func TestKamelHelpTraitWorksOffline(t *testing.T) {
-	traitCmd := kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file")
+	traitCmd := Kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file")
 	traitCmd.SetOut(ioutil.Discard)
 	assert.Nil(t, traitCmd.Execute())
 }
 
 func TestKamelCompletionWorksOffline(t *testing.T) {
-	bashCmd := kamel("completion", "bash", "--config", "non-existent-kubeconfig-file")
+	bashCmd := Kamel("completion", "bash", "--config", "non-existent-kubeconfig-file")
 	bashCmd.SetOut(ioutil.Discard)
-	zshCmd := kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file")
+	zshCmd := Kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file")
 	zshCmd.SetOut(ioutil.Discard)
 	assert.Nil(t, bashCmd.Execute())
 	assert.Nil(t, zshCmd.Execute())

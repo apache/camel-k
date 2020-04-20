@@ -24,6 +24,7 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client/clientset/versioned"
 	"github.com/stretchr/testify/assert"
@@ -32,7 +33,7 @@ import (
 )
 
 func TestClientFunctionalities(t *testing.T) {
-	withNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ns string) {
 		cfg, err := config.GetConfig()
 		assert.Nil(t, err)
 		camel, err := versioned.NewForConfig(cfg)
