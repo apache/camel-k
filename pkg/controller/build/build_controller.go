@@ -23,6 +23,7 @@ import (
 	"time"
 
 	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/util/log"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -36,6 +37,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	buildv1 "github.com/openshift/api/build/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -83,6 +86,25 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				// to another
 				return oldBuild.Generation != newBuild.Generation ||
 					oldBuild.Status.Phase != newBuild.Status.Phase
+			},
+			DeleteFunc: func(e event.DeleteEvent) bool {
+				build := e.Object.(*v1.Build)
+				namespace := build.Namespace
+				name := build.Labels["camel.apache.org/created.by.name"]
+				options := []k8sclient.DeleteAllOfOption{
+					k8sclient.InNamespace(namespace),
+					k8sclient.MatchingLabels{"camel.apache.org/created.by.name": name},
+				}
+
+				// delete BuildConfig
+				if err := mgr.GetClient().DeleteAllOf(context.TODO(), &buildv1.BuildConfig{}, options...); err != nil {
+					log.Error(err, "Failed to delete build configs for integration "+name)
+				} else {
+					log.Info("Deleted build configs for integration " + name)
+				}
+
+				// Evaluates to false if the object has been confirmed deleted
+				return !e.DeleteStateUnknown
 			},
 		})
 	if err != nil {

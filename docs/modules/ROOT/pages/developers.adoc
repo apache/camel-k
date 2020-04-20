@@ -177,12 +177,11 @@ You are going to run the operator code **outside** OpenShift in your IDE so, fir
 // use kubectl in plain Kubernetes
 oc scale deployment/camel-k-operator --replicas 0
 ```
-
 You can scale it back to 1 when you're done and you have updated the operator image.
 
 You can setup the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode.
 
-When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen*:
+When configuring the IDE task, make sure to add the command line argument `operator` and add all required environment variables in the *IDE task configuration screen*:
 
 * Set the `KUBERNETES_CONFIG` environment variable to point to your Kubernetes configuration file (usually `<homedir>/.kube/config`).
 * Set the `WATCH_NAMESPACE` environment variable to a Kubernetes namespace you have access to.

@@ -40,6 +40,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	imagev1 "github.com/openshift/api/image/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 )
@@ -83,6 +85,21 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				oldIntegrationKit.Status.Phase != newIntegrationKit.Status.Phase
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
+			kit := e.Object.(*v1.IntegrationKit)
+			namespace := kit.Namespace
+			name := kit.Labels["camel.apache.org/created.by.name"]
+			options := []k8sclient.DeleteAllOfOption{
+				k8sclient.InNamespace(namespace),
+				k8sclient.MatchingLabels{"camel.apache.org/created.by.name": name},
+			}
+
+			// delete ImageStream
+			if err := mgr.GetClient().DeleteAllOf(context.TODO(), &imagev1.ImageStream{}, options...); err != nil {
+				log.Error(err, "Failed to delete image streams for integration "+name)
+			} else {
+				log.Info("Deleted image streams for integration " + name)
+			}
+
 			// Evaluates to false if the object has been confirmed deleted
 			return !e.DeleteStateUnknown
 		},
