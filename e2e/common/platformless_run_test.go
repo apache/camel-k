@@ -19,43 +19,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package common
 
 import (
 	"os"
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
-func TestRunGlobalInstall(t *testing.T) {
-	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if !forceGlobalTest {
-		ocp, err := openshift.IsOpenShift(TestClient)
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
-			return
-		}
+func TestPlatformlessRun(t *testing.T) {
+	needsStagingRepo := os.Getenv("STAGING_RUNTIME_REPO") != ""
+	ocp, err := openshift.IsOpenShift(TestClient)
+	assert.Nil(t, err)
+	if needsStagingRepo || !ocp {
+		t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")
+		return
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--global").Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
-		// NS2
-		WithNewTestNamespace(t, func(ns2 string) {
-			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).Should(BeNil())
+		// Delete the platform from the namespace before running the integration
+		Eventually(DeletePlatform(ns)).Should(BeTrue())
 
-			Expect(Kamel("run", "-n", ns2, "files/Java.java").Execute()).Should(BeNil())
-			Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationLogs(ns2, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).Should(BeNil())
-		})
+		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
+		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
+		// Platform should be recreated
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(PlatformProfile(ns)).Should(Equal(v1.TraitProfile("")))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }

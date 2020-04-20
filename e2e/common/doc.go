@@ -19,26 +19,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
-
-import (
-	"testing"
-
-	. "github.com/apache/camel-k/e2e/support"
-	. "github.com/onsi/gomega"
-)
-
-// TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.
-// This feature is used in Tekton pipelines.
-func TestTektonLikeBehavior(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateOperatorServiceAccount(ns)).Should(BeNil())
-		Expect(CreateOperatorRole(ns)).Should(BeNil())
-		Expect(CreateOperatorRoleBinding(ns)).Should(BeNil())
-
-		Eventually(OperatorPod(ns)).Should(BeNil())
-		Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).Should(BeNil())
-
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-	})
-}
+// Package common contains common e2e tests whose outcome does not depend on the builder that has been used, thus they that can be executed with a single builder in the CI
+package common

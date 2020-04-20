@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package common
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/e2e/util"
+	"github.com/apache/camel-k/e2e/support/util"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"

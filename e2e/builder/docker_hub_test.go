@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package builder
 
 import (
 	"os"
@@ -30,18 +30,17 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func TestRunWithGithubPackagesRegistry(t *testing.T) {
-	user := os.Getenv("TEST_GITHUB_PACKAGES_USERNAME")
-	pass := os.Getenv("TEST_GITHUB_PACKAGES_PASSWORD")
-	repo := os.Getenv("TEST_GITHUB_PACKAGES_REPO")
-	if user == "" || pass == "" || repo == "" {
-		t.Skip("no github packages data: skipping")
+func TestRunWithDockerHubRegistry(t *testing.T) {
+	user := os.Getenv("TEST_DOCKER_HUB_USERNAME")
+	pass := os.Getenv("TEST_DOCKER_HUB_PASSWORD")
+	if user == "" || pass == "" {
+		t.Skip("no docker hub credentials: skipping")
 	} else {
 		WithNewTestNamespace(t, func(ns string) {
 			Expect(Kamel("install",
 				"-n", ns,
-				"--registry", "docker.pkg.github.com",
-				"--organization", repo,
+				"--registry", "docker.io",
+				"--organization", user,
 				"--registry-auth-username", user,
 				"--registry-auth-password", pass,
 				"--cluster-type", "kubernetes").
@@ -50,7 +49,7 @@ func TestRunWithGithubPackagesRegistry(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(IntegrationPodImage(ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.pkg.github.com"))
+			Eventually(IntegrationPodImage(ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.io"))
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
