@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package common
 
 import (
 	"context"
@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/e2e/util"
+	"github.com/apache/camel-k/e2e/support/util"
 	. "github.com/onsi/gomega"
 )
 

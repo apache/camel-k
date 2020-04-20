@@ -19,43 +19,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package common
 
 import (
+	"io/ioutil"
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client/clientset/versioned"
 	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
-func TestClientFunctionalities(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		cfg, err := config.GetConfig()
-		assert.Nil(t, err)
-		camel, err := versioned.NewForConfig(cfg)
-		assert.Nil(t, err)
+func TestKamelVersionWorksOffline(t *testing.T) {
+	assert.Nil(t, Kamel("version", "--config", "non-existent-kubeconfig-file").Execute())
+}
 
-		lst, err := camel.CamelV1().Integrations(ns).List(metav1.ListOptions{})
-		assert.Nil(t, err)
-		assert.Empty(t, lst.Items)
+func TestKamelHelpTraitWorksOffline(t *testing.T) {
+	traitCmd := Kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file")
+	traitCmd.SetOut(ioutil.Discard)
+	assert.Nil(t, traitCmd.Execute())
+}
 
-		integration, err := camel.CamelV1().Integrations(ns).Create(&v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "dummy",
-			},
-		})
-		assert.Nil(t, err)
-
-		lst, err = camel.CamelV1().Integrations(ns).List(metav1.ListOptions{})
-		assert.Nil(t, err)
-		assert.NotEmpty(t, lst.Items)
-		assert.Equal(t, lst.Items[0].Name, integration.Name)
-
-		err = camel.CamelV1().Integrations(ns).Delete("dummy", nil)
-		assert.Nil(t, err)
-	})
+func TestKamelCompletionWorksOffline(t *testing.T) {
+	bashCmd := Kamel("completion", "bash", "--config", "non-existent-kubeconfig-file")
+	bashCmd.SetOut(ioutil.Discard)
+	zshCmd := Kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file")
+	zshCmd.SetOut(ioutil.Discard)
+	assert.Nil(t, bashCmd.Execute())
+	assert.Nil(t, zshCmd.Execute())
 }

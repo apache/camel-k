@@ -19,42 +19,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package common
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
 )
 
-func TestPlatformlessRun(t *testing.T) {
-	needsStagingRepo := os.Getenv("STAGING_RUNTIME_REPO") != ""
-	ocp, err := openshift.IsOpenShift(TestClient)
-	assert.Nil(t, err)
-	if needsStagingRepo || !ocp {
-		t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")
-		return
-	}
-
+func TestBasicInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+	})
+}
 
-		// Delete the platform from the namespace before running the integration
-		Eventually(DeletePlatform(ns)).Should(BeTrue())
+func TestAlternativeImageInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--operator-image", "x/y:latest").Execute()).Should(BeNil())
+		Eventually(OperatorImage(ns)).Should(Equal("x/y:latest"))
+	})
+}
 
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
-		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+func TestKitMainInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--kit", "main").Execute()).Should(BeNil())
+		Eventually(Build(ns, "main")).ShouldNot(BeNil())
+	})
+}
 
-		// Platform should be recreated
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformProfile(ns)).Should(Equal(v1.TraitProfile("")))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+func TestMavenRepositoryInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--maven-repository", "https://my.repo.org/public/").Execute()).Should(BeNil())
+		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(Not(BeNil()))
+		Eventually(func() string {
+			return Configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
+		}).Should(ContainSubstring("https://my.repo.org/public/"))
 	})
 }

@@ -1,4 +1,4 @@
-// +build knative
+// +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package knative
 
 import (
 	"strings"

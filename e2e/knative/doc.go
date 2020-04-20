@@ -19,31 +19,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
-
-import (
-	"io/ioutil"
-	"testing"
-
-	. "github.com/apache/camel-k/e2e/support"
-	"github.com/stretchr/testify/assert"
-)
-
-func TestKamelVersionWorksOffline(t *testing.T) {
-	assert.Nil(t, Kamel("version", "--config", "non-existent-kubeconfig-file").Execute())
-}
-
-func TestKamelHelpTraitWorksOffline(t *testing.T) {
-	traitCmd := Kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file")
-	traitCmd.SetOut(ioutil.Discard)
-	assert.Nil(t, traitCmd.Execute())
-}
-
-func TestKamelCompletionWorksOffline(t *testing.T) {
-	bashCmd := Kamel("completion", "bash", "--config", "non-existent-kubeconfig-file")
-	bashCmd.SetOut(ioutil.Discard)
-	zshCmd := Kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file")
-	zshCmd.SetOut(ioutil.Discard)
-	assert.Nil(t, bashCmd.Execute())
-	assert.Nil(t, zshCmd.Execute())
-}
+// Package knative contains Knative related e2e tests
+package knative

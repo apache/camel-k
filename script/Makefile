@@ -125,12 +125,16 @@ test: build
 	go test ./...
 
 test-integration: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e -tags=integration
-	#go test -timeout 60m -v ./e2e -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common -tags=integration
+	#go test -timeout 60m -v ./e2e/common -tags=integration
 
 test-knative: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e -tags=knative
-	#go test -timeout 60m -v ./e2e -tags=knative
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/knative -tags=integration
+	#go test -timeout 60m -v ./e2e/knative -tags=integration
+
+test-builder: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/builder -tags=integration
+	#go test -timeout 60m -v ./e2e/builder -tags=integration
 
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
@@ -144,7 +148,9 @@ build-olm:
 	./script/build_olm.sh $(VERSION)
 
 build-compile-integration-tests:
-	go test -c -tags="integration knative" ./e2e/*.go
+	go test -c -tags="integration" ./e2e/common
+	go test -c -tags="integration" ./e2e/knative
+	go test -c -tags="integration" ./e2e/builder
 
 clean:
 	# disable gomodules when executing go clean:
