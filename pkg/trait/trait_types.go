@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
@@ -735,4 +736,16 @@ func (e *Environment) getIntegrationContainer() *corev1.Container {
 	}
 
 	return e.Resources.GetContainerByName(containerName)
+}
+
+func (e *Environment) getAllInterceptors() []string {
+	res := make([]string, 0)
+	util.StringSliceUniqueConcat(&res, e.Interceptors)
+
+	if e.Integration != nil {
+		for _, s := range e.Integration.Sources() {
+			util.StringSliceUniqueConcat(&res, s.Interceptors)
+		}
+	}
+	return res
 }

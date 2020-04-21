@@ -20,6 +20,11 @@ package integration
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/knative"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 )
@@ -50,5 +55,31 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 		return nil, err
 	}
 
+	pl, err := platform.GetCurrentPlatform(ctx, action.client, integration.Namespace)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		return nil, err
+	} else if pl != nil {
+		integration.Status.Profile = determineBestProfile(ctx, action.client, integration, pl)
+	}
+
 	return integration, nil
+}
+
+// DetermineBestProfile tries to detect the best trait profile for the integration
+func determineBestProfile(ctx context.Context, c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) v1.TraitProfile {
+	if integration.Spec.Profile != "" {
+		return integration.Spec.Profile
+	}
+	if integration.Status.Profile != "" {
+		// Integration already has a profile
+		return integration.Status.Profile
+	}
+	if p.Status.Profile != "" {
+		// Use platform profile if set
+		return p.Status.Profile
+	}
+	if knative.IsEnabledInNamespace(ctx, c, integration.Namespace) {
+		return v1.TraitProfileKnative
+	}
+	return platform.GetProfile(p)
 }
