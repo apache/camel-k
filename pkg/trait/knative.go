@@ -69,6 +69,8 @@ type knativeTrait struct {
 	// that can be removed in a future version of Knative, filtering is enabled only when the integration is
 	// listening from more than 1 channel.
 	FilterSourceChannels *bool `property:"filter-source-channels"`
+	// Enables Knative CamelSource pre 0.15 compatibility fixes (will be removed in future versions).
+	CamelSourceCompat *bool `property:"camel-source-compat"`
 	// Enable automatic discovery of all trait properties.
 	Auto *bool `property:"auto"`
 }
@@ -173,6 +175,30 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {
+	// To be removed when Knative CamelSources < 0.15 will no longer be supported
+	// Older versions of Knative Sources use a loader rather than an interceptor
+	if t.CamelSourceCompat == nil || *t.CamelSourceCompat {
+		for i, s := range e.Integration.Spec.Sources {
+			if s.Loader == "knative-source" {
+				s.Loader = ""
+				util.StringSliceUniqueAdd(&s.Interceptors, "knative-source")
+				e.Integration.Spec.Sources[i] = s
+			}
+		}
+	}
+	// End of temporary code
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		// Interceptor may have been set by a Knative CamelSource
+		if util.StringSliceExists(e.getAllInterceptors(), "knative-source") {
+			// Adding required libraries for Camel sources
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-knative")
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
+			// Adding platform HTTP
+			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
+		}
+	}
+
 	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 	}

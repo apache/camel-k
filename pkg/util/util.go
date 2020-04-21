@@ -88,6 +88,16 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	return true
 }
 
+// StringSliceUniqueConcat append all the items of the "items" slice if they are not already present in the slice
+func StringSliceUniqueConcat(slice *[]string, items []string) bool {
+	for _, item := range items {
+		if !StringSliceUniqueAdd(slice, item) {
+			return false
+		}
+	}
+	return true
+}
+
 // EncodeXML --
 func EncodeXML(content interface{}) ([]byte, error) {
 	w := &bytes.Buffer{}
