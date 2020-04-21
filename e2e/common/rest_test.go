@@ -64,7 +64,7 @@ func TestRunREST(t *testing.T) {
 				name := "Peter"
 				route := Route(ns, "rest-consumer")
 				Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
-				response := httpReqest(t, fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name))
+				response := httpRequest(t, fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name))
 				assert.Equal(t, fmt.Sprintf("%s Doe", name), response)
 				Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
 
