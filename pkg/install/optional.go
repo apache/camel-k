@@ -2,6 +2,7 @@ package install
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/go-logr/logr"
 )
