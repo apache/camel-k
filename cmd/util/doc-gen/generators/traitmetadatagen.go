@@ -19,11 +19,11 @@ package generators
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"io"
 	"os"
 	"path"
 	"reflect"
-	"gopkg.in/yaml.v2"
 	"strings"
 
 	"k8s.io/gengo/args"
@@ -34,34 +34,34 @@ import (
 // traitMetaDataGen produces YAML documentation about trait descriptions
 type traitMetaDataGen struct {
 	generator.DefaultGen
-	arguments           *args.GeneratorArgs
-	Root 								*traitMetaDataRoot
+	arguments *args.GeneratorArgs
+	Root      *traitMetaDataRoot
 }
 
 type traitMetaDataRoot struct {
-	Traits []traitMetaData 			 		`yaml:traits`
+	Traits []traitMetaData `yaml:"traits"`
 }
 
 type traitMetaData struct {
-	Name       		string                   		`yaml:"name"`
-	Platform 			bool												`yaml:platform`
-	Profiles			[]string										`yaml:profiles`
-	Description 	string                     	`yaml:"description"`
-	Properties 		[]traitPropertyMetaData 		`yaml:"properties"`
+	Name        string                  `yaml:"name"`
+	Platform    bool                    `yaml:"platform"`
+	Profiles    []string                `yaml:"profiles"`
+	Description string                  `yaml:"description"`
+	Properties  []traitPropertyMetaData `yaml:"properties"`
 }
 
 type traitPropertyMetaData struct {
-	Name         		string      							`yaml:"name"`
-	TypeName     		string      							`yaml:"type"`
-	Description			string										`yaml:"description"`
+	Name        string `yaml:"name"`
+	TypeName    string `yaml:"type"`
+	Description string `yaml:"description"`
 }
 
 // NewtraitMetaDataGen --
 func NewtraitMetaDataGen(arguments *args.GeneratorArgs) generator.Generator {
-	return &traitMetaDataGen {
+	return &traitMetaDataGen{
 		DefaultGen: generator.DefaultGen{},
 		arguments:  arguments,
-		Root: &traitMetaDataRoot{},
+		Root:       &traitMetaDataRoot{},
 	}
 }
 
@@ -82,7 +82,7 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 	traitID := g.getTraitID(t)
 	td := &traitMetaData{}
 	g.buildDescription(t, traitID, td)
-	g.buildFields(t, traitID, td)
+	g.buildFields(t, td)
 	g.Root.Traits = append(g.Root.Traits, *td)
 	return nil
 }
@@ -104,10 +104,10 @@ func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
 	defer file.Close()
 
 	data, err := yaml.Marshal(g.Root)
-  if err != nil {
-    fmt.Fprintf(file, "error: %v", err)
-  }
-  fmt.Fprintf(file, "%s", string(data))
+	if err != nil {
+		fmt.Fprintf(file, "error: %v", err)
+	}
+	fmt.Fprintf(file, "%s", string(data))
 	return nil
 }
 
@@ -133,20 +133,20 @@ func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *t
 	td.Platform = isPlatformTrait(traitID)
 }
 
-func (g *traitMetaDataGen) buildFields(t *types.Type, traitID string, td *traitMetaData) {
+func (g *traitMetaDataGen) buildFields(t *types.Type, td *traitMetaData) {
 	if len(t.Members) > 1 {
 		var res = []string(nil)
-		g.buildMembers(t, traitID, &res, td)
+		g.buildMembers(t, &res, td)
 	}
 }
 
-func (g *traitMetaDataGen) buildMembers(t *types.Type, traitID string, content *[]string, td *traitMetaData) {
+func (g *traitMetaDataGen) buildMembers(t *types.Type, content *[]string, td *traitMetaData) {
 	for _, m := range t.Members {
 		res := append([]string(nil), *content...)
 		prop := reflect.StructTag(m.Tags).Get("property")
 		if prop != "" {
 			if strings.Contains(prop, "squash") {
-				g.buildMembers(m.Type, traitID, &res, td)
+				g.buildMembers(m.Type, &res, td)
 			} else {
 				pd := traitPropertyMetaData{}
 				pd.Name = prop
