@@ -25,8 +25,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/indentedwriter"
 	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
 
 	"github.com/fatih/structs"
 	"gopkg.in/yaml.v2"
@@ -71,11 +71,11 @@ type traitHelpCommandOptions struct {
 }
 
 type traitDescription struct {
-	Name       	trait.ID                   `json:"name" yaml:"name"`
-	Platform   	bool                       `json:"platform" yaml:"platform"`
-	Profiles   	[]string                   `json:"profiles" yaml:"profiles"`
-	Properties 	[]traitPropertyDescription `json:"properties" yaml:"properties"`
-	Description string                  	 `json:"description" yaml:"description"`
+	Name        trait.ID                   `json:"name" yaml:"name"`
+	Platform    bool                       `json:"platform" yaml:"platform"`
+	Profiles    []string                   `json:"profiles" yaml:"profiles"`
+	Properties  []traitPropertyDescription `json:"properties" yaml:"properties"`
+	Description string                     `json:"description" yaml:"description"`
 }
 
 type traitPropertyDescription struct {
@@ -86,7 +86,7 @@ type traitPropertyDescription struct {
 }
 
 type traitMetaData struct {
-	Traits []traitDescription 			 			`yaml:traits`
+	Traits []traitDescription `yaml:"traits"`
 }
 
 func (command *traitHelpCommandOptions) validate(args []string) error {
@@ -107,7 +107,7 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 	err := yaml.Unmarshal(deploy.Resource("/traits.yaml"), traitMetaData)
 	if err != nil {
 		return err
-  }
+	}
 	res, err := yaml.Marshal(traitMetaData)
 	if err != nil {
 		return err
@@ -131,12 +131,12 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 
 				var targetTrait *traitDescription
 				for _, item := range traitMetaData.Traits {
-	        if item.Name == t.ID() {
+					if item.Name == t.ID() {
 						targetTrait = &item
 						td.Description = item.Description
 						break
-	        }
-    		}
+					}
+				}
 				computeTraitProperties(structs.Fields(t), &td.Properties, targetTrait)
 				traitDescriptions = append(traitDescriptions, td)
 			}
@@ -224,7 +224,7 @@ func computeTraitProperties(fields []*structs.Field, properties *[]traitProperty
 		}
 
 		// apply the description from metadata
-		if (targetTrait != nil) {
+		if targetTrait != nil {
 			for _, item := range targetTrait.Properties {
 				if item.Name == tp.Name {
 					tp.Description = item.Description
