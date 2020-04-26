@@ -69,6 +69,10 @@ Can contain simple event types or full Camel URIs (to use a specific broker).
 that can be removed in a future version of Knative, filtering is enabled only when the integration is
 listening from more than 1 channel.
 
+| knative.camel-source-compat
+| bool
+| Enables Knative CamelSource pre 0.15 compatibility fixes (will be removed in future versions).
+
 | knative.auto
 | bool
 | Enable automatic discovery of all trait properties.

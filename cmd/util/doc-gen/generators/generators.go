@@ -29,6 +29,7 @@ import (
 // CustomArgs --
 type CustomArgs struct {
 	DocDir    string
+	DeployDir string
 	TraitPath string
 	NavPath   string
 	ListPath  string
@@ -59,7 +60,7 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) (packag
 			PackageName: strings.Split(filepath.Base(pkg.Path), ".")[0],
 			PackagePath: pkg.Path,
 			GeneratorFunc: func(c *generator.Context) (generators []generator.Generator) {
-				generators = append(generators, NewTraitDocGen(arguments))
+				generators = append(generators, NewTraitDocGen(arguments), NewtraitMetaDataGen(arguments))
 				return generators
 			},
 		})

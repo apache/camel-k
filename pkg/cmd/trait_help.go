@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
+	"github.com/apache/camel-k/deploy"
 
 	"github.com/fatih/structs"
 	"gopkg.in/yaml.v2"
@@ -70,16 +71,22 @@ type traitHelpCommandOptions struct {
 }
 
 type traitDescription struct {
-	Name       trait.ID                   `json:"name" yaml:"name"`
-	Platform   bool                       `json:"platform" yaml:"platform"`
-	Profiles   []string                   `json:"profiles" yaml:"profiles"`
-	Properties []traitPropertyDescription `json:"properties" yaml:"properties"`
+	Name       	trait.ID                   `json:"name" yaml:"name"`
+	Platform   	bool                       `json:"platform" yaml:"platform"`
+	Profiles   	[]string                   `json:"profiles" yaml:"profiles"`
+	Properties 	[]traitPropertyDescription `json:"properties" yaml:"properties"`
+	Description string                  	 `json:"description" yaml:"description"`
 }
 
 type traitPropertyDescription struct {
 	Name         string      `json:"name" yaml:"name"`
 	TypeName     string      `json:"type" yaml:"type"`
 	DefaultValue interface{} `json:"defaultValue,omitempty" yaml:"defaultValue,omitempty"`
+	Description  string      `json:"description" yaml:"description"`
+}
+
+type traitMetaData struct {
+	Traits []traitDescription 			 			`yaml:traits`
 }
 
 func (command *traitHelpCommandOptions) validate(args []string) error {
@@ -96,6 +103,17 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 	var traitDescriptions []*traitDescription
 	var catalog = trait.NewCatalog(command.Context, nil)
 
+	var traitMetaData = &traitMetaData{}
+	err := yaml.Unmarshal(deploy.Resource("/traits.yaml"), traitMetaData)
+	if err != nil {
+		return err
+  }
+	res, err := yaml.Marshal(traitMetaData)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(cmd.OutOrStdout(), string(res))
+
 	for _, tp := range v1.AllTraitProfiles {
 		traits := catalog.TraitsForProfile(tp)
 		for _, t := range traits {
@@ -110,7 +128,16 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 					Platform: t.IsPlatformTrait(),
 					Profiles: make([]string, 0),
 				}
-				computeTraitProperties(structs.Fields(t), &td.Properties)
+
+				var targetTrait *traitDescription
+				for _, item := range traitMetaData.Traits {
+	        if item.Name == t.ID() {
+						targetTrait = &item
+						td.Description = item.Description
+						break
+	        }
+    		}
+				computeTraitProperties(structs.Fields(t), &td.Properties, targetTrait)
 				traitDescriptions = append(traitDescriptions, td)
 			}
 			td.addProfile(string(tp))
@@ -159,10 +186,10 @@ func findTraitDescription(id trait.ID, traitDescriptions []*traitDescription) *t
 	return nil
 }
 
-func computeTraitProperties(fields []*structs.Field, properties *[]traitPropertyDescription) {
+func computeTraitProperties(fields []*structs.Field, properties *[]traitPropertyDescription, targetTrait *traitDescription) {
 	for _, f := range fields {
 		if f.IsEmbedded() && f.IsExported() && f.Kind() == reflect.Struct {
-			computeTraitProperties(f.Fields(), properties)
+			computeTraitProperties(f.Fields(), properties, targetTrait)
 		}
 
 		if !f.IsExported() || f.IsEmbedded() {
@@ -194,6 +221,15 @@ func computeTraitProperties(fields []*structs.Field, properties *[]traitProperty
 			}
 		} else {
 			tp.DefaultValue = f.Value()
+		}
+
+		// apply the description from metadata
+		if (targetTrait != nil) {
+			for _, item := range targetTrait.Properties {
+				if item.Name == tp.Name {
+					tp.Description = item.Description
+				}
+			}
 		}
 
 		*properties = append(*properties, tp)

@@ -1,0 +1,708 @@
+traits:
+- name: affinity
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: Allows to constrain which nodes the integration pod(s) are eligible
+    to be scheduled on, based on labels on the node,or with inter-pod affinity and
+    anti-affinity, based on labels on pods that are already running on the nodes.It’s
+    disabled by default.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: pod-affinity
+    type: bool
+    description: Always co-locates multiple replicas of the integration in the same
+      node (default *false*).
+  - name: pod-anti-affinity
+    type: bool
+    description: Never co-locates multiple replicas of the integration in the same
+      node (default *false*).
+  - name: node-affinity-labels
+    type: string
+    description: Defines a set of nodes the integration pod(s) are eligible to be
+      scheduled on, based on labels on the node.
+  - name: pod-affinity-labels
+    type: string
+    description: Defines a set of pods (namely those matching the label selector,
+      relative to the given namespace) that theintegration pod(s) should be co-located
+      with.
+  - name: pod-anti-affinity-labels
+    type: string
+    description: Defines a set of pods (namely those matching the label selector,
+      relative to the given namespace) that theintegration pod(s) should not be co-located
+      with.
+- name: builder
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The builder trait is internally used to determine the best strategy
+    tobuild and configure IntegrationKits.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: verbose
+    type: bool
+    description: Enable verbose logging on build components that support it (e.g.
+      Kaniko build pod).
+- name: camel
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Camel trait can be used to configure versions of Apache Camel K
+    runtime and related libraries, it cannot be disabled.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: runtime-version
+    type: string
+    description: The camel-k-runtime version to use for the integration. It overrides
+      the default version set in the Integration Platform.
+- name: container
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Container trait can be used to configure properties of the container
+    where the integration will run.It also provides configuration for Services associated
+    to the container.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: ""
+  - name: request-cpu
+    type: string
+    description: The minimum amount of CPU required.
+  - name: request-memory
+    type: string
+    description: The minimum amount of memory required.
+  - name: limit-cpu
+    type: string
+    description: The maximum amount of CPU required.
+  - name: limit-memory
+    type: string
+    description: The maximum amount of memory required.
+  - name: expose
+    type: bool
+    description: Can be used to enable/disable exposure via kubernetes Service.
+  - name: port
+    type: int
+    description: To configure a different port exposed by the container (default `8080`).
+  - name: port-name
+    type: string
+    description: To configure a different port name for the port exposed by the container
+      (default `http`).
+  - name: service-port
+    type: int
+    description: To configure under which service port the container port is to be
+      exposed (default `80`).
+  - name: service-port-name
+    type: string
+    description: To configure under which service port name the container port is
+      to be exposed (default `http`).
+  - name: name
+    type: string
+    description: The main container name. It's named `integration` by default.
+  - name: probes-enabled
+    type: bool
+    description: ProbesEnabled enable/disable probes on the container (default `false`)
+  - name: probe-path
+    type: string
+    description: Path to access on the probe ( default `/health`). Note that this
+      property is not supportedon quarkus runtime and setting it will result in the
+      integration failing to start.
+  - name: liveness-initial-delay
+    type: int32
+    description: Number of seconds after the container has started before liveness
+      probes are initiated.
+  - name: liveness-timeout
+    type: int32
+    description: Number of seconds after which the probe times out. Applies to the
+      liveness probe.
+  - name: liveness-period
+    type: int32
+    description: How often to perform the probe. Applies to the liveness probe.
+  - name: liveness-success-threshold
+    type: int32
+    description: Minimum consecutive successes for the probe to be considered successful
+      after having failed.Applies to the liveness probe.
+  - name: liveness-failure-threshold
+    type: int32
+    description: Minimum consecutive failures for the probe to be considered failed
+      after having succeeded.Applies to the liveness probe.
+  - name: readiness-initial-delay
+    type: int32
+    description: Number of seconds after the container has started before readiness
+      probes are initiated.
+  - name: readiness-timeout
+    type: int32
+    description: Number of seconds after which the probe times out. Applies to the
+      readiness probe.
+  - name: readiness-period
+    type: int32
+    description: How often to perform the probe. Applies to the readiness probe.
+  - name: readiness-success-threshold
+    type: int32
+    description: Minimum consecutive successes for the probe to be considered successful
+      after having failed.Applies to the readiness probe.
+  - name: readiness-failure-threshold
+    type: int32
+    description: Minimum consecutive failures for the probe to be considered failed
+      after having succeeded.Applies to the readiness probe.
+- name: cron
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Cron trait can be used to customize the behaviour of periodic
+    timer/cron based integrations.While normally an integration requires a pod to
+    be always up and running, some periodic tasks, such as batch jobs,require to be
+    activated at specific hours of the day or with a periodic delay of minutes.For
+    such tasks, the cron trait can materialize the integration as a Kubernetes CronJob
+    instead of a standard deployment,in order to save resources when the integration
+    does not need to be executed.Integrations that start from the following components
+    are evaluated by the cron trait: `timer`, `cron`, `quartz`.The rules for using
+    a Kubernetes CronJob are the following:- `timer`: when periods can be written
+    as cron expressions. E.g. `timer:tick?period=60000`.- `cron`, `quartz`: when the
+    cron expression does not contain seconds (or the "seconds" part is set to 0).
+    E.g.  `cron:tab?schedule=0/2+*+*+*+?` or `quartz:trigger?cron=0+0/2+*+*+*+?`.'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: schedule
+    type: string
+    description: The CronJob schedule for the whole integration. If multiple routes
+      are declared, they must have the same schedule for thismechanism to work correctly.
+  - name: components
+    type: string
+    description: 'A comma separated list of the Camel components that need to be customized
+      in order for them to work when the schedule is triggered externally by Kubernetes.A
+      specific customizer is activated for each specified component. E.g. for the
+      `timer` component, the `cron-timer` customizer isactivated (it''s present in
+      the `org.apache.camel.k:camel-k-runtime-cron` library).Supported components
+      are currently: `cron`, `timer` and `quartz`.'
+  - name: fallback
+    type: bool
+    description: Use the default Camel implementation of the `cron` endpoint (`quartz`)
+      instead of trying to materialize the integrationas Kubernetes CronJob.
+  - name: concurrency-policy
+    type: string
+    description: 'Specifies how to treat concurrent executions of a Job.Valid values
+      are:- "Allow": allows CronJobs to run concurrently;- "Forbid" (default): forbids
+      concurrent runs, skipping next run if previous run hasn''t finished yet;- "Replace":
+      cancels currently running job and replaces it with a new one'
+  - name: auto
+    type: bool
+    description: Automatically deploy the integration as CronJob when all routes areeither
+      starting from a periodic consumer (only `cron`, `timer` and `quartz` are supported)
+      or a passive consumer (e.g. `direct` is a passive consumer).It's required that
+      all periodic consumers have the same period and it can be expressed as cron
+      schedule (e.g. `1m` can be expressed as `0/1 * * * *`,while `35m` or `50s` cannot).
+- name: dependencies
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Dependencies trait is internally used to automatically add runtime
+    dependencies based on theintegration that the user wants to run.
+  properties: []
+- name: deployer
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The deployer trait can be used to explicitly select the kind of high
+    level resource thatwill deploy the integration.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: kind
+    type: string
+    description: Allows to explicitly select the desired deployment kind between `deployment`,
+      `cron-job` or `knative-service` when creating the resources for running the
+      integration.
+- name: deployment
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Deployment trait is responsible for generating the Kubernetes deployment
+    that will make surethe integration will run in the cluster.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+- name: environment
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The environment trait is used internally to inject standard environment
+    variables in the integration container,such as `NAMESPACE`, `POD_NAME` and others.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: container-meta
+    type: bool
+    description: ""
+- name: gc
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The GC Trait garbage-collects all resources that are no longer necessary
+    upon integration updates.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: discovery-cache
+    type: ./pkg/trait.discoveryCacheType
+    description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
+      (default `memory`)
+- name: ingress
+  platform: false
+  profiles:
+  - Kubernetes
+  description: The Ingress trait can be used to expose the service associated with
+    the integrationto the outside world with a Kubernetes Ingress.It's enabled by
+    default whenever a Service is added to the integration (through the `service`
+    trait).
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: host
+    type: string
+    description: '**Required**. To configure the host exposed by the ingress.'
+  - name: auto
+    type: bool
+    description: To automatically add an ingress whenever the integration uses a HTTP
+      endpoint consumer.
+- name: istio
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Istio trait allows to configure properties related to the Istio
+    service mesh,such as sidecar injection and outbound IP ranges.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: allow
+    type: string
+    description: Configures a (comma-separated) list of CIDR subnets that should not
+      be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`
+      by default).
+  - name: inject
+    type: bool
+    description: Forces the value for labels `sidecar.istio.io/inject`. By default
+      the label is set to `true` on deployment and not set on Knative Service.
+- name: jolokia
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Jolokia trait activates and configures the Jolokia Java agent.See
+    https://jolokia.org/reference/html/agents.html
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: ca-cert
+    type: string
+    description: The PEM encoded CA certification file path, used to verify client
+      certificates,applicable when `protocol` is `https` and `use-ssl-client-authentication`
+      is `true`(default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`
+      for OpenShift).
+  - name: client-principal
+    type: '[]string'
+    description: The principal(s) which must be given in a client certificate to allow
+      access to the Jolokia endpoint,applicable when `protocol` is `https` and `use-ssl-client-authentication`
+      is `true`(default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc`
+      and `cn=fuse-console.fuse.svc` for OpenShift).
+  - name: discovery-enabled
+    type: bool
+    description: Listen for multicast requests (default `false`)
+  - name: extended-client-check
+    type: bool
+    description: Mandate the client certificate contains a client flag in the extended
+      key usage section,applicable when `protocol` is `https` and `use-ssl-client-authentication`
+      is `true`(default `true` for OpenShift).
+  - name: host
+    type: string
+    description: The Host address to which the Jolokia agent should bind to. If `"\*"`
+      or `"0.0.0.0"` is given,the servers binds to every network interface (default
+      `"*"`).
+  - name: password
+    type: string
+    description: The password used for authentication, applicable when the `user`
+      option is set.
+  - name: port
+    type: int
+    description: The Jolokia endpoint port (default `8778`).
+  - name: protocol
+    type: string
+    description: The protocol to use, either `http` or `https` (default `https` for
+      OpenShift)
+  - name: user
+    type: string
+    description: The user to be used for authentication
+  - name: use-ssl-client-authentication
+    type: bool
+    description: Whether client certificates should be used for authentication (default
+      `true` for OpenShift).
+  - name: options
+    type: string
+    description: 'A comma-separated list of additional Jolokia options as definedin
+      https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration
+      options],e.g.: `keystore=...,executor=...`'
+- name: jvm
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The JVM trait is used to configure the JVM that runs the integration.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: debug
+    type: bool
+    description: Activates remote debugging, so that a debugger can be attached to
+      the JVM, e.g., using port-forwarding
+  - name: debug-suspend
+    type: bool
+    description: Suspends the target JVM immediately before the main class is loaded
+  - name: debug-address
+    type: string
+    description: Transport address at which to listen for the newly launched JVM
+  - name: options
+    type: string
+    description: A comma-separated list of JVM options
+- name: knative-service
+  platform: false
+  profiles:
+  - Knative
+  description: The Knative Service trait allows to configure options when running
+    the integration as Knative service instead ofa standard Kubernetes Deployment.Running
+    integrations as Knative Services adds auto-scaling (and scaling-to-zero) features,
+    but those featuresare only meaningful when the routes use a HTTP endpoint consumer.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: autoscaling-class
+    type: string
+    description: Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev`
+      or `kpa.autoscaling.knative.dev` autoscaling).Refer to the Knative documentation
+      for more information.
+  - name: autoscaling-metric
+    type: string
+    description: Configures the Knative autoscaling metric property (e.g. to set `concurrency`
+      based or `cpu` based autoscaling).Refer to the Knative documentation for more
+      information.
+  - name: autoscaling-target
+    type: int
+    description: Sets the allowed concurrency level or CPU percentage (depending on
+      the autoscaling metric) for each Pod.Refer to the Knative documentation for
+      more information.
+  - name: min-scale
+    type: int
+    description: The minimum number of Pods that should be running at any time for
+      the integration. It's **zero** by default, meaning thatthe integration is scaled
+      down to zero when not used for a configured amount of time.Refer to the Knative
+      documentation for more information.
+  - name: max-scale
+    type: int
+    description: An upper bound for the number of Pods that can be running in parallel
+      for the integration.Knative has its own cap value that depends on the installation.Refer
+      to the Knative documentation for more information.
+  - name: auto
+    type: bool
+    description: Automatically deploy the integration as Knative service when all
+      conditions hold:* Integration is using the Knative profile* All routes are either
+      starting from a HTTP based consumer or a passive consumer (e.g. `direct` is
+      a passive consumer)
+- name: knative
+  platform: false
+  profiles:
+  - Knative
+  description: The Knative trait automatically discovers addresses of Knative resources
+    and inject them into therunning integration.The full Knative configuration is
+    injected in the CAMEL_KNATIVE_CONFIGURATION in JSON format.The Camel Knative component
+    will then use the full configuration to configure the routes.The trait is enabled
+    by default when the Knative profile is active.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: configuration
+    type: string
+    description: Can be used to inject a Knative complete configuration in JSON format.
+  - name: channel-sources
+    type: string
+    description: Comma-separated list of channels used as source of integration routes.Can
+      contain simple channel names or full Camel URIs.
+  - name: channel-sinks
+    type: string
+    description: Comma-separated list of channels used as destination of integration
+      routes.Can contain simple channel names or full Camel URIs.
+  - name: endpoint-sources
+    type: string
+    description: Comma-separated list of channels used as source of integration routes.
+  - name: endpoint-sinks
+    type: string
+    description: Comma-separated list of endpoints used as destination of integration
+      routes.Can contain simple endpoint names or full Camel URIs.
+  - name: event-sources
+    type: string
+    description: Comma-separated list of event types that the integration will be
+      subscribed to.Can contain simple event types or full Camel URIs (to use a specific
+      broker different from "default").
+  - name: event-sinks
+    type: string
+    description: Comma-separated list of event types that the integration will produce.Can
+      contain simple event types or full Camel URIs (to use a specific broker).
+  - name: filter-source-channels
+    type: bool
+    description: Enables filtering on events based on the header "ce-knativehistory".
+      Since this is an experimental headerthat can be removed in a future version
+      of Knative, filtering is enabled only when the integration islistening from
+      more than 1 channel.
+  - name: camel-source-compat
+    type: bool
+    description: Enables Knative CamelSource pre 0.15 compatibility fixes (will be
+      removed in future versions).
+  - name: auto
+    type: bool
+    description: Enable automatic discovery of all trait properties.
+- name: openapi
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The OpenAPI DSL trait is internally used to allow creating integrations
+    from a OpenAPI specs.
+  properties: []
+- name: owner
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Owner trait ensures that all created resources belong to the integration
+    being createdand transfers annotations and labels on the integration onto these
+    owned resources.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: target-annotations
+    type: string
+    description: The annotations to be transferred (A comma-separated list of label
+      keys)
+  - name: target-labels
+    type: string
+    description: The labels to be transferred (A comma-separated list of label keys)
+- name: platform
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The platform trait is a base trait that is used to assign an integration
+    platform to an integration.In case the platform is missing, the trait is allowed
+    to create a default platform.This feature is especially useful in contexts where
+    there's no need to provide a custom configuration for the platform(e.g. on OpenShift
+    the default settings work, since there's an embedded container image registry).
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: create-default
+    type: bool
+    description: To create a default (empty) platform when the platform is missing.
+  - name: auto
+    type: bool
+    description: To automatically detect from the environment if a default platform
+      can be created (it will be created on OpenShift only).
+- name: prometheus
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Prometheus trait configures the Prometheus JMX exporter and exposes
+    the integration with a `Service`and a `ServiceMonitor` resources so that the Prometheus
+    endpoint can be scraped.WARNING: The creation of the `ServiceMonitor` resource
+    requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]custom
+    resource definition to be installed.You can set `service-monitor` to `false` for
+    the Prometheus trait to work without the Prometheus operator.It''s disabled by
+    default.'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: port
+    type: int
+    description: The Prometheus endpoint port (default `9779`).
+  - name: service-monitor
+    type: bool
+    description: Whether a `ServiceMonitor` resource is created (default `true`).
+  - name: service-monitor-labels
+    type: string
+    description: The `ServiceMonitor` resource labels, applicable when `service-monitor`
+      is `true`.
+  - name: configmap
+    type: string
+    description: To use a custom ConfigMap containing the Prometheus exporter configuration
+      (under the `content` ConfigMap key). When this property is left empty (default),Camel
+      K generates a standard Prometheus configuration for the integration.
+- name: pull-secret
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Pull Secret trait sets a pull secret on the pod,to allow Kubernetes
+    to retrieve the container image from an external registry.The pull secret can
+    be specified manually or, in case you've configured authentication for an external
+    container registryon the `IntegrationPlatform`, the same secret is used to pull
+    images.It's enabled by default whenever you configure authentication for an external
+    container registry,so it assumes that external registries are private.If your
+    registry does not need authentication for pulling images, you can disable this
+    trait.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: secret-name
+    type: string
+    description: The pull secret name to set on the Pod. If left empty this is automatically
+      taken from the `IntegrationPlatform` registry configuration.
+  - name: auto
+    type: bool
+    description: Automatically configures the platform registry secret on the pod
+      if it is of type `kubernetes.io/dockerconfigjson`.
+- name: quarkus
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Quarkus trait activates the Quarkus runtime.It's disabled by default.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: native
+    type: bool
+    description: The Quarkus runtime type (reserved for future use)
+- name: route
+  platform: false
+  profiles:
+  - OpenShift
+  description: The Route trait can be used to configure the creation of OpenShift
+    routes for the integration.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: host
+    type: string
+    description: To configure the host exposed by the route.
+  - name: tls-termination
+    type: string
+    description: The TLS termination type, like `edge`, `passthrough` or `reencrypt`.Refer
+      to the OpenShift documentation for additional information.
+  - name: tls-certificate
+    type: string
+    description: The TLS certificate contents.Refer to the OpenShift documentation
+      for additional information.
+  - name: tls-key
+    type: string
+    description: The TLS certificate key contents.Refer to the OpenShift documentation
+      for additional information.
+  - name: tls-ca-certificate
+    type: string
+    description: The TLS cert authority certificate contents.Refer to the OpenShift
+      documentation for additional information.
+  - name: tls-destination-ca-certificate
+    type: string
+    description: The destination CA certificate provides the contents of the ca certificate
+      of the final destination.  When using reencrypttermination this file should
+      be provided in order to have routers use it for health checks on the secure
+      connection.If this field is not specified, the router may provide its own destination
+      CA and perform hostname validation usingthe short service name (service.namespace.svc),
+      which allows infrastructure generated certificates to automaticallyverify.Refer
+      to the OpenShift documentation for additional information.
+  - name: tls-insecure-edge-termination-policy
+    type: string
+    description: To configure how to deal with insecure traffic, e.g. `Allow`, `Disable`
+      or `Redirect` traffic.Refer to the OpenShift documentation for additional information.
+- name: service
+  platform: false
+  profiles:
+  - Kubernetes
+  - OpenShift
+  description: The Service trait exposes the integration with a Service resource so
+    that it can be accessed by other applications(or integrations) in the same namespace.It's
+    enabled by default if the integration depends on a Camel component that can expose
+    a HTTP endpoint.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: To automatically detect from the code if a Service needs to be created.
