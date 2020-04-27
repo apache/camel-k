@@ -183,7 +183,7 @@ traits:
     a Kubernetes CronJob are the following:- `timer`: when periods can be written
     as cron expressions. E.g. `timer:tick?period=60000`.- `cron`, `quartz`: when the
     cron expression does not contain seconds (or the "seconds" part is set to 0).
-    E.g.  `cron:tab?schedule=0/2+*+*+*+?` or `quartz:trigger?cron=0+0/2+*+*+*+?`.'
+    E.g.  `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?` or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.'
   properties:
   - name: enabled
     type: bool
@@ -288,7 +288,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: discovery-cache
-    type: ./pkg/trait.discoveryCacheType
+    type: github.com/apache/camel-k/pkg/trait.discoveryCacheType
     description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
       (default `memory`)
 - name: ingress
