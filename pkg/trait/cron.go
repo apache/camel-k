@@ -47,7 +47,7 @@ import (
 // The rules for using a Kubernetes CronJob are the following:
 // - `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=60000`.
 // - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
-//   `cron:tab?schedule=0/2+*+*+*+?` or `quartz:trigger?cron=0+0/2+*+*+*+?`.
+//   `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?` or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.
 //
 // +camel-k:trait=cron
 type cronTrait struct {
