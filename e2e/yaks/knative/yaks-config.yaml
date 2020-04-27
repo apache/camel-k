@@ -1,0 +1,12 @@
+config:
+  namespace:
+    temporary: true
+pre:
+- name: installation
+  run: |
+    kamel install -n $YAKS_NAMESPACE
+
+    kamel run receiver.groovy -w -n $YAKS_NAMESPACE
+
+    kubectl apply -f source.yaml -n $YAKS_NAMESPACE
+    kubectl wait camelsource --all --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
