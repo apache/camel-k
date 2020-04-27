@@ -267,8 +267,11 @@ jobs:
           # Make the Apache Snapshots repository enabled by efault
           export KAMEL_INSTALL_MAVEN_REPOSITORIES=https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots
 
+          echo "Making kamel global"
+          sudo mv kamel /usr/local/bin/
+
           echo "installing camel k cluster resources"
-          ./kamel install --cluster-setup
+          kamel install --cluster-setup
 
           # Then run integration tests
           export KAMEL_INSTALL_REGISTRY=${CAMEL_K_REGISTRY}:5000
