@@ -92,23 +92,33 @@ jobs:
         # Prerequisites
         sudo pip install yq
 
+        export SERVING_VERSION=v0.14.0
+        export EVENTING_VERSION=v0.14.1
+        export SOURCES_VERSION=v0.14.1
+
         # Serving
-        kubectl apply --filename https://github.com/knative/serving/releases/download/v0.14.0/serving-crds.yaml
-        curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+        kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
+        curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
         # Kourier
-        kubectl apply --filename https://github.com/knative/net-kourier/releases/download/v0.14.0/kourier.yaml
+        kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$SERVING_VERSION/kourier.yaml
         kubectl patch configmap/config-network \
-          --namespace knative-serving \
-          --type merge \
-          --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
+        --namespace knative-serving \
+        --type merge \
+        --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
 
         # Eventing
-        kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.14.1/eventing-crds.yaml
-        curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+        kubectl apply --filename https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-crds.yaml
+        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+
+        # Eventing channels
+        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+
+        # Eventing broker
+        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
         # Camel Sources
-        kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/v0.14.0/camel.yaml
+        kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
 
         # Wait for installation completed
         while [ "$(kubectl get pod -n kourier-system --no-headers | wc -l)" == "0" ]; do echo "Waiting for pods to start in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
@@ -231,23 +241,33 @@ jobs:
           # Prerequisites
           sudo pip install yq
 
+          export SERVING_VERSION=v0.14.0
+          export EVENTING_VERSION=v0.14.1
+          export SOURCES_VERSION=v0.14.1
+
           # Serving
-          kubectl apply --filename https://github.com/knative/serving/releases/download/v0.14.0/serving-crds.yaml
-          curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+          kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
+          curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
           # Kourier
-          kubectl apply --filename https://github.com/knative/net-kourier/releases/download/v0.14.0/kourier.yaml
+          kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$SERVING_VERSION/kourier.yaml
           kubectl patch configmap/config-network \
           --namespace knative-serving \
           --type merge \
           --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
 
           # Eventing
-          kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.14.1/eventing-crds.yaml
-          curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+          kubectl apply --filename https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-crds.yaml
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+
+          # Eventing channels
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+
+          # Eventing broker
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
           # Camel Sources
-          kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/v0.14.1/camel.yaml
+          kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
 
           # Wait for installation completed
           while [ "$(kubectl get pod -n kourier-system --no-headers | wc -l)" == "0" ]; do echo "Waiting for pods to start in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
