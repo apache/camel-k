@@ -8,7 +8,7 @@ require (
 	// required by knative 0.12
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.9-0.20191108183826-59d068f8d8ff // indirect
 	github.com/Masterminds/semver v1.5.0
-	github.com/container-tools/spectrum v0.3.0
+	github.com/container-tools/spectrum v0.3.2
 	github.com/coreos/prometheus-operator v0.34.0
 	github.com/evanphx/json-patch v4.5.0+incompatible
 	github.com/fatih/structs v1.1.0
@@ -38,8 +38,8 @@ require (
 	go.uber.org/multierr v1.1.0
 	gopkg.in/inf.v0 v0.9.1
 	gopkg.in/yaml.v2 v2.2.4
-	k8s.io/api v0.17.0
-	k8s.io/apimachinery v0.17.0
+	k8s.io/api v0.17.4
+	k8s.io/apimachinery v0.17.4
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20191010091904-7fa3014cb28f
 	knative.dev/eventing v0.12.0
@@ -76,3 +76,6 @@ replace (
 )
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
+
+// Using a fork that removes the https ping before using http in case of insecure registry (for Spectrum)
+replace github.com/google/go-containerregistry => github.com/nicolaferraro/go-containerregistry v0.0.0-20200428072705-e7aced86aca8
