@@ -3,3 +3,5 @@ title: Apache Camel K
 version: latest
 nav:
 - modules/ROOT/nav.adoc
+- modules/languages/nav-languages.adoc
+- modules/ROOT/nav-end.adoc
