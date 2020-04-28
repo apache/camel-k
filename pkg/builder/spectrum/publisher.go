@@ -69,6 +69,8 @@ func publisher(ctx *builder.Context) error {
 		Target:       target,
 		PullInsecure: pullInsecure,
 		PushInsecure: pl.Status.Build.Registry.Insecure,
+		Stdout:       os.Stdout,
+		Stderr:       os.Stderr,
 	}
 
 	digest, err := spectrum.Build(options, libraryPath+":/deployments/dependencies")
