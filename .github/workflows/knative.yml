@@ -94,7 +94,7 @@ jobs:
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/v0.14.0/serving-crds.yaml
-        curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
+        curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
         # Kourier
         kubectl apply --filename https://github.com/knative/net-kourier/releases/download/v0.14.0/kourier.yaml
@@ -105,7 +105,7 @@ jobs:
 
         # Eventing
         kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.14.1/eventing-crds.yaml
-        curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
+        curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
         # Camel Sources
         kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/v0.14.0/camel.yaml
@@ -233,7 +233,7 @@ jobs:
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/v0.14.0/serving-crds.yaml
-          curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
+          curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
           # Kourier
           kubectl apply --filename https://github.com/knative/net-kourier/releases/download/v0.14.0/kourier.yaml
@@ -244,7 +244,7 @@ jobs:
 
           # Eventing
           kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.14.1/eventing-crds.yaml
-          curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
+          curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
           # Camel Sources
           kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/v0.14.1/camel.yaml
