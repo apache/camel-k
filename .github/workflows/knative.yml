@@ -228,34 +228,33 @@ jobs:
           yaks install --cluster-setup
       - name: Install Knative
         run: |
-        # Prerequisites
-        sudo pip install yq
+          # Prerequisites
+          sudo pip install yq
 
-        # Serving
-        kubectl apply --filename https://github.com/knative/serving/releases/download/v0.14.0/serving-crds.yaml
-        curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
+          # Serving
+          kubectl apply --filename https://github.com/knative/serving/releases/download/v0.14.0/serving-crds.yaml
+          curl -L -s https://github.com/knative/serving/releases/download/v0.14.0/serving-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
 
-        # Kourier
-        kubectl apply --filename https://github.com/knative/net-kourier/releases/download/v0.14.0/kourier.yaml
-        kubectl patch configmap/config-network \
-        --namespace knative-serving \
-        --type merge \
-        --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
+          # Kourier
+          kubectl apply --filename https://github.com/knative/net-kourier/releases/download/v0.14.0/kourier.yaml
+          kubectl patch configmap/config-network \
+          --namespace knative-serving \
+          --type merge \
+          --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
 
-        # Eventing
-        kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.14.1/eventing-crds.yaml
-        curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
+          # Eventing
+          kubectl apply --filename https://github.com/knative/eventing/releases/download/v0.14.1/eventing-crds.yaml
+          curl -L -s https://github.com/knative/eventing/releases/download/v0.14.1/eventing-core.yaml | yq 'del(.spec.template.spec.containers[].resources)' -y 2>/dev/null | kubectl apply -f -
 
-        # Camel Sources
-        kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/v0.14.1/camel.yaml
+          # Camel Sources
+          kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/v0.14.1/camel.yaml
 
-        # Wait for installation completed
-        while [ "$(kubectl get pod -n kourier-system --no-headers | wc -l)" == "0" ]; do echo "Waiting for pods to start in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
-        while [ "$(kubectl get pod -n kourier-system -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
-        while [ "$(kubectl get pod -n knative-serving -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-serving"; kubectl get pod -n knative-serving; sleep 5; done
-        while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; kubectl get pod -n knative-eventing; sleep 5; done
-        while [ "$(kubectl get pod -n knative-sources -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-sources"; kubectl get pod -n knative-sources; sleep 5; done
-
+          # Wait for installation completed
+          while [ "$(kubectl get pod -n kourier-system --no-headers | wc -l)" == "0" ]; do echo "Waiting for pods to start in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
+          while [ "$(kubectl get pod -n kourier-system -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
+          while [ "$(kubectl get pod -n knative-serving -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-serving"; kubectl get pod -n knative-serving; sleep 5; done
+          while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; kubectl get pod -n knative-eventing; sleep 5; done
+          while [ "$(kubectl get pod -n knative-sources -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-sources"; kubectl get pod -n knative-sources; sleep 5; done
 
       - name: Run IT
         run: |
