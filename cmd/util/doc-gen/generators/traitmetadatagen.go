@@ -19,13 +19,13 @@ package generators
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io"
 	"os"
 	"path"
 	"reflect"
 	"strings"
 
+	"gopkg.in/yaml.v2"
 	"k8s.io/gengo/args"
 	"k8s.io/gengo/generator"
 	"k8s.io/gengo/types"
@@ -152,9 +152,7 @@ func (g *traitMetaDataGen) buildMembers(t *types.Type, content *[]string, td *tr
 				pd.Name = prop
 				pd.TypeName = strings.TrimPrefix(m.Type.Name.Name, "*")
 
-				for _, line := range filterOutTagsAndComments(m.CommentLines) {
-					res = append(res, line)
-				}
+				res = append(res, filterOutTagsAndComments(m.CommentLines)...)
 				pd.Description = strings.Join(res, "")
 				td.Properties = append(td.Properties, pd)
 			}

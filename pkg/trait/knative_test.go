@@ -521,7 +521,7 @@ func NewFakeClient(namespace string) (client.Client, error) {
 				},
 				Broker: "default",
 				Subscriber: duckv1.Destination{
-					Ref: &corev1.ObjectReference{
+					Ref: &duckv1.KReference{
 						APIVersion: serving.SchemeGroupVersion.String(),
 						Kind:       "Service",
 						Name:       "event-source-1",

@@ -56,7 +56,7 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 				Name:       channelReference.Name,
 			},
 			Subscriber: &duckv1.Destination{
-				Ref: &corev1.ObjectReference{
+				Ref: &duckv1.KReference{
 					APIVersion: serving.SchemeGroupVersion.String(),
 					Kind:       "Service",
 					Name:       serviceName,
@@ -87,7 +87,7 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 			},
 			Broker: brokerReference.Name,
 			Subscriber: duckv1.Destination{
-				Ref: &corev1.ObjectReference{
+				Ref: &duckv1.KReference{
 					APIVersion: serving.SchemeGroupVersion.String(),
 					Kind:       "Service",
 					Name:       serviceName,

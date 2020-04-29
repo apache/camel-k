@@ -131,6 +131,7 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 
 				var targetTrait *traitDescription
 				for _, item := range traitMetaData.Traits {
+					item := item
 					if item.Name == t.ID() {
 						targetTrait = &item
 						td.Description = item.Description

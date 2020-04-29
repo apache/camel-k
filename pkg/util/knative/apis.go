@@ -31,6 +31,14 @@ var (
 			GroupVersionKind: schema.GroupVersionKind{
 				Kind:    "Channel",
 				Group:   "messaging.knative.dev",
+				Version: "v1beta1",
+			},
+			Resource: "channels",
+		},
+		{
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Channel",
+				Group:   "messaging.knative.dev",
 				Version: "v1alpha1",
 			},
 			Resource: "channels",
@@ -42,6 +50,14 @@ var (
 				Version: "v1alpha1",
 			},
 			Resource: "channels",
+		},
+		{
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "InMemoryChannel",
+				Group:   "messaging.knative.dev",
+				Version: "v1beta1",
+			},
+			Resource: "inmemorychannels",
 		},
 		{
 			GroupVersionKind: schema.GroupVersionKind{
@@ -99,6 +115,14 @@ var (
 
 	// KnownBrokerKinds are known broker kinds belonging to Knative
 	KnownBrokerKinds = []GroupVersionKindResource{
+		{
+			GroupVersionKind: schema.GroupVersionKind{
+				Kind:    "Broker",
+				Group:   "eventing.knative.dev",
+				Version: "v1beta1",
+			},
+			Resource: "brokers",
+		},
 		{
 			GroupVersionKind: schema.GroupVersionKind{
 				Kind:    "Broker",
