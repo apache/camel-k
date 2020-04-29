@@ -18,12 +18,16 @@ limitations under the License.
 package apis
 
 import (
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	eventingv1beta1 "knative.dev/eventing/pkg/apis/eventing/v1beta1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingv1beta1 "knative.dev/eventing/pkg/apis/messaging/v1beta1"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
-	AddToSchemes = append(AddToSchemes, eventing.AddToScheme)
-	AddToSchemes = append(AddToSchemes, messaging.AddToScheme)
+	AddToSchemes = append(AddToSchemes, eventingv1alpha1.AddToScheme)
+	AddToSchemes = append(AddToSchemes, eventingv1beta1.AddToScheme)
+	AddToSchemes = append(AddToSchemes, messagingv1alpha1.AddToScheme)
+	AddToSchemes = append(AddToSchemes, messagingv1beta1.AddToScheme)
 }

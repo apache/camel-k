@@ -5,8 +5,6 @@ go 1.13
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
-	// required by knative 0.12
-	contrib.go.opencensus.io/exporter/stackdriver v0.12.9-0.20191108183826-59d068f8d8ff // indirect
 	github.com/Masterminds/semver v1.5.0
 	github.com/container-tools/spectrum v0.3.2
 	github.com/coreos/prometheus-operator v0.34.0
@@ -42,14 +40,14 @@ require (
 	k8s.io/apimachinery v0.17.4
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20191010091904-7fa3014cb28f
-	knative.dev/eventing v0.12.0
-	knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
-	knative.dev/serving v0.12.1
+	knative.dev/eventing v0.14.1
+	knative.dev/pkg v0.0.0-20200410152005-2a1db869228c
+	knative.dev/serving v0.14.0
 	sigs.k8s.io/controller-runtime v0.4.0
 )
 
 // Pinned to kubernetes 1.16.2:
-// - Knative 0.12.0 requires 1.16.4
+// - Knative 0.14.0 requires 1.16.4
 // - Operator SDK 0.15.0 requires 1.16.2
 replace (
 	k8s.io/api => k8s.io/api v0.0.0-20191016110408-35e52d86657a
