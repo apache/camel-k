@@ -269,17 +269,17 @@ func IntegrationPod(ns string, name string) func() *corev1.Pod {
 	}
 }
 
-func IntegrationConditionHolds(ns string, name string, conditionType v1.IntegrationConditionType) func() bool {
-	return func() bool {
+func IntegrationCondition(ns string, name string, conditionType v1.IntegrationConditionType) func() corev1.ConditionStatus {
+	return func() corev1.ConditionStatus {
 		it := Integration(ns, name)()
 		if it == nil {
-			return false
+			return "IntegrationMissing"
 		}
 		c := it.Status.GetCondition(conditionType)
 		if c == nil {
-			return false
+			return "ConditionMissing"
 		}
-		return c.Status == corev1.ConditionTrue
+		return c.Status
 	}
 }
 
