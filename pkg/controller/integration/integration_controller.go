@@ -24,6 +24,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
@@ -216,8 +217,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		OwnerType:    &v1.Integration{},
 		IsController: false,
 	})
-	if err != nil {
-		return err
+	if _, ok := err.(*meta.NoKindMatchError); ok {
+		log.Info("No watch has been set on Knative services because the type is not known")
+	} else if err != nil {
+		log.Error(err, "Cannot set watch on Knative services")
 	}
 
 	// Watch cronjob to update the ready condition
