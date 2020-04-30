@@ -194,6 +194,8 @@ const (
 	IntegrationConditionJolokiaAvailable IntegrationConditionType = "JolokiaAvailable"
 	// IntegrationConditionProbesAvailable --
 	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
+	// IntegrationConditionReady --
+	IntegrationConditionReady IntegrationConditionType = "Ready"
 
 	// IntegrationConditionKitAvailableReason --
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
@@ -231,6 +233,10 @@ const (
 	IntegrationConditionJolokiaAvailableReason string = "JolokiaAvailable"
 	// IntegrationConditionProbesAvailableReason --
 	IntegrationConditionProbesAvailableReason string = "ProbesAvailable"
+	// IntegrationConditionErrorReason --
+	IntegrationConditionErrorReason string = "Error"
+	// IntegrationConditionCronJobCreatedReason --
+	IntegrationConditionCronJobCreatedReason string = "CronJobCreatedReason"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.
