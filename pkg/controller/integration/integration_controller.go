@@ -22,10 +22,12 @@ import (
 
 	camelevent "github.com/apache/camel-k/pkg/event"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -195,6 +197,33 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			// that are used to reconcile the integration replicas.
 			return oldReplicaSet.Status.Replicas != newReplicaSet.Status.Replicas
 		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch deployment to update the ready condition
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
+		OwnerType:    &v1.Integration{},
+		IsController: false,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch Knative service to update the ready condition
+	err = c.Watch(&source.Kind{Type: &servingv1.Service{}}, &handler.EnqueueRequestForOwner{
+		OwnerType:    &v1.Integration{},
+		IsController: false,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch cronjob to update the ready condition
+	err = c.Watch(&source.Kind{Type: &v1beta1.CronJob{}}, &handler.EnqueueRequestForOwner{
+		OwnerType:    &v1.Integration{},
+		IsController: false,
 	})
 	if err != nil {
 		return err
