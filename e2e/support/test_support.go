@@ -269,6 +269,20 @@ func IntegrationPod(ns string, name string) func() *corev1.Pod {
 	}
 }
 
+func IntegrationConditionHolds(ns string, name string, conditionType v1.IntegrationConditionType) func() bool {
+	return func() bool {
+		it := Integration(ns, name)()
+		if it == nil {
+			return false
+		}
+		c := it.Status.GetCondition(conditionType)
+		if c == nil {
+			return false
+		}
+		return c.Status == corev1.ConditionTrue
+	}
+}
+
 func ConfigMap(ns string, name string) func() *corev1.ConfigMap {
 	return func() *corev1.ConfigMap {
 		cm := corev1.ConfigMap{}
