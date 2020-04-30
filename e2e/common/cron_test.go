@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
@@ -38,6 +39,7 @@ func TestRunCronExample(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
 			Eventually(IntegrationCronJob(ns, "cron"), TestTimeoutMedium).ShouldNot(BeNil())
+			Eventually(IntegrationConditionHolds(ns, "cron", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "cron"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})

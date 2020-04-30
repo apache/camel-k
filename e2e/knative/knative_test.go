@@ -26,6 +26,7 @@ import (
 	"time"
 
 	. "github.com/apache/camel-k/e2e/support"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
@@ -36,10 +37,13 @@ func TestRunServiceCombo(t *testing.T) {
 		Expect(Kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
 		Expect(Kamel("run", "-n", ns, "files/knative2.groovy").Execute()).Should(BeNil())
 		Eventually(IntegrationPodPhase(ns, "knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationConditionHolds(ns, "knative2", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 		Expect(Kamel("run", "-n", ns, "files/knative3.groovy").Execute()).Should(BeNil())
 		Eventually(IntegrationPodPhase(ns, "knative3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationConditionHolds(ns, "knative3", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 		Expect(Kamel("run", "-n", ns, "files/knative1.groovy").Execute()).Should(BeNil())
 		Eventually(IntegrationPodPhase(ns, "knative1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationConditionHolds(ns, "knative1", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 		// Correct logs
 		Eventually(IntegrationLogs(ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 2: Hello from knative2"))
 		Eventually(IntegrationLogs(ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 3: Hello from knative3"))

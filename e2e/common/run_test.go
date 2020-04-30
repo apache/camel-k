@@ -22,19 +22,15 @@ limitations under the License.
 package common
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
 
 func TestRunSimpleExamples(t *testing.T) {
-	if os.Getenv("KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY") == "Buildah" {
-		t.Skip("Apparently this test require too much CI resources to be run with Buildah, let's save some...")
-		return
-	}
 
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
@@ -43,6 +39,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/Java.java").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -51,6 +48,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/Prop.java", "--property-file", "files/prop.properties").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "prop"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "prop", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "prop"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -59,6 +57,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/xml.xml").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "xml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "xml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "xml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -67,6 +66,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "groovy", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -75,6 +75,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/js.js").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "js", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -83,6 +84,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/kotlin.kts").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "kotlin"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "kotlin", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "kotlin"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -91,6 +93,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "yaml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -99,6 +102,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "--name", "yaml-quarkus", "files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "yaml-quarkus"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "yaml-quarkus", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "yaml-quarkus"), TestTimeoutShort).Should(ContainSubstring("powered by Quarkus"))
 			Eventually(IntegrationLogs(ns, "yaml-quarkus"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
@@ -108,6 +112,7 @@ func TestRunSimpleExamples(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "--name", "polyglot", "files/js-polyglot.js", "files/yaml-polyglot.yaml").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "polyglot"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionHolds(ns, "polyglot", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
 			Eventually(IntegrationLogs(ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-yaml"))
 			Eventually(IntegrationLogs(ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-js"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
