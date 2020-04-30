@@ -110,10 +110,7 @@ func (g *traitDocGen) GenerateType(context *generator.Context, t *types.Type, ou
 }
 
 func (g *traitDocGen) Finalize(c *generator.Context, w io.Writer) error {
-	if err := g.FinalizeNav(c); err != nil {
-		return err
-	}
-	return g.FinalizeList(c)
+	return g.FinalizeNav(c)
 }
 
 func (g *traitDocGen) FinalizeNav(*generator.Context) error {
@@ -134,35 +131,9 @@ func (g *traitDocGen) FinalizeNav(*generator.Context) error {
 	sort.Strings(g.generatedTraitFiles)
 	for _, t := range g.generatedTraitFiles {
 		name := traitNameFromFile(t)
-		content = append(content, "** xref:traits/"+t+"["+name+"]")
+		content = append(content, "** xref:traits:"+t+"["+name+"]")
 	}
 	content = append(content, adocNavMarkerEnd)
-	content = append(content, post...)
-
-	return writeFile(file, content)
-}
-
-func (g *traitDocGen) FinalizeList(*generator.Context) error {
-	docDir := g.arguments.CustomArgs.(*CustomArgs).DocDir
-	listPath := g.arguments.CustomArgs.(*CustomArgs).ListPath
-	filename := path.Join(docDir, listPath)
-
-	file, content, err := readFile(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	pre, post := split(content, adocListMarkerStart, adocListMarkerEnd)
-
-	content = append([]string(nil), pre...)
-	content = append(content, adocListMarkerStart)
-	sort.Strings(g.generatedTraitFiles)
-	for _, t := range g.generatedTraitFiles {
-		name := traitNameFromFile(t)
-		content = append(content, "* xref:traits/"+t+"["+name+" Trait]")
-	}
-	content = append(content, adocListMarkerEnd)
 	content = append(content, post...)
 
 	return writeFile(file, content)
