@@ -39,7 +39,7 @@ func TestRunCronExample(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
 			Eventually(IntegrationCronJob(ns, "cron"), TestTimeoutMedium).ShouldNot(BeNil())
-			Eventually(IntegrationConditionHolds(ns, "cron", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(BeTrue())
+			Eventually(IntegrationCondition(ns, "cron", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "cron"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -49,6 +49,7 @@ func TestRunCronExample(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "files/cron-timer.groovy").Execute()).Should(BeNil())
 			Eventually(IntegrationCronJob(ns, "cron-timer"), TestTimeoutMedium).ShouldNot(BeNil())
+			Eventually(IntegrationCondition(ns, "cron", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "cron-timer"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
@@ -58,6 +59,7 @@ func TestRunCronExample(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "files/cron-fallback.groovy").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "cron-fallback"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "cron", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "cron-fallback"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
