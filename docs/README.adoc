@@ -11,22 +11,26 @@ yarn install
 
 == Local development
 
-To build the local copy of the website and preview it, execute:
-
-```
-yarn dev
-```
-
-== Build the Documentation Website
-
-To generate the documentation website from the remote repository branch, execute:
+To build the partial website from the local worktree, execute:
 
 ```
 yarn build
 ```
 
-To preview it in the local browser, execute:
+== Build and preview
+
+To build the partial website from the local worktree and preview the results, execute:
 
 ```
 yarn preview
 ```
+
+== xref check
+
+To check the xrefs in the partial site, execute:
+
+```
+yarn checks
+```
+
+Valid xrefs to parts of the site in other sources will appear as (spurious) errors.

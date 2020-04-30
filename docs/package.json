@@ -4,15 +4,15 @@
   "description": "Camel K Documentation",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@antora/cli": "~2.3.0",
-    "@antora/site-generator-default": "~2.3.0",
+    "@antora/cli": "~2.3.1",
+    "@antora/site-generator-default": "~2.3.1",
     "@antora/xref-validator": "gitlab:antora/xref-validator",
+    "@djencks/asciidoctor-antora-indexer": "^0.0.2",
     "lite-server": "^2.4.0"
   },
   "scripts": {
-    "preview": "cd public && lite-server",
+    "preview": "yarn build && cd build/site && lite-server",
     "build": "yarn antora --stacktrace antora-playbook.yml",
-    "dev": "yarn antora --stacktrace antora-playbook-dev.yml && yarn preview",
     "checks": "yarn antora --generator @antora/xref-validator antora-playbook.yml"
   }
 }
