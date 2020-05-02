@@ -59,7 +59,7 @@ func TestThreeScaleInjection(t *testing.T) {
 	assert.Equal(t, "http", svc.Annotations["discovery.3scale.net/scheme"])
 	assert.Equal(t, "/", svc.Annotations["discovery.3scale.net/path"])
 	assert.Equal(t, "80", svc.Annotations["discovery.3scale.net/port"])
-	assert.Equal(t, "/api-doc", svc.Annotations["discovery.3scale.net/description-path"])
+	assert.Equal(t, "/openapi.json", svc.Annotations["discovery.3scale.net/description-path"])
 }
 
 func TestThreeScaleInjectionNoAPIPath(t *testing.T) {

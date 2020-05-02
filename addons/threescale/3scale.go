@@ -41,7 +41,7 @@ type threeScaleTrait struct {
 	Path string `property:"path"`
 	// The port where the service is exposed (default `80`)
 	Port int `property:"port"`
-	// The path where the Open-API specification is published (default `/api-doc`)
+	// The path where the Open-API specification is published (default `/openapi.json`)
 	DescriptionPath *string `property:"description-path"`
 }
 
@@ -64,7 +64,7 @@ const (
 	// ThreeScaleDescriptionPathAnnotation --
 	ThreeScaleDescriptionPathAnnotation = "discovery.3scale.net/description-path"
 	// ThreeScaleDescriptionPathDefaultValue --
-	ThreeScaleDescriptionPathDefaultValue = "/api-doc"
+	ThreeScaleDescriptionPathDefaultValue = "/openapi.json"
 
 	// ThreeScaleDiscoveryLabel --
 	ThreeScaleDiscoveryLabel = "discovery.3scale.net"
