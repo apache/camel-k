@@ -199,15 +199,11 @@ func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.
 func notifyIfConditionUpdated(recorder record.EventRecorder, new runtime.Object, oldConditions, newConditions []v1.ResourceCondition, resourceType, name, reason string) {
 	// Update information about changes in conditions
 	for _, cond := range getCommonChangedConditions(oldConditions, newConditions) {
-		head := ""
-		if cond.GetStatus() == corev1.ConditionFalse {
-			head = "No "
-		}
 		tail := ""
 		if cond.GetMessage() != "" {
 			tail = fmt.Sprintf(": %s", cond.GetMessage())
 		}
-		recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s%s for %s %s%s", head, cond.GetType(), resourceType, name, tail)
+		recorder.Eventf(new, corev1.EventTypeNormal, reason, "Condition %q is %q for %s %s%s", cond.GetType(), cond.GetStatus(), resourceType, name, tail)
 	}
 }
 

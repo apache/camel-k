@@ -2,24 +2,22 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strconv"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	"knative.dev/pkg/apis"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // nolint: gocritic
 func MirrorReadyCondition(ctx context.Context, c client.Client, it *v1.Integration) {
-	if isConditionTrue(it, v1.IntegrationConditionDeploymentAvailable) {
-		mirrorReadyConditionFromDeployment(ctx, c, it)
-	} else if isConditionTrue(it, v1.IntegrationConditionKnativeServiceAvailable) {
-		mirrorReadyConditionFromKnativeService(ctx, c, it)
+	if isConditionTrue(it, v1.IntegrationConditionDeploymentAvailable) || isConditionTrue(it, v1.IntegrationConditionKnativeServiceAvailable) {
+		mirrorReadyConditionFromReplicaSet(ctx, c, it)
 	} else if isConditionTrue(it, v1.IntegrationConditionCronJobAvailable) {
 		mirrorReadyConditionFromCronJob(ctx, c, it)
 	} else {
@@ -32,39 +30,49 @@ func MirrorReadyCondition(ctx context.Context, c client.Client, it *v1.Integrati
 	}
 }
 
-func mirrorReadyConditionFromDeployment(ctx context.Context, c client.Client, it *v1.Integration) {
-	deployment := appsv1.Deployment{}
-	if err := c.Get(ctx, runtimeclient.ObjectKey{Namespace: it.Namespace, Name: it.Name}, &deployment); err != nil {
+func mirrorReadyConditionFromReplicaSet(ctx context.Context, c client.Client, it *v1.Integration) {
+	list := appsv1.ReplicaSetList{}
+	opts := runtimeclient.MatchingLabels{
+		"camel.apache.org/integration": it.Name,
+	}
+	if err := c.List(ctx, &list, opts, runtimeclient.InNamespace(it.Namespace)); err != nil {
 		setReadyConditionError(it, err)
-	} else {
-		for _, c := range deployment.Status.Conditions {
-			if c.Type == appsv1.DeploymentAvailable {
-				it.Status.SetCondition(
-					v1.IntegrationConditionReady,
-					c.Status,
-					c.Reason,
-					c.Message,
-				)
-			}
+		return
+	}
+
+	if len(list.Items) == 0 {
+		setReadyConditionError(it, errors.New("replicaset not found"))
+		return
+	}
+
+	var rs *appsv1.ReplicaSet
+	for _, r := range list.Items {
+		r := r
+		if r.Labels["camel.apache.org/generation"] == strconv.FormatInt(it.Generation, 10) {
+			rs = &r
 		}
 	}
-}
-
-func mirrorReadyConditionFromKnativeService(ctx context.Context, c client.Client, it *v1.Integration) {
-	service := servingv1.Service{}
-	if err := c.Get(ctx, runtimeclient.ObjectKey{Namespace: it.Namespace, Name: it.Name}, &service); err != nil {
-		setReadyConditionError(it, err)
+	if rs == nil {
+		rs = &list.Items[0]
+	}
+	var replicas int32 = 1
+	if rs.Spec.Replicas != nil {
+		replicas = *rs.Spec.Replicas
+	}
+	if replicas == rs.Status.ReadyReplicas {
+		it.Status.SetCondition(
+			v1.IntegrationConditionReady,
+			corev1.ConditionTrue,
+			v1.IntegrationConditionReplicaSetReadyReason,
+			"",
+		)
 	} else {
-		for _, c := range service.Status.Conditions {
-			if c.Type == apis.ConditionReady {
-				it.Status.SetCondition(
-					v1.IntegrationConditionReady,
-					c.Status,
-					c.Reason,
-					c.Message,
-				)
-			}
-		}
+		it.Status.SetCondition(
+			v1.IntegrationConditionReady,
+			corev1.ConditionTrue,
+			v1.IntegrationConditionReplicaSetReadyReason,
+			"",
+		)
 	}
 }
 

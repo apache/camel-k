@@ -24,12 +24,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -196,31 +193,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			newReplicaSet := e.ObjectNew.(*appsv1.ReplicaSet)
 			// Ignore updates to the ReplicaSet other than the replicas ones,
 			// that are used to reconcile the integration replicas.
-			return oldReplicaSet.Status.Replicas != newReplicaSet.Status.Replicas
+			return oldReplicaSet.Status.Replicas != newReplicaSet.Status.Replicas ||
+				oldReplicaSet.Status.ReadyReplicas != newReplicaSet.Status.ReadyReplicas ||
+				oldReplicaSet.Status.AvailableReplicas != newReplicaSet.Status.AvailableReplicas
 		},
 	})
 	if err != nil {
 		return err
-	}
-
-	// Watch deployment to update the ready condition
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &v1.Integration{},
-		IsController: false,
-	})
-	if err != nil {
-		return err
-	}
-
-	// Watch Knative service to update the ready condition
-	err = c.Watch(&source.Kind{Type: &servingv1.Service{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &v1.Integration{},
-		IsController: false,
-	})
-	if _, ok := err.(*meta.NoKindMatchError); ok {
-		log.Info("No watch has been set on Knative services because the type is not known")
-	} else if err != nil {
-		log.Error(err, "Cannot set watch on Knative services")
 	}
 
 	// Watch cronjob to update the ready condition
