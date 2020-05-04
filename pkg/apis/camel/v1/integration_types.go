@@ -236,7 +236,11 @@ const (
 	// IntegrationConditionErrorReason --
 	IntegrationConditionErrorReason string = "Error"
 	// IntegrationConditionCronJobCreatedReason --
-	IntegrationConditionCronJobCreatedReason string = "CronJobCreatedReason"
+	IntegrationConditionCronJobCreatedReason string = "CronJobCreated"
+	// IntegrationConditionReplicaSetReadyReason --
+	IntegrationConditionReplicaSetReadyReason string = "ReplicaSetReady"
+	// IntegrationConditionReplicaSetNotReadyReason --
+	IntegrationConditionReplicaSetNotReadyReason string = "ReplicaSetNotReady"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.
