@@ -171,6 +171,8 @@ const (
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --
 	IntegrationPhaseRunning IntegrationPhase = "Running"
+	// IntegrationPhaseUpdating is a phase where the operator is not supposed to interact with the resource
+	IntegrationPhaseUpdating IntegrationPhase = "Updating"
 	// IntegrationPhaseError --
 	IntegrationPhaseError IntegrationPhase = "Error"
 
