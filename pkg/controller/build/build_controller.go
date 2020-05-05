@@ -202,6 +202,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	for _, a := range actions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
+		a.InjectRecorder(r.recorder)
 
 		if a.CanHandle(target) {
 			targetLog.Infof("Invoking action %s", a.Name())
@@ -218,10 +219,10 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 					return res, err
 				}
 
-				if newTarget.Status.Phase != target.Status.Phase {
+				if newTarget.Status.Phase != instance.Status.Phase {
 					targetLog.Info(
 						"state transition",
-						"phase-from", target.Status.Phase,
+						"phase-from", instance.Status.Phase,
 						"phase-to", newTarget.Status.Phase,
 					)
 				}

@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.3.0-snapshot-main
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.1.0
-    camel.apache.org/catalog.loader.version: 3.1.0
+    camel.apache.org/catalog.version: 3.2.0
+    camel.apache.org/catalog.loader.version: 3.2.0
     camel.apache.org/runtime.version: 1.3.0-SNAPSHOT
     camel.apache.org/runtime.provider: main
 spec:
@@ -31,9 +31,9 @@ spec:
     provider: main
     applicationClass: org.apache.camel.k.main.Application
     metadata:
-      camel.version: 3.1.0
-      quarkus.version: 1.3.2.Final
-      camel-quarkus.version: 1.0.0-M6
+      camel.version: 3.2.0
+      quarkus.version: 1.4.1.Final
+      camel-quarkus.version: 1.0.0-M7
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
@@ -1099,6 +1099,19 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.aws2.sqs.Sqs2Component
+    camel-aws2-kinesis:
+      groupId: org.apache.camel
+      artifactId: camel-aws2-kinesis
+      schemes:
+      - id: aws2-kinesis
+        http: false
+        passive: false
+      - id: aws2-kinesis-firehose
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.kinesis.Kinesis2Component
+      - org.apache.camel.component.aws2.firehose.KinesisFirehose2Component
     camel-reactive-streams:
       groupId: org.apache.camel
       artifactId: camel-reactive-streams
@@ -1148,15 +1161,6 @@ spec:
       javaTypes:
       - org.apache.camel.component.dataset.DataSetComponent
       - org.apache.camel.component.dataset.DataSetTestComponent
-    camel-elytron:
-      groupId: org.apache.camel
-      artifactId: camel-elytron
-      schemes:
-      - id: elytron
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.elytron.ElytronComponent
     camel-jsonapi:
       groupId: org.apache.camel
       artifactId: camel-jsonapi
@@ -1330,6 +1334,25 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.timer.TimerComponent
+    camel-core-languages:
+      groupId: org.apache.camel
+      artifactId: camel-core-languages
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+      javaTypes:
+      - org.apache.camel.language.constant.ConstantLanguage
+      - org.apache.camel.language.property.ExchangePropertyLanguage
+      - org.apache.camel.language.simple.FileLanguage
+      - org.apache.camel.language.header.HeaderLanguage
+      - org.apache.camel.language.ref.RefLanguage
+      - org.apache.camel.language.simple.SimpleLanguage
+      - org.apache.camel.language.tokenizer.TokenizeLanguage
     camel-jcache:
       groupId: org.apache.camel
       artifactId: camel-jcache
@@ -1399,15 +1422,6 @@ spec:
       - jsonpath
       javaTypes:
       - org.apache.camel.jsonpath.JsonPathLanguage
-    camel-spark-rest:
-      groupId: org.apache.camel
-      artifactId: camel-spark-rest
-      schemes:
-      - id: spark-rest
-        http: true
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.sparkrest.SparkComponent
     camel-jt400:
       groupId: org.apache.camel
       artifactId: camel-jt400
@@ -1548,15 +1562,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.master.MasterComponent
-    camel-eventadmin:
-      groupId: org.apache.camel
-      artifactId: camel-eventadmin
-      schemes:
-      - id: eventadmin
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.eventadmin.EventAdminComponent
     camel-optaplanner:
       groupId: org.apache.camel
       artifactId: camel-optaplanner
@@ -1711,14 +1716,9 @@ spec:
     camel-avro:
       groupId: org.apache.camel
       artifactId: camel-avro
-      schemes:
-      - id: avro
-        http: false
-        passive: false
       dataformats:
       - avro
       javaTypes:
-      - org.apache.camel.component.avro.AvroComponent
       - org.apache.camel.dataformat.avro.AvroDataFormat
     camel-mllp:
       groupId: org.apache.camel
@@ -1747,6 +1747,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.elsql.ElsqlComponent
+    camel-aws2-lambda:
+      groupId: org.apache.camel
+      artifactId: camel-aws2-lambda
+      schemes:
+      - id: aws2-lambda
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.lambda.Lambda2Component
     camel-aws-msk:
       groupId: org.apache.camel
       artifactId: camel-aws-msk
@@ -2365,25 +2374,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.aws2.msk.MSK2Component
-    camel-base:
-      groupId: org.apache.camel
-      artifactId: camel-base
-      languages:
-      - constant
-      - exchangeProperty
-      - file
-      - header
-      - ref
-      - simple
-      - tokenize
-      javaTypes:
-      - org.apache.camel.language.constant.ConstantLanguage
-      - org.apache.camel.language.property.ExchangePropertyLanguage
-      - org.apache.camel.language.simple.FileLanguage
-      - org.apache.camel.language.header.HeaderLanguage
-      - org.apache.camel.language.ref.RefLanguage
-      - org.apache.camel.language.simple.SimpleLanguage
-      - org.apache.camel.language.tokenizer.TokenizeLanguage
     camel-jpa:
       groupId: org.apache.camel
       artifactId: camel-jpa
@@ -2393,6 +2383,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.jpa.JpaComponent
+    camel-avro-rpc:
+      groupId: org.apache.camel
+      artifactId: camel-avro-rpc
+      schemes:
+      - id: avro
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.avro.AvroComponent
     camel-cassandraql:
       groupId: org.apache.camel
       artifactId: camel-cassandraql
@@ -2431,6 +2430,15 @@ spec:
       - syslog
       javaTypes:
       - org.apache.camel.component.syslog.SyslogDataFormat
+    camel-aws2-s3:
+      groupId: org.apache.camel
+      artifactId: camel-aws2-s3
+      schemes:
+      - id: aws2-s3
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.s3.AWS2S3Component
     camel-pubnub:
       groupId: org.apache.camel
       artifactId: camel-pubnub
@@ -2490,7 +2498,7 @@ spec:
       dataformats:
       - secureXML
       javaTypes:
-      - org.apache.camel.component.xmlsecurity.XmlSignatureComponent
+      - org.apache.camel.component.xmlsecurity.XmlSignerComponent
       - org.apache.camel.component.xmlsecurity.XmlVerifierComponent
       - org.apache.camel.dataformat.xmlsecurity.XMLSecurityDataFormat
     camel-bonita:
@@ -2583,15 +2591,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.xchange.XChangeComponent
-    camel-paxlogging:
-      groupId: org.apache.camel
-      artifactId: camel-paxlogging
-      schemes:
-      - id: paxlogging
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.paxlogging.PaxLoggingComponent
     camel-tarfile:
       groupId: org.apache.camel
       artifactId: camel-tarfile

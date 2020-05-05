@@ -22,13 +22,16 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/util/log"
+	"k8s.io/client-go/tools/record"
 )
 
 // Action --
 type Action interface {
 	client.Injectable
 	log.Injectable
+	camelevent.Injectable
 
 	// a user friendly name for the action
 	Name() string
@@ -41,8 +44,9 @@ type Action interface {
 }
 
 type baseAction struct {
-	client client.Client
-	L      log.Logger
+	client   client.Client
+	L        log.Logger
+	recorder record.EventRecorder
 }
 
 func (action *baseAction) InjectClient(client client.Client) {
@@ -51,4 +55,8 @@ func (action *baseAction) InjectClient(client client.Client) {
 
 func (action *baseAction) InjectLogger(log log.Logger) {
 	action.L = log
+}
+
+func (action *baseAction) InjectRecorder(recorder record.EventRecorder) {
+	action.recorder = recorder
 }

@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.3.0-snapshot-quarkus
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.1.0
-    camel.apache.org/catalog.loader.version: 3.1.0
+    camel.apache.org/catalog.version: 3.2.0
+    camel.apache.org/catalog.loader.version: 3.2.0
     camel.apache.org/runtime.version: 1.3.0-SNAPSHOT
     camel.apache.org/runtime.provider: quarkus
 spec:
@@ -31,9 +31,9 @@ spec:
     provider: quarkus
     applicationClass: io.quarkus.runner.GeneratedMain
     metadata:
-      camel.version: 3.1.0
-      quarkus.version: 1.3.2.Final
-      camel-quarkus.version: 1.0.0-M6
+      camel.version: 3.2.0
+      quarkus.version: 1.4.1.Final
+      camel-quarkus.version: 1.0.0-M7
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-quarkus
@@ -93,6 +93,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.file.FileComponent
+    camel-quarkus-aws2-s3:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-s3
+      schemes:
+      - id: aws2-s3
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.s3.AWS2S3Component
     camel-quarkus-xpath:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-xpath
@@ -1131,14 +1140,9 @@ spec:
     camel-quarkus-avro:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-avro
-      schemes:
-      - id: avro
-        http: false
-        passive: false
       dataformats:
       - avro
       javaTypes:
-      - org.apache.camel.component.avro.AvroComponent
       - org.apache.camel.dataformat.avro.AvroDataFormat
     camel-quarkus-couchbase:
       groupId: org.apache.camel.quarkus
@@ -1303,6 +1307,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.infinispan.InfinispanComponent
+    camel-quarkus-avro-rpc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-avro-rpc
+      schemes:
+      - id: avro
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.avro.AvroComponent
     camel-quarkus-telegram:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-telegram

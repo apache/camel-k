@@ -237,10 +237,10 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 					return res, err
 				}
 
-				if newTarget.Status.Phase != target.Status.Phase {
+				if newTarget.Status.Phase != instance.Status.Phase {
 					targetLog.Info(
 						"state transition",
-						"phase-from", target.Status.Phase,
+						"phase-from", instance.Status.Phase,
 						"phase-to", newTarget.Status.Phase,
 					)
 				}

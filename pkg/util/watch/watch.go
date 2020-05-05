@@ -139,6 +139,7 @@ func HandleIntegrationEvents(ctx context.Context, integration *v1.Integration,
 	defer watcher.Stop()
 	events := watcher.ResultChan()
 
+	var lastEvent *corev1.Event
 	for {
 		select {
 		case <-ctx.Done():
@@ -161,7 +162,8 @@ func HandleIntegrationEvents(ctx context.Context, integration *v1.Integration,
 						return nil
 					}
 
-					if evt.CreationTimestamp.UnixNano() >= integration.CreationTimestamp.UnixNano() {
+					if isAllowed(lastEvent, &evt, integration.CreationTimestamp.UnixNano()) {
+						lastEvent = &evt
 						if !handler(&evt) {
 							return nil
 						}
@@ -277,6 +279,7 @@ func HandleIntegrationPlatformEvents(ctx context.Context, p *v1.IntegrationPlatf
 	defer watcher.Stop()
 	events := watcher.ResultChan()
 
+	var lastEvent *corev1.Event
 	for {
 		select {
 		case <-ctx.Done():
@@ -299,7 +302,8 @@ func HandleIntegrationPlatformEvents(ctx context.Context, p *v1.IntegrationPlatf
 						return nil
 					}
 
-					if evt.CreationTimestamp.UnixNano() >= p.CreationTimestamp.UnixNano() {
+					if isAllowed(lastEvent, &evt, p.CreationTimestamp.UnixNano()) {
+						lastEvent = &evt
 						if !handler(&evt) {
 							return nil
 						}
@@ -308,4 +312,49 @@ func HandleIntegrationPlatformEvents(ctx context.Context, p *v1.IntegrationPlatf
 			}
 		}
 	}
+}
+
+func isAllowed(lastEvent, event *corev1.Event, baseTime int64) bool {
+	if lastEvent == nil {
+		return true
+	}
+
+	curTime := event.CreationTimestamp.UnixNano()
+	if event.LastTimestamp.UnixNano() > curTime {
+		curTime = event.LastTimestamp.UnixNano()
+	}
+	if curTime < baseTime {
+		return false
+	}
+
+	lastTime := lastEvent.CreationTimestamp.UnixNano()
+	if lastEvent.LastTimestamp.UnixNano() > lastTime {
+		lastTime = lastEvent.LastTimestamp.UnixNano()
+	}
+	if curTime < lastTime {
+		return false
+	}
+
+	if lastEvent.Reason != event.Reason {
+		return true
+	}
+	if lastEvent.Message != event.Message {
+		return true
+	}
+	if lastEvent.Type != event.Type {
+		return true
+	}
+	if lastEvent.InvolvedObject.Kind != event.InvolvedObject.Kind {
+		return true
+	}
+	if lastEvent.InvolvedObject.APIVersion != event.InvolvedObject.APIVersion {
+		return true
+	}
+	if lastEvent.InvolvedObject.Namespace != event.InvolvedObject.Namespace {
+		return true
+	}
+	if lastEvent.InvolvedObject.Name != event.InvolvedObject.Name {
+		return true
+	}
+	return false
 }
