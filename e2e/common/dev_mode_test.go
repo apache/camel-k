@@ -68,7 +68,7 @@ func TestRunDevMode(t *testing.T) {
 			defer pipew.Close()
 			defer piper.Close()
 
-			remoteFile := "https://github.com/apache/camel-k/raw/e80eb5353cbccf47c89a9f0a1c68ffbe3d0f1521/e2e/files/yaml.yaml"
+			remoteFile := "https://raw.githubusercontent.com/apache/camel-k/b29333f0a878d5d09fb3965be8fe586d77dd95d0/e2e/common/files/yaml.yaml"
 			kamelRun := KamelWithContext(ctx, "run", "-n", ns, remoteFile, "--dev")
 			kamelRun.SetOut(pipew)
 
