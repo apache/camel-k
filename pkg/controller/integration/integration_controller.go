@@ -260,6 +260,7 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 		NewDeployAction(),
 		NewMonitorAction(),
 		NewErrorAction(),
+		NewNoopAction(),
 	}
 
 	for _, a := range actions {

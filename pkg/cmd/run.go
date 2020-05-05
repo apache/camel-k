@@ -33,8 +33,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/spf13/pflag"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
@@ -47,6 +45,7 @@ import (
 	"github.com/magiconair/properties"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -299,6 +298,12 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	}
+	if o.Logs || o.Dev || o.Wait {
+		go watch.HandleIntegrationEvents(o.Context, integration, func(event *corev1.Event) bool {
+			fmt.Fprintln(cmd.OutOrStdout(), event.Message)
+			return true
+		})
+	}
 	if o.Wait || o.Dev {
 		for {
 			integrationPhase, err := o.waitForIntegrationReady(cmd, integration)
@@ -379,11 +384,6 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration 
 
 		return true
 	}
-
-	go watch.HandleIntegrationEvents(o.Context, integration, func(event *corev1.Event) bool {
-		fmt.Fprintln(cmd.OutOrStdout(), event.Message)
-		return true
-	})
 
 	return watch.HandleIntegrationStateChanges(o.Context, integration, handler)
 }
@@ -586,8 +586,18 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		if err != nil {
 			return nil, err
 		}
+		// Hold the resource from the operator controller
+		clone.Status.Phase = v1.IntegrationPhaseUpdating
+		err = c.Status().Update(o.Context, clone)
+		// Update the spec
 		integration.ResourceVersion = clone.ResourceVersion
 		err = c.Update(o.Context, &integration)
+		if err != nil {
+			return nil, err
+		}
+		// Reset the status
+		integration.Status = v1.IntegrationStatus{}
+		err = c.Status().Update(o.Context, &integration)
 	}
 
 	if err != nil {
