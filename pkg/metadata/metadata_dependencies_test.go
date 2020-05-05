@@ -616,6 +616,7 @@ func TestXMLLanguageDependencies(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
+			"camel:core-languages",
 			"camel:direct",
 			"camel:ognl",
 			"camel:saxon",
@@ -736,6 +737,7 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
+			"camel:core-languages",
 			"camel:direct",
 			"camel:ognl",
 			"camel:saxon",

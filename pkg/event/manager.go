@@ -90,7 +90,7 @@ func NotifyIntegrationUpdated(ctx context.Context, c client.Client, recorder rec
 	if new.Status.Phase != v1.IntegrationPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration", new.Name, ReasonIntegrationConditionChanged)
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration", new.Name, ReasonIntegrationPhaseUpdated)
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration", new.Name, ReasonIntegrationPhaseUpdated, "")
 }
 
 // NotifyIntegrationKitUpdated automatically generates events when an integration kit changes
@@ -107,7 +107,7 @@ func NotifyIntegrationKitUpdated(ctx context.Context, c client.Client, recorder 
 	if new.Status.Phase != v1.IntegrationKitPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration Kit", new.Name, ReasonIntegrationKitConditionChanged)
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Kit", new.Name, ReasonIntegrationKitPhaseUpdated)
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Kit", new.Name, ReasonIntegrationKitPhaseUpdated, "")
 }
 
 // NotifyIntegrationKitError automatically generates error events when the integration kit reconcile cycle phase has an error
@@ -136,7 +136,7 @@ func NotifyIntegrationPlatformUpdated(ctx context.Context, c client.Client, reco
 	if new.Status.Phase != v1.IntegrationPlatformPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Integration Platform", new.Name, ReasonIntegrationPlatformConditionChanged)
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Platform", new.Name, ReasonIntegrationPlatformPhaseUpdated)
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Integration Platform", new.Name, ReasonIntegrationPlatformPhaseUpdated, "")
 }
 
 // NotifyIntegrationPlatformError automatically generates error events when the integration Platform reconcile cycle phase has an error
@@ -165,7 +165,13 @@ func NotifyBuildUpdated(ctx context.Context, c client.Client, recorder record.Ev
 	if new.Status.Phase != v1.BuildPhaseNone {
 		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Build", new.Name, ReasonBuildConditionChanged)
 	}
-	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Build", new.Name, ReasonBuildPhaseUpdated)
+	info := ""
+	if new.Status.Failure != nil {
+		attempt := new.Status.Failure.Recovery.Attempt
+		attemptMax := new.Status.Failure.Recovery.AttemptMax
+		info = fmt.Sprintf(" (recovery %d of %d)", attempt, attemptMax)
+	}
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Build", new.Name, ReasonBuildPhaseUpdated, info)
 }
 
 // NotifyBuildError automatically generates error events when the build reconcile cycle phase has an error
@@ -181,17 +187,17 @@ func NotifyBuildError(ctx context.Context, c client.Client, recorder record.Even
 }
 
 // nolint:lll
-func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, new runtime.Object, oldPhase, newPhase string, resourceType, name, reason string) {
+func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, new runtime.Object, oldPhase, newPhase string, resourceType, name, reason, info string) {
 	// Update information about phase changes
 	if oldPhase != newPhase {
 		phase := newPhase
 		if phase == "" {
 			phase = "[none]"
 		}
-		recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s %s in phase %s", resourceType, name, phase)
+		recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s %s in phase %q%s", resourceType, name, phase, info)
 
 		if creatorRef, creator := getCreatorObject(ctx, c, new); creatorRef != nil && creator != nil {
-			recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s %s dependent resource %s (%s) changed phase to %s", creatorRef.Kind, creatorRef.Name, name, resourceType, phase)
+			recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s %s subresource %s (%s) changed phase to %q%s", creatorRef.Kind, creatorRef.Name, name, resourceType, phase, info)
 		}
 	}
 }

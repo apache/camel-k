@@ -22,14 +22,13 @@ import (
 	"fmt"
 	"sync"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
+	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/util/patch"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
@@ -91,6 +90,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	if err != nil {
 		return nil, err
 	}
+	camelevent.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 
 	// Start the build asynchronously to avoid blocking the reconcile loop
 	action.routines.Store(build.Name, true)
@@ -156,6 +156,7 @@ func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, buil
 		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
 		return err
 	}
+	camelevent.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 	build.Status = target.Status
 	return nil
 }

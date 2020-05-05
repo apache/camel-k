@@ -50,9 +50,6 @@ const (
 
 	adocNavMarkerStart = adocCommonMarkerStart + " (trait-nav)"
 	adocNavMarkerEnd   = adocCommonMarkerEnd + " (trait-nav)"
-
-	adocListMarkerStart = adocCommonMarkerStart + " (trait-list)"
-	adocListMarkerEnd   = adocCommonMarkerEnd + " (trait-list)"
 )
 
 var (
