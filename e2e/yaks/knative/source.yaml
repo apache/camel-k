@@ -30,7 +30,7 @@ spec:
       from:
         uri: timer:tick
         parameters:
-          period: 3s
+          period: 3000
         steps:
         - set-header:
             constant: text/plain
