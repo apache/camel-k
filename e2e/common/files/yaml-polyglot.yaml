@@ -18,7 +18,7 @@
 - from:
     uri: "timer:yaml"
     parameters:
-      period: "5s"
+      period: "5000"
     steps:
       - set-header:
           name: "m"

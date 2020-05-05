@@ -17,7 +17,7 @@ You are now ready to create your first integration using Camel K. Just create a 
 
 .hello.groovy
 ```groovy
-from('timer:tick?period=3s')
+from('timer:tick?period=3000')
   .setBody().constant('Hello world from Camel K')
   .to('log:info')
 ```

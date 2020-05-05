@@ -10,7 +10,7 @@ Users of Camel K can instantly run integration code written in Camel DSL on thei
 Just write a _helloworld.groovy_ integration file with the following content:
 
 ```groovy
-from('timer:tick?period=3s')
+from('timer:tick?period=3000')
   .setBody().constant('Hello world from Camel K')
   .to('log:info')
 ```
