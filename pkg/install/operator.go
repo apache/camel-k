@@ -130,10 +130,17 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 	}
 
 	if errevt := installEvents(ctx, c, cfg.Namespace, customizer, collection, force); errevt != nil {
-		if k8serrors.IsAlreadyExists(err) {
-			return err
+		if k8serrors.IsAlreadyExists(errevt) {
+			return errevt
 		}
 		fmt.Println("Warning: the operator will not be able to publish Kubernetes events. Try installing as cluster-admin to allow it to generate events.")
+	}
+
+	if errmtr := installServiceMonitors(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
+		if k8serrors.IsAlreadyExists(errmtr) {
+			return errmtr
+		}
+		fmt.Println("Warning: the operator will not be able to create servicemonitors for metrics. Try installing as cluster-admin to allow the creation of servicemonitors.")
 	}
 
 	return nil
@@ -168,6 +175,13 @@ func installEvents(ctx context.Context, c client.Client, namespace string, custo
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-role-events.yaml",
 		"operator-role-binding-events.yaml",
+	)
+}
+
+func installServiceMonitors(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+		"operator-role-servicemonitors.yaml",
+		"operator-role-binding-servicemonitors.yaml",
 	)
 }
 
