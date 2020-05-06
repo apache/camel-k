@@ -171,7 +171,26 @@ A PMC member with access to the @ApacheCamel Twitter account should announce the
 [[post-release]]
 == Post Release
 
+=== Operator Hub
+
 The https://github.com/operator-framework/community-operators[OperatorHub] downstream channel should be synced to publish the latest version
 of Camel K, so that it can be easily installed on platforms that support Operator Hub.
 
 To do so, the content of `/deploy/olm-catalog/camel-k/<version>` (and package manifest) should be uploaded to the "community-operators" repository (2 PRs, one for OpenShift and one for all other platforms).
+
+=== Helm
+
+An helm chart must be generated with the new version.
+
+First update the chart version in the `Chart.yaml` file under the `/helm` section, setting a new chart release.
+
+From the master branch:
+
+```
+./script/set-version.sh <released-version>
+make generate-helm
+```
+
+Commit to the master branch the tar.gz file and the updated index that have been generated in `/docs/charts` and the updated `Chart.yaml`.
+
+Wait for them to be available on https://hub.helm.sh/.
