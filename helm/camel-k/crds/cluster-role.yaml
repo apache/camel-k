@@ -22,7 +22,6 @@ metadata:
     app: "camel-k"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
-    {{- include "camel-k.labels" . | nindent 4 }}
   name: camel-k:edit
 rules:
 - apiGroups:
@@ -31,4 +30,3 @@ rules:
   - '*'
   verbs:
   - '*'
-
