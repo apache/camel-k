@@ -470,7 +470,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	srcs = append(srcs, o.Sources...)
 
 	for _, source := range srcs {
-		data, err := o.loadData(source, o.Compression)
+		data, err := loadData(source, o.Compression)
 		if err != nil {
 			return nil, err
 		}
@@ -485,7 +485,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	}
 
 	for _, resource := range o.Resources {
-		data, err := o.loadData(resource, o.Compression)
+		data, err := loadData(resource, o.Compression)
 		if err != nil {
 			return nil, err
 		}
@@ -501,7 +501,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 	}
 
 	for _, resource := range o.OpenAPIs {
-		data, err := o.loadData(resource, o.Compression)
+		data, err := loadData(resource, o.Compression)
 		if err != nil {
 			return nil, err
 		}
@@ -623,7 +623,7 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 	return name
 }
 
-func (*runCmdOptions) loadData(fileName string, compress bool) (string, error) {
+func loadData(fileName string, compress bool) (string, error) {
 	var content []byte
 	var err error
 
