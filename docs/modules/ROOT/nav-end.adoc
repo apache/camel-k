@@ -1,4 +1,2 @@
-* xref:tutorials/tutorials.adoc[Tutorials]
-** xref:tutorials/tekton/tekton.adoc[Tekton Pipelines]
 * xref:uninstalling.adoc[Uninstalling]
 * xref:developers.adoc[Contributing to Camel K]
