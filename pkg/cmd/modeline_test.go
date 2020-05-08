@@ -46,6 +46,19 @@ func TestModelineRunSimple(t *testing.T) {
 	assert.Equal(t, []string{"run", fileName, "--dependency", "mvn:org.my:lib:1.0"}, flags)
 }
 
+func TestModelineRunHelp(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+	// no file created
+	fileName := path.Join(dir, "simple.groovy")
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "--help"})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, "--help"}, flags)
+}
+
 func TestModelineRunChain(t *testing.T) {
 	dir, err := ioutil.TempDir("", "camel-k-test-")
 	assert.NoError(t, err)
