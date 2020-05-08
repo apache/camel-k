@@ -39,6 +39,12 @@ func TestKamelHelpTraitWorksOffline(t *testing.T) {
 	assert.Nil(t, traitCmd.Execute())
 }
 
+func TestKamelHelpOptionWorksOffline(t *testing.T) {
+	traitCmd := Kamel("run", "Xxx.java", "--help")
+	traitCmd.SetOut(ioutil.Discard)
+	assert.Nil(t, traitCmd.Execute())
+}
+
 func TestKamelCompletionWorksOffline(t *testing.T) {
 	bashCmd := Kamel("completion", "bash", "--config", "non-existent-kubeconfig-file")
 	bashCmd.SetOut(ioutil.Discard)
