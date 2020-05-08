@@ -1,0 +1,98 @@
+= Camel K Modeline
+
+Integration files can contain modeline hooks that allow to customize the way integrations are executed via command line.
+
+For example, take the following integration file:
+
+.Hello.java
+----
+// camel-k: dependency=mvn:org.my:application:1.0 // <1>
+
+import org.apache.camel.builder.RouteBuilder;
+
+public class Hello extends RouteBuilder {
+  @Override
+  public void configure() throws Exception {
+
+      from("timer:java?period=1000")
+        .bean(org.my.BusinessLogic) // <2>
+        .log("${body}");
+
+  }
+}
+----
+<1> Modeline import of Maven library
+<2> Usage of a business logic class from the external library
+
+When the integration code above is executed using the `kamel run` CLI command, the modeline options declared in the file are appended to
+the list of arguments that are passed to the command.
+
+The `kamel` CLI will alert you, printing the full command in the shell:
+
+----
+$ kamel run Hello.java
+Modeline options have been loaded from source files
+Full command: kamel run Hello.java --dependency mvn:org.my:application:1.0
+...
+----
+
+Multiple options, even of the same type, can be specified for an integration. For example
+the following modeline options make sure that the integration runs on the Quarkus runtime and enable the 3scale exposure.
+
+.QuarkusRest.java
+----
+// camel-k: trait=quarkus.enabled=true trait=3scale.enabled=true // <1>
+
+import org.apache.camel.builder.RouteBuilder;
+
+public class QuarkusRest extends RouteBuilder {
+  @Override
+  public void configure() throws Exception {
+
+      rest().get("/")
+        .route()
+        .setBody().constant("Hello");
+
+  }
+}
+----
+<1> Enable both the Quarkus and 3scale traits, to run the integration on Quarkus and expose the routes via 3scale
+
+All options that are available for the `kamel run` command can be specified as modeline options.
+The following is a partial list of useful options:
+
+.Useful Modeline Options
+|===
+|Option | Description
+
+|dependency
+|An external library that should be included. E.g. for Maven dependencies "dependency=mvn:org.my/app:1.0"
+
+|env
+|Set an environment variable in the integration container. E.g "env=MY_VAR=my-value"
+
+|label
+|Add a label to the integration. E.g. "label=my.company=hello"
+
+|name
+|The integration name
+
+|open-api
+|Add an OpenAPI v2 spec (file path)
+
+|profile
+|Trait profile used for deployment
+
+|property
+|Add a camel property
+
+|property-file
+|Bind a property file to the integration. E.g. "property-file=integration.properties"
+
+|resource
+|Add a resource
+
+|trait
+|Configure a trait. E.g. "trait=service.enabled=false"
+
+|===
