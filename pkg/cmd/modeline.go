@@ -8,6 +8,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/modeline"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"path/filepath"
 )
 
@@ -33,7 +34,22 @@ var (
 
 func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.Command, []string, error) {
 	processed := make(map[string]bool)
-	return createKamelWithModelineCommand(ctx, osArgs[1:], processed)
+	originalFlags := osArgs[1:]
+	rootCmd, flags, err := createKamelWithModelineCommand(ctx, append([]string(nil), originalFlags...), processed)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return rootCmd, flags, err
+	}
+	if len(originalFlags) != len(flags) {
+		// Give a feedback about the actual command that is run
+		fmt.Fprintln(rootCmd.OutOrStdout(), "Modeline options have been loaded from source files")
+		fmt.Fprint(rootCmd.OutOrStdout(), "Full command: kamel ")
+		for _, a := range flags {
+			fmt.Fprintf(rootCmd.OutOrStdout(), "%s ", a)
+		}
+		fmt.Fprintln(rootCmd.OutOrStdout())
+	}
+	return rootCmd, flags, nil
 }
 
 func createKamelWithModelineCommand(ctx context.Context, args []string, processedFiles map[string]bool) (*cobra.Command, []string, error) {
@@ -52,7 +68,9 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 	}
 
 	err = target.ParseFlags(flags)
-	if err != nil {
+	if err == pflag.ErrHelp {
+		return rootCmd, args, nil
+	} else if err != nil {
 		return nil, nil, err
 	}
 

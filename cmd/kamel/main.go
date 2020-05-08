@@ -19,7 +19,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"os"
 	"time"
@@ -42,18 +41,8 @@ func main() {
 	defer cancel()
 
 	// Add modeline options to the command
-	rootCmd, args, err := cmd.NewKamelWithModelineCommand(ctx, os.Args)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		exitOnError(err)
-	}
-
-	// Give a feedback about the actual command that is run
-	fmt.Fprint(rootCmd.OutOrStdout(), "Executing: kamel ")
-	for _, a := range args {
-		fmt.Fprintf(rootCmd.OutOrStdout(), "%s ", a)
-	}
-	fmt.Fprintln(rootCmd.OutOrStdout())
+	rootCmd, _, err := cmd.NewKamelWithModelineCommand(ctx, os.Args)
+	exitOnError(err)
 
 	err = rootCmd.Execute()
 	exitOnError(err)
