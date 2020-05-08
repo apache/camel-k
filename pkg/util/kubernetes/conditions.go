@@ -69,8 +69,8 @@ func mirrorReadyConditionFromReplicaSet(ctx context.Context, c client.Client, it
 	} else {
 		it.Status.SetCondition(
 			v1.IntegrationConditionReady,
-			corev1.ConditionTrue,
-			v1.IntegrationConditionReplicaSetReadyReason,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionReplicaSetNotReadyReason,
 			"",
 		)
 	}
