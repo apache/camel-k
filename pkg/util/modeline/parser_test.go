@@ -1,8 +1,9 @@
 package modeline
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseGroovyFile(t *testing.T) {
