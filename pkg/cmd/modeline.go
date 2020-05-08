@@ -84,7 +84,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 	var files = append([]string(nil), fg.Args()...)
 	files = append(files, sources...)
 
-	var opts []modeline.Option
+	opts := make([]modeline.Option, 0)
 	for _, f := range files {
 		if processedFiles[f] {
 			continue

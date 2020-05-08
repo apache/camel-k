@@ -299,6 +299,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev || o.Wait {
+		// nolint: errcheck
 		go watch.HandleIntegrationEvents(o.Context, integration, func(event *corev1.Event) bool {
 			fmt.Fprintln(cmd.OutOrStdout(), event.Message)
 			return true
@@ -589,6 +590,9 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		// Hold the resource from the operator controller
 		clone.Status.Phase = v1.IntegrationPhaseUpdating
 		err = c.Status().Update(o.Context, clone)
+		if err != nil {
+			return nil, err
+		}
 		// Update the spec
 		integration.ResourceVersion = clone.ResourceVersion
 		err = c.Update(o.Context, &integration)
