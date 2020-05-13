@@ -19,7 +19,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.SagaPropagation;
 import org.apache.camel.model.rest.RestParamType;
 import org.apache.camel.service.lra.LRASagaService;
-import org.apache.camel.Exchange;
 
 public class Payment extends RouteBuilder {
 	@Override
