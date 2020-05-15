@@ -42,11 +42,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
-
 // Add creates a new Integration Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
@@ -86,6 +81,21 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				oldIntegration.Status.Phase != newIntegration.Status.Phase
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
+			integration := e.Object.(*v1.Integration)
+			namespace := integration.Namespace
+			name := integration.Name
+			options := []k8sclient.DeleteAllOfOption{
+				k8sclient.InNamespace(namespace),
+				k8sclient.MatchingLabels{"camel.apache.org/created.by.name": name},
+			}
+
+			// delete Builds
+			if err := mgr.GetClient().DeleteAllOf(context.TODO(), &v1.Build{}, options...); err != nil {
+				log.Error(err, "Failed to delete builds for integration "+name)
+			} else {
+				log.Info("Deleted builds for integration " + name)
+			}
+
 			// Evaluates to false if the object has been confirmed deleted
 			return !e.DeleteStateUnknown
 		},
