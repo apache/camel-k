@@ -74,6 +74,8 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 							"channel-sinks":    "channel-sink-1",
 							"endpoint-sources": "endpoint-source-1",
 							"endpoint-sinks":   "endpoint-sink-1,endpoint-sink-2",
+							"event-sources":    "knative:event",
+							"event-sinks":      "knative:event",
 						},
 					},
 				},
@@ -141,6 +143,12 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	eSink2 := ne.FindService("endpoint-sink-2", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSink2)
 	assert.Equal(t, "endpoint-sink-2.host", eSink2.Host)
+
+	eEventSource := ne.FindService("default", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, "eventing.knative.dev/v1alpha1", "Broker")
+	assert.NotNil(t, eEventSource)
+	eEventSink := ne.FindService("default", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEvent, "eventing.knative.dev/v1alpha1", "Broker")
+	assert.NotNil(t, eEventSink)
+	assert.Equal(t, "broker-default.host", eEventSink.Host)
 }
 
 func TestKnativeEnvConfigurationFromSource(t *testing.T) {
