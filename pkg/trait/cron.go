@@ -91,8 +91,8 @@ type cronInfo struct {
 type cronExtractor func(string) *cronInfo
 
 const (
-	genericCronComponent         = "cron"
-	genericCronComponentFallback = "camel:quartz"
+	genericCronComponent               = "cron"
+	genericCronComponentFallbackScheme = "quartz"
 )
 
 var (
@@ -165,14 +165,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 			t.ConcurrencyPolicy = string(v1beta1.ForbidConcurrent)
 		}
 
-		hasQuarkus := false
-
-		qt := e.GetTrait("quarkus")
-		if qt != nil {
-			hasQuarkus = qt.(*quarkusTrait).Enabled != nil && *(qt.(*quarkusTrait).Enabled)
-		}
-
-		if (hasQuarkus || (t.Schedule == "" && t.Components == "")) && t.Fallback == nil {
+		if (t.Schedule == "" && t.Components == "") && t.Fallback == nil {
 			// If there's at least a `cron` endpoint, add a fallback implementation
 			fromURIs, err := t.getSourcesFromURIs(e)
 			if err != nil {
@@ -235,11 +228,15 @@ func (t *cronTrait) Apply(e *Environment) error {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityCron)
 
 		if t.Fallback != nil && *t.Fallback {
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, genericCronComponentFallback)
+			fallbackArtifact := e.CamelCatalog.GetArtifactByScheme(genericCronComponentFallbackScheme)
+			if fallbackArtifact == nil {
+				return fmt.Errorf("no fallback artifact for scheme %q has been found in camel catalog", genericCronComponentFallbackScheme)
+			}
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fallbackArtifact.GetDependencyID())
 		}
 	}
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
+	if (t.Fallback == nil || !*t.Fallback) && e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 		if e.ApplicationProperties == nil {
 			e.ApplicationProperties = make(map[string]string)
 		}
