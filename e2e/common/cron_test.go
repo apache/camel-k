@@ -44,6 +44,16 @@ func TestRunCronExample(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
+		t.Run("cron-quarkus", func(t *testing.T) {
+			RegisterTestingT(t)
+
+			Expect(Kamel("run", "--name", "cron-quarkus", "-n", ns, "files/cron.groovy", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
+			Eventually(IntegrationCronJob(ns, "cron-quarkus"), TestTimeoutMedium).ShouldNot(BeNil())
+			Eventually(IntegrationCondition(ns, "cron-quarkus", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "cron-quarkus"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
 		t.Run("cron-timer", func(t *testing.T) {
 			RegisterTestingT(t)
 
@@ -67,9 +77,10 @@ func TestRunCronExample(t *testing.T) {
 		t.Run("cron-fallback-quarkus", func(t *testing.T) {
 			RegisterTestingT(t)
 
-			Expect(Kamel("run", "-n", ns, "files/cron.groovy").Execute()).Should(BeNil())
-			Eventually(IntegrationPodPhase(ns, "cron"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationLogs(ns, "cron"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("run", "--name", "cron-fallback-quarkus", "-n", ns, "files/cron-fallback.groovy", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "cron-fallback-quarkus"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "cron-fallback-quarkus", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "cron-fallback-quarkus"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 	})
