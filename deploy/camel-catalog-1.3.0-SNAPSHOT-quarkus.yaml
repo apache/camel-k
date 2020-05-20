@@ -41,7 +41,7 @@ spec:
       cron:
         dependencies:
         - groupId: org.apache.camel.k
-          artifactId: camel-k-runtime-cron
+          artifactId: camel-k-quarkus-cron
       health:
         dependencies:
         - groupId: org.apache.camel.quarkus
