@@ -362,7 +362,7 @@ func TestCronDepsFallback(t *testing.T) {
 	assert.NotNil(t, ct)
 	assert.NotNil(t, ct.Fallback)
 	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
-	assert.Contains(t, environment.Integration.Status.Dependencies, genericCronComponentFallback)
+	assert.Contains(t, environment.Integration.Status.Dependencies, "camel:quartz")
 	assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-cron")
 }
 
@@ -514,7 +514,6 @@ func TestCronWithQuarkus(t *testing.T) {
 
 	ct := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
-	assert.NotNil(t, ct.Fallback)
-	assert.True(t, *ct.Fallback)
+	assert.Nil(t, ct.Fallback)
 	assert.Contains(t, environment.Interceptors, "cron")
 }
