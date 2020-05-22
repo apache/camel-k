@@ -75,6 +75,7 @@ metadata:
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes,
       with serverless superpowers.
     repository: https://github.com/apache/camel-k
+    operators.operatorframework.io/internal-objects: '["builds.camel.apache.org","integrationkits.camel.apache.org","camelcatalogs.camel.apache.org"]'
     support: Camel
   name: camel-k-operator.v1.0.0-snapshot
   namespace: placeholder

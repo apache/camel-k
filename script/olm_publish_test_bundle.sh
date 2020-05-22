@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,35 +15,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Prefer unsnapshotting to regenerating, because changes done to snapshot file may get lost
-
 location=$(dirname $0)
-olm_catalog=${location}/../deploy/olm-catalog
 
+cd $location/..
 
-for d in $(find ${olm_catalog} -type d -name "*-SNAPSHOT*");
-do
-  mv ${d} ${d//-SNAPSHOT/}
-done
-for d in $(find ${olm_catalog} -type d -name "*-snapshot*");
-do
-  mv ${d} ${d//-snapshot/}
-done
+PACKAGE=camel-k-dev
+VERSION=$(make get-version)
 
-for f in $(find ${olm_catalog} -type f -name "*-SNAPSHOT*");
-do
-  mv ${f} ${f//-SNAPSHOT/}
-done
-for f in $(find ${olm_catalog} -type f -name "*-snapshot*");
-do
-  mv ${f} ${f//-snapshot/}
-done
+if [ -z "${QUAY_USERNAME}" ]; then
+  echo "Missing QUAY_USERNAME environment variable"
+  exit 1
+fi
 
-for f in $(find ${olm_catalog}/camel-k-dev -type f);
-do
-  sed -i 's/-SNAPSHOT//g' $f
-done
-for f in $(find ${olm_catalog}/camel-k-dev -type f);
-do
-  sed -i 's/-snapshot//g' $f
-done
+if [ -z "${QUAY_PASSWORD}" ]; then
+  echo "Missing QUAY_PASSWORD environment variable"
+  exit 1
+fi
+
+QUAY_ORGANIZATION=${QUAY_ORGANIZATION:-${QUAY_USERNAME}}
+echo "Quay organization: $QUAY_ORGANIZATION"
+
+echo "Publishing version: $VERSION"
+
+export AUTH_TOKEN=$(curl -sH "Content-Type: application/json" -XPOST https://quay.io/cnr/api/v1/users/login -d '{"user": {"username": "'"${QUAY_USERNAME}"'", "password": "'"${QUAY_PASSWORD}"'"}}' | jq -r '.token')
+
+operator-courier --verbose push deploy/olm-catalog/${PACKAGE}/ ${QUAY_ORGANIZATION} ${PACKAGE} ${VERSION} "$AUTH_TOKEN"
