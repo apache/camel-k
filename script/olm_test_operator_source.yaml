@@ -15,8 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-channels:
-- currentCSV: camel-k-operator.v1.0.0-snapshot
-  name: alpha
-defaultChannel: alpha
-packageName: camel-k
+# This resource can be used to install an operator source on a OLM powered cluster
+# that will display Camel K dev packages (e.g. nightly releases)
+
+apiVersion: operators.coreos.com/v1
+kind: OperatorSource
+metadata:
+  name: camel-k-tests
+  namespace: openshift-marketplace
+spec:
+  type: appregistry
+  endpoint: https://quay.io/cnr
+  registryNamespace: camelk
+  displayName: "Apache Nightly Operators"
+  publisher: "Apache"
