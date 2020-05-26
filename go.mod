@@ -6,6 +6,8 @@ require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
 	github.com/Masterminds/semver v1.5.0
+	github.com/apache/camel-k/pkg/apis/camel v0.0.0
+	github.com/apache/camel-k/pkg/client/camel v0.0.0
 	github.com/container-tools/spectrum v0.3.2
 	github.com/coreos/prometheus-operator v0.34.0
 	github.com/evanphx/json-patch v4.5.0+incompatible
@@ -77,3 +79,9 @@ replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503
 
 // Using a fork that removes the https ping before using http in case of insecure registry (for Spectrum)
 replace github.com/google/go-containerregistry => github.com/nicolaferraro/go-containerregistry v0.0.0-20200428072705-e7aced86aca8
+
+// Local modules
+replace (
+	github.com/apache/camel-k/pkg/apis/camel => ./pkg/apis/camel
+	github.com/apache/camel-k/pkg/client/camel => ./pkg/client/camel
+)

@@ -126,7 +126,3 @@ type IntegrationKitCondition struct {
 	// A human readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
 }
-
-func init() {
-	SchemeBuilder.Register(&IntegrationKit{}, &IntegrationKitList{})
-}

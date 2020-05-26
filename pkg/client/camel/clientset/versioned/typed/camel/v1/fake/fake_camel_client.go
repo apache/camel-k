@@ -20,7 +20,7 @@ limitations under the License.
 package fake
 
 import (
-	v1 "github.com/apache/camel-k/pkg/client/clientset/versioned/typed/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

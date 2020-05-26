@@ -23,7 +23,7 @@ import (
 	"time"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	scheme "github.com/apache/camel-k/pkg/client/clientset/versioned/scheme"
+	scheme "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/scheme"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

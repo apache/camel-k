@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/client/clientset/versioned"
+	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

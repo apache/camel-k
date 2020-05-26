@@ -24,9 +24,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/apache/camel-k/pkg/client/clientset/versioned"
-	camel "github.com/apache/camel-k/pkg/client/informers/externalversions/camel"
-	internalinterfaces "github.com/apache/camel-k/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
+	camel "github.com/apache/camel-k/pkg/client/camel/informers/externalversions/camel"
+	internalinterfaces "github.com/apache/camel-k/pkg/client/camel/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
