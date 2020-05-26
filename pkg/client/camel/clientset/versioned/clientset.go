@@ -22,7 +22,7 @@ package versioned
 import (
 	"fmt"
 
-	camelv1 "github.com/apache/camel-k/pkg/client/clientset/versioned/typed/camel/v1"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

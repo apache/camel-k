@@ -20,8 +20,8 @@ limitations under the License.
 package camel
 
 import (
-	v1 "github.com/apache/camel-k/pkg/client/informers/externalversions/camel/v1"
-	internalinterfaces "github.com/apache/camel-k/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.com/apache/camel-k/pkg/client/camel/informers/externalversions/camel/v1"
+	internalinterfaces "github.com/apache/camel-k/pkg/client/camel/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

@@ -20,7 +20,7 @@ limitations under the License.
 package v1
 
 import (
-	internalinterfaces "github.com/apache/camel-k/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/apache/camel-k/pkg/client/camel/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

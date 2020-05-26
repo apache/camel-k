@@ -23,68 +23,68 @@ import (
 	time "time"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	versioned "github.com/apache/camel-k/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/apache/camel-k/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.com/apache/camel-k/pkg/client/listers/camel/v1"
+	versioned "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
+	internalinterfaces "github.com/apache/camel-k/pkg/client/camel/informers/externalversions/internalinterfaces"
+	v1 "github.com/apache/camel-k/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// IntegrationKitInformer provides access to a shared informer and lister for
-// IntegrationKits.
-type IntegrationKitInformer interface {
+// BuildInformer provides access to a shared informer and lister for
+// Builds.
+type BuildInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.IntegrationKitLister
+	Lister() v1.BuildLister
 }
 
-type integrationKitInformer struct {
+type buildInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewIntegrationKitInformer constructs a new informer for IntegrationKit type.
+// NewBuildInformer constructs a new informer for Build type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewIntegrationKitInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredIntegrationKitInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewBuildInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredBuildInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredIntegrationKitInformer constructs a new informer for IntegrationKit type.
+// NewFilteredBuildInformer constructs a new informer for Build type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredIntegrationKitInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredBuildInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().IntegrationKits(namespace).List(options)
+				return client.CamelV1().Builds(namespace).List(options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().IntegrationKits(namespace).Watch(options)
+				return client.CamelV1().Builds(namespace).Watch(options)
 			},
 		},
-		&camelv1.IntegrationKit{},
+		&camelv1.Build{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *integrationKitInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredIntegrationKitInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *buildInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredBuildInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *integrationKitInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&camelv1.IntegrationKit{}, f.defaultInformer)
+func (f *buildInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&camelv1.Build{}, f.defaultInformer)
 }
 
-func (f *integrationKitInformer) Lister() v1.IntegrationKitLister {
-	return v1.NewIntegrationKitLister(f.Informer().GetIndexer())
+func (f *buildInformer) Lister() v1.BuildLister {
+	return v1.NewBuildLister(f.Informer().GetIndexer())
 }

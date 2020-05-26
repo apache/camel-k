@@ -119,7 +119,7 @@ generate-doc:
 generate-deepcopy:
 	operator-sdk generate k8s
 
-build: build-resources build-kamel build-compile-integration-tests
+build: build-resources build-kamel build-compile-integration-tests build-submodules
 
 test: build
 	go test ./...
@@ -143,6 +143,9 @@ build-resources:
 	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-main.yaml -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
 	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-quarkus.yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
 	./script/embed_resources.sh deploy
+
+build-submodules:
+	./script/build_submodules.sh
 
 build-olm:
 	./script/build_olm.sh $(VERSION)
@@ -250,4 +253,4 @@ get-staging-repo:
 get-version:
 	@echo $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules

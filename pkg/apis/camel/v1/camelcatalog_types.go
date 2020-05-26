@@ -101,7 +101,3 @@ const (
 	// RuntimeProviderQuarkus --
 	RuntimeProviderQuarkus RuntimeProvider = "quarkus"
 )
-
-func init() {
-	SchemeBuilder.Register(&CamelCatalog{}, &CamelCatalogList{})
-}

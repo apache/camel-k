@@ -29,22 +29,22 @@ go run k8s.io/code-generator/cmd/client-gen \
 	--clientset-name "versioned"  \
 	--input-base=github.com/apache/camel-k/pkg/apis \
 	--output-base=$rootdir \
-	--output-package=github.com/apache/camel-k/pkg/client/clientset
+	--output-package=github.com/apache/camel-k/pkg/client/camel/clientset
 
 
 go run k8s.io/code-generator/cmd/lister-gen \
 	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1 \
 	--go-header-file=$rootdir/script/headers/default.txt \
 	--output-base=$rootdir \
-	--output-package=github.com/apache/camel-k/pkg/client/listers
+	--output-package=github.com/apache/camel-k/pkg/client/camel/listers
 
 go run k8s.io/code-generator/cmd/informer-gen \
-    --versioned-clientset-package=github.com/apache/camel-k/pkg/client/clientset/versioned \
-	--listers-package=github.com/apache/camel-k/pkg/client/listers \
+    --versioned-clientset-package=github.com/apache/camel-k/pkg/client/camel/clientset/versioned \
+	--listers-package=github.com/apache/camel-k/pkg/client/camel/listers \
 	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1 \
 	--go-header-file=$rootdir/script/headers/default.txt \
 	--output-base=$rootdir \
-	--output-package=github.com/apache/camel-k/pkg/client/informers
+	--output-package=github.com/apache/camel-k/pkg/client/camel/informers
 
 
 # hack to fix non go-module compliance
