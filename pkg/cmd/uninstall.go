@@ -60,6 +60,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().String("olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
 	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines "+
 		"global scope for the operator (used in combination with the --global flag)")
+	cmd.Flags().Bool("all", false, "Do uninstall all Camel-K resources")
 
 	return &cmd, &options
 }
@@ -76,6 +77,7 @@ type uninstallCmdOptions struct {
 	SkipConfigMaps          bool `mapstructure:"skip-config-maps"`
 	Global                  bool `mapstructure:"global"`
 	OlmEnabled              bool `mapstructure:"olm"`
+	UninstallAll            bool `mapstructure:"all"`
 
 	OlmOptions olm.Options
 }
@@ -105,7 +107,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	}
 
 	uninstallViaOLM := false
-	if o.OlmEnabled {
+	if o.OlmEnabled || o.UninstallAll {
 		var err error
 		if uninstallViaOLM, err = olm.IsAPIAvailable(o.Context, c, o.Namespace); err != nil {
 			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
@@ -175,7 +177,7 @@ func (o *uninstallCmdOptions) uninstallOperator(c client.Client) error {
 }
 
 func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) error {
-	if !o.SkipCrd {
+	if !o.SkipCrd || o.UninstallAll {
 		if err := o.uninstallCrd(c); err != nil {
 			if k8serrors.IsForbidden(err) {
 				return createActionNotAuthorizedError()
@@ -185,7 +187,7 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) err
 		fmt.Printf("Camel K Custom Resource Definitions removed from cluster\n")
 	}
 
-	if !o.SkipClusterRoles {
+	if !o.SkipClusterRoles || o.UninstallAll {
 		if err := o.uninstallClusterRoles(c); err != nil {
 			if k8serrors.IsForbidden(err) {
 				return createActionNotAuthorizedError()
