@@ -39,4 +39,4 @@ The following configuration options are available:
 When running with Quarkus enabled, then Camel K only supports out of the box, those Camel components that
 are available as Camel Quarkus Extensions.
 
-You can see the list of extensions from the xref:https://camel.apache.org/camel-quarkus/latest/list-of-camel-quarkus-extensions.html[Camel Quarkus documentation].
+You can see the list of extensions from the https://camel.apache.org/camel-quarkus/latest/list-of-camel-quarkus-extensions.html[Camel Quarkus documentation].
