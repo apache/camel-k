@@ -28,6 +28,7 @@ import (
 type IntegrationSpec struct {
 	Replicas           *int32               `json:"replicas,omitempty"`
 	Sources            []SourceSpec         `json:"sources,omitempty"`
+	Flows              []Flow               `json:"flows,omitempty"`
 	Resources          []ResourceSpec       `json:"resources,omitempty"`
 	Kit                string               `json:"kit,omitempty"`
 	Dependencies       []string             `json:"dependencies,omitempty"`

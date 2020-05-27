@@ -37,6 +37,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/flows"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
@@ -82,6 +83,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().Bool("dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
+	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringArray("logging-level", nil, "Configure the logging level. e.g. \"--logging-level org.apache.camel=DEBUG\"")
@@ -110,6 +112,7 @@ type runCmdOptions struct {
 	Logs            bool     `mapstructure:"logs" yaml:",omitempty"`
 	Sync            bool     `mapstructure:"sync" yaml:",omitempty"`
 	Dev             bool     `mapstructure:"dev" yaml:",omitempty"`
+	UseFlows        bool     `mapstructure:"use-flows" yaml:",omitempty"`
 	Save            bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
 	IntegrationKit  string   `mapstructure:"kit" yaml:",omitempty"`
 	IntegrationName string   `mapstructure:"name" yaml:",omitempty"`
@@ -476,13 +479,21 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 			return nil, err
 		}
 
-		integration.Spec.AddSources(v1.SourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:        path.Base(source),
-				Content:     data,
-				Compression: o.Compression,
-			},
-		})
+		if o.UseFlows && (strings.HasSuffix(source, ".yaml") || strings.HasSuffix(source, ".yml")) {
+			flows, err := flows.UnmarshalString(data)
+			if err != nil {
+				return nil, err
+			}
+			integration.Spec.AddFlows(flows...)
+		} else {
+			integration.Spec.AddSources(v1.SourceSpec{
+				DataSpec: v1.DataSpec{
+					Name:        path.Base(source),
+					Content:     data,
+					Compression: o.Compression,
+				},
+			})
+		}
 	}
 
 	for _, resource := range o.Resources {
