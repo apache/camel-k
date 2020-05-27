@@ -22,10 +22,12 @@ import (
 	"sort"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/pkg/errors"
-
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/flows"
+	"github.com/pkg/errors"
 )
+
+const flowsInternalSourceName = "camel-k-embedded-flow.yaml"
 
 // Internal trait
 type initTrait struct {
@@ -48,6 +50,21 @@ func (t *initTrait) Configure(e *Environment) (bool, error) {
 
 func (t *initTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+
+		// Flows need to be turned into a generated source
+		if len(e.Integration.Spec.Flows) > 0 {
+			content, err := flows.Marshal(e.Integration.Spec.Flows)
+			if err != nil {
+				return err
+			}
+			e.Integration.Status.AddOrReplaceGeneratedSources(v1.SourceSpec{
+				DataSpec: v1.DataSpec{
+					Name:    flowsInternalSourceName,
+					Content: string(content),
+				},
+			})
+		}
+
 		//
 		// Dependencies need to be recomputed in case of a trait declares a capability but as
 		// the dependencies trait runs earlier than some task such as the cron one, we need to

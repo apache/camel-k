@@ -82,6 +82,11 @@ func (in *IntegrationSpec) AddResources(resources ...ResourceSpec) {
 	in.Resources = append(in.Resources, resources...)
 }
 
+// AddFlows --
+func (in *IntegrationSpec) AddFlows(flows ...Flow) {
+	in.Flows = append(in.Flows, flows...)
+}
+
 // AddConfiguration --
 func (in *IntegrationSpec) AddConfiguration(confType string, confValue string) {
 	in.Configuration = append(in.Configuration, ConfigurationSpec{
@@ -127,6 +132,26 @@ func (in *IntegrationStatus) AddOrReplaceGeneratedResources(resources ...Resourc
 	}
 
 	in.GeneratedResources = append(in.GeneratedResources, newResources...)
+}
+
+// AddOrReplaceGeneratedSources --
+func (in *IntegrationStatus) AddOrReplaceGeneratedSources(sources ...SourceSpec) {
+	newSources := make([]SourceSpec, 0)
+	for _, source := range sources {
+		replaced := false
+		for i, r := range in.GeneratedSources {
+			if r.Name == source.Name {
+				in.GeneratedSources[i] = source
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			newSources = append(newSources, source)
+		}
+	}
+
+	in.GeneratedSources = append(in.GeneratedSources, newSources...)
 }
 
 // Configurations --
