@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-from('cron:tab?schedule=0/1+*+*+*+*+?')
+from('quartz:trigger?cron=0/1+*+*+*+*+?')
     .routeId('groovy')
     .setHeader("m").constant("string!")
     .setBody()
