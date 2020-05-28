@@ -17,5 +17,13 @@ To verify that all resources have been removed you can use the following command
 [source]
 ----
 kubectl get all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
-No resources found in default namespace.
+NAME                                   READY   STATUS        RESTARTS   AGE
+clusterrole.rbac.authorization.k8s.io/camel-k:edit   2020-05-28T20:31:39Z
+
+NAME                                                                                  CREATED AT
+customresourcedefinition.apiextensions.k8s.io/builds.camel.apache.org                 2020-05-28T20:31:39Z
+customresourcedefinition.apiextensions.k8s.io/camelcatalogs.camel.apache.org          2020-05-28T20:31:39Z
+customresourcedefinition.apiextensions.k8s.io/integrationkits.camel.apache.org        2020-05-28T20:31:39Z
+customresourcedefinition.apiextensions.k8s.io/integrationplatforms.camel.apache.org   2020-05-28T20:31:39Z
+customresourcedefinition.apiextensions.k8s.io/integrations.camel.apache.org           2020-05-28T20:31:39Z
 ----
