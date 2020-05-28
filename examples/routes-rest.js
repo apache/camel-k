@@ -17,12 +17,8 @@
 //
 // To run this integrations use:
 //
-//     kamel run --name=withrest --dependency=camel-undertow examples/routes-rest.js
+//     kamel run --name=withrest examples/routes-rest.js
 //
-
-c = restConfiguration();
-c.setComponent('undertow');
-c.setPort('8080');
 
 rest('/say/hello')
     .produces("text/plain")
