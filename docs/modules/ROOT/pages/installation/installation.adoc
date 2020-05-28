@@ -28,9 +28,10 @@ For example, if you're using Linux, you can put `kamel` in `/usr/bin`.
 
 Once you have put the "kamel" CLI in the path, log into your cluster using the standard "oc" (OpenShift) or "kubectl" (Kubernetes) client tool and execute the following command to install Camel K:
 
-```
+[source]
+----
 kamel install
-```
+----
 
 This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace.
 
@@ -44,4 +45,4 @@ You're now ready to xref:running/running.adoc[run some integrations].
 == Installation via Helm
 
 Camel K is also available in Helm Hub for installation.
-Follow the instructions on the [Camel K](https://hub.helm.sh/charts/camel-k/camel-k) page for more information.
+Follow the instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K] page for more information.
