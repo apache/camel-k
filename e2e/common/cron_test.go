@@ -83,5 +83,18 @@ func TestRunCronExample(t *testing.T) {
 			Eventually(IntegrationLogs(ns, "cron-fallback-quarkus"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
+
+		// Enable this test when https://github.com/apache/camel-k-runtime/issues/346 is fixed (Camel K Runtime 1.3.x)
+		/*
+			t.Run("cron-quartz-quarkus", func(t *testing.T) {
+				RegisterTestingT(t)
+
+				Expect(Kamel("run", "--name", "cron-quartz-quarkus", "-n", ns, "files/cron-quartz.groovy", "-t", "quarkus.enabled=true").Execute()).Should(BeNil())
+				Eventually(IntegrationPodPhase(ns, "cron-quartz-quarkus"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(IntegrationCondition(ns, "cron-quartz-quarkus", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+				Eventually(IntegrationLogs(ns, "cron-quartz-quarkus"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			})
+		*/
 	})
 }
