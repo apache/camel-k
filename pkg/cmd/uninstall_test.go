@@ -76,6 +76,5 @@ func TestUninstallAllFlag(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, uninstallCmdOptions.SkipCrd)
 	assert.True(t, uninstallCmdOptions.SkipClusterRoles)
-	assert.True(t, uninstallCmdOptions.OlmEnabled)
 	assert.False(t, uninstallCmdOptions.SkipIntegrationPlatform)
 }
