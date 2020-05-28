@@ -21,7 +21,7 @@ Some of the most used commands are:
 |`kamel help`
 
 |init
-|Initialize empty Camel K files
+|Initialize empty Camel K files (besides Java you can also do this for other languages like Groovy, Kotlin, XML, YMAL)
 |`kamel init Routes.java`
 
 |run
@@ -47,6 +47,12 @@ Some of the most used commands are:
 |===
 
 The list above is not the full list of available commands. You can run `kamel help` to obtain the full list.
+And each command also takes `--help` as parameter to output more information, eg
+
+[source]
+----
+kamel run --help
+----
 
 == Modeline
 

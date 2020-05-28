@@ -59,9 +59,10 @@ This is a high-level overview of the project structure:
 
 To build the whole project you now need to run:
 
-```
+[source]
+----
 make
-```
+----
 
 This execute a full build of both the Java and Go code. If you need to build the components separately you can execute:
 
@@ -71,9 +72,10 @@ This execute a full build of both the Java and Go code. If you need to build the
 
 After a successful build, if you're connected to a Docker daemon, you can build the operator Docker image by running:
 
-```
+[source]
+----
 make images
-```
+----
 
 [[push-snapshot]]
 == Push runtime snapshot
@@ -84,7 +86,8 @@ For the Java bits in runtime you can push to the Apache Snapshot repository with
 
 In your settings.xml you'll need to have the correct ASF credentials to push.
 
-```
+[source,xml]
+----
     <server>
       <id>apache.snapshots.https</id>
       <username>username</username>
@@ -95,15 +98,16 @@ In your settings.xml you'll need to have the correct ASF credentials to push.
       <username>username</username>
       <password>password</password>
     </server>
-```
+----
 
 Don't forget to first run a `make build-runtime` before pushing the snapshot.
 
 The above command produces a `camel-k` image with name `docker.io/apache/camel-k`. Sometimes you might need to produce camel-k images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `imgDestination` to the make as shown below:
 
-```
+[source]
+----
 make imgDestination='docker.io/myrepo' images
-```
+----
 
 [[testing]]
 == Testing
@@ -118,18 +122,20 @@ Integration tests are all in the https://github.com/apache/camel-k/tree/master/e
 Since both names end with `_test.go`, both would be executed by go during build, so you need to put a special **build tag** to mark
 integration tests. A integration test should start with the following line:
 
-```
+[source]
+----
 // +build integration
-```
+----
 
 Look into the https://github.com/apache/camel-k/tree/master/e2e[/e2e] directory for examples of integration tests.
 
 Before running a integration test, you need to be connected to a Kubernetes/OpenShift namespace.
 After you log in into your cluster, you can run the following command to execute **all** integration tests:
 
-```
+[source]
+----
 make test-integration
-```
+----
 
 [[running]]
 == Running
@@ -153,15 +159,17 @@ This command assumes you have an already running Minikube instance.
 
 Now you can play with Camel K:
 
-```
+[source]
+----
 ./kamel run examples/Sample.java
-```
+----
 
 To add additional dependencies to your routes:
 
-```
+[source]
+----
 ./kamel run -d camel:dns examples/dns.js
-```
+----
 
 [[debugging]]
 == Debugging and Running from IDE
@@ -178,10 +186,11 @@ It is a bit more complex (but not so much).
 
 You are going to run the operator code **outside** OpenShift in your IDE so, first of all, you need to **stop the operator running inside**:
 
-```
+[source]
+----
 // use kubectl in plain Kubernetes
 oc scale deployment/camel-k-operator --replicas 0
-```
+----
 
 You can scale it back to 1 when you're done and you have updated the operator image.
 
