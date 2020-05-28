@@ -10,6 +10,8 @@ kamel uninstall
 
 This will uninstall from the cluster namespace all Camel K resources along with the operator.
 
+NOTE:  By _default_ the resources possibly shared between clusters such as https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources[CustomResourceDefinitions (CRD)], https://kubernetes.io/docs/reference/access-authn-authz/rbac[ClusterRole] and https://docs.openshift.com/container-platform/4.1/applications/operators/olm-understanding-olm.html[Operator Lifecycle Manager(OLM)] will be  **excluded**. To force the inclusion of all resources you can use the **--all** flag.
+
 To verify that all resources have been removed you can use the following command:
 
 [source]
