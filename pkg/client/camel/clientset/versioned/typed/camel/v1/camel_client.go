@@ -28,6 +28,7 @@ import (
 type CamelV1Interface interface {
 	RESTClient() rest.Interface
 	BuildsGetter
+	CamelCatalogsGetter
 	IntegrationsGetter
 	IntegrationKitsGetter
 	IntegrationPlatformsGetter
@@ -40,6 +41,10 @@ type CamelV1Client struct {
 
 func (c *CamelV1Client) Builds(namespace string) BuildInterface {
 	return newBuilds(c, namespace)
+}
+
+func (c *CamelV1Client) CamelCatalogs(namespace string) CamelCatalogInterface {
+	return newCamelCatalogs(c, namespace)
 }
 
 func (c *CamelV1Client) Integrations(namespace string) IntegrationInterface {

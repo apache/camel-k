@@ -72,6 +72,7 @@ type CamelCatalogStatus struct {
 
 // CamelCatalog is the Schema for the camelcatalogs API
 // +k8s:openapi-gen=true
+// +genclient
 type CamelCatalog struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`

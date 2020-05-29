@@ -27,6 +27,14 @@ type BuildListerExpansion interface{}
 // BuildNamespaceLister.
 type BuildNamespaceListerExpansion interface{}
 
+// CamelCatalogListerExpansion allows custom methods to be added to
+// CamelCatalogLister.
+type CamelCatalogListerExpansion interface{}
+
+// CamelCatalogNamespaceListerExpansion allows custom methods to be added to
+// CamelCatalogNamespaceLister.
+type CamelCatalogNamespaceListerExpansion interface{}
+
 // IntegrationListerExpansion allows custom methods to be added to
 // IntegrationLister.
 type IntegrationListerExpansion interface{}
