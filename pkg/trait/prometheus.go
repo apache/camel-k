@@ -170,7 +170,6 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 
 func (t *prometheusTrait) getContainerPort() *corev1.ContainerPort {
 	containerPort := corev1.ContainerPort{
-		Name:          prometheusPortName,
 		ContainerPort: int32(t.Port),
 		Protocol:      corev1.ProtocolTCP,
 	}
@@ -179,10 +178,11 @@ func (t *prometheusTrait) getContainerPort() *corev1.ContainerPort {
 
 func (t *prometheusTrait) getServicePort() *corev1.ServicePort {
 	servicePort := corev1.ServicePort{
-		Name:       prometheusPortName,
-		Port:       int32(t.Port),
-		Protocol:   corev1.ProtocolTCP,
-		TargetPort: intstr.FromString(prometheusPortName),
+		Name:     prometheusPortName,
+		Port:     int32(t.Port),
+		Protocol: corev1.ProtocolTCP,
+		// Avoid relying on named port, as Knative enforces specific values used for content negotiation
+		TargetPort: intstr.FromInt(t.Port),
 	}
 	return &servicePort
 }
