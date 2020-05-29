@@ -68,7 +68,6 @@ func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 
 	ports := container.Ports
 	assert.Len(t, ports, 1)
-	assert.Equal(t, "prometheus", ports[0].Name)
 	assert.Equal(t, int32(9779), ports[0].ContainerPort)
 	assert.Equal(t, corev1.ProtocolTCP, ports[0].Protocol)
 
