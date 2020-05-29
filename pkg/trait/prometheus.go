@@ -135,8 +135,11 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 			serviceEnabled = serviceTrait.isEnabled()
 		}
 		if serviceEnabled {
-			// add a new service if not already created
+			// Add a new service if not already created
 			service = getServiceFor(e)
+			// Override the service name if none exists.
+			// This is required for Knative Serving, that checks no standard eponymous service exist
+			service.Name = service.Name + "-prometheus"
 			e.Resources.Add(service)
 		}
 	} else {
@@ -144,7 +147,6 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	}
 
 	// Add the service port and service monitor resource
-	// A better strategy may be needed when the Knative profile is active
 	if serviceEnabled {
 		servicePort := t.getServicePort()
 		service.Spec.Ports = append(service.Spec.Ports, *servicePort)
