@@ -21,6 +21,8 @@ package v1
 
 type BuildExpansion interface{}
 
+type CamelCatalogExpansion interface{}
+
 type IntegrationExpansion interface{}
 
 type IntegrationKitExpansion interface{}

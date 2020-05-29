@@ -33,6 +33,10 @@ func (c *FakeCamelV1) Builds(namespace string) v1.BuildInterface {
 	return &FakeBuilds{c, namespace}
 }
 
+func (c *FakeCamelV1) CamelCatalogs(namespace string) v1.CamelCatalogInterface {
+	return &FakeCamelCatalogs{c, namespace}
+}
+
 func (c *FakeCamelV1) Integrations(namespace string) v1.IntegrationInterface {
 	return &FakeIntegrations{c, namespace}
 }

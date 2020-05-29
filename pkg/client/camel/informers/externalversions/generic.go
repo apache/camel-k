@@ -56,6 +56,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=camel.apache.org, Version=v1
 	case v1.SchemeGroupVersion.WithResource("builds"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().Builds().Informer()}, nil
+	case v1.SchemeGroupVersion.WithResource("camelcatalogs"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().CamelCatalogs().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("integrations"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().Integrations().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("integrationkits"):

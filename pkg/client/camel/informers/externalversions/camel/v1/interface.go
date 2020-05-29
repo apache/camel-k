@@ -27,6 +27,8 @@ import (
 type Interface interface {
 	// Builds returns a BuildInformer.
 	Builds() BuildInformer
+	// CamelCatalogs returns a CamelCatalogInformer.
+	CamelCatalogs() CamelCatalogInformer
 	// Integrations returns a IntegrationInformer.
 	Integrations() IntegrationInformer
 	// IntegrationKits returns a IntegrationKitInformer.
@@ -49,6 +51,11 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // Builds returns a BuildInformer.
 func (v *version) Builds() BuildInformer {
 	return &buildInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// CamelCatalogs returns a CamelCatalogInformer.
+func (v *version) CamelCatalogs() CamelCatalogInformer {
+	return &camelCatalogInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Integrations returns a IntegrationInformer.
