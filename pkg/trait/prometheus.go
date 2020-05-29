@@ -121,9 +121,16 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	options := []string{strconv.Itoa(t.Port), path.Join(prometheusJmxExporterConfigMountPath, prometheusJmxExporterConfigFileName)}
 	container.Args = append(container.Args, "-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar="+strings.Join(options, ":"))
 
-	// Add the container port
+	// Configure the Prometheus container port
 	containerPort := t.getContainerPort()
-	container.Ports = append(container.Ports, *containerPort)
+	controller, err := e.DetermineControllerStrategy(t.Ctx, t.Client)
+	if err != nil {
+		return err
+	}
+	// Skip declaring the Prometheus port when Knative is enabled, as only one container port is supported
+	if controller != ControllerStrategyKnativeService {
+		container.Ports = append(container.Ports, *containerPort)
+	}
 	condition.Message = fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
 
 	// Retrieve the service or create a new one if the service trait is enabled
