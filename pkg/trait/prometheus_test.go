@@ -72,7 +72,7 @@ func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 	assert.Equal(t, corev1.ProtocolTCP, ports[0].Protocol)
 
 	service := environment.Resources.GetService(func(service *corev1.Service) bool {
-		return service.Name == "integration-name"
+		return service.Name == "integration-name-prometheus"
 	})
 	assert.NotNil(t, service)
 	assert.Len(t, service.Spec.Ports, 1)
