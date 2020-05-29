@@ -103,7 +103,7 @@ func TestApplyPrometheusTraitWithoutContainerDoesNotSucceed(t *testing.T) {
 	assert.Equal(t, corev1.ConditionFalse, condition.Status)
 }
 
-func TestApplyPrometheusTraitWithServiceDoesNotSucceed(t *testing.T) {
+func TestApplyPrometheusTraitWithServiceDoesSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
 	environment.Resources = kubernetes.NewCollection(
 		&appsv1.Deployment{
@@ -146,8 +146,8 @@ func TestApplyPrometheusTraitWithServiceDoesNotSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1.IntegrationConditionServiceNotAvailableReason, condition.Reason)
-	assert.Equal(t, corev1.ConditionFalse, condition.Status)
+	assert.Equal(t, v1.IntegrationConditionPrometheusAvailableReason, condition.Reason)
+	assert.Equal(t, corev1.ConditionTrue, condition.Status)
 }
 
 func TestPrometheusTraitGetServiceMonitor(t *testing.T) {

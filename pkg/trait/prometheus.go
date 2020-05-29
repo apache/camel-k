@@ -139,6 +139,8 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 			service = getServiceFor(e)
 			e.Resources.Add(service)
 		}
+	} else {
+		serviceEnabled = true
 	}
 
 	// Add the service port and service monitor resource
