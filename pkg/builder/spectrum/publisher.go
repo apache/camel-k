@@ -19,13 +19,16 @@ package spectrum
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/log"
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func publisher(ctx *builder.Context) error {
@@ -64,13 +67,23 @@ func publisher(ctx *builder.Context) error {
 		pullInsecure = false
 	}
 
+	registryConfigDir := ""
+	if pl.Spec.Build.Registry.Secret != "" {
+		registryConfigDir, err = mountSecret(ctx, pl.Spec.Build.Registry.Secret)
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(registryConfigDir)
+	}
+
 	options := spectrum.Options{
-		Base:         ctx.BaseImage,
-		Target:       target,
-		PullInsecure: pullInsecure,
-		PushInsecure: pl.Status.Build.Registry.Insecure,
-		Stdout:       os.Stdout,
-		Stderr:       os.Stderr,
+		PullInsecure:  pullInsecure,
+		PushInsecure:  pl.Status.Build.Registry.Insecure,
+		PushConfigDir: registryConfigDir,
+		Base:          ctx.BaseImage,
+		Target:        target,
+		Stdout:        os.Stdout,
+		Stderr:        os.Stderr,
 	}
 
 	digest, err := spectrum.Build(options, libraryPath+":/deployments/dependencies")
@@ -81,4 +94,32 @@ func publisher(ctx *builder.Context) error {
 	ctx.Image = target
 	ctx.Digest = digest
 	return nil
+}
+
+func mountSecret(ctx *builder.Context, name string) (string, error) {
+	dir, err := ioutil.TempDir("", "spectrum-secret-")
+	if err != nil {
+		return "", err
+	}
+
+	secret, err := ctx.CoreV1().Secrets(ctx.Namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		os.RemoveAll(dir)
+		return "", err
+	}
+
+	for file, content := range secret.Data {
+		if err := ioutil.WriteFile(filepath.Join(dir, remap(file)), content, 0600); err != nil {
+			os.RemoveAll(dir)
+			return "", err
+		}
+	}
+	return dir, nil
+}
+
+func remap(name string) string {
+	if name == ".dockerconfigjson" {
+		return "config.json"
+	}
+	return name
 }
