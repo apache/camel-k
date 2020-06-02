@@ -27,6 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // NewMonitorAction creates a new monitoring action for an integration
@@ -90,6 +91,9 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 			integration.Status.Replicas = &replicas
 		}
 	}
+
+	// Mirror ready condition from the sub resource (e.g.ReplicaSet, Deployment, CronJob, ...) to the integration
+	kubernetes.MirrorReadyCondition(ctx, action.client, integration)
 
 	return integration, nil
 }
