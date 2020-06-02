@@ -68,7 +68,6 @@ func TestConfigureDeploymentTraitDoesSucceed(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.True(t, configured)
-	assert.NotNil(t, deploymentTrait.deployer)
 }
 
 func TestConfigureDeploymentTraitWhileBuildingKitDoesNotSucceed(t *testing.T) {

@@ -33,7 +33,6 @@ import (
 // +camel-k:trait=deployment
 type deploymentTrait struct {
 	BaseTrait `property:",squash"`
-	deployer  deployerTrait
 }
 
 var _ ControllerStrategySelector = &deploymentTrait{}
@@ -85,15 +84,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	enabled := e.IntegrationInPhase(v1.IntegrationPhaseDeploying)
-	if enabled {
-		dt := e.Catalog.GetTrait("deployer")
-		if dt != nil {
-			t.deployer = *dt.(*deployerTrait)
-		}
-	}
-
-	return enabled, nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying), nil
 }
 
 func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
@@ -145,12 +136,6 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 func (t *deploymentTrait) IsPlatformTrait() bool {
 	return true
 }
-
-// **********************************
-//
-// Deployment
-//
-// **********************************
 
 func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// create a copy to avoid sharing the underlying annotation map
