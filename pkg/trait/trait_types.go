@@ -223,7 +223,7 @@ const (
 	ControllerStrategyKnativeService ControllerStrategy = "knative-service"
 	ControllerStrategyCronJob        ControllerStrategy = "cron-job"
 
-	DefaultControllerStrategy ControllerStrategy = ControllerStrategyDeployment
+	DefaultControllerStrategy = ControllerStrategyDeployment
 )
 
 // GetTrait --
