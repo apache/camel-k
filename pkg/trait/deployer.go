@@ -110,12 +110,6 @@ func (t *deployerTrait) Apply(e *Environment) error {
 			}
 			return nil
 		})
-
-		// Mirror ready condition from the sub resource to the integration
-		e.PostActions = append(e.PostActions, func(e *Environment) error {
-			kubernetes.MirrorReadyCondition(t.Ctx, t.Client, e.Integration)
-			return nil
-		})
 	}
 
 	return nil

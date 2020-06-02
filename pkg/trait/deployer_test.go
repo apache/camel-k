@@ -52,7 +52,7 @@ func TestApplyDeployerTraitDoesSucceed(t *testing.T) {
 	err := deployerTrait.Apply(environment)
 
 	assert.Nil(t, err)
-	assert.Len(t, environment.PostActions, 2)
+	assert.Len(t, environment.PostActions, 1)
 }
 
 func TestApplyDeployerTraitInInitializationPhaseDoesSucceed(t *testing.T) {
