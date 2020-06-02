@@ -75,8 +75,7 @@ type cronTrait struct {
 	//
 	// It's required that all periodic consumers have the same period and it can be expressed as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`,
 	// while `35m` or `50s` cannot).
-	Auto     *bool `property:"auto"`
-	deployer deployerTrait
+	Auto *bool `property:"auto"`
 }
 
 var _ ControllerStrategySelector = &cronTrait{}
@@ -179,10 +178,6 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 				}
 			}
 		}
-	}
-	dt := e.Catalog.GetTrait("deployer")
-	if dt != nil {
-		t.deployer = *dt.(*deployerTrait)
 	}
 
 	// Fallback strategy can be implemented in any other controller
