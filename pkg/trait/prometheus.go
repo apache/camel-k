@@ -131,7 +131,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	if controller != ControllerStrategyKnativeService {
 		container.Ports = append(container.Ports, *containerPort)
 	}
-	condition.Message = fmt.Sprintf("%s(%s/%d)", container.Name, containerPort.Name, containerPort.ContainerPort)
+	condition.Message = fmt.Sprintf("%s(%d)", container.Name, containerPort.ContainerPort)
 
 	// Retrieve the service or create a new one if the service trait is enabled
 	serviceEnabled := false
