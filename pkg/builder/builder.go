@@ -68,6 +68,7 @@ func (b *defaultBuilder) Run(build v1.BuilderTask) v1.BuildStatus {
 
 	c := Context{
 		Client:    b.client,
+		C:         b.ctx,
 		Path:      buildDir,
 		Namespace: build.Meta.Namespace,
 		Build:     build,
