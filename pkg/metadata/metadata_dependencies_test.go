@@ -168,7 +168,7 @@ func TestDependenciesQuarkus(t *testing.T) {
 			    from("http:test").to("log:end");
 			    from("https:test").to("log:end");
 			    from("twitter-timeline:test").to("mock:end");
-			    from("direct:start").circuitBreaker().hystrixConfiguration().executionTimeoutInMilliseconds(100).end()
+			    from("direct:start").circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(1500).end()
 			    .to("direct:other").onFallback().setBody(constant("Fallback response")).end();
 		    `,
 		},
@@ -188,9 +188,10 @@ func TestDependenciesQuarkus(t *testing.T) {
 			"camel-quarkus:timer",
 			"camel-quarkus:twitter",
 			"camel-quarkus:direct",
-			"camel-quarkus:hystrix",
 		},
 		meta.Dependencies.List())
+
+	assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityCircuitBreaker))
 }
 
 func TestJacksonDependency(t *testing.T) {
@@ -315,7 +316,7 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 		meta.Dependencies.List())
 }
 
-func TestHystrixDependency(t *testing.T) {
+func TestCircuitBreakerDependency(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
 			Name: "Request.groovy",
@@ -338,10 +339,11 @@ func TestHystrixDependency(t *testing.T) {
 	assert.ElementsMatch(t,
 		[]string{
 			"camel:http",
-			"camel:hystrix",
 			"camel:log",
 		},
 		meta.Dependencies.List())
+
+	assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityCircuitBreaker))
 }
 
 func TestRestDependency(t *testing.T) {
@@ -496,7 +498,7 @@ func TestRestClosureDependencyKotlin(t *testing.T) {
 		meta.Dependencies.List())
 }
 
-func TestXMLHystrixDependency(t *testing.T) {
+func TestXMLCircuitBreakerDependency(t *testing.T) {
 	code := v1.SourceSpec{
 
 		DataSpec: v1.DataSpec{
@@ -523,11 +525,12 @@ func TestXMLHystrixDependency(t *testing.T) {
 		t,
 		[]string{
 			"camel:direct",
-			"camel:hystrix",
 			"camel:kafka",
 			"camel:log",
 		},
 		meta.Dependencies.List())
+
+	assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityCircuitBreaker))
 }
 
 func TestXMLRestDependency(t *testing.T) {
@@ -696,7 +699,7 @@ func TestYAMLRestDependency(t *testing.T) {
 	assert.True(t, meta.RequiredCapabilities.Has("rest"))
 }
 
-func TestYAMLHystrixDependency(t *testing.T) {
+func TestYAMLCircuitBreakerDependency(t *testing.T) {
 	code := v1.SourceSpec{
 
 		DataSpec: v1.DataSpec{
@@ -715,9 +718,9 @@ func TestYAMLHystrixDependency(t *testing.T) {
 		t,
 		[]string{
 			"camel:direct",
-			"camel:hystrix",
 		},
 		meta.Dependencies.List())
+	assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityCircuitBreaker))
 }
 
 func TestYAMLLanguageDependencies(t *testing.T) {

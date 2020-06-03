@@ -56,6 +56,10 @@ spec:
           artifactId: camel-quarkus-rest
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-platform-http
+      circuit-breaker:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-microprofile-fault-tolerance
   artifacts:
     camel-quarkus-kudu:
       groupId: org.apache.camel.quarkus

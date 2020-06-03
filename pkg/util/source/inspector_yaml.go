@@ -60,7 +60,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		meta.ExposesHTTPServices = true
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)
 	case "circuitBreaker":
-		i.addDependency("camel:hystrix", meta)
+		meta.RequiredCapabilities.Add(v1.CapabilityCircuitBreaker)
 	}
 
 	var maybeURI string

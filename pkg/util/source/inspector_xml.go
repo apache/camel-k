@@ -47,7 +47,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				meta.ExposesHTTPServices = true
 				meta.RequiredCapabilities.Add(v1.CapabilityRest)
 			case "circuitBreaker":
-				i.addDependency("camel:hystrix", meta)
+				meta.RequiredCapabilities.Add(v1.CapabilityCircuitBreaker)
 			case "language":
 				for _, a := range se.Attr {
 					if a.Name.Local == "language" {
