@@ -18,7 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
-	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"unicode"
@@ -30,7 +30,7 @@ var disallowedChars = regexp.MustCompile(`[^a-z0-9-]`)
 
 // SanitizeName sanitizes the given name to be compatible with k8s
 func SanitizeName(name string) string {
-	name = path.Base(name)
+	name = filepath.Base(name)
 	name = strings.Split(name, ".")[0]
 	name = scase.KebabCase(name)
 	name = strings.ToLower(name)
