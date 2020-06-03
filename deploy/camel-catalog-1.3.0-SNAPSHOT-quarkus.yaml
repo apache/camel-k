@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.3.0-snapshot-quarkus
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.2.0
-    camel.apache.org/catalog.loader.version: 3.2.0
+    camel.apache.org/catalog.version: 3.3.0
+    camel.apache.org/catalog.loader.version: 3.3.0
     camel.apache.org/runtime.version: 1.3.0-SNAPSHOT
     camel.apache.org/runtime.provider: quarkus
 spec:
@@ -31,9 +31,9 @@ spec:
     provider: quarkus
     applicationClass: io.quarkus.runner.GeneratedMain
     metadata:
-      camel.version: 3.2.0
-      quarkus.version: 1.4.1.Final
-      camel-quarkus.version: 1.0.0-M7
+      camel.version: 3.3.0
+      quarkus.version: 1.5.0.Final
+      camel-quarkus.version: 1.0.0-CR2
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-quarkus
