@@ -54,15 +54,16 @@ var (
 	xpathRegexp             = regexp.MustCompile(`.*\.?xpath\s*\(.*\).*`)
 	xtokenizeRegexp         = regexp.MustCompile(`.*\.xtokenize\s*\(.*\).*`)
 
+	sourceCapabilities = map[*regexp.Regexp][]string{
+		circuitBreakerRegexp: {v1.CapabilityCircuitBreaker},
+	}
+
 	sourceDependencies = map[*regexp.Regexp]catalog2deps{
 		jsonLibraryRegexp: func(_ *camel.RuntimeCatalog) []string {
 			return []string{"camel:jackson"}
 		},
 		jsonLanguageRegexp: func(_ *camel.RuntimeCatalog) []string {
 			return []string{"camel:jackson"}
-		},
-		circuitBreakerRegexp: func(_ *camel.RuntimeCatalog) []string {
-			return []string{"camel:hystrix"}
 		},
 		restConfigurationRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
@@ -200,12 +201,22 @@ func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 }
 
 // discoverDependencies returns a list of dependencies required by the given source code
-func (i *baseInspector) discoverCapabilities(_ v1.SourceSpec, meta *Metadata) {
+func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadata) {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
 
 	for _, uri := range uris {
 		if i.getURIPrefix(uri) == "platform-http" {
 			meta.RequiredCapabilities.Add(v1.CapabilityPlatformHTTP)
+		}
+	}
+
+	for pattern, capabilities := range sourceCapabilities {
+		if !pattern.MatchString(source.Content) {
+			continue
+		}
+
+		for _, capability := range capabilities {
+			meta.RequiredCapabilities.Add(capability)
 		}
 	}
 }

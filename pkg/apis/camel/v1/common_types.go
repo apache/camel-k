@@ -116,6 +116,8 @@ const (
 	CapabilityCron = "cron"
 	// CapabilityPlatformHTTP --
 	CapabilityPlatformHTTP = "platform-http"
+	// CapabilityCircuitBreaker
+	CapabilityCircuitBreaker = "circuit-breaker"
 )
 
 // ResourceCondition is a common type for all conditions

@@ -56,6 +56,10 @@ spec:
           artifactId: camel-rest
         - groupId: org.apache.camel.k
           artifactId: camel-k-runtime-http
+      circuit-breaker:
+        dependencies:
+        - groupId: org.apache.camel
+          artifactId: camel-microprofile-fault-tolerance
   artifacts:
     camel-zipfile:
       groupId: org.apache.camel
