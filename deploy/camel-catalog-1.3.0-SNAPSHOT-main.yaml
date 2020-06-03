@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.3.0-snapshot-main
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.2.0
-    camel.apache.org/catalog.loader.version: 3.2.0
+    camel.apache.org/catalog.version: 3.3.0
+    camel.apache.org/catalog.loader.version: 3.3.0
     camel.apache.org/runtime.version: 1.3.0-SNAPSHOT
     camel.apache.org/runtime.provider: main
 spec:
@@ -31,9 +31,9 @@ spec:
     provider: main
     applicationClass: org.apache.camel.k.main.Application
     metadata:
-      camel.version: 3.2.0
-      quarkus.version: 1.4.1.Final
-      camel-quarkus.version: 1.0.0-M7
+      camel.version: 3.3.0
+      quarkus.version: 1.5.0.Final
+      camel-quarkus.version: 1.0.0-CR2
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
@@ -325,6 +325,15 @@ spec:
       - lzf
       javaTypes:
       - org.apache.camel.dataformat.lzf.LZFDataFormat
+    camel-splunk-hec:
+      groupId: org.apache.camel
+      artifactId: camel-splunk-hec
+      schemes:
+      - id: splunk-hec
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.splunkhec.SplunkHECComponent
     camel-aws2-translate:
       groupId: org.apache.camel
       artifactId: camel-aws2-translate
@@ -369,6 +378,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.cometd.CometdComponent
+    camel-djl:
+      groupId: org.apache.camel
+      artifactId: camel-djl
+      schemes:
+      - id: djl
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.djl.DJLComponent
     camel-bean-validator:
       groupId: org.apache.camel
       artifactId: camel-bean-validator
@@ -2266,6 +2284,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.jira.JiraComponent
+    camel-azure-storage-blob:
+      groupId: org.apache.camel
+      artifactId: camel-azure-storage-blob
+      schemes:
+      - id: azure-storage-blob
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.storage.blob.BlobComponent
     camel-asterisk:
       groupId: org.apache.camel
       artifactId: camel-asterisk
@@ -2818,6 +2845,15 @@ spec:
         passive: true
       javaTypes:
       - org.apache.camel.component.ref.RefComponent
+    camel-azure-storage-queue:
+      groupId: org.apache.camel
+      artifactId: camel-azure-storage-queue
+      schemes:
+      - id: azure-storage-queue
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.storage.queue.QueueComponent
     camel-stomp:
       groupId: org.apache.camel
       artifactId: camel-stomp
