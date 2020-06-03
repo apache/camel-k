@@ -43,6 +43,9 @@ func Unmarshal(reader io.Reader) ([]v1.Flow, error) {
 	// Using the Kubernetes decoder to turn them into JSON before unmarshal.
 	// This avoids having map[interface{}]interface{} objects which are not JSON compatible.
 	jsonData, err := yaml.ToJSON(buffered)
+	if err != nil {
+		return nil, err
+	}
 	if err = json.Unmarshal(jsonData, &flows); err != nil {
 		return nil, err
 	}
