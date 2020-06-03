@@ -121,7 +121,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	strategy, err := e.DetermineControllerStrategy(t.Ctx, t.Client)
+	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		e.Integration.Status.SetErrorCondition(
 			v1.IntegrationConditionKnativeServiceAvailable,
