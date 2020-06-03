@@ -49,3 +49,19 @@ script:
 cache:
   directories:
     - $GOPATH/pkg/mod
+
+# Installing newer openjdk11 because of issues with 11.0.2
+# See:
+# - https://bugs.openjdk.java.net/browse/JDK-8213202
+# - https://travis-ci.community/t/old-java-version-in-bionic/4726/2
+before_install:
+  - echo $JAVA_HOME
+  - which java
+  - sudo rm -rf /usr/local/lib/jvm/
+  - sudo add-apt-repository -y ppa:openjdk-r/ppa
+  - sudo apt-get update
+  - sudo apt-get install -y openjdk-11-jdk-headless
+  - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+  - which java
+  - java -version
+  - $JAVA_HOME/bin/java -version
