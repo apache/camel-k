@@ -90,7 +90,7 @@ func Run(namespace string, buildName string, taskName string) {
 	exitOnError(err, "cannot create merge patch")
 	if len(p) > 0 {
 		exitOnError(
-			c.Status().Patch(ctx, target, controller.ConstantPatch(types.MergePatchType, p)),
+			c.Status().Patch(ctx, target, controller.RawPatch(types.MergePatchType, p)),
 			fmt.Sprintf("\n--- patch ---\n%s\n-------------\n", string(p)),
 		)
 	} else {

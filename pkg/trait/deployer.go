@@ -103,7 +103,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 					continue
 				}
 
-				err = env.Client.Patch(env.C, resource, client.ConstantPatch(types.MergePatchType, p))
+				err = env.Client.Patch(env.C, resource, client.RawPatch(types.MergePatchType, p))
 				if err != nil {
 					return errors.Wrap(err, "error during patch resource")
 				}

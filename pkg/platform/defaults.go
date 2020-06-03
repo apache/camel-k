@@ -280,7 +280,7 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 		if err != nil {
 			return err
 		} else if len(p) != 0 {
-			err = client.Patch(ctx, cm, k8sclient.ConstantPatch(types.MergePatchType, p))
+			err = client.Patch(ctx, cm, k8sclient.RawPatch(types.MergePatchType, p))
 			if err != nil {
 				return errors.Wrap(err, "error during patch resource")
 			}
