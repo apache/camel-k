@@ -146,7 +146,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 			service = getServiceFor(e)
 			// Override the service name if none exists.
 			// This is required for Knative Serving, that checks no standard eponymous service exist
-			service.Name = service.Name + "-prometheus"
+			service.Name += "-prometheus"
 			e.Resources.Add(service)
 		}
 	} else {
