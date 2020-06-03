@@ -28,8 +28,6 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
-
 	"k8s.io/apimachinery/pkg/runtime"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -298,7 +296,7 @@ func (e *Environment) DetermineProfile() v1.TraitProfile {
 }
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration
-func (e *Environment) DetermineControllerStrategy(ctx context.Context, c controller.Reader) (ControllerStrategy, error) {
+func (e *Environment) DetermineControllerStrategy() (ControllerStrategy, error) {
 	defaultStrategy := DefaultControllerStrategy
 	for _, creator := range e.getControllerStrategyChoosers() {
 		if strategy, err := creator.SelectControllerStrategy(e); err != nil {

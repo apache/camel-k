@@ -194,7 +194,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	// CronJob strategy requires common schedule
-	strategy, err := e.DetermineControllerStrategy(t.Ctx, t.Client)
+	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		e.Integration.Status.SetErrorCondition(
 			v1.IntegrationConditionCronJobAvailable,

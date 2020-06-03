@@ -123,7 +123,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 
 	// Configure the Prometheus container port
 	containerPort := t.getContainerPort()
-	controller, err := e.DetermineControllerStrategy(t.Ctx, t.Client)
+	controller, err := e.DetermineControllerStrategy()
 	if err != nil {
 		return err
 	}

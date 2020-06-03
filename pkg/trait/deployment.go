@@ -63,7 +63,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 	//
 	// Don't deploy when a different strategy is needed (e.g. Knative, Cron)
 	//
-	strategy, err := e.DetermineControllerStrategy(t.Ctx, t.Client)
+	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		e.Integration.Status.SetErrorCondition(
 			v1.IntegrationConditionDeploymentAvailable,
