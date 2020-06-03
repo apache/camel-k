@@ -151,7 +151,7 @@ func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, buil
 		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
 		return err
 	}
-	err = action.client.Status().Patch(ctx, target, client.ConstantPatch(types.MergePatchType, p))
+	err = action.client.Status().Patch(ctx, target, client.RawPatch(types.MergePatchType, p))
 	if err != nil {
 		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
 		return err
