@@ -60,6 +60,10 @@ spec:
         dependencies:
         - groupId: org.apache.camel
           artifactId: camel-microprofile-fault-tolerance
+      tracing:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-runtime-tracing
   artifacts:
     camel-zipfile:
       groupId: org.apache.camel
