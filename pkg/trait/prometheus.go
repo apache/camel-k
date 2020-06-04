@@ -34,11 +34,15 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Prometheus trait configures the Prometheus JMX exporter and exposes the integration with a `Service`
-// and a `ServiceMonitor` resources so that the Prometheus endpoint can be scraped.
+// The Prometheus trait configures a Prometheus-compatible endpoint. It also exposes the integration with a `Service`
+// and a `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the Prometheus
+// operator.
+//
+// The metrics exposed vary depending on the configured runtime. With Quarkus, the metrics are exposed
+// using MicroProfile Metrics. While with the default runtime, they are exposed using the Prometheus JMX exporter.
 //
 // WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
-//custom resource definition to be installed.
+// custom resource definition to be installed.
 // You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator.
 //
 // It's disabled by default.
@@ -46,14 +50,15 @@ import (
 // +camel-k:trait=prometheus
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
-	// The Prometheus endpoint port (default `9779`).
-	Port int `property:"port"`
+	// The Prometheus endpoint port (default `9779`, or `8080` with Quarkus).
+	Port *int `property:"port"`
 	// Whether a `ServiceMonitor` resource is created (default `true`).
 	ServiceMonitor bool `property:"service-monitor"`
 	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 	ServiceMonitorLabels string `property:"service-monitor-labels"`
-	// To use a custom ConfigMap containing the Prometheus exporter configuration (under the `content` ConfigMap key). When this property is left empty (default),
-	// Camel K generates a standard Prometheus configuration for the integration.
+	// To use a custom ConfigMap containing the Prometheus JMX exporter configuration (under the `content` ConfigMap key).
+	// When this property is left empty (default), Camel K generates a standard Prometheus configuration for the integration.
+	// It is not applicable when using Quarkus.
 	ConfigMap string `property:"configmap"`
 }
 
@@ -66,7 +71,6 @@ const (
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait:      NewBaseTrait("prometheus", 1900),
-		Port:           9779,
 		ServiceMonitor: true,
 	}
 }
@@ -81,22 +85,28 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// Add the Camel management and Prometheus agent dependencies
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
-		// TODO: We may want to make the Prometheus version configurable
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.prometheus.jmx/jmx_prometheus_javaagent:0.3.1")
+		switch e.CamelCatalog.Runtime.Provider {
+		case v1.RuntimeProviderQuarkus:
+			// Add the Camel Quarkus MP Metrics extension
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-microprofile-metrics")
+		case v1.RuntimeProviderMain:
+			// Add the Camel management and Prometheus agent dependencies
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+			// TODO: We may want to make the Prometheus version configurable
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.prometheus.jmx/jmx_prometheus_javaagent:0.3.1")
 
-		// Use the provided configuration or add the default Prometheus JMX exporter configuration
-		configMapName := t.getJmxExporterConfigMapOrAdd(e)
+			// Use the provided configuration or add the default Prometheus JMX exporter configuration
+			configMapName := t.getJmxExporterConfigMapOrAdd(e)
 
-		e.Integration.Status.AddOrReplaceGeneratedResources(v1.ResourceSpec{
-			Type: v1.ResourceTypeData,
-			DataSpec: v1.DataSpec{
-				Name:       prometheusJmxExporterConfigFileName,
-				ContentRef: configMapName,
-			},
-			MountPath: prometheusJmxExporterConfigMountPath,
-		})
+			e.Integration.Status.AddOrReplaceGeneratedResources(v1.ResourceSpec{
+				Type: v1.ResourceTypeData,
+				DataSpec: v1.DataSpec{
+					Name:       prometheusJmxExporterConfigFileName,
+					ContentRef: configMapName,
+				},
+				MountPath: prometheusJmxExporterConfigMountPath,
+			})
+		}
 		return nil
 	}
 
@@ -117,9 +127,20 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		Reason: v1.IntegrationConditionPrometheusAvailableReason,
 	}
 
-	// Configure the Prometheus Java agent
-	options := []string{strconv.Itoa(t.Port), path.Join(prometheusJmxExporterConfigMountPath, prometheusJmxExporterConfigFileName)}
-	container.Args = append(container.Args, "-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar="+strings.Join(options, ":"))
+	var port int
+	switch e.CamelCatalog.Runtime.Provider {
+	case v1.RuntimeProviderQuarkus:
+		port = 8080
+	case v1.RuntimeProviderMain:
+		port = 9779
+		// Configure the Prometheus Java agent
+		options := []string{strconv.Itoa(port), path.Join(prometheusJmxExporterConfigMountPath, prometheusJmxExporterConfigFileName)}
+		container.Args = append(container.Args, "-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar="+strings.Join(options, ":"))
+	}
+
+	if t.Port == nil {
+		t.Port = &port
+	}
 
 	// Configure the Prometheus container port
 	containerPort := t.getContainerPort()
@@ -179,7 +200,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 
 func (t *prometheusTrait) getContainerPort() *corev1.ContainerPort {
 	containerPort := corev1.ContainerPort{
-		ContainerPort: int32(t.Port),
+		ContainerPort: int32(*t.Port),
 		Protocol:      corev1.ProtocolTCP,
 	}
 	return &containerPort
@@ -188,10 +209,10 @@ func (t *prometheusTrait) getContainerPort() *corev1.ContainerPort {
 func (t *prometheusTrait) getServicePort() *corev1.ServicePort {
 	servicePort := corev1.ServicePort{
 		Name:     prometheusPortName,
-		Port:     int32(t.Port),
+		Port:     int32(*t.Port),
 		Protocol: corev1.ProtocolTCP,
 		// Avoid relying on named port, as Knative enforces specific values used for content negotiation
-		TargetPort: intstr.FromInt(t.Port),
+		TargetPort: intstr.FromInt(*t.Port),
 	}
 	return &servicePort
 }

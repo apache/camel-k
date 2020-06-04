@@ -30,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -172,8 +173,14 @@ func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
 	enabled := true
 	trait.Enabled = &enabled
 
+	camelCatalog, err := camel.DefaultCatalog()
+	if err != nil {
+		panic(err)
+	}
+
 	environment := &Environment{
-		Catalog: NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(context.TODO(), nil),
+		CamelCatalog: camelCatalog,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "integration-namespace",
