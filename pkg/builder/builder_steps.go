@@ -25,6 +25,10 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/jitpack"
+
+	"github.com/rs/xid"
+
 	"github.com/apache/camel-k/pkg/util/controller"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -184,7 +188,33 @@ func injectDependencies(ctx *Context) error {
 
 			ctx.Maven.Project.AddEncodedDependencyGAV(gav)
 		default:
-			return fmt.Errorf("unknown dependency type: %s", d)
+			if dep := jitpack.ToDependency(d); dep != nil {
+				ctx.Maven.Project.AddDependency(*dep)
+
+				addRepo := true
+				for _, repo := range ctx.Maven.Project.Repositories {
+					if repo.URL == jitpack.RepoURL {
+						addRepo = false
+						break
+					}
+				}
+				if addRepo {
+					ctx.Maven.Project.Repositories = append(ctx.Maven.Project.Repositories, maven.Repository{
+						ID:  "jitpack.io-" + xid.New().String(),
+						URL: jitpack.RepoURL,
+						Releases: maven.RepositoryPolicy{
+							Enabled:        true,
+							ChecksumPolicy: "fail",
+						},
+						Snapshots: maven.RepositoryPolicy{
+							Enabled:        true,
+							ChecksumPolicy: "fail",
+						},
+					})
+				}
+			} else {
+				return fmt.Errorf("unknown dependency type: %s", d)
+			}
 		}
 	}
 
