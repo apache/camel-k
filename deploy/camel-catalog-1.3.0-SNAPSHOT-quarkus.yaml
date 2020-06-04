@@ -60,6 +60,10 @@ spec:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-microprofile-fault-tolerance
+      tracing:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-opentracing
   artifacts:
     camel-quarkus-kudu:
       groupId: org.apache.camel.quarkus

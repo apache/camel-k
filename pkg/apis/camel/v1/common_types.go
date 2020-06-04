@@ -118,6 +118,8 @@ const (
 	CapabilityPlatformHTTP = "platform-http"
 	// CapabilityCircuitBreaker
 	CapabilityCircuitBreaker = "circuit-breaker"
+	// CapabilityTracing --
+	CapabilityTracing = "tracing"
 )
 
 // ResourceCondition is a common type for all conditions

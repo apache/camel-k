@@ -774,3 +774,36 @@ traits:
   - name: description-path
     type: string
     description: The path where the Open-API specification is published (default `/openapi.json`)
+- name: tracing
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Tracing trait can be used to automatically publish tracing information
+    to anOpenTracing compatible collector.The trait is able to automatically discover
+    the tracing endpoint available in the namespace (supports **Jaeger**).The Tracing
+    trait is disabled by default.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait, including automatic
+      discovery of the tracing endpoint.
+  - name: service-name
+    type: string
+    description: The name of the service that publishes tracing data (defaults to
+      the integration name)
+  - name: endpoint
+    type: string
+    description: The target endpoint of the OpenTracing service (automatically discovered
+      by default)
+  - name: sampler-type
+    type: string
+    description: The sampler type (default "const")
+  - name: sampler-param
+    type: string
+    description: The sampler specific param (default "1")
