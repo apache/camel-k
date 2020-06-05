@@ -174,7 +174,7 @@ func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args,
-		"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005",
+		"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005",
 	)
 }
 
