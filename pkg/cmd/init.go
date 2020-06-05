@@ -47,6 +47,9 @@ func newCmdInit(rootCmdOptions *RootCmdOptions) (*cobra.Command, *initCmdOptions
 			}
 			return nil
 		},
+		Annotations: map[string]string{
+			offlineCommandLabel: "true",
+		},
 	}
 
 	return &cmd, &options
