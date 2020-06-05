@@ -1042,7 +1042,7 @@ func DeleteTestNamespace(ns metav1.Object) {
 	}
 
 	// Wait for all pods to be deleted
-	gomega.Eventually(NumPods(ns.GetName()), 60*time.Second).Should(gomega.Equal(0))
+	gomega.Eventually(NumPods(ns.GetName()), TestTimeoutMedium).Should(gomega.Equal(0))
 }
 
 func NewTestNamespace(injectKnativeBroker bool) metav1.Object {
