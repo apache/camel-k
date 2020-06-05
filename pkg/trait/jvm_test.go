@@ -204,6 +204,7 @@ func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
 	trait := newJvmTrait().(*jvmTrait)
 	enabled := true
 	trait.Enabled = &enabled
+	trait.PrintCommand = false
 	trait.Ctx = context.TODO()
 	trait.Client = client
 
