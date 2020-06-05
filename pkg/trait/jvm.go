@@ -22,7 +22,7 @@ import (
 	"sort"
 	"strings"
 
-	inf "gopkg.in/inf.v0"
+	"gopkg.in/inf.v0"
 
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
@@ -48,6 +48,8 @@ type jvmTrait struct {
 	DebugAddress string `property:"debug-address"`
 	// A comma-separated list of JVM options
 	Options *string `property:"options"`
+	// Prints the command used the start the JVM in the container logs (default `true`)
+	PrintCommand bool `property:"print-command"`
 }
 
 func newJvmTrait() Trait {
@@ -55,6 +57,7 @@ func newJvmTrait() Trait {
 		BaseTrait: NewBaseTrait("jvm", 2000),
 		// To be defaulted to "*:5005" when upgrading the default base image to JDK9+
 		DebugAddress: "5005",
+		PrintCommand: true,
 	}
 }
 
@@ -106,59 +109,72 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	}
 
 	container := e.getIntegrationContainer()
-	if container != nil {
-		// Set the container command and working directory
-		container.Command = []string{"java"}
-		container.WorkingDir = "/deployments"
-
-		// Remote debugging
-		if t.Debug {
-			suspend := "n"
-			if t.DebugSuspend {
-				suspend = "y"
-			}
-			container.Args = append(container.Args,
-				fmt.Sprintf("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%s",
-					suspend, t.DebugAddress))
-		}
-
-		hasHeapSizeOption := false
-		// Add JVM options
-		if t.Options != nil {
-			hasHeapSizeOption = strings.Contains(*t.Options, "-Xmx") ||
-				strings.Contains(*t.Options, "-XX:MaxHeapSize") ||
-				strings.Contains(*t.Options, "-XX:MinRAMPercentage") ||
-				strings.Contains(*t.Options, "-XX:MaxRAMPercentage")
-
-			container.Args = append(container.Args, strings.Split(*t.Options, ",")...)
-		}
-
-		// Tune JVM maximum heap size based on the container memory limit, if any.
-		// This is configured off-container, thus is limited to explicit user configuration.
-		// We may want to inject a wrapper script into the container image, so that it can
-		// be performed in-container, based on CGroups memory resource control files.
-		if memory, hasLimit := container.Resources.Limits[corev1.ResourceMemory]; !hasHeapSizeOption && hasLimit {
-			// Simple heuristic that caps the maximum heap size to 50% of the memory limit
-			percentage := int64(50)
-			// Unless the memory limit is lower than 300M, in which case we leave more room for the non-heap memory
-			if resource.NewScaledQuantity(300, 6).Cmp(memory) > 0 {
-				percentage = 25
-			}
-			memory.AsDec().Mul(memory.AsDec(), inf.NewDec(percentage, 2))
-			container.Args = append(container.Args, fmt.Sprintf("-Xmx%dM", memory.ScaledValue(resource.Mega)))
-		}
-
-		// Add mounted resources to the class path
-		for _, m := range container.VolumeMounts {
-			classpath.Add(m.MountPath)
-		}
-		items := classpath.List()
-		// Keep class path sorted so that it's consistent over reconciliation cycles
-		sort.Strings(items)
-
-		container.Args = append(container.Args, "-cp", strings.Join(items, ":"))
-		container.Args = append(container.Args, e.CamelCatalog.Runtime.ApplicationClass)
+	if container == nil {
+		return nil
 	}
+
+	// Build the container command
+	var args []string
+
+	// Remote debugging
+	if t.Debug {
+		suspend := "n"
+		if t.DebugSuspend {
+			suspend = "y"
+		}
+		args = append(args,
+			fmt.Sprintf("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%s",
+				suspend, t.DebugAddress))
+	}
+
+	hasHeapSizeOption := false
+	// Add JVM options
+	if t.Options != nil {
+		hasHeapSizeOption = strings.Contains(*t.Options, "-Xmx") ||
+			strings.Contains(*t.Options, "-XX:MaxHeapSize") ||
+			strings.Contains(*t.Options, "-XX:MinRAMPercentage") ||
+			strings.Contains(*t.Options, "-XX:MaxRAMPercentage")
+
+		args = append(args, strings.Split(*t.Options, ",")...)
+	}
+
+	// Tune JVM maximum heap size based on the container memory limit, if any.
+	// This is configured off-container, thus is limited to explicit user configuration.
+	// We may want to inject a wrapper script into the container image, so that it can
+	// be performed in-container, based on CGroups memory resource control files.
+	if memory, hasLimit := container.Resources.Limits[corev1.ResourceMemory]; !hasHeapSizeOption && hasLimit {
+		// Simple heuristic that caps the maximum heap size to 50% of the memory limit
+		percentage := int64(50)
+		// Unless the memory limit is lower than 300M, in which case we leave more room for the non-heap memory
+		if resource.NewScaledQuantity(300, 6).Cmp(memory) > 0 {
+			percentage = 25
+		}
+		memory.AsDec().Mul(memory.AsDec(), inf.NewDec(percentage, 2))
+		args = append(args, fmt.Sprintf("-Xmx%dM", memory.ScaledValue(resource.Mega)))
+	}
+
+	// Add mounted resources to the class path
+	for _, m := range container.VolumeMounts {
+		classpath.Add(m.MountPath)
+	}
+	items := classpath.List()
+	// Keep class path sorted so that it's consistent over reconciliation cycles
+	sort.Strings(items)
+
+	args = append(args, "-cp", strings.Join(items, ":"))
+	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
+
+	if t.PrintCommand {
+		args = append([]string{"java"}, args...)
+		container.Command = []string{"/bin/sh", "-c"}
+		cmd := strings.Join(args, " ")
+		container.Args = []string{"echo " + cmd + " && " + cmd}
+	} else {
+		container.Command = []string{"java"}
+		container.Args = args
+	}
+
+	container.WorkingDir = "/deployments"
 
 	return nil
 }
