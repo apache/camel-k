@@ -935,7 +935,7 @@ func NumPods(ns string) func() int {
 
 func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 	ns := NewTestNamespace(false)
-	defer DeleteTestNamespace(ns)
+	defer DeleteTestNamespace(t, ns)
 	defer UserCleanup()
 
 	InvokeUserTestCode(t, ns.GetName(), doRun)
@@ -943,7 +943,7 @@ func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 
 func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
 	ns := NewTestNamespace(true)
-	defer DeleteTestNamespace(ns)
+	defer DeleteTestNamespace(t, ns)
 	defer DeleteKnativeBroker(ns)
 	defer UserCleanup()
 
@@ -1017,7 +1017,7 @@ func DeleteKnativeBroker(ns metav1.Object) {
 	}
 }
 
-func DeleteTestNamespace(ns metav1.Object) {
+func DeleteTestNamespace(t *testing.T, ns metav1.Object) {
 	var oc bool
 	var err error
 	if oc, err = openshift.IsOpenShift(TestClient); err != nil {
@@ -1033,16 +1033,23 @@ func DeleteTestNamespace(ns metav1.Object) {
 			},
 		}
 		if err := TestClient.Delete(TestContext, prj); err != nil {
-			log.Error(err, "cannot delete test project", "name", prj.Name)
+			t.Logf("Warning: cannot delete test project %q", prj.Name)
 		}
 	} else {
 		if err := TestClient.Delete(TestContext, ns.(runtime.Object)); err != nil {
-			log.Error(err, "cannot delete test namespace", "name", ns.GetName())
+			t.Logf("Warning: cannot delete test namespace %q", ns.GetName())
 		}
 	}
 
 	// Wait for all pods to be deleted
-	gomega.Eventually(NumPods(ns.GetName()), TestTimeoutMedium).Should(gomega.Equal(0))
+	pods := NumPods(ns.GetName())()
+	for i := 0; pods > 0 && i < 60; i++ {
+		time.Sleep(1 * time.Second)
+		pods = NumPods(ns.GetName())()
+	}
+	if pods > 0 {
+		t.Logf("Warning: some pods are still running in namespace %q after deletion (%d)", ns.GetName(), pods)
+	}
 }
 
 func NewTestNamespace(injectKnativeBroker bool) metav1.Object {
