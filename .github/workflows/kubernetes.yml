@@ -114,8 +114,8 @@ jobs:
         docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
         docker push ${LOCAL_IMAGE}
 
-        # Make the Apache Snapshots repository enabled by efault
-        export KAMEL_INSTALL_MAVEN_REPOSITORIES=https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots
+        # Make the Apache Snapshots or Apache Staging repository enabled by default
+        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
 
         echo "installing camel k cluster resources"
         ./kamel install --cluster-setup
