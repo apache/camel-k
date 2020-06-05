@@ -18,16 +18,16 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.3.0-snapshot-main
+  name: camel-catalog-1.3.0-main
   labels:
     app: camel-k
     camel.apache.org/catalog.version: 3.3.0
     camel.apache.org/catalog.loader.version: 3.3.0
-    camel.apache.org/runtime.version: 1.3.0-SNAPSHOT
+    camel.apache.org/runtime.version: 1.3.0
     camel.apache.org/runtime.provider: main
 spec:
   runtime:
-    version: 1.3.0-SNAPSHOT
+    version: 1.3.0
     provider: main
     applicationClass: org.apache.camel.k.main.Application
     metadata:
