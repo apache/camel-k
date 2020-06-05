@@ -44,7 +44,7 @@ type jvmTrait struct {
 	Debug bool `property:"debug"`
 	// Suspends the target JVM immediately before the main class is loaded
 	DebugSuspend bool `property:"debug-suspend"`
-	// Transport address at which to listen for the newly launched JVM
+	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
 	DebugAddress string `property:"debug-address"`
 	// A comma-separated list of JVM options
 	Options *string `property:"options"`
@@ -54,9 +54,8 @@ type jvmTrait struct {
 
 func newJvmTrait() Trait {
 	return &jvmTrait{
-		BaseTrait: NewBaseTrait("jvm", 2000),
-		// To be defaulted to "*:5005" when upgrading the default base image to JDK9+
-		DebugAddress: "5005",
+		BaseTrait:    NewBaseTrait("jvm", 2000),
+		DebugAddress: "*:5005",
 		PrintCommand: true,
 	}
 }

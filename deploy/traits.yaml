@@ -415,7 +415,8 @@ traits:
     description: Suspends the target JVM immediately before the main class is loaded
   - name: debug-address
     type: string
-    description: Transport address at which to listen for the newly launched JVM
+    description: Transport address at which to listen for the newly launched JVM (default
+      `*:5005`)
   - name: options
     type: string
     description: A comma-separated list of JVM options
