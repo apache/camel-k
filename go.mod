@@ -15,6 +15,7 @@ require (
 	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v0.1.0
 	github.com/google/uuid v1.1.1
+	github.com/hashicorp/go-getter v1.4.1
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0

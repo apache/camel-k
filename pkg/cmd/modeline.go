@@ -116,7 +116,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 			return nil, nil, errors.Wrapf(err, "cannot process file %s", f)
 		}
 		for i, o := range ops {
-			if fileOptions[o.Name] && !isRemoteHTTPFile(f) {
+			if fileOptions[o.Name] && isLocal(f) {
 				refPath := o.Value
 				if !filepath.IsAbs(refPath) {
 					full := path.Join(baseDir, refPath)

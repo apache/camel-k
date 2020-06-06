@@ -23,13 +23,12 @@ import (
 	"fmt"
 
 	"io/ioutil"
-	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"path"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"syscall"
 
@@ -202,24 +201,17 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 		return errors.New("run expects at least 1 argument, received 0")
 	}
 
-	for _, fileName := range args {
-		if !isRemoteHTTPFile(fileName) {
-			if _, err := os.Stat(fileName); err != nil && os.IsNotExist(err) {
-				return errors.Wrap(err, "file "+fileName+" does not exist")
+	for _, source := range args {
+		if isLocal(source) {
+			if _, err := os.Stat(source); err != nil && os.IsNotExist(err) {
+				return errors.Wrapf(err, "file %s does not exist", source)
 			} else if err != nil {
-				return errors.Wrap(err, "error while accessing file "+fileName)
+				return errors.Wrapf(err, "error while accessing file %s", source)
 			}
 		} else {
-			// nolint: gosec
-			resp, err := http.Get(fileName)
-			if resp != nil && resp.Body != nil {
-				_ = resp.Body.Close()
-			}
-
+			_, err := loadData(source, false)
 			if err != nil {
-				return errors.Wrap(err, "The URL provided is not reachable")
-			} else if resp.StatusCode != 200 {
-				return errors.New("The URL provided is not reachable " + fileName + " The error code returned is " + strconv.Itoa(resp.StatusCode))
+				return errors.Wrap(err, "The provided source is not reachable")
 			}
 		}
 	}
@@ -401,7 +393,7 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error
 	files = append(files, o.OpenAPIs...)
 
 	for _, s := range files {
-		if !isRemoteHTTPFile(s) {
+		if isLocal(s) {
 			changes, err := sync.File(o.Context, s)
 			if err != nil {
 				return err
@@ -638,24 +630,27 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 	return name
 }
 
-func loadData(fileName string, compress bool) (string, error) {
+func loadData(source string, compress bool) (string, error) {
 	var content []byte
 	var err error
 
-	if !isRemoteHTTPFile(fileName) {
-		content, err = ioutil.ReadFile(fileName)
+	if isLocal(source) {
+		content, err = ioutil.ReadFile(source)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		/* #nosec */
-		resp, err := http.Get(fileName)
+		u, err := url.Parse(source)
 		if err != nil {
 			return "", err
 		}
-		defer resp.Body.Close()
 
-		content, err = ioutil.ReadAll(resp.Body)
+		g, ok := Getters[u.Scheme]
+		if !ok {
+			return "", fmt.Errorf("unable to find a getter for URL: %s", source)
+		}
+
+		content, err = g.Get(u)
 		if err != nil {
 			return "", err
 		}
@@ -709,8 +704,12 @@ func (*runCmdOptions) configureTrait(integration *v1.Integration, config string)
 	return nil
 }
 
-func isRemoteHTTPFile(fileName string) bool {
-	return strings.HasPrefix(fileName, "http://") || strings.HasPrefix(fileName, "https://")
+func isLocal(fileName string) bool {
+	info, err := os.Stat(fileName)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
 
 func addPropertyFile(fileName string, spec *v1.IntegrationSpec) error {
