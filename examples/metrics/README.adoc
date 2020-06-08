@@ -1,0 +1,27 @@
+= Camel Quarkus with MicroProfile Metrics and Prometheus Example
+
+This example demonstrates how to expose metrics using the https://camel.apache.org/camel-quarkus/latest/extensions/microprofile-metrics.html[Camel MicroProfile Metrics component], and how to declare custom metrics using https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/app-programming-model.adoc#annotations[the MicroProfile Metrics annotations].
+
+To run it:
+
+[source,shell]
+----
+$ kamel run --name metrics Metrics.java Service.java -t quarkus.enabled=true -t prometheus.enabled=true
+----
+
+The _Prometheus_ trait automatically exposes a service, that can be scrapped by a Prometheus server.
+
+The metrics can be retrieved by port-forwarding this service, e.g.:
+
+[source,shell]
+----
+$ kubectl port-forward svc/metrics-prometheus 8080:8080
+$ curl http://localhost:8080/metrics
+----
+
+Or via the API server proxy, e.g.:
+
+[source,shell]
+----
+$ kubectl get --raw /api/v1/namespaces/$(kubectl config view --minify --output 'jsonpath={..namespace}')/services/metrics-prometheus:8080/proxy/metrics
+----
