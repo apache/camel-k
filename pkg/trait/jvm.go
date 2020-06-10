@@ -22,6 +22,8 @@ import (
 	"sort"
 	"strings"
 
+	infp "gopkg.in/inf.v0"
+
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
@@ -146,7 +148,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		if resource.NewScaledQuantity(300, 6).Cmp(memory) > 0 {
 			percentage = 25
 		}
-		memory.AsDec().Mul(memory.AsDec(), inf.NewDec(percentage, 2))
+		memory.AsDec().Mul(memory.AsDec(), infp.NewDec(percentage, 2))
 		args = append(args, fmt.Sprintf("-Xmx%dM", memory.ScaledValue(resource.Mega)))
 	}
 
