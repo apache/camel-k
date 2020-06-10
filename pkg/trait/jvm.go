@@ -22,8 +22,6 @@ import (
 	"sort"
 	"strings"
 
-	"gopkg.in/inf.v0"
-
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
@@ -44,12 +42,12 @@ type jvmTrait struct {
 	Debug bool `property:"debug"`
 	// Suspends the target JVM immediately before the main class is loaded
 	DebugSuspend bool `property:"debug-suspend"`
+	// Prints the command used the start the JVM in the container logs (default `true`)
+	PrintCommand bool `property:"print-command"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
 	DebugAddress string `property:"debug-address"`
 	// A comma-separated list of JVM options
 	Options *string `property:"options"`
-	// Prints the command used the start the JVM in the container logs (default `true`)
-	PrintCommand bool `property:"print-command"`
 }
 
 func newJvmTrait() Trait {
