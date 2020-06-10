@@ -49,10 +49,13 @@ type IntegrationPlatformStatus struct {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// IntegrationPlatform is the Schema for the integrationplatforms API
 // +k8s:openapi-gen=true
 // +genclient
+// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
+
+// IntegrationPlatform is the Schema for the integrationplatforms API
 type IntegrationPlatform struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
