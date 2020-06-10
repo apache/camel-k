@@ -47,6 +47,17 @@ type IntegrationKitStatus struct {
 	Platform        string                    `json:"platform,omitempty"`
 	Conditions      []IntegrationKitCondition `json:"conditions,omitempty"`
 	Version         string                    `json:"version,omitempty"`
+
+	// startTimestamp is a timestamp representing the server time when this Kit
+	// creation process has been started
+	BuildStartTimestamp *metav1.Time `json:"buildStartTimestamp,omitempty"`
+
+	// completionTimestamp is a timestamp representing the server time when this Kit
+	// creation process was/ finished, whether that build failed or succeeded.
+	BuildCompletionTimestamp *metav1.Time `json:"buildCompletionTimestamp,omitempty"`
+
+	// duration contains time.Duration object describing the Kit creation time.
+	BuildDuration string `json:"buildDuration,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

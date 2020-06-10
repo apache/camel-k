@@ -824,6 +824,14 @@ func (in *IntegrationKitStatus) DeepCopyInto(out *IntegrationKitStatus) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.BuildStartTimestamp != nil {
+		in, out := &in.BuildStartTimestamp, &out.BuildStartTimestamp
+		*out = (*in).DeepCopy()
+	}
+	if in.BuildCompletionTimestamp != nil {
+		in, out := &in.BuildCompletionTimestamp, &out.BuildCompletionTimestamp
+		*out = (*in).DeepCopy()
+	}
 	return
 }
 

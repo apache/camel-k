@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -130,6 +131,12 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1.Integ
 	switch build.Status.Phase {
 	case v1.BuildPhaseRunning:
 		action.L.Info("Build running")
+		if kit.Status.BuildStartTimestamp == nil {
+			kit.Status.BuildStartTimestamp = &metav1.Time{
+				Time: time.Now(),
+			}
+			return kit, err
+		}
 	case v1.BuildPhaseSucceeded:
 		// we should ensure that the integration kit is still in the right phase,
 		// if not there is a chance that the kit has been modified by the user
@@ -170,6 +177,11 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1.Integ
 			})
 		}
 
+		kit.Status.BuildCompletionTimestamp = &metav1.Time{Time: time.Now()}
+		if kit.Status.BuildStartTimestamp != nil {
+			kit.Status.BuildDuration = kit.Status.BuildCompletionTimestamp.Sub(kit.Status.BuildStartTimestamp.Time).String()
+		}
+
 		return kit, err
 	case v1.BuildPhaseError, v1.BuildPhaseInterrupted:
 		// we should ensure that the integration kit is still in the right phase,
@@ -185,6 +197,10 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1.Integ
 		// Let's copy the build failure to the integration kit status
 		kit.Status.Failure = build.Status.Failure
 		kit.Status.Phase = v1.IntegrationKitPhaseError
+		kit.Status.BuildCompletionTimestamp = &metav1.Time{Time: time.Now()}
+		if kit.Status.BuildStartTimestamp != nil {
+			kit.Status.BuildDuration = kit.Status.BuildCompletionTimestamp.Sub(kit.Status.BuildStartTimestamp.Time).String()
+		}
 
 		return kit, nil
 	}

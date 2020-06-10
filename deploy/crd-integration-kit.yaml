@@ -50,6 +50,14 @@ spec:
       type: string
       description: The IntegrationKit type
       JSONPath: .metadata.labels.camel\.apache\.org\/kit\.type
+    - name: Build Started
+      type: date
+      description: The IntegrationKit build start time
+      JSONPath: .status.buildStartTimestamp
+    - name: Build Duration
+      type: string
+      description: The IntegrationKit build duration time
+      JSONPath: .status.buildDuration
     - name: Image
       type: string
       description: The IntegrationKit image
