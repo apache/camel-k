@@ -113,6 +113,9 @@ generate: generate-deepcopy generate-client generate-doc
 generate-client:
 	./script/gen_client.sh
 
+generate-crd:
+	./script/gen_crd.sh
+
 generate-doc:
 	./script/gen_doc.sh
 
