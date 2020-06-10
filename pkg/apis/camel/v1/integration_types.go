@@ -96,7 +96,7 @@ type ResourceType string
 
 // ResourceSpec --
 type ResourceSpec struct {
-	DataSpec
+	DataSpec  `json:",inline"`
 	Type      ResourceType `json:"type,omitempty"`
 	MountPath string       `json:"mountPath,omitempty"`
 }
@@ -110,7 +110,7 @@ const (
 
 // SourceSpec --
 type SourceSpec struct {
-	DataSpec
+	DataSpec `json:",inline"`
 	Language Language `json:"language,omitempty"`
 	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
 	// interpret this source at runtime
