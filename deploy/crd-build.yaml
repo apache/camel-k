@@ -37,6 +37,8 @@ spec:
     listKind: BuildList
     plural: builds
     singular: build
+    shortNames:
+      - ikb
   subresources:
     status: {}
   additionalPrinterColumns:
