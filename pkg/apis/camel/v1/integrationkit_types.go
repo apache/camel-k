@@ -50,10 +50,15 @@ type IntegrationKitStatus struct {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// IntegrationKit is the Schema for the integrationkits API
 // +k8s:openapi-gen=true
 // +genclient
+// +kubebuilder:resource:path=integrationkits,scope=Namespaced,shortName=ik
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration kit phase"
+// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.type`,description="The integration kit type"
+// +kubebuilder:printcolumn:name="Image",type=string,JSONPath=`.status.image`,description="The integration kit image"
+
+// IntegrationKit is the Schema for the integrationkits API
 type IntegrationKit struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
