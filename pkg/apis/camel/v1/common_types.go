@@ -18,9 +18,10 @@ limitations under the License.
 package v1
 
 import (
+	"encoding/json"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // ConfigurationSpec --
@@ -133,13 +134,4 @@ type ResourceCondition interface {
 }
 
 // Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
-type Flow map[string]interface{}
-
-// DeepCopy copies the receiver, creating a new Flow.
-func (in *Flow) DeepCopy() *Flow {
-	if in == nil {
-		return nil
-	}
-	out := Flow(runtime.DeepCopyJSON(*in))
-	return &out
-}
+type Flow json.RawMessage
