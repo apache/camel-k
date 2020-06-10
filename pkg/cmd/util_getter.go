@@ -29,8 +29,8 @@ var Getters map[string]Getter
 
 func init() {
 	Getters = map[string]Getter{
-		"http":   HttpGetter{},
-		"https":  HttpGetter{},
+		"http":   HTTPGetter{},
+		"https":  HTTPGetter{},
 		"github": GitHubGetter{},
 	}
 }
@@ -41,14 +41,14 @@ type Getter interface {
 
 // A simple getter that retrieves the content of an integration from an
 // http(s) endpoint.
-type HttpGetter struct {
+type HTTPGetter struct {
 }
 
-func (g HttpGetter) Get(u *url.URL) ([]byte, error) {
+func (g HTTPGetter) Get(u *url.URL) ([]byte, error) {
 	return g.doGet(u.String())
 }
 
-func (g HttpGetter) doGet(source string) ([]byte, error) {
+func (g HTTPGetter) doGet(source string) ([]byte, error) {
 	// nolint: gosec
 	resp, err := http.Get(source)
 	if err != nil {
@@ -73,7 +73,7 @@ func (g HttpGetter) doGet(source string) ([]byte, error) {
 // A simple getter that retrieves the content of an integration from
 // a GitHub endpoint using a RAW endpoint.
 type GitHubGetter struct {
-	HttpGetter
+	HTTPGetter
 }
 
 func (g GitHubGetter) Get(u *url.URL) ([]byte, error) {
@@ -92,5 +92,5 @@ func (g GitHubGetter) Get(u *url.URL) ([]byte, error) {
 
 	srcURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", items[1], items[2], branch, items[3])
 
-	return g.HttpGetter.doGet(srcURL)
+	return g.HTTPGetter.doGet(srcURL)
 }
