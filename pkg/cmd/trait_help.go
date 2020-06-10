@@ -108,11 +108,6 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 	if err != nil {
 		return err
 	}
-	res, err := yaml.Marshal(traitMetaData)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintln(cmd.OutOrStdout(), string(res))
 
 	for _, tp := range v1.AllTraitProfiles {
 		traits := catalog.TraitsForProfile(tp)
