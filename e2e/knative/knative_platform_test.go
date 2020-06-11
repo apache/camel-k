@@ -55,7 +55,7 @@ func TestKnativePlatformTest(t *testing.T) {
 				it.Spec.Profile = ""
 				var flows []v1.Flow
 				for _, flow := range it.Spec.Flows {
-					flows = append(flows, []byte(strings.ReplaceAll(string(flow), "string!", "string!!!")))
+					flows = append(flows, v1.Flow(strings.ReplaceAll(string(flow), "string!", "string!!!")))
 				}
 				it.Spec.Flows = flows
 			})).To(BeNil())

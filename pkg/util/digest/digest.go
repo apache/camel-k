@@ -68,7 +68,7 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 
 	// Integration flows
 	for _, flow := range integration.Spec.Flows {
-		if _, err := hash.Write(flow); err != nil {
+		if _, err := hash.Write([]byte(flow)); err != nil {
 			return "", err
 		}
 	}
