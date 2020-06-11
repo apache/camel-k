@@ -84,9 +84,9 @@ spec:
                   type: array
                 flows:
                   items:
-                    $ref: '#/definitions/encoding~1json~0RawMessage'
                     description: Flow is an unstructured object representing a Camel
                       Flow in YAML/JSON DSL
+                    type: string
                   type: array
                 kit:
                   type: string

@@ -471,8 +471,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		}
 
 		if o.UseFlows && (strings.HasSuffix(source, ".yaml") || strings.HasSuffix(source, ".yml")) {
-			flows := []byte(data)
-			integration.Spec.AddFlows(flows)
+			integration.Spec.AddFlows(v1.Flow(data))
 		} else {
 			integration.Spec.AddSources(v1.SourceSpec{
 				DataSpec: v1.DataSpec{
