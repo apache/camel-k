@@ -36,7 +36,6 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/flows"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
@@ -472,11 +471,8 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		}
 
 		if o.UseFlows && (strings.HasSuffix(source, ".yaml") || strings.HasSuffix(source, ".yml")) {
-			flows, err := flows.UnmarshalString(data)
-			if err != nil {
-				return nil, err
-			}
-			integration.Spec.AddFlows(flows...)
+			flows := []byte(data)
+			integration.Spec.AddFlows(flows)
 		} else {
 			integration.Spec.AddSources(v1.SourceSpec{
 				DataSpec: v1.DataSpec{
