@@ -183,7 +183,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, resourceName 
 	if err != nil {
 		return err
 	}
-	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1beta1")
+	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1")
 	if err != nil {
 		return err
 	}
