@@ -332,6 +332,3 @@ spec:
           specReplicasPath: .spec.replicas
           statusReplicasPath: .status.replicas
         status: {}
-    - name: v1alpha1
-      served: true
-      storage: false
