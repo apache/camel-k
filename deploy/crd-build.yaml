@@ -4694,6 +4694,7 @@ spec:
                   type: string
                 startedAt:
                   format: date-time
+                  nullable: true
                   type: string
               type: object
           type: object
