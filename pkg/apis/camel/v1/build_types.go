@@ -89,6 +89,7 @@ type BuildStatus struct {
 	Artifacts  []Artifact       `json:"artifacts,omitempty"`
 	Error      string           `json:"error,omitempty"`
 	Failure    *Failure         `json:"failure,omitempty"`
+	// +nullable
 	StartedAt  metav1.Time      `json:"startedAt,omitempty"`
 	Platform   string           `json:"platform,omitempty"`
 	Conditions []BuildCondition `json:"conditions,omitempty"`
