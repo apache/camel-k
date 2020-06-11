@@ -268,7 +268,7 @@ func (in *CamelArtifact) DeepCopyInto(out *CamelArtifact) {
 	}
 	if in.Dependencies != nil {
 		in, out := &in.Dependencies, &out.Dependencies
-		*out = make([]CamelArtifact, len(*in))
+		*out = make([]CamelArtifactDependency, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}

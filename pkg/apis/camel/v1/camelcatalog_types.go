@@ -43,11 +43,11 @@ type CamelArtifactDependency struct {
 // CamelArtifact --
 type CamelArtifact struct {
 	CamelArtifactDependency `json:",inline" yaml:",inline"`
-	Schemes                 []CamelScheme   `json:"schemes,omitempty" yaml:"schemes,omitempty"`
-	Languages               []string        `json:"languages,omitempty" yaml:"languages,omitempty"`
-	DataFormats             []string        `json:"dataformats,omitempty" yaml:"dataformats,omitempty"`
-	Dependencies            []CamelArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
-	JavaTypes               []string        `json:"javaTypes,omitempty" yaml:"javaTypes,omitempty"`
+	Schemes                 []CamelScheme             `json:"schemes,omitempty" yaml:"schemes,omitempty"`
+	Languages               []string                  `json:"languages,omitempty" yaml:"languages,omitempty"`
+	DataFormats             []string                  `json:"dataformats,omitempty" yaml:"dataformats,omitempty"`
+	Dependencies            []CamelArtifactDependency `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+	JavaTypes               []string                  `json:"javaTypes,omitempty" yaml:"javaTypes,omitempty"`
 }
 
 // CamelLoader --
