@@ -69,10 +69,14 @@ type CamelCatalogStatus struct {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// CamelCatalog is the Schema for the camelcatalogs API
 // +k8s:openapi-gen=true
 // +genclient
+// +kubebuilder:resource:path=camelcatalogs,scope=Namespaced,shortName=cc
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Runtime Version",type=string,JSONPath=`.spec.runtime.version`,description="The Camel K Runtime version"
+// +kubebuilder:printcolumn:name="Runtime Provider",type=string,JSONPath=`.spec.runtime.provider`,description="The Camel K Runtime provider"
+
+// CamelCatalog is the Schema for the camelcatalogs API
 type CamelCatalog struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
