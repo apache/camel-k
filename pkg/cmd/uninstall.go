@@ -237,7 +237,7 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(c client.Client) error
 }
 
 func (o *uninstallCmdOptions) uninstallCrd(c kubernetes.Interface) error {
-	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1beta1")
+	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1")
 	if err != nil {
 		return err
 	}
