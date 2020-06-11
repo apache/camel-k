@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/pkg/errors"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/flows"
-	"github.com/pkg/errors"
 )
 
-const flowsInternalSourceName = "camel-k-embedded-flow.yaml"
+const flowsInternalSourceName = "camel-k-embedded-flow-%d.yaml"
 
 // Internal trait
 type initTrait struct {
@@ -52,15 +52,11 @@ func (t *initTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 
 		// Flows need to be turned into a generated source
-		if len(e.Integration.Spec.Flows) > 0 {
-			content, err := flows.Marshal(e.Integration.Spec.Flows)
-			if err != nil {
-				return err
-			}
+		for i, flow := range e.Integration.Spec.Flows {
 			e.Integration.Status.AddOrReplaceGeneratedSources(v1.SourceSpec{
 				DataSpec: v1.DataSpec{
-					Name:    flowsInternalSourceName,
-					Content: string(content),
+					Name:    fmt.Sprintf(flowsInternalSourceName, i),
+					Content: string(flow),
 				},
 			})
 		}
