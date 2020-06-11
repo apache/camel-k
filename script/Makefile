@@ -239,6 +239,8 @@ release-nightly: clean codegen set-version build-resources build images images-p
 release-helm:
 	./script/release_helm.sh
 
+install-crc:
+	./script/install_crc.sh $(VERSION)
 install-minishift:
 	./script/install_minishift.sh
 install-minikube:
