@@ -4675,7 +4675,6 @@ spec:
                       required:
                         - attempt
                         - attemptMax
-                        - attemptTime
                       type: object
                     time:
                       format: date-time

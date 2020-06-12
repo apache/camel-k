@@ -45,8 +45,9 @@ type Failure struct {
 
 // FailureRecovery --
 type FailureRecovery struct {
-	Attempt     int         `json:"attempt"`
-	AttemptMax  int         `json:"attemptMax"`
+	Attempt    int `json:"attempt"`
+	AttemptMax int `json:"attemptMax"`
+	// +optional
 	AttemptTime metav1.Time `json:"attemptTime"`
 }
 
