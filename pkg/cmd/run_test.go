@@ -72,6 +72,35 @@ func TestRunWithAdditionalSourcesFlag(t *testing.T) {
 	assert.Len(t, runCmdOptions.Sources, 2)
 }
 
+func TestRunWithTraitFlag(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "--trait", "sample.enabled=true", "example.js")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(runCmdOptions.Traits))
+	assert.Equal(t, "sample.enabled=true", runCmdOptions.Traits[0])
+}
+
+func TestRunWithAdditionalTraitFlag(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "--trait", "sample.enabled=true", "--trait", "sample.second=true", "example.js")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(runCmdOptions.Traits))
+	assert.Equal(t, "sample.enabled=true", runCmdOptions.Traits[0])
+	assert.Equal(t, "sample.second=true", runCmdOptions.Traits[1])
+}
+
 //
 // This test does work when running as single test but fails
 // otherwise as we are using a global viper instance
