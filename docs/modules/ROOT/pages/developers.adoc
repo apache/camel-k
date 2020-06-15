@@ -45,7 +45,6 @@ This is a high-level overview of the project structure:
 | Path						| Content
 | https://github.com/apache/camel-k/tree/master/build[/build]			| Contains the Docker and Maven build configuration.
 | https://github.com/apache/camel-k/tree/master/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary (manager) and the **kamel** client tool.
-| https://github.com/apache/camel-k/tree/master/build[/build]		| Contains build data used by the operator-sdk.
 | https://github.com/apache/camel-k/tree/master/deploy[/deploy]		| Contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
 | https://github.com/apache/camel-k/tree/master/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
 | https://github.com/apache/camel-k/tree/master/e2e[/e2e]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
