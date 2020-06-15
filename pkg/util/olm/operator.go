@@ -40,7 +40,7 @@ var DefaultOperatorName = "camel-k-operator"
 var DefaultPackage = "camel-k"
 
 // DefaultChannel is the distribution channel in Operator Hub
-var DefaultChannel = "alpha"
+var DefaultChannel = "stable"
 
 // DefaultSource is the name of the operator source where the operator is published
 var DefaultSource = "community-operators"
