@@ -113,7 +113,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	}
 
 	// Build the container command
-	var args []string
+	// Other traits may have already contributed some arguments
+	args := container.Args
 
 	// Remote debugging
 	if t.Debug {
