@@ -65,7 +65,9 @@ type ImageTask struct {
 
 // BuilderTask --
 type BuilderTask struct {
-	BaseTask     `json:",inline"`
+	BaseTask `json:",inline"`
+	// This is required until https://github.com/kubernetes-sigs/controller-tools/pull/395 gets merged
+	// +kubebuilder:pruning:PreserveUnknownFields
 	Meta         metav1.ObjectMeta `json:"meta,omitempty"`
 	Image        string            `json:"image,omitempty"`
 	BaseImage    string            `json:"baseImage,omitempty"`
@@ -82,13 +84,13 @@ type BuilderTask struct {
 
 // BuildStatus defines the observed state of Build
 type BuildStatus struct {
-	Phase      BuildPhase       `json:"phase,omitempty"`
-	Image      string           `json:"image,omitempty"`
-	Digest     string           `json:"digest,omitempty"`
-	BaseImage  string           `json:"baseImage,omitempty"`
-	Artifacts  []Artifact       `json:"artifacts,omitempty"`
-	Error      string           `json:"error,omitempty"`
-	Failure    *Failure         `json:"failure,omitempty"`
+	Phase     BuildPhase `json:"phase,omitempty"`
+	Image     string     `json:"image,omitempty"`
+	Digest    string     `json:"digest,omitempty"`
+	BaseImage string     `json:"baseImage,omitempty"`
+	Artifacts []Artifact `json:"artifacts,omitempty"`
+	Error     string     `json:"error,omitempty"`
+	Failure   *Failure   `json:"failure,omitempty"`
 	// +nullable
 	StartedAt  metav1.Time      `json:"startedAt,omitempty"`
 	Platform   string           `json:"platform,omitempty"`

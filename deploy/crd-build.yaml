@@ -804,6 +804,7 @@ spec:
                             type: object
                           meta:
                             type: object
+                            x-kubernetes-preserve-unknown-fields: true
                           name:
                             type: string
                           properties:
