@@ -105,7 +105,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		if t.ChannelSources == "" {
 			items := make([]string, 0)
 
-			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeChannel)...)
 				return true
 			})
@@ -115,7 +115,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		if t.ChannelSinks == "" {
 			items := make([]string, 0)
 
-			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeChannel)...)
 				return true
 			})
@@ -125,7 +125,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		if t.EndpointSources == "" {
 			items := make([]string, 0)
 
-			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeEndpoint)...)
 				return true
 			})
@@ -135,7 +135,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		if t.EndpointSinks == "" {
 			items := make([]string, 0)
 
-			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeEndpoint)...)
 				return true
 			})
@@ -145,7 +145,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		if t.EventSources == "" {
 			items := make([]string, 0)
 
-			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeEvent)...)
 				return true
 			})
@@ -155,7 +155,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		if t.EventSinks == "" {
 			items := make([]string, 0)
 
-			metadata.Each(e.CamelCatalog, e.Integration.Spec.Sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeEvent)...)
 				return true
 			})
