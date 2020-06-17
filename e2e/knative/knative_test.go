@@ -134,3 +134,13 @@ func TestRunBroker(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
+
+func TestRunFlow(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).Should(BeNil())
+		Expect(Kamel("run", "-n", ns, "files/flow.yaml").Execute()).Should(BeNil())
+		Eventually(IntegrationPodPhase(ns, "flow"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationCondition(ns, "flow", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+	})
+}
