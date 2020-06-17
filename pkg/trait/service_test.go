@@ -328,8 +328,8 @@ func TestServiceWithNodeport(t *testing.T) {
 				Traits: map[string]v1.TraitSpec{
 					"service": {
 						Configuration: map[string]string{
-							"enabled": 	"true",
-							"auto":    	"false",
+							"enabled":  "true",
+							"auto":     "false",
 							"nodeport": "true",
 						},
 					},
