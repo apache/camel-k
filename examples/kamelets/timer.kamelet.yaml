@@ -1,0 +1,24 @@
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: timer
+spec:
+  displayName: "Timer"
+  description: "Produces produces periodic events with a custom payload"
+  parameters:
+    - name: message
+      description: The message to generate
+      schema:
+        type: string
+  produces:
+    type: text.types.camel.apache.org
+    schema:
+      content:
+        type: string
+  flow:
+    from:
+      uri: timer:tick
+      steps:
+        - set-body:
+            constant: "Hello [here there'll be the message] !!!"
+        - to: "log:info"
