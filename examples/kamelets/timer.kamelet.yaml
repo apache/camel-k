@@ -3,17 +3,21 @@ kind: Kamelet
 metadata:
   name: timer
 spec:
-  displayName: "Timer"
-  description: "Produces produces periodic events with a custom payload"
-  parameters:
-    - name: message
-      description: The message to generate
-      schema:
+  definition:
+    title: "Timer"
+    description: "Produces produces periodic events with a custom payload"
+    required:
+      - message
+    properties:
+      message:
+        title: Message
+        description: The message to generate
         type: string
-  produces:
-    type: text.types.camel.apache.org
-    schema:
-      content:
+  types:
+    out:
+      mediaType: application/json
+      schema:
+        id: text.camel.apache.org
         type: string
   flow:
     from:
