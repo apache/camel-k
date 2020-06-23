@@ -122,6 +122,11 @@ spec:
       kind: IntegrationPlatform
       name: integrationplatforms.camel.apache.org
       version: v1
+    - description: A Camel K Kamelet resource
+      displayName: Kamelet
+      kind: Kamelet
+      name: kamelets.camel.apache.org
+      version: v1alpha1
   description: |
     Apache Camel K
     ==============

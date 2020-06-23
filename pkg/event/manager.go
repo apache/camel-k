@@ -20,6 +20,7 @@ package event
 import (
 	"context"
 	"fmt"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -59,6 +60,13 @@ const (
 	ReasonBuildConditionChanged = "BuildConditionChanged"
 	// ReasonBuildError --
 	ReasonBuildError = "BuildError"
+
+	// ReasonKameletError --
+	ReasonKameletError = "KameletError"
+	// ReasonKameletConditionChanged --
+	ReasonKameletConditionChanged = "KameletConditionChanged"
+	// ReasonKameletPhaseUpdated --
+	ReasonKameletPhaseUpdated = "KameletPhaseUpdated"
 
 	// ReasonRelatedObjectChanged --
 	ReasonRelatedObjectChanged = "ReasonRelatedObjectChanged"
@@ -149,6 +157,35 @@ func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, record
 		return
 	}
 	recorder.Eventf(p, corev1.EventTypeWarning, ReasonIntegrationPlatformError, "Cannot reconcile Integration Platform %s: %v", p.Name, err)
+}
+
+// NotifyKameletUpdated automatically generates events when a Kamelet changes
+func NotifyKameletUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1alpha1.Kamelet) {
+	if new == nil {
+		return
+	}
+	oldPhase := ""
+	var oldConditions []v1.ResourceCondition
+	if old != nil {
+		oldPhase = string(old.Status.Phase)
+		oldConditions = old.Status.GetConditions()
+	}
+	if new.Status.Phase != v1alpha1.KameletPhaseNone {
+		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "Kamelet", new.Name, ReasonKameletConditionChanged)
+	}
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "Kamelet", new.Name, ReasonKameletPhaseUpdated, "")
+}
+
+// NotifyKameletError automatically generates error events when the kamelet reconcile cycle phase has an error
+func NotifyKameletError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1alpha1.Kamelet, err error) {
+	k := old
+	if new != nil {
+		k = new
+	}
+	if k == nil {
+		return
+	}
+	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile Kamelet %s: %v", k.Name, err)
 }
 
 // NotifyBuildUpdated automatically generates events when a build changes

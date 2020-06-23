@@ -19,6 +19,7 @@ package log
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/go-logr/logr"
@@ -120,6 +121,16 @@ func (l Logger) ForIntegrationKit(target *v1.IntegrationKit) Logger {
 
 // ForIntegrationPlatform --
 func (l Logger) ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
+	return l.WithValues(
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
+		"ns", target.Namespace,
+		"name", target.Name,
+	)
+}
+
+// ForIntegrationPlatform --
+func (l Logger) ForKamelet(target *v1alpha1.Kamelet) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,

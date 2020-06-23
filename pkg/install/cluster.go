@@ -20,6 +20,7 @@ package install
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -45,27 +46,32 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	}
 
 	// Install CRD for Integration Platform (if needed)
-	if err := installCRD(ctx, c, "IntegrationPlatform", "crd-integration-platform.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationPlatform", "v1", "crd-integration-platform.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration Kit (if needed)
-	if err := installCRD(ctx, c, "IntegrationKit", "crd-integration-kit.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationKit", "v1", "crd-integration-kit.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration (if needed)
-	if err := installCRD(ctx, c, "Integration", "crd-integration.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "Integration", "v1", "crd-integration.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Camel Catalog (if needed)
-	if err := installCRD(ctx, c, "CamelCatalog", "crd-camel-catalog.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "CamelCatalog", "v1", "crd-camel-catalog.yaml", collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Build (if needed)
-	if err := installCRD(ctx, c, "Build", "crd-build.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "Build", "v1", "crd-build.yaml", collection); err != nil {
+		return err
+	}
+
+	// Install CRD for Kamelet (if needed)
+	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "crd-kamelet.yaml", collection); err != nil {
 		return err
 	}
 
@@ -120,32 +126,37 @@ func WaitForAllCRDInstallation(ctx context.Context, clientProvider client.Provid
 
 // AreAllCRDInstalled check if all the required CRDs are installed
 func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
-	if ok, err := IsCRDInstalled(ctx, c, "IntegrationPlatform"); err != nil {
+	if ok, err := IsCRDInstalled(ctx, c, "IntegrationPlatform", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "IntegrationKit"); err != nil {
+	if ok, err := IsCRDInstalled(ctx, c, "IntegrationKit", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "Integration"); err != nil {
+	if ok, err := IsCRDInstalled(ctx, c, "Integration", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "CamelCatalog"); err != nil {
+	if ok, err := IsCRDInstalled(ctx, c, "CamelCatalog", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	return IsCRDInstalled(ctx, c, "Build")
+	if ok, err := IsCRDInstalled(ctx, c, "Build", "v1"); err != nil {
+		return ok, err
+	} else if !ok {
+		return false, nil
+	}
+	return IsCRDInstalled(ctx, c, "Kamelet", "v1alpha1")
 }
 
 // IsCRDInstalled check if the given CRD kind is installed
-func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, error) {
-	lst, err := c.Discovery().ServerResourcesForGroupVersion("camel.apache.org/v1")
+func IsCRDInstalled(ctx context.Context, c client.Client, kind string, version string) (bool, error) {
+	lst, err := c.Discovery().ServerResourcesForGroupVersion(fmt.Sprintf("camel.apache.org/%s", version))
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -159,7 +170,7 @@ func IsCRDInstalled(ctx context.Context, c client.Client, kind string) (bool, er
 	return false, nil
 }
 
-func installCRD(ctx context.Context, c client.Client, kind string, resourceName string, collection *kubernetes.Collection) error {
+func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, collection *kubernetes.Collection) error {
 	crd := deploy.Resource(resourceName)
 	if collection != nil {
 		unstr, err := kubernetes.LoadRawResourceFromYaml(string(crd))
@@ -171,7 +182,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, resourceName 
 	}
 
 	// Installing Integration CRD
-	installed, err := IsCRDInstalled(ctx, c, kind)
+	installed, err := IsCRDInstalled(ctx, c, kind, version)
 	if err != nil {
 		return err
 	}

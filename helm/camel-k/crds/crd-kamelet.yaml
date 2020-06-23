@@ -15,14 +15,31 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-operator-path: deploy/operator-deployment.yaml
-crd-cr-paths:
-  - deploy/crd-build.yaml
-  - deploy/crd-camel-catalog.yaml
-  - deploy/crd-integration.yaml
-  - deploy/crd-integration-kit.yaml
-  - deploy/crd-integration-platform.yaml
-  - deploy/crd-kamelet.yaml
-role-paths:
-  - deploy/operator-role-olm.yaml
-  - deploy/operator-role-olm-cluster.yaml
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: kamelets.camel.apache.org
+  labels:
+    app: "camel-k"
+spec:
+  group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+  subresources:
+    status: {}
+  names:
+    kind: Kamelet
+    listKind: KameletList
+    plural: kamelets
+    singular: kamelet
+    shortNames:
+    - kl
+  additionalPrinterColumns:
+  - name: Phase
+    type: string
+    description: The Kamelet phase
+    JSONPath: .status.phase
