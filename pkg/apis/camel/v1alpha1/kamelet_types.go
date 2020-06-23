@@ -14,7 +14,19 @@ type KameletSpec struct {
 	Authorization AuthorizationSpec   `json:"authorization,omitempty"`
 	Sources       *camelv1.SourceSpec `json:"sources,omitempty"`
 	Flow          *camelv1.Flow       `json:"flow,omitempty"`
+	Consumes      *EventType          `json:"consumes,omitempty"`
+	Produces      *EventType          `json:"produces,omitempty"`
 	Dependencies  []string            `json:"dependencies,omitempty"`
+}
+
+type EventType struct {
+	Type   string      `json:"type,omitempty"`
+	Schema *DataSchema `json:"schema,omitempty"`
+}
+
+type DataSchema struct {
+	Ref     *corev1.ObjectReference `json:"ref,omitempty"`
+	Content *openapi.Schema         `json:"schema,omitempty"`
 }
 
 type KameletInfo struct {
