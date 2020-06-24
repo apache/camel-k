@@ -125,7 +125,16 @@ type SourceSpec struct {
 	// Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
 	// uses to pre/post process sources
 	Interceptors []string `json:"interceptors,omitempty"`
+	// Type defines the kind of source described by this object
+	Type SourceType `json:"type,omitempty"`
 }
+
+type SourceType string
+
+const (
+	SourceTypeDefault SourceType = ""
+	SourceTypeKamelet SourceType = "kamelet"
+)
 
 // Language --
 type Language string
