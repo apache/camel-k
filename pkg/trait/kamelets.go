@@ -28,6 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"regexp"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sort"
 	"strconv"
 	"strings"
@@ -54,6 +55,11 @@ func newKameletsTrait() Trait {
 	}
 }
 
+// IsPlatformTrait overrides base class method
+func (t *kameletsTrait) IsPlatformTrait() bool {
+	return true
+}
+
 func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
@@ -73,47 +79,85 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 
 	}
 
-	return t.List != "", nil
+	return len(t.getKamelets()) > 0, nil
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
-
+	if err := t.addKamelets(e); err != nil {
+		return err
+	}
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
-func (t *kameletsTrait) IsPlatformTrait() bool {
-	return true
+func (t *kameletsTrait) addKamelets(e *Environment) error {
+	for _, k := range t.getKamelets() {
+		var kamelet v1alpha1.Kamelet
+		key := client.ObjectKey{
+			Namespace: e.Integration.Namespace,
+			Name:      k,
+		}
+		if err := t.Client.Get(t.Ctx, key, &kamelet); err != nil {
+			return err
+		}
+		if err := t.addKameletAsSource(e, kamelet); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kamelet) error {
+func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kamelet) error {
 	var sources []v1.SourceSpec
 
-	flowData, err := flows.Marshal([]v1.Flow{kamelet.Spec.Flow})
-	if err != nil {
-		return err
+	if kamelet.Spec.Flow != nil {
+		flowData, err := flows.Marshal([]v1.Flow{*kamelet.Spec.Flow})
+		if err != nil {
+			return err
+		}
+		flowSource := v1.SourceSpec{
+			DataSpec: v1.DataSpec{
+				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
+				Content: string(flowData),
+			},
+			Language: v1.LanguageYaml,
+			Type:     v1.SourceTypeKamelet,
+		}
+		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
+		if err != nil {
+			return err
+		}
+		sources = append(sources, flowSource)
 	}
-	flowSource := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name:    "flow.yaml",
-			Content: string(flowData),
-		},
-		Language: v1.LanguageYaml,
-		Type:     v1.SourceTypeKamelet,
-	}
-	flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
-	if err != nil {
-		return err
-	}
-	sources = append(sources, flowSource)
 
 	for idx, s := range kamelet.Spec.Sources {
-		intSource, err := integrationSourceFromKameletSource(e, kamelet, s, fmt.Sprintf("%s-kamelet-%s-source-%03d", e.Integration.Name, kamelet.Name, idx))
+		intSource, err := integrationSourceFromKameletSource(e, kamelet, s, fmt.Sprintf("%s-kamelet-%s-%03d", e.Integration.Name, kamelet.Name, idx))
 		if err != nil {
 			return err
 		}
 		sources = append(sources, intSource)
 	}
+
+	kameletCounter := 0
+	for _, source := range sources {
+		if source.Type == v1.SourceTypeKamelet {
+			kameletCounter++
+		}
+		replaced := false
+		for idx, existing := range e.Integration.Status.GeneratedSources {
+			if existing.Name == source.Name {
+				replaced = true
+				e.Integration.Status.GeneratedSources[idx] = source
+			}
+		}
+		if !replaced {
+			e.Integration.Status.GeneratedSources = append(e.Integration.Status.GeneratedSources, source)
+		}
+	}
+
+	if kameletCounter > 1 {
+		return fmt.Errorf(`kamelet %s contains %d sources of type "kamelet": at most one is allowed`, kamelet.Name, kameletCounter)
+	}
+
 	return nil
 }
 
@@ -128,9 +172,15 @@ func (t *kameletsTrait) getKamelets() []string {
 	return answer
 }
 
-func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
+func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
+	if source.Type == v1.SourceTypeKamelet {
+		// Kamelets must be named "<kamelet-name>.extension"
+		language := source.InferLanguage()
+		source.Name = fmt.Sprintf("%s.%s", kamelet.Name, string(language))
+	}
+
 	if source.DataSpec.ContentRef != "" {
-		return renameSource(kamelet, source), nil
+		return source, nil
 	}
 
 	// Create configmaps to avoid storing kamelet definitions in the integration CR
@@ -169,19 +219,11 @@ func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamele
 
 	e.Resources.Add(&cm)
 
-	target := renameSource(kamelet, source)
+	target := source.DeepCopy()
 	target.Content = ""
 	target.ContentRef = name
 	target.ContentKey = "content"
-	return target, nil
-}
-
-func renameSource(kamelet *v1alpha1.Kamelet, source v1.SourceSpec) v1.SourceSpec {
-	target := source.DeepCopy()
-	if !strings.HasPrefix(target.Name, fmt.Sprintf("kamelet-%s-", kamelet.Name)) {
-		target.Name = fmt.Sprintf("kamelet-%s-%s", kamelet.Name, target.Name)
-	}
-	return *target
+	return *target, nil
 }
 
 func extractKamelets(uris []string) (kamelets []string) {
