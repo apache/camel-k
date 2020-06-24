@@ -54,6 +54,9 @@ var (
 	// SourcesMountPath --
 	SourcesMountPath = path.Join(BasePath, "sources")
 
+	// KameletsMountPath --
+	KameletsMountPath = path.Join(BasePath, "kamelets.d")
+
 	// ResourcesMountPath --
 	ResourcesMountPath = path.Join(BasePath, "resources")
 
@@ -527,12 +530,20 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 	for i, s := range e.Integration.Sources() {
 		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
-		refName := fmt.Sprintf("i-source-%03d", i)
-		resName := strings.TrimPrefix(s.Name, "/")
-		resPath := path.Join(SourcesMountPath, refName)
-
 		if s.ContentRef != "" {
 			cmName = s.ContentRef
+		}
+
+		refName := fmt.Sprintf("i-source-%03d", i)
+		if s.Type == v1.SourceTypeKamelet {
+			refName = fmt.Sprintf("i-kamelet-source-%03d", i)
+		}
+
+		resName := strings.TrimPrefix(s.Name, "/")
+
+		resPath := path.Join(SourcesMountPath, refName)
+		if s.Type == v1.SourceTypeKamelet {
+			resPath = KameletsMountPath
 		}
 
 		*vols = append(*vols, corev1.Volume{
