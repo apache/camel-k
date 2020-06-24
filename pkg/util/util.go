@@ -90,12 +90,13 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 
 // StringSliceUniqueConcat append all the items of the "items" slice if they are not already present in the slice
 func StringSliceUniqueConcat(slice *[]string, items []string) bool {
+	changed := false
 	for _, item := range items {
-		if !StringSliceUniqueAdd(slice, item) {
-			return false
+		if StringSliceUniqueAdd(slice, item) {
+			changed = true
 		}
 	}
-	return true
+	return changed
 }
 
 // EncodeXML --
