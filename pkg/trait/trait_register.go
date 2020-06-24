@@ -25,6 +25,7 @@ func init() {
 	AddToTraits(newCamelTrait)
 	AddToTraits(newOpenAPITrait)
 	AddToTraits(newKnativeTrait)
+	AddToTraits(newKameletsTrait)
 	AddToTraits(newDependenciesTrait)
 	AddToTraits(newBuilderTrait)
 	AddToTraits(newQuarkusTrait)

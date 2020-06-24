@@ -184,6 +184,50 @@ func ComputeForResource(res v1.ResourceSpec) (string, error) {
 	return digest, nil
 }
 
+// ComputeForSource returns a digest for the specific source
+func ComputeForSource(s v1.SourceSpec) (string, error) {
+	hash := sha256.New()
+	// Operator version is relevant
+	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
+		return "", err
+	}
+
+	if _, err := hash.Write([]byte(s.Content)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(s.Name)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(s.Type)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(s.Language)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(s.ContentKey)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(s.ContentRef)); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(s.Loader)); err != nil {
+		return "", err
+	}
+	for _, i := range s.Interceptors {
+		if _, err := hash.Write([]byte(i)); err != nil {
+			return "", err
+		}
+	}
+
+	if _, err := hash.Write([]byte(strconv.FormatBool(s.Compression))); err != nil {
+		return "", err
+	}
+
+	// Add a letter at the beginning and use URL safe encoding
+	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+	return digest, nil
+}
+
 func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
 	res := make([]string, len(m))
 	i := 0
