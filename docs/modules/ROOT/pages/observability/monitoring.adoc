@@ -1,0 +1,125 @@
+[[monitoring]]
+= Camel K Monitoring
+
+The Camel K monitoring architecture relies on https://prometheus.io[Prometheus] and the eponymous operator.
+
+The https://github.com/coreos/prometheus-operator[Prometheus Operator] serves to make running Prometheus on top of Kubernetes as easy as possible, while preserving Kubernetes-native configuration options.
+
+[[prerequisites]]
+== Prerequisites
+
+To take fully advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus operator instance, that can be configured to integrate Camel K integrations.
+
+[[kubernetes]]
+=== Kubernetes
+
+You can deploy the Prometheus operator by running:
+
+```
+$ kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/v0.38.0/bundle.yaml
+```
+
+WARNING: Beware this installs the operator in the `default` namespace. You must download the file locally and replace the `namespace` fields to deploy the resources into another namespace.
+
+Then, you can create a `Prometheus` resource, that the operator will use as configuration to deploy a managed Prometheus instance:
+
+```
+$ cat <<EOF | kubectl apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus
+spec:
+  serviceMonitorSelector:
+    matchExpressions:
+      - key: camel.apache.org/integration
+        operator: Exists
+EOF
+```
+
+By default, the Prometheus instance discovers applications to be monitored in the same namespace.
+You can use the `serviceMonitorNamespaceSelector` field from the `Prometheus` resource to enable cross-namespace monitoring.
+You may also need to specify a ServiceAccount with the `serviceAccountName` field, that's bound to a Role with the necessary permissions.
+
+[[openshift]]
+=== OpenShift
+
+Starting OpenShift 4.3, the Prometheus operator, that's already deployed as part of the monitoring stack, can be used to https://docs.openshift.com/container-platform/4.3/monitoring/monitoring-your-own-services.html[monitor application services].
+This needs to be enabled by following these instructions:
+
+. Check whether the `cluster-monitoring-config` ConfigMap object exists in the `openshift-monitoring` project:
+
+  $ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+
+. If it does not exist, create it:
+
+  $ oc -n openshift-monitoring create configmap cluster-monitoring-config
+
+. Start editing the cluster-monitoring-config ConfigMap:
+
+  $ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+
+. Set the `techPreviewUserWorkload` setting to `true` under `data/config.yaml`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    techPreviewUserWorkload:
+      enabled: true
+----
+
+On OpenShift versions prior to 4.3, or if you do not want to change your cluster monitoring stack configuration, you can refer to the <<Kubernetes>> section in order to deploy a separate Prometheus operator instance.
+
+[[instrumentation]]
+== Instrumentation
+
+The Prometheus trait automates the configuration of integration pods to expose a _metrics_ endpoint, that can be discovered and scrapped by a Prometheus server.
+
+The Prometheus trait can be enabled when running an integration, e.g.:
+
+```
+$ kamel run -t prometheus.enabled=true ...
+```
+
+Alternatively, the Prometheus trait can be enabled globally once, by updating the integration platform, e.g.:
+
+```
+$ kubectl patch ip camel-k --type=merge -p '{"spec":{"traits":{"prometheus":{"configuration":{"enabled":"true"}}}}}'
+```
+
+The underlying instrumentation mechanism depends on the configured integration runtime.
+As a result, the set of registered metrics, as well as the naming convention they follow, also depends on it.
+
+=== Default Runtime
+
+When the default, a.k.a. _main_, runtime is configured for the integration, the https://github.com/prometheus/jmx_exporter[JMX exporter] is responsible for collecting and exposing metrics from JMX mBeans.
+
+A custom configuration for the JMX exporter can be used by setting the `prometheus.configmap` parameter from the Prometheus trait with the name of a ConfigMap containing a `prometheus-jmx-exporter.yaml` key, e.g.:
+
+```
+$ kamel run -t prometheus.enabled=true -t prometheus.configmap=<jmx_exporter_config>...
+```
+
+Otherwise, the Prometheus trait uses a default configuration.
+
+=== Quarkus Runtime
+
+When the Quarkus runtime is configured for the integration, the https://camel.apache.org/camel-quarkus/latest/extensions/microprofile-metrics.html[Camel Quarkus MicroProfile Metrics extension] is responsible for collection and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
+
+The MicroProfile Metrics extension registers and exposes the following metrics out-of-the-box:
+
+* https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/required-metrics.adoc#required-metrics[JVM and operating system related metrics]
+
+* https://camel.apache.org/camel-quarkus/latest/extensions/microprofile-metrics.html#_camel_route_metrics[Camel specific metrics]
+
+It is possible to extend this set of metrics by using either, or both:
+
+* The https://camel.apache.org/components/latest/microprofile-metrics-component.html[MicroProfile Metrics component]
+
+* The https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/app-programming-model.adoc#annotations[MicroProfile Metrics annotations], in external dependencies
