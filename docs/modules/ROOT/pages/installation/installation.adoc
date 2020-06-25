@@ -12,6 +12,7 @@ before installing it. Customized instructions are needed for the following clust
 
 - xref:installation/minikube.adoc[Minikube]
 - xref:installation/minishift.adoc[Minishift]
+- xref:installation/crc.adoc[Red Hat CodeReady Containers (CRC)]
 - xref:installation/gke.adoc[Google Kubernetes Engine (GKE)]
 - xref:installation/openshift.adoc[OpenShift]
 

@@ -141,6 +141,15 @@ make test-integration
 
 If you want to install everything you have in your source code and see it running on Kubernetes, you need to run the following command:
 
+=== For Red Hat CodeReady Containers (CRC)
+
+* You need to have https://docs.docker.com/get-docker/[Docker] installed and running (or connected to a Docker daemon)
+* Run `make install-crc`: to build the project and install it in the current namespace on CRC
+* You can specify a different namespace with `make install-crc project=myawesomeproject`
+* To uninstall Camel K, run `kamel uninstall --all --olm=false`
+
+The commands assumes you have an already running CRC instance and logged in correctly.
+
 === For Minishift
 
 * Run `make install-minishift` (or just `make install`): to build the project and install it in the current namespace on Minishift
