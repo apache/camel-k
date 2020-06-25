@@ -86,6 +86,7 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 	if err := t.addKamelets(e); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -99,10 +100,16 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		if err := t.Client.Get(t.Ctx, key, &kamelet); err != nil {
 			return err
 		}
+
 		if err := t.addKameletAsSource(e, kamelet); err != nil {
 			return err
 		}
+
+		// Adding dependencies from Kamelets
+		util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
 	}
+	// resort dependencies
+	sort.Strings(e.Integration.Status.Dependencies)
 	return nil
 }
 
