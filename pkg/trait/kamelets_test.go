@@ -84,6 +84,10 @@ func TestKameletLookup(t *testing.T) {
 					"uri": "timer:tick",
 				},
 			},
+			Dependencies: []string{
+				"camel:timer",
+				"camel:log",
+			},
 		},
 	})
 	enabled, err := trait.Configure(environment)
@@ -102,6 +106,8 @@ func TestKameletLookup(t *testing.T) {
 	source := environment.Integration.Status.GeneratedSources[0]
 	assert.Equal(t, "timer.yaml", source.Name)
 	assert.Equal(t, "kamelet", string(source.Type))
+
+	assert.Equal(t, []string{"camel:log", "camel:timer"}, environment.Integration.Status.Dependencies)
 }
 
 func TestKameletSecondarySourcesLookup(t *testing.T) {
@@ -235,6 +241,100 @@ func TestErrorMultipleKameletSources(t *testing.T) {
 
 	err = trait.Apply(environment)
 	assert.Error(t, err)
+}
+
+func TestMultipleKamelets(t *testing.T) {
+	trait, environment := createKameletsTestEnvironment(`
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:logger
+    - to: kamelet:logger
+`, &v1alpha1.Kamelet{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "timer",
+		},
+		Spec: v1alpha1.KameletSpec{
+			Flow: &v1.Flow{
+				"from": map[string]interface{}{
+					"uri": "timer:tick",
+				},
+			},
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "support.groovy",
+						Content: "from('xxx:xxx').('to:log:info')",
+					},
+					Language: v1.LanguageGroovy,
+				},
+			},
+			Dependencies: []string{
+				"camel:timer",
+				"camel:xxx",
+			},
+		},
+	}, &v1alpha1.Kamelet{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "logger",
+		},
+		Spec: v1alpha1.KameletSpec{
+			Flow: &v1.Flow{
+				"from": map[string]interface{}{
+					"uri": "tbd:endpoint",
+					"steps": []interface{}{
+						map[string]interface{}{
+							"to": map[string]interface{}{
+								"uri": "log:info",
+							},
+						},
+					},
+				},
+			},
+			Dependencies: []string{
+				"camel:log",
+				"camel:tbd",
+			},
+		},
+	})
+	enabled, err := trait.Configure(environment)
+	assert.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Equal(t, []string{"logger", "timer"}, trait.getKamelets())
+
+	err = trait.Apply(environment)
+	assert.NoError(t, err)
+
+	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-flow" })
+	assert.NotNil(t, cmFlow)
+	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-000" })
+	assert.NotNil(t, cmRes)
+	cmFlow2 := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-logger-flow" })
+	assert.NotNil(t, cmFlow2)
+
+	assert.Len(t, environment.Integration.Status.GeneratedSources, 3)
+
+	flowSource2 := environment.Integration.Status.GeneratedSources[0]
+	assert.Equal(t, "logger.yaml", flowSource2.Name)
+	assert.Equal(t, "kamelet", string(flowSource2.Type))
+	assert.Equal(t, "it-kamelet-logger-flow", flowSource2.ContentRef)
+	assert.Equal(t, "content", flowSource2.ContentKey)
+
+	flowSource := environment.Integration.Status.GeneratedSources[1]
+	assert.Equal(t, "timer.yaml", flowSource.Name)
+	assert.Equal(t, "kamelet", string(flowSource.Type))
+	assert.Equal(t, "it-kamelet-timer-flow", flowSource.ContentRef)
+	assert.Equal(t, "content", flowSource.ContentKey)
+
+	supportSource := environment.Integration.Status.GeneratedSources[2]
+	assert.Equal(t, "support.groovy", supportSource.Name)
+	assert.Equal(t, "", string(supportSource.Type))
+	assert.Equal(t, "it-kamelet-timer-000", supportSource.ContentRef)
+	assert.Equal(t, "content", supportSource.ContentKey)
+
+	assert.Equal(t, []string{"camel:log", "camel:tbd", "camel:timer", "camel:xxx"}, environment.Integration.Status.Dependencies)
 }
 
 func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kameletsTrait, *Environment) {
