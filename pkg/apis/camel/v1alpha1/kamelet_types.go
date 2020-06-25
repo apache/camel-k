@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	AnnotationIcon = "camel.apache.org/icon"
+	AnnotationIcon = "camel.apache.org/kamelet.icon"
 )
 
 // KameletSpec defines the desired state of Kamelet

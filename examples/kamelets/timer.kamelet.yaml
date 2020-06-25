@@ -2,10 +2,12 @@ apiVersion: camel.apache.org/v1alpha1
 kind: Kamelet
 metadata:
   name: timer
+  annotations:
+    camel.apache.org/kamelet.icon: timer
 spec:
   definition:
     title: "Timer"
-    description: "Produces produces periodic events with a custom payload"
+    description: "Produces periodic events with a custom payload"
     required:
       - message
     properties:
