@@ -137,7 +137,7 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 	go func() {
 		defer podCancel()
 
-		if _, err := out.WriteString(prefix + "Monitoring pod " + podName); err != nil {
+		if _, err := out.WriteString(prefix + "Monitoring pod " + podName + "\n"); err != nil {
 			s.L.Error(err, "Cannot write to output")
 			return
 		}
