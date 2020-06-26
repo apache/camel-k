@@ -94,7 +94,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 	cmd.Flags().StringArray("property-file", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
-	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list fo files listed as arguments of the command")
+	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
