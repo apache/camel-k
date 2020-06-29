@@ -21,4 +21,4 @@ rootdir=$location/../pkg/apis/camel
 echo "Generating CRDs..."
 
 cd $rootdir
-go run sigs.k8s.io/controller-tools/cmd/controller-gen crd paths=./... output:crd:dir=../../../deploy/crds crd:crdVersions=v1
+go run sigs.k8s.io/controller-tools/cmd/controller-gen crd paths=./... output:crd:dir=../../../deploy/crds crd:crdVersions=v1beta1
