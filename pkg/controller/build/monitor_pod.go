@@ -60,8 +60,9 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 	case pod.Status.Phase == corev1.PodPending && action.isPodScheduled(pod),
 		pod.Status.Phase == corev1.PodRunning:
 		build.Status.Phase = v1.BuildPhaseRunning
-		if build.Status.StartedAt.Time.IsZero() {
-			build.Status.StartedAt = metav1.Now()
+		if build.Status.StartedAt == nil || build.Status.StartedAt.Time.IsZero() {
+			now := metav1.Now()
+			build.Status.StartedAt = &now
 		}
 
 	case pod.Status.Phase == corev1.PodSucceeded:

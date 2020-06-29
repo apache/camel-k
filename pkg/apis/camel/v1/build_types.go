@@ -84,15 +84,14 @@ type BuilderTask struct {
 
 // BuildStatus defines the observed state of Build
 type BuildStatus struct {
-	Phase     BuildPhase `json:"phase,omitempty"`
-	Image     string     `json:"image,omitempty"`
-	Digest    string     `json:"digest,omitempty"`
-	BaseImage string     `json:"baseImage,omitempty"`
-	Artifacts []Artifact `json:"artifacts,omitempty"`
-	Error     string     `json:"error,omitempty"`
-	Failure   *Failure   `json:"failure,omitempty"`
-	// +nullable
-	StartedAt  metav1.Time      `json:"startedAt,omitempty"`
+	Phase      BuildPhase       `json:"phase,omitempty"`
+	Image      string           `json:"image,omitempty"`
+	Digest     string           `json:"digest,omitempty"`
+	BaseImage  string           `json:"baseImage,omitempty"`
+	Artifacts  []Artifact       `json:"artifacts,omitempty"`
+	Error      string           `json:"error,omitempty"`
+	Failure    *Failure         `json:"failure,omitempty"`
+	StartedAt  *metav1.Time     `json:"startedAt,omitempty"`
 	Platform   string           `json:"platform,omitempty"`
 	Conditions []BuildCondition `json:"conditions,omitempty"`
 	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
