@@ -17,7 +17,7 @@
 //
 // To run this integrations use:
 //
-//     kamel run -d camel:dns examples/dns.js
+//     kamel run -d camel-dns examples/dns.js
 //
 // Or simply (since dependency auto-detection is enabled by default):
 //
