@@ -176,7 +176,10 @@ func (in *BuildStatus) DeepCopyInto(out *BuildStatus) {
 		*out = new(Failure)
 		(*in).DeepCopyInto(*out)
 	}
-	in.StartedAt.DeepCopyInto(&out.StartedAt)
+	if in.StartedAt != nil {
+		in, out := &in.StartedAt, &out.StartedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.Conditions != nil {
 		in, out := &in.Conditions, &out.Conditions
 		*out = make([]BuildCondition, len(*in))

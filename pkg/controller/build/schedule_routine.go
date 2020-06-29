@@ -103,9 +103,10 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Build) {
 	defer action.routines.Delete(build.Name)
 
+	now := metav1.Now()
 	status := v1.BuildStatus{
 		Phase:     v1.BuildPhaseRunning,
-		StartedAt: metav1.Now(),
+		StartedAt: &now,
 	}
 	if err := action.updateBuildStatus(ctx, build, status); err != nil {
 		return
