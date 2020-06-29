@@ -1,0 +1,9 @@
+[[installation-on-crc]]
+= Installing Camel K on Red Hat CodeReady Containers (CRC)- OpenShift 4 on your laptop
+
+You can run Camel K integrations on OpenShift 4 on your laptop using the CodeReady Containers cluster creation tool.
+Follow the instructions in the https://code-ready.github.io/crc/[getting started guide] for the installation.
+
+After https://code-ready.github.io/crc/#setting-up-codeready-containers_gsg[setting up] and https://code-ready.github.io/crc/#starting-the-virtual-machine_gsg[starting] the cluster you will need to login with the `kubeadmin` user as shown in the startup logs (or setting up a user with sufficient permissions).
+
+You can now proceed with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].
