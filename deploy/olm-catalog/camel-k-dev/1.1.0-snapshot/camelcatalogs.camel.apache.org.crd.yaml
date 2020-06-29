@@ -1,3 +1,4 @@
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,32 +23,236 @@ metadata:
   labels:
     app: "camel-k"
 spec:
+  additionalPrinterColumns:
+    - JSONPath: .spec.runtime.version
+      description: The Camel K Runtime version
+      name: Runtime Version
+      type: string
+    - JSONPath: .spec.runtime.provider
+      description: The Camel K Runtime provider
+      name: Runtime Provider
+      type: string
   group: camel.apache.org
   names:
     kind: CamelCatalog
     listKind: CamelCatalogList
     plural: camelcatalogs
-    singular: camelcatalog
     shortNames:
       - cc
+    singular: camelcatalog
   scope: Namespaced
-  version: v1
-  versions:
-  - name: v1
-    served: true
-    storage: true
-  - name: v1alpha1
-    served: true
-    storage: false
   subresources:
     status: {}
-  additionalPrinterColumns:
-    - name: Camel Version
-      type: string
-      description: The Camel version
-      JSONPath: .spec.version
-    - name: Runtime Version
-      type: string
-      description: The Camel K Runtime version
-      JSONPath: .spec.runtimeVersion
-
+  validation:
+    openAPIV3Schema:
+      description: CamelCatalog is the Schema for the camelcatalogs API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: CamelCatalogSpec defines the desired state of CamelCatalog
+          properties:
+            artifacts:
+              additionalProperties:
+                description: CamelArtifact --
+                properties:
+                  artifactId:
+                    type: string
+                  dataformats:
+                    items:
+                      type: string
+                    type: array
+                  dependencies:
+                    items:
+                      description: CamelArtifactDependency represent a maven's dependency
+                      properties:
+                        artifactId:
+                          type: string
+                        exclusions:
+                          items:
+                            description: CamelArtifactExclusion --
+                            properties:
+                              artifactId:
+                                type: string
+                              groupId:
+                                type: string
+                            required:
+                              - artifactId
+                              - groupId
+                            type: object
+                          type: array
+                        groupId:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - artifactId
+                        - groupId
+                      type: object
+                    type: array
+                  exclusions:
+                    items:
+                      description: CamelArtifactExclusion --
+                      properties:
+                        artifactId:
+                          type: string
+                        groupId:
+                          type: string
+                      required:
+                        - artifactId
+                        - groupId
+                      type: object
+                    type: array
+                  groupId:
+                    type: string
+                  javaTypes:
+                    items:
+                      type: string
+                    type: array
+                  languages:
+                    items:
+                      type: string
+                    type: array
+                  schemes:
+                    items:
+                      description: CamelScheme --
+                      properties:
+                        http:
+                          type: boolean
+                        id:
+                          type: string
+                        passive:
+                          type: boolean
+                      required:
+                        - http
+                        - id
+                        - passive
+                      type: object
+                    type: array
+                  version:
+                    type: string
+                required:
+                  - artifactId
+                  - groupId
+                type: object
+              type: object
+            loaders:
+              additionalProperties:
+                description: CamelLoader --
+                properties:
+                  artifactId:
+                    type: string
+                  dependencies:
+                    items:
+                      description: MavenArtifact --
+                      properties:
+                        artifactId:
+                          type: string
+                        groupId:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - artifactId
+                        - groupId
+                      type: object
+                    type: array
+                  groupId:
+                    type: string
+                  languages:
+                    items:
+                      type: string
+                    type: array
+                  version:
+                    type: string
+                required:
+                  - artifactId
+                  - groupId
+                type: object
+              type: object
+            runtime:
+              description: RuntimeSpec --
+              properties:
+                applicationClass:
+                  type: string
+                capabilities:
+                  additionalProperties:
+                    description: Capability --
+                    properties:
+                      dependencies:
+                        items:
+                          description: MavenArtifact --
+                          properties:
+                            artifactId:
+                              type: string
+                            groupId:
+                              type: string
+                            version:
+                              type: string
+                          required:
+                            - artifactId
+                            - groupId
+                          type: object
+                        type: array
+                      metadata:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    required:
+                      - dependencies
+                    type: object
+                  type: object
+                dependencies:
+                  items:
+                    description: MavenArtifact --
+                    properties:
+                      artifactId:
+                        type: string
+                      groupId:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - artifactId
+                      - groupId
+                    type: object
+                  type: array
+                metadata:
+                  additionalProperties:
+                    type: string
+                  type: object
+                provider:
+                  description: RuntimeProvider --
+                  type: string
+                version:
+                  type: string
+              required:
+                - applicationClass
+                - dependencies
+                - provider
+                - version
+              type: object
+          required:
+            - artifacts
+            - loaders
+            - runtime
+          type: object
+        status:
+          description: CamelCatalogStatus defines the observed state of CamelCatalog
+          type: object
+      type: object
+  version: v1
+  versions:
+    - name: v1
+      served: true
+      storage: true
