@@ -144,6 +144,11 @@ If you want to install everything you have in your source code and see it runnin
 === For Red Hat CodeReady Containers (CRC)
 
 * You need to have https://docs.docker.com/get-docker/[Docker] installed and running (or connected to a Docker daemon)
+* You need to setup Docker daemon to https://docs.docker.com/registry/insecure/[trust] CRC's insecure Docker registry which is exposed by default through the route `default-route-openshift-image-registry.apps-crc.testing`. One way of doing that is to instruct the Docker daemon to trust the certificate:
+** `oc extract secret/router-ca --keys=tls.crt -n openshift-ingress-operator`: to extract the certificate
+** `sudo cp tls.crt /etc/docker/certs.d/default-route-openshift-image-registry.apps-crc.testing/ca.crt`: to copy the certificate for Docker daemon to trust
+** `docker login -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing`: to test that the certificate is trusted
+
 * Run `make install-crc`: to build the project and install it in the current namespace on CRC
 * You can specify a different namespace with `make install-crc project=myawesomeproject`
 * To uninstall Camel K, run `kamel uninstall --all --olm=false`
