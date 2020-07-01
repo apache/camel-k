@@ -152,7 +152,7 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 			Name:      "integration-name",
 			Namespace: "namespace",
 			Labels: map[string]string{
-				"camel.apache.org/integration": "integration-name",
+				v1.IntegrationLabel: "integration-name",
 			},
 		},
 		Spec: appsv1.DeploymentSpec{

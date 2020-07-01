@@ -30,7 +30,7 @@ import (
 
 // Print prints integrations logs to the stdout
 func Print(ctx context.Context, client kubernetes.Interface, integration *v1.Integration, out io.Writer) error {
-	scraper := NewSelectorScraper(client, integration.Namespace, integration.Name, "camel.apache.org/integration="+integration.Name)
+	scraper := NewSelectorScraper(client, integration.Namespace, integration.Name, v1.IntegrationLabel+"="+integration.Name)
 	reader := scraper.Start(ctx)
 
 	if _, err := io.Copy(out, ioutil.NopCloser(reader)); err != nil {

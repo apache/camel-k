@@ -128,14 +128,14 @@ func TestApplyPrometheusTraitWithServiceDoesSucceed(t *testing.T) {
 				Name:      "service-name",
 				Namespace: "namespace",
 				Labels: map[string]string{
-					"camel.apache.org/integration":  "integration-name",
+					v1.IntegrationLabel:             "integration-name",
 					"camel.apache.org/service.type": v1.ServiceTypeUser,
 				},
 			},
 			Spec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{},
 				Selector: map[string]string{
-					"camel.apache.org/integration": "integration-name",
+					v1.IntegrationLabel: "integration-name",
 				},
 			},
 		})
@@ -162,8 +162,8 @@ func TestPrometheusTraitGetServiceMonitor(t *testing.T) {
 	assert.Equal(t, "monitoring.coreos.com/v1", serviceMonitor.APIVersion)
 	assert.Equal(t, "integration-name", serviceMonitor.Name)
 	assert.Equal(t, "integration-namespace", serviceMonitor.Namespace)
-	assert.Equal(t, "integration-name", serviceMonitor.Labels["camel.apache.org/integration"])
-	assert.Equal(t, "integration-name", serviceMonitor.Spec.Selector.MatchLabels["camel.apache.org/integration"])
+	assert.Equal(t, "integration-name", serviceMonitor.Labels[v1.IntegrationLabel])
+	assert.Equal(t, "integration-name", serviceMonitor.Spec.Selector.MatchLabels[v1.IntegrationLabel])
 	assert.Len(t, serviceMonitor.Spec.Endpoints, 1)
 	assert.Equal(t, "prometheus", serviceMonitor.Spec.Endpoints[0].Port)
 }

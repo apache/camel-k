@@ -258,7 +258,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 
 func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 	labels := map[string]string{
-		"camel.apache.org/integration": e.Integration.Name,
+		v1.IntegrationLabel: e.Integration.Name,
 	}
 
 	annotations := make(map[string]string)

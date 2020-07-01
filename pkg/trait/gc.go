@@ -114,7 +114,7 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 				// Label the resource with the current integration generation
 				labels["camel.apache.org/generation"] = generation
 				// Make sure the integration label is set
-				labels["camel.apache.org/integration"] = env.Integration.Name
+				labels[v1.IntegrationLabel] = env.Integration.Name
 				resource.SetLabels(labels)
 			})
 			return nil
@@ -125,7 +125,7 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 }
 
 func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
-	integration, _ := labels.NewRequirement("camel.apache.org/integration", selection.Equals, []string{e.Integration.Name})
+	integration, _ := labels.NewRequirement(v1.IntegrationLabel, selection.Equals, []string{e.Integration.Name})
 	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
 	if err != nil {
 		t.L.ForIntegration(e.Integration).Errorf(err, "cannot determine generation requirement")

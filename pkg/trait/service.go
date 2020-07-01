@@ -135,13 +135,13 @@ func getServiceFor(e *Environment) *corev1.Service {
 			Name:      e.Integration.Name,
 			Namespace: e.Integration.Namespace,
 			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
+				v1.IntegrationLabel: e.Integration.Name,
 			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{},
 			Selector: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
+				v1.IntegrationLabel: e.Integration.Name,
 			},
 		},
 	}

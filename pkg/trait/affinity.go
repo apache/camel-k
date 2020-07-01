@@ -162,7 +162,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deploy
 
 	if t.PodAffinity {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
-			Key:      "camel.apache.org/integration",
+			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,
 			Values: []string{
 				e.Integration.Name,
@@ -218,7 +218,7 @@ func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.De
 
 	if t.PodAntiAffinity {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
-			Key:      "camel.apache.org/integration",
+			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,
 			Values: []string{
 				e.Integration.Name,

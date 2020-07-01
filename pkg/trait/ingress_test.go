@@ -181,14 +181,14 @@ func createNominalIngressTest() (*ingressTrait, *Environment) {
 					Name:      "service-name",
 					Namespace: "namespace",
 					Labels: map[string]string{
-						"camel.apache.org/integration":  "integration-name",
+						v1.IntegrationLabel:             "integration-name",
 						"camel.apache.org/service.type": v1.ServiceTypeUser,
 					},
 				},
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{},
 					Selector: map[string]string{
-						"camel.apache.org/integration": "integration-name",
+						v1.IntegrationLabel: "integration-name",
 					},
 				},
 			},

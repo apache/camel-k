@@ -155,7 +155,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Name:      e.Integration.Name,
 			Namespace: e.Integration.Namespace,
 			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
+				v1.IntegrationLabel: e.Integration.Name,
 			},
 			Annotations: annotations,
 		},
@@ -163,13 +163,13 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Replicas: e.Integration.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
+					v1.IntegrationLabel: e.Integration.Name,
 				},
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"camel.apache.org/integration": e.Integration.Name,
+						v1.IntegrationLabel: e.Integration.Name,
 					},
 					Annotations: annotations,
 				},

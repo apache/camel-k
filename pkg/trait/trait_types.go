@@ -355,7 +355,7 @@ func (e *Environment) ComputeApplicationProperties() *corev1.ConfigMap {
 				Name:      e.Integration.Name + "-application-properties",
 				Namespace: e.Integration.Namespace,
 				Labels: map[string]string{
-					"camel.apache.org/integration":     e.Integration.Name,
+					v1.IntegrationLabel:                e.Integration.Name,
 					"camel.apache.org/properties.type": "application",
 				},
 			},
@@ -393,7 +393,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 					Name:      e.Integration.Name + "-user-properties",
 					Namespace: e.Integration.Namespace,
 					Labels: map[string]string{
-						"camel.apache.org/integration":     e.Integration.Name,
+						v1.IntegrationLabel:                e.Integration.Name,
 						"camel.apache.org/properties.type": "user",
 					},
 				},
@@ -418,7 +418,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 				Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
 				Namespace: e.Integration.Namespace,
 				Labels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
+					v1.IntegrationLabel: e.Integration.Name,
 				},
 				Annotations: map[string]string{
 					"camel.apache.org/source.language":    string(s.InferLanguage()),

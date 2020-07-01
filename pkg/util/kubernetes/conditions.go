@@ -50,7 +50,7 @@ func MirrorReadyCondition(ctx context.Context, c client.Client, it *v1.Integrati
 func mirrorReadyConditionFromReplicaSet(ctx context.Context, c client.Client, it *v1.Integration) {
 	list := appsv1.ReplicaSetList{}
 	opts := runtimeclient.MatchingLabels{
-		"camel.apache.org/integration": it.Name,
+		v1.IntegrationLabel: it.Name,
 	}
 	if err := c.List(ctx, &list, opts, runtimeclient.InNamespace(it.Namespace)); err != nil {
 		setReadyConditionError(it, err)
