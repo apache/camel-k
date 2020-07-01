@@ -127,7 +127,7 @@ func (t *routeTrait) Apply(e *Environment) error {
 			Name:      t.service.Name,
 			Namespace: t.service.Namespace,
 			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
+				v1.IntegrationLabel: e.Integration.Name,
 			},
 		},
 		Spec: routev1.RouteSpec{

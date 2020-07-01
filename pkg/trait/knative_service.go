@@ -262,7 +262,7 @@ func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
 
 func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 	labels := map[string]string{
-		"camel.apache.org/integration": e.Integration.Name,
+		v1.IntegrationLabel: e.Integration.Name,
 	}
 
 	annotations := make(map[string]string)

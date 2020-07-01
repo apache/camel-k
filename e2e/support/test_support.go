@@ -257,7 +257,7 @@ func IntegrationPod(ns string, name string) func() *corev1.Pod {
 		err := TestClient.List(TestContext, &lst,
 			k8sclient.InNamespace(ns),
 			k8sclient.MatchingLabels{
-				"camel.apache.org/integration": name,
+				v1.IntegrationLabel: name,
 			})
 		if err != nil {
 			panic(err)

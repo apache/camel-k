@@ -257,7 +257,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 			Name:      generatedContentName,
 			Namespace: e.Integration.Namespace,
 			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
+				v1.IntegrationLabel: e.Integration.Name,
 			},
 			Annotations: map[string]string{
 				"camel.apache.org/source.language":    string(v1.LanguageXML),

@@ -222,7 +222,7 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 	if err != nil {
 		return nil, err
 	}
-	labels["camel.apache.org/integration"] = e.Integration.Name
+	labels[v1.IntegrationLabel] = e.Integration.Name
 
 	smt := monitoringv1.ServiceMonitor{
 		TypeMeta: metav1.TypeMeta{
@@ -237,7 +237,7 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 		Spec: monitoringv1.ServiceMonitorSpec{
 			Selector: metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
+					v1.IntegrationLabel: e.Integration.Name,
 				},
 			},
 			Endpoints: []monitoringv1.Endpoint{
@@ -266,7 +266,7 @@ func (t *prometheusTrait) getJmxExporterConfigMapOrAdd(e *Environment) string {
 			Name:      defaultName,
 			Namespace: e.Integration.Namespace,
 			Labels: map[string]string{
-				"camel.apache.org/integration": e.Integration.Name,
+				v1.IntegrationLabel: e.Integration.Name,
 			},
 		},
 		Data: map[string]string{

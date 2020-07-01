@@ -109,7 +109,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 
 		if t.LabelKey == nil {
-			val := "camel.apache.org/integration"
+			val := v1.IntegrationLabel
 			t.LabelKey = &val
 		}
 

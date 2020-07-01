@@ -95,7 +95,7 @@ func createEnvironment(t *testing.T) (*corev1.Service, *trait.Environment) {
 	svc := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
-				"camel.apache.org/integration": "test",
+				v1.IntegrationLabel: "test",
 			},
 		},
 	}

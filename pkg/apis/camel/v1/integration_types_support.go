@@ -25,6 +25,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const IntegrationLabel = "camel.apache.org/integration"
+
 // NewIntegration --
 func NewIntegration(namespace string, name string) Integration {
 	return Integration{

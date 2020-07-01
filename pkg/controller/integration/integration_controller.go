@@ -175,7 +175,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			var requests []reconcile.Request
 
 			labels := rs.GetLabels()
-			integrationName, ok := labels["camel.apache.org/integration"]
+			integrationName, ok := labels[v1.IntegrationLabel]
 			if ok {
 				requests = append(requests, reconcile.Request{
 					NamespacedName: types.NamespacedName{

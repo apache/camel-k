@@ -74,14 +74,14 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 
 	// Enforce the scale sub-resource label selector
 	// It is used by the HPA that queries the scale sub-resource endpoint to list the pods owned by the integration
-	integration.Status.Selector = "camel.apache.org/integration=" + integration.Name
+	integration.Status.Selector = v1.IntegrationLabel + "=" + integration.Name
 
 	// Check replicas
 	replicaSets := &appsv1.ReplicaSetList{}
 	err = action.client.List(ctx, replicaSets,
 		k8sclient.InNamespace(integration.Namespace),
 		k8sclient.MatchingLabels{
-			"camel.apache.org/integration": integration.Name,
+			v1.IntegrationLabel: integration.Name,
 		})
 	if err != nil {
 		return nil, err

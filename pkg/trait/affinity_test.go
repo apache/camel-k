@@ -98,7 +98,7 @@ func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 	assert.ElementsMatch(t, [1]string{"value"}, userRequirement.Values)
 	assert.NotNil(t, podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1])
 	integrationRequirement := podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1]
-	assert.Equal(t, "camel.apache.org/integration", integrationRequirement.Key)
+	assert.Equal(t, v1.IntegrationLabel, integrationRequirement.Key)
 	assert.Equal(t, metav1.LabelSelectorOpIn, integrationRequirement.Operator)
 	assert.ElementsMatch(t, [1]string{"integration-name"}, integrationRequirement.Values)
 }
@@ -119,7 +119,7 @@ func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 	assert.Equal(t, metav1.LabelSelectorOpDoesNotExist, userRequirement.Operator)
 	assert.NotNil(t, podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1])
 	integrationRequirement := podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1]
-	assert.Equal(t, "camel.apache.org/integration", integrationRequirement.Key)
+	assert.Equal(t, v1.IntegrationLabel, integrationRequirement.Key)
 	assert.Equal(t, metav1.LabelSelectorOpIn, integrationRequirement.Operator)
 	assert.ElementsMatch(t, [1]string{"integration-name"}, integrationRequirement.Values)
 }
