@@ -8,14 +8,14 @@ The https://github.com/coreos/prometheus-operator[Prometheus Operator] serves to
 [[prerequisites]]
 == Prerequisites
 
-To take fully advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus operator instance, that can be configured to integrate Camel K integrations.
+To take fully advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus Operator instance, that can be configured to integrate Camel K integrations.
 
 [[kubernetes]]
 === Kubernetes
 
 You can deploy the Prometheus operator by running:
 
-```
+```sh
 $ kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/v0.38.0/bundle.yaml
 ```
 
@@ -23,7 +23,7 @@ WARNING: Beware this installs the operator in the `default` namespace. You must 
 
 Then, you can create a `Prometheus` resource, that the operator will use as configuration to deploy a managed Prometheus instance:
 
-```
+```sh
 $ cat <<EOF | kubectl apply -f -
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
@@ -44,7 +44,7 @@ You may also need to specify a ServiceAccount with the `serviceAccountName` fiel
 [[openshift]]
 === OpenShift
 
-Starting OpenShift 4.3, the Prometheus operator, that's already deployed as part of the monitoring stack, can be used to https://docs.openshift.com/container-platform/4.3/monitoring/monitoring-your-own-services.html[monitor application services].
+Starting OpenShift 4.3, the Prometheus Operator, that's already deployed as part of the monitoring stack, can be used to https://docs.openshift.com/container-platform/4.3/monitoring/monitoring-your-own-services.html[monitor application services].
 This needs to be enabled by following these instructions:
 
 . Check whether the `cluster-monitoring-config` ConfigMap object exists in the `openshift-monitoring` project:
@@ -74,43 +74,43 @@ data:
       enabled: true
 ----
 
-On OpenShift versions prior to 4.3, or if you do not want to change your cluster monitoring stack configuration, you can refer to the <<Kubernetes>> section in order to deploy a separate Prometheus operator instance.
+On OpenShift versions prior to 4.3, or if you do not want to change your cluster monitoring stack configuration, you can refer to the <<Kubernetes>> section in order to deploy a separate Prometheus Operator instance.
 
 [[instrumentation]]
 == Instrumentation
 
-The Prometheus trait automates the configuration of integration pods to expose a _metrics_ endpoint, that can be discovered and scrapped by a Prometheus server.
+The xref:traits/pages/prometheus.adoc[Prometheus trait] automates the configuration of integration pods to expose a _metrics_ endpoint, that can be discovered and scrapped by a Prometheus server.
 
 The Prometheus trait can be enabled when running an integration, e.g.:
 
-```
+```sh
 $ kamel run -t prometheus.enabled=true ...
 ```
 
 Alternatively, the Prometheus trait can be enabled globally once, by updating the integration platform, e.g.:
 
-```
+```sh
 $ kubectl patch ip camel-k --type=merge -p '{"spec":{"traits":{"prometheus":{"configuration":{"enabled":"true"}}}}}'
 ```
 
 The underlying instrumentation mechanism depends on the configured integration runtime.
 As a result, the set of registered metrics, as well as the naming convention they follow, also depends on it.
 
-=== Default Runtime
+=== Main
 
 When the default, a.k.a. _main_, runtime is configured for the integration, the https://github.com/prometheus/jmx_exporter[JMX exporter] is responsible for collecting and exposing metrics from JMX mBeans.
 
 A custom configuration for the JMX exporter can be used by setting the `prometheus.configmap` parameter from the Prometheus trait with the name of a ConfigMap containing a `prometheus-jmx-exporter.yaml` key, e.g.:
 
-```
+```sh
 $ kamel run -t prometheus.enabled=true -t prometheus.configmap=<jmx_exporter_config>...
 ```
 
 Otherwise, the Prometheus trait uses a default configuration.
 
-=== Quarkus Runtime
+=== Quarkus
 
-When the Quarkus runtime is configured for the integration, the https://camel.apache.org/camel-quarkus/latest/extensions/microprofile-metrics.html[Camel Quarkus MicroProfile Metrics extension] is responsible for collection and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
+When the Quarkus runtime is configured for the integration, the https://camel.apache.org/camel-quarkus/latest/extensions/microprofile-metrics.html[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
 
 The MicroProfile Metrics extension registers and exposes the following metrics out-of-the-box:
 
@@ -123,3 +123,85 @@ It is possible to extend this set of metrics by using either, or both:
 * The https://camel.apache.org/components/latest/microprofile-metrics-component.html[MicroProfile Metrics component]
 
 * The https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/app-programming-model.adoc#annotations[MicroProfile Metrics annotations], in external dependencies
+
+=== Discovery
+
+The Prometheus trait automatically configures the resources necessary for the Prometheus Operator to reconcile, so that the managed Prometheus instance can scrape the integration _metrics_ endpoint.
+
+By default, the Prometheus trait creates a `ServiceMonitor` resource, with the `camel.apache.org/integration` label, which must match the `serviceMonitorSelector` field from the `Prometheus` resource.
+Additional labels can be specified with the `service-monitor-labels` parameter from the Prometheus trait, e.g.:
+
+```sh
+$ kamel run -t prometheus.service-monitor-labels="label_to_be_match_by=prometheus_selector" ...
+```
+
+The creation of the `ServiceMonitor` resource can be disabled using the `service-monitor` parameter, e.g.:
+
+```sh
+$ kamel run -t prometheus.service-monitor=false ...
+```
+
+More information can be found in the xref:traits/pages/prometheus.adoc[Prometheus trait] documentation.
+
+The Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/getting-started.md#related-resources[getting started] guide documents the discovery mechanism, as well as the relationship between the operator resources.
+
+In case your integration metrics are not discovered, you may want to rely on https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/troubleshooting.md#troubleshooting-servicemonitor-changes[Troubleshooting `ServiceMonitor` changes].
+
+=== Alerting
+
+The Prometheus Operator declares the `AlertManager` resource that can be used to configure _Alertmanager_ instances, along with `Prometheus` instances.
+
+Assuming an `AlertManager` resource already exists in your cluster, you can register a `PrometheusRule` resource that is used by Prometheus to trigger alerts, e.g.:
+
+```sh
+$ cat <<EOF | kubectl apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: example
+    role: alert-rules
+  name: prometheus-rules
+spec:
+  groups:
+  - name: camel-k.rules
+    rules:
+    - alert: CamelKAlert
+      expr: application_camel_context_exchanges_failed_total > 0
+EOF
+```
+
+More information can be found in the Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/alerting.md[Alerting] user guide. You can also find more details in https://docs.openshift.com/container-platform/4.4/monitoring/monitoring-your-own-services.html#creating-alerting-rules_monitoring-your-own-services[Creating alerting rules] from the OpenShift documentation.
+
+=== Autoscaling
+
+Integration metrics can be exported for horizontal pod autoscaling (HPA), using the https://github.com/DirectXMan12/k8s-prometheus-adapter[custom metrics Prometheus adapter].
+If you have an OpenShift cluster, you can follow https://docs.openshift.com/container-platform/4.4/monitoring/exposing-custom-application-metrics-for-autoscaling.html[Exposing custom application metrics for autoscaling] to set it up.
+
+Assuming you have the Prometheus adapter up and running, you can create a `HorizontalPodAutoscaler` resource, e.g.:
+
+```sh
+$ cat <<EOF | kubectl apply -f -
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: camel-k-autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: camel.apache.org/v1
+    kind: Integration
+    name: example
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: application_camel_context_exchanges_inflight_count
+      target:
+        type: AverageValue
+        averageValue: 1k
+EOF
+```
+
+More information can be found in https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[Horizontal Pod Autoscaler] from the Kubernetes documentation.
