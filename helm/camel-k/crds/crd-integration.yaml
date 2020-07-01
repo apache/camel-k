@@ -46,6 +46,7 @@ spec:
   scope: Namespaced
   subresources:
     scale:
+      labelSelectorPath: .status.selector
       specReplicasPath: .spec.replicas
       statusReplicasPath: .status.replicas
     status: {}
@@ -322,6 +323,8 @@ spec:
               description: RuntimeProvider --
               type: string
             runtimeVersion:
+              type: string
+            selector:
               type: string
             version:
               type: string

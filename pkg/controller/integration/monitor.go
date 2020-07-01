@@ -58,7 +58,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 
 		integration.Status.Digest = hash
 		integration.Status.Phase = v1.IntegrationPhaseInitialization
-		if integration.Spec.Profile != v1.TraitProfile("") {
+		if integration.Spec.Profile != "" {
 			integration.Status.Profile = integration.Spec.Profile
 		}
 		integration.Status.Version = defaults.Version
@@ -71,6 +71,10 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	if err != nil {
 		return nil, err
 	}
+
+	// Enforce the scale sub-resource label selector
+	// It is used by the HPA that queries the scale sub-resource endpoint to list the pods owned by the integration
+	integration.Status.Selector = "camel.apache.org/integration=" + integration.Name
 
 	// Check replicas
 	replicaSets := &appsv1.ReplicaSetList{}
