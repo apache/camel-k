@@ -57,6 +57,7 @@ type IntegrationStatus struct {
 	Conditions         []IntegrationCondition `json:"conditions,omitempty"`
 	Version            string                 `json:"version,omitempty"`
 	Replicas           *int32                 `json:"replicas,omitempty"`
+	Selector           string                 `json:"selector,omitempty"`
 	Capabilities       []string               `json:"capabilities,omitempty"`
 }
 
@@ -65,7 +66,7 @@ type IntegrationStatus struct {
 // +genclient
 // +kubebuilder:resource:path=integrations,scope=Namespaced,shortName=it
 // +kubebuilder:subresource:status
-// +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas
+// +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration phase"
 // +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.kit`,description="The integration kit"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
