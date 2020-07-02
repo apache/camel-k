@@ -79,7 +79,7 @@ On OpenShift versions prior to 4.3, or if you do not want to change your cluster
 [[instrumentation]]
 == Instrumentation
 
-The xref:traits/pages/prometheus.adoc[Prometheus trait] automates the configuration of integration pods to expose a _metrics_ endpoint, that can be discovered and scrapped by a Prometheus server.
+The xref:traits:prometheus.adoc[Prometheus trait] automates the configuration of integration pods to expose a _metrics_ endpoint, that can be discovered and scrapped by a Prometheus server.
 
 The Prometheus trait can be enabled when running an integration, e.g.:
 
@@ -141,7 +141,7 @@ The creation of the `ServiceMonitor` resource can be disabled using the `service
 $ kamel run -t prometheus.service-monitor=false ...
 ```
 
-More information can be found in the xref:traits/pages/prometheus.adoc[Prometheus trait] documentation.
+More information can be found in the xref:traits:prometheus.adoc[Prometheus trait] documentation.
 
 The Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/getting-started.md#related-resources[getting started] guide documents the discovery mechanism, as well as the relationship between the operator resources.
 
