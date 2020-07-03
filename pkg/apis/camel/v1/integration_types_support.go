@@ -156,6 +156,22 @@ func (in *IntegrationStatus) AddOrReplaceGeneratedSources(sources ...SourceSpec)
 	in.GeneratedSources = append(in.GeneratedSources, newSources...)
 }
 
+// AddConfigurationsIfMissing --
+func (in *IntegrationStatus) AddConfigurationsIfMissing(configurations ...ConfigurationSpec) {
+	for _, config := range configurations {
+		alreadyPresent := false
+		for _, r := range in.Configuration {
+			if r.Type == config.Type && r.Value == config.Value {
+				alreadyPresent = true
+				break
+			}
+		}
+		if !alreadyPresent {
+			in.Configuration = append(in.Configuration, config)
+		}
+	}
+}
+
 // Configurations --
 func (in *IntegrationSpec) Configurations() []ConfigurationSpec {
 	if in == nil {
