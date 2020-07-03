@@ -45,8 +45,25 @@ type kameletsTrait struct {
 	List string `property:"list"`
 }
 
+type configurationKey struct {
+	kamelet         string
+	configurationID string
+}
+
+func newConfigurationKey(kamelet, configurationID string) configurationKey {
+	return configurationKey{
+		kamelet:         kamelet,
+		configurationID: configurationID,
+	}
+}
+
+const (
+	kameletLabel              = "camel.apache.org/kamelet"
+	kameletConfigurationLabel = "camel.apache.org/kamelet.configuration"
+)
+
 var (
-	kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+)(?:$|[^a-z0-9-.].*)")
+	kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
 )
 
 func newKameletsTrait() Trait {
@@ -79,19 +96,21 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 
 	}
 
-	return len(t.getKamelets()) > 0, nil
+	return len(t.getKameletKeys()) > 0, nil
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
 	if err := t.addKamelets(e); err != nil {
 		return err
 	}
-
+	if err := t.addConfigurationSecrets(e); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	for _, k := range t.getKamelets() {
+	for _, k := range t.getKameletKeys() {
 		var kamelet v1alpha1.Kamelet
 		key := client.ObjectKey{
 			Namespace: e.Integration.Namespace,
@@ -168,14 +187,75 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kame
 	return nil
 }
 
-func (t *kameletsTrait) getKamelets() []string {
+func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
+	for _, k := range t.getConfigurationKeys() {
+		var options = metav1.ListOptions{
+			LabelSelector: fmt.Sprintf("%s=%s", kameletLabel, k.kamelet),
+		}
+		if k.configurationID != "" {
+			options.LabelSelector = fmt.Sprintf("%s=%s,%s=%s", kameletLabel, k.kamelet, kameletConfigurationLabel, k.configurationID)
+		}
+		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(options)
+		if err != nil {
+			return err
+		}
+
+		for _, item := range secrets.Items {
+			if item.Labels != nil && item.Labels[kameletConfigurationLabel] != k.configurationID {
+				continue
+			}
+
+			e.Integration.Status.AddConfigurationsIfMissing(v1.ConfigurationSpec{
+				Type:  "secret",
+				Value: item.Name,
+			})
+		}
+	}
+	return nil
+}
+
+func (t *kameletsTrait) getKameletKeys() []string {
 	answer := make([]string, 0)
 	for _, item := range strings.Split(t.List, ",") {
 		i := strings.Trim(item, " \t\"")
+		if strings.Contains(i, "/") {
+			i = strings.SplitN(i, "/", 2)[0]
+		}
 		if i != "" {
-			answer = append(answer, i)
+			util.StringSliceUniqueAdd(&answer, i)
 		}
 	}
+	sort.Strings(answer)
+	return answer
+}
+
+func (t *kameletsTrait) getConfigurationKeys() []configurationKey {
+	answer := make([]configurationKey, 0)
+	for _, item := range t.getKameletKeys() {
+		answer = append(answer, newConfigurationKey(item, ""))
+	}
+	for _, item := range strings.Split(t.List, ",") {
+		i := strings.Trim(item, " \t\"")
+		if strings.Contains(i, "/") {
+			parts := strings.SplitN(i, "/", 2)
+			newKey := newConfigurationKey(parts[0], parts[1])
+			alreadyPresent := false
+			for _, existing := range answer {
+				if existing == newKey {
+					alreadyPresent = true
+					break
+				}
+			}
+			if !alreadyPresent {
+				answer = append(answer, newKey)
+			}
+		}
+	}
+	sort.Slice(answer, func(i, j int) bool {
+		o1 := answer[i]
+		o2 := answer[j]
+		return o1.kamelet < o2.kamelet || (o1.kamelet == o2.kamelet && o1.configurationID < o2.configurationID)
+	})
 	return answer
 }
 
@@ -236,7 +316,7 @@ func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet
 func extractKamelets(uris []string) (kamelets []string) {
 	for _, uri := range uris {
 		matches := kameletNameRegexp.FindStringSubmatch(uri)
-		if len(matches) == 2 {
+		if len(matches) > 1 {
 			kamelets = append(kamelets, matches[1])
 		}
 	}

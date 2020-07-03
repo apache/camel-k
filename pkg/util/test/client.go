@@ -20,9 +20,9 @@ package test
 import (
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/client"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
+	fakeclientset "k8s.io/client-go/kubernetes/fake"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 
@@ -40,10 +40,25 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	}
 
 	c := fake.NewFakeClientWithScheme(scheme, initObjs...)
+	filtered := make([]runtime.Object, 0, len(initObjs))
+	for _, o := range initObjs {
+		kinds, _, _ := scheme.ObjectKinds(o)
+		allow := true
+		for _, k := range kinds {
+			if k.Group == "camel.apache.org" {
+				allow = false
+				break
+			}
+		}
+		if allow {
+			filtered = append(filtered, o)
+		}
+	}
+	clientset := fakeclientset.NewSimpleClientset(filtered...)
 
 	return &FakeClient{
 		Client:    c,
-		Interface: nil,
+		Interface: clientset,
 	}, nil
 }
 

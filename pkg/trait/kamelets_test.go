@@ -64,7 +64,17 @@ func TestConfigurationWithKamelets(t *testing.T) {
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Equal(t, []string{"c0", "c1", "c2", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKamelets())
+	assert.Equal(t, []string{"c0", "c1", "c2", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys())
+	assert.Equal(t, []configurationKey{
+		newConfigurationKey("c0", ""),
+		newConfigurationKey("c1", ""),
+		newConfigurationKey("c2", ""),
+		newConfigurationKey("complex-.-.-1a", ""),
+		newConfigurationKey("complex-.-.-1b", ""),
+		newConfigurationKey("complex-.-.-1b", "a"),
+		newConfigurationKey("complex-.-.-1c", ""),
+		newConfigurationKey("complex-.-.-1c", "b"),
+	}, trait.getConfigurationKeys())
 }
 
 func TestKameletLookup(t *testing.T) {
@@ -93,7 +103,7 @@ func TestKameletLookup(t *testing.T) {
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Equal(t, []string{"timer"}, trait.getKamelets())
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
@@ -141,7 +151,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Equal(t, []string{"timer"}, trait.getKamelets())
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
@@ -191,7 +201,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Equal(t, []string{"timer"}, trait.getKamelets())
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
@@ -237,7 +247,7 @@ func TestErrorMultipleKameletSources(t *testing.T) {
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Equal(t, []string{"timer"}, trait.getKamelets())
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	assert.Error(t, err)
@@ -302,7 +312,7 @@ func TestMultipleKamelets(t *testing.T) {
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Equal(t, []string{"logger", "timer"}, trait.getKamelets())
+	assert.Equal(t, []string{"logger", "timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
@@ -335,6 +345,134 @@ func TestMultipleKamelets(t *testing.T) {
 	assert.Equal(t, "content", supportSource.ContentKey)
 
 	assert.Equal(t, []string{"camel:log", "camel:tbd", "camel:timer", "camel:xxx"}, environment.Integration.Status.Dependencies)
+}
+
+func TestKameletConfigLookup(t *testing.T) {
+	trait, environment := createKameletsTestEnvironment(`
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: log:info
+`, &v1alpha1.Kamelet{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "timer",
+		},
+		Spec: v1alpha1.KameletSpec{
+			Flow: &v1.Flow{
+				"from": map[string]interface{}{
+					"uri": "timer:tick",
+				},
+			},
+			Dependencies: []string{
+				"camel:timer",
+				"camel:log",
+			},
+		},
+	}, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret",
+			Labels: map[string]string{
+				"camel.apache.org/kamelet": "timer",
+			},
+		},
+	}, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret2",
+			Labels: map[string]string{
+				"camel.apache.org/kamelet":               "timer",
+				"camel.apache.org/kamelet.configuration": "id2",
+			},
+		},
+	}, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret3",
+			Labels: map[string]string{
+				"camel.apache.org/kamelet": "timer",
+			},
+		},
+	})
+	enabled, err := trait.Configure(environment)
+	assert.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
+	assert.Equal(t, []configurationKey{newConfigurationKey("timer", "")}, trait.getConfigurationKeys())
+
+	err = trait.Apply(environment)
+	assert.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Configuration, 2)
+	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
+	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
+	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
+}
+
+func TestKameletNamedConfigLookup(t *testing.T) {
+	trait, environment := createKameletsTestEnvironment(`
+- from:
+    uri: kamelet:timer/id2
+    steps:
+    - to: log:info
+`, &v1alpha1.Kamelet{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "timer",
+		},
+		Spec: v1alpha1.KameletSpec{
+			Flow: &v1.Flow{
+				"from": map[string]interface{}{
+					"uri": "timer:tick",
+				},
+			},
+			Dependencies: []string{
+				"camel:timer",
+				"camel:log",
+			},
+		},
+	}, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret",
+			Labels: map[string]string{
+				"camel.apache.org/kamelet": "timer",
+			},
+		},
+	}, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret2",
+			Labels: map[string]string{
+				"camel.apache.org/kamelet":               "timer",
+				"camel.apache.org/kamelet.configuration": "id2",
+			},
+		},
+	}, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret3",
+			Labels: map[string]string{
+				"camel.apache.org/kamelet":               "timer",
+				"camel.apache.org/kamelet.configuration": "id3",
+			},
+		},
+	})
+	enabled, err := trait.Configure(environment)
+	assert.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
+	assert.Equal(t, []configurationKey{
+		newConfigurationKey("timer", ""),
+		newConfigurationKey("timer", "id2"),
+	}, trait.getConfigurationKeys())
+
+	err = trait.Apply(environment)
+	assert.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Configuration, 2)
+	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
+	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
+	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
 }
 
 func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kameletsTrait, *Environment) {
