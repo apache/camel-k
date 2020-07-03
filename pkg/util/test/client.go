@@ -18,6 +18,8 @@ limitations under the License.
 package test
 
 import (
+	"strings"
+
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/client"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,7 +27,6 @@ import (
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -41,13 +42,16 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 
 	c := fake.NewFakeClientWithScheme(scheme, initObjs...)
 	filtered := make([]runtime.Object, 0, len(initObjs))
+	skipList := []string{"camel", "knative"}
 	for _, o := range initObjs {
 		kinds, _, _ := scheme.ObjectKinds(o)
 		allow := true
 		for _, k := range kinds {
-			if k.Group == "camel.apache.org" {
-				allow = false
-				break
+			for _, skip := range skipList {
+				if strings.Contains(k.Group, skip) {
+					allow = false
+					break
+				}
 			}
 		}
 		if allow {

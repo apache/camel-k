@@ -18,20 +18,21 @@ limitations under the License.
 package trait
 
 import (
+	"encoding/json"
 	"fmt"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/flows"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"regexp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sort"
-	"strconv"
-	"strings"
 )
 
 // The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
@@ -136,19 +137,21 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kame
 	var sources []v1.SourceSpec
 
 	if kamelet.Spec.Flow != nil {
-		flowData, err := flows.Marshal([]v1.Flow{*kamelet.Spec.Flow})
-		if err != nil {
-			return err
-		}
+		// TODO fixme removed for changes to Flow
+		//flowData, err := flows.Marshal([]v1.Flow{*kamelet.Spec.Flow})
+		//if err != nil {
+		//	return err
+		//}
 		flowSource := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
-				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
-				Content: string(flowData),
+				Name: fmt.Sprintf("%s.yaml", kamelet.Name),
+				//Content: string(flowData),
+				Content: string(*kamelet.Spec.Flow),
 			},
 			Language: v1.LanguageYaml,
 			Type:     v1.SourceTypeKamelet,
 		}
-		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
+		flowSource, err := integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
 		if err != nil {
 			return err
 		}
@@ -272,6 +275,11 @@ func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet
 
 	// Create configmaps to avoid storing kamelet definitions in the integration CR
 
+	schema, err := json.Marshal(kamelet.Spec.Definition)
+	if err != nil {
+		return v1.SourceSpec{}, err
+	}
+
 	// Compute the input digest and store it along with the configmap
 	hash, err := digest.ComputeForSource(source)
 	if err != nil {
@@ -301,6 +309,7 @@ func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet
 		},
 		Data: map[string]string{
 			"content": source.Content,
+			"schema":  string(schema),
 		},
 	}
 

@@ -476,7 +476,8 @@ func (in *KameletSpec) DeepCopyInto(out *KameletSpec) {
 	}
 	if in.Flow != nil {
 		in, out := &in.Flow, &out.Flow
-		*out = (*in).DeepCopy()
+		*out = new(v1.Flow)
+		**out = **in
 	}
 	out.Authorization = in.Authorization
 	if in.Types != nil {
