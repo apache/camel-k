@@ -18,6 +18,8 @@ limitations under the License.
 package v1
 
 import (
+	"encoding/json"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -133,4 +135,7 @@ type ResourceCondition interface {
 }
 
 // Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
-type Flow string
+// +kubebuilder:validation:Type=object
+type Flow struct {
+	json.RawMessage `json:",inline"`
+}

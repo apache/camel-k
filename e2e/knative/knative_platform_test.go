@@ -25,11 +25,16 @@ import (
 	"strings"
 	"testing"
 
+	. "github.com/onsi/gomega"
+
+	"github.com/stretchr/testify/assert"
+
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/flow"
 	"github.com/apache/camel-k/pkg/util/knative"
-	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestKnativePlatformTest(t *testing.T) {
@@ -53,11 +58,12 @@ func TestKnativePlatformTest(t *testing.T) {
 			// Change something in the integration to produce a redeploy
 			Expect(UpdateIntegration(ns, "yaml", func(it *v1.Integration) {
 				it.Spec.Profile = ""
-				var flows []v1.Flow
-				for _, flow := range it.Spec.Flows {
-					flows = append(flows, v1.Flow(strings.ReplaceAll(string(flow), "string!", "string!!!")))
-				}
-				it.Spec.Flows = flows
+				content, err := flow.Marshal(it.Spec.Flows)
+				assert.NoError(t, err)
+				newData := strings.ReplaceAll(string(content), "string!", "string!!!")
+				newFlows, err := flow.UnmarshalString(newData)
+				assert.NoError(t, err)
+				it.Spec.Flows = newFlows
 			})).To(BeNil())
 			// Spec profile should be reset by "kamel run"
 			Eventually(IntegrationSpecProfile(ns, "yaml")).Should(Equal(v1.TraitProfile("")))
