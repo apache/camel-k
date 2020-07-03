@@ -19,19 +19,18 @@ package trait
 
 import (
 	"context"
+	"gopkg.in/yaml.v2"
+	"testing"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"testing"
-
-	"github.com/apache/camel-k/pkg/util/camel"
-
-	"github.com/stretchr/testify/assert"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestConfigurationNoKameletsUsed(t *testing.T) {
@@ -89,11 +88,11 @@ func TestKameletLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: &v1.Flow{
+			Flow: deleteMeAtSomePoint(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
-			},
+			}),
 			Dependencies: []string{
 				"camel:timer",
 				"camel:log",
@@ -132,11 +131,11 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: &v1.Flow{
+			Flow: deleteMeAtSomePoint(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
-			},
+			}),
 			Sources: []v1.SourceSpec{
 				{
 					DataSpec: v1.DataSpec{
@@ -237,11 +236,11 @@ func TestErrorMultipleKameletSources(t *testing.T) {
 					Type: v1.SourceTypeKamelet,
 				},
 			},
-			Flow: &v1.Flow{
+			Flow: deleteMeAtSomePoint(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
-			},
+			}),
 		},
 	})
 	enabled, err := trait.Configure(environment)
@@ -266,11 +265,11 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: &v1.Flow{
+			Flow: deleteMeAtSomePoint(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
-			},
+			}),
 			Sources: []v1.SourceSpec{
 				{
 					DataSpec: v1.DataSpec{
@@ -291,7 +290,7 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "logger",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: &v1.Flow{
+			Flow: deleteMeAtSomePoint(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "tbd:endpoint",
 					"steps": []interface{}{
@@ -302,7 +301,7 @@ func TestMultipleKamelets(t *testing.T) {
 						},
 					},
 				},
-			},
+			}),
 			Dependencies: []string{
 				"camel:log",
 				"camel:tbd",
@@ -359,11 +358,11 @@ func TestKameletConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: &v1.Flow{
+			Flow: deleteMeAtSomePoint(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
-			},
+			}),
 			Dependencies: []string{
 				"camel:timer",
 				"camel:log",
@@ -421,11 +420,11 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: &v1.Flow{
+			Flow: deleteMeAtSomePoint(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
-			},
+			}),
 			Dependencies: []string{
 				"camel:timer",
 				"camel:log",
@@ -510,4 +509,13 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	}
 
 	return trait, environment
+}
+
+func deleteMeAtSomePoint(flow map[string]interface{}) *v1.Flow {
+	data, err := yaml.Marshal(flow)
+	if err != nil {
+		panic(err)
+	}
+	f := v1.Flow(data)
+	return &f
 }

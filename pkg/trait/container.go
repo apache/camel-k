@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
-
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -193,9 +192,12 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	envvar.SetVal(&container.Env, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-	envvar.SetVal(&container.Env, "CAMEL_K_ROUTES", strings.Join(e.ComputeSourcesURI(), ","))
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
+
+	// Configure sources
+	envvar.SetVal(&container.Env, "CAMEL_K_ROUTES", strings.Join(e.ComputeSourcesURI(), ","))
+	e.AddSourcesProperties()
 
 	t.configureResources(e, &container)
 
