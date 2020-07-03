@@ -31,6 +31,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/flow"
 )
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
@@ -67,8 +68,12 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	}
 
 	// Integration flows
-	for _, flow := range integration.Spec.Flows {
-		if _, err := hash.Write([]byte(flow)); err != nil {
+	if len(integration.Spec.Flows) > 0 {
+		flows, err := flow.Marshal(integration.Spec.Flows)
+		if err != nil {
+			return "", err
+		}
+		if _, err := hash.Write(flows); err != nil {
 			return "", err
 		}
 	}

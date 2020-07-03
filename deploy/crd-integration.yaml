@@ -88,9 +88,7 @@ spec:
               type: array
             flows:
               items:
-                description: Flow is an unstructured object representing a Camel Flow
-                  in YAML/JSON DSL
-                type: string
+                type: object
               type: array
             kit:
               type: string
