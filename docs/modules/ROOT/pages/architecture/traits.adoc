@@ -1,0 +1,6 @@
+[[traits]]
+= Traits
+
+image::architecture/camel-k-traits.jpg[traits]
+
+TBD

@@ -1,0 +1,27 @@
+[[build]]
+= Build
+
+A *Build* resources, describes the process of assembling a container image that copes with the requirement of an xref:architecture/cr/integration.adoc[Integration] or xref:architecture/cr/integration-kit.adoc[IntegrationKit].
+
+[source,go]
+----
+type Build struct {
+	Spec   BuildSpec    // <1>
+	Status BuildStatus  // <2>
+}
+
+type BuildSpec struct {
+	Tasks []Task        // <3>
+}
+----
+<1> The desired state
+<2> The status of the object at current time
+<3> The build tasks
+
+[NOTE]
+====
+the full go definition can be found https://github.com/apache/camel-k/blob/master/pkg/apis/camel/v1/build_types.go[here]
+====
+
+image::architecture/camel-k-state-machine-build.png[life cycle]
+

@@ -1,0 +1,49 @@
+[[operator]]
+= Operator
+
+image::architecture/camel-k-operator.jpg[overview]
+
+Per the Kubernetes glossary, a controller is an application that implements a control-loop that **observes** the shared state of the cluster through the API server, **evaluates** the changes needed to move the current state toward the desired state and finally applyes the changes to **reconcile** the resources to the desired state.
+
+image::architecture/operator-control-loop.png[control-loop]
+
+This pattern is the foundation of every https://kubernetes.io/docs/concepts/architecture/controller/[Controllers] whipped by default by Kubernetes but can also be used by https://kubernetes.io/docs/concepts/extend-kubernetes/operator[Operators] that are controllers that encode domain specific knowledge and extends the Kubernetes API to create, configure and manage instances of complex applications on behalf of Kubernetes users. 
+
+With the Camel K Operator we have moved this pattern to the next level as it goes beyon the tasks to install and maintain applications but it materializes them according to the integration logic expressed through the **Camel DSL**.
+
+The Camel K Operator defines a number of new Kubernetes API through the https://kubernetes.io/docs/concepts/extend-kubernetes/#user-defined-types[**Custom Resource** (CR)] extension mechanism:
+
+* xref:architecture/cr/integration-platform.adoc[IntegrationPlatform]
+* xref:architecture/cr/integration.adoc[Integration]
+* xref:architecture/cr/integration-kit.adoc[IntegrationKit]
+* xref:architecture/cr/build.adoc[Build]
+* xref:architecture/cr/camel-catalog.adoc[CamelCatalog]
+
+All the api conform to the Kubernetes https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[api conventions].
+
+To manage the interaction with them, a simple control loop was not enough and we ended up with a sort of “Hierarchical Operator Pattern” where the reconcile phase may trigger other controllers and supervises them.
+
+image::architecture/camel-k-operator-control-loop.png[control-loop]
+
+== State Machine 
+
+With the exception of the `CamelCatalog`, each CR has a dedicated state machine in charge to orchestrate the transition to the phases each CR need to go through to bring integrations to the desired state.
+
+image::architecture/camel-k-state-machine-basic.png[State Machine]
+
+Each state of the CR is handled by a dedicated handler, named `Action`, defined as follow:
+
+[code,go]
+----
+type Action interface {
+	CanHandle(cr *v1.CR) bool // <1>
+	Handle(ctx context.Context, cr *v1.CR) (*v1.CR, error) // <2>
+}
+----
+<1> Determine if the action can handle the CR as example by looking at the phase of the CR which is store as part of the status sub resource.
+<2> Implement the action and return a non `nil` instance to signal to the controller that the CR need to be updated with the new one, instead if the method returns a `nil` instance, then nothing will happen and unless the CR changes outside the control of the operator, the same action will be invoked on the next interation. This is useful when a CR need to delegate some work to a different controller so the CR won't be moved to the next stage till the sub operation has completed. 
+
+[NOTE]
+====
+Since the go language does not yet supoprt generics, there is an `Action` definition per CR, The full list of definitions can be found in the https://github.com/apache/camel-k/tree/master/pkg/controller[controller package]
+====

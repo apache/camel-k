@@ -1,0 +1,36 @@
+[[integration]]
+= Integration
+
+An *Integration* describe the application by listing sources, resources, dependencies and by providing configuration options.
+
+[source,go]
+----
+type Integration struct {
+	Spec   IntegrationSpec   // <1>
+	Status IntegrationStatus // <2>
+}
+
+type IntegrationSpec struct {
+	Sources            []SourceSpec           // <3>    
+	Flows              []Flow                 // <3> 
+	Resources          []ResourceSpec         // <3>            
+	Dependencies       []string               // <4> 
+	Repositories       []string               // <4>
+	Profile            TraitProfile           // <5>
+	Traits             map[string]TraitSpec   // <5>
+	Configuration      []ConfigurationSpec    // <6>
+}
+----
+<1> The desired state
+<2> The status of the object at current time
+<3> Integration sources and resource files
+<4> The dependencies required by the integration and related repositories (if needed)
+<5> The traits configuration
+<6> The integration configuration (properties, secrets, configmaps)
+
+[NOTE]
+====
+the full go definition can be found https://github.com/apache/camel-k/blob/master/pkg/apis/camel/v1/integration_types.go[here]
+====
+
+image::architecture/camel-k-state-machine-integration.png[life cycle]

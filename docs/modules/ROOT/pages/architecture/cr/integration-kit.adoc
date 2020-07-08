@@ -1,0 +1,34 @@
+[[integration-kit]]
+= IntegrationKit
+
+The *IntegrationKit* is a fundamental side resource which describe a container image created by the camel-k operator as well as the configurations that need to be applied to every integration that is executed on top of it. An *IntegrationKit* does not include any source code or resource file defined by the **Integration** from wcich it has been generated.
+
+[source,go]
+----
+type IntegrationKit struct {
+	Spec   IntegrationKitSpec   // <1>
+	Status IntegrationKitStatus // <2>
+}
+
+type IntegrationKitSpec struct {
+	Image         string                 // <3>
+	Dependencies  []string               // <4>
+	Repositories  []string               // <4>    
+	Profile       TraitProfile           // <5>
+	Traits        map[string]TraitSpec   // <5>
+	Configuration []ConfigurationSpec    // <6>
+}
+----
+<1> The desired state
+<2> The status of the object at current time
+<3> The container image
+<4> The dependencies required by the kit and related repositories (if needed)
+<5> The traits configuration
+<6> The integration configuration (properties, secrets, configmaps)
+
+[NOTE]
+====
+the full go definition can be found https://github.com/apache/camel-k/blob/master/pkg/apis/camel/v1/integrationkit_types.go[here]
+====
+
+image::architecture/camel-k-state-machine-integrationkit.png[life cycle]
