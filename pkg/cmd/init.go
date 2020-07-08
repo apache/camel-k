@@ -34,7 +34,7 @@ func newCmdInit(rootCmdOptions *RootCmdOptions) (*cobra.Command, *initCmdOptions
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "init",
+		Use:     "init [flags] IntegrationFile.java",
 		Short:   "Initialize empty Camel K files",
 		Long:    `Initialize empty Camel K integrations and other resources.`,
 		PreRunE: decode(&options),
