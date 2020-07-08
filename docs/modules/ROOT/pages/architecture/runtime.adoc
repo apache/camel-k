@@ -1,0 +1,6 @@
+[[runtime]]
+= Runtime
+
+image::architecture/camel-k-runtimes.jpg[runtimes]
+
+TBD

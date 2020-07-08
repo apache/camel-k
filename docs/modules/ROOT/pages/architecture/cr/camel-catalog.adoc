@@ -1,0 +1,9 @@
+[[camel-catalog]]
+= CamelCatalog
+
+The*CamelCatalog* is a static side resources that provides metadata related to the what it is included in the xref:architecture/runtime.adoc[Runtime] in term of Camel components, languages, dataformats and what capabilities are prvided.
+
+[NOTE]
+====
+the full go definition can be found https://github.com/apache/camel-k/blob/master/pkg/apis/camel/v1/camelcatalog_types.go[here]
+====
