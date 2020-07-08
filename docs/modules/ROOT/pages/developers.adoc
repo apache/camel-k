@@ -207,7 +207,7 @@ oc scale deployment/camel-k-operator --replicas 0
 
 You can scale it back to 1 when you're done and you have updated the operator image.
 
-You can setup the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode.
+You can setup the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode with `operator` as argument.
 
 When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen*:
 
@@ -215,7 +215,8 @@ When configuring the IDE task, make sure to add all required environment variabl
 * Set the `WATCH_NAMESPACE` environment variable to a Kubernetes namespace you have access to.
 * Set the `OPERATOR_NAME` environment variable to `camel-k`.
 
-After you setup the IDE task, you can run and debug the operator process.
+
+After you setup the IDE task, with Java 11+ to be used by default, you can run and debug the operator process.
 
 NOTE: The operator can be fully debugged in Minishift, because it uses OpenShift S2I binary builds under the hood.
 The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator and the publisher pod
