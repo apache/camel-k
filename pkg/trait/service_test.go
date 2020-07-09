@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 const (
@@ -67,12 +68,10 @@ func TestServiceWithDefaults(t *testing.T) {
 					},
 				},
 				Traits: map[string]v1.TraitSpec{
-					"service": {
-						Configuration: map[string]string{
-							"enabled": "true",
-							"auto":    "false",
-						},
-					},
+					"service": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": true,
+						"auto":    false,
+					}),
 				},
 			},
 		},
@@ -155,22 +154,18 @@ func TestService(t *testing.T) {
 					},
 				},
 				Traits: map[string]v1.TraitSpec{
-					"service": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
-					"container": {
-						Configuration: map[string]string{
-							"enabled":           "true",
-							"auto":              "false",
-							"expose":            "true",
-							"port":              "8081",
-							"port-name":         "http-8081",
-							"service-port":      "81",
-							"service-port-name": "http-81",
-						},
-					},
+					"service": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": true,
+					}),
+					"container": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled":           true,
+						"auto":              false,
+						"expose":            true,
+						"port":              8081,
+						"port-name":         "http-8081",
+						"service-port":      81,
+						"service-port-name": "http-81",
+					}),
 				},
 			},
 		},
@@ -243,17 +238,13 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: map[string]v1.TraitSpec{
-					"service": {
-						Configuration: map[string]string{
-							"enabled": "true",
-							"auto":    "false",
-						},
-					},
-					"container": {
-						Configuration: map[string]string{
-							"name": "my-container-name",
-						},
-					},
+					"service": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": true,
+						"auto":    false,
+					}),
+					"container": test.TraitSpecFromMap(t, map[string]interface{}{
+						"name": "my-container-name",
+					}),
 				},
 			},
 		},
@@ -289,9 +280,11 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	assert.NotNil(t, d)
 
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+
+	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits["container"])
 	assert.Equal(
 		t,
-		environment.Integration.Spec.Traits["container"].Configuration["name"],
+		trait["name"],
 		d.Spec.Template.Spec.Containers[0].Name,
 	)
 }
@@ -326,13 +319,11 @@ func TestServiceWithNodeport(t *testing.T) {
 					},
 				},
 				Traits: map[string]v1.TraitSpec{
-					"service": {
-						Configuration: map[string]string{
-							"enabled":  "true",
-							"auto":     "false",
-							"nodeport": "true",
-						},
-					},
+					"service": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled":  true,
+						"auto":     false,
+						"nodeport": true,
+					}),
 				},
 			},
 		},

@@ -22,11 +22,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/apache/camel-k/pkg/util/indentedwriter"
+	"github.com/spf13/cobra"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/spf13/cobra"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
 )
 
 func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describePlatformCommandOptions) {
@@ -86,8 +87,8 @@ func (command *describePlatformCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *describePlatformCommandOptions) describeIntegrationPlatform(platform v1.IntegrationPlatform) string {
-	return indentedwriter.IndentedString(func(out io.Writer) {
+func (command *describePlatformCommandOptions) describeIntegrationPlatform(platform v1.IntegrationPlatform) (string, error) {
+	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(out)
 		describeObjectMeta(w, platform.ObjectMeta)
 		w.Write(0, "Phase:\t%s\n", platform.Status.Phase)
@@ -108,6 +109,7 @@ func (command *describePlatformCommandOptions) describeIntegrationPlatform(platf
 				w.Write(2, "%s\n", kit)
 			}
 		}
+		return nil
 	})
 }
 

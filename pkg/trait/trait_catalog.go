@@ -19,15 +19,17 @@ package trait
 
 import (
 	"context"
+	"encoding/json"
 	"reflect"
 	"sort"
 	"strings"
 
+	"github.com/fatih/structs"
+	"github.com/pkg/errors"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/fatih/structs"
-	"github.com/pkg/errors"
 )
 
 // Catalog collects all information about traits in one place
@@ -185,6 +187,15 @@ func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
 	}
 
 	return nil
+}
+
+func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
+	data, err := json.Marshal(&in)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(data, &target)
 }
 
 // ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits

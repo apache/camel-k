@@ -25,16 +25,14 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/util/indentedwriter"
-
 	"github.com/fatih/structs"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/apache/camel-k/pkg/trait"
-
+	"github.com/apache/camel-k/deploy"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/spf13/cobra"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
 )
 
 func newTraitHelpCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *traitHelpCommandOptions) {
@@ -158,7 +156,11 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), string(res))
 	default:
-		fmt.Fprintln(cmd.OutOrStdout(), outputTraits(traitDescriptions))
+		res, err := outputTraits(traitDescriptions)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), res)
 	}
 
 	return nil
@@ -232,8 +234,8 @@ func computeTraitProperties(fields []*structs.Field, properties *[]traitProperty
 	}
 }
 
-func outputTraits(descriptions []*traitDescription) string {
-	return indentedwriter.IndentedString(func(out io.Writer) {
+func outputTraits(descriptions []*traitDescription) (string, error) {
+	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(out)
 
 		for _, td := range descriptions {
@@ -250,5 +252,7 @@ func outputTraits(descriptions []*traitDescription) string {
 			}
 			w.Writeln(0, "")
 		}
+
+		return nil
 	})
 }

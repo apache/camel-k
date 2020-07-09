@@ -20,12 +20,13 @@ package trait
 import (
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
 	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestOwner(t *testing.T) {
@@ -42,12 +43,10 @@ func TestOwner(t *testing.T) {
 func SetUpOwnerEnvironment(t *testing.T) *Environment {
 	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
 	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"owner": {
-			Configuration: map[string]string{
-				"target-labels":      "com.mycompany/mylabel1",
-				"target-annotations": "com.mycompany/myannotation2",
-			},
-		},
+		"owner": test.TraitSpecFromMap(t, map[string]interface{}{
+			"target-labels":      "com.mycompany/mylabel1",
+			"target-annotations": "com.mycompany/myannotation2",
+		}),
 	}
 
 	env.Integration.SetLabels(map[string]string{

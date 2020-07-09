@@ -125,16 +125,12 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: map[string]v1.TraitSpec{
-					"knative": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
-					"knative-service": {
-						Configuration: map[string]string{
-							"enabled": "false",
-						},
-					},
+					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": "true",
+					}),
+					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": "false",
+					}),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -163,11 +159,9 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: map[string]v1.TraitSpec{
-					"knative": {
-						Configuration: map[string]string{
-							"enabled": "false",
-						},
-					},
+					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": "false",
+					}),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -196,21 +190,15 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: map[string]v1.TraitSpec{
-					"knative": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
-					"knative-service": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
-					"gc": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
+					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": "true",
+					}),
+					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": "true",
+					}),
+					"gc": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": "true",
+					}),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -239,11 +227,9 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: map[string]v1.TraitSpec{
-					"knative": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
+					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": "true",
+					}),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -265,16 +251,12 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		},
 		Spec: v1.IntegrationSpec{
 			Traits: map[string]v1.TraitSpec{
-				"knative": {
-					Configuration: map[string]string{
-						"enabled": "true",
-					},
-				},
-				"knative-service": {
-					Configuration: map[string]string{
-						"enabled": "true",
-					},
-				},
+				"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+					"enabled": "true",
+				}),
+				"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
+					"enabled": "true",
+				}),
 			},
 		},
 		Status: v1.IntegrationStatus{

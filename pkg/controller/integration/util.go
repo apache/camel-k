@@ -19,17 +19,16 @@ package integration
 
 import (
 	"context"
-
-	"github.com/apache/camel-k/pkg/util/controller"
-
-	"k8s.io/apimachinery/pkg/selection"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 
+	"k8s.io/apimachinery/pkg/selection"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -89,7 +88,6 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 			continue
 		}
 
-		//
 		// When a platform kit is created it inherits the traits from the integrations and as
 		// some traits may influence the build thus the artifacts present on the container image,
 		// we need to take traits into account when looking up for compatible kits.
@@ -100,11 +98,13 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 		//
 		// A kit can be used only if it contains a subset of the traits and related configurations
 		// declared on integration.
-		//
-		if !HasMatchingTraits(&kit, integration) {
+		match, err := HasMatchingTraits(&kit, integration)
+		if err != nil {
+			return nil, err
+		}
+		if !match {
 			continue
 		}
-
 		if util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
 			return &kit, nil
 		}
@@ -114,29 +114,45 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 }
 
 // HasMatchingTraits compare traits defined on kit against those defined on integration.
-func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) bool {
-	for kitTraitName, kitTraitConf := range kit.Spec.Traits {
-		iTraitConf, ok := integration.Spec.Traits[kitTraitName]
+func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
+	for name, kitTraitConf := range kit.Spec.Traits {
+		intTraitConf, ok := integration.Spec.Traits[name]
 		if !ok {
-			// skip it because trait configured on kit is not defined on integration.
-			return false
+			// skip it because trait configured on kit is not defined on integration
+			return false, nil
 		}
-
-		for ck, cv := range kitTraitConf.Configuration {
-			iv, ok := iTraitConf.Configuration[ck]
-
+		data, err := json.Marshal(intTraitConf)
+		if err != nil {
+			return false, err
+		}
+		intTrait := make(map[string]interface{})
+		err = json.Unmarshal(data, &intTrait)
+		if err != nil {
+			return false, err
+		}
+		data, err = json.Marshal(kitTraitConf)
+		if err != nil {
+			return false, err
+		}
+		kitTrait := make(map[string]interface{})
+		err = json.Unmarshal(data, &kitTrait)
+		if err != nil {
+			return false, err
+		}
+		for ck, cv := range kitTrait {
+			iv, ok := intTrait[ck]
 			if !ok {
 				// skip it because trait configured on kit has a value that is not defined
 				// in integration trait
-				return false
+				return false, nil
 			}
 			if iv != cv {
 				// skip it because trait configured on kit has a value that differs from
 				// the one configured on integration
-				return false
+				return false, nil
 			}
 		}
 	}
 
-	return true
+	return true, nil
 }

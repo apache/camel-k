@@ -15,27 +15,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package test
 
 import (
-	"fmt"
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func (in *Artifact) String() string {
-	return in.ID
+// TraitSpecFromMap --
+func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
+	var trait v1.TraitSpec
+
+	data, err := json.Marshal(spec)
+	assert.Nil(t, err)
+
+	err = json.Unmarshal(data, &trait)
+	assert.Nil(t, err)
+
+	return trait
 }
 
-func (in *ConfigurationSpec) String() string {
-	return fmt.Sprintf("%s=%s", in.Type, in.Value)
-}
+// TraitSpecFromMap --
+func TraitSpecToMap(t *testing.T, spec v1.TraitSpec) map[string]string {
+	trait := make(map[string]string)
 
-// CapabilityDependencies ---
-func (in *RuntimeSpec) CapabilityDependencies(capability string) []MavenArtifact {
-	deps := make([]MavenArtifact, 0)
+	data, err := json.Marshal(spec)
+	assert.Nil(t, err)
 
-	if capability, ok := in.Capabilities[capability]; ok {
-		deps = append(deps, capability.Dependencies...)
-	}
+	err = json.Unmarshal(data, &trait)
+	assert.Nil(t, err)
 
-	return deps
+	return trait
 }

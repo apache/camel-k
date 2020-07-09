@@ -22,11 +22,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/apache/camel-k/pkg/util/indentedwriter"
+	"github.com/spf13/cobra"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/spf13/cobra"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/apache/camel-k/pkg/util/indentedwriter"
 )
 
 func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describeKitCommandOptions) {
@@ -86,8 +87,8 @@ func (command *describeKitCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *describeKitCommandOptions) describeIntegrationKit(kit v1.IntegrationKit) string {
-	return indentedwriter.IndentedString(func(out io.Writer) {
+func (command *describeKitCommandOptions) describeIntegrationKit(kit v1.IntegrationKit) (string, error) {
+	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(out)
 
 		describeObjectMeta(w, kit.ObjectMeta)
@@ -126,6 +127,6 @@ func (command *describeKitCommandOptions) describeIntegrationKit(kit v1.Integrat
 			}
 		}
 
-		describeTraits(w, kit.Spec.Traits)
+		return describeTraits(w, kit.Spec.Traits)
 	})
 }

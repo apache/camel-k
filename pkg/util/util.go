@@ -211,6 +211,18 @@ type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)
 }
 
+// SortedMapKeys --
+func SortedMapKeys(m map[string]interface{}) []string {
+	res := make([]string, len(m))
+	i := 0
+	for k := range m {
+		res[i] = k
+		i++
+	}
+	sort.Strings(res)
+	return res
+}
+
 // SortedStringMapKeys --
 func SortedStringMapKeys(m map[string]string) []string {
 	res := make([]string, len(m))

@@ -22,15 +22,15 @@ import (
 	"fmt"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-
 	"github.com/spf13/cobra"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreateCommandOptions) {
@@ -98,93 +98,87 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		}
 	}
 
-	ctx := v1.NewIntegrationKit(command.Namespace, args[0])
+	kit := v1.NewIntegrationKit(command.Namespace, args[0])
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
-	if err := c.Get(command.Context, key, &ctx); err == nil {
+	if err := c.Get(command.Context, key, &kit); err == nil {
 		// the integration kit already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if ctx.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
-			fmt.Printf("integration kit \"%s\" is not editable\n", ctx.Name)
+		if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
+			fmt.Printf("integration kit \"%s\" is not editable\n", kit.Name)
 			return nil
 		}
 	}
 
-	ctx = v1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
-	ctx.Labels = map[string]string{
+	kit = v1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
+	kit.Labels = map[string]string{
 		"camel.apache.org/kit.type": v1.IntegrationKitTypeUser,
 	}
-	ctx.Spec = v1.IntegrationKitSpec{
+	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies:  make([]string, 0, len(command.Dependencies)),
 		Configuration: make([]v1.ConfigurationSpec, 0),
 		Repositories:  command.Repositories,
 	}
 
 	if command.Image != "" {
-		//
 		// if the Image is set, the kit do not require any build but
 		// is be marked as external as the information about the classpath
 		// is missing so it cannot be used as base for other Kits
-		//
-		ctx.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
+		kit.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
 
-		//
 		// Set the Image to be used by the kit
-		//
-		ctx.Spec.Image = command.Image
+		kit.Spec.Image = command.Image
 	}
 	for _, item := range command.Dependencies {
 		switch {
 		case strings.HasPrefix(item, "mvn:"):
-			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
 		case strings.HasPrefix(item, "file:"):
-			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, item)
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
 		case strings.HasPrefix(item, "camel-quarkus-"):
-			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel-quarkus:"+strings.TrimPrefix(item, "camel-quarkus-"))
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel-quarkus:"+strings.TrimPrefix(item, "camel-quarkus-"))
 		case strings.HasPrefix(item, "camel-"):
-			ctx.Spec.Dependencies = append(ctx.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
 	}
 
 	for _, item := range command.Properties {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
+		kit.Spec.Configuration = append(kit.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "property",
 			Value: item,
 		})
 	}
 	for _, item := range command.Configmaps {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
+		kit.Spec.Configuration = append(kit.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "configmap",
 			Value: item,
 		})
 	}
 	for _, item := range command.Secrets {
-		ctx.Spec.Configuration = append(ctx.Spec.Configuration, v1.ConfigurationSpec{
+		kit.Spec.Configuration = append(kit.Spec.Configuration, v1.ConfigurationSpec{
 			Type:  "secret",
 			Value: item,
 		})
 	}
-	for _, item := range command.Traits {
-		if err := command.configureTrait(&ctx, item); err != nil {
-			return nil
-		}
+	if err := command.configureTraits(&kit, command.Traits, catalog); err != nil {
+		return nil
 	}
 
 	existed := false
-	err = c.Create(command.Context, &ctx)
+	err = c.Create(command.Context, &kit)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
-		clone := ctx.DeepCopy()
+		clone := kit.DeepCopy()
 		err = c.Get(command.Context, key, clone)
 		if err != nil {
 			fmt.Print(err.Error())
 			return nil
 		}
-		ctx.ResourceVersion = clone.ResourceVersion
-		err = c.Update(command.Context, &ctx)
+		kit.ResourceVersion = clone.ResourceVersion
+		err = c.Update(command.Context, &kit)
 	}
 
 	if err != nil {
@@ -193,35 +187,21 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	}
 
 	if !existed {
-		fmt.Printf("integration kit \"%s\" created\n", ctx.Name)
+		fmt.Printf("integration kit \"%s\" created\n", kit.Name)
 	} else {
-		fmt.Printf("integration kit \"%s\" updated\n", ctx.Name)
+		fmt.Printf("integration kit \"%s\" updated\n", kit.Name)
 	}
 
 	return nil
 }
 
-func (*kitCreateCommandOptions) configureTrait(ctx *v1.IntegrationKit, config string) error {
-	if ctx.Spec.Traits == nil {
-		ctx.Spec.Traits = make(map[string]v1.TraitSpec)
+func (*kitCreateCommandOptions) configureTraits(kit *v1.IntegrationKit, options []string, catalog *trait.Catalog) error {
+	traits, err := configureTraits(options, catalog)
+	if err != nil {
+		return err
 	}
 
-	parts := traitConfigRegexp.FindStringSubmatch(config)
-	if len(parts) < 4 {
-		return errors.New("unrecognized config format (expected \"<trait>.<prop>=<val>\"): " + config)
-	}
-	traitID := parts[1]
-	prop := parts[2][1:]
-	val := parts[3]
+	kit.Spec.Traits = traits
 
-	spec, ok := ctx.Spec.Traits[traitID]
-	if !ok {
-		spec = v1.TraitSpec{
-			Configuration: make(map[string]string),
-		}
-	}
-
-	spec.Configuration[prop] = val
-	ctx.Spec.Traits[traitID] = spec
 	return nil
 }

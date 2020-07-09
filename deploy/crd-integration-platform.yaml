@@ -183,12 +183,6 @@ spec:
               type: object
             traits:
               additionalProperties:
-                description: A TraitSpec contains the configuration of a trait
-                properties:
-                  configuration:
-                    additionalProperties:
-                      type: string
-                    type: object
                 type: object
               type: object
           type: object
@@ -355,12 +349,6 @@ spec:
               type: object
             traits:
               additionalProperties:
-                description: A TraitSpec contains the configuration of a trait
-                properties:
-                  configuration:
-                    additionalProperties:
-                      type: string
-                    type: object
                 type: object
               type: object
             version:

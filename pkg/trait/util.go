@@ -25,13 +25,12 @@ import (
 	"strings"
 
 	user "github.com/mitchellh/go-homedir"
-	"github.com/mitchellh/mapstructure"
 	"github.com/scylladb/go-set/strset"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
@@ -147,25 +146,6 @@ func FilterTransferableAnnotations(annotations map[string]string) map[string]str
 		res[k] = v
 	}
 	return res
-}
-
-func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
-	md := mapstructure.Metadata{}
-
-	decoder, err := mapstructure.NewDecoder(
-		&mapstructure.DecoderConfig{
-			Metadata:         &md,
-			WeaklyTypedInput: true,
-			TagName:          "property",
-			Result:           &target,
-		},
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return decoder.Decode(in.Configuration)
 }
 
 func mustHomeDir() string {
