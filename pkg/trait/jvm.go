@@ -41,15 +41,15 @@ import (
 type jvmTrait struct {
 	BaseTrait `property:",squash"`
 	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
-	Debug bool `property:"debug"`
+	Debug bool `property:"debug" json:"debug,omitempty"`
 	// Suspends the target JVM immediately before the main class is loaded
-	DebugSuspend bool `property:"debug-suspend"`
+	DebugSuspend bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
 	// Prints the command used the start the JVM in the container logs (default `true`)
-	PrintCommand bool `property:"print-command"`
+	PrintCommand bool `property:"print-command" json:"printCommand,omitempty"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
-	DebugAddress string `property:"debug-address"`
+	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
 	// A comma-separated list of JVM options
-	Options *string `property:"options"`
+	Options *string `property:"options" json:"options,omitempty"`
 }
 
 func newJvmTrait() Trait {
