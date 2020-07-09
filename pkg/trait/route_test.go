@@ -32,6 +32,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func createTestRouteEnvironment(t *testing.T, name string) *Environment {
@@ -120,11 +121,9 @@ func TestRoute_Disabled(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
 	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": {
-			Configuration: map[string]string{
-				"enabled": "false",
-			},
-		},
+		"route": test.TraitSpecFromMap(t, map[string]interface{}{
+			"enabled": false,
+		}),
 	}
 
 	traitsCatalog := environment.Catalog
@@ -147,11 +146,9 @@ func TestRoute_TLS(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": {
-			Configuration: map[string]string{
-				"tls-termination": string(routev1.TLSTerminationEdge),
-			},
-		},
+		"route": test.TraitSpecFromMap(t, map[string]interface{}{
+			"tls-termination": string(routev1.TLSTerminationEdge),
+		}),
 	}
 
 	err := traitsCatalog.apply(environment)
@@ -173,11 +170,9 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
 	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		containerTraitID: {
-			Configuration: map[string]string{
-				"service-port-name": "my-port",
-			},
-		},
+		containerTraitID: test.TraitSpecFromMap(t, map[string]interface{}{
+			"service-port-name": "my-port",
+		}),
 	}
 
 	traitsCatalog := environment.Catalog
@@ -194,9 +189,11 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 
 	assert.NotNil(t, route)
 	assert.NotNil(t, route.Spec.Port)
+
+	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits[containerTraitID])
 	assert.Equal(
 		t,
-		environment.Integration.Spec.Traits[containerTraitID].Configuration["service-port-name"],
+		trait["service-port-name"],
 		route.Spec.Port.TargetPort.StrVal,
 	)
 }

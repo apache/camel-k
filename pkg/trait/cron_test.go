@@ -22,16 +22,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util"
+	passert "github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/camel"
-	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	passert "github.com/magiconair/properties/assert"
-	"github.com/stretchr/testify/assert"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
+	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestCronFromURI(t *testing.T) {
@@ -319,11 +320,9 @@ func TestCronDepsFallback(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: map[string]v1.TraitSpec{
-					"cron": {
-						Configuration: map[string]string{
-							"fallback": "true",
-						},
-					},
+					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
+						"fallback": true,
+					}),
 				},
 			},
 		},
@@ -396,11 +395,9 @@ func TestCronWithMain(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: map[string]v1.TraitSpec{
-					"quarkus": {
-						Configuration: map[string]string{
-							"enabled": "false",
-						},
-					},
+					"quarkus": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": false,
+					}),
 				},
 			},
 		},
@@ -472,11 +469,9 @@ func TestCronWithQuarkus(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: map[string]v1.TraitSpec{
-					"quarkus": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
+					"quarkus": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": true,
+					}),
 				},
 			},
 		},

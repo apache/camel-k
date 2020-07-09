@@ -20,6 +20,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"io/ioutil"
@@ -32,6 +33,17 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/magiconair/properties"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
@@ -42,14 +54,6 @@ import (
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
-	"github.com/magiconair/properties"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var (
@@ -220,7 +224,6 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 }
 
 func (o *runCmdOptions) validate() error {
-
 	for _, volume := range o.Volumes {
 		volumeConfig := strings.Split(volume, ":")
 		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 || len(strings.TrimSpace(volumeConfig[1])) == 0 {
@@ -267,7 +270,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	integration, err := o.createIntegration(c, args)
+	integration, err := o.createIntegration(c, args, catalog)
 	if err != nil {
 		return err
 	}
@@ -288,7 +291,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Sync || o.Dev {
-		err = o.syncIntegration(c, args)
+		err = o.syncIntegration(c, args, catalog)
 		if err != nil {
 			return err
 		}
@@ -384,7 +387,7 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration 
 	return watch.HandleIntegrationStateChanges(o.Context, integration, handler)
 }
 
-func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error {
+func (o *runCmdOptions) syncIntegration(c client.Client, sources []string, catalog *trait.Catalog) error {
 	// Let's watch all relevant files when in dev mode
 	var files []string
 	files = append(files, sources...)
@@ -404,7 +407,7 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error
 					case <-o.Context.Done():
 						return
 					case <-changes:
-						_, err := o.updateIntegrationCode(c, sources)
+						_, err := o.updateIntegrationCode(c, sources, catalog)
 						if err != nil {
 							fmt.Println("Unable to sync integration: ", err.Error())
 						}
@@ -419,12 +422,12 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string) error
 	return nil
 }
 
-func (o *runCmdOptions) createIntegration(c client.Client, sources []string) (*v1.Integration, error) {
-	return o.updateIntegrationCode(c, sources)
+func (o *runCmdOptions) createIntegration(c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
+	return o.updateIntegrationCode(c, sources, catalog)
 }
 
 //nolint: gocyclo
-func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string) (*v1.Integration, error) {
+func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
 	namespace := o.Namespace
 
 	name := o.GetIntegrationName(sources)
@@ -547,10 +550,8 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string)
 		integration.Spec.AddConfiguration("env", item)
 	}
 
-	for _, traitConf := range o.Traits {
-		if err := o.configureTrait(&integration, traitConf); err != nil {
-			return nil, err
-		}
+	if err := o.configureTraits(&integration, o.Traits, catalog); err != nil {
+		return nil, err
 	}
 
 	switch o.OutputFormat {
@@ -669,38 +670,14 @@ func loadData(source string, compress bool) (string, error) {
 	return string(content), nil
 }
 
-func (*runCmdOptions) configureTrait(integration *v1.Integration, config string) error {
-	if integration.Spec.Traits == nil {
-		integration.Spec.Traits = make(map[string]v1.TraitSpec)
+func (*runCmdOptions) configureTraits(integration *v1.Integration, options []string, catalog *trait.Catalog) error {
+	traits, err := configureTraits(options, catalog)
+	if err != nil {
+		return err
 	}
 
-	parts := traitConfigRegexp.FindStringSubmatch(config)
-	if len(parts) < 4 {
-		return errors.New("unrecognized config format (expected \"<trait>.<prop>=<val>\"): " + config)
-	}
-	traitID := parts[1]
-	prop := parts[2][1:]
-	val := parts[3]
+	integration.Spec.Traits = traits
 
-	spec, ok := integration.Spec.Traits[traitID]
-	if !ok {
-		spec = v1.TraitSpec{
-			Configuration: make(map[string]string),
-		}
-	}
-
-	if len(spec.Configuration[prop]) > 0 {
-		// Aggregate multiple occurrences of the same option into a comma-separated string,
-		// attempting to follow POSIX conventions.
-		// This enables to execute:
-		// $ kamel run -t <trait>.<property>=<value_1> ... -t <trait>.<property>=<value_N>
-		// Or:
-		// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
-		spec.Configuration[prop] = spec.Configuration[prop] + "," + val
-	} else {
-		spec.Configuration[prop] = val
-	}
-	integration.Spec.Traits[traitID] = spec
 	return nil
 }
 
@@ -743,4 +720,78 @@ func escapePropertyFileItem(item string) string {
 	item = strings.ReplaceAll(item, `=`, `\=`)
 	item = strings.ReplaceAll(item, `:`, `\:`)
 	return item
+}
+
+func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.TraitSpec, error) {
+	traits := make(map[string]map[string]interface{})
+
+	for _, option := range options {
+		parts := traitConfigRegexp.FindStringSubmatch(option)
+		if len(parts) < 4 {
+			return nil, errors.New("unrecognized config format (expected \"<trait>.<prop>=<value>\"): " + option)
+		}
+		id := parts[1]
+		prop := parts[2][1:]
+		value := parts[3]
+		if _, ok := traits[id]; !ok {
+			traits[id] = make(map[string]interface{})
+		}
+		switch v := traits[id][prop].(type) {
+		case []string:
+			traits[id][prop] = append(v, value)
+		case string:
+			// Aggregate multiple occurrences of the same option into a string array, to emulate POSIX conventions.
+			// This enables executing:
+			// $ kamel run -t <trait>.<property>=<value_1> ... -t <trait>.<property>=<value_N>
+			// Or:
+			// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
+			traits[id][prop] = []string{v, value}
+		case nil:
+			traits[id][prop] = value
+		}
+	}
+
+	specs := make(map[string]v1.TraitSpec)
+	for id, config := range traits {
+		t := catalog.GetTrait(id)
+		if t != nil {
+			// let's take a clone to prevent default values set at runtime from being serialized
+			zero := reflect.New(reflect.TypeOf(t)).Interface()
+			err := configureTrait(config, zero)
+			if err != nil {
+				return nil, err
+			}
+			data, err := json.Marshal(zero)
+			if err != nil {
+				return nil, err
+			}
+			var spec v1.TraitSpec
+			err = json.Unmarshal(data, &spec)
+			if err != nil {
+				return nil, err
+			}
+			specs[id] = spec
+		}
+	}
+
+	return specs, nil
+}
+
+func configureTrait(config map[string]interface{}, trait interface{}) error {
+	md := mapstructure.Metadata{}
+
+	decoder, err := mapstructure.NewDecoder(
+		&mapstructure.DecoderConfig{
+			Metadata:         &md,
+			WeaklyTypedInput: true,
+			TagName:          "property",
+			Result:           &trait,
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return decoder.Decode(config)
 }

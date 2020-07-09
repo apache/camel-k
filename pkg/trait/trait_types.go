@@ -128,13 +128,13 @@ func NewBaseTrait(id string, order int) BaseTrait {
 
 // BaseTrait is the root trait with noop implementations for hooks
 type BaseTrait struct {
-	TraitID ID
+	TraitID ID `json:"-"`
 	// Can be used to enable or disable a trait. All traits share this common property.
-	Enabled        *bool `property:"enabled"`
-	Client         client.Client
-	Ctx            context.Context
-	ExecutionOrder int
-	L              log.Logger
+	Enabled        *bool           `property:"enabled" json:"enabled,omitempty"`
+	Client         client.Client   `json:"-"`
+	Ctx            context.Context `json:"-"`
+	ExecutionOrder int             `json:"-"`
+	L              log.Logger      `json:"-"`
 }
 
 // ID returns the identifier of the trait

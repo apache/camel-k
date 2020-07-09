@@ -22,6 +22,8 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -97,10 +99,18 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 		if _, err := hash.Write([]byte(name + "[")); err != nil {
 			return "", err
 		}
-		spec := integration.Spec.Traits[name]
-		for _, prop := range util.SortedStringMapKeys(spec.Configuration) {
-			val := spec.Configuration[prop]
-			if _, err := hash.Write([]byte(prop + "=" + val + ",")); err != nil {
+		spec, err := json.Marshal(integration.Spec.Traits[name])
+		if err != nil {
+			return "", err
+		}
+		trait := make(map[string]interface{})
+		err = json.Unmarshal(spec, &trait)
+		if err != nil {
+			return "", err
+		}
+		for _, prop := range util.SortedMapKeys(trait) {
+			val := trait[prop]
+			if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", prop, val))); err != nil {
 				return "", err
 			}
 		}

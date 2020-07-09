@@ -29,6 +29,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestContainerWithDefaults(t *testing.T) {
@@ -106,11 +107,9 @@ func TestContainerWithCustomName(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: map[string]v1.TraitSpec{
-					"container": {
-						Configuration: map[string]string{
-							"name": "my-container-name",
-						},
-					},
+					"container": test.TraitSpecFromMap(t, map[string]interface{}{
+						"name": "my-container-name",
+					}),
 				},
 			},
 		},
@@ -145,5 +144,7 @@ func TestContainerWithCustomName(t *testing.T) {
 
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
-	assert.Equal(t, environment.Integration.Spec.Traits["container"].Configuration["name"], d.Spec.Template.Spec.Containers[0].Name)
+
+	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits["container"])
+	assert.Equal(t, trait["name"], d.Spec.Template.Spec.Containers[0].Name)
 }

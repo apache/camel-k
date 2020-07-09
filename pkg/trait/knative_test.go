@@ -21,13 +21,12 @@ import (
 	"context"
 	"testing"
 
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
@@ -66,18 +65,16 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				Sources:   []v1.SourceSpec{},
 				Resources: []v1.ResourceSpec{},
 				Traits: map[string]v1.TraitSpec{
-					"knative": {
-						Configuration: map[string]string{
-							"enabled":          "true",
-							"auto":             "false",
-							"channel-sources":  "channel-source-1",
-							"channel-sinks":    "channel-sink-1",
-							"endpoint-sources": "endpoint-source-1",
-							"endpoint-sinks":   "endpoint-sink-1,endpoint-sink-2",
-							"event-sources":    "knative:event",
-							"event-sinks":      "knative:event",
-						},
-					},
+					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled":          true,
+						"auto":             false,
+						"channel-sources":  "channel-source-1",
+						"channel-sinks":    "channel-sink-1",
+						"endpoint-sources": "endpoint-source-1",
+						"endpoint-sinks":   "endpoint-sink-1,endpoint-sink-2",
+						"event-sources":    "knative:event",
+						"event-sinks":      "knative:event",
+					}),
 				},
 			},
 		},
@@ -188,11 +185,9 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: map[string]v1.TraitSpec{
-					"knative": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
+					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": true,
+					}),
 				},
 			},
 		},
@@ -367,11 +362,9 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: map[string]v1.TraitSpec{
-					"knative": {
-						Configuration: map[string]string{
-							"enabled": "true",
-						},
-					},
+					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+						"enabled": true,
+					}),
 				},
 			},
 		},

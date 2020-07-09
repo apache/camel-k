@@ -61,14 +61,20 @@ func (iw *Writer) Flush() {
 }
 
 // IndentedString --
-func IndentedString(f func(io.Writer)) string {
+func IndentedString(f func(io.Writer) error) (string, error) {
 	var out tabwriter.Writer
 	buf := &bytes.Buffer{}
 	out.Init(buf, 0, 8, 2, ' ', 0)
 
-	f(&out)
+	err := f(&out)
+	if err != nil {
+		return "", err
+	}
 
-	out.Flush()
+	err = out.Flush()
+	if err != nil {
+		return "", err
+	}
 
-	return buf.String()
+	return buf.String(), nil
 }
