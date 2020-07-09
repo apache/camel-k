@@ -431,7 +431,7 @@ traits:
   description: The Knative Service trait allows to configure options when running
     the integration as Knative service instead ofa standard Kubernetes Deployment.Running
     integrations as Knative Services adds auto-scaling (and scaling-to-zero) features,
-    but those featuresare only meaningful when the routes use a HTTP endpoint consumer.
+    but those features are only meaningful when the routes use a HTTP endpoint consumer.
   properties:
   - name: enabled
     type: bool
