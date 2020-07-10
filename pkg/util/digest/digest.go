@@ -71,7 +71,7 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 
 	// Integration flows
 	if len(integration.Spec.Flows) > 0 {
-		flows, err := flow.Marshal(integration.Spec.Flows)
+		flows, err := flow.ToYamlDSL(integration.Spec.Flows)
 		if err != nil {
 			return "", err
 		}

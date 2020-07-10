@@ -54,7 +54,7 @@ func (t *initTrait) Apply(e *Environment) error {
 
 		// Flows need to be turned into a generated source
 		if len(e.Integration.Spec.Flows) > 0 {
-			content, err := flow.Marshal(e.Integration.Spec.Flows)
+			content, err := flow.ToYamlDSL(e.Integration.Spec.Flows)
 			if err != nil {
 				return err
 			}

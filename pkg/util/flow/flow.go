@@ -31,13 +31,13 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// UnmarshalString reads flows contained in a string
-func UnmarshalString(flowsString string) ([]v1.Flow, error) {
-	return Unmarshal(bytes.NewReader([]byte(flowsString)))
+// FromYamlDSLString creates a slice of flows from a Camel YAML DSL string
+func FromYamlDSLString(flowsString string) ([]v1.Flow, error) {
+	return FromYamlDSL(bytes.NewReader([]byte(flowsString)))
 }
 
-// Unmarshal flows from a stream
-func Unmarshal(reader io.Reader) ([]v1.Flow, error) {
+// FromYamlDSL creates a slice of flows from a Camel YAML DSL stream
+func FromYamlDSL(reader io.Reader) ([]v1.Flow, error) {
 	buffered, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -56,8 +56,8 @@ func Unmarshal(reader io.Reader) ([]v1.Flow, error) {
 	return flows, err
 }
 
-// Marshal flows as byte array
-func Marshal(flows []v1.Flow) ([]byte, error) {
+// ToYamlDSL converts a flow into its Camel YAML DSL equivalent
+func ToYamlDSL(flows []v1.Flow) ([]byte, error) {
 	data, err := json.Marshal(&flows)
 	if err != nil {
 		return nil, err

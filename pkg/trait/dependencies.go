@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 
 	"github.com/apache/camel-k/pkg/metadata"
 
@@ -66,7 +67,11 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
 	}
 
-	for _, s := range e.Integration.Sources() {
+	sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+	if err != nil {
+		return err
+	}
+	for _, s := range sources {
 		meta := metadata.Extract(e.CamelCatalog, s)
 		lang := s.InferLanguage()
 

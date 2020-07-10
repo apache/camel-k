@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -110,8 +111,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 	if t.Auto == nil || *t.Auto {
 		if len(t.ChannelSources) == 0 {
 			items := make([]string, 0)
-
-			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
+			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
+			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeChannel)...)
 				return true
 			})
@@ -120,8 +124,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.ChannelSinks) == 0 {
 			items := make([]string, 0)
-
-			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
+			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
+			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeChannel)...)
 				return true
 			})
@@ -130,8 +137,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EndpointSources) == 0 {
 			items := make([]string, 0)
-
-			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
+			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
+			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeEndpoint)...)
 				return true
 			})
@@ -140,8 +150,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EndpointSinks) == 0 {
 			items := make([]string, 0)
-
-			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
+			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
+			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeEndpoint)...)
 				return true
 			})
@@ -150,8 +163,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EventSources) == 0 {
 			items := make([]string, 0)
-
-			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
+			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
+			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeEvent)...)
 				return true
 			})
@@ -160,8 +176,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EventSinks) == 0 {
 			items := make([]string, 0)
-
-			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
+			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
+			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeEvent)...)
 				return true
 			})

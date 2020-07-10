@@ -58,10 +58,10 @@ func TestKnativePlatformTest(t *testing.T) {
 			// Change something in the integration to produce a redeploy
 			Expect(UpdateIntegration(ns, "yaml", func(it *v1.Integration) {
 				it.Spec.Profile = ""
-				content, err := flow.Marshal(it.Spec.Flows)
+				content, err := flow.ToYamlDSL(it.Spec.Flows)
 				assert.NoError(t, err)
 				newData := strings.ReplaceAll(string(content), "string!", "string!!!")
-				newFlows, err := flow.UnmarshalString(newData)
+				newFlows, err := flow.FromYamlDSLString(newData)
 				assert.NoError(t, err)
 				it.Spec.Flows = newFlows
 			})).To(BeNil())

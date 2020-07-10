@@ -129,6 +129,7 @@ func (r *ReconcileKamelet) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	actions := []Action{
 		NewInitializeAction(),
+		NewMonitorAction(),
 	}
 
 	var targetPhase v1alpha1.KameletPhase
