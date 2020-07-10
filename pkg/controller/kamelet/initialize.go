@@ -19,6 +19,7 @@ package kamelet
 
 import (
 	"context"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 

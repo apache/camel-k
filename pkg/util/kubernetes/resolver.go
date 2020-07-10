@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/gzip"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -84,7 +85,7 @@ func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error
 		var uncompressed []byte
 		var err error
 		if uncompressed, err = gzip.UncompressBase64(cnt); err != nil {
-			return err
+			return errors.Wrap(err, "error while uncompressing data")
 		}
 		data.Compression = false
 		data.Content = string(uncompressed)

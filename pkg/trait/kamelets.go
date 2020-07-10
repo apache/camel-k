@@ -20,8 +20,6 @@ package trait
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/flow"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"regexp"
 	"sort"
 	"strconv"
@@ -32,6 +30,8 @@ import (
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/flow"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -61,6 +61,9 @@ func newConfigurationKey(kamelet, configurationID string) configurationKey {
 }
 
 const (
+	contentKey = "content"
+	schemaKey  = "schema"
+
 	kameletLabel              = "camel.apache.org/kamelet"
 	kameletConfigurationLabel = "camel.apache.org/kamelet.configuration"
 )
@@ -148,7 +151,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 }
 
 func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kamelet) error {
-	var sources []v1.SourceSpec
+	sources := make([]v1.SourceSpec, 0)
 
 	if kamelet.Spec.Flow != nil {
 
@@ -321,8 +324,8 @@ func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet
 			},
 		},
 		Data: map[string]string{
-			"content": source.Content,
-			"schema":  string(schema),
+			contentKey: source.Content,
+			schemaKey:  string(schema),
 		},
 	}
 
@@ -331,7 +334,7 @@ func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet
 	target := source.DeepCopy()
 	target.Content = ""
 	target.ContentRef = name
-	target.ContentKey = "content"
+	target.ContentKey = contentKey
 	return *target, nil
 }
 

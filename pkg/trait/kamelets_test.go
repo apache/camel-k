@@ -98,6 +98,7 @@ func TestKameletLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
@@ -146,6 +147,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 				},
 			},
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
@@ -196,6 +198,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 				},
 			},
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
@@ -242,6 +245,7 @@ func TestErrorMultipleKameletSources(t *testing.T) {
 				},
 			}),
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
@@ -284,6 +288,7 @@ func TestMultipleKamelets(t *testing.T) {
 				"camel:xxx",
 			},
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	}, &v1alpha1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -307,6 +312,7 @@ func TestMultipleKamelets(t *testing.T) {
 				"camel:tbd",
 			},
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
@@ -368,6 +374,7 @@ func TestKameletConfigLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	}, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -430,6 +437,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
+		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	}, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -516,6 +524,6 @@ func marshalOrFail(flow map[string]interface{}) *v1.Flow {
 	if err != nil {
 		panic(err)
 	}
-	f := v1.Flow{data}
+	f := v1.Flow{RawMessage: data}
 	return &f
 }
