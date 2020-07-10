@@ -19,7 +19,7 @@ package trait
 
 import (
 	"context"
-	"gopkg.in/yaml.v2"
+	"encoding/json"
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -88,7 +88,7 @@ func TestKameletLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: deleteMeAtSomePoint(map[string]interface{}{
+			Flow: marshalOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -131,7 +131,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: deleteMeAtSomePoint(map[string]interface{}{
+			Flow: marshalOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -236,7 +236,7 @@ func TestErrorMultipleKameletSources(t *testing.T) {
 					Type: v1.SourceTypeKamelet,
 				},
 			},
-			Flow: deleteMeAtSomePoint(map[string]interface{}{
+			Flow: marshalOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -265,7 +265,7 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: deleteMeAtSomePoint(map[string]interface{}{
+			Flow: marshalOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -290,7 +290,7 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "logger",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: deleteMeAtSomePoint(map[string]interface{}{
+			Flow: marshalOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "tbd:endpoint",
 					"steps": []interface{}{
@@ -358,7 +358,7 @@ func TestKameletConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: deleteMeAtSomePoint(map[string]interface{}{
+			Flow: marshalOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -420,7 +420,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: deleteMeAtSomePoint(map[string]interface{}{
+			Flow: marshalOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -511,11 +511,11 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	return trait, environment
 }
 
-func deleteMeAtSomePoint(flow map[string]interface{}) *v1.Flow {
-	data, err := yaml.Marshal(flow)
+func marshalOrFail(flow map[string]interface{}) *v1.Flow {
+	data, err := json.Marshal(flow)
 	if err != nil {
 		panic(err)
 	}
-	f := v1.Flow(data)
+	f := v1.Flow{data}
 	return &f
 }

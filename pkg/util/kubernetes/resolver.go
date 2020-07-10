@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
+	"github.com/apache/camel-k/pkg/util/gzip"
 	corev1 "k8s.io/api/core/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -71,8 +71,23 @@ func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error
 		//
 		// Replace ref source content with real content
 		//
-		data.Content = cm.Data["content"]
+		key := data.ContentKey
+		if key == "" {
+			key = "content"
+		}
+		data.Content = cm.Data[key]
 		data.ContentRef = ""
+	}
+
+	if data.Compression {
+		cnt := []byte(data.Content)
+		var uncompressed []byte
+		var err error
+		if uncompressed, err = gzip.UncompressBase64(cnt); err != nil {
+			return err
+		}
+		data.Compression = false
+		data.Content = string(uncompressed)
 	}
 
 	return nil

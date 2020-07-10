@@ -20,6 +20,8 @@ package trait
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/flow"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"regexp"
 	"sort"
 	"strconv"
@@ -83,10 +85,18 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		return false, nil
+	}
+
 	if t.Auto == nil || *t.Auto {
 		if t.List == "" {
 			var kamelets []string
-			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
+			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
+			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				util.StringSliceUniqueConcat(&kamelets, extractKamelets(meta.FromURIs))
 				util.StringSliceUniqueConcat(&kamelets, extractKamelets(meta.ToURIs))
 				return true
@@ -121,6 +131,10 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 			return err
 		}
 
+		if kamelet.Status.Phase != v1alpha1.KameletPhaseReady {
+			return fmt.Errorf("kamelet %q is not %s: %s", k, v1alpha1.KameletPhaseReady, kamelet.Status.Phase)
+		}
+
 		if err := t.addKameletAsSource(e, kamelet); err != nil {
 			return err
 		}
@@ -137,21 +151,20 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kame
 	var sources []v1.SourceSpec
 
 	if kamelet.Spec.Flow != nil {
-		// TODO fixme removed for changes to Flow
-		//flowData, err := flows.Marshal([]v1.Flow{*kamelet.Spec.Flow})
-		//if err != nil {
-		//	return err
-		//}
+
+		flowData, err := flow.ToYamlDSL([]v1.Flow{*kamelet.Spec.Flow})
+		if err != nil {
+			return err
+		}
 		flowSource := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
-				Name: fmt.Sprintf("%s.yaml", kamelet.Name),
-				//Content: string(flowData),
-				Content: string(*kamelet.Spec.Flow),
+				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
+				Content: string(flowData),
 			},
 			Language: v1.LanguageYaml,
 			Type:     v1.SourceTypeKamelet,
 		}
-		flowSource, err := integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
+		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
 		if err != nil {
 			return err
 		}

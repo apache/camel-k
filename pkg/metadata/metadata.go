@@ -22,9 +22,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/gzip"
-	"github.com/apache/camel-k/pkg/util/log"
-
 	src "github.com/apache/camel-k/pkg/util/source"
 )
 
@@ -64,10 +61,11 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 
 // Extract returns metadata information from the source code
 func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) IntegrationMetadata {
-	var err error
-	source, err = uncompress(source)
-	if err != nil {
-		log.Errorf(err, "unable to uncompress source %s: %v", source.Name, err)
+	if source.ContentRef != "" {
+		panic("source must be dereferenced before calling this method")
+	}
+	if source.Compression {
+		panic("source must be uncompressed before calling this method")
 	}
 
 	language := source.InferLanguage()
@@ -93,20 +91,4 @@ func Each(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, consumer func(
 			break
 		}
 	}
-}
-
-func uncompress(spec v1.SourceSpec) (v1.SourceSpec, error) {
-	if spec.Compression {
-		data := []byte(spec.Content)
-		var uncompressed []byte
-		var err error
-		if uncompressed, err = gzip.UncompressBase64(data); err != nil {
-			return spec, err
-		}
-		newSpec := spec
-		newSpec.Compression = false
-		newSpec.Content = string(uncompressed)
-		return newSpec, nil
-	}
-	return spec, nil
 }

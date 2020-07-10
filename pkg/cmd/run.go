@@ -498,7 +498,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		}
 
 		if o.UseFlows && (strings.HasSuffix(source, ".yaml") || strings.HasSuffix(source, ".yml")) {
-			flows, err := flow.UnmarshalString(data)
+			flows, err := flow.FromYamlDSLString(data)
 			if err != nil {
 				return nil, err
 			}

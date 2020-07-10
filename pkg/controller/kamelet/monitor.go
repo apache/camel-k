@@ -15,39 +15,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package flow
+package kamelet
 
 import (
-	"bytes"
-	"encoding/json"
-	"testing"
+	"context"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-func TestReadWriteYaml(t *testing.T) {
-	// yaml in conventional form as marshalled by the go runtime
-	yaml := `- from:
-    steps:
-    - to: log:info
-    uri: timer:tick
-`
+// NewMonitorAction returns an action that monitors the kamelet after it's fully initialized
+func NewMonitorAction() Action {
+	return &monitorAction{}
+}
 
-	yamlReader := bytes.NewReader([]byte(yaml))
-	flows, err := FromYamlDSL(yamlReader)
-	assert.NoError(t, err)
-	assert.NotNil(t, flows)
-	assert.Len(t, flows, 1)
+type monitorAction struct {
+	baseAction
+}
 
-	flow := map[string]interface{}{}
-	err = json.Unmarshal(flows[0].RawMessage, &flow)
-	assert.NoError(t, err)
+func (action *monitorAction) Name() string {
+	return "monitor"
+}
 
-	assert.NotNil(t, flow["from"])
-	assert.Nil(t, flow["xx"])
+func (action *monitorAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
+	return kamelet.Status.Phase == v1alpha1.KameletPhaseReady
+}
 
-	data, err := ToYamlDSL(flows)
-	assert.NoError(t, err)
-	assert.NotNil(t, data)
-	assert.Equal(t, yaml, string(data))
+func (action *monitorAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
+	// Doing nothing for now
+	return kamelet, nil
 }
