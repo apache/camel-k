@@ -45,7 +45,7 @@ jobs:
           ${{ runner.os }}-go-
     - name: Prerequisites
       run: |
-        export OPERATOR_SDK_VERSION=v0.15.2
+        export OPERATOR_SDK_VERSION=v0.17.1
         curl -L https://github.com/operator-framework/operator-sdk/releases/download/v0.15.2/operator-sdk-${OPERATOR_SDK_VERSION}-x86_64-linux-gnu -o operator-sdk
         chmod a+x operator-sdk
         sudo mv operator-sdk /usr/local/bin
@@ -55,7 +55,8 @@ jobs:
         TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
       run: |
-        VERSION=${GITHUB_REF##*/}
+        TAG=${GITHUB_REF##*/}
+        VERSION=${TAG:1}
         echo "Using VERSION=$VERSION"
         echo "::set-env name=VERSION::$VERSION"
 

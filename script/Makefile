@@ -218,6 +218,9 @@ images-push-staging:
 set-version:
 	./script/set_version.sh $(VERSION) $(IMAGE_NAME)
 
+set-module-version:
+	./script/set_go_modules_version.sh $(VERSION)
+
 git-tag:
 	./script/git_tag.sh $(VERSION) $(RELEASE_GIT_REMOTE)
 
@@ -233,11 +236,11 @@ package-artifacts:
 unsnapshot-olm:
 	./script/unsnapshot_olm.sh
 
-release: clean codegen set-version build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
+release: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
 
-release-staging: clean codegen set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
 
-release-nightly: clean codegen set-version build-resources build images images-push cross-compile package-examples
+release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile package-examples
 
 release-helm:
 	./script/release_helm.sh
@@ -258,4 +261,4 @@ get-staging-repo:
 get-version:
 	@echo $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version
