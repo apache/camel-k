@@ -21,17 +21,16 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 const (
@@ -44,6 +43,9 @@ func TestKnativeService(t *testing.T) {
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	assert.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -62,7 +64,7 @@ func TestKnativeService(t *testing.T) {
 					{
 						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
-							Content:     `from("undertow:test").log("hello")`,
+							Content:     string(compressedRoute),
 							Compression: true,
 						},
 						Language: v1.LanguageJavaScript,

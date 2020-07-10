@@ -21,15 +21,14 @@ import (
 	"context"
 	"testing"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/gzip"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 )
 
@@ -43,6 +42,9 @@ func TestServiceWithDefaults(t *testing.T) {
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	assert.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -61,7 +63,7 @@ func TestServiceWithDefaults(t *testing.T) {
 					{
 						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
-							Content:     `from("undertow:test").log("hello")`,
+							Content:     string(compressedRoute),
 							Compression: true,
 						},
 						Language: v1.LanguageJavaScript,
@@ -130,6 +132,9 @@ func TestService(t *testing.T) {
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
 
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	assert.NoError(t, err)
+
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -147,7 +152,7 @@ func TestService(t *testing.T) {
 					{
 						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
-							Content:     `from("undertow:test").log("hello")`,
+							Content:     string(compressedRoute),
 							Compression: true,
 						},
 						Language: v1.LanguageJavaScript,
@@ -295,6 +300,9 @@ func TestServiceWithNodePort(t *testing.T) {
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
 
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	assert.NoError(t, err)
+
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -312,7 +320,7 @@ func TestServiceWithNodePort(t *testing.T) {
 					{
 						DataSpec: v1.DataSpec{
 							Name:        "routes.js",
-							Content:     `from("undertow:test").log("hello")`,
+							Content:     string(compressedRoute),
 							Compression: true,
 						},
 						Language: v1.LanguageJavaScript,

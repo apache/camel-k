@@ -557,7 +557,7 @@ func (e *Environment) AddSourcesProperties() {
 				properties[fmt.Sprintf("camel.k.kamelets[%s].loader", kameletName)] = s.Loader
 			}
 			if s.Compression {
-				properties[fmt.Sprintf("camel.k.kamelets[%s].compression", kameletName)] = "true"
+				properties[fmt.Sprintf("camel.k.kamelets[%s].compression", kameletName)] = True
 			}
 
 			interceptors := make([]string, 0, len(s.Interceptors))
