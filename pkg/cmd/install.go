@@ -92,6 +92,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().String("base-image", "", "Set the base Image used to run integrations")
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
+	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
 	cmd.Flags().StringArray("kit", nil, "Add an integration kit to build at startup")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
@@ -135,31 +136,32 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	Wait                 bool     `mapstructure:"wait"`
-	ClusterSetupOnly     bool     `mapstructure:"cluster-setup"`
-	SkipOperatorSetup    bool     `mapstructure:"skip-operator-setup"`
-	SkipClusterSetup     bool     `mapstructure:"skip-cluster-setup"`
-	ExampleSetup         bool     `mapstructure:"example"`
-	Global               bool     `mapstructure:"global"`
-	KanikoBuildCache     bool     `mapstructure:"kaniko-build-cache"`
-	Save                 bool     `mapstructure:"save" kamel:"omitsave"`
-	Force                bool     `mapstructure:"force"`
-	Olm                  bool     `mapstructure:"olm"`
-	ClusterType          string   `mapstructure:"cluster-type"`
-	OutputFormat         string   `mapstructure:"output"`
-	RuntimeVersion       string   `mapstructure:"runtime-version"`
-	BaseImage            string   `mapstructure:"base-image"`
-	OperatorImage        string   `mapstructure:"operator-image"`
-	LocalRepository      string   `mapstructure:"local-repository"`
-	BuildStrategy        string   `mapstructure:"build-strategy"`
-	BuildPublishStrategy string   `mapstructure:"build-publish-strategy"`
-	BuildTimeout         string   `mapstructure:"build-timeout"`
-	MavenRepositories    []string `mapstructure:"maven-repositories"`
-	MavenSettings        string   `mapstructure:"maven-settings"`
-	Properties           []string `mapstructure:"properties"`
-	Kits                 []string `mapstructure:"kits"`
-	TraitProfile         string   `mapstructure:"trait-profile"`
-	HTTPProxySecret      string   `mapstructure:"http-proxy-secret"`
+	Wait                    bool     `mapstructure:"wait"`
+	ClusterSetupOnly        bool     `mapstructure:"cluster-setup"`
+	SkipOperatorSetup       bool     `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup        bool     `mapstructure:"skip-cluster-setup"`
+	ExampleSetup            bool     `mapstructure:"example"`
+	Global                  bool     `mapstructure:"global"`
+	KanikoBuildCache        bool     `mapstructure:"kaniko-build-cache"`
+	Save                    bool     `mapstructure:"save" kamel:"omitsave"`
+	Force                   bool     `mapstructure:"force"`
+	Olm                     bool     `mapstructure:"olm"`
+	ClusterType             string   `mapstructure:"cluster-type"`
+	OutputFormat            string   `mapstructure:"output"`
+	RuntimeVersion          string   `mapstructure:"runtime-version"`
+	BaseImage               string   `mapstructure:"base-image"`
+	OperatorImage           string   `mapstructure:"operator-image"`
+	OperatorImagePullPolicy string   `mapstructure:"operator-image-pull-policy"`
+	LocalRepository         string   `mapstructure:"local-repository"`
+	BuildStrategy           string   `mapstructure:"build-strategy"`
+	BuildPublishStrategy    string   `mapstructure:"build-publish-strategy"`
+	BuildTimeout            string   `mapstructure:"build-timeout"`
+	MavenRepositories       []string `mapstructure:"maven-repositories"`
+	MavenSettings           string   `mapstructure:"maven-settings"`
+	Properties              []string `mapstructure:"properties"`
+	Kits                    []string `mapstructure:"kits"`
+	TraitProfile            string   `mapstructure:"trait-profile"`
+	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
 
 	registry     v1.IntegrationPlatformRegistrySpec
 	registryAuth registry.Auth
@@ -241,10 +243,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		if !o.SkipOperatorSetup && !installViaOLM {
 			cfg := install.OperatorConfiguration{
-				CustomImage: o.OperatorImage,
-				Namespace:   namespace,
-				Global:      o.Global,
-				ClusterType: o.ClusterType,
+				CustomImage:           o.OperatorImage,
+				CustomImagePullPolicy: o.OperatorImagePullPolicy,
+				Namespace:             namespace,
+				Global:                o.Global,
+				ClusterType:           o.ClusterType,
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
 			if err != nil {
