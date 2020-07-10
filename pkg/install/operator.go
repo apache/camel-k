@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/rbac/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,10 +41,11 @@ import (
 
 // OperatorConfiguration --
 type OperatorConfiguration struct {
-	CustomImage string
-	Namespace   string
-	Global      bool
-	ClusterType string
+	CustomImage           string
+	CustomImagePullPolicy string
+	Namespace             string
+	Global                bool
+	ClusterType           string
 }
 
 // Operator installs the operator resources in the given namespace
@@ -58,6 +60,14 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					d.Spec.Template.Spec.Containers[0].Image = cfg.CustomImage
+				}
+			}
+		}
+
+		if cfg.CustomImagePullPolicy != "" {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					d.Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullPolicy(cfg.CustomImagePullPolicy)
 				}
 			}
 		}

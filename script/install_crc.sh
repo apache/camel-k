@@ -46,7 +46,7 @@ docker push default-route-openshift-image-registry.apps-crc.testing/$project/cam
 
 # Try setup with standard user
 ret=0
-cmd="./kamel install --olm=false --operator-image=image-registry.openshift-image-registry.svc:5000/$project/camel-k:$1"
+cmd="./kamel install --olm=false --operator-image=image-registry.openshift-image-registry.svc:5000/$project/camel-k:$1 --operator-image-pull-policy=Always"
 eval "$cmd -n $project 2>/dev/null || export ret=\$?"
 
 if [ $ret -ne 0 ]; then
