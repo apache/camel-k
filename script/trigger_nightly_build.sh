@@ -16,5 +16,5 @@
 # limitations under the License.
 
 V=$(make get-version | sed s/-SNAPSHOT/-nightly.$(date +%Y%m%d%H%M)/)
-git tag $V
-git push upstream $V
+git tag v$V
+git push upstream v$V

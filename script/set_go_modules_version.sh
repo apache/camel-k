@@ -17,22 +17,19 @@
 
 set -e
 
-if [ "$#" -ne 2 ]; then
-    echo "usage: $0 version remote"
+if [ "$#" -ne 1 ]; then
+    echo "usage: $0 version"
     exit 1
 fi
 
 location=$(dirname $0)
 target_version=$1
 target_tag=v$target_version
-target_staging=staging-$target_tag
-target_remote=$2
 
-git branch -D ${target_staging} || true
-git checkout -b ${target_staging}
-git add * || true
-git commit -a -m "Release ${target_version}"
-git tag --force ${target_tag} ${target_staging}
-git push --force ${target_remote} ${target_tag}
+api_rule="s/github.com\/apache\/camel-k\/pkg\/apis\/camel [A-Za-z0-9\.\-]+.*$/github.com\/apache\/camel-k\/pkg\/apis\/camel $target_tag/"
+client_rule="s/github.com\/apache\/camel-k\/pkg\/client\/camel [A-Za-z0-9\.\-]+.*$/github.com\/apache\/camel-k\/pkg\/client\/camel $target_tag/"
 
-echo "Tag ${target_tag} pushed ${target_remote}"
+sed -i -r "$api_rule" $location/../go.mod
+sed -i -r "$client_rule" $location/../go.mod
+
+sed -i -r "$api_rule" $location/../pkg/client/camel/go.mod
