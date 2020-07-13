@@ -190,7 +190,7 @@ func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
 }
 
 func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
-	data, err := json.Marshal(&in)
+	data, err := json.Marshal(&in.Configuration)
 	if err != nil {
 		return err
 	}

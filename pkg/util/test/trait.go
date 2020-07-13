@@ -33,7 +33,7 @@ func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
 	data, err := json.Marshal(spec)
 	assert.Nil(t, err)
 
-	err = json.Unmarshal(data, &trait)
+	err = json.Unmarshal(data, &trait.Configuration)
 	assert.Nil(t, err)
 
 	return trait
@@ -43,7 +43,7 @@ func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
 func TraitSpecToMap(t *testing.T, spec v1.TraitSpec) map[string]string {
 	trait := make(map[string]string)
 
-	data, err := json.Marshal(spec)
+	data, err := json.Marshal(spec.Configuration)
 	assert.Nil(t, err)
 
 	err = json.Unmarshal(data, &trait)

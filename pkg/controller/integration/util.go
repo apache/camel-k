@@ -115,32 +115,32 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 
 // HasMatchingTraits compare traits defined on kit against those defined on integration.
 func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
-	for name, kitTraitConf := range kit.Spec.Traits {
-		intTraitConf, ok := integration.Spec.Traits[name]
+	for name, kitTrait := range kit.Spec.Traits {
+		intTrait, ok := integration.Spec.Traits[name]
 		if !ok {
 			// skip it because trait configured on kit is not defined on integration
 			return false, nil
 		}
-		data, err := json.Marshal(intTraitConf)
+		data, err := json.Marshal(intTrait.Configuration)
 		if err != nil {
 			return false, err
 		}
-		intTrait := make(map[string]interface{})
-		err = json.Unmarshal(data, &intTrait)
+		intConf := make(map[string]interface{})
+		err = json.Unmarshal(data, &intConf)
 		if err != nil {
 			return false, err
 		}
-		data, err = json.Marshal(kitTraitConf)
+		data, err = json.Marshal(kitTrait.Configuration)
 		if err != nil {
 			return false, err
 		}
-		kitTrait := make(map[string]interface{})
-		err = json.Unmarshal(data, &kitTrait)
+		kitConf := make(map[string]interface{})
+		err = json.Unmarshal(data, &kitConf)
 		if err != nil {
 			return false, err
 		}
-		for ck, cv := range kitTrait {
-			iv, ok := intTrait[ck]
+		for ck, cv := range kitConf {
+			iv, ok := intConf[ck]
 			if !ok {
 				// skip it because trait configured on kit has a value that is not defined
 				// in integration trait

@@ -766,7 +766,7 @@ func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.Tr
 				return nil, err
 			}
 			var spec v1.TraitSpec
-			err = json.Unmarshal(data, &spec)
+			err = json.Unmarshal(data, &spec.Configuration)
 			if err != nil {
 				return nil, err
 			}
