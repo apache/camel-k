@@ -164,22 +164,22 @@ func TestTraitHierarchyDecode(t *testing.T) {
 
 	env.Platform.Spec.Traits = make(map[string]v1.TraitSpec)
 	env.Platform.Spec.Traits["knative-service"] = test.TraitSpecFromMap(t, map[string]interface{}{
-		"enabled":            false,
-		"min-scale":          1,
-		"max-scale":          10,
-		"autoscaling-target": 15,
+		"enabled":           false,
+		"minScale":          1,
+		"maxScale":          10,
+		"autoscalingTarget": 15,
 	})
 	env.Platform.ResyncStatusFullConfig()
 
 	env.IntegrationKit.Spec.Traits = make(map[string]v1.TraitSpec)
 	env.IntegrationKit.Spec.Traits["knative-service"] = test.TraitSpecFromMap(t, map[string]interface{}{
-		"enabled":   true,
-		"min-scale": 5,
+		"enabled":  true,
+		"minScale": 5,
 	})
 
 	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
 	env.Integration.Spec.Traits["knative-service"] = test.TraitSpecFromMap(t, map[string]interface{}{
-		"max-scale": 20,
+		"maxScale": 20,
 	})
 
 	c := NewTraitTestCatalog()
