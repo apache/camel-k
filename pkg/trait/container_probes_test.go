@@ -20,15 +20,15 @@ package trait
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	appsv1 "k8s.io/api/apps/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
@@ -56,10 +56,8 @@ func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
 }
 
 func newTestContainerTrait() *containerTrait {
-	enabled := true
-
 	tr := newContainerTrait().(*containerTrait)
-	tr.ProbesEnabled = enabled
+	tr.ProbesEnabled = true
 
 	return tr
 }
