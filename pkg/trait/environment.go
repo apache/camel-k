@@ -29,7 +29,7 @@ import (
 // +camel-k:trait=environment
 type environmentTrait struct {
 	BaseTrait     `property:",squash"`
-	ContainerMeta bool `property:"container-meta"`
+	ContainerMeta bool `property:"container-meta" json:"containerMeta,omitempty"`
 }
 
 const (
