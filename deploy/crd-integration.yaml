@@ -157,6 +157,12 @@ spec:
               type: array
             traits:
               additionalProperties:
+                description: A TraitSpec contains the configuration of a trait
+                properties:
+                  configuration:
+                    type: object
+                required:
+                  - configuration
                 type: object
               type: object
           type: object

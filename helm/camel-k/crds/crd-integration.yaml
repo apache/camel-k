@@ -160,9 +160,9 @@ spec:
                 description: A TraitSpec contains the configuration of a trait
                 properties:
                   configuration:
-                    additionalProperties:
-                      type: string
                     type: object
+                required:
+                  - configuration
                 type: object
               type: object
           type: object

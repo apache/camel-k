@@ -99,7 +99,7 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 		if _, err := hash.Write([]byte(name + "[")); err != nil {
 			return "", err
 		}
-		spec, err := json.Marshal(integration.Spec.Traits[name])
+		spec, err := json.Marshal(integration.Spec.Traits[name].Configuration)
 		if err != nil {
 			return "", err
 		}

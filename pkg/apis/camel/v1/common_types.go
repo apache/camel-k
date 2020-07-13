@@ -54,8 +54,14 @@ type FailureRecovery struct {
 }
 
 // A TraitSpec contains the configuration of a trait
-// +kubebuilder:validation:Type=object
 type TraitSpec struct {
+	Configuration TraitConfiguration `json:"configuration"`
+}
+
+// +kubebuilder:validation:Type=object
+
+// TraitConfiguration --
+type TraitConfiguration struct {
 	json.RawMessage `json:",inline"`
 }
 
