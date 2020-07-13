@@ -21,18 +21,20 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/pkg/errors"
+
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
-	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // The Knative trait automatically discovers addresses of Knative resources and inject them into the
@@ -47,32 +49,32 @@ import (
 type knativeTrait struct {
 	BaseTrait `property:",squash"`
 	// Can be used to inject a Knative complete configuration in JSON format.
-	Configuration string `property:"configuration"`
-	// Comma-separated list of channels used as source of integration routes.
+	Configuration string `property:"configuration" json:"configuration,omitempty"`
+	// List of channels used as source of integration routes.
 	// Can contain simple channel names or full Camel URIs.
-	ChannelSources string `property:"channel-sources"`
-	// Comma-separated list of channels used as destination of integration routes.
+	ChannelSources []string `property:"channel-sources" json:"channelSources,omitempty"`
+	// List of channels used as destination of integration routes.
 	// Can contain simple channel names or full Camel URIs.
-	ChannelSinks string `property:"channel-sinks"`
-	// Comma-separated list of channels used as source of integration routes.
-	EndpointSources string `property:"endpoint-sources"`
-	// Comma-separated list of endpoints used as destination of integration routes.
+	ChannelSinks []string `property:"channel-sinks" json:"channelSinks,omitempty"`
+	// List of channels used as source of integration routes.
+	EndpointSources []string `property:"endpoint-sources" json:"endpointSources,omitempty"`
+	// List of endpoints used as destination of integration routes.
 	// Can contain simple endpoint names or full Camel URIs.
-	EndpointSinks string `property:"endpoint-sinks"`
-	// Comma-separated list of event types that the integration will be subscribed to.
+	EndpointSinks []string `property:"endpoint-sinks" json:"endpointSinks,omitempty"`
+	// List of event types that the integration will be subscribed to.
 	// Can contain simple event types or full Camel URIs (to use a specific broker different from "default").
-	EventSources string `property:"event-sources"`
-	// Comma-separated list of event types that the integration will produce.
+	EventSources []string `property:"event-sources" json:"eventSources,omitempty"`
+	// List of event types that the integration will produce.
 	// Can contain simple event types or full Camel URIs (to use a specific broker).
-	EventSinks string `property:"event-sinks"`
+	EventSinks []string `property:"event-sinks" json:"eventSinks,omitempty"`
 	// Enables filtering on events based on the header "ce-knativehistory". Since this is an experimental header
 	// that can be removed in a future version of Knative, filtering is enabled only when the integration is
 	// listening from more than 1 channel.
-	FilterSourceChannels *bool `property:"filter-source-channels"`
+	FilterSourceChannels *bool `property:"filter-source-channels" json:"filterSourceChannels,omitempty"`
 	// Enables Knative CamelSource pre 0.15 compatibility fixes (will be removed in future versions).
-	CamelSourceCompat *bool `property:"camel-source-compat"`
+	CamelSourceCompat *bool `property:"camel-source-compat" json:"camelSourceCompat,omitempty"`
 	// Enable automatic discovery of all trait properties.
-	Auto *bool `property:"auto"`
+	Auto *bool `property:"auto" json:"auto,omitempty"`
 }
 
 const (
@@ -102,7 +104,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.Auto == nil || *t.Auto {
-		if t.ChannelSources == "" {
+		if len(t.ChannelSources) == 0 {
 			items := make([]string, 0)
 
 			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
@@ -110,9 +112,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 
-			t.ChannelSources = strings.Join(items, ",")
+			t.ChannelSources = items
 		}
-		if t.ChannelSinks == "" {
+		if len(t.ChannelSinks) == 0 {
 			items := make([]string, 0)
 
 			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
@@ -120,9 +122,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 
-			t.ChannelSinks = strings.Join(items, ",")
+			t.ChannelSinks = items
 		}
-		if t.EndpointSources == "" {
+		if len(t.EndpointSources) == 0 {
 			items := make([]string, 0)
 
 			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
@@ -130,9 +132,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 
-			t.EndpointSources = strings.Join(items, ",")
+			t.EndpointSources = items
 		}
-		if t.EndpointSinks == "" {
+		if len(t.EndpointSinks) == 0 {
 			items := make([]string, 0)
 
 			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
@@ -140,9 +142,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 
-			t.EndpointSinks = strings.Join(items, ",")
+			t.EndpointSinks = items
 		}
-		if t.EventSources == "" {
+		if len(t.EventSources) == 0 {
 			items := make([]string, 0)
 
 			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
@@ -150,9 +152,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 
-			t.EventSources = strings.Join(items, ",")
+			t.EventSources = items
 		}
-		if t.EventSinks == "" {
+		if len(t.EventSinks) == 0 {
 			items := make([]string, 0)
 
 			metadata.Each(e.CamelCatalog, e.Integration.Sources(), func(_ int, meta metadata.IntegrationMetadata) bool {
@@ -160,9 +162,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 
-			t.EventSinks = strings.Join(items, ",")
+			t.EventSinks = items
 		}
-		if len(strings.Split(t.ChannelSources, ",")) > 1 {
+		if len(t.ChannelSources) > 1 {
 			// Always filter channels when the integration subscribes to more than one
 			// Using Knative experimental header: https://github.com/knative/eventing/blob/7df0cc56c28d58223ff25d5ddfb487fa8c29a004/pkg/provisioners/message.go#L28
 			// TODO: filter automatically all source channels when the feature becomes stable
@@ -395,24 +397,23 @@ func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference
 func (t *knativeTrait) ifServiceMissingDo(
 	e *Environment,
 	env *knativeapi.CamelEnvironment,
-	serviceURIsAsString string,
+	serviceURIs []string,
 	serviceType knativeapi.CamelServiceType,
 	endpointKind knativeapi.CamelEndpointKind,
 	gen func(ref *corev1.ObjectReference, url *url.URL, serviceURI string) error) error {
-	return t.withServiceDo(true, e, env, serviceURIsAsString, serviceType, endpointKind, gen)
+	return t.withServiceDo(true, e, env, serviceURIs, serviceType, endpointKind, gen)
 }
 
 func (t *knativeTrait) withServiceDo(
 	skipDuplicates bool,
 	e *Environment,
 	env *knativeapi.CamelEnvironment,
-	serviceURIsAsString string,
+	serviceURIs []string,
 	serviceType knativeapi.CamelServiceType,
 	endpointKind knativeapi.CamelEndpointKind,
 	gen func(ref *corev1.ObjectReference, url *url.URL, serviceURI string) error) error {
 
-	serviceURIs := t.extractServices(serviceURIsAsString, serviceType)
-	for _, serviceURI := range serviceURIs {
+	for _, serviceURI := range t.extractServices(serviceURIs, serviceType) {
 		ref, err := knativeutil.ExtractObjectReference(serviceURI)
 		if err != nil {
 			return err
@@ -440,9 +441,9 @@ func (t *knativeTrait) withServiceDo(
 	return nil
 }
 
-func (t *knativeTrait) extractServices(names string, serviceType knativeapi.CamelServiceType) []string {
+func (t *knativeTrait) extractServices(names []string, serviceType knativeapi.CamelServiceType) []string {
 	answer := make([]string, 0)
-	for _, item := range strings.Split(names, ",") {
+	for _, item := range names {
 		i := strings.Trim(item, " \t\"")
 		if i != "" {
 			i = knativeutil.NormalizeToURI(serviceType, i)
