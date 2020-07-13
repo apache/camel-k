@@ -119,7 +119,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 				Profile: v1.TraitProfileOpenShift,
 				Traits: map[string]v1.TraitSpec{
 					"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-						"container-meta": true,
+						"containerMeta": true,
 					}),
 				},
 			},
@@ -185,7 +185,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 				Profile: v1.TraitProfileOpenShift,
 				Traits: map[string]v1.TraitSpec{
 					"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-						"container-meta": false,
+						"containerMeta": false,
 					}),
 				},
 			},
