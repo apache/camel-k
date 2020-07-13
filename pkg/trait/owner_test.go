@@ -44,8 +44,8 @@ func SetUpOwnerEnvironment(t *testing.T) *Environment {
 	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
 	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"owner": test.TraitSpecFromMap(t, map[string]interface{}{
-			"target-labels":      "com.mycompany/mylabel1",
-			"target-annotations": "com.mycompany/myannotation2",
+			"targetLabels":      []string{"com.mycompany/mylabel1"},
+			"targetAnnotations": []string{"com.mycompany/myannotation2"},
 		}),
 	}
 

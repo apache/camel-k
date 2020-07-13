@@ -18,13 +18,11 @@ limitations under the License.
 package trait
 
 import (
-	"strings"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // The Owner trait ensures that all created resources belong to the integration being created
@@ -33,10 +31,10 @@ import (
 // +camel-k:trait=owner
 type ownerTrait struct {
 	BaseTrait `property:",squash"`
-	// The annotations to be transferred (A comma-separated list of label keys)
-	TargetAnnotations string `property:"target-annotations"`
-	// The labels to be transferred (A comma-separated list of label keys)
-	TargetLabels string `property:"target-labels"`
+	// The set of annotations to be transferred
+	TargetAnnotations []string `property:"target-annotations" json:"targetAnnotations,omitempty"`
+	// The set of labels to be transferred
+	TargetLabels []string `property:"target-labels" json:"targetLabels,omitempty"`
 }
 
 func newOwnerTrait() Trait {
@@ -63,7 +61,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 
 	targetLabels := make(map[string]string)
 	if e.Integration.Labels != nil {
-		for _, k := range strings.Split(t.TargetLabels, ",") {
+		for _, k := range t.TargetLabels {
 			if v, ok := e.Integration.Labels[k]; ok {
 				targetLabels[k] = v
 			}
@@ -72,7 +70,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 
 	targetAnnotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for _, k := range strings.Split(t.TargetAnnotations, ",") {
+		for _, k := range t.TargetAnnotations {
 			if v, ok := e.Integration.Annotations[k]; ok {
 				targetAnnotations[k] = v
 			}
