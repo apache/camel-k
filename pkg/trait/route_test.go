@@ -147,7 +147,7 @@ func TestRoute_TLS(t *testing.T) {
 
 	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tls-termination": string(routev1.TLSTerminationEdge),
+			"tlsTermination": string(routev1.TLSTerminationEdge),
 		}),
 	}
 
@@ -171,7 +171,7 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		containerTraitID: test.TraitSpecFromMap(t, map[string]interface{}{
-			"service-port-name": "my-port",
+			"servicePortName": "my-port",
 		}),
 	}
 
@@ -193,7 +193,7 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits[containerTraitID])
 	assert.Equal(
 		t,
-		trait["service-port-name"],
+		trait["servicePortName"],
 		route.Spec.Port.TargetPort.StrVal,
 	)
 }
