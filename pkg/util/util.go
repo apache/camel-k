@@ -26,6 +26,7 @@ import (
 	"path"
 	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -65,6 +66,18 @@ func StringSliceExists(slice []string, item string) bool {
 	for i := 0; i < len(slice); i++ {
 		if slice[i] == item {
 			return true
+		}
+	}
+
+	return false
+}
+
+func StringSliceContainsAnyOf(slice []string, items ...string) bool {
+	for i := 0; i < len(slice); i++ {
+		for j := 0; j < len(items); j++ {
+			if strings.Contains(slice[i], items[j]) {
+				return true
+			}
 		}
 	}
 

@@ -33,6 +33,7 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -48,8 +49,8 @@ type jvmTrait struct {
 	PrintCommand bool `property:"print-command" json:"printCommand,omitempty"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
 	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
-	// A comma-separated list of JVM options
-	Options *string `property:"options" json:"options,omitempty"`
+	// A list of JVM options
+	Options []string `property:"options" json:"options,omitempty"`
 }
 
 func newJvmTrait() Trait {
@@ -129,13 +130,10 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	hasHeapSizeOption := false
 	// Add JVM options
-	if t.Options != nil {
-		hasHeapSizeOption = strings.Contains(*t.Options, "-Xmx") ||
-			strings.Contains(*t.Options, "-XX:MaxHeapSize") ||
-			strings.Contains(*t.Options, "-XX:MinRAMPercentage") ||
-			strings.Contains(*t.Options, "-XX:MaxRAMPercentage")
+	if len(t.Options) > 0 {
+		hasHeapSizeOption = util.StringSliceContainsAnyOf(t.Options, "-Xmx", "-XX:MaxHeapSize", "-XX:MinRAMPercentage", "-XX:MaxRAMPercentage")
 
-		args = append(args, strings.Split(*t.Options, ",")...)
+		args = append(args, t.Options...)
 	}
 
 	// Tune JVM maximum heap size based on the container memory limit, if any.
