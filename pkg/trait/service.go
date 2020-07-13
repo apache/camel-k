@@ -18,11 +18,12 @@ limitations under the License.
 package trait
 
 import (
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
@@ -34,9 +35,9 @@ import (
 type serviceTrait struct {
 	BaseTrait `property:",squash"`
 	// To automatically detect from the code if a Service needs to be created.
-	Auto *bool `property:"auto"`
+	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Enable Service to be exposed as NodePort
-	NodePort *bool `property:"nodeport"`
+	NodePort *bool `property:"nodeport" json:"nodeport,omitempty"`
 }
 
 const (
