@@ -55,7 +55,8 @@ func TestRunSimpleExamples(t *testing.T) {
 
 		t.Run("run java from GitHub (RAW)", func(t *testing.T) {
 			RegisterTestingT(t)
-			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/master/e2e/common/files/Java.java").Execute()).Should(BeNil())
+			// TODO enable master in quarkus mode when https://github.com/apache/camel-quarkus/issues/711 is fixed
+			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/master/e2e/common/files/Java.java", "-t", "quarkus.enabled=false").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

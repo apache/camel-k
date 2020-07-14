@@ -20,7 +20,7 @@ import org.apache.camel.builder.RouteBuilder;
 public class RestConsumer extends RouteBuilder {
   @Override
   public void configure() throws Exception {
-    restConfiguration().port(8080);
+
     rest("/customers")
     .get("/{name}").to("direct:start");
 
