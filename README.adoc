@@ -1,3 +1,6 @@
+:toc: macro
+:toclevels: 3
+
 = Apache Camel K
 
 image:https://github.com/apache/camel-k/workflows/build/badge.svg["Build", link="https://github.com/apache/camel-k/actions"]
@@ -11,6 +14,8 @@ image:https://github.com/apache/camel-k/workflows/knative/badge.svg["Knative", l
 image:https://img.shields.io/travis/apache/camel-k/master.svg?label=openshift["OpenShift", link="https://travis-ci.org/apache/camel-k"]
 
 Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
+
+toc::[]
 
 [[getting-started]]
 == Getting Started
@@ -66,7 +71,7 @@ integration "sample" created
 integration "sample" in phase Waiting For Platform
 ```
 
-NOTE: It will take some time for your integration to get started for the first time. This is because the camel-k operator has to pull and cache the camel-k builder images into the cluster’s registry.
+NOTE: It will take some time for your integration to get started for the first time. This is because the camel-k operator has to pull and cache the camel-k builder images into the cluster's registry.
 
 You can follow this process by watching the pods in the namespace where the operator is running:
 
