@@ -3,8 +3,6 @@ module github.com/apache/camel-k
 go 1.13
 
 require (
-	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.1 // indirect
 	github.com/Masterminds/semver v1.5.0
 	github.com/apache/camel-k/pkg/apis/camel v0.0.0
 	github.com/apache/camel-k/pkg/client/camel v0.0.0
@@ -33,26 +31,25 @@ require (
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cobra v1.0.0
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.4.0
+	github.com/spf13/viper v1.6.2
 	github.com/stoewer/go-strcase v1.0.2
 	github.com/stretchr/testify v1.5.1
 	go.uber.org/multierr v1.5.0
 	gopkg.in/inf.v0 v0.9.1
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api v0.18.2
 	k8s.io/apimachinery v0.18.2
 	k8s.io/client-go v12.0.0+incompatible
-	k8s.io/gengo v0.0.0-20200114144118-36b2048a9120
-	knative.dev/eventing v0.14.1
-	knative.dev/pkg v0.0.0-20200410152005-2a1db869228c
-	knative.dev/serving v0.14.0
+	k8s.io/gengo v0.0.0-20200205140755-e0e292d8aa12
+	knative.dev/eventing v0.15.0
+	knative.dev/pkg v0.0.0-20200519155757-14eb3ae3a5a7
+	knative.dev/serving v0.15.0
 	sigs.k8s.io/controller-runtime v0.5.2
 )
 
 // Pinned to Kubernetes 1.17.6:
-// - Knative 0.14.0 requires 1.16.4
+// - Knative 0.15.0 requires 1.16.4
 // - Operator SDK 0.17.1 requires 1.17.4
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
