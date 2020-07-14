@@ -25,7 +25,7 @@ import (
 
 // The Quarkus trait activates the Quarkus runtime.
 //
-// It's disabled by default.
+// It's enabled by default.
 //
 // +camel-k:trait=quarkus
 type quarkusTrait struct {
@@ -41,7 +41,7 @@ func newQuarkusTrait() Trait {
 }
 
 func (t *quarkusTrait) isEnabled() bool {
-	return t.Enabled != nil && *t.Enabled
+	return t.Enabled == nil || *t.Enabled
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, error) {

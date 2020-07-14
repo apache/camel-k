@@ -61,11 +61,11 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 	trait, environment := createNominalCamelTest()
 	environment.CamelCatalog = nil
 	environment.Integration.Status.RuntimeVersion = "Unmatchable version"
-	environment.Integration.Status.RuntimeProvider = v1.RuntimeProviderMain
+	environment.Integration.Status.RuntimeProvider = v1.RuntimeProviderQuarkus
 
 	err := trait.Apply(environment)
 	assert.NotNil(t, err)
-	assert.Equal(t, "unable to find catalog matching version requirement: runtime=Unmatchable version, provider=main", err.Error())
+	assert.Equal(t, "unable to find catalog matching version requirement: runtime=Unmatchable version, provider=quarkus", err.Error())
 }
 
 func createNominalCamelTest() (*camelTrait, *Environment) {
