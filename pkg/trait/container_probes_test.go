@@ -37,7 +37,7 @@ func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
 
 	switch provider {
 	case v1.RuntimeProviderMain:
-		catalog, err = camel.DefaultCatalog()
+		catalog, err = camel.MainCatalog()
 	case v1.RuntimeProviderQuarkus:
 		catalog, err = camel.QuarkusCatalog()
 	}

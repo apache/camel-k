@@ -58,7 +58,7 @@ func TestOpenShiftTraits(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.NotNil(t, env.GetTrait("service"))
@@ -79,7 +79,7 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
 	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
 	env.Integration.Spec.Traits["service"] = test.TraitSpecFromMap(t, map[string]interface{}{
 		"port": 7071,
@@ -93,7 +93,7 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('undertow:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
 	env.Integration.Spec.Traits = make(map[string]v1.TraitSpec)
 	env.Integration.Spec.Traits["service"] = test.TraitSpecFromMap(t, map[string]interface{}{
 		"enabled": false,

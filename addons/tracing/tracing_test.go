@@ -28,7 +28,7 @@ import (
 )
 
 func TestTracingTrait(t *testing.T) {
-	e := createEnvironment(t, camel.DefaultCatalog)
+	e := createEnvironment(t, camel.MainCatalog)
 	tracing := NewTracingTrait()
 	enabled := true
 	tracing.(*tracingTrait).Enabled = &enabled
@@ -48,7 +48,7 @@ func TestTracingTrait(t *testing.T) {
 }
 
 func TestTracingTraitFullConfig(t *testing.T) {
-	e := createEnvironment(t, camel.DefaultCatalog)
+	e := createEnvironment(t, camel.MainCatalog)
 	tracing := NewTracingTrait()
 	enabled := true
 	tracing.(*tracingTrait).Enabled = &enabled

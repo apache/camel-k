@@ -43,7 +43,7 @@ func TestServiceWithDefaults(t *testing.T) {
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
 	assert.NoError(t, err)
 
 	environment := Environment{
@@ -132,7 +132,7 @@ func TestService(t *testing.T) {
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
 	assert.NoError(t, err)
 
 	environment := Environment{
@@ -300,7 +300,7 @@ func TestServiceWithNodePort(t *testing.T) {
 
 	traitCatalog := NewCatalog(context.TODO(), nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
 	assert.NoError(t, err)
 
 	environment := Environment{

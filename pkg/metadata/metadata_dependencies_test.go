@@ -51,12 +51,12 @@ func TestDependenciesJavaSource(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:activemq",
-			"camel:amqp",
-			"camel:log",
-			"camel:telegram",
-			"camel:timer",
-			"camel:twitter",
+			"camel-quarkus:activemq",
+			"camel-quarkus:amqp",
+			"camel-quarkus:log",
+			"camel-quarkus:telegram",
+			"camel-quarkus:timer",
+			"camel-quarkus:twitter",
 		},
 		meta.Dependencies.List())
 }
@@ -85,11 +85,11 @@ func TestDependenciesJavaScript(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:activemq",
-			"camel:amqp",
-			"camel:log",
-			"camel:telegram",
-			"camel:timer",
+			"camel-quarkus:activemq",
+			"camel-quarkus:amqp",
+			"camel-quarkus:log",
+			"camel-quarkus:telegram",
+			"camel-quarkus:timer",
 		},
 		meta.Dependencies.List())
 }
@@ -120,12 +120,12 @@ func TestDependenciesGroovy(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:activemq",
-			"camel:amqp",
-			"camel:log",
-			"camel:telegram",
-			"camel:timer",
-			"camel:twitter",
+			"camel-quarkus:activemq",
+			"camel-quarkus:amqp",
+			"camel-quarkus:log",
+			"camel-quarkus:telegram",
+			"camel-quarkus:timer",
+			"camel-quarkus:twitter",
 		},
 		meta.Dependencies.List())
 }
@@ -150,10 +150,10 @@ func TestDependencies(t *testing.T) {
 
 	assert.ElementsMatch(t,
 		[]string{
-			"camel:http",
-			"camel:log",
-			"camel:mock",
-			"camel:twitter",
+			"camel-quarkus:http",
+			"camel-quarkus:log",
+			"camel-quarkus:mock",
+			"camel-quarkus:twitter",
 		},
 		meta.Dependencies.List())
 }
@@ -214,9 +214,9 @@ func TestJacksonDependency(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:http",
-			"camel:jackson",
-			"camel:log",
+			"camel-quarkus:http",
+			"camel-quarkus:jackson",
+			"camel-quarkus:log",
 		},
 		meta.Dependencies.List())
 }
@@ -242,9 +242,9 @@ func TestJacksonImplicitDependency(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:http",
-			"camel:jackson",
-			"camel:log",
+			"camel-quarkus:http",
+			"camel-quarkus:jackson",
+			"camel-quarkus:log",
 		},
 		meta.Dependencies.List())
 }
@@ -275,14 +275,12 @@ func TestLanguageDependencies(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:direct",
-			"camel:ognl",
-			"camel:saxon",
-			"camel:xpath",
-			"camel:jsonpath",
-			"camel:groovy",
-			"camel:xml-jaxp",
-			"camel:mvel",
+			"camel-quarkus:direct",
+			"camel-quarkus:ognl",
+			"camel-quarkus:xpath",
+			"camel-quarkus:jsonpath",
+			"camel-quarkus:groovy",
+			"camel-quarkus:xml-jaxp",
 		},
 		meta.Dependencies.List())
 }
@@ -309,10 +307,10 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:direct",
-			"camel:ognl",
-			"camel:xpath",
-			"camel:jsonpath",
+			"camel-quarkus:direct",
+			"camel-quarkus:ognl",
+			"camel-quarkus:xpath",
+			"camel-quarkus:jsonpath",
 		},
 		meta.Dependencies.List())
 }
@@ -339,8 +337,8 @@ func TestCircuitBreakerDependency(t *testing.T) {
 
 	assert.ElementsMatch(t,
 		[]string{
-			"camel:http",
-			"camel:log",
+			"camel-quarkus:http",
+			"camel-quarkus:log",
 		},
 		meta.Dependencies.List())
 
@@ -370,11 +368,11 @@ func TestRestDependency(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:http",
-			"camel:direct",
-			"camel:log",
-			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel.k/camel-k-runtime-http",
+			"camel-quarkus:http",
+			"camel-quarkus:direct",
+			"camel-quarkus:log",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -401,11 +399,11 @@ func TestRestWithPathDependency(t *testing.T) {
 
 	assert.ElementsMatch(
 		t, []string{
-			"camel:http",
-			"camel:direct",
-			"camel:log",
-			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel.k/camel-k-runtime-http",
+			"camel-quarkus:http",
+			"camel-quarkus:direct",
+			"camel-quarkus:log",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -416,7 +414,7 @@ func TestRestConfigurationDependency(t *testing.T) {
 			Name: "Request.groovy",
 			Content: `
                 restConfiguration()
-                    .component("undertow")
+                    .component("netty-http")
 			    from("http:test")
                     .to("log:info")
 		    `,
@@ -431,10 +429,10 @@ func TestRestConfigurationDependency(t *testing.T) {
 
 	assert.ElementsMatch(
 		t, []string{
-			"camel:http",
-			"camel:log",
-			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel.k/camel-k-runtime-http",
+			"camel-quarkus:http",
+			"camel-quarkus:log",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -461,10 +459,10 @@ func TestRestClosureDependencyGroovy(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:http",
-			"camel:log",
-			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel.k/camel-k-runtime-http",
+			"camel-quarkus:http",
+			"camel-quarkus:log",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -491,10 +489,10 @@ func TestRestClosureDependencyKotlin(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:http",
-			"camel:log",
-			"mvn:org.apache.camel/camel-rest",
-			"mvn:org.apache.camel.k/camel-k-runtime-http",
+			"camel-quarkus:http",
+			"camel-quarkus:log",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -525,9 +523,9 @@ func TestXMLCircuitBreakerDependency(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:direct",
-			"camel:kafka",
-			"camel:log",
+			"camel-quarkus:direct",
+			"camel-quarkus:kafka",
+			"camel-quarkus:log",
 		},
 		meta.Dependencies.List())
 
@@ -564,8 +562,8 @@ func TestXMLRestDependency(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:direct",
-			"camel:mock",
+			"camel-quarkus:direct",
+			"camel-quarkus:mock",
 		},
 		meta.Dependencies.List())
 
@@ -620,15 +618,13 @@ func TestXMLLanguageDependencies(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:core-languages",
-			"camel:direct",
-			"camel:ognl",
-			"camel:saxon",
-			"camel:xpath",
-			"camel:xml-jaxp",
-			"camel:jsonpath",
-			"camel:groovy",
-			"camel:mvel",
+			"camel-quarkus:core",
+			"camel-quarkus:direct",
+			"camel-quarkus:ognl",
+			"camel-quarkus:xpath",
+			"camel-quarkus:xml-jaxp",
+			"camel-quarkus:jsonpath",
+			"camel-quarkus:groovy",
 		},
 		meta.Dependencies.List())
 }
@@ -661,8 +657,6 @@ const yamlWithLanguages = `
         - transform:
             simple: "${body.toUpperCase()}"
         - transform:
-            mvel: "resource:classpath:script.mvel"
-        - transform:
             xquery: "/ns:foo/bar"
         - transform:
             xpath: "//foo/bar"
@@ -692,8 +686,8 @@ func TestYAMLRestDependency(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:direct",
-			"camel:log",
+			"camel-quarkus:direct",
+			"camel-quarkus:log",
 		},
 		meta.Dependencies.List())
 
@@ -718,7 +712,7 @@ func TestYAMLCircuitBreakerDependency(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:direct",
+			"camel-quarkus:direct",
 		},
 		meta.Dependencies.List())
 	assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityCircuitBreaker))
@@ -741,15 +735,13 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:core-languages",
-			"camel:direct",
-			"camel:ognl",
-			"camel:saxon",
-			"camel:xpath",
-			"camel:jsonpath",
-			"camel:groovy",
-			"camel:xml-jaxp",
-			"camel:mvel",
+			"camel-quarkus:core",
+			"camel-quarkus:direct",
+			"camel-quarkus:ognl",
+			"camel-quarkus:xpath",
+			"camel-quarkus:jsonpath",
+			"camel-quarkus:groovy",
+			"camel-quarkus:xml-jaxp",
 		},
 		meta.Dependencies.List())
 }

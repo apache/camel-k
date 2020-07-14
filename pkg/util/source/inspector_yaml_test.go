@@ -99,7 +99,7 @@ func TestYAMLRestDSL(t *testing.T) {
 			err := inspector.Extract(code, &meta)
 			assert.Nil(t, err)
 			assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityRest))
-			assert.True(t, meta.Dependencies.Has("camel:log"))
+			assert.True(t, meta.Dependencies.Has("camel-quarkus:log"))
 			assert.True(t, meta.ExposesHTTPServices)
 		})
 	}

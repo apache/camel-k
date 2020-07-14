@@ -298,8 +298,6 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 			assert.Nil(t, err)
 
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
-			assert.Equal(t, "true", environment.ApplicationProperties["customizer.platform-http.enabled"])
-			assert.Equal(t, "8080", environment.ApplicationProperties["customizer.platform-http.bind-port"])
 		})
 	}
 }
@@ -347,7 +345,7 @@ func TestKnativePlatformHttpDepdencies(t *testing.T) {
 			assert.Nil(t, err)
 
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
-			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-http")
+			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-platform-http")
 		})
 	}
 }

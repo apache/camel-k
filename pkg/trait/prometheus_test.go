@@ -173,7 +173,7 @@ func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
 	enabled := true
 	trait.Enabled = &enabled
 
-	camelCatalog, err := camel.DefaultCatalog()
+	camelCatalog, err := camel.MainCatalog()
 	if err != nil {
 		panic(err)
 	}
