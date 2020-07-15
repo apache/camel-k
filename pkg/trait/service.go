@@ -37,7 +37,7 @@ type serviceTrait struct {
 	// To automatically detect from the code if a Service needs to be created.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Enable Service to be exposed as NodePort
-	NodePort *bool `property:"nodeport" json:"nodeport,omitempty"`
+	NodePort *bool `property:"node-port" json:"nodePort,omitempty"`
 }
 
 const (
@@ -106,7 +106,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	return true, nil
 }
 
-func (t *serviceTrait) isNodeport() bool {
+func (t *serviceTrait) isNodePort() bool {
 	return t.NodePort == nil || *t.NodePort
 
 }
@@ -117,10 +117,9 @@ func (t *serviceTrait) Apply(e *Environment) error {
 	if svc == nil {
 		svc = getServiceFor(e)
 
-		if t.isNodeport() {
-			svc.Spec.Type = "NodePort"
+		if t.isNodePort() {
+			svc.Spec.Type = corev1.ServiceTypeNodePort
 		}
-
 	}
 	e.Resources.Add(svc)
 	return nil
