@@ -34,15 +34,15 @@ import (
 type threeScaleTrait struct {
 	trait.BaseTrait `property:",squash"`
 	// Enables automatic configuration of the trait.
-	Auto *bool `property:"auto"`
+	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The scheme to use to contact the service (default `http`)
-	Scheme string `property:"scheme"`
+	Scheme string `property:"scheme" json:"scheme,omitempty"`
 	// The path where the API is published (default `/`)
-	Path string `property:"path"`
+	Path string `property:"path" json:"path,omitempty"`
 	// The port where the service is exposed (default `80`)
-	Port int `property:"port"`
+	Port int `property:"port" json:"port,omitempty"`
 	// The path where the Open-API specification is published (default `/openapi.json`)
-	DescriptionPath *string `property:"description-path"`
+	DescriptionPath *string `property:"description-path" json:"descriptionPath,omitempty"`
 }
 
 const (
