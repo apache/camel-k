@@ -31,7 +31,7 @@ import (
 type quarkusTrait struct {
 	BaseTrait `property:",squash"`
 	// The Quarkus runtime type (reserved for future use)
-	Native bool `property:"native"`
+	Native bool `property:"native" json:"native,omitempty"`
 }
 
 func newQuarkusTrait() Trait {
