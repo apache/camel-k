@@ -111,14 +111,15 @@ func TestApplyJolokiaTraitWithoutContainerShouldReportJolokiaUnavailable(t *test
 
 func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
-	options := "host=explicit-host," +
-		"discoveryEnabled=true," +
-		"protocol=http," +
-		"caCert=.cacert," +
-		"extendedClientCheck=false," +
-		"clientPrincipal=cn:any," +
-		"useSslClientAuthentication=false"
-	trait.Options = &options
+	trait.Options = []string{
+		"host=explicit-host",
+		"discoveryEnabled=true",
+		"protocol=http",
+		"caCert=.cacert",
+		"extendedClientCheck=false",
+		"clientPrincipal=cn:any",
+		"useSslClientAuthentication=false",
+	}
 
 	err := trait.Apply(environment)
 
@@ -135,107 +136,132 @@ func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 
 func TestApplyJolokiaTraitWithUnparseableOptionShouldReturnError(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
-	options := "unparseable options"
-	trait.Options = &options
+	trait.Options = []string{"unparseable options"}
 
 	err := trait.Apply(environment)
 
 	assert.NotNil(t, err)
 }
 
-func TestSetDefaultJolokiaOptionShoudlNotOverrideOptionsMap(t *testing.T) {
+func TestSetDefaultJolokiaOptionShouldNotOverrideOptionsMap(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{"key": "value"}
 	optionValue := ""
-	setDefaultJolokiaOption(options, &optionValue, "key", "new-value")
+
+	trait.setDefaultJolokiaOption(options, &optionValue, "key", "new-value")
+
 	assert.Equal(t, "", optionValue)
 }
 
-func TestSetDefaultStringJolokiaOptionShoudlSucceed(t *testing.T) {
+func TestSetDefaultStringJolokiaOptionShouldSucceed(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	var option *string
-	setDefaultJolokiaOption(options, &option, "key", "new-value")
+
+	trait.setDefaultJolokiaOption(options, &option, "key", "new-value")
+
 	assert.Equal(t, "new-value", *option)
 }
 
-func TestSetDefaultStringJolokiaOptionShoudlNotOverrideExistingValue(t *testing.T) {
+func TestSetDefaultStringJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := "existing-value"
 	option := &optionValue
-	setDefaultJolokiaOption(options, &option, "key", "new-value")
+
+	trait.setDefaultJolokiaOption(options, &option, "key", "new-value")
+
 	assert.Equal(t, "existing-value", *option)
 }
 
-func TestSetDefaultIntJolokiaOptionShoudlSucceed(t *testing.T) {
+func TestSetDefaultIntJolokiaOptionShouldSucceed(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	var option *int
-	setDefaultJolokiaOption(options, &option, "key", 2)
+
+	trait.setDefaultJolokiaOption(options, &option, "key", 2)
+
 	assert.Equal(t, 2, *option)
 }
 
-func TestSetDefaultIntJolokiaOptionShoudlNotOverrideExistingValue(t *testing.T) {
+func TestSetDefaultIntJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := 1
 	option := &optionValue
-	setDefaultJolokiaOption(options, &option, "key", 2)
+
+	trait.setDefaultJolokiaOption(options, &option, "key", 2)
+
 	assert.Equal(t, 1, *option)
 }
 
-func TestSetDefaultBoolJolokiaOptionShoudlSucceed(t *testing.T) {
+func TestSetDefaultBoolJolokiaOptionShouldSucceed(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	var option *bool
-	setDefaultJolokiaOption(options, &option, "key", true)
+
+	trait.setDefaultJolokiaOption(options, &option, "key", true)
+
 	assert.Equal(t, true, *option)
 }
 
-func TestSetDefaultBoolJolokiaOptionShoudlNotOverrideExistingValue(t *testing.T) {
+func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	option := new(bool)
-	setDefaultJolokiaOption(options, &option, "key", true)
+
+	trait.setDefaultJolokiaOption(options, &option, "key", true)
+
 	assert.Equal(t, false, *option)
 }
 
 func TestAddStringOptionToJolokiaOptions(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := "value"
 
-	addToJolokiaOptions(options, "key", &optionValue)
+	trait.addToJolokiaOptions(options, "key", &optionValue)
 
 	assert.Len(t, options, 1)
 	assert.Equal(t, "value", options["key"])
 }
 
 func TestAddIntOptionToJolokiaOptions(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
-	addToJolokiaOptions(options, "key", 1)
+	trait.addToJolokiaOptions(options, "key", 1)
 
 	assert.Len(t, options, 1)
 	assert.Equal(t, "1", options["key"])
 }
 
 func TestAddIntPointerOptionToJolokiaOptions(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := 1
 
-	addToJolokiaOptions(options, "key", &optionValue)
+	trait.addToJolokiaOptions(options, "key", &optionValue)
 
 	assert.Len(t, options, 1)
 	assert.Equal(t, "1", options["key"])
 }
 
 func TestAddBoolPointerOptionToJolokiaOptions(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
-	addToJolokiaOptions(options, "key", new(bool))
+	trait.addToJolokiaOptions(options, "key", new(bool))
 
 	assert.Len(t, options, 1)
 	assert.Equal(t, "false", options["key"])
 }
 
 func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {
+	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
-	addToJolokiaOptions(options, "key", new(rune))
+	trait.addToJolokiaOptions(options, "key", new(rune))
 
 	assert.Len(t, options, 0)
 }
