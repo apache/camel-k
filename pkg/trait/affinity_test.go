@@ -67,7 +67,7 @@ func TestApplyEmptyAffinityLabelsDoesSucceed(t *testing.T) {
 
 func TestApplyNodeAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait, environment, deployment := createNominalAffinityTest()
-	affinityTrait.NodeAffinityLabels = "criteria = value"
+	affinityTrait.NodeAffinityLabels = []string{"criteria = value"}
 
 	err := affinityTrait.Apply(environment)
 
@@ -84,7 +84,7 @@ func TestApplyNodeAffinityLabelsDoesSucceed(t *testing.T) {
 func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait, environment, deployment := createNominalAffinityTest()
 	affinityTrait.PodAntiAffinity = true
-	affinityTrait.PodAntiAffinityLabels = "criteria != value"
+	affinityTrait.PodAntiAffinityLabels = []string{"criteria != value"}
 
 	err := affinityTrait.Apply(environment)
 
@@ -106,7 +106,7 @@ func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait, environment, deployment := createNominalAffinityTest()
 	affinityTrait.PodAffinity = true
-	affinityTrait.PodAffinityLabels = "!criteria"
+	affinityTrait.PodAffinityLabels = []string{"!criteria"}
 
 	err := affinityTrait.Apply(environment)
 
