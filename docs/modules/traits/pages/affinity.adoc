@@ -36,16 +36,16 @@ The following configuration options are available:
 | Never co-locates multiple replicas of the integration in the same node (default *false*).
 
 | affinity.node-affinity-labels
-| string
+| []string
 | Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
 
 | affinity.pod-affinity-labels
-| string
+| []string
 | Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
 integration pod(s) should be co-located with.
 
 | affinity.pod-anti-affinity-labels
-| string
+| []string
 | Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
 integration pod(s) should not be co-located with.
 

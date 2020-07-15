@@ -28,12 +28,12 @@ The following configuration options are available:
 | Can be used to enable or disable a trait. All traits share this common property.
 
 | owner.target-annotations
-| string
-| The annotations to be transferred (A comma-separated list of label keys)
+| []string
+| The set of annotations to be transferred
 
 | owner.target-labels
-| string
-| The labels to be transferred (A comma-separated list of label keys)
+| []string
+| The set of labels to be transferred
 
 |===
 
