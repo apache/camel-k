@@ -34,7 +34,7 @@ import (
 type camelTrait struct {
 	BaseTrait `property:",squash"`
 	// The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
-	RuntimeVersion string `property:"runtime-version"`
+	RuntimeVersion string `property:"runtime-version" json:"runtimeVersion,omitempty"`
 }
 
 func newCamelTrait() Trait {
