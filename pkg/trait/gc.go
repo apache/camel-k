@@ -63,7 +63,7 @@ const (
 type garbageCollectorTrait struct {
 	BaseTrait `property:",squash"`
 	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)
-	DiscoveryCache *discoveryCacheType `property:"discovery-cache"`
+	DiscoveryCache *discoveryCacheType `property:"discovery-cache" json:"discoveryCache,omitempty"`
 }
 
 func newGarbageCollectorTrait() Trait {
