@@ -64,7 +64,7 @@ type IntegrationStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 // +genclient
-// +kubebuilder:resource:path=integrations,scope=Namespaced,shortName=it
+// +kubebuilder:resource:path=integrations,scope=Namespaced,shortName=it,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration phase"

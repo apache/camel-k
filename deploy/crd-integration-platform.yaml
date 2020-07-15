@@ -35,6 +35,9 @@ spec:
     shortNames:
       - ip
     singular: integrationplatform
+    categories:
+      - kamel
+      - camel
   scope: Namespaced
   subresources:
     status: {}

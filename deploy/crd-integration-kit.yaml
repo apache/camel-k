@@ -43,6 +43,9 @@ spec:
     shortNames:
       - ik
     singular: integrationkit
+    categories:
+      - kamel
+      - camel
   scope: Namespaced
   subresources:
     status: {}

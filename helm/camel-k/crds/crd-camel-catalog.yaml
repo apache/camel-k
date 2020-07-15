@@ -40,6 +40,9 @@ spec:
     shortNames:
       - cc
     singular: camelcatalog
+    categories:
+      - kamel
+      - camel
   scope: Namespaced
   subresources:
     status: {}
