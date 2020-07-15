@@ -51,15 +51,15 @@ import (
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
 	// The Prometheus endpoint port (default `9779`, or `8080` with Quarkus).
-	Port *int `property:"port"`
+	Port *int `property:"port" json:"port,omitempty"`
 	// Whether a `ServiceMonitor` resource is created (default `true`).
-	ServiceMonitor bool `property:"service-monitor"`
+	ServiceMonitor bool `property:"service-monitor" json:"serviceMonitor,omitempty"`
 	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
-	ServiceMonitorLabels string `property:"service-monitor-labels"`
+	ServiceMonitorLabels []string `property:"service-monitor-labels" json:"serviceMonitorLabels,omitempty"`
 	// To use a custom ConfigMap containing the Prometheus JMX exporter configuration (under the `content` ConfigMap key).
 	// When this property is left empty (default), Camel K generates a standard Prometheus configuration for the integration.
 	// It is not applicable when using Quarkus.
-	ConfigMap string `property:"configmap"`
+	ConfigMap string `property:"configmap" json:"configMap,omitempty"`
 }
 
 const (
@@ -218,7 +218,7 @@ func (t *prometheusTrait) getServicePort() *corev1.ServicePort {
 }
 
 func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.ServiceMonitor, error) {
-	labels, err := parseCsvMap(&t.ServiceMonitorLabels)
+	labels, err := keyValuePairArrayAsStringMap(t.ServiceMonitorLabels)
 	if err != nil {
 		return nil, err
 	}

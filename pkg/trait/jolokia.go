@@ -19,7 +19,6 @@ package trait
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -68,8 +67,6 @@ type jolokiaTrait struct {
 	Options []string `property:"options" json:"options,omitempty"`
 }
 
-var optionParsingRegexp = regexp.MustCompile(`^(\w+)=(.+)$`)
-
 func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
 		BaseTrait: NewBaseTrait("jolokia", 1800),
@@ -106,7 +103,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	}
 
 	// Configure the Jolokia Java agent, first with the extra options
-	options, err := t.parseOptions(t.Options)
+	options, err := keyValuePairArrayAsStringMap(t.Options)
 	if err != nil {
 		return err
 	}
@@ -166,20 +163,6 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	container.Ports = append(container.Ports, containerPort)
 
 	return nil
-}
-
-func (t *jolokiaTrait) parseOptions(options []string) (map[string]string, error) {
-	m := make(map[string]string)
-
-	for _, option := range options {
-		if match := optionParsingRegexp.FindStringSubmatch(option); match != nil {
-			m[match[1]] = match[2]
-		} else {
-			return nil, fmt.Errorf("unable to parse Jolokia option: %s", option)
-		}
-	}
-
-	return m, nil
 }
 
 func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option interface{}, key string, value interface{}) {
