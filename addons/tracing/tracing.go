@@ -35,15 +35,15 @@ import (
 type tracingTrait struct {
 	trait.BaseTrait `property:",squash"`
 	// Enables automatic configuration of the trait, including automatic discovery of the tracing endpoint.
-	Auto *bool `property:"auto"`
+	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes tracing data (defaults to the integration name)
-	ServiceName string `property:"service-name"`
+	ServiceName string `property:"service-name" json:"serviceName,omitempty"`
 	// The target endpoint of the OpenTracing service (automatically discovered by default)
-	Endpoint string `property:"endpoint"`
+	Endpoint string `property:"endpoint" json:"endpoint,omitempty"`
 	// The sampler type (default "const")
-	SamplerType *string `property:"sampler-type"`
+	SamplerType *string `property:"sampler-type" json:"samplerType,omitempty"`
 	// The sampler specific param (default "1")
-	SamplerParam *string `property:"sampler-param"`
+	SamplerParam *string `property:"sampler-param" json:"samplerParam,omitempty"`
 }
 
 const (
