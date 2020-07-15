@@ -23,16 +23,16 @@ traits:
     description: Never co-locates multiple replicas of the integration in the same
       node (default *false*).
   - name: node-affinity-labels
-    type: string
+    type: '[]string'
     description: Defines a set of nodes the integration pod(s) are eligible to be
       scheduled on, based on labels on the node.
   - name: pod-affinity-labels
-    type: string
+    type: '[]string'
     description: Defines a set of pods (namely those matching the label selector,
       relative to the given namespace) that theintegration pod(s) should be co-located
       with.
   - name: pod-anti-affinity-labels
-    type: string
+    type: '[]string'
     description: Defines a set of pods (namely those matching the label selector,
       relative to the given namespace) that theintegration pod(s) should not be co-located
       with.
@@ -253,11 +253,7 @@ traits:
   - OpenShift
   description: The Deployment trait is responsible for generating the Kubernetes deployment
     that will make surethe integration will run in the cluster.
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+  properties: []
 - name: environment
   platform: true
   profiles:
@@ -390,10 +386,9 @@ traits:
     description: Whether client certificates should be used for authentication (default
       `true` for OpenShift).
   - name: options
-    type: string
-    description: 'A comma-separated list of additional Jolokia options as definedin
-      https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration
-      options],e.g.: `keystore=...,executor=...`'
+    type: '[]string'
+    description: A list of additional Jolokia options as definedin https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM
+      agent configuration options]
 - name: jvm
   platform: true
   profiles:
@@ -413,17 +408,17 @@ traits:
   - name: debug-suspend
     type: bool
     description: Suspends the target JVM immediately before the main class is loaded
+  - name: print-command
+    type: bool
+    description: Prints the command used the start the JVM in the container logs (default
+      `true`)
   - name: debug-address
     type: string
     description: Transport address at which to listen for the newly launched JVM (default
       `*:5005`)
   - name: options
-    type: string
-    description: A comma-separated list of JVM options
-  - name: print-command
-    type: bool
-    description: Prints the command used the start the JVM in the container logs (default
-      `true`)
+    type: '[]string'
+    description: A list of JVM options
 - name: knative-service
   platform: false
   profiles:
@@ -431,7 +426,7 @@ traits:
   description: The Knative Service trait allows to configure options when running
     the integration as Knative service instead ofa standard Kubernetes Deployment.Running
     integrations as Knative Services adds auto-scaling (and scaling-to-zero) features,
-    but those features are only meaningful when the routes use a HTTP endpoint consumer.
+    but those featuresare only meaningful when the routes use a HTTP endpoint consumer.
   properties:
   - name: enabled
     type: bool
@@ -487,29 +482,29 @@ traits:
     type: string
     description: Can be used to inject a Knative complete configuration in JSON format.
   - name: channel-sources
-    type: string
-    description: Comma-separated list of channels used as source of integration routes.Can
-      contain simple channel names or full Camel URIs.
+    type: '[]string'
+    description: List of channels used as source of integration routes.Can contain
+      simple channel names or full Camel URIs.
   - name: channel-sinks
-    type: string
-    description: Comma-separated list of channels used as destination of integration
-      routes.Can contain simple channel names or full Camel URIs.
+    type: '[]string'
+    description: List of channels used as destination of integration routes.Can contain
+      simple channel names or full Camel URIs.
   - name: endpoint-sources
-    type: string
-    description: Comma-separated list of channels used as source of integration routes.
+    type: '[]string'
+    description: List of channels used as source of integration routes.
   - name: endpoint-sinks
-    type: string
-    description: Comma-separated list of endpoints used as destination of integration
-      routes.Can contain simple endpoint names or full Camel URIs.
+    type: '[]string'
+    description: List of endpoints used as destination of integration routes.Can contain
+      simple endpoint names or full Camel URIs.
   - name: event-sources
-    type: string
-    description: Comma-separated list of event types that the integration will be
-      subscribed to.Can contain simple event types or full Camel URIs (to use a specific
-      broker different from "default").
+    type: '[]string'
+    description: List of event types that the integration will be subscribed to.Can
+      contain simple event types or full Camel URIs (to use a specific broker different
+      from "default").
   - name: event-sinks
-    type: string
-    description: Comma-separated list of event types that the integration will produce.Can
-      contain simple event types or full Camel URIs (to use a specific broker).
+    type: '[]string'
+    description: List of event types that the integration will produce.Can contain
+      simple event types or full Camel URIs (to use a specific broker).
   - name: filter-source-channels
     type: bool
     description: Enables filtering on events based on the header "ce-knativehistory".
@@ -586,12 +581,11 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: target-annotations
-    type: string
-    description: The annotations to be transferred (A comma-separated list of label
-      keys)
+    type: '[]string'
+    description: The set of annotations to be transferred
   - name: target-labels
-    type: string
-    description: The labels to be transferred (A comma-separated list of label keys)
+    type: '[]string'
+    description: The set of labels to be transferred
 - name: platform
   platform: true
   profiles:
@@ -643,7 +637,7 @@ traits:
     type: bool
     description: Whether a `ServiceMonitor` resource is created (default `true`).
   - name: service-monitor-labels
-    type: string
+    type: '[]string'
     description: The `ServiceMonitor` resource labels, applicable when `service-monitor`
       is `true`.
   - name: configmap
@@ -754,6 +748,9 @@ traits:
   - name: auto
     type: bool
     description: To automatically detect from the code if a Service needs to be created.
+  - name: node-port
+    type: bool
+    description: Enable Service to be exposed as NodePort
 - name: 3scale
   platform: false
   profiles:
