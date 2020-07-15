@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -38,36 +39,36 @@ type jolokiaTrait struct {
 	// The PEM encoded CA certification file path, used to verify client certificates,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).
-	CaCert *string `property:"ca-cert"`
+	CaCert *string `property:"ca-cert" json:"CACert,omitempty"`
 	// The principal(s) which must be given in a client certificate to allow access to the Jolokia endpoint,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc` and `cn=fuse-console.fuse.svc` for OpenShift).
-	ClientPrincipal []string `property:"client-principal"`
+	ClientPrincipal []string `property:"client-principal" json:"clientPrincipal,omitempty"`
 	// Listen for multicast requests (default `false`)
-	DiscoveryEnabled *bool `property:"discovery-enabled"`
+	DiscoveryEnabled *bool `property:"discovery-enabled" json:"discoveryEnabled,omitempty"`
 	// Mandate the client certificate contains a client flag in the extended key usage section,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `true` for OpenShift).
-	ExtendedClientCheck *bool `property:"extended-client-check"`
+	ExtendedClientCheck *bool `property:"extended-client-check" json:"extendedClientCheck,omitempty"`
 	// The Host address to which the Jolokia agent should bind to. If `"\*"` or `"0.0.0.0"` is given,
 	// the servers binds to every network interface (default `"*"`).
-	Host *string `property:"host"`
+	Host *string `property:"host" json:"host,omitempty"`
 	// The password used for authentication, applicable when the `user` option is set.
-	Password *string `property:"password"`
+	Password *string `property:"password" json:"password,omitempty"`
 	// The Jolokia endpoint port (default `8778`).
-	Port int `property:"port"`
+	Port int `property:"port" json:"port,omitempty"`
 	// The protocol to use, either `http` or `https` (default `https` for OpenShift)
-	Protocol *string `property:"protocol"`
+	Protocol *string `property:"protocol" json:"protocol,omitempty"`
 	// The user to be used for authentication
-	User *string `property:"user"`
+	User *string `property:"user" json:"user,omitempty"`
 	// Whether client certificates should be used for authentication (default `true` for OpenShift).
-	UseSslClientAuthentication *bool `property:"use-ssl-client-authentication"`
-
-	// A comma-separated list of additional Jolokia options as defined
-	// in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration options],
-	// e.g.: `keystore=...,executor=...`
-	Options *string `property:"options"`
+	UseSslClientAuthentication *bool `property:"use-ssl-client-authentication" json:"useSSLClientAuthentication,omitempty"`
+	// A list of additional Jolokia options as defined
+	// in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration options]
+	Options []string `property:"options" json:"options,omitempty"`
 }
+
+var optionParsingRegexp = regexp.MustCompile(`^(\w+)=(.+)$`)
 
 func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
@@ -105,26 +106,21 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	}
 
 	// Configure the Jolokia Java agent, first with the extra options
-	options, err := parseCsvMap(t.Options)
+	options, err := t.parseOptions(t.Options)
 	if err != nil {
 		return err
 	}
 
-	if len(t.ClientPrincipal) == 1 {
-		// Work-around the lack of proper support for multi-valued trait options from the CLI
-		t.ClientPrincipal = strings.Split(t.ClientPrincipal[0], ",")
-	}
-
-	setDefaultJolokiaOption(options, &t.Host, "host", "*")
-	setDefaultJolokiaOption(options, &t.DiscoveryEnabled, "discoveryEnabled", false)
+	t.setDefaultJolokiaOption(options, &t.Host, "host", "*")
+	t.setDefaultJolokiaOption(options, &t.DiscoveryEnabled, "discoveryEnabled", false)
 
 	// Configure HTTPS by default for OpenShift
 	if e.DetermineProfile() == v1.TraitProfileOpenShift {
-		setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
-		setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
-		setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
-		setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
-		setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", []string{
+		t.setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
+		t.setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
+		t.setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
+		t.setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
+		t.setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", []string{
 			// Master API proxy for OpenShift 3
 			"cn=system:master-proxy",
 			// Default Hawtio and Fuse consoles for OpenShift 4
@@ -134,16 +130,16 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	}
 
 	// Then add explicitly set trait configuration properties
-	addToJolokiaOptions(options, "caCert", t.CaCert)
-	addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
-	addToJolokiaOptions(options, "discoveryEnabled", t.DiscoveryEnabled)
-	addToJolokiaOptions(options, "extendedClientCheck", t.ExtendedClientCheck)
-	addToJolokiaOptions(options, "host", t.Host)
-	addToJolokiaOptions(options, "password", t.Password)
-	addToJolokiaOptions(options, "port", t.Port)
-	addToJolokiaOptions(options, "protocol", t.Protocol)
-	addToJolokiaOptions(options, "user", t.User)
-	addToJolokiaOptions(options, "useSslClientAuthentication", t.UseSslClientAuthentication)
+	t.addToJolokiaOptions(options, "caCert", t.CaCert)
+	t.addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
+	t.addToJolokiaOptions(options, "discoveryEnabled", t.DiscoveryEnabled)
+	t.addToJolokiaOptions(options, "extendedClientCheck", t.ExtendedClientCheck)
+	t.addToJolokiaOptions(options, "host", t.Host)
+	t.addToJolokiaOptions(options, "password", t.Password)
+	t.addToJolokiaOptions(options, "port", t.Port)
+	t.addToJolokiaOptions(options, "protocol", t.Protocol)
+	t.addToJolokiaOptions(options, "user", t.User)
+	t.addToJolokiaOptions(options, "useSslClientAuthentication", t.UseSslClientAuthentication)
 
 	// Options must be sorted so that the environment variable value is consistent over iterations,
 	// otherwise the value changes which results in triggering a new deployment.
@@ -172,7 +168,21 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	return nil
 }
 
-func setDefaultJolokiaOption(options map[string]string, option interface{}, key string, value interface{}) {
+func (t *jolokiaTrait) parseOptions(options []string) (map[string]string, error) {
+	m := make(map[string]string)
+
+	for _, option := range options {
+		if match := optionParsingRegexp.FindStringSubmatch(option); match != nil {
+			m[match[1]] = match[2]
+		} else {
+			return nil, fmt.Errorf("unable to parse Jolokia option: %s", option)
+		}
+	}
+
+	return m, nil
+}
+
+func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option interface{}, key string, value interface{}) {
 	// Do not override existing option
 	if _, ok := options[key]; ok {
 		return
@@ -200,7 +210,7 @@ func setDefaultJolokiaOption(options map[string]string, option interface{}, key 
 	}
 }
 
-func addToJolokiaOptions(options map[string]string, key string, value interface{}) {
+func (t *jolokiaTrait) addToJolokiaOptions(options map[string]string, key string, value interface{}) {
 	switch v := value.(type) {
 	case *bool:
 		if v != nil {
