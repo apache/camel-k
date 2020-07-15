@@ -47,7 +47,7 @@ const builderDir = "/builder"
 type builderTrait struct {
 	BaseTrait `property:",squash"`
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-	Verbose bool `property:"verbose"`
+	Verbose bool `property:"verbose" json:"verbose,omitempty"`
 }
 
 func newBuilderTrait() Trait {
