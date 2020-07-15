@@ -111,25 +111,17 @@ func CollectConfigurationPairs(configurationType string, configurable ...v1.Conf
 	return result
 }
 
-var (
-	csvMapValidatingRegexp = regexp.MustCompile(`^(\w+)=([^,]+)(?:,(\w+)=([^,]+))*$`)
-	csvMapParsingRegexp    = regexp.MustCompile(`(\w+)=([^,]+)`)
-)
+var keyValuePairRegexp = regexp.MustCompile(`^(\w+)=(.+)$`)
 
-func parseCsvMap(csvMap *string) (map[string]string, error) {
+func keyValuePairArrayAsStringMap(pairs []string) (map[string]string, error) {
 	m := make(map[string]string)
 
-	if csvMap == nil || len(*csvMap) == 0 {
-		return m, nil
-	}
-
-	if !csvMapValidatingRegexp.MatchString(*csvMap) {
-		return nil, fmt.Errorf("cannot parse [%s] as CSV map", *csvMap)
-	}
-
-	matches := csvMapParsingRegexp.FindAllStringSubmatch(*csvMap, -1)
-	for i := range matches {
-		m[matches[i][1]] = matches[i][2]
+	for _, pair := range pairs {
+		if match := keyValuePairRegexp.FindStringSubmatch(pair); match != nil {
+			m[match[1]] = match[2]
+		} else {
+			return nil, fmt.Errorf("unable to parse key/value pair: %s", pair)
+		}
 	}
 
 	return m, nil
