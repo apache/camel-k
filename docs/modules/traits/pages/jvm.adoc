@@ -34,17 +34,17 @@ The following configuration options are available:
 | bool
 | Suspends the target JVM immediately before the main class is loaded
 
+| jvm.print-command
+| bool
+| Prints the command used the start the JVM in the container logs (default `true`)
+
 | jvm.debug-address
 | string
 | Transport address at which to listen for the newly launched JVM (default `*:5005`)
 
 | jvm.options
-| string
-| A comma-separated list of JVM options
-
-| jvm.print-command
-| bool
-| Prints the command used the start the JVM in the container logs (default `true`)
+| []string
+| A list of JVM options
 
 |===
 

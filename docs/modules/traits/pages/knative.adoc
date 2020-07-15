@@ -35,32 +35,32 @@ The following configuration options are available:
 | Can be used to inject a Knative complete configuration in JSON format.
 
 | knative.channel-sources
-| string
-| Comma-separated list of channels used as source of integration routes.
+| []string
+| List of channels used as source of integration routes.
 Can contain simple channel names or full Camel URIs.
 
 | knative.channel-sinks
-| string
-| Comma-separated list of channels used as destination of integration routes.
+| []string
+| List of channels used as destination of integration routes.
 Can contain simple channel names or full Camel URIs.
 
 | knative.endpoint-sources
-| string
-| Comma-separated list of channels used as source of integration routes.
+| []string
+| List of channels used as source of integration routes.
 
 | knative.endpoint-sinks
-| string
-| Comma-separated list of endpoints used as destination of integration routes.
+| []string
+| List of endpoints used as destination of integration routes.
 Can contain simple endpoint names or full Camel URIs.
 
 | knative.event-sources
-| string
-| Comma-separated list of event types that the integration will be subscribed to.
+| []string
+| List of event types that the integration will be subscribed to.
 Can contain simple event types or full Camel URIs (to use a specific broker different from "default").
 
 | knative.event-sinks
-| string
-| Comma-separated list of event types that the integration will produce.
+| []string
+| List of event types that the integration will produce.
 Can contain simple event types or full Camel URIs (to use a specific broker).
 
 | knative.filter-source-channels

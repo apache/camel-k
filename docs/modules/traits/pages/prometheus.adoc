@@ -44,7 +44,7 @@ The following configuration options are available:
 | Whether a `ServiceMonitor` resource is created (default `true`).
 
 | prometheus.service-monitor-labels
-| string
+| []string
 | The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 
 | prometheus.configmap

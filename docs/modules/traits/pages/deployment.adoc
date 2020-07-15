@@ -15,7 +15,7 @@ WARNING: The deployment trait is a *platform trait*: disabling it may compromise
 
 Trait properties can be specified when running any integration with the CLI:
 ```
-kamel run --trait deployment.[key]=[value] --trait deployment.[key2]=[value2] integration.groovy
+kamel run --trait deployment.[key]=[value] integration.groovy
 ```
 The following configuration options are available:
 
