@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -38,17 +39,17 @@ import (
 type affinityTrait struct {
 	BaseTrait `property:",squash"`
 	// Always co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAffinity bool `property:"pod-affinity"`
+	PodAffinity bool `property:"pod-affinity" json:"podAffinity,omitempty"`
 	// Never co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAntiAffinity bool `property:"pod-anti-affinity"`
+	PodAntiAffinity bool `property:"pod-anti-affinity" json:"podAntiAffinity,omitempty"`
 	// Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
-	NodeAffinityLabels string `property:"node-affinity-labels"`
+	NodeAffinityLabels []string `property:"node-affinity-labels" json:"nodeAffinityLabels,omitempty"`
 	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
 	// integration pod(s) should be co-located with.
-	PodAffinityLabels string `property:"pod-affinity-labels"`
+	PodAffinityLabels []string `property:"pod-affinity-labels" json:"podAffinityLabels,omitempty"`
 	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
 	// integration pod(s) should not be co-located with.
-	PodAntiAffinityLabels string `property:"pod-anti-affinity-labels"`
+	PodAntiAffinityLabels []string `property:"pod-anti-affinity-labels" json:"podAntiAffinityLabels,omitempty"`
 }
 
 func newAffinityTrait() Trait {
@@ -92,12 +93,12 @@ func (t *affinityTrait) Apply(e *Environment) (err error) {
 }
 
 func (t *affinityTrait) addNodeAffinity(_ *Environment, deployment *appsv1.Deployment) error {
-	if t.NodeAffinityLabels == "" {
+	if len(t.NodeAffinityLabels) == 0 {
 		return nil
 	}
 
 	nodeSelectorRequirements := make([]corev1.NodeSelectorRequirement, 0)
-	selector, err := labels.Parse(t.NodeAffinityLabels)
+	selector, err := labels.Parse(strings.Join(t.NodeAffinityLabels, ","))
 	if err != nil {
 		return err
 	}
@@ -135,13 +136,13 @@ func (t *affinityTrait) addNodeAffinity(_ *Environment, deployment *appsv1.Deplo
 }
 
 func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deployment) error {
-	if !t.PodAffinity && t.PodAffinityLabels == "" {
+	if !t.PodAffinity && len(t.PodAffinityLabels) == 0 {
 		return nil
 	}
 
 	labelSelectorRequirements := make([]metav1.LabelSelectorRequirement, 0)
-	if t.PodAffinityLabels != "" {
-		selector, err := labels.Parse(t.PodAffinityLabels)
+	if len(t.PodAffinityLabels) > 0 {
+		selector, err := labels.Parse(strings.Join(t.PodAffinityLabels, ","))
 		if err != nil {
 			return err
 		}
@@ -191,13 +192,13 @@ func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deploy
 }
 
 func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.Deployment) error {
-	if !t.PodAntiAffinity && t.PodAntiAffinityLabels == "" {
+	if !t.PodAntiAffinity && len(t.PodAntiAffinityLabels) == 0 {
 		return nil
 	}
 
 	labelSelectorRequirements := make([]metav1.LabelSelectorRequirement, 0)
-	if t.PodAntiAffinityLabels != "" {
-		selector, err := labels.Parse(t.PodAntiAffinityLabels)
+	if len(t.PodAntiAffinityLabels) > 0 {
+		selector, err := labels.Parse(strings.Join(t.PodAntiAffinityLabels, ","))
 		if err != nil {
 			return err
 		}
