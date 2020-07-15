@@ -54,28 +54,28 @@ type cronTrait struct {
 	BaseTrait `property:",squash"`
 	// The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 	// mechanism to work correctly.
-	Schedule string `property:"schedule"`
+	Schedule string `property:"schedule" json:"schedule,omitempty"`
 	// A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
 	// A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
 	// activated (it's present in the `org.apache.camel.k:camel-k-runtime-cron` library).
 	//
 	// Supported components are currently: `cron`, `timer` and `quartz`.
-	Components string `property:"components"`
+	Components string `property:"components" json:"components,omitempty"`
 	// Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integration
 	// as Kubernetes CronJob.
-	Fallback *bool `property:"fallback"`
+	Fallback *bool `property:"fallback" json:"fallback,omitempty"`
 	// Specifies how to treat concurrent executions of a Job.
 	// Valid values are:
 	// - "Allow": allows CronJobs to run concurrently;
 	// - "Forbid" (default): forbids concurrent runs, skipping next run if previous run hasn't finished yet;
 	// - "Replace": cancels currently running job and replaces it with a new one
-	ConcurrencyPolicy string `property:"concurrency-policy"`
+	ConcurrencyPolicy string `property:"concurrency-policy" json:"concurrencyPolicy,omitempty"`
 	// Automatically deploy the integration as CronJob when all routes are
 	// either starting from a periodic consumer (only `cron`, `timer` and `quartz` are supported) or a passive consumer (e.g. `direct` is a passive consumer).
 	//
 	// It's required that all periodic consumers have the same period and it can be expressed as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`,
 	// while `35m` or `50s` cannot).
-	Auto *bool `property:"auto"`
+	Auto *bool `property:"auto" json:"auto,omitempty"`
 }
 
 var _ ControllerStrategySelector = &cronTrait{}
