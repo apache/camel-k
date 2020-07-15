@@ -289,7 +289,7 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	)
 }
 
-func TestServiceWithNodeport(t *testing.T) {
+func TestServiceWithNodePort(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -320,9 +320,9 @@ func TestServiceWithNodeport(t *testing.T) {
 				},
 				Traits: map[string]v1.TraitSpec{
 					"service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled":  true,
-						"auto":     false,
-						"nodeport": true,
+						"enabled":   true,
+						"auto":      false,
+						"node-port": true,
 					}),
 				},
 			},
@@ -368,5 +368,5 @@ func TestServiceWithNodeport(t *testing.T) {
 	assert.Len(t, s.Spec.Ports, 1)
 	assert.Equal(t, int32(80), s.Spec.Ports[0].Port)
 
-	assert.Equal(t, corev1.ServiceType("NodePort"), s.Spec.Type)
+	assert.Equal(t, corev1.ServiceTypeNodePort, s.Spec.Type)
 }
