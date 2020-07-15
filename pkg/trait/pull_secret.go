@@ -38,9 +38,9 @@ import (
 type pullSecretTrait struct {
 	BaseTrait `property:",squash"`
 	// The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.
-	SecretName string `property:"secret-name"`
+	SecretName string `property:"secret-name" json:"secretName,omitempty"`
 	// Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
-	Auto *bool `property:"auto"`
+	Auto *bool `property:"auto" json:"auto,omitempty"`
 }
 
 func newPullSecretTrait() Trait {
