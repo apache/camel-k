@@ -43,6 +43,9 @@ spec:
     shortNames:
       - it
     singular: integration
+    categories:
+      - kamel
+      - camel
   scope: Namespaced
   subresources:
     scale:

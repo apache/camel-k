@@ -139,7 +139,7 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 // +genclient
-// +kubebuilder:resource:path=builds,scope=Namespaced,shortName=ikb
+// +kubebuilder:resource:path=builds,scope=Namespaced,shortName=ikb,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The build phase"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`,description="The time at which the build was created"

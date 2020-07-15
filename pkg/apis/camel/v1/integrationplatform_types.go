@@ -51,7 +51,7 @@ type IntegrationPlatformStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 // +genclient
-// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip
+// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
 

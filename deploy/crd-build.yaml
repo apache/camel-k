@@ -51,6 +51,9 @@ spec:
     shortNames:
       - ikb
     singular: build
+    categories:
+      - kamel
+      - camel
   scope: Namespaced
   subresources:
     status: {}

@@ -52,7 +52,7 @@ type IntegrationKitStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 // +genclient
-// +kubebuilder:resource:path=integrationkits,scope=Namespaced,shortName=ik
+// +kubebuilder:resource:path=integrationkits,scope=Namespaced,shortName=ik,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration kit phase"
 // +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.type`,description="The integration kit type"
