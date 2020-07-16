@@ -176,6 +176,12 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 									public void configure() {
 										from("knative:endpoint/s3fileMover1")
 											.log("${body}");
+
+										from("knative:channel/channel-source-1")
+ 											.log("${body}");
+
+										from("knative:event/evt.type")
+ 											.log("${body}");
 									}
 								}
 							`,
@@ -240,6 +246,15 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	assert.NotNil(t, source)
 	assert.Empty(t, source.Host)
 	assert.Nil(t, source.Port)
+	assert.Empty(t, source.Metadata[knativeapi.CamelMetaKnativeReply])
+
+	channel := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "", "")
+	assert.NotNil(t, channel)
+	assert.Equal(t, "false", channel.Metadata[knativeapi.CamelMetaKnativeReply])
+
+	broker := ne.FindService("default", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, "", "")
+	assert.NotNil(t, broker)
+	assert.Equal(t, "false", broker.Metadata[knativeapi.CamelMetaKnativeReply])
 }
 
 func TestKnativePlatformHttpConfig(t *testing.T) {
