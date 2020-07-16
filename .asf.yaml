@@ -1,0 +1,11 @@
+github:
+  description: "Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers"
+  homepage: https://camel.apache.org
+  labels:
+    - camel
+    - integration
+    - kubernetes
+    - serverless
+    - knative
+    - openshift
+    - operator
