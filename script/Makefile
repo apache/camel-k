@@ -16,7 +16,7 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.1.0-SNAPSHOT
 LAST_RELEASED_VERSION := 1.0.0
-RUNTIME_VERSION := 1.3.0
+RUNTIME_VERSION := 1.4.0
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
@@ -30,7 +30,7 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO :=
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1228
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central

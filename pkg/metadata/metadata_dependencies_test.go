@@ -185,6 +185,7 @@ func TestDependenciesQuarkus(t *testing.T) {
 		[]string{
 			"camel-quarkus:http",
 			"camel-quarkus:log",
+			"camel-quarkus:mock",
 			"camel-quarkus:timer",
 			"camel-quarkus:twitter",
 			"camel-quarkus:direct",
