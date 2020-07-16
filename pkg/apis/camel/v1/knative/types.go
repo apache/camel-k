@@ -17,6 +17,8 @@ limitations under the License.
 
 package knative
 
+import "fmt"
+
 // CamelEnvironment is the top level configuration object expected by the Camel Knative component
 type CamelEnvironment struct {
 	Services []CamelServiceDefinition `json:"services"`
@@ -60,6 +62,14 @@ const (
 	CamelServiceTypeEvent CamelServiceType = "event"
 )
 
+func (s CamelServiceType) ResourceDescription(subject string) string {
+	prefix := ""
+	if s == CamelServiceTypeEvent {
+		prefix = "broker for "
+	}
+	return fmt.Sprintf("%s%s %s", prefix, string(s), subject)
+}
+
 // Meta Options
 const (
 	CamelMetaServicePath = "service.path"
@@ -71,6 +81,7 @@ const (
 
 	CamelMetaKnativeKind       = "knative.kind"
 	CamelMetaKnativeAPIVersion = "knative.apiVersion"
+	CamelMetaKnativeReply      = "knative.reply"
 
 	CamelMetaEndpointKind = "camel.endpoint.kind"
 

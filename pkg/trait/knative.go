@@ -246,6 +246,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 				knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 				knativeapi.CamelMetaKnativeKind:       ref.Kind,
+				knativeapi.CamelMetaKnativeReply:      "false",
 			}
 			if t.FilterSourceChannels != nil && *t.FilterSourceChannels {
 				meta[knativeapi.CamelMetaFilterPrefix+knativeHistoryHeader] = loc.Host
@@ -311,6 +312,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 				knativeapi.CamelMetaKnativeAPIVersion: serving.SchemeGroupVersion.String(),
 				knativeapi.CamelMetaKnativeKind:       "Service",
+				// knative.reply is left to default ("true") in case of simple service
 			},
 		}
 		env.Services = append(env.Services, svc)
@@ -351,6 +353,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 						knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 						knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 						knativeapi.CamelMetaKnativeKind:       ref.Kind,
+						knativeapi.CamelMetaKnativeReply:      "false",
 					},
 				}
 				env.Services = append(env.Services, svc)
@@ -424,18 +427,18 @@ func (t *knativeTrait) withServiceDo(
 		possibleRefs := knativeutil.FillMissingReferenceData(serviceType, ref)
 		actualRef, err := knativeutil.GetAddressableReference(t.Ctx, t.Client, possibleRefs, e.Integration.Namespace, ref.Name)
 		if err != nil && k8serrors.IsNotFound(err) {
-			return errors.Errorf("cannot find %s %s", serviceType, ref.Name)
+			return errors.Errorf("cannot find %s", serviceType.ResourceDescription(ref.Name))
 		} else if err != nil {
-			return errors.Wrapf(err, "error looking up %s %s", serviceType, ref.Name)
+			return errors.Wrapf(err, "error looking up %s", serviceType.ResourceDescription(ref.Name))
 		}
 		targetURL, err := knativeutil.GetSinkURL(t.Ctx, t.Client, actualRef, e.Integration.Namespace)
 		if err != nil {
-			return errors.Wrapf(err, "cannot determine address of %s %s", string(serviceType), ref.Name)
+			return errors.Wrapf(err, "cannot determine address of %s", serviceType.ResourceDescription(ref.Name))
 		}
-		t.L.Infof("Found URL for %s: %s", string(serviceType), targetURL.String())
+		t.L.Infof("Found URL for %s: %s", serviceType.ResourceDescription(ref.Name), targetURL.String())
 		err = gen(actualRef, targetURL, serviceURI)
 		if err != nil {
-			return errors.Wrapf(err, "unexpected error while executing handler for %s %s", string(serviceType), ref.Name)
+			return errors.Wrapf(err, "unexpected error while executing handler for %s", serviceType.ResourceDescription(ref.Name))
 		}
 	}
 	return nil
