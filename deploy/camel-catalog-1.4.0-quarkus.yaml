@@ -18,22 +18,22 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.3.0-quarkus
+  name: camel-catalog-1.4.0-quarkus
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.3.0
-    camel.apache.org/catalog.loader.version: 3.3.0
-    camel.apache.org/runtime.version: 1.3.0
+    camel.apache.org/catalog.version: 3.4.0
+    camel.apache.org/catalog.loader.version: 3.4.0
+    camel.apache.org/runtime.version: 1.4.0
     camel.apache.org/runtime.provider: quarkus
 spec:
   runtime:
-    version: 1.3.0
+    version: 1.4.0
     provider: quarkus
     applicationClass: io.quarkus.runner.GeneratedMain
     metadata:
-      camel.version: 3.3.0
-      quarkus.version: 1.5.0.Final
-      camel-quarkus.version: 1.0.0-CR2
+      camel.version: 3.4.0
+      quarkus.version: 1.6.0.Final
+      camel-quarkus.version: 1.0.0-CR3
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-quarkus
@@ -135,6 +135,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.influxdb.InfluxDbComponent
+    camel-quarkus-mock:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mock
+      schemes:
+      - id: mock
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.mock.MockComponent
     camel-quarkus-kubernetes:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-kubernetes
@@ -232,6 +241,24 @@ spec:
       - soapjaxb
       javaTypes:
       - org.apache.camel.dataformat.soap.SoapJaxbDataFormat
+    camel-quarkus-tika:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tika
+      schemes:
+      - id: tika
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.tika.TikaComponent
+    camel-quarkus-jolt:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jolt
+      schemes:
+      - id: jolt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jolt.JoltComponent
     camel-quarkus-validator:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-validator
@@ -429,6 +456,15 @@ spec:
       - tarfile
       javaTypes:
       - org.apache.camel.dataformat.tarfile.TarFileDataFormat
+    camel-quarkus-vertx:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vertx
+      schemes:
+      - id: vertx
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.VertxComponent
     camel-quarkus-jira:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jira
@@ -984,6 +1020,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.aws2.sqs.Sqs2Component
+    camel-quarkus-aws2-athena:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-athena
+      schemes:
+      - id: aws2-athena
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.athena.Athena2Component
     camel-quarkus-cassandraql:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-cassandraql
@@ -1018,6 +1063,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.servicenow.ServiceNowComponent
+    camel-quarkus-json-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-json-validator
+      schemes:
+      - id: json-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jsonvalidator.JsonValidatorComponent
     camel-quarkus-grpc:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-grpc

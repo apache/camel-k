@@ -18,22 +18,22 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.3.0-main
+  name: camel-catalog-1.4.0-main
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.3.0
-    camel.apache.org/catalog.loader.version: 3.3.0
-    camel.apache.org/runtime.version: 1.3.0
+    camel.apache.org/catalog.version: 3.4.0
+    camel.apache.org/catalog.loader.version: 3.4.0
+    camel.apache.org/runtime.version: 1.4.0
     camel.apache.org/runtime.provider: main
 spec:
   runtime:
-    version: 1.3.0
+    version: 1.4.0
     provider: main
     applicationClass: org.apache.camel.k.main.Application
     metadata:
-      camel.version: 3.3.0
-      quarkus.version: 1.5.0.Final
-      camel-quarkus.version: 1.0.0-CR2
+      camel.version: 3.4.0
+      quarkus.version: 1.6.0.Final
+      camel-quarkus.version: 1.0.0-CR3
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
@@ -2072,6 +2072,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.undertow.UndertowComponent
+    camel-resteasy:
+      groupId: org.apache.camel
+      artifactId: camel-resteasy
+      schemes:
+      - id: resteasy
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.resteasy.ResteasyComponent
     camel-robotframework:
       groupId: org.apache.camel
       artifactId: camel-robotframework
@@ -3086,6 +3095,15 @@ spec:
         passive: true
       javaTypes:
       - org.apache.camel.component.validator.ValidatorComponent
+    camel-aws2-athena:
+      groupId: org.apache.camel
+      artifactId: camel-aws2-athena
+      schemes:
+      - id: aws2-athena
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.athena.Athena2Component
     camel-k-loader-yaml:
       groupId: org.apache.camel.k
       artifactId: camel-k-loader-yaml
