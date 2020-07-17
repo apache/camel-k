@@ -21,12 +21,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
@@ -104,8 +105,8 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T) {
 	c, err := test.NewFakeClient(
 		//
-		// Should be discarded because it contains both of the required traits but one
-		// contains a different configuration value
+		// Should be discarded because it contains a subset of the required traits but
+		// with different configuration value
 		//
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -124,13 +125,12 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "false",
-					}),
+				Traits: v1.IntegrationKitTraits{
+					Quarkus: &v1.QuarkusTrait{
+						Trait: v1.Trait{
+							Enabled: trait.BoolP(false),
+						},
+					},
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -138,8 +138,8 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 		},
 		//
-		// Should be discarded because it contains a subset of the required traits but
-		// with different configuration value
+		// Should be discarded because it contains both of the required traits but
+		// also an additional one
 		//
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -158,10 +158,15 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "false",
-					}),
+				Traits: v1.IntegrationKitTraits{
+					Builder: &v1.BuilderTrait{
+						Verbose: true,
+					},
+					Quarkus: &v1.QuarkusTrait{
+						Trait: v1.Trait{
+							Enabled: trait.BoolP(true),
+						},
+					},
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -169,8 +174,8 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 		},
 		//
-		// Should be discarded because it contains both of the required traits but
-		// also an additional one
+		// Should NOT be discarded because it contains a subset of the required traits and
+		// same configuration values
 		//
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -189,47 +194,12 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
-					"gc": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
-				},
-			},
-			Status: v1.IntegrationKitStatus{
-				Phase: v1.IntegrationKitPhaseReady,
-			},
-		},
-		//
-		// Should NOT be discarded because it contains a subset of the required traits and
-		// same configuration values
-		//
-		&v1.IntegrationKit{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKitKind,
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-				Name:      "my-kit-4",
-				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
-				},
-			},
-			Spec: v1.IntegrationKitSpec{
-				Dependencies: []string{
-					"camel-core",
-					"camel-irc",
-				},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
+				Traits: v1.IntegrationKitTraits{
+					Quarkus: &v1.QuarkusTrait{
+						Trait: v1.Trait{
+							Enabled: trait.BoolP(true),
+						},
+					},
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -250,13 +220,22 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: map[string]v1.TraitSpec{
-				"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-					"enabled": "true",
-				}),
-				"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-					"enabled": "true",
-				}),
+			Traits: v1.Traits{
+				Knative: &v1.KnativeTrait{
+					Trait: v1.Trait{
+						Enabled: trait.BoolP(true),
+					},
+				},
+				KnativeService: &v1.KnativeServiceTrait{
+					Trait: v1.Trait{
+						Enabled: trait.BoolP(true),
+					},
+				},
+				Quarkus: &v1.QuarkusTrait{
+					Trait: v1.Trait{
+						Enabled: trait.BoolP(true),
+					},
+				},
 			},
 		},
 		Status: v1.IntegrationStatus{
@@ -269,5 +248,5 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, i)
-	assert.Equal(t, "my-kit-4", i.Name)
+	assert.Equal(t, "my-kit-3", i.Name)
 }

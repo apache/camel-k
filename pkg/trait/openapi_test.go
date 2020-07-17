@@ -20,11 +20,10 @@ package trait
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/stretchr/testify/assert"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 func TestRestDslTraitApplicability(t *testing.T) {

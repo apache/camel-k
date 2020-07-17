@@ -20,20 +20,16 @@ package trait
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/metadata"
-
 	"github.com/scylladb/go-set/strset"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Dependencies trait is internally used to automatically add runtime dependencies based on the
-// integration that the user wants to run.
-//
-// +camel-k:trait=dependencies
 type dependenciesTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	v1.DependenciesTrait
 }
 
 func newDependenciesTrait() Trait {

@@ -66,10 +66,9 @@ func TestApplyGarbageCollectorTraitDuringInitializationPhaseSkipPostActions(t *t
 	assert.Len(t, environment.PostActions, 0)
 }
 
-func createNominalGarbageCollectorTest() (*garbageCollectorTrait, *Environment) {
-	trait := newGarbageCollectorTrait().(*garbageCollectorTrait)
-	enabled := true
-	trait.Enabled = &enabled
+func createNominalGarbageCollectorTest() (*gcTrait, *Environment) {
+	trait := newGarbageCollectorTrait().(*gcTrait)
+	trait.Enabled = BoolP(true)
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),

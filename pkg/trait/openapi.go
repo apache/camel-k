@@ -26,18 +26,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/pkg/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -46,11 +45,9 @@ import (
 // OpenAPITraitName ---
 const OpenAPITraitName = "openapi"
 
-// The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
-//
-// +camel-k:trait=openapi
 type openAPITrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	v1.OpenAPITrait
 }
 
 func newOpenAPITrait() Trait {

@@ -23,13 +23,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
-// The environment trait is used internally to inject standard environment variables in the integration container,
-// such as `NAMESPACE`, `POD_NAME` and others.
-//
-// +camel-k:trait=environment
 type environmentTrait struct {
-	BaseTrait     `property:",squash"`
-	ContainerMeta bool `property:"container-meta" json:"containerMeta,omitempty"`
+	BaseTrait
+	v1.EnvironmentTrait
 }
 
 const (
@@ -52,8 +48,10 @@ const (
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
 		BaseTrait: NewBaseTrait("environment", 800),
-		// Enable injection of NAMESPACE and POD_NAME environment variables.
-		ContainerMeta: true,
+		// Enable injection of NAMESPACE and POD_NAME environment variables by default
+		EnvironmentTrait: v1.EnvironmentTrait{
+			ContainerMeta: true,
+		},
 	}
 }
 

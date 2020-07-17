@@ -26,17 +26,17 @@ import (
 
 // IntegrationSpec defines the desired state of Integration
 type IntegrationSpec struct {
-	Replicas           *int32               `json:"replicas,omitempty"`
-	Sources            []SourceSpec         `json:"sources,omitempty"`
-	Flows              []Flow               `json:"flows,omitempty"`
-	Resources          []ResourceSpec       `json:"resources,omitempty"`
-	Kit                string               `json:"kit,omitempty"`
-	Dependencies       []string             `json:"dependencies,omitempty"`
-	Profile            TraitProfile         `json:"profile,omitempty"`
-	Traits             map[string]TraitSpec `json:"traits,omitempty"`
-	Configuration      []ConfigurationSpec  `json:"configuration,omitempty"`
-	Repositories       []string             `json:"repositories,omitempty"`
-	ServiceAccountName string               `json:"serviceAccountName,omitempty"`
+	Replicas           *int32              `json:"replicas,omitempty"`
+	Sources            []SourceSpec        `json:"sources,omitempty"`
+	Flows              []Flow              `json:"flows,omitempty"`
+	Resources          []ResourceSpec      `json:"resources,omitempty"`
+	Kit                string              `json:"kit,omitempty"`
+	Dependencies       []string            `json:"dependencies,omitempty"`
+	Profile            TraitProfile        `json:"profile,omitempty"`
+	Traits             Traits              `json:"traits,omitempty"`
+	Configuration      []ConfigurationSpec `json:"configuration,omitempty"`
+	Repositories       []string            `json:"repositories,omitempty"`
+	ServiceAccountName string              `json:"serviceAccountName,omitempty"`
 }
 
 // IntegrationStatus defines the observed state of Integration

@@ -15,39 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package test
+package v1
 
-import (
-	"encoding/json"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-)
-
-// TraitSpecFromMap --
-func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
-	var trait v1.TraitSpec
-
-	data, err := json.Marshal(spec)
-	assert.Nil(t, err)
-
-	err = json.Unmarshal(data, &trait.Configuration)
-	assert.Nil(t, err)
-
-	return trait
-}
-
-// TraitSpecFromMap --
-func TraitSpecToMap(t *testing.T, spec v1.TraitSpec) map[string]string {
-	trait := make(map[string]string)
-
-	data, err := json.Marshal(spec.Configuration)
-	assert.Nil(t, err)
-
-	err = json.Unmarshal(data, &trait)
-	assert.Nil(t, err)
-
-	return trait
+// The deployer trait can be used to explicitly select the kind of high level resource that
+// will deploy the integration.
+//
+// +camel-k:trait=deployer
+type DeployerTrait struct {
+	Trait `property:",squash" json:",inline"`
+	// Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service` when creating the resources for running the integration.
+	Kind string `property:"kind" json:"kind,omitempty"`
 }

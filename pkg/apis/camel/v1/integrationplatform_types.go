@@ -30,7 +30,7 @@ type IntegrationPlatformSpec struct {
 	Profile       TraitProfile                     `json:"profile,omitempty"`
 	Build         IntegrationPlatformBuildSpec     `json:"build,omitempty"`
 	Resources     IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
-	Traits        map[string]TraitSpec             `json:"traits,omitempty"`
+	Traits        Traits                           `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec              `json:"configuration,omitempty"`
 }
 

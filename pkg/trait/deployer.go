@@ -29,14 +29,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
-// The deployer trait can be used to explicitly select the kind of high level resource that
-// will deploy the integration.
-//
-// +camel-k:trait=deployer
 type deployerTrait struct {
-	BaseTrait `property:",squash"`
-	// Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service` when creating the resources for running the integration.
-	Kind string `property:"kind" json:"kind,omitempty"`
+	BaseTrait
+	v1.DeployerTrait
 }
 
 var _ ControllerStrategySelector = &deployerTrait{}

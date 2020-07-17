@@ -23,15 +23,9 @@ import (
 	"github.com/apache/camel-k/pkg/builder/runtime"
 )
 
-// The Quarkus trait activates the Quarkus runtime.
-//
-// It's disabled by default.
-//
-// +camel-k:trait=quarkus
 type quarkusTrait struct {
-	BaseTrait `property:",squash"`
-	// The Quarkus runtime type (reserved for future use)
-	Native bool `property:"native" json:"native,omitempty"`
+	BaseTrait
+	v1.QuarkusTrait
 }
 
 func newQuarkusTrait() Trait {

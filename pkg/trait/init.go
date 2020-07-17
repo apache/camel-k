@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/pkg/errors"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/flow"
@@ -42,10 +40,6 @@ func newInitTrait() Trait {
 }
 
 func (t *initTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
-		return false, errors.New("trait init cannot be disabled")
-	}
-
 	return true, nil
 }
 

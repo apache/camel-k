@@ -156,17 +156,17 @@ func (c *Catalog) GetTrait(id string) Trait {
 }
 
 func (c *Catalog) configure(env *Environment) error {
-	if env.Platform != nil && env.Platform.Status.Traits != nil {
+	if env.Platform != nil {
 		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
 			return err
 		}
 	}
-	if env.IntegrationKit != nil && env.IntegrationKit.Spec.Traits != nil {
+	if env.IntegrationKit != nil {
 		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
 			return err
 		}
 	}
-	if env.Integration != nil && env.Integration.Spec.Traits != nil {
+	if env.Integration != nil {
 		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
 			return err
 		}
@@ -175,12 +175,22 @@ func (c *Catalog) configure(env *Environment) error {
 	return nil
 }
 
-func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
-	for id, traitSpec := range traits {
+func (c *Catalog) configureTraits(traits interface{}) error {
+	data, err := json.Marshal(traits)
+	if err != nil {
+		return err
+	}
+	traitsMap := make(map[string]interface{})
+	err = json.Unmarshal(data, &traitsMap)
+	if err != nil {
+		return err
+	}
+
+	for id, trait := range traitsMap {
 		catTrait := c.GetTrait(id)
 		if catTrait != nil {
-			trait := traitSpec
-			if err := decodeTraitSpec(&trait, catTrait); err != nil {
+			trait := trait
+			if err := decodeTrait(&trait, catTrait); err != nil {
 				return err
 			}
 		}
@@ -189,8 +199,8 @@ func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
 	return nil
 }
 
-func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
-	data, err := json.Marshal(&in.Configuration)
+func decodeTrait(in interface{}, target interface{}) error {
+	data, err := json.Marshal(&in)
 	if err != nil {
 		return err
 	}

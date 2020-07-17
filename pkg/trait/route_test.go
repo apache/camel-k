@@ -32,7 +32,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func createTestRouteEnvironment(t *testing.T, name string) *Environment {
@@ -120,10 +119,12 @@ func TestRoute_Default(t *testing.T) {
 func TestRoute_Disabled(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"enabled": false,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			Trait: v1.Trait{
+				Enabled: BoolP(false),
+			},
+		},
 	}
 
 	traitsCatalog := environment.Catalog
@@ -145,10 +146,10 @@ func TestRoute_TLS(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination": string(routev1.TLSTerminationEdge),
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination: string(routev1.TLSTerminationEdge),
+		},
 	}
 
 	err := traitsCatalog.apply(environment)
@@ -169,10 +170,10 @@ func TestRoute_TLS(t *testing.T) {
 func TestRoute_WithCustomServicePort(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		containerTraitID: test.TraitSpecFromMap(t, map[string]interface{}{
-			"servicePortName": "my-port",
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Container: &v1.ContainerTrait{
+			ServicePortName: "my-port",
+		},
 	}
 
 	traitsCatalog := environment.Catalog
@@ -190,10 +191,9 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 	assert.NotNil(t, route)
 	assert.NotNil(t, route.Spec.Port)
 
-	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits[containerTraitID])
 	assert.Equal(
 		t,
-		trait["servicePortName"],
+		environment.Integration.Spec.Traits.Container.ServicePortName,
 		route.Spec.Port.TargetPort.StrVal,
 	)
 }

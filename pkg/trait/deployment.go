@@ -27,12 +27,9 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
-// the integration will run in the cluster.
-//
-// +camel-k:trait=deployment
 type deploymentTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	v1.DeploymentTrait
 }
 
 var _ ControllerStrategySelector = &deploymentTrait{}

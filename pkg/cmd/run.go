@@ -20,9 +20,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -550,7 +548,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		integration.Spec.AddConfiguration("env", item)
 	}
 
-	if err := o.configureTraits(&integration, o.Traits, catalog); err != nil {
+	if err := o.configureTraits(&integration, o.Traits); err != nil {
 		return nil, err
 	}
 
@@ -670,15 +668,8 @@ func loadData(source string, compress bool) (string, error) {
 	return string(content), nil
 }
 
-func (*runCmdOptions) configureTraits(integration *v1.Integration, options []string, catalog *trait.Catalog) error {
-	traits, err := configureTraits(options, catalog)
-	if err != nil {
-		return err
-	}
-
-	integration.Spec.Traits = traits
-
-	return nil
+func (*runCmdOptions) configureTraits(integration *v1.Integration, options []string) error {
+	return configureTraits(options, &integration.Spec.Traits)
 }
 
 func isLocal(fileName string) bool {
@@ -722,76 +713,46 @@ func escapePropertyFileItem(item string) string {
 	return item
 }
 
-func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.TraitSpec, error) {
-	traits := make(map[string]map[string]interface{})
+func configureTraits(options []string, traits interface{}) error {
+	config := make(map[string]map[string]interface{})
 
 	for _, option := range options {
 		parts := traitConfigRegexp.FindStringSubmatch(option)
 		if len(parts) < 4 {
-			return nil, errors.New("unrecognized config format (expected \"<trait>.<prop>=<value>\"): " + option)
+			return errors.New("unrecognized config format (expected \"<trait>.<prop>=<value>\"): " + option)
 		}
 		id := parts[1]
 		prop := parts[2][1:]
 		value := parts[3]
-		if _, ok := traits[id]; !ok {
-			traits[id] = make(map[string]interface{})
+		if _, ok := config[id]; !ok {
+			config[id] = make(map[string]interface{})
 		}
-		switch v := traits[id][prop].(type) {
+		switch v := config[id][prop].(type) {
 		case []string:
-			traits[id][prop] = append(v, value)
+			config[id][prop] = append(v, value)
 		case string:
 			// Aggregate multiple occurrences of the same option into a string array, to emulate POSIX conventions.
 			// This enables executing:
 			// $ kamel run -t <trait>.<property>=<value_1> ... -t <trait>.<property>=<value_N>
 			// Or:
 			// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
-			traits[id][prop] = []string{v, value}
+			config[id][prop] = []string{v, value}
 		case nil:
-			traits[id][prop] = value
+			config[id][prop] = value
 		}
 	}
 
-	specs := make(map[string]v1.TraitSpec)
-	for id, config := range traits {
-		t := catalog.GetTrait(id)
-		if t != nil {
-			// let's take a clone to prevent default values set at runtime from being serialized
-			zero := reflect.New(reflect.TypeOf(t)).Interface()
-			err := configureTrait(config, zero)
-			if err != nil {
-				return nil, err
-			}
-			data, err := json.Marshal(zero)
-			if err != nil {
-				return nil, err
-			}
-			var spec v1.TraitSpec
-			err = json.Unmarshal(data, &spec.Configuration)
-			if err != nil {
-				return nil, err
-			}
-			specs[id] = spec
-		}
-	}
-
-	return specs, nil
-}
-
-func configureTrait(config map[string]interface{}, trait interface{}) error {
-	md := mapstructure.Metadata{}
-
+	metadata := mapstructure.Metadata{}
 	decoder, err := mapstructure.NewDecoder(
 		&mapstructure.DecoderConfig{
-			Metadata:         &md,
+			Metadata:         &metadata,
 			WeaklyTypedInput: true,
 			TagName:          "property",
-			Result:           &trait,
+			Result:           &traits,
 		},
 	)
-
 	if err != nil {
 		return err
 	}
-
 	return decoder.Decode(config)
 }

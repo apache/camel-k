@@ -83,10 +83,12 @@ func TestKnativeService(t *testing.T) {
 					{Type: "secret", Value: "my-secret"},
 					{Type: "property", Value: "my-property=my-property-value"},
 				},
-				Traits: map[string]v1.TraitSpec{
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-					}),
+				Traits: v1.Traits{
+					KnativeService: &v1.KnativeServiceTrait{
+						Trait: v1.Trait{
+							Enabled: BoolP(true),
+						},
+					},
 				},
 			},
 		},
@@ -195,17 +197,19 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKnative,
-				Traits: map[string]v1.TraitSpec{
-					"deployer": test.TraitSpecFromMap(t, map[string]interface{}{
-						"kind": "knative-service",
-					}),
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-						"auto":    false,
-					}),
-					"container": test.TraitSpecFromMap(t, map[string]interface{}{
-						"name": "my-container-name",
-					}),
+				Traits: v1.Traits{
+					Deployer: &v1.DeployerTrait{
+						Kind: "knative-service",
+					},
+					KnativeService: &v1.KnativeServiceTrait{
+						Trait: v1.Trait{
+							Enabled: BoolP(true),
+						},
+						Auto: BoolP(false),
+					},
+					Container: &v1.ContainerTrait{
+						Name: "my-container-name",
+					},
 				},
 			},
 		},
@@ -242,10 +246,9 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 	assert.NotNil(t, s)
 
-	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits["container"])
 	assert.Equal(
 		t,
-		trait["name"],
+		environment.Integration.Spec.Traits.Container.Name,
 		s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Name,
 	)
 }
