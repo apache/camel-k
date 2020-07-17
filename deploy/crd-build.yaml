@@ -19,8 +19,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: builds.camel.apache.org
-  labels:
-    app: "camel-k"
 spec:
   additionalPrinterColumns:
     - JSONPath: .status.phase
@@ -45,15 +43,15 @@ spec:
       type: integer
   group: camel.apache.org
   names:
+    categories:
+      - kamel
+      - camel
     kind: Build
     listKind: BuildList
     plural: builds
     shortNames:
       - ikb
     singular: build
-    categories:
-      - kamel
-      - camel
   scope: Namespaced
   subresources:
     status: {}

@@ -34,15 +34,15 @@ spec:
       type: string
   group: camel.apache.org
   names:
+    categories:
+      - kamel
+      - camel
     kind: CamelCatalog
     listKind: CamelCatalogList
     plural: camelcatalogs
     shortNames:
       - cc
     singular: camelcatalog
-    categories:
-      - kamel
-      - camel
   scope: Namespaced
   subresources:
     status: {}

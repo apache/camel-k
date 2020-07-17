@@ -37,15 +37,15 @@ spec:
       type: string
   group: camel.apache.org
   names:
+    categories:
+      - kamel
+      - camel
     kind: IntegrationKit
     listKind: IntegrationKitList
     plural: integrationkits
     shortNames:
       - ik
     singular: integrationkit
-    categories:
-      - kamel
-      - camel
   scope: Namespaced
   subresources:
     status: {}
@@ -96,8 +96,33 @@ spec:
                 type: string
               type: array
             traits:
-              additionalProperties:
-                type: object
+              description: IntegrationKitTraits --
+              properties:
+                builder:
+                  description: The builder trait is internally used to determine the
+                    best strategy to build and configure IntegrationKits.
+                  properties:
+                    enabled:
+                      description: Can be used to enable or disable a trait. All traits
+                        share this common property.
+                      type: boolean
+                    verbose:
+                      description: Enable verbose logging on build components that
+                        support it (e.g. Kaniko build pod).
+                      type: boolean
+                  type: object
+                quarkus:
+                  description: "The Quarkus trait activates the Quarkus runtime. \n
+                    It's disabled by default."
+                  properties:
+                    enabled:
+                      description: Can be used to enable or disable a trait. All traits
+                        share this common property.
+                      type: boolean
+                    native:
+                      description: The Quarkus runtime type (reserved for future use)
+                      type: boolean
+                  type: object
               type: object
           type: object
         status:
