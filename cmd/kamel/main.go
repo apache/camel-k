@@ -23,7 +23,8 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/apache/camel-k/addons"
+	// Please help me find a solution that solves both strong-typing and extensibility :)
+	//_ "github.com/apache/camel-k/addons"
 	_ "github.com/apache/camel-k/pkg/builder/kaniko"
 	_ "github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/cmd"

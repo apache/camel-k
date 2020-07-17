@@ -31,8 +31,8 @@ import (
 // The 3scale trait is disabled by default.
 //
 // +camel-k:trait=3scale
-type threeScaleTrait struct {
-	trait.BaseTrait `property:",squash"`
+type ThreeScaleTrait struct {
+	v1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The scheme to use to contact the service (default `http`)
@@ -43,6 +43,11 @@ type threeScaleTrait struct {
 	Port int `property:"port" json:"port,omitempty"`
 	// The path where the Open-API specification is published (default `/openapi.json`)
 	DescriptionPath *string `property:"description-path" json:"descriptionPath,omitempty"`
+}
+
+type threeScaleTrait struct {
+	trait.BaseTrait
+	ThreeScaleTrait
 }
 
 const (
