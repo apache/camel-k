@@ -5,7 +5,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: Allows constraining which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node,or with inter-pod affinity and anti-affinity, based on labels on pods that are already running on the nodes.It’s disabled by default.
+  description: Allows constraining which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node, or with inter-pod affinity and anti-affinity, based on labels on pods that are already running on the nodes. It's disabled by default.
   properties:
   - name: enabled
     type: bool
@@ -31,7 +31,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The builder trait is internally used to determine the best strategy tobuild and configure IntegrationKits.
+  description: The builder trait is internally used to determine the best strategy to build and configure IntegrationKits.
   properties:
   - name: enabled
     type: bool
@@ -59,7 +59,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Container trait can be used to configure properties of the container where the integration will run.It also provides configuration for Services associated to the container.
+  description: The Container trait can be used to configure properties of the container where the integration will run. It also provides configuration for Services associated to the container.
   properties:
   - name: enabled
     type: bool
@@ -139,7 +139,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: 'The Cron trait can be used to customize the behaviour of periodic timer/cron based integrations.While normally an integration requires a pod to be always up and running, some periodic tasks, such as batch jobs,require to be activated at specific hours of the day or with a periodic delay of minutes.For such tasks, the cron trait can materialize the integration as a Kubernetes CronJob instead of a standard deployment,in order to save resources when the integration does not need to be executed.Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.The rules for using a Kubernetes CronJob are the following:- `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=60000`.- `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.  `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?` or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.'
+  description: 'The Cron trait can be used to customize the behaviour of periodic timer/cron based integrations. While normally an integration requires a pod to be always up and running, some periodic tasks, such as batch jobs, require to be activated at specific hours of the day or with a periodic delay of minutes. For such tasks, the cron trait can materialize the integration as a Kubernetes CronJob instead of a standard deployment, in order to save resources when the integration does not need to be executed. Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`. The rules for using a Kubernetes CronJob are the following: - `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=60000`. - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g. `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?` or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.'
   properties:
   - name: enabled
     type: bool
@@ -165,7 +165,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Dependencies trait is internally used to automatically add runtime dependencies based on theintegration that the user wants to run.
+  description: The Dependencies trait is internally used to automatically add runtime dependencies based on the integration that the user wants to run.
   properties: []
 - name: deployer
   platform: true
@@ -173,7 +173,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The deployer trait can be used to explicitly select the kind of high level resource thatwill deploy the integration.
+  description: The deployer trait can be used to explicitly select the kind of high level resource that will deploy the integration.
   properties:
   - name: enabled
     type: bool
@@ -187,7 +187,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Deployment trait is responsible for generating the Kubernetes deployment that will make surethe integration will run in the cluster.
+  description: The Deployment trait is responsible for generating the Kubernetes deployment that will make sure the integration will run in the cluster.
   properties: []
 - name: environment
   platform: true
@@ -195,7 +195,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The environment trait is used internally to inject standard environment variables in the integration container,such as `NAMESPACE`, `POD_NAME` and others.
+  description: The environment trait is used internally to inject standard environment variables in the integration container, such as `NAMESPACE`, `POD_NAME` and others.
   properties:
   - name: enabled
     type: bool
@@ -221,7 +221,7 @@ traits:
   platform: false
   profiles:
   - Kubernetes
-  description: The Ingress trait can be used to expose the service associated with the integrationto the outside world with a Kubernetes Ingress.It's enabled by default whenever a Service is added to the integration (through the `service` trait).
+  description: The Ingress trait can be used to expose the service associated with the integration to the outside world with a Kubernetes Ingress. It's enabled by default whenever a Service is added to the integration (through the `service` trait).
   properties:
   - name: enabled
     type: bool
@@ -238,7 +238,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Istio trait allows to configure properties related to the Istio service mesh,such as sidecar injection and outbound IP ranges.
+  description: The Istio trait allows to configure properties related to the Istio service mesh, such as sidecar injection and outbound IP ranges.
   properties:
   - name: enabled
     type: bool
@@ -255,7 +255,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Jolokia trait activates and configures the Jolokia Java agent.See https://jolokia.org/reference/html/agents.html
+  description: The Jolokia trait activates and configures the Jolokia Java agent. See https://jolokia.org/reference/html/agents.html
   properties:
   - name: enabled
     type: bool
@@ -323,7 +323,7 @@ traits:
   platform: false
   profiles:
   - Knative
-  description: The Knative Service trait allows to configure options when running the integration as Knative service instead ofa standard Kubernetes Deployment.Running integrations as Knative Services adds auto-scaling (and scaling-to-zero) features, but those featuresare only meaningful when the routes use a HTTP endpoint consumer.
+  description: The Knative Service trait allows to configure options when running the integration as Knative service instead of a standard Kubernetes Deployment. Running integrations as Knative Services adds auto-scaling (and scaling-to-zero) features, but those features are only meaningful when the routes use a HTTP endpoint consumer.
   properties:
   - name: enabled
     type: bool
@@ -350,7 +350,7 @@ traits:
   platform: false
   profiles:
   - Knative
-  description: The Knative trait automatically discovers addresses of Knative resources and inject them into therunning integration.The full Knative configuration is injected in the CAMEL_KNATIVE_CONFIGURATION in JSON format.The Camel Knative component will then use the full configuration to configure the routes.The trait is enabled by default when the Knative profile is active.
+  description: The Knative trait automatically discovers addresses of Knative resources and inject them into the running integration. The full Knative configuration is injected in the CAMEL_KNATIVE_CONFIGURATION in JSON format. The Camel Knative component will then use the full configuration to configure the routes. The trait is enabled by default when the Knative profile is active.
   properties:
   - name: enabled
     type: bool
@@ -391,7 +391,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: 'The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doingleader election and starting *master* routes only on certain instances.It''s activated automatically when using the master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`.NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods.It''s recommended to use a different service account than "default" when running the integration.'
+  description: 'The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doing leader election and starting *master* routes only on certain instances. It''s activated automatically when using the master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`. NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods. It''s recommended to use a different service account than "default" when running the integration.'
   properties:
   - name: enabled
     type: bool
@@ -425,7 +425,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Owner trait ensures that all created resources belong to the integration being createdand transfers annotations and labels on the integration onto these owned resources.
+  description: The Owner trait ensures that all created resources belong to the integration being created and transfers annotations and labels on the integration onto these owned resources.
   properties:
   - name: enabled
     type: bool
@@ -442,7 +442,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The platform trait is a base trait that is used to assign an integration platform to an integration.In case the platform is missing, the trait is allowed to create a default platform.This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform(e.g. on OpenShift the default settings work, since there's an embedded container image registry).
+  description: The platform trait is a base trait that is used to assign an integration platform to an integration. In case the platform is missing, the trait is allowed to create a default platform. This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform (e.g. on OpenShift the default settings work, since there's an embedded container image registry).
   properties:
   - name: enabled
     type: bool
@@ -459,7 +459,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: 'The Prometheus trait configures a Prometheus-compatible endpoint. It also exposes the integration with a `Service`and a `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the Prometheusoperator.The metrics exposed vary depending on the configured runtime. With Quarkus, the metrics are exposedusing MicroProfile Metrics. While with the default runtime, they are exposed using the Prometheus JMX exporter.WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]custom resource definition to be installed.You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator.It''s disabled by default.'
+  description: 'The Prometheus trait configures a Prometheus-compatible endpoint. It also exposes the integration with a `Service` and a `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the Prometheus operator. The metrics exposed vary depending on the configured runtime. With Quarkus, the metrics are exposed using MicroProfile Metrics. While with the default runtime, they are exposed using the Prometheus JMX exporter. WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator] custom resource definition to be installed. You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator. It''s disabled by default.'
   properties:
   - name: enabled
     type: bool
@@ -482,7 +482,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Pull Secret trait sets a pull secret on the pod,to allow Kubernetes to retrieve the container image from an external registry.The pull secret can be specified manually or, in case you've configured authentication for an external container registryon the `IntegrationPlatform`, the same secret is used to pull images.It's enabled by default whenever you configure authentication for an external container registry,so it assumes that external registries are private.If your registry does not need authentication for pulling images, you can disable this trait.
+  description: The Pull Secret trait sets a pull secret on the pod, to allow Kubernetes to retrieve the container image from an external registry. The pull secret can be specified manually or, in case you've configured authentication for an external container registry on the `IntegrationPlatform`, the same secret is used to pull images. It's enabled by default whenever you configure authentication for an external container registry, so it assumes that external registries are private. If your registry does not need authentication for pulling images, you can disable this trait.
   properties:
   - name: enabled
     type: bool
@@ -499,7 +499,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Quarkus trait activates the Quarkus runtime.It's disabled by default.
+  description: The Quarkus trait activates the Quarkus runtime. It's disabled by default.
   properties:
   - name: enabled
     type: bool
@@ -542,7 +542,7 @@ traits:
   profiles:
   - Kubernetes
   - OpenShift
-  description: The Service trait exposes the integration with a Service resource so that it can be accessed by other applications(or integrations) in the same namespace.It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
+  description: The Service trait exposes the integration with a Service resource so that it can be accessed by other applications (or integrations) in the same namespace. It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
   properties:
   - name: enabled
     type: bool
@@ -559,7 +559,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The 3scale trait can be used to automatically create annotations that allow3scale to discover the generated service and make it available for API management.The 3scale trait is disabled by default.
+  description: The 3scale trait can be used to automatically create annotations that allow 3scale to discover the generated service and make it available for API management. The 3scale trait is disabled by default.
   properties:
   - name: enabled
     type: bool
@@ -585,7 +585,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Tracing trait can be used to automatically publish tracing information to anOpenTracing compatible collector.The trait is able to automatically discover the tracing endpoint available in the namespace (supports **Jaeger**).The Tracing trait is disabled by default.
+  description: The Tracing trait can be used to automatically publish tracing information to an OpenTracing compatible collector. The trait is able to automatically discover the tracing endpoint available in the namespace (supports **Jaeger**). The Tracing trait is disabled by default.
   properties:
   - name: enabled
     type: bool
