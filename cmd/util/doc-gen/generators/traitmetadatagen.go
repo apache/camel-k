@@ -128,7 +128,17 @@ func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *t
 	var desc = []string(nil)
 	desc = append(desc, g.filterOutTagsAndComments(t.CommentLines)...)
 	td.Name = traitID
-	td.Description = strings.Join(desc, "")
+	td.Description = ""
+	for _, line := range desc {
+		text := strings.Trim(line, " ")
+		if len(text) == 0 {
+			continue
+		}
+		if len(td.Description) > 0 {
+			td.Description += " "
+		}
+		td.Description += text
+	}
 	td.Profiles = determineProfiles(traitID)
 	td.Platform = isPlatformTrait(traitID)
 }
