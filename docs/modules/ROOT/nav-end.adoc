@@ -1,2 +1,3 @@
+* xref:troubleshooting.adoc[Troubleshooting]
 * xref:uninstalling.adoc[Uninstalling]
 * xref:developers.adoc[Contributing]
