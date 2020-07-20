@@ -1,0 +1,32 @@
+[[troubleshooting]]
+= Troubleshooting
+
+== `Error during unshare(CLONE_NEWUSER): Invalid argument`
+
+Buildah is best used with the OCI container runtime.
+When used with the Docker container runtime, it may not have the permissions to perform some required system calls.
+
+From https://github.com/containers/buildah/issues/1901[containers/buildah#1901], it seems a system call, that's forbidden by default with the Docker container runtime, is still necessary when the user doesn't have the `CAP_SYS_ADMIN` capability.
+
+The only option is to change the Docker container runtime to use a different _seccomp_ profile, e.g.:
+
+[source,sh]
+----
+$ docker run --security-opt seccomp=/usr/share/containers/seccomp.json
+----
+
+However, that requires being able to configure your cluster container runtime.
+
+A work-around is to use another builder strategy, like Kaniko or Spectrum, e.g. when installing Camel K:
+
+[source,sh]
+----
+$ kamel install --build-publish-strategy=kaniko
+----
+
+Or by patching your `IntegrationPlatform` resource directly if you have Camel K already installed, e.g.:
+
+[source,sh]
+----
+$ kubectl patch ip camel-k --type='merge' -p '{"spec":{"build":{"publishStrategy":"kaniko"}}}'
+----
