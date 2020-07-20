@@ -1,9 +1,9 @@
 ---
 title: Secured Monitoring
 authors:
-  - @astefanutti
+  - "@astefanutti"
 reviewers:
-  - @lburgazzoli
+  - "@lburgazzoli"
 approvers:
   - TBD
 creation-date: 2020-07-06
@@ -127,9 +127,9 @@ image::assets/camel-k-monitoring.svg[Camel K Integration Monitoring with Quarkus
 
 * `kube-rbac-proxy` does not currently support restricting authentication for a sub-set of endpoints. As all the traffic served from a single port would be proxied, an option should be added, so that it is possible to enable RBAC only for the _metrics_ endpoint.
 
-* The proposal compatibility with Knative has to be confirmed, in particular, scrapping requests made to the same port as the application port should not be taken into account for auto-scaling.
+* The proposal compatibility with Knative has to be confirmed, in particular, scraping requests made to the same port as the application port should not be taken into account for auto-scaling.
 
-* The proposal compatibility with the ability to migrate from `ServiceMonitor` to `PodMonitoring` should be assessed: see https://github.com/apache/camel-k/issues/1555[#1555].
+* The proposal compatibility with the ability to migrate from `ServiceMonitor` to `PodMonitoring` should also be assessed: see https://github.com/apache/camel-k/issues/1555[#1555].
 
 == Alternatives
 
