@@ -1,2 +1,2 @@
 * xref:uninstalling.adoc[Uninstalling]
-* xref:developers.adoc[Contributing to Camel K]
+* xref:developers.adoc[Contributing]
