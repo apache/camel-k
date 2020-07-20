@@ -3,9 +3,9 @@
 
 We love contributions!
 
-The project is written in https://golang.org/[go] and contains some parts written in Java for the https://github.com/apache/camel-k-runtime/[integration runtime]
-Camel K is built on top of Kubernetes through *Custom Resource Definitions*. The https://github.com/operator-framework/operator-sdk[Operator SDK] is used
-to manage the lifecycle of those custom resources.
+The project is written in https://golang.org/[go] and contains some parts written in Java for the https://github.com/apache/camel-k-runtime/[integration runtime].
+Camel K is built on top of Kubernetes through *Custom Resource Definitions*.
+The https://github.com/operator-framework/operator-sdk[Operator SDK] is used to manage the lifecycle of those custom resources.
 
 [[requirements]]
 == Requirements
@@ -13,19 +13,19 @@ to manage the lifecycle of those custom resources.
 In order to build the project, you need to comply with the following requirements:
 
 * **Go version 1.13+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
-* **Operator SDK v0.9.0+**: used to build the operator and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
+* **Operator SDK v0.17.1+**: used to build the operator, and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
 * **GNU Make**: used to define composite build actions. This should be already installed or available as package if you have a good OS (https://www.gnu.org/software/make/).
 
 The Camel K Java runtime (camel-k-runtime) requires:
 
-* **Java 11**: needed for compilation.
+* **Java 11**: needed for compilation
 * **Maven**: needed for building
 
 [[checks]]
 == Running checks
 Checks rely on `golangci-lint` being installed, to install it look at the https://github.com/golangci/golangci-lint#local-installation[Local Installation] instructions.
 
-You can run checks via `make lint` or you can install a GIT pre-commit hook and have the checks run via https://pre-commit.com[pre-commit]; then make sure to install the pre-commit hooks after installing pre-commit by running
+You can run checks via `make lint`, or you can install a GIT pre-commit hook and have the checks run via https://pre-commit.com[pre-commit]; then make sure to install the pre-commit hooks after installing pre-commit by running:
 
  $ pre-commit install
 
@@ -63,7 +63,7 @@ To build the whole project you now need to run:
 make
 ----
 
-This execute a full build of both the Java and Go code. If you need to build the components separately you can execute:
+This executes a full build of the Go code. If you need to build the components separately you can execute:
 
 * `make build-operator`: to build the operator binary only.
 * `make build-kamel`: to build the `kamel` client tool only.
@@ -144,11 +144,10 @@ If you want to install everything you have in your source code and see it runnin
 === For Red Hat CodeReady Containers (CRC)
 
 * You need to have https://docs.docker.com/get-docker/[Docker] installed and running (or connected to a Docker daemon)
-* You need to setup Docker daemon to https://docs.docker.com/registry/insecure/[trust] CRC's insecure Docker registry which is exposed by default through the route `default-route-openshift-image-registry.apps-crc.testing`. One way of doing that is to instruct the Docker daemon to trust the certificate:
+* You need to set up Docker daemon to https://docs.docker.com/registry/insecure/[trust] CRC's insecure Docker registry which is exposed by default through the route `default-route-openshift-image-registry.apps-crc.testing`. One way of doing that is to instruct the Docker daemon to trust the certificate:
 ** `oc extract secret/router-ca --keys=tls.crt -n openshift-ingress-operator`: to extract the certificate
 ** `sudo cp tls.crt /etc/docker/certs.d/default-route-openshift-image-registry.apps-crc.testing/ca.crt`: to copy the certificate for Docker daemon to trust
 ** `docker login -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing`: to test that the certificate is trusted
-
 * Run `make install-crc`: to build the project and install it in the current namespace on CRC
 * You can specify a different namespace with `make install-crc project=myawesomeproject`
 * To uninstall Camel K, run `kamel uninstall --all --olm=false`
@@ -205,9 +204,9 @@ You are going to run the operator code **outside** OpenShift in your IDE so, fir
 oc scale deployment/camel-k-operator --replicas 0
 ----
 
-You can scale it back to 1 when you're done and you have updated the operator image.
+You can scale it back to 1 when you're done, and you have updated the operator image.
 
-You can setup the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode with `operator` as argument.
+You can set up the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode with `operator` as argument.
 
 When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen*:
 
@@ -216,8 +215,7 @@ When configuring the IDE task, make sure to add all required environment variabl
 * Set the `OPERATOR_NAME` environment variable to `camel-k`.
 
 
-After you setup the IDE task, with Java 11+ to be used by default, you can run and debug the operator process.
+After you set up the IDE task, with Java 11+ to be used by default, you can run and debug the operator process.
 
 NOTE: The operator can be fully debugged in Minishift, because it uses OpenShift S2I binary builds under the hood.
-The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator and the publisher pod
-share a common persistent volume.
+The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator, and the publisher pod share a common persistent volume.
