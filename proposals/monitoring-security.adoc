@@ -129,7 +129,7 @@ image::assets/camel-k-monitoring.svg[Camel K Integration Monitoring with Quarkus
 
 * The proposal compatibility with Knative has to be confirmed, in particular, scraping requests made to the same port as the application port should not be taken into account for auto-scaling.
 
-* The proposal compatibility with the ability to migrate from `ServiceMonitor` to `PodMonitoring` should also be assessed: see https://github.com/apache/camel-k/issues/1555[#1555].
+* The proposal compatibility with the ability to migrate from `ServiceMonitor` to `PodMonitor` should also be assessed: see https://github.com/apache/camel-k/issues/1555[#1555].
 
 == Alternatives
 
