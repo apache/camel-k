@@ -1,19 +1,20 @@
 ---
 title: Secured Monitoring
 authors:
-  - "@astefanutti"
+  - @astefanutti
 reviewers:
-  - TBD
+  - @lburgazzoli
 approvers:
   - TBD
 creation-date: 2020-07-06
-last-updated: 2020-17-07
+last-updated: 2020-20-07
 status: implementable
 see-also: []
 replaces: []
 superseded-by: []
 ---
 
+[[monitoring-security]]
 = Secured Monitoring
 
 == Summary
@@ -34,7 +35,7 @@ The goal of this proposal is to secure the communication between Prometheus and 
 
 The implementation should rely on standard https://kubernetes.io/docs/reference/access-authn-authz/rbac/[Kubernetes RBAC authorization], as well as the security mechanisms supported by the Prometheus Operator.
 
-== Current Architecture
+== Context
 
 It is recommended to use the Prometheus Operator to set up Prometheus on Kubernetes / OpenShift clusters.
 
@@ -42,8 +43,6 @@ The Prometheus Operator defines the `Prometheus` custom resource definition (CRD
 The operator also defines the `ServiceMonitor` CRD, that is used to define the _metrics_ endpoints that managed Prometheus instances should scrape, based on label selection, as depicted in the following diagram:
 
 image::assets/prometheus-operator.png[Prometheus Operator architecture]
-
-== Proposal
 
 The `ServiceMonitor` CRD declares a `.spec` section that defines a list of target ``Endpoint``s. The `Endpoint` API already supports:
 
@@ -98,7 +97,11 @@ While the Prometheus trait already supports the auto-configuration of the `Servi
 
 == Proposal
 
+=== Architecture
+
 The _metrics_ endpoint configured by the Prometheus trait can be gated using https://github.com/brancz/kube-rbac-proxy[kube-rbac-proxy], deployed as a side-car container, into the integration pod, and configured using https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens[service account token authentication].
+
+The use of `kube-rbac-proxy` as a side-car has the advantage to encapsulate the authentication and authorization concerns, so that all kind of Prometheus exporters can be used out-of-the-box, seamlessly from the application standpoint.
 
 The communication between Prometheus and the integration during metrics scraping follows the sequence illustrated in the diagram below:
 
@@ -114,16 +117,19 @@ image::assets/service-account-token-monitoring.svg[Service Account Token Authent
 . The _kube-rbac-proxy_ proxy authorizes the user identified with the service account token by triggering a `SubjectAccessReview` request for the `/metrics` resource to the API server,
 . The _kube-rbac-proxy_ proxy forwards the authorized request to the upstream integration _metrics_ endpoint that returns the monitoring data.
 
-== Risks and Mitigation
+Quarkus serves all HTTP traffic from a single port, and does not support using a separate port for the _metrics_ endpoint (https://github.com/quarkusio/quarkus/issues/7893[quarkusio/quarkus#7893]). Besides, Knative does not (yet) support declaring multiple container ports in revisions / Knative services (https://github.com/knative/serving/issues/8471[knative/serving#8471]). For these reasons, the _metrics_ endpoint will be served on the same port as the application traffic:
 
-The use of `kube-rbac-proxy` as a side-car has the advantage to encapsulate the authentication and authorization concerns, so that all kind of Prometheus exporters can be used out-of-the-box.
+image::assets/camel-k-monitoring.svg[Camel K Integration Monitoring with Quarkus]
 
-While passing a token for client authentication can be a security risk, as the receiving server can use the token to impersonate the client, it is mitigated by the authentication of the integration using its certificate, and the validation of its identity against the `ServerName` field of the corresponding `ServiceMonitor` resource.
+=== Discussion
 
-== Open Points
+* While passing a token for client authentication can be a security risk, as the receiving server can use the token to impersonate the client, it is mitigated by the authentication of the integration using its certificate, and the validation of its identity against the `ServerName` field of the corresponding `ServiceMonitor` resource.
 
-- The proposal compatibility with the ability to migrate from `ServiceMonitor` to `PodMonitoring` should be assessed: see https://github.com/apache/camel-k/issues/1555[#1555].
-- Quarkus serves all HTTP traffic from a single port and does not support having a separate port for the _metrics_ endpoint: see https://github.com/quarkusio/quarkus/issues/7893[quarkusio/quarkus#7893]. The ability to use `kube-rbac-proxy` in parallel of another solution for securing application traffic should be confirmed.
+* `kube-rbac-proxy` does not currently support restricting authentication for a sub-set of endpoints. As all the traffic served from a single port would be proxied, an option should be added, so that it is possible to enable RBAC only for the _metrics_ endpoint.
+
+* The proposal compatibility with Knative has to be confirmed, in particular, scrapping requests made to the same port as the application port should not be taken into account for auto-scaling.
+
+* The proposal compatibility with the ability to migrate from `ServiceMonitor` to `PodMonitoring` should be assessed: see https://github.com/apache/camel-k/issues/1555[#1555].
 
 == Alternatives
 
@@ -153,9 +159,10 @@ A custom CA could be used, along with solutions like https://github.com/jetstack
 
 Conversely, on a typical OpenShift 4 cluster, the service signing CA can be accessed with:
 
-```sh
+[source,sh]
+----
 $ oc get secrets/signing-key -n openshift-service-ca -o "jsonpath={.data['tls\.key']}" | base64 --decode > ca.key
-```
+----
 
 However, the service signing certificates cannot be used for client authentication.
 
