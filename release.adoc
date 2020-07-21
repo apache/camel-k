@@ -61,6 +61,12 @@ The following tasks need to be done:
 make clean codegen set-version build-resources check-licenses
 ```
 
+Rebuild auto-generated data, including trait info:
+
+```
+make generate
+```
+
 Remove all snapshot files in the `/deploy` directory, then run again:
 ```
 # After removing snapshots from /deploy
