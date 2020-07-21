@@ -52,7 +52,7 @@ var (
 		"You can run `kamel help` to list the available commands or go to the [Camel K Website](https://camel.apache.org/projects/camel-k/) for more information."
 
 	// KamelCLIDownloadURLTemplate is the download template with 3 missing parameters (version, version, os)
-	KamelCLIDownloadURLTemplate = "https://github.com/apache/camel-k/releases/download/%s/camel-k-client-%s-%s-64bit.tar.gz"
+	KamelCLIDownloadURLTemplate = "https://github.com/apache/camel-k/releases/download/v%s/camel-k-client-%s-%s-64bit.tar.gz"
 )
 
 // OpenShiftConsoleDownloadLink installs the download link for the OpenShift console
