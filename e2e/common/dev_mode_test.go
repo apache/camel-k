@@ -24,6 +24,7 @@ package common
 import (
 	"context"
 	"io"
+	"os"
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
@@ -50,6 +51,9 @@ func TestRunDevMode(t *testing.T) {
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "yaml" in phase Running`, "Magicstring!", "Magicjordan!")
 
+			args := os.Args
+			defer func() { os.Args = args }()
+			os.Args = []string{"kamel", "run", "-n", ns, file, "--dev"}
 			go kamelRun.Execute()
 
 			Eventually(logScanner.IsFound(`integration "yaml" in phase Running`), TestTimeoutMedium).Should(BeTrue())
@@ -74,6 +78,9 @@ func TestRunDevMode(t *testing.T) {
 
 			logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
 
+			args := os.Args
+			defer func() { os.Args = args }()
+			os.Args = []string{"kamel", "-n", ns, "run", remoteFile, "--dev"}
 			go kamelRun.Execute()
 
 			Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
