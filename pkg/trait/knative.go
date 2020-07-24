@@ -423,11 +423,11 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 	}
 
 	err := t.withServiceDo(false, e, env, services, serviceType, knativeapi.CamelEndpointKindSink, func(ref *corev1.ObjectReference, url *url.URL, serviceURI string) error {
-		util.StringSliceUniqueAdd(&e.Interceptors, "knative-sink-binding")
-		e.ApplicationProperties["loader.interceptor.knative-sink-binding.name"] = ref.Name
-		e.ApplicationProperties["loader.interceptor.knative-sink-binding.type"] = string(serviceType)
-		e.ApplicationProperties["loader.interceptor.knative-sink-binding.kind"] = ref.Kind
-		e.ApplicationProperties["loader.interceptor.knative-sink-binding.api-version"] = ref.APIVersion
+		e.ApplicationProperties["camel.k.customizer.sinkbinding.enabled"] = "true"
+		e.ApplicationProperties["camel.k.customizer.sinkbinding.name"] = ref.Name
+		e.ApplicationProperties["camel.k.customizer.sinkbinding.type"] = string(serviceType)
+		e.ApplicationProperties["camel.k.customizer.sinkbinding.kind"] = ref.Kind
+		e.ApplicationProperties["camel.k.customizer.sinkbinding.api-version"] = ref.APIVersion
 
 		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 			e.PostStepProcessors = append(e.PostStepProcessors, func(e *Environment) error {
