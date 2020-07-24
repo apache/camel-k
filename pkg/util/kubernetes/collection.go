@@ -254,6 +254,17 @@ func (c *Collection) GetRoute(filter func(*routev1.Route) bool) *routev1.Route {
 	return retValue
 }
 
+// GetCronJob returns a CronJob that matches the given function
+func (c *Collection) GetCronJob(filter func(job *v1beta1.CronJob) bool) *v1beta1.CronJob {
+	var retValue *v1beta1.CronJob
+	c.VisitCronJob(func(re *v1beta1.CronJob) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
 // VisitCronJob executes the visitor function on all CronJob resources
 func (c *Collection) VisitCronJob(visitor func(*v1beta1.CronJob)) {
 	c.Visit(func(res runtime.Object) {
@@ -355,6 +366,29 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 			visitor(cntref)
 		}
 	})
+}
+
+// GetController returns the controller associated with the integration (e.g. Deployment, Knative Service or CronJob)
+func (c *Collection) GetController(filter func(object runtime.Object) bool) runtime.Object {
+	d := c.GetDeployment(func(deployment *appsv1.Deployment) bool {
+		return filter(deployment)
+	})
+	if d != nil {
+		return d
+	}
+	svc := c.GetKnativeService(func(service *serving.Service) bool {
+		return filter(service)
+	})
+	if svc != nil {
+		return svc
+	}
+	cj := c.GetCronJob(func(job *v1beta1.CronJob) bool {
+		return filter(job)
+	})
+	if cj != nil {
+		return cj
+	}
+	return nil
 }
 
 // VisitPodSpec executes the visitor function on all PodSpec inside deployments or other resources
