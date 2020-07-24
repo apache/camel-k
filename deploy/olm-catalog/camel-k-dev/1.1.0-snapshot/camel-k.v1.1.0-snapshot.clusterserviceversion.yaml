@@ -411,6 +411,7 @@ spec:
         - apiGroups:
           - eventing.knative.dev
           - messaging.knative.dev
+          - sources.knative.dev
           resources:
           - '*'
           verbs:

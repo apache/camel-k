@@ -31,9 +31,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
+	sourcesv1alpha1 "knative.dev/eventing/pkg/apis/sources/v1alpha1"
 	"knative.dev/pkg/apis/duck"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
+	"knative.dev/pkg/tracker"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -96,6 +99,40 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 		},
 	}
 	return &subs
+}
+
+// CreateSinkBinding ---
+func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) runtime.Object {
+	binding := sourcesv1alpha1.SinkBinding{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: sourcesv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "SinkBinding",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: source.Namespace,
+			Name:      source.Name,
+		},
+		Spec: sourcesv1alpha1.SinkBindingSpec{
+			BindingSpec: duckv1alpha1.BindingSpec{
+				Subject: tracker.Reference{
+					APIVersion: source.APIVersion,
+					Kind:       source.Kind,
+					Name:       source.Name,
+				},
+			},
+			SourceSpec: duckv1.SourceSpec{
+				Sink: duckv1.Destination{
+					Ref: &duckv1.KReference{
+						APIVersion: target.APIVersion,
+						Kind:       target.Kind,
+						Name:       target.Name,
+					},
+				},
+			},
+		},
+	}
+
+	return &binding
 }
 
 // GetAddressableReference looks up the resource among all given types and returns an object reference to it
