@@ -407,7 +407,20 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string, catal
 					case <-o.Context.Done():
 						return
 					case <-changes:
-						_, err := o.updateIntegrationCode(c, sources, catalog)
+						// let's create a new command to parse modeline changes and update our integration
+						newCmd, _, err := createKamelWithModelineCommand(o.Context, os.Args[1:], make(map[string]bool))
+						if err != nil {
+							fmt.Println("Unable to sync integration: ", err.Error())
+							continue
+						}
+						newCmd.Args = o.validateArgs
+						newCmd.PreRunE = o.decode
+						newCmd.RunE = func(cmd *cobra.Command, args []string) error {
+							_, err := o.updateIntegrationCode(c, sources, catalog)
+							return err
+						}
+						newCmd.PostRunE = nil
+						err = newCmd.Execute()
 						if err != nil {
 							fmt.Println("Unable to sync integration: ", err.Error())
 						}
