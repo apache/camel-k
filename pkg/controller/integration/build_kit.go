@@ -119,7 +119,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	platformKit.Spec = v1.IntegrationKitSpec{
 		Dependencies: integration.Status.Dependencies,
 		Repositories: integration.Spec.Repositories,
-		Traits:       action.filterKitTraits(ctx, integration.Spec.Traits),
+		Traits:       action.filterKitTraits(integration.Spec.Traits),
 	}
 
 	if err := action.client.Create(ctx, &platformKit); err != nil {
@@ -133,19 +133,9 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	return integration, nil
 }
 
-func (action *buildKitAction) filterKitTraits(ctx context.Context, in map[string]v1.TraitSpec) map[string]v1.TraitSpec {
-	if len(in) == 0 {
-		return in
-	}
-	catalog := trait.NewCatalog(ctx, action.client)
-	out := make(map[string]v1.TraitSpec)
-	for name, conf := range in {
-		t := catalog.GetTrait(name)
-		if t != nil && !t.InfluencesKit() {
-			// We don't store the trait configuration if the trait cannot influence the kit behavior
-			continue
-		}
-		out[name] = conf
-	}
+func (action *buildKitAction) filterKitTraits(in v1.Traits) v1.IntegrationKitTraits {
+	out := v1.IntegrationKitTraits{}
+	out.Builder = in.Builder
+	out.Quarkus = in.Quarkus
 	return out
 }

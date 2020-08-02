@@ -31,7 +31,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, enabled bool) Environment {
@@ -44,9 +43,6 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
-			},
-			Spec: v1.IntegrationSpec{
-				Traits: make(map[string]v1.TraitSpec),
 			},
 		},
 		Platform: &v1.IntegrationPlatform{
@@ -64,9 +60,11 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 	env.Platform.ResyncStatusFullConfig()
 
 	if enabled {
-		env.Integration.Spec.Traits["istio"] = test.TraitSpecFromMap(t, map[string]interface{}{
-			"enabled": true,
-		})
+		env.Integration.Spec.Traits.Istio = &v1.IstioTrait{
+			Trait: v1.Trait{
+				Enabled: BoolP(true),
+			},
+		}
 	}
 
 	return env
@@ -109,10 +107,9 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 	}
 
 	env := NewIstioTestEnv(t, &d, &s, true)
-	env.Integration.Spec.Traits["istio"] = test.TraitSpecFromMap(t, map[string]interface{}{
-		"enabled": true,
-		"inject":  true,
-	})
+
+	env.Integration.Spec.Traits.Istio.Enabled = BoolP(true)
+	env.Integration.Spec.Traits.Istio.Inject = BoolP(true)
 
 	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
@@ -136,10 +133,9 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 	}
 
 	env := NewIstioTestEnv(t, &d, &s, true)
-	env.Integration.Spec.Traits["istio"] = test.TraitSpecFromMap(t, map[string]interface{}{
-		"enabled": true,
-		"inject":  false,
-	})
+
+	env.Integration.Spec.Traits.Istio.Enabled = BoolP(true)
+	env.Integration.Spec.Traits.Istio.Inject = BoolP(false)
 
 	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)

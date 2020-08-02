@@ -21,33 +21,25 @@ import (
 	"errors"
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// The Ingress trait can be used to expose the service associated with the integration
-// to the outside world with a Kubernetes Ingress.
-//
-// It's enabled by default whenever a Service is added to the integration (through the `service` trait).
-//
-// +camel-k:trait=ingress
 type ingressTrait struct {
-	BaseTrait `property:",squash"`
-	// **Required**. To configure the host exposed by the ingress.
-	Host string `property:"host" json:"host,omitempty"`
-	// To automatically add an ingress whenever the integration uses a HTTP endpoint consumer.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	BaseTrait
+	v1.IngressTrait
 }
 
 func newIngressTrait() Trait {
 	return &ingressTrait{
 		BaseTrait: NewBaseTrait("ingress", 2400),
-		Host:      "",
+		IngressTrait: v1.IngressTrait{
+			Host: "",
+		},
 	}
 }
 

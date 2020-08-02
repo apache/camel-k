@@ -53,16 +53,32 @@ type FailureRecovery struct {
 	AttemptTime metav1.Time `json:"attemptTime"`
 }
 
-// A TraitSpec contains the configuration of a trait
-type TraitSpec struct {
-	Configuration TraitConfiguration `json:"configuration"`
-}
-
-// +kubebuilder:validation:Type=object
-
-// TraitConfiguration --
-type TraitConfiguration struct {
-	json.RawMessage `json:",inline"`
+// Traits --
+type Traits struct {
+	Affinity       *AffinityTrait       `property:"affinity" json:"affinity,omitempty"`
+	Builder        *BuilderTrait        `property:"builder" json:"builder,omitempty"`
+	Camel          *CamelTrait          `property:"camel" json:"camel,omitempty"`
+	Container      *ContainerTrait      `property:"container" json:"container,omitempty"`
+	Cron           *CronTrait           `property:"cron" json:"cron,omitempty"`
+	Dependencies   *DependenciesTrait   `property:"dependencies" json:"dependencies,omitempty"`
+	Deployer       *DeployerTrait       `property:"deployer" json:"deployer,omitempty"`
+	Deployment     *DeploymentTrait     `property:"deployment" json:"deployment,omitempty"`
+	Environment    *EnvironmentTrait    `property:"environment" json:"environment,omitempty"`
+	GC             *GCTrait             `property:"gc" json:"gc,omitempty"`
+	Ingress        *IngressTrait        `property:"ingress" json:"ingress,omitempty"`
+	Istio          *IstioTrait          `property:"istio" json:"istio,omitempty"`
+	Jolokia        *JolokiaTrait        `property:"jolokia" json:"jolokia,omitempty"`
+	JVM            *JvmTrait            `property:"jvm" json:"jvm,omitempty"`
+	Knative        *KnativeTrait        `property:"knative" json:"knative,omitempty"`
+	KnativeService *KnativeServiceTrait `property:"knative-service" json:"knative-service,omitempty"`
+	OpenAPI        *OpenAPITrait        `property:"openapi" json:"openapi,omitempty"`
+	Owner          *OwnerTrait          `property:"owner" json:"owner,omitempty"`
+	Platform       *PlatformTrait       `property:"platform" json:"platform,omitempty"`
+	Prometheus     *PrometheusTrait     `property:"prometheus" json:"prometheus,omitempty"`
+	PullSecret     *PullSecretTrait     `property:"pull-secret" json:"pull-secret,omitempty"`
+	Quarkus        *QuarkusTrait        `property:"quarkus" json:"quarkus,omitempty"`
+	Route          *RouteTrait          `property:"route" json:"route,omitempty"`
+	Service        *ServiceTrait        `property:"service" json:"service,omitempty"`
 }
 
 // Configurable --

@@ -34,32 +34,9 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Prometheus trait configures a Prometheus-compatible endpoint. It also exposes the integration with a `Service`
-// and a `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the Prometheus
-// operator.
-//
-// The metrics exposed vary depending on the configured runtime. With Quarkus, the metrics are exposed
-// using MicroProfile Metrics. While with the default runtime, they are exposed using the Prometheus JMX exporter.
-//
-// WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
-// custom resource definition to be installed.
-// You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator.
-//
-// It's disabled by default.
-//
-// +camel-k:trait=prometheus
 type prometheusTrait struct {
-	BaseTrait `property:",squash"`
-	// The Prometheus endpoint port (default `9779`, or `8080` with Quarkus).
-	Port *int `property:"port" json:"port,omitempty"`
-	// Whether a `ServiceMonitor` resource is created (default `true`).
-	ServiceMonitor bool `property:"service-monitor" json:"serviceMonitor,omitempty"`
-	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
-	ServiceMonitorLabels []string `property:"service-monitor-labels" json:"serviceMonitorLabels,omitempty"`
-	// To use a custom ConfigMap containing the Prometheus JMX exporter configuration (under the `content` ConfigMap key).
-	// When this property is left empty (default), Camel K generates a standard Prometheus configuration for the integration.
-	// It is not applicable when using Quarkus.
-	ConfigMap string `property:"configmap" json:"configMap,omitempty"`
+	BaseTrait
+	v1.PrometheusTrait
 }
 
 const (
@@ -70,8 +47,10 @@ const (
 
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
-		BaseTrait:      NewBaseTrait("prometheus", 1900),
-		ServiceMonitor: true,
+		BaseTrait: NewBaseTrait("prometheus", 1900),
+		PrometheusTrait: v1.PrometheusTrait{
+			ServiceMonitor: true,
+		},
 	}
 }
 

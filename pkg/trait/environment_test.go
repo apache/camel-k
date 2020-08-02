@@ -30,7 +30,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
@@ -117,10 +116,10 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileOpenShift,
-				Traits: map[string]v1.TraitSpec{
-					"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-						"containerMeta": true,
-					}),
+				Traits: v1.Traits{
+					Environment: &v1.EnvironmentTrait{
+						ContainerMeta: true,
+					},
 				},
 			},
 		},
@@ -183,10 +182,10 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileOpenShift,
-				Traits: map[string]v1.TraitSpec{
-					"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-						"containerMeta": false,
-					}),
+				Traits: v1.Traits{
+					Environment: &v1.EnvironmentTrait{
+						ContainerMeta: false,
+					},
 				},
 			},
 		},

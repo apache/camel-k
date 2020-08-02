@@ -64,17 +64,19 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				Profile:   v1.TraitProfileKnative,
 				Sources:   []v1.SourceSpec{},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled":         true,
-						"auto":            false,
-						"channelSources":  []string{"channel-source-1"},
-						"channelSinks":    []string{"channel-sink-1"},
-						"endpointSources": []string{"endpoint-source-1"},
-						"endpointSinks":   []string{"endpoint-sink-1", "endpoint-sink-2"},
-						"eventSources":    []string{"knative:event"},
-						"eventSinks":      []string{"knative:event"},
-					}),
+				Traits: v1.Traits{
+					Knative: &v1.KnativeTrait{
+						Trait: v1.Trait{
+							Enabled: BoolP(true),
+						},
+						Auto:            BoolP(false),
+						ChannelSources:  []string{"channel-source-1"},
+						ChannelSinks:    []string{"channel-sink-1"},
+						EndpointSources: []string{"endpoint-source-1"},
+						EndpointSinks:   []string{"endpoint-sink-1", "endpoint-sink-2"},
+						EventSources:    []string{"knative:event"},
+						EventSinks:      []string{"knative:event"},
+					},
 				},
 			},
 		},
@@ -190,10 +192,12 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-					}),
+				Traits: v1.Traits{
+					Knative: &v1.KnativeTrait{
+						Trait: v1.Trait{
+							Enabled: BoolP(true),
+						},
+					},
 				},
 			},
 		},
@@ -376,10 +380,12 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 					source,
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-					}),
+				Traits: v1.Traits{
+					Knative: &v1.KnativeTrait{
+						Trait: v1.Trait{
+							Enabled: BoolP(true),
+						},
+					},
 				},
 			},
 		},

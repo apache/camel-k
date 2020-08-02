@@ -26,7 +26,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 )
 
@@ -51,23 +50,24 @@ func describeObjectMeta(w *indentedwriter.Writer, om metav1.ObjectMeta) {
 	w.Write(0, "Creation Timestamp:\t%s\n", om.CreationTimestamp.Format(time.RFC1123Z))
 }
 
-func describeTraits(w *indentedwriter.Writer, traits map[string]v1.TraitSpec) error {
-	if len(traits) > 0 {
+func describeTraits(w *indentedwriter.Writer, traits interface{}) error {
+	data, err := json.Marshal(traits)
+	if err != nil {
+		return err
+	}
+	traitsMap := make(map[string]map[string]interface{})
+	err = json.Unmarshal(data, &traitsMap)
+	if err != nil {
+		return err
+	}
+
+	if len(traitsMap) > 0 {
 		w.Write(0, "Traits:\n")
 
-		for trait := range traits {
-			w.Write(1, "%s:\n", strings.Title(trait))
+		for id, trait := range traitsMap {
+			w.Write(1, "%s:\n", strings.Title(id))
 			//TODO: print the whole TraitSpec as Yaml
-			data, err := json.Marshal(traits[trait])
-			if err != nil {
-				return err
-			}
-			config := make(map[string]interface{})
-			err = json.Unmarshal(data, &config)
-			if err != nil {
-				return err
-			}
-			for k, v := range config {
+			for k, v := range trait {
 				w.Write(2, "%s:\t%v\n", strings.Title(k), v)
 			}
 		}

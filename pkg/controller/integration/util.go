@@ -115,38 +115,40 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 
 // HasMatchingTraits compare traits defined on kit against those defined on integration.
 func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
-	for name, kitTrait := range kit.Spec.Traits {
-		intTrait, ok := integration.Spec.Traits[name]
+	data, err := json.Marshal(kit.Spec.Traits)
+	if err != nil {
+		return false, err
+	}
+	kitConf := make(map[string]map[string]interface{})
+	err = json.Unmarshal(data, &kitConf)
+	if err != nil {
+		return false, err
+	}
+
+	data, err = json.Marshal(integration.Spec.Traits)
+	if err != nil {
+		return false, err
+	}
+	intConf := make(map[string]map[string]interface{})
+	err = json.Unmarshal(data, &intConf)
+	if err != nil {
+		return false, err
+	}
+
+	for id, kitTrait := range kitConf {
+		intTrait, ok := intConf[id]
 		if !ok {
 			// skip it because trait configured on kit is not defined on integration
 			return false, nil
 		}
-		data, err := json.Marshal(intTrait.Configuration)
-		if err != nil {
-			return false, err
-		}
-		intConf := make(map[string]interface{})
-		err = json.Unmarshal(data, &intConf)
-		if err != nil {
-			return false, err
-		}
-		data, err = json.Marshal(kitTrait.Configuration)
-		if err != nil {
-			return false, err
-		}
-		kitConf := make(map[string]interface{})
-		err = json.Unmarshal(data, &kitConf)
-		if err != nil {
-			return false, err
-		}
-		for ck, cv := range kitConf {
-			iv, ok := intConf[ck]
+		for key, kitVal := range kitTrait {
+			intVal, ok := intTrait[key]
 			if !ok {
 				// skip it because trait configured on kit has a value that is not defined
 				// in integration trait
 				return false, nil
 			}
-			if iv != cv {
+			if intVal != kitVal {
 				// skip it because trait configured on kit has a value that differs from
 				// the one configured on integration
 				return false, nil
@@ -154,5 +156,5 @@ func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) (boo
 		}
 	}
 
-	return true, nil
-}
+		return true, nil
+	}

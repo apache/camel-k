@@ -23,15 +23,12 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"path"
-	"sort"
 	"strconv"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/flow"
 )
@@ -95,28 +92,12 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	}
 
 	// Integration traits
-	for _, name := range sortedTraitSpecMapKeys(integration.Spec.Traits) {
-		if _, err := hash.Write([]byte(name + "[")); err != nil {
-			return "", err
-		}
-		spec, err := json.Marshal(integration.Spec.Traits[name].Configuration)
-		if err != nil {
-			return "", err
-		}
-		trait := make(map[string]interface{})
-		err = json.Unmarshal(spec, &trait)
-		if err != nil {
-			return "", err
-		}
-		for _, prop := range util.SortedMapKeys(trait) {
-			val := trait[prop]
-			if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", prop, val))); err != nil {
-				return "", err
-			}
-		}
-		if _, err := hash.Write([]byte("]")); err != nil {
-			return "", err
-		}
+	traits, err := json.Marshal(integration.Spec.Traits)
+	if err != nil {
+		return "", err
+	}
+	if _, err := hash.Write(traits); err != nil {
+		return "", err
 	}
 
 	// Add a letter at the beginning and use URL safe encoding
@@ -182,17 +163,6 @@ func ComputeForResource(res v1.ResourceSpec) (string, error) {
 	// Add a letter at the beginning and use URL safe encoding
 	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
 	return digest, nil
-}
-
-func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
-	res := make([]string, len(m))
-	i := 0
-	for k := range m {
-		res[i] = k
-		i++
-	}
-	sort.Strings(res)
-	return res
 }
 
 // ComputeSHA1 ---

@@ -32,7 +32,6 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestCronFromURI(t *testing.T) {
@@ -249,7 +248,6 @@ func TestCronDeps(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits:    map[string]v1.TraitSpec{},
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
@@ -319,10 +317,10 @@ func TestCronDepsFallback(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"fallback": true,
-					}),
+				Traits: v1.Traits{
+					Cron: &v1.CronTrait{
+						Fallback: BoolP(true),
+					},
 				},
 			},
 		},
@@ -394,10 +392,12 @@ func TestCronWithMain(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"quarkus": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": false,
-					}),
+				Traits: v1.Traits{
+					Quarkus: &v1.QuarkusTrait{
+						Trait: v1.Trait{
+							Enabled: BoolP(false),
+						},
+					},
 				},
 			},
 		},
@@ -468,10 +468,12 @@ func TestCronWithQuarkus(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"quarkus": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-					}),
+				Traits: v1.Traits{
+					Quarkus: &v1.QuarkusTrait{
+						Trait: v1.Trait{
+							Enabled: BoolP(true),
+						},
+					},
 				},
 			},
 		},

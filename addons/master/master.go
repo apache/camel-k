@@ -40,8 +40,8 @@ import (
 // It's recommended to use a different service account than "default" when running the integration.
 //
 // +camel-k:trait=master
-type masterTrait struct {
-	trait.BaseTrait `property:",squash"`
+type MasterTrait struct {
+	v1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
@@ -55,6 +55,11 @@ type masterTrait struct {
 	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
 	LabelValue           *string  `property:"label-value" json:"labelValue,omitempty"`
 	delegateDependencies []string `json:"-"`
+}
+
+type masterTrait struct {
+	trait.BaseTrait
+	MasterTrait
 }
 
 // NewMasterTrait --

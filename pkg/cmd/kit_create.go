@@ -163,7 +163,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 			Value: item,
 		})
 	}
-	if err := command.configureTraits(&kit, command.Traits, catalog); err != nil {
+	if err := command.configureTraits(&kit, command.Traits); err != nil {
 		return nil
 	}
 
@@ -195,13 +195,6 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	return nil
 }
 
-func (*kitCreateCommandOptions) configureTraits(kit *v1.IntegrationKit, options []string, catalog *trait.Catalog) error {
-	traits, err := configureTraits(options, catalog)
-	if err != nil {
-		return err
-	}
-
-	kit.Spec.Traits = traits
-
-	return nil
+func (*kitCreateCommandOptions) configureTraits(kit *v1.IntegrationKit, options []string) error {
+	return configureTraits(options, &kit.Spec.Traits)
 }

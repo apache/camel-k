@@ -29,9 +29,15 @@ type IntegrationKitSpec struct {
 	Image         string               `json:"image,omitempty"`
 	Dependencies  []string             `json:"dependencies,omitempty"`
 	Profile       TraitProfile         `json:"profile,omitempty"`
-	Traits        map[string]TraitSpec `json:"traits,omitempty"`
+	Traits        IntegrationKitTraits `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec  `json:"configuration,omitempty"`
 	Repositories  []string             `json:"repositories,omitempty"`
+}
+
+// IntegrationKitTraits --
+type IntegrationKitTraits struct {
+	Builder *BuilderTrait `property:"builder" json:"builder,omitempty"`
+	Quarkus *QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 }
 
 // IntegrationKitStatus defines the observed state of IntegrationKit

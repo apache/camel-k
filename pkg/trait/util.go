@@ -35,6 +35,14 @@ import (
 
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
 
+func BoolP(b bool) *bool {
+	return &b
+}
+
+func IntP(i int) *int {
+	return &i
+}
+
 // GetIntegrationKit retrieves the kit set on the integration
 func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {
 	if integration.Status.Kit == "" {

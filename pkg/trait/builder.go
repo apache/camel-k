@@ -23,7 +23,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/builder/spectrum"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -35,19 +34,15 @@ import (
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/builder/s2i"
+	"github.com/apache/camel-k/pkg/builder/spectrum"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 const builderDir = "/builder"
 
-// The builder trait is internally used to determine the best strategy to
-// build and configure IntegrationKits.
-//
-// +camel-k:trait=builder
 type builderTrait struct {
-	BaseTrait `property:",squash"`
-	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-	Verbose bool `property:"verbose" json:"verbose,omitempty"`
+	BaseTrait
+	v1.BuilderTrait
 }
 
 func newBuilderTrait() Trait {
