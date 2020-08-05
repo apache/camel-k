@@ -81,6 +81,13 @@ func (c *Collection) Add(resource runtime.Object) {
 	}
 }
 
+// AddFirst adds a resource to the head of the collection
+func (c *Collection) AddFirst(resource runtime.Object) {
+	if resource != nil {
+		c.items = append([]runtime.Object{resource}, c.items...)
+	}
+}
+
 // AddAll adds all resources to the collection
 func (c *Collection) AddAll(resource []runtime.Object) {
 	c.items = append(c.items, resource...)

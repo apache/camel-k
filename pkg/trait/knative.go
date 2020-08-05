@@ -460,7 +460,7 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 						Name:       ref.Name,
 						APIVersion: ref.APIVersion,
 					}
-					e.Resources.Add(knativeutil.CreateSinkBinding(source, target))
+					e.Resources.AddFirst(knativeutil.CreateSinkBinding(source, target))
 				}
 				return nil
 			})
