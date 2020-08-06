@@ -25,4 +25,4 @@
       - transform:
           simple: "${body.toUpperCase()}"
       - to: "log:info"
-      - to: "knative:channel/messages"
+      - to: "knative:channel/messages?apiVersion=messaging.knative.dev/v1beta1&kind=InMemoryChannel"
