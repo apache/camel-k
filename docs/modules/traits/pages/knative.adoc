@@ -73,6 +73,12 @@ listening from more than 1 channel.
 | bool
 | Enables Knative CamelSource pre 0.15 compatibility fixes (will be removed in future versions).
 
+| knative.sink-binding
+| bool
+| Allows binding the integration to a sink via a Knative SinkBinding resource.
+This can be used when the integration targets a single sink.
+It's disabled by default.
+
 | knative.auto
 | bool
 | Enable automatic discovery of all trait properties.
