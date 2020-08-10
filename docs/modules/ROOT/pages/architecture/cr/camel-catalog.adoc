@@ -1,7 +1,7 @@
 [[camel-catalog]]
 = CamelCatalog
 
-The*CamelCatalog* is a static side resources that provides metadata related to the what it is included in the xref:architecture/runtime.adoc[Runtime] in term of Camel components, languages, dataformats and what capabilities are prvided.
+The *CamelCatalog* is a static side resources that provides metadata related to the what it is included in the xref:architecture/runtime.adoc[Runtime] in term of Camel components, languages, dataformats and what capabilities are prvided.
 
 [NOTE]
 ====

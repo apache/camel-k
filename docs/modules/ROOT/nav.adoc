@@ -27,6 +27,7 @@
 *** xref:architecture/cr/camel-catalog.adoc[CamelCatalog]
 ** xref:architecture/runtime.adoc[Runtime]
 ** xref:architecture/traits.adoc[Traits]
+** xref:architecture/sources.adoc[Sources]
 * Observability
 ** xref:observability/monitoring.adoc[Monitoring]
 * xref:traits:traits.adoc[Traits]
