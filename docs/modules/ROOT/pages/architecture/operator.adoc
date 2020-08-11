@@ -9,7 +9,7 @@ image::architecture/operator-control-loop.png[control-loop]
 
 This pattern is the foundation of every https://kubernetes.io/docs/concepts/architecture/controller/[Controllers] shipped by default by Kubernetes but can also be used by https://kubernetes.io/docs/concepts/extend-kubernetes/operator[Operators] that are controllers that encode domain specific knowledge and extends the Kubernetes API to create, configure and manage instances of complex applications on behalf of Kubernetes users. 
 
-With the Camel K Operator we have moved this pattern to the next level as it goes beyon the tasks to install and maintain applications but it materializes them according to the integration logic expressed through the **Camel DSL**.
+With the Camel K Operator we have moved this pattern to the next level as it goes beyond the tasks to install and maintain applications but materializes them according to the integration logic expressed through the **Camel DSL**.
 
 The Camel K Operator defines a number of new Kubernetes API through the https://kubernetes.io/docs/concepts/extend-kubernetes/#user-defined-types[**Custom Resource** (CR)] extension mechanism:
 
