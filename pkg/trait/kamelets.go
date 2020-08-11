@@ -185,13 +185,20 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kame
 		if err != nil {
 			return err
 		}
+
+		propertyNames := make([]string, 0, len(kamelet.Status.Properties))
+		for _, p := range kamelet.Status.Properties {
+			propertyNames = append(propertyNames, p.Name)
+		}
+
 		flowSource := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
 				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
 				Content: string(flowData),
 			},
-			Language: v1.LanguageYaml,
-			Type:     v1.SourceTypeTemplate,
+			Language:      v1.LanguageYaml,
+			Type:          v1.SourceTypeTemplate,
+			PropertyNames: propertyNames,
 		}
 		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
 		if err != nil {
