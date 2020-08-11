@@ -1,7 +1,7 @@
 [[build]]
 = Build
 
-A *Build* resources, describes the process of assembling a container image that copes with the requirement of an xref:architecture/cr/integration.adoc[Integration] or xref:architecture/cr/integration-kit.adoc[IntegrationKit].
+A *Build* resource, describes the process of assembling a container image that copes with the requirement of an xref:architecture/cr/integration.adoc[Integration] or xref:architecture/cr/integration-kit.adoc[IntegrationKit].
 
 [source,go]
 ----
