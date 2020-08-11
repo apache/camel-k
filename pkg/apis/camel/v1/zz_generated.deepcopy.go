@@ -1312,6 +1312,11 @@ func (in *SourceSpec) DeepCopyInto(out *SourceSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.PropertyNames != nil {
+		in, out := &in.PropertyNames, &out.PropertyNames
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

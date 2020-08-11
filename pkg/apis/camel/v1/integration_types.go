@@ -127,13 +127,15 @@ type SourceSpec struct {
 	Interceptors []string `json:"interceptors,omitempty"`
 	// Type defines the kind of source described by this object
 	Type SourceType `json:"type,omitempty"`
+	// List of property names defined in the source (e.g. if type is "template")
+	PropertyNames []string `json:"property-names,omitempty"`
 }
 
 type SourceType string
 
 const (
-	SourceTypeDefault SourceType = ""
-	SourceTypeKamelet SourceType = "kamelet"
+	SourceTypeDefault  SourceType = ""
+	SourceTypeTemplate SourceType = "template"
 )
 
 // Language --

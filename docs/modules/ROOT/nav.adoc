@@ -37,6 +37,7 @@
 ** xref:traits:istio.adoc[Istio]
 ** xref:traits:jolokia.adoc[Jolokia]
 ** xref:traits:jvm.adoc[Jvm]
+** xref:traits:kamelets.adoc[Kamelets]
 ** xref:traits:knative-service.adoc[Knative Service]
 ** xref:traits:knative.adoc[Knative]
 ** xref:traits:master.adoc[Master]

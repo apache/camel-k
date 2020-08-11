@@ -41,7 +41,5 @@ func (action *initializeAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
-	target := kamelet.DeepCopy()
-	target.Status.Phase = v1alpha1.KameletPhaseReady
-	return target, nil
+	return updateStatus(kamelet)
 }

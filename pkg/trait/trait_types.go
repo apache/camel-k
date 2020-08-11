@@ -54,9 +54,6 @@ var (
 	// SourcesMountPath --
 	SourcesMountPath = path.Join(BasePath, "sources")
 
-	// KameletsMountPath --
-	KameletsMountPath = path.Join(BasePath, "kamelets.d")
-
 	// ResourcesMountPath --
 	ResourcesMountPath = path.Join(BasePath, "resources")
 
@@ -478,34 +475,43 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	return maps
 }
 
-// ComputeSourcesURI --
-func (e *Environment) ComputeSourcesURI() []string {
-	sources := e.Integration.Sources()
-	paths := make([]string, 0, len(sources))
-
-	for i, s := range sources {
-		if s.Type == v1.SourceTypeKamelet {
-			// Kamelet information is added to application.properties
-			continue
-		}
+// AddSourcesProperties --
+func (e *Environment) AddSourcesProperties() {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	for i, s := range e.Integration.Sources() {
 		root := path.Join(SourcesMountPath, fmt.Sprintf("i-source-%03d", i))
 
 		srcName := strings.TrimPrefix(s.Name, "/")
 		src := path.Join(root, srcName)
 		src = "file:" + src
-		interceptors := make([]string, 0, len(s.Interceptors))
+		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", i)] = src
 
-		params := make([]string, 0)
+		simpleName := srcName
+		if strings.Contains(srcName, ".") {
+			simpleName = srcName[0:strings.Index(srcName, ".")]
+		}
+		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", i)] = simpleName
+
+		for pid, p := range s.PropertyNames {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", i, pid)] = p
+		}
+
+		if s.Type != "" {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", i)] = string(s.Type)
+		}
 		if s.InferLanguage() != "" {
-			params = append(params, "language="+string(s.InferLanguage()))
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", i)] = string(s.InferLanguage())
 		}
 		if s.Loader != "" {
-			params = append(params, "loader="+s.Loader)
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", i)] = string(s.Loader)
 		}
 		if s.Compression {
-			params = append(params, "compression=true")
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compression", i)] = "true"
 		}
 
+		interceptors := make([]string, 0, len(s.Interceptors))
 		if s.Interceptors != nil {
 			interceptors = append(interceptors, s.Interceptors...)
 		}
@@ -513,73 +519,7 @@ func (e *Environment) ComputeSourcesURI() []string {
 			interceptors = append(interceptors, e.Interceptors...)
 		}
 		if len(interceptors) > 0 {
-			params = append(params, "interceptors="+strings.Join(interceptors, ","))
-		}
-
-		if len(params) > 0 {
-			src = fmt.Sprintf("%s?%s", src, strings.Join(params, "&"))
-		}
-
-		paths = append(paths, src)
-	}
-
-	return paths
-}
-
-// AddSourcesProperties --
-func (e *Environment) AddSourcesProperties() {
-	sources := e.Integration.Sources()
-	properties := make(map[string]string)
-
-	for _, s := range sources {
-		if s.Type == v1.SourceTypeKamelet {
-			// We compute properties only for Kamelets
-			// TODO move other sources types to this format instead of ENV_VAR
-
-			srcName := strings.TrimPrefix(s.Name, "/")
-			kameletName := srcName
-			if strings.Contains(kameletName, ".") {
-				kameletName = kameletName[0:strings.LastIndex(kameletName, ".")]
-			}
-			root := path.Join(KameletsMountPath, kameletName)
-
-			src := path.Join(root, srcName)
-			src = "file:" + src
-			properties[fmt.Sprintf("camel.k.kamelets[%s].location", kameletName)] = src
-
-			schemaName := path.Join(root, fmt.Sprintf("%s-schema.json", kameletName))
-			properties[fmt.Sprintf("camel.k.kamelets[%s].schema", kameletName)] = schemaName
-
-			if s.InferLanguage() != "" {
-				properties[fmt.Sprintf("camel.k.kamelets[%s].language", kameletName)] = string(s.InferLanguage())
-			}
-			if s.Loader != "" {
-				properties[fmt.Sprintf("camel.k.kamelets[%s].loader", kameletName)] = s.Loader
-			}
-			if s.Compression {
-				properties[fmt.Sprintf("camel.k.kamelets[%s].compression", kameletName)] = True
-			}
-
-			interceptors := make([]string, 0, len(s.Interceptors))
-			if s.Interceptors != nil {
-				interceptors = append(interceptors, s.Interceptors...)
-			}
-			if e.Interceptors != nil {
-				interceptors = append(interceptors, e.Interceptors...)
-			}
-			for i, interceptor := range interceptors {
-				properties[fmt.Sprintf("camel.k.kamelets[%s].interceptors[%d]", kameletName, i)] = interceptor
-			}
-		}
-	}
-
-	if len(properties) > 0 {
-		if e.ApplicationProperties == nil {
-			e.ApplicationProperties = properties
-		} else {
-			for k, v := range properties {
-				e.ApplicationProperties[k] = v
-			}
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].interceptors", i)] = strings.Join(interceptors, ",")
 		}
 	}
 }
@@ -596,67 +536,30 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			cmName = s.ContentRef
 		}
 		resName := strings.TrimPrefix(s.Name, "/")
+		refName := fmt.Sprintf("i-source-%03d", i)
+		resPath := path.Join(SourcesMountPath, refName)
 
-		if s.Type == v1.SourceTypeKamelet {
-			kameletName := resName
-			if strings.Contains(kameletName, ".") {
-				kameletName = kameletName[0:strings.LastIndex(kameletName, ".")]
-			}
-			refName := fmt.Sprintf("i-kamelet-source-%03d", i)
-			resPath := path.Join(KameletsMountPath, kameletName)
-			schemaResName := fmt.Sprintf("%s-schema.json", kameletName)
-
-			*vols = append(*vols, corev1.Volume{
-				Name: refName,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: cmName,
-						},
-						Items: []corev1.KeyToPath{
-							{
-								Key:  "content",
-								Path: resName,
-							},
-							{
-								Key:  "schema",
-								Path: schemaResName,
-							},
+		*vols = append(*vols, corev1.Volume{
+			Name: refName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: cmName,
+					},
+					Items: []corev1.KeyToPath{
+						{
+							Key:  "content",
+							Path: resName,
 						},
 					},
 				},
-			})
+			},
+		})
 
-			*mnts = append(*mnts, corev1.VolumeMount{
-				Name:      refName,
-				MountPath: resPath,
-			})
-		} else {
-			refName := fmt.Sprintf("i-source-%03d", i)
-			resPath := path.Join(SourcesMountPath, refName)
-
-			*vols = append(*vols, corev1.Volume{
-				Name: refName,
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: cmName,
-						},
-						Items: []corev1.KeyToPath{
-							{
-								Key:  "content",
-								Path: resName,
-							},
-						},
-					},
-				},
-			})
-
-			*mnts = append(*mnts, corev1.VolumeMount{
-				Name:      refName,
-				MountPath: resPath,
-			})
-		}
+		*mnts = append(*mnts, corev1.VolumeMount{
+			Name:      refName,
+			MountPath: resPath,
+		})
 	}
 
 	for i, r := range e.Integration.Resources() {

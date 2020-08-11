@@ -49,7 +49,7 @@ func TestOpenShiftTraits(t *testing.T) {
 	assert.Nil(t, env.GetTrait("service"))
 	assert.Nil(t, env.GetTrait("route"))
 	assert.NotNil(t, env.GetTrait("owner"))
-	assert.Nil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels["camel.apache.org/properties.type"] != ""
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
@@ -64,7 +64,7 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 	assert.NotNil(t, env.GetTrait("service"))
 	assert.NotNil(t, env.GetTrait("route"))
 	assert.NotNil(t, env.GetTrait("owner"))
-	assert.Nil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels["camel.apache.org/properties.type"] != ""
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
@@ -114,7 +114,7 @@ func TestKubernetesTraits(t *testing.T) {
 	assert.Nil(t, env.GetTrait("service"))
 	assert.Nil(t, env.GetTrait("route"))
 	assert.NotNil(t, env.GetTrait("owner"))
-	assert.Nil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels["camel.apache.org/properties.type"] != ""
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
@@ -129,7 +129,7 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 	assert.NotNil(t, env.GetTrait("service"))
 	assert.Nil(t, env.GetTrait("route"))
 	assert.NotNil(t, env.GetTrait("owner"))
-	assert.Nil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+	assert.NotNil(t, res.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels["camel.apache.org/properties.type"] != ""
 	}))
 	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {

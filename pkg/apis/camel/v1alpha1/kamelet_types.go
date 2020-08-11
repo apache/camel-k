@@ -58,6 +58,12 @@ type AuthorizationSpec struct {
 type KameletStatus struct {
 	Phase      KameletPhase       `json:"phase,omitempty"`
 	Conditions []KameletCondition `json:"conditions,omitempty"`
+	Properties []KameletProperty  `json:"properties,omitempty"`
+}
+
+type KameletProperty struct {
+	Name    string `json:"name,omitempty"`
+	Default string `json:"default,omitempty"`
 }
 
 // KameletCondition describes the state of a resource at a certain point.
@@ -95,11 +101,13 @@ const (
 	KameletPhaseReady KameletPhase = "Ready"
 )
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 // Kamelet is the Schema for the kamelets API
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:openapi-gen=true
+// +genclient
+// +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=kamelets,scope=Namespaced
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
 type Kamelet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

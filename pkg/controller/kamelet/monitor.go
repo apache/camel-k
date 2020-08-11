@@ -41,6 +41,5 @@ func (action *monitorAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
 }
 
 func (action *monitorAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
-	// Doing nothing for now
-	return kamelet, nil
+	return updateStatus(kamelet)
 }

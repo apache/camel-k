@@ -21,19 +21,16 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/envvar"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
-
 	serving "knative.dev/serving/pkg/apis/serving/v1"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 const (
@@ -195,8 +192,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 
-	// Configure sources
-	envvar.SetVal(&container.Env, "CAMEL_K_ROUTES", strings.Join(e.ComputeSourcesURI(), ","))
 	e.AddSourcesProperties()
 
 	t.configureResources(e, &container)
