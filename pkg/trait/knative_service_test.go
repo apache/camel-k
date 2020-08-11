@@ -118,7 +118,7 @@ func TestKnativeService(t *testing.T) {
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative"))
 	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
-	assert.Equal(t, 4, environment.Resources.Size())
+	assert.Equal(t, 5, environment.Resources.Size())
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName
@@ -128,8 +128,8 @@ func TestKnativeService(t *testing.T) {
 
 	spec := s.Spec.ConfigurationSpec.Template.Spec
 
-	assert.Len(t, spec.Containers[0].VolumeMounts, 5)
-	assert.Len(t, spec.Volumes, 5)
+	assert.Len(t, spec.Containers[0].VolumeMounts, 6)
+	assert.Len(t, spec.Volumes, 6)
 
 	assert.Condition(t, func() bool {
 		for _, v := range spec.Containers[0].VolumeMounts {
@@ -172,7 +172,9 @@ func TestKnativeService(t *testing.T) {
 		}
 	})
 
-	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_ROUTES", "file:/etc/camel/sources/i-source-000/routes.js?language=js&compression=true")
+	assert.Equal(t, "file:/etc/camel/sources/i-source-000/routes.js", environment.ApplicationProperties["camel.k.sources[0].location"])
+	assert.Equal(t, "js", environment.ApplicationProperties["camel.k.sources[0].language"])
+	assert.Equal(t, "true", environment.ApplicationProperties["camel.k.sources[0].compression"])
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 }

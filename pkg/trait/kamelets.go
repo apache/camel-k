@@ -88,7 +88,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -114,11 +114,16 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
-	if err := t.addKamelets(e); err != nil {
-		return err
-	}
-	if err := t.addConfigurationSecrets(e); err != nil {
-		return err
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		if err := t.addKamelets(e); err != nil {
+			return err
+		}
+		if err := t.addConfigurationSecrets(e); err != nil {
+			return err
+		}
+	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+		return t.configureApplicationProperties(e)
 	}
 	return nil
 }
@@ -150,6 +155,27 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 	return nil
 }
 
+func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
+	for _, k := range t.getKameletKeys() {
+		var kamelet v1alpha1.Kamelet
+		key := client.ObjectKey{
+			Namespace: e.Integration.Namespace,
+			Name:      k,
+		}
+		if err := t.Client.Get(t.Ctx, key, &kamelet); err != nil {
+			return err
+		}
+
+		// Configuring defaults from Kamelet
+		for _, prop := range kamelet.Status.Properties {
+			if prop.Default != "" {
+				e.ApplicationProperties[fmt.Sprintf("camel.kamelet.%s.%s", kamelet.Name, prop.Name)] = prop.Default
+			}
+		}
+	}
+	return nil
+}
+
 func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
@@ -165,7 +191,7 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kame
 				Content: string(flowData),
 			},
 			Language: v1.LanguageYaml,
-			Type:     v1.SourceTypeKamelet,
+			Type:     v1.SourceTypeTemplate,
 		}
 		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
 		if err != nil {
@@ -184,7 +210,7 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kame
 
 	kameletCounter := 0
 	for _, source := range sources {
-		if source.Type == v1.SourceTypeKamelet {
+		if source.Type == v1.SourceTypeTemplate {
 			kameletCounter++
 		}
 		replaced := false
@@ -279,7 +305,7 @@ func (t *kameletsTrait) getConfigurationKeys() []configurationKey {
 }
 
 func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
-	if source.Type == v1.SourceTypeKamelet {
+	if source.Type == v1.SourceTypeTemplate {
 		// Kamelets must be named "<kamelet-name>.extension"
 		language := source.InferLanguage()
 		source.Name = fmt.Sprintf("%s.%s", kamelet.Name, string(language))

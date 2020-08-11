@@ -19,6 +19,8 @@ limitations under the License.
 
 package v1alpha1
 
+import "encoding/json"
+
 // JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 type JSONSchemaProps struct {
 	ID          string        `json:"id,omitempty" protobuf:"bytes,1,opt,name=id"`
@@ -59,7 +61,7 @@ type JSONSchemaProps struct {
 	// default is a default value for undefined object fields.
 	// Defaulting is a beta feature under the CustomResourceDefaulting feature gate.
 	// Defaulting requires spec.preserveUnknownFields to be false.
-	Default              *JSON                      `json:"default,omitempty" protobuf:"bytes,8,opt,name=default"`
+	Default              *json.RawMessage           `json:"default,omitempty" protobuf:"bytes,8,opt,name=default"`
 	Maximum              *float64                   `json:"maximum,omitempty" protobuf:"bytes,9,opt,name=maximum"`
 	ExclusiveMaximum     bool                       `json:"exclusiveMaximum,omitempty" protobuf:"bytes,10,opt,name=exclusiveMaximum"`
 	Minimum              *float64                   `json:"minimum,omitempty" protobuf:"bytes,11,opt,name=minimum"`
@@ -71,7 +73,7 @@ type JSONSchemaProps struct {
 	MinItems             *int64                     `json:"minItems,omitempty" protobuf:"bytes,17,opt,name=minItems"`
 	UniqueItems          bool                       `json:"uniqueItems,omitempty" protobuf:"bytes,18,opt,name=uniqueItems"`
 	MultipleOf           *float64                   `json:"multipleOf,omitempty" protobuf:"bytes,19,opt,name=multipleOf"`
-	Enum                 []JSON                     `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
+	Enum                 []*json.RawMessage         `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
 	MaxProperties        *int64                     `json:"maxProperties,omitempty" protobuf:"bytes,21,opt,name=maxProperties"`
 	MinProperties        *int64                     `json:"minProperties,omitempty" protobuf:"bytes,22,opt,name=minProperties"`
 	Required             []string                   `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
@@ -87,7 +89,7 @@ type JSONSchemaProps struct {
 	AdditionalItems      *JSONSchemaPropsOrBool     `json:"additionalItems,omitempty" protobuf:"bytes,33,opt,name=additionalItems"`
 	Definitions          JSONSchemaDefinitions      `json:"definitions,omitempty" protobuf:"bytes,34,opt,name=definitions"`
 	ExternalDocs         *ExternalDocumentation     `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
-	Example              *JSON                      `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
+	Example              *json.RawMessage           `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
 	Nullable             bool                       `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
 
 	// x-kubernetes-preserve-unknown-fields stops the API server

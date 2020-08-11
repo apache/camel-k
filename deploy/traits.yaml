@@ -319,6 +319,23 @@ traits:
   - name: options
     type: '[]string'
     description: A list of JVM options
+- name: kamelets
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common property.
+  - name: auto
+    type: bool
+    description: Automatically inject all referenced Kamelets and their default configuration (enabled by default)
+  - name: list
+    type: string
+    description: Comma separated list of Kamelet names to load into the current integration
 - name: knative-service
   platform: false
   profiles:

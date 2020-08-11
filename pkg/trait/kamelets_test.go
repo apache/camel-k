@@ -115,7 +115,7 @@ func TestKameletLookup(t *testing.T) {
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
 	source := environment.Integration.Status.GeneratedSources[0]
 	assert.Equal(t, "timer.yaml", source.Name)
-	assert.Equal(t, "kamelet", string(source.Type))
+	assert.Equal(t, "template", string(source.Type))
 
 	assert.Equal(t, []string{"camel:log", "camel:timer"}, environment.Integration.Status.Dependencies)
 }
@@ -165,7 +165,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 
 	flowSource := environment.Integration.Status.GeneratedSources[0]
 	assert.Equal(t, "timer.yaml", flowSource.Name)
-	assert.Equal(t, "kamelet", string(flowSource.Type))
+	assert.Equal(t, "template", string(flowSource.Type))
 	assert.Equal(t, "it-kamelet-timer-flow", flowSource.ContentRef)
 	assert.Equal(t, "content", flowSource.ContentKey)
 
@@ -194,7 +194,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 						Name:    "mykamelet.groovy",
 						Content: `from("timer").to("log:info")`,
 					},
-					Type: v1.SourceTypeKamelet,
+					Type: v1.SourceTypeTemplate,
 				},
 			},
 		},
@@ -215,7 +215,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
 	source := environment.Integration.Status.GeneratedSources[0]
 	assert.Equal(t, "timer.groovy", source.Name)
-	assert.Equal(t, "kamelet", string(source.Type))
+	assert.Equal(t, "template", string(source.Type))
 }
 
 func TestErrorMultipleKameletSources(t *testing.T) {
@@ -236,7 +236,7 @@ func TestErrorMultipleKameletSources(t *testing.T) {
 						Name:    "mykamelet.groovy",
 						Content: `from("timer").to("log:info")`,
 					},
-					Type: v1.SourceTypeKamelet,
+					Type: v1.SourceTypeTemplate,
 				},
 			},
 			Flow: marshalOrFail(map[string]interface{}{
@@ -333,13 +333,13 @@ func TestMultipleKamelets(t *testing.T) {
 
 	flowSource2 := environment.Integration.Status.GeneratedSources[0]
 	assert.Equal(t, "logger.yaml", flowSource2.Name)
-	assert.Equal(t, "kamelet", string(flowSource2.Type))
+	assert.Equal(t, "template", string(flowSource2.Type))
 	assert.Equal(t, "it-kamelet-logger-flow", flowSource2.ContentRef)
 	assert.Equal(t, "content", flowSource2.ContentKey)
 
 	flowSource := environment.Integration.Status.GeneratedSources[1]
 	assert.Equal(t, "timer.yaml", flowSource.Name)
-	assert.Equal(t, "kamelet", string(flowSource.Type))
+	assert.Equal(t, "template", string(flowSource.Type))
 	assert.Equal(t, "it-kamelet-timer-flow", flowSource.ContentRef)
 	assert.Equal(t, "content", flowSource.ContentKey)
 
