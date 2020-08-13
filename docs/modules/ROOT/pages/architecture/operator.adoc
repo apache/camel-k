@@ -33,7 +33,7 @@ image::architecture/camel-k-state-machine-basic.png[State Machine]
 
 Each state of the CR is handled by a dedicated handler, named `Action`, defined as follow:
 
-[code,go]
+[source,go]
 ----
 type Action interface {
 	CanHandle(cr *v1.CR) bool // <1>
