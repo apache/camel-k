@@ -1,4 +1,4 @@
-Feature: Camel K can run latest released Knative CamelSource
+Feature: Camel K can serve metrics to Prometheus
 
   Background: Prepare Thanos URL
     Given URL: https://thanos-querier.openshift-monitoring:9091
