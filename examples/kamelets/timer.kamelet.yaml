@@ -11,6 +11,11 @@ spec:
     required:
       - message
     properties:
+      period:
+        title: Period
+        description: The time interval between two events
+        type: integer
+        default: 1000
       message:
         title: Message
         description: The message to generate
@@ -24,7 +29,9 @@ spec:
   flow:
     from:
       uri: timer:tick
+      parameters:
+        period: "{{period}}"
       steps:
         - set-body:
-            constant: "Hello [here there'll be the message] !!!"
-        - to: "log:info"
+            constant: "{{message}}"
+        - to: "direct:{{routeId}}"

@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.5.1-snapshot-main
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.4.0
-    camel.apache.org/catalog.loader.version: 3.4.0
+    camel.apache.org/catalog.version: 3.5.0-SNAPSHOT
+    camel.apache.org/catalog.loader.version: 3.5.0-SNAPSHOT
     camel.apache.org/runtime.version: 1.5.1-SNAPSHOT
     camel.apache.org/runtime.provider: main
 spec:
@@ -31,9 +31,9 @@ spec:
     provider: main
     applicationClass: org.apache.camel.k.main.Application
     metadata:
-      camel.version: 3.4.0
-      quarkus.version: 1.6.0.Final
-      camel-quarkus.version: 1.0.0-CR3
+      camel.version: 3.5.0-SNAPSHOT
+      quarkus.version: 1.7.0.Final
+      camel-quarkus.version: 1.0.0
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
@@ -94,6 +94,15 @@ spec:
       javaTypes:
       - org.apache.camel.component.azure.blob.BlobServiceComponent
       - org.apache.camel.component.azure.queue.QueueServiceComponent
+    camel-vertx-websocket:
+      groupId: org.apache.camel
+      artifactId: camel-vertx-websocket
+      schemes:
+      - id: vertx-websocket
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.websocket.VertxWebsocketComponent
     camel-seda:
       groupId: org.apache.camel
       artifactId: camel-seda
@@ -193,6 +202,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.sjms2.Sjms2Component
+    camel-vertx-http:
+      groupId: org.apache.camel
+      artifactId: camel-vertx-http
+      schemes:
+      - id: vertx-http
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.http.VertxHttpComponent
     camel-facebook:
       groupId: org.apache.camel
       artifactId: camel-facebook
@@ -299,6 +317,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.aws2.iam.IAM2Component
+    camel-jsonata:
+      groupId: org.apache.camel
+      artifactId: camel-jsonata
+      schemes:
+      - id: jsonata
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jsonata.JsonataComponent
     camel-aws-eks:
       groupId: org.apache.camel
       artifactId: camel-aws-eks
@@ -595,6 +622,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.weka.WekaComponent
+    camel-azure-eventhubs:
+      groupId: org.apache.camel
+      artifactId: camel-azure-eventhubs
+      schemes:
+      - id: azure-eventhubs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.eventhubs.EventHubsComponent
     camel-jacksonxml:
       groupId: org.apache.camel
       artifactId: camel-jacksonxml
@@ -780,6 +816,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.salesforce.SalesforceComponent
+    camel-minio:
+      groupId: org.apache.camel
+      artifactId: camel-minio
+      schemes:
+      - id: minio
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.minio.MinioComponent
     camel-xj:
       groupId: org.apache.camel
       artifactId: camel-xj
@@ -1288,6 +1333,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.guava.eventbus.GuavaEventBusComponent
+    camel-aws2-sts:
+      groupId: org.apache.camel
+      artifactId: camel-aws2-sts
+      schemes:
+      - id: aws2-sts
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.sts.STS2Component
     camel-msv:
       groupId: org.apache.camel
       artifactId: camel-msv
@@ -2200,6 +2254,15 @@ spec:
       - groovy
       javaTypes:
       - org.apache.camel.language.groovy.GroovyLanguage
+    camel-arangodb:
+      groupId: org.apache.camel
+      artifactId: camel-arangodb
+      schemes:
+      - id: arangodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.arangodb.ArangoDbComponent
     camel-saga:
       groupId: org.apache.camel
       artifactId: camel-saga
@@ -2794,6 +2857,15 @@ spec:
       - grok
       javaTypes:
       - org.apache.camel.component.grok.GrokDataFormat
+    camel-oaipmh:
+      groupId: org.apache.camel
+      artifactId: camel-oaipmh
+      schemes:
+      - id: oaipmh
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.oaipmh.component.OAIPMHComponent
     camel-mvel:
       groupId: org.apache.camel
       artifactId: camel-mvel
