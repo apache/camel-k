@@ -1,4 +1,5 @@
-// camel-k: language=groovy
+// camel-k: language=groovy dependency=mvn:org.apache.camel.k:camel-kamelet:1.5.1-SNAPSHOT
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,5 +17,5 @@
  * limitations under the License.
  */
 
-from('kamelet:timer')
-    .to('log:info')
+from('kamelet:timer?message=Hello+Kamelets&period=1000')
+    .log('${body}')
