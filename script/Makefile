@@ -30,7 +30,7 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1235
+STAGING_RUNTIME_REPO :=
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
