@@ -31,7 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
 	"knative.dev/pkg/apis/duck"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
