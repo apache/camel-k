@@ -21,9 +21,19 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '**.adoc'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
   push:
     branches:
       - master
+    paths-ignore:
+      - '**.adoc'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
 
 jobs:
   test:
