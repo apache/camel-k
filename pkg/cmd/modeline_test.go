@@ -42,7 +42,7 @@ func TestModelineRunSimple(t *testing.T) {
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", fileName, "--dependency", "mvn:org.my/lib:1.0"}, flags)
+	assert.Equal(t, []string{"run", fileName, "--dependency=mvn:org.my/lib:1.0"}, flags)
 }
 
 func TestModelineRunHelp(t *testing.T) {
@@ -73,7 +73,7 @@ func TestModelineRunChain(t *testing.T) {
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", "-d", "mvn:org.my/lib2:1.0", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", "-d", "mvn:org.my/lib2:1.0", fileName, "--dependency", "mvn:org.my/lib:2.0"}, flags)
+	assert.Equal(t, []string{"run", "-d", "mvn:org.my/lib2:1.0", fileName, "--dependency=mvn:org.my/lib:2.0"}, flags)
 }
 
 func TestModelineRunMultipleFiles(t *testing.T) {
@@ -98,7 +98,7 @@ func TestModelineRunMultipleFiles(t *testing.T) {
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", fileName, "--source", fileName2, "--dependency", "mvn:org.my/lib:3.0"}, flags)
+	assert.Equal(t, []string{"run", fileName, "--source=" + fileName2, "--dependency=mvn:org.my/lib:3.0"}, flags)
 }
 
 func TestModelineRunPropertyFiles(t *testing.T) {
@@ -127,5 +127,5 @@ func TestModelineRunPropertyFiles(t *testing.T) {
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", fileName, "--property-file", propFileName}, flags)
+	assert.Equal(t, []string{"run", fileName, "--property-file=" + propFileName}, flags)
 }

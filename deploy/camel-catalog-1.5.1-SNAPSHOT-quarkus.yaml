@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.5.1-snapshot-quarkus
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.4.0
-    camel.apache.org/catalog.loader.version: 3.4.0
+    camel.apache.org/catalog.version: 3.5.0-SNAPSHOT
+    camel.apache.org/catalog.loader.version: 3.5.0-SNAPSHOT
     camel.apache.org/runtime.version: 1.5.1-SNAPSHOT
     camel.apache.org/runtime.provider: quarkus
 spec:
@@ -31,9 +31,9 @@ spec:
     provider: quarkus
     applicationClass: io.quarkus.runner.GeneratedMain
     metadata:
-      camel.version: 3.4.0
-      quarkus.version: 1.6.0.Final
-      camel-quarkus.version: 1.0.0-CR3
+      camel.version: 3.5.0-SNAPSHOT
+      quarkus.version: 1.7.0.Final
+      camel-quarkus.version: 1.0.0
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-quarkus
@@ -1045,6 +1045,13 @@ spec:
       - zipfile
       javaTypes:
       - org.apache.camel.dataformat.zipfile.ZipFileDataFormat
+    camel-quarkus-grok:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-grok
+      dataformats:
+      - grok
+      javaTypes:
+      - org.apache.camel.component.grok.GrokDataFormat
     camel-quarkus-servlet:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-servlet
@@ -1128,6 +1135,15 @@ spec:
       - org.apache.camel.component.openstack.neutron.NeutronComponent
       - org.apache.camel.component.openstack.nova.NovaComponent
       - org.apache.camel.component.openstack.swift.SwiftComponent
+    camel-quarkus-jpa:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jpa
+      schemes:
+      - id: jpa
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jpa.JpaComponent
     camel-quarkus-consul:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-consul

@@ -280,6 +280,10 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
 		go func() {
 			<-cs
+			if o.Context.Err() != nil {
+				// Context canceled
+				return
+			}
 			fmt.Printf("Run integration terminating\n")
 			err := DeleteIntegration(o.Context, c, integration.Name, integration.Namespace)
 			if err != nil {
@@ -338,9 +342,9 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if o.Sync && !o.Logs && !o.Dev {
+	if o.Sync || o.Logs || o.Dev {
 		// Let's add a Wait point, otherwise the script terminates
-		<-o.Context.Done()
+		<-o.RootContext.Done()
 	}
 
 	return nil
@@ -408,7 +412,7 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string, catal
 						return
 					case <-changes:
 						// let's create a new command to parse modeline changes and update our integration
-						newCmd, _, err := createKamelWithModelineCommand(o.Context, os.Args[1:], make(map[string]bool))
+						newCmd, _, err := createKamelWithModelineCommand(o.RootContext, os.Args[1:], make(map[string]bool))
 						if err != nil {
 							fmt.Println("Unable to sync integration: ", err.Error())
 							continue
@@ -420,6 +424,10 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string, catal
 							return err
 						}
 						newCmd.PostRunE = nil
+
+						// cancel the existing command to release watchers
+						o.ContextCancel()
+						// run the new one
 						err = newCmd.Execute()
 						if err != nil {
 							fmt.Println("Unable to sync integration: ", err.Error())
