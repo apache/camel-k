@@ -38,6 +38,12 @@ var (
 	nonRunOptions = map[string]bool{
 		"language": true, // language is a marker modeline option for other tools
 	}
+	disallowedOptions = map[string]bool{
+		"dev":  true,
+		"wait": true,
+		"logs": true,
+		"sync": true,
+	}
 
 	// file options must be considered relative to the source files they belong to
 	fileOptions = map[string]bool{
@@ -116,6 +122,10 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 			return nil, nil, errors.Wrapf(err, "cannot process file %s", f)
 		}
 		for i, o := range ops {
+			if disallowedOptions[o.Name] {
+				return nil, nil, fmt.Errorf("option %q is disallowed in modeline", o.Name)
+			}
+
 			if fileOptions[o.Name] && isLocal(f) {
 				refPath := o.Value
 				if !filepath.IsAbs(refPath) {
@@ -157,8 +167,12 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 		if len(o.Name) > 1 {
 			prefix = "--"
 		}
-		args = append(args, fmt.Sprintf("%s%s", prefix, o.Name))
-		args = append(args, o.Value)
+		// Using the k=v syntax to avoid issues with booleans
+		if len(o.Value) > 0 {
+			args = append(args, fmt.Sprintf("%s%s=%s", prefix, o.Name, o.Value))
+		} else {
+			args = append(args, fmt.Sprintf("%s%s", prefix, o.Name))
+		}
 	}
 
 	return createKamelWithModelineCommand(ctx, args, processedFiles)

@@ -35,16 +35,21 @@ superpowers.
 
 // RootCmdOptions --
 type RootCmdOptions struct {
-	Context    context.Context `mapstructure:"-"`
-	_client    client.Client   `mapstructure:"-"`
-	KubeConfig string          `mapstructure:"kube-config"`
-	Namespace  string          `mapstructure:"namespace"`
+	RootContext   context.Context    `mapstructure:"-"`
+	Context       context.Context    `mapstructure:"-"`
+	ContextCancel context.CancelFunc `mapstructure:"-"`
+	_client       client.Client      `mapstructure:"-"`
+	KubeConfig    string             `mapstructure:"kube-config"`
+	Namespace     string             `mapstructure:"namespace"`
 }
 
 // NewKamelCommand --
 func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
+	childCtx, childCancel := context.WithCancel(ctx)
 	options := RootCmdOptions{
-		Context: ctx,
+		RootContext:   ctx,
+		Context:       childCtx,
+		ContextCancel: childCancel,
 	}
 
 	var err error
