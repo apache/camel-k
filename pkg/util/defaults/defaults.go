@@ -23,7 +23,7 @@ package defaults
 
 const (
 	// Version --
-	Version = "1.1.0"
+	Version = "1.1.1-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
 	DefaultRuntimeVersion = "1.4.1"
