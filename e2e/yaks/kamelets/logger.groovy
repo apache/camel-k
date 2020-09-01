@@ -17,5 +17,5 @@
  * limitations under the License.
  */
 
-from('kamelet:timer?message=Hello+Kamelets&period=1000')
+from('knative:channel/messages')
     .log('${body}')

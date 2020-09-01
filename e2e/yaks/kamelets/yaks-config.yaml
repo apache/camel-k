@@ -23,6 +23,11 @@ pre:
   run: |
     kamel install -n $YAKS_NAMESPACE
 
+    kubectl apply -f messages-channel.yaml -n $YAKS_NAMESPACE
+
     kubectl apply -f timer.kamelet.yaml -n $YAKS_NAMESPACE
 
-    kamel run usage.groovy -w -n $YAKS_NAMESPACE
+    kubectl apply -f timer-source.yaml -n $YAKS_NAMESPACE
+    kubectl wait kameletbinding timer-source --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+
+    kamel run logger.groovy -w -n $YAKS_NAMESPACE

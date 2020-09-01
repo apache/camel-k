@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util/log"
@@ -55,4 +56,21 @@ func matchOrEmpty(reg *regexp.Regexp, str string) string {
 		return match[1]
 	}
 	return ""
+}
+
+func AppendParameters(uri string, params map[string]string) string {
+	prefix := "&"
+	if !strings.Contains(uri, "?") {
+		prefix = "?"
+	}
+	keys := make([]string, 0, len(params))
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		uri += fmt.Sprintf("%s%s=%s", prefix, url.QueryEscape(k), url.QueryEscape(params[k]))
+		prefix = "&"
+	}
+	return uri
 }

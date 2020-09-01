@@ -129,8 +129,18 @@ func (l Logger) ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 	)
 }
 
-// ForIntegrationPlatform --
+// ForKamelet --
 func (l Logger) ForKamelet(target *v1alpha1.Kamelet) Logger {
+	return l.WithValues(
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
+		"ns", target.Namespace,
+		"name", target.Name,
+	)
+}
+
+// ForKameletBinding --
+func (l Logger) ForKameletBinding(target *v1alpha1.KameletBinding) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,

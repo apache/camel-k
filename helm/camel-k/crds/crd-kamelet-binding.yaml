@@ -15,8 +15,31 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-channels:
-- currentCSV: camel-k-operator.v1.2.0-snapshot
-  name: stable
-defaultChannel: stable
-packageName: camel-k-dev
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: kameletbindings.camel.apache.org
+  labels:
+    app: "camel-k"
+spec:
+  group: camel.apache.org
+  scope: Namespaced
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+  subresources:
+    status: {}
+  names:
+    kind: KameletBinding
+    listKind: KameletBindingList
+    plural: kameletbindings
+    singular: kameletbinding
+    shortNames:
+    - klb
+  additionalPrinterColumns:
+  - name: Phase
+    type: string
+    description: The KameletBinding phase
+    JSONPath: .status.phase

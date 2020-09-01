@@ -23,6 +23,7 @@ crd-cr-paths:
   - deploy/crd-integration-kit.yaml
   - deploy/crd-integration-platform.yaml
   - deploy/crd-kamelet.yaml
+  - deploy/crd-kamelet-binding.yaml
 role-paths:
   - deploy/operator-role-olm.yaml
   - deploy/operator-role-olm-cluster.yaml

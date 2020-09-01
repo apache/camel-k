@@ -80,20 +80,96 @@ metadata:
           "name": "example"
         },
         "spec": {}
+      },
+      {
+        "apiVersion": "camel.apache.org/v1alpha1",
+        "kind": "Kamelet",
+        "metadata": {
+          "name": "example"
+        },
+        "spec": {
+          "definition": {
+            "description": "Produces periodic events with a custom payload",
+            "properties": {
+              "message": {
+                "description": "The message to generate",
+                "title": "Message",
+                "type": "string"
+              },
+              "period": {
+                "default": 1000,
+                "description": "The time interval between two events",
+                "title": "Period",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "message"
+            ],
+            "title": "Example Timer"
+          },
+          "flow": {
+            "from": {
+              "parameters": {
+                "period": "#property:period"
+              },
+              "steps": [
+                {
+                  "set-body": {
+                    "constant": "#property:message"
+                  }
+                },
+                {
+                  "to": "direct:#property:routeId"
+                }
+              ],
+              "uri": "timer:tick"
+            }
+          }
+        }
+      },
+      {
+        "apiVersion": "camel.apache.org/v1alpha1",
+        "kind": "KameletBinding",
+        "metadata": {
+          "name": "example"
+        },
+        "spec": {
+          "source": {
+            "ref": {
+              "apiVersion": "camel.apache.org/v1alpha1",
+              "kind": "Kamelet",
+              "name": "example"
+            },
+            "properties": {
+              "message": "Hello world"
+            }
+          },
+          "sink": {
+            "ref": {
+              "apiVersion": "messaging.knative.dev/v1beta1",
+              "kind": "InMemoryChannel",
+              "name": "example"
+            }
+          }
+        }
       }]
     capabilities: Full Lifecycle
     categories: Integration & Delivery
     certified: "false"
-    containerImage: docker.io/apache/camel-k:1.1.0-SNAPSHOT
+    containerImage: docker.io/apache/camel-k:1.2.0-SNAPSHOT
     createdAt: "2020-06-09T02:45:00Z"
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes,
       with serverless superpowers.
     repository: https://github.com/apache/camel-k
     operators.operatorframework.io/internal-objects: '["builds.camel.apache.org","integrationkits.camel.apache.org","camelcatalogs.camel.apache.org"]'
     support: Camel
-  name: camel-k-operator.v1.1.0-snapshot
+  name: camel-k-operator.v1.2.0-snapshot
   namespace: placeholder
 spec:
+  relatedImages:
+  - name: integration-base-image
+    image: adoptopenjdk/openjdk11:slim
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
@@ -122,10 +198,15 @@ spec:
       kind: IntegrationPlatform
       name: integrationplatforms.camel.apache.org
       version: v1
-    - description: A Camel K Kamelet resource
+    - description: A Camel K connector
       displayName: Kamelet
       kind: Kamelet
       name: kamelets.camel.apache.org
+      version: v1alpha1
+    - description: A Camel K connector binding resource
+      displayName: Kamelet Binding
+      kind: KameletBinding
+      name: kameletbindings.camel.apache.org
       version: v1alpha1
   description: |
     Apache Camel K
@@ -231,7 +312,7 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: docker.io/apache/camel-k:1.1.0-SNAPSHOT
+                image: docker.io/apache/camel-k:1.2.0-SNAPSHOT
                 imagePullPolicy: IfNotPresent
                 name: camel-k-operator
                 resources: {}
@@ -470,8 +551,8 @@ spec:
   minKubeVersion: 1.11.0
   provider:
     name: The Apache Software Foundation
-  replaces: camel-k-operator.v1.0.0
+  replaces: camel-k-operator.v1.1.0
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.1.0-snapshot
+  version: 1.2.0
