@@ -18,6 +18,7 @@ limitations under the License.
 package uri
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -88,4 +89,56 @@ func TestQueryParameter(t *testing.T) {
 		})
 	}
 
+}
+
+func TestAppendParameters(t *testing.T) {
+	tests := []struct {
+		prefix   string
+		params   map[string]string
+		expected string
+	}{
+		{
+			prefix:   "kamelet://mykamelet",
+			params:   nil,
+			expected: "kamelet://mykamelet",
+		},
+		{
+			prefix: "kamelet://mykamelet",
+			params: map[string]string{
+				"a": "b",
+			},
+			expected: "kamelet://mykamelet?a=b",
+		},
+		{
+			prefix: "kamelet://mykamelet",
+			params: map[string]string{
+				"a": "b",
+				"c": "d",
+			},
+			expected: "kamelet://mykamelet?a=b&c=d",
+		},
+		{
+			prefix: "kamelet://mykamelet",
+			params: map[string]string{
+				"z": "y",
+				"c": "d",
+			},
+			expected: "kamelet://mykamelet?c=d&z=y",
+		},
+		{
+			prefix: "kamelet://mykamelet?h=m",
+			params: map[string]string{
+				"z": "y",
+				"c": "d",
+			},
+			expected: "kamelet://mykamelet?h=m&c=d&z=y",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("appendParameters-%d-%s", i, test.expected), func(t *testing.T) {
+			uri := AppendParameters(test.prefix, test.params)
+			assert.Equal(t, test.expected, uri)
+		})
+	}
 }

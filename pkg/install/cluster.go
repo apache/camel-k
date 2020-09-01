@@ -75,6 +75,11 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
+	// Install CRD for KameletBinding (if needed)
+	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "crd-kamelet-binding.yaml", collection); err != nil {
+		return err
+	}
+
 	// Installing ClusterRole
 	clusterRoleInstalled, err := IsClusterRoleInstalled(ctx, c)
 	if err != nil {

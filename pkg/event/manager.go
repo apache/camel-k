@@ -68,6 +68,13 @@ const (
 	// ReasonKameletPhaseUpdated --
 	ReasonKameletPhaseUpdated = "KameletPhaseUpdated"
 
+	// ReasonKameletBindingError --
+	ReasonKameletBindingError = "KameletBindingError"
+	// ReasonKameletBindingConditionChanged --
+	ReasonKameletBindingConditionChanged = "KameletBindingConditionChanged"
+	// ReasonKameletBindingPhaseUpdated --
+	ReasonKameletBindingPhaseUpdated = "KameletBindingPhaseUpdated"
+
 	// ReasonRelatedObjectChanged --
 	ReasonRelatedObjectChanged = "ReasonRelatedObjectChanged"
 )
@@ -186,6 +193,35 @@ func NotifyKameletError(ctx context.Context, c client.Client, recorder record.Ev
 		return
 	}
 	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile Kamelet %s: %v", k.Name, err)
+}
+
+// NotifyKameletBindingUpdated automatically generates events when a KameletBinding changes
+func NotifyKameletBindingUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1alpha1.KameletBinding) {
+	if new == nil {
+		return
+	}
+	oldPhase := ""
+	var oldConditions []v1.ResourceCondition
+	if old != nil {
+		oldPhase = string(old.Status.Phase)
+		oldConditions = old.Status.GetConditions()
+	}
+	if new.Status.Phase != v1alpha1.KameletBindingPhaseNone {
+		notifyIfConditionUpdated(recorder, new, oldConditions, new.Status.GetConditions(), "KameletBinding", new.Name, ReasonKameletBindingConditionChanged)
+	}
+	notifyIfPhaseUpdated(ctx, c, recorder, new, oldPhase, string(new.Status.Phase), "KameletBinding", new.Name, ReasonKameletBindingPhaseUpdated, "")
+}
+
+// NotifyKameletBindingError automatically generates error events when the kameletBinding reconcile cycle phase has an error
+func NotifyKameletBindingError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, new *v1alpha1.KameletBinding, err error) {
+	k := old
+	if new != nil {
+		k = new
+	}
+	if k == nil {
+		return
+	}
+	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile KameletBinding %s: %v", k.Name, err)
 }
 
 // NotifyBuildUpdated automatically generates events when a build changes

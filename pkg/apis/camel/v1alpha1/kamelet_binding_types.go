@@ -1,0 +1,115 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package v1alpha1
+
+import (
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// KameletBindingSpec --
+type KameletBindingSpec struct {
+	// Integration is an optional integration used to specify custom parameters
+	Integration *v1.IntegrationSpec `json:"integration,omitempty"`
+	// Source is the starting point of the integration defined by this binding
+	Source Endpoint `json:"source,omitempty"`
+	// Sink is the destination of the integration defined by this binding
+	Sink Endpoint `json:"sink,omitempty"`
+}
+
+// Endpoint represents a source/sink external entity
+type Endpoint struct {
+	// Ref can be used to declare a Kubernetes resource as source/sink endpoint
+	Ref *metav1.OwnerReference `json:"ref,omitempty"`
+	// URI can alternatively be used to specify the (Camel) endpoint explicitly
+	URI *string `json:"uri,omitempty"`
+	// Properties are a key value representation of endpoint properties
+	Properties map[string]string `json:"properties,omitempty"`
+}
+
+// KameletBindingStatus --
+type KameletBindingStatus struct {
+	// Phase --
+	Phase KameletBindingPhase `json:"phase,omitempty"`
+	// Conditions --
+	Conditions []KameletBindingCondition `json:"conditions,omitempty"`
+}
+
+// KameletBindingCondition describes the state of a resource at a certain point.
+type KameletBindingCondition struct {
+	// Type of kameletBinding condition.
+	Type KameletBindingConditionType `json:"type"`
+	// Status of the condition, one of True, False, Unknown.
+	Status corev1.ConditionStatus `json:"status"`
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+	// Last time the condition transitioned from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	// The reason for the condition's last transition.
+	Reason string `json:"reason,omitempty"`
+	// A human readable message indicating details about the transition.
+	Message string `json:"message,omitempty"`
+}
+
+type KameletBindingConditionType string
+
+const (
+	// KameletBindingConditionReady --
+	KameletBindingConditionReady KameletBindingConditionType = "Ready"
+)
+
+type KameletBindingPhase string
+
+const (
+	// KameletKind --
+	KameletBindingKind string = "KameletBinding"
+
+	// KameletBindingPhaseNone --
+	KameletBindingPhaseNone KameletBindingPhase = ""
+	// KameletBindingPhaseCreating --
+	KameletBindingPhaseCreating KameletBindingPhase = "Creating"
+	// KameletBindingPhaseError --
+	KameletBindingPhaseError KameletBindingPhase = "Error"
+	// KameletBindingPhaseReady --
+	KameletBindingPhaseReady KameletBindingPhase = "Ready"
+)
+
+// KameletBinding is the Schema for the kamelets binding API
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:openapi-gen=true
+// +genclient
+// +kubebuilder:resource:path=kameletbindings,scope=Namespaced,shortName=klb,categories=kamel;camel
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet Binding phase"
+type KameletBinding struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   KameletBindingSpec   `json:"spec,omitempty"`
+	Status KameletBindingStatus `json:"status,omitempty"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// KameletBindingList contains a list of KameletBinding
+type KameletBindingList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []KameletBinding `json:"items"`
+}

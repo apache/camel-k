@@ -24,7 +24,7 @@ import (
 )
 
 // GetConditions --
-func (in *KameletStatus) GetConditions() []v1.ResourceCondition {
+func (in *KameletBindingStatus) GetConditions() []v1.ResourceCondition {
 	res := make([]v1.ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
 		res = append(res, c)
@@ -33,37 +33,37 @@ func (in *KameletStatus) GetConditions() []v1.ResourceCondition {
 }
 
 // GetType --
-func (c KameletCondition) GetType() string {
+func (c KameletBindingCondition) GetType() string {
 	return string(c.Type)
 }
 
 // GetStatus --
-func (c KameletCondition) GetStatus() corev1.ConditionStatus {
+func (c KameletBindingCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
 // GetLastUpdateTime --
-func (c KameletCondition) GetLastUpdateTime() metav1.Time {
+func (c KameletBindingCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
 // GetLastTransitionTime --
-func (c KameletCondition) GetLastTransitionTime() metav1.Time {
+func (c KameletBindingCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
 // GetReason --
-func (c KameletCondition) GetReason() string {
+func (c KameletBindingCondition) GetReason() string {
 	return c.Reason
 }
 
 // GetMessage --
-func (c KameletCondition) GetMessage() string {
+func (c KameletBindingCondition) GetMessage() string {
 	return c.Message
 }
 
 // GetCondition returns the condition with the provided type.
-func (in *KameletStatus) GetCondition(condType KameletConditionType) *KameletCondition {
+func (in *KameletBindingStatus) GetCondition(condType KameletBindingConditionType) *KameletBindingCondition {
 	for i := range in.Conditions {
 		c := in.Conditions[i]
 		if c.Type == condType {
@@ -74,8 +74,8 @@ func (in *KameletStatus) GetCondition(condType KameletConditionType) *KameletCon
 }
 
 // SetCondition --
-func (in *KameletStatus) SetCondition(condType KameletConditionType, status corev1.ConditionStatus, reason string, message string) {
-	in.SetConditions(KameletCondition{
+func (in *KameletBindingStatus) SetCondition(condType KameletBindingConditionType, status corev1.ConditionStatus, reason string, message string) {
+	in.SetConditions(KameletBindingCondition{
 		Type:               condType,
 		Status:             status,
 		LastUpdateTime:     metav1.Now(),
@@ -86,8 +86,8 @@ func (in *KameletStatus) SetCondition(condType KameletConditionType, status core
 }
 
 // SetErrorCondition --
-func (in *KameletStatus) SetErrorCondition(condType KameletConditionType, reason string, err error) {
-	in.SetConditions(KameletCondition{
+func (in *KameletBindingStatus) SetErrorCondition(condType KameletBindingConditionType, reason string, err error) {
+	in.SetConditions(KameletBindingCondition{
 		Type:               condType,
 		Status:             corev1.ConditionFalse,
 		LastUpdateTime:     metav1.Now(),
@@ -101,7 +101,7 @@ func (in *KameletStatus) SetErrorCondition(condType KameletConditionType, reason
 //
 // If a condition that we are about to add already exists and has the same status and
 // reason then we are not going to update.
-func (in *KameletStatus) SetConditions(conditions ...KameletCondition) {
+func (in *KameletBindingStatus) SetConditions(conditions ...KameletBindingCondition) {
 	for _, condition := range conditions {
 		if condition.LastUpdateTime.IsZero() {
 			condition.LastUpdateTime = metav1.Now()
@@ -126,7 +126,7 @@ func (in *KameletStatus) SetConditions(conditions ...KameletCondition) {
 }
 
 // RemoveCondition removes the resource condition with the provided type.
-func (in *KameletStatus) RemoveCondition(condType KameletConditionType) {
+func (in *KameletBindingStatus) RemoveCondition(condType KameletBindingConditionType) {
 	newConditions := in.Conditions[:0]
 	for _, c := range in.Conditions {
 		if c.Type != condType {
@@ -135,4 +135,28 @@ func (in *KameletStatus) RemoveCondition(condType KameletConditionType) {
 	}
 
 	in.Conditions = newConditions
+}
+
+// NewKameletBinding --
+func NewKameletBinding(namespace string, name string) KameletBinding {
+	return KameletBinding{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       KameletBindingKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+	}
+}
+
+// NewKameletBindingList --
+func NewKameletBindingList() KameletBindingList {
+	return KameletBindingList{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       KameletBindingKind,
+		},
+	}
 }

@@ -15,8 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-channels:
-- currentCSV: camel-k-operator.v1.2.0-snapshot
-  name: stable
-defaultChannel: stable
-packageName: camel-k-dev
+apiVersion: messaging.knative.dev/v1beta1
+kind: InMemoryChannel
+metadata:
+  name: messages

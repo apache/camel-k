@@ -7,11 +7,18 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func updateStatus(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 	target := kamelet.DeepCopy()
 	target.Status.Phase = v1alpha1.KameletPhaseReady
+	target.Status.SetCondition(
+		v1alpha1.KameletConditionReady,
+		corev1.ConditionTrue,
+		"",
+		"",
+	)
 	if err := recomputeProperties(target); err != nil {
 		return nil, err
 	}
