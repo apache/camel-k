@@ -10,7 +10,7 @@ spec:
       name: timer
     properties:
       message: Hello Kamelets
-      period: "1000"
+      period: 1000
   sink:
     ref:
       kind: InMemoryChannel

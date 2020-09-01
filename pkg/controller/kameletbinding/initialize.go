@@ -119,7 +119,21 @@ func getEndpointURI(e v1alpha1.Endpoint) (string, error) {
 	if err != nil {
 		return baseURI, err
 	}
-	return uri.AppendParameters(baseURI, e.Properties), nil
+
+	// Convert json properties to string before using them in URI
+	if len(e.Properties.RawMessage) > 0 {
+		var props map[string]interface{}
+		if err := json.Unmarshal(e.Properties.RawMessage, &props); err != nil {
+			return "", err
+		}
+		stringProps := make(map[string]string, len(props))
+		for k, v := range props {
+			stringProps[k] = fmt.Sprintf("%v", v)
+		}
+		return uri.AppendParameters(baseURI, stringProps), nil
+	}
+
+	return baseURI, nil
 }
 
 func getEndpointBaseURI(e v1alpha1.Endpoint) (string, error) {
