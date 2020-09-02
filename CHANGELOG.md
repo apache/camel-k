@@ -381,6 +381,7 @@
 - Add license headers to files generated with kamel init [\#1420](https://github.com/apache/camel-k/pull/1420) ([ipolyzos](https://github.com/ipolyzos))
 - Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Properly handle platform-http component in routes [\#1411](https://github.com/apache/camel-k/pull/1411) ([lburgazzoli](https://github.com/lburgazzoli))
+- Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [1.0.0-nightly.202004171040](https://github.com/apache/camel-k/tree/1.0.0-nightly.202004171040) (2020-04-17)
 
@@ -395,7 +396,6 @@
 **Merged pull requests:**
 
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
-- Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
 - Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1384: allow to define an alternative prometheus config [\#1397](https://github.com/apache/camel-k/pull/1397) ([nicolaferraro](https://github.com/nicolaferraro))
