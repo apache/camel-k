@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: sources.knative.dev/v1alpha2
+apiVersion: sources.knative.dev/v1alpha1
 kind: CamelSource
 metadata:
   name: camel-timer-source
