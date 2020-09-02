@@ -42,14 +42,14 @@ require (
 	k8s.io/apimachinery v0.18.2
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20200205140755-e0e292d8aa12
-	knative.dev/eventing v0.15.0
-	knative.dev/pkg v0.0.0-20200519155757-14eb3ae3a5a7
-	knative.dev/serving v0.15.0
+	knative.dev/eventing v0.16.2
+	knative.dev/pkg v0.0.0-20200702222342-ea4d6e985ba0
+	knative.dev/serving v0.16.0
 	sigs.k8s.io/controller-runtime v0.5.2
 )
 
-// Pinned to Kubernetes 1.17.6:
-// - Knative 0.15.0 requires 1.16.4
+// Pinned to Kubernetes 0.17.6:
+// - Knative 0.16.0 requires  0.17.6
 // - Operator SDK 0.17.1 requires 1.17.4
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM

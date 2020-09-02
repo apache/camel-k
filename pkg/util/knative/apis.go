@@ -31,7 +31,7 @@ var (
 			GroupVersionKind: schema.GroupVersionKind{
 				Kind:    "Channel",
 				Group:   "messaging.knative.dev",
-				Version: "v1beta1",
+				Version: "v1",
 			},
 			Resource: "channels",
 		},
@@ -39,17 +39,17 @@ var (
 			GroupVersionKind: schema.GroupVersionKind{
 				Kind:    "Channel",
 				Group:   "messaging.knative.dev",
-				Version: "v1alpha1",
+				Version: "v1beta1",
 			},
 			Resource: "channels",
 		},
 		{
 			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Channel",
-				Group:   "eventing.knative.dev",
-				Version: "v1alpha1",
+				Kind:    "InMemoryChannel",
+				Group:   "messaging.knative.dev",
+				Version: "v1",
 			},
-			Resource: "channels",
+			Resource: "inmemorychannels",
 		},
 		{
 			GroupVersionKind: schema.GroupVersionKind{
@@ -61,11 +61,11 @@ var (
 		},
 		{
 			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "InMemoryChannel",
+				Kind:    "KafkaChannel",
 				Group:   "messaging.knative.dev",
-				Version: "v1alpha1",
+				Version: "v1beta1",
 			},
-			Resource: "inmemorychannels",
+			Resource: "kafkachannels",
 		},
 		{
 			GroupVersionKind: schema.GroupVersionKind{
@@ -119,7 +119,7 @@ var (
 			GroupVersionKind: schema.GroupVersionKind{
 				Kind:    "Broker",
 				Group:   "eventing.knative.dev",
-				Version: "v1beta1",
+				Version: "v1",
 			},
 			Resource: "brokers",
 		},
@@ -127,7 +127,7 @@ var (
 			GroupVersionKind: schema.GroupVersionKind{
 				Kind:    "Broker",
 				Group:   "eventing.knative.dev",
-				Version: "v1alpha1",
+				Version: "v1beta1",
 			},
 			Resource: "brokers",
 		},
