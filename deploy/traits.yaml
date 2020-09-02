@@ -519,7 +519,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Quarkus trait activates the Quarkus runtime. It's disabled by default.
+  description: The Quarkus trait activates the Quarkus runtime. It's enabled by default.
   properties:
   - name: enabled
     type: bool
