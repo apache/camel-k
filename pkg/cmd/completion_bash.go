@@ -153,6 +153,14 @@ __kamel_kubectl_get_known_integrationkits() {
 
 __custom_func() {
     case ${last_command} in
+        kamel_describe_integration)
+            __kamel_kubectl_get_integrations
+            return
+            ;;
+        kamel_describe_kit)
+            __kamel_kubectl_get_integrationkits
+            return
+            ;;
         kamel_delete)
             __kamel_kubectl_get_integrations
             return
