@@ -295,7 +295,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Sync || o.Dev {
-		err = o.syncIntegration(c, args, catalog)
+		err = o.syncIntegration(cmd, c, args, catalog)
 		if err != nil {
 			return err
 		}
@@ -391,7 +391,7 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration 
 	return watch.HandleIntegrationStateChanges(o.Context, integration, handler)
 }
 
-func (o *runCmdOptions) syncIntegration(c client.Client, sources []string, catalog *trait.Catalog) error {
+func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog *trait.Catalog) error {
 	// Let's watch all relevant files when in dev mode
 	var files []string
 	files = append(files, sources...)
@@ -413,6 +413,8 @@ func (o *runCmdOptions) syncIntegration(c client.Client, sources []string, catal
 					case <-changes:
 						// let's create a new command to parse modeline changes and update our integration
 						newCmd, _, err := createKamelWithModelineCommand(o.RootContext, os.Args[1:], make(map[string]bool))
+						newCmd.SetOut(cmd.OutOrStdout())
+						newCmd.SetErr(cmd.ErrOrStderr())
 						if err != nil {
 							fmt.Println("Unable to sync integration: ", err.Error())
 							continue
