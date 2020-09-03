@@ -127,6 +127,9 @@ jobs:
         # Eventing broker
         curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
+        # Eventing sugar controller for injection
+        kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
+
         # Camel Sources
         kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
 
@@ -275,6 +278,9 @@ jobs:
 
           # Eventing broker
           curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+
+          # Eventing sugar controller for injection
+          kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
           # Camel Sources
           kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
