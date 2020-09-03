@@ -85,7 +85,7 @@ func TestAPIs(t *testing.T) {
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Channel",
-		APIVersion: "messaging.knative.dev/v1beta1",
+		APIVersion: "messaging.knative.dev/v1",
 		Name:       "ciao",
 	}, refs[0])
 
@@ -95,7 +95,7 @@ func TestAPIs(t *testing.T) {
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "KafkaChannel",
-		APIVersion: "messaging.knative.dev/v1alpha1",
+		APIVersion: "messaging.knative.dev/v1beta1",
 		Name:       "ciao",
 	}, refs[0])
 
@@ -105,17 +105,17 @@ func TestAPIs(t *testing.T) {
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Channel",
-		APIVersion: "messaging.knative.dev/v1beta1",
+		APIVersion: "messaging.knative.dev/v1",
 		Name:       "ciao",
 	}, refs[0])
 
-	ref, err = ExtractObjectReference("knative:channel/ciao?apiVersion=eventing.knative.dev/v1alpha1")
+	ref, err = ExtractObjectReference("knative:channel/ciao?apiVersion=messaging.knative.dev/v1")
 	assert.Nil(t, err)
 	refs = FillMissingReferenceData(knative.CamelServiceTypeChannel, ref)
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Channel",
-		APIVersion: "eventing.knative.dev/v1alpha1",
+		APIVersion: "messaging.knative.dev/v1",
 		Name:       "ciao",
 	}, refs[0])
 
@@ -130,7 +130,7 @@ func TestAPIs(t *testing.T) {
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Broker",
-		APIVersion: "eventing.knative.dev/v1beta1",
+		APIVersion: "eventing.knative.dev/v1",
 		Name:       "default",
 	}, refs[0])
 
@@ -150,7 +150,7 @@ func TestAPIs(t *testing.T) {
 	checkValidRefs(t, refs)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Broker",
-		APIVersion: "eventing.knative.dev/v1beta1",
+		APIVersion: "eventing.knative.dev/v1",
 		Name:       "aaa",
 	}, refs[0])
 }

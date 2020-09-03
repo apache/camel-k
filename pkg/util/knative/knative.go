@@ -30,9 +30,9 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
-	sourcesv1alpha1 "knative.dev/eventing/pkg/apis/sources/v1alpha1"
+	sources "knative.dev/eventing/pkg/apis/sources/v1alpha2"
 	"knative.dev/pkg/apis/duck"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
@@ -84,7 +84,7 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 		},
 		Spec: eventing.TriggerSpec{
 			Filter: &eventing.TriggerFilter{
-				Attributes: &eventing.TriggerFilterAttributes{
+				Attributes: eventing.TriggerFilterAttributes{
 					"type": eventType,
 				},
 			},
@@ -103,16 +103,16 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 
 // CreateSinkBinding ---
 func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) runtime.Object {
-	binding := sourcesv1alpha1.SinkBinding{
+	binding := sources.SinkBinding{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: sourcesv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: sources.SchemeGroupVersion.String(),
 			Kind:       "SinkBinding",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: source.Namespace,
 			Name:      source.Name,
 		},
-		Spec: sourcesv1alpha1.SinkBindingSpec{
+		Spec: sources.SinkBindingSpec{
 			BindingSpec: duckv1alpha1.BindingSpec{
 				Subject: tracker.Reference{
 					APIVersion: source.APIVersion,

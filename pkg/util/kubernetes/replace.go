@@ -27,7 +27,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -60,7 +59,6 @@ func ReplaceResource(ctx context.Context, c client.Client, res runtime.Object) e
 		mapRequiredMeta(existing, res)
 		mapRequiredServiceData(existing, res)
 		mapRequiredRouteData(existing, res)
-		mapRequiredKnativeData(existing, res)
 		mapRequiredKnativeServiceV1Beta1Data(existing, res)
 		mapRequiredKnativeServiceV1Data(existing, res)
 		err = c.Update(ctx, res)
@@ -91,14 +89,6 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*routev1.Route); ok {
 		if toC, ok := to.(*routev1.Route); ok {
 			toC.Spec.Host = fromC.Spec.Host
-		}
-	}
-}
-
-func mapRequiredKnativeData(from runtime.Object, to runtime.Object) {
-	if fromC, ok := from.(*messaging.Subscription); ok {
-		if toC, ok := to.(*messaging.Subscription); ok {
-			toC.Spec.DeprecatedGeneration = fromC.Spec.DeprecatedGeneration
 		}
 	}
 }

@@ -102,9 +102,9 @@ jobs:
         # Prerequisites
         sudo pip install yq
 
-        export SERVING_VERSION=v0.14.0
-        export EVENTING_VERSION=v0.14.1
-        export SOURCES_VERSION=v0.14.1
+        export SERVING_VERSION=v0.16.0
+        export EVENTING_VERSION=v0.16.2
+        export SOURCES_VERSION=v0.16.0
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
@@ -125,7 +125,10 @@ jobs:
         curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
         # Eventing broker
-        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+
+        # Eventing sugar controller for injection
+        kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
         # Camel Sources
         kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
@@ -251,9 +254,9 @@ jobs:
           # Prerequisites
           sudo pip install yq
 
-          export SERVING_VERSION=v0.14.0
-          export EVENTING_VERSION=v0.14.1
-          export SOURCES_VERSION=v0.14.1
+          export SERVING_VERSION=v0.16.0
+          export EVENTING_VERSION=v0.16.2
+          export SOURCES_VERSION=v0.16.0
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
@@ -274,7 +277,10 @@ jobs:
           curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
           # Eventing broker
-          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+
+          # Eventing sugar controller for injection
+          kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
           # Camel Sources
           kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml

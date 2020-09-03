@@ -33,7 +33,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
@@ -492,8 +492,7 @@ func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference
 	found := e.Resources.HasKnativeTrigger(func(trigger *eventing.Trigger) bool {
 		return trigger.Spec.Broker == ref.Name &&
 			trigger.Spec.Filter != nil &&
-			trigger.Spec.Filter.Attributes != nil &&
-			(*trigger.Spec.Filter.Attributes)["type"] == eventType
+			trigger.Spec.Filter.Attributes["type"] == eventType
 	})
 	if !found {
 		trigger := knativeutil.CreateTrigger(*ref, e.Integration.Name, eventType)

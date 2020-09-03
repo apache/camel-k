@@ -57,9 +57,8 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	messagingv1beta1 "knative.dev/eventing/pkg/apis/messaging/v1beta1"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	// let's enable addons in all tests
@@ -881,10 +880,10 @@ func CreateKamelPod(ns string, name string, command ...string) error {
 
 func CreateKnativeChannelv1Alpha1(ns string, name string) func() error {
 	return func() error {
-		channel := messagingv1alpha1.InMemoryChannel{
+		channel := messaging.InMemoryChannel{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "InMemoryChannel",
-				APIVersion: messagingv1alpha1.SchemeGroupVersion.String(),
+				APIVersion: messaging.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
@@ -897,10 +896,10 @@ func CreateKnativeChannelv1Alpha1(ns string, name string) func() error {
 
 func CreateKnativeChannelv1Beta1(ns string, name string) func() error {
 	return func() error {
-		channel := messagingv1beta1.InMemoryChannel{
+		channel := messaging.InMemoryChannel{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "InMemoryChannel",
-				APIVersion: messagingv1beta1.SchemeGroupVersion.String(),
+				APIVersion: messaging.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
