@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Integration is logged twice in dev mode [\#1668](https://github.com/apache/camel-k/issues/1668)
 - operator.adoc - ascii doc warning [\#1662](https://github.com/apache/camel-k/issues/1662)
 - Caffeine with Knative doesn't work [\#1649](https://github.com/apache/camel-k/issues/1649)
 - Build error when using traits [\#1648](https://github.com/apache/camel-k/issues/1648)
@@ -25,6 +26,7 @@
 
 - Added an automatic changelog Github action [\#1684](https://github.com/apache/camel-k/pull/1684) ([oscerd](https://github.com/oscerd))
 - Add describe command completion [\#1683](https://github.com/apache/camel-k/pull/1683) ([johnpoth](https://github.com/johnpoth))
+- fix \#1668: cancel previous context before issuing a new one [\#1679](https://github.com/apache/camel-k/pull/1679) ([nicolaferraro](https://github.com/nicolaferraro))
 - Create amqpConsume.java [\#1678](https://github.com/apache/camel-k/pull/1678) ([rbaumgar](https://github.com/rbaumgar))
 - build\(ci\): ignore some paths on the GitHub action workflows [\#1672](https://github.com/apache/camel-k/pull/1672) ([lburgazzoli](https://github.com/lburgazzoli))
 - docs: remove old references to the runtime [\#1671](https://github.com/apache/camel-k/pull/1671) ([lburgazzoli](https://github.com/lburgazzoli))
