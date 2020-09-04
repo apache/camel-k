@@ -203,7 +203,6 @@
 - Basic javascript example generates "Multiple applicable overloads found for method name process" [\#1144](https://github.com/apache/camel-k/issues/1144)
 - Basic groovy example generates "Ambiguous method overloading for method org.apache.camel.model.RouteDefinition\#process" [\#1143](https://github.com/apache/camel-k/issues/1143)
 - Multiple traits to create a service [\#1061](https://github.com/apache/camel-k/issues/1061)
-- Remove support for java class loader [\#1050](https://github.com/apache/camel-k/issues/1050)
 - Camel K Operator is not reading the Telegram endpoint API-Key properly. [\#1039](https://github.com/apache/camel-k/issues/1039)
 - No interface for setting the number of pods on which an integration is to be deployed [\#1032](https://github.com/apache/camel-k/issues/1032)
 - Is there a way to co-locate the camel-k-operator, builder and PV in the same node [\#924](https://github.com/apache/camel-k/issues/924)
@@ -484,6 +483,7 @@
 - Abilty to disable sidecar injection in knative services [\#1173](https://github.com/apache/camel-k/issues/1173)
 - Support for using ENV variables in kamel binary [\#1103](https://github.com/apache/camel-k/issues/1103)
 - Get rid of json schema generation [\#1037](https://github.com/apache/camel-k/issues/1037)
+- camel-k-maven-settings localRepository change is not working [\#1010](https://github.com/apache/camel-k/issues/1010)
 - Error in jsonschema gen [\#561](https://github.com/apache/camel-k/issues/561)
 - Provide config command for kamel [\#504](https://github.com/apache/camel-k/issues/504)
 - Decouple traits from base image [\#394](https://github.com/apache/camel-k/issues/394)
@@ -697,6 +697,7 @@
 
 **Closed issues:**
 
+- Remove support for java class loader [\#1050](https://github.com/apache/camel-k/issues/1050)
 - can't use a function processor with javascript [\#1035](https://github.com/apache/camel-k/issues/1035)
 - Cannot push kit image to GCR \(or Docker.io\) during integration creation [\#1024](https://github.com/apache/camel-k/issues/1024)
 - groovy.lang.MissingMethodException: No signature of method: Script1.context\(\) [\#1022](https://github.com/apache/camel-k/issues/1022)
@@ -738,7 +739,6 @@
 **Closed issues:**
 
 - Failing start the camel-k-operator 1.0.0.-M3-SNAPSHOT with the minishifit [\#1015](https://github.com/apache/camel-k/issues/1015)
-- camel-k-maven-settings localRepository change is not working [\#1010](https://github.com/apache/camel-k/issues/1010)
 - Provide a plain text file with the latest version of Camel K for easier automation of downloading via the tooling [\#1009](https://github.com/apache/camel-k/issues/1009)
 - Cannot use knative-source-yaml loader [\#1005](https://github.com/apache/camel-k/issues/1005)
 - Pubilsh Camel K 1.0.0-M2 to operator hub [\#1004](https://github.com/apache/camel-k/issues/1004)
