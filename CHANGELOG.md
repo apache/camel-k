@@ -1205,6 +1205,7 @@
 - chore\(lint\): fix findings [\#533](https://github.com/apache/camel-k/pull/533) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix: do not add probes to knative services [\#532](https://github.com/apache/camel-k/pull/532) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add option to health probes [\#531](https://github.com/apache/camel-k/pull/531) ([lburgazzoli](https://github.com/lburgazzoli))
+- feature\(kaniko\): support for incremental build [\#530](https://github.com/apache/camel-k/pull/530) ([lburgazzoli](https://github.com/lburgazzoli))
 - ordered delete [\#529](https://github.com/apache/camel-k/pull/529) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1236,7 +1237,6 @@
 
 **Merged pull requests:**
 
-- feature\(kaniko\): support for incremental build [\#530](https://github.com/apache/camel-k/pull/530) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix: Allow file names as delete cmd argument [\#522](https://github.com/apache/camel-k/pull/522) ([christophd](https://github.com/christophd))
 - chore\(image\): include camel runtime adapters [\#521](https://github.com/apache/camel-k/pull/521) ([lburgazzoli](https://github.com/lburgazzoli))
 - test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
@@ -1372,6 +1372,7 @@
 - kamel stuck when a secret has an illegal name [\#357](https://github.com/apache/camel-k/pull/357) ([lburgazzoli](https://github.com/lburgazzoli))
 - Enable status subresource for integration [\#352](https://github.com/apache/camel-k/pull/352) ([astefanutti](https://github.com/astefanutti))
 - build handlers: split buld step in two phases: submit and run [\#351](https://github.com/apache/camel-k/pull/351) ([lburgazzoli](https://github.com/lburgazzoli))
+- fix openapi handling when used in conjunction with deployment.container-image=true [\#350](https://github.com/apache/camel-k/pull/350) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.2.0](https://github.com/apache/camel-k/tree/0.2.0) (2019-01-22)
 
@@ -1415,7 +1416,6 @@
 
 **Merged pull requests:**
 
-- fix openapi handling when used in conjunction with deployment.container-image=true [\#350](https://github.com/apache/camel-k/pull/350) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: regenerated resources.go [\#349](https://github.com/apache/camel-k/pull/349) ([rhuss](https://github.com/rhuss))
 - fix\(kamel log\): Use integration name for looking up containers [\#348](https://github.com/apache/camel-k/pull/348) ([rhuss](https://github.com/rhuss))
 - Integration/IntegrationContext builds sometimes fail [\#346](https://github.com/apache/camel-k/pull/346) ([lburgazzoli](https://github.com/lburgazzoli))
