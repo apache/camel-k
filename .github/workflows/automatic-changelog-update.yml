@@ -18,14 +18,9 @@
 name: Changelog
 
 on:
-  pull_request:
-    types: [closed]
-
-  release:
-    types: [published]
-
-  issues:
-    types: [closed, edited]
+  schedule:
+    # Run every hour
+    - cron:  '0 * * * *'
 
 jobs:
   generate_changelog:
