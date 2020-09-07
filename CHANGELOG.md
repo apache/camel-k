@@ -86,7 +86,6 @@
 - Add a specific label to the integration pod [\#1129](https://github.com/apache/camel-k/issues/1129)
 - Add documentation for integration platform configuration [\#951](https://github.com/apache/camel-k/issues/951)
 - kamel --dev stuck when mvn dependencies has problem [\#911](https://github.com/apache/camel-k/issues/911)
-- Update Camel-K/Knative examples for 1.0.0-M1 release [\#908](https://github.com/apache/camel-k/issues/908)
 - IntegrationPlatform stucked in "status.phase: Starting" [\#466](https://github.com/apache/camel-k/issues/466)
 - camel-k operator Error with minikube [\#431](https://github.com/apache/camel-k/issues/431)
 - Structured trait configuration [\#395](https://github.com/apache/camel-k/issues/395)
@@ -789,6 +788,7 @@
 - Build completes OK but integration shows ERROR [\#965](https://github.com/apache/camel-k/issues/965)
 - Monitoring kubectl for changes to integrations misses transition to error state [\#937](https://github.com/apache/camel-k/issues/937)
 - Knative route from AWS S3 endpoint immediatly stops after starting [\#919](https://github.com/apache/camel-k/issues/919)
+- Update Camel-K/Knative examples for 1.0.0-M1 release [\#908](https://github.com/apache/camel-k/issues/908)
 - Dev mode doesn't show if the build failed [\#906](https://github.com/apache/camel-k/issues/906)
 - Road Map about Yaml DSL [\#902](https://github.com/apache/camel-k/issues/902)
 - Issues with pre-published Kubernetes secret and Camel-K integration [\#900](https://github.com/apache/camel-k/issues/900)
@@ -1007,7 +1007,7 @@
 - Set RestWithRestlet response Content-Type header to text/plain [\#738](https://github.com/apache/camel-k/pull/738) ([jamesnetherton](https://github.com/jamesnetherton))
 - Added KEYS file [\#734](https://github.com/apache/camel-k/pull/734) ([oscerd](https://github.com/oscerd))
 - Bump to 1.0.0-M1-SNAPSHOT and release changes [\#733](https://github.com/apache/camel-k/pull/733) ([nicolaferraro](https://github.com/nicolaferraro))
-- Rename 'context' term used by Camel K. [\#726](https://github.com/apache/camel-k/pull/726) ([lburgazzoli](https://github.com/lburgazzoli))
+- \#709 Add ASL license header into the files [\#712](https://github.com/apache/camel-k/pull/712) ([WillemJiang](https://github.com/WillemJiang))
 
 ## [0.3.4](https://github.com/apache/camel-k/tree/0.3.4) (2019-06-07)
 
@@ -1050,6 +1050,7 @@
 **Merged pull requests:**
 
 - chore\(regen\): regenerate defaults [\#727](https://github.com/apache/camel-k/pull/727) ([lburgazzoli](https://github.com/lburgazzoli))
+- Rename 'context' term used by Camel K. [\#726](https://github.com/apache/camel-k/pull/726) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix: Do not share labels map reference in integration deployment [\#725](https://github.com/apache/camel-k/pull/725) ([astefanutti](https://github.com/astefanutti))
 - Filter allowed env variables in Knative [\#724](https://github.com/apache/camel-k/pull/724) ([nicolaferraro](https://github.com/nicolaferraro))
 - Automatically configure global build strategy [\#723](https://github.com/apache/camel-k/pull/723) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1058,7 +1059,6 @@
 - Don't automatically install contexts upon platform installation [\#719](https://github.com/apache/camel-k/pull/719) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: default to camel-k-runtime v0.3.3 [\#718](https://github.com/apache/camel-k/pull/718) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#707: sign released artifacts [\#713](https://github.com/apache/camel-k/pull/713) ([nicolaferraro](https://github.com/nicolaferraro))
-- \#709 Add ASL license header into the files [\#712](https://github.com/apache/camel-k/pull/712) ([WillemJiang](https://github.com/WillemJiang))
 - kamel run --dev examples/resources-route.groovy issues Cannot find resource [\#710](https://github.com/apache/camel-k/pull/710) ([lburgazzoli](https://github.com/lburgazzoli))
 - \#701 Update the cluster-setup document for installing knative on minishift [\#708](https://github.com/apache/camel-k/pull/708) ([WillemJiang](https://github.com/WillemJiang))
 - trait\(route\): do not set Route.Spec.TLS if not needed [\#705](https://github.com/apache/camel-k/pull/705) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -1295,7 +1295,6 @@
 - kamel stuck when a secret has an illegal name [\#356](https://github.com/apache/camel-k/issues/356)
 - catalog should be available as custom resource [\#302](https://github.com/apache/camel-k/issues/302)
 - Provide a way to inject annotations/labels into child resources [\#263](https://github.com/apache/camel-k/issues/263)
-- Remove old resources on redeploy [\#211](https://github.com/apache/camel-k/issues/211)
 - Expose metrics to Prometheus [\#82](https://github.com/apache/camel-k/issues/82)
 - Cannot deploy integration if not in the root package [\#41](https://github.com/apache/camel-k/issues/41)
 
@@ -1470,6 +1469,7 @@
 - Do not always scale down to 0 in Knative [\#219](https://github.com/apache/camel-k/issues/219)
 - Allow to push to a Knative channel or service endpoint [\#218](https://github.com/apache/camel-k/issues/218)
 - Support subscription to multiple Knative channels [\#216](https://github.com/apache/camel-k/issues/216)
+- Remove old resources on redeploy [\#211](https://github.com/apache/camel-k/issues/211)
 - Create a Istio trait [\#209](https://github.com/apache/camel-k/issues/209)
 - Provide example with custom processor [\#205](https://github.com/apache/camel-k/issues/205)
 - Kamel CLI - Add command to run integration in Java debug mode [\#190](https://github.com/apache/camel-k/issues/190)
