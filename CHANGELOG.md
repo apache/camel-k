@@ -25,6 +25,7 @@
 
 **Merged pull requests:**
 
+- Changelog updater: run every hour [\#1688](https://github.com/apache/camel-k/pull/1688) ([oscerd](https://github.com/oscerd))
 - Fix \#1670: upgrade to Knative 0.16 and support from 0.15 to 0.17 [\#1685](https://github.com/apache/camel-k/pull/1685) ([nicolaferraro](https://github.com/nicolaferraro))
 - Added an automatic changelog Github action [\#1684](https://github.com/apache/camel-k/pull/1684) ([oscerd](https://github.com/oscerd))
 - Add describe command completion [\#1683](https://github.com/apache/camel-k/pull/1683) ([johnpoth](https://github.com/johnpoth))
@@ -1549,6 +1550,7 @@
 - misc runtime fixes and improvements [\#191](https://github.com/apache/camel-k/pull/191) ([lburgazzoli](https://github.com/lburgazzoli))
 - corrected minor spelling or wrong language reference \(Kotlin-\>JavaScript\) [\#187](https://github.com/apache/camel-k/pull/187) ([marcellanz](https://github.com/marcellanz))
 - kamel run --dev mode terminate pod if pressing ctrl + c  [\#186](https://github.com/apache/camel-k/pull/186) ([dmvolod](https://github.com/dmvolod))
+- Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.4](https://github.com/apache/camel-k/tree/0.0.4) (2018-10-16)
 
@@ -1575,7 +1577,6 @@
 - operator: swich to type safe trait definition [\#176](https://github.com/apache/camel-k/pull/176) ([lburgazzoli](https://github.com/lburgazzoli))
 - runtime\(groovy\) : improve registry dsl [\#170](https://github.com/apache/camel-k/pull/170) ([lburgazzoli](https://github.com/lburgazzoli))
 - Regenerate code, deps and fixes [\#166](https://github.com/apache/camel-k/pull/166) ([lburgazzoli](https://github.com/lburgazzoli))
-- Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add travis build info [\#163](https://github.com/apache/camel-k/pull/163) ([nicolaferraro](https://github.com/nicolaferraro))
 - \(chore\) Add gitter badge [\#162](https://github.com/apache/camel-k/pull/162) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add initial support for traits [\#160](https://github.com/apache/camel-k/pull/160) ([nicolaferraro](https://github.com/nicolaferraro))
