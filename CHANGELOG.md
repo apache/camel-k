@@ -1550,7 +1550,6 @@
 - misc runtime fixes and improvements [\#191](https://github.com/apache/camel-k/pull/191) ([lburgazzoli](https://github.com/lburgazzoli))
 - corrected minor spelling or wrong language reference \(Kotlin-\>JavaScript\) [\#187](https://github.com/apache/camel-k/pull/187) ([marcellanz](https://github.com/marcellanz))
 - kamel run --dev mode terminate pod if pressing ctrl + c  [\#186](https://github.com/apache/camel-k/pull/186) ([dmvolod](https://github.com/dmvolod))
-- operator: swich to type safe trait definition [\#176](https://github.com/apache/camel-k/pull/176) ([lburgazzoli](https://github.com/lburgazzoli))
 - Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.4](https://github.com/apache/camel-k/tree/0.0.4) (2018-10-16)
@@ -1575,6 +1574,7 @@
 - Add log command [\#179](https://github.com/apache/camel-k/pull/179) ([lburgazzoli](https://github.com/lburgazzoli))
 - configure camel context from properties [\#178](https://github.com/apache/camel-k/pull/178) ([lburgazzoli](https://github.com/lburgazzoli))
 - Misc fixing [\#177](https://github.com/apache/camel-k/pull/177) ([lburgazzoli](https://github.com/lburgazzoli))
+- operator: swich to type safe trait definition [\#176](https://github.com/apache/camel-k/pull/176) ([lburgazzoli](https://github.com/lburgazzoli))
 - runtime\(groovy\) : improve registry dsl [\#170](https://github.com/apache/camel-k/pull/170) ([lburgazzoli](https://github.com/lburgazzoli))
 - Regenerate code, deps and fixes [\#166](https://github.com/apache/camel-k/pull/166) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add travis build info [\#163](https://github.com/apache/camel-k/pull/163) ([nicolaferraro](https://github.com/nicolaferraro))
