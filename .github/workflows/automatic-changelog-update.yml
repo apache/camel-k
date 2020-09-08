@@ -19,8 +19,8 @@ name: Changelog
 
 on:
   schedule:
-    # Run every hour
-    - cron:  '0 * * * *'
+    # Run at 3 during the night
+    - cron:  '0 3 * * *'
 
 jobs:
   generate_changelog:
