@@ -1,6 +1,8 @@
 [[installation-on-minishift]]
 = Installing Camel K on Minishift
 
+WARNING: Minishift is no longer maintained and multiple users reported installation issues for Camel K, due to its old API version
+
 You can run Camel K integrations on OpenShift using the Minishift cluster creation tool.
 Follow the instructions in the https://github.com/minishift/minishift#getting-started[getting started guide] for the installation.
 
