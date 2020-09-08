@@ -802,7 +802,6 @@
 - Orphan generated XML DSL from OpenAPI JSON after deleting integration [\#839](https://github.com/apache/camel-k/issues/839)
 - All links of the documentation are missing spaces before and after displayed text [\#794](https://github.com/apache/camel-k/issues/794)
 - Update Camel K tagline in Kamel CLI [\#732](https://github.com/apache/camel-k/issues/732)
-- Allow to provide custom settings.xml  [\#715](https://github.com/apache/camel-k/issues/715)
 - Review reset and delete with --all option for merging similar functions to one place  [\#598](https://github.com/apache/camel-k/issues/598)
 - Able to run maven build with debug and/or extended info [\#85](https://github.com/apache/camel-k/issues/85)
 - Remove references to host that did compilation in stacktraces [\#972](https://github.com/apache/camel-k/issues/972)
@@ -1017,6 +1016,7 @@
 **Closed issues:**
 
 - Don't automatically install contexts upon platform installation [\#716](https://github.com/apache/camel-k/issues/716)
+- Allow to provide custom settings.xml  [\#715](https://github.com/apache/camel-k/issues/715)
 - Question about the installation of the cluster [\#701](https://github.com/apache/camel-k/issues/701)
 - Provide a way to override the default image name [\#698](https://github.com/apache/camel-k/issues/698)
 - kamel run --dev examples/resources-route.groovy issues Cannot find resource [\#697](https://github.com/apache/camel-k/issues/697)
@@ -1453,6 +1453,7 @@
 - Re-add missing commits [\#293](https://github.com/apache/camel-k/pull/293) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(log\): make dev-mode work in Knative [\#280](https://github.com/apache/camel-k/pull/280) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
+- Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
 - trait: add a trait to inject pod metadata as env var [\#276](https://github.com/apache/camel-k/pull/276) ([lburgazzoli](https://github.com/lburgazzoli))
 - Traits lifecycle [\#273](https://github.com/apache/camel-k/pull/273) ([lburgazzoli](https://github.com/lburgazzoli))
 
@@ -1481,7 +1482,6 @@
 
 **Merged pull requests:**
 
-- Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
 - Allow using compressed sources in Knative profile [\#272](https://github.com/apache/camel-k/pull/272) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(deps\): update kotlin to v1.3.11 [\#271](https://github.com/apache/camel-k/pull/271) ([lburgazzoli](https://github.com/lburgazzoli))
 - builder: wake up event loop when the container image buils is done to seep up deployment time [\#269](https://github.com/apache/camel-k/pull/269) ([lburgazzoli](https://github.com/lburgazzoli))
