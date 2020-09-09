@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Failed to install Camel-K in IKS [\#1687](https://github.com/apache/camel-k/issues/1687)
 - Upgrade base to Knative 0.16 and support 0.17 [\#1670](https://github.com/apache/camel-k/issues/1670)
 - Integration is logged twice in dev mode [\#1668](https://github.com/apache/camel-k/issues/1668)
 - operator.adoc - ascii doc warning [\#1662](https://github.com/apache/camel-k/issues/1662)
@@ -25,6 +26,8 @@
 
 **Merged pull requests:**
 
+- Automatic changelog: Let's run during the night only one time [\#1692](https://github.com/apache/camel-k/pull/1692) ([oscerd](https://github.com/oscerd))
+- chore\(doc\): document Kamelets and fix small issues [\#1690](https://github.com/apache/camel-k/pull/1690) ([nicolaferraro](https://github.com/nicolaferraro))
 - Changelog updater: run every hour [\#1688](https://github.com/apache/camel-k/pull/1688) ([oscerd](https://github.com/oscerd))
 - Fix \#1670: upgrade to Knative 0.16 and support from 0.15 to 0.17 [\#1685](https://github.com/apache/camel-k/pull/1685) ([nicolaferraro](https://github.com/nicolaferraro))
 - Added an automatic changelog Github action [\#1684](https://github.com/apache/camel-k/pull/1684) ([oscerd](https://github.com/oscerd))
