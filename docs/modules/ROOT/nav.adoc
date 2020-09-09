@@ -9,6 +9,7 @@
 *** xref:installation/registry/gcr.adoc[Gcr.io]
 * xref:running/running.adoc[Running]
 ** xref:running/dev-mode.adoc[Dev Mode]
+** xref:running/run-from-github.adoc[Run from GitHub]
 * xref:tutorials/tutorials.adoc[Tutorials]
 * xref:cli/cli.adoc[CLI]
 ** xref:cli/modeline.adoc[Modeline]
