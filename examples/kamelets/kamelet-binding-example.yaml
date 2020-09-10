@@ -7,7 +7,9 @@ spec:
     ref:
       kind: Kamelet
       apiVersion: camel.apache.org/v1alpha1
-      name: timer
+      name: timer-source
+    properties:
+      message: "Hello world!"
   sink:
     ref:
       kind: InMemoryChannel

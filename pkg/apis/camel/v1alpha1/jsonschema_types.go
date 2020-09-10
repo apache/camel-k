@@ -166,6 +166,10 @@ type JSONSchemaProps struct {
 	//      Atomic maps will be entirely replaced when updated.
 	// +optional
 	XMapType *string `json:"x-kubernetes-map-type,omitempty" protobuf:"bytes,43,opt,name=xKubernetesMapType"`
+
+	// x-descriptors annotates an object to define additional display options.
+	// +optional
+	XDescriptors []string `json:"x-descriptors,omitempty" protobuf:"bytes,44,opt,name=xDescriptors"`
 }
 
 // JSON represents any valid JSON value.
