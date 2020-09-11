@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.1.1-SNAPSHOT
+VERSION := 1.1.1
 LAST_RELEASED_VERSION := 1.1.0
 RUNTIME_VERSION := 1.4.1
 BUILDAH_VERSION := 1.14.0
