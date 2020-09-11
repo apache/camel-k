@@ -20,6 +20,7 @@
 - Release Camel K 1.1.0 [\#1618](https://github.com/apache/camel-k/issues/1618)
 - kamel install not working on vanilla k8 cluster  [\#1552](https://github.com/apache/camel-k/issues/1552)
 - Use sinkbinding in operator [\#1548](https://github.com/apache/camel-k/issues/1548)
+- Publish yaml schema of design definition on https://www.schemastore.org/json/ [\#1538](https://github.com/apache/camel-k/issues/1538)
 - In dev mode, changes to modeline are not taken into account [\#1536](https://github.com/apache/camel-k/issues/1536)
 - PublishStrategy missing from IntegrationPlatform build spec [\#1370](https://github.com/apache/camel-k/issues/1370)
 - kamel install not working - Error: cannot find automatically a registry where to push images [\#674](https://github.com/apache/camel-k/issues/674)
