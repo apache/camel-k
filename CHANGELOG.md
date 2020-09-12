@@ -2,7 +2,38 @@
 
 ## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...HEAD)
+
+**Merged pull requests:**
+
+- Automatic changelog: Let's run during the night only one time [\#1692](https://github.com/apache/camel-k/pull/1692) ([oscerd](https://github.com/oscerd))
+- chore\(doc\): document Kamelets and fix small issues [\#1690](https://github.com/apache/camel-k/pull/1690) ([nicolaferraro](https://github.com/nicolaferraro))
+- Changelog updater: run every hour [\#1688](https://github.com/apache/camel-k/pull/1688) ([oscerd](https://github.com/oscerd))
+- Fix \#1670: upgrade to Knative 0.16 and support from 0.15 to 0.17 [\#1685](https://github.com/apache/camel-k/pull/1685) ([nicolaferraro](https://github.com/nicolaferraro))
+- Added an automatic changelog Github action [\#1684](https://github.com/apache/camel-k/pull/1684) ([oscerd](https://github.com/oscerd))
+- Add describe command completion [\#1683](https://github.com/apache/camel-k/pull/1683) ([johnpoth](https://github.com/johnpoth))
+- fix \#1668: cancel previous context before issuing a new one [\#1679](https://github.com/apache/camel-k/pull/1679) ([nicolaferraro](https://github.com/nicolaferraro))
+- Create amqpConsume.java [\#1678](https://github.com/apache/camel-k/pull/1678) ([rbaumgar](https://github.com/rbaumgar))
+- build\(ci\): ignore some paths on the GitHub action workflows [\#1672](https://github.com/apache/camel-k/pull/1672) ([lburgazzoli](https://github.com/lburgazzoli))
+- docs: remove old references to the runtime [\#1671](https://github.com/apache/camel-k/pull/1671) ([lburgazzoli](https://github.com/lburgazzoli))
+- \[test\] Create integration test for exposing metrics to prometheus [\#1660](https://github.com/apache/camel-k/pull/1660) ([llowinge](https://github.com/llowinge))
+- Remove backport gh action. It doesn't work [\#1659](https://github.com/apache/camel-k/pull/1659) ([oscerd](https://github.com/oscerd))
+- Fixes \(mainly typo\) in documentation [\#1658](https://github.com/apache/camel-k/pull/1658) ([ikwattro](https://github.com/ikwattro))
+- chore\(doc\): document sinkbinding in the context of sources and Kamelets [\#1655](https://github.com/apache/camel-k/pull/1655) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(release\): create additional tags for go modules [\#1653](https://github.com/apache/camel-k/pull/1653) ([nicolaferraro](https://github.com/nicolaferraro))
+- Add support for oidc [\#1647](https://github.com/apache/camel-k/pull/1647) ([aslom](https://github.com/aslom))
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1644](https://github.com/apache/camel-k/pull/1644) ([oscerd](https://github.com/oscerd))
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1642](https://github.com/apache/camel-k/pull/1642) ([oscerd](https://github.com/oscerd))
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1641](https://github.com/apache/camel-k/pull/1641) ([oscerd](https://github.com/oscerd))
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1640](https://github.com/apache/camel-k/pull/1640) ([oscerd](https://github.com/oscerd))
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1639](https://github.com/apache/camel-k/pull/1639) ([oscerd](https://github.com/oscerd))
+- Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
+- fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+
+## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...v1.1.1)
 
 **Closed issues:**
 
@@ -27,39 +58,17 @@
 
 **Merged pull requests:**
 
-- Automatic changelog: Let's run during the night only one time [\#1692](https://github.com/apache/camel-k/pull/1692) ([oscerd](https://github.com/oscerd))
-- chore\(doc\): document Kamelets and fix small issues [\#1690](https://github.com/apache/camel-k/pull/1690) ([nicolaferraro](https://github.com/nicolaferraro))
-- Changelog updater: run every hour [\#1688](https://github.com/apache/camel-k/pull/1688) ([oscerd](https://github.com/oscerd))
-- Fix \#1670: upgrade to Knative 0.16 and support from 0.15 to 0.17 [\#1685](https://github.com/apache/camel-k/pull/1685) ([nicolaferraro](https://github.com/nicolaferraro))
-- Added an automatic changelog Github action [\#1684](https://github.com/apache/camel-k/pull/1684) ([oscerd](https://github.com/oscerd))
-- Add describe command completion [\#1683](https://github.com/apache/camel-k/pull/1683) ([johnpoth](https://github.com/johnpoth))
-- fix \#1668: cancel previous context before issuing a new one [\#1679](https://github.com/apache/camel-k/pull/1679) ([nicolaferraro](https://github.com/nicolaferraro))
-- Create amqpConsume.java [\#1678](https://github.com/apache/camel-k/pull/1678) ([rbaumgar](https://github.com/rbaumgar))
-- build\(ci\): ignore some paths on the GitHub action workflows [\#1672](https://github.com/apache/camel-k/pull/1672) ([lburgazzoli](https://github.com/lburgazzoli))
-- docs: remove old references to the runtime [\#1671](https://github.com/apache/camel-k/pull/1671) ([lburgazzoli](https://github.com/lburgazzoli))
-- \[test\] Create integration test for exposing metrics to prometheus [\#1660](https://github.com/apache/camel-k/pull/1660) ([llowinge](https://github.com/llowinge))
-- Remove backport gh action. It doesn't work [\#1659](https://github.com/apache/camel-k/pull/1659) ([oscerd](https://github.com/oscerd))
-- Fixes \(mainly typo\) in documentation [\#1658](https://github.com/apache/camel-k/pull/1658) ([ikwattro](https://github.com/ikwattro))
-- chore\(doc\): document sinkbinding in the context of sources and Kamelets [\#1655](https://github.com/apache/camel-k/pull/1655) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(release\): create additional tags for go modules [\#1653](https://github.com/apache/camel-k/pull/1653) ([nicolaferraro](https://github.com/nicolaferraro))
-- Add support for oidc [\#1647](https://github.com/apache/camel-k/pull/1647) ([aslom](https://github.com/aslom))
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1644](https://github.com/apache/camel-k/pull/1644) ([oscerd](https://github.com/oscerd))
+- Add support for oidc \(\#1647\) [\#1694](https://github.com/apache/camel-k/pull/1694) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fix \#1636: use messaging/v1beta1 for Knative subscription [\#1669](https://github.com/apache/camel-k/pull/1669) ([nicolaferraro](https://github.com/nicolaferraro))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1643](https://github.com/apache/camel-k/pull/1643) ([oscerd](https://github.com/oscerd))
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1642](https://github.com/apache/camel-k/pull/1642) ([oscerd](https://github.com/oscerd))
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1641](https://github.com/apache/camel-k/pull/1641) ([oscerd](https://github.com/oscerd))
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1640](https://github.com/apache/camel-k/pull/1640) ([oscerd](https://github.com/oscerd))
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1639](https://github.com/apache/camel-k/pull/1639) ([oscerd](https://github.com/oscerd))
-- Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
-- Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
-- fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
-
-## [v1.1.0](https://github.com/apache/camel-k/tree/v1.1.0) (2020-07-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...v1.1.0)
 
 ## [pkg/client/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.0) (2020-07-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.0...pkg/client/camel/v1.1.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...pkg/client/camel/v1.1.0)
+
+## [v1.1.0](https://github.com/apache/camel-k/tree/v1.1.0) (2020-07-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.0...v1.1.0)
 
 ## [pkg/apis/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.0) (2020-07-21)
 
@@ -1554,7 +1563,6 @@
 - misc runtime fixes and improvements [\#191](https://github.com/apache/camel-k/pull/191) ([lburgazzoli](https://github.com/lburgazzoli))
 - corrected minor spelling or wrong language reference \(Kotlin-\>JavaScript\) [\#187](https://github.com/apache/camel-k/pull/187) ([marcellanz](https://github.com/marcellanz))
 - kamel run --dev mode terminate pod if pressing ctrl + c  [\#186](https://github.com/apache/camel-k/pull/186) ([dmvolod](https://github.com/dmvolod))
-- Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.4](https://github.com/apache/camel-k/tree/0.0.4) (2018-10-16)
 
@@ -1581,6 +1589,7 @@
 - operator: swich to type safe trait definition [\#176](https://github.com/apache/camel-k/pull/176) ([lburgazzoli](https://github.com/lburgazzoli))
 - runtime\(groovy\) : improve registry dsl [\#170](https://github.com/apache/camel-k/pull/170) ([lburgazzoli](https://github.com/lburgazzoli))
 - Regenerate code, deps and fixes [\#166](https://github.com/apache/camel-k/pull/166) ([lburgazzoli](https://github.com/lburgazzoli))
+- Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add travis build info [\#163](https://github.com/apache/camel-k/pull/163) ([nicolaferraro](https://github.com/nicolaferraro))
 - \(chore\) Add gitter badge [\#162](https://github.com/apache/camel-k/pull/162) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add initial support for traits [\#160](https://github.com/apache/camel-k/pull/160) ([nicolaferraro](https://github.com/nicolaferraro))
