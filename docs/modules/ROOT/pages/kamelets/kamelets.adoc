@@ -276,7 +276,7 @@ spec:
       name: messages
 ----
 <1> Reference to the source that provides data
-<1> Reference to the sink where data should be sent to
+<2> Reference to the sink where data should be sent to
 
 This binding takes the `telegram-text-source` Kamelet, configures it using specific properties ("botToken") and
 makes sure that messages produced by the Kamelet are forwarded to the Knative **InMemoryChannel** named "messages".
