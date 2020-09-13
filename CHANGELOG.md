@@ -23,6 +23,7 @@
 - chore\(release\): create additional tags for go modules [\#1653](https://github.com/apache/camel-k/pull/1653) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add support for oidc [\#1647](https://github.com/apache/camel-k/pull/1647) ([aslom](https://github.com/aslom))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1644](https://github.com/apache/camel-k/pull/1644) ([oscerd](https://github.com/oscerd))
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1643](https://github.com/apache/camel-k/pull/1643) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1642](https://github.com/apache/camel-k/pull/1642) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1641](https://github.com/apache/camel-k/pull/1641) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1640](https://github.com/apache/camel-k/pull/1640) ([oscerd](https://github.com/oscerd))
@@ -60,7 +61,6 @@
 
 - Add support for oidc \(\#1647\) [\#1694](https://github.com/apache/camel-k/pull/1694) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1636: use messaging/v1beta1 for Knative subscription [\#1669](https://github.com/apache/camel-k/pull/1669) ([nicolaferraro](https://github.com/nicolaferraro))
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1643](https://github.com/apache/camel-k/pull/1643) ([oscerd](https://github.com/oscerd))
 
 ## [pkg/client/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.0) (2020-07-21)
 
@@ -1563,6 +1563,7 @@
 - misc runtime fixes and improvements [\#191](https://github.com/apache/camel-k/pull/191) ([lburgazzoli](https://github.com/lburgazzoli))
 - corrected minor spelling or wrong language reference \(Kotlin-\>JavaScript\) [\#187](https://github.com/apache/camel-k/pull/187) ([marcellanz](https://github.com/marcellanz))
 - kamel run --dev mode terminate pod if pressing ctrl + c  [\#186](https://github.com/apache/camel-k/pull/186) ([dmvolod](https://github.com/dmvolod))
+- Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.4](https://github.com/apache/camel-k/tree/0.0.4) (2018-10-16)
 
@@ -1589,7 +1590,6 @@
 - operator: swich to type safe trait definition [\#176](https://github.com/apache/camel-k/pull/176) ([lburgazzoli](https://github.com/lburgazzoli))
 - runtime\(groovy\) : improve registry dsl [\#170](https://github.com/apache/camel-k/pull/170) ([lburgazzoli](https://github.com/lburgazzoli))
 - Regenerate code, deps and fixes [\#166](https://github.com/apache/camel-k/pull/166) ([lburgazzoli](https://github.com/lburgazzoli))
-- Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add travis build info [\#163](https://github.com/apache/camel-k/pull/163) ([nicolaferraro](https://github.com/nicolaferraro))
 - \(chore\) Add gitter badge [\#162](https://github.com/apache/camel-k/pull/162) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add initial support for traits [\#160](https://github.com/apache/camel-k/pull/160) ([nicolaferraro](https://github.com/nicolaferraro))
