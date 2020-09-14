@@ -1,0 +1,25 @@
+[[run-from-github]]
+= Run from GitHub
+
+It is possible to run integrations from GitHub with a dedicated URL
+syntax:
+
+```
+kamel run github:$user/$repo/$path?branch=$branch
+```
+
+As example, running the following command
+
+```
+kamel run github:apache/camel-k/examples/Sample.java
+```
+
+is equivalent to:
+
+```
+kamel run https://raw.githubusercontent.com/apache/camel-k/master/examples/Sample.java
+```
+
+but does not require to type the full GitHub RAW URL.
+
+Declaring the branch query param is not required and defaults to `master` if not explicit set.
