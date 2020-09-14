@@ -311,7 +311,7 @@ spec:
   sink:
     uri: https://mycompany.com/the-service # <1>
 ----
-<1> KameletBinding with explicity URI
+<1> KameletBinding with explicitly URI
 
 This KameletBinding explicitly defines an URI where data is going to be pushed.
 
