@@ -41,7 +41,7 @@ type Action interface {
 }
 ----
 <1> Determine if the action can handle the CR as example by looking at the phase of the CR which is store as part of the status sub resource.
-<2> Implement the action and return a non `nil` instance to signal to the controller that the CR need to be updated with the new one, instead if the method returns a `nil` instance, then nothing will happen and unless the CR changes outside the control of the operator, the same action will be invoked on the next interation. This is useful when a CR need to delegate some work to a different controller so the CR won't be moved to the next stage till the sub operation has completed. 
+<2> Implement the action and return a non `nil` instance to signal to the controller that the CR need to be updated with the new one, instead if the method returns a `nil` instance, then nothing will happen and unless the CR changes outside the control of the operator, the same action will be invoked on the next iteration. This is useful when a CR need to delegate some work to a different controller so the CR won't be moved to the next stage till the sub operation has completed. 
 
 [NOTE]
 ====
