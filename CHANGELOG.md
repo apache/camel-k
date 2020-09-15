@@ -4,8 +4,16 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...HEAD)
 
+**Closed issues:**
+
+- kamelets: runtime support [\#1575](https://github.com/apache/camel-k/issues/1575)
+
 **Merged pull requests:**
 
+- Document Update [\#1704](https://github.com/apache/camel-k/pull/1704) ([NiteshKoushik](https://github.com/NiteshKoushik))
+- Document Update [\#1702](https://github.com/apache/camel-k/pull/1702) ([NiteshKoushik](https://github.com/NiteshKoushik))
+- Switch from Gitter to Zulip [\#1701](https://github.com/apache/camel-k/pull/1701) ([lburgazzoli](https://github.com/lburgazzoli))
+- Add documentation about kamel run from github [\#1695](https://github.com/apache/camel-k/pull/1695) ([davsclaus](https://github.com/davsclaus))
 - Automatic changelog: Let's run during the night only one time [\#1692](https://github.com/apache/camel-k/pull/1692) ([oscerd](https://github.com/oscerd))
 - chore\(doc\): document Kamelets and fix small issues [\#1690](https://github.com/apache/camel-k/pull/1690) ([nicolaferraro](https://github.com/nicolaferraro))
 - Changelog updater: run every hour [\#1688](https://github.com/apache/camel-k/pull/1688) ([oscerd](https://github.com/oscerd))
@@ -34,7 +42,15 @@
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...v1.1.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.1...v1.1.1)
+
+## [pkg/apis/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.1) (2020-09-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.1...pkg/apis/camel/v1.1.1)
+
+## [pkg/client/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.1) (2020-09-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...pkg/client/camel/v1.1.1)
 
 **Closed issues:**
 
