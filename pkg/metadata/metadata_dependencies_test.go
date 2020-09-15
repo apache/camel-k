@@ -276,10 +276,12 @@ func TestLanguageDependencies(t *testing.T) {
 		t,
 		[]string{
 			"camel-quarkus:direct",
+			"camel-quarkus:mvel",
 			"camel-quarkus:ognl",
 			"camel-quarkus:xpath",
 			"camel-quarkus:jsonpath",
 			"camel-quarkus:groovy",
+			"camel-quarkus:saxon",
 			"camel-quarkus:xml-jaxp",
 		},
 		meta.Dependencies.List())
@@ -620,10 +622,12 @@ func TestXMLLanguageDependencies(t *testing.T) {
 		[]string{
 			"camel-quarkus:core",
 			"camel-quarkus:direct",
+			"camel-quarkus:mvel",
 			"camel-quarkus:ognl",
 			"camel-quarkus:xpath",
 			"camel-quarkus:xml-jaxp",
 			"camel-quarkus:jsonpath",
+			"camel-quarkus:saxon",
 			"camel-quarkus:groovy",
 		},
 		meta.Dependencies.List())
@@ -741,6 +745,7 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 			"camel-quarkus:xpath",
 			"camel-quarkus:jsonpath",
 			"camel-quarkus:groovy",
+			"camel-quarkus:saxon",
 			"camel-quarkus:xml-jaxp",
 		},
 		meta.Dependencies.List())
