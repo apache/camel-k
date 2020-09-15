@@ -1,7 +1,7 @@
 [[installation]]
 = Installation
 
-Camel K allows to run integrations directly on a Kubernetes or OpenShift cluster.
+Camel K allows us to run integrations directly on a Kubernetes or OpenShift cluster.
 To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
 [[requirements]]
@@ -22,7 +22,7 @@ Other cluster types (such as OpenShift clusters) should *not need* prior configu
 == Procedure
 
 To start using Camel K you need the **"kamel"** CLI tool, that can be used to both configure the cluster and run integrations.
-Look into the https://github.com/apache/camel-k/releases[release page] for latest version of the *camel-k-client* tool for your specific platform.
+Look into the https://github.com/apache/camel-k/releases[release page] for the latest version of the *camel-k-client* tool for your specific platform.
 
 Download and uncompress the archive. It contains a small binary file named `kamel` that you should put into your system path.
 For example, if you're using Linux, you can put `kamel` in `/usr/bin`.
@@ -36,9 +36,9 @@ kamel install
 
 This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace.
 
-IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately this
+IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately, this
 operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
-For Minishift, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for first-time installation.
+For Minishift, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for the first-time installation.
 
 You're now ready to xref:running/running.adoc[run some integrations].
 
