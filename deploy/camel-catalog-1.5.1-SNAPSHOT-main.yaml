@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.5.1-snapshot-main
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.5.0-SNAPSHOT
-    camel.apache.org/catalog.loader.version: 3.5.0-SNAPSHOT
+    camel.apache.org/catalog.version: 3.5.0
+    camel.apache.org/catalog.loader.version: 3.5.0
     camel.apache.org/runtime.version: 1.5.1-SNAPSHOT
     camel.apache.org/runtime.provider: main
 spec:
@@ -31,9 +31,9 @@ spec:
     provider: main
     applicationClass: org.apache.camel.k.main.Application
     metadata:
-      camel.version: 3.5.0-SNAPSHOT
-      quarkus.version: 1.7.0.Final
-      camel-quarkus.version: 1.0.0
+      camel.version: 3.5.0
+      quarkus.version: 1.8.0.Final
+      camel-quarkus.version: 1.1.0
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime-main
@@ -3235,6 +3235,16 @@ spec:
         artifactId: camel-knative
       - groupId: org.apache.camel.k
         artifactId: camel-knative-http
+    camel-kamelet:
+      groupId: org.apache.camel.k
+      artifactId: camel-kamelet
+      schemes:
+      - id: kamelet
+        http: true
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-kamelet
   loaders:
     yaml:
       groupId: org.apache.camel.k
