@@ -6,11 +6,13 @@
 
 **Closed issues:**
 
+- Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - kamelets: runtime support [\#1575](https://github.com/apache/camel-k/issues/1575)
 
 **Merged pull requests:**
 
 - Document Update [\#1704](https://github.com/apache/camel-k/pull/1704) ([NiteshKoushik](https://github.com/NiteshKoushik))
+- Document update [\#1703](https://github.com/apache/camel-k/pull/1703) ([NiteshKoushik](https://github.com/NiteshKoushik))
 - Document Update [\#1702](https://github.com/apache/camel-k/pull/1702) ([NiteshKoushik](https://github.com/NiteshKoushik))
 - Switch from Gitter to Zulip [\#1701](https://github.com/apache/camel-k/pull/1701) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add documentation about kamel run from github [\#1695](https://github.com/apache/camel-k/pull/1695) ([davsclaus](https://github.com/davsclaus))
