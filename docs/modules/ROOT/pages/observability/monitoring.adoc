@@ -8,7 +8,7 @@ The https://github.com/coreos/prometheus-operator[Prometheus Operator] serves to
 [[prerequisites]]
 == Prerequisites
 
-To take fully advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus Operator instance, that can be configured to integrate Camel K integrations.
+To take full advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus Operator instance, that can be configured to integrate Camel K integrations.
 
 [[kubernetes]]
 === Kubernetes

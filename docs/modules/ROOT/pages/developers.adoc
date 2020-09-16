@@ -14,7 +14,7 @@ In order to build the project, you need to comply with the following requirement
 
 * **Go version 1.13+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
 * **Operator SDK v0.17.1+**: used to build the operator, and the Docker images. Instructions in the https://github.com/operator-framework/operator-sdk[Operator SDK website] (binary downloads available in the release page).
-* **GNU Make**: used to define composite build actions. This should be already installed or available as package if you have a good OS (https://www.gnu.org/software/make/).
+* **GNU Make**: used to define composite build actions. This should be already installed or available as a package if you have a good OS (https://www.gnu.org/software/make/).
 
 The Camel K Java runtime (camel-k-runtime) requires:
 
@@ -75,7 +75,7 @@ After a successful build, if you're connected to a Docker daemon, you can build 
 make images
 ----
 
-The above command produces a `camel-k` image with name `docker.io/apache/camel-k`. Sometimes you might need to produce camel-k images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `imgDestination` to the make as shown below:
+The above command produces a `camel-k` image with the name `docker.io/apache/camel-k`. Sometimes you might need to produce camel-k images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `imgDestination` to the make as shown below:
 
 [source]
 ----
@@ -92,8 +92,8 @@ Integration tests (aimed at ensuring that the code integrates correctly with Kub
 The **convention** used in this repo is to name unit tests `xxx_test.go`, and name integration tests `yyy_integration_test.go`.
 Integration tests are all in the https://github.com/apache/camel-k/tree/master/e2e[/e2e] dir.
 
-Since both names end with `_test.go`, both would be executed by go during build, so you need to put a special **build tag** to mark
-integration tests. A integration test should start with the following line:
+Since both names end with `_test.go`, both would be executed by go during the build, so you need to put a special **build tag** to mark
+integration tests. An integration test should start with the following line:
 
 [source]
 ----
@@ -102,7 +102,7 @@ integration tests. A integration test should start with the following line:
 
 Look into the https://github.com/apache/camel-k/tree/master/e2e[/e2e] directory for examples of integration tests.
 
-Before running a integration test, you need to be connected to a Kubernetes/OpenShift namespace.
+Before running an integration test, you need to be connected to a Kubernetes/OpenShift namespace.
 After you log in into your cluster, you can run the following command to execute **all** integration tests:
 
 [source]
@@ -126,7 +126,7 @@ If you want to install everything you have in your source code and see it runnin
 * You can specify a different namespace with `make install-crc project=myawesomeproject`
 * To uninstall Camel K, run `kamel uninstall --all --olm=false`
 
-The commands assumes you have an already running CRC instance and logged in correctly.
+The commands assume you have an already running CRC instance and logged in correctly.
 
 === For Minishift
 
@@ -180,7 +180,7 @@ oc scale deployment/camel-k-operator --replicas 0
 
 You can scale it back to 1 when you're done, and you have updated the operator image.
 
-You can set up the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode with `operator` as argument.
+You can set up the IDE (e.g. Goland) to execute the https://github.com/apache/camel-k/blob/master/cmd/manager/main.go[/cmd/manager/main.go] file in debug mode with `operator` as the argument.
 
 When configuring the IDE task, make sure to add all required environment variables in the *IDE task configuration screen*:
 
@@ -192,4 +192,4 @@ When configuring the IDE task, make sure to add all required environment variabl
 After you set up the IDE task, with Java 11+ to be used by default, you can run and debug the operator process.
 
 NOTE: The operator can be fully debugged in Minishift, because it uses OpenShift S2I binary builds under the hood.
-The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator, and the publisher pod share a common persistent volume.
+The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator and the publisher pod share a common persistent volume.

@@ -9,8 +9,8 @@ used when needed to provide data to internal services or publish data outside, w
 
 Knative Sources fall into this category, but in general, sources described here can be used with any underlying technology.
 
-NOTE: https://knative.dev/docs/eventing/samples/apache-camel-source/[Knative CamelSources] are a community effort to provide specific sources for Knative.
-What we describe in this document is a more general approach that is alternative to Knative CamelSources and aims to supersede them.
+NOTE: https://knative.dev/docs/eventing/samples/apache-camel-source/[Knative CamelSources] is a community effort to provide specific sources for Knative.
+What we describe in this document is a more general approach that is an alternative to Knative CamelSources and aims to supersede them.
 
 == Sources Design
 
@@ -18,7 +18,7 @@ The following diagram shows how sources are materialized from their elementary b
 
 image::architecture/camel-k-sources-diagram.png[Next-gen Sources diagram]
 
-=== Kamelets as Abtract Sources
+=== Kamelets as Abstract Sources
 
 In the context of sources, *Kamelets* play the role of abstract sources that can be materialized once the user provides values for all
 mandatory parameters contained in the Kamelet specification.
@@ -77,7 +77,7 @@ spec:
 <3> Destination of the generated events
 
 When binding a Kamelet to a single (fully specified) Knative destination, Camel K does not attempt to do any binding,
-instead it delegates the actual mapping to a Knative *SinkBinding* resource.
+instead, it delegates the actual mapping to a Knative *SinkBinding* resource.
 
 The **SinkBinding** intercepts the creation of the Deployment containing the integration specification, to inject the
 exact coordinates of the destination (in the example, of the InMemoryChannel named `mychannel`).
