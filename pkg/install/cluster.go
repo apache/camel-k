@@ -80,6 +80,11 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
+	// Wait for all CRDs to be installed before proceeding
+	if err := WaitForAllCRDInstallation(ctx, clientProvider, 25*time.Second); err != nil {
+		return err
+	}
+
 	// Installing ClusterRole
 	clusterRoleInstalled, err := IsClusterRoleInstalled(ctx, c)
 	if err != nil {
@@ -95,11 +100,6 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	// Install OpenShift Console download links if possible
 	err = OpenShiftConsoleDownloadLink(ctx, c)
 	if err != nil {
-		return err
-	}
-
-	// Wait for all CRDs to be installed before proceeding
-	if err := WaitForAllCRDInstallation(ctx, clientProvider, 25*time.Second); err != nil {
 		return err
 	}
 
@@ -156,7 +156,12 @@ func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
 	} else if !ok {
 		return false, nil
 	}
-	return IsCRDInstalled(ctx, c, "Kamelet", "v1alpha1")
+	if ok, err := IsCRDInstalled(ctx, c, "Kamelet", "v1alpha1"); err != nil {
+		return ok, err
+	} else if !ok {
+		return false, nil
+	}
+	return IsCRDInstalled(ctx, c, "KameletBinding", "v1alpha1")
 }
 
 // IsCRDInstalled check if the given CRD kind is installed
