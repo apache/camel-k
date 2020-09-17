@@ -508,7 +508,7 @@ func (e *Environment) AddSourcesProperties() {
 			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", i)] = string(s.Loader)
 		}
 		if s.Compression {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compression", i)] = "true"
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", i)] = "true"
 		}
 
 		interceptors := make([]string, 0, len(s.Interceptors))
@@ -518,8 +518,8 @@ func (e *Environment) AddSourcesProperties() {
 		if e.Interceptors != nil {
 			interceptors = append(interceptors, e.Interceptors...)
 		}
-		if len(interceptors) > 0 {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].interceptors", i)] = strings.Join(interceptors, ",")
+		for intID, interceptor := range interceptors {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].interceptors[%d]", i, intID)] = interceptor
 		}
 	}
 }

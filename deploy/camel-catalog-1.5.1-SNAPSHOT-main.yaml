@@ -64,6 +64,10 @@ spec:
         dependencies:
         - groupId: org.apache.camel.k
           artifactId: camel-k-runtime-tracing
+      master:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-runtime-master
   artifacts:
     camel-zipfile:
       groupId: org.apache.camel
