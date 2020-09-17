@@ -124,7 +124,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 func (t *masterTrait) Apply(e *trait.Environment) error {
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-master")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityMaster)
 
 		// Master sub endpoints need to be added to the list of dependencies
 		for _, dep := range t.delegateDependencies {
