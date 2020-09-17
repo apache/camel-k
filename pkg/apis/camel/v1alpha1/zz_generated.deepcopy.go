@@ -363,6 +363,11 @@ func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.XDescriptors != nil {
+		in, out := &in.XDescriptors, &out.XDescriptors
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

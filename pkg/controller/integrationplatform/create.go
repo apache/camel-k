@@ -19,7 +19,6 @@ package integrationplatform
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/apache/camel-k/deploy"
@@ -50,30 +49,6 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		if strings.HasPrefix(k, "camel-catalog-") {
 			action.L.Infof("Installing camel catalog: %s", k)
 			err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, k)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	if l := len(platform.Status.Resources.Kits); l > 0 {
-		res := make([]string, 0, l)
-
-		for _, c := range platform.Status.Resources.Kits {
-			//
-			// Assuming that if the resource ends with a yaml extension, the full
-			// resource name is provided
-			//
-			if !strings.HasSuffix(c, ".yaml") && !strings.HasSuffix(c, ".yml") {
-				c = fmt.Sprintf("platform-integration-kit-%s.yaml", c)
-			}
-
-			res = append(res, c)
-		}
-
-		if len(res) > 0 {
-			action.L.Info("Installing custom platform resources")
-			err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, res...)
 			if err != nil {
 				return nil, err
 			}

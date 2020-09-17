@@ -93,7 +93,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("base-image", "", "Set the base Image used to run integrations")
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
 	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
-	cmd.Flags().StringArray("kit", nil, "Add an integration kit to build at startup")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
@@ -159,7 +158,6 @@ type installCmdOptions struct {
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
 	Properties              []string `mapstructure:"properties"`
-	Kits                    []string `mapstructure:"kits"`
 	TraitProfile            string   `mapstructure:"trait-profile"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
 
@@ -347,8 +345,6 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			platform.Spec.Build.KanikoBuildCache = &o.KanikoBuildCache
 		}
 
-		platform.Spec.Resources.Kits = o.Kits
-
 		// Do not create an integration platform in global mode as platforms are expected
 		// to be created in other namespaces.
 		// In OLM mode, the operator is installed in an external namespace, so it's ok to install the platform locally.
@@ -479,11 +475,6 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	schema := runtime.NewScheme()
 	if err := apis.AddToScheme(schema); err != nil {
 		return err
-	}
-
-	for _, kit := range o.Kits {
-		err := errorIfKitIsNotAvailable(schema, kit)
-		result = multierr.Append(result, err)
 	}
 
 	if len(o.MavenRepositories) > 0 && o.MavenSettings != "" {
