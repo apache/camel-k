@@ -44,8 +44,9 @@ func TestAlternativeImageInstallation(t *testing.T) {
 
 func TestKitMainInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--kit", "main").Execute()).Should(BeNil())
-		Eventually(Build(ns, "main")).ShouldNot(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("kit", "create", "timer", "-d", "camel:timer", "-n", ns).Execute()).Should(BeNil())
+		Eventually(Build(ns, "timer")).ShouldNot(BeNil())
 	})
 }
 
