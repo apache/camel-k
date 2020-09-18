@@ -7,7 +7,11 @@
 **Closed issues:**
 
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
+- kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
+- Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
 - kamelets: runtime support [\#1575](https://github.com/apache/camel-k/issues/1575)
+- kamelets: operator support [\#1574](https://github.com/apache/camel-k/issues/1574)
+- Support for Kamelets [\#1567](https://github.com/apache/camel-k/issues/1567)
 
 **Merged pull requests:**
 
@@ -42,6 +46,7 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+- Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
 
@@ -232,6 +237,7 @@
 - Support of 3rd party camel components, data formats and type converters [\#1285](https://github.com/apache/camel-k/issues/1285)
 - Camel-k with Spring boot  [\#1176](https://github.com/apache/camel-k/issues/1176)
 - routes-rest.js not working [\#1174](https://github.com/apache/camel-k/issues/1174)
+- Unable to run Knative integration [\#1169](https://github.com/apache/camel-k/issues/1169)
 - Basic javascript example generates "Multiple applicable overloads found for method name process" [\#1144](https://github.com/apache/camel-k/issues/1144)
 - Basic groovy example generates "Ambiguous method overloading for method org.apache.camel.model.RouteDefinition\#process" [\#1143](https://github.com/apache/camel-k/issues/1143)
 - Multiple traits to create a service [\#1061](https://github.com/apache/camel-k/issues/1061)
@@ -362,6 +368,7 @@
 - Fixed link in Quarkus.adoc [\#1473](https://github.com/apache/camel-k/pull/1473) ([oscerd](https://github.com/oscerd))
 - Fix \#1470: support inline YAML [\#1472](https://github.com/apache/camel-k/pull/1472) ([nicolaferraro](https://github.com/nicolaferraro))
 - Update uninstalling.doc [\#1467](https://github.com/apache/camel-k/pull/1467) ([ipolyzos](https://github.com/ipolyzos))
+- \#1465 remove crd and clusterrole on uninstall [\#1466](https://github.com/apache/camel-k/pull/1466) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1463: add apis and client as submodule [\#1464](https://github.com/apache/camel-k/pull/1464) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1045: hide internal CRDs in OLM console [\#1461](https://github.com/apache/camel-k/pull/1461) ([nicolaferraro](https://github.com/nicolaferraro))
 - Make cron work on quarkus runtime [\#1460](https://github.com/apache/camel-k/pull/1460) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -379,7 +386,6 @@
 
 **Merged pull requests:**
 
-- \#1465 remove crd and clusterrole on uninstall [\#1466](https://github.com/apache/camel-k/pull/1466) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1449: add support for modeline options [\#1455](https://github.com/apache/camel-k/pull/1455) ([nicolaferraro](https://github.com/nicolaferraro))
 - information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1450: fix servicemonitor roles on direct install [\#1453](https://github.com/apache/camel-k/pull/1453) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -634,7 +640,6 @@
 
 **Closed issues:**
 
-- Unable to run Knative integration [\#1169](https://github.com/apache/camel-k/issues/1169)
 - Trying to get sample RestWithUndertow working. [\#1130](https://github.com/apache/camel-k/issues/1130)
 - unable to execute basic Examples eg. Printer.groovy in GKE [\#1115](https://github.com/apache/camel-k/issues/1115)
 - kamel scale integration to zero not possible [\#1094](https://github.com/apache/camel-k/issues/1094)
@@ -1242,7 +1247,6 @@
 - chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
 - Adding Probes to Knative services [\#514](https://github.com/apache/camel-k/pull/514) ([lburgazzoli](https://github.com/lburgazzoli))
-- feature\(knative\): support configmap and secrets [\#500](https://github.com/apache/camel-k/pull/500) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.0](https://github.com/apache/camel-k/tree/0.3.0) (2019-03-04)
 
@@ -1280,6 +1284,7 @@
 - minikube doc update [\#509](https://github.com/apache/camel-k/pull/509) ([kameshsampath](https://github.com/kameshsampath))
 - chore\(crd\): add missing label to CamelCatalog CRD [\#502](https://github.com/apache/camel-k/pull/502) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(install\): fix wrong resource kind [\#501](https://github.com/apache/camel-k/pull/501) ([lburgazzoli](https://github.com/lburgazzoli))
+- feature\(knative\): support configmap and secrets [\#500](https://github.com/apache/camel-k/pull/500) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#497: upgrade to knative 0.4.0 [\#499](https://github.com/apache/camel-k/pull/499) ([nicolaferraro](https://github.com/nicolaferraro))
 - Perform garbage collection asynchronously [\#496](https://github.com/apache/camel-k/pull/496) ([astefanutti](https://github.com/astefanutti))
 - Do not swallow error returned by controller actions [\#494](https://github.com/apache/camel-k/pull/494) ([astefanutti](https://github.com/astefanutti))
@@ -1541,7 +1546,6 @@
 - trait: add builder trait [\#233](https://github.com/apache/camel-k/pull/233) ([lburgazzoli](https://github.com/lburgazzoli))
 - Make it work on GKE [\#232](https://github.com/apache/camel-k/pull/232) ([nicolaferraro](https://github.com/nicolaferraro))
 - temporary build folder not cleaned up [\#231](https://github.com/apache/camel-k/pull/231) ([lburgazzoli](https://github.com/lburgazzoli))
-- refactor: make traits more flexible [\#229](https://github.com/apache/camel-k/pull/229) ([lburgazzoli](https://github.com/lburgazzoli))
 - Bump version to 0.0.6-SNAPSHOT [\#228](https://github.com/apache/camel-k/pull/228) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.5](https://github.com/apache/camel-k/tree/0.0.5) (2018-11-16)
@@ -1563,6 +1567,7 @@
 
 **Merged pull requests:**
 
+- refactor: make traits more flexible [\#229](https://github.com/apache/camel-k/pull/229) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix kaniko build [\#227](https://github.com/apache/camel-k/pull/227) ([nicolaferraro](https://github.com/nicolaferraro))
 - runtime: small improvement to the dependency lister plugin [\#225](https://github.com/apache/camel-k/pull/225) ([lburgazzoli](https://github.com/lburgazzoli))
 - new builder [\#223](https://github.com/apache/camel-k/pull/223) ([lburgazzoli](https://github.com/lburgazzoli))
