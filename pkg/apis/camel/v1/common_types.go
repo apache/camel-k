@@ -129,6 +129,8 @@ const (
 	CapabilityCircuitBreaker = "circuit-breaker"
 	// CapabilityTracing --
 	CapabilityTracing = "tracing"
+	// CapabilityMaster --
+	CapabilityMaster = "master"
 )
 
 // ResourceCondition is a common type for all conditions

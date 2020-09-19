@@ -46,7 +46,7 @@ func TestRunREST(t *testing.T) {
 		}
 
 		Expect(Kamel("install", "-n", ns, "--trait-profile", profile).Execute()).Should(BeNil())
-		Expect(Kamel("run", "-n", ns, "files/RestConsumer.java", "-d", "camel:undertow").Execute()).Should(BeNil())
+		Expect(Kamel("run", "-n", ns, "files/RestConsumer.java").Execute()).Should(BeNil())
 		Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 
 		t.Run("Service works", func(t *testing.T) {

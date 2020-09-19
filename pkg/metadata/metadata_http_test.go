@@ -32,7 +32,7 @@ func TestHttpJavaSource(t *testing.T) {
 			Name: "Request.java",
 			Content: `
 			from("telegram:bots/cippa").to("log:stash");
-			from("undertow:uri").to("log:stash");
+			from("netty-http:uri").to("log:stash");
 			from("ine:xistent").to("log:stash");
 		`,
 		},
@@ -55,7 +55,7 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 			Name: "Request.java",
 			Content: `
 			from("direct:bots/cippa").to("log:stash");
-			from("undertow:uri").to("log:stash");
+			from("netty-http:uri").to("log:stash");
 			from("seda:path").to("log:stash");
 		`,
 		},
@@ -141,7 +141,7 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 			Name: "Request.groovy",
 			Content: `
 			from('direct:bots/cippa').to("log:stash");
-			from('undertow:uri').to("log:stash");
+			from('netty-http:uri').to("log:stash");
 			from('seda:path').to("log:stash");
 		`,
 		},

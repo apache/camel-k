@@ -29,41 +29,22 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestKitMainFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "main")
-}
-
-func TestKitGroovyFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "groovy")
-}
-
-func TestKitKotlinFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "kotlin")
-}
-
-func TestKitJSFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "js")
-}
-
-func TestKitXMLFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "xml")
-}
-
-func TestKitJavaFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "java")
-}
-
-func TestKitYAMLFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "yaml")
+func TestKitTimerToLogFullBuild(t *testing.T) {
+	doKitFullBuild(t, "timer-to-log", "camel:timer", "camel:log")
 }
 
 func TestKitKnativeFullBuild(t *testing.T) {
-	doNamedKitFullBuild(t, "knative")
+	doKitFullBuild(t, "knative", "camel:knative")
 }
 
-func doNamedKitFullBuild(t *testing.T, name string) {
+func doKitFullBuild(t *testing.T, name string, dependencies ...string) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--kit", name).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		buildKitArgs := []string{"kit", "create", name, "-n", ns}
+		for _, dep := range dependencies {
+			buildKitArgs = append(buildKitArgs, "-d", dep)
+		}
+		Expect(Kamel(buildKitArgs...).Execute()).Should(BeNil())
 		Eventually(Build(ns, name)).ShouldNot(BeNil())
 		Eventually(func() v1.BuildPhase {
 			return Build(ns, name)().Status.Phase

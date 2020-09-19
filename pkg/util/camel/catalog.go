@@ -37,6 +37,11 @@ import (
 
 // DefaultCatalog --
 func DefaultCatalog() (*RuntimeCatalog, error) {
+	return QuarkusCatalog()
+}
+
+// MainCatalog --
+func MainCatalog() (*RuntimeCatalog, error) {
 	return catalogForRuntimeProvider(v1.RuntimeProviderMain)
 }
 

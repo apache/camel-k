@@ -43,8 +43,8 @@ func TestPlatformHttpCapabilities(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:platform-http",
-			"camel:log",
+			"camel-quarkus:platform-http",
+			"camel-quarkus:log",
 		},
 		meta.Dependencies.List())
 

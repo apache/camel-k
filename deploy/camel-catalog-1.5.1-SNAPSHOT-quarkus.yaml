@@ -66,8 +66,8 @@ spec:
           artifactId: camel-quarkus-opentracing
       master:
         dependencies:
-        - groupId: org.apache.camel.quarkus
-          artifactId: camel-quarkus-master
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-quarkus-master
   artifacts:
     camel-quarkus-aws2-ses:
       groupId: org.apache.camel.quarkus

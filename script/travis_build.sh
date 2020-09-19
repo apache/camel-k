@@ -77,7 +77,7 @@ export IMAGE=docker.io/apache/camel-k:$(make version)
 docker build -t "${IMAGE}" -f build/Dockerfile .
 
 echo "installing camel k cluster resources"
-export KAMEL_INSTALL_MAVEN_REPOSITORIES=https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots
+export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
 ./kamel install --cluster-setup
 
 oc login -u developer
