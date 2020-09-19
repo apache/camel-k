@@ -1546,6 +1546,7 @@
 - trait: add builder trait [\#233](https://github.com/apache/camel-k/pull/233) ([lburgazzoli](https://github.com/lburgazzoli))
 - Make it work on GKE [\#232](https://github.com/apache/camel-k/pull/232) ([nicolaferraro](https://github.com/nicolaferraro))
 - temporary build folder not cleaned up [\#231](https://github.com/apache/camel-k/pull/231) ([lburgazzoli](https://github.com/lburgazzoli))
+- refactor: make traits more flexible [\#229](https://github.com/apache/camel-k/pull/229) ([lburgazzoli](https://github.com/lburgazzoli))
 - Bump version to 0.0.6-SNAPSHOT [\#228](https://github.com/apache/camel-k/pull/228) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.5](https://github.com/apache/camel-k/tree/0.0.5) (2018-11-16)
@@ -1567,7 +1568,6 @@
 
 **Merged pull requests:**
 
-- refactor: make traits more flexible [\#229](https://github.com/apache/camel-k/pull/229) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix kaniko build [\#227](https://github.com/apache/camel-k/pull/227) ([nicolaferraro](https://github.com/nicolaferraro))
 - runtime: small improvement to the dependency lister plugin [\#225](https://github.com/apache/camel-k/pull/225) ([lburgazzoli](https://github.com/lburgazzoli))
 - new builder [\#223](https://github.com/apache/camel-k/pull/223) ([lburgazzoli](https://github.com/lburgazzoli))
