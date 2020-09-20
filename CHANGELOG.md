@@ -9,9 +9,11 @@
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
+- Deprecate build kit at platform set-up time [\#1604](https://github.com/apache/camel-k/issues/1604)
 - kamelets: runtime support [\#1575](https://github.com/apache/camel-k/issues/1575)
 - kamelets: operator support [\#1574](https://github.com/apache/camel-k/issues/1574)
 - Support for Kamelets [\#1567](https://github.com/apache/camel-k/issues/1567)
+- Switch to Quarkus as default runtime for integrations [\#1513](https://github.com/apache/camel-k/issues/1513)
 
 **Merged pull requests:**
 
@@ -46,6 +48,7 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
@@ -1243,7 +1246,6 @@
 - fix: do not add probes to knative services [\#532](https://github.com/apache/camel-k/pull/532) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add option to health probes [\#531](https://github.com/apache/camel-k/pull/531) ([lburgazzoli](https://github.com/lburgazzoli))
 - feature\(kaniko\): support for incremental build [\#530](https://github.com/apache/camel-k/pull/530) ([lburgazzoli](https://github.com/lburgazzoli))
-- ordered delete [\#529](https://github.com/apache/camel-k/pull/529) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
 - Adding Probes to Knative services [\#514](https://github.com/apache/camel-k/pull/514) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -1274,6 +1276,7 @@
 
 **Merged pull requests:**
 
+- ordered delete [\#529](https://github.com/apache/camel-k/pull/529) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix: Allow file names as delete cmd argument [\#522](https://github.com/apache/camel-k/pull/522) ([christophd](https://github.com/christophd))
 - chore\(image\): include camel runtime adapters [\#521](https://github.com/apache/camel-k/pull/521) ([lburgazzoli](https://github.com/lburgazzoli))
 - test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
