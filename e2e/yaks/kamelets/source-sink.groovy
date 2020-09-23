@@ -17,5 +17,8 @@
  * limitations under the License.
  */
 
-from('kamelet:timer?message=Hello+Kamelets&period=1000')
-    .log('${body}')
+from('timer:tick')
+  .setBody().constant('Camel K')
+  .to("kamelet:echo-sink")
+  .to("kamelet:echo-sink?prefix=nice+")
+  .log('${body}')

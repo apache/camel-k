@@ -1,13 +1,13 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
-  name: timer-source
+  name: timer-source-binding
 spec:
   source:
     ref:
       kind: Kamelet
       apiVersion: camel.apache.org/v1alpha1
-      name: timer
+      name: timer-source
     properties:
       message: Hello Kamelets
       period: 1000

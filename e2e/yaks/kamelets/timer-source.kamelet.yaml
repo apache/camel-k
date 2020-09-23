@@ -1,9 +1,9 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: Kamelet
 metadata:
-  name: timer
-  annotations:
-    camel.apache.org/kamelet.icon: timer
+  name: timer-source
+  label:
+    camel.apache.org/kamelet.type: "source"
 spec:
   definition:
     title: "Timer"

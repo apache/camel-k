@@ -120,7 +120,7 @@ metadata:
                   }
                 },
                 {
-                  "to": "direct:#property:routeId"
+                  "to": "direct:{{routeId}}"
                 }
               ],
               "uri": "timer:tick"
