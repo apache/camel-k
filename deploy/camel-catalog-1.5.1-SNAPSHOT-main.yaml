@@ -3244,8 +3244,8 @@ spec:
       artifactId: camel-kamelet
       schemes:
       - id: kamelet
-        http: true
-        passive: false
+        http: false
+        passive: true
       dependencies:
       - groupId: org.apache.camel.k
         artifactId: camel-kamelet
