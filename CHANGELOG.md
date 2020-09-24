@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Add Kamelet integration tests [\#1709](https://github.com/apache/camel-k/issues/1709)
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
@@ -17,6 +18,7 @@
 
 **Merged pull requests:**
 
+- Fix \#1709: add e2e tests about kamelets [\#1711](https://github.com/apache/camel-k/pull/1711) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Minor\] grammatical/typo changes [\#1705](https://github.com/apache/camel-k/pull/1705) ([PoojaChandak](https://github.com/PoojaChandak))
 - Document Update [\#1704](https://github.com/apache/camel-k/pull/1704) ([NiteshKoushik](https://github.com/NiteshKoushik))
 - Document update [\#1703](https://github.com/apache/camel-k/pull/1703) ([NiteshKoushik](https://github.com/NiteshKoushik))
