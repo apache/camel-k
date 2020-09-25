@@ -45,6 +45,7 @@ func init() {
 	AddToTraits(newRouteTrait)
 	AddToTraits(newIstioTrait)
 	AddToTraits(newIngressTrait)
+	AddToTraits(newServiceBindingTrait)
 	AddToTraits(newOwnerTrait)
 	AddToTraits(newPdbTrait)
 }

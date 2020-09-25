@@ -28,6 +28,7 @@ require (
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/radovskyb/watcher v1.0.6
+	github.com/redhat-developer/service-binding-operator v0.4.0
 	github.com/rs/xid v1.2.1
 	github.com/scylladb/go-set v1.0.2
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
@@ -37,7 +38,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
 	github.com/stoewer/go-strcase v1.0.2
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	go.uber.org/multierr v1.5.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	gopkg.in/inf.v0 v0.9.1
@@ -57,6 +58,10 @@ replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
 	k8s.io/client-go => k8s.io/client-go v0.18.9
 	k8s.io/code-generator => k8s.io/code-generator v0.18.9
+	// Required by Service Binding Operator dependency, see https://github.com/redhat-developer/service-binding-operator/pull/798
+	github.com/operator-framework/operator-lifecycle-manager => github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88
+	github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v0.17.1
+	k8s.io/api => k8s.io/api v0.18.9
 )
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
