@@ -25,9 +25,11 @@ pre:
 
     kubectl apply -f messages-channel.yaml -n $YAKS_NAMESPACE
 
-    kubectl apply -f timer.kamelet.yaml -n $YAKS_NAMESPACE
+    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
+    kubectl apply -f echo-sink.kamelet.yaml -n $YAKS_NAMESPACE
 
-    kubectl apply -f timer-source.yaml -n $YAKS_NAMESPACE
+    kubectl apply -f timer-source-binding.yaml -n $YAKS_NAMESPACE
     kubectl wait kameletbinding timer-source --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
 
     kamel run logger.groovy -w -n $YAKS_NAMESPACE
+    kamel run source-sink.groovy -w -n $YAKS_NAMESPACE

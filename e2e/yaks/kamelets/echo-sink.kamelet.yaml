@@ -1,0 +1,27 @@
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: echo-sink
+  label:
+    camel.apache.org/kamelet.type: "sink"
+spec:
+  definition:
+    title: "Echo"
+    description: "Replies with an echo message to each incoming event"
+    properties:
+      prefix:
+        title: Prefix
+        description: The prefix to prepend to the incoming event
+        type: string
+        default: "echo: "
+  types:
+    in:
+      mediaType: text/plain
+    out:
+      mediaType: text/plain
+  flow:
+    from:
+      uri: "direct:{{routeId}}"
+      steps:
+        - set-body:
+            simple: "{{prefix}}${body}"
