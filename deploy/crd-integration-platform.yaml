@@ -18,26 +18,29 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: integrationplatforms.camel.apache.org
   labels:
     app: "camel-k"
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.0.0-20200528125929-5c0c6ae3b64b
+  creationTimestamp: null
+  name: integrationplatforms.camel.apache.org
 spec:
   additionalPrinterColumns:
-    - JSONPath: .status.phase
-      description: The integration platform phase
-      name: Phase
-      type: string
+  - JSONPath: .status.phase
+    description: The integration platform phase
+    name: Phase
+    type: string
   group: camel.apache.org
   names:
+    categories:
+    - kamel
+    - camel
     kind: IntegrationPlatform
     listKind: IntegrationPlatformList
     plural: integrationplatforms
     shortNames:
-      - ip
+    - ip
     singular: integrationplatform
-    categories:
-      - kamel
-      - camel
   scope: Namespaced
   subresources:
     status: {}
@@ -98,7 +101,7 @@ spec:
                                 must be defined
                               type: boolean
                           required:
-                            - key
+                          - key
                           type: object
                         secretKeyRef:
                           description: Selects a key of a secret.
@@ -116,7 +119,7 @@ spec:
                                 be defined
                               type: boolean
                           required:
-                            - key
+                          - key
                           type: object
                       type: object
                     timeout:
@@ -167,8 +170,8 @@ spec:
                   value:
                     type: string
                 required:
-                  - type
-                  - value
+                - type
+                - value
                 type: object
               type: array
             profile:
@@ -178,14 +181,15 @@ spec:
             resources:
               description: IntegrationPlatformResourcesSpec contains platform related
                 resources
-              properties:
-                kits:
-                  items:
-                    type: string
-                  type: array
               type: object
             traits:
               additionalProperties:
+                description: A TraitSpec contains the configuration of a trait
+                properties:
+                  configuration:
+                    type: object
+                required:
+                - configuration
                 type: object
               type: object
           type: object
@@ -229,7 +233,7 @@ spec:
                                 must be defined
                               type: boolean
                           required:
-                            - key
+                          - key
                           type: object
                         secretKeyRef:
                           description: Selects a key of a secret.
@@ -247,7 +251,7 @@ spec:
                                 be defined
                               type: boolean
                           required:
-                            - key
+                          - key
                           type: object
                       type: object
                     timeout:
@@ -317,8 +321,8 @@ spec:
                     description: Type of integration condition.
                     type: string
                 required:
-                  - status
-                  - type
+                - status
+                - type
                 type: object
               type: array
             configuration:
@@ -330,8 +334,8 @@ spec:
                   value:
                     type: string
                 required:
-                  - type
-                  - value
+                - type
+                - value
                 type: object
               type: array
             phase:
@@ -344,14 +348,15 @@ spec:
             resources:
               description: IntegrationPlatformResourcesSpec contains platform related
                 resources
-              properties:
-                kits:
-                  items:
-                    type: string
-                  type: array
               type: object
             traits:
               additionalProperties:
+                description: A TraitSpec contains the configuration of a trait
+                properties:
+                  configuration:
+                    type: object
+                required:
+                - configuration
                 type: object
               type: object
             version:
@@ -360,6 +365,6 @@ spec:
       type: object
   version: v1
   versions:
-    - name: v1
-      served: true
-      storage: true
+  - name: v1
+    served: true
+    storage: true

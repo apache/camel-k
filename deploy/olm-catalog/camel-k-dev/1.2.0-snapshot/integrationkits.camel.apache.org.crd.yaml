@@ -18,30 +18,36 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: integrationkits.camel.apache.org
   labels:
     app: "camel-k"
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.0.0-20200528125929-5c0c6ae3b64b
+  creationTimestamp: null
+  name: integrationkits.camel.apache.org
 spec:
   additionalPrinterColumns:
-    - JSONPath: .status.phase
-      description: The integration kit phase
-      name: Phase
-      type: string
-    - JSONPath: .metadata.labels.camel\.apache\.org\/kit\.type
-      description: The integration kit type
-      name: Type
-      type: string
-    - JSONPath: .status.image
-      description: The integration kit image
-      name: Image
-      type: string
+  - JSONPath: .status.phase
+    description: The integration kit phase
+    name: Phase
+    type: string
+  - JSONPath: .metadata.labels.camel\.apache\.org\/kit\.type
+    description: The integration kit type
+    name: Type
+    type: string
+  - JSONPath: .status.image
+    description: The integration kit image
+    name: Image
+    type: string
   group: camel.apache.org
   names:
+    categories:
+    - kamel
+    - camel
     kind: IntegrationKit
     listKind: IntegrationKitList
     plural: integrationkits
     shortNames:
-      - ik
+    - ik
     singular: integrationkit
   scope: Namespaced
   subresources:
@@ -74,8 +80,8 @@ spec:
                   value:
                     type: string
                 required:
-                  - type
-                  - value
+                - type
+                - value
                 type: object
               type: array
             dependencies:
@@ -97,9 +103,9 @@ spec:
                 description: A TraitSpec contains the configuration of a trait
                 properties:
                   configuration:
-                    additionalProperties:
-                      type: string
                     type: object
+                required:
+                - configuration
                 type: object
               type: object
           type: object
@@ -119,7 +125,7 @@ spec:
                   target:
                     type: string
                 required:
-                  - id
+                - id
                 type: object
               type: array
             baseImage:
@@ -152,8 +158,8 @@ spec:
                     description: Type of integration condition.
                     type: string
                 required:
-                  - status
-                  - type
+                - status
+                - type
                 type: object
               type: array
             digest:
@@ -174,16 +180,16 @@ spec:
                       format: date-time
                       type: string
                   required:
-                    - attempt
-                    - attemptMax
+                  - attempt
+                  - attemptMax
                   type: object
                 time:
                   format: date-time
                   type: string
               required:
-                - reason
-                - recovery
-                - time
+              - reason
+              - recovery
+              - time
               type: object
             image:
               type: string
@@ -203,6 +209,6 @@ spec:
       type: object
   version: v1
   versions:
-    - name: v1
-      served: true
-      storage: true
+  - name: v1
+    served: true
+    storage: true
