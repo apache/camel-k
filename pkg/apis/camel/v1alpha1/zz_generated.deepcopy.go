@@ -162,7 +162,15 @@ func (in JSONSchemaDependencies) DeepCopyInto(out *JSONSchemaDependencies) {
 		in := &in
 		*out = make(JSONSchemaDependencies, len(*in))
 		for key, val := range *in {
-			(*out)[key] = *val.DeepCopy()
+			var outVal []string
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				in, out := &val, &outVal
+				*out = make([]string, len(*in))
+				copy(*out, *in)
+			}
+			(*out)[key] = outVal
 		}
 		return
 	}
@@ -197,12 +205,12 @@ func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 	}
 	if in.Maximum != nil {
 		in, out := &in.Maximum, &out.Maximum
-		*out = new(float64)
+		*out = new(json.Number)
 		**out = **in
 	}
 	if in.Minimum != nil {
 		in, out := &in.Minimum, &out.Minimum
-		*out = new(float64)
+		*out = new(json.Number)
 		**out = **in
 	}
 	if in.MaxLength != nil {
@@ -227,7 +235,7 @@ func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 	}
 	if in.MultipleOf != nil {
 		in, out := &in.MultipleOf, &out.MultipleOf
-		*out = new(float64)
+		*out = new(json.Number)
 		**out = **in
 	}
 	if in.Enum != nil {
@@ -262,7 +270,7 @@ func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 	}
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
-		*out = new(JSONSchemaPropsOrArray)
+		*out = new(JSONSchemaProps)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.AllOf != nil {
@@ -300,8 +308,8 @@ func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 	}
 	if in.AdditionalProperties != nil {
 		in, out := &in.AdditionalProperties, &out.AdditionalProperties
-		*out = new(JSONSchemaPropsOrBool)
-		(*in).DeepCopyInto(*out)
+		*out = new(bool)
+		**out = **in
 	}
 	if in.PatternProperties != nil {
 		in, out := &in.PatternProperties, &out.PatternProperties
@@ -314,13 +322,21 @@ func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 		in, out := &in.Dependencies, &out.Dependencies
 		*out = make(JSONSchemaDependencies, len(*in))
 		for key, val := range *in {
-			(*out)[key] = *val.DeepCopy()
+			var outVal []string
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				in, out := &val, &outVal
+				*out = make([]string, len(*in))
+				copy(*out, *in)
+			}
+			(*out)[key] = outVal
 		}
 	}
 	if in.AdditionalItems != nil {
 		in, out := &in.AdditionalItems, &out.AdditionalItems
-		*out = new(JSONSchemaPropsOrBool)
-		(*in).DeepCopyInto(*out)
+		*out = new(bool)
+		**out = **in
 	}
 	if in.Definitions != nil {
 		in, out := &in.Definitions, &out.Definitions
