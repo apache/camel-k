@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Salesforce Integration as Knative Serverless Service fails [\#1713](https://github.com/apache/camel-k/issues/1713)
 - Add Kamelet integration tests [\#1709](https://github.com/apache/camel-k/issues/1709)
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
@@ -1592,6 +1593,7 @@
 - misc runtime fixes and improvements [\#191](https://github.com/apache/camel-k/pull/191) ([lburgazzoli](https://github.com/lburgazzoli))
 - corrected minor spelling or wrong language reference \(Kotlin-\>JavaScript\) [\#187](https://github.com/apache/camel-k/pull/187) ([marcellanz](https://github.com/marcellanz))
 - kamel run --dev mode terminate pod if pressing ctrl + c  [\#186](https://github.com/apache/camel-k/pull/186) ([dmvolod](https://github.com/dmvolod))
+- Add log command [\#179](https://github.com/apache/camel-k/pull/179) ([lburgazzoli](https://github.com/lburgazzoli))
 - Ci integration tests [\#165](https://github.com/apache/camel-k/pull/165) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.4](https://github.com/apache/camel-k/tree/0.0.4) (2018-10-16)
@@ -1613,7 +1615,6 @@
 
 - chore\(logging\): move log colouring definition to runtime [\#181](https://github.com/apache/camel-k/pull/181) ([lburgazzoli](https://github.com/lburgazzoli))
 - camel-http4 not recognized automatically [\#180](https://github.com/apache/camel-k/pull/180) ([lburgazzoli](https://github.com/lburgazzoli))
-- Add log command [\#179](https://github.com/apache/camel-k/pull/179) ([lburgazzoli](https://github.com/lburgazzoli))
 - configure camel context from properties [\#178](https://github.com/apache/camel-k/pull/178) ([lburgazzoli](https://github.com/lburgazzoli))
 - Misc fixing [\#177](https://github.com/apache/camel-k/pull/177) ([lburgazzoli](https://github.com/lburgazzoli))
 - operator: swich to type safe trait definition [\#176](https://github.com/apache/camel-k/pull/176) ([lburgazzoli](https://github.com/lburgazzoli))
