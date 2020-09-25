@@ -46,7 +46,8 @@ func (action *platformSetupAction) Name() string {
 // CanHandle tells whether this action can handle the integration
 func (action *platformSetupAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseNone ||
-		integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform
+		integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform ||
+		integration.Status.Phase == v1.IntegrationPhaseWaitingForServiceBindingCollectionReady
 }
 
 // Handle handles the integrations

@@ -44,6 +44,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
+    sb "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
 )
 
 // Add creates a new Integration Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -212,6 +213,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	err = c.Watch(&source.Kind{Type: &v1beta1.CronJob{}}, &handler.EnqueueRequestForOwner{
 		OwnerType:    &v1.Integration{},
 		IsController: false,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch ServiceBindings created
+	err = c.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
+		OwnerType:    &v1.Integration{},
+		IsController: true,
 	})
 	if err != nil {
 		return err

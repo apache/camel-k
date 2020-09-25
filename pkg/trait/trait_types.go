@@ -42,12 +42,13 @@ import (
 const True = "true"
 
 var (
-	basePath            = "/etc/camel"
-	confDPath           = path.Join(basePath, "conf.d")
-	sourcesMountPath    = path.Join(basePath, "sources")
-	resourcesMountPath  = path.Join(basePath, "resources")
-	configMapsMountPath = path.Join(confDPath, "_configmaps")
-	secretsMountPath    = path.Join(confDPath, "_secrets")
+	basePath                 = "/etc/camel"
+	confDPath                = path.Join(basePath, "conf.d")
+	sourcesMountPath         = path.Join(basePath, "sources")
+	resourcesMountPath       = path.Join(basePath, "resources")
+	configMapsMountPath      = path.Join(confDPath, "_configmaps")
+	secretsMountPath         = path.Join(confDPath, "_secrets")
+	serviceBindingsMountPath = path.Join(ConfdPath, "_servicebindings")
 )
 
 // Identifiable represent an identifiable type
@@ -196,6 +197,7 @@ type Environment struct {
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
 	Interceptors          []string
+	ServiceBindings       map[string]string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -671,6 +673,25 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	// Volumes :: Additional Secrets
 	//
+    // append Service Binding secrets
+    for _, name := range e.ServiceBindings {
+        refName := kubernetes.SanitizeLabel(name)
+
+        *vols = append(*vols, corev1.Volume{
+            Name: refName,
+            VolumeSource: corev1.VolumeSource{
+                Secret: &corev1.SecretVolumeSource{
+                    SecretName: name,
+                },
+            },
+        })
+
+        *mnts = append(*mnts, corev1.VolumeMount{
+            Name:      refName,
+            MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(name)),
+        })
+    }
+    secrets := e.CollectConfigurationValues("secret")
 	for _, secretName := range e.collectConfigurationValues("secret") {
 		refName := kubernetes.SanitizeLabel(secretName)
 
