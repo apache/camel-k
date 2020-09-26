@@ -18,42 +18,45 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: builds.camel.apache.org
   labels:
     app: "camel-k"
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.0.0-20200528125929-5c0c6ae3b64b
+  creationTimestamp: null
+  name: builds.camel.apache.org
 spec:
   additionalPrinterColumns:
-    - JSONPath: .status.phase
-      description: The build phase
-      name: Phase
-      type: string
-    - JSONPath: .metadata.creationTimestamp
-      description: The time at which the build was created
-      name: Age
-      type: date
-    - JSONPath: .status.startedAt
-      description: The time at which the build was last (re-)started
-      name: Started
-      type: date
-    - JSONPath: .status.duration
-      description: The build last execution duration
-      name: Duration
-      type: string
-    - JSONPath: .status.failure.recovery.attempt
-      description: The number of execution attempts
-      name: Attempts
-      type: integer
+  - JSONPath: .status.phase
+    description: The build phase
+    name: Phase
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: The time at which the build was created
+    name: Age
+    type: date
+  - JSONPath: .status.startedAt
+    description: The time at which the build was last (re-)started
+    name: Started
+    type: date
+  - JSONPath: .status.duration
+    description: The build last execution duration
+    name: Duration
+    type: string
+  - JSONPath: .status.failure.recovery.attempt
+    description: The number of execution attempts
+    name: Attempts
+    type: integer
   group: camel.apache.org
   names:
+    categories:
+    - kamel
+    - camel
     kind: Build
     listKind: BuildList
     plural: builds
     shortNames:
-      - ikb
+    - ikb
     singular: build
-    categories:
-      - kamel
-      - camel
   scope: Namespaced
   subresources:
     status: {}
@@ -150,8 +153,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchFields:
@@ -188,8 +191,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                       type: object
@@ -200,8 +203,8 @@ spec:
                                       format: int32
                                       type: integer
                                   required:
-                                    - preference
-                                    - weight
+                                  - preference
+                                  - weight
                                   type: object
                                 type: array
                               requiredDuringSchedulingIgnoredDuringExecution:
@@ -256,8 +259,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchFields:
@@ -294,14 +297,14 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                       type: object
                                     type: array
                                 required:
-                                  - nodeSelectorTerms
+                                - nodeSelectorTerms
                                 type: object
                             type: object
                           podAffinity:
@@ -370,8 +373,8 @@ spec:
                                                       type: string
                                                     type: array
                                                 required:
-                                                  - key
-                                                  - operator
+                                                - key
+                                                - operator
                                                 type: object
                                               type: array
                                             matchLabels:
@@ -407,7 +410,7 @@ spec:
                                             topologyKey is not allowed.
                                           type: string
                                       required:
-                                        - topologyKey
+                                      - topologyKey
                                       type: object
                                     weight:
                                       description: weight associated with matching
@@ -416,8 +419,8 @@ spec:
                                       format: int32
                                       type: integer
                                   required:
-                                    - podAffinityTerm
-                                    - weight
+                                  - podAffinityTerm
+                                  - weight
                                   type: object
                                 type: array
                               requiredDuringSchedulingIgnoredDuringExecution:
@@ -478,8 +481,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchLabels:
@@ -511,7 +514,7 @@ spec:
                                         Empty topologyKey is not allowed.
                                       type: string
                                   required:
-                                    - topologyKey
+                                  - topologyKey
                                   type: object
                                 type: array
                             type: object
@@ -581,8 +584,8 @@ spec:
                                                       type: string
                                                     type: array
                                                 required:
-                                                  - key
-                                                  - operator
+                                                - key
+                                                - operator
                                                 type: object
                                               type: array
                                             matchLabels:
@@ -618,7 +621,7 @@ spec:
                                             topologyKey is not allowed.
                                           type: string
                                       required:
-                                        - topologyKey
+                                      - topologyKey
                                       type: object
                                     weight:
                                       description: weight associated with matching
@@ -627,8 +630,8 @@ spec:
                                       format: int32
                                       type: integer
                                   required:
-                                    - podAffinityTerm
-                                    - weight
+                                  - podAffinityTerm
+                                  - weight
                                   type: object
                                 type: array
                               requiredDuringSchedulingIgnoredDuringExecution:
@@ -689,8 +692,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchLabels:
@@ -722,7 +725,7 @@ spec:
                                         Empty topologyKey is not allowed.
                                       type: string
                                   required:
-                                    - topologyKey
+                                  - topologyKey
                                   type: object
                                 type: array
                             type: object
@@ -762,7 +765,7 @@ spec:
                                       its key must be defined
                                     type: boolean
                                 required:
-                                  - key
+                                - key
                                 type: object
                               secretKeyRef:
                                 description: Selects a key of a secret.
@@ -782,7 +785,7 @@ spec:
                                       key must be defined
                                     type: boolean
                                 required:
-                                  - key
+                                - key
                                 type: object
                             type: object
                           timeout:
@@ -840,8 +843,8 @@ spec:
                                       version:
                                         type: string
                                     required:
-                                      - artifactId
-                                      - groupId
+                                    - artifactId
+                                    - groupId
                                     type: object
                                   type: array
                                 metadata:
@@ -849,7 +852,7 @@ spec:
                                     type: string
                                   type: object
                               required:
-                                - dependencies
+                              - dependencies
                               type: object
                             type: object
                           dependencies:
@@ -863,8 +866,8 @@ spec:
                                 version:
                                   type: string
                               required:
-                                - artifactId
-                                - groupId
+                              - artifactId
+                              - groupId
                               type: object
                             type: array
                           metadata:
@@ -877,10 +880,10 @@ spec:
                           version:
                             type: string
                         required:
-                          - applicationClass
-                          - dependencies
-                          - provider
-                          - version
+                        - applicationClass
+                        - dependencies
+                        - provider
+                        - version
                         type: object
                       sources:
                         items:
@@ -909,6 +912,16 @@ spec:
                                 that will interpret this source at runtime
                               type: string
                             name:
+                              type: string
+                            property-names:
+                              description: List of property names defined in the source
+                                (e.g. if type is "template")
+                              items:
+                                type: string
+                              type: array
+                            type:
+                              description: Type defines the kind of source described
+                                by this object
                               type: string
                           type: object
                         type: array
@@ -954,8 +967,8 @@ spec:
                                 are mutually exclusive.
                               type: string
                           required:
-                            - mountPath
-                            - name
+                          - mountPath
+                          - name
                           type: object
                         type: array
                       volumes:
@@ -996,7 +1009,7 @@ spec:
                                     in AWS (Amazon EBS volume). More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore'
                                   type: string
                               required:
-                                - volumeID
+                              - volumeID
                               type: object
                             azureDisk:
                               description: AzureDisk represents an Azure Data Disk
@@ -1031,8 +1044,8 @@ spec:
                                     here will force the ReadOnly setting in VolumeMounts.
                                   type: boolean
                               required:
-                                - diskName
-                                - diskURI
+                              - diskName
+                              - diskURI
                               type: object
                             azureFile:
                               description: AzureFile represents an Azure File Service
@@ -1050,8 +1063,8 @@ spec:
                                   description: Share Name
                                   type: string
                               required:
-                                - secretName
-                                - shareName
+                              - secretName
+                              - shareName
                               type: object
                             cephfs:
                               description: CephFS represents a Ceph FS mount on the
@@ -1094,7 +1107,7 @@ spec:
                                     default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
                                   type: string
                               required:
-                                - monitors
+                              - monitors
                               type: object
                             cinder:
                               description: 'Cinder represents a cinder volume attached
@@ -1128,7 +1141,7 @@ spec:
                                     in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
                                   type: string
                               required:
-                                - volumeID
+                              - volumeID
                               type: object
                             configMap:
                               description: ConfigMap represents a configMap that should
@@ -1180,8 +1193,8 @@ spec:
                                           May not start with the string '..'.
                                         type: string
                                     required:
-                                      - key
-                                      - path
+                                    - key
+                                    - path
                                     type: object
                                   type: array
                                 name:
@@ -1240,7 +1253,7 @@ spec:
                                     values.
                                   type: object
                               required:
-                                - driver
+                              - driver
                               type: object
                             downwardAPI:
                               description: DownwardAPI represents downward API about
@@ -1279,7 +1292,7 @@ spec:
                                               in the specified API version.
                                             type: string
                                         required:
-                                          - fieldPath
+                                        - fieldPath
                                         type: object
                                       mode:
                                         description: 'Optional: mode bits to use on
@@ -1310,8 +1323,8 @@ spec:
                                             type: string
                                           divisor:
                                             anyOf:
-                                              - type: integer
-                                              - type: string
+                                            - type: integer
+                                            - type: string
                                             description: Specifies the output format
                                               of the exposed resources, defaults to
                                               "1"
@@ -1321,10 +1334,10 @@ spec:
                                             description: 'Required: resource to select'
                                             type: string
                                         required:
-                                          - resource
+                                        - resource
                                         type: object
                                     required:
-                                      - path
+                                    - path
                                     type: object
                                   type: array
                               type: object
@@ -1340,8 +1353,8 @@ spec:
                                   type: string
                                 sizeLimit:
                                   anyOf:
-                                    - type: integer
-                                    - type: string
+                                  - type: integer
+                                  - type: string
                                   description: 'Total amount of local storage required
                                     for this EmptyDir volume. The size limit is also
                                     applicable for memory medium. The maximum usage
@@ -1431,7 +1444,7 @@ spec:
                                       type: string
                                   type: object
                               required:
-                                - driver
+                              - driver
                               type: object
                             flocker:
                               description: Flocker represents a Flocker volume attached
@@ -1482,7 +1495,7 @@ spec:
                                     info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk'
                                   type: boolean
                               required:
-                                - pdName
+                              - pdName
                               type: object
                             gitRepo:
                               description: 'GitRepo represents a git repository at
@@ -1507,7 +1520,7 @@ spec:
                                   description: Commit hash for the specified revision.
                                   type: string
                               required:
-                                - repository
+                              - repository
                               type: object
                             glusterfs:
                               description: 'Glusterfs represents a Glusterfs mount
@@ -1528,8 +1541,8 @@ spec:
                                     Defaults to false. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod'
                                   type: boolean
                               required:
-                                - endpoints
-                                - path
+                              - endpoints
+                              - path
                               type: object
                             hostPath:
                               description: 'HostPath represents a pre-existing file
@@ -1552,7 +1565,7 @@ spec:
                                     to "" More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath'
                                   type: string
                               required:
-                                - path
+                              - path
                               type: object
                             iscsi:
                               description: 'ISCSI represents an ISCSI Disk resource
@@ -1622,9 +1635,9 @@ spec:
                                     than default (typically TCP ports 860 and 3260).
                                   type: string
                               required:
-                                - iqn
-                                - lun
-                                - targetPortal
+                              - iqn
+                              - lun
+                              - targetPortal
                               type: object
                             name:
                               description: 'Volume''s name. Must be a DNS_LABEL and
@@ -1648,8 +1661,8 @@ spec:
                                     of the NFS server. More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs'
                                   type: string
                               required:
-                                - path
-                                - server
+                              - path
+                              - server
                               type: object
                             persistentVolumeClaim:
                               description: 'PersistentVolumeClaimVolumeSource represents
@@ -1666,7 +1679,7 @@ spec:
                                     VolumeMounts. Default false.
                                   type: boolean
                               required:
-                                - claimName
+                              - claimName
                               type: object
                             photonPersistentDisk:
                               description: PhotonPersistentDisk represents a PhotonController
@@ -1684,7 +1697,7 @@ spec:
                                     persistent disk
                                   type: string
                               required:
-                                - pdID
+                              - pdID
                               type: object
                             portworxVolume:
                               description: PortworxVolume represents a portworx volume
@@ -1705,7 +1718,7 @@ spec:
                                     volume
                                   type: string
                               required:
-                                - volumeID
+                              - volumeID
                               type: object
                             projected:
                               description: Items for all in one resources secrets,
@@ -1772,8 +1785,8 @@ spec:
                                                     '..'.
                                                   type: string
                                               required:
-                                                - key
-                                                - path
+                                              - key
+                                              - path
                                               type: object
                                             type: array
                                           name:
@@ -1816,7 +1829,7 @@ spec:
                                                         API version.
                                                       type: string
                                                   required:
-                                                    - fieldPath
+                                                  - fieldPath
                                                   type: object
                                                 mode:
                                                   description: 'Optional: mode bits
@@ -1854,8 +1867,8 @@ spec:
                                                       type: string
                                                     divisor:
                                                       anyOf:
-                                                        - type: integer
-                                                        - type: string
+                                                      - type: integer
+                                                      - type: string
                                                       description: Specifies the output
                                                         format of the exposed resources,
                                                         defaults to "1"
@@ -1866,10 +1879,10 @@ spec:
                                                         to select'
                                                       type: string
                                                   required:
-                                                    - resource
+                                                  - resource
                                                   type: object
                                               required:
-                                                - path
+                                              - path
                                               type: object
                                             type: array
                                         type: object
@@ -1919,8 +1932,8 @@ spec:
                                                     '..'.
                                                   type: string
                                               required:
-                                                - key
-                                                - path
+                                              - key
+                                              - path
                                               type: object
                                             type: array
                                           name:
@@ -1967,12 +1980,12 @@ spec:
                                               the token into.
                                             type: string
                                         required:
-                                          - path
+                                        - path
                                         type: object
                                     type: object
                                   type: array
                               required:
-                                - sources
+                              - sources
                               type: object
                             quobyte:
                               description: Quobyte represents a Quobyte mount on the
@@ -2008,8 +2021,8 @@ spec:
                                     an already created Quobyte volume by name.
                                   type: string
                               required:
-                                - registry
-                                - volume
+                              - registry
+                              - volume
                               type: object
                             rbd:
                               description: 'RBD represents a Rados Block Device mount
@@ -2065,8 +2078,8 @@ spec:
                                     More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
                                   type: string
                               required:
-                                - image
-                                - monitors
+                              - image
+                              - monitors
                               type: object
                             scaleIO:
                               description: ScaleIO represents a ScaleIO persistent
@@ -2126,9 +2139,9 @@ spec:
                                     this volume source.
                                   type: string
                               required:
-                                - gateway
-                                - secretRef
-                                - system
+                              - gateway
+                              - secretRef
+                              - system
                               type: object
                             secret:
                               description: 'Secret represents a secret that should
@@ -2180,8 +2193,8 @@ spec:
                                           May not start with the string '..'.
                                         type: string
                                     required:
-                                      - key
-                                      - path
+                                    - key
+                                    - path
                                     type: object
                                   type: array
                                 optional:
@@ -2259,10 +2272,10 @@ spec:
                                     vmdk
                                   type: string
                               required:
-                                - volumePath
+                              - volumePath
                               type: object
                           required:
-                            - name
+                          - name
                           type: object
                         type: array
                     type: object
@@ -2333,8 +2346,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchFields:
@@ -2371,8 +2384,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                       type: object
@@ -2383,8 +2396,8 @@ spec:
                                       format: int32
                                       type: integer
                                   required:
-                                    - preference
-                                    - weight
+                                  - preference
+                                  - weight
                                   type: object
                                 type: array
                               requiredDuringSchedulingIgnoredDuringExecution:
@@ -2439,8 +2452,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchFields:
@@ -2477,14 +2490,14 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                       type: object
                                     type: array
                                 required:
-                                  - nodeSelectorTerms
+                                - nodeSelectorTerms
                                 type: object
                             type: object
                           podAffinity:
@@ -2553,8 +2566,8 @@ spec:
                                                       type: string
                                                     type: array
                                                 required:
-                                                  - key
-                                                  - operator
+                                                - key
+                                                - operator
                                                 type: object
                                               type: array
                                             matchLabels:
@@ -2590,7 +2603,7 @@ spec:
                                             topologyKey is not allowed.
                                           type: string
                                       required:
-                                        - topologyKey
+                                      - topologyKey
                                       type: object
                                     weight:
                                       description: weight associated with matching
@@ -2599,8 +2612,8 @@ spec:
                                       format: int32
                                       type: integer
                                   required:
-                                    - podAffinityTerm
-                                    - weight
+                                  - podAffinityTerm
+                                  - weight
                                   type: object
                                 type: array
                               requiredDuringSchedulingIgnoredDuringExecution:
@@ -2661,8 +2674,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchLabels:
@@ -2694,7 +2707,7 @@ spec:
                                         Empty topologyKey is not allowed.
                                       type: string
                                   required:
-                                    - topologyKey
+                                  - topologyKey
                                   type: object
                                 type: array
                             type: object
@@ -2764,8 +2777,8 @@ spec:
                                                       type: string
                                                     type: array
                                                 required:
-                                                  - key
-                                                  - operator
+                                                - key
+                                                - operator
                                                 type: object
                                               type: array
                                             matchLabels:
@@ -2801,7 +2814,7 @@ spec:
                                             topologyKey is not allowed.
                                           type: string
                                       required:
-                                        - topologyKey
+                                      - topologyKey
                                       type: object
                                     weight:
                                       description: weight associated with matching
@@ -2810,8 +2823,8 @@ spec:
                                       format: int32
                                       type: integer
                                   required:
-                                    - podAffinityTerm
-                                    - weight
+                                  - podAffinityTerm
+                                  - weight
                                   type: object
                                 type: array
                               requiredDuringSchedulingIgnoredDuringExecution:
@@ -2872,8 +2885,8 @@ spec:
                                                   type: string
                                                 type: array
                                             required:
-                                              - key
-                                              - operator
+                                            - key
+                                            - operator
                                             type: object
                                           type: array
                                         matchLabels:
@@ -2905,7 +2918,7 @@ spec:
                                         Empty topologyKey is not allowed.
                                       type: string
                                   required:
-                                    - topologyKey
+                                  - topologyKey
                                   type: object
                                 type: array
                             type: object
@@ -2961,7 +2974,7 @@ spec:
                                         its key must be defined
                                       type: boolean
                                   required:
-                                    - key
+                                  - key
                                   type: object
                                 fieldRef:
                                   description: 'Selects a field of the pod: supports
@@ -2978,7 +2991,7 @@ spec:
                                         the specified API version.
                                       type: string
                                   required:
-                                    - fieldPath
+                                  - fieldPath
                                   type: object
                                 resourceFieldRef:
                                   description: 'Selects a resource of the container:
@@ -2993,8 +3006,8 @@ spec:
                                       type: string
                                     divisor:
                                       anyOf:
-                                        - type: integer
-                                        - type: string
+                                      - type: integer
+                                      - type: string
                                       description: Specifies the output format of
                                         the exposed resources, defaults to "1"
                                       pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
@@ -3003,7 +3016,7 @@ spec:
                                       description: 'Required: resource to select'
                                       type: string
                                   required:
-                                    - resource
+                                  - resource
                                   type: object
                                 secretKeyRef:
                                   description: Selects a key of a secret in the pod's
@@ -3024,11 +3037,11 @@ spec:
                                         key must be defined
                                       type: boolean
                                   required:
-                                    - key
+                                  - key
                                   type: object
                               type: object
                           required:
-                            - name
+                          - name
                           type: object
                         type: array
                       image:
@@ -3199,8 +3212,8 @@ spec:
                                 are mutually exclusive.
                               type: string
                           required:
-                            - mountPath
-                            - name
+                          - mountPath
+                          - name
                           type: object
                         type: array
                       volumes:
@@ -3241,7 +3254,7 @@ spec:
                                     in AWS (Amazon EBS volume). More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore'
                                   type: string
                               required:
-                                - volumeID
+                              - volumeID
                               type: object
                             azureDisk:
                               description: AzureDisk represents an Azure Data Disk
@@ -3276,8 +3289,8 @@ spec:
                                     here will force the ReadOnly setting in VolumeMounts.
                                   type: boolean
                               required:
-                                - diskName
-                                - diskURI
+                              - diskName
+                              - diskURI
                               type: object
                             azureFile:
                               description: AzureFile represents an Azure File Service
@@ -3295,8 +3308,8 @@ spec:
                                   description: Share Name
                                   type: string
                               required:
-                                - secretName
-                                - shareName
+                              - secretName
+                              - shareName
                               type: object
                             cephfs:
                               description: CephFS represents a Ceph FS mount on the
@@ -3339,7 +3352,7 @@ spec:
                                     default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
                                   type: string
                               required:
-                                - monitors
+                              - monitors
                               type: object
                             cinder:
                               description: 'Cinder represents a cinder volume attached
@@ -3373,7 +3386,7 @@ spec:
                                     in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md'
                                   type: string
                               required:
-                                - volumeID
+                              - volumeID
                               type: object
                             configMap:
                               description: ConfigMap represents a configMap that should
@@ -3425,8 +3438,8 @@ spec:
                                           May not start with the string '..'.
                                         type: string
                                     required:
-                                      - key
-                                      - path
+                                    - key
+                                    - path
                                     type: object
                                   type: array
                                 name:
@@ -3485,7 +3498,7 @@ spec:
                                     values.
                                   type: object
                               required:
-                                - driver
+                              - driver
                               type: object
                             downwardAPI:
                               description: DownwardAPI represents downward API about
@@ -3524,7 +3537,7 @@ spec:
                                               in the specified API version.
                                             type: string
                                         required:
-                                          - fieldPath
+                                        - fieldPath
                                         type: object
                                       mode:
                                         description: 'Optional: mode bits to use on
@@ -3555,8 +3568,8 @@ spec:
                                             type: string
                                           divisor:
                                             anyOf:
-                                              - type: integer
-                                              - type: string
+                                            - type: integer
+                                            - type: string
                                             description: Specifies the output format
                                               of the exposed resources, defaults to
                                               "1"
@@ -3566,10 +3579,10 @@ spec:
                                             description: 'Required: resource to select'
                                             type: string
                                         required:
-                                          - resource
+                                        - resource
                                         type: object
                                     required:
-                                      - path
+                                    - path
                                     type: object
                                   type: array
                               type: object
@@ -3585,8 +3598,8 @@ spec:
                                   type: string
                                 sizeLimit:
                                   anyOf:
-                                    - type: integer
-                                    - type: string
+                                  - type: integer
+                                  - type: string
                                   description: 'Total amount of local storage required
                                     for this EmptyDir volume. The size limit is also
                                     applicable for memory medium. The maximum usage
@@ -3676,7 +3689,7 @@ spec:
                                       type: string
                                   type: object
                               required:
-                                - driver
+                              - driver
                               type: object
                             flocker:
                               description: Flocker represents a Flocker volume attached
@@ -3727,7 +3740,7 @@ spec:
                                     info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk'
                                   type: boolean
                               required:
-                                - pdName
+                              - pdName
                               type: object
                             gitRepo:
                               description: 'GitRepo represents a git repository at
@@ -3752,7 +3765,7 @@ spec:
                                   description: Commit hash for the specified revision.
                                   type: string
                               required:
-                                - repository
+                              - repository
                               type: object
                             glusterfs:
                               description: 'Glusterfs represents a Glusterfs mount
@@ -3773,8 +3786,8 @@ spec:
                                     Defaults to false. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod'
                                   type: boolean
                               required:
-                                - endpoints
-                                - path
+                              - endpoints
+                              - path
                               type: object
                             hostPath:
                               description: 'HostPath represents a pre-existing file
@@ -3797,7 +3810,7 @@ spec:
                                     to "" More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath'
                                   type: string
                               required:
-                                - path
+                              - path
                               type: object
                             iscsi:
                               description: 'ISCSI represents an ISCSI Disk resource
@@ -3867,9 +3880,9 @@ spec:
                                     than default (typically TCP ports 860 and 3260).
                                   type: string
                               required:
-                                - iqn
-                                - lun
-                                - targetPortal
+                              - iqn
+                              - lun
+                              - targetPortal
                               type: object
                             name:
                               description: 'Volume''s name. Must be a DNS_LABEL and
@@ -3893,8 +3906,8 @@ spec:
                                     of the NFS server. More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs'
                                   type: string
                               required:
-                                - path
-                                - server
+                              - path
+                              - server
                               type: object
                             persistentVolumeClaim:
                               description: 'PersistentVolumeClaimVolumeSource represents
@@ -3911,7 +3924,7 @@ spec:
                                     VolumeMounts. Default false.
                                   type: boolean
                               required:
-                                - claimName
+                              - claimName
                               type: object
                             photonPersistentDisk:
                               description: PhotonPersistentDisk represents a PhotonController
@@ -3929,7 +3942,7 @@ spec:
                                     persistent disk
                                   type: string
                               required:
-                                - pdID
+                              - pdID
                               type: object
                             portworxVolume:
                               description: PortworxVolume represents a portworx volume
@@ -3950,7 +3963,7 @@ spec:
                                     volume
                                   type: string
                               required:
-                                - volumeID
+                              - volumeID
                               type: object
                             projected:
                               description: Items for all in one resources secrets,
@@ -4017,8 +4030,8 @@ spec:
                                                     '..'.
                                                   type: string
                                               required:
-                                                - key
-                                                - path
+                                              - key
+                                              - path
                                               type: object
                                             type: array
                                           name:
@@ -4061,7 +4074,7 @@ spec:
                                                         API version.
                                                       type: string
                                                   required:
-                                                    - fieldPath
+                                                  - fieldPath
                                                   type: object
                                                 mode:
                                                   description: 'Optional: mode bits
@@ -4099,8 +4112,8 @@ spec:
                                                       type: string
                                                     divisor:
                                                       anyOf:
-                                                        - type: integer
-                                                        - type: string
+                                                      - type: integer
+                                                      - type: string
                                                       description: Specifies the output
                                                         format of the exposed resources,
                                                         defaults to "1"
@@ -4111,10 +4124,10 @@ spec:
                                                         to select'
                                                       type: string
                                                   required:
-                                                    - resource
+                                                  - resource
                                                   type: object
                                               required:
-                                                - path
+                                              - path
                                               type: object
                                             type: array
                                         type: object
@@ -4164,8 +4177,8 @@ spec:
                                                     '..'.
                                                   type: string
                                               required:
-                                                - key
-                                                - path
+                                              - key
+                                              - path
                                               type: object
                                             type: array
                                           name:
@@ -4212,12 +4225,12 @@ spec:
                                               the token into.
                                             type: string
                                         required:
-                                          - path
+                                        - path
                                         type: object
                                     type: object
                                   type: array
                               required:
-                                - sources
+                              - sources
                               type: object
                             quobyte:
                               description: Quobyte represents a Quobyte mount on the
@@ -4253,8 +4266,8 @@ spec:
                                     an already created Quobyte volume by name.
                                   type: string
                               required:
-                                - registry
-                                - volume
+                              - registry
+                              - volume
                               type: object
                             rbd:
                               description: 'RBD represents a Rados Block Device mount
@@ -4310,8 +4323,8 @@ spec:
                                     More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
                                   type: string
                               required:
-                                - image
-                                - monitors
+                              - image
+                              - monitors
                               type: object
                             scaleIO:
                               description: ScaleIO represents a ScaleIO persistent
@@ -4371,9 +4384,9 @@ spec:
                                     this volume source.
                                   type: string
                               required:
-                                - gateway
-                                - secretRef
-                                - system
+                              - gateway
+                              - secretRef
+                              - system
                               type: object
                             secret:
                               description: 'Secret represents a secret that should
@@ -4425,8 +4438,8 @@ spec:
                                           May not start with the string '..'.
                                         type: string
                                     required:
-                                      - key
-                                      - path
+                                    - key
+                                    - path
                                     type: object
                                   type: array
                                 optional:
@@ -4504,10 +4517,10 @@ spec:
                                     vmdk
                                   type: string
                               required:
-                                - volumePath
+                              - volumePath
                               type: object
                           required:
-                            - name
+                          - name
                           type: object
                         type: array
                       workingDir:
@@ -4532,7 +4545,7 @@ spec:
                   target:
                     type: string
                 required:
-                  - id
+                - id
                 type: object
               type: array
             baseImage:
@@ -4565,8 +4578,8 @@ spec:
                     description: Type of integration condition.
                     type: string
                 required:
-                  - status
-                  - type
+                - status
+                - type
                 type: object
               type: array
             digest:
@@ -4593,16 +4606,16 @@ spec:
                       format: date-time
                       type: string
                   required:
-                    - attempt
-                    - attemptMax
+                  - attempt
+                  - attemptMax
                   type: object
                 time:
                   format: date-time
                   type: string
               required:
-                - reason
-                - recovery
-                - time
+              - reason
+              - recovery
+              - time
               type: object
             image:
               type: string
@@ -4618,6 +4631,6 @@ spec:
       type: object
   version: v1
   versions:
-    - name: v1
-      served: true
-      storage: true
+  - name: v1
+    served: true
+    storage: true

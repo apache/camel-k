@@ -15,10 +15,54 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 location=$(dirname $0)
-rootdir=$location/../pkg/apis/camel
+apidir=$location/../pkg/apis/camel
 
 echo "Generating CRDs..."
 
-cd $rootdir
-go run sigs.k8s.io/controller-tools/cmd/controller-gen crd paths=./... output:crd:dir=../../../deploy/crds crd:crdVersions=v1beta1
+cd $apidir
+go run sigs.k8s.io/controller-tools/cmd/controller-gen crd paths=./... output:crd:artifacts:config=false output:crd:dir=../../../deploy/crds crd:crdVersions=v1beta1
+
+# cleanup
+rm -r ./config
+
+# to root
+cd ../../../
+
+version=$(make -s get-version | tr '[:upper:]' '[:lower:]')
+echo "Version for OLM: $version"
+
+deploy_crd_file() {
+  source=$1
+
+  for dest in ${@:2}; do
+    cat ./script/headers/yaml.txt > $dest
+    echo "" >> $dest
+    cat $source | sed -n '/^---/,/^status/p;/^status/q' \
+      | sed '1d;$d' \
+      | sed 's/^metadata:/metadata:\n  labels:\n    app: "camel-k"/' >> $dest
+  done
+
+}
+
+deploy_crd() {
+  name=$1
+  plural=$2
+
+  deploy_crd_file ./deploy/crds/camel.apache.org_$plural.yaml \
+    ./deploy/crd-$name.yaml \
+    ./helm/camel-k/crds/crd-$name.yaml \
+    ./deploy/olm-catalog/camel-k-dev/$version/$plural.camel.apache.org.crd.yaml
+}
+
+deploy_crd build builds
+deploy_crd camel-catalog camelcatalogs
+deploy_crd integration integrations
+deploy_crd integration-kit integrationkits
+deploy_crd integration-platform integrationplatforms
+deploy_crd kamelet kamelets
+deploy_crd kamelet-binding kameletbindings
+
+rm -r ./deploy/crds

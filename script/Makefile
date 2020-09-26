@@ -108,7 +108,7 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate: generate-deepcopy generate-client generate-doc
+generate: generate-deepcopy generate-crd generate-client generate-doc
 
 generate-client:
 	./script/gen_client.sh
