@@ -175,7 +175,6 @@
 - fix\(jvm\): Integration do not shutdown gracefully when jvm.print-command is set [\#1558](https://github.com/apache/camel-k/pull/1558) ([astefanutti](https://github.com/astefanutti))
 - fix\(util\): line break after "Monitoring pod ..." message [\#1554](https://github.com/apache/camel-k/pull/1554) ([tadayosi](https://github.com/tadayosi))
 - fix: bug in utility function [\#1553](https://github.com/apache/camel-k/pull/1553) ([nicolaferraro](https://github.com/nicolaferraro))
-- support make install-crc \#1410 [\#1544](https://github.com/apache/camel-k/pull/1544) ([johnpoth](https://github.com/johnpoth))
 - Cannot expose knative endpoints in YAML [\#1540](https://github.com/apache/camel-k/pull/1540) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: add a backport action [\#1531](https://github.com/apache/camel-k/pull/1531) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(doc\): remove redundant '/build' entry in project structure [\#1530](https://github.com/apache/camel-k/pull/1530) ([tadayosi](https://github.com/tadayosi))
@@ -222,6 +221,7 @@
 
 **Merged pull requests:**
 
+- support make install-crc \#1410 [\#1544](https://github.com/apache/camel-k/pull/1544) ([johnpoth](https://github.com/johnpoth))
 -  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - fix: JVM trait overrides other traits JVM arguments [\#1529](https://github.com/apache/camel-k/pull/1529) ([astefanutti](https://github.com/astefanutti))
 - Backport fix for \#1511 in release-1.0.x [\#1520](https://github.com/apache/camel-k/pull/1520) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -398,7 +398,6 @@
 - information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1450: fix servicemonitor roles on direct install [\#1453](https://github.com/apache/camel-k/pull/1453) ([nicolaferraro](https://github.com/nicolaferraro))
 - Helm fix [\#1448](https://github.com/apache/camel-k/pull/1448) ([nicolaferraro](https://github.com/nicolaferraro))
-- Update 3scale.go [\#1439](https://github.com/apache/camel-k/pull/1439) ([rajatdiptabiswas](https://github.com/rajatdiptabiswas))
 
 ## [1.0.0-nightly.202005060045](https://github.com/apache/camel-k/tree/1.0.0-nightly.202005060045) (2020-05-05)
 
@@ -419,6 +418,7 @@
 - Fix \#1367: add more build events [\#1444](https://github.com/apache/camel-k/pull/1444) ([nicolaferraro](https://github.com/nicolaferraro))
 - Partially Fixes Camel 14995: generates master and 3/threescale traits docs. [\#1441](https://github.com/apache/camel-k/pull/1441) ([djencks](https://github.com/djencks))
 - Fixes CAMEL-14993 generate traits table with Antora, etc. [\#1440](https://github.com/apache/camel-k/pull/1440) ([djencks](https://github.com/djencks))
+- Update 3scale.go [\#1439](https://github.com/apache/camel-k/pull/1439) ([rajatdiptabiswas](https://github.com/rajatdiptabiswas))
 - Add ready condition to the integration [\#1438](https://github.com/apache/camel-k/pull/1438) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1414: upgrade to knative 0.14 and support v1beta1 channels and b… [\#1437](https://github.com/apache/camel-k/pull/1437) ([nicolaferraro](https://github.com/nicolaferraro))
 - Attempt to upgrade knative CI [\#1435](https://github.com/apache/camel-k/pull/1435) ([nicolaferraro](https://github.com/nicolaferraro))
