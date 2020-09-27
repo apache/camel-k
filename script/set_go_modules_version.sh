@@ -29,7 +29,13 @@ target_tag=v$target_version
 api_rule="s/github.com\/apache\/camel-k\/pkg\/apis\/camel [A-Za-z0-9\.\-]+.*$/github.com\/apache\/camel-k\/pkg\/apis\/camel $target_tag/"
 client_rule="s/github.com\/apache\/camel-k\/pkg\/client\/camel [A-Za-z0-9\.\-]+.*$/github.com\/apache\/camel-k\/pkg\/client\/camel $target_tag/"
 
-sed -i -r "$api_rule" $location/../go.mod
-sed -i -r "$client_rule" $location/../go.mod
-
-sed -i -r "$api_rule" $location/../pkg/client/camel/go.mod
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  sed -i -r "$api_rule" $location/../go.mod
+  sed -i -r "$client_rule" $location/../go.mod
+  sed -i -r "$api_rule" $location/../pkg/client/camel/go.mod
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  sed -i '' -E "$api_rule" $location/../go.mod
+  sed -i '' -E "$client_rule" $location/../go.mod
+  sed -i '' -E "$api_rule" $location/../pkg/client/camel/go.mod
+fi

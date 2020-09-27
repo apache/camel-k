@@ -30,11 +30,22 @@ sanitized_image_name=${image_name//\//\\\/}
 
 for f in $(find $location/../deploy -type f -name "*.yaml" | grep -v olm-catalog);
 do
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    sed -i '' -E "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+  fi
 done
 
 # Update helm chart
-sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
-sed -i -r "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
+  sed -i -r "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  sed -i '' -E "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
+  sed -i '' -E "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
+fi
 
 echo "Camel K version set to: $version and image name to: $image_name"

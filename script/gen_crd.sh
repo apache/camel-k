@@ -40,9 +40,16 @@ deploy_crd_file() {
   for dest in ${@:2}; do
     cat ./script/headers/yaml.txt > $dest
     echo "" >> $dest
-    cat $source | sed -n '/^---/,/^status/p;/^status/q' \
-      | sed '1d;$d' \
-      | sed 's/^metadata:/metadata:\n  labels:\n    app: "camel-k"/' >> $dest
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      cat $source | sed -n '/^---/,/^status/p;/^status/q' \
+        | sed '1d;$d' \
+        | sed 's/^metadata:/metadata:\n  labels:\n    app: "camel-k"/' >> $dest
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+      # Mac OSX
+      cat $source | sed -n '/^---/,/^status/p;/^status/q' \
+        | sed '1d;$d' \
+        | sed $'s/^metadata:/metadata:\\\n  labels:\\\n    app: "camel-k"/' >> $dest
+    fi
   done
 
 }
