@@ -20,6 +20,7 @@
 
 **Merged pull requests:**
 
+- docs: add section describing secret ref in properties files [\#1716](https://github.com/apache/camel-k/pull/1716) ([evanshortiss](https://github.com/evanshortiss))
 - Fix \#1710: auto-generate CRD specification on "generate" task \(and fix Kamelets\) [\#1714](https://github.com/apache/camel-k/pull/1714) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1709: add e2e tests about kamelets [\#1711](https://github.com/apache/camel-k/pull/1711) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Minor\] grammatical/typo changes [\#1705](https://github.com/apache/camel-k/pull/1705) ([PoojaChandak](https://github.com/PoojaChandak))
@@ -175,6 +176,7 @@
 - fix\(jvm\): Integration do not shutdown gracefully when jvm.print-command is set [\#1558](https://github.com/apache/camel-k/pull/1558) ([astefanutti](https://github.com/astefanutti))
 - fix\(util\): line break after "Monitoring pod ..." message [\#1554](https://github.com/apache/camel-k/pull/1554) ([tadayosi](https://github.com/tadayosi))
 - fix: bug in utility function [\#1553](https://github.com/apache/camel-k/pull/1553) ([nicolaferraro](https://github.com/nicolaferraro))
+- support make install-crc \#1410 [\#1544](https://github.com/apache/camel-k/pull/1544) ([johnpoth](https://github.com/johnpoth))
 - Cannot expose knative endpoints in YAML [\#1540](https://github.com/apache/camel-k/pull/1540) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: add a backport action [\#1531](https://github.com/apache/camel-k/pull/1531) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(doc\): remove redundant '/build' entry in project structure [\#1530](https://github.com/apache/camel-k/pull/1530) ([tadayosi](https://github.com/tadayosi))
@@ -221,7 +223,6 @@
 
 **Merged pull requests:**
 
-- support make install-crc \#1410 [\#1544](https://github.com/apache/camel-k/pull/1544) ([johnpoth](https://github.com/johnpoth))
 -  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - fix: JVM trait overrides other traits JVM arguments [\#1529](https://github.com/apache/camel-k/pull/1529) ([astefanutti](https://github.com/astefanutti))
 - Backport fix for \#1511 in release-1.0.x [\#1520](https://github.com/apache/camel-k/pull/1520) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -455,7 +456,6 @@
 - Include checksum when checking for compatible kits [\#1389](https://github.com/apache/camel-k/pull/1389) ([lburgazzoli](https://github.com/lburgazzoli))
 - bug: fix minor repetition of example heading in cron trait [\#1385](https://github.com/apache/camel-k/pull/1385) ([AemieJ](https://github.com/AemieJ))
 - fix \#1382: enable prometheus roles when installing from olm and helm [\#1383](https://github.com/apache/camel-k/pull/1383) ([nicolaferraro](https://github.com/nicolaferraro))
-- Switch to java 11 by default and adapt to runtime 1.3.x [\#1381](https://github.com/apache/camel-k/pull/1381) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1379: make download link available also when installing from operator hub [\#1380](https://github.com/apache/camel-k/pull/1380) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1356: remove namespace resources on uninstall and fix maven-sett… [\#1378](https://github.com/apache/camel-k/pull/1378) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -484,6 +484,7 @@
 
 **Merged pull requests:**
 
+- Switch to java 11 by default and adapt to runtime 1.3.x [\#1381](https://github.com/apache/camel-k/pull/1381) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(build\): fix package\_artifact.sh script call [\#1374](https://github.com/apache/camel-k/pull/1374) ([johnpoth](https://github.com/johnpoth))
 - Add nightly releases [\#1373](https://github.com/apache/camel-k/pull/1373) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1364: only delete direct children of the integration during gc [\#1372](https://github.com/apache/camel-k/pull/1372) ([nicolaferraro](https://github.com/nicolaferraro))
