@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Environment Variables from Secrets [\#1715](https://github.com/apache/camel-k/issues/1715)
 - Salesforce Integration as Knative Serverless Service fails [\#1713](https://github.com/apache/camel-k/issues/1713)
 - Generate CRD schema for Kamelet + KameletBinding [\#1710](https://github.com/apache/camel-k/issues/1710)
 - Add Kamelet integration tests [\#1709](https://github.com/apache/camel-k/issues/1709)
@@ -456,6 +457,7 @@
 - Include checksum when checking for compatible kits [\#1389](https://github.com/apache/camel-k/pull/1389) ([lburgazzoli](https://github.com/lburgazzoli))
 - bug: fix minor repetition of example heading in cron trait [\#1385](https://github.com/apache/camel-k/pull/1385) ([AemieJ](https://github.com/AemieJ))
 - fix \#1382: enable prometheus roles when installing from olm and helm [\#1383](https://github.com/apache/camel-k/pull/1383) ([nicolaferraro](https://github.com/nicolaferraro))
+- Switch to java 11 by default and adapt to runtime 1.3.x [\#1381](https://github.com/apache/camel-k/pull/1381) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1379: make download link available also when installing from operator hub [\#1380](https://github.com/apache/camel-k/pull/1380) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1356: remove namespace resources on uninstall and fix maven-sett… [\#1378](https://github.com/apache/camel-k/pull/1378) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -484,7 +486,6 @@
 
 **Merged pull requests:**
 
-- Switch to java 11 by default and adapt to runtime 1.3.x [\#1381](https://github.com/apache/camel-k/pull/1381) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(build\): fix package\_artifact.sh script call [\#1374](https://github.com/apache/camel-k/pull/1374) ([johnpoth](https://github.com/johnpoth))
 - Add nightly releases [\#1373](https://github.com/apache/camel-k/pull/1373) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1364: only delete direct children of the integration during gc [\#1372](https://github.com/apache/camel-k/pull/1372) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1189,6 +1190,7 @@
 - context with status error should not be included when looking up suitable context for an integration [\#585](https://github.com/apache/camel-k/pull/585) ([lburgazzoli](https://github.com/lburgazzoli))
 - Split builder from operator [\#583](https://github.com/apache/camel-k/pull/583) ([astefanutti](https://github.com/astefanutti))
 - Add log4j-slf4j-impl as runtime dependency in default project build [\#578](https://github.com/apache/camel-k/pull/578) ([astefanutti](https://github.com/astefanutti))
+- knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.2](https://github.com/apache/camel-k/tree/0.3.2) (2019-03-26)
 
@@ -1212,7 +1214,6 @@
 - chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 - allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
-- knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
 - dependencies: add support for boms [\#565](https://github.com/apache/camel-k/pull/565) ([lburgazzoli](https://github.com/lburgazzoli))
 - Upgrade Operator SDK to version 0.6.0 [\#562](https://github.com/apache/camel-k/pull/562) ([astefanutti](https://github.com/astefanutti))
 
