@@ -6,10 +6,12 @@
 
 **Closed issues:**
 
+- Thread blocked calling knative REST [\#1720](https://github.com/apache/camel-k/issues/1720)
 - Environment Variables from Secrets [\#1715](https://github.com/apache/camel-k/issues/1715)
 - Salesforce Integration as Knative Serverless Service fails [\#1713](https://github.com/apache/camel-k/issues/1713)
 - Generate CRD schema for Kamelet + KameletBinding [\#1710](https://github.com/apache/camel-k/issues/1710)
 - Add Kamelet integration tests [\#1709](https://github.com/apache/camel-k/issues/1709)
+- Does camel-k plan to provide Java SDK client Calls? [\#1708](https://github.com/apache/camel-k/issues/1708)
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
@@ -1190,7 +1192,6 @@
 - context with status error should not be included when looking up suitable context for an integration [\#585](https://github.com/apache/camel-k/pull/585) ([lburgazzoli](https://github.com/lburgazzoli))
 - Split builder from operator [\#583](https://github.com/apache/camel-k/pull/583) ([astefanutti](https://github.com/astefanutti))
 - Add log4j-slf4j-impl as runtime dependency in default project build [\#578](https://github.com/apache/camel-k/pull/578) ([astefanutti](https://github.com/astefanutti))
-- knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.2](https://github.com/apache/camel-k/tree/0.3.2) (2019-03-26)
 
@@ -1214,6 +1215,7 @@
 - chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 - allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
+- knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
 - dependencies: add support for boms [\#565](https://github.com/apache/camel-k/pull/565) ([lburgazzoli](https://github.com/lburgazzoli))
 - Upgrade Operator SDK to version 0.6.0 [\#562](https://github.com/apache/camel-k/pull/562) ([astefanutti](https://github.com/astefanutti))
 
