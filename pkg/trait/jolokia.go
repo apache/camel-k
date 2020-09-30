@@ -85,9 +85,17 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		// Add the Camel management and Jolokia agent dependencies
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+
+		switch e.CamelCatalog.Runtime.Provider {
+		case v1.RuntimeProviderQuarkus:
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-management")
+		case v1.RuntimeProviderMain:
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
+		}
+
 		// TODO: We may want to make the Jolokia version configurable
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia/jolokia-jvm:jar:agent:1.6.2")
+
 		return nil
 	}
 
