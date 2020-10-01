@@ -47,7 +47,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	}
 
 	cmd.Flags().Bool("skip-operator", false, "Do not uninstall the Camel K Operator in the current namespace")
-	cmd.Flags().Bool("skip-crd", true, "Do not uninstall the Camel-k Custom Resource Definitions (CRD)")
+	cmd.Flags().Bool("skip-crd", true, "Do not uninstall the Camel K Custom Resource Definitions (CRD)")
 	cmd.Flags().Bool("skip-role-bindings", false, "Do not uninstall the Camel K Role Bindings in the current namespace")
 	cmd.Flags().Bool("skip-roles", false, "Do not uninstall the Camel K Roles in the current namespace")
 	cmd.Flags().Bool("skip-cluster-roles", true, "Do not uninstall the Camel K Cluster Roles")
@@ -60,7 +60,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().String("olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
 	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines "+
 		"global scope for the operator (used in combination with the --global flag)")
-	cmd.Flags().Bool("all", false, "Do uninstall all Camel-K resources")
+	cmd.Flags().Bool("all", false, "Do uninstall all Camel K resources")
 
 	return &cmd, &options
 }
