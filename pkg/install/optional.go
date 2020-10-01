@@ -19,13 +19,14 @@ package install
 
 import (
 	"context"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/go-logr/logr"
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong
-func OperatorStartupOptionalTools(ctx context.Context, c client.Client, log logr.Logger) {
+func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, log logr.Logger) {
 
 	// Try to register the OpenShift CLI Download link if possible
 	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
@@ -41,6 +42,14 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, log logr
 		if err := installClusterRole(ctx, c, nil); err != nil {
 			log.Info("Cannot install user cluster role: skipping.")
 			log.V(8).Info("Error while installing user cluster role", "error", err)
+		}
+	}
+
+	// Try to install Kamelet Catalog automatically if operator is namespace scoped
+	if namespace != "" && !strings.Contains(namespace, ",") {
+		if err := KameletCatalog(ctx, c, namespace); err != nil {
+			log.Info("Cannot install bundled Kamelet Catalog: skipping.")
+			log.V(8).Info("Error while installing bundled Kamelet Catalog", "error", err)
 		}
 	}
 
