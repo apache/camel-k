@@ -41,9 +41,19 @@ done
 
 for f in $(find ${olm_catalog}/camel-k-dev -type f);
 do
-  sed -i 's/-SNAPSHOT//g' $f
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sed -i 's/-SNAPSHOT//g' $f
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    sed -i '' 's/-SNAPSHOT//g' $f
+  fi
 done
 for f in $(find ${olm_catalog}/camel-k-dev -type f);
 do
-  sed -i 's/-snapshot//g' $f
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sed -i 's/-snapshot//g' $f
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    sed -i '' 's/-snapshot//g' $f
+  fi
 done
