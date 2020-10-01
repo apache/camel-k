@@ -55,6 +55,11 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		}
 	}
 
+	// Kamelet Catalog installed on platform reconciliation for cases where users install a global operator
+	if err := install.KameletCatalog(ctx, action.client, platform.Namespace); err != nil {
+		return nil, err
+	}
+
 	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 
 	return platform, nil

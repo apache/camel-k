@@ -71,6 +71,14 @@ func TemplateResource(name string, params interface{}) (string, error) {
 	return buf.String(), nil
 }
 
+// DirExists tells if a directory exists and can be listed for files
+func DirExists(dirName string) bool {
+	if _, err := assets.Open(dirName); err != nil {
+		return false
+	}
+	return true
+}
+
 // Resources lists all file names in the given path (starts with '/')
 func Resources(dirName string) []string {
 	dir, err := assets.Open(dirName)

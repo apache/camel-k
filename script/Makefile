@@ -32,6 +32,11 @@ STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
 STAGING_RUNTIME_REPO :=
 
+# Define here the repo containing the default Kamelet catalog (if any)
+KAMELET_CATALOG_REPO :=
+# Optional branch for the default Kamelet catalog
+KAMELET_CATALOG_REPO_BRANCH :=
+
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
 PACKAGE_ARTIFACTS_STRATEGY := copy
@@ -142,10 +147,13 @@ test-builder: build
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
-build-resources:
+build-resources: bundle-kamelets
 	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-main.yaml -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
 	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-quarkus.yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
 	./script/embed_resources.sh deploy
+
+bundle-kamelets:
+	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_BRANCH)
 
 build-submodules:
 	./script/build_submodules.sh
@@ -261,4 +269,4 @@ get-staging-repo:
 get-version:
 	@echo $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets

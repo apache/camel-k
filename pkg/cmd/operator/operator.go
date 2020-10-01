@@ -149,7 +149,7 @@ func Run() {
 	// Try to register the OpenShift CLI Download link if possible
 	installCtx, installCancel := context.WithTimeout(context.TODO(), 1*time.Minute)
 	defer installCancel()
-	install.OperatorStartupOptionalTools(installCtx, c, log)
+	install.OperatorStartupOptionalTools(installCtx, c, namespace, log)
 
 	// Setup all Controllers
 	if err := controller.AddToManager(mgr); err != nil {
