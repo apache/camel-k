@@ -18,6 +18,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+	"fmt"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -135,6 +138,24 @@ func (in *KameletBindingStatus) RemoveCondition(condType KameletBindingCondition
 	}
 
 	in.Conditions = newConditions
+}
+
+// GetPropertyMap returns the EndpointProperties as map
+func (p EndpointProperties) GetPropertyMap() (map[string]string, error) {
+	if len(p.RawMessage) == 0 {
+		return nil, nil
+	}
+
+	// Convert json property values to objects before getting their string representation
+	var props map[string]interface{}
+	if err := json.Unmarshal(p.RawMessage, &props); err != nil {
+		return nil, err
+	}
+	stringProps := make(map[string]string, len(props))
+	for k, v := range props {
+		stringProps[k] = fmt.Sprintf("%v", v)
+	}
+	return stringProps, nil
 }
 
 // NewKameletBinding --

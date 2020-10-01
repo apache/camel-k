@@ -1,4 +1,4 @@
-// camel-k: language=groovy dependency=mvn:org.apache.camel.k:camel-kamelet:1.5.1-SNAPSHOT
+// camel-k: language=groovy
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,5 +17,7 @@
  * limitations under the License.
  */
 
-from('knative:channel/messages')
-    .log('${body}')
+from('kamelet:timer-source?message=Camel+K')
+  .to("kamelet:echo-sink")
+  .to("kamelet:echo-sink?prefix=nice+")
+  .log('${body}')

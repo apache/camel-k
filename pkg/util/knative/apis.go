@@ -176,6 +176,36 @@ func FillMissingReferenceData(serviceType knativev1.CamelServiceType, ref v1.Obj
 	return refs
 }
 
+func GetServiceType(ref v1.ObjectReference) (*knativev1.CamelServiceType, error) {
+	refGV, err := schema.ParseGroupVersion(ref.APIVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, c := range KnownChannelKinds {
+		if c.Group == refGV.Group && c.Kind == ref.Kind {
+			channelType := knativev1.CamelServiceTypeChannel
+			return &channelType, nil
+		}
+	}
+
+	for _, c := range KnownBrokerKinds {
+		if c.Group == refGV.Group && c.Kind == ref.Kind {
+			eventType := knativev1.CamelServiceTypeEvent
+			return &eventType, nil
+		}
+	}
+
+	for _, c := range KnownEndpointKinds {
+		if c.Group == refGV.Group && c.Kind == ref.Kind {
+			endpointType := knativev1.CamelServiceTypeEndpoint
+			return &endpointType, nil
+		}
+	}
+
+	return nil, nil
+}
+
 // nolint: gocritic
 func fillMissingReferenceDataWith(serviceTypes []GroupVersionKindResource, ref v1.ObjectReference) []v1.ObjectReference {
 	list := make([]v1.ObjectReference, 0)
