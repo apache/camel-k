@@ -23,6 +23,7 @@
 
 **Merged pull requests:**
 
+- \[fix\] Use in-place editing [\#1722](https://github.com/apache/camel-k/pull/1722) ([llowinge](https://github.com/llowinge))
 - docs: add section describing secret ref in properties files [\#1716](https://github.com/apache/camel-k/pull/1716) ([evanshortiss](https://github.com/evanshortiss))
 - Fix \#1710: auto-generate CRD specification on "generate" task \(and fix Kamelets\) [\#1714](https://github.com/apache/camel-k/pull/1714) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1709: add e2e tests about kamelets [\#1711](https://github.com/apache/camel-k/pull/1711) ([nicolaferraro](https://github.com/nicolaferraro))
