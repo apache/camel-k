@@ -21,15 +21,16 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -240,6 +241,21 @@ func (t *knativeTrait) Apply(e *Environment) error {
 		if t.Configuration != "" {
 			if err := env.Deserialize(t.Configuration); err != nil {
 				return err
+			}
+		}
+
+		// Convert deprecated Host and Port fields to URL field
+		// Can be removed once CamelSource controller migrate to the new API
+		for i, service := range env.Services {
+			if service.URL == "" {
+				URL := "http://" + service.Host
+				if service.Port != nil {
+					URL = URL + ":" + strconv.Itoa(*service.Port)
+				}
+				service.URL = URL
+				service.Host = ""
+				service.Port = nil
+				env.Services[i] = service
 			}
 		}
 
