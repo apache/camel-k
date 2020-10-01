@@ -25,7 +25,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/api/rbac/v1beta1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -81,9 +81,9 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 			}
 
 			// Turn Role & RoleBinding into their equivalent cluster types
-			if r, ok := o.(*v1beta1.Role); ok {
+			if r, ok := o.(*rbacv1.Role); ok {
 				if strings.HasPrefix(r.Name, "camel-k-operator") {
-					o = &v1beta1.ClusterRole{
+					o = &rbacv1.ClusterRole{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: cfg.Namespace,
 							Name:      r.Name,
@@ -93,17 +93,17 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 				}
 			}
 
-			if rb, ok := o.(*v1beta1.RoleBinding); ok {
+			if rb, ok := o.(*rbacv1.RoleBinding); ok {
 				if strings.HasPrefix(rb.Name, "camel-k-operator") {
 					rb.Subjects[0].Namespace = cfg.Namespace
 
-					o = &v1beta1.ClusterRoleBinding{
+					o = &rbacv1.ClusterRoleBinding{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: cfg.Namespace,
 							Name:      rb.Name,
 						},
 						Subjects: rb.Subjects,
-						RoleRef: v1beta1.RoleRef{
+						RoleRef: rbacv1.RoleRef{
 							APIGroup: rb.RoleRef.APIGroup,
 							Kind:     "ClusterRole",
 							Name:     rb.RoleRef.Name,
