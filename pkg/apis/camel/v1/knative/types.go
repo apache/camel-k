@@ -33,11 +33,14 @@ func NewCamelEnvironment() CamelEnvironment {
 
 // CamelServiceDefinition defines the parameters to connect to Knative service. It's also used for exposed services
 type CamelServiceDefinition struct {
-	ServiceType CamelServiceType  `json:"type"`
-	Name        string            `json:"name"`
-	Host        string            `json:"host,omitempty"`
-	Port        *int              `json:"port,omitempty"`
-	Metadata    map[string]string `json:"metadata,omitempty"`
+	ServiceType CamelServiceType `json:"type"`
+	Name        string           `json:"name"`
+	// Deprecated: use URL instead
+	Host string `json:"host,omitempty"`
+	// Deprecated: use URL instead
+	Port     *int              `json:"port,omitempty"`
+	URL      string            `json:"url,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // CamelEndpointKind --
@@ -73,11 +76,6 @@ func (s CamelServiceType) ResourceDescription(subject string) string {
 // Meta Options
 const (
 	CamelMetaServicePath = "service.path"
-	CamelMetaServiceID   = "service.id"
-	CamelMetaServiceName = "service.name"
-	CamelMetaServiceHost = "service.host"
-	CamelMetaServicePort = "service.port"
-	CamelMetaServiceZone = "service.zone"
 
 	CamelMetaKnativeKind       = "knative.kind"
 	CamelMetaKnativeAPIVersion = "knative.apiVersion"

@@ -20,36 +20,21 @@ package knative
 import (
 	"encoding/json"
 	"net/url"
-	"strconv"
 )
 
 // BuildCamelServiceDefinition creates a CamelServiceDefinition from a given URL
 func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType,
 	serviceURL url.URL, apiVersion, kind string) (CamelServiceDefinition, error) {
 
-	port := 80
-
 	definition := CamelServiceDefinition{
 		Name:        name,
-		Host:        serviceURL.Host,
-		Port:        &port,
+		URL:         serviceURL.String(),
 		ServiceType: serviceType,
 		Metadata: map[string]string{
 			CamelMetaEndpointKind:      string(endpointKind),
 			CamelMetaKnativeAPIVersion: apiVersion,
 			CamelMetaKnativeKind:       kind,
 		},
-	}
-	portStr := serviceURL.Port()
-	if portStr != "" {
-		port, err := strconv.Atoi(portStr)
-		if err != nil {
-			return CamelServiceDefinition{}, err
-		}
-		definition.Port = &port
-	}
-	if serviceURL.Path != "" {
-		definition.Metadata[CamelMetaServicePath] = serviceURL.Path
 	}
 
 	return definition, nil

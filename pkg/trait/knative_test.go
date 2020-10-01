@@ -123,28 +123,28 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 
 	cSource1 := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1beta1", "Channel")
 	assert.NotNil(t, cSource1)
-	assert.Empty(t, cSource1.Host)
+	assert.Empty(t, cSource1.URL)
 
 	cSink1 := ne.FindService("channel-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1beta1", "Channel")
 	assert.NotNil(t, cSink1)
-	assert.Equal(t, "channel-sink-1.host", cSink1.Host)
+	assert.Equal(t, "http://channel-sink-1.host/", cSink1.URL)
 
 	eSource1 := ne.FindService("endpoint-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSource1)
-	assert.Empty(t, eSource1.Host)
+	assert.Empty(t, eSource1.URL)
 
 	eSink1 := ne.FindService("endpoint-sink-1", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSink1)
-	assert.Equal(t, "endpoint-sink-1.host", eSink1.Host)
+	assert.Equal(t, "http://endpoint-sink-1.host/", eSink1.URL)
 	eSink2 := ne.FindService("endpoint-sink-2", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, eSink2)
-	assert.Equal(t, "endpoint-sink-2.host", eSink2.Host)
+	assert.Equal(t, "http://endpoint-sink-2.host/", eSink2.URL)
 
 	eEventSource := ne.FindService("default", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, "eventing.knative.dev/v1beta1", "Broker")
 	assert.NotNil(t, eEventSource)
 	eEventSink := ne.FindService("default", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEvent, "eventing.knative.dev/v1beta1", "Broker")
 	assert.NotNil(t, eEventSink)
-	assert.Equal(t, "broker-default.host", eEventSink.Host)
+	assert.Equal(t, "http://broker-default.host/", eEventSink.URL)
 }
 
 func TestKnativeEnvConfigurationFromSource(t *testing.T) {
@@ -243,8 +243,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 
 	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, source)
-	assert.Empty(t, source.Host)
-	assert.Nil(t, source.Port)
+	assert.Empty(t, source.URL)
 	assert.Empty(t, source.Metadata[knativeapi.CamelMetaKnativeReply])
 
 	channel := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "", "")
