@@ -20,14 +20,11 @@ package kameletbinding
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"net/url"
-	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/uri"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -61,40 +58,33 @@ func (action *initializeAction) Handle(ctx context.Context, kameletbinding *v1al
 		it.Spec = *kameletbinding.Spec.Integration.DeepCopy()
 	}
 
-	fromURI, err := getEndpointURI(kameletbinding.Spec.Source)
+	from, err := bindings.Translate(v1alpha1.EndpointTypeSource, kameletbinding.Spec.Source)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine source URI")
 	}
-	toURI, err := getEndpointURI(kameletbinding.Spec.Sink)
+	to, err := bindings.Translate(v1alpha1.EndpointTypeSink, kameletbinding.Spec.Sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
 
-	// TODO remove this after making sinkbinding the default (https://github.com/apache/camel-k/issues/1654)
-	if strings.HasPrefix(toURI, "knative:") {
-		knativeConfig := map[string]interface{}{
-			"sinkBinding": true,
-		}
-		knativeConfigJSON, err := json.Marshal(knativeConfig)
-		if err != nil {
-			return nil, err
-		}
+	if len(from.Traits) > 0 || len(to.Traits) > 0 {
 		if it.Spec.Traits == nil {
 			it.Spec.Traits = make(map[string]v1.TraitSpec)
 		}
-		it.Spec.Traits["knative"] = v1.TraitSpec{
-			Configuration: v1.TraitConfiguration{
-				RawMessage: knativeConfigJSON,
-			},
+		for k, v := range from.Traits {
+			it.Spec.Traits[k] = v
+		}
+		for k, v := range to.Traits {
+			it.Spec.Traits[k] = v
 		}
 	}
 
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
-			"uri": fromURI,
+			"uri": from.URI,
 			"steps": []map[string]interface{}{
 				{
-					"to": toURI,
+					"to": to.URI,
 				},
 			},
 		},
@@ -112,57 +102,4 @@ func (action *initializeAction) Handle(ctx context.Context, kameletbinding *v1al
 	target := kameletbinding.DeepCopy()
 	target.Status.Phase = v1alpha1.KameletBindingPhaseCreating
 	return target, nil
-}
-
-func getEndpointURI(e v1alpha1.Endpoint) (string, error) {
-	baseURI, err := getEndpointBaseURI(e)
-	if err != nil {
-		return baseURI, err
-	}
-
-	// Convert json properties to string before using them in URI
-	if len(e.Properties.RawMessage) > 0 {
-		var props map[string]interface{}
-		if err := json.Unmarshal(e.Properties.RawMessage, &props); err != nil {
-			return "", err
-		}
-		stringProps := make(map[string]string, len(props))
-		for k, v := range props {
-			stringProps[k] = fmt.Sprintf("%v", v)
-		}
-		return uri.AppendParameters(baseURI, stringProps), nil
-	}
-
-	return baseURI, nil
-}
-
-func getEndpointBaseURI(e v1alpha1.Endpoint) (string, error) {
-	if err := validateEndpoint(e); err != nil {
-		return "", err
-	}
-
-	// return the URI if explicitly stated
-	if e.URI != nil {
-		return *e.URI, nil
-	}
-
-	// Kamelets are a known type
-	if e.Ref.Kind == v1alpha1.KameletKind {
-		return fmt.Sprintf("kamelet:%s", url.PathEscape(e.Ref.Name)), nil
-	}
-
-	// assume we're using Knative for the time being (Kafka resources may be added in the future)
-	return uri.AppendParameters(fmt.Sprintf("knative:endpoint/%s", url.PathEscape(e.Ref.Name)), map[string]string{
-		"apiVersion": e.Ref.APIVersion,
-		"kind":       e.Ref.Kind,
-	}), nil
-}
-
-func validateEndpoint(e v1alpha1.Endpoint) error {
-	if e.Ref == nil && e.URI == nil {
-		return errors.New("no ref or URI specified in endpoint")
-	} else if e.Ref != nil && e.URI != nil {
-		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
-	}
-	return nil
 }

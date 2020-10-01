@@ -38,12 +38,19 @@ type KameletBindingSpec struct {
 // Endpoint represents a source/sink external entity
 type Endpoint struct {
 	// Ref can be used to declare a Kubernetes resource as source/sink endpoint
-	Ref *metav1.OwnerReference `json:"ref,omitempty"`
+	Ref *corev1.ObjectReference `json:"ref,omitempty"`
 	// URI can alternatively be used to specify the (Camel) endpoint explicitly
 	URI *string `json:"uri,omitempty"`
 	// Properties are a key value representation of endpoint properties
 	Properties EndpointProperties `json:"properties,omitempty"`
 }
+
+type EndpointType string
+
+const (
+	EndpointTypeSource EndpointType = "source"
+	EndpointTypeSink   EndpointType = "sink"
+)
 
 // EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
 // +kubebuilder:validation:Type=object
