@@ -26,6 +26,7 @@ jobs:
   generate_changelog:
     runs-on: ubuntu-latest
     name: Generate changelog for master branch
+    if: github.ref == 'refs/heads/master' && github.repository == 'apache/camel-k'
     steps:
       - uses: actions/checkout@v1
 
