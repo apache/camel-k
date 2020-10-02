@@ -88,7 +88,7 @@ spec:
         - filter:
             simple: "${body} != null"
         - log: "${body}"
-        - to: "direct:{{routeId}}"
+        - to: "kamelet:sink"
 ----
 <1> The Kamelet ID, to be used in integrations that want to leverage the Kamelet
 <2> Annotations such as icon provide additional display features to the Kamelet
@@ -493,10 +493,10 @@ spec:
         - filter:
             simple: "${body} != null"
         - log: "${body}"
-        - to: "direct:{{routeId}}"
+        - to: "kamelet:sink"
 ----
 
-Source and sink flows will connect to the outside route via the `direct:{{routeId}}` endpoint:
+Source and sink flows will connect to the outside route via the `kamelet:source` or `kamelet:sink` special endpoints:
 - A source Kamelet must start **from** `direct:{{routeId}}`
 - A sink Kamelet must contain a call **to** `direct:{{routeId}}`
 

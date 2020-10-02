@@ -34,4 +34,4 @@ spec:
       steps:
         - set-body:
             constant: "{{message}}"
-        - to: "direct:{{routeId}}"
+        - to: "kamelet:sink"
