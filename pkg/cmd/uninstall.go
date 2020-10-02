@@ -50,6 +50,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().Bool("skip-crd", true, "Do not uninstall the Camel K Custom Resource Definitions (CRD)")
 	cmd.Flags().Bool("skip-role-bindings", false, "Do not uninstall the Camel K Role Bindings in the current namespace")
 	cmd.Flags().Bool("skip-roles", false, "Do not uninstall the Camel K Roles in the current namespace")
+	cmd.Flags().Bool("skip-cluster-role-bindings", true, "Do not uninstall the Camel K Cluster Role Bindings")
 	cmd.Flags().Bool("skip-cluster-roles", true, "Do not uninstall the Camel K Cluster Roles")
 	cmd.Flags().Bool("skip-integration-platform", false, "Do not uninstall the Camel K Integration Platform in the current namespace")
 	cmd.Flags().Bool("skip-service-accounts", false, "Do not uninstall the Camel K Service Accounts in the current namespace")
@@ -71,6 +72,7 @@ type uninstallCmdOptions struct {
 	SkipCrd                 bool `mapstructure:"skip-crd"`
 	SkipRoleBindings        bool `mapstructure:"skip-role-bindings"`
 	SkipRoles               bool `mapstructure:"skip-roles"`
+	SkipClusterRoleBindings bool `mapstructure:"skip-cluster-role-bindings"`
 	SkipClusterRoles        bool `mapstructure:"skip-cluster-roles"`
 	SkipIntegrationPlatform bool `mapstructure:"skip-integration-platform"`
 	SkipServiceAccounts     bool `mapstructure:"skip-service-accounts"`
@@ -185,6 +187,16 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) err
 			return err
 		}
 		fmt.Printf("Camel K Custom Resource Definitions removed from cluster\n")
+	}
+
+	if !o.SkipClusterRoleBindings || o.UninstallAll {
+		if err := o.uninstallClusterRoleBindings(c); err != nil {
+			if k8serrors.IsForbidden(err) {
+				return createActionNotAuthorizedError()
+			}
+			return err
+		}
+		fmt.Printf("Camel K Cluster Role Bindings removed from cluster\n")
 	}
 
 	if !o.SkipClusterRoles || o.UninstallAll {
@@ -309,6 +321,24 @@ func (o *uninstallCmdOptions) uninstallClusterRoles(c client.Client) error {
 	return nil
 }
 
+func (o *uninstallCmdOptions) uninstallClusterRoleBindings(c client.Client) error {
+	api := c.RbacV1()
+
+	clusterRoleBindings, err := api.ClusterRoleBindings().List(defaultListOptions)
+	if err != nil {
+		return err
+	}
+
+	for _, clusterRoleBinding := range clusterRoleBindings.Items {
+		err := api.ClusterRoleBindings().Delete(clusterRoleBinding.Name, &metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (o *uninstallCmdOptions) uninstallServiceAccounts(c client.Client) error {
 	api := c.CoreV1()
 
@@ -368,6 +398,6 @@ func (o *uninstallCmdOptions) uninstallConfigMaps(c client.Client) error {
 
 func createActionNotAuthorizedError() error {
 	fmt.Println("Current user is not authorized to remove cluster-wide objects like custom resource definitions or cluster roles")
-	msg := `login as cluster-admin and execute "kamel uninstall" or use flags "--skip-crd --skip-cluster-roles"`
+	msg := `login as cluster-admin and execute "kamel uninstall" or use flags "--skip-crd --skip-cluster-roles --skip-cluster-role-bindings"`
 	return errors.New(msg)
 }
