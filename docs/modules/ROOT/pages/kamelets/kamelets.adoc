@@ -498,8 +498,8 @@ spec:
 
 Source and sink flows will connect to the outside route via the `direct:{{routeId}}` endpoint:
 
-- A source Kamelet must contain a call **to** `direct:{{routeId}}`
-- A sink Kamelet must start **from** `direct:{{routeId}}` 
+- A source Kamelet must contain a call **to** `kamelet:sink`
+- A sink Kamelet must start **from** `kamelet:source` 
 
 Kamelets contain a **single route template** written in YAML DSL, as in the previous example.
 
