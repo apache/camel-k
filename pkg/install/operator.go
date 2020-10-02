@@ -87,6 +87,9 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: cfg.Namespace,
 							Name:      r.Name,
+							Labels: map[string]string{
+								"app": "camel-k",
+							},
 						},
 						Rules: r.Rules,
 					}
@@ -101,6 +104,9 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: cfg.Namespace,
 							Name:      rb.Name,
+							Labels: map[string]string{
+								"app": "camel-k",
+							},
 						},
 						Subjects: rb.Subjects,
 						RoleRef: v1beta1.RoleRef{
