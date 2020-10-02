@@ -2865,6 +2865,16 @@ spec:
       dependencies:
       - groupId: org.apache.camel.k
         artifactId: camel-k-quarkus-kamelet
+    camel-wrap:
+      groupId: org.apache.camel.k
+      artifactId: camel-wrap
+      schemes:
+      - id: wrap
+        http: false
+        passive: false
+      dependencies:
+      - groupId: org.apache.camel.k
+        artifactId: camel-k-quarkus-wrap
   loaders:
     yaml:
       groupId: org.apache.camel.k
