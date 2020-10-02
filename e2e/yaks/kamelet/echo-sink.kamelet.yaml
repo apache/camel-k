@@ -21,7 +21,7 @@ spec:
       mediaType: text/plain
   flow:
     from:
-      uri: "direct:{{routeId}}"
+      uri: "kamelet:source"
       steps:
         - set-body:
             simple: "{{prefix}}${body}"

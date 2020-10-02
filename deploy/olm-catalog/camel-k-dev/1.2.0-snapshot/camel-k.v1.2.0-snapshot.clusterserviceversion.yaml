@@ -120,7 +120,7 @@ metadata:
                   }
                 },
                 {
-                  "to": "direct:{{routeId}}"
+                  "to": "kamelet:sink"
                 }
               ],
               "uri": "timer:tick"
