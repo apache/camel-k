@@ -333,5 +333,4 @@ jobs:
           export CAMEL_K_TEST_IMAGE_NAME=${CAMEL_K_REGISTRY}:5000/apache/camel-k
           export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
 
-          yaks test e2e/yaks/knative
-          yaks test e2e/yaks/knative-sinkbinding
+          yaks test e2e/yaks/common
