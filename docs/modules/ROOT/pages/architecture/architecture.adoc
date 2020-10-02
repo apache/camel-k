@@ -1,13 +1,20 @@
 [[architecture]]
 = Architecture
 
+[[high-level-architecture]]
+== High Level Architecture
 
-image::architecture/camel-k.jpg[Overview]
+NOTE: The following diagram reflects the Camel K architecture as of version 1.1.1
 
-The *Camel K* core platform is based on three concepts:
+image::architecture/camel-k-high-level.svg[Overview]
 
-1. The xref:architecture/operator.adoc[Operator] which is the intelligence that coordinates all the moving parts.
-2. The xref:architecture/runtime.adoc[Runtime] which provides the functionality to run the integration.
+[[concepts]]
+== Concepts
+
+The main *Camel K* platform concepts are:
+
+1. The xref:architecture/operator.adoc[Operator] which is the intelligence that coordinates all the moving parts;
+2. The xref:architecture/runtime.adoc[Runtime] which provides the functionality to run the integration;
 3. The xref:architecture/traits.adoc[Traits] through which the behavior of the operator and the runtime can be customized.
 
 For information on how *Camel K* is able to provide *Sources* e.g. for the Knative platform:
