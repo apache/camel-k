@@ -522,6 +522,15 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - "kafka.strimzi.io"
+          resources:
+          - topics
+          - kafkas
+          verbs:
+          - get
+          - list
+          - watch
         serviceAccountName: camel-k-operator
     strategy: deployment
   installModes:
