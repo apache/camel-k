@@ -37,13 +37,13 @@ func RegisterBindingProvider(bp BindingProvider) {
 }
 
 // Translate execute all chained binding providers, returning the first success or the first error
-func Translate(endpointType v1alpha1.EndpointType, endpoint v1alpha1.Endpoint) (*Binding, error) {
-	if err := validateEndpoint(endpoint); err != nil {
+func Translate(ctx BindingContext, endpointType v1alpha1.EndpointType, endpoint v1alpha1.Endpoint) (*Binding, error) {
+	if err := validateEndpoint(ctx, endpoint); err != nil {
 		return nil, err
 	}
 
 	for _, bp := range bindingProviders {
-		b, err := bp.Translate(endpointType, endpoint)
+		b, err := bp.Translate(ctx, endpointType, endpoint)
 		if b != nil || err != nil {
 			return b, err
 		}
@@ -51,11 +51,14 @@ func Translate(endpointType v1alpha1.EndpointType, endpoint v1alpha1.Endpoint) (
 	return nil, nil
 }
 
-func validateEndpoint(e v1alpha1.Endpoint) error {
+func validateEndpoint(ctx BindingContext, e v1alpha1.Endpoint) error {
 	if e.Ref == nil && e.URI == nil {
 		return errors.New("no ref or URI specified in endpoint")
 	} else if e.Ref != nil && e.URI != nil {
 		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
+	}
+	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
+		return errors.New("cross-namespace references are not allowed in kamelet binding")
 	}
 	return nil
 }

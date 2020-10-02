@@ -18,8 +18,10 @@ limitations under the License.
 package bindings
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/test"
 	"net/url"
 	"testing"
 
@@ -166,7 +168,19 @@ func TestBindings(t *testing.T) {
 
 	for i, tc := range testcases {
 		t.Run(fmt.Sprintf("test-%d-%s", i, tc.uri), func(t *testing.T) {
-			binding, err := Translate(tc.endpointType, tc.endpoint)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			client, err := test.NewFakeClient()
+			assert.NoError(t, err)
+
+			bindingContext := BindingContext{
+				Ctx:       ctx,
+				Client:    client,
+				Namespace: "test",
+			}
+
+			binding, err := Translate(bindingContext, tc.endpointType, tc.endpoint)
 			assert.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)

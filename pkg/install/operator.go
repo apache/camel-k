@@ -159,6 +159,13 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		fmt.Println("Warning: the operator will not be able to create servicemonitors for metrics. Try installing as cluster-admin to allow the creation of servicemonitors.")
 	}
 
+	if errmtr := installStrimziBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
+		if k8serrors.IsAlreadyExists(errmtr) {
+			return errmtr
+		}
+		fmt.Println("Warning: the operator will not be able to lookup strimzi kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
+	}
+
 	return nil
 }
 
@@ -198,6 +205,13 @@ func installServiceMonitors(ctx context.Context, c client.Client, namespace stri
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-role-servicemonitors.yaml",
 		"operator-role-binding-servicemonitors.yaml",
+	)
+}
+
+func installStrimziBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+		"operator-role-strimzi.yaml",
+		"operator-role-binding-strimzi.yaml",
 	)
 }
 

@@ -37,7 +37,7 @@ func (k KnativeRefBindingProvider) ID() string {
 	return "knative-ref"
 }
 
-func (k KnativeRefBindingProvider) Translate(endpointType v1alpha1.EndpointType, e v1alpha1.Endpoint) (*Binding, error) {
+func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointType v1alpha1.EndpointType, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil

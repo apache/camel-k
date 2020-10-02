@@ -120,7 +120,7 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate: generate-deepcopy generate-crd generate-client generate-doc
+generate: generate-deepcopy generate-crd generate-client generate-doc generate-strimzi
 
 generate-client:
 	./script/gen_client.sh
@@ -133,6 +133,10 @@ generate-doc:
 
 generate-deepcopy: controller-gen
 	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
+
+generate-strimzi:
+	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
+	./script/gen_client_strimzi.sh
 
 build: build-resources build-kamel build-compile-integration-tests build-submodules
 
@@ -276,7 +280,7 @@ get-staging-repo:
 get-version:
 	@echo $(VERSION)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets
+.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-strimzi
 
 # find or download controller-gen
 # download controller-gen if necessary

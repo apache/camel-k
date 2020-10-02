@@ -58,11 +58,17 @@ func (action *initializeAction) Handle(ctx context.Context, kameletbinding *v1al
 		it.Spec = *kameletbinding.Spec.Integration.DeepCopy()
 	}
 
-	from, err := bindings.Translate(v1alpha1.EndpointTypeSource, kameletbinding.Spec.Source)
+	bindingContext := bindings.BindingContext{
+		Ctx:       ctx,
+		Client:    action.client,
+		Namespace: it.Namespace,
+	}
+
+	from, err := bindings.Translate(bindingContext, v1alpha1.EndpointTypeSource, kameletbinding.Spec.Source)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine source URI")
 	}
-	to, err := bindings.Translate(v1alpha1.EndpointTypeSink, kameletbinding.Spec.Sink)
+	to, err := bindings.Translate(bindingContext, v1alpha1.EndpointTypeSink, kameletbinding.Spec.Sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}

@@ -234,3 +234,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - "kafka.strimzi.io"
+  resources:
+  - topics
+  - kafkas
+  verbs:
+  - get
+  - list
+  - watch

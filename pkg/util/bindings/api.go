@@ -19,8 +19,10 @@ limitations under the License.
 package bindings
 
 import (
+	"context"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 )
 
 const (
@@ -42,7 +44,13 @@ type BindingProvider interface {
 	// ID returns the name of the binding provider
 	ID() string
 	// Translate does the actual mapping
-	Translate(endpointType v1alpha1.EndpointType, endpoint v1alpha1.Endpoint) (*Binding, error)
+	Translate(ctx BindingContext, endpointType v1alpha1.EndpointType, endpoint v1alpha1.Endpoint) (*Binding, error)
 	// Order returns the relative order of execution of the binding provider
 	Order() int
+}
+
+type BindingContext struct {
+	Ctx       context.Context
+	Client    client.Client
+	Namespace string
 }
