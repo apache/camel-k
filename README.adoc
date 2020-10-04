@@ -35,6 +35,7 @@ the following cluster types:
 - https://camel.apache.org/camel-k/latest/installation/minishift.html[Minishift]
 - https://camel.apache.org/camel-k/latest/installation/gke.html[Google Kubernetes Engine (GKE)]
 - https://camel.apache.org/camel-k/latest/installation/openshift.html[OpenShift]
+- https://camel.apache.org/camel-k/latest/installation/iks.html[IBM Kubernetes Service (IKS)]
 
 Other cluster types (such as OpenShift clusters) should not need prior configuration.
 
