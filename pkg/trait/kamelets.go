@@ -273,7 +273,7 @@ func (t *kameletsTrait) getKameletKeys() []string {
 		if strings.Contains(i, "/") {
 			i = strings.SplitN(i, "/", 2)[0]
 		}
-		if i != "" {
+		if i != "" && v1alpha1.ValidKameletName(i) {
 			util.StringSliceUniqueAdd(&answer, i)
 		}
 	}

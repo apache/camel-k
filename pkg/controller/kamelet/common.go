@@ -12,16 +12,28 @@ import (
 
 func updateStatus(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 	target := kamelet.DeepCopy()
-	target.Status.Phase = v1alpha1.KameletPhaseReady
-	target.Status.SetCondition(
-		v1alpha1.KameletConditionReady,
-		corev1.ConditionTrue,
-		"",
-		"",
-	)
-	if err := recomputeProperties(target); err != nil {
-		return nil, err
+
+	if !v1alpha1.ValidKameletName(kamelet.Name) {
+		target.Status.Phase = v1alpha1.KameletPhaseError
+		target.Status.SetCondition(
+			v1alpha1.KameletConditionReady,
+			corev1.ConditionFalse,
+			v1alpha1.KameletConditionIllegalName,
+			fmt.Sprintf("Kamelet name %q is reserved", kamelet.Name),
+		)
+	} else {
+		target.Status.Phase = v1alpha1.KameletPhaseReady
+		target.Status.SetCondition(
+			v1alpha1.KameletConditionReady,
+			corev1.ConditionTrue,
+			"",
+			"",
+		)
+		if err := recomputeProperties(target); err != nil {
+			return nil, err
+		}
 	}
+
 	return target, nil
 }
 

@@ -136,3 +136,7 @@ func (in *KameletStatus) RemoveCondition(condType KameletConditionType) {
 
 	in.Conditions = newConditions
 }
+
+func ValidKameletName(name string) bool {
+	return !reservedKameletNames[name]
+}
