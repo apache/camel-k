@@ -18,5 +18,5 @@
 
 from('knative:endpoint/display')
   .log('${body}')
-  .setBody().header('CE-Type')
+  .setBody().header('CamelCloudEventType')
   .log('type: ${body}');
