@@ -36,7 +36,7 @@ func recomputeProperties(kamelet *v1alpha1.Kamelet) error {
 		defValue := ""
 		if v.Default != nil {
 			var val interface{}
-			if err := json.Unmarshal(*v.Default, &val); err != nil {
+			if err := json.Unmarshal(v.Default.RawMessage, &val); err != nil {
 				return errors.Wrapf(err, "cannot decode default value for property %q", k)
 			}
 			defValue = fmt.Sprintf("%v", val)
