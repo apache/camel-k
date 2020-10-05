@@ -33,9 +33,25 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/onsi/gomega"
+
+	"github.com/spf13/cobra"
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
+	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
-	rbacv1 "k8s.io/api/rbac/v1"
+	projectv1 "github.com/openshift/api/project/v1"
+	routev1 "github.com/openshift/api/route/v1"
 
 	"github.com/apache/camel-k/e2e/support/util"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -45,25 +61,12 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	"github.com/google/uuid"
-	"github.com/onsi/gomega"
-	projectv1 "github.com/openshift/api/project/v1"
-	routev1 "github.com/openshift/api/route/v1"
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
-	"github.com/spf13/cobra"
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	// let's enable addons in all tests
 	_ "github.com/apache/camel-k/addons"
 )
+
+const kubeConfigEnvVar = "KUBECONFIG"
 
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
@@ -134,7 +137,7 @@ func init() {
 }
 
 func NewTestClient() (client.Client, error) {
-	return client.NewOutOfClusterClient(os.Getenv(k8sutil.KubeConfigEnvVar))
+	return client.NewOutOfClusterClient(os.Getenv(kubeConfigEnvVar))
 }
 
 func Kamel(args ...string) *cobra.Command {
@@ -776,30 +779,7 @@ func Rolebinding(ns string) func() *rbacv1.RoleBinding {
 	}
 }
 
-func Clusterrole(ns string) func() *rbacv1.ClusterRole {
-	return func() *rbacv1.ClusterRole {
-		lst := rbacv1.ClusterRoleList{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ClusterRole",
-				APIVersion: rbacv1.SchemeGroupVersion.String(),
-			},
-		}
-		err := TestClient.List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
-				"app": "camel-k",
-			})
-		if err != nil {
-			panic(err)
-		}
-		if len(lst.Items) == 0 {
-			return nil
-		}
-		return &lst.Items[0]
-	}
-}
-
-func Serviceaccount(ns, name string) func() *corev1.ServiceAccount {
+func ServiceAccount(ns, name string) func() *corev1.ServiceAccount {
 	return func() *corev1.ServiceAccount {
 		lst := corev1.ServiceAccountList{
 			TypeMeta: metav1.TypeMeta{

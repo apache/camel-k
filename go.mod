@@ -8,21 +8,20 @@ require (
 	github.com/apache/camel-k/pkg/client/camel v0.0.0
 	github.com/container-tools/spectrum v0.3.2
 	github.com/coreos/prometheus-operator v0.38.1-0.20200424145508-7e176fda06cc
-	github.com/evanphx/json-patch v4.5.0+incompatible
+	github.com/evanphx/json-patch v4.9.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v0.1.0
 	github.com/google/uuid v1.1.1
-	github.com/hashicorp/go-getter v1.4.1
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/gomega v1.10.1
 	github.com/opencontainers/runc v1.0.0-rc2.0.20190611121236-6cc515888830 // indirect
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
+	github.com/operator-framework/operator-lib v0.1.0
 	github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88
-	github.com/operator-framework/operator-sdk v0.17.1
 	github.com/pkg/errors v0.9.1
 	github.com/radovskyb/watcher v1.0.6
 	github.com/rs/xid v1.2.1
@@ -38,43 +37,25 @@ require (
 	go.uber.org/multierr v1.5.0
 	gopkg.in/inf.v0 v0.9.1
 	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/api v0.18.2
-	k8s.io/apimachinery v0.18.2
+	k8s.io/api v0.18.4
+	k8s.io/apimachinery v0.18.4
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20200205140755-e0e292d8aa12
 	knative.dev/eventing v0.16.2
 	knative.dev/pkg v0.0.0-20200702222342-ea4d6e985ba0
 	knative.dev/serving v0.16.0
-	sigs.k8s.io/controller-runtime v0.5.2
+	sigs.k8s.io/controller-runtime v0.6.1
 )
 
 // Pinned to Kubernetes 0.17.6:
-// - Knative 0.16.0 requires  0.17.6
-// - Operator SDK 0.17.1 requires 1.17.4
+// - Knative 0.16.0 depends on 0.17.6
+// - Controller Runtime 0.5.11 depends on 1.17.9
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
-	github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.10.0
 	k8s.io/api => k8s.io/api v0.17.6
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.6
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.6
-	k8s.io/apiserver => k8s.io/apiserver v0.17.6
-	k8s.io/cli-runtime => k8s.io/cli-runtime v0.17.6
 	k8s.io/client-go => k8s.io/client-go v0.17.6
-	k8s.io/cloud-provider => k8s.io/cloud-provider v0.17.6
-	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.17.6
-	k8s.io/code-generator => k8s.io/code-generator v0.17.6
-	k8s.io/component-base => k8s.io/component-base v0.17.6
-	k8s.io/cri-api => k8s.io/cri-api v0.17.6
-	k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.17.6
-	k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.17.6
-	k8s.io/kube-controller-manager => k8s.io/kube-controller-manager v0.17.6
-	k8s.io/kube-proxy => k8s.io/kube-proxy v0.17.6
-	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.17.6
-	k8s.io/kubectl => k8s.io/kubectl v0.17.6
-	k8s.io/kubelet => k8s.io/kubelet v0.17.6
-	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.17.6
-	k8s.io/metrics => k8s.io/metrics v0.17.6
-	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.17.6
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.5.11
 )
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm

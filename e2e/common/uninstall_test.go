@@ -39,7 +39,7 @@ func TestBasicUninstall(t *testing.T) {
 		Eventually(Role(ns)).Should(BeNil())
 		Eventually(Rolebinding(ns)).Should(BeNil())
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
-		Eventually(Serviceaccount(ns, "camel-k-operator")).Should(BeNil())
+		Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
 		Eventually(OperatorPod(ns)).Should(BeNil())
 	})
 }
@@ -85,7 +85,7 @@ func TestUninstallSkipServiceAccounts(t *testing.T) {
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except cluster-roles
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-service-accounts").Execute()).Should(BeNil())
-		Eventually(Serviceaccount(ns, "camel-k-operator")).ShouldNot(BeNil())
+		Eventually(ServiceAccount(ns, "camel-k-operator")).ShouldNot(BeNil())
 	})
 }
 
