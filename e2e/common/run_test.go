@@ -44,24 +44,6 @@ func TestRunSimpleExamples(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
-		t.Run("run java from GitHub", func(t *testing.T) {
-			RegisterTestingT(t)
-			Expect(Kamel("run", "-n", ns, "github:apache/camel-k/e2e/common/files/Java.java").Execute()).Should(BeNil())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
-		})
-
-		t.Run("run java from GitHub (RAW)", func(t *testing.T) {
-			RegisterTestingT(t)
-			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/master/e2e/common/files/Java.java").Execute()).Should(BeNil())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
-		})
-
 		t.Run("run java with properties", func(t *testing.T) {
 			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/Prop.java", "--property-file", "files/prop.properties").Execute()).Should(BeNil())
@@ -136,5 +118,51 @@ func TestRunSimpleExamples(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
+	})
+}
+
+func TestRunExamplesFromGitHUB(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+
+		t.Run("run java from GitHub", func(t *testing.T) {
+			RegisterTestingT(t)
+			Expect(Kamel("run", "-n", ns, "github:apache/camel-k/e2e/common/files/Java.java").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
+		t.Run("run java from GitHub (RAW)", func(t *testing.T) {
+			RegisterTestingT(t)
+			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/master/e2e/common/files/Java.java").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
+		t.Run("run from GitHub Gist (ID)", func(t *testing.T) {
+			name := "github-gist-id"
+			RegisterTestingT(t)
+			Expect(Kamel("run", "-n", ns, "--name", name, "gist:e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
+		t.Run("run from GitHub Gist (URL)", func(t *testing.T) {
+			name := "github-gist-url"
+			RegisterTestingT(t)
+			Expect(Kamel("run", "-n", ns, "--name", name, "https://gist.github.com/lburgazzoli/e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
 	})
 }

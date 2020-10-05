@@ -18,13 +18,10 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
-	"encoding/base64"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"path"
@@ -49,7 +46,6 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/flow"
-	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/sync"
@@ -207,19 +203,8 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 		return errors.New("run expects at least 1 argument, received 0")
 	}
 
-	for _, source := range args {
-		if isLocal(source) {
-			if _, err := os.Stat(source); err != nil && os.IsNotExist(err) {
-				return errors.Wrapf(err, "file %s does not exist", source)
-			} else if err != nil {
-				return errors.Wrapf(err, "error while accessing file %s", source)
-			}
-		} else {
-			_, _, err := loadData(source, false, false)
-			if err != nil {
-				return errors.Wrap(err, "The provided source is not reachable")
-			}
-		}
+	if _, err := ResolveSources(context.Background(), args, false); err != nil {
+		return errors.Wrap(err, "One of the provided sources is not reachable")
 	}
 
 	return nil
@@ -414,7 +399,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 						return
 					case <-changes:
 						// let's create a new command to parse modeline changes and update our integration
-						newCmd, _, err := createKamelWithModelineCommand(o.RootContext, os.Args[1:], make(map[string]bool))
+						newCmd, _, err := createKamelWithModelineCommand(o.RootContext, os.Args[1:])
 						newCmd.SetOut(cmd.OutOrStdout())
 						newCmd.SetErr(cmd.ErrOrStderr())
 						if err != nil {
@@ -493,14 +478,14 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	srcs = append(srcs, sources...)
 	srcs = append(srcs, o.Sources...)
 
-	for _, source := range srcs {
-		data, compressed, err := loadData(source, o.Compression, o.CompressBinary)
-		if err != nil {
-			return nil, err
-		}
+	resolvedSources, err := ResolveSources(context.Background(), srcs, o.Compression)
+	if err != nil {
+		return nil, err
+	}
 
-		if !compressed && o.UseFlows && (strings.HasSuffix(source, ".yaml") || strings.HasSuffix(source, ".yml")) {
-			flows, err := flow.FromYamlDSLString(data)
+	for _, source := range resolvedSources {
+		if o.UseFlows && !o.Compression && (strings.HasSuffix(source.Name, ".yaml") || strings.HasSuffix(source.Name, ".yml")) {
+			flows, err := flow.FromYamlDSLString(source.Content)
 			if err != nil {
 				return nil, err
 			}
@@ -508,16 +493,16 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		} else {
 			integration.Spec.AddSources(v1.SourceSpec{
 				DataSpec: v1.DataSpec{
-					Name:        path.Base(source),
-					Content:     data,
-					Compression: compressed,
+					Name:        source.Name,
+					Content:     source.Content,
+					Compression: source.Compress,
 				},
 			})
 		}
 	}
 
 	for _, resource := range o.Resources {
-		data, compressed, err := loadData(resource, o.Compression, o.CompressBinary)
+		data, compressed, err := loadContent(resource, o.Compression, o.CompressBinary)
 		if err != nil {
 			return nil, err
 		}
@@ -533,7 +518,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 
 	for _, resource := range o.OpenAPIs {
-		data, compressed, err := loadData(resource, o.Compression, o.CompressBinary)
+		data, compressed, err := loadContent(resource, o.Compression, o.CompressBinary)
 		if err != nil {
 			return nil, err
 		}
@@ -603,7 +588,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 
 	existed := false
-	err := c.Create(o.Context, &integration)
+	err = c.Create(o.Context, &integration)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		clone := integration.DeepCopy()
@@ -654,53 +639,6 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 		name = kubernetes.SanitizeName(sources[0])
 	}
 	return name
-}
-
-func loadData(source string, compress bool, compressBinary bool) (string, bool, error) {
-	var content []byte
-	var err error
-
-	if isLocal(source) {
-		content, err = ioutil.ReadFile(source)
-		if err != nil {
-			return "", false, err
-		}
-	} else {
-		u, err := url.Parse(source)
-		if err != nil {
-			return "", false, err
-		}
-
-		g, ok := Getters[u.Scheme]
-		if !ok {
-			return "", false, fmt.Errorf("unable to find a getter for URL: %s", source)
-		}
-
-		content, err = g.Get(u)
-		if err != nil {
-			return "", false, err
-		}
-	}
-
-	doCompress := compress
-	if !doCompress && compressBinary {
-		contentType := http.DetectContentType(content)
-		if strings.HasPrefix(contentType, "application/octet-stream") {
-			doCompress = true
-		}
-	}
-
-	if doCompress {
-		var b bytes.Buffer
-
-		if err := gzip.Compress(&b, content); err != nil {
-			return "", false, err
-		}
-
-		return base64.StdEncoding.EncodeToString(b.Bytes()), true, nil
-	}
-
-	return string(content), false, nil
 }
 
 func (*runCmdOptions) configureTraits(integration *v1.Integration, options []string, catalog *trait.Catalog) error {

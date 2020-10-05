@@ -47,7 +47,6 @@ var (
 
 	// file options must be considered relative to the source files they belong to
 	fileOptions = map[string]bool{
-		"source":        true,
 		"resource":      true,
 		"config":        true,
 		"open-api":      true,
@@ -55,10 +54,10 @@ var (
 	}
 )
 
+// NewKamelWithModelineCommand ---
 func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.Command, []string, error) {
-	processed := make(map[string]bool)
 	originalFlags := osArgs[1:]
-	rootCmd, flags, err := createKamelWithModelineCommand(ctx, append([]string(nil), originalFlags...), processed)
+	rootCmd, flags, err := createKamelWithModelineCommand(ctx, originalFlags)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		return rootCmd, flags, err
@@ -75,7 +74,7 @@ func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.C
 	return rootCmd, flags, nil
 }
 
-func createKamelWithModelineCommand(ctx context.Context, args []string, processedFiles map[string]bool) (*cobra.Command, []string, error) {
+func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.Command, []string, error) {
 	rootCmd, err := NewKamelCommand(ctx)
 	if err != nil {
 		return nil, nil, err
@@ -99,44 +98,20 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 
 	fg := target.Flags()
 
-	sources, err := fg.GetStringArray(runCmdSourcesArgs)
+	additionalSources, err := fg.GetStringArray(runCmdSourcesArgs)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var files = append([]string(nil), fg.Args()...)
-	files = append(files, sources...)
+	files := make([]string, 0, len(fg.Args())+len(additionalSources))
+	files = append(files, fg.Args()...)
+	files = append(files, additionalSources...)
 
-	opts := make([]modeline.Option, 0)
-	for _, f := range files {
-		if processedFiles[f] {
-			continue
-		}
-		baseDir := filepath.Dir(f)
-		content, _, err := loadData(f, false, false)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "cannot read file %s", f)
-		}
-		ops, err := modeline.Parse(f, content)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "cannot process file %s", f)
-		}
-		for i, o := range ops {
-			if disallowedOptions[o.Name] {
-				return nil, nil, fmt.Errorf("option %q is disallowed in modeline", o.Name)
-			}
-
-			if fileOptions[o.Name] && isLocal(f) {
-				refPath := o.Value
-				if !filepath.IsAbs(refPath) {
-					full := path.Join(baseDir, refPath)
-					o.Value = full
-					ops[i] = o
-				}
-			}
-		}
-		opts = append(opts, ops...)
+	opts, err := extractModelineOptions(ctx, files)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "cannot read sources")
 	}
+
 	// filter out in place non-run options
 	nOpts := 0
 	for _, o := range opts {
@@ -145,23 +120,9 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 			nOpts++
 		}
 	}
+
 	opts = opts[:nOpts]
 
-	// No new options, returning a new command with computed args
-	if len(opts) == 0 {
-		// Recreating the command as it's dirty
-		rootCmd, err = NewKamelCommand(ctx)
-		if err != nil {
-			return nil, nil, err
-		}
-		rootCmd.SetArgs(args)
-		return rootCmd, args, nil
-	}
-
-	// New options added, recomputing
-	for _, f := range files {
-		processedFiles[f] = true
-	}
 	for _, o := range opts {
 		prefix := "-"
 		if len(o.Name) > 1 {
@@ -175,5 +136,46 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 		}
 	}
 
-	return createKamelWithModelineCommand(ctx, args, processedFiles)
+	// Recreating the command as it's dirty
+	rootCmd, err = NewKamelCommand(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	rootCmd.SetArgs(args)
+
+	return rootCmd, args, nil
+}
+
+func extractModelineOptions(ctx context.Context, sources []string) ([]modeline.Option, error) {
+	opts := make([]modeline.Option, 0)
+
+	resolvedSources, err := ResolveSources(ctx, sources, false)
+	if err != nil {
+		return opts, errors.Wrap(err, "cannot read sources")
+	}
+
+	for _, resolvedSource := range resolvedSources {
+		ops, err := modeline.Parse(resolvedSource.Location, resolvedSource.Content)
+		if err != nil {
+			return opts, errors.Wrapf(err, "cannot process file %s", resolvedSource.Location)
+		}
+		for i, o := range ops {
+			if disallowedOptions[o.Name] {
+				return opts, fmt.Errorf("option %q is disallowed in modeline", o.Name)
+			}
+
+			if fileOptions[o.Name] && resolvedSource.Local {
+				baseDir := filepath.Dir(resolvedSource.Origin)
+				refPath := o.Value
+				if !filepath.IsAbs(refPath) {
+					full := path.Join(baseDir, refPath)
+					o.Value = full
+					ops[i] = o
+				}
+			}
+		}
+		opts = append(opts, ops...)
+	}
+
+	return opts, nil
 }

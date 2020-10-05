@@ -82,23 +82,23 @@ func TestModelineRunMultipleFiles(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	file := `
-		// camel-k: source=ext.groovy
+		// camel-k: dependency=mvn:org.my/lib1:3.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
 	err = ioutil.WriteFile(fileName, []byte(file), 0777)
 	assert.NoError(t, err)
 
 	file2 := `
-		// camel-k: dependency=mvn:org.my/lib:3.0
+		// camel-k: dependency=mvn:org.my/lib2:3.0
 	`
 	fileName2 := path.Join(dir, "ext.groovy")
 	err = ioutil.WriteFile(fileName2, []byte(file2), 0777)
 	assert.NoError(t, err)
 
-	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, fileName2})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", fileName, "--source=" + fileName2, "--dependency=mvn:org.my/lib:3.0"}, flags)
+	assert.Equal(t, []string{"run", fileName, fileName2, "--dependency=mvn:org.my/lib1:3.0", "--dependency=mvn:org.my/lib2:3.0"}, flags)
 }
 
 func TestModelineRunPropertyFiles(t *testing.T) {

@@ -209,6 +209,18 @@ func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []str
 	return submatchs.List()
 }
 
+// FindNamedMatches ---
+func FindNamedMatches(expr string, str string) map[string]string {
+	regex := regexp.MustCompile(expr)
+	match := regex.FindStringSubmatch(str)
+
+	results := map[string]string{}
+	for i, name := range match {
+		results[regex.SubexpNames()[i]] = name
+	}
+	return results
+}
+
 // FileExists --
 func FileExists(name string) (bool, error) {
 	info, err := os.Stat(name)
