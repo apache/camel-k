@@ -27,6 +27,10 @@ const (
 	AnnotationIcon = "camel.apache.org/kamelet.icon"
 )
 
+var (
+	reservedKameletNames = map[string]bool{"source": true, "sink": true}
+)
+
 // KameletSpec defines the desired state of Kamelet
 type KameletSpec struct {
 	Definition    JSONSchemaProps             `json:"definition,omitempty"`
@@ -89,6 +93,11 @@ const (
 	KameletConditionReady KameletConditionType = "Ready"
 )
 
+const (
+	// KameletConditionIllegalName --
+	KameletConditionIllegalName string = "IllegalName"
+)
+
 type KameletPhase string
 
 const (
@@ -99,6 +108,8 @@ const (
 	KameletPhaseNone KameletPhase = ""
 	// KameletPhaseReady --
 	KameletPhaseReady KameletPhase = "Ready"
+	// KameletPhaseError --
+	KameletPhaseError KameletPhase = "Error"
 )
 
 // +genclient
