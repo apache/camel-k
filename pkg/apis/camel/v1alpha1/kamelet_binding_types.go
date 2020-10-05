@@ -105,13 +105,13 @@ const (
 	KameletBindingPhaseReady KameletBindingPhase = "Ready"
 )
 
-// KameletBinding is the Schema for the kamelets binding API
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +k8s:openapi-gen=true
+// +kubebuilder:object:root=true
 // +genclient
 // +kubebuilder:resource:path=kameletbindings,scope=Namespaced,shortName=klb,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet Binding phase"
+
+// KameletBinding is the Schema for the kamelets binding API
 type KameletBinding struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
