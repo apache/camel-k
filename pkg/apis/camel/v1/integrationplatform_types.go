@@ -23,6 +23,7 @@ import (
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
 // IntegrationPlatformSpec defines the desired state of IntegrationPlatform
 type IntegrationPlatformSpec struct {
@@ -47,9 +48,8 @@ type IntegrationPlatformStatus struct {
 	Version    string                         `json:"version,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +k8s:openapi-gen=true
 // +genclient
+// +kubebuilder:object:root=true
 // +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
@@ -63,7 +63,7 @@ type IntegrationPlatform struct {
 	Status IntegrationPlatformStatus `json:"status,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // IntegrationPlatformList contains a list of IntegrationPlatform
 type IntegrationPlatformList struct {

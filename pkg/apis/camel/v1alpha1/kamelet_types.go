@@ -101,13 +101,13 @@ const (
 	KameletPhaseReady KameletPhase = "Ready"
 )
 
-// Kamelet is the Schema for the kamelets API
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +k8s:openapi-gen=true
 // +genclient
+// +kubebuilder:object:root=true
 // +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
+
+// Kamelet is the Schema for the kamelets API
 type Kamelet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -116,7 +116,7 @@ type Kamelet struct {
 	Status KameletStatus `json:"status,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // KameletList contains a list of Kamelet
 type KameletList struct {

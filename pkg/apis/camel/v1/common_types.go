@@ -59,17 +59,18 @@ type TraitSpec struct {
 }
 
 // +kubebuilder:validation:Type=object
-
 // TraitConfiguration --
 type TraitConfiguration struct {
 	json.RawMessage `json:",inline"`
 }
 
+// +kubebuilder:object:generate=false
 // Configurable --
 type Configurable interface {
 	Configurations() []ConfigurationSpec
 }
 
+// +kubebuilder:object:generate=false
 // PlatformInjectable --
 type PlatformInjectable interface {
 	SetIntegrationPlatform(platform *IntegrationPlatform)
@@ -133,6 +134,7 @@ const (
 	CapabilityMaster = "master"
 )
 
+// +kubebuilder:object:generate=false
 // ResourceCondition is a common type for all conditions
 type ResourceCondition interface {
 	GetType() string

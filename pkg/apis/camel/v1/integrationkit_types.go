@@ -23,6 +23,7 @@ import (
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
 // IntegrationKitSpec defines the desired state of IntegrationKit
 type IntegrationKitSpec struct {
@@ -49,9 +50,8 @@ type IntegrationKitStatus struct {
 	Version         string                    `json:"version,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +k8s:openapi-gen=true
 // +genclient
+// +kubebuilder:object:root=true
 // +kubebuilder:resource:path=integrationkits,scope=Namespaced,shortName=ik,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration kit phase"
@@ -67,7 +67,7 @@ type IntegrationKit struct {
 	Status IntegrationKitStatus `json:"status,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // IntegrationKitList contains a list of IntegrationKit
 type IntegrationKitList struct {
