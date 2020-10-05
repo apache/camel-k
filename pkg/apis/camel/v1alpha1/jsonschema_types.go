@@ -61,22 +61,22 @@ type JSONSchemaProps struct {
 	// default is a default value for undefined object fields.
 	// Defaulting is a beta feature under the CustomResourceDefaulting feature gate.
 	// Defaulting requires spec.preserveUnknownFields to be false.
-	Default          *json.RawMessage   `json:"default,omitempty" protobuf:"bytes,8,opt,name=default"`
-	Maximum          *json.Number       `json:"maximum,omitempty" protobuf:"bytes,9,opt,name=maximum"`
-	ExclusiveMaximum bool               `json:"exclusiveMaximum,omitempty" protobuf:"bytes,10,opt,name=exclusiveMaximum"`
-	Minimum          *json.Number       `json:"minimum,omitempty" protobuf:"bytes,11,opt,name=minimum"`
-	ExclusiveMinimum bool               `json:"exclusiveMinimum,omitempty" protobuf:"bytes,12,opt,name=exclusiveMinimum"`
-	MaxLength        *int64             `json:"maxLength,omitempty" protobuf:"bytes,13,opt,name=maxLength"`
-	MinLength        *int64             `json:"minLength,omitempty" protobuf:"bytes,14,opt,name=minLength"`
-	Pattern          string             `json:"pattern,omitempty" protobuf:"bytes,15,opt,name=pattern"`
-	MaxItems         *int64             `json:"maxItems,omitempty" protobuf:"bytes,16,opt,name=maxItems"`
-	MinItems         *int64             `json:"minItems,omitempty" protobuf:"bytes,17,opt,name=minItems"`
-	UniqueItems      bool               `json:"uniqueItems,omitempty" protobuf:"bytes,18,opt,name=uniqueItems"`
-	MultipleOf       *json.Number       `json:"multipleOf,omitempty" protobuf:"bytes,19,opt,name=multipleOf"`
-	Enum             []*json.RawMessage `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
-	MaxProperties    *int64             `json:"maxProperties,omitempty" protobuf:"bytes,21,opt,name=maxProperties"`
-	MinProperties    *int64             `json:"minProperties,omitempty" protobuf:"bytes,22,opt,name=minProperties"`
-	Required         []string           `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
+	Default          *JSON        `json:"default,omitempty" protobuf:"bytes,8,opt,name=default"`
+	Maximum          *json.Number `json:"maximum,omitempty" protobuf:"bytes,9,opt,name=maximum"`
+	ExclusiveMaximum bool         `json:"exclusiveMaximum,omitempty" protobuf:"bytes,10,opt,name=exclusiveMaximum"`
+	Minimum          *json.Number `json:"minimum,omitempty" protobuf:"bytes,11,opt,name=minimum"`
+	ExclusiveMinimum bool         `json:"exclusiveMinimum,omitempty" protobuf:"bytes,12,opt,name=exclusiveMinimum"`
+	MaxLength        *int64       `json:"maxLength,omitempty" protobuf:"bytes,13,opt,name=maxLength"`
+	MinLength        *int64       `json:"minLength,omitempty" protobuf:"bytes,14,opt,name=minLength"`
+	Pattern          string       `json:"pattern,omitempty" protobuf:"bytes,15,opt,name=pattern"`
+	MaxItems         *int64       `json:"maxItems,omitempty" protobuf:"bytes,16,opt,name=maxItems"`
+	MinItems         *int64       `json:"minItems,omitempty" protobuf:"bytes,17,opt,name=minItems"`
+	UniqueItems      bool         `json:"uniqueItems,omitempty" protobuf:"bytes,18,opt,name=uniqueItems"`
+	MultipleOf       *json.Number `json:"multipleOf,omitempty" protobuf:"bytes,19,opt,name=multipleOf"`
+	Enum             []*JSON      `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
+	MaxProperties    *int64       `json:"maxProperties,omitempty" protobuf:"bytes,21,opt,name=maxProperties"`
+	MinProperties    *int64       `json:"minProperties,omitempty" protobuf:"bytes,22,opt,name=minProperties"`
+	Required         []string     `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
 
 	//Items                *JSONSchemaPropsOrArray    `json:"items,omitempty" protobuf:"bytes,24,opt,name=items"`
 
@@ -98,7 +98,7 @@ type JSONSchemaProps struct {
 	AdditionalItems *bool                  `json:"additionalItems,omitempty" protobuf:"bytes,33,opt,name=additionalItems"`
 	Definitions     JSONSchemaDefinitions  `json:"definitions,omitempty" protobuf:"bytes,34,opt,name=definitions"`
 	ExternalDocs    *ExternalDocumentation `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
-	Example         *json.RawMessage       `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
+	Example         *JSON                  `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
 	Nullable        bool                   `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
 
 	// x-kubernetes-preserve-unknown-fields stops the API server
@@ -184,7 +184,7 @@ type JSONSchemaProps struct {
 // JSON represents any valid JSON value.
 // These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
 type JSON struct {
-	Raw []byte `protobuf:"bytes,1,opt,name=raw"`
+	json.RawMessage `json:",inline" protobuf:"bytes,1,opt,name=raw"`
 }
 
 // OpenAPISchemaType is used by the kube-openapi generator when constructing
