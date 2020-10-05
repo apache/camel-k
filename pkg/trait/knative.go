@@ -343,6 +343,9 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 }
 
 func (t *knativeTrait) createSubscription(e *Environment, ref *corev1.ObjectReference) error {
+	if ref.Namespace == "" {
+		ref.Namespace = e.Integration.Namespace
+	}
 	sub := knativeutil.CreateSubscription(*ref, e.Integration.Name)
 	e.Resources.Add(sub)
 	return nil
@@ -530,6 +533,9 @@ func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference
 			trigger.Spec.Filter.Attributes["type"] == eventType
 	})
 	if !found {
+		if ref.Namespace == "" {
+			ref.Namespace = e.Integration.Namespace
+		}
 		trigger := knativeutil.CreateTrigger(*ref, e.Integration.Name, eventType)
 		e.Resources.Add(trigger)
 	}
