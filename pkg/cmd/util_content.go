@@ -23,34 +23,55 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
-var Getters map[string]Getter
+func loadContent(source string, compress bool, compressBinary bool) (string, bool, error) {
+	var content []byte
+	var err error
 
-func init() {
-	Getters = map[string]Getter{
-		"http":   HTTPGetter{},
-		"https":  HTTPGetter{},
-		"github": GitHubGetter{},
+	if isLocal(source) {
+		content, err = ioutil.ReadFile(source)
+	} else {
+		u, err := url.Parse(source)
+		if err != nil {
+			return "", false, err
+		}
+
+		switch u.Scheme {
+		case "github":
+			content, err = loadContentGitHub(u)
+		case "http":
+			content, err = loadContentHTTP(u)
+		case "https":
+			content, err = loadContentHTTP(u)
+		default:
+			return "", false, fmt.Errorf("unsupported scheme %s", u.Scheme)
+		}
 	}
+
+	if err != nil {
+		return "", false, err
+	}
+	doCompress := compress
+	if !doCompress && compressBinary {
+		contentType := http.DetectContentType(content)
+		if strings.HasPrefix(contentType, "application/octet-stream") {
+			doCompress = true
+		}
+	}
+
+	if doCompress {
+		answer, err := compressToString(content)
+		return answer, true, err
+	}
+
+	return string(content), false, nil
 }
 
-type Getter interface {
-	Get(u *url.URL) ([]byte, error)
-}
-
-// A simple getter that retrieves the content of an integration from an
-// http(s) endpoint.
-type HTTPGetter struct {
-}
-
-func (g HTTPGetter) Get(u *url.URL) ([]byte, error) {
-	return g.doGet(u.String())
-}
-
-func (g HTTPGetter) doGet(source string) ([]byte, error) {
+func loadContentHTTP(u *url.URL) ([]byte, error) {
 	// nolint: gosec
-	resp, err := http.Get(source)
+	resp, err := http.Get(u.String())
 	if err != nil {
 		return []byte{}, err
 	}
@@ -59,7 +80,7 @@ func (g HTTPGetter) doGet(source string) ([]byte, error) {
 	}()
 
 	if resp.StatusCode != 200 {
-		return []byte{}, fmt.Errorf("the provided URL %s is not reachable, error code is %d", source, resp.StatusCode)
+		return []byte{}, fmt.Errorf("the provided URL %s is not reachable, error code is %d", u.String(), resp.StatusCode)
 	}
 
 	content, err := ioutil.ReadAll(resp.Body)
@@ -70,13 +91,7 @@ func (g HTTPGetter) doGet(source string) ([]byte, error) {
 	return content, nil
 }
 
-// A simple getter that retrieves the content of an integration from
-// a GitHub endpoint using a RAW endpoint.
-type GitHubGetter struct {
-	HTTPGetter
-}
-
-func (g GitHubGetter) Get(u *url.URL) ([]byte, error) {
+func loadContentGitHub(u *url.URL) ([]byte, error) {
 	src := u.Scheme + ":" + u.Opaque
 	re := regexp.MustCompile(`^github:([^/]+)/([^/]+)/(.+)$`)
 
@@ -91,6 +106,10 @@ func (g GitHubGetter) Get(u *url.URL) ([]byte, error) {
 	}
 
 	srcURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", items[1], items[2], branch, items[3])
+	rawURL, err := url.Parse(srcURL)
+	if err != nil {
+		return []byte{}, err
+	}
 
-	return g.HTTPGetter.doGet(srcURL)
+	return loadContentHTTP(rawURL)
 }

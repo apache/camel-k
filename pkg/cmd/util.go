@@ -18,10 +18,13 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/gzip"
 	"log"
 	"reflect"
 	"strings"
@@ -236,4 +239,14 @@ func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.S
 	}
 
 	return reflect.StructField{}, false
+}
+
+func compressToString(content []byte) (string, error) {
+	var b bytes.Buffer
+
+	if err := gzip.Compress(&b, content); err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(b.Bytes()), nil
 }
