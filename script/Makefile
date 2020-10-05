@@ -50,6 +50,13 @@ PACKAGE_ARTIFACTS_STRATEGY := copy
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultStartingCSV=
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
 
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
 # Build
 GOLDFLAGS += -X github.com/apache/camel-k/pkg/cmd/operator.GitCommit=$(GIT_COMMIT)
 GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
@@ -124,8 +131,8 @@ generate-crd:
 generate-doc:
 	./script/gen_doc.sh
 
-generate-deepcopy:
-	operator-sdk generate k8s
+generate-deepcopy: controller-gen
+	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
 
 build: build-resources build-kamel build-compile-integration-tests build-submodules
 
@@ -204,7 +211,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	cp kamel build/_output/bin
 endif
-	operator-sdk build --image-builder docker $(IMAGE_NAME):$(VERSION)
+	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
 
 images-dev: test package-artifacts
 	mkdir -p build/_maven_output
@@ -214,7 +221,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	cp kamel build/_output/bin
 endif
-	operator-sdk build --image-builder docker $(IMAGE_NAME):$(VERSION)
+	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
 
 images-push:
 	docker push $(IMAGE_NAME):$(VERSION)
@@ -270,3 +277,20 @@ get-version:
 	@echo $(VERSION)
 
 .PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets
+
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif

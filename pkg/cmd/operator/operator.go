@@ -26,13 +26,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
-	"github.com/operator-framework/operator-sdk/pkg/leader"
-	"github.com/operator-framework/operator-sdk/pkg/ready"
-	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	corev1 "k8s.io/api/core/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
@@ -43,9 +36,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
+	"github.com/operator-framework/operator-lib/leader"
+
 	"github.com/apache/camel-k/pkg/apis"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/controller"
+	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 var log = logf.Log.WithName("cmd")
@@ -56,7 +54,6 @@ var GitCommit string
 func printVersion() {
 	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
-	log.Info(fmt.Sprintf("Operator SDK Version: %v", sdkVersion.Version))
 	log.Info(fmt.Sprintf("Buildah Version: %v", defaults.BuildahVersion))
 	log.Info(fmt.Sprintf("Kaniko Version: %v", defaults.KanikoVersion))
 	log.Info(fmt.Sprintf("Camel K Operator Version: %v", defaults.Version))
@@ -80,13 +77,13 @@ func Run() {
 
 	printVersion()
 
-	namespace, err := k8sutil.GetWatchNamespace()
+	namespace, err := getWatchNamespace()
 	if err != nil {
 		log.Error(err, "failed to get watch namespace")
 		os.Exit(1)
 	}
 
-	// Get a config to talk to the apiserver
+	// Get a config to talk to the API server
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Error(err, "")
@@ -94,19 +91,15 @@ func Run() {
 	}
 
 	// Become the leader before proceeding
-	err = leader.Become(context.TODO(), "camel-k-lock")
+	err = leader.Become(context.TODO(), "hawtio-lock")
 	if err != nil {
-		log.Error(err, "")
-		os.Exit(1)
+		if err == leader.ErrNoNamespace {
+			log.Info("Local run detected, leader election is disabled")
+		} else {
+			log.Error(err, "")
+			os.Exit(1)
+		}
 	}
-
-	r := ready.NewFileReady()
-	err = r.Set()
-	if err != nil {
-		log.Error(err, "")
-		os.Exit(1)
-	}
-	defer r.Unset() // nolint: errcheck
 
 	// Configure an event broadcaster
 	c, err := client.NewClient(false)
@@ -124,7 +117,6 @@ func Run() {
 		log.Info("Event broadcasting to Kubernetes is disabled because of missing permissions to create events")
 	} else {
 		eventBroadcaster = record.NewBroadcaster()
-		//eventBroadcaster.StartLogging(camellog.WithName("events").Infof)
 		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
 	}
 
@@ -164,4 +156,18 @@ func Run() {
 		log.Error(err, "manager exited non-zero")
 		os.Exit(1)
 	}
+}
+
+// getWatchNamespace returns the Namespace the operator should be watching for changes
+func getWatchNamespace() (string, error) {
+	// WatchNamespaceEnvVar is the constant for env variable WATCH_NAMESPACE
+	// which specifies the Namespace to watch.
+	// An empty value means the operator is running with cluster scope.
+	var watchNamespaceEnvVar = "WATCH_NAMESPACE"
+
+	ns, found := os.LookupEnv(watchNamespaceEnvVar)
+	if !found {
+		return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
+	}
+	return ns, nil
 }

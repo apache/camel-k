@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 
 	user "github.com/mitchellh/go-homedir"
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
@@ -36,8 +35,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
+
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -45,7 +44,10 @@ import (
 	"github.com/apache/camel-k/pkg/apis"
 )
 
-const inContainerNamespaceFile = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+const (
+	inContainerNamespaceFile = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+	kubeConfigEnvVar         = "KUBECONFIG"
+)
 
 // Client is an abstraction for a k8s client
 type Client interface {
@@ -117,7 +119,7 @@ func NewClient(fastDiscovery bool) (Client, error) {
 		mapper = newFastDiscoveryRESTMapper(cfg)
 	}
 
-	// Create a new client to avoid using cache (enabled by default on operator-sdk client)
+	// Create a new client to avoid using cache (enabled by default with controller-runtime client)
 	clientOptions := controller.Options{
 		Scheme: scheme,
 		Mapper: mapper,
@@ -165,7 +167,7 @@ func initialize(kubeconfig string) {
 			panic(err)
 		}
 	}
-	os.Setenv(k8sutil.KubeConfigEnvVar, kubeconfig)
+	os.Setenv(kubeConfigEnvVar, kubeconfig)
 }
 
 func getDefaultKubeConfigFile() (string, error) {
@@ -221,7 +223,7 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 
 func shouldUseContainerMode() (bool, error) {
 	// When kube config is set, container mode is not used
-	if os.Getenv(k8sutil.KubeConfigEnvVar) != "" {
+	if os.Getenv(kubeConfigEnvVar) != "" {
 		return false, nil
 	}
 	// Use container mode only when the kubeConfigFile does not exist and the container namespace file is present
