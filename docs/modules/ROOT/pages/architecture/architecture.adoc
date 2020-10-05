@@ -6,7 +6,7 @@
 
 NOTE: The following diagram reflects the Camel K architecture as of version 1.1.1
 
-image::architecture/camel-k-high-level.svg[Overview]
+image::architecture/camel-k-high-level.svg[Overview, width=1024]
 
 [[concepts]]
 == Concepts
