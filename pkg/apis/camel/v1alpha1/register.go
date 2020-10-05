@@ -15,10 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// NOTE: Boilerplate only.  Ignore this file.
-
 // Package v1alpha1 contains Camel unstable API Schema definitions
-// +k8s:deepcopy-gen=package,register
+// +kubebuilder:object:generate=true
 // +groupName=camel.apache.org
 package v1alpha1
 
