@@ -7,7 +7,7 @@ package v1alpha1
 import (
 	"encoding/json"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -31,8 +31,8 @@ func (in *Endpoint) DeepCopyInto(out *Endpoint) {
 	*out = *in
 	if in.Ref != nil {
 		in, out := &in.Ref, &out.Ref
-		*out = new(metav1.OwnerReference)
-		(*in).DeepCopyInto(*out)
+		*out = new(corev1.ObjectReference)
+		**out = **in
 	}
 	if in.URI != nil {
 		in, out := &in.URI, &out.URI
