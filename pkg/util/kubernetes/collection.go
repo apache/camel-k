@@ -18,16 +18,20 @@ limitations under the License.
 package kubernetes
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
-	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
+
+	routev1 "github.com/openshift/api/route/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // A Collection is a container of Kubernetes resources

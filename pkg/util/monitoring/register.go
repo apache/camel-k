@@ -18,9 +18,11 @@ limitations under the License.
 package monitoring
 
 import (
-	monitoringv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	"github.com/sirupsen/logrus"
+
 	"k8s.io/apimachinery/pkg/runtime"
+
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 )
 
 type registerFunction func(*runtime.Scheme) error

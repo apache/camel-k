@@ -7,7 +7,6 @@ require (
 	github.com/apache/camel-k/pkg/apis/camel v0.0.0
 	github.com/apache/camel-k/pkg/client/camel v0.0.0
 	github.com/container-tools/spectrum v0.3.2
-	github.com/coreos/prometheus-operator v0.38.1-0.20200424145508-7e176fda06cc
 	github.com/evanphx/json-patch v4.9.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
@@ -23,6 +22,7 @@ require (
 	github.com/operator-framework/operator-lib v0.1.0
 	github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
 	github.com/radovskyb/watcher v1.0.6
 	github.com/rs/xid v1.2.1
 	github.com/scylladb/go-set v1.0.2
