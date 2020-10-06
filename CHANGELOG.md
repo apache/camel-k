@@ -24,6 +24,9 @@
 
 **Merged pull requests:**
 
+- fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
+- Upgrade to Operator SDK 1.0+ [\#1741](https://github.com/apache/camel-k/pull/1741) ([astefanutti](https://github.com/astefanutti))
+- Added installations steps to IBM Kubernetes Service\(IKS\) [\#1739](https://github.com/apache/camel-k/pull/1739) ([juanjopb](https://github.com/juanjopb))
 - Fix typo [\#1736](https://github.com/apache/camel-k/pull/1736) ([llowinge](https://github.com/llowinge))
 - doc: Add high-level architecture diagram [\#1735](https://github.com/apache/camel-k/pull/1735) ([astefanutti](https://github.com/astefanutti))
 - fix: Uninstall cluster role bindings [\#1734](https://github.com/apache/camel-k/pull/1734) ([christophd](https://github.com/christophd))
@@ -33,6 +36,7 @@
 - chore: Make scripts portable [\#1729](https://github.com/apache/camel-k/pull/1729) ([christophd](https://github.com/christophd))
 - \[fix\] Use correct name of kameletbinding [\#1728](https://github.com/apache/camel-k/pull/1728) ([llowinge](https://github.com/llowinge))
 - \[fix\] Use bigger timeout to start querying metrics in test [\#1726](https://github.com/apache/camel-k/pull/1726) ([llowinge](https://github.com/llowinge))
+- Related to \#1675: install default Kamelets [\#1725](https://github.com/apache/camel-k/pull/1725) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Adapt Knative service definition to new KnativeEnvironment definition [\#1724](https://github.com/apache/camel-k/pull/1724) ([astefanutti](https://github.com/astefanutti))
 - Jolokia trait fixes so that it works with Hawtio Online [\#1723](https://github.com/apache/camel-k/pull/1723) ([astefanutti](https://github.com/astefanutti))
 - \[fix\] Use in-place editing [\#1722](https://github.com/apache/camel-k/pull/1722) ([llowinge](https://github.com/llowinge))
