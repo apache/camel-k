@@ -250,6 +250,8 @@ doing additional processing (such as tranformations or other enterprise integrat
 A common use case is that of **Knative Sources**, for which the Apache Camel developers maintain the https://knative.dev/docs/eventing/samples/apache-camel-source/[Knative CamelSources].
 Kamelets represent an **evolution** of the model proposed in CamelSources, but they allow using the same declarative style of binding, via a resource named **KameletBinding**.
 
+=== Binding to a Knative Destination
+
 A KameletBinding allows to declaratively move data from a system described by a Kamelet towards a Knative destination (or other kind of destinations, in the future), or from
 a Knative channel/broker to another external system described by a Kamelet.
 
@@ -289,6 +291,44 @@ A Kamelet of type "sink", by contrast, can only be used in the `sink` section of
 
 **Under the covers, a KameletBinding creates an Integration** resource that implements the binding, but this is transparent to the end user.
 
+=== Binding to a Kafka Topic
+
+The example seen in the previous paragraph can be also configured to push data a https://strimzi.io/[Strimzi] Kafka topic (Kamelets can be also configured to pull data from topics).
+
+To do so, you need to:
+
+- Install Strimzi on your cluster
+- Create a Strimzi *Kafka* cluster using plain listener and **no authentication**
+- Create a Strimzi *KafkaTopic* named `my-topic`
+
+Refer to the https://strimzi.io/[Strimzi documentation] for instructions on how to do that.
+
+The following binding can be created to push data into the `my-topic` topic:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: telegram-text-source-to-kafka
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: telegram-text-source
+    properties:
+      botToken: the-token-here
+  sink:
+    ref: # <1>
+      kind: KafkaTopic
+      apiVersion: kafka.strimzi.io/v1beta1
+      name: my-topic
+----
+<1> Kubernetes reference to a Strimzi KafkaTopic
+
+After creating it, messages will flow from Telegram to Kafka.
+
 === Binding to an explicit URI
 
 An alternative way to use a KameletBinding is to configure the source/sink to be an explicit Camel URI.
@@ -315,7 +355,8 @@ spec:
 
 This KameletBinding explicitly defines an URI where data is going to be pushed.
 
-NOTE: the `uri` option is also conventionally used in Knative to specify a non-kubernetes destination
+NOTE: the `uri` option is also conventionally used in Knative to specify a non-kubernetes destination.
+To comply with the Knative specifications, in case an "http" or "https" URI is used, Camel will send https://cloudevents.io/[CloudEvents] to the destination.
 
 [[kamelets-specification]]
 == Kamelet Specification
