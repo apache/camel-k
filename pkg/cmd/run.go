@@ -22,8 +22,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -91,7 +91,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringArray("logging-level", nil, "Configure the logging level. e.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().Bool("compression", false, "Enable store source as a compressed binary blob")
+	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
+	cmd.Flags().Bool("compress-binary", true, "Enable compression of sources and resources having a binary content type (to encode them)")
 	cmd.Flags().StringArray("resource", nil, "Add a resource")
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
@@ -111,6 +112,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 type runCmdOptions struct {
 	*RootCmdOptions `json:"-"`
 	Compression     bool     `mapstructure:"compression" yaml:",omitempty"`
+	CompressBinary  bool     `mapstructure:"compress-binary" yaml:",omitempty"`
 	Wait            bool     `mapstructure:"wait" yaml:",omitempty"`
 	Logs            bool     `mapstructure:"logs" yaml:",omitempty"`
 	Sync            bool     `mapstructure:"sync" yaml:",omitempty"`
@@ -213,7 +215,7 @@ func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 				return errors.Wrapf(err, "error while accessing file %s", source)
 			}
 		} else {
-			_, err := loadData(source, false)
+			_, _, err := loadData(source, false, false)
 			if err != nil {
 				return errors.Wrap(err, "The provided source is not reachable")
 			}
@@ -492,12 +494,12 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	srcs = append(srcs, o.Sources...)
 
 	for _, source := range srcs {
-		data, err := loadData(source, o.Compression)
+		data, compressed, err := loadData(source, o.Compression, o.CompressBinary)
 		if err != nil {
 			return nil, err
 		}
 
-		if o.UseFlows && (strings.HasSuffix(source, ".yaml") || strings.HasSuffix(source, ".yml")) {
+		if !compressed && o.UseFlows && (strings.HasSuffix(source, ".yaml") || strings.HasSuffix(source, ".yml")) {
 			flows, err := flow.FromYamlDSLString(data)
 			if err != nil {
 				return nil, err
@@ -508,14 +510,14 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 				DataSpec: v1.DataSpec{
 					Name:        path.Base(source),
 					Content:     data,
-					Compression: o.Compression,
+					Compression: compressed,
 				},
 			})
 		}
 	}
 
 	for _, resource := range o.Resources {
-		data, err := loadData(resource, o.Compression)
+		data, compressed, err := loadData(resource, o.Compression, o.CompressBinary)
 		if err != nil {
 			return nil, err
 		}
@@ -524,14 +526,14 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 			DataSpec: v1.DataSpec{
 				Name:        path.Base(resource),
 				Content:     data,
-				Compression: o.Compression,
+				Compression: compressed,
 			},
 			Type: v1.ResourceTypeData,
 		})
 	}
 
 	for _, resource := range o.OpenAPIs {
-		data, err := loadData(resource, o.Compression)
+		data, compressed, err := loadData(resource, o.Compression, o.CompressBinary)
 		if err != nil {
 			return nil, err
 		}
@@ -540,7 +542,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 			DataSpec: v1.DataSpec{
 				Name:        path.Base(resource),
 				Content:     data,
-				Compression: o.Compression,
+				Compression: compressed,
 			},
 			Type: v1.ResourceTypeOpenAPI,
 		})
@@ -654,43 +656,51 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 	return name
 }
 
-func loadData(source string, compress bool) (string, error) {
+func loadData(source string, compress bool, compressBinary bool) (string, bool, error) {
 	var content []byte
 	var err error
 
 	if isLocal(source) {
 		content, err = ioutil.ReadFile(source)
 		if err != nil {
-			return "", err
+			return "", false, err
 		}
 	} else {
 		u, err := url.Parse(source)
 		if err != nil {
-			return "", err
+			return "", false, err
 		}
 
 		g, ok := Getters[u.Scheme]
 		if !ok {
-			return "", fmt.Errorf("unable to find a getter for URL: %s", source)
+			return "", false, fmt.Errorf("unable to find a getter for URL: %s", source)
 		}
 
 		content, err = g.Get(u)
 		if err != nil {
-			return "", err
+			return "", false, err
 		}
 	}
 
-	if compress {
+	doCompress := compress
+	if !doCompress && compressBinary {
+		contentType := http.DetectContentType(content)
+		if strings.HasPrefix(contentType, "application/octet-stream") {
+			doCompress = true
+		}
+	}
+
+	if doCompress {
 		var b bytes.Buffer
 
 		if err := gzip.Compress(&b, content); err != nil {
-			return "", err
+			return "", false, err
 		}
 
-		return base64.StdEncoding.EncodeToString(b.Bytes()), nil
+		return base64.StdEncoding.EncodeToString(b.Bytes()), true, nil
 	}
 
-	return string(content), nil
+	return string(content), false, nil
 }
 
 func (*runCmdOptions) configureTraits(integration *v1.Integration, options []string, catalog *trait.Catalog) error {
