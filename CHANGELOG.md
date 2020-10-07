@@ -14,6 +14,8 @@
 - Add Kamelet integration tests [\#1709](https://github.com/apache/camel-k/issues/1709)
 - Does camel-k plan to provide Java SDK client Calls? [\#1708](https://github.com/apache/camel-k/issues/1708)
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
+- Upgrade to Prometheus operator version 0.42.0+ [\#1697](https://github.com/apache/camel-k/issues/1697)
+- Add support for Strimzi Topics in KameletBinding [\#1686](https://github.com/apache/camel-k/issues/1686)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
 - Deprecate build kit at platform set-up time [\#1604](https://github.com/apache/camel-k/issues/1604)
@@ -24,6 +26,8 @@
 
 **Merged pull requests:**
 
+- Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
 - Upgrade to Operator SDK 1.0+ [\#1741](https://github.com/apache/camel-k/pull/1741) ([astefanutti](https://github.com/astefanutti))
 - Added installations steps to IBM Kubernetes Service\(IKS\) [\#1739](https://github.com/apache/camel-k/pull/1739) ([juanjopb](https://github.com/juanjopb))
@@ -35,6 +39,7 @@
 - fix\(\#1717\) Automatic changelog update should not be run on forks [\#1730](https://github.com/apache/camel-k/pull/1730) ([christophd](https://github.com/christophd))
 - chore: Make scripts portable [\#1729](https://github.com/apache/camel-k/pull/1729) ([christophd](https://github.com/christophd))
 - \[fix\] Use correct name of kameletbinding [\#1728](https://github.com/apache/camel-k/pull/1728) ([llowinge](https://github.com/llowinge))
+- chore\(binding\): refactor binding mechanism and add many more tests [\#1727](https://github.com/apache/camel-k/pull/1727) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[fix\] Use bigger timeout to start querying metrics in test [\#1726](https://github.com/apache/camel-k/pull/1726) ([llowinge](https://github.com/llowinge))
 - Related to \#1675: install default Kamelets [\#1725](https://github.com/apache/camel-k/pull/1725) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Adapt Knative service definition to new KnativeEnvironment definition [\#1724](https://github.com/apache/camel-k/pull/1724) ([astefanutti](https://github.com/astefanutti))
@@ -750,7 +755,6 @@
 - fix the version of the operator image [\#1077](https://github.com/apache/camel-k/pull/1077) ([zhfeng](https://github.com/zhfeng))
 - Support KUBECONF env variable [\#1076](https://github.com/apache/camel-k/pull/1076) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(build\): Use JSON merge patch to update build status [\#1074](https://github.com/apache/camel-k/pull/1074) ([astefanutti](https://github.com/astefanutti))
-- Automatically generate trait documentation from code [\#1068](https://github.com/apache/camel-k/pull/1068) ([nicolaferraro](https://github.com/nicolaferraro))
 - examples with camel-amqp and connection factory [\#1067](https://github.com/apache/camel-k/pull/1067) ([hguerrero](https://github.com/hguerrero))
 - add wrapper for processor functions [\#1066](https://github.com/apache/camel-k/pull/1066) ([hguerrero](https://github.com/hguerrero))
 - feat\(build\): Better report build progress [\#1064](https://github.com/apache/camel-k/pull/1064) ([astefanutti](https://github.com/astefanutti))
@@ -781,6 +785,7 @@
 
 **Merged pull requests:**
 
+- Automatically generate trait documentation from code [\#1068](https://github.com/apache/camel-k/pull/1068) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1048: use container mode only when no other mechanism is available [\#1054](https://github.com/apache/camel-k/pull/1054) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1038: redeploy integration when trait config changes [\#1053](https://github.com/apache/camel-k/pull/1053) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove support for java class loader [\#1052](https://github.com/apache/camel-k/pull/1052) ([lburgazzoli](https://github.com/lburgazzoli))
