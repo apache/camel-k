@@ -113,7 +113,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string, processe
 			continue
 		}
 		baseDir := filepath.Dir(f)
-		content, err := loadData(f, false)
+		content, _, err := loadData(f, false, false)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "cannot read file %s", f)
 		}
