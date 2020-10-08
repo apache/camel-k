@@ -231,6 +231,15 @@ func FileExists(name string) (bool, error) {
 	return !info.IsDir(), err
 }
 
+// DirectoryExists --
+func DirectoryExists(directory string) (bool, error) {
+	info, err := os.Stat(directory)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return info.IsDir(), err
+}
+
 // BytesMarshaller --
 type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)
