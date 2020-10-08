@@ -80,6 +80,21 @@ func GenerateCatalog(
 	runtime v1.RuntimeSpec,
 	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 
+	settings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
+	if err != nil {
+		return nil, err
+	}
+
+	return GenerateLocalCatalog(settings, mvn, runtime, providerDependencies)
+}
+
+// GenerateLocalCatalog --
+func GenerateLocalCatalog(
+	settings string,
+	mvn v1.MavenSpec,
+	runtime v1.RuntimeSpec,
+	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
+
 	root := os.TempDir()
 	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
 	if err != nil {
@@ -101,10 +116,7 @@ func GenerateCatalog(
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
 	mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))
 
-	settings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
-	if err != nil {
-		return nil, err
-	}
+	mc.SettingsContent = nil
 	if settings != "" {
 		mc.SettingsContent = []byte(settings)
 	}

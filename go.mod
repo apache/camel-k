@@ -52,8 +52,11 @@ require (
 
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
-	k8s.io/client-go => k8s.io/client-go v0.18.9
-	k8s.io/code-generator => k8s.io/code-generator v0.18.9
+	k8s.io/api => k8s.io/api v0.17.6
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.6
+	k8s.io/client-go => k8s.io/client-go v0.17.6
+	k8s.io/code-generator => k8s.io/code-generator v0.17.6
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.5.11
 )
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
