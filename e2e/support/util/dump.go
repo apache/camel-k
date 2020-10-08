@@ -21,6 +21,7 @@ package util
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"testing"
 
@@ -32,7 +33,7 @@ import (
 )
 
 // Dump prints all information about the given namespace to debug errors
-func Dump(c client.Client, ns string, t *testing.T) error {
+func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 
 	t.Logf("-------------------- start dumping namespace %s --------------------\n", ns)
 
@@ -40,7 +41,7 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 	if err != nil {
 		return err
 	}
-	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(metav1.ListOptions{})
+	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -54,7 +55,7 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
-	its, err := camelClient.CamelV1().Integrations(ns).List(metav1.ListOptions{})
+	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
-	iks, err := camelClient.CamelV1().IntegrationKits(ns).List(metav1.ListOptions{})
+	iks, err := camelClient.CamelV1().IntegrationKits(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
-	cms, err := c.CoreV1().ConfigMaps(ns).List(metav1.ListOptions{})
+	cms, err := c.CoreV1().ConfigMaps(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -96,7 +97,7 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
-	lst, err := c.CoreV1().Pods(ns).List(metav1.ListOptions{})
+	lst, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -112,7 +113,7 @@ func Dump(c client.Client, ns string, t *testing.T) error {
 		for _, container := range allContainers {
 			pad := "    "
 			t.Logf("%s%s\n", pad, container.Name)
-			err := dumpLogs(c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, t)
+			err := dumpLogs(ctx, c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, t)
 			if err != nil {
 				t.Logf("%sERROR while reading the logs: %v\n", pad, err)
 			}
@@ -129,12 +130,12 @@ func dumpConditions(prefix string, conditions []v1.PodCondition, t *testing.T) {
 	}
 }
 
-func dumpLogs(c client.Client, prefix string, ns string, name string, container string, t *testing.T) error {
+func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, t *testing.T) error {
 	lines := int64(50)
 	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{
 		Container: container,
 		TailLines: &lines,
-	}).Stream()
+	}).Stream(ctx)
 	if err != nil {
 		return err
 	}

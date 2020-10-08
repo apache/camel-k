@@ -74,7 +74,7 @@ func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ v1alpha
 		}
 
 		// look them up
-		topic, err := s.Client.KafkaTopics(ctx.Namespace).Get(endpoint.Ref.Name, v1.GetOptions{})
+		topic, err := s.Client.KafkaTopics(ctx.Namespace).Get(ctx.Ctx, endpoint.Ref.Name, v1.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +84,7 @@ func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ v1alpha
 			return nil, fmt.Errorf("no %q label defined on topic %s", v1beta1.StrimziKafkaClusterLabel, endpoint.Ref.Name)
 		}
 
-		cluster, err := s.Client.Kafkas(ctx.Namespace).Get(clusterName, v1.GetOptions{})
+		cluster, err := s.Client.Kafkas(ctx.Namespace).Get(ctx.Ctx, clusterName, v1.GetOptions{})
 		if err != nil {
 			return nil, err
 		}

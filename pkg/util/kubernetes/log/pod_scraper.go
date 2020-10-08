@@ -82,7 +82,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 		Follow:    true,
 		Container: containerName,
 	}
-	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.podName, &logOptions).Context(ctx).Stream()
+	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.podName, &logOptions).Stream(ctx)
 	if err != nil {
 		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
 		return
@@ -148,7 +148,7 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, po
 		},
 	}
 	podClient := s.client.CoreV1().Pods(pod.Namespace)
-	watcher, err := podClient.Watch(metav1.ListOptions{
+	watcher, err := podClient.Watch(ctx, metav1.ListOptions{
 		FieldSelector: "metadata.name=" + pod.Name,
 	})
 	if err != nil {

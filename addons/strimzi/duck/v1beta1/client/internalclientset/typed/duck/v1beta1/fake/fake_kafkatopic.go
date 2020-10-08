@@ -20,6 +20,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	v1beta1 "github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -39,7 +41,7 @@ var kafkatopicsResource = schema.GroupVersionResource{Group: "kafka.strimzi.io",
 var kafkatopicsKind = schema.GroupVersionKind{Group: "kafka.strimzi.io", Version: "v1beta1", Kind: "KafkaTopic"}
 
 // Get takes name of the kafkaTopic, and returns the corresponding kafkaTopic object, and an error if there is any.
-func (c *FakeKafkaTopics) Get(name string, options v1.GetOptions) (result *v1beta1.KafkaTopic, err error) {
+func (c *FakeKafkaTopics) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.KafkaTopic, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(kafkatopicsResource, c.ns, name), &v1beta1.KafkaTopic{})
 
@@ -50,7 +52,7 @@ func (c *FakeKafkaTopics) Get(name string, options v1.GetOptions) (result *v1bet
 }
 
 // List takes label and field selectors, and returns the list of KafkaTopics that match those selectors.
-func (c *FakeKafkaTopics) List(opts v1.ListOptions) (result *v1beta1.KafkaTopicList, err error) {
+func (c *FakeKafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.KafkaTopicList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(kafkatopicsResource, kafkatopicsKind, c.ns, opts), &v1beta1.KafkaTopicList{})
 
@@ -72,7 +74,7 @@ func (c *FakeKafkaTopics) List(opts v1.ListOptions) (result *v1beta1.KafkaTopicL
 }
 
 // Watch returns a watch.Interface that watches the requested kafkaTopics.
-func (c *FakeKafkaTopics) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeKafkaTopics) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(kafkatopicsResource, c.ns, opts))
 

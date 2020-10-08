@@ -18,6 +18,7 @@ limitations under the License.
 package discovery
 
 import (
+	"context"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -28,5 +29,5 @@ var TracingLocators []TracingLocator
 
 // TracingLocator is able to find the address of an available tracing endpoint
 type TracingLocator interface {
-	FindEndpoint(client.Client, log.Logger, *trait.Environment) (string, error)
+	FindEndpoint(context.Context, client.Client, log.Logger, *trait.Environment) (string, error)
 }

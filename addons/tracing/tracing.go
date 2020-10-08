@@ -90,7 +90,7 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 	if t.Auto == nil || *t.Auto {
 		if t.Endpoint == "" {
 			for _, locator := range discovery.TracingLocators {
-				endpoint, err := locator.FindEndpoint(t.Client, t.L, e)
+				endpoint, err := locator.FindEndpoint(e.C, t.Client, t.L, e)
 				if err != nil {
 					return false, err
 				}

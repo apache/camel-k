@@ -20,6 +20,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -40,7 +42,7 @@ var integrationplatformsResource = schema.GroupVersionResource{Group: "camel.apa
 var integrationplatformsKind = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "IntegrationPlatform"}
 
 // Get takes name of the integrationPlatform, and returns the corresponding integrationPlatform object, and an error if there is any.
-func (c *FakeIntegrationPlatforms) Get(name string, options v1.GetOptions) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Get(ctx context.Context, name string, options v1.GetOptions) (result *camelv1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(integrationplatformsResource, c.ns, name), &camelv1.IntegrationPlatform{})
 
@@ -51,7 +53,7 @@ func (c *FakeIntegrationPlatforms) Get(name string, options v1.GetOptions) (resu
 }
 
 // List takes label and field selectors, and returns the list of IntegrationPlatforms that match those selectors.
-func (c *FakeIntegrationPlatforms) List(opts v1.ListOptions) (result *camelv1.IntegrationPlatformList, err error) {
+func (c *FakeIntegrationPlatforms) List(ctx context.Context, opts v1.ListOptions) (result *camelv1.IntegrationPlatformList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(integrationplatformsResource, integrationplatformsKind, c.ns, opts), &camelv1.IntegrationPlatformList{})
 
@@ -73,14 +75,14 @@ func (c *FakeIntegrationPlatforms) List(opts v1.ListOptions) (result *camelv1.In
 }
 
 // Watch returns a watch.Interface that watches the requested integrationPlatforms.
-func (c *FakeIntegrationPlatforms) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeIntegrationPlatforms) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(integrationplatformsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a integrationPlatform and creates it.  Returns the server's representation of the integrationPlatform, and an error, if there is any.
-func (c *FakeIntegrationPlatforms) Create(integrationPlatform *camelv1.IntegrationPlatform) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Create(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts v1.CreateOptions) (result *camelv1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(integrationplatformsResource, c.ns, integrationPlatform), &camelv1.IntegrationPlatform{})
 
@@ -91,7 +93,7 @@ func (c *FakeIntegrationPlatforms) Create(integrationPlatform *camelv1.Integrati
 }
 
 // Update takes the representation of a integrationPlatform and updates it. Returns the server's representation of the integrationPlatform, and an error, if there is any.
-func (c *FakeIntegrationPlatforms) Update(integrationPlatform *camelv1.IntegrationPlatform) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Update(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts v1.UpdateOptions) (result *camelv1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(integrationplatformsResource, c.ns, integrationPlatform), &camelv1.IntegrationPlatform{})
 
@@ -103,7 +105,7 @@ func (c *FakeIntegrationPlatforms) Update(integrationPlatform *camelv1.Integrati
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeIntegrationPlatforms) UpdateStatus(integrationPlatform *camelv1.IntegrationPlatform) (*camelv1.IntegrationPlatform, error) {
+func (c *FakeIntegrationPlatforms) UpdateStatus(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts v1.UpdateOptions) (*camelv1.IntegrationPlatform, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(integrationplatformsResource, "status", c.ns, integrationPlatform), &camelv1.IntegrationPlatform{})
 
@@ -114,7 +116,7 @@ func (c *FakeIntegrationPlatforms) UpdateStatus(integrationPlatform *camelv1.Int
 }
 
 // Delete takes name of the integrationPlatform and deletes it. Returns an error if one occurs.
-func (c *FakeIntegrationPlatforms) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeIntegrationPlatforms) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(integrationplatformsResource, c.ns, name), &camelv1.IntegrationPlatform{})
 
@@ -122,15 +124,15 @@ func (c *FakeIntegrationPlatforms) Delete(name string, options *v1.DeleteOptions
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeIntegrationPlatforms) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(integrationplatformsResource, c.ns, listOptions)
+func (c *FakeIntegrationPlatforms) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(integrationplatformsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &camelv1.IntegrationPlatformList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched integrationPlatform.
-func (c *FakeIntegrationPlatforms) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, name, pt, data, subresources...), &camelv1.IntegrationPlatform{})
 

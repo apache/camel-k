@@ -87,7 +87,7 @@ func IsOperatorInstalled(ctx context.Context, client client.Client, namespace st
 
 // HasPermissionToInstall checks if the current user/serviceaccount has the right permissions to install camel k via OLM
 func HasPermissionToInstall(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
-	if ok, err := kubernetes.CheckPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
+	if ok, err := kubernetes.CheckPermission(ctx, client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -98,7 +98,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 		targetNamespace = options.GlobalNamespace
 	}
 
-	if ok, err := kubernetes.CheckPermission(client, olmv1alpha1.GroupName, "subscriptions", targetNamespace, options.Package, "create"); err != nil {
+	if ok, err := kubernetes.CheckPermission(ctx, client, olmv1alpha1.GroupName, "subscriptions", targetNamespace, options.Package, "create"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -111,7 +111,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 	}
 
 	if !global {
-		if ok, err := kubernetes.CheckPermission(client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "list"); err != nil {
+		if ok, err := kubernetes.CheckPermission(ctx, client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "list"); err != nil {
 			return false, err
 		} else if !ok {
 			return false, nil
@@ -122,7 +122,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 			return false, err
 		}
 		if group == nil {
-			if ok, err := kubernetes.CheckPermission(client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "create"); err != nil {
+			if ok, err := kubernetes.CheckPermission(ctx, client, olmv1.GroupName, "operatorgroups", namespace, options.Package, "create"); err != nil {
 				return false, err
 			} else if !ok {
 				return false, nil

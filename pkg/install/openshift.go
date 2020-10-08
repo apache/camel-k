@@ -78,7 +78,7 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 		},
 	}
 
-	sar, err = c.AuthorizationV1().SelfSubjectAccessReviews().Create(sar)
+	sar, err = c.AuthorizationV1().SelfSubjectAccessReviews().Create(ctx, sar, metav1.CreateOptions{})
 	if err != nil {
 		if errors.IsForbidden(err) {
 			// Let's just skip the ConsoleCLIDownload resource creation

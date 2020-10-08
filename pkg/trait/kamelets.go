@@ -247,7 +247,7 @@ func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
 		if k.configurationID != "" {
 			options.LabelSelector = fmt.Sprintf("%s=%s,%s=%s", kameletLabel, k.kamelet, kameletConfigurationLabel, k.configurationID)
 		}
-		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(options)
+		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(e.C, options)
 		if err != nil {
 			return err
 		}

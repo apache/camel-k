@@ -92,7 +92,7 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 }
 
 func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) error {
-	list, err := s.listPods()
+	list, err := s.listPods(ctx)
 	if err != nil {
 		return err
 	}
@@ -161,8 +161,8 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 	}()
 }
 
-func (s *SelectorScraper) listPods() (*corev1.PodList, error) {
-	list, err := s.client.CoreV1().Pods(s.namespace).List(metav1.ListOptions{
+func (s *SelectorScraper) listPods(ctx context.Context) (*corev1.PodList, error) {
+	list, err := s.client.CoreV1().Pods(s.namespace).List(ctx, metav1.ListOptions{
 		LabelSelector: s.labelSelector,
 	})
 	if err != nil {

@@ -20,6 +20,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -40,7 +42,7 @@ var integrationkitsResource = schema.GroupVersionResource{Group: "camel.apache.o
 var integrationkitsKind = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "IntegrationKit"}
 
 // Get takes name of the integrationKit, and returns the corresponding integrationKit object, and an error if there is any.
-func (c *FakeIntegrationKits) Get(name string, options v1.GetOptions) (result *camelv1.IntegrationKit, err error) {
+func (c *FakeIntegrationKits) Get(ctx context.Context, name string, options v1.GetOptions) (result *camelv1.IntegrationKit, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(integrationkitsResource, c.ns, name), &camelv1.IntegrationKit{})
 
@@ -51,7 +53,7 @@ func (c *FakeIntegrationKits) Get(name string, options v1.GetOptions) (result *c
 }
 
 // List takes label and field selectors, and returns the list of IntegrationKits that match those selectors.
-func (c *FakeIntegrationKits) List(opts v1.ListOptions) (result *camelv1.IntegrationKitList, err error) {
+func (c *FakeIntegrationKits) List(ctx context.Context, opts v1.ListOptions) (result *camelv1.IntegrationKitList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(integrationkitsResource, integrationkitsKind, c.ns, opts), &camelv1.IntegrationKitList{})
 
@@ -73,14 +75,14 @@ func (c *FakeIntegrationKits) List(opts v1.ListOptions) (result *camelv1.Integra
 }
 
 // Watch returns a watch.Interface that watches the requested integrationKits.
-func (c *FakeIntegrationKits) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeIntegrationKits) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(integrationkitsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a integrationKit and creates it.  Returns the server's representation of the integrationKit, and an error, if there is any.
-func (c *FakeIntegrationKits) Create(integrationKit *camelv1.IntegrationKit) (result *camelv1.IntegrationKit, err error) {
+func (c *FakeIntegrationKits) Create(ctx context.Context, integrationKit *camelv1.IntegrationKit, opts v1.CreateOptions) (result *camelv1.IntegrationKit, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(integrationkitsResource, c.ns, integrationKit), &camelv1.IntegrationKit{})
 
@@ -91,7 +93,7 @@ func (c *FakeIntegrationKits) Create(integrationKit *camelv1.IntegrationKit) (re
 }
 
 // Update takes the representation of a integrationKit and updates it. Returns the server's representation of the integrationKit, and an error, if there is any.
-func (c *FakeIntegrationKits) Update(integrationKit *camelv1.IntegrationKit) (result *camelv1.IntegrationKit, err error) {
+func (c *FakeIntegrationKits) Update(ctx context.Context, integrationKit *camelv1.IntegrationKit, opts v1.UpdateOptions) (result *camelv1.IntegrationKit, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(integrationkitsResource, c.ns, integrationKit), &camelv1.IntegrationKit{})
 
@@ -103,7 +105,7 @@ func (c *FakeIntegrationKits) Update(integrationKit *camelv1.IntegrationKit) (re
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeIntegrationKits) UpdateStatus(integrationKit *camelv1.IntegrationKit) (*camelv1.IntegrationKit, error) {
+func (c *FakeIntegrationKits) UpdateStatus(ctx context.Context, integrationKit *camelv1.IntegrationKit, opts v1.UpdateOptions) (*camelv1.IntegrationKit, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(integrationkitsResource, "status", c.ns, integrationKit), &camelv1.IntegrationKit{})
 
@@ -114,7 +116,7 @@ func (c *FakeIntegrationKits) UpdateStatus(integrationKit *camelv1.IntegrationKi
 }
 
 // Delete takes name of the integrationKit and deletes it. Returns an error if one occurs.
-func (c *FakeIntegrationKits) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeIntegrationKits) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(integrationkitsResource, c.ns, name), &camelv1.IntegrationKit{})
 
@@ -122,15 +124,15 @@ func (c *FakeIntegrationKits) Delete(name string, options *v1.DeleteOptions) err
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeIntegrationKits) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(integrationkitsResource, c.ns, listOptions)
+func (c *FakeIntegrationKits) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(integrationkitsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &camelv1.IntegrationKitList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched integrationKit.
-func (c *FakeIntegrationKits) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *camelv1.IntegrationKit, err error) {
+func (c *FakeIntegrationKits) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.IntegrationKit, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(integrationkitsResource, c.ns, name, pt, data, subresources...), &camelv1.IntegrationKit{})
 

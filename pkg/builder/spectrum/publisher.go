@@ -102,7 +102,7 @@ func mountSecret(ctx *builder.Context, name string) (string, error) {
 		return "", err
 	}
 
-	secret, err := ctx.CoreV1().Secrets(ctx.Namespace).Get(name, metav1.GetOptions{})
+	secret, err := ctx.CoreV1().Secrets(ctx.Namespace).Get(ctx.C, name, metav1.GetOptions{})
 	if err != nil {
 		os.RemoveAll(dir)
 		return "", err

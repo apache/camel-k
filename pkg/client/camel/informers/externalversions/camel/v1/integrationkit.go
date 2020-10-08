@@ -20,6 +20,7 @@ limitations under the License.
 package v1
 
 import (
+	"context"
 	time "time"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -62,13 +63,13 @@ func NewFilteredIntegrationKitInformer(client versioned.Interface, namespace str
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().IntegrationKits(namespace).List(options)
+				return client.CamelV1().IntegrationKits(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().IntegrationKits(namespace).Watch(options)
+				return client.CamelV1().IntegrationKits(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&camelv1.IntegrationKit{},
