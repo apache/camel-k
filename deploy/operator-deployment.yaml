@@ -39,7 +39,7 @@ spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:1.2.0-SNAPSHOT
+          image: docker.io/apache/camel-k:1.2.0
           command:
           - kamel
           - operator
