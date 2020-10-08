@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
+- Propagate Kamelet icon on binding [\#1747](https://github.com/apache/camel-k/issues/1747)
 - Thread blocked calling knative REST [\#1720](https://github.com/apache/camel-k/issues/1720)
 - Automatic changelog update should not be run on forks [\#1717](https://github.com/apache/camel-k/issues/1717)
 - Environment Variables from Secrets [\#1715](https://github.com/apache/camel-k/issues/1715)
@@ -22,10 +24,13 @@
 - kamelets: runtime support [\#1575](https://github.com/apache/camel-k/issues/1575)
 - kamelets: operator support [\#1574](https://github.com/apache/camel-k/issues/1574)
 - Support for Kamelets [\#1567](https://github.com/apache/camel-k/issues/1567)
+- Add a kamel help cli command [\#1545](https://github.com/apache/camel-k/issues/1545)
 - Switch to Quarkus as default runtime for integrations [\#1513](https://github.com/apache/camel-k/issues/1513)
 
 **Merged pull requests:**
 
+- Fix \#1750: auto-compress/encode binary sources and resources [\#1751](https://github.com/apache/camel-k/pull/1751) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fix \#1747: propagate icon on kameletbinding and fix integration owner… [\#1749](https://github.com/apache/camel-k/pull/1749) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
@@ -212,7 +217,6 @@
 - fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 - CLI - Make kamel run handle github urls that are not raw [\#1515](https://github.com/apache/camel-k/pull/1515) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): bump version to 1.1.0-SNAPSHOT and update OLM/HELM [\#1510](https://github.com/apache/camel-k/pull/1510) ([nicolaferraro](https://github.com/nicolaferraro))
-- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.1](https://github.com/apache/camel-k/tree/1.0.1) (2020-06-25)
 
@@ -387,6 +391,7 @@
 - Avoid requirements of a kubeconfig when using  command [\#1493](https://github.com/apache/camel-k/pull/1493) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add tracing trait and automatically discover Jaeger [\#1492](https://github.com/apache/camel-k/pull/1492) ([nicolaferraro](https://github.com/nicolaferraro))
 - support for jitpack dependencies [\#1491](https://github.com/apache/camel-k/pull/1491) ([lburgazzoli](https://github.com/lburgazzoli))
+- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 - chore\(keys\): update PGP key [\#1488](https://github.com/apache/camel-k/pull/1488) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1396: use circuitbreaker capability from runtime [\#1486](https://github.com/apache/camel-k/pull/1486) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Regenerate catalogs with Camel version 3.3.0 [\#1485](https://github.com/apache/camel-k/pull/1485) ([astefanutti](https://github.com/astefanutti))
@@ -755,6 +760,7 @@
 - fix the version of the operator image [\#1077](https://github.com/apache/camel-k/pull/1077) ([zhfeng](https://github.com/zhfeng))
 - Support KUBECONF env variable [\#1076](https://github.com/apache/camel-k/pull/1076) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(build\): Use JSON merge patch to update build status [\#1074](https://github.com/apache/camel-k/pull/1074) ([astefanutti](https://github.com/astefanutti))
+- Automatically generate trait documentation from code [\#1068](https://github.com/apache/camel-k/pull/1068) ([nicolaferraro](https://github.com/nicolaferraro))
 - examples with camel-amqp and connection factory [\#1067](https://github.com/apache/camel-k/pull/1067) ([hguerrero](https://github.com/hguerrero))
 - add wrapper for processor functions [\#1066](https://github.com/apache/camel-k/pull/1066) ([hguerrero](https://github.com/hguerrero))
 - feat\(build\): Better report build progress [\#1064](https://github.com/apache/camel-k/pull/1064) ([astefanutti](https://github.com/astefanutti))
@@ -785,7 +791,6 @@
 
 **Merged pull requests:**
 
-- Automatically generate trait documentation from code [\#1068](https://github.com/apache/camel-k/pull/1068) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1048: use container mode only when no other mechanism is available [\#1054](https://github.com/apache/camel-k/pull/1054) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1038: redeploy integration when trait config changes [\#1053](https://github.com/apache/camel-k/pull/1053) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove support for java class loader [\#1052](https://github.com/apache/camel-k/pull/1052) ([lburgazzoli](https://github.com/lburgazzoli))
