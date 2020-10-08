@@ -85,11 +85,11 @@ func GenerateCatalog(
 		return nil, err
 	}
 
-	return GenerateLocalCatalog(settings, mvn, runtime, providerDependencies)
+	return GenerateCatalogCommon(settings, mvn, runtime, providerDependencies)
 }
 
-// GenerateLocalCatalog --
-func GenerateLocalCatalog(
+// GenerateCatalogCommon --
+func GenerateCatalogCommon(
 	settings string,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
