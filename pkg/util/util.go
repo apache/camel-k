@@ -247,6 +247,24 @@ func DirectoryExists(directory string) (bool, error) {
 	return info.IsDir(), nil
 }
 
+// CreateDirectory --
+func CreateDirectory(directory string) error {
+	// If directory does not exist, create it.
+	directoryExists, err := DirectoryExists(directory)
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(directory, 0777)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // BytesMarshaller --
 type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)

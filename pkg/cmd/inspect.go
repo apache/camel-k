@@ -20,9 +20,13 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -30,6 +34,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/scylladb/go-set/strset"
 	"github.com/spf13/cobra"
+)
+
+var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
+
+const (
+	defaultRuntimeVersion         = "1.3.0"
+	defaultCamelVersion           = "3.3.0"
+	defaultWorkspaceDirectoryName = "workspace"
 )
 
 func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdOptions) {
@@ -40,7 +52,7 @@ func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdO
 	cmd := cobra.Command{
 		Use:     "inspect [files to inspect]",
 		Short:   "Generate dependencies list the given integration files.",
-		Long:    `Compute and emit the dependencies for a list of integration files.`,
+		Long:    "Output dependencies for a list of integration files. By default this command returns the top level dependencies only.",
 		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
@@ -57,14 +69,24 @@ func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdO
 		},
 	}
 
+	cmd.Flags().Bool("all-dependencies", false, "Compute and output transitive dependencies.")
+	cmd.Flags().String("additional-dependencies", "", `Comma-separated list of additional top-level dependencies with the format:
+		<type>:<dependency-name>
+			where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
+	cmd.Flags().String("workspace", "", "Absolute path to workspace directory. Default: <kamel-invocation-directory>/workspace")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().String("dependencies-directory", "", "Absolute path to directory containing all dependencies. Default: <kamel-invocation-directory>/workspace/dependencies")
 
 	return &cmd, &options
 }
 
 type inspectCmdOptions struct {
 	*RootCmdOptions
-	OutputFormat string `mapstructure:"output"`
+	AllDependencies        bool   `mapstructure:"all-dependencies"`
+	OutputFormat           string `mapstructure:"output"`
+	AdditionalDependencies string `mapstructure:"additional-dependencies"`
+	Workspace              string `mapstructure:"workspace"`
+	DependenciesDirectory  string `mapstructure:"dependencies-directory"`
 }
 
 func (command *inspectCmdOptions) validate(args []string) error {
@@ -89,6 +111,41 @@ func (command *inspectCmdOptions) validate(args []string) error {
 		}
 	}
 
+	// Validate list of additional dependencies i.e. make sure that each dependency has
+	// a valid type.
+	if command.AdditionalDependencies != "" {
+		additionalDependencies := strings.Split(command.AdditionalDependencies, ",")
+
+		for _, dependency := range additionalDependencies {
+			dependencyComponents := strings.Split(dependency, ":")
+
+			TypeIsValid := false
+			for _, dependencyType := range acceptedDependencyTypes {
+				if dependencyType == dependencyComponents[0] {
+					TypeIsValid = true
+				}
+			}
+
+			if !TypeIsValid {
+				return errors.New("Unexpected type for user-provided dependency: " + dependency + ", check command usage for valid format.")
+			}
+		}
+	}
+
+	// If provided, ensure that that the dependencies directory exists.
+	if command.DependenciesDirectory != "" {
+		dependenciesDirectoryExists, err := util.DirectoryExists(command.DependenciesDirectory)
+		// Report any error.
+		if err != nil {
+			return err
+		}
+
+		// Signal file not found.
+		if !dependenciesDirectoryExists {
+			return errors.New("input file " + command.DependenciesDirectory + " file does not exist")
+		}
+	}
+
 	return nil
 }
 
@@ -107,6 +164,43 @@ func (command *inspectCmdOptions) run(args []string) error {
 		}
 	}
 
+	// Get top-level dependencies, this is the default behavior when no other options are provided.
+	dependencies, err := getTopLevelDependencies(catalog, command.OutputFormat, args)
+	if err != nil {
+		return err
+	}
+
+	// Add additional user-provided dependencies.
+	if command.AdditionalDependencies != "" {
+		additionalDependencies := strings.Split(command.AdditionalDependencies, ",")
+		for _, dependency := range additionalDependencies {
+			dependencies = append(dependencies, dependency)
+		}
+	}
+
+	// If --all-dependencies flag is set, add transitive dependencies.
+	if command.AllDependencies {
+		// Create workspace directory to hold all intermediate files.
+		workspaceDirectory, err := getWorkspaceDirectory(command)
+		if err != nil {
+			return err
+		}
+
+		// The dependencies var will contain both top level and transitive dependencies.
+		dependencies, err = getTransitiveDependencies(catalog, dependencies, workspaceDirectory)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, dep := range dependencies {
+		fmt.Printf("%v\n", dep)
+	}
+
+	return nil
+}
+
+func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args []string) ([]string, error) {
 	// List of top-level dependencies.
 	dependencies := strset.New()
 
@@ -114,7 +208,7 @@ func (command *inspectCmdOptions) run(args []string) error {
 	for _, source := range args {
 		data, _, err := loadContent(source, false, false)
 		if err != nil {
-			return err
+			return []string{}, err
 		}
 
 		sourceSpec := v1.SourceSpec{
@@ -129,10 +223,10 @@ func (command *inspectCmdOptions) run(args []string) error {
 		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
 	}
 
-	if command.OutputFormat != "" {
-		err := printDependencies(command.OutputFormat, dependencies)
+	if format != "" {
+		err := printDependencies(format, dependencies)
 		if err != nil {
-			return err
+			return []string{}, err
 		}
 	} else {
 		// Print output in text form.
@@ -140,8 +234,7 @@ func (command *inspectCmdOptions) run(args []string) error {
 			fmt.Printf("%v\n", dep)
 		}
 	}
-
-	return nil
+	return dependencies.List(), nil
 }
 
 func generateCatalog() (*camel.RuntimeCatalog, error) {
@@ -155,7 +248,7 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 		Provider: v1.RuntimeProviderMain,
 	}
 	providerDependencies := []maven.Dependency{}
-	catalog, err := camel.GenerateLocalCatalog(settings, mvn, runtime, providerDependencies)
+	catalog, err := camel.GenerateCatalogCommon(settings, mvn, runtime, providerDependencies)
 	if err != nil {
 		return nil, err
 	}
@@ -181,4 +274,68 @@ func printDependencies(format string, dependecies *strset.Set) error {
 		return errors.New("unknown output format: " + format)
 	}
 	return nil
+}
+
+func getTransitiveDependencies(
+	catalog *camel.RuntimeCatalog,
+	dependencies []string,
+	workspaceDirectory string) ([]string, error) {
+
+	mvn := v1.MavenSpec{
+		LocalRepository: "",
+	}
+
+	// Create Maven project.
+	project := runtime.GenerateProjectCommon(defaultCamelVersion, defaultRuntimeVersion)
+
+	// Inject dependencies into Maven project.
+	err := builder.InjectDependenciesCommon(&project, dependencies, catalog)
+	if err != nil {
+		return []string{}, err
+	}
+
+	// Create local Maven context.
+	mc := maven.NewContext(path.Join(workspaceDirectory, "maven"), project)
+	mc.LocalRepository = mvn.LocalRepository
+	mc.Timeout = mvn.GetTimeout().Duration
+
+	// Compute dependencies.
+	content, err := runtime.ComputeDependenciesCommon(mc, catalog.Runtime.Version)
+	if err != nil {
+		return nil, err
+	}
+
+	// Compose artifcats list.
+	artifacts := []v1.Artifact{}
+	artifacts, err = runtime.ProcessTransitiveDependencies(content, "dependencies")
+	if err != nil {
+		return nil, err
+	}
+
+	allDependencies := strset.New()
+	for _, entry := range artifacts {
+		allDependencies.Add(fmt.Sprintf("%s\n", entry.Location))
+	}
+
+	return allDependencies.List(), nil
+}
+
+func getWorkspaceDirectory(command *inspectCmdOptions) (string, error) {
+	// Path to workspace directory.
+	workspaceDirectory := command.Workspace
+	if command.Workspace == "" {
+		currentDirectory, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		workspaceDirectory = path.Join(currentDirectory, defaultWorkspaceDirectoryName)
+	}
+
+	// Create the workspace directory if it does not already exist.
+	err := util.CreateDirectory(workspaceDirectory)
+	if err != nil {
+		return "", err
+	}
+
+	return workspaceDirectory, nil
 }

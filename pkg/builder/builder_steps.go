@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/jitpack"
 
 	"github.com/rs/xid"
@@ -140,7 +141,17 @@ func generateProjectSettings(ctx *Context) error {
 
 func injectDependencies(ctx *Context) error {
 	// Add dependencies from build
-	for _, d := range ctx.Build.Dependencies {
+	return InjectDependenciesCommon(&ctx.Maven.Project, ctx.Build.Dependencies, ctx.Catalog)
+}
+
+// InjectDependenciesCommon --
+func InjectDependenciesCommon(
+	project *maven.Project,
+	dependencies []string,
+	catalog *camel.RuntimeCatalog) error {
+
+	// Add dependencies from build
+	for _, d := range dependencies {
 		switch {
 		case strings.HasPrefix(d, "bom:"):
 			mid := strings.TrimPrefix(d, "bom:")
@@ -151,7 +162,7 @@ func injectDependencies(ctx *Context) error {
 				return err
 			}
 
-			ctx.Maven.Project.DependencyManagement.Dependencies = append(ctx.Maven.Project.DependencyManagement.Dependencies, maven.Dependency{
+			project.DependencyManagement.Dependencies = append(project.DependencyManagement.Dependencies, maven.Dependency{
 				GroupID:    d.GroupID,
 				ArtifactID: d.ArtifactID,
 				Version:    d.Version,
@@ -165,7 +176,7 @@ func injectDependencies(ctx *Context) error {
 				artifactID = "camel-" + artifactID
 			}
 
-			ctx.Maven.Project.AddDependencyGAV("org.apache.camel", artifactID, "")
+			project.AddDependencyGAV("org.apache.camel", artifactID, "")
 		case strings.HasPrefix(d, "camel-k:"):
 			artifactID := strings.TrimPrefix(d, "camel-k:")
 
@@ -173,7 +184,7 @@ func injectDependencies(ctx *Context) error {
 				artifactID = "camel-k-" + artifactID
 			}
 
-			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
+			project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
 		case strings.HasPrefix(d, "camel-quarkus:"):
 			artifactID := strings.TrimPrefix(d, "camel-quarkus:")
 
@@ -181,25 +192,25 @@ func injectDependencies(ctx *Context) error {
 				artifactID = "camel-quarkus-" + artifactID
 			}
 
-			ctx.Maven.Project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
+			project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
 		case strings.HasPrefix(d, "mvn:"):
 			mid := strings.TrimPrefix(d, "mvn:")
 			gav := strings.Replace(mid, "/", ":", -1)
 
-			ctx.Maven.Project.AddEncodedDependencyGAV(gav)
+			project.AddEncodedDependencyGAV(gav)
 		default:
 			if dep := jitpack.ToDependency(d); dep != nil {
-				ctx.Maven.Project.AddDependency(*dep)
+				project.AddDependency(*dep)
 
 				addRepo := true
-				for _, repo := range ctx.Maven.Project.Repositories {
+				for _, repo := range project.Repositories {
 					if repo.URL == jitpack.RepoURL {
 						addRepo = false
 						break
 					}
 				}
 				if addRepo {
-					ctx.Maven.Project.Repositories = append(ctx.Maven.Project.Repositories, maven.Repository{
+					project.Repositories = append(project.Repositories, maven.Repository{
 						ID:  "jitpack.io-" + xid.New().String(),
 						URL: jitpack.RepoURL,
 						Releases: maven.RepositoryPolicy{
@@ -219,18 +230,18 @@ func injectDependencies(ctx *Context) error {
 	}
 
 	// Add dependencies from catalog
-	deps := make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
-	copy(deps, ctx.Maven.Project.Dependencies)
+	deps := make([]maven.Dependency, len(project.Dependencies))
+	copy(deps, project.Dependencies)
 
 	for _, d := range deps {
-		if a, ok := ctx.Catalog.Artifacts[d.ArtifactID]; ok {
+		if a, ok := catalog.Artifacts[d.ArtifactID]; ok {
 			for _, dep := range a.Dependencies {
 				md := maven.Dependency{
 					GroupID:    dep.GroupID,
 					ArtifactID: dep.ArtifactID,
 				}
 
-				ctx.Maven.Project.AddDependency(md)
+				project.AddDependency(md)
 
 				for _, e := range dep.Exclusions {
 					me := maven.Exclusion{
@@ -238,18 +249,18 @@ func injectDependencies(ctx *Context) error {
 						ArtifactID: e.ArtifactID,
 					}
 
-					ctx.Maven.Project.AddDependencyExclusion(md, me)
+					project.AddDependencyExclusion(md, me)
 				}
 			}
 		}
 	}
 
 	// Post process dependencies
-	deps = make([]maven.Dependency, len(ctx.Maven.Project.Dependencies))
-	copy(deps, ctx.Maven.Project.Dependencies)
+	deps = make([]maven.Dependency, len(project.Dependencies))
+	copy(deps, project.Dependencies)
 
 	for _, d := range deps {
-		if a, ok := ctx.Catalog.Artifacts[d.ArtifactID]; ok {
+		if a, ok := catalog.Artifacts[d.ArtifactID]; ok {
 			md := maven.Dependency{
 				GroupID:    a.GroupID,
 				ArtifactID: a.ArtifactID,
@@ -261,7 +272,7 @@ func injectDependencies(ctx *Context) error {
 					ArtifactID: e.ArtifactID,
 				}
 
-				ctx.Maven.Project.AddDependencyExclusion(md, me)
+				project.AddDependencyExclusion(md, me)
 			}
 		}
 	}

@@ -60,10 +60,19 @@ func loadCamelCatalog(ctx *builder.Context) error {
 }
 
 func generateProject(ctx *builder.Context) error {
-	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
+	p := GenerateProjectCommon(ctx.Build.Runtime.Metadata["camel.version"], ctx.Build.Runtime.Version)
 
 	// Add all the properties from the build configuration
 	p.Properties.AddAll(ctx.Build.Properties)
+
+	ctx.Maven.Project = p
+
+	return nil
+}
+
+// GenerateProjectCommon --
+func GenerateProjectCommon(camelVersion string, runtimeVersion string) maven.Project {
+	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
@@ -71,21 +80,19 @@ func generateProject(ctx *builder.Context) error {
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel",
 		ArtifactID: "camel-bom",
-		Version:    ctx.Build.Runtime.Metadata["camel.version"],
+		Version:    camelVersion,
 		Type:       "pom",
 		Scope:      "import",
 	})
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies, maven.Dependency{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-runtime-bom",
-		Version:    ctx.Build.Runtime.Version,
+		Version:    runtimeVersion,
 		Type:       "pom",
 		Scope:      "import",
 	})
 
-	ctx.Maven.Project = p
-
-	return nil
+	return p
 }
 
 func computeDependencies(ctx *builder.Context) error {
@@ -93,30 +100,56 @@ func computeDependencies(ctx *builder.Context) error {
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.Runtime.Version)
+
+	// Compute dependencies.
+	content, err := ComputeDependenciesCommon(mc, ctx.Catalog.Runtime.Version)
+	if err != nil {
+		return err
+	}
+
+	// Process artifacts list and add it to existing artifacts.
+	artifacts := []v1.Artifact{}
+	artifacts, err = ProcessTransitiveDependencies(content, "dependencies")
+	if err != nil {
+		return err
+	}
+	ctx.Artifacts = append(ctx.Artifacts, artifacts...)
+
+	return nil
+}
+
+// ComputeDependenciesCommon --
+func ComputeDependenciesCommon(mc maven.Context, runtimeVersion string) ([]byte, error) {
+	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", runtimeVersion)
 
 	if err := maven.Run(mc); err != nil {
-		return errors.Wrap(err, "failure while determining classpath")
+		return nil, errors.Wrap(err, "failure while determining classpath")
 	}
 
 	dependencies := path.Join(mc.Path, "target", "dependencies.yaml")
 	content, err := ioutil.ReadFile(dependencies)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	return content, nil
+}
+
+// ProcessTransitiveDependencies --
+func ProcessTransitiveDependencies(content []byte, outputDir string) ([]v1.Artifact, error) {
 	cp := make(map[string][]v1.Artifact)
-	err = yaml2.Unmarshal(content, &cp)
+	err := yaml2.Unmarshal(content, &cp)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	artifacts := []v1.Artifact{}
 	for _, e := range cp["dependencies"] {
 		_, fileName := path.Split(e.Location)
 
 		gav, err := maven.ParseGAV(e.ID)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 
 		//
@@ -125,19 +158,19 @@ func computeDependencies(ctx *builder.Context) error {
 		if e.Checksum == "" {
 			chksum, err := digest.ComputeSHA1(e.Location)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			e.Checksum = "sha1:" + chksum
 		}
 
-		ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
+		artifacts = append(artifacts, v1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
-			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
+			Target:   path.Join(outputDir, gav.GroupID+"."+fileName),
 			Checksum: e.Checksum,
 		})
 	}
 
-	return nil
+	return artifacts, nil
 }
