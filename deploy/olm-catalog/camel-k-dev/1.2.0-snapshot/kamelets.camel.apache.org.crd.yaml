@@ -67,8 +67,7 @@ spec:
               description: AuthorizationSpec is TODO (oauth information)
               type: object
             definition:
-              description: JSONSchemaProps is a JSON-Schema following Specification
-                Draft 4 (http://json-schema.org/).
+              description: JSONSchemaProps is a JSON-Schema definition.
               properties:
                 $ref:
                   type: string
@@ -90,7 +89,6 @@ spec:
                     Defaulting is a beta feature under the CustomResourceDefaulting
                     feature gate. Defaulting requires spec.preserveUnknownFields to
                     be false.
-                  type: Any
                 definitions:
                   additionalProperties: {}
                   description: JSONSchemaDefinitions contains the models explicitly
@@ -106,11 +104,9 @@ spec:
                 description:
                   type: string
                 enum:
-                  items:
-                    type: Any
+                  items: {}
                   type: array
-                example:
-                  type: Any
+                example: {}
                 exclusiveMaximum:
                   type: boolean
                 exclusiveMinimum:
@@ -330,8 +326,7 @@ spec:
                   mediaType:
                     type: string
                   schema:
-                    description: JSONSchemaProps is a JSON-Schema following Specification
-                      Draft 4 (http://json-schema.org/).
+                    description: JSONSchemaProps is a JSON-Schema definition.
                     properties:
                       $ref:
                         type: string
@@ -353,7 +348,6 @@ spec:
                           fields. Defaulting is a beta feature under the CustomResourceDefaulting
                           feature gate. Defaulting requires spec.preserveUnknownFields
                           to be false.
-                        type: Any
                       definitions:
                         additionalProperties: {}
                         description: JSONSchemaDefinitions contains the models explicitly
@@ -370,11 +364,9 @@ spec:
                       description:
                         type: string
                       enum:
-                        items:
-                          type: Any
+                        items: {}
                         type: array
-                      example:
-                        type: Any
+                      example: {}
                       exclusiveMaximum:
                         type: boolean
                       exclusiveMinimum:
