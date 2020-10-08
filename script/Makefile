@@ -120,7 +120,7 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate: generate-deepcopy generate-crd generate-client generate-doc generate-strimzi
+generate: generate-deepcopy generate-crd generate-client generate-doc generate-json-schema generate-strimzi
 
 generate-client:
 	./script/gen_client.sh
@@ -133,6 +133,9 @@ generate-doc:
 
 generate-deepcopy: controller-gen
 	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
+
+generate-json-schema:
+	./script/gen_json_schema.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
 
 generate-strimzi:
 	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
