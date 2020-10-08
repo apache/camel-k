@@ -44,7 +44,7 @@ func IsEnabledInNamespace(ctx context.Context, c client.Client, namespace string
 			Group:    kgv.Group,
 			Version:  kgv.Version,
 			Resource: kgv.Resource,
-		}).Namespace(namespace).List(metav1.ListOptions{})
+		}).Namespace(namespace).List(ctx, metav1.ListOptions{})
 
 		if err == nil {
 			return true

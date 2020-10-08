@@ -20,6 +20,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	"time"
 
 	v1beta1 "github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
@@ -37,9 +38,9 @@ type KafkasGetter interface {
 
 // KafkaInterface has methods to work with Kafka resources.
 type KafkaInterface interface {
-	Get(name string, options v1.GetOptions) (*v1beta1.Kafka, error)
-	List(opts v1.ListOptions) (*v1beta1.KafkaList, error)
-	Watch(opts v1.ListOptions) (watch.Interface, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.Kafka, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.KafkaList, error)
+	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	KafkaExpansion
 }
 
@@ -58,20 +59,20 @@ func newKafkas(c *KafkaV1beta1Client, namespace string) *kafkas {
 }
 
 // Get takes name of the kafka, and returns the corresponding kafka object, and an error if there is any.
-func (c *kafkas) Get(name string, options v1.GetOptions) (result *v1beta1.Kafka, err error) {
+func (c *kafkas) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Kafka, err error) {
 	result = &v1beta1.Kafka{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("kafkas").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of Kafkas that match those selectors.
-func (c *kafkas) List(opts v1.ListOptions) (result *v1beta1.KafkaList, err error) {
+func (c *kafkas) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.KafkaList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -82,13 +83,13 @@ func (c *kafkas) List(opts v1.ListOptions) (result *v1beta1.KafkaList, err error
 		Resource("kafkas").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested kafkas.
-func (c *kafkas) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *kafkas) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -99,5 +100,5 @@ func (c *kafkas) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		Resource("kafkas").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(ctx)
 }

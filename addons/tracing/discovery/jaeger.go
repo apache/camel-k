@@ -18,6 +18,7 @@ limitations under the License.
 package discovery
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -36,11 +37,11 @@ const (
 	jaegerPortName = "http-c-binary-trft"
 )
 
-func (loc *JaegerTracingLocator) FindEndpoint(c client.Client, l log.Logger, e *trait.Environment) (string, error) {
+func (loc *JaegerTracingLocator) FindEndpoint(ctx context.Context, c client.Client, l log.Logger, e *trait.Environment) (string, error) {
 	opts := metav1.ListOptions{
 		LabelSelector: "app.kubernetes.io/part-of=jaeger,app.kubernetes.io/component=service-collector",
 	}
-	lst, err := c.CoreV1().Services(e.Integration.Namespace).List(opts)
+	lst, err := c.CoreV1().Services(e.Integration.Namespace).List(ctx, opts)
 	if err != nil {
 		return "", err
 	}

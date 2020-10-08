@@ -213,7 +213,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, version strin
 		Post().
 		Body(crdJSON).
 		Resource("customresourcedefinitions").
-		Do()
+		Do(ctx)
 	// Check result
 	if result.Error() != nil && !k8serrors.IsAlreadyExists(result.Error()) {
 		return result.Error()

@@ -39,23 +39,23 @@ func TestClientFunctionalities(t *testing.T) {
 		camel, err := versioned.NewForConfig(cfg)
 		assert.Nil(t, err)
 
-		lst, err := camel.CamelV1().Integrations(ns).List(metav1.ListOptions{})
+		lst, err := camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
 		assert.Nil(t, err)
 		assert.Empty(t, lst.Items)
 
-		integration, err := camel.CamelV1().Integrations(ns).Create(&v1.Integration{
+		integration, err := camel.CamelV1().Integrations(ns).Create(TestContext, &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "dummy",
 			},
-		})
+		}, metav1.CreateOptions{})
 		assert.Nil(t, err)
 
-		lst, err = camel.CamelV1().Integrations(ns).List(metav1.ListOptions{})
+		lst, err = camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
 		assert.Nil(t, err)
 		assert.NotEmpty(t, lst.Items)
 		assert.Equal(t, lst.Items[0].Name, integration.Name)
 
-		err = camel.CamelV1().Integrations(ns).Delete("dummy", nil)
+		err = camel.CamelV1().Integrations(ns).Delete(TestContext, "dummy", metav1.DeleteOptions{})
 		assert.Nil(t, err)
 	})
 }

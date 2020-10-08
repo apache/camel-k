@@ -138,7 +138,7 @@ func publisher(ctx *builder.Context) error {
 		Resource("buildconfigs").
 		Name("camel-k-" + ctx.Build.Meta.Name).
 		SubResource("instantiatebinary").
-		Do()
+		Do(ctx.C)
 
 	if result.Error() != nil {
 		return errors.Wrap(result.Error(), "cannot instantiate binary")

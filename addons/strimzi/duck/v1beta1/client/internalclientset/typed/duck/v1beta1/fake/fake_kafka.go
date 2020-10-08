@@ -20,6 +20,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	v1beta1 "github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -39,7 +41,7 @@ var kafkasResource = schema.GroupVersionResource{Group: "kafka.strimzi.io", Vers
 var kafkasKind = schema.GroupVersionKind{Group: "kafka.strimzi.io", Version: "v1beta1", Kind: "Kafka"}
 
 // Get takes name of the kafka, and returns the corresponding kafka object, and an error if there is any.
-func (c *FakeKafkas) Get(name string, options v1.GetOptions) (result *v1beta1.Kafka, err error) {
+func (c *FakeKafkas) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Kafka, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(kafkasResource, c.ns, name), &v1beta1.Kafka{})
 
@@ -50,7 +52,7 @@ func (c *FakeKafkas) Get(name string, options v1.GetOptions) (result *v1beta1.Ka
 }
 
 // List takes label and field selectors, and returns the list of Kafkas that match those selectors.
-func (c *FakeKafkas) List(opts v1.ListOptions) (result *v1beta1.KafkaList, err error) {
+func (c *FakeKafkas) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.KafkaList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(kafkasResource, kafkasKind, c.ns, opts), &v1beta1.KafkaList{})
 
@@ -72,7 +74,7 @@ func (c *FakeKafkas) List(opts v1.ListOptions) (result *v1beta1.KafkaList, err e
 }
 
 // Watch returns a watch.Interface that watches the requested kafkas.
-func (c *FakeKafkas) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeKafkas) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(kafkasResource, c.ns, opts))
 

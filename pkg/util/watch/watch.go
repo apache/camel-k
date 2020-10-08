@@ -51,7 +51,7 @@ func HandleIntegrationStateChanges(ctx context.Context, integration *v1.Integrat
 		return nil, err
 	}
 
-	watcher, err := dynamicClient.Watch(metav1.ListOptions{
+	watcher, err := dynamicClient.Watch(ctx, metav1.ListOptions{
 		FieldSelector:   "metadata.name=" + integration.Name,
 		ResourceVersion: integration.ObjectMeta.ResourceVersion,
 	})
@@ -126,7 +126,7 @@ func HandleIntegrationEvents(ctx context.Context, integration *v1.Integration,
 	if err != nil {
 		return err
 	}
-	watcher, err := dynamicClient.Watch(metav1.ListOptions{
+	watcher, err := dynamicClient.Watch(ctx, metav1.ListOptions{
 		FieldSelector: fmt.Sprintf("involvedObject.kind=Integration,"+
 			"involvedObject.apiVersion=%s,"+
 			"involvedObject.name=%s",
@@ -192,7 +192,7 @@ func HandlePlatformStateChanges(ctx context.Context, platform *v1.IntegrationPla
 	if err != nil {
 		return err
 	}
-	watcher, err := dynamicClient.Watch(metav1.ListOptions{
+	watcher, err := dynamicClient.Watch(ctx, metav1.ListOptions{
 		FieldSelector: "metadata.name=" + platform.Name,
 	})
 	if err != nil {
@@ -266,7 +266,7 @@ func HandleIntegrationPlatformEvents(ctx context.Context, p *v1.IntegrationPlatf
 	if err != nil {
 		return err
 	}
-	watcher, err := dynamicClient.Watch(metav1.ListOptions{
+	watcher, err := dynamicClient.Watch(ctx, metav1.ListOptions{
 		FieldSelector: fmt.Sprintf("involvedObject.kind=IntegrationPlatform,"+
 			"involvedObject.apiVersion=%s,"+
 			"involvedObject.name=%s",

@@ -208,7 +208,7 @@ func IntegrationLogs(ns string, name string) func() string {
 			Container: containerName,
 			TailLines: &tail,
 		}
-		byteReader, err := TestClient.CoreV1().Pods(ns).GetLogs(pod.Name, &logOptions).Context(TestContext).Stream()
+		byteReader, err := TestClient.CoreV1().Pods(ns).GetLogs(pod.Name, &logOptions).Stream(TestContext)
 		if err != nil {
 			log.Error(err, "Error while reading the pod logs")
 			return ""
@@ -949,7 +949,7 @@ func InvokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 	defer func() {
 		if t.Failed() {
 
-			if err := util.Dump(TestClient, ns, t); err != nil {
+			if err := util.Dump(TestContext, TestClient, ns, t); err != nil {
 				t.Logf("Error while dumping namespace %s: %v\n", ns, err)
 			}
 		}
@@ -1077,7 +1077,7 @@ func NewTestNamespace(injectKnativeBroker bool) metav1.Object {
 	if injectKnativeBroker && oc {
 		// use Kubernetes API - https://access.redhat.com/solutions/2677921
 		var namespace *corev1.Namespace
-		if namespace, err = TestClient.CoreV1().Namespaces().Get(name, metav1.GetOptions{}); err != nil {
+		if namespace, err = TestClient.CoreV1().Namespaces().Get(TestContext, name, metav1.GetOptions{}); err != nil {
 			panic(err)
 		} else {
 			if _, ok := namespace.GetLabels()[brokerLabel]; !ok {

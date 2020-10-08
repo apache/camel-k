@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/spf13/viper"
@@ -129,29 +130,29 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	}
 
 	if !o.SkipIntegrationPlatform {
-		if err = o.uninstallIntegrationPlatform(); err != nil {
+		if err = o.uninstallIntegrationPlatform(o.Context); err != nil {
 			return err
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Integration Platform removed from namespace %s\n", o.Namespace)
 	}
 
-	if err = o.uninstallNamespaceResources(c); err != nil {
+	if err = o.uninstallNamespaceResources(o.Context, c); err != nil {
 		return err
 	}
 
 	if !uninstallViaOLM {
 		if !o.SkipOperator {
-			if err = o.uninstallOperator(c); err != nil {
+			if err = o.uninstallOperator(o.Context, c); err != nil {
 				return err
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Camel K Operator removed from namespace %s\n", o.Namespace)
 		}
 
-		if err = o.uninstallNamespaceRoles(c); err != nil {
+		if err = o.uninstallNamespaceRoles(o.Context, c); err != nil {
 			return err
 		}
 
-		if err = o.uninstallClusterWideResources(c); err != nil {
+		if err = o.uninstallClusterWideResources(o.Context, c); err != nil {
 			return err
 		}
 
@@ -160,16 +161,16 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallOperator(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallOperator(ctx context.Context, c client.Client) error {
 	api := c.AppsV1()
 
-	deployments, err := api.Deployments(o.Namespace).List(defaultListOptions)
+	deployments, err := api.Deployments(o.Namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, deployment := range deployments.Items {
-		err := api.Deployments(o.Namespace).Delete(deployment.Name, &metav1.DeleteOptions{})
+		err := api.Deployments(o.Namespace).Delete(ctx, deployment.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -178,9 +179,9 @@ func (o *uninstallCmdOptions) uninstallOperator(c client.Client) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context, c client.Client) error {
 	if !o.SkipCrd || o.UninstallAll {
-		if err := o.uninstallCrd(c); err != nil {
+		if err := o.uninstallCrd(ctx, c); err != nil {
 			if k8serrors.IsForbidden(err) {
 				return createActionNotAuthorizedError()
 			}
@@ -190,7 +191,7 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) err
 	}
 
 	if !o.SkipClusterRoleBindings || o.UninstallAll {
-		if err := o.uninstallClusterRoleBindings(c); err != nil {
+		if err := o.uninstallClusterRoleBindings(ctx, c); err != nil {
 			if k8serrors.IsForbidden(err) {
 				return createActionNotAuthorizedError()
 			}
@@ -200,7 +201,7 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) err
 	}
 
 	if !o.SkipClusterRoles || o.UninstallAll {
-		if err := o.uninstallClusterRoles(c); err != nil {
+		if err := o.uninstallClusterRoles(ctx, c); err != nil {
 			if k8serrors.IsForbidden(err) {
 				return createActionNotAuthorizedError()
 			}
@@ -212,23 +213,23 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(c client.Client) err
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallNamespaceRoles(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallNamespaceRoles(ctx context.Context, c client.Client) error {
 	if !o.SkipRoleBindings {
-		if err := o.uninstallRoleBindings(c); err != nil {
+		if err := o.uninstallRoleBindings(ctx, c); err != nil {
 			return err
 		}
 		fmt.Printf("Camel K Role Bindings removed from namespace %s\n", o.Namespace)
 	}
 
 	if !o.SkipRoles {
-		if err := o.uninstallRoles(c); err != nil {
+		if err := o.uninstallRoles(ctx, c); err != nil {
 			return err
 		}
 		fmt.Printf("Camel K Roles removed from namespace %s\n", o.Namespace)
 	}
 
 	if !o.SkipServiceAccounts {
-		if err := o.uninstallServiceAccounts(c); err != nil {
+		if err := o.uninstallServiceAccounts(ctx, c); err != nil {
 			return err
 		}
 		fmt.Printf("Camel K Service Accounts removed from namespace %s\n", o.Namespace)
@@ -237,9 +238,9 @@ func (o *uninstallCmdOptions) uninstallNamespaceRoles(c client.Client) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallNamespaceResources(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c client.Client) error {
 	if !o.SkipConfigMaps {
-		if err := o.uninstallConfigMaps(c); err != nil {
+		if err := o.uninstallConfigMaps(ctx, c); err != nil {
 			return err
 		}
 		fmt.Printf("Camel K Config Maps removed from namespace %s\n", o.Namespace)
@@ -248,7 +249,7 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(c client.Client) error
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallCrd(c kubernetes.Interface) error {
+func (o *uninstallCmdOptions) uninstallCrd(ctx context.Context, c kubernetes.Interface) error {
 	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1beta1")
 	if err != nil {
 		return err
@@ -258,7 +259,7 @@ func (o *uninstallCmdOptions) uninstallCrd(c kubernetes.Interface) error {
 		Delete().
 		Param("labelSelector", "app=camel-k").
 		Resource("customresourcedefinitions").
-		Do()
+		Do(ctx)
 
 	if result.Error() != nil {
 		return result.Error()
@@ -267,16 +268,16 @@ func (o *uninstallCmdOptions) uninstallCrd(c kubernetes.Interface) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallRoles(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallRoles(ctx context.Context, c client.Client) error {
 	api := c.RbacV1()
 
-	roleBindings, err := api.Roles(o.Namespace).List(defaultListOptions)
+	roleBindings, err := api.Roles(o.Namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, roleBinding := range roleBindings.Items {
-		err := api.Roles(o.Namespace).Delete(roleBinding.Name, &metav1.DeleteOptions{})
+		err := api.Roles(o.Namespace).Delete(ctx, roleBinding.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -285,16 +286,16 @@ func (o *uninstallCmdOptions) uninstallRoles(c client.Client) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallRoleBindings(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallRoleBindings(ctx context.Context, c client.Client) error {
 	api := c.RbacV1()
 
-	roleBindings, err := api.RoleBindings(o.Namespace).List(defaultListOptions)
+	roleBindings, err := api.RoleBindings(o.Namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, roleBinding := range roleBindings.Items {
-		err := api.RoleBindings(o.Namespace).Delete(roleBinding.Name, &metav1.DeleteOptions{})
+		err := api.RoleBindings(o.Namespace).Delete(ctx, roleBinding.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -303,16 +304,16 @@ func (o *uninstallCmdOptions) uninstallRoleBindings(c client.Client) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallClusterRoles(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallClusterRoles(ctx context.Context, c client.Client) error {
 	api := c.RbacV1()
 
-	clusterRoles, err := api.ClusterRoles().List(defaultListOptions)
+	clusterRoles, err := api.ClusterRoles().List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, clusterRole := range clusterRoles.Items {
-		err := api.ClusterRoles().Delete(clusterRole.Name, &metav1.DeleteOptions{})
+		err := api.ClusterRoles().Delete(ctx, clusterRole.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -321,16 +322,16 @@ func (o *uninstallCmdOptions) uninstallClusterRoles(c client.Client) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallClusterRoleBindings(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallClusterRoleBindings(ctx context.Context, c client.Client) error {
 	api := c.RbacV1()
 
-	clusterRoleBindings, err := api.ClusterRoleBindings().List(defaultListOptions)
+	clusterRoleBindings, err := api.ClusterRoleBindings().List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, clusterRoleBinding := range clusterRoleBindings.Items {
-		err := api.ClusterRoleBindings().Delete(clusterRoleBinding.Name, &metav1.DeleteOptions{})
+		err := api.ClusterRoleBindings().Delete(ctx, clusterRoleBinding.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -339,16 +340,16 @@ func (o *uninstallCmdOptions) uninstallClusterRoleBindings(c client.Client) erro
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallServiceAccounts(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallServiceAccounts(ctx context.Context, c client.Client) error {
 	api := c.CoreV1()
 
-	serviceAccountList, err := api.ServiceAccounts(o.Namespace).List(defaultListOptions)
+	serviceAccountList, err := api.ServiceAccounts(o.Namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, serviceAccount := range serviceAccountList.Items {
-		err := api.ServiceAccounts(o.Namespace).Delete(serviceAccount.Name, &metav1.DeleteOptions{})
+		err := api.ServiceAccounts(o.Namespace).Delete(ctx, serviceAccount.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -357,19 +358,19 @@ func (o *uninstallCmdOptions) uninstallServiceAccounts(c client.Client) error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallIntegrationPlatform() error {
+func (o *uninstallCmdOptions) uninstallIntegrationPlatform(ctx context.Context) error {
 	api, err := customclient.GetDefaultDynamicClientFor("integrationplatforms", o.Namespace)
 	if err != nil {
 		return err
 	}
 
-	integrationPlatforms, err := api.List(defaultListOptions)
+	integrationPlatforms, err := api.List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, integrationPlatform := range integrationPlatforms.Items {
-		err := api.Delete(integrationPlatform.GetName(), &metav1.DeleteOptions{})
+		err := api.Delete(ctx, integrationPlatform.GetName(), metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -378,16 +379,16 @@ func (o *uninstallCmdOptions) uninstallIntegrationPlatform() error {
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallConfigMaps(c client.Client) error {
+func (o *uninstallCmdOptions) uninstallConfigMaps(ctx context.Context, c client.Client) error {
 	api := c.CoreV1()
 
-	configMapsList, err := api.ConfigMaps(o.Namespace).List(defaultListOptions)
+	configMapsList, err := api.ConfigMaps(o.Namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, configMap := range configMapsList.Items {
-		err := api.ConfigMaps(o.Namespace).Delete(configMap.Name, &metav1.DeleteOptions{})
+		err := api.ConfigMaps(o.Namespace).Delete(ctx, configMap.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
