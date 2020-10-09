@@ -1,8 +1,16 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.0...v1.2.0)
+
+## [pkg/client/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.0) (2020-10-08)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.0...pkg/client/camel/v1.2.0)
+
+## [pkg/apis/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.2.0) (2020-10-08)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...pkg/apis/camel/v1.2.0)
 
 **Closed issues:**
 
@@ -17,6 +25,7 @@
 - Does camel-k plan to provide Java SDK client Calls? [\#1708](https://github.com/apache/camel-k/issues/1708)
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - Upgrade to Prometheus operator version 0.42.0+ [\#1697](https://github.com/apache/camel-k/issues/1697)
+- Kamel init - Do not include license header [\#1696](https://github.com/apache/camel-k/issues/1696)
 - Add support for Strimzi Topics in KameletBinding [\#1686](https://github.com/apache/camel-k/issues/1686)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
@@ -29,6 +38,9 @@
 
 **Merged pull requests:**
 
+- chore: tidy go.sum [\#1755](https://github.com/apache/camel-k/pull/1755) ([astefanutti](https://github.com/astefanutti))
+- Upgrade k8s api to 0.18.9 and Knative to 0.18.0 [\#1753](https://github.com/apache/camel-k/pull/1753) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(crd\): make CRD more json-schema friend [\#1752](https://github.com/apache/camel-k/pull/1752) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1750: auto-compress/encode binary sources and resources [\#1751](https://github.com/apache/camel-k/pull/1751) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1747: propagate icon on kameletbinding and fix integration owner… [\#1749](https://github.com/apache/camel-k/pull/1749) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -89,15 +101,15 @@
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.1...v1.1.1)
-
-## [pkg/apis/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.1) (2020-09-11)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.1...pkg/apis/camel/v1.1.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.1...v1.1.1)
 
 ## [pkg/client/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.1) (2020-09-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...pkg/client/camel/v1.1.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.1...pkg/client/camel/v1.1.1)
+
+## [pkg/apis/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.1) (2020-09-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.0...pkg/apis/camel/v1.1.1)
 
 **Closed issues:**
 
@@ -125,17 +137,17 @@
 - Add support for oidc \(\#1647\) [\#1694](https://github.com/apache/camel-k/pull/1694) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1636: use messaging/v1beta1 for Knative subscription [\#1669](https://github.com/apache/camel-k/pull/1669) ([nicolaferraro](https://github.com/nicolaferraro))
 
-## [pkg/client/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.0) (2020-07-21)
+## [pkg/apis/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.0) (2020-07-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...pkg/client/camel/v1.1.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...pkg/apis/camel/v1.1.0)
 
 ## [v1.1.0](https://github.com/apache/camel-k/tree/v1.1.0) (2020-07-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.0...v1.1.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...v1.1.0)
 
-## [pkg/apis/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.0) (2020-07-21)
+## [pkg/client/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.0) (2020-07-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.0.1...pkg/apis/camel/v1.1.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/1.0.1...pkg/client/camel/v1.1.0)
 
 **Closed issues:**
 
@@ -217,6 +229,7 @@
 - fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 - CLI - Make kamel run handle github urls that are not raw [\#1515](https://github.com/apache/camel-k/pull/1515) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): bump version to 1.1.0-SNAPSHOT and update OLM/HELM [\#1510](https://github.com/apache/camel-k/pull/1510) ([nicolaferraro](https://github.com/nicolaferraro))
+- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.1](https://github.com/apache/camel-k/tree/1.0.1) (2020-06-25)
 
@@ -391,7 +404,6 @@
 - Avoid requirements of a kubeconfig when using  command [\#1493](https://github.com/apache/camel-k/pull/1493) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add tracing trait and automatically discover Jaeger [\#1492](https://github.com/apache/camel-k/pull/1492) ([nicolaferraro](https://github.com/nicolaferraro))
 - support for jitpack dependencies [\#1491](https://github.com/apache/camel-k/pull/1491) ([lburgazzoli](https://github.com/lburgazzoli))
-- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 - chore\(keys\): update PGP key [\#1488](https://github.com/apache/camel-k/pull/1488) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1396: use circuitbreaker capability from runtime [\#1486](https://github.com/apache/camel-k/pull/1486) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Regenerate catalogs with Camel version 3.3.0 [\#1485](https://github.com/apache/camel-k/pull/1485) ([astefanutti](https://github.com/astefanutti))
