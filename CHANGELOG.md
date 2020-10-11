@@ -98,7 +98,6 @@
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
-- Fix typo missing space "featuresare" -\> "features are" [\#1598](https://github.com/apache/camel-k/pull/1598) ([apupier](https://github.com/apupier))
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
 
@@ -198,6 +197,7 @@
 - Upgrade Knative to version 0.15.0 [\#1605](https://github.com/apache/camel-k/pull/1605) ([oscerd](https://github.com/oscerd))
 - Fix \#1601: add v prefix to future tags [\#1603](https://github.com/apache/camel-k/pull/1603) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Structured traits configuration serialization [\#1600](https://github.com/apache/camel-k/pull/1600) ([astefanutti](https://github.com/astefanutti))
+- Fix typo missing space "featuresare" -\> "features are" [\#1598](https://github.com/apache/camel-k/pull/1598) ([apupier](https://github.com/apupier))
 - chore: Add information on how to debug the camel-k operator [\#1597](https://github.com/apache/camel-k/pull/1597) ([johnpoth](https://github.com/johnpoth))
 - Fixes incomplete help message [\#1596](https://github.com/apache/camel-k/pull/1596) ([orpiske](https://github.com/orpiske))
 - Submit secured monitoring proposal [\#1594](https://github.com/apache/camel-k/pull/1594) ([astefanutti](https://github.com/astefanutti))
