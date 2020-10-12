@@ -29,7 +29,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	yaml2 "gopkg.in/yaml.v2"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 // ToJSON --
@@ -44,22 +44,7 @@ func ToYAML(value runtime.Object) ([]byte, error) {
 		return nil, err
 	}
 
-	return JSONToYAML(data)
-}
-
-// JSONToYAML --
-func JSONToYAML(src []byte) ([]byte, error) {
-	jsondata := map[string]interface{}{}
-	err := json.Unmarshal(src, &jsondata)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling json: %v", err)
-	}
-	yamldata, err := yaml2.Marshal(&jsondata)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
-	}
-
-	return yamldata, nil
+	return util.JSONToYAML(data)
 }
 
 // GetConfigMap --
