@@ -111,19 +111,18 @@ func (command *inspectCmdOptions) validate(args []string) error {
 }
 
 func (command *inspectCmdOptions) run(args []string) error {
-	// A Camel catalog is requiref for this operatio.
-	settings := ""
-	mvn := v1.MavenSpec{
-		LocalRepository: "",
-	}
-	runtime := v1.RuntimeSpec{
-		Version:  "1.3.0",
-		Provider: v1.RuntimeProviderMain,
-	}
-	providerDependencies := []maven.Dependency{}
-	catalog, err := camel.GenerateLocalCatalog(settings, mvn, runtime, providerDependencies)
+	// Attempt to reuse existing Camel catalog if one is present.
+	catalog, err := camel.MainCatalog()
 	if err != nil {
 		return err
+	}
+
+	// Generate catalog if one was not found.
+	if catalog == nil {
+		catalog, err = generateCatalog()
+		if err != nil {
+			return err
+		}
 	}
 
 	// TODO: compression not supported for this command for now.
@@ -156,4 +155,23 @@ func (command *inspectCmdOptions) run(args []string) error {
 	}
 
 	return nil
+}
+
+func generateCatalog() (*camel.RuntimeCatalog, error) {
+	// A Camel catalog is requiref for this operatio.
+	settings := ""
+	mvn := v1.MavenSpec{
+		LocalRepository: "",
+	}
+	runtime := v1.RuntimeSpec{
+		Version:  "1.3.0",
+		Provider: v1.RuntimeProviderMain,
+	}
+	providerDependencies := []maven.Dependency{}
+	catalog, err := camel.GenerateLocalCatalog(settings, mvn, runtime, providerDependencies)
+	if err != nil {
+		return nil, err
+	}
+
+	return catalog, nil
 }
