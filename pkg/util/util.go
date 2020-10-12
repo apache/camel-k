@@ -19,6 +19,7 @@ package util
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -31,6 +32,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/scylladb/go-set/strset"
+	yaml2 "gopkg.in/yaml.v2"
 )
 
 // StringSliceJoin --
@@ -272,4 +274,36 @@ func SortedStringMapKeys(m map[string]string) []string {
 	}
 	sort.Strings(res)
 	return res
+}
+
+// DependenciesToJSON --
+func DependenciesToJSON(list []string) ([]byte, error) {
+	jsondata := map[string]interface{}{}
+	jsondata["dependencies"] = list
+	return json.Marshal(jsondata)
+}
+
+// DependenciesToYAML --
+func DependenciesToYAML(list []string) ([]byte, error) {
+	data, err := DependenciesToJSON(list)
+	if err != nil {
+		return nil, err
+	}
+
+	return JSONToYAML(data)
+}
+
+// JSONToYAML --
+func JSONToYAML(src []byte) ([]byte, error) {
+	jsondata := map[string]interface{}{}
+	err := json.Unmarshal(src, &jsondata)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling json: %v", err)
+	}
+	yamldata, err := yaml2.Marshal(&jsondata)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
+	}
+
+	return yamldata, nil
 }

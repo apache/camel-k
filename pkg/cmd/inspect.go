@@ -53,6 +53,7 @@ func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdO
 		},
 	}
 
+	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	// TODO: support the following options:
 	cmd.Flags().Bool("all-dependencies", false, "Include both top level and transitive dependencies.")
 	cmd.Flags().String("dependencies-directory", "", "If set, directory will contain all integration dependencies.")
@@ -64,6 +65,7 @@ func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdO
 type inspectCmdOptions struct {
 	*RootCmdOptions
 	AllDependencies        bool   `mapstructure:"all-dependencies"`
+	OutputFormat           string `mapstructure:"output"`
 	DependenciesDirectory  string `mapstructure:"dependencies-directory"`
 	AdditionalDependencies string `mapstructure:"additional-dependencies"`
 }
@@ -150,8 +152,16 @@ func (command *inspectCmdOptions) run(args []string) error {
 		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
 	}
 
-	for _, dep := range dependencies.List() {
-		fmt.Printf("%v\n", dep)
+	if command.OutputFormat != "" {
+		err := printDependencies(command.OutputFormat, dependencies)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Print output in text form.
+		for _, dep := range dependencies.List() {
+			fmt.Printf("%v\n", dep)
+		}
 	}
 
 	return nil
@@ -174,4 +184,24 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 	}
 
 	return catalog, nil
+}
+
+func printDependencies(format string, dependecies *strset.Set) error {
+	switch format {
+	case "yaml":
+		data, err := util.DependenciesToYAML(dependecies.List())
+		if err != nil {
+			return err
+		}
+		fmt.Print(string(data))
+	case "json":
+		data, err := util.DependenciesToJSON(dependecies.List())
+		if err != nil {
+			return err
+		}
+		fmt.Print(string(data))
+	default:
+		return errors.New("unknown output format: " + format)
+	}
+	return nil
 }
