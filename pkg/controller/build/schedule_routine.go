@@ -22,13 +22,14 @@ import (
 	"fmt"
 	"sync"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/util/patch"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
@@ -114,13 +115,15 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 
 	for i, task := range build.Spec.Tasks {
 		if task.Builder == nil {
+			duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 			status := v1.BuildStatus{
 				// Error the build directly as we know recovery won't work over ill-defined tasks
 				Phase: v1.BuildPhaseError,
 				Error: fmt.Sprintf("task cannot be executed using the routine strategy: %s",
 					task.GetName()),
-				Duration: metav1.Now().Sub(build.Status.StartedAt.Time).String(),
+				Duration: duration.String(),
 			}
+			buildDuration.WithLabelValues(string(status.Phase)).Observe(duration.Seconds())
 			_ = action.updateBuildStatus(ctx, build, status)
 			break
 		}
@@ -128,11 +131,13 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 		status := action.builder.Run(*task.Builder)
 		lastTask := i == len(build.Spec.Tasks)-1
 		taskFailed := status.Phase == v1.BuildPhaseFailed
-		if lastTask || taskFailed {
-			status.Duration = metav1.Now().Sub(build.Status.StartedAt.Time).String()
-		}
 		if lastTask && !taskFailed {
 			status.Phase = v1.BuildPhaseSucceeded
+		}
+		if lastTask || taskFailed {
+			duration := metav1.Now().Sub(build.Status.StartedAt.Time)
+			status.Duration = duration.String()
+			buildDuration.WithLabelValues(string(status.Phase)).Observe(duration.Seconds())
 		}
 		err := action.updateBuildStatus(ctx, build, status)
 		if err != nil || taskFailed {
