@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -91,6 +92,10 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	if err != nil {
 		return nil, err
 	}
+
+	// Report the duration the Build has been waiting in the build queue
+	queueDuration.Observe(time.Now().Sub(build.CreationTimestamp.Time).Seconds())
+
 	camelevent.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 
 	// Start the build asynchronously to avoid blocking the reconcile loop

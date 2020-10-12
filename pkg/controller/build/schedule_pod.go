@@ -20,6 +20,7 @@ package build
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -103,6 +104,9 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1.Build) (*
 		if err := action.client.Create(ctx, pod); err != nil {
 			return nil, errors.Wrap(err, "cannot create build pod")
 		}
+
+		// Report the duration the Build has been waiting in the build queue
+		queueDuration.Observe(time.Now().Sub(build.CreationTimestamp.Time).Seconds())
 	}
 
 	build.Status.Phase = v1.BuildPhasePending

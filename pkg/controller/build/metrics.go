@@ -45,9 +45,23 @@ var (
 			buildResult,
 		},
 	)
+
+	queueDuration = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name: "camel_k_build_queue_duration_seconds",
+			Help: "Camel K build queue duration",
+			Buckets: []float64{
+				5 * time.Second.Seconds(),
+				15 * time.Second.Seconds(),
+				30 * time.Second.Seconds(),
+				1 * time.Minute.Seconds(),
+				5 * time.Minute.Seconds(),
+			},
+		},
+	)
 )
 
 func init() {
 	// Register custom metrics with the global prometheus registry
-	metrics.Registry.MustRegister(buildDuration)
+	metrics.Registry.MustRegister(buildDuration, queueDuration)
 }
