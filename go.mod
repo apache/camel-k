@@ -24,6 +24,7 @@ require (
 	github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
+	github.com/prometheus/client_golang v1.7.1
 	github.com/radovskyb/watcher v1.0.6
 	github.com/rs/xid v1.2.1
 	github.com/scylladb/go-set v1.0.2
