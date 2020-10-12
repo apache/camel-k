@@ -70,32 +70,10 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		return err
 	}
 	for _, s := range sources {
+		// Add source-related dependencies.
+		dependencies.Merge(AddSourceDependencies(s, e.CamelCatalog))
+
 		meta := metadata.Extract(e.CamelCatalog, s)
-		lang := s.InferLanguage()
-
-		// add auto-detected dependencies
-		dependencies.Merge(meta.Dependencies)
-
-		for loader, v := range e.CamelCatalog.Loaders {
-			// add loader specific dependencies
-			if s.Loader != "" && s.Loader == loader {
-				dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
-
-				for _, d := range v.Dependencies {
-					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
-				}
-			} else if s.Loader == "" {
-				// add language specific dependencies
-				if util.StringSliceExists(v.Languages, string(lang)) {
-					dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
-
-					for _, d := range v.Dependencies {
-						dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
-					}
-				}
-			}
-		}
-
 		meta.RequiredCapabilities.Each(func(item string) bool {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
 			return true

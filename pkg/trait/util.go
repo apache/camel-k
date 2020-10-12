@@ -31,6 +31,9 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
@@ -151,4 +154,37 @@ func mustHomeDir() string {
 func toHostDir(host string) string {
 	h := strings.Replace(strings.Replace(host, "https://", "", 1), "http://", "", 1)
 	return toFileName.ReplaceAllString(h, "_")
+}
+
+// AddSourceDependencies --
+func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) *strset.Set {
+	dependencies := strset.New()
+
+	// Add auto-detected dependencies.
+	meta := metadata.Extract(catalog, source)
+	dependencies.Merge(meta.Dependencies)
+
+	// Add loader dependencies.
+	lang := source.InferLanguage()
+	for loader, v := range catalog.Loaders {
+		// add loader specific dependencies
+		if source.Loader != "" && source.Loader == loader {
+			dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
+
+			for _, d := range v.Dependencies {
+				dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+			}
+		} else if source.Loader == "" {
+			// add language specific dependencies
+			if util.StringSliceExists(v.Languages, string(lang)) {
+				dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
+
+				for _, d := range v.Dependencies {
+					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+				}
+			}
+		}
+	}
+
+	return dependencies
 }
