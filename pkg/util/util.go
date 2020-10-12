@@ -237,7 +237,12 @@ func DirectoryExists(directory string) (bool, error) {
 	if os.IsNotExist(err) {
 		return false, nil
 	}
-	return info.IsDir(), err
+
+	if err != nil {
+		return false, err
+	}
+
+	return info.IsDir(), nil
 }
 
 // BytesMarshaller --

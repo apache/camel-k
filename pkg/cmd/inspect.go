@@ -23,7 +23,7 @@ import (
 	"path"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -148,32 +148,7 @@ func (command *inspectCmdOptions) run(args []string) error {
 		}
 
 		// Extract list of top-level dependencies.
-		metadata.Extract(catalog, sourceSpec)
-		meta := metadata.Extract(catalog, sourceSpec)
-		lang := sourceSpec.InferLanguage()
-
-		// add auto-detected dependencies
-		dependencies.Merge(meta.Dependencies)
-
-		for loader, v := range catalog.Loaders {
-			// add loader specific dependencies
-			if sourceSpec.Loader != "" && sourceSpec.Loader == loader {
-				dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
-
-				for _, d := range v.Dependencies {
-					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
-				}
-			} else if sourceSpec.Loader == "" {
-				// add language specific dependencies
-				if util.StringSliceExists(v.Languages, string(lang)) {
-					dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
-
-					for _, d := range v.Dependencies {
-						dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
-					}
-				}
-			}
-		}
+		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
 	}
 
 	for _, dep := range dependencies.List() {
