@@ -26,6 +26,7 @@ if [ "$#" -ge 1 ]; then
     -Dcatalog.path=${rootdir}/deploy \
     -Druntime.version=$runtimeVersion \
     -B \
+    -U \
     "$@"
 else
   echo "usage: $0 runtime.version catalog.runtime [staging.repo]"
