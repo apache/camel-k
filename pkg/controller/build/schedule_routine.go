@@ -129,8 +129,8 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 				Duration: duration.String(),
 			}
 			// Account for the Build metrics
-			buildAttempt.WithLabelValues(string(status.Phase)).Inc()
-			buildDuration.WithLabelValues(string(status.Phase)).Observe(duration.Seconds())
+			buildAttempt.WithLabelValues(status.Phase.String()).Inc()
+			buildDuration.WithLabelValues(status.Phase.String()).Observe(duration.Seconds())
 			_ = action.updateBuildStatus(ctx, build, status)
 			break
 		}
@@ -145,8 +145,8 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 			duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 			status.Duration = duration.String()
 			// Account for the Build metrics
-			buildAttempt.WithLabelValues(string(status.Phase)).Inc()
-			buildDuration.WithLabelValues(string(status.Phase)).Observe(duration.Seconds())
+			buildAttempt.WithLabelValues(status.Phase.String()).Inc()
+			buildDuration.WithLabelValues(status.Phase.String()).Observe(duration.Seconds())
 		}
 		err := action.updateBuildStatus(ctx, build, status)
 		if err != nil || taskFailed {
