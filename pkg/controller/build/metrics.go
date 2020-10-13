@@ -25,9 +25,18 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-const buildResult = "result"
+const buildResultLabel = "result"
 
 var (
+	buildAttempt = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "camel_k_build_attempt",
+			Help: "Camel K build attempt",
+		},
+		[]string{
+			buildResultLabel,
+		})
+
 	buildDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name: "camel_k_build_duration_seconds",
@@ -42,7 +51,7 @@ var (
 			},
 		},
 		[]string{
-			buildResult,
+			buildResultLabel,
 		},
 	)
 
@@ -63,5 +72,5 @@ var (
 
 func init() {
 	// Register custom metrics with the global prometheus registry
-	metrics.Registry.MustRegister(buildDuration, queueDuration)
+	metrics.Registry.MustRegister(buildAttempt, buildDuration, queueDuration)
 }
