@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.2.0...HEAD)
+
+**Merged pull requests:**
+
+- chore\(build\): remove reference to staging repo [\#1758](https://github.com/apache/camel-k/pull/1758) ([lburgazzoli](https://github.com/lburgazzoli))
+
 ## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.0...v1.2.0)
