@@ -70,8 +70,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 		// Account for the Build metrics
-		buildAttempt.WithLabelValues(string(build.Status.Phase)).Inc()
-		buildDuration.WithLabelValues(string(build.Status.Phase)).Observe(duration.Seconds())
+		buildAttempt.WithLabelValues(build.Status.Phase.String()).Inc()
+		buildDuration.WithLabelValues(build.Status.Phase.String()).Observe(duration.Seconds())
 		for _, task := range build.Spec.Tasks {
 			if task.Image != nil {
 				build.Status.Image = task.Image.BuiltImage
@@ -91,8 +91,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 		// Account for the Build metrics
-		buildAttempt.WithLabelValues(string(build.Status.Phase)).Inc()
-		buildDuration.WithLabelValues(string(build.Status.Phase)).Observe(duration.Seconds())
+		buildAttempt.WithLabelValues(build.Status.Phase.String()).Inc()
+		buildDuration.WithLabelValues(build.Status.Phase.String()).Observe(duration.Seconds())
 	}
 
 	return build, nil

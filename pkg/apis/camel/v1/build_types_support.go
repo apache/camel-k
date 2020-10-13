@@ -56,6 +56,10 @@ func NewBuildList() BuildList {
 	}
 }
 
+func(buildPhase *BuildPhase) String() string {
+	return string(*buildPhase)
+}
+
 // SetIntegrationPlatform --
 func (in *Build) SetIntegrationPlatform(platform *IntegrationPlatform) {
 	cs := corev1.ConditionTrue
