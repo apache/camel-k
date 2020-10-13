@@ -53,7 +53,7 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 		// and recover the build if it's missing. This can happen when the operator
 		// stops abruptly and restarts or the build status update fails.
 		build.Status.Phase = v1.BuildPhaseFailed
-
+		buildAttempt.WithLabelValues(string(build.Status.Phase)).Inc()
 		return build, nil
 	}
 
