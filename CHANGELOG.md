@@ -4,9 +4,18 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.2.0...HEAD)
 
+**Closed issues:**
+
+- Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
+- Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
+- Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
+
 **Merged pull requests:**
 
+- Release Helm charts and bump versions [\#1759](https://github.com/apache/camel-k/pull/1759) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): remove reference to staging repo [\#1758](https://github.com/apache/camel-k/pull/1758) ([lburgazzoli](https://github.com/lburgazzoli))
+- Fix \#1537: generate json schema for full Kubernetes resources [\#1756](https://github.com/apache/camel-k/pull/1756) ([nicolaferraro](https://github.com/nicolaferraro))
+- Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
