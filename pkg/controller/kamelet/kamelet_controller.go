@@ -21,13 +21,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-	camelevent "github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/platform"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -36,6 +34,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
+	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
 // Add creates a new Kamelet Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -50,11 +54,18 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
-	return &ReconcileKamelet{
-		client:   c,
-		scheme:   mgr.GetScheme(),
-		recorder: mgr.GetEventRecorderFor("camel-k-kamelet-controller"),
-	}
+	return monitoring.NewInstrumentedReconciler(
+		&reconcileKamelet{
+			client:   c,
+			scheme:   mgr.GetScheme(),
+			recorder: mgr.GetEventRecorderFor("camel-k-kamelet-controller"),
+		},
+		schema.GroupVersionKind{
+			Group:   v1alpha1.SchemeGroupVersion.Group,
+			Version: v1alpha1.SchemeGroupVersion.Version,
+			Kind:    v1alpha1.KameletKind,
+		},
+	)
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -88,12 +99,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileKamelet{}
+var _ reconcile.Reconciler = &reconcileKamelet{}
 
-// ReconcileKamelet reconciles a Kamelet object
-type ReconcileKamelet struct {
+// reconcileKamelet reconciles a Kamelet object
+type reconcileKamelet struct {
 	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
+	// that reads objects from the cache and writes to the API server
 	client   client.Client
 	scheme   *runtime.Scheme
 	recorder record.EventRecorder
@@ -104,7 +115,7 @@ type ReconcileKamelet struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileKamelet) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileKamelet) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling Kamelet")
 

@@ -22,12 +22,12 @@ import (
 	"sync"
 	"time"
 
-	camelevent "github.com/apache/camel-k/pkg/event"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -40,7 +40,9 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
+	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
 // Add creates a new Build Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -55,13 +57,20 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
-	return &ReconcileBuild{
-		client:   c,
-		reader:   mgr.GetAPIReader(),
-		scheme:   mgr.GetScheme(),
-		builder:  builder.New(c),
-		recorder: mgr.GetEventRecorderFor("camel-k-build-controller"),
-	}
+	return monitoring.NewInstrumentedReconciler(
+		&reconcileBuild{
+			client:   c,
+			reader:   mgr.GetAPIReader(),
+			scheme:   mgr.GetScheme(),
+			builder:  builder.New(c),
+			recorder: mgr.GetEventRecorderFor("camel-k-build-controller"),
+		},
+		schema.GroupVersionKind{
+			Group:   v1.SchemeGroupVersion.Group,
+			Version: v1.SchemeGroupVersion.Version,
+			Kind:    v1.BuildKind,
+		},
+	)
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -111,12 +120,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileBuild{}
+var _ reconcile.Reconciler = &reconcileBuild{}
 
-// ReconcileBuild reconciles a Build object
-type ReconcileBuild struct {
+// reconcileBuild reconciles a Build object
+type reconcileBuild struct {
 	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
+	// that reads objects from the cache and writes to the API server
 	client client.Client
 	// Non-caching client to be used whenever caching may cause race conditions,
 	// like in the builds scheduling critical section
@@ -132,7 +141,7 @@ type ReconcileBuild struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling Build")
 
@@ -255,7 +264,7 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) (reconcile.Result, error) {
+func (r *reconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) (reconcile.Result, error) {
 	err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err

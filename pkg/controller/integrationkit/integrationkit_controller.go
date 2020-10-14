@@ -20,18 +20,13 @@ package integrationkit
 import (
 	"context"
 
-	camelevent "github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/platform"
-	"k8s.io/client-go/tools/record"
-
-	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/log"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/client-go/tools/record"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -42,6 +37,11 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
 // Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -56,11 +56,18 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
-	return &ReconcileIntegrationKit{
-		client:   c,
-		scheme:   mgr.GetScheme(),
-		recorder: mgr.GetEventRecorderFor("camel-k-integration-kit-controller"),
-	}
+	return monitoring.NewInstrumentedReconciler(
+		&reconcileIntegrationKit{
+			client:   c,
+			scheme:   mgr.GetScheme(),
+			recorder: mgr.GetEventRecorderFor("camel-k-integration-kit-controller"),
+		},
+		schema.GroupVersionKind{
+			Group:   v1.SchemeGroupVersion.Group,
+			Version: v1.SchemeGroupVersion.Version,
+			Kind:    v1.IntegrationKitKind,
+		},
+	)
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -112,7 +119,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
-	// requests for any integrationkits that are in phase waiting for platform
+	// requests for any integration kits that are in phase waiting for platform
 	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 			platform := a.Object.(*v1.IntegrationPlatform)
@@ -149,12 +156,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileIntegrationKit{}
+var _ reconcile.Reconciler = &reconcileIntegrationKit{}
 
-// ReconcileIntegrationKit reconciles a IntegrationKit object
-type ReconcileIntegrationKit struct {
+// reconcileIntegrationKit reconciles a IntegrationKit object
+type reconcileIntegrationKit struct {
 	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
+	// that reads objects from the cache and writes to the API server
 	client   client.Client
 	scheme   *runtime.Scheme
 	recorder record.EventRecorder
@@ -165,7 +172,7 @@ type ReconcileIntegrationKit struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling IntegrationKit")
 
@@ -264,7 +271,7 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileIntegrationKit) update(ctx context.Context, base *v1.IntegrationKit, target *v1.IntegrationKit) (reconcile.Result, error) {
+func (r *reconcileIntegrationKit) update(ctx context.Context, base *v1.IntegrationKit, target *v1.IntegrationKit) (reconcile.Result, error) {
 	dgst, err := digest.ComputeForIntegrationKit(target)
 	if err != nil {
 		return reconcile.Result{}, err
