@@ -21,10 +21,9 @@ import (
 	"context"
 	"time"
 
-	camelevent "github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/platform"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -38,6 +37,9 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
 // Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -52,11 +54,18 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
-	return &ReconcileIntegrationPlatform{
-		client:   c,
-		scheme:   mgr.GetScheme(),
-		recorder: mgr.GetEventRecorderFor("camel-k-integration-platform-controller"),
-	}
+	return monitoring.NewInstrumentedReconciler(
+		&reconcileIntegrationPlatform{
+			client:   c,
+			scheme:   mgr.GetScheme(),
+			recorder: mgr.GetEventRecorderFor("camel-k-integration-platform-controller"),
+		},
+		schema.GroupVersionKind{
+			Group:   v1.SchemeGroupVersion.Group,
+			Version: v1.SchemeGroupVersion.Version,
+			Kind:    v1.IntegrationPlatformKind,
+		},
+	)
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -90,12 +99,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileIntegrationPlatform{}
+var _ reconcile.Reconciler = &reconcileIntegrationPlatform{}
 
-// ReconcileIntegrationPlatform reconciles a IntegrationPlatform object
-type ReconcileIntegrationPlatform struct {
+// reconcileIntegrationPlatform reconciles a IntegrationPlatform object
+type reconcileIntegrationPlatform struct {
 	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
+	// that reads objects from the cache and writes to the API server
 	client   client.Client
 	scheme   *runtime.Scheme
 	recorder record.EventRecorder
@@ -106,7 +115,7 @@ type ReconcileIntegrationPlatform struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileIntegrationPlatform) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileIntegrationPlatform) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling IntegrationPlatform")
 
