@@ -22,18 +22,15 @@ import (
 	"sort"
 	"strings"
 
-	infp "gopkg.in/inf.v0"
-
-	"github.com/pkg/errors"
-	"github.com/scylladb/go-set/strset"
-
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
-
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/pkg/errors"
+	"github.com/scylladb/go-set/strset"
+	infp "gopkg.in/inf.v0"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -126,6 +123,14 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		args = append(args,
 			fmt.Sprintf("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%s",
 				suspend, t.DebugAddress))
+
+		// Add label to mark the pods with debug enabled
+		e.Resources.VisitPodTemplateMeta(func(meta *metav1.ObjectMeta) {
+			if meta.Labels == nil {
+				meta.Labels = make(map[string]string)
+			}
+			meta.Labels["camel.apache.org/debug"] = "true"
+		})
 	}
 
 	hasHeapSizeOption := false

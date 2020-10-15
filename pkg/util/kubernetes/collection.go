@@ -415,6 +415,19 @@ func (c *Collection) VisitPodSpec(visitor func(container *corev1.PodSpec)) {
 	})
 }
 
+// VisitPodTemplateMeta executes the visitor function on all PodTemplate metadata inside deployments or other resources
+func (c *Collection) VisitPodTemplateMeta(visitor func(meta *metav1.ObjectMeta)) {
+	c.VisitDeployment(func(d *appsv1.Deployment) {
+		visitor(&d.Spec.Template.ObjectMeta)
+	})
+	c.VisitKnativeConfigurationSpec(func(cs *serving.ConfigurationSpec) {
+		visitor(&cs.Template.ObjectMeta)
+	})
+	c.VisitCronJob(func(d *v1beta1.CronJob) {
+		visitor(&d.Spec.JobTemplate.Spec.Template.ObjectMeta)
+	})
+}
+
 // VisitKnativeConfigurationSpec executes the visitor function on all knative ConfigurationSpec inside serving Services
 func (c *Collection) VisitKnativeConfigurationSpec(visitor func(container *serving.ConfigurationSpec)) {
 	c.VisitKnativeService(func(s *serving.Service) {
