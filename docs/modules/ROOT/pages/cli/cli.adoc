@@ -28,6 +28,10 @@ Some of the most used commands are:
 |Run an integration on Kubernetes
 |`kamel run Routes.java`
 
+|debug
+|Debug a remote integration using a local debugger
+|`kamel debug myintegration`
+
 |get
 |Get integrations deployed on Kubernetes
 |`kamel get`
