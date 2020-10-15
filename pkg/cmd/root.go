@@ -22,11 +22,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spf13/viper"
-
 	"github.com/apache/camel-k/pkg/client"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless
@@ -136,6 +136,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(newCmdOperator())
 	cmd.AddCommand(cmdOnly(newCmdBuilder(options)))
 	cmd.AddCommand(cmdOnly(newCmdInit(options)))
+	cmd.AddCommand(cmdOnly(newCmdDebug(options)))
 }
 
 func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
@@ -186,6 +187,15 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	var err error
 	command._client, err = command.NewCmdClient()
 	return command._client, err
+}
+
+// GetCamelCmdClient returns a client to access the Camel resources
+func (command *RootCmdOptions) GetCamelCmdClient() (*camelv1.CamelV1Client, error) {
+	c, err := command.GetCmdClient()
+	if err != nil {
+		return nil, err
+	}
+	return camelv1.NewForConfig(c.GetConfig())
 }
 
 // NewCmdClient returns a new client that can be used from command line tools
