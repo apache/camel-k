@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
+- Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
 
 **Merged pull requests:**
@@ -1247,6 +1249,7 @@
 - cleanup [\#590](https://github.com/apache/camel-k/pull/590) ([lburgazzoli](https://github.com/lburgazzoli))
 - context with status error should not be included when looking up suitable context for an integration [\#585](https://github.com/apache/camel-k/pull/585) ([lburgazzoli](https://github.com/lburgazzoli))
 - Split builder from operator [\#583](https://github.com/apache/camel-k/pull/583) ([astefanutti](https://github.com/astefanutti))
+- Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add log4j-slf4j-impl as runtime dependency in default project build [\#578](https://github.com/apache/camel-k/pull/578) ([astefanutti](https://github.com/astefanutti))
 
 ## [0.3.2](https://github.com/apache/camel-k/tree/0.3.2) (2019-03-26)
@@ -1267,7 +1270,6 @@
 
 **Merged pull requests:**
 
-- Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 - allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
