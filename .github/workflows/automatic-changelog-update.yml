@@ -21,6 +21,7 @@ on:
   schedule:
     # Run at 3 during the night
     - cron:  '0 3 * * *'
+  workflow_dispatch:
 
 jobs:
   generate_changelog:
