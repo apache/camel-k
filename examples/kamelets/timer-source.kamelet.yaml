@@ -50,5 +50,5 @@ spec:
         period: "#property:period"
       steps:
       - set-body:
-          constant: "#property:message"
+          constant: "{{message}}"
       - to: "kamelet:sink"
