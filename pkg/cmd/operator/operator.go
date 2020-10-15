@@ -91,7 +91,7 @@ func Run() {
 	}
 
 	// Become the leader before proceeding
-	err = leader.Become(context.TODO(), "hawtio-lock")
+	err = leader.Become(context.TODO(), "camel-k-lock")
 	if err != nil {
 		if err == leader.ErrNoNamespace {
 			log.Info("Local run detected, leader election is disabled")
