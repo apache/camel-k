@@ -14,6 +14,8 @@
 
 **Merged pull requests:**
 
+- fix: Correct operator leader election ConfigMap lock name [\#1765](https://github.com/apache/camel-k/pull/1765) ([astefanutti](https://github.com/astefanutti))
+- Added workflow dispatch to changelog gh action [\#1764](https://github.com/apache/camel-k/pull/1764) ([oscerd](https://github.com/oscerd))
 - Release Helm charts and bump versions [\#1759](https://github.com/apache/camel-k/pull/1759) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): remove reference to staging repo [\#1758](https://github.com/apache/camel-k/pull/1758) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1537: generate json schema for full Kubernetes resources [\#1756](https://github.com/apache/camel-k/pull/1756) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1249,7 +1251,6 @@
 - cleanup [\#590](https://github.com/apache/camel-k/pull/590) ([lburgazzoli](https://github.com/lburgazzoli))
 - context with status error should not be included when looking up suitable context for an integration [\#585](https://github.com/apache/camel-k/pull/585) ([lburgazzoli](https://github.com/lburgazzoli))
 - Split builder from operator [\#583](https://github.com/apache/camel-k/pull/583) ([astefanutti](https://github.com/astefanutti))
-- Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add log4j-slf4j-impl as runtime dependency in default project build [\#578](https://github.com/apache/camel-k/pull/578) ([astefanutti](https://github.com/astefanutti))
 
 ## [0.3.2](https://github.com/apache/camel-k/tree/0.3.2) (2019-03-26)
@@ -1270,6 +1271,7 @@
 
 **Merged pull requests:**
 
+- Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 - allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
