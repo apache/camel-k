@@ -18,7 +18,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     app: camel-k
     camel.apache.org/component: operator
@@ -33,7 +32,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: camel-k
         camel.apache.org/component: operator
@@ -61,5 +59,8 @@ spec:
           image: {{ .Values.operator.image }}
           imagePullPolicy: IfNotPresent
           name: camel-k-operator
+          ports:
+            - containerPort: 8080
+              name: metrics
           resources: {}
       serviceAccountName: camel-k-operator

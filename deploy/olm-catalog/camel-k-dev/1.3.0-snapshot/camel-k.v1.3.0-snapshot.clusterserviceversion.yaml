@@ -315,6 +315,9 @@ spec:
                 image: docker.io/apache/camel-k:1.3.0-SNAPSHOT
                 imagePullPolicy: IfNotPresent
                 name: camel-k-operator
+                ports:
+                - containerPort: 8080
+                  name: metrics
                 resources: {}
               serviceAccountName: camel-k-operator
       permissions:

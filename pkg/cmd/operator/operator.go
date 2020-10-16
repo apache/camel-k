@@ -31,10 +31,10 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
 
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/operator-framework/operator-lib/leader"
@@ -122,9 +122,10 @@ func Run() {
 	}
 
 	// Create a new Cmd to provide shared dependencies and start components
-	mgr, err := manager.New(cfg, manager.Options{
+	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Namespace:        namespace,
 		EventBroadcaster: eventBroadcaster,
+		MetricsBindAddress: ":8080",
 	})
 	if err != nil {
 		log.Error(err, "")
