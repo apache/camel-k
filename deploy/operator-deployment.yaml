@@ -40,10 +40,13 @@ spec:
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:1.3.0-SNAPSHOT
+          imagePullPolicy: IfNotPresent
           command:
           - kamel
           - operator
-          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: metrics
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
