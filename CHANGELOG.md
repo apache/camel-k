@@ -1292,6 +1292,7 @@
 - Add option to health probes [\#525](https://github.com/apache/camel-k/issues/525)
 - Remove operator metrics port and service [\#513](https://github.com/apache/camel-k/issues/513)
 - Adding Probes to Knative services [\#511](https://github.com/apache/camel-k/issues/511)
+- Release version 0.3.0 [\#489](https://github.com/apache/camel-k/issues/489)
 
 **Merged pull requests:**
 
@@ -1332,7 +1333,6 @@
 - Upgrade to Knative  \> v0.3.0 [\#497](https://github.com/apache/camel-k/issues/497)
 - Support for MAVEN\_MIRROR\_URL [\#492](https://github.com/apache/camel-k/issues/492)
 - Came-k routes takes long time to terminate [\#490](https://github.com/apache/camel-k/issues/490)
-- Release version 0.3.0 [\#489](https://github.com/apache/camel-k/issues/489)
 - improve resource gc performances [\#487](https://github.com/apache/camel-k/issues/487)
 - Unable to send message to knative channel [\#483](https://github.com/apache/camel-k/issues/483)
 - add finalizer to ensure integration children are cleaned up [\#477](https://github.com/apache/camel-k/issues/477)
