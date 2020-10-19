@@ -19,14 +19,16 @@ package install
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -46,11 +48,12 @@ type OperatorConfiguration struct {
 	Namespace             string
 	Global                bool
 	ClusterType           string
+	Monitoring            OperatorMonitoringConfiguration
 }
 
-// Operator installs the operator resources in the given namespace
-func Operator(ctx context.Context, c client.Client, cfg OperatorConfiguration, force bool) error {
-	return OperatorOrCollect(ctx, c, cfg, nil, force)
+// OperatorMonitoringConfiguration --
+type OperatorMonitoringConfiguration struct {
+	Enabled bool
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
@@ -166,6 +169,18 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		fmt.Println("Warning: the operator will not be able to lookup strimzi kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
 	}
 
+	if cfg.Monitoring.Enabled {
+		if err := installPodMonitor(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+			if k8serrors.IsForbidden(err) {
+				fmt.Println("Warning: the creation of PodMonitor resources is not allowed. Try installing as cluster-admin to allow the creation of PodMonitor resources.")
+			} else if meta.IsNoMatchError(errors.Cause(err)) {
+				fmt.Println("Warning: the creation of the PodMonitor resource has failed: ", err)
+			} else {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -212,6 +227,12 @@ func installStrimziBindings(ctx context.Context, c client.Client, namespace stri
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-role-strimzi.yaml",
 		"operator-role-binding-strimzi.yaml",
+	)
+}
+
+func installPodMonitor(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+		"operator-pod-monitor.yaml",
 	)
 }
 
