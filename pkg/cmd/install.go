@@ -118,6 +118,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 
+	// monitoring
+	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
+
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -157,6 +160,7 @@ type installCmdOptions struct {
 	BuildTimeout            string   `mapstructure:"build-timeout"`
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
+	Monitoring              bool     `mapstructure:"monitoring"`
 	Properties              []string `mapstructure:"properties"`
 	TraitProfile            string   `mapstructure:"trait-profile"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
@@ -246,6 +250,9 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				Namespace:             namespace,
 				Global:                o.Global,
 				ClusterType:           o.ClusterType,
+				Monitoring: install.OperatorMonitoringConfiguration{
+					Enabled: o.Monitoring,
+				},
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
 			if err != nil {

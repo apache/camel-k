@@ -39,6 +39,7 @@ var FastMapperAllowedAPIGroups = map[string]bool{
 	"rbac.authorization.k8s.io": true,
 	"console.openshift.io":      true, // OpenShift console resources
 	"operators.coreos.com":      true, // Operator SDK OLM
+	"monitoring.coreos.com":     true, // Prometheus resources
 }
 
 // newFastDiscoveryRESTMapper comes from https://github.com/kubernetes-sigs/controller-runtime/pull/592.
