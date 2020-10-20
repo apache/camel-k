@@ -170,11 +170,11 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 	}
 
 	if cfg.Monitoring.Enabled {
-		if err := installPodMonitor(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if err := installMonitoringResources(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			if k8serrors.IsForbidden(err) {
-				fmt.Println("Warning: the creation of PodMonitor resources is not allowed. Try installing as cluster-admin to allow the creation of PodMonitor resources.")
+				fmt.Println("Warning: the creation of monitoring resources is not allowed. Try installing as cluster-admin to allow the creation of monitoring resources.")
 			} else if meta.IsNoMatchError(errors.Cause(err)) {
-				fmt.Println("Warning: the creation of the PodMonitor resource has failed: ", err)
+				fmt.Println("Warning: the creation of the monitoring resources failed: ", err)
 			} else {
 				return err
 			}
@@ -230,9 +230,10 @@ func installStrimziBindings(ctx context.Context, c client.Client, namespace stri
 	)
 }
 
-func installPodMonitor(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+func installMonitoringResources(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-pod-monitor.yaml",
+		"operator-prometheus-rule.yaml",
 	)
 }
 

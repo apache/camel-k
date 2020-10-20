@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: camel-k-operator
+spec:
+  groups:
+    - name: camel-k-operator
+      rules:
+        - alert: CamelKReconciliationDuration
+          expr: 100 * (1 - sum(rate(camel_k_reconciliation_duration_seconds_bucket{le="0.5"}[5m])) by (job) / sum(rate(camel_k_reconciliation_duration_seconds_count[5m])) by (job)) > 10
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the reconciliation requests for {{ $labels.job }} have their duration above 0.5s.
