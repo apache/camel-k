@@ -14,6 +14,8 @@
 
 **Merged pull requests:**
 
+- Add a kamel debug command [\#1769](https://github.com/apache/camel-k/pull/1769) ([nicolaferraro](https://github.com/nicolaferraro))
+- fix: Kamelet example [\#1768](https://github.com/apache/camel-k/pull/1768) ([christophd](https://github.com/christophd))
 - fix: Correct operator leader election ConfigMap lock name [\#1765](https://github.com/apache/camel-k/pull/1765) ([astefanutti](https://github.com/astefanutti))
 - Added workflow dispatch to changelog gh action [\#1764](https://github.com/apache/camel-k/pull/1764) ([oscerd](https://github.com/oscerd))
 - Release Helm charts and bump versions [\#1759](https://github.com/apache/camel-k/pull/1759) ([nicolaferraro](https://github.com/nicolaferraro))
