@@ -18,4 +18,4 @@
 jdk:
   - openjdk11
 install:
-  - mvn clean install -f ./e2e/yaks/monitoring/app/pom.xml
+  - mvn clean install -f ./e2e/yaks/openshift/monitoring/app/pom.xml
