@@ -86,20 +86,6 @@ func (command *inspectCmdOptions) validate(args []string) error {
 		}
 	}
 
-	// If provided, ensure that that the dependencies directory exists.
-	if command.DependenciesDirectory != "" {
-		dependenciesDirectoryExists, err := util.DirectoryExists(command.DependenciesDirectory)
-		// Report any error.
-		if err != nil {
-			return err
-		}
-
-		// Signal file not found.
-		if !dependenciesDirectoryExists {
-			return errors.New("input file " + command.DependenciesDirectory + " file does not exist")
-		}
-	}
-
 	// TODO: validate list of additional dependencies i.e. make sure that each dependency is
 	// in the correct format.
 
