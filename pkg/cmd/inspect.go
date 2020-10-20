@@ -86,9 +86,6 @@ func (command *inspectCmdOptions) validate(args []string) error {
 		}
 	}
 
-	// TODO: validate list of additional dependencies i.e. make sure that each dependency is
-	// in the correct format.
-
 	return nil
 }
 
