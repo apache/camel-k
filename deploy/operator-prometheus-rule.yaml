@@ -14,3 +14,17 @@ spec:
           annotations:
             message: |
               {{ printf "%0.0f" $value }}% of the reconciliation requests for {{ $labels.job }} have their duration above 0.5s.
+        - alert: CamelKReconciliationFailure
+          expr: |
+            sum(rate(camel_k_reconciliation_duration_seconds_count{result="Errored"}[5m])) by (job)
+            /
+            sum(rate(camel_k_reconciliation_duration_seconds_count[5m])) by (job)
+            * 100
+            > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the reconciliation requests
+              for {{ $labels.job }} have failed.
