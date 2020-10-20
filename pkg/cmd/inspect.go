@@ -127,15 +127,12 @@ func (command *inspectCmdOptions) run(args []string) error {
 		}
 	}
 
-	// TODO: compression not supported for this command for now.
-	compression := false
-
 	// List of top-level dependencies.
 	dependencies := strset.New()
 
 	// Invoke the dependency inspector code for each source file.
 	for _, source := range args {
-		data, _, err := loadData(source, compression, compression)
+		data, _, err := loadContent(source, false, false)
 		if err != nil {
 			return err
 		}
@@ -144,7 +141,7 @@ func (command *inspectCmdOptions) run(args []string) error {
 			DataSpec: v1.DataSpec{
 				Name:        path.Base(source),
 				Content:     data,
-				Compression: compression,
+				Compression: false,
 			},
 		}
 
