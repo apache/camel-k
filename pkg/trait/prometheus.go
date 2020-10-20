@@ -34,18 +34,19 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Prometheus trait configures a Prometheus-compatible endpoint. It also exposes the integration with a `Service`
-// and a `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the Prometheus
-// operator.
+// The Prometheus trait configures a Prometheus-compatible endpoint. This trait also exposes the integration with 
+//`Service` and `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the 
+// Prometheus Operator.
 //
-// The metrics exposed vary depending on the configured runtime. With Quarkus, the metrics are exposed
-// using MicroProfile Metrics. While with the default runtime, they are exposed using the Prometheus JMX exporter.
+// The metrics exposed vary depending on the configured runtime. With the default Quarkus runtime, metrics are
+// exposed using MicroProfile Metrics. While with the Java main runtime, metrics are exposed using the Prometheus 
+// JMX exporter.
 //
 // WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
 // custom resource definition to be installed.
-// You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus operator.
+// You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator.
 //
-// It's disabled by default.
+// The Prometheus trait is disabled by default.
 //
 // +camel-k:trait=prometheus
 type prometheusTrait struct {
