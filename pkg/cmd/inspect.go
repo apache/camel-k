@@ -54,20 +54,13 @@ func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdO
 	}
 
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
-	// TODO: support the following options:
-	cmd.Flags().Bool("all-dependencies", false, "Include both top level and transitive dependencies.")
-	cmd.Flags().String("dependencies-directory", "", "If set, directory will contain all integration dependencies.")
-	cmd.Flags().String("additional-dependencies", "", "Comma separated list of additional dependencies.")
 
 	return &cmd, &options
 }
 
 type inspectCmdOptions struct {
 	*RootCmdOptions
-	AllDependencies        bool   `mapstructure:"all-dependencies"`
-	OutputFormat           string `mapstructure:"output"`
-	DependenciesDirectory  string `mapstructure:"dependencies-directory"`
-	AdditionalDependencies string `mapstructure:"additional-dependencies"`
+	OutputFormat string `mapstructure:"output"`
 }
 
 func (command *inspectCmdOptions) validate(args []string) error {
