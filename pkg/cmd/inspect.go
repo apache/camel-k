@@ -26,6 +26,7 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/scylladb/go-set/strset"
 	"github.com/spf13/cobra"
@@ -164,7 +165,7 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 		LocalRepository: "",
 	}
 	runtime := v1.RuntimeSpec{
-		Version:  "1.3.0",
+		Version:  defaults.DefaultRuntimeVersion,
 		Provider: v1.RuntimeProviderMain,
 	}
 	providerDependencies := []maven.Dependency{}
