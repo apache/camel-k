@@ -206,12 +206,8 @@ func (command *inspectCmdOptions) run(args []string) error {
 	}
 
 	// Top level dependencies are printed out.
-	if !command.AllDependencies {
-		for _, dep := range dependencies {
-			fmt.Printf("%v\n", dep)
-		}
-
-		// The dependencies var will contain both top level and transitive dependencies.
+	if command.AllDependencies {
+		// If --all-dependencies flag is set, move all transitive dependencies in the --dependencies-directory.
 		err = getTransitiveDependencies(catalog, dependencies, command)
 		if err != nil {
 			return err
