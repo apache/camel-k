@@ -106,7 +106,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1.Build) (*
 		}
 
 		// Report the duration the Build has been waiting in the build queue
-		queueDuration.Observe(time.Now().Sub(build.CreationTimestamp.Time).Seconds())
+		queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
 	}
 
 	build.Status.Phase = v1.BuildPhasePending
