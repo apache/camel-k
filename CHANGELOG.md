@@ -14,6 +14,7 @@
 
 **Merged pull requests:**
 
+- update prometheus trait doc with quarkus as default runtime [\#1772](https://github.com/apache/camel-k/pull/1772) ([smccarthy-ie](https://github.com/smccarthy-ie))
 - Add a kamel debug command [\#1769](https://github.com/apache/camel-k/pull/1769) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Kamelet example [\#1768](https://github.com/apache/camel-k/pull/1768) ([christophd](https://github.com/christophd))
 - fix: Correct operator leader election ConfigMap lock name [\#1765](https://github.com/apache/camel-k/pull/1765) ([astefanutti](https://github.com/astefanutti))
@@ -275,7 +276,6 @@
 - Add time it takes to build a kit in the builder pod log [\#1186](https://github.com/apache/camel-k/issues/1186)
 - Saga example [\#1097](https://github.com/apache/camel-k/issues/1097)
 - java.lang.NoSuchMethodError: com.javainuse.route.SimpleRouteBuilder.getContext\(\)Lorg/apache/camel/model/ModelCamelContext; [\#1073](https://github.com/apache/camel-k/issues/1073)
-- Error after cluster restart [\#933](https://github.com/apache/camel-k/issues/933)
 - Error pushing image to camel-k-ctx [\#853](https://github.com/apache/camel-k/issues/853)
 - service and route not created when using --open-api parameter [\#843](https://github.com/apache/camel-k/issues/843)
 - one page of documentation to install Camel-K on Minikube is incorrect [\#798](https://github.com/apache/camel-k/issues/798)
@@ -899,6 +899,7 @@
 
 - Build completes OK but integration shows ERROR [\#965](https://github.com/apache/camel-k/issues/965)
 - Monitoring kubectl for changes to integrations misses transition to error state [\#937](https://github.com/apache/camel-k/issues/937)
+- Error after cluster restart [\#933](https://github.com/apache/camel-k/issues/933)
 - Knative route from AWS S3 endpoint immediatly stops after starting [\#919](https://github.com/apache/camel-k/issues/919)
 - Dev mode doesn't show if the build failed [\#906](https://github.com/apache/camel-k/issues/906)
 - Road Map about Yaml DSL [\#902](https://github.com/apache/camel-k/issues/902)
