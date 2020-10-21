@@ -36,3 +36,35 @@ spec:
             message: |
               {{ printf "%0.0f" $value }}% of the reconciliation requests
               for {{ $labels.job }} have failed.
+        - alert: CamelKSuccessBuildDuration2m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_duration_seconds_bucket{le="120",result="Succeeded"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_duration_seconds_count{result="Succeeded"}[5m])) by (job)
+            )
+            * 100
+            > 10
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the successful builds
+              for {{ $labels.job }} have their duration above 2m.
+        - alert: CamelKSuccessBuildDuration5m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_duration_seconds_bucket{le="300",result="Succeeded"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_duration_seconds_count{result="Succeeded"}[5m])) by (job)
+            )
+            * 100
+            > 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the successful builds
+              for {{ $labels.job }} have their duration above 5m.
