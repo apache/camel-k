@@ -69,9 +69,6 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1.Build) 
 
 	if build.Status.Failure.Recovery.Attempt >= build.Status.Failure.Recovery.AttemptMax {
 		build.Status.Phase = v1.BuildPhaseError
-		buildAttempts.
-			WithLabelValues(build.Status.Phase.String()).
-			Observe(float64(getBuildAttemptsFor(build)))
 		return build, nil
 	}
 
@@ -97,12 +94,4 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1.Build) 
 	)
 
 	return build, nil
-}
-
-func getBuildAttemptsFor(build *v1.Build) int {
-	attempts := 1
-	if build.Status.Failure != nil {
-		attempts += build.Status.Failure.Recovery.Attempt
-	}
-	return attempts
 }

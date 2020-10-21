@@ -130,12 +130,7 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 			}
 
 			// Account for the Build metrics
-			buildAttempts.
-				WithLabelValues(status.Phase.String()).
-				Observe(float64(getBuildAttemptsFor(build)))
-			buildDuration.
-				WithLabelValues(status.Phase.String()).
-				Observe(duration.Seconds())
+			observeBuildResult(build, status.Phase, duration)
 
 			_ = action.updateBuildStatus(ctx, build, status)
 			break
@@ -152,12 +147,7 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 			status.Duration = duration.String()
 
 			// Account for the Build metrics
-			buildAttempts.
-				WithLabelValues(status.Phase.String()).
-				Observe(float64(getBuildAttemptsFor(build)))
-			buildDuration.
-				WithLabelValues(status.Phase.String()).
-				Observe(duration.Seconds())
+			observeBuildResult(build, status.Phase, duration)
 		}
 
 		err := action.updateBuildStatus(ctx, build, status)
