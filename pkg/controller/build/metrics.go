@@ -31,17 +31,6 @@ import (
 const buildResultLabel = "result"
 
 var (
-	buildAttempts = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "camel_k_build_attempts",
-			Help:    "Camel K build attempts",
-			Buckets: []float64{1, 2, 3, 4, 5},
-		},
-		[]string{
-			buildResultLabel,
-		},
-	)
-
 	buildDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name: "camel_k_build_duration_seconds",
@@ -54,6 +43,17 @@ var (
 				5 * time.Minute.Seconds(),
 				10 * time.Minute.Seconds(),
 			},
+		},
+		[]string{
+			buildResultLabel,
+		},
+	)
+
+	buildRecovery = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "camel_k_build_recovery_attempts",
+			Help:    "Camel K build recovery attempts",
+			Buckets: []float64{0, 1, 2, 3, 4, 5},
 		},
 		[]string{
 			buildResultLabel,
@@ -77,7 +77,7 @@ var (
 
 func init() {
 	// Register custom metrics with the global prometheus registry
-	metrics.Registry.MustRegister(buildAttempts, buildDuration, queueDuration)
+	metrics.Registry.MustRegister(buildDuration, buildRecovery, queueDuration)
 }
 
 func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Duration) {
@@ -89,7 +89,7 @@ func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Dura
 		phase = v1.BuildPhaseError
 	}
 
-	buildAttempts.WithLabelValues(phase.String()).Observe(float64(attempt))
+	buildRecovery.WithLabelValues(phase.String()).Observe(float64(attempt))
 	buildDuration.WithLabelValues(phase.String()).Observe(duration.Seconds())
 }
 
