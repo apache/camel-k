@@ -28,14 +28,16 @@ import (
 const buildResultLabel = "result"
 
 var (
-	buildAttempt = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "camel_k_build_attempt",
-			Help: "Camel K build attempt",
+	buildAttempts = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "camel_k_build_attempts",
+			Help:    "Camel K build attempts",
+			Buckets: []float64{1, 2, 3, 4, 5},
 		},
 		[]string{
 			buildResultLabel,
-		})
+		},
+	)
 
 	buildDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -72,5 +74,5 @@ var (
 
 func init() {
 	// Register custom metrics with the global prometheus registry
-	metrics.Registry.MustRegister(buildAttempt, buildDuration, queueDuration)
+	metrics.Registry.MustRegister(buildAttempts, buildDuration, queueDuration)
 }
