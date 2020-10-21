@@ -18,11 +18,14 @@ limitations under the License.
 package build
 
 import (
+	"math"
 	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 const buildResultLabel = "result"
@@ -75,4 +78,27 @@ var (
 func init() {
 	// Register custom metrics with the global prometheus registry
 	metrics.Registry.MustRegister(buildAttempts, buildDuration, queueDuration)
+}
+
+func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Duration) {
+	attempt, attemptMax := getBuildAttemptFor(build)
+
+	if phase == v1.BuildPhaseFailed && attempt >= attemptMax {
+		// The phase will be updated in the recovery action,
+		// so let's account for it right now.
+		phase = v1.BuildPhaseError
+	}
+
+	buildAttempts.WithLabelValues(phase.String()).Observe(float64(attempt))
+	buildDuration.WithLabelValues(phase.String()).Observe(duration.Seconds())
+}
+
+func getBuildAttemptFor(build *v1.Build) (int, int) {
+	attempt := 0
+	attemptMax := math.MaxInt32
+	if failure := build.Status.Failure; failure != nil {
+		attempt += failure.Recovery.Attempt
+		attemptMax = failure.Recovery.AttemptMax
+	}
+	return attempt, attemptMax
 }

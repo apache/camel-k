@@ -71,12 +71,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		build.Status.Duration = duration.String()
 
 		// Account for the Build metrics
-		buildAttempts.
-			WithLabelValues(build.Status.Phase.String()).
-			Observe(float64(getBuildAttemptsFor(build)))
-		buildDuration.
-			WithLabelValues(build.Status.Phase.String()).
-			Observe(duration.Seconds())
+		observeBuildResult(build, build.Status.Phase, duration)
 
 		for _, task := range build.Spec.Tasks {
 			if task.Image != nil {
@@ -98,12 +93,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		build.Status.Duration = duration.String()
 
 		// Account for the Build metrics
-		buildAttempts.
-			WithLabelValues(build.Status.Phase.String()).
-			Observe(float64(getBuildAttemptsFor(build)))
-		buildDuration.
-			WithLabelValues(build.Status.Phase.String()).
-			Observe(duration.Seconds())
+		observeBuildResult(build, build.Status.Phase, duration)
 	}
 
 	return build, nil
