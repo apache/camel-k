@@ -81,3 +81,35 @@ spec:
           annotations:
             message: |
               {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }} have failed.
+        - alert: CamelKBuildQueueDuration1m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_queue_duration_seconds_bucket{le="60"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_queue_duration_seconds_count[5m])) by (job)
+            )
+            * 100
+            > 1
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }}
+              have been queued for more than 1m.
+        - alert: CamelKBuildQueueDuration5m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_queue_duration_seconds_bucket{le="300"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_queue_duration_seconds_count[5m])) by (job)
+            )
+            * 100
+            > 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }}
+              have been queued for more than 5m.
