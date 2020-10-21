@@ -94,7 +94,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	}
 
 	// Report the duration the Build has been waiting in the build queue
-	queueDuration.Observe(time.Now().Sub(build.CreationTimestamp.Time).Seconds())
+	queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
 
 	camelevent.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 
