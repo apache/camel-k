@@ -39,8 +39,6 @@ import (
 var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
 
 const (
-	defaultRuntimeVersion            = "1.3.0"
-	defaultCamelVersion              = "3.3.0"
 	defaultWorkspaceDirectoryName    = "workspace"
 	defaultDependenciesDirectoryName = "dependencies"
 )
@@ -303,7 +301,7 @@ func getTransitiveDependencies(
 	}
 
 	// Create Maven project.
-	project := runtime.GenerateProjectCommon(defaultCamelVersion, defaultRuntimeVersion)
+	project := runtime.GenerateProjectCommon(defaults.CamelVersion, defaults.DefaultRuntimeVersion)
 
 	// Inject dependencies into Maven project.
 	err := builder.InjectDependenciesCommon(&project, dependencies, catalog)
