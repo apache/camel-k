@@ -70,7 +70,7 @@ spec:
               for {{ $labels.job }} have their duration above 5m.
         - alert: CamelKBuildFailure
           expr: |
-            sum(rate(camel_k_build_duration_seconds_count{result="Error"}[5m])) by (job)
+            sum(rate(camel_k_build_duration_seconds_count{result="Failed"}[5m])) by (job)
             /
             sum(rate(camel_k_build_duration_seconds_count[5m])) by (job)
             * 100
@@ -81,6 +81,19 @@ spec:
           annotations:
             message: |
               {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }} have failed.
+        - alert: CamelKBuildError
+          expr: |
+            sum(rate(camel_k_build_duration_seconds_count{result="Error"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_duration_seconds_count[5m])) by (job)
+            * 100
+            > 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }} have errored.
         - alert: CamelKBuildQueueDuration1m
           expr: |
             (
