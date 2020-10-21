@@ -180,8 +180,11 @@ func (command *inspectCmdOptions) run(args []string) error {
 	// Fetch existing catalog or create new one if one does not already exist.
 	catalog, err := createCamelCatalog()
 
+	// Output top-level dependencies.
+	outputTopLevel := !command.AllDependencies
+
 	// Get top-level dependencies, this is the default behavior when no other options are provided.
-	dependencies, err := getTopLevelDependencies(catalog, command.OutputFormat, args)
+	dependencies, err := getTopLevelDependencies(catalog, command.OutputFormat, args, outputTopLevel)
 	if err != nil {
 		return err
 	}
@@ -208,7 +211,7 @@ func (command *inspectCmdOptions) run(args []string) error {
 	return nil
 }
 
-func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args []string) ([]string, error) {
+func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args []string, outputTopLevel bool) ([]string, error) {
 	// List of top-level dependencies.
 	dependencies := strset.New()
 
@@ -236,7 +239,7 @@ func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args 
 		if err != nil {
 			return []string{}, err
 		}
-	} else {
+	} else if outputTopLevel {
 		// Print output in text form.
 		for _, dep := range dependencies.List() {
 			fmt.Printf("%v\n", dep)
