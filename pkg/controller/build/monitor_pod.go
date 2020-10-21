@@ -69,9 +69,15 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		build.Status.Phase = v1.BuildPhaseSucceeded
 		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
+
 		// Account for the Build metrics
-		buildAttempt.WithLabelValues(build.Status.Phase.String()).Inc()
-		buildDuration.WithLabelValues(build.Status.Phase.String()).Observe(duration.Seconds())
+		buildAttempts.
+			WithLabelValues(build.Status.Phase.String()).
+			Observe(float64(getBuildAttemptsFor(build)))
+		buildDuration.
+			WithLabelValues(build.Status.Phase.String()).
+			Observe(duration.Seconds())
+
 		for _, task := range build.Spec.Tasks {
 			if task.Image != nil {
 				build.Status.Image = task.Image.BuiltImage
@@ -90,9 +96,14 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		build.Status.Phase = v1.BuildPhaseFailed
 		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
+
 		// Account for the Build metrics
-		buildAttempt.WithLabelValues(build.Status.Phase.String()).Inc()
-		buildDuration.WithLabelValues(build.Status.Phase.String()).Observe(duration.Seconds())
+		buildAttempts.
+			WithLabelValues(build.Status.Phase.String()).
+			Observe(float64(getBuildAttemptsFor(build)))
+		buildDuration.
+			WithLabelValues(build.Status.Phase.String()).
+			Observe(duration.Seconds())
 	}
 
 	return build, nil
