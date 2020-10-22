@@ -21,6 +21,7 @@
 - Added workflow dispatch to changelog gh action [\#1764](https://github.com/apache/camel-k/pull/1764) ([oscerd](https://github.com/oscerd))
 - Release Helm charts and bump versions [\#1759](https://github.com/apache/camel-k/pull/1759) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): remove reference to staging repo [\#1758](https://github.com/apache/camel-k/pull/1758) ([lburgazzoli](https://github.com/lburgazzoli))
+- Add inspect sub-command with basic support [\#1757](https://github.com/apache/camel-k/pull/1757) ([doru1004](https://github.com/doru1004))
 - Fix \#1537: generate json schema for full Kubernetes resources [\#1756](https://github.com/apache/camel-k/pull/1756) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
 
@@ -276,6 +277,7 @@
 - Add time it takes to build a kit in the builder pod log [\#1186](https://github.com/apache/camel-k/issues/1186)
 - Saga example [\#1097](https://github.com/apache/camel-k/issues/1097)
 - java.lang.NoSuchMethodError: com.javainuse.route.SimpleRouteBuilder.getContext\(\)Lorg/apache/camel/model/ModelCamelContext; [\#1073](https://github.com/apache/camel-k/issues/1073)
+- Error after cluster restart [\#933](https://github.com/apache/camel-k/issues/933)
 - Error pushing image to camel-k-ctx [\#853](https://github.com/apache/camel-k/issues/853)
 - service and route not created when using --open-api parameter [\#843](https://github.com/apache/camel-k/issues/843)
 - one page of documentation to install Camel-K on Minikube is incorrect [\#798](https://github.com/apache/camel-k/issues/798)
@@ -843,6 +845,7 @@
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
 - chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
+- Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
 
@@ -876,7 +879,6 @@
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
 - chore\(tests\): add integration tests for common knative issues [\#1016](https://github.com/apache/camel-k/pull/1016) ([nicolaferraro](https://github.com/nicolaferraro))
-- Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#1005: allow to customize loader and add default dependencies for… [\#1007](https://github.com/apache/camel-k/pull/1007) ([nicolaferraro](https://github.com/nicolaferraro))
 - Update OLM manifests for 1.0.0-M2 release [\#1006](https://github.com/apache/camel-k/pull/1006) ([astefanutti](https://github.com/astefanutti))
 - fix: Avoid updating Deployment replicas in default configuration [\#1003](https://github.com/apache/camel-k/pull/1003) ([astefanutti](https://github.com/astefanutti))
@@ -899,7 +901,6 @@
 
 - Build completes OK but integration shows ERROR [\#965](https://github.com/apache/camel-k/issues/965)
 - Monitoring kubectl for changes to integrations misses transition to error state [\#937](https://github.com/apache/camel-k/issues/937)
-- Error after cluster restart [\#933](https://github.com/apache/camel-k/issues/933)
 - Knative route from AWS S3 endpoint immediatly stops after starting [\#919](https://github.com/apache/camel-k/issues/919)
 - Dev mode doesn't show if the build failed [\#906](https://github.com/apache/camel-k/issues/906)
 - Road Map about Yaml DSL [\#902](https://github.com/apache/camel-k/issues/902)
