@@ -46,4 +46,5 @@ func init() {
 	AddToTraits(newIstioTrait)
 	AddToTraits(newIngressTrait)
 	AddToTraits(newOwnerTrait)
+	AddToTraits(newPdbTrait)
 }
