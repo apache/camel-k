@@ -14,6 +14,7 @@
 
 **Merged pull requests:**
 
+- Automatic changelog: Remove deprecated github action commands [\#1775](https://github.com/apache/camel-k/pull/1775) ([oscerd](https://github.com/oscerd))
 - update prometheus trait doc with quarkus as default runtime [\#1772](https://github.com/apache/camel-k/pull/1772) ([smccarthy-ie](https://github.com/smccarthy-ie))
 - Add a kamel debug command [\#1769](https://github.com/apache/camel-k/pull/1769) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Kamelet example [\#1768](https://github.com/apache/camel-k/pull/1768) ([christophd](https://github.com/christophd))
@@ -845,7 +846,6 @@
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
 - chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
-- Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
 
@@ -879,6 +879,7 @@
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
 - chore\(tests\): add integration tests for common knative issues [\#1016](https://github.com/apache/camel-k/pull/1016) ([nicolaferraro](https://github.com/nicolaferraro))
+- Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#1005: allow to customize loader and add default dependencies for… [\#1007](https://github.com/apache/camel-k/pull/1007) ([nicolaferraro](https://github.com/nicolaferraro))
 - Update OLM manifests for 1.0.0-M2 release [\#1006](https://github.com/apache/camel-k/pull/1006) ([astefanutti](https://github.com/astefanutti))
 - fix: Avoid updating Deployment replicas in default configuration [\#1003](https://github.com/apache/camel-k/pull/1003) ([astefanutti](https://github.com/astefanutti))
