@@ -26,14 +26,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint|event)(?:$|/([A-Za-z0-9.-]+)(?:[/?].*|$))`)
+var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint|event)(?:[?].*|$|/([A-Za-z0-9.-]+)(?:[/?].*|$))`)
 var plainNameRegexp = regexp.MustCompile(`^[A-Za-z0-9.-]+$`)
 
 const (
-	paramAPIVersion       = "apiVersion"
-	paramKind             = "kind"
-	paramBrokerName       = "brokerName"
-	paramBrokerAPIVersion = "brokerApiVersion"
+	paramAPIVersion = "apiVersion"
+	paramKind       = "kind"
+	paramBrokerName = "name"
 )
 
 // FilterURIs returns all Knative URIs of the given type from a slice
@@ -62,7 +61,7 @@ func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 		if name == "" {
 			name = "default"
 		}
-		apiVersion := uriutils.GetQueryParameter(uri, paramBrokerAPIVersion)
+		apiVersion := uriutils.GetQueryParameter(uri, paramAPIVersion)
 		return v1.ObjectReference{
 			Name:       name,
 			APIVersion: apiVersion,

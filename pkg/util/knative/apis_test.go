@@ -134,7 +134,7 @@ func TestAPIs(t *testing.T) {
 		Name:       "default",
 	}, refs[0])
 
-	ref, err = ExtractObjectReference("knative:event/ciao?brokerApiVersion=xxx")
+	ref, err = ExtractObjectReference("knative:event/ciao?apiVersion=xxx")
 	assert.Nil(t, err)
 	refs = FillMissingReferenceData(knative.CamelServiceTypeEvent, ref)
 	checkValidRefs(t, refs)
@@ -144,7 +144,7 @@ func TestAPIs(t *testing.T) {
 		Name:       "default",
 	}, refs[0])
 
-	ref, err = ExtractObjectReference("knative:event/ciao?brokerName=aaa")
+	ref, err = ExtractObjectReference("knative:event/ciao?name=aaa")
 	assert.Nil(t, err)
 	refs = FillMissingReferenceData(knative.CamelServiceTypeEvent, ref)
 	checkValidRefs(t, refs)
