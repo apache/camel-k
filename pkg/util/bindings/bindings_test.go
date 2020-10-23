@@ -36,6 +36,7 @@ func TestBindings(t *testing.T) {
 	testcases := []struct {
 		endpointType v1alpha1.EndpointType
 		endpoint     v1alpha1.Endpoint
+		profile      camelv1.TraitProfile
 		uri          string
 		traits       map[string]camelv1.TraitSpec
 	}{
@@ -160,6 +161,14 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
 			endpoint: v1alpha1.Endpoint{
+				URI: asStringPointer("https://myurl/hey"),
+			},
+			profile: camelv1.TraitProfileKubernetes,
+			uri:     "https://myurl/hey",
+		},
+		{
+			endpointType: v1alpha1.EndpointTypeSink,
+			endpoint: v1alpha1.Endpoint{
 				URI: asStringPointer("docker://xxx"),
 			},
 			uri: "docker://xxx",
@@ -174,10 +183,16 @@ func TestBindings(t *testing.T) {
 			client, err := test.NewFakeClient()
 			assert.NoError(t, err)
 
+			profile := tc.profile
+			if profile == "" {
+				profile = camelv1.TraitProfileKnative
+			}
+
 			bindingContext := BindingContext{
 				Ctx:       ctx,
 				Client:    client,
 				Namespace: "test",
+				Profile:   profile,
 			}
 
 			binding, err := Translate(bindingContext, tc.endpointType, tc.endpoint)

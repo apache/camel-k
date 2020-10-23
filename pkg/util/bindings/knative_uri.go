@@ -40,6 +40,10 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointType v1
 		// works only on uris
 		return nil, nil
 	}
+	if ctx.Profile != v1.TraitProfileKnative {
+		// use cloudevent binding only in Knative trait profile
+		return nil, nil
+	}
 	if !strings.HasPrefix(*e.URI, "http:") && !strings.HasPrefix(*e.URI, "https:") {
 		// only translates http/https uri to Knative calls
 		return nil, nil

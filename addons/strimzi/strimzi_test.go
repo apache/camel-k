@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
 	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1/client/internalclientset/fake"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -42,6 +43,7 @@ func TestStrimziDirect(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := v1alpha1.Endpoint{
@@ -102,6 +104,7 @@ func TestStrimziLookup(t *testing.T) {
 	bindingContext := bindings.BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := v1alpha1.Endpoint{
