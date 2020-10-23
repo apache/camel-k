@@ -52,6 +52,9 @@ func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdO
 
 			return nil
 		},
+		Annotations: map[string]string{
+			offlineCommandLabel: "true",
+		},
 	}
 
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
