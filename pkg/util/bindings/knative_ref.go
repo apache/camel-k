@@ -19,6 +19,7 @@ package bindings
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -69,12 +70,21 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointType v1
 
 	var serviceURI string
 	if *serviceType == knativeapis.CamelServiceTypeEvent {
+		// TODO enable this when the runtime will support changing the broker name (https://github.com/apache/camel-k-runtime/issues/535)
+		//if props["name"] == "" {
+		//	props["name"] = e.Ref.Name
+		//}
 		if eventType, ok := props["type"]; ok {
 			// consume prop
 			delete(props, "type")
 			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, eventType)
 		} else {
-			serviceURI = fmt.Sprintf("knative:%s", *serviceType)
+			if endpointType == v1alpha1.EndpointTypeSink {
+				// Allowing no event type, but it can fail. See https://github.com/apache/camel-k-runtime/issues/536
+				serviceURI = fmt.Sprintf("knative:%s", *serviceType)
+			} else {
+				return nil, errors.New(`property "type" must be provided when reading from the Broker`)
+			}
 		}
 	} else {
 		serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
