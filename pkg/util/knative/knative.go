@@ -80,7 +80,7 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: brokerReference.Namespace,
-			Name:      brokerReference.Name + "-" + serviceName + "-" + eventType,
+			Name:      brokerReference.Name + "-" + serviceName + "-" + kubernetesutils.SanitizeLabel(eventType),
 		},
 		Spec: eventing.TriggerSpec{
 			Filter: &eventing.TriggerFilter{
