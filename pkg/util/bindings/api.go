@@ -20,6 +20,7 @@ package bindings
 
 import (
 	"context"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -53,4 +54,5 @@ type BindingContext struct {
 	Ctx       context.Context
 	Client    client.Client
 	Namespace string
+	Profile   v1.TraitProfile
 }
