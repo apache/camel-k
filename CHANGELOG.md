@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kamelet binding to an explicit URI failing [\#1774](https://github.com/apache/camel-k/issues/1774)
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
@@ -14,6 +15,7 @@
 
 **Merged pull requests:**
 
+- Fix \#1774: use direct HTTP binding when Knative is not in use [\#1776](https://github.com/apache/camel-k/pull/1776) ([nicolaferraro](https://github.com/nicolaferraro))
 - Automatic changelog: Remove deprecated github action commands [\#1775](https://github.com/apache/camel-k/pull/1775) ([oscerd](https://github.com/oscerd))
 - update prometheus trait doc with quarkus as default runtime [\#1772](https://github.com/apache/camel-k/pull/1772) ([smccarthy-ie](https://github.com/smccarthy-ie))
 - Add a kamel debug command [\#1769](https://github.com/apache/camel-k/pull/1769) ([nicolaferraro](https://github.com/nicolaferraro))
