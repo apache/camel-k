@@ -21,9 +21,11 @@ on:
   pull_request:
     branches: 
       - master
+      - "release-*"
   push:
     branches:
       - master
+      - "release-*"
 jobs:
   build:
     runs-on: ubuntu-latest
