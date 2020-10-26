@@ -21,6 +21,7 @@ on:
   pull_request:
     branches:
       - master
+      - "release-*"
     paths-ignore:
       - '**.adoc'
       - 'KEYS'
@@ -29,6 +30,7 @@ on:
   push:
     branches:
       - master
+      - "release-*"
     paths-ignore:
       - '**.adoc'
       - 'KEYS'
