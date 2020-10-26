@@ -61,6 +61,14 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 	}
 
 	var n int
+	if !o.SkipKameletBindings {
+		if n, err = o.deleteAllKameletBindings(c); err != nil {
+			fmt.Print(err)
+			return
+		}
+		fmt.Printf("%d kamelet bindings deleted from namespace %s\n", n, o.Namespace)
+	}
+
 	if !o.SkipIntegrations {
 		if n, err = o.deleteAllIntegrations(c); err != nil {
 			fmt.Print(err)
@@ -75,14 +83,6 @@ func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
 			return
 		}
 		fmt.Printf("%d integration kits deleted from namespace %s\n", n, o.Namespace)
-	}
-
-	if !o.SkipKameletBindings {
-		if n, err = o.deleteAllKameletBindings(c); err != nil {
-			fmt.Print(err)
-			return
-		}
-		fmt.Printf("%d kamelet bindings deleted from namespace %s\n", n, o.Namespace)
 	}
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
