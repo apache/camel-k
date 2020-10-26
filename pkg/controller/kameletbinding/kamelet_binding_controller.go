@@ -21,6 +21,7 @@ import (
 	"context"
 	"time"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	camelevent "github.com/apache/camel-k/pkg/event"
@@ -79,6 +80,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			// Evaluates to false if the object has been confirmed deleted
 			return !e.DeleteStateUnknown
 		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Watch Integration to propagate changes downstream
+	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForOwner{
+		OwnerType:    &v1alpha1.KameletBinding{},
+		IsController: false,
 	})
 	if err != nil {
 		return err
