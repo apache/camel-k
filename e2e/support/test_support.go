@@ -23,6 +23,7 @@ package support
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -33,9 +34,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
-
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -887,6 +889,92 @@ func CreateKnativeChannelv1Beta1(ns string, name string) func() error {
 			},
 		}
 		return TestClient.Create(TestContext, &channel)
+	}
+}
+
+/*
+	Kamelets
+*/
+
+func CreateTimerKamelet(ns string, name string) func() error {
+	return func() error {
+		kamelet := v1alpha1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+			Spec: v1alpha1.KameletSpec{
+				Definition: v1alpha1.JSONSchemaProps{
+					Properties: map[string]v1alpha1.JSONSchemaProps{
+						"message": {
+							Type: "string",
+						},
+					},
+				},
+				Flow: asFlow(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+						"steps": []map[string]interface{}{
+							{
+								"set-body": map[string]interface{}{
+									"constant": "{{message}}",
+								},
+							},
+							{
+								"to": "kamelet:sink",
+							},
+						},
+					},
+				}),
+			},
+		}
+		return TestClient.Create(TestContext, &kamelet)
+	}
+}
+
+func BindKameletTo(ns, name, from string, to corev1.ObjectReference, properties map[string]string) func() error {
+	return func() error {
+		kb := v1alpha1.KameletBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+			Spec: v1alpha1.KameletBindingSpec{
+				Source: v1alpha1.Endpoint{
+					Ref: &corev1.ObjectReference{
+						Kind:       "Kamelet",
+						APIVersion: v1alpha1.SchemeGroupVersion.String(),
+						Name:       from,
+					},
+					Properties: asEndpointProperties(properties),
+				},
+				Sink: v1alpha1.Endpoint{
+					Ref:        &to,
+					Properties: asEndpointProperties(map[string]string{}),
+				},
+			},
+		}
+		return kubernetes.ReplaceResource(TestContext, TestClient, &kb)
+	}
+}
+
+func asFlow(source map[string]interface{}) *v1.Flow {
+	bytes, err := json.Marshal(source)
+	if err != nil {
+		panic(err)
+	}
+	return &v1.Flow{
+		RawMessage: bytes,
+	}
+}
+
+func asEndpointProperties(props map[string]string) v1alpha1.EndpointProperties {
+	bytes, err := json.Marshal(props)
+	if err != nil {
+		panic(err)
+	}
+	return v1alpha1.EndpointProperties{
+		RawMessage: bytes,
 	}
 }
 
