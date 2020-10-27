@@ -15,8 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TOKEN=`oc config view --minify --output 'jsonpath={..token}'`
-echo "openshift.token=${TOKEN}" > openshift-token.properties
-oc -n ${YAKS_NAMESPACE} create secret generic openshift-token-secret --from-file=openshift-token.properties
-oc -n ${YAKS_NAMESPACE} label secret openshift-token-secret yaks.citrusframework.org/test=metrics
-rm openshift-token.properties
+SOURCE_DIR=$( dirname "${BASH_SOURCE[0]}")
+APP_FOLDER="${SOURCE_DIR}/app"
+
+mvn clean install -f $APP_FOLDER
+LOCAL_MVN_HOME=$(mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout)
+
+OPERATOR_POD=$(oc -n ${YAKS_NAMESPACE} get pods -l name=camel-k-operator --no-headers -o custom-columns=NAME:.metadata.name)
+oc -n ${YAKS_NAMESPACE} exec $OPERATOR_POD -- mkdir -p /tmp/artifacts/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/
+oc -n ${YAKS_NAMESPACE} rsync $LOCAL_MVN_HOME/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ $OPERATOR_POD:/tmp/artifacts/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ --exclude=\* --include=camel-k-example-metrics-1.0.0-SNAPSHOT.\* --no-perms=true
