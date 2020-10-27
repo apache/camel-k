@@ -19,11 +19,15 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
+	"time"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/spf13/cobra"
+	k8errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -65,6 +69,9 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	integrationId := args[0]
+
 	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       v1.IntegrationKind,
@@ -72,18 +79,124 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: o.Namespace,
-			Name:      args[0],
+			Name:      integrationId,
 		},
 	}
 	key := k8sclient.ObjectKey{
 		Namespace: o.Namespace,
-		Name:      args[0],
+		Name:      integrationId,
 	}
 
-	if err := c.Get(o.Context, key, &integration); err != nil {
-		return err
-	}
-	if err := k8slog.Print(o.Context, c, &integration, cmd.OutOrStdout()); err != nil {
+	var pollTimeout = 600 * time.Second // 10 minutes should be adequate for a timeout
+	var pollInterval = 2 * time.Second
+	var currLogMsg = ""
+	var newLogMsg = ""
+
+	err = wait.PollImmediate(pollInterval, pollTimeout, func() (done bool, err error) {
+
+		//
+		// Reduce repetition of messages by tracking the last message
+		// and checking if its different from the new message
+		//
+		if newLogMsg != currLogMsg {
+			fmt.Println(newLogMsg)
+			currLogMsg = newLogMsg
+		}
+
+		//
+		// Try and find the integration
+		//
+		err = c.Get(o.Context, key, &integration)
+		if err != nil && !k8errors.IsNotFound(err) {
+			// different error so return
+			return false, err
+		}
+
+		if k8errors.IsNotFound(err) {
+			//
+			// Don't have an integration yet so log and wait
+			//
+			newLogMsg = fmt.Sprintf("Integration '%s' not yet available. Will keep checking ...", integrationId)
+			return false, nil
+		}
+
+		//
+		// Found the integration so check its status using its phase
+		//
+		phase := integration.Status.Phase
+		switch phase {
+		case "Running":
+			//
+			// Found the running integration so step over to scraping its pod log
+			//
+			fmt.Printf("Integration '%s' is now running. Showing log ...\n", integrationId)
+			if err := k8slog.Print(o.Context, c, &integration, cmd.OutOrStdout()); err != nil {
+				return false, err
+			} else {
+				return true, nil
+			}
+			break
+		case "Building Kit":
+			//
+			// This phase can take a while so check progress using
+			// the associated Integration Kit's progress
+			//
+			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is being initialised. This may take some time ...", integrationId)
+			if integration.Status.Kit == "" {
+				//
+				// Not created yet so wait quietly
+				//
+				return false, nil
+			}
+
+			integrationKit := v1.IntegrationKit{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       v1.IntegrationKitKind,
+					APIVersion: v1.SchemeGroupVersion.String(),
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: o.Namespace,
+					Name:      integration.Status.Kit,
+				},
+			}
+			ikKey := k8sclient.ObjectKey{
+				Namespace: o.Namespace,
+				Name:      integration.Status.Kit,
+			}
+
+			//
+			// Query for the integration kit
+			//
+			if err := c.Get(o.Context, ikKey, &integrationKit); err != nil {
+				if !k8errors.IsNotFound(err) {
+					//
+					// Not created yet so wait quietly
+					//
+					return false, nil
+				} else {
+					//
+					// Integration kit query made an error
+					//
+					return false, err
+				}
+			}
+
+			//
+			// Found the building kit so output its phase
+			//
+			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is at: %s", integrationId, integrationKit.Status.Phase)
+			break
+		default:
+			//
+			// Integration is still building, deploying or even in error
+			//
+			newLogMsg = fmt.Sprintf("Integration '%s' is at: %s ...", integrationId, phase)
+		}
+
+		return false, nil
+	})
+
+	if err != nil {
 		return err
 	}
 
