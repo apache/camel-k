@@ -166,11 +166,9 @@ func (command *inspectCmdOptions) run(args []string) error {
 	// Fetch existing catalog or create new one if one does not already exist.
 	catalog, err := createCamelCatalog()
 
-	// Output top-level dependencies.
-	outputTopLevel := !command.AllDependencies
-
 	// Get top-level dependencies, this is the default behavior when no other options are provided.
-	dependencies, err := getTopLevelDependencies(catalog, command.OutputFormat, args, outputTopLevel)
+	// Do not output these options when transitive options are enbled.
+	dependencies, err := getTopLevelDependencies(catalog, command.OutputFormat, args, !command.AllDependencies)
 	if err != nil {
 		return err
 	}
@@ -178,7 +176,6 @@ func (command *inspectCmdOptions) run(args []string) error {
 	// Add additional user-provided dependencies.
 	if command.AdditionalDependencies != nil {
 		for _, additionalDependency := range command.AdditionalDependencies {
-			fmt.Printf(" Dep : %v \n", additionalDependency)
 			dependencies = append(dependencies, additionalDependency)
 		}
 	}
@@ -195,7 +192,7 @@ func (command *inspectCmdOptions) run(args []string) error {
 	return nil
 }
 
-func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args []string, outputTopLevel bool) ([]string, error) {
+func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args []string, outputPlainText bool) ([]string, error) {
 	// List of top-level dependencies.
 	dependencies := strset.New()
 
@@ -218,17 +215,11 @@ func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args 
 		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
 	}
 
-	if format != "" {
-		err := printDependencies(format, dependencies)
-		if err != nil {
-			return []string{}, err
-		}
-	} else if outputTopLevel {
-		// Print output in text form.
-		for _, dep := range dependencies.List() {
-			fmt.Printf("%v\n", dep)
-		}
+	err := outputDependencies(dependencies.List(), format, outputPlainText)
+	if err != nil {
+		return []string{}, err
 	}
+
 	return dependencies.List(), nil
 }
 
@@ -249,26 +240,6 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 	}
 
 	return catalog, nil
-}
-
-func printDependencies(format string, dependecies *strset.Set) error {
-	switch format {
-	case "yaml":
-		data, err := util.DependenciesToYAML(dependecies.List())
-		if err != nil {
-			return err
-		}
-		fmt.Print(string(data))
-	case "json":
-		data, err := util.DependenciesToJSON(dependecies.List())
-		if err != nil {
-			return err
-		}
-		fmt.Print(string(data))
-	default:
-		return errors.New("unknown output format: " + format)
-	}
-	return nil
 }
 
 func getTransitiveDependencies(
@@ -312,16 +283,63 @@ func getTransitiveDependencies(
 		return err
 	}
 
+	// Dump dependencies in the dependencies directory and construct the list of dependencies.
+	transitiveDependencies := []string{}
 	for _, entry := range artifacts {
 		// Copy dependencies from Maven default directory to the DependenciesDirectory.
 		_, err := util.CopyFile(entry.Location, entry.Target)
 		if err != nil {
 			return err
 		}
+
+		transitiveDependencies = append(transitiveDependencies, entry.Target)
 	}
 
+	// Remove directory used for computing the dependencies.
 	defer os.RemoveAll(temporaryDirectory)
 
+	// Output transitive dependencies only if requested via the output format flag.
+	err = outputDependencies(transitiveDependencies, command.OutputFormat, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func outputDependencies(dependencies []string, format string, outputPlainText bool) error {
+	if format != "" {
+		err := printDependencies(format, dependencies)
+		if err != nil {
+			return err
+		}
+	} else if outputPlainText {
+		// Print output in text form.
+		for _, dep := range dependencies {
+			fmt.Printf("%v\n", dep)
+		}
+	}
+
+	return nil
+}
+
+func printDependencies(format string, dependecies []string) error {
+	switch format {
+	case "yaml":
+		data, err := util.DependenciesToYAML(dependecies)
+		if err != nil {
+			return err
+		}
+		fmt.Print(string(data))
+	case "json":
+		data, err := util.DependenciesToJSON(dependecies)
+		if err != nil {
+			return err
+		}
+		fmt.Print(string(data))
+	default:
+		return errors.New("unknown output format: " + format)
+	}
 	return nil
 }
 
