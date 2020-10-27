@@ -52,6 +52,7 @@ func (action *errorAction) Handle(ctx context.Context, integration *v1.Integrati
 
 		integration.Status.Digest = hash
 		integration.Status.Phase = v1.IntegrationPhaseInitialization
+		integration.Status.InitializationTimestamp = nil
 
 		return integration, nil
 	}
