@@ -22,11 +22,11 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -57,13 +57,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	if hash != integration.Status.Digest {
 		action.L.Info("Integration needs a rebuild")
 
+		integration.Initialize()
 		integration.Status.Digest = hash
-		integration.Status.Phase = v1.IntegrationPhaseInitialization
-		if integration.Spec.Profile != "" {
-			integration.Status.Profile = integration.Spec.Profile
-		}
-		integration.Status.Version = defaults.Version
-		integration.Status.InitializationTimestamp = nil
 
 		return integration, nil
 	}

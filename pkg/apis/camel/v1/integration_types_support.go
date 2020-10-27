@@ -52,6 +52,18 @@ func NewIntegrationList() IntegrationList {
 }
 
 // Sources return a new slice containing all the sources associated to the integration
+func (in *Integration) Initialize() {
+	profile := in.Status.Profile
+	if in.Spec.Profile != "" {
+		profile = in.Spec.Profile
+	}
+	in.Status = IntegrationStatus{
+		Phase:   IntegrationPhaseInitialization,
+		Profile: profile,
+	}
+}
+
+// Sources return a new slice containing all the sources associated to the integration
 func (in *Integration) Sources() []SourceSpec {
 	sources := make([]SourceSpec, 0, len(in.Spec.Sources)+len(in.Status.GeneratedSources))
 	sources = append(sources, in.Spec.Sources...)

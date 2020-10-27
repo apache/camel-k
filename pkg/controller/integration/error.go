@@ -50,9 +50,8 @@ func (action *errorAction) Handle(ctx context.Context, integration *v1.Integrati
 	if hash != integration.Status.Digest {
 		action.L.Info("Integration needs a rebuild")
 
+		integration.Initialize()
 		integration.Status.Digest = hash
-		integration.Status.Phase = v1.IntegrationPhaseInitialization
-		integration.Status.InitializationTimestamp = nil
 
 		return integration, nil
 	}

@@ -20,13 +20,13 @@ package integration
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/knative"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/knative"
 )
 
 // NewPlatformSetupAction creates a new platform-setup action
