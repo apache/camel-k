@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- KameletBinding to broker fails [\#1778](https://github.com/apache/camel-k/issues/1778)
 - Kamelet binding to an explicit URI failing [\#1774](https://github.com/apache/camel-k/issues/1774)
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
@@ -15,6 +16,8 @@
 
 **Merged pull requests:**
 
+- Make inspect subcommand run locally. [\#1782](https://github.com/apache/camel-k/pull/1782) ([doru1004](https://github.com/doru1004))
+- Fix \#1778: allow pushing to broker via KameletBinding [\#1780](https://github.com/apache/camel-k/pull/1780) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1774: use direct HTTP binding when Knative is not in use [\#1776](https://github.com/apache/camel-k/pull/1776) ([nicolaferraro](https://github.com/nicolaferraro))
 - Automatic changelog: Remove deprecated github action commands [\#1775](https://github.com/apache/camel-k/pull/1775) ([oscerd](https://github.com/oscerd))
 - update prometheus trait doc with quarkus as default runtime [\#1772](https://github.com/apache/camel-k/pull/1772) ([smccarthy-ie](https://github.com/smccarthy-ie))
