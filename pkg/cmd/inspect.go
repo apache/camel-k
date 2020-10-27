@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
@@ -255,7 +254,7 @@ func getTransitiveDependencies(
 	project := runtime.GenerateProjectCommon(defaults.CamelVersion, defaults.DefaultRuntimeVersion)
 
 	// Inject dependencies into Maven project.
-	err := builder.InjectDependenciesCommon(&project, dependencies, catalog)
+	err := camel.ManageIntegrationDependencies(&project, dependencies, catalog)
 	if err != nil {
 		return err
 	}
