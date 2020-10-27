@@ -21,6 +21,7 @@ import (
 	"context"
 
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -62,6 +63,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 			integration.Status.Profile = integration.Spec.Profile
 		}
 		integration.Status.Version = defaults.Version
+		integration.Status.InitializationTimestamp = nil
 
 		return integration, nil
 	}
@@ -72,8 +74,9 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return nil, err
 	}
 
-	// Enforce the scale sub-resource label selector
-	// It is used by the HPA that queries the scale sub-resource endpoint to list the pods owned by the integration
+	// Enforce the scale sub-resource label selector.
+	// It is used by the HPA that queries the scale sub-resource endpoint,
+	// to list the pods owned by the integration.
 	integration.Status.Selector = v1.IntegrationLabel + "=" + integration.Name
 
 	// Check replicas
@@ -96,8 +99,17 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		}
 	}
 
-	// Mirror ready condition from the sub resource (e.g.ReplicaSet, Deployment, CronJob, ...) to the integration
+	// Mirror ready condition from the owned resource (e.g.ReplicaSet, Deployment, CronJob, ...)
+	// into the owning integration
+	previous := integration.Status.GetCondition(v1.IntegrationConditionReady)
 	kubernetes.MirrorReadyCondition(ctx, action.client, integration)
+
+	if next := integration.Status.GetCondition(v1.IntegrationConditionReady);
+		(previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
+			next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
+		// Observe the time to first readiness metric
+		timeToFirstReadiness.Observe(next.FirstTruthyTime.Time.Sub(integration.Status.InitializationTimestamp.Time).Seconds())
+	}
 
 	return integration, nil
 }

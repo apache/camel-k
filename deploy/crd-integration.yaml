@@ -194,6 +194,10 @@ spec:
                 description: IntegrationCondition describes the state of a resource
                   at a certain point.
                 properties:
+                  firstTruthyTime:
+                    description: First time the condition status transitioned to True.
+                    format: date-time
+                    type: string
                   lastTransitionTime:
                     description: Last time the condition transitioned from one status
                       to another.
@@ -330,6 +334,11 @@ spec:
             image:
               type: string
             kit:
+              type: string
+            lastInitTimestamp:
+              description: The timestamp representing the last time when this integration
+                was initialized.
+              format: date-time
               type: string
             phase:
               description: IntegrationPhase --

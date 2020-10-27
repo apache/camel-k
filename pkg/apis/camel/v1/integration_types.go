@@ -60,6 +60,8 @@ type IntegrationStatus struct {
 	Replicas           *int32                 `json:"replicas,omitempty"`
 	Selector           string                 `json:"selector,omitempty"`
 	Capabilities       []string               `json:"capabilities,omitempty"`
+	// The timestamp representing the last time when this integration was initialized.
+	InitializationTimestamp *metav1.Time `json:"lastInitTimestamp,omitempty"`
 }
 
 // +genclient
@@ -274,6 +276,8 @@ type IntegrationCondition struct {
 	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
 	// Last time the condition transitioned from one status to another.
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	// First time the condition status transitioned to True.
+	FirstTruthyTime *metav1.Time `json:"firstTruthyTime,omitempty"`
 	// The reason for the condition's last transition.
 	Reason string `json:"reason,omitempty"`
 	// A human readable message indicating details about the transition.

@@ -282,24 +282,20 @@ func (in *IntegrationStatus) GetCondition(condType IntegrationConditionType) *In
 // SetCondition --
 func (in *IntegrationStatus) SetCondition(condType IntegrationConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(IntegrationCondition{
-		Type:               condType,
-		Status:             status,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            message,
+		Type:    condType,
+		Status:  status,
+		Reason:  reason,
+		Message: message,
 	})
 }
 
 // SetErrorCondition --
 func (in *IntegrationStatus) SetErrorCondition(condType IntegrationConditionType, reason string, err error) {
 	in.SetConditions(IntegrationCondition{
-		Type:               condType,
-		Status:             corev1.ConditionFalse,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            err.Error(),
+		Type:    condType,
+		Status:  corev1.ConditionFalse,
+		Reason:  reason,
+		Message: err.Error(),
 	})
 }
 
@@ -308,22 +304,36 @@ func (in *IntegrationStatus) SetErrorCondition(condType IntegrationConditionType
 // If a condition that we are about to add already exists and has the same status and
 // reason then we are not going to update.
 func (in *IntegrationStatus) SetConditions(conditions ...IntegrationCondition) {
+	now := metav1.Now()
 	for _, condition := range conditions {
-		if condition.LastUpdateTime.IsZero() {
-			condition.LastUpdateTime = metav1.Now()
-		}
-		if condition.LastTransitionTime.IsZero() {
-			condition.LastTransitionTime = metav1.Now()
-		}
-
 		currentCond := in.GetCondition(condition.Type)
 
 		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
 			return
 		}
-		// Do not update lastTransitionTime if the status of the condition doesn't change.
-		if currentCond != nil && currentCond.Status == condition.Status {
-			condition.LastTransitionTime = currentCond.LastTransitionTime
+
+		if condition.LastUpdateTime.IsZero() {
+			condition.LastUpdateTime = now
+		}
+
+		if condition.LastTransitionTime.IsZero() {
+			// We may want not to set it when the current condition is nil
+			condition.LastTransitionTime = now
+		}
+
+		if (condition.FirstTruthyTime == nil || condition.FirstTruthyTime.IsZero()) && condition.Status == corev1.ConditionTrue {
+			condition.FirstTruthyTime = &now
+		}
+
+		if currentCond != nil {
+			if currentCond.Status == condition.Status {
+				// Do not update LastTransitionTime if the status of the condition doesn't change
+				condition.LastTransitionTime = currentCond.LastTransitionTime
+			}
+			if !(currentCond.FirstTruthyTime != nil || currentCond.FirstTruthyTime.IsZero()) {
+				// Preserve FirstTruthyTime
+				condition.FirstTruthyTime = currentCond.FirstTruthyTime.DeepCopy()
+			}
 		}
 
 		in.RemoveCondition(condition.Type)

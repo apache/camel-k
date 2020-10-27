@@ -20,6 +20,8 @@ package integration
 import (
 	"context"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -55,6 +57,10 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 	integration.SetIntegrationKit(&kit)
 	integration.Status.Version = defaults.Version
+	if timestamp := integration.Status.InitializationTimestamp; timestamp == nil || timestamp.IsZero() {
+		now := metav1.Now()
+		integration.Status.InitializationTimestamp = &now
+	}
 
 	return integration, nil
 }
