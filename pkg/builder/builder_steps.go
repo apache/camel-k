@@ -23,14 +23,9 @@ import (
 	"os"
 	"path"
 	"reflect"
-	"strings"
-
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/jitpack"
-
-	"github.com/rs/xid"
 
 	"github.com/apache/camel-k/pkg/util/controller"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -38,7 +33,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 var stepsByID = make(map[string]Step)
@@ -141,164 +135,11 @@ func generateProjectSettings(ctx *Context) error {
 
 func injectDependencies(ctx *Context) error {
 	// Add dependencies from build
-	return InjectDependenciesCommon(&ctx.Maven.Project, ctx.Build.Dependencies, ctx.Catalog)
-}
-
-// InjectDependenciesCommon --
-func InjectDependenciesCommon(
-	project *maven.Project,
-	dependencies []string,
-	catalog *camel.RuntimeCatalog) error {
-
-	// Add dependencies from build
-	for _, d := range dependencies {
-		switch {
-		case strings.HasPrefix(d, "bom:"):
-			mid := strings.TrimPrefix(d, "bom:")
-			gav := strings.Replace(mid, "/", ":", -1)
-
-			d, err := maven.ParseGAV(gav)
-			if err != nil {
-				return err
-			}
-
-			project.DependencyManagement.Dependencies = append(project.DependencyManagement.Dependencies, maven.Dependency{
-				GroupID:    d.GroupID,
-				ArtifactID: d.ArtifactID,
-				Version:    d.Version,
-				Type:       "pom",
-				Scope:      "import",
-			})
-		case strings.HasPrefix(d, "camel:"):
-			artifactID := strings.TrimPrefix(d, "camel:")
-
-			if !strings.HasPrefix(artifactID, "camel-") {
-				artifactID = "camel-" + artifactID
-			}
-
-			project.AddDependencyGAV("org.apache.camel", artifactID, "")
-		case strings.HasPrefix(d, "camel-k:"):
-			artifactID := strings.TrimPrefix(d, "camel-k:")
-
-			if !strings.HasPrefix(artifactID, "camel-k-") {
-				artifactID = "camel-k-" + artifactID
-			}
-
-			project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
-		case strings.HasPrefix(d, "camel-quarkus:"):
-			artifactID := strings.TrimPrefix(d, "camel-quarkus:")
-
-			if !strings.HasPrefix(artifactID, "camel-quarkus-") {
-				artifactID = "camel-quarkus-" + artifactID
-			}
-
-			project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
-		case strings.HasPrefix(d, "mvn:"):
-			mid := strings.TrimPrefix(d, "mvn:")
-			gav := strings.Replace(mid, "/", ":", -1)
-
-			project.AddEncodedDependencyGAV(gav)
-		default:
-			if dep := jitpack.ToDependency(d); dep != nil {
-				project.AddDependency(*dep)
-
-				addRepo := true
-				for _, repo := range project.Repositories {
-					if repo.URL == jitpack.RepoURL {
-						addRepo = false
-						break
-					}
-				}
-				if addRepo {
-					project.Repositories = append(project.Repositories, maven.Repository{
-						ID:  "jitpack.io-" + xid.New().String(),
-						URL: jitpack.RepoURL,
-						Releases: maven.RepositoryPolicy{
-							Enabled:        true,
-							ChecksumPolicy: "fail",
-						},
-						Snapshots: maven.RepositoryPolicy{
-							Enabled:        true,
-							ChecksumPolicy: "fail",
-						},
-					})
-				}
-			} else {
-				return fmt.Errorf("unknown dependency type: %s", d)
-			}
-		}
-	}
-
-	// Add dependencies from catalog
-	deps := make([]maven.Dependency, len(project.Dependencies))
-	copy(deps, project.Dependencies)
-
-	for _, d := range deps {
-		if a, ok := catalog.Artifacts[d.ArtifactID]; ok {
-			for _, dep := range a.Dependencies {
-				md := maven.Dependency{
-					GroupID:    dep.GroupID,
-					ArtifactID: dep.ArtifactID,
-				}
-
-				project.AddDependency(md)
-
-				for _, e := range dep.Exclusions {
-					me := maven.Exclusion{
-						GroupID:    e.GroupID,
-						ArtifactID: e.ArtifactID,
-					}
-
-					project.AddDependencyExclusion(md, me)
-				}
-			}
-		}
-	}
-
-	// Post process dependencies
-	deps = make([]maven.Dependency, len(project.Dependencies))
-	copy(deps, project.Dependencies)
-
-	for _, d := range deps {
-		if a, ok := catalog.Artifacts[d.ArtifactID]; ok {
-			md := maven.Dependency{
-				GroupID:    a.GroupID,
-				ArtifactID: a.ArtifactID,
-			}
-
-			for _, e := range a.Exclusions {
-				me := maven.Exclusion{
-					GroupID:    e.GroupID,
-					ArtifactID: e.ArtifactID,
-				}
-
-				project.AddDependencyExclusion(md, me)
-			}
-		}
-	}
-
-	return nil
+	return camel.ManageIntegrationDependencies(&ctx.Maven.Project, ctx.Build.Dependencies, ctx.Catalog)
 }
 
 func sanitizeDependencies(ctx *Context) error {
-	for i := 0; i < len(ctx.Maven.Project.Dependencies); i++ {
-		dep := ctx.Maven.Project.Dependencies[i]
-
-		// It may be externalized into runtime provider specific steps
-		switch dep.GroupID {
-		case "org.apache.camel":
-			fallthrough
-		case "org.apache.camel.k":
-			fallthrough
-		case "org.apache.camel.quarkus":
-			//
-			// Remove the version so we force using the one configured by the bom
-			//
-			ctx.Maven.Project.Dependencies[i].Version = ""
-		}
-	}
-
-	return nil
+	return camel.SanitizeIntegrationDependencies(ctx.Maven.Project.Dependencies)
 }
 
 type artifactsSelector func(ctx *Context) error
