@@ -21,7 +21,11 @@ config:
 pre:
   - name: ObtainToken
     script: ./obtainToken.sh
-  - name: installation
+  - name: Camel-k install
     run: |
       kamel install -w -n ${YAKS_NAMESPACE}
-      kamel run --name metrics Metrics.java -w -n $YAKS_NAMESPACE --dependency github:apache:camel-k:master-SNAPSHOT
+  - name: Dependency install
+    script: ./dependencyInstall.sh
+  - name: Integration run
+    run: |
+      kamel run --name metrics Metrics.java -w -n $YAKS_NAMESPACE --dependency mvn:com.github.openshift-integration:camel-k-example-metrics:1.0.0-SNAPSHOT
