@@ -18,20 +18,33 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/apache/camel-k/pkg/cmd/operator"
 	"github.com/spf13/cobra"
+
+	"github.com/apache/camel-k/pkg/cmd/operator"
 )
 
-func newCmdOperator() *cobra.Command {
-	cmd := cobra.Command{
-		Use:    "operator",
-		Short:  "Run the Camel K operator",
-		Long:   `Run the Camel K operator`,
-		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
-			operator.Run()
-		},
+func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
+	options := operatorCmdOptions{
 	}
 
-	return &cmd
+	cmd := cobra.Command{
+		Use:     "operator",
+		Short:   "Run the Camel K operator",
+		Long:    `Run the Camel K operator`,
+		Hidden:  true,
+		PreRunE: decode(&options),
+		Run:     options.run,
+	}
+
+	cmd.Flags().Int32("monitoring-port", 8080, "The port of the metrics endpoint")
+
+	return &cmd, &options
+}
+
+type operatorCmdOptions struct {
+	MonitoringPort int32 `mapstructure:"monitoring-port"`
+}
+
+func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
+	operator.Run(o.MonitoringPort)
 }

@@ -24,6 +24,7 @@ import (
 	"math/rand"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/apache/camel-k/pkg/platform"
@@ -63,7 +64,7 @@ func printVersion() {
 }
 
 // Run starts the Camel K operator
-func Run() {
+func Run(monitoringPort int32) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()
@@ -123,9 +124,9 @@ func Run() {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		Namespace:        namespace,
-		EventBroadcaster: eventBroadcaster,
-		MetricsBindAddress: ":8080",
+		Namespace:          namespace,
+		EventBroadcaster:   eventBroadcaster,
+		MetricsBindAddress: ":" + strconv.Itoa(int(monitoringPort)),
 	})
 	if err != nil {
 		log.Error(err, "")
