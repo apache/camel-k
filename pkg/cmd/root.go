@@ -22,11 +22,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/client"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/apache/camel-k/pkg/client"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 )
 
 const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless
@@ -133,7 +134,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdReset(options)))
 	cmd.AddCommand(newCmdDescribe(options))
 	cmd.AddCommand(cmdOnly(newCmdRebuild(options)))
-	cmd.AddCommand(newCmdOperator())
+	cmd.AddCommand(cmdOnly(newCmdOperator()))
 	cmd.AddCommand(cmdOnly(newCmdBuilder(options)))
 	cmd.AddCommand(cmdOnly(newCmdInit(options)))
 	cmd.AddCommand(cmdOnly(newCmdDebug(options)))
