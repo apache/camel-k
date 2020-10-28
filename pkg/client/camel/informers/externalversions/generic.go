@@ -23,6 +23,7 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -64,6 +65,12 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().IntegrationKits().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("integrationplatforms"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().IntegrationPlatforms().Informer()}, nil
+
+		// Group=camel.apache.org, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithResource("kamelets"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().Kamelets().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("kameletbindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().KameletBindings().Informer()}, nil
 
 	}
 
