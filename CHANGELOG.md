@@ -16,6 +16,7 @@
 
 **Merged pull requests:**
 
+- \[ENTESB-15044\] Refactor monitoring test to be able consume camel quar… [\#1790](https://github.com/apache/camel-k/pull/1790) ([llowinge](https://github.com/llowinge))
 - Make inspect subcommand run locally. [\#1782](https://github.com/apache/camel-k/pull/1782) ([doru1004](https://github.com/doru1004))
 - Fix \#1778: allow pushing to broker via KameletBinding [\#1780](https://github.com/apache/camel-k/pull/1780) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1774: use direct HTTP binding when Knative is not in use [\#1776](https://github.com/apache/camel-k/pull/1776) ([nicolaferraro](https://github.com/nicolaferraro))
