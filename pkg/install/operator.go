@@ -54,6 +54,7 @@ type OperatorConfiguration struct {
 // OperatorMonitoringConfiguration --
 type OperatorMonitoringConfiguration struct {
 	Enabled bool
+	Port    int32
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
@@ -72,6 +73,14 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					d.Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullPolicy(cfg.CustomImagePullPolicy)
 				}
+			}
+		}
+
+		if d, ok := o.(*appsv1.Deployment); ok {
+			if d.Labels["camel.apache.org/component"] == "operator" {
+				d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
+					fmt.Sprintf("--monitoring-port=%d", cfg.Monitoring.Port))
+				d.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort = cfg.Monitoring.Port
 			}
 		}
 

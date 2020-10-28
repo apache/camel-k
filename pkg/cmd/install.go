@@ -24,9 +24,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/olm"
-	"github.com/apache/camel-k/pkg/util/registry"
 	"go.uber.org/multierr"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -36,14 +41,9 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/olm"
+	"github.com/apache/camel-k/pkg/util/registry"
 	"github.com/apache/camel-k/pkg/util/watch"
-
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdOptions) {
@@ -120,6 +120,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 	// monitoring
 	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
+	cmd.Flags().Int("monitoring-port", 8080, "The port of the metrics endpoint")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -161,6 +162,7 @@ type installCmdOptions struct {
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
 	Monitoring              bool     `mapstructure:"monitoring"`
+	MonitoringPort          int32    `mapstructure:"monitoring-port"`
 	Properties              []string `mapstructure:"properties"`
 	TraitProfile            string   `mapstructure:"trait-profile"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
@@ -252,6 +254,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				ClusterType:           o.ClusterType,
 				Monitoring: install.OperatorMonitoringConfiguration{
 					Enabled: o.Monitoring,
+					Port:    o.MonitoringPort,
 				},
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
