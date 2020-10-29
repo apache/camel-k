@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+-  Changes to KameletBinding must be propagated to Integrations [\#1785](https://github.com/apache/camel-k/issues/1785)
 - KameletBinding to broker fails [\#1778](https://github.com/apache/camel-k/issues/1778)
 - Kamelet binding to an explicit URI failing [\#1774](https://github.com/apache/camel-k/issues/1774)
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
@@ -17,7 +18,9 @@
 **Merged pull requests:**
 
 - \[ENTESB-15044\] Refactor monitoring test to be able consume camel quar… [\#1790](https://github.com/apache/camel-k/pull/1790) ([llowinge](https://github.com/llowinge))
+- Fix \#1785: propagate klb changes to integrations [\#1786](https://github.com/apache/camel-k/pull/1786) ([nicolaferraro](https://github.com/nicolaferraro))
 - Make inspect subcommand run locally. [\#1782](https://github.com/apache/camel-k/pull/1782) ([doru1004](https://github.com/doru1004))
+- doc\(example\): timer-source example refactory and timer-source-log-sink new example [\#1781](https://github.com/apache/camel-k/pull/1781) ([squakez](https://github.com/squakez))
 - Fix \#1778: allow pushing to broker via KameletBinding [\#1780](https://github.com/apache/camel-k/pull/1780) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1774: use direct HTTP binding when Knative is not in use [\#1776](https://github.com/apache/camel-k/pull/1776) ([nicolaferraro](https://github.com/nicolaferraro))
 - Automatic changelog: Remove deprecated github action commands [\#1775](https://github.com/apache/camel-k/pull/1775) ([oscerd](https://github.com/oscerd))
@@ -128,6 +131,7 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+- doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -215,7 +219,6 @@
 
 - Initial architecture documentation [\#1629](https://github.com/apache/camel-k/pull/1629) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
-- doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Polish secured monitoring proposal [\#1626](https://github.com/apache/camel-k/pull/1626) ([astefanutti](https://github.com/astefanutti))
 - doc: Update secured monitoring proposal for Quarkus/Knative single-port [\#1625](https://github.com/apache/camel-k/pull/1625) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1599: generate good trait doc [\#1622](https://github.com/apache/camel-k/pull/1622) ([nicolaferraro](https://github.com/nicolaferraro))
