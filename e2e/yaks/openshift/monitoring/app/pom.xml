@@ -26,8 +26,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- Will be replaced by sed to test specific version. -->
-		<version.camel.quarkus>1.0.0-CR2</version.camel.quarkus>
 	</properties>
 
 	<dependencies>
