@@ -169,7 +169,19 @@ func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 		// Configuring defaults from Kamelet
 		for _, prop := range kamelet.Status.Properties {
 			if prop.Default != "" {
-				e.ApplicationProperties[fmt.Sprintf("camel.kamelet.%s.%s", kamelet.Name, prop.Name)] = prop.Default
+				// Check whether user specified a value
+				userDefined := false
+				propName := fmt.Sprintf("camel.kamelet.%s.%s", kamelet.Name, prop.Name)
+				propPrefix := propName + "="
+				for _, userProp := range e.Integration.Spec.Configuration {
+					if strings.HasPrefix(userProp.Value, propPrefix) {
+						userDefined = true
+						break
+					}
+				}
+				if !userDefined {
+					e.ApplicationProperties[propName] = prop.Default
+				}
 			}
 		}
 	}
