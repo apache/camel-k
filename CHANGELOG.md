@@ -33,7 +33,6 @@
 - chore\(build\): remove reference to staging repo [\#1758](https://github.com/apache/camel-k/pull/1758) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add inspect sub-command with basic support [\#1757](https://github.com/apache/camel-k/pull/1757) ([doru1004](https://github.com/doru1004))
 - Fix \#1537: generate json schema for full Kubernetes resources [\#1756](https://github.com/apache/camel-k/pull/1756) ([nicolaferraro](https://github.com/nicolaferraro))
-- Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
@@ -78,6 +77,7 @@
 - chore\(crd\): make CRD more json-schema friend [\#1752](https://github.com/apache/camel-k/pull/1752) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1750: auto-compress/encode binary sources and resources [\#1751](https://github.com/apache/camel-k/pull/1751) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1747: propagate icon on kameletbinding and fix integration owner… [\#1749](https://github.com/apache/camel-k/pull/1749) ([nicolaferraro](https://github.com/nicolaferraro))
+- Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
@@ -131,7 +131,6 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
-- doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -219,6 +218,7 @@
 
 - Initial architecture documentation [\#1629](https://github.com/apache/camel-k/pull/1629) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
+- doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Polish secured monitoring proposal [\#1626](https://github.com/apache/camel-k/pull/1626) ([astefanutti](https://github.com/astefanutti))
 - doc: Update secured monitoring proposal for Quarkus/Knative single-port [\#1625](https://github.com/apache/camel-k/pull/1625) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1599: generate good trait doc [\#1622](https://github.com/apache/camel-k/pull/1622) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1756,6 +1756,7 @@
 - Add asciidoc documentation with sub-documents and some badges [\#109](https://github.com/apache/camel-k/pull/109) ([nicolaferraro](https://github.com/nicolaferraro))
 - Refactor build, deploy and run workflow [\#107](https://github.com/apache/camel-k/pull/107) ([lburgazzoli](https://github.com/lburgazzoli))
 - Bump version to 0.0.3-SNAPSHOT [\#105](https://github.com/apache/camel-k/pull/105) ([nicolaferraro](https://github.com/nicolaferraro))
+- feat\(examples\): Add a Camel-caffeine Cache java sample [\#101](https://github.com/apache/camel-k/pull/101) ([oscerd](https://github.com/oscerd))
 
 ## [0.0.2](https://github.com/apache/camel-k/tree/0.0.2) (2018-09-19)
 
@@ -1786,7 +1787,6 @@
 **Merged pull requests:**
 
 - Fix golint findings, remove unused code [\#103](https://github.com/apache/camel-k/pull/103) ([lburgazzoli](https://github.com/lburgazzoli))
-- feat\(examples\): Add a Camel-caffeine Cache java sample [\#101](https://github.com/apache/camel-k/pull/101) ([oscerd](https://github.com/oscerd))
 - Add delete integration option [\#100](https://github.com/apache/camel-k/pull/100) ([dmvolod](https://github.com/dmvolod))
 - chore: refactor pkg/build to a more idiomatic structure [\#99](https://github.com/apache/camel-k/pull/99) ([lburgazzoli](https://github.com/lburgazzoli))
 - Auto-discover dependencies [\#98](https://github.com/apache/camel-k/pull/98) ([nicolaferraro](https://github.com/nicolaferraro))
