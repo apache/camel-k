@@ -39,6 +39,7 @@
 - Add inspect sub-command with basic support [\#1757](https://github.com/apache/camel-k/pull/1757) ([doru1004](https://github.com/doru1004))
 - Fix \#1537: generate json schema for full Kubernetes resources [\#1756](https://github.com/apache/camel-k/pull/1756) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 
 ## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
@@ -84,7 +85,6 @@
 - Fix \#1750: auto-compress/encode binary sources and resources [\#1751](https://github.com/apache/camel-k/pull/1751) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1747: propagate icon on kameletbinding and fix integration owner… [\#1749](https://github.com/apache/camel-k/pull/1749) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
 - Upgrade to Operator SDK 1.0+ [\#1741](https://github.com/apache/camel-k/pull/1741) ([astefanutti](https://github.com/astefanutti))
 - Added installations steps to IBM Kubernetes Service\(IKS\) [\#1739](https://github.com/apache/camel-k/pull/1739) ([juanjopb](https://github.com/juanjopb))
@@ -1035,7 +1035,6 @@
 - camelContext is not supported in XML DSL routedefinition [\#731](https://github.com/apache/camel-k/issues/731)
 - Switch to go mod compatible version of operator-sdk [\#702](https://github.com/apache/camel-k/issues/702)
 - `make generate` does not work with new module structure [\#699](https://github.com/apache/camel-k/issues/699)
-- Making sure external dep projects can import Camel K APIs [\#679](https://github.com/apache/camel-k/issues/679)
 - camel-k-operator ready for running integration when camel-k-\* builds are still fails [\#582](https://github.com/apache/camel-k/issues/582)
 - Honour KUBECONFIG [\#574](https://github.com/apache/camel-k/issues/574)
 - Generate website using Antora [\#282](https://github.com/apache/camel-k/issues/282)
@@ -1149,6 +1148,7 @@
 - Question about the installation of the cluster [\#701](https://github.com/apache/camel-k/issues/701)
 - Provide a way to override the default image name [\#698](https://github.com/apache/camel-k/issues/698)
 - kamel run --dev examples/resources-route.groovy issues Cannot find resource [\#697](https://github.com/apache/camel-k/issues/697)
+- Making sure external dep projects can import Camel K APIs [\#679](https://github.com/apache/camel-k/issues/679)
 - Remove depenency on Istio for Knative sources [\#669](https://github.com/apache/camel-k/issues/669)
 - Allow to subscribe to multiple knative channels in the same integration   [\#668](https://github.com/apache/camel-k/issues/668)
 - Error creating integration context with buildStrategy: pod on minikube [\#666](https://github.com/apache/camel-k/issues/666)
