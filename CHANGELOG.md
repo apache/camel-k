@@ -39,7 +39,6 @@
 - Add inspect sub-command with basic support [\#1757](https://github.com/apache/camel-k/pull/1757) ([doru1004](https://github.com/doru1004))
 - Fix \#1537: generate json schema for full Kubernetes resources [\#1756](https://github.com/apache/camel-k/pull/1756) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
-- chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 
 ## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
@@ -85,6 +84,7 @@
 - Fix \#1750: auto-compress/encode binary sources and resources [\#1751](https://github.com/apache/camel-k/pull/1751) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1747: propagate icon on kameletbinding and fix integration owner… [\#1749](https://github.com/apache/camel-k/pull/1749) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
 - Upgrade to Operator SDK 1.0+ [\#1741](https://github.com/apache/camel-k/pull/1741) ([astefanutti](https://github.com/astefanutti))
 - Added installations steps to IBM Kubernetes Service\(IKS\) [\#1739](https://github.com/apache/camel-k/pull/1739) ([juanjopb](https://github.com/juanjopb))
