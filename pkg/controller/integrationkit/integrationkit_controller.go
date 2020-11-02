@@ -171,6 +171,14 @@ func (r *ReconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 
 	ctx := context.TODO()
 
+	// Make sure the operator is allowed to act on namespace
+	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
+		return reconcile.Result{}, err
+	} else if !ok {
+		rlog.Info("Ignoring request because namespace is locked")
+		return reconcile.Result{}, nil
+	}
+
 	var instance v1.IntegrationKit
 
 	// Fetch the IntegrationKit instance

@@ -138,6 +138,14 @@ func (r *ReconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	ctx := context.TODO()
 
+	// Make sure the operator is allowed to act on namespace
+	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
+		return reconcile.Result{}, err
+	} else if !ok {
+		rlog.Info("Ignoring request because namespace is locked")
+		return reconcile.Result{}, nil
+	}
+
 	// Fetch the Build instance
 	var instance v1.Build
 

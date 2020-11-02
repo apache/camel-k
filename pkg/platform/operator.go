@@ -32,6 +32,8 @@ const operatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
 const operatorNamespaceEnvVariable = "NAMESPACE"
 const operatorPodNameEnvVariable = "POD_NAME"
 
+const OperatorLockName = "camel-k-lock"
+
 // GetCurrentOperatorImage returns the image currently used by the running operator if present (when running out of cluster, it may be absent).
 func GetCurrentOperatorImage(ctx context.Context, c client.Client) (string, error) {
 	podNamespace := GetOperatorNamespace()
@@ -79,4 +81,35 @@ func GetOperatorPodName() string {
 		return podName
 	}
 	return ""
+}
+
+// IsNamespaceLocked tells if the namespace contains a lock indicating that an operator owns it
+func IsNamespaceLocked(ctx context.Context, c client.Client, namespace string) (bool, error) {
+	if namespace == "" {
+		return false, nil
+	}
+
+	cm := v1.ConfigMap{}
+	key := client.ObjectKey{
+		Namespace: namespace,
+		Name:      OperatorLockName,
+	}
+	if err := c.Get(ctx, key, &cm); err != nil && k8serrors.IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return true, err
+	}
+	return true, nil
+}
+
+// IsOperatorAllowedOnNamespace returns true if the current operator is allowed to react on changes in the given namespace
+func IsOperatorAllowedOnNamespace(ctx context.Context, c client.Client, namespace string) (bool, error) {
+	if !IsCurrentOperatorGlobal() {
+		return true, nil
+	}
+	alreadyOwned, err := IsNamespaceLocked(ctx, c, namespace)
+	if err != nil {
+		return false, err
+	}
+	return !alreadyOwned, nil
 }

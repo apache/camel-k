@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -46,7 +47,7 @@ func TestRunGlobalInstall(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns, "--global").Execute()).Should(BeNil())
 
-		// NS2
+		// NS2: namespace without operator
 		WithNewTestNamespace(t, func(ns2 string) {
 			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).Should(BeNil())
 
@@ -54,6 +55,22 @@ func TestRunGlobalInstall(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns2, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).Should(BeNil())
+
+			Expect(ConfigMap(ns2, platform.OperatorLockName)()).Should(BeNil(), "No locking configmap expected")
+		})
+
+		// NS3: namespace with its own operator
+		WithNewTestNamespace(t, func(ns3 string) {
+			Expect(Kamel("install", "-n", ns3, "--olm=false").Execute()).Should(BeNil())
+
+			Expect(Kamel("run", "-n", ns3, "files/Java.java").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns3, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationLogs(ns3, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns3).Execute()).Should(BeNil())
+
+			Expect(ConfigMap(ns3, platform.OperatorLockName)()).ShouldNot(BeNil(),
+				"OperatorSDK is expected to use configmaps for locking: if this changes (e.g. using Leases) we should update our guard logic",
+			)
 		})
 
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
