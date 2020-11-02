@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/apache/camel-k/pkg/platform"
 	corev1 "k8s.io/api/core/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
@@ -91,7 +92,7 @@ func Run() {
 	}
 
 	// Become the leader before proceeding
-	err = leader.Become(context.TODO(), "camel-k-lock")
+	err = leader.Become(context.TODO(), platform.OperatorLockName)
 	if err != nil {
 		if err == leader.ErrNoNamespace {
 			log.Info("Local run detected, leader election is disabled")

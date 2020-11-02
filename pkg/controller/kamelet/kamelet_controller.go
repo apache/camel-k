@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/platform"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -108,6 +109,14 @@ func (r *ReconcileKamelet) Reconcile(request reconcile.Request) (reconcile.Resul
 	rlog.Info("Reconciling Kamelet")
 
 	ctx := context.TODO()
+
+	// Make sure the operator is allowed to act on namespace
+	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
+		return reconcile.Result{}, err
+	} else if !ok {
+		rlog.Info("Ignoring request because namespace is locked")
+		return reconcile.Result{}, nil
+	}
 
 	// Fetch the Kamelet instance
 	var instance v1alpha1.Kamelet

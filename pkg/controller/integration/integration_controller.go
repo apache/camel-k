@@ -21,6 +21,7 @@ import (
 	"context"
 
 	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/platform"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -235,6 +236,14 @@ func (r *ReconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	rlog.Info("Reconciling Integration")
 
 	ctx := context.TODO()
+
+	// Make sure the operator is allowed to act on namespace
+	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
+		return reconcile.Result{}, err
+	} else if !ok {
+		rlog.Info("Ignoring request because namespace is locked")
+		return reconcile.Result{}, nil
+	}
 
 	// Fetch the Integration instance
 	var instance v1.Integration
