@@ -109,7 +109,7 @@ func computeDependencies(ctx *builder.Context) error {
 
 	// Process artifacts list and add it to existing artifacts.
 	artifacts := []v1.Artifact{}
-	artifacts, err = ProcessTransitiveDependencies(content, "dependencies")
+	artifacts, err = ProcessTransitiveDependencies(content)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func ComputeDependenciesCommon(mc maven.Context, runtimeVersion string) ([]byte,
 }
 
 // ProcessTransitiveDependencies --
-func ProcessTransitiveDependencies(content []byte, outputDir string) ([]v1.Artifact, error) {
+func ProcessTransitiveDependencies(content []byte) ([]v1.Artifact, error) {
 	cp := make(map[string][]v1.Artifact)
 	err := yaml2.Unmarshal(content, &cp)
 	if err != nil {
@@ -167,7 +167,7 @@ func ProcessTransitiveDependencies(content []byte, outputDir string) ([]v1.Artif
 		artifacts = append(artifacts, v1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
-			Target:   path.Join(outputDir, gav.GroupID+"."+fileName),
+			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
 			Checksum: e.Checksum,
 		})
 	}
