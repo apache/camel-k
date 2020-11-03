@@ -18,6 +18,6 @@ please take note of the namespace and region created to configure them on the in
 You can now download *kamel* CLI tool the from https://github.com/apache/camel-k/releases[release page]
 and put it on your system path.
 
-After configure *kamel* CLI, you could start with the https://camel.apache.org/camel-k/latest/installation/installation.html#procedure[standard installation] or https://camel.apache.org/camel-k/latest/installation/installation.html#helm[installation via Helm].
+After configure *kamel* CLI, you could start with the xref:installation/installation.adoc#procedure[standard installation] or xref:installation/installation.adoc#helm[installation via Helm].
 
-Finally you are ready to work with Camel K. 
+Finally you are ready to work with Camel K.

@@ -115,17 +115,17 @@ Otherwise, the Prometheus trait uses a default configuration.
 
 === Quarkus
 
-When the Quarkus runtime is configured for the integration, the https://camel.apache.org/camel-quarkus/latest/extensions/microprofile-metrics.html[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
+When the Quarkus runtime is configured for the integration, the xref:latest@camel-quarkus:extensions/microprofile-metrics.adoc[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
 
 The MicroProfile Metrics extension registers and exposes the following metrics out-of-the-box:
 
 * https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/required-metrics.adoc#required-metrics[JVM and operating system related metrics]
 
-* https://camel.apache.org/camel-quarkus/latest/extensions/microprofile-metrics.html#_camel_route_metrics[Camel specific metrics]
+* xref:latest@camel-quarkus:extensions/microprofile-metrics.adoc#_camel_route_metrics[Camel specific metrics]
 
 It is possible to extend this set of metrics by using either, or both:
 
-* The https://camel.apache.org/components/latest/microprofile-metrics-component.html[MicroProfile Metrics component]
+* The xref:latest@components:microprofile-metrics-component.adoc[MicroProfile Metrics component]
 
 * The https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/app-programming-model.adoc#annotations[MicroProfile Metrics annotations], in external dependencies
 
