@@ -314,6 +314,12 @@ spec:
                       fieldPath: metadata.namespace
                 image: docker.io/apache/camel-k:1.3.0-SNAPSHOT
                 imagePullPolicy: IfNotPresent
+                livenessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 8081
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
                 name: camel-k-operator
                 ports:
                 - containerPort: 8080
