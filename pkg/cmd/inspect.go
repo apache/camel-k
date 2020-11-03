@@ -19,26 +19,10 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder/runtime"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/pkg/errors"
-	"github.com/scylladb/go-set/strset"
 	"github.com/spf13/cobra"
 )
-
-var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
-
-const defaultDependenciesDirectoryName = "dependencies"
 
 func newCmdInspect(rootCmdOptions *RootCmdOptions) (*cobra.Command, *inspectCmdOptions) {
 	options := inspectCmdOptions{
@@ -84,261 +68,21 @@ type inspectCmdOptions struct {
 }
 
 func (command *inspectCmdOptions) validate(args []string) error {
-	// If no source files have been provided there is nothing to inspect.
-	if len(args) == 0 {
-		return errors.New("no integration files have been provided, nothing to inspect")
-	}
-
-	// Ensure source files exist.
-	for _, arg := range args {
-		// fmt.Printf("Validating file: %v\n", arg)
-		fileExists, err := util.FileExists(arg)
-
-		// Report any error.
-		if err != nil {
-			return err
-		}
-
-		// Signal file not found.
-		if !fileExists {
-			return errors.New("input file " + arg + " file does not exist")
-		}
-	}
-
-	// Validate list of additional dependencies i.e. make sure that each dependency has
-	// a valid type.
-	if command.AdditionalDependencies != nil {
-		for _, additionalDependency := range command.AdditionalDependencies {
-			dependencyComponents := strings.Split(additionalDependency, ":")
-
-			TypeIsValid := false
-			for _, dependencyType := range acceptedDependencyTypes {
-				if dependencyType == dependencyComponents[0] {
-					TypeIsValid = true
-				}
-			}
-
-			if !TypeIsValid {
-				return errors.New("Unexpected type for user-provided dependency: " + additionalDependency + ", check command usage for valid format.")
-			}
-
-		}
-	}
-
-	return nil
+	return validateIntegrationForDependencies(args, command.AdditionalDependencies)
 }
 
 func (command *inspectCmdOptions) run(args []string) error {
-	// Fetch existing catalog or create new one if one does not already exist.
-	catalog, err := createCamelCatalog()
-
-	// Get top-level dependencies, this is the default behavior when no other options are provided.
-	// Do not output these options when transitive options are enbled.
-	dependencies, err := getTopLevelDependencies(catalog, command.OutputFormat, args, !command.AllDependencies)
+	// Fetch dependencies.
+	dependencies, err := getDependencies(args, command.AdditionalDependencies, command.AllDependencies)
 	if err != nil {
 		return err
 	}
 
-	// Add additional user-provided dependencies.
-	if command.AdditionalDependencies != nil {
-		for _, additionalDependency := range command.AdditionalDependencies {
-			dependencies = append(dependencies, additionalDependency)
-		}
-	}
-
-	// Top level dependencies are printed out.
-	if command.AllDependencies {
-		// If --all-dependencies flag is set, move all transitive dependencies in the --dependencies-directory.
-		err = getTransitiveDependencies(catalog, dependencies, command)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func getTopLevelDependencies(catalog *camel.RuntimeCatalog, format string, args []string, printDependencies bool) ([]string, error) {
-	// List of top-level dependencies.
-	dependencies := strset.New()
-
-	// Invoke the dependency inspector code for each source file.
-	for _, source := range args {
-		data, _, err := loadContent(source, false, false)
-		if err != nil {
-			return []string{}, err
-		}
-
-		sourceSpec := v1.SourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:        path.Base(source),
-				Content:     data,
-				Compression: false,
-			},
-		}
-
-		// Extract list of top-level dependencies.
-		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
-	}
-
-	if printDependencies {
-		err := outputDependencies(dependencies.List(), format)
-		if err != nil {
-			return []string{}, err
-		}
-	}
-
-	return dependencies.List(), nil
-}
-
-func generateCatalog() (*camel.RuntimeCatalog, error) {
-	// A Camel catalog is requiref for this operatio.
-	settings := ""
-	mvn := v1.MavenSpec{
-		LocalRepository: "",
-	}
-	runtime := v1.RuntimeSpec{
-		Version:  defaults.DefaultRuntimeVersion,
-		Provider: v1.RuntimeProviderQuarkus,
-	}
-	providerDependencies := []maven.Dependency{}
-	catalog, err := camel.GenerateCatalogCommon(settings, mvn, runtime, providerDependencies)
-	if err != nil {
-		return nil, err
-	}
-
-	return catalog, nil
-}
-
-func getTransitiveDependencies(
-	catalog *camel.RuntimeCatalog,
-	dependencies []string,
-	command *inspectCmdOptions) error {
-
-	mvn := v1.MavenSpec{
-		LocalRepository: "",
-	}
-
-	// Create Maven project.
-	project := runtime.GenerateQuarkusProjectCommon(
-		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
-		defaults.DefaultRuntimeVersion, catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"])
-
-	// Inject dependencies into Maven project.
-	err := camel.ManageIntegrationDependencies(&project, dependencies, catalog)
-	if err != nil {
-		return err
-	}
-
-	// Create local Maven context.
-	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
-	if err != nil {
-		return err
-	}
-
-	// Maven local context to be used for generating the transitive dependencies.
-	mc := maven.NewContext(temporaryDirectory, project)
-	mc.LocalRepository = mvn.LocalRepository
-	mc.Timeout = mvn.GetTimeout().Duration
-
-	// Make maven command less verbose.
-	mc.AdditionalArguments = append(mc.AdditionalArguments, "-q")
-
-	err = runtime.BuildQuarkusRunnerCommon(mc)
-	if err != nil {
-		return err
-	}
-
-	// Compute dependencies.
-	content, err := runtime.ComputeQuarkusDependenciesCommon(mc, catalog.Runtime.Version)
-	if err != nil {
-		return err
-	}
-
-	// Compose artifacts list.
-	artifacts := []v1.Artifact{}
-	artifacts, err = runtime.ProcessQuarkusTransitiveDependencies(mc, content)
-	if err != nil {
-		return err
-	}
-
-	// Dump dependencies in the dependencies directory and construct the list of dependencies.
-	transitiveDependencies := []string{}
-	for _, entry := range artifacts {
-		transitiveDependencies = append(transitiveDependencies, entry.Location)
-	}
-
-	// Remove directory used for computing the dependencies.
-	defer os.RemoveAll(temporaryDirectory)
-
-	// Output transitive dependencies only if requested via the output format flag.
-	err = outputDependencies(transitiveDependencies, command.OutputFormat)
+	// Print dependencies.
+	err = outputDependencies(dependencies, command.OutputFormat)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func outputDependencies(dependencies []string, format string) error {
-	if format != "" {
-		err := printDependencies(format, dependencies)
-		if err != nil {
-			return err
-		}
-	} else {
-		// Print output in text form.
-		for _, dep := range dependencies {
-			fmt.Printf("%v\n", dep)
-		}
-	}
-
-	return nil
-}
-
-func printDependencies(format string, dependecies []string) error {
-	switch format {
-	case "yaml":
-		data, err := util.DependenciesToYAML(dependecies)
-		if err != nil {
-			return err
-		}
-		fmt.Print(string(data))
-	case "json":
-		data, err := util.DependenciesToJSON(dependecies)
-		if err != nil {
-			return err
-		}
-		fmt.Print(string(data))
-	default:
-		return errors.New("unknown output format: " + format)
-	}
-	return nil
-}
-
-func getWorkingDirectory() (string, error) {
-	currentDirectory, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	return currentDirectory, nil
-}
-
-func createCamelCatalog() (*camel.RuntimeCatalog, error) {
-	// Attempt to reuse existing Camel catalog if one is present.
-	catalog, err := camel.DefaultCatalog()
-	if err != nil {
-		return nil, err
-	}
-
-	// Generate catalog if one was not found.
-	if catalog == nil {
-		catalog, err = generateCatalog()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return catalog, nil
 }
