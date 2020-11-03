@@ -139,6 +139,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdInit(options)))
 	cmd.AddCommand(cmdOnly(newCmdDebug(options)))
 	cmd.AddCommand(cmdOnly(newCmdInspect(options)))
+	cmd.AddCommand(cmdOnly(newCmdLocalRun(options)))
 }
 
 func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {

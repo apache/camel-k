@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -32,6 +31,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 	"github.com/spf13/cobra"
 )

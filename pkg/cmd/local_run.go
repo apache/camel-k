@@ -1,0 +1,131 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package cmd
+
+import (
+	"errors"
+	"fmt"
+	"path"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/scylladb/go-set/strset"
+	"github.com/spf13/cobra"
+)
+
+func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCmdOptions) {
+	options := localRunCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
+
+	cmd := cobra.Command{
+		Use:     "local-run [files to inspect]",
+		Short:   "Run a Camel integration locally.",
+		Long:    `Run a Camel integration locally using existing integration files.`,
+		PreRunE: decode(&options),
+		RunE: func(_ *cobra.Command, args []string) error {
+			if err := options.validate(args); err != nil {
+				return err
+			}
+			if err := options.run(args); err != nil {
+				fmt.Println(err.Error())
+			}
+
+			return nil
+		},
+		Annotations: map[string]string{
+			offlineCommandLabel: "true",
+		},
+	}
+
+	cmd.Flags().StringP("properties", "p", "", "Output format. One of: json|yaml")
+
+	return &cmd, &options
+}
+
+type localRunCmdOptions struct {
+	*RootCmdOptions
+	Properties string `mapstructure:"properties"`
+}
+
+func (command *localRunCmdOptions) validate(args []string) error {
+	// If no source files have been provided there is nothing to inspect.
+	if len(args) == 0 {
+		return errors.New("no integration files have been provided, nothing to inspect")
+	}
+
+	// Ensure source files exist.
+	for _, arg := range args {
+		// fmt.Printf("Validating file: %v\n", arg)
+		fileExists, err := util.FileExists(arg)
+
+		// Report any error.
+		if err != nil {
+			return err
+		}
+
+		// Signal file not found.
+		if !fileExists {
+			return errors.New("input file " + arg + " file does not exist")
+		}
+	}
+
+	return nil
+}
+
+func (command *localRunCmdOptions) run(args []string) error {
+	// Attempt to reuse existing Camel catalog if one is present.
+	catalog, err := camel.MainCatalog()
+	if err != nil {
+		return err
+	}
+
+	// Generate catalog if one was not found.
+	if catalog == nil {
+		catalog, err = generateCatalog()
+		if err != nil {
+			return err
+		}
+	}
+
+	// List of top-level dependencies.
+	dependencies := strset.New()
+
+	// Invoke the dependency inspector code for each source file.
+	for _, source := range args {
+		data, _, err := loadContent(source, false, false)
+		if err != nil {
+			return err
+		}
+
+		sourceSpec := v1.SourceSpec{
+			DataSpec: v1.DataSpec{
+				Name:        path.Base(source),
+				Content:     data,
+				Compression: false,
+			},
+		}
+
+		// Extract list of top-level dependencies.
+		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
+	}
+
+	return nil
+}
