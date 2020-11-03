@@ -34,6 +34,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
@@ -64,8 +65,7 @@ func printVersion() {
 }
 
 // Run starts the Camel K operator
-func Run(monitoringPort int32) {
-	rand.Seed(time.Now().UTC().UnixNano())
+func Run(healthPort, monitoringPort int32) {rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()
 
@@ -124,12 +124,19 @@ func Run(monitoringPort int32) {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		Namespace:          namespace,
-		EventBroadcaster:   eventBroadcaster,
-		MetricsBindAddress: ":" + strconv.Itoa(int(monitoringPort)),
+		Namespace:              namespace,
+		EventBroadcaster:       eventBroadcaster,
+		HealthProbeBindAddress: ":" + strconv.Itoa(int(healthPort)),
+		MetricsBindAddress:     ":" + strconv.Itoa(int(monitoringPort)),
 	})
 	if err != nil {
 		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	// Add health check
+	if err := mgr.AddHealthzCheck("health-probe", healthz.Ping); err != nil {
+		log.Error(err, "Unable add liveness check")
 		os.Exit(1)
 	}
 

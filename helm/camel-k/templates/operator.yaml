@@ -58,6 +58,12 @@ spec:
                   fieldPath: metadata.namespace
           image: {{ .Values.operator.image }}
           imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 5
           name: camel-k-operator
           ports:
             - containerPort: 8080

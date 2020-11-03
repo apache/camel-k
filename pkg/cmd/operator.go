@@ -36,15 +36,17 @@ func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
 		Run:     options.run,
 	}
 
+	cmd.Flags().Int32("health-port", 8081, "The port of the health endpoint")
 	cmd.Flags().Int32("monitoring-port", 8080, "The port of the metrics endpoint")
 
 	return &cmd, &options
 }
 
 type operatorCmdOptions struct {
+	HealthPort     int32 `mapstructure:"health-port"`
 	MonitoringPort int32 `mapstructure:"monitoring-port"`
 }
 
 func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
-	operator.Run(o.MonitoringPort)
+	operator.Run(o.HealthPort, o.MonitoringPort)
 }
