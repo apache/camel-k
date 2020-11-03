@@ -15,12 +15,17 @@
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
+- Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
+- helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
+- Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
+- Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
 **Merged pull requests:**
 
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
 - \[test\] Detect camel quarkus version dynamically in monitoring test [\#1795](https://github.com/apache/camel-k/pull/1795) ([llowinge](https://github.com/llowinge))
+- \#1283: Enhance the `kamel log` command to show more detail prior to i… [\#1793](https://github.com/apache/camel-k/pull/1793) ([phantomjinx](https://github.com/phantomjinx))
 - Fix \#1791: auto-generate v1alpha1 resources [\#1792](https://github.com/apache/camel-k/pull/1792) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[ENTESB-15044\] Refactor monitoring test to be able consume camel quar… [\#1790](https://github.com/apache/camel-k/pull/1790) ([llowinge](https://github.com/llowinge))
 - Fix \#1785: propagate klb changes to integrations [\#1786](https://github.com/apache/camel-k/pull/1786) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -338,7 +343,6 @@
 - Camel-K build fails with error: open /workspace/builder-656588331/package/context/Dockerfile: no such file or directory [\#923](https://github.com/apache/camel-k/issues/923)
 - Add support for defining the loader to be used by the runtime [\#910](https://github.com/apache/camel-k/issues/910)
 - Support shebang to precise that a file is a Camel-K executable file [\#754](https://github.com/apache/camel-k/issues/754)
-- Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
 - Cannot reinstall the kamel in minikube [\#711](https://github.com/apache/camel-k/issues/711)
 - \[DISCUSS\] Vision for Knative Sources [\#639](https://github.com/apache/camel-k/issues/639)
 - Remove maven wrapper from camel-k [\#629](https://github.com/apache/camel-k/issues/629)
