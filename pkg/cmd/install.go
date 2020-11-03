@@ -101,7 +101,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("http-proxy-secret", "", "Configure the source of the secret holding HTTP proxy server details "+
 		"(HTTP_PROXY|HTTPS_PROXY|NO_PROXY)")
 
-	// olm
+	// OLM
 	cmd.Flags().Bool("olm", true, "Try to install everything via OLM (Operator Lifecycle Manager) if available")
 	cmd.Flags().String("olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
 	cmd.Flags().String("olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
@@ -113,10 +113,13 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the "+
 		"operator (used in combination with the --global flag)")
 
-	// maven settings
+	// Maven settings
 	cmd.Flags().String("local-repository", "", "Location of the local maven repository")
 	cmd.Flags().String("maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
+
+	// health
+	cmd.Flags().Int("health-port", 8081, "The port of the health endpoint")
 
 	// monitoring
 	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
@@ -161,6 +164,7 @@ type installCmdOptions struct {
 	BuildTimeout            string   `mapstructure:"build-timeout"`
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
+	HealthPort              int32    `mapstructure:"health-port"`
 	Monitoring              bool     `mapstructure:"monitoring"`
 	MonitoringPort          int32    `mapstructure:"monitoring-port"`
 	Properties              []string `mapstructure:"properties"`
@@ -252,6 +256,9 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				Namespace:             namespace,
 				Global:                o.Global,
 				ClusterType:           o.ClusterType,
+				Health: install.OperatorHealthConfiguration{
+					Port: o.HealthPort,
+				},
 				Monitoring: install.OperatorMonitoringConfiguration{
 					Enabled: o.Monitoring,
 					Port:    o.MonitoringPort,

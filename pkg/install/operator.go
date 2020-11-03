@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/apache/camel-k/deploy"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -48,7 +49,13 @@ type OperatorConfiguration struct {
 	Namespace             string
 	Global                bool
 	ClusterType           string
+	Health                OperatorHealthConfiguration
 	Monitoring            OperatorMonitoringConfiguration
+}
+
+// OperatorHealthConfiguration --
+type OperatorHealthConfiguration struct {
+	Port int32
 }
 
 // OperatorMonitoringConfiguration --
@@ -78,9 +85,14 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 
 		if d, ok := o.(*appsv1.Deployment); ok {
 			if d.Labels["camel.apache.org/component"] == "operator" {
+				// Metrics endpoint port
 				d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
 					fmt.Sprintf("--monitoring-port=%d", cfg.Monitoring.Port))
 				d.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort = cfg.Monitoring.Port
+				// Health endpoint port
+				d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
+					fmt.Sprintf("--health-port=%d", cfg.Health.Port))
+				d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(int(cfg.Health.Port))
 			}
 		}
 
