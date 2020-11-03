@@ -18,15 +18,9 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"path"
+	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/scylladb/go-set/strset"
 	"github.com/spf13/cobra"
 )
 
@@ -55,76 +49,47 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 		},
 	}
 
-	cmd.Flags().StringP("properties", "p", "", "Output format. One of: json|yaml")
+	cmd.Flags().StringArrayP("properties-file", "p", nil, "File containing the integration properties.")
+	cmd.Flags().StringArrayP("dependency", "d", nil, `Additional top-level dependency with the format:
+<type>:<dependency-name>
+where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
 
 	return &cmd, &options
 }
 
 type localRunCmdOptions struct {
 	*RootCmdOptions
-	Properties string `mapstructure:"properties"`
+	PropertiesFiles        []string `mapstructure:"properties"`
+	AdditionalDependencies []string `mapstructure:"dependencies"`
 }
 
 func (command *localRunCmdOptions) validate(args []string) error {
-	// If no source files have been provided there is nothing to inspect.
-	if len(args) == 0 {
-		return errors.New("no integration files have been provided, nothing to inspect")
+	// Validate additional dependencies specified by the user.
+	err := validateIntegrationForDependencies(args, command.AdditionalDependencies)
+	if err != nil {
+		return err
 	}
 
-	// Ensure source files exist.
-	for _, arg := range args {
-		// fmt.Printf("Validating file: %v\n", arg)
-		fileExists, err := util.FileExists(arg)
-
-		// Report any error.
-		if err != nil {
-			return err
-		}
-
-		// Signal file not found.
-		if !fileExists {
-			return errors.New("input file " + arg + " file does not exist")
-		}
+	// Validate properties file.
+	err = validateFiles(command.PropertiesFiles)
+	if err != nil {
+		return nil
 	}
 
 	return nil
 }
 
 func (command *localRunCmdOptions) run(args []string) error {
-	// Attempt to reuse existing Camel catalog if one is present.
-	catalog, err := camel.MainCatalog()
+	// Fetch dependencies.
+	dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
 	if err != nil {
 		return err
 	}
 
-	// Generate catalog if one was not found.
-	if catalog == nil {
-		catalog, err = generateCatalog()
-		if err != nil {
-			return err
-		}
-	}
-
-	// List of top-level dependencies.
-	dependencies := strset.New()
-
-	// Invoke the dependency inspector code for each source file.
-	for _, source := range args {
-		data, _, err := loadContent(source, false, false)
-		if err != nil {
-			return err
-		}
-
-		sourceSpec := v1.SourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:        path.Base(source),
-				Content:     data,
-				Compression: false,
-			},
-		}
-
-		// Extract list of top-level dependencies.
-		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
+	// Print dependencies.
+	err = outputDependencies(dependencies, "")
+	if err != nil {
+		return err
 	}
 
 	return nil
