@@ -21,6 +21,9 @@
 # Unuseful file
 /deploy/operator.yaml
 
+# Bundle directory
+/bundle
+
 # IDEs
 .idea
 *.iml
@@ -32,6 +35,7 @@
 build/_output
 build/_test
 build/_maven_output
+/api_*
 
 # envrc
 .envrc
