@@ -67,34 +67,27 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.13.x
-    - name: Get KinD (Kubernetes in Docker)
-      uses: engineerd/setup-kind@v0.1.0
-      with:
-        version: v0.6.1
-        skipClusterCreation: "true"
-    - name: Start KinD Cluster with Internal Registry
-      run: |
-        CLUSTER_NAME="kind"
-        REGISTRY_CONTAINER_NAME='kind-registry'
-        REGISTRY_PORT='5000'
-        docker run -d -p "${REGISTRY_PORT}:5000" --restart=always --name "${REGISTRY_CONTAINER_NAME}" registry:2
-
-        REGISTRY_IP=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}")
-        cat <<EOF | kind create cluster --config=-
-        kind: Cluster
-        apiVersion: kind.x-k8s.io/v1alpha4
-        containerdConfigPatches:
-        - |-
-          [plugins."io.containerd.grpc.v1.cri".registry.mirrors."${REGISTRY_IP}:${REGISTRY_PORT}"]
-            endpoint = ["http://${REGISTRY_IP}:${REGISTRY_PORT}"]
-        EOF
-        for node in $(kind get nodes --name ${CLUSTER_NAME}); do
-          docker exec "${node}" sh -c "echo $(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}") registry >> /etc/hosts"
-        done
+    - name: Kubernetes KinD Cluster
+      uses: container-tools/kind-action@v1
     - name: Info
       run: |
         kubectl cluster-info
         kubectl describe nodes
+    - name: Build Operator
+      run: |
+        echo "Build project"
+        make build-kamel
+        echo "Adding maven artifacts to the image context"
+        make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
+        echo "Copying binary file to docker dir"
+        mkdir -p ./build/_output/bin
+        cp ./kamel ./build/_output/bin/
+        echo "Building the images"
+        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
+        docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
+        docker push ${LOCAL_IMAGE}
+
+        sudo mv ./kamel /usr/local/bin
     - name: Run IT
       # Disable registry tests as not compatible with KinD
       #env:
@@ -104,38 +97,19 @@ jobs:
       #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
       #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
       run: |
-        # Set the test to periodically cleanup the docker system
-        export KAMEL_TEST_CLEANUP="docker system prune -f"
+        echo "Installing camel k cluster resources"
+        kamel install --cluster-setup
 
-        # Using Spectrum as builder (faster)
+        # Configure install options
         export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
-
-        # Compute registry parameters
-        CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
-        echo "Using registry ${CAMEL_K_REGISTRY}:5000"
-        echo "Build project"
-        make build-kamel
-        echo "Adding maven artifacts to the image context"
-        make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
-        echo "Copying binary file to docker dir"
-        mkdir -p ./build/_output/bin
-        cp ./kamel ./build/_output/bin/
-        echo "Building the images"
-        export LOCAL_IMAGE=localhost:5000/apache/camel-k:$(make version)
-        export IMAGE=${CAMEL_K_REGISTRY}:5000/apache/camel-k:$(make version)
-        docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
-        docker push ${LOCAL_IMAGE}
-
-        # Make the Apache Snapshots or Apache Staging repository enabled by default
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+        export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
+        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+        export KAMEL_INSTALL_OPERATOR_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
 
-        echo "installing camel k cluster resources"
-        ./kamel install --cluster-setup
+        # Configure test options
+        export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
+        export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
 
         # Then run integration tests
-        export KAMEL_INSTALL_REGISTRY=${CAMEL_K_REGISTRY}:5000
-        export KAMEL_INSTALL_REGISTRY_INSECURE=true
-        export KAMEL_INSTALL_OPERATOR_IMAGE=${IMAGE}
-        export CAMEL_K_TEST_IMAGE_NAME=${CAMEL_K_REGISTRY}:5000/apache/camel-k
-        export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
         make test-integration
