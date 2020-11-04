@@ -61,7 +61,8 @@ deploy_crd() {
   deploy_crd_file ./deploy/crds/camel.apache.org_$plural.yaml \
     ./deploy/crd-$name.yaml \
     ./helm/camel-k/crds/crd-$name.yaml \
-    ./deploy/olm-catalog/camel-k-dev/$version/$plural.camel.apache.org.crd.yaml
+    ./deploy/olm-catalog/camel-k-dev/$version/$plural.camel.apache.org.crd.yaml \
+    ./config/crd/bases/camel.apache.org_$plural.yaml
 }
 
 deploy_crd build builds

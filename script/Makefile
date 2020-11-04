@@ -15,6 +15,7 @@
 
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.3.0-SNAPSHOT
+OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_VERSION := 1.2.0
 RUNTIME_VERSION := 1.5.0
 BUILDAH_VERSION := 1.14.0
@@ -30,7 +31,7 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := 
+STAGING_RUNTIME_REPO :=
 
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO :=
@@ -294,10 +295,68 @@ ifeq (, $(shell which controller-gen))
 	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.3 ;\
 	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
 	}
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+kustomize:
+ifeq (, $(shell which kustomize))
+	@{ \
+	set -e ;\
+	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$KUSTOMIZE_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+	rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
+	}
+KUSTOMIZE=$(GOBIN)/kustomize
+else
+KUSTOMIZE=$(shell which kustomize)
+endif
+
+.PHONY: manifests $(BUNDLE_CAMEL_APIS) bundle bundle-build
+
+#
+# This is a workaround as controller-gen is limited to non-moduled api
+# projects, ie. mod.go in api directory
+# - Will cd into api directory first and execute from there
+manifests: controller-gen generate-crd
+
+#
+# - Have to copy pkg/apis since it is a module in its own right
+# - The dependency of v1alpha1 api on v1 results in duplication
+#   of the v1 schema in those CRDs so need to split them up
+# - No way to add a licence header to the CRD other then post-script
+#
+
+BUNDLE_CAMEL_APIS = v1 v1alpha1
+
+$(BUNDLE_CAMEL_APIS):
+	@# Clean up api directory, copy over fresh version
+	rm -rf api_$@ && cp -rf pkg/apis api_$@
+	@# Remove the camel directory and re-copy only the required api
+	rm -rf api_$@/camel/* && cp -rf pkg/apis/camel/$@ api_$@/camel/
+	@# operator-sdk generate ... cannot execute across separate modules so need to temporarily move api
+	operator-sdk generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
+	@# Adds the licence header to the csv file.
+	./script/add_license.sh config/manifests ./script/headers/yaml.txt
+	@# Clean up temporary working api directories
+	rm -rf api_*
+
+bundle: manifests $(BUNDLE_CAMEL_APIS)
+	@# Build kustomize manifests
+	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle --overwrite --version $(OPERATOR_VERSION) $(BUNDLE_METADATA_OPTS)
+	@# Move the dockerfile into the bundle directory
+	mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
+	@# Adds the licence headers to the csv file
+	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
+	@#operator-sdk bundle validate ./bundle
+
+# Build the bundle image.
+bundle-build:
+	cd bundle
+	docker build -f Dockerfile -t $(BUNDLE_IMG) .

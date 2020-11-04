@@ -1,0 +1,29 @@
+domain: apache.org
+layout: go.kubebuilder.io/v2
+projectName: camel-k
+repo: github.com/apache/camel-k
+resources:
+- group: camel
+  kind: Build
+  version: v1
+- group: camel
+  kind: CamelCatalog
+  version: v1
+- group: camel
+  kind: IntegrationKit
+  version: v1
+- group: camel
+  kind: IntegrationPlatform
+  version: v1
+- group: camel
+  kind: Integration
+  version: v1
+- group: camel
+  kind: KameletBinding
+  version: v1alpha1
+- group: camel
+  kind: Kamelet
+  version: v1alpha1
+version: 3-alpha
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}
