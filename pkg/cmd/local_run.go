@@ -49,7 +49,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 		},
 	}
 
-	cmd.Flags().StringArrayP("properties-file", "p", nil, "File containing the integration properties.")
+	cmd.Flags().StringArrayP("properties-file", "p", nil, "File containing integration properties.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, `Additional top-level dependency with the format:
 <type>:<dependency-name>
 where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
@@ -59,11 +59,19 @@ where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
 
 type localRunCmdOptions struct {
 	*RootCmdOptions
-	PropertiesFiles        []string `mapstructure:"properties"`
+	PropertiesFiles        []string `mapstructure:"properties-files"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 }
 
 func (command *localRunCmdOptions) validate(args []string) error {
+	for _, additionalDependency := range command.AdditionalDependencies {
+		fmt.Printf("Dep: %v\n", additionalDependency)
+	}
+
+	for _, prop := range command.PropertiesFiles {
+		fmt.Printf("Prop: %v\n", prop)
+	}
+
 	// Validate additional dependencies specified by the user.
 	err := validateIntegrationForDependencies(args, command.AdditionalDependencies)
 	if err != nil {
@@ -90,6 +98,12 @@ func (command *localRunCmdOptions) run(args []string) error {
 	err = outputDependencies(dependencies, "")
 	if err != nil {
 		return err
+	}
+
+	// Run the integration locally.
+	err = RunLocalIntegration(command.PropertiesFiles, dependencies, args)
+	if err != nil {
+		return nil
 	}
 
 	return nil
