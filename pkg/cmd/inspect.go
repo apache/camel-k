@@ -220,7 +220,7 @@ func getTransitiveDependencies(
 	}
 
 	// Create Maven project.
-	project := runtime.GenerateProjectCommon(defaults.CamelVersion, defaults.DefaultRuntimeVersion)
+	project := runtime.GenerateProjectCommon(catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"], defaults.DefaultRuntimeVersion)
 
 	// Inject dependencies into Maven project.
 	err := camel.ManageIntegrationDependencies(&project, dependencies, catalog)

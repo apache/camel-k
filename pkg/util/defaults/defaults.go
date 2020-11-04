@@ -42,7 +42,4 @@ const (
 
 	// ImageName --
 	ImageName = "docker.io/apache/camel-k"
-
-	// CamelVersion --
-	CamelVersion = "3.6.0"
 )
