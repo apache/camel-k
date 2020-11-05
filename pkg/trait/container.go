@@ -19,9 +19,6 @@ package trait
 
 import (
 	"fmt"
-	"sort"
-	"strconv"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -31,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
+	"sort"
 )
 
 const (
@@ -394,9 +392,6 @@ func (t *containerTrait) configureResources(_ *Environment, container *corev1.Co
 
 func (t *containerTrait) configureHTTP(e *Environment) error {
 	switch e.CamelCatalog.Runtime.Provider {
-	case v1.RuntimeProviderMain:
-		e.ApplicationProperties["customizer.platform-http.enabled"] = True
-		e.ApplicationProperties["customizer.platform-http.bind-port"] = strconv.Itoa(t.Port)
 	case v1.RuntimeProviderQuarkus:
 		// Quarkus does not offer a runtime option to change http listening ports
 		return nil
@@ -433,9 +428,6 @@ func (t *containerTrait) configureProbes(e *Environment, container *corev1.Conta
 	}
 
 	switch e.CamelCatalog.Runtime.Provider {
-	case v1.RuntimeProviderMain:
-		e.ApplicationProperties["customizer.health.enabled"] = True
-		e.ApplicationProperties["customizer.health.path"] = path
 	case v1.RuntimeProviderQuarkus:
 		// Quarkus does not offer a runtime option to change the path of the health endpoint but there
 		// is a build time property:

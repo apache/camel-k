@@ -27,10 +27,6 @@ func init() {
 
 // TODO: organise runtime steps into nested structs
 type steps struct {
-	// Main
-	LoadCamelCatalog    builder.Step
-	GenerateProject     builder.Step
-	ComputeDependencies builder.Step
 	// Quarkus
 	LoadCamelQuarkusCatalog    builder.Step
 	GenerateQuarkusProject     builder.Step
@@ -40,19 +36,6 @@ type steps struct {
 
 // Steps --
 var Steps = steps{
-	// Main
-	LoadCamelCatalog: builder.NewStep(
-		builder.InitPhase,
-		loadCamelCatalog,
-	),
-	GenerateProject: builder.NewStep(
-		builder.ProjectGenerationPhase,
-		generateProject,
-	),
-	ComputeDependencies: builder.NewStep(
-		builder.ProjectBuildPhase,
-		computeDependencies,
-	),
 	// Quarkus
 	LoadCamelQuarkusCatalog: builder.NewStep(
 		builder.InitPhase,

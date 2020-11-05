@@ -91,9 +91,6 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		case v1.RuntimeProviderQuarkus:
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-management")
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel-quarkus:jaxb")
-		case v1.RuntimeProviderMain:
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
 		}
 
 		// TODO: We may want to make the Jolokia version configurable

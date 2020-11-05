@@ -27,47 +27,40 @@ import (
 
 func TestFindBestMatch(t *testing.T) {
 	catalogs := []v1.CamelCatalog{
-		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderMain}}},
-		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.1", Provider: v1.RuntimeProviderMain}}},
 		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderQuarkus}}},
 		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.1", Provider: v1.RuntimeProviderQuarkus}}},
 	}
 
-	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "~1.0.x", Provider: v1.RuntimeProviderMain})
+	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "~1.0.x", Provider: v1.RuntimeProviderQuarkus})
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "1.0.1", c.Runtime.Version)
-	assert.Equal(t, v1.RuntimeProviderMain, c.Runtime.Provider)
+	assert.Equal(t, v1.RuntimeProviderQuarkus, c.Runtime.Provider)
 }
 
 func TestFindExactSemVerMatch(t *testing.T) {
 	catalogs := []v1.CamelCatalog{
-		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderMain}}},
-		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.1", Provider: v1.RuntimeProviderMain}}},
 		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderQuarkus}}},
 		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.1", Provider: v1.RuntimeProviderQuarkus}}},
 	}
 
-	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderMain})
+	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderQuarkus})
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "1.0.0", c.Runtime.Version)
-	assert.Equal(t, v1.RuntimeProviderMain, c.Runtime.Provider)
+	assert.Equal(t, v1.RuntimeProviderQuarkus, c.Runtime.Provider)
 }
 
 func TestFindRangeMatch(t *testing.T) {
 	catalogs := []v1.CamelCatalog{
-		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderMain}}},
-		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.1", Provider: v1.RuntimeProviderMain}}},
-		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.2", Provider: v1.RuntimeProviderMain}}},
 		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderQuarkus}}},
 		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.1", Provider: v1.RuntimeProviderQuarkus}}},
 		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.2", Provider: v1.RuntimeProviderQuarkus}}},
 	}
 
-	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "> 1.0.1, < 1.0.3", Provider: v1.RuntimeProviderMain})
+	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "> 1.0.1, < 1.0.3", Provider: v1.RuntimeProviderQuarkus})
 	assert.Nil(t, err)
 	assert.NotNil(t, c)
 	assert.Equal(t, "1.0.2", c.Runtime.Version)
-	assert.Equal(t, v1.RuntimeProviderMain, c.Runtime.Provider)
+	assert.Equal(t, v1.RuntimeProviderQuarkus, c.Runtime.Provider)
 }

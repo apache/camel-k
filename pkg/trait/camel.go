@@ -83,12 +83,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 
 	runtime := v1.RuntimeSpec{
 		Version:  runtimeVersion,
-		Provider: v1.RuntimeProviderMain,
-	}
-
-	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	if quarkus.isEnabled() {
-		runtime.Provider = v1.RuntimeProviderQuarkus
+		Provider: v1.RuntimeProviderQuarkus,
 	}
 
 	catalog, err := camel.LoadCatalog(e.C, e.Client, ns, runtime)

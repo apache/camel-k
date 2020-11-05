@@ -158,8 +158,6 @@ type Flow struct {
 type RuntimeProvider string
 
 const (
-	// RuntimeProviderMain --
-	RuntimeProviderMain RuntimeProvider = "main"
 	// RuntimeProviderQuarkus --
 	RuntimeProviderQuarkus RuntimeProvider = "quarkus"
 )

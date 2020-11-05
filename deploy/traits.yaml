@@ -531,7 +531,7 @@ traits:
     type: bool
     description: Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
 - name: quarkus
-  platform: false
+  platform: true
   profiles:
   - Kubernetes
   - Knative

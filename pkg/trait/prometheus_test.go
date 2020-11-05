@@ -63,13 +63,11 @@ func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
 
-	assert.Equal(t, container.Args, []string{
-		"-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar=9779:/etc/prometheus/prometheus-jmx-exporter.yaml",
-	})
+	assert.Empty(t, container.Args)
 
 	ports := container.Ports
 	assert.Len(t, ports, 1)
-	assert.Equal(t, int32(9779), ports[0].ContainerPort)
+	assert.Equal(t, int32(8080), ports[0].ContainerPort)
 	assert.Equal(t, corev1.ProtocolTCP, ports[0].Protocol)
 
 	service := environment.Resources.GetService(func(service *corev1.Service) bool {
@@ -173,7 +171,7 @@ func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
 	enabled := true
 	trait.Enabled = &enabled
 
-	camelCatalog, err := camel.MainCatalog()
+	camelCatalog, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
 	}

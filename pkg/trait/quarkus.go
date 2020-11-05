@@ -52,6 +52,11 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 	return nil
 }
 
+// IsPlatformTrait overrides base class method
+func (t *quarkusTrait) IsPlatformTrait() bool {
+	return true
+}
+
 // InfluencesKit overrides base class method
 func (t *quarkusTrait) InfluencesKit() bool {
 	return true

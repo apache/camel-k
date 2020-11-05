@@ -37,10 +37,10 @@ func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
 	var err error = nil
 
 	switch provider {
-	case v1.RuntimeProviderMain:
-		catalog, err = camel.MainCatalog()
 	case v1.RuntimeProviderQuarkus:
 		catalog, err = camel.QuarkusCatalog()
+	default:
+		panic("unknown provider " + provider)
 	}
 
 	assert.Nil(t, err)
@@ -63,21 +63,6 @@ func newTestContainerTrait() *containerTrait {
 	return tr
 }
 
-func TestProbesDeps(t *testing.T) {
-	env := newTestProbesEnv(t, v1.RuntimeProviderMain)
-	env.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-
-	ctr := newTestContainerTrait()
-
-	ok, err := ctr.Configure(&env)
-	assert.Nil(t, err)
-	assert.True(t, ok)
-
-	err = ctr.Apply(&env)
-	assert.Nil(t, err)
-	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-health")
-}
-
 func TestProbesDepsQuarkus(t *testing.T) {
 	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
 	env.Integration.Status.Phase = v1.IntegrationPhaseInitialization
@@ -96,7 +81,7 @@ func TestProbesDepsQuarkus(t *testing.T) {
 func TestProbesOnDeployment(t *testing.T) {
 	target := appsv1.Deployment{}
 
-	env := newTestProbesEnv(t, v1.RuntimeProviderMain)
+	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
@@ -121,7 +106,7 @@ func TestProbesOnDeployment(t *testing.T) {
 func TestProbesOnDeploymentWithNoHttpPort(t *testing.T) {
 	target := appsv1.Deployment{}
 
-	env := newTestProbesEnv(t, v1.RuntimeProviderMain)
+	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
@@ -138,7 +123,7 @@ func TestProbesOnDeploymentWithNoHttpPort(t *testing.T) {
 func TestProbesOnKnativeService(t *testing.T) {
 	target := serving.Service{}
 
-	env := newTestProbesEnv(t, v1.RuntimeProviderMain)
+	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
@@ -163,7 +148,7 @@ func TestProbesOnKnativeService(t *testing.T) {
 func TestProbesOnKnativeServiceWithNoHttpPort(t *testing.T) {
 	target := serving.Service{}
 
-	env := newTestProbesEnv(t, v1.RuntimeProviderMain)
+	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 

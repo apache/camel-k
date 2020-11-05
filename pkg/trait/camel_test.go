@@ -80,7 +80,7 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 			CamelCatalogSpec: v1.CamelCatalogSpec{
 				Runtime: v1.RuntimeSpec{
 					Version:  "0.0.1",
-					Provider: v1.RuntimeProviderMain,
+					Provider: v1.RuntimeProviderQuarkus,
 				},
 			},
 		},

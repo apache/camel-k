@@ -27,51 +27,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestTracingTrait(t *testing.T) {
-	e := createEnvironment(t, camel.MainCatalog)
-	tracing := NewTracingTrait()
-	enabled := true
-	tracing.(*tracingTrait).Enabled = &enabled
-	tracing.(*tracingTrait).Endpoint = "http://endpoint1"
-	ok, err := tracing.Configure(e)
-	assert.Nil(t, err)
-	assert.True(t, ok)
-
-	err = tracing.Apply(e)
-	assert.Nil(t, err)
-
-	assert.Equal(t, "true", e.ApplicationProperties["camel.k.customizer.tracing.enabled"])
-	assert.Equal(t, "http://endpoint1", e.ApplicationProperties["camel.k.customizer.tracing.reporter.sender.endpoint"])
-	assert.Equal(t, "test", e.ApplicationProperties["camel.k.customizer.tracing.service-name"])
-	assert.Equal(t, "const", e.ApplicationProperties["camel.k.customizer.tracing.sampler.type"])
-	assert.Equal(t, "1", e.ApplicationProperties["camel.k.customizer.tracing.sampler.param"])
-}
-
-func TestTracingTraitFullConfig(t *testing.T) {
-	e := createEnvironment(t, camel.MainCatalog)
-	tracing := NewTracingTrait()
-	enabled := true
-	tracing.(*tracingTrait).Enabled = &enabled
-	tracing.(*tracingTrait).Endpoint = "http://endpoint2"
-	samplerParam := "2"
-	tracing.(*tracingTrait).SamplerParam = &samplerParam
-	samplerType := "buh"
-	tracing.(*tracingTrait).SamplerType = &samplerType
-	tracing.(*tracingTrait).ServiceName = "myservice"
-	ok, err := tracing.Configure(e)
-	assert.Nil(t, err)
-	assert.True(t, ok)
-
-	err = tracing.Apply(e)
-	assert.Nil(t, err)
-
-	assert.Equal(t, "true", e.ApplicationProperties["camel.k.customizer.tracing.enabled"])
-	assert.Equal(t, "http://endpoint2", e.ApplicationProperties["camel.k.customizer.tracing.reporter.sender.endpoint"])
-	assert.Equal(t, "myservice", e.ApplicationProperties["camel.k.customizer.tracing.service-name"])
-	assert.Equal(t, "buh", e.ApplicationProperties["camel.k.customizer.tracing.sampler.type"])
-	assert.Equal(t, "2", e.ApplicationProperties["camel.k.customizer.tracing.sampler.param"])
-}
-
 func TestTracingTraitOnQuarkus(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	tracing := NewTracingTrait()
