@@ -220,7 +220,10 @@ func getTransitiveDependencies(
 	}
 
 	// Create Maven project.
-	project := runtime.GenerateProjectCommon(catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"], defaults.DefaultRuntimeVersion)
+	//project := runtime.GenerateProjectCommon(catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"], defaults.DefaultRuntimeVersion)
+	project := runtime.GenerateQuarkusProjectCommon(
+		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
+		defaults.DefaultRuntimeVersion, catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"])
 
 	// Inject dependencies into Maven project.
 	err := camel.ManageIntegrationDependencies(&project, dependencies, catalog)
@@ -237,16 +240,22 @@ func getTransitiveDependencies(
 	mc := maven.NewContext(temporaryDirectory, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.GetTimeout().Duration
+	// mc.Stdout = os.Stderr
+
+	err = runtime.BuildQuarkusRunnerCommon(mc)
+	if err != nil {
+		return err
+	}
 
 	// Compute dependencies.
-	content, err := runtime.ComputeDependenciesCommon(mc, catalog.Runtime.Version)
+	content, err := runtime.ComputeQuarkusDependenciesCommon(mc, catalog.Runtime.Version)
 	if err != nil {
 		return err
 	}
 
 	// Compose artifacts list.
 	artifacts := []v1.Artifact{}
-	artifacts, err = runtime.ProcessTransitiveDependencies(content)
+	artifacts, err = runtime.ProcessQuarkusTransitiveDependencies(mc, content)
 	if err != nil {
 		return err
 	}
