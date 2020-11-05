@@ -199,7 +199,7 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 	}
 	runtime := v1.RuntimeSpec{
 		Version:  defaults.DefaultRuntimeVersion,
-		Provider: v1.RuntimeProviderMain,
+		Provider: v1.RuntimeProviderQuarkus,
 	}
 	providerDependencies := []maven.Dependency{}
 	catalog, err := camel.GenerateCatalogCommon(settings, mvn, runtime, providerDependencies)
@@ -316,7 +316,7 @@ func getWorkingDirectory() (string, error) {
 
 func createCamelCatalog() (*camel.RuntimeCatalog, error) {
 	// Attempt to reuse existing Camel catalog if one is present.
-	catalog, err := camel.MainCatalog()
+	catalog, err := camel.DefaultCatalog()
 	if err != nil {
 		return nil, err
 	}
