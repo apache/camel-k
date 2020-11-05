@@ -141,7 +141,7 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 					PublishStrategy:  strategy,
 					Registry:         v1.IntegrationPlatformRegistrySpec{Address: "registry"},
 					RuntimeVersion:   defaults.DefaultRuntimeVersion,
-					RuntimeProvider:  v1.RuntimeProviderMain,
+					RuntimeProvider:  v1.RuntimeProviderQuarkus,
 					KanikoBuildCache: &kanikoCache,
 				},
 			},

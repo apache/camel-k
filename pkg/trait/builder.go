@@ -33,7 +33,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
-	"github.com/apache/camel-k/pkg/builder/runtime"
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -198,13 +197,7 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 	}
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	if quarkus.isEnabled() {
-		// Add build steps for Quarkus runtime
-		quarkus.addBuildSteps(task)
-	} else {
-		// Add build steps for default runtime
-		task.Steps = append(task.Steps, builder.StepIDsFor(runtime.MainSteps...)...)
-	}
+	quarkus.addBuildSteps(task)
 
 	return task
 }

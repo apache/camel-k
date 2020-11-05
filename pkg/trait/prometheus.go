@@ -19,10 +19,6 @@ package trait
 
 import (
 	"fmt"
-	"path"
-	"strconv"
-	"strings"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -90,23 +86,6 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		case v1.RuntimeProviderQuarkus:
 			// Add the Camel Quarkus MP Metrics extension
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-microprofile-metrics")
-		case v1.RuntimeProviderMain:
-			// Add the Camel management and Prometheus agent dependencies
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel/camel-management")
-			// TODO: We may want to make the Prometheus version configurable
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.prometheus.jmx/jmx_prometheus_javaagent:0.3.1")
-
-			// Use the provided configuration or add the default Prometheus JMX exporter configuration
-			configMapName := t.getJmxExporterConfigMapOrAdd(e)
-
-			e.Integration.Status.AddOrReplaceGeneratedResources(v1.ResourceSpec{
-				Type: v1.ResourceTypeData,
-				DataSpec: v1.DataSpec{
-					Name:       prometheusJmxExporterConfigFileName,
-					ContentRef: configMapName,
-				},
-				MountPath: prometheusJmxExporterConfigMountPath,
-			})
 		}
 		return nil
 	}
@@ -132,11 +111,6 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	switch e.CamelCatalog.Runtime.Provider {
 	case v1.RuntimeProviderQuarkus:
 		port = 8080
-	case v1.RuntimeProviderMain:
-		port = 9779
-		// Configure the Prometheus Java agent
-		options := []string{strconv.Itoa(port), path.Join(prometheusJmxExporterConfigMountPath, prometheusJmxExporterConfigFileName)}
-		container.Args = append(container.Args, "-javaagent:dependencies/io.prometheus.jmx.jmx_prometheus_javaagent-0.3.1.jar="+strings.Join(options, ":"))
 	}
 
 	if t.Port == nil {

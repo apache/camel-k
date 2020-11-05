@@ -56,13 +56,6 @@ const (
 
 var (
 	tracingProperties = map[v1.RuntimeProvider]map[string]string{
-		v1.RuntimeProviderMain: {
-			propEnabled:      "camel.k.customizer.tracing.enabled",
-			propEndpoint:     "camel.k.customizer.tracing.reporter.sender.endpoint",
-			propServiceName:  "camel.k.customizer.tracing.service-name",
-			propSamplerType:  "camel.k.customizer.tracing.sampler.type",
-			propSamplerParam: "camel.k.customizer.tracing.sampler.param",
-		},
 		v1.RuntimeProviderQuarkus: {
 			propEndpoint:     "quarkus.jaeger.endpoint",
 			propServiceName:  "quarkus.jaeger.service-name",
