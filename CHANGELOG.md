@@ -25,6 +25,7 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
 - \[test\] Detect camel quarkus version dynamically in monitoring test [\#1795](https://github.com/apache/camel-k/pull/1795) ([llowinge](https://github.com/llowinge))
