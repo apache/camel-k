@@ -62,13 +62,22 @@ func loadCamelQuarkusCatalog(ctx *builder.Context) error {
 }
 
 func generateQuarkusProject(ctx *builder.Context) error {
+	p := GenerateQuarkusProjectCommon(ctx.Build.Runtime.Metadata["camel-quarkus.version"], ctx.Build.Runtime.Version, ctx.Build.Runtime.Metadata["quarkus.version"])
+
+	// Add all the properties from the build configuration
+	p.Properties.AddAll(ctx.Build.Properties)
+
+	ctx.Maven.Project = p
+
+	return nil
+}
+
+// GenerateQuarkusProjectCommon --
+func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion string, quarkusVersion string) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
-
-	// Add all the properties from the build configuration
-	p.Properties.AddAll(ctx.Build.Properties)
 
 	// camel-quarkus doe routes discovery at startup but we don't want
 	// this to happen as routes are loaded at runtime and looking for
@@ -84,14 +93,14 @@ func generateQuarkusProject(ctx *builder.Context) error {
 		maven.Dependency{
 			GroupID:    "org.apache.camel.quarkus",
 			ArtifactID: "camel-quarkus-bom",
-			Version:    ctx.Build.Runtime.Metadata["camel-quarkus.version"],
+			Version:    camelQuarkusVersion,
 			Type:       "pom",
 			Scope:      "import",
 		},
 		maven.Dependency{
 			GroupID:    "org.apache.camel.k",
 			ArtifactID: "camel-k-runtime-bom",
-			Version:    ctx.Build.Runtime.Version,
+			Version:    runtimeVersion,
 			Type:       "pom",
 			Scope:      "import",
 		},
@@ -102,7 +111,7 @@ func generateQuarkusProject(ctx *builder.Context) error {
 		maven.Plugin{
 			GroupID:    "io.quarkus",
 			ArtifactID: "quarkus-maven-plugin",
-			Version:    ctx.Build.Runtime.Metadata["quarkus.version"],
+			Version:    quarkusVersion,
 			Executions: []maven.Execution{
 				{
 					Goals: []string{
@@ -113,9 +122,7 @@ func generateQuarkusProject(ctx *builder.Context) error {
 		},
 	)
 
-	ctx.Maven.Project = p
-
-	return nil
+	return p
 }
 
 func buildQuarkusRunner(ctx *builder.Context) error {
@@ -124,6 +131,16 @@ func buildQuarkusRunner(ctx *builder.Context) error {
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
+	err := BuildQuarkusRunnerCommon(mc)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// BuildQuarkusRunnerCommon --
+func BuildQuarkusRunnerCommon(mc maven.Context) error {
 	resourcesPath := path.Join(mc.Path, "src", "main", "resources")
 	if err := os.MkdirAll(resourcesPath, os.ModePerm); err != nil {
 		return errors.Wrap(err, "failure while creating resource folder")
@@ -154,30 +171,55 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
+	// Compute dependencies.
+	content, err := ComputeQuarkusDependenciesCommon(mc, ctx.Catalog.Runtime.Version)
+	if err != nil {
+		return err
+	}
+
+	// Process artifacts list and add it to existing artifacts.
+	artifacts := []v1.Artifact{}
+	artifacts, err = ProcessQuarkusTransitiveDependencies(mc, content)
+	if err != nil {
+		return err
+	}
+	ctx.Artifacts = append(ctx.Artifacts, artifacts...)
+
+	return nil
+}
+
+// ComputeQuarkusDependenciesCommon --
+func ComputeQuarkusDependenciesCommon(mc maven.Context, runtimeVersion string) ([]byte, error) {
 	// Retrieve the runtime dependencies
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", ctx.Catalog.Runtime.Version)
+	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", runtimeVersion)
 	if err := maven.Run(mc); err != nil {
-		return errors.Wrap(err, "failure while determining classpath")
+		return nil, errors.Wrap(err, "failure while determining classpath")
 	}
 
 	dependencies := path.Join(mc.Path, "target", "dependencies.yaml")
 	content, err := ioutil.ReadFile(dependencies)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	return content, nil
+}
+
+// ProcessQuarkusTransitiveDependencies --
+func ProcessQuarkusTransitiveDependencies(mc maven.Context, content []byte) ([]v1.Artifact, error) {
 	cp := make(map[string][]v1.Artifact)
-	err = yaml2.Unmarshal(content, &cp)
+	err := yaml2.Unmarshal(content, &cp)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	artifacts := []v1.Artifact{}
 	for _, e := range cp["dependencies"] {
 		_, fileName := path.Split(e.Location)
 
 		gav, err := maven.ParseGAV(e.ID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		//
@@ -186,13 +228,13 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 		if e.Checksum == "" {
 			chksum, err := digest.ComputeSHA1(e.Location)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			e.Checksum = "sha1:" + chksum
 		}
 
-		ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
+		artifacts = append(artifacts, v1.Artifact{
 			ID:       e.ID,
 			Location: e.Location,
 			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
@@ -207,15 +249,15 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	//
 	runnerChecksum, err := digest.ComputeSHA1(mc.Path, "target", runner)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	ctx.Artifacts = append(ctx.Artifacts, v1.Artifact{
+	artifacts = append(artifacts, v1.Artifact{
 		ID:       runner,
 		Location: path.Join(mc.Path, "target", runner),
 		Target:   path.Join("dependencies", runner),
 		Checksum: "sha1:" + runnerChecksum,
 	})
 
-	return nil
+	return artifacts, nil
 }
