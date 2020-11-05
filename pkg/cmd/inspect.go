@@ -237,10 +237,13 @@ func getTransitiveDependencies(
 		return err
 	}
 
+	// Maven local context to be used for generating the transitive dependencies.
 	mc := maven.NewContext(temporaryDirectory, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.GetTimeout().Duration
-	// mc.Stdout = os.Stderr
+
+	// Make maven command less verbose.
+	mc.AdditionalArguments = append(mc.AdditionalArguments, "-q")
 
 	err = runtime.BuildQuarkusRunnerCommon(mc)
 	if err != nil {
