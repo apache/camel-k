@@ -220,7 +220,6 @@ func getTransitiveDependencies(
 	}
 
 	// Create Maven project.
-	//project := runtime.GenerateProjectCommon(catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"], defaults.DefaultRuntimeVersion)
 	project := runtime.GenerateQuarkusProjectCommon(
 		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
 		defaults.DefaultRuntimeVersion, catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"])
