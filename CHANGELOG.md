@@ -1592,6 +1592,7 @@
 - chore\(log\): make dev-mode work in Knative [\#280](https://github.com/apache/camel-k/pull/280) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
+- trait: add a trait to inject pod metadata as env var [\#276](https://github.com/apache/camel-k/pull/276) ([lburgazzoli](https://github.com/lburgazzoli))
 - Traits lifecycle [\#273](https://github.com/apache/camel-k/pull/273) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.1.0](https://github.com/apache/camel-k/tree/0.1.0) (2018-12-10)
