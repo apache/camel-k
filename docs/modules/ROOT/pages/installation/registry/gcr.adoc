@@ -29,7 +29,7 @@ Ensure you have the https://github.com/apache/camel-k/releases[*kamel* CLI] on y
 You should now execute the following command to install cluster resources and the operator (in the current namespace):
 
 ```
-kamel install --registry gcr.io --organization <<your-project-id>> --registry-secret kaniko-secret
+kamel install --build-publish-strategy=Kaniko --registry gcr.io --organization <<your-project-id>> --registry-secret kaniko-secret
 ```
 
 Use the project id of your project on GKE. Usually this can be obtained from the connection string.

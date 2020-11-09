@@ -19,6 +19,7 @@ package install
 
 import (
 	"context"
+	"io/ioutil"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -36,6 +37,21 @@ func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace str
 		return "", err
 	}
 
+	return registrySecretFromDataOrCollect(ctx, c, namespace, secretData, collection, force)
+}
+
+// RegistrySecretFromFileOrCollect generates a secret from a docker-config.json file and creates it on the cluster (or appends it to the collection)
+func RegistrySecretFromFileOrCollect(ctx context.Context, c client.Client, namespace string, file string, collection *kubernetes.Collection, force bool) (string, error) {
+	secretData, err := ioutil.ReadFile(file)
+	if err != nil {
+		return "", err
+	}
+
+	return registrySecretFromDataOrCollect(ctx, c, namespace, secretData, collection, force)
+}
+
+// registrySecretFromDataOrCollect generates a secret from a docker config file content file and creates it on the cluster (or appends it to the collection)
+func registrySecretFromDataOrCollect(ctx context.Context, c client.Client, namespace string, secretData []byte, collection *kubernetes.Collection, force bool) (string, error) {
 	registrySecret := v1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",

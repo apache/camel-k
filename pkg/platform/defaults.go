@@ -70,15 +70,18 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
-			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyBuildah
+			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
 		}
 	}
 
 	if p.Status.Build.BuildStrategy == "" {
 		// If the operator is global, a global build strategy should be used
 		if IsCurrentOperatorGlobal() {
-			// The only global strategy we have for now
-			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
+			if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
+				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
+			} else {
+				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
+			}
 		} else {
 			if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
 				p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {

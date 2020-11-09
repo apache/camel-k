@@ -84,6 +84,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().String("registry-secret", "", "A secret used to push/pull images to the Docker registry")
 	cmd.Flags().Bool("registry-insecure", false, "Configure to configure registry access in insecure mode or not")
+	cmd.Flags().String("registry-auth-file", "", "A docker registry configuration file containing authorization tokens for pushing and pulling images")
 	cmd.Flags().String("registry-auth-server", "", "The docker registry authentication server")
 	cmd.Flags().String("registry-auth-username", "", "The docker registry authentication username")
 	cmd.Flags().String("registry-auth-password", "", "The docker registry authentication password")
@@ -171,9 +172,11 @@ type installCmdOptions struct {
 	TraitProfile            string   `mapstructure:"trait-profile"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
 
-	registry     v1.IntegrationPlatformRegistrySpec
-	registryAuth registry.Auth
-	olmOptions   olm.Options
+	registry         v1.IntegrationPlatformRegistrySpec
+	registryAuth     registry.Auth
+	RegistryAuthFile string `mapstructure:"registry-auth-file"`
+
+	olmOptions olm.Options
 }
 
 // nolint: gocyclo
@@ -277,6 +280,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			regData := o.registryAuth
 			regData.Registry = o.registry.Address
 			generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace, regData, collection, o.Force)
+			if err != nil {
+				return err
+			}
+		} else if o.RegistryAuthFile != "" {
+			generatedSecretName, err = install.RegistrySecretFromFileOrCollect(o.Context, c, namespace, o.RegistryAuthFile, collection, o.Force)
 			if err != nil {
 				return err
 			}
@@ -507,9 +515,23 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	if o.registry.Secret != "" && o.registryAuth.IsSet() {
+	if o.registry.Secret != "" && (o.registryAuth.IsSet() || o.RegistryAuthFile != "") {
 		err := fmt.Errorf("incompatible options combinations: you cannot set both registry-secret and registry-auth-[*] settings")
 		result = multierr.Append(result, err)
+	}
+
+	if o.registryAuth.IsSet() && o.RegistryAuthFile != "" {
+		err := fmt.Errorf("incompatible options combinations: you cannot set registry-auth-file with other registry-auth-[*] settings")
+		result = multierr.Append(result, err)
+	}
+
+	if o.RegistryAuthFile != "" {
+		nfo, err := os.Stat(o.RegistryAuthFile)
+		if err != nil {
+			result = multierr.Append(result, err)
+		} else if nfo.IsDir() {
+			result = multierr.Append(result, errors.Wrapf(err, "registry file cannot be a directory: %s", o.RegistryAuthFile))
+		}
 	}
 
 	if o.BuildStrategy != "" {
