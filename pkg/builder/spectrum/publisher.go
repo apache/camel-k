@@ -79,6 +79,7 @@ func publisher(ctx *builder.Context) error {
 	options := spectrum.Options{
 		PullInsecure:  pullInsecure,
 		PushInsecure:  pl.Status.Build.Registry.Insecure,
+		PullConfigDir: registryConfigDir,
 		PushConfigDir: registryConfigDir,
 		Base:          ctx.BaseImage,
 		Target:        target,

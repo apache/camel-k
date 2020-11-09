@@ -1,0 +1,17 @@
+[[configuring-registry-digitalocean]]
+= Configuring a DigitalOcean Container Registry
+
+You can host your container images on the Digital Ocean container registry in case your cluster doesn't provide a xref:installation/registry/registry.adoc[default registry].
+
+After logging in into the DigitalOcean web console on https://www.digitalocean.com/, access the *registry page* to do the following actions:
+
+- Take note of the registry address and organization: you should find something like `registry.digitalocean.com/<your-org-id>`
+- Download the "Docker Credentials" for the registry for **"Read & Write"**: this will save a file named `docker-config.json` in your machine
+
+[source,bash]
+----
+# make sure you set the right organization parameter
+kamel install --registry registry.digitalocean.com --organization your-org-id --registry-auth-file docker-config.json
+----
+
+Have fun with Camel K!

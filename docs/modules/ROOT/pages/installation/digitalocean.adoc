@@ -1,0 +1,8 @@
+[[installation-on-digitalocean]]
+= Installing Camel K on DigitalOcean
+
+This guide assumes you've already created a Kubernetes Engine cluster on https://digitalocean.com.
+
+To install Camel K on a DigitalOcean Kubernetes cluster, just to xref:installation/registry/digitalocean.adoc[configure the DigitalOcen container registry] during installation.
+
+After doing that, you'll be ready to play with Camel K. Enjoy!
