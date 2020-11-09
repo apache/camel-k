@@ -17,7 +17,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION := 1.3.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_VERSION := 1.2.0
-RUNTIME_VERSION := 1.5.0
+RUNTIME_VERSION := 1.6.0-SNAPSHOT
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
@@ -161,7 +161,7 @@ build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
 build-resources: bundle-kamelets
-	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION)-quarkus.yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
+	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION).yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
 	./script/embed_resources.sh deploy
 
 bundle-kamelets:

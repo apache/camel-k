@@ -18,30 +18,29 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.5.0-quarkus
+  name: camel-catalog-1.6.0-snapshot
   labels:
     app: camel-k
-    camel.apache.org/catalog.version: 3.5.0
-    camel.apache.org/catalog.loader.version: 3.5.0
-    camel.apache.org/runtime.version: 1.5.0
-    camel.apache.org/runtime.provider: quarkus
+    camel.apache.org/catalog.version: 3.6.0
+    camel.apache.org/catalog.loader.version: 3.6.0
+    camel.apache.org/runtime.version: 1.6.0-SNAPSHOT
 spec:
   runtime:
-    version: 1.5.0
+    version: 1.6.0-SNAPSHOT
     provider: quarkus
     applicationClass: io.quarkus.runner.GeneratedMain
     metadata:
-      camel.version: 3.5.0
-      quarkus.version: 1.8.0.Final
-      camel-quarkus.version: 1.1.0
+      camel.version: 3.6.0
+      quarkus.version: 1.9.0.Final
+      camel-quarkus.version: 1.3.0
     dependencies:
     - groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-quarkus
+      artifactId: camel-k-runtime
     capabilities:
       cron:
         dependencies:
         - groupId: org.apache.camel.k
-          artifactId: camel-k-quarkus-cron
+          artifactId: camel-k-cron
       health:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -67,7 +66,7 @@ spec:
       master:
         dependencies:
         - groupId: org.apache.camel.k
-          artifactId: camel-k-quarkus-master
+          artifactId: camel-k-master
   artifacts:
     camel-quarkus-aws2-ses:
       groupId: org.apache.camel.quarkus
@@ -1464,6 +1463,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.asterisk.AsteriskComponent
+    camel-quarkus-jcache:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jcache
+      schemes:
+      - id: jcache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jcache.JCacheComponent
     camel-quarkus-file:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-file
@@ -1783,15 +1791,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.saga.SagaComponent
-    camel-quarkus-hipchat:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-hipchat
-      schemes:
-      - id: hipchat
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.hipchat.HipchatComponent
     camel-quarkus-ldap:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-ldap
@@ -2452,6 +2451,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.nagios.NagiosComponent
+    camel-quarkus-hbase:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-hbase
+      schemes:
+      - id: hbase
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hbase.HBaseComponent
     camel-quarkus-language:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-language
@@ -2736,6 +2744,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.ehcache.EhcacheComponent
+    camel-quarkus-spark:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-spark
+      schemes:
+      - id: spark
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.spark.SparkComponent
     camel-quarkus-fhir:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-fhir
@@ -2804,116 +2821,87 @@ spec:
       javaTypes:
       - org.apache.camel.dataformat.xstream.JsonDataFormat
       - org.apache.camel.dataformat.xstream.XStreamDataFormat
-    camel-k-loader-yaml:
+    camel-k-cron:
       groupId: org.apache.camel.k
-      artifactId: camel-k-loader-yaml
-    camel-k-loader-groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-groovy
-    camel-k-loader-kotlin:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-kotlin
-    camel-k-loader-js:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-js
-    camel-k-loader-xml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-xml
-    camel-k-loader-java:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-java
-    camel-k-runtime-main:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-main
-    camel-k-runtime-health:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-health
-    camel-k-runtime-http:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-http
-    camel-k-runtime-webhook:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-webhook
-    camel-k-runtime-cron:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-cron
-    camel-k-runtime-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-runtime-knative
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-quarkus-knative
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-quarkus-loader-yaml
-    camel-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-knative
+      artifactId: camel-k-cron
       schemes:
-      - id: knative
-        http: true
+      - id: cron
+        http: false
         passive: false
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-quarkus-knative
-    camel-kamelet:
+    camel-k-kamelet:
       groupId: org.apache.camel.k
-      artifactId: camel-kamelet
+      artifactId: camel-k-kamelet
       schemes:
       - id: kamelet
         http: false
         passive: true
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-quarkus-kamelet
-    camel-wrap:
+    camel-k-knative:
       groupId: org.apache.camel.k
-      artifactId: camel-wrap
+      artifactId: camel-k-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+    camel-k-master:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-master
+      schemes:
+      - id: master
+        http: false
+        passive: false
+    camel-k-webhook:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-webhook
+      schemes:
+      - id: webhook
+        http: true
+        passive: true
+    camel-k-wrap:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-wrap
       schemes:
       - id: wrap
         http: false
         passive: false
-      dependencies:
-      - groupId: org.apache.camel.k
-        artifactId: camel-k-quarkus-wrap
   loaders:
     yaml:
       groupId: org.apache.camel.k
-      artifactId: camel-k-quarkus-loader-yaml
+      artifactId: camel-k-loader-yaml
       languages:
       - yaml
       metadata:
         native: "true"
     groovy:
       groupId: org.apache.camel.k
-      artifactId: camel-k-quarkus-loader-groovy
+      artifactId: camel-k-loader-groovy
       languages:
       - groovy
       metadata:
         native: "false"
     kts:
       groupId: org.apache.camel.k
-      artifactId: camel-k-quarkus-loader-kotlin
+      artifactId: camel-k-loader-kotlin
       languages:
       - kts
       metadata:
         native: "false"
     js:
       groupId: org.apache.camel.k
-      artifactId: camel-k-quarkus-loader-js
+      artifactId: camel-k-loader-js
       languages:
       - js
       metadata:
         native: "true"
     xml:
       groupId: org.apache.camel.k
-      artifactId: camel-k-quarkus-loader-xml
+      artifactId: camel-k-loader-xml
       languages:
       - xml
       metadata:
         native: "true"
     java:
       groupId: org.apache.camel.k
-      artifactId: camel-k-quarkus-loader-java
+      artifactId: camel-k-loader-java
       languages:
       - java
       metadata:
