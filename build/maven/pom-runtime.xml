@@ -65,12 +65,12 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-runtime-core</artifactId>
+            <artifactId>camel-k-core</artifactId>
             <version>${runtime.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-runtime-knative</artifactId>
+            <artifactId>camel-k-knative</artifactId>
             <version>${runtime.version}</version>
         </dependency>
         <dependency>

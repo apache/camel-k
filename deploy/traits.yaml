@@ -149,7 +149,7 @@ traits:
     description: The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for thismechanism to work correctly.
   - name: components
     type: string
-    description: 'A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer isactivated (it''s present in the `org.apache.camel.k:camel-k-runtime-cron` library).Supported components are currently: `cron`, `timer` and `quartz`.'
+    description: 'A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer isactivated (it''s present in the `org.apache.camel.k:camel-k-cron` library).Supported components are currently: `cron`, `timer` and `quartz`.'
   - name: fallback
     type: bool
     description: Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integrationas Kubernetes CronJob.

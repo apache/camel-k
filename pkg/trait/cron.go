@@ -57,7 +57,7 @@ type cronTrait struct {
 	Schedule string `property:"schedule" json:"schedule,omitempty"`
 	// A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
 	// A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
-	// activated (it's present in the `org.apache.camel.k:camel-k-runtime-cron` library).
+	// activated (it's present in the `org.apache.camel.k:camel-k-cron` library).
 	//
 	// Supported components are currently: `cron`, `timer` and `quartz`.
 	Components string `property:"components" json:"components,omitempty"`
