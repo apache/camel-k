@@ -88,10 +88,10 @@ func RunLocalIntegration(properties []string, dependencies []string, routes []st
 	fmt.Printf("executing: %s", strings.Join(cmd.Args, " "))
 
 	// Add directory where the properties file resides.
-	os.Setenv("CAMEL_K_CONF_D", strings.Join(confDirectories(properties), ","))
+	cmd.Env = append(cmd.Env, "CAMEL_K_CONF_D="+strings.Join(confDirectories(properties), ","))
 
 	// Add files to the command line under the CAMEL_K_ROUTES flag.
-	os.Setenv("CAMEL_K_ROUTES", strings.Join(formatRoutes(routes), ","))
+	cmd.Env = append(cmd.Env, "CAMEL_K_ROUTES="+strings.Join(formatRoutes(routes), ","))
 
 	return cmd.Run()
 }
