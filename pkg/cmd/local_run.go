@@ -30,9 +30,9 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	}
 
 	cmd := cobra.Command{
-		Use:     "local-run [files to inspect]",
-		Short:   "Run a Camel integration locally.",
-		Long:    `Run a Camel integration locally using existing integration files.`,
+		Use:     "local-run [integration files]",
+		Short:   "Run integration locally.",
+		Long:    `Run integration locally using the input integration files.`,
 		PreRunE: decode(&options),
 		RunE: func(_ *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
@@ -55,7 +55,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 		},
 	}
 
-	cmd.Flags().StringArrayP("properties-file", "p", nil, "File containing integration properties.")
+	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, `Additional top-level dependency with the format:
 <type>:<dependency-name>
 where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
@@ -65,19 +65,11 @@ where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
 
 type localRunCmdOptions struct {
 	*RootCmdOptions
-	PropertiesFiles        []string `mapstructure:"properties-files"`
+	PropertiesFiles        []string `mapstructure:"property-files"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 }
 
 func (command *localRunCmdOptions) validate(args []string) error {
-	for _, additionalDependency := range command.AdditionalDependencies {
-		fmt.Printf("Dep: %v\n", additionalDependency)
-	}
-
-	for _, prop := range command.PropertiesFiles {
-		fmt.Printf("Prop: %v\n", prop)
-	}
-
 	// Validate additional dependencies specified by the user.
 	err := validateIntegrationForDependencies(args, command.AdditionalDependencies)
 	if err != nil {
