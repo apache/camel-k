@@ -54,6 +54,7 @@ type IntegrationKitStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=integrationkits,scope=Namespaced,shortName=ik,categories=kamel;camel
 // +kubebuilder:subresource:status
+// +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration kit phase"
 // +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.type`,description="The integration kit type"
 // +kubebuilder:printcolumn:name="Image",type=string,JSONPath=`.status.image`,description="The integration kit image"

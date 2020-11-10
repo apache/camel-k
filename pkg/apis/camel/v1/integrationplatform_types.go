@@ -52,6 +52,7 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip,categories=kamel;camel
 // +kubebuilder:subresource:status
+// +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
 
 // IntegrationPlatform is the Schema for the integrationplatforms API
