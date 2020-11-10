@@ -259,5 +259,14 @@ func ProcessQuarkusTransitiveDependencies(mc maven.Context, content []byte) ([]v
 		Checksum: "sha1:" + runnerChecksum,
 	})
 
+	// currentpath, errr := os.Getwd()
+	// if errr != nil {
+	// 	return nil, errr
+	// }
+	// _, err = util.CopyFile(path.Join(mc.Path, "target", runner), path.Join(currentpath, runner))
+	// if err != nil {
+	// 	return nil, err
+	// }
+
 	return artifacts, nil
 }
