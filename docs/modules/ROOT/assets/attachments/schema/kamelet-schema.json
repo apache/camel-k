@@ -1046,6 +1046,9 @@
     },
     "org.apache.camel.k.loader.yaml.parser.RouteStepParser$Definition": {
       "properties": {
+        "auto-startup": {
+          "type": "boolean"
+        },
         "from": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.RouteStepParser$From"
         },
@@ -3006,6 +3009,9 @@
         "id": {
           "type": "string"
         },
+        "max-decompressed-size": {
+          "type": "string"
+        },
         "preserve-path-elements": {
           "type": "string"
         },
@@ -3401,6 +3407,9 @@
         "id": {
           "type": "string"
         },
+        "max-decompressed-size": {
+          "type": "string"
+        },
         "preserve-path-elements": {
           "type": "string"
         },
@@ -3552,6 +3561,16 @@
             "id": {
               "type": "string"
             },
+            "option": {
+              "enum": [
+                "DEFAULT_PATH_LEAF_TO_NULL",
+                "ALWAYS_RETURN_LIST",
+                "AS_PATH_LIST",
+                "SUPPRESS_EXCEPTIONS",
+                "REQUIRE_PROPERTIES"
+              ],
+              "type": "string"
+            },
             "result-type": {
               "type": "string"
             },
@@ -3612,6 +3631,14 @@
               "type": "string"
             },
             "ref": {
+              "type": "string"
+            },
+            "scope": {
+              "enum": [
+                "Singleton",
+                "Request",
+                "Prototype"
+              ],
               "type": "string"
             },
             "trim": {
@@ -3822,6 +3849,12 @@
               "type": "string"
             },
             "mode": {
+              "enum": [
+                "i",
+                "w",
+                "u",
+                "t"
+              ],
               "type": "string"
             },
             "trim": {
@@ -3861,6 +3894,9 @@
               "type": "string"
             },
             "object-model": {
+              "type": "string"
+            },
+            "pre-compile": {
               "type": "string"
             },
             "result-type": {

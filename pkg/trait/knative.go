@@ -224,14 +224,14 @@ func (t *knativeTrait) Apply(e *Environment) error {
 		if util.StringSliceExists(e.getAllInterceptors(), "knative-source") {
 			// Adding required libraries for Camel sources
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-knative")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-knative")
 			// Adding platform HTTP
 			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 		}
 	}
 
 	if t.SinkBinding != nil && *t.SinkBinding {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-runtime-knative")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-knative")
 	}
 
 	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {
