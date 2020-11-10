@@ -68,6 +68,7 @@ type IntegrationStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=integrations,scope=Namespaced,shortName=it,categories=kamel;camel
 // +kubebuilder:subresource:status
+// +kubebuilder:storageversion
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration phase"
 // +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.kit`,description="The integration kit"
