@@ -77,7 +77,7 @@ func RunLocalIntegration(properties []string, dependencies []string, routes []st
 	args := make([]string, 0)
 	args = append(args, "-cp")
 	args = append(args, classpathValue)
-	args = append(args, "org.apache.camel.k.main.Application")
+	args = append(args, "io.quarkus.runner.GeneratedMain")
 
 	cmd := exec.CommandContext(ctx, javaCmd, args...)
 	cmd.Stderr = os.Stderr
