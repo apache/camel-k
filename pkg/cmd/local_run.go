@@ -65,7 +65,7 @@ where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
 
 type localRunCmdOptions struct {
 	*RootCmdOptions
-	PropertiesFiles        []string `mapstructure:"property-files"`
+	PropertyFiles          []string `mapstructure:"property-files"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 }
 
@@ -77,7 +77,7 @@ func (command *localRunCmdOptions) validate(args []string) error {
 	}
 
 	// Validate properties file.
-	err = validateFiles(command.PropertiesFiles)
+	err = validateFiles(command.PropertyFiles)
 	if err != nil {
 		return nil
 	}
@@ -103,7 +103,7 @@ func (command *localRunCmdOptions) run(args []string) error {
 	}
 
 	// Run the integration locally.
-	err = RunLocalIntegration(command.PropertiesFiles, dependencies, args)
+	err = RunLocalIntegration(command.PropertyFiles, dependencies, args)
 	if err != nil {
 		return nil
 	}
