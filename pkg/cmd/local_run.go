@@ -38,8 +38,14 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 			if err := options.validate(args); err != nil {
 				return err
 			}
+			if err := options.init(); err != nil {
+				return err
+			}
 			if err := options.run(args); err != nil {
 				fmt.Println(err.Error())
+			}
+			if err := options.deinit(); err != nil {
+				return err
 			}
 
 			return nil
@@ -87,6 +93,10 @@ func (command *localRunCmdOptions) validate(args []string) error {
 	return nil
 }
 
+func (command *localRunCmdOptions) init() error {
+	return createMavenWorkingDirectory()
+}
+
 func (command *localRunCmdOptions) run(args []string) error {
 	// Fetch dependencies.
 	dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
@@ -107,4 +117,8 @@ func (command *localRunCmdOptions) run(args []string) error {
 	}
 
 	return nil
+}
+
+func (command *localRunCmdOptions) deinit() error {
+	return deleteMavenWorkingDirectory()
 }

@@ -35,6 +35,10 @@ import (
 	"github.com/scylladb/go-set/strset"
 )
 
+// Directory used by Maven for an invocation of the kamel local command.
+// By default a temporary folder will be used.
+var mavenWorkingDirectory string = ""
+
 var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
 
 const defaultDependenciesDirectoryName = "dependencies"
@@ -112,14 +116,8 @@ func getTransitiveDependencies(
 		return nil, err
 	}
 
-	// Create local Maven context.
-	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
-	if err != nil {
-		return nil, err
-	}
-
 	// Maven local context to be used for generating the transitive dependencies.
-	mc := maven.NewContext(temporaryDirectory, project)
+	mc := maven.NewContext(mavenWorkingDirectory, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.GetTimeout().Duration
 
@@ -149,9 +147,6 @@ func getTransitiveDependencies(
 	for _, entry := range artifacts {
 		transitiveDependencies = append(transitiveDependencies, entry.Location)
 	}
-
-	// Remove directory used for computing the dependencies.
-	defer os.RemoveAll(temporaryDirectory)
 
 	return transitiveDependencies, nil
 }
@@ -298,6 +293,26 @@ func validateIntegrationForDependencies(args []string, additionalDependencies []
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func createMavenWorkingDirectory() error {
+	// Create local Maven context.
+	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
+	if err != nil {
+		return err
+	}
+
+	// Set the Maven directory to the default value.
+	mavenWorkingDirectory = temporaryDirectory
+
+	return nil
+}
+
+func deleteMavenWorkingDirectory() error {
+	// Remove directory used for computing the dependencies.
+	defer os.RemoveAll(mavenWorkingDirectory)
 
 	return nil
 }
