@@ -155,27 +155,38 @@ func extractModelineOptions(ctx context.Context, sources []string) ([]modeline.O
 	}
 
 	for _, resolvedSource := range resolvedSources {
-		ops, err := modeline.Parse(resolvedSource.Location, resolvedSource.Content)
+		ops, err := ExtractModelineOptionsFromSource(resolvedSource)
 		if err != nil {
-			return opts, errors.Wrapf(err, "cannot process file %s", resolvedSource.Location)
+			return opts, err
 		}
-		for i, o := range ops {
-			if disallowedOptions[o.Name] {
-				return opts, fmt.Errorf("option %q is disallowed in modeline", o.Name)
-			}
 
-			if fileOptions[o.Name] && resolvedSource.Local {
-				baseDir := filepath.Dir(resolvedSource.Origin)
-				refPath := o.Value
-				if !filepath.IsAbs(refPath) {
-					full := path.Join(baseDir, refPath)
-					o.Value = full
-					ops[i] = o
-				}
-			}
-		}
 		opts = append(opts, ops...)
 	}
 
 	return opts, nil
+}
+
+// ExtractModelineOptionsFromSource --
+func ExtractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option, error) {
+	ops, err := modeline.Parse(resolvedSource.Location, resolvedSource.Content)
+	if err != nil {
+		return ops, errors.Wrapf(err, "cannot process file %s", resolvedSource.Location)
+	}
+	for i, o := range ops {
+		if disallowedOptions[o.Name] {
+			return ops, fmt.Errorf("option %q is disallowed in modeline", o.Name)
+		}
+
+		if fileOptions[o.Name] && resolvedSource.Local {
+			baseDir := filepath.Dir(resolvedSource.Origin)
+			refPath := o.Value
+			if !filepath.IsAbs(refPath) {
+				full := path.Join(baseDir, refPath)
+				o.Value = full
+				ops[i] = o
+			}
+		}
+	}
+
+	return ops, nil
 }

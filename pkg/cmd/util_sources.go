@@ -66,25 +66,8 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 
 	for _, location := range locations {
 		if isLocal(location) {
-			if _, err := os.Stat(location); err != nil && os.IsNotExist(err) {
-				return sources, errors.Wrapf(err, "file %s does not exist", location)
-			} else if err != nil {
-				return sources, errors.Wrapf(err, "error while accessing file %s", location)
-			}
-
-			answer := Source{
-				Name:     path.Base(location),
-				Origin:   location,
-				Location: location,
-				Compress: compress,
-				Local:    true,
-			}
-
-			content, err := ioutil.ReadFile(location)
+			answer, err := ResolveLocalSource(location, compress)
 			if err != nil {
-				return sources, err
-			}
-			if err := answer.setContent(content); err != nil {
 				return sources, err
 			}
 
@@ -198,4 +181,31 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 	}
 
 	return sources, nil
+}
+
+// ResolveLocalSource --
+func ResolveLocalSource(location string, compress bool) (Source, error) {
+	if _, err := os.Stat(location); err != nil && os.IsNotExist(err) {
+		return Source{}, errors.Wrapf(err, "file %s does not exist", location)
+	} else if err != nil {
+		return Source{}, errors.Wrapf(err, "error while accessing file %s", location)
+	}
+
+	answer := Source{
+		Name:     path.Base(location),
+		Origin:   location,
+		Location: location,
+		Compress: compress,
+		Local:    true,
+	}
+
+	content, err := ioutil.ReadFile(location)
+	if err != nil {
+		return Source{}, err
+	}
+	if err := answer.setContent(content); err != nil {
+		return Source{}, err
+	}
+
+	return answer, nil
 }
