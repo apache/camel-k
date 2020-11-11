@@ -19,6 +19,7 @@
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
+- Expose operator related metrics [\#1267](https://github.com/apache/camel-k/issues/1267)
 - helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
 - Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
 - Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
@@ -45,6 +46,7 @@
 - fix: Kamelet example [\#1768](https://github.com/apache/camel-k/pull/1768) ([christophd](https://github.com/christophd))
 - fix: Correct operator leader election ConfigMap lock name [\#1765](https://github.com/apache/camel-k/pull/1765) ([astefanutti](https://github.com/astefanutti))
 - Added workflow dispatch to changelog gh action [\#1764](https://github.com/apache/camel-k/pull/1764) ([oscerd](https://github.com/oscerd))
+- Camel K operator monitoring [\#1762](https://github.com/apache/camel-k/pull/1762) ([astefanutti](https://github.com/astefanutti))
 - Release Helm charts and bump versions [\#1759](https://github.com/apache/camel-k/pull/1759) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): remove reference to staging repo [\#1758](https://github.com/apache/camel-k/pull/1758) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add inspect sub-command with basic support [\#1757](https://github.com/apache/camel-k/pull/1757) ([doru1004](https://github.com/doru1004))
@@ -1224,7 +1226,6 @@
 - drop support for knative \< 0.4 [\#658](https://github.com/apache/camel-k/pull/658) ([lburgazzoli](https://github.com/lburgazzoli))
 - remove spring boot support [\#657](https://github.com/apache/camel-k/pull/657) ([lburgazzoli](https://github.com/lburgazzoli))
 - remove support for integration container image creation [\#656](https://github.com/apache/camel-k/pull/656) ([lburgazzoli](https://github.com/lburgazzoli))
-- Fix \#651: removed camel 3.0.0-M1 catalog [\#652](https://github.com/apache/camel-k/pull/652) ([aldettinger](https://github.com/aldettinger))
 - Initial OLM manifest [\#648](https://github.com/apache/camel-k/pull/648) ([astefanutti](https://github.com/astefanutti))
 - Adding a note about the delay at first Sample run [\#647](https://github.com/apache/camel-k/pull/647) ([rafaeltuelho](https://github.com/rafaeltuelho))
 - Fix \#645: use the right kind of sink in knative trait [\#646](https://github.com/apache/camel-k/pull/646) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1257,6 +1258,7 @@
 
 **Merged pull requests:**
 
+- Fix \#651: removed camel 3.0.0-M1 catalog [\#652](https://github.com/apache/camel-k/pull/652) ([aldettinger](https://github.com/aldettinger))
 - Upgrade to camel-k-runtime 0.3.2 [\#643](https://github.com/apache/camel-k/pull/643) ([davsclaus](https://github.com/davsclaus))
 - feat: Add volume argument to kamel run [\#640](https://github.com/apache/camel-k/pull/640) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Add .exe file extension to Windows kamel binary [\#636](https://github.com/apache/camel-k/pull/636) ([jamesnetherton](https://github.com/jamesnetherton))
