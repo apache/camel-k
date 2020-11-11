@@ -41,6 +41,10 @@ var mavenWorkingDirectory string = ""
 
 var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
 
+var additionalDependencyUsageMessage = `Additional top-level dependencies are specified with the format:
+<type>:<dependency-name>
+where <type> is one of {` + strings.Join(acceptedDependencyTypes, "|") + `}.`
+
 const defaultDependenciesDirectoryName = "dependencies"
 
 func getDependencies(args []string, additionalDependencies []string, allDependencies bool) ([]string, error) {
@@ -92,6 +96,31 @@ func getTopLevelDependencies(catalog *camel.RuntimeCatalog, args []string) ([]st
 
 		// Extract list of top-level dependencies.
 		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
+
+		// Extract modeline dependencies from file and add them to the list of
+		// top-level dependencies.
+		resolvedSource, err := ResolveLocalSource(source, false)
+		if err != nil {
+			return []string{}, err
+		}
+
+		opts, err := ExtractModelineOptionsFromSource(resolvedSource)
+		if err != nil {
+			return []string{}, err
+		}
+
+		for _, o := range opts {
+			if o.Name == "dependency" {
+				// Make sure dependency is valid.
+				isValid := validateDependency(o.Value)
+				if !isValid {
+					return []string{}, errors.New("Unexpected type for modeline dependency: " + o.Value + ". " + additionalDependencyUsageMessage)
+				}
+
+				// Only valid modeline dependencies are added to the top level dependencies list.
+				dependencies.Add(o.Value)
+			}
+		}
 	}
 
 	return dependencies.List(), nil
@@ -257,23 +286,27 @@ func validateAdditionalDependencies(additionalDependencies []string) error {
 	// a valid type.
 	if additionalDependencies != nil {
 		for _, additionalDependency := range additionalDependencies {
-			dependencyComponents := strings.Split(additionalDependency, ":")
-
-			TypeIsValid := false
-			for _, dependencyType := range acceptedDependencyTypes {
-				if dependencyType == dependencyComponents[0] {
-					TypeIsValid = true
-				}
+			isValid := validateDependency(additionalDependency)
+			if !isValid {
+				return errors.New("Unexpected type for user-provided dependency: " + additionalDependency + ". " + additionalDependencyUsageMessage)
 			}
-
-			if !TypeIsValid {
-				return errors.New("Unexpected type for user-provided dependency: " + additionalDependency + ", check command usage for valid format.")
-			}
-
 		}
 	}
 
 	return nil
+}
+
+func validateDependency(additionalDependency string) bool {
+	dependencyComponents := strings.Split(additionalDependency, ":")
+
+	TypeIsValid := false
+	for _, dependencyType := range acceptedDependencyTypes {
+		if dependencyType == dependencyComponents[0] {
+			TypeIsValid = true
+		}
+	}
+
+	return TypeIsValid
 }
 
 func validateIntegrationForDependencies(args []string, additionalDependencies []string) error {
