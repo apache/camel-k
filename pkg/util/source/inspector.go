@@ -29,6 +29,10 @@ import (
 
 type catalog2deps func(*camel.RuntimeCatalog) []string
 
+const (
+	defaultJsonDataformat = "json-jackson"
+)
+
 var (
 	singleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	doubleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
@@ -59,11 +63,19 @@ var (
 	}
 
 	sourceDependencies = map[*regexp.Regexp]catalog2deps{
-		jsonLibraryRegexp: func(_ *camel.RuntimeCatalog) []string {
-			return []string{"camel:jackson"}
+		jsonLibraryRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			res := make([]string, 0)
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataformat); jsonDF != nil {
+				res = append(res, jsonDF.GetDependencyID())
+			}
+			return res
 		},
-		jsonLanguageRegexp: func(_ *camel.RuntimeCatalog) []string {
-			return []string{"camel:jackson"}
+		jsonLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			res := make([]string, 0)
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataformat); jsonDF != nil {
+				res = append(res, jsonDF.GetDependencyID())
+			}
+			return res
 		},
 		restConfigurationRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
