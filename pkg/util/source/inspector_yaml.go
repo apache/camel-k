@@ -19,6 +19,7 @@ package source
 
 import (
 	"fmt"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	yaml2 "gopkg.in/yaml.v2"
@@ -61,6 +62,22 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)
 	case "circuitBreaker":
 		meta.RequiredCapabilities.Add(v1.CapabilityCircuitBreaker)
+	case "unmarshal":
+		fallthrough
+	case "marshal":
+		if cm, ok := content.(map[interface{}]interface{}); ok {
+			if js, jsOk := cm["json"]; jsOk {
+				dataFormatID := defaultJsonDataformat
+				if jsContent, jsContentOk := js.(map[interface{}]interface{}); jsContentOk {
+					if lib, libOk := jsContent["library"]; libOk {
+						dataFormatID = strings.ToLower(fmt.Sprintf("json-%s", lib))
+					}
+				}
+				if dfDep := i.catalog.GetArtifactByDataFormat(dataFormatID); dfDep != nil {
+					i.addDependency(dfDep.GetDependencyID(), meta)
+				}
+			}
+		}
 	}
 
 	var maybeURI string

@@ -18,6 +18,7 @@ limitations under the License.
 package source
 
 import (
+	"fmt"
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -101,6 +102,84 @@ func TestYAMLRestDSL(t *testing.T) {
 			assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityRest))
 			assert.True(t, meta.Dependencies.Has("camel-quarkus:log"))
 			assert.True(t, meta.ExposesHTTPServices)
+		})
+	}
+}
+
+const YAMLJSONMarshal = `
+- from:
+    uri: timer:tick
+    steps:
+    - marshal:
+        json: {}
+`
+
+const YAMLJSONUnmarshal = `
+- from:
+    uri: timer:tick
+    steps:
+    - unmarshal:
+        json: {}
+`
+
+const YAMLJSONGsonMarshal = `
+- from:
+    uri: timer:tick
+    steps:
+    - marshal:
+        json:
+          library: Gson
+`
+
+const YAMLJSONUnknownMarshal = `
+- from:
+    uri: timer:tick
+    steps:
+    - marshal:
+        json:
+          library: Unknown
+`
+
+func TestYAMLJson(t *testing.T) {
+	tc := []struct {
+		source     string
+		dependency string
+	}{
+		{
+			source:     YAMLJSONMarshal,
+			dependency: "camel-quarkus:jackson",
+		},
+		{
+			source:     YAMLJSONUnmarshal,
+			dependency: "camel-quarkus:jackson",
+		},
+		{
+			source:     YAMLJSONGsonMarshal,
+			dependency: "camel-quarkus:gson",
+		},
+		{
+			source:     YAMLJSONUnknownMarshal,
+			dependency: "camel-quarkus:timer",
+		},
+	}
+
+	for i, test := range tc {
+		t.Run(fmt.Sprintf("%s-%d", test.dependency, i), func(t *testing.T) {
+			code := v1.SourceSpec{
+				DataSpec: v1.DataSpec{
+					Name:    "route.yaml",
+					Content: test.source,
+				},
+				Language: v1.LanguageYaml,
+			}
+
+			meta := NewMetadata()
+			inspector := NewtestYAMLInspector(t)
+
+			err := inspector.Extract(code, &meta)
+			assert.Nil(t, err)
+			assert.True(t, meta.RequiredCapabilities.IsEmpty())
+			assert.Contains(t, meta.Dependencies.List(), test.dependency)
 		})
 	}
 }

@@ -28,6 +28,7 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 	catalog := RuntimeCatalog{}
 	catalog.CamelCatalogSpec = spec
 	catalog.artifactByScheme = make(map[string]string)
+	catalog.artifactByDataFormat = make(map[string]string)
 	catalog.schemesByID = make(map[string]v1.CamelScheme)
 	catalog.languageDependencies = make(map[string]string)
 	catalog.javaTypeDependencies = make(map[string]string)
@@ -37,6 +38,10 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 			scheme := scheme
 			catalog.artifactByScheme[scheme.ID] = id
 			catalog.schemesByID[scheme.ID] = scheme
+		}
+		for _, dataFormat := range artifact.DataFormats {
+			dataFormat := dataFormat
+			catalog.artifactByDataFormat[dataFormat] = id
 		}
 		for _, language := range artifact.Languages {
 			// Skip languages in common dependencies since they are always available to integrations
@@ -60,6 +65,7 @@ type RuntimeCatalog struct {
 	v1.CamelCatalogSpec
 
 	artifactByScheme     map[string]string
+	artifactByDataFormat map[string]string
 	schemesByID          map[string]v1.CamelScheme
 	languageDependencies map[string]string
 	javaTypeDependencies map[string]string
@@ -79,6 +85,16 @@ func (c *RuntimeCatalog) HasArtifact(artifact string) bool {
 // GetArtifactByScheme returns the artifact corresponding to the given component scheme
 func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1.CamelArtifact {
 	if id, ok := c.artifactByScheme[scheme]; ok {
+		if artifact, present := c.Artifacts[id]; present {
+			return &artifact
+		}
+	}
+	return nil
+}
+
+// GetArtifactByDataFormat returns the artifact corresponding to the given data format
+func (c *RuntimeCatalog) GetArtifactByDataFormat(dataFormat string) *v1.CamelArtifact {
+	if id, ok := c.artifactByDataFormat[dataFormat]; ok {
 		if artifact, present := c.Artifacts[id]; present {
 			return &artifact
 		}
