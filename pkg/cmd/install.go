@@ -52,8 +52,8 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	}
 	cmd := cobra.Command{
 		Use:     "install",
-		Short:   "Installs Camel K on a Kubernetes cluster",
-		Long:    `Installs Camel K on a Kubernetes or OpenShift cluster.`,
+		Short:   "Install Camel K on a Kubernetes cluster",
+		Long:    `Install Camel K on a Kubernetes or OpenShift cluster.`,
 		PreRunE: options.decode,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
@@ -70,7 +70,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 		PostRunE: options.postRun,
 	}
 
-	cmd.Flags().BoolP("wait", "w", false, "Waits for the platform to be running")
+	cmd.Flags().BoolP("wait", "w", false, "Wait for the platform to be running")
 	cmd.Flags().Bool("cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
 	cmd.Flags().String("cluster-type", "", "Set explicitly the cluster type to Kubernetes or OpenShift")
 	cmd.Flags().Bool("skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")

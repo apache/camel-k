@@ -73,7 +73,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().StringArrayP("dependency", "d", nil, "An external library that should be included. E.g. for Maven dependencies \"mvn:org.my/app:1.0\"")
-	cmd.Flags().BoolP("wait", "w", false, "Waits for the integration to be running")
+	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
 	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
