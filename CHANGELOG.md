@@ -23,6 +23,7 @@
 - helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
 - Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
 - Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
+- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
 **Merged pull requests:**
@@ -1041,7 +1042,6 @@
 - Route trait does not work if route.auto is set to false [\#767](https://github.com/apache/camel-k/issues/767)
 - Switch to Camel 3 [\#755](https://github.com/apache/camel-k/issues/755)
 - Do not create a route on top of prometheus service only [\#749](https://github.com/apache/camel-k/issues/749)
-- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Add a --global install option [\#745](https://github.com/apache/camel-k/issues/745)
 - CR example is using wrong schema [\#737](https://github.com/apache/camel-k/issues/737)
 - camelContext is not supported in XML DSL routedefinition [\#731](https://github.com/apache/camel-k/issues/731)
@@ -1226,6 +1226,7 @@
 - drop support for knative \< 0.4 [\#658](https://github.com/apache/camel-k/pull/658) ([lburgazzoli](https://github.com/lburgazzoli))
 - remove spring boot support [\#657](https://github.com/apache/camel-k/pull/657) ([lburgazzoli](https://github.com/lburgazzoli))
 - remove support for integration container image creation [\#656](https://github.com/apache/camel-k/pull/656) ([lburgazzoli](https://github.com/lburgazzoli))
+- Fix \#651: removed camel 3.0.0-M1 catalog [\#652](https://github.com/apache/camel-k/pull/652) ([aldettinger](https://github.com/aldettinger))
 - Initial OLM manifest [\#648](https://github.com/apache/camel-k/pull/648) ([astefanutti](https://github.com/astefanutti))
 - Adding a note about the delay at first Sample run [\#647](https://github.com/apache/camel-k/pull/647) ([rafaeltuelho](https://github.com/rafaeltuelho))
 - Fix \#645: use the right kind of sink in knative trait [\#646](https://github.com/apache/camel-k/pull/646) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1258,7 +1259,6 @@
 
 **Merged pull requests:**
 
-- Fix \#651: removed camel 3.0.0-M1 catalog [\#652](https://github.com/apache/camel-k/pull/652) ([aldettinger](https://github.com/aldettinger))
 - Upgrade to camel-k-runtime 0.3.2 [\#643](https://github.com/apache/camel-k/pull/643) ([davsclaus](https://github.com/davsclaus))
 - feat: Add volume argument to kamel run [\#640](https://github.com/apache/camel-k/pull/640) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Add .exe file extension to Windows kamel binary [\#636](https://github.com/apache/camel-k/pull/636) ([jamesnetherton](https://github.com/jamesnetherton))
