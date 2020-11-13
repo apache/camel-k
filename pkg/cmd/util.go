@@ -24,10 +24,11 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/gzip"
 	"log"
 	"reflect"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/gzip"
 
 	"github.com/mitchellh/mapstructure"
 

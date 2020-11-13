@@ -30,7 +30,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	}
 
 	cmd := cobra.Command{
-		Use:     "local-run [integration files]",
+		Use:     "run [integration files]",
 		Short:   "Run integration locally.",
 		Long:    `Run integration locally using the input integration files.`,
 		PreRunE: decode(&options),
