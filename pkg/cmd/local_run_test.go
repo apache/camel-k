@@ -24,14 +24,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func addTestLocalRunCmd(options *RootCmdOptions, rootCmd *cobra.Command) *localRunCmdOptions {
+func addTestLocalRunCmd(rootCmdOptions *RootCmdOptions, rootCmd *cobra.Command) *localRunCmdOptions {
 	//add a testing version of run Command
-	localRunCmd, localRunCmdOptions := newCmdLocalRun(options)
+	localCmd := newCmdLocal(rootCmdOptions)
+	localRunCmd, localRunCmdOptions := newCmdLocalRun(rootCmdOptions)
 	localRunCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
 	localRunCmd.Args = test.ArbitraryArgs
-	rootCmd.AddCommand(localRunCmd)
+	localCmd.AddCommand(localRunCmd)
+	rootCmd.AddCommand(localCmd)
 	return localRunCmdOptions
 }
 
@@ -42,7 +44,7 @@ func TestLocalRunPropertyFileFlag(t *testing.T) {
 
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "local-run", "route.java", "--property-file", "file1.properties", "--property-file", "file2.properties")
+	_, err := test.ExecuteCommand(rootCmd, "local", "run", "route.java", "--property-file", "file1.properties", "--property-file", "file2.properties")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -62,7 +64,7 @@ func TestLocalRunAdditionalDependenciesFlag(t *testing.T) {
 
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "local-run", "route.java", "-d", "mvn:camel-component-1", "-d", "mvn:camel-component-2")
+	_, err := test.ExecuteCommand(rootCmd, "local", "run", "route.java", "-d", "mvn:camel-component-1", "-d", "mvn:camel-component-2")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

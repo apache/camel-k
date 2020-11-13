@@ -31,6 +31,7 @@ import (
 
 const (
 	runCmdName        = "run"
+	localCmdName      = "local"
 	runCmdSourcesArgs = "source"
 )
 
@@ -98,9 +99,14 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 
 	fg := target.Flags()
 
-	additionalSources, err := fg.GetStringArray(runCmdSourcesArgs)
-	if err != nil {
-		return nil, nil, err
+	// Only the run command has source flag (for now). Remove condition when
+	// local run also supports source.
+	additionalSources := make([]string, 0)
+	if target.Name() == runCmdName && target.Parent().Name() != localCmdName {
+		additionalSources, err = fg.GetStringArray(runCmdSourcesArgs)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	files := make([]string, 0, len(fg.Args())+len(additionalSources))
