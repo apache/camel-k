@@ -96,12 +96,6 @@ func (command *localRunCmdOptions) run(args []string) error {
 		return err
 	}
 
-	// Print dependencies.
-	err = outputDependencies(dependencies, "")
-	if err != nil {
-		return err
-	}
-
 	// Run the integration locally.
 	err = RunLocalIntegration(command.PropertyFiles, dependencies, args)
 	if err != nil {
