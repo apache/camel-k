@@ -13,7 +13,9 @@
 -  Changes to KameletBinding must be propagated to Integrations [\#1785](https://github.com/apache/camel-k/issues/1785)
 - KameletBinding to broker fails [\#1778](https://github.com/apache/camel-k/issues/1778)
 - Kamelet binding to an explicit URI failing [\#1774](https://github.com/apache/camel-k/issues/1774)
+- Use registry secrets for both pulling and pushing [\#1771](https://github.com/apache/camel-k/issues/1771)
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
+- Ability to configure PodDisruptionBudget for integrations [\#1760](https://github.com/apache/camel-k/issues/1760)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
@@ -23,11 +25,11 @@
 - helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
 - Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
 - Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
-- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
 **Merged pull requests:**
 
+- Fix \#1771: use registry creds for pull and push and set Spectrum as default [\#1807](https://github.com/apache/camel-k/pull/1807) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
@@ -35,6 +37,7 @@
 - \#1283: Enhance the `kamel log` command to show more detail prior to i… [\#1793](https://github.com/apache/camel-k/pull/1793) ([phantomjinx](https://github.com/phantomjinx))
 - Fix \#1791: auto-generate v1alpha1 resources [\#1792](https://github.com/apache/camel-k/pull/1792) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[ENTESB-15044\] Refactor monitoring test to be able consume camel quar… [\#1790](https://github.com/apache/camel-k/pull/1790) ([llowinge](https://github.com/llowinge))
+- Create PodDisruptionBudget for every integration [\#1787](https://github.com/apache/camel-k/pull/1787) ([mmelko](https://github.com/mmelko))
 - Fix \#1785: propagate klb changes to integrations [\#1786](https://github.com/apache/camel-k/pull/1786) ([nicolaferraro](https://github.com/nicolaferraro))
 - Make inspect subcommand run locally. [\#1782](https://github.com/apache/camel-k/pull/1782) ([doru1004](https://github.com/doru1004))
 - doc\(example\): timer-source example refactory and timer-source-log-sink new example [\#1781](https://github.com/apache/camel-k/pull/1781) ([squakez](https://github.com/squakez))
@@ -1042,6 +1045,7 @@
 - Route trait does not work if route.auto is set to false [\#767](https://github.com/apache/camel-k/issues/767)
 - Switch to Camel 3 [\#755](https://github.com/apache/camel-k/issues/755)
 - Do not create a route on top of prometheus service only [\#749](https://github.com/apache/camel-k/issues/749)
+- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Add a --global install option [\#745](https://github.com/apache/camel-k/issues/745)
 - CR example is using wrong schema [\#737](https://github.com/apache/camel-k/issues/737)
 - camelContext is not supported in XML DSL routedefinition [\#731](https://github.com/apache/camel-k/issues/731)
@@ -1230,7 +1234,6 @@
 - Initial OLM manifest [\#648](https://github.com/apache/camel-k/pull/648) ([astefanutti](https://github.com/astefanutti))
 - Adding a note about the delay at first Sample run [\#647](https://github.com/apache/camel-k/pull/647) ([rafaeltuelho](https://github.com/rafaeltuelho))
 - Fix \#645: use the right kind of sink in knative trait [\#646](https://github.com/apache/camel-k/pull/646) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(doc\): change the description of the project [\#628](https://github.com/apache/camel-k/pull/628) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.3.3](https://github.com/apache/camel-k/tree/0.3.3) (2019-05-03)
 
@@ -1266,6 +1269,7 @@
 - feat: Add kamel describe command [\#633](https://github.com/apache/camel-k/pull/633) ([jamesnetherton](https://github.com/jamesnetherton))
 - Modified PR \#625 as requested [\#632](https://github.com/apache/camel-k/pull/632) ([valdar](https://github.com/valdar))
 - Use non-caching client in builds scheduling critical section [\#631](https://github.com/apache/camel-k/pull/631) ([astefanutti](https://github.com/astefanutti))
+- chore\(doc\): change the description of the project [\#628](https://github.com/apache/camel-k/pull/628) ([nicolaferraro](https://github.com/nicolaferraro))
 - Updated README for configmap [\#626](https://github.com/apache/camel-k/pull/626) ([stevef1uk](https://github.com/stevef1uk))
 - Build improvements [\#623](https://github.com/apache/camel-k/pull/623) ([astefanutti](https://github.com/astefanutti))
 -  allow to configure default configurations on platform [\#622](https://github.com/apache/camel-k/pull/622) ([lburgazzoli](https://github.com/lburgazzoli))
