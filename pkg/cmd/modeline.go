@@ -161,7 +161,7 @@ func extractModelineOptions(ctx context.Context, sources []string) ([]modeline.O
 	}
 
 	for _, resolvedSource := range resolvedSources {
-		ops, err := ExtractModelineOptionsFromSource(resolvedSource)
+		ops, err := extractModelineOptionsFromSource(resolvedSource)
 		if err != nil {
 			return opts, err
 		}
@@ -172,8 +172,7 @@ func extractModelineOptions(ctx context.Context, sources []string) ([]modeline.O
 	return opts, nil
 }
 
-// ExtractModelineOptionsFromSource --
-func ExtractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option, error) {
+func extractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option, error) {
 	ops, err := modeline.Parse(resolvedSource.Location, resolvedSource.Content)
 	if err != nil {
 		return ops, errors.Wrapf(err, "cannot process file %s", resolvedSource.Location)
