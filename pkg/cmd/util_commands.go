@@ -82,9 +82,7 @@ func RunLocalIntegration(properties []string, dependencies []string, routes []st
 	cmd := exec.CommandContext(ctx, javaCmd, args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	// cmd.Dir = ctx.Path
 
-	// TODO: for debug purposes, remove when done.
 	fmt.Printf("executing: %s", strings.Join(cmd.Args, " "))
 
 	// Add directory where the properties file resides.
