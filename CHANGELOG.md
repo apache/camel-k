@@ -1234,6 +1234,7 @@
 - Initial OLM manifest [\#648](https://github.com/apache/camel-k/pull/648) ([astefanutti](https://github.com/astefanutti))
 - Adding a note about the delay at first Sample run [\#647](https://github.com/apache/camel-k/pull/647) ([rafaeltuelho](https://github.com/rafaeltuelho))
 - Fix \#645: use the right kind of sink in knative trait [\#646](https://github.com/apache/camel-k/pull/646) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(doc\): change the description of the project [\#628](https://github.com/apache/camel-k/pull/628) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.3.3](https://github.com/apache/camel-k/tree/0.3.3) (2019-05-03)
 
@@ -1269,7 +1270,6 @@
 - feat: Add kamel describe command [\#633](https://github.com/apache/camel-k/pull/633) ([jamesnetherton](https://github.com/jamesnetherton))
 - Modified PR \#625 as requested [\#632](https://github.com/apache/camel-k/pull/632) ([valdar](https://github.com/valdar))
 - Use non-caching client in builds scheduling critical section [\#631](https://github.com/apache/camel-k/pull/631) ([astefanutti](https://github.com/astefanutti))
-- chore\(doc\): change the description of the project [\#628](https://github.com/apache/camel-k/pull/628) ([nicolaferraro](https://github.com/nicolaferraro))
 - Updated README for configmap [\#626](https://github.com/apache/camel-k/pull/626) ([stevef1uk](https://github.com/stevef1uk))
 - Build improvements [\#623](https://github.com/apache/camel-k/pull/623) ([astefanutti](https://github.com/astefanutti))
 -  allow to configure default configurations on platform [\#622](https://github.com/apache/camel-k/pull/622) ([lburgazzoli](https://github.com/lburgazzoli))
