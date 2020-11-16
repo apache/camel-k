@@ -47,6 +47,7 @@
 ** xref:traits:master.adoc[Master]
 ** xref:traits:openapi.adoc[Openapi]
 ** xref:traits:owner.adoc[Owner]
+** xref:traits:pdb.adoc[Pdb]
 ** xref:traits:platform.adoc[Platform]
 ** xref:traits:prometheus.adoc[Prometheus]
 ** xref:traits:pull-secret.adoc[Pull Secret]

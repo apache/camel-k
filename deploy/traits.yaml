@@ -456,6 +456,23 @@ traits:
   - name: target-labels
     type: '[]string'
     description: The set of labels to be transferred
+- name: pdb
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The PDB trait allows to configure the PodDisruptionBudget resource for the Integration pods.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common property.
+  - name: min-available
+    type: string
+    description: The number of pods for the Integration that must still be available after an eviction.It can be either an absolute number or a percentage.Only one of `min-available` and `max-unavailable` can be specified.
+  - name: max-unavailable
+    type: string
+    description: The number of pods for the Integration that can be unavailable after an eviction.It can be either an absolute number or a percentage (default `1` if `min-available` is also not set).Only one of `max-unavailable` and `min-available` can be specified.
 - name: platform
   platform: true
   profiles:
