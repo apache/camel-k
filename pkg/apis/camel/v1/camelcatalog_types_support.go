@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -74,4 +75,57 @@ func (in *CamelArtifact) GetDependencyID() string {
 	default:
 		return "mvn:" + in.GroupID + ":" + in.ArtifactID + ":" + in.Version
 	}
+}
+
+func (in *CamelArtifact) GetConsumerDependencyIDs(schemeID string) (deps []string) {
+	return in.getDependencyIDs(schemeID, consumerScheme)
+}
+
+func (in *CamelArtifact) GetProducerDependencyIDs(schemeID string) (deps []string) {
+	return in.getDependencyIDs(schemeID, producerScheme)
+}
+
+func (in *CamelArtifact) getDependencyIDs(schemeID string, scope func(CamelScheme) CamelSchemeScope) (deps []string) {
+	ads := in.getDependencies(schemeID, scope)
+	if ads == nil {
+		return deps
+	}
+	deps = make([]string, 0, len(ads))
+	for _, ad := range ads {
+		deps = append(deps, fmt.Sprintf("mvn:%s/%s", ad.GroupID, ad.ArtifactID))
+	}
+	return deps
+}
+
+func (in *CamelArtifact) GetConsumerDependencies(schemeID string) []CamelArtifactDependency {
+	return in.getDependencies(schemeID, consumerScheme)
+}
+
+func (in *CamelArtifact) GetProducerDependencies(schemeID string) []CamelArtifactDependency {
+	return in.getDependencies(schemeID, producerScheme)
+}
+
+func (in *CamelArtifact) getDependencies(schemeID string, scope func(CamelScheme) CamelSchemeScope) []CamelArtifactDependency {
+	scheme := in.GetScheme(schemeID)
+	if scheme == nil {
+		return nil
+	}
+	return scope(*scheme).Dependencies
+}
+
+func (in *CamelArtifact) GetScheme(schemeID string) *CamelScheme {
+	for _, scheme := range in.Schemes {
+		if scheme.ID == schemeID {
+			return &scheme
+		}
+	}
+	return nil
+}
+
+func consumerScheme(scheme CamelScheme) CamelSchemeScope {
+	return scheme.Consumer
+}
+
+func producerScheme(scheme CamelScheme) CamelSchemeScope {
+	return scheme.Producer
 }

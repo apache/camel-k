@@ -23,9 +23,16 @@ import (
 
 // CamelScheme --
 type CamelScheme struct {
-	ID      string `json:"id" yaml:"id"`
-	Passive bool   `json:"passive" yaml:"passive"`
-	HTTP    bool   `json:"http" yaml:"http"`
+	ID       string           `json:"id" yaml:"id"`
+	Passive  bool             `json:"passive" yaml:"passive"`
+	HTTP     bool             `json:"http" yaml:"http"`
+	Consumer CamelSchemeScope `json:"consumer,omitempty" yaml:"consumer,omitempty"`
+	Producer CamelSchemeScope `json:"producer,omitempty" yaml:"producer,omitempty"`
+}
+
+// CamelSchemeScope contains scoped information about a scheme
+type CamelSchemeScope struct {
+	Dependencies []CamelArtifactDependency `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
 }
 
 // CamelArtifactExclusion --

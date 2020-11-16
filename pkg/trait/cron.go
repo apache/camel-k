@@ -228,6 +228,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 				return fmt.Errorf("no fallback artifact for scheme %q has been found in camel catalog", genericCronComponentFallbackScheme)
 			}
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fallbackArtifact.GetDependencyID())
+			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, fallbackArtifact.GetConsumerDependencyIDs(genericCronComponentFallbackScheme))
 		}
 	}
 
