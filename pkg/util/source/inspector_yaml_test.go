@@ -37,6 +37,80 @@ func NewtestYAMLInspector(t *testing.T) YAMLInspector {
 	}
 }
 
+const YAMLRouteConsumer = `
+- from:
+    uri: knative:endpoint/default
+    steps:
+      - to:
+          uri: "log:out"
+`
+
+const YAMLRouteProducer = `
+- from:
+    uri: timer:tick
+    steps:
+      - to:
+          uri: knative:endpoint/service
+`
+
+const YAMLRouteTransformer = `
+- from:
+    uri: knative:channel/mychannel
+    steps:
+      - to:
+          uri: knative:endpoint/service
+`
+
+func TestYAMLDependencies(t *testing.T) {
+	tests := []struct {
+		name                string
+		source              string
+		dependencies        []string
+		missingDependencies []string
+	}{
+		{
+			name:                "consumer",
+			source:              YAMLRouteConsumer,
+			dependencies:        []string{`mvn:org.apache.camel.k/camel-k-knative-consumer`},
+			missingDependencies: []string{`mvn:org.apache.camel.k/camel-k-knative-producer`},
+		},
+		{
+			name:                "producer",
+			source:              YAMLRouteProducer,
+			dependencies:        []string{`mvn:org.apache.camel.k/camel-k-knative-producer`},
+			missingDependencies: []string{`mvn:org.apache.camel.k/camel-k-knative-consumer`},
+		},
+		{
+			name:         "transformer",
+			source:       YAMLRouteTransformer,
+			dependencies: []string{`mvn:org.apache.camel.k/camel-k-knative-producer`, `mvn:org.apache.camel.k/camel-k-knative-consumer`},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			code := v1.SourceSpec{
+				DataSpec: v1.DataSpec{
+					Name:    "route.yaml",
+					Content: test.source,
+				},
+				Language: v1.LanguageYaml,
+			}
+
+			meta := NewMetadata()
+			inspector := NewtestYAMLInspector(t)
+
+			err := inspector.Extract(code, &meta)
+			assert.Nil(t, err)
+			for _, dependency := range test.dependencies {
+				assert.Contains(t, meta.Dependencies.List(), dependency)
+			}
+			for _, missingDependency := range test.missingDependencies {
+				assert.NotContains(t, meta.Dependencies.List(), missingDependency)
+			}
+		})
+	}
+}
+
 const YAMLRestDSL = `
 - rest:
     verb: "post"

@@ -235,12 +235,27 @@ func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadat
 
 // discoverDependencies returns a list of dependencies required by the given source code
 func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) {
-	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
+	for _, uri := range meta.FromURIs {
+		candidateComp, scheme := i.decodeComponent(uri)
+		if candidateComp != nil {
+			i.addDependency(candidateComp.GetDependencyID(), meta)
+			if scheme != nil {
+				for _, dep := range candidateComp.GetConsumerDependencyIDs(scheme.ID) {
+					i.addDependency(dep, meta)
+				}
+			}
+		}
+	}
 
-	for _, uri := range uris {
-		candidateComp := i.decodeComponent(uri)
-		if candidateComp != "" {
-			i.addDependency(candidateComp, meta)
+	for _, uri := range meta.ToURIs {
+		candidateComp, scheme := i.decodeComponent(uri)
+		if candidateComp != nil {
+			i.addDependency(candidateComp.GetDependencyID(), meta)
+			if scheme != nil {
+				for _, dep := range candidateComp.GetProducerDependencyIDs(scheme.ID) {
+					i.addDependency(dep, meta)
+				}
+			}
 		}
 	}
 
@@ -280,16 +295,18 @@ func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
 	meta.Dependencies.Add(dependency)
 }
 
-func (i *baseInspector) decodeComponent(uri string) string {
+func (i *baseInspector) decodeComponent(uri string) (*v1.CamelArtifact, *v1.CamelScheme) {
 	uriSplit := strings.SplitN(uri, ":", 2)
 	if len(uriSplit) < 2 {
-		return ""
+		return nil, nil
 	}
 	uriStart := uriSplit[0]
-	if component := i.catalog.GetArtifactByScheme(uriStart); component != nil {
-		return component.GetDependencyID()
+	scheme, ok := i.catalog.GetScheme(uriStart)
+	var schemeRef *v1.CamelScheme
+	if ok {
+		schemeRef = &scheme
 	}
-	return ""
+	return i.catalog.GetArtifactByScheme(uriStart), schemeRef
 }
 
 // hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active
