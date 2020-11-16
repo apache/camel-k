@@ -19,19 +19,27 @@ package trait
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+
 	"k8s.io/api/policy/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// The Pdb trait allows to configure the PodDisruptionBudget resource.
+// The PDB trait allows to configure the PodDisruptionBudget resource for the Integration pods.
 //
 // +camel-k:trait=pdb
 type pdbTrait struct {
-	BaseTrait      `property:",squash"`
+	BaseTrait `property:",squash"`
+	// The number of pods for the Integration that must still be available after an eviction.
+	// It can be either an absolute number or a percentage.
+	// Only one of `min-available` and `max-unavailable` can be specified.
+	MinAvailable string `property:"min-available" json:"minAvailable,omitempty"`
+	// The number of pods for the Integration that can be unavailable after an eviction.
+	// It can be either an absolute number or a percentage (default `1` if `min-available` is also not set).
+	// Only one of `max-unavailable` and `min-available` can be specified.
 	MaxUnavailable string `property:"max-unavailable" json:"maxUnavailable,omitempty"`
-	MinAvailable   string `property:"min-available" json:"minAvailable,omitempty"`
 }
 
 func newPdbTrait() Trait {
@@ -65,45 +73,39 @@ func (t *pdbTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *pdbTrait) Apply(e *Environment) error {
-	if pdb, err := t.generatePodDisruptionBudget(e); err == nil {
-		e.Resources.Add(pdb)
-	} else {
-		return err
-	}
-	return nil
-}
-
-func (t *pdbTrait) generatePodDisruptionBudget(e *Environment) (*v1beta1.PodDisruptionBudget, error) {
 	if t.MaxUnavailable == "" && t.MinAvailable == "" {
 		t.MaxUnavailable = "1"
 	}
 
-	integration := e.Integration
-	spec := v1beta1.PodDisruptionBudgetSpec{
-		Selector: &metav1.LabelSelector{
-			MatchLabels: map[string]string{
-				v1.IntegrationLabel: integration.Name,
-			},
-		},
-	}
+	pdb := t.podDisruptionBudgetFor(e.Integration)
+	e.Resources.Add(pdb)
 
-	var min, max intstr.IntOrString
+	return nil
+}
 
-	if t.MaxUnavailable != "" {
-		max = intstr.Parse(t.MaxUnavailable)
-		spec.MaxUnavailable = &max
-
-	} else {
-		min = intstr.Parse(t.MinAvailable)
-		spec.MinAvailable = &min
-	}
-
-	return &v1beta1.PodDisruptionBudget{
+func (t *pdbTrait) podDisruptionBudgetFor(integration *v1.Integration) *v1beta1.PodDisruptionBudget {
+	pdb := &v1beta1.PodDisruptionBudget{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      integration.Name,
 			Namespace: integration.Namespace,
 			Labels:    integration.Labels,
 		},
-		Spec: spec,
-	}, nil
+		Spec: v1beta1.PodDisruptionBudgetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					v1.IntegrationLabel: integration.Name,
+				},
+			},
+		},
+	}
+
+	if t.MaxUnavailable != "" {
+		max := intstr.Parse(t.MaxUnavailable)
+		pdb.Spec.MaxUnavailable = &max
+	} else {
+		min := intstr.Parse(t.MinAvailable)
+		pdb.Spec.MinAvailable = &min
+	}
+
+	return pdb
 }
