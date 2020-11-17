@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- scaling out camel-k integrations are not working correctly [\#1806](https://github.com/apache/camel-k/issues/1806)
 - Remove main runtime from operator codebase [\#1803](https://github.com/apache/camel-k/issues/1803)
 - Scalability of integration components in a non knative environment [\#1798](https://github.com/apache/camel-k/issues/1798)
 - Panic when attempting to convert from unstructured to Integration with traits [\#1794](https://github.com/apache/camel-k/issues/1794)
@@ -757,7 +758,6 @@
 - broken routes.js example [\#1065](https://github.com/apache/camel-k/issues/1065)
 - camel-k installation struggles [\#1059](https://github.com/apache/camel-k/issues/1059)
 - camel-k-maven-plugin must not contain any of these characters \/:"\<\>|?\* but found \> @ line 16, column 18 [\#1056](https://github.com/apache/camel-k/issues/1056)
-- Automatically extract trait configuration for user manual [\#1014](https://github.com/apache/camel-k/issues/1014)
 - Cannot set blockOwnerDeletion in this case because cannot find RESTMapping for APIVersion camel.apache.org/v1alpha1 Kind IntegrationKit [\#764](https://github.com/apache/camel-k/issues/764)
 - Error creating integration context with buildStrategy: routine on minikube [\#665](https://github.com/apache/camel-k/issues/665)
 - Kaniko: Add ability to push to on-premise registries [\#613](https://github.com/apache/camel-k/issues/613)
@@ -884,6 +884,7 @@
 **Closed issues:**
 
 - Failing start the camel-k-operator 1.0.0.-M3-SNAPSHOT with the minishifit [\#1015](https://github.com/apache/camel-k/issues/1015)
+- Automatically extract trait configuration for user manual [\#1014](https://github.com/apache/camel-k/issues/1014)
 - Provide a plain text file with the latest version of Camel K for easier automation of downloading via the tooling [\#1009](https://github.com/apache/camel-k/issues/1009)
 - Cannot use knative-source-yaml loader [\#1005](https://github.com/apache/camel-k/issues/1005)
 - Pubilsh Camel K 1.0.0-M2 to operator hub [\#1004](https://github.com/apache/camel-k/issues/1004)
@@ -1013,7 +1014,6 @@
 - External kamel bin testing [\#894](https://github.com/apache/camel-k/pull/894) ([bouskaJ](https://github.com/bouskaJ))
 - BuildConfig's, ImageStream's and Pod's not labeled with camel-k and can't delete with -l 'app=camel-k' [\#884](https://github.com/apache/camel-k/pull/884) ([dmvolod](https://github.com/dmvolod))
 - Fix embedded resources snapshot version [\#882](https://github.com/apache/camel-k/pull/882) ([dmvolod](https://github.com/dmvolod))
-- Switch to images-dev build on install-mini\<plaform\> [\#881](https://github.com/apache/camel-k/pull/881) ([dmvolod](https://github.com/dmvolod))
 - Added unit tests for ingress\_trait \#255 [\#880](https://github.com/apache/camel-k/pull/880) ([aldettinger](https://github.com/aldettinger))
 - feat: Enable integration scale sub-resource [\#962](https://github.com/apache/camel-k/pull/962) ([astefanutti](https://github.com/astefanutti))
 - fix: Add option to disable Kaniko cache warming [\#922](https://github.com/apache/camel-k/pull/922) ([asifdxtreme](https://github.com/asifdxtreme))
@@ -1072,6 +1072,7 @@
 
 **Merged pull requests:**
 
+- Switch to images-dev build on install-mini\<plaform\> [\#881](https://github.com/apache/camel-k/pull/881) ([dmvolod](https://github.com/dmvolod))
 - Fix make clean for tests and remove binary file from repo [\#879](https://github.com/apache/camel-k/pull/879) ([dmvolod](https://github.com/dmvolod))
 - chore\(js\): fix examples, use arrow function for lambda style processor [\#877](https://github.com/apache/camel-k/pull/877) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(GC\): Skip 503 errors when scanning for resources to be GCed [\#876](https://github.com/apache/camel-k/pull/876) ([astefanutti](https://github.com/astefanutti))
