@@ -1,0 +1,142 @@
+[[integration-monitoring]]
+= Camel K Integration Monitoring
+
+NOTE: The Camel K monitoring architecture relies on https://prometheus.io[Prometheus] and the eponymous operator. Make sure you've checked the xref:observability/monitoring.adoc#prerequisites[Camel K monitoring prerequisites].
+
+[[instrumentation]]
+== Instrumentation
+
+The xref:traits:prometheus.adoc[Prometheus trait] automates the configuration of integration pods to expose a _metrics_ endpoint, that can be discovered and scraped by a Prometheus server.
+
+The Prometheus trait can be enabled when running an integration, e.g.:
+
+[source,sh]
+----
+$ kamel run -t prometheus.enabled=true ...
+----
+
+Alternatively, the Prometheus trait can be enabled globally once, by updating the integration platform, e.g.:
+
+[source,sh]
+----
+$ kubectl patch ip camel-k --type=merge -p '{"spec":{"traits":{"prometheus":{"configuration":{"enabled":"true"}}}}}'
+----
+
+The underlying instrumentation mechanism depends on the configured integration runtime.
+As a result, the set of registered metrics, as well as the naming convention they follow, also depends on it.
+
+=== Main
+
+When the default, a.k.a. _main_, runtime is configured for the integration, the https://github.com/prometheus/jmx_exporter[JMX exporter] is responsible for collecting and exposing metrics from JMX mBeans.
+
+A custom configuration for the JMX exporter can be used by setting the `prometheus.configmap` parameter from the Prometheus trait with the name of a ConfigMap containing a `prometheus-jmx-exporter.yaml` key, e.g.:
+
+[source,sh]
+----
+$ kamel run -t prometheus.enabled=true -t prometheus.configmap=<jmx_exporter_config>...
+----
+
+Otherwise, the Prometheus trait uses a default configuration.
+
+=== Quarkus
+
+When the Quarkus runtime is configured for the integration, the xref:latest@camel-quarkus::reference/extensions/microprofile-metrics.adoc[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
+
+The MicroProfile Metrics extension registers and exposes the following metrics out-of-the-box:
+
+* https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/required-metrics.adoc#required-metrics[JVM and operating system related metrics]
+
+* xref:latest@camel-quarkus::reference/extensions/microprofile-metrics.adoc#_camel_route_metrics[Camel specific metrics]
+
+It is possible to extend this set of metrics by using either, or both:
+
+* The xref:latest@components::microprofile-metrics-component.adoc[MicroProfile Metrics component]
+
+* The https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/app-programming-model.adoc#annotations[MicroProfile Metrics annotations], in external dependencies
+
+== Discovery
+
+The Prometheus trait automatically configures the resources necessary for the Prometheus Operator to reconcile, so that the managed Prometheus instance can scrape the integration _metrics_ endpoint.
+
+By default, the Prometheus trait creates a `ServiceMonitor` resource, with the `camel.apache.org/integration` label, which must match the `serviceMonitorSelector` field from the `Prometheus` resource.
+Additional labels can be specified with the `service-monitor-labels` parameter from the Prometheus trait, e.g.:
+
+[source,sh]
+----
+$ kamel run -t prometheus.service-monitor-labels="label_to_be_match_by=prometheus_selector" ...
+----
+
+The creation of the `ServiceMonitor` resource can be disabled using the `service-monitor` parameter, e.g.:
+
+[source,sh]
+----
+$ kamel run -t prometheus.service-monitor=false ...
+----
+
+More information can be found in the xref:traits:prometheus.adoc[Prometheus trait] documentation.
+
+The Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/getting-started.md#related-resources[getting started] guide documents the discovery mechanism, as well as the relationship between the operator resources.
+
+In case your integration metrics are not discovered, you may want to rely on https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/troubleshooting.md#troubleshooting-servicemonitor-changes[Troubleshooting `ServiceMonitor` changes].
+
+== Alerting
+
+The Prometheus Operator declares the `AlertManager` resource that can be used to configure _Alertmanager_ instances, along with `Prometheus` instances.
+
+Assuming an `AlertManager` resource already exists in your cluster, you can register a `PrometheusRule` resource that is used by Prometheus to trigger alerts, e.g.:
+
+[source,sh]
+----
+$ cat <<EOF | kubectl apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: example
+    role: alert-rules
+  name: prometheus-rules
+spec:
+  groups:
+  - name: camel-k.rules
+    rules:
+    - alert: CamelKAlert
+      expr: application_camel_context_exchanges_failed_total > 0
+EOF
+----
+
+More information can be found in the Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/alerting.md[Alerting] user guide.
+You can also find more details in https://docs.openshift.com/container-platform/4.4/monitoring/monitoring-your-own-services.html#creating-alerting-rules_monitoring-your-own-services[Creating alerting rules] from the OpenShift documentation.
+
+== Autoscaling
+
+Integration metrics can be exported for horizontal pod autoscaling (HPA), using the https://github.com/DirectXMan12/k8s-prometheus-adapter[custom metrics Prometheus adapter].
+If you have an OpenShift cluster, you can follow https://docs.openshift.com/container-platform/4.4/monitoring/exposing-custom-application-metrics-for-autoscaling.html[Exposing custom application metrics for autoscaling] to set it up.
+
+Assuming you have the Prometheus adapter up and running, you can create a `HorizontalPodAutoscaler` resource, e.g.:
+
+[source,sh]
+----
+$ cat <<EOF | kubectl apply -f -
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: camel-k-autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: camel.apache.org/v1
+    kind: Integration
+    name: example
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: application_camel_context_exchanges_inflight_count
+      target:
+        type: AverageValue
+        averageValue: 1k
+EOF
+----
+
+More information can be found in https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[Horizontal Pod Autoscaler] from the Kubernetes documentation.
