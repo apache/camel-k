@@ -406,3 +406,28 @@ func deleteMavenWorkingDirectory() error {
 
 	return nil
 }
+
+func moveAllDependenciesToCustomDirectory(dependencies []string, dependenciesDirectory string) ([]string, error) {
+	directoryExists, err := util.DirectoryExists(dependenciesDirectory)
+	if err != nil {
+		return nil, err
+	}
+
+	// If directory does not exist, create it.
+	if !directoryExists {
+		err := os.MkdirAll(dependenciesDirectory, 0777)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Copy and construct list of relocated dependencies.
+	relocatedDependenciesList := []string{}
+	for _, dependency := range dependencies {
+		newDependencyLocation := path.Join(dependenciesDirectory, path.Base(dependency))
+		util.CopyFile(dependency, newDependencyLocation)
+		relocatedDependenciesList = append(relocatedDependenciesList, newDependencyLocation)
+	}
+
+	return relocatedDependenciesList, nil
+}
