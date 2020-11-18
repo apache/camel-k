@@ -61,7 +61,7 @@ This needs to be enabled by following these instructions:
 
   $ oc -n openshift-monitoring edit configmap cluster-monitoring-config
 
-. Set the `techPreviewUserWorkload` setting to `true` under `data/config.yaml`:
+. Set the `enableUserWorkload` setting to `true` under `data/config.yaml`:
 +
 [source,yaml]
 ----
@@ -73,6 +73,20 @@ metadata:
 data:
   config.yaml: |
     enableUserWorkload: true
+----
+Note that, in OpenShift versions from 4.3 to 4.5, the configuration is as following:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    techPreviewUserWorkload:
+      enabled: true
 ----
 
 On OpenShift versions prior to 4.3, or if you do not want to change your cluster monitoring stack configuration, you can refer to the <<Kubernetes>> section in order to deploy a separate Prometheus Operator instance.
