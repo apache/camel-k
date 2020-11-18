@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -56,9 +55,8 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	}
 
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
-	cmd.Flags().StringArrayP("dependency", "d", nil, `Additional top-level dependency with the format:
-<type>:<dependency-name>
-where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property.")
+	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
 
 	return &cmd, &options
 }
@@ -66,6 +64,7 @@ where <type> is one of {`+strings.Join(acceptedDependencyTypes, "|")+`}.`)
 type localRunCmdOptions struct {
 	*RootCmdOptions
 	PropertyFiles          []string `mapstructure:"property-files"`
+	Properties             []string `mapstructure:"properties"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 }
 
@@ -77,7 +76,7 @@ func (command *localRunCmdOptions) validate(args []string) error {
 	}
 
 	// Validate properties file.
-	err = validateFiles(command.PropertyFiles)
+	err = validatePropertyFiles(command.PropertyFiles)
 	if err != nil {
 		return nil
 	}
@@ -94,6 +93,12 @@ func (command *localRunCmdOptions) run(args []string) error {
 	dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
 	if err != nil {
 		return err
+	}
+
+	// Manage integration properties which may come from files or CLI.
+	err = updateIntegrationProperties(command)
+	if err != nil {
+		return nil
 	}
 
 	// Run the integration locally.

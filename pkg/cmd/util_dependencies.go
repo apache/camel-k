@@ -305,6 +305,75 @@ func validateIntegrationForDependencies(args []string, additionalDependencies []
 	return nil
 }
 
+func validatePropertyFiles(propertyFiles []string) error {
+	for _, fileName := range propertyFiles {
+		if !strings.HasSuffix(fileName, ".properties") {
+			return fmt.Errorf("supported property files must have a .properties extension: %s", fileName)
+		}
+
+		if file, err := os.Stat(fileName); err != nil {
+			return errors.Wrapf(err, "unable to access property file %s", fileName)
+		} else if file.IsDir() {
+			return fmt.Errorf("property file %s is a directory", fileName)
+		}
+	}
+
+	return nil
+}
+
+func getPropertiesDir() string {
+	// Directory is created under the maven directory which is removed.
+	return path.Join(mavenWorkingDirectory, "properties")
+}
+
+func createPropertiesDirectory() error {
+	// Check directory exists.
+	directoryExists, err := util.DirectoryExists(getPropertiesDir())
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(getPropertiesDir(), 0777)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func updateIntegrationProperties(command *localRunCmdOptions) error {
+	// Create properties directory under Maven working directory. This ensures that
+	// property files of different integrations do not clash.
+	err := createPropertiesDirectory()
+	if err != nil {
+		return err
+	}
+
+	// Relocate properties files to this integration's property directory.
+	relocatedPropertyFiles := []string{}
+	for _, propertyFile := range command.PropertyFiles {
+		relocatedPropertyFile := path.Join(getPropertiesDir(), path.Base(propertyFile))
+		util.CopyFile(propertyFile, relocatedPropertyFile)
+		relocatedPropertyFiles = append(relocatedPropertyFiles, relocatedPropertyFile)
+	}
+
+	// Output list of properties to property file if any CLI properties were given.
+	if len(command.Properties) > 0 {
+		propertyFilePath := path.Join(getPropertiesDir(), "CLI.properties")
+		err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(command.Properties, "\n")), 0777)
+		if err != nil {
+			return err
+		}
+		relocatedPropertyFiles = append(relocatedPropertyFiles, propertyFilePath)
+	}
+
+	// Update command PropertyFiles.
+	command.PropertyFiles = relocatedPropertyFiles
+
+	return nil
+}
+
 func createMavenWorkingDirectory() error {
 	// Create local Maven context.
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
