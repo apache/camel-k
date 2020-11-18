@@ -218,16 +218,9 @@ func (o *runCmdOptions) validate() error {
 		}
 	}
 
-	for _, fileName := range o.PropertyFiles {
-		if !strings.HasSuffix(fileName, ".properties") {
-			return fmt.Errorf("supported property files must have a .properties extension: %s", fileName)
-		}
-
-		if file, err := os.Stat(fileName); err != nil {
-			return errors.Wrapf(err, "unable to access property file %s", fileName)
-		} else if file.IsDir() {
-			return fmt.Errorf("property file %s is a directory", fileName)
-		}
+	err := validatePropertyFiles(o.PropertyFiles)
+	if err != nil {
+		return err
 	}
 
 	for _, label := range o.Labels {

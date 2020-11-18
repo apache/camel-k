@@ -57,6 +57,26 @@ func TestLocalRunPropertyFileFlag(t *testing.T) {
 	}
 }
 
+func TestLocalRunPropertiesFlag(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	localRunCmdOptions := addTestLocalRunCmd(options, rootCmd)
+
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "local", "run", "route.java", "-p", "prop1=value1", "-p", "prop2=value2")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(localRunCmdOptions.Properties) != 2 {
+		t.Fatalf("Additional dependencies expected to contain: \n %v elements\nGot:\n %v elements\n", 2, len(localRunCmdOptions.Properties))
+	}
+	if localRunCmdOptions.Properties[0] != "prop1=value1" || localRunCmdOptions.Properties[1] != "prop2=value2" {
+		t.Fatalf("Additional dependencies expected to be: \n %v\nGot:\n %v\n", "[prop1=value1, prop2=value2]", localRunCmdOptions.Properties)
+	}
+}
+
 func TestLocalRunAdditionalDependenciesFlag(t *testing.T) {
 	options, rootCmd := kamelTestPreAddCommandInit()
 
