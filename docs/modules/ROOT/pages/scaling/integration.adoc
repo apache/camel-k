@@ -1,0 +1,67 @@
+[[integration-scaling]]
+= Camel K Integration Scaling
+
+== Manual Scaling
+
+An Integration can be scaled using the `kubectl scale` command, e.g.:
+
+[source,sh]
+----
+$ kubectl scale it <integration_name> --replicas <number_of_replicas>
+----
+
+This can also be achieved by editing the Integration resource directly, e.g.:
+
+[source,sh]
+----
+$ kubectl patch it <integration_name> -p '{"spec":{"replicas":<number_of_replicas>}}'
+----
+
+The Integration also reports its number of replicas in the `.Status.Replicas` field, e.g.:
+
+[source,sh]
+----
+$ kubectl get it <integration_name> -o jsonpath='{.spec.replicas}'
+----
+
+== Autoscaling with HPA
+
+An Integration can automatically scale based on its CPU utilization and custom metrics using https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[horizontal pod autoscaling (HPA)].
+
+For example, executing the following command creates an _autoscaler_ for the Integration, with target CPU utilization set to 80%, and the number of replicas between 2 and 5:
+
+[source,sh]
+----
+$ kubectl autoscale it <integration_name> --min=2 --max=5 --cpu-percent=80
+----
+
+xref:observability/integration.adoc[Integration metrics] can also be exported for horizontal pod autoscaling (HPA), using the https://github.com/DirectXMan12/k8s-prometheus-adapter[custom metrics Prometheus adapter], so that the Integration can scale automatically based on its own metrics.
+
+If you have an OpenShift cluster, you can follow https://docs.openshift.com/container-platform/4.4/monitoring/exposing-custom-application-metrics-for-autoscaling.html[Exposing custom application metrics for autoscaling] to set it up.
+
+Assuming you have the Prometheus adapter up and running, you can create a `HorizontalPodAutoscaler` resource based on a particular Integration metric, e.g.:
+
+[source,yaml]
+----
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: camel-k-autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: camel.apache.org/v1
+    kind: Integration
+    name: example
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: application_camel_context_exchanges_inflight_count
+      target:
+        type: AverageValue
+        averageValue: 1k
+----
+
+More information can be found in https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[Horizontal Pod Autoscaler] from the Kubernetes documentation.
