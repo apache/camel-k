@@ -106,37 +106,3 @@ EOF
 
 More information can be found in the Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/alerting.md[Alerting] user guide.
 You can also find more details in https://docs.openshift.com/container-platform/4.4/monitoring/monitoring-your-own-services.html#creating-alerting-rules_monitoring-your-own-services[Creating alerting rules] from the OpenShift documentation.
-
-== Autoscaling
-
-Integration metrics can be exported for horizontal pod autoscaling (HPA), using the https://github.com/DirectXMan12/k8s-prometheus-adapter[custom metrics Prometheus adapter].
-If you have an OpenShift cluster, you can follow https://docs.openshift.com/container-platform/4.4/monitoring/exposing-custom-application-metrics-for-autoscaling.html[Exposing custom application metrics for autoscaling] to set it up.
-
-Assuming you have the Prometheus adapter up and running, you can create a `HorizontalPodAutoscaler` resource, e.g.:
-
-[source,sh]
-----
-$ cat <<EOF | kubectl apply -f -
-apiVersion: autoscaling/v2beta2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: camel-k-autoscaler
-spec:
-  scaleTargetRef:
-    apiVersion: camel.apache.org/v1
-    kind: Integration
-    name: example
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-  - type: Pods
-    pods:
-      metric:
-        name: application_camel_context_exchanges_inflight_count
-      target:
-        type: AverageValue
-        averageValue: 1k
-EOF
-----
-
-More information can be found in https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[Horizontal Pod Autoscaler] from the Kubernetes documentation.
