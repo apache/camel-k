@@ -55,7 +55,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	}
 
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property.")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
 
 	return &cmd, &options
