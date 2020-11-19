@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- How to specify resource for integration components [\#1814](https://github.com/apache/camel-k/issues/1814)
+- scaling out camel-k integrations are not working correctly [\#1806](https://github.com/apache/camel-k/issues/1806)
 - Remove main runtime from operator codebase [\#1803](https://github.com/apache/camel-k/issues/1803)
 - Scalability of integration components in a non knative environment [\#1798](https://github.com/apache/camel-k/issues/1798)
 - Panic when attempting to convert from unstructured to Integration with traits [\#1794](https://github.com/apache/camel-k/issues/1794)
@@ -30,6 +32,7 @@
 
 **Merged pull requests:**
 
+- chore\(doc\): Add Camel K operator monitoring documentation [\#1812](https://github.com/apache/camel-k/pull/1812) ([astefanutti](https://github.com/astefanutti))
 - Update PDB trait documentation [\#1810](https://github.com/apache/camel-k/pull/1810) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1549: auto-detect json in YAML [\#1809](https://github.com/apache/camel-k/pull/1809) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1771: use registry creds for pull and push and set Spectrum as default [\#1807](https://github.com/apache/camel-k/pull/1807) ([nicolaferraro](https://github.com/nicolaferraro))
