@@ -20,6 +20,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -54,6 +55,8 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 		},
 	}
 
+	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
+	cmd.Flags().String("docker-registry", "", "Docker registry to store intermediate images.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
@@ -63,6 +66,8 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 
 type localRunCmdOptions struct {
 	*RootCmdOptions
+	Containerize           bool     `mapstructure:"containerize"`
+	DockerRegistry         string   `mapstructure:"docker-registry"`
 	PropertyFiles          []string `mapstructure:"property-files"`
 	Properties             []string `mapstructure:"properties"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
@@ -79,6 +84,11 @@ func (command *localRunCmdOptions) validate(args []string) error {
 	err = validatePropertyFiles(command.PropertyFiles)
 	if err != nil {
 		return nil
+	}
+
+	// If containerize is set then docker registry must be set.
+	if command.Containerize && command.DockerRegistry == "" {
+		return errors.New("containerization is active but no registry has been provided")
 	}
 
 	return nil
