@@ -71,7 +71,19 @@ type inspectCmdOptions struct {
 }
 
 func (command *inspectCmdOptions) validate(args []string) error {
-	return validateIntegrationForDependencies(args, command.AdditionalDependencies)
+	// Validate integration files.
+	err := validateIntegrationFiles(args)
+	if err != nil {
+		return err
+	}
+
+	// Validate additional dependencies specified by the user.
+	err = validateAdditionalDependencies(command.AdditionalDependencies)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (command *inspectCmdOptions) init() error {

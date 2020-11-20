@@ -284,7 +284,7 @@ func validateDependency(additionalDependency string) bool {
 	return TypeIsValid
 }
 
-func validateIntegrationForDependencies(args []string, additionalDependencies []string) error {
+func validateIntegrationFiles(args []string) error {
 	// If no source files have been provided there is nothing to inspect.
 	if len(args) == 0 {
 		return errors.New("no integration files have been provided")
@@ -294,12 +294,6 @@ func validateIntegrationForDependencies(args []string, additionalDependencies []
 	err := validateFiles(args)
 	if err != nil {
 		return nil
-	}
-
-	// Validate additional dependencies specified by the user.
-	err = validateAdditionalDependencies(additionalDependencies)
-	if err != nil {
-		return err
 	}
 
 	return nil
