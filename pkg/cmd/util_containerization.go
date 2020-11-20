@@ -63,7 +63,7 @@ func createAndBuildBaseImage(dockerRegistry string) error {
 	cmd := exec.CommandContext(ctx, "docker", args...)
 
 	// Output executed command.
-	fmt.Printf("Executing: " + strings.Join(cmd.Args, " "))
+	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {

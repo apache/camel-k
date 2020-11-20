@@ -74,8 +74,14 @@ type localRunCmdOptions struct {
 }
 
 func (command *localRunCmdOptions) validate(args []string) error {
+	// Validate integration files.
+	err := validateIntegrationFiles(args)
+	if err != nil {
+		return err
+	}
+
 	// Validate additional dependencies specified by the user.
-	err := validateIntegrationForDependencies(args, command.AdditionalDependencies)
+	err = validateAdditionalDependencies(command.AdditionalDependencies)
 	if err != nil {
 		return err
 	}
