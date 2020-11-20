@@ -33,6 +33,7 @@
 **Merged pull requests:**
 
 - chore\(doc\): Add Camel K operator monitoring documentation [\#1812](https://github.com/apache/camel-k/pull/1812) ([astefanutti](https://github.com/astefanutti))
+- \#1743: Begin generating the operator bundle using operator-sdk [\#1811](https://github.com/apache/camel-k/pull/1811) ([phantomjinx](https://github.com/phantomjinx))
 - Update PDB trait documentation [\#1810](https://github.com/apache/camel-k/pull/1810) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1549: auto-detect json in YAML [\#1809](https://github.com/apache/camel-k/pull/1809) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1771: use registry creds for pull and push and set Spectrum as default [\#1807](https://github.com/apache/camel-k/pull/1807) ([nicolaferraro](https://github.com/nicolaferraro))
