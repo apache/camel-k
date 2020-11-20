@@ -65,8 +65,8 @@ func assembleClasspatchArgValue(properties []string, dependencies []string, rout
 	return strings.Join(classpathContents, ":")
 }
 
-// RunLocalIntegration --
-func RunLocalIntegration(properties []string, dependencies []string, routes []string) error {
+// GetIntegrationRunCommand --
+func GetIntegrationRunCommand(properties []string, dependencies []string, routes []string) *exec.Cmd {
 	// Create classpath value.
 	classpathValue := assembleClasspatchArgValue(properties, dependencies, routes)
 
@@ -83,13 +83,13 @@ func RunLocalIntegration(properties []string, dependencies []string, routes []st
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
-	fmt.Printf("executing: %s", strings.Join(cmd.Args, " "))
-
 	// Add directory where the properties file resides.
 	cmd.Env = append(cmd.Env, "CAMEL_K_CONF_D="+getPropertiesDir())
 
 	// Add files to the command line under the CAMEL_K_ROUTES flag.
 	cmd.Env = append(cmd.Env, "CAMEL_K_ROUTES="+strings.Join(formatRoutes(routes), ","))
 
-	return cmd.Run()
+	fmt.Printf("executing: %s", strings.Join(cmd.Args, " "))
+
+	return cmd
 }

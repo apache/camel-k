@@ -50,6 +50,7 @@ func addLocalSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
 	}
 
 	localCmd.AddCommand(cmdOnly(newCmdLocalRun(options)))
+	localCmd.AddCommand(cmdOnly(newCmdLocalCreate(options)))
 
 	return nil
 }

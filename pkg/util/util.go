@@ -23,6 +23,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -74,6 +75,7 @@ func StringSliceExists(slice []string, item string) bool {
 	return false
 }
 
+// StringSliceContainsAnyOf --
 func StringSliceContainsAnyOf(slice []string, items ...string) bool {
 	for i := 0; i < len(slice); i++ {
 		for j := 0; j < len(items); j++ {
@@ -324,4 +326,15 @@ func JSONToYAML(src []byte) ([]byte, error) {
 	}
 
 	return yamldata, nil
+}
+
+// WriteToFile --
+func WriteToFile(filePath string, fileContents string) error {
+	err := ioutil.WriteFile(filePath, []byte(fileContents), 0777)
+	if err != nil {
+		return errors.Errorf("error writing file: %v", filePath)
+	}
+
+	// All went well, return true.
+	return nil
 }
