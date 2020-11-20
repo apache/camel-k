@@ -111,8 +111,28 @@ func (command *localRunCmdOptions) run(args []string) error {
 		return nil
 	}
 
-	// Run the integration locally.
-	err = RunLocalIntegration(command.PropertyFiles, dependencies, args)
+	// Run integration inside a local container.
+	if command.Containerize {
+		// Get base image name.
+
+		// Assemble Dockerfile for containerized run.
+		// - copy properties
+		// - copy dependencies
+		// - copy sources
+		// = assemble run command: GetIntegrationRunCommand
+
+		// Build container image.
+
+		// Run container image.
+
+		return nil
+	}
+
+	// Get integration run command.
+	cmd := GetIntegrationRunCommand(command.PropertyFiles, dependencies, args)
+
+	// Run integration locally.
+	err = cmd.Run()
 	if err != nil {
 		return nil
 	}
