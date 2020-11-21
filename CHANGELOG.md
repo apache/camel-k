@@ -32,6 +32,7 @@
 
 **Merged pull requests:**
 
+- chore\(doc\): Shorten monitoring/scaling navigation menu items [\#1819](https://github.com/apache/camel-k/pull/1819) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Add Camel K operator monitoring documentation [\#1812](https://github.com/apache/camel-k/pull/1812) ([astefanutti](https://github.com/astefanutti))
 - \#1743: Begin generating the operator bundle using operator-sdk [\#1811](https://github.com/apache/camel-k/pull/1811) ([phantomjinx](https://github.com/phantomjinx))
 - Update PDB trait documentation [\#1810](https://github.com/apache/camel-k/pull/1810) ([astefanutti](https://github.com/astefanutti))
