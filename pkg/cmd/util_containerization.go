@@ -48,6 +48,26 @@ func deleteDockerBaseWorkingDirectory() error {
 	return nil
 }
 
+func createDockerWorkingDirectory() error {
+	// Create local docker base directory.
+	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-")
+	if err != nil {
+		return err
+	}
+
+	// Set the Docker base directory to the default value.
+	docker.WorkingDirectory = temporaryDirectory
+
+	return nil
+}
+
+func deleteDockerWorkingDirectory() error {
+	// Remove directory used for computing the dependencies.
+	defer os.RemoveAll(docker.WorkingDirectory)
+
+	return nil
+}
+
 func createAndBuildBaseImage(dockerRegistry string) error {
 	// Set docker registry.
 	docker.RegistryName = dockerRegistry
