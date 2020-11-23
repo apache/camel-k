@@ -112,10 +112,13 @@ func (command *localRunCmdOptions) run(args []string) error {
 	}
 
 	// Manage integration properties which may come from files or CLI.
-	err = updateIntegrationProperties(command)
+	propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
 	if err != nil {
 		return nil
 	}
+
+	// Update property files with relocated files.
+	command.PropertyFiles = propertyFiles
 
 	// Run integration inside a local container.
 	if command.Containerize {
