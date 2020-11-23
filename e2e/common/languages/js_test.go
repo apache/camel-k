@@ -19,45 +19,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package languages
 
 import (
-	"fmt"
-	"path"
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/e2e/support/util"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 )
 
-func TestRunInitGeneratedExamples(t *testing.T) {
+func TestRunSimpleJavaScriptExamples(t *testing.T) {
+
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
-		for _, lang := range camelv1.Languages {
-			t.Run("init run "+string(lang), func(t *testing.T) {
-				RegisterTestingT(t)
-				dir := util.MakeTempDir(t)
-				itName := fmt.Sprintf("init%s", string(lang))          // e.g. initjava
-				fileName := fmt.Sprintf("%s.%s", itName, string(lang)) // e.g. initjava.java
-				file := path.Join(dir, fileName)
-				Expect(Kamel("init", file).Execute()).Should(BeNil())
-				Expect(Kamel("run", "-n", ns, file).Execute()).Should(BeNil())
-				Eventually(IntegrationPodPhase(ns, itName), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-				Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring(languageInitExpectedString(lang)))
-				Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
-			})
-		}
-	})
-}
+		t.Run("run js", func(t *testing.T) {
+			RegisterTestingT(t)
+			Expect(Kamel("run", "-n", ns, "../files/js.js").Execute()).Should(BeNil())
+			Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "js", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
 
-func languageInitExpectedString(lang camelv1.Language) string {
-	langDesc := string(lang)
-	if lang == camelv1.LanguageKotlin {
-		langDesc = "kotlin"
-	}
-	return fmt.Sprintf(" Hello Camel K from %s", langDesc)
+		t.Run("init run JavaScript", func(t *testing.T) {
+			RunInitGeneratedExample(camelv1.LanguageJavaScript, ns, t)
+		})
+
+	})
 }
