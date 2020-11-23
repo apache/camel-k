@@ -148,7 +148,7 @@ test: build
 	go test ./...
 
 test-integration: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common -tags=integration && go test -timeout 60m -v ./e2e/common/languages -tags=integration
 	#go test -timeout 60m -v ./e2e/common -tags=integration
 
 test-knative: build
