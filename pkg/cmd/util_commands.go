@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -80,8 +79,6 @@ func assembleIntegrationRunCommand(properties []string, dependencies []string, r
 
 	// Add files to the command line under the CAMEL_K_ROUTES flag.
 	cmd.Env = append(cmd.Env, "CAMEL_K_ROUTES="+strings.Join(formatRoutes(routes), ","))
-
-	fmt.Printf("executing: %s", strings.Join(cmd.Args, " "))
 
 	return cmd
 }

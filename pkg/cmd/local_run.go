@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -117,25 +118,11 @@ func (command *localRunCmdOptions) run(args []string) error {
 		return nil
 	}
 
-	// // Run integration inside a local container.
-	// if command.Containerize {
-	// 	// Get base image name.
-
-	// 	// Assemble Dockerfile for containerized run.
-	// 	// - copy properties
-	// 	// - copy dependencies
-	// 	// - copy sources
-	// 	// = assemble run command: GetIntegrationRunCommand
-
-	// 	// Build container image.
-
-	// 	// Run container image.
-
-	// 	return nil
-	// }
-
 	// Get integration run command.
 	cmd := GetLocalIntegrationRunCommand(propertyFiles, dependencies, args)
+
+	// Output command we are about to run.
+	fmt.Printf("Executing: %s", strings.Join(cmd.Args, " "))
 
 	// Run integration locally.
 	err = cmd.Run()

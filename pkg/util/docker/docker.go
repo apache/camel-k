@@ -18,7 +18,6 @@ limitations under the License.
 package docker
 
 import (
-	"errors"
 	"os/exec"
 	"path"
 	"strings"
@@ -54,24 +53,20 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd) error {
 	dockerFile = append(dockerFile, FROM(GetFullDockerImage(BaseImageName, latestTag)))
 
 	// Create container workspace directory.
-	dockerFile = append(dockerFile, RUNMakeDir(IntegrationWorkingDirectory))
+	dockerFile = append(dockerFile, RUNMakeDir(GetContainerWorkspaceDir()))
 
 	// Set workspace directory.
-	dockerFile = append(dockerFile, WORKDIR(IntegrationWorkingDirectory))
+	dockerFile = append(dockerFile, WORKDIR(GetContainerWorkspaceDir()))
 
 	// Copy files from local directory to container directories.
-	dockerFile = append(dockerFile, COPY(util.GetLocalRoutesDir(), GetContainerRoutesDir()))
-	dockerFile = append(dockerFile, COPY(util.GetLocalPropertiesDir(), GetContainerPropertiesDir()))
-	dockerFile = append(dockerFile, COPY(util.GetLocalDependenciesDir(), GetContainerDependenciesDir()))
+	dockerFile = append(dockerFile, COPY(util.DefaultRoutesDirectoryName, util.DefaultRoutesDirectoryName))
+	dockerFile = append(dockerFile, COPY(util.DefaultPropertiesDirectoryName, util.DefaultPropertiesDirectoryName))
+	dockerFile = append(dockerFile, COPY(util.DefaultDependenciesDirectoryName, util.DefaultDependenciesDirectoryName))
 
 	// All Env variables the command requires need to be set in the container.
 	for _, keyValue := range integrationRunCmd.Env {
 		values := strings.Split(keyValue, "=")
-		if len(values) != 2 {
-			return errors.New("env var was not of key=value form")
-		}
-
-		dockerFile = append(dockerFile, ENV(values[0], values[1]))
+		dockerFile = append(dockerFile, ENV(values[0], strings.Join(values[1:], "=")))
 	}
 
 	// Compose command line.
@@ -107,7 +102,7 @@ func BuildIntegrationImageArgs(imageName string) []string {
 
 // GetContainerWorkspaceDir -- directory inside the container where all the integration files are copied.
 func GetContainerWorkspaceDir() string {
-	return containerFileSeparator + "workspace"
+	return containerFileSeparator + util.DefaultWorkingDirectoryName
 }
 
 // GetContainerPropertiesDir -- directory inside the container where all the integration property files are copied.
