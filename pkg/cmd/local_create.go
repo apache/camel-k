@@ -56,6 +56,7 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 	}
 
 	cmd.Flags().Bool("base-image", false, "Create base image used as a starting point for any integration.")
+	cmd.Flags().String("image-name", "", "Integration image name.")
 	cmd.Flags().String("docker-registry", "", "Docker registry to store intermediate images.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
@@ -67,6 +68,7 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 type localCreateCmdOptions struct {
 	*RootCmdOptions
 	BaseImage              bool     `mapstructure:"base-image"`
+	ImageName              string   `mapstructure:"image-name"`
 	DockerRegistry         string   `mapstructure:"docker-registry"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 	Properties             []string `mapstructure:"properties"`
@@ -79,6 +81,10 @@ func (command *localCreateCmdOptions) validate(args []string) error {
 		err := validateIntegrationFiles(args)
 		if err != nil {
 			return err
+		}
+
+		if command.ImageName == "" {
+			return errors.New("image name not provided for integration")
 		}
 	}
 
@@ -96,7 +102,7 @@ func (command *localCreateCmdOptions) validate(args []string) error {
 
 	// Docker registry must be set.
 	if command.DockerRegistry == "" {
-		return errors.New("base image cannot be created as no registry has been provided")
+		return errors.New("no image can be created as registry has not been provided")
 	}
 
 	return nil
@@ -144,20 +150,25 @@ func (command *localCreateCmdOptions) run(args []string) error {
 			return nil
 		}
 
-		// Update property files with relocated files.
-		command.PropertyFiles = propertyFiles
-
 		// Fetch dependencies.
 		dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
 		if err != nil {
 			return err
 		}
 
-		// Get integration run command.
-		cmd := GetIntegrationRunCommand(command.PropertyFiles, dependencies, args)
+		// Copy dependencies to a dependencies folder under a local directory.
+		err = updateIntegrationDependencies(dependencies)
+		if err != nil {
+			return err
+		}
 
-		// Run integration locally.
-		err = cmd.Run()
+		// Get integration run command to be run inside the container. This means the command
+		// has to be created with the paths which will be valid inside the container.
+		containerCmd := GetContainerIntegrationRunCommand(propertyFiles, dependencies, args)
+
+		err = createAndBuildIntegrationImage(command.DockerRegistry, containerCmd, command.ImageName)
+		// // Run integration locally.
+		// err = containerCmd.Run()
 		if err != nil {
 			return nil
 		}

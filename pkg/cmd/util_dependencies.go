@@ -35,17 +35,11 @@ import (
 	"github.com/scylladb/go-set/strset"
 )
 
-// Directory used by Maven for an invocation of the kamel local command.
-// By default a temporary folder will be used.
-var mavenWorkingDirectory string = ""
-
 var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
 
 var additionalDependencyUsageMessage = `Additional top-level dependencies are specified with the format:
 <type>:<dependency-name>
 where <type> is one of {` + strings.Join(acceptedDependencyTypes, "|") + `}.`
-
-const defaultDependenciesDirectoryName = "dependencies"
 
 func getDependencies(args []string, additionalDependencies []string, allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist.
@@ -121,7 +115,7 @@ func getTransitiveDependencies(
 	}
 
 	// Maven local context to be used for generating the transitive dependencies.
-	mc := maven.NewContext(mavenWorkingDirectory, project)
+	mc := maven.NewContext(util.MavenWorkingDirectory, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.GetTimeout().Duration
 
@@ -315,31 +309,10 @@ func validatePropertyFiles(propertyFiles []string) error {
 	return nil
 }
 
-func getPropertiesDir() string {
-	// Directory is created under the maven directory which is removed.
-	return path.Join(mavenWorkingDirectory, "properties")
-}
-
-func createPropertiesDirectory() error {
-	// Check directory exists.
-	directoryExists, err := util.DirectoryExists(getPropertiesDir())
-	if err != nil {
-		return err
-	}
-
-	if !directoryExists {
-		err := os.MkdirAll(getPropertiesDir(), 0777)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func updateIntegrationProperties(properties []string, propertyFiles []string) ([]string, error) {
 	// Create properties directory under Maven working directory. This ensures that
 	// property files of different integrations do not clash.
-	err := createPropertiesDirectory()
+	err := util.CreateLocalPropertiesDirectory()
 	if err != nil {
 		return nil, err
 	}
@@ -347,14 +320,14 @@ func updateIntegrationProperties(properties []string, propertyFiles []string) ([
 	// Relocate properties files to this integration's property directory.
 	relocatedPropertyFiles := []string{}
 	for _, propertyFile := range propertyFiles {
-		relocatedPropertyFile := path.Join(getPropertiesDir(), path.Base(propertyFile))
+		relocatedPropertyFile := path.Join(util.GetLocalPropertiesDir(), path.Base(propertyFile))
 		util.CopyFile(propertyFile, relocatedPropertyFile)
 		relocatedPropertyFiles = append(relocatedPropertyFiles, relocatedPropertyFile)
 	}
 
 	// Output list of properties to property file if any CLI properties were given.
 	if len(properties) > 0 {
-		propertyFilePath := path.Join(getPropertiesDir(), "CLI.properties")
+		propertyFilePath := path.Join(util.GetLocalPropertiesDir(), "CLI.properties")
 		err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0777)
 		if err != nil {
 			return nil, err
@@ -366,6 +339,24 @@ func updateIntegrationProperties(properties []string, propertyFiles []string) ([
 	return relocatedPropertyFiles, nil
 }
 
+func updateIntegrationDependencies(dependencies []string) error {
+	// Create dependencies directory under Maven working directory. This ensures that
+	// dependencies will be removed after they are not needed.
+	err := util.CreateLocalDependenciesDirectory()
+	if err != nil {
+		return err
+	}
+
+	// Relocate dependencies files to this integration's dependencies directory.
+	for _, dependency := range dependencies {
+		relocatedDependency := path.Join(util.GetLocalDependenciesDir(), path.Base(dependency))
+		util.CopyFile(dependency, relocatedDependency)
+	}
+
+	// Return relocated PropertyFiles.
+	return nil
+}
+
 func createMavenWorkingDirectory() error {
 	// Create local Maven context.
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
@@ -374,14 +365,14 @@ func createMavenWorkingDirectory() error {
 	}
 
 	// Set the Maven directory to the default value.
-	mavenWorkingDirectory = temporaryDirectory
+	util.MavenWorkingDirectory = temporaryDirectory
 
 	return nil
 }
 
 func deleteMavenWorkingDirectory() error {
 	// Remove directory used for computing the dependencies.
-	defer os.RemoveAll(mavenWorkingDirectory)
+	defer os.RemoveAll(util.MavenWorkingDirectory)
 
 	return nil
 }

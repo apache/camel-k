@@ -36,6 +36,20 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 )
 
+/// Directories and file names:
+
+// MavenWorkingDirectory --  Directory used by Maven for an invocation of the kamel local command. By default a temporary folder will be used.
+var MavenWorkingDirectory string = ""
+
+// DefaultDependenciesDirectoryName --
+const DefaultDependenciesDirectoryName = "dependencies"
+
+// DefaultPropertiesDirectoryName --
+const DefaultPropertiesDirectoryName = "properties"
+
+// DefaultRoutesDirectoryName --
+const DefaultRoutesDirectoryName = "routes"
+
 // StringSliceJoin --
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0
@@ -336,5 +350,70 @@ func WriteToFile(filePath string, fileContents string) error {
 	}
 
 	// All went well, return true.
+	return nil
+}
+
+/// Local directories:
+
+// GetLocalPropertiesDir -- <mavenWorkingDirectory>/properties
+func GetLocalPropertiesDir() string {
+	return path.Join(MavenWorkingDirectory, DefaultPropertiesDirectoryName)
+}
+
+// GetLocalDependenciesDir --<mavenWorkingDirectory>/dependencies
+func GetLocalDependenciesDir() string {
+	return path.Join(MavenWorkingDirectory, DefaultDependenciesDirectoryName)
+}
+
+// GetLocalRoutesDir -- <mavenWorkingDirectory>/routes
+func GetLocalRoutesDir() string {
+	return path.Join(MavenWorkingDirectory, DefaultDependenciesDirectoryName)
+}
+
+// CreateLocalPropertiesDirectory --
+func CreateLocalPropertiesDirectory() error {
+	directoryExists, err := DirectoryExists(GetLocalPropertiesDir())
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(GetLocalPropertiesDir(), 0777)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// CreateLocalDependenciesDirectory --
+func CreateLocalDependenciesDirectory() error {
+	directoryExists, err := DirectoryExists(GetLocalDependenciesDir())
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(GetLocalDependenciesDir(), 0777)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// CreateLocalRoutesDirectory --
+func CreateLocalRoutesDirectory() error {
+	directoryExists, err := DirectoryExists(GetLocalRoutesDir())
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(GetLocalRoutesDir(), 0777)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

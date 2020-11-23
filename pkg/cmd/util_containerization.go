@@ -28,6 +28,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+/// Local Docker file system management functions.
+
 func createDockerBaseWorkingDirectory() error {
 	// Create local docker base directory.
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-base-")
@@ -56,14 +58,14 @@ func createDockerWorkingDirectory() error {
 	}
 
 	// Set the Docker base directory to the default value.
-	docker.WorkingDirectory = temporaryDirectory
+	docker.IntegrationWorkingDirectory = temporaryDirectory
 
 	return nil
 }
 
 func deleteDockerWorkingDirectory() error {
 	// Remove directory used for computing the dependencies.
-	defer os.RemoveAll(docker.WorkingDirectory)
+	defer os.RemoveAll(docker.IntegrationWorkingDirectory)
 
 	return nil
 }
@@ -88,6 +90,30 @@ func createAndBuildBaseImage(dockerRegistry string) error {
 	// Run the command.
 	if err := cmd.Run(); err != nil {
 		errors.Errorf("base image containerization did not run successfully: %v", err)
+	}
+
+	return nil
+}
+
+func createAndBuildIntegrationImage(dockerRegistry string, integrationRunCmd *exec.Cmd, imageName string) error {
+	docker.RegistryName = dockerRegistry
+
+	// Create the integration image Docker file.
+	err := docker.CreateIntegrationImageDockerFile(integrationRunCmd)
+	if err != nil {
+		return err
+	}
+
+	// Get the Docker command arguments for building the base image and create the command.
+	args := docker.BuildIntegrationImageArgs(imageName)
+	cmd := exec.CommandContext(ctx, "docker", args...)
+
+	// Output executed command.
+	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
+
+	// Run the command.
+	if err := cmd.Run(); err != nil {
+		errors.Errorf("integration image containerization did not run successfully: %v", err)
 	}
 
 	return nil

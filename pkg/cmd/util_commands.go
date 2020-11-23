@@ -22,8 +22,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/docker"
 )
 
 var (
@@ -40,21 +42,11 @@ func formatRoutes(files []string) []string {
 		// Extract extension.
 		extension := a[len(a)-1]
 
-		// Add file if extension is supported.
+		// Add file with extension.
 		routes = append(routes, "file:"+route+"?language="+extension)
 	}
 
 	return routes
-}
-
-func confDirectories(properties []string) []string {
-	confDirs := []string{}
-
-	for _, propertiesPath := range properties {
-		confDirs = append(confDirs, path.Dir(propertiesPath))
-	}
-
-	return confDirs
 }
 
 func assembleClasspatchArgValue(properties []string, dependencies []string, routes []string) string {
@@ -65,8 +57,7 @@ func assembleClasspatchArgValue(properties []string, dependencies []string, rout
 	return strings.Join(classpathContents, ":")
 }
 
-// GetIntegrationRunCommand --
-func GetIntegrationRunCommand(properties []string, dependencies []string, routes []string) *exec.Cmd {
+func assembleIntegrationRunCommand(properties []string, dependencies []string, routes []string, propertiesDir string) *exec.Cmd {
 	// Create classpath value.
 	classpathValue := assembleClasspatchArgValue(properties, dependencies, routes)
 
@@ -83,8 +74,9 @@ func GetIntegrationRunCommand(properties []string, dependencies []string, routes
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
-	// Add directory where the properties file resides.
-	cmd.Env = append(cmd.Env, "CAMEL_K_CONF_D="+getPropertiesDir())
+	// Add directory where the properties files reside. The directory is the local properties directory
+	// or the properties directory inside the container.
+	cmd.Env = append(cmd.Env, "CAMEL_K_CONF_D="+propertiesDir)
 
 	// Add files to the command line under the CAMEL_K_ROUTES flag.
 	cmd.Env = append(cmd.Env, "CAMEL_K_ROUTES="+strings.Join(formatRoutes(routes), ","))
@@ -92,4 +84,22 @@ func GetIntegrationRunCommand(properties []string, dependencies []string, routes
 	fmt.Printf("executing: %s", strings.Join(cmd.Args, " "))
 
 	return cmd
+}
+
+// GetLocalIntegrationRunCommand --
+func GetLocalIntegrationRunCommand(properties []string, dependencies []string, routes []string) *exec.Cmd {
+	return assembleIntegrationRunCommand(properties, dependencies, routes, util.GetLocalPropertiesDir())
+}
+
+// GetContainerIntegrationRunCommand --
+func GetContainerIntegrationRunCommand(properties []string, dependencies []string, routes []string) *exec.Cmd {
+	// This is the integration command which will be run inside the container. Therefore all paths need to
+	// be valid container paths.
+
+	// Update property file paths.
+	containerProperties := docker.ContainerizeFilePaths(properties, docker.GetContainerPropertiesDir())
+	containerDependencies := docker.ContainerizeFilePaths(dependencies, docker.GetContainerDependenciesDir())
+	containerRoutes := docker.ContainerizeFilePaths(routes, docker.GetContainerRoutesDir())
+
+	return assembleIntegrationRunCommand(containerProperties, containerDependencies, containerRoutes, docker.GetContainerPropertiesDir())
 }
