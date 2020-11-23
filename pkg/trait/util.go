@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 
 	user "github.com/mitchellh/go-homedir"
@@ -77,7 +78,9 @@ func CollectConfigurationValues(configurationType string, configurable ...v1.Con
 		}
 	}
 
-	return result.List()
+	s := result.List()
+	sort.Strings(s)
+	return s
 }
 
 // CollectConfigurationPairs --
