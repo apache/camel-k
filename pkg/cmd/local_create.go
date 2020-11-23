@@ -111,7 +111,12 @@ func (command *localCreateCmdOptions) init(args []string) error {
 
 	// If integration files are provided an integration image will be built.
 	if len(args) > 0 {
-		err := createMavenWorkingDirectory()
+		err := createDockerWorkingDirectory()
+		if err != nil {
+			return err
+		}
+
+		err = createMavenWorkingDirectory()
 		if err != nil {
 			return err
 		}
@@ -158,6 +163,7 @@ func (command *localCreateCmdOptions) deinit(args []string) error {
 
 	// If integration files are provided delete the maven project folder.
 	if len(args) > 0 {
+		deleteDockerWorkingDirectory()
 		deleteMavenWorkingDirectory()
 	}
 
