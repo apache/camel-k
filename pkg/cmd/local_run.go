@@ -117,28 +117,25 @@ func (command *localRunCmdOptions) run(args []string) error {
 		return nil
 	}
 
-	// Update property files with relocated files.
-	command.PropertyFiles = propertyFiles
+	// // Run integration inside a local container.
+	// if command.Containerize {
+	// 	// Get base image name.
 
-	// Run integration inside a local container.
-	if command.Containerize {
-		// Get base image name.
+	// 	// Assemble Dockerfile for containerized run.
+	// 	// - copy properties
+	// 	// - copy dependencies
+	// 	// - copy sources
+	// 	// = assemble run command: GetIntegrationRunCommand
 
-		// Assemble Dockerfile for containerized run.
-		// - copy properties
-		// - copy dependencies
-		// - copy sources
-		// = assemble run command: GetIntegrationRunCommand
+	// 	// Build container image.
 
-		// Build container image.
+	// 	// Run container image.
 
-		// Run container image.
-
-		return nil
-	}
+	// 	return nil
+	// }
 
 	// Get integration run command.
-	cmd := GetIntegrationRunCommand(command.PropertyFiles, dependencies, args)
+	cmd := GetLocalIntegrationRunCommand(propertyFiles, dependencies, args)
 
 	// Run integration locally.
 	err = cmd.Run()

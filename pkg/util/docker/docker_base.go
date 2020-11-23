@@ -31,8 +31,8 @@ var BaseImageName string = "integration-base-image"
 // BaseWorkingDirectory -- directory used by Docker to construct the base image.
 var BaseWorkingDirectory string = ""
 
-// WorkingDirectory -- directory used by Docker to construct the integration image.
-var WorkingDirectory string = ""
+// IntegrationWorkingDirectory -- directory used by Docker to construct the integration image.
+var IntegrationWorkingDirectory string = ""
 
 // Internal variables.
 var (

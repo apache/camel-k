@@ -18,6 +18,8 @@ limitations under the License.
 package docker
 
 import (
+	"errors"
+	"os/exec"
 	"path"
 	"strings"
 
@@ -34,9 +36,50 @@ func CreateBaseImageDockerFile() error {
 	// Ensure Maven is already installed.
 	dockerFile = append(dockerFile, RUNMavenInstall())
 
-	// Write <base-work-dir>/Dockerfile
+	// Write <BaseWorkingDirectory>/Dockerfile
 	baseDockerFilePath := path.Join(BaseWorkingDirectory, "Dockerfile")
 	err := util.WriteToFile(baseDockerFilePath, strings.Join(dockerFile, "\n"))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateIntegrationImageDockerFile --
+func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd) error {
+	dockerFile := []string{}
+
+	// Start from the base image that contains the maven install: <RegistryName>/<BaseImageName>
+	dockerFile = append(dockerFile, FROM(GetFullDockerImage(BaseImageName, latestTag)))
+
+	// Create container workspace directory.
+	dockerFile = append(dockerFile, RUNMakeDir(IntegrationWorkingDirectory))
+
+	// Set workspace directory.
+	dockerFile = append(dockerFile, WORKDIR(IntegrationWorkingDirectory))
+
+	// Copy files from local directory to container directories.
+	dockerFile = append(dockerFile, COPY(util.GetLocalRoutesDir(), GetContainerRoutesDir()))
+	dockerFile = append(dockerFile, COPY(util.GetLocalPropertiesDir(), GetContainerPropertiesDir()))
+	dockerFile = append(dockerFile, COPY(util.GetLocalDependenciesDir(), GetContainerDependenciesDir()))
+
+	// All Env variables the command requires need to be set in the container.
+	for _, keyValue := range integrationRunCmd.Env {
+		values := strings.Split(keyValue, "=")
+		if len(values) != 2 {
+			return errors.New("env var was not of key=value form")
+		}
+
+		dockerFile = append(dockerFile, ENV(values[0], values[1]))
+	}
+
+	// Compose command line.
+	dockerFile = append(dockerFile, CMDShellWrap(strings.Join(integrationRunCmd.Args, " ")))
+
+	// Write <IntegrationWorkingDirectory>/Dockerfile
+	integrationDockerFilePath := path.Join(IntegrationWorkingDirectory, "Dockerfile")
+	err := util.WriteToFile(integrationDockerFilePath, strings.Join(dockerFile, "\n"))
 	if err != nil {
 		return err
 	}
@@ -48,7 +91,47 @@ func CreateBaseImageDockerFile() error {
 func BuildBaseImageArgs() []string {
 	// Construct the docker command:
 	//
-	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName>
+	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName> <BaseWorkingDirectory>
 	//
 	return BuildImageArgs(BaseWorkingDirectory, BaseImageName, BaseWorkingDirectory)
+}
+
+// BuildIntegrationImageArgs --
+func BuildIntegrationImageArgs(imageName string) []string {
+	// Construct the docker command:
+	//
+	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName> <MavenWorkingDirectory>
+	//
+	return BuildImageArgs(IntegrationWorkingDirectory, imageName, util.MavenWorkingDirectory)
+}
+
+// GetContainerWorkspaceDir -- directory inside the container where all the integration files are copied.
+func GetContainerWorkspaceDir() string {
+	return containerFileSeparator + "workspace"
+}
+
+// GetContainerPropertiesDir -- directory inside the container where all the integration property files are copied.
+func GetContainerPropertiesDir() string {
+	return GetContainerWorkspaceDir() + containerFileSeparator + util.DefaultPropertiesDirectoryName
+}
+
+// GetContainerDependenciesDir -- directory inside the container where all the integration dependencies are copied.
+func GetContainerDependenciesDir() string {
+	return GetContainerWorkspaceDir() + containerFileSeparator + util.DefaultDependenciesDirectoryName
+}
+
+// GetContainerRoutesDir -- directory inside the container where all the integration routes are copied.
+func GetContainerRoutesDir() string {
+	return GetContainerWorkspaceDir() + containerFileSeparator + util.DefaultRoutesDirectoryName
+}
+
+// ContainerizeFilePaths -- make paths valid container paths given a valid container directory in newDir.
+func ContainerizeFilePaths(currentFilePaths []string, newDir string) []string {
+	newFilePaths := []string{}
+
+	for _, currentFilePath := range currentFilePaths {
+		newFilePaths = append(newFilePaths, newDir+containerFileSeparator+path.Base(currentFilePath))
+	}
+
+	return newFilePaths
 }
