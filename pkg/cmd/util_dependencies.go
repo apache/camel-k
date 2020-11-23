@@ -349,8 +349,24 @@ func updateIntegrationDependencies(dependencies []string) error {
 
 	// Relocate dependencies files to this integration's dependencies directory.
 	for _, dependency := range dependencies {
-		relocatedDependency := path.Join(util.GetLocalDependenciesDir(), path.Base(dependency))
-		util.CopyFile(dependency, relocatedDependency)
+		util.CopyFile(dependency, path.Join(util.GetLocalDependenciesDir(), path.Base(dependency)))
+	}
+
+	// Return relocated PropertyFiles.
+	return nil
+}
+
+func updateIntegrationRoutes(routes []string) error {
+	// Create dependencies directory under Maven working directory. This ensures that
+	// dependencies will be removed after they are not needed.
+	err := util.CreateLocalRoutesDirectory()
+	if err != nil {
+		return err
+	}
+
+	// Relocate dependencies files to this integration's dependencies directory.
+	for _, route := range routes {
+		util.CopyFile(route, path.Join(util.GetLocalRoutesDir(), path.Base(route)))
 	}
 
 	// Return relocated PropertyFiles.

@@ -50,6 +50,9 @@ const DefaultPropertiesDirectoryName = "properties"
 // DefaultRoutesDirectoryName --
 const DefaultRoutesDirectoryName = "routes"
 
+// DefaultWorkingDirectoryName --
+const DefaultWorkingDirectoryName = "workspace"
+
 // StringSliceJoin --
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0
@@ -367,7 +370,7 @@ func GetLocalDependenciesDir() string {
 
 // GetLocalRoutesDir -- <mavenWorkingDirectory>/routes
 func GetLocalRoutesDir() string {
-	return path.Join(MavenWorkingDirectory, DefaultDependenciesDirectoryName)
+	return path.Join(MavenWorkingDirectory, DefaultRoutesDirectoryName)
 }
 
 // CreateLocalPropertiesDirectory --

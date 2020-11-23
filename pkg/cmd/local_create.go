@@ -162,13 +162,16 @@ func (command *localCreateCmdOptions) run(args []string) error {
 			return err
 		}
 
+		// Copy routes to a routes folder under a local directory.
+		err = updateIntegrationRoutes(args)
+		if err != nil {
+			return err
+		}
+
 		// Get integration run command to be run inside the container. This means the command
 		// has to be created with the paths which will be valid inside the container.
 		containerCmd := GetContainerIntegrationRunCommand(propertyFiles, dependencies, args)
-
 		err = createAndBuildIntegrationImage(command.DockerRegistry, containerCmd, command.ImageName)
-		// // Run integration locally.
-		// err = containerCmd.Run()
 		if err != nil {
 			return nil
 		}

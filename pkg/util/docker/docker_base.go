@@ -58,9 +58,7 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 	args = append(args, ImageArg(imageName, "")...)
 
 	// Root of source directory.
-	if sourceDir != "" {
-		args = append(args, sourceDir)
-	}
+	args = append(args, sourceDir)
 
 	return args
 }
