@@ -336,36 +336,34 @@ func createPropertiesDirectory() error {
 	return nil
 }
 
-func updateIntegrationProperties(command *localRunCmdOptions) error {
+func updateIntegrationProperties(properties []string, propertyFiles []string) ([]string, error) {
 	// Create properties directory under Maven working directory. This ensures that
 	// property files of different integrations do not clash.
 	err := createPropertiesDirectory()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Relocate properties files to this integration's property directory.
 	relocatedPropertyFiles := []string{}
-	for _, propertyFile := range command.PropertyFiles {
+	for _, propertyFile := range propertyFiles {
 		relocatedPropertyFile := path.Join(getPropertiesDir(), path.Base(propertyFile))
 		util.CopyFile(propertyFile, relocatedPropertyFile)
 		relocatedPropertyFiles = append(relocatedPropertyFiles, relocatedPropertyFile)
 	}
 
 	// Output list of properties to property file if any CLI properties were given.
-	if len(command.Properties) > 0 {
+	if len(properties) > 0 {
 		propertyFilePath := path.Join(getPropertiesDir(), "CLI.properties")
-		err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(command.Properties, "\n")), 0777)
+		err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0777)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		relocatedPropertyFiles = append(relocatedPropertyFiles, propertyFilePath)
 	}
 
-	// Update command PropertyFiles.
-	command.PropertyFiles = relocatedPropertyFiles
-
-	return nil
+	// Return relocated PropertyFiles.
+	return relocatedPropertyFiles, nil
 }
 
 func createMavenWorkingDirectory() error {

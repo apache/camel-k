@@ -58,6 +58,7 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 	cmd.Flags().Bool("base-image", false, "Create base image used as a starting point for any integration.")
 	cmd.Flags().String("docker-registry", "", "Docker registry to store intermediate images.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, "Add an additional dependency")
 
 	return &cmd, &options
@@ -68,6 +69,7 @@ type localCreateCmdOptions struct {
 	BaseImage              bool     `mapstructure:"base-image"`
 	DockerRegistry         string   `mapstructure:"docker-registry"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
+	Properties             []string `mapstructure:"properties"`
 	PropertyFiles          []string `mapstructure:"property-files"`
 }
 
@@ -136,6 +138,15 @@ func (command *localCreateCmdOptions) run(args []string) error {
 
 	// Create integration image if integration files were provided.
 	if len(args) > 0 {
+		// Manage integration properties which may come from files or CLI.
+		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
+		if err != nil {
+			return nil
+		}
+
+		// Update property files with relocated files.
+		command.PropertyFiles = propertyFiles
+
 		// Fetch dependencies.
 		dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
 		if err != nil {
