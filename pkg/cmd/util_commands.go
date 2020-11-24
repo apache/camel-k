@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -83,9 +84,20 @@ func assembleIntegrationRunCommand(properties []string, dependencies []string, r
 	return cmd
 }
 
-// GetLocalIntegrationRunCommand --
-func GetLocalIntegrationRunCommand(properties []string, dependencies []string, routes []string) *exec.Cmd {
-	return assembleIntegrationRunCommand(properties, dependencies, routes, util.GetLocalPropertiesDir())
+// RunLocalIntegrationRunCommand --
+func RunLocalIntegrationRunCommand(properties []string, dependencies []string, routes []string) error {
+	cmd := assembleIntegrationRunCommand(properties, dependencies, routes, util.GetLocalPropertiesDir())
+
+	// Output command we are about to run.
+	fmt.Printf("Executing: %s", strings.Join(cmd.Args, " "))
+
+	// Run integration locally.
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetContainerIntegrationRunCommand --

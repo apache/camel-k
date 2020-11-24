@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -57,6 +56,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	}
 
 	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
+	cmd.Flags().String("image-name", "", "Integration image name.")
 	cmd.Flags().String("docker-registry", "", "Docker registry to store intermediate images.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
@@ -68,6 +68,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 type localRunCmdOptions struct {
 	*RootCmdOptions
 	Containerize           bool     `mapstructure:"containerize"`
+	ImageName              string   `mapstructure:"image-name"`
 	DockerRegistry         string   `mapstructure:"docker-registry"`
 	PropertyFiles          []string `mapstructure:"property-files"`
 	Properties             []string `mapstructure:"properties"`
@@ -76,13 +77,15 @@ type localRunCmdOptions struct {
 
 func (command *localRunCmdOptions) validate(args []string) error {
 	// Validate integration files.
-	err := validateIntegrationFiles(args)
-	if err != nil {
-		return err
+	if command.ImageName == "" {
+		err := validateIntegrationFiles(args)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Validate additional dependencies specified by the user.
-	err = validateAdditionalDependencies(command.AdditionalDependencies)
+	err := validateAdditionalDependencies(command.AdditionalDependencies)
 	if err != nil {
 		return err
 	}
@@ -90,12 +93,17 @@ func (command *localRunCmdOptions) validate(args []string) error {
 	// Validate properties file.
 	err = validatePropertyFiles(command.PropertyFiles)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	// If containerize is set then docker registry must be set.
 	if command.Containerize && command.DockerRegistry == "" {
 		return errors.New("containerization is active but no registry has been provided")
+	}
+
+	// If containerize is set then docker registry must be set.
+	if command.ImageName != "" && command.DockerRegistry == "" {
+		return errors.New("cannot get image as no registry has been provided")
 	}
 
 	return nil
@@ -106,6 +114,17 @@ func (command *localRunCmdOptions) init() error {
 }
 
 func (command *localRunCmdOptions) run(args []string) error {
+	// If local run is provided with an image name, it will just run the image locally and exit.
+	if command.ImageName != "" {
+		// Run image locally.
+		err := runIntegrationImage(command.DockerRegistry, command.ImageName)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	// Fetch dependencies.
 	dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
 	if err != nil {
@@ -115,19 +134,29 @@ func (command *localRunCmdOptions) run(args []string) error {
 	// Manage integration properties which may come from files or CLI.
 	propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	// Get integration run command.
-	cmd := GetLocalIntegrationRunCommand(propertyFiles, dependencies, args)
+	// If this is a containerized local run, create, build and run the container image.
+	if command.Containerize {
+		// Create and build integration image.
+		err = createAndBuildIntegrationImage(command.DockerRegistry, false, command.ImageName,
+			propertyFiles, dependencies, args)
+		if err != nil {
+			return err
+		}
 
-	// Output command we are about to run.
-	fmt.Printf("Executing: %s", strings.Join(cmd.Args, " "))
-
-	// Run integration locally.
-	err = cmd.Run()
-	if err != nil {
-		return nil
+		// Run integratgion image.
+		err = runIntegrationImage(command.DockerRegistry, command.ImageName)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Run integration locally.
+		err = RunLocalIntegrationRunCommand(propertyFiles, dependencies, args)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
