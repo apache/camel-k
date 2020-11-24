@@ -110,15 +110,13 @@ func (command *localCreateCmdOptions) validate(args []string) error {
 
 func (command *localCreateCmdOptions) init(args []string) error {
 	// If base image construction is enabled create a directory for it.
-	if command.BaseImage {
-		err := createDockerBaseWorkingDirectory()
-		if err != nil {
-			return err
-		}
+	err := createDockerBaseWorkingDirectory()
+	if err != nil {
+		return err
 	}
 
 	// If integration files are provided an integration image will be built.
-	if len(args) > 0 {
+	if !command.BaseImage {
 		err := createDockerWorkingDirectory()
 		if err != nil {
 			return err
@@ -134,47 +132,23 @@ func (command *localCreateCmdOptions) init(args []string) error {
 }
 
 func (command *localCreateCmdOptions) run(args []string) error {
-	// Create the Dockerfile and build the base image.
-	if command.BaseImage {
-		err := createAndBuildBaseImage(command.DockerRegistry)
-		if err != nil {
-			return err
-		}
+	// Fetch dependencies.
+	dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
+	if err != nil {
+		return err
 	}
 
-	// Create integration image if integration files were provided.
-	if len(args) > 0 {
-		// Manage integration properties which may come from files or CLI.
-		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
-		if err != nil {
-			return nil
-		}
+	// Manage integration properties which may come from files or CLI.
+	propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
+	if err != nil {
+		return err
+	}
 
-		// Fetch dependencies.
-		dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
-		if err != nil {
-			return err
-		}
-
-		// Copy dependencies to a dependencies folder under a local directory.
-		err = updateIntegrationDependencies(dependencies)
-		if err != nil {
-			return err
-		}
-
-		// Copy routes to a routes folder under a local directory.
-		err = updateIntegrationRoutes(args)
-		if err != nil {
-			return err
-		}
-
-		// Get integration run command to be run inside the container. This means the command
-		// has to be created with the paths which will be valid inside the container.
-		containerCmd := GetContainerIntegrationRunCommand(propertyFiles, dependencies, args)
-		err = createAndBuildIntegrationImage(command.DockerRegistry, containerCmd, command.ImageName)
-		if err != nil {
-			return nil
-		}
+	// Create and build integration image.
+	err = createAndBuildIntegrationImage(command.DockerRegistry, command.BaseImage,
+		command.ImageName, propertyFiles, dependencies, args)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -182,12 +156,10 @@ func (command *localCreateCmdOptions) run(args []string) error {
 
 func (command *localCreateCmdOptions) deinit(args []string) error {
 	// If base image construction is enabled delete the directory for it.
-	if command.BaseImage {
-		deleteDockerBaseWorkingDirectory()
-	}
+	deleteDockerBaseWorkingDirectory()
 
 	// If integration files are provided delete the maven project folder.
-	if len(args) > 0 {
+	if !command.BaseImage {
 		deleteDockerWorkingDirectory()
 		deleteMavenWorkingDirectory()
 	}

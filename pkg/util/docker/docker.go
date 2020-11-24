@@ -95,9 +95,18 @@ func BuildBaseImageArgs() []string {
 func BuildIntegrationImageArgs(imageName string) []string {
 	// Construct the docker command:
 	//
-	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName> <MavenWorkingDirectory>
+	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<ImageName> <MavenWorkingDirectory>
 	//
 	return BuildImageArgs(IntegrationWorkingDirectory, imageName, util.MavenWorkingDirectory)
+}
+
+// RunIntegrationImageArgs --
+func RunIntegrationImageArgs(imageName string) []string {
+	// Construct the docker command:
+	//
+	// docker run --network="host" <dockerRegistry>/<ImageName>
+	//
+	return RunImageArgs(imageName, latestTag)
 }
 
 // GetContainerWorkspaceDir -- directory inside the container where all the integration files are copied.
