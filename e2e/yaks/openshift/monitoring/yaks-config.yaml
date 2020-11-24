@@ -23,7 +23,7 @@ pre:
     script: ./obtainToken.sh
   - name: Camel-k install
     run: |
-      kamel install -w -n ${YAKS_NAMESPACE}
+      kamel install -w -n ${YAKS_NAMESPACE} --monitoring=true
   - name: Dependency install
     script: ./dependencyInstall.sh
   - name: Integration run
