@@ -77,7 +77,7 @@ type localRunCmdOptions struct {
 
 func (command *localRunCmdOptions) validate(args []string) error {
 	// Validate integration files.
-	if command.ImageName == "" {
+	if command.ImageName == "" || command.Containerize {
 		err := validateIntegrationFiles(args)
 		if err != nil {
 			return err
@@ -101,7 +101,12 @@ func (command *localRunCmdOptions) validate(args []string) error {
 		return errors.New("containerization is active but no registry has been provided")
 	}
 
-	// If containerize is set then docker registry must be set.
+	// If containerize is set then docker image name must be set.
+	if command.Containerize && command.ImageName == "" {
+		return errors.New("containerization is active but no image name has been provided")
+	}
+
+	// If ImageName is provided then docker registry must be set.
 	if command.ImageName != "" && command.DockerRegistry == "" {
 		return errors.New("cannot get image as no registry has been provided")
 	}
@@ -115,7 +120,7 @@ func (command *localRunCmdOptions) init() error {
 
 func (command *localRunCmdOptions) run(args []string) error {
 	// If local run is provided with an image name, it will just run the image locally and exit.
-	if command.ImageName != "" {
+	if command.ImageName != "" && !command.Containerize {
 		// Run image locally.
 		err := runIntegrationImage(command.DockerRegistry, command.ImageName)
 		if err != nil {
