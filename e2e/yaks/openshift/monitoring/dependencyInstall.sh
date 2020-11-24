@@ -26,4 +26,4 @@ LOCAL_MVN_HOME=$(mvn help:evaluate -Dexpression=settings.localRepository -q -Dfo
 
 OPERATOR_POD=$(oc -n ${YAKS_NAMESPACE} get pods -l name=camel-k-operator --no-headers -o custom-columns=NAME:.metadata.name)
 oc -n ${YAKS_NAMESPACE} exec $OPERATOR_POD -- mkdir -p /tmp/artifacts/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/
-oc -n ${YAKS_NAMESPACE} rsync $LOCAL_MVN_HOME/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ $OPERATOR_POD:/tmp/artifacts/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ --exclude=\* --include=camel-k-example-metrics-1.0.0-SNAPSHOT.\* --no-perms=true
+oc -n ${YAKS_NAMESPACE} rsync $LOCAL_MVN_HOME/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ $OPERATOR_POD:/tmp/artifacts/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ --no-perms=true
