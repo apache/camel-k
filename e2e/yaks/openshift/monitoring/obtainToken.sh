@@ -17,6 +17,8 @@
 
 TOKEN=`oc config view --minify --output 'jsonpath={..token}'`
 echo "openshift.token=${TOKEN}" > openshift-token.properties
-oc -n ${YAKS_NAMESPACE} create secret generic openshift-token-secret --from-file=openshift-token.properties
-oc -n ${YAKS_NAMESPACE} label secret openshift-token-secret yaks.citrusframework.org/test=metrics
+oc -n ${YAKS_NAMESPACE} create secret generic openshift-token-secret-metrics --from-file=openshift-token.properties
+oc -n ${YAKS_NAMESPACE} create secret generic openshift-token-secret-alerting --from-file=openshift-token.properties
+oc -n ${YAKS_NAMESPACE} label secret openshift-token-secret-metrics yaks.citrusframework.org/test=metrics
+oc -n ${YAKS_NAMESPACE} label secret openshift-token-secret-alerting yaks.citrusframework.org/test=alerting
 rm openshift-token.properties
