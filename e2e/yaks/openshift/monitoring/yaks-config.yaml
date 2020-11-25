@@ -28,4 +28,6 @@ pre:
     script: ./dependencyInstall.sh
   - name: Integration run
     run: |
+      set +e
+      kamel run --name metrics Metrics.java -w -n $YAKS_NAMESPACE --dependency mvn:com.github.openshift-integration:camel-k-example-metrics-non-existing:1.0.0-SNAPSHOT
       kamel run --name metrics Metrics.java -w -n $YAKS_NAMESPACE --dependency mvn:com.github.openshift-integration:camel-k-example-metrics:1.0.0-SNAPSHOT
