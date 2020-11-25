@@ -4,9 +4,15 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.2.1...HEAD)
 
+**Closed issues:**
+
+- Multiple knative revisions created when integration has multiple spec.configuration items [\#1824](https://github.com/apache/camel-k/issues/1824)
+
 **Merged pull requests:**
 
+- Sort the integration configurations before returning [\#1825](https://github.com/apache/camel-k/pull/1825) ([kaczyns](https://github.com/kaczyns))
 - chore\(doc\): Shorten monitoring/scaling navigation menu items [\#1819](https://github.com/apache/camel-k/pull/1819) ([astefanutti](https://github.com/astefanutti))
+- Support CLI properties for kamel local run. [\#1817](https://github.com/apache/camel-k/pull/1817) ([doru1004](https://github.com/doru1004))
 - chore\(doc\): Add Camel K operator monitoring documentation [\#1812](https://github.com/apache/camel-k/pull/1812) ([astefanutti](https://github.com/astefanutti))
 - \#1743: Begin generating the operator bundle using operator-sdk [\#1811](https://github.com/apache/camel-k/pull/1811) ([phantomjinx](https://github.com/phantomjinx))
 - Update PDB trait documentation [\#1810](https://github.com/apache/camel-k/pull/1810) ([astefanutti](https://github.com/astefanutti))
