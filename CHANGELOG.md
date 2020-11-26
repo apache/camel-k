@@ -906,7 +906,6 @@
 - fix \#1023: add possibility to reference staging artifacts [\#1029](https://github.com/apache/camel-k/pull/1029) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: fix eaxmples [\#1026](https://github.com/apache/camel-k/pull/1026) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
-- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
@@ -937,6 +936,7 @@
 
 **Merged pull requests:**
 
+- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - fix \#985: add correct clusterroles for knative in global mode [\#1019](https://github.com/apache/camel-k/pull/1019) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
