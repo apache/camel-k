@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	kameletutils "github.com/apache/camel-k/pkg/kamelet"
 )
 
 // NewInitializeAction returns a action that initializes the kamelet configuration when not provided by the user
@@ -41,5 +42,5 @@ func (action *initializeAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
-	return updateStatus(kamelet)
+	return kameletutils.Initialize(kamelet)
 }

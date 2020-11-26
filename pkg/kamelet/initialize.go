@@ -27,7 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func updateStatus(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
+func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 	target := kamelet.DeepCopy()
 
 	if !v1alpha1.ValidKameletName(kamelet.Name) {

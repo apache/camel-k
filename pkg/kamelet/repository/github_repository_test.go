@@ -15,32 +15,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kamelet
+package repository
 
 import (
 	"context"
+	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	kameletutils "github.com/apache/camel-k/pkg/kamelet"
+	"github.com/stretchr/testify/assert"
 )
 
-// NewMonitorAction returns an action that monitors the kamelet after it's fully initialized
-func NewMonitorAction() Action {
-	return &monitorAction{}
-}
+func TestGithubRepository(t *testing.T) {
+	ctx := context.Background()
+	repo := newGithubKameletRepository("apache", "camel-kamelets", "", "")
+	list, err := repo.List(ctx)
+	assert.NoError(t, err)
+	assert.True(t, len(list) > 0)
+	// Repeat multiple times to be sure cache is working and we don't hit rate limits
+	maxDistinct := 5
+	for i := 0; i < 200; i++ {
+		maxPos := maxDistinct
+		if len(list) < maxDistinct {
+			maxPos = len(list)
+		}
+		kameletName := list[i%maxPos]
+		kamelet, err := repo.Get(ctx, kameletName)
+		assert.NoError(t, err)
+		assert.Equal(t, kameletName, kamelet.Name)
+	}
 
-type monitorAction struct {
-	baseAction
-}
-
-func (action *monitorAction) Name() string {
-	return "monitor"
-}
-
-func (action *monitorAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
-	return kamelet.Status.Phase == v1alpha1.KameletPhaseReady
-}
-
-func (action *monitorAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
-	return kameletutils.Initialize(kamelet)
 }

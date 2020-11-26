@@ -15,32 +15,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kamelet
+package repository
 
 import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	kameletutils "github.com/apache/camel-k/pkg/kamelet"
 )
 
-// NewMonitorAction returns an action that monitors the kamelet after it's fully initialized
-func NewMonitorAction() Action {
-	return &monitorAction{}
+type emptyKameletRepository struct {
 }
 
-type monitorAction struct {
-	baseAction
+func newEmptyKameletRepository() KameletRepository {
+	return &emptyKameletRepository{}
 }
 
-func (action *monitorAction) Name() string {
-	return "monitor"
+// Enforce type
+var _ KameletRepository = &emptyKameletRepository{}
+
+func (e *emptyKameletRepository) List(_ context.Context) ([]string, error) {
+	return nil, nil
 }
 
-func (action *monitorAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
-	return kamelet.Status.Phase == v1alpha1.KameletPhaseReady
+func (e *emptyKameletRepository) Get(_ context.Context, _ string) (*v1alpha1.Kamelet, error) {
+	return nil, nil
 }
 
-func (action *monitorAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
-	return kameletutils.Initialize(kamelet)
+func (c *emptyKameletRepository) String() string {
+	return "Empty[]"
 }

@@ -491,7 +491,8 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	trait.Client = client
 
 	environment := &Environment{
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(context.TODO(), client),
+		Client:       client,
 		CamelCatalog: catalog,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{

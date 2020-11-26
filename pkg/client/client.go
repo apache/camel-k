@@ -22,6 +22,8 @@ import (
 	"os"
 	"path/filepath"
 
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
 	user "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -42,6 +44,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/apache/camel-k/pkg/apis"
+	camel "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
 )
 
 const (
@@ -53,6 +56,8 @@ const (
 type Client interface {
 	controller.Client
 	kubernetes.Interface
+	CamelV1() camelv1.CamelV1Interface
+	CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface
 	GetScheme() *runtime.Scheme
 	GetConfig() *rest.Config
 	GetCurrentNamespace(kubeConfig string) (string, error)
@@ -71,8 +76,20 @@ type Provider struct {
 type defaultClient struct {
 	controller.Client
 	kubernetes.Interface
+	camel  camel.Interface
 	scheme *runtime.Scheme
 	config *rest.Config
+}
+
+// Check interface compliance
+var _ Client = &defaultClient{}
+
+func (c *defaultClient) CamelV1() camelv1.CamelV1Interface {
+	return c.camel.CamelV1()
+}
+
+func (c *defaultClient) CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface {
+	return c.camel.CamelV1alpha1()
 }
 
 func (c *defaultClient) GetScheme() *runtime.Scheme {
@@ -114,6 +131,11 @@ func NewClient(fastDiscovery bool) (Client, error) {
 		return nil, err
 	}
 
+	var camelClientset camel.Interface
+	if camelClientset, err = camel.NewForConfig(cfg); err != nil {
+		return nil, err
+	}
+
 	var mapper meta.RESTMapper
 	if fastDiscovery {
 		mapper = newFastDiscoveryRESTMapper(cfg)
@@ -132,6 +154,7 @@ func NewClient(fastDiscovery bool) (Client, error) {
 	return &defaultClient{
 		Client:    dynClient,
 		Interface: clientset,
+		camel:     camelClientset,
 		scheme:    clientOptions.Scheme,
 		config:    cfg,
 	}, nil
@@ -144,9 +167,14 @@ func FromManager(manager manager.Manager) (Client, error) {
 	if clientset, err = kubernetes.NewForConfig(manager.GetConfig()); err != nil {
 		return nil, err
 	}
+	var camelClientset camel.Interface
+	if camelClientset, err = camel.NewForConfig(manager.GetConfig()); err != nil {
+		return nil, err
+	}
 	return &defaultClient{
 		Client:    manager.GetClient(),
 		Interface: clientset,
+		camel:     camelClientset,
 		scheme:    manager.GetScheme(),
 		config:    manager.GetConfig(),
 	}, nil

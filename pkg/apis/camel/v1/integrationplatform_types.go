@@ -33,6 +33,7 @@ type IntegrationPlatformSpec struct {
 	Resources     IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
 	Traits        map[string]TraitSpec             `json:"traits,omitempty"`
 	Configuration []ConfigurationSpec              `json:"configuration,omitempty"`
+	Kamelet       IntegrationPlatformKameletSpec   `json:"kamelet,omitempty"`
 }
 
 // IntegrationPlatformResourcesSpec contains platform related resources
@@ -126,6 +127,16 @@ type IntegrationPlatformRegistrySpec struct {
 	Secret       string `json:"secret,omitempty"`
 	CA           string `json:"ca,omitempty"`
 	Organization string `json:"organization,omitempty"`
+}
+
+// IntegrationPlatformKameletSpec --
+type IntegrationPlatformKameletSpec struct {
+	Repositories []IntegrationPlatformKameletRepositorySpec `json:"repositories,omitempty"`
+}
+
+// IntegrationPlatformKameletRepositorySpec --
+type IntegrationPlatformKameletRepositorySpec struct {
+	URI string `json:"uri,omitempty"`
 }
 
 // IntegrationPlatformBuildStrategy enumerates all implemented build strategies

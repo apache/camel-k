@@ -22,7 +22,12 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/client"
+	camel "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
+	fakecamelclientset "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/fake"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
@@ -41,35 +46,47 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	}
 
 	c := fake.NewFakeClientWithScheme(scheme, initObjs...)
-	filtered := make([]runtime.Object, 0, len(initObjs))
-	skipList := []string{"camel", "knative"}
-	for _, o := range initObjs {
-		kinds, _, _ := scheme.ObjectKinds(o)
-		allow := true
-		for _, k := range kinds {
-			for _, skip := range skipList {
-				if strings.Contains(k.Group, skip) {
-					allow = false
-					break
-				}
-			}
-		}
-		if allow {
-			filtered = append(filtered, o)
-		}
-	}
-	clientset := fakeclientset.NewSimpleClientset(filtered...)
+
+	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
+		return strings.Contains(gvk.Group, "camel")
+	})...)
+	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
+		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative")
+	})...)
 
 	return &FakeClient{
 		Client:    c,
 		Interface: clientset,
+		camel:     camelClientset,
 	}, nil
+}
+
+func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(gvk schema.GroupVersionKind) bool) (res []runtime.Object) {
+	for _, obj := range input {
+		kinds, _, _ := scheme.ObjectKinds(obj)
+		for _, k := range kinds {
+			if filter(k) {
+				res = append(res, obj)
+				break
+			}
+		}
+	}
+	return res
 }
 
 // FakeClient ---
 type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
+	camel camel.Interface
+}
+
+func (c *FakeClient) CamelV1() camelv1.CamelV1Interface {
+	return c.camel.CamelV1()
+}
+
+func (c *FakeClient) CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface {
+	return c.camel.CamelV1alpha1()
 }
 
 // GetScheme ---
