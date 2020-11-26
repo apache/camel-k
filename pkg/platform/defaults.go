@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/pkg/kamelet/repository"
 	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/pkg/errors"
 
@@ -245,6 +246,12 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 		if verbose {
 			log.Log.Infof("Kaniko cache set to %t", *p.Status.Build.KanikoBuildCache)
 		}
+	}
+
+	if len(p.Status.Kamelet.Repositories) == 0 {
+		p.Status.Kamelet.Repositories = append(p.Status.Kamelet.Repositories, v1.IntegrationPlatformKameletRepositorySpec{
+			URI: repository.DefaultRemoteRepository,
+		})
 	}
 
 	if verbose {

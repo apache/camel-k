@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/kamelet/repository"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/pkg/errors"
@@ -108,13 +109,18 @@ func (action *initializeAction) findIcon(ctx context.Context, binding *v1alpha1.
 		return "", nil
 	}
 
-	key := client.ObjectKey{
-		Namespace: binding.Namespace,
-		Name:      kameletRef.Name,
-	}
-	var kamelet v1alpha1.Kamelet
-	if err := action.client.Get(ctx, key, &kamelet); err != nil {
+	repo, err := repository.New(ctx, action.client, binding.Namespace)
+	if err != nil {
 		return "", err
 	}
+
+	kamelet, err := repo.Get(ctx, kameletRef.Name)
+	if err != nil {
+		return "", err
+	}
+	if kamelet == nil {
+		return "", nil
+	}
+
 	return kamelet.Annotations[v1alpha1.AnnotationIcon], nil
 }

@@ -174,6 +174,18 @@ spec:
                 - value
                 type: object
               type: array
+            kamelet:
+              description: IntegrationPlatformKameletSpec --
+              properties:
+                repositories:
+                  items:
+                    description: IntegrationPlatformKameletRepositorySpec --
+                    properties:
+                      uri:
+                        type: string
+                    type: object
+                  type: array
+              type: object
             profile:
               description: TraitProfile represents lists of traits that are enabled
                 for the specific installation/integration
@@ -338,6 +350,18 @@ spec:
                 - value
                 type: object
               type: array
+            kamelet:
+              description: IntegrationPlatformKameletSpec --
+              properties:
+                repositories:
+                  items:
+                    description: IntegrationPlatformKameletRepositorySpec --
+                    properties:
+                      uri:
+                        type: string
+                    type: object
+                  type: array
+              type: object
             phase:
               description: IntegrationPlatformPhase --
               type: string

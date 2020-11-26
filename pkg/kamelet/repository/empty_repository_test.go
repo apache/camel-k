@@ -15,32 +15,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kamelet
+package repository
 
 import (
 	"context"
+	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	kameletutils "github.com/apache/camel-k/pkg/kamelet"
+	"github.com/stretchr/testify/assert"
 )
 
-// NewMonitorAction returns an action that monitors the kamelet after it's fully initialized
-func NewMonitorAction() Action {
-	return &monitorAction{}
-}
-
-type monitorAction struct {
-	baseAction
-}
-
-func (action *monitorAction) Name() string {
-	return "monitor"
-}
-
-func (action *monitorAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
-	return kamelet.Status.Phase == v1alpha1.KameletPhaseReady
-}
-
-func (action *monitorAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
-	return kameletutils.Initialize(kamelet)
+func TestEmptyRepository(t *testing.T) {
+	ctx := context.Background()
+	repo := newEmptyKameletRepository()
+	list, err := repo.List(ctx)
+	assert.NoError(t, err)
+	assert.Len(t, list, 0)
+	k, err := repo.Get(ctx, "non-existing")
+	assert.NoError(t, err)
+	assert.Nil(t, k)
 }

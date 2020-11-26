@@ -15,32 +15,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kamelet
+package repository
 
 import (
-	"context"
-
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	kameletutils "github.com/apache/camel-k/pkg/kamelet"
+	"strings"
 )
 
-// NewMonitorAction returns an action that monitors the kamelet after it's fully initialized
-func NewMonitorAction() Action {
-	return &monitorAction{}
+var fileSuffixes = []string{".kamelet.yaml", ".kamelet.yml", ".kamelet.json"}
+
+func isKameletFileName(fileName string) bool {
+	for _, suffix := range fileSuffixes {
+		if strings.HasSuffix(fileName, suffix) {
+			return true
+		}
+	}
+	return false
 }
 
-type monitorAction struct {
-	baseAction
+func isFileNameForKamelet(name, fileName string) bool {
+	for _, suffix := range fileSuffixes {
+		if name+suffix == fileName {
+			return true
+		}
+	}
+	return false
 }
 
-func (action *monitorAction) Name() string {
-	return "monitor"
-}
-
-func (action *monitorAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
-	return kamelet.Status.Phase == v1alpha1.KameletPhaseReady
-}
-
-func (action *monitorAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
-	return kameletutils.Initialize(kamelet)
+func getKameletNameFromFile(fileName string) string {
+	name := fileName
+	for _, suffix := range fileSuffixes {
+		name = strings.TrimSuffix(name, suffix)
+	}
+	return name
 }

@@ -27,6 +27,8 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	kameletutils "github.com/apache/camel-k/pkg/kamelet"
+	"github.com/apache/camel-k/pkg/kamelet/repository"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
@@ -34,7 +36,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
@@ -129,58 +130,81 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 }
 
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	for _, k := range t.getKameletKeys() {
-		var kamelet v1alpha1.Kamelet
-		key := client.ObjectKey{
-			Namespace: e.Integration.Namespace,
-			Name:      k,
-		}
-		if err := t.Client.Get(t.Ctx, key, &kamelet); err != nil {
+	kameletKeys := t.getKameletKeys()
+	if len(kameletKeys) > 0 {
+		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace)
+		if err != nil {
 			return err
 		}
+		for _, k := range t.getKameletKeys() {
+			kamelet, err := repo.Get(e.C, k)
+			if err != nil {
+				return err
+			}
+			if kamelet == nil {
+				return fmt.Errorf("kamelet %s not found in any of the defined repositories: %s", k, repo.String())
+			}
 
-		if kamelet.Status.Phase != v1alpha1.KameletPhaseReady {
-			return fmt.Errorf("kamelet %q is not %s: %s", k, v1alpha1.KameletPhaseReady, kamelet.Status.Phase)
+			// Initialize remote kamelets
+			kamelet, err = kameletutils.Initialize(kamelet)
+			if err != nil {
+				return err
+			}
+
+			if kamelet.Status.Phase != v1alpha1.KameletPhaseReady {
+				return fmt.Errorf("kamelet %q is not %s: %s", k, v1alpha1.KameletPhaseReady, kamelet.Status.Phase)
+			}
+
+			if err := t.addKameletAsSource(e, kamelet); err != nil {
+				return err
+			}
+
+			// Adding dependencies from Kamelets
+			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
 		}
-
-		if err := t.addKameletAsSource(e, kamelet); err != nil {
-			return err
-		}
-
-		// Adding dependencies from Kamelets
-		util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
+		// resort dependencies
+		sort.Strings(e.Integration.Status.Dependencies)
 	}
-	// resort dependencies
-	sort.Strings(e.Integration.Status.Dependencies)
 	return nil
 }
 
 func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
-	for _, k := range t.getKameletKeys() {
-		var kamelet v1alpha1.Kamelet
-		key := client.ObjectKey{
-			Namespace: e.Integration.Namespace,
-			Name:      k,
-		}
-		if err := t.Client.Get(t.Ctx, key, &kamelet); err != nil {
+	if len(t.getKameletKeys()) > 0 {
+		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace)
+		if err != nil {
 			return err
 		}
+		for _, k := range t.getKameletKeys() {
+			kamelet, err := repo.Get(e.C, k)
+			if err != nil {
+				return err
+			}
+			if kamelet == nil {
+				return fmt.Errorf("kamelet %s not found in any of the defined repositories: %s", k, repo.String())
+			}
 
-		// Configuring defaults from Kamelet
-		for _, prop := range kamelet.Status.Properties {
-			if prop.Default != "" {
-				// Check whether user specified a value
-				userDefined := false
-				propName := fmt.Sprintf("camel.kamelet.%s.%s", kamelet.Name, prop.Name)
-				propPrefix := propName + "="
-				for _, userProp := range e.Integration.Spec.Configuration {
-					if strings.HasPrefix(userProp.Value, propPrefix) {
-						userDefined = true
-						break
+			// remote Kamelets may not be fully initialized
+			kamelet, err = kameletutils.Initialize(kamelet)
+			if err != nil {
+				return err
+			}
+
+			// Configuring defaults from Kamelet
+			for _, prop := range kamelet.Status.Properties {
+				if prop.Default != "" {
+					// Check whether user specified a value
+					userDefined := false
+					propName := fmt.Sprintf("camel.kamelet.%s.%s", kamelet.Name, prop.Name)
+					propPrefix := propName + "="
+					for _, userProp := range e.Integration.Spec.Configuration {
+						if strings.HasPrefix(userProp.Value, propPrefix) {
+							userDefined = true
+							break
+						}
 					}
-				}
-				if !userDefined {
-					e.ApplicationProperties[propName] = prop.Default
+					if !userDefined {
+						e.ApplicationProperties[propName] = prop.Default
+					}
 				}
 			}
 		}
@@ -188,7 +212,7 @@ func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 	return nil
 }
 
-func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet v1alpha1.Kamelet) error {
+func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
 	if kamelet.Spec.Flow != nil {
@@ -323,7 +347,7 @@ func (t *kameletsTrait) getConfigurationKeys() []configurationKey {
 	return answer
 }
 
-func integrationSourceFromKameletSource(e *Environment, kamelet v1alpha1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
+func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
 	if source.Type == v1.SourceTypeTemplate {
 		// Kamelets must be named "<kamelet-name>.extension"
 		language := source.InferLanguage()

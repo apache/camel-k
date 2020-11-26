@@ -46,3 +46,8 @@ client_tag="pkg/client/camel/$target_tag"
 git tag --force ${client_tag} ${target_staging}
 git push --force ${target_remote} ${client_tag}
 echo "Tag ${client_tag} pushed to ${target_remote}"
+
+kamelet_repo_tag="pkg/kamelet/repository/$target_tag"
+git tag --force ${kamelet_repo_tag} ${target_staging}
+git push --force ${target_remote} ${kamelet_repo_tag}
+echo "Tag ${kamelet_repo_tag} pushed to ${target_remote}"
