@@ -10,6 +10,7 @@
 
 **Merged pull requests:**
 
+- Provide tests for ENTESB-14497 [\#1829](https://github.com/apache/camel-k/pull/1829) ([llowinge](https://github.com/llowinge))
 - Sort the integration configurations before returning [\#1825](https://github.com/apache/camel-k/pull/1825) ([kaczyns](https://github.com/kaczyns))
 - chore\(doc\): Shorten monitoring/scaling navigation menu items [\#1819](https://github.com/apache/camel-k/pull/1819) ([astefanutti](https://github.com/astefanutti))
 - Support CLI properties for kamel local run. [\#1817](https://github.com/apache/camel-k/pull/1817) ([doru1004](https://github.com/doru1004))
@@ -563,6 +564,7 @@
 - Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Properly handle platform-http component in routes [\#1411](https://github.com/apache/camel-k/pull/1411) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
+- Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [1.0.0-nightly.202004171040](https://github.com/apache/camel-k/tree/1.0.0-nightly.202004171040) (2020-04-17)
 
@@ -578,7 +580,6 @@
 
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
-- Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1384: allow to define an alternative prometheus config [\#1397](https://github.com/apache/camel-k/pull/1397) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix YAML rest-dsl inspections [\#1392](https://github.com/apache/camel-k/pull/1392) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(builder\): small refactor to image context lookup [\#1391](https://github.com/apache/camel-k/pull/1391) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -906,6 +907,7 @@
 - fix \#1023: add possibility to reference staging artifacts [\#1029](https://github.com/apache/camel-k/pull/1029) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: fix eaxmples [\#1026](https://github.com/apache/camel-k/pull/1026) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
+- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
@@ -936,7 +938,6 @@
 
 **Merged pull requests:**
 
-- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - fix \#985: add correct clusterroles for knative in global mode [\#1019](https://github.com/apache/camel-k/pull/1019) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
