@@ -77,7 +77,8 @@ type knativeTrait struct {
 	CamelSourceCompat *bool `property:"camel-source-compat" json:"camelSourceCompat,omitempty"`
 	// Allows binding the integration to a sink via a Knative SinkBinding resource.
 	// This can be used when the integration targets a single sink.
-	// It's disabled by default.
+	// It's enabled by default when the integration targets a single sink
+	// (except when the integration is owned by a Knative source).
 	SinkBinding *bool `property:"sink-binding" json:"sinkBinding,omitempty"`
 	// Enable automatic discovery of all trait properties.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
@@ -194,6 +195,10 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			// TODO: filter automatically all source channels when the feature becomes stable
 			filter := true
 			t.FilterSourceChannels = &filter
+		}
+		if t.SinkBinding == nil {
+			allowed := t.isSinkBindingAllowed(e)
+			t.SinkBinding = &allowed
 		}
 	}
 
@@ -452,6 +457,23 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 	}
 
 	return nil
+}
+
+func (t *knativeTrait) isSinkBindingAllowed(e *Environment) bool {
+	services := t.extractServices(t.ChannelSinks, knativeapi.CamelServiceTypeChannel)
+	services = append(services, t.extractServices(t.EndpointSinks, knativeapi.CamelServiceTypeEndpoint)...)
+	services = append(services, t.extractServices(t.EventSinks, knativeapi.CamelServiceTypeEvent)...)
+
+	if len(services) != 1 {
+		return false
+	}
+
+	for _, owner := range e.Integration.OwnerReferences {
+		if strings.Contains(owner.APIVersion, "sources.knative.dev") {
+			return false
+		}
+	}
+	return true
 }
 
 func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.CamelEnvironment) error {

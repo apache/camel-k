@@ -77,7 +77,8 @@ listening from more than 1 channel.
 | bool
 | Allows binding the integration to a sink via a Knative SinkBinding resource.
 This can be used when the integration targets a single sink.
-It's disabled by default.
+It's enabled by default when the integration targets a single sink
+(except when the integration is owned by a Knative source).
 
 | knative.auto
 | bool

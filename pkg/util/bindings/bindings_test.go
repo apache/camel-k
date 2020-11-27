@@ -50,9 +50,6 @@ func TestBindings(t *testing.T) {
 				},
 			},
 			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&kind=Service",
-			traits: asTraitSpec("knative", map[string]interface{}{
-				"sinkBinding": true,
-			}),
 		},
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
@@ -67,9 +64,6 @@ func TestBindings(t *testing.T) {
 				}),
 			},
 			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&ce.override.ce-type=mytype&kind=Service",
-			traits: asTraitSpec("knative", map[string]interface{}{
-				"sinkBinding": true,
-			}),
 		},
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
@@ -81,9 +75,6 @@ func TestBindings(t *testing.T) {
 				},
 			},
 			uri: "knative:channel/mychannel?apiVersion=messaging.knative.dev%2Fv1&kind=Channel",
-			traits: asTraitSpec("knative", map[string]interface{}{
-				"sinkBinding": true,
-			}),
 		},
 		{
 			endpointType: v1alpha1.EndpointTypeSource,
