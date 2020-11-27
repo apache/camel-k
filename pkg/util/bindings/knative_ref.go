@@ -18,12 +18,10 @@ limitations under the License.
 package bindings
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/knative"
@@ -91,28 +89,8 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointType v1
 	}
 
 	serviceURI = uri.AppendParameters(serviceURI, props)
-
-	var traits map[string]v1.TraitSpec
-	if endpointType == v1alpha1.EndpointTypeSink {
-		knativeConfig := make(map[string]interface{})
-		// TODO remove this after making sinkbinding the default (https://github.com/apache/camel-k/issues/1654)
-		knativeConfig["sinkBinding"] = true
-		knativeConfigJSON, err := json.Marshal(knativeConfig)
-		if err != nil {
-			return nil, err
-		}
-		traits = map[string]v1.TraitSpec{
-			"knative": {
-				Configuration: v1.TraitConfiguration{
-					RawMessage: knativeConfigJSON,
-				},
-			},
-		}
-	}
-
 	return &Binding{
-		URI:    serviceURI,
-		Traits: traits,
+		URI: serviceURI,
 	}, nil
 }
 
