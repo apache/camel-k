@@ -65,35 +65,8 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.13.x
-    - name: Get KinD (Kubernetes in Docker)
-      uses: engineerd/setup-kind@v0.1.0
-      with:
-        version: v0.6.1
-        skipClusterCreation: "true"
-    - name: Start KinD Cluster with Internal Registry
-      run: |
-        CLUSTER_NAME="kind"
-        REGISTRY_CONTAINER_NAME='kind-registry'
-        REGISTRY_PORT='5000'
-        docker run -d -p "${REGISTRY_PORT}:5000" --restart=always --name "${REGISTRY_CONTAINER_NAME}" registry:2
-
-        REGISTRY_IP=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}")
-        cat <<EOF | kind create cluster --config=-
-        kind: Cluster
-        apiVersion: kind.x-k8s.io/v1alpha4
-        containerdConfigPatches:
-        - |-
-          [plugins."io.containerd.grpc.v1.cri".registry.mirrors."${REGISTRY_IP}:${REGISTRY_PORT}"]
-            endpoint = ["http://${REGISTRY_IP}:${REGISTRY_PORT}"]
-        EOF
-        for node in $(kind get nodes --name ${CLUSTER_NAME}); do
-          docker exec "${node}" sh -c "echo $(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}") registry >> /etc/hosts"
-        done
-    - name: Downgrade Kubectl
-      run: |
-        # It fails with version 1.18
-        sudo apt-get install -y --allow-downgrades kubectl=1.16.3-00
-
+    - name: Kubernetes KinD Cluster
+      uses: container-tools/kind-action@v1
     - name: Info
       run: |
         kubectl version
@@ -142,18 +115,8 @@ jobs:
         while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; kubectl get pod -n knative-eventing; sleep 5; done
         while [ "$(kubectl get pod -n knative-sources -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-sources"; kubectl get pod -n knative-sources; sleep 5; done
 
-    - name: Run IT
+    - name: Build Operator
       run: |
-        # Set the test to periodically cleanup the docker system
-        export KAMEL_TEST_CLEANUP="docker system prune -f"
-
-        # Use spectrum builder (faster):
-        export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
-
-        # Compute registry parameters
-        CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
-        echo "Using registry ${CAMEL_K_REGISTRY}:5000"
-
         echo "Build project"
         make build-kamel
         echo "Adding maven artifacts to the image context"
@@ -162,23 +125,28 @@ jobs:
         mkdir -p ./build/_output/bin
         cp ./kamel ./build/_output/bin/
         echo "Building the images"
-        export LOCAL_IMAGE=localhost:5000/apache/camel-k:$(make version)
-        export IMAGE=${CAMEL_K_REGISTRY}:5000/apache/camel-k:$(make version)
+        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
         docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
         docker push ${LOCAL_IMAGE}
 
-        # Make the Apache Snapshots or Apache Staging repository enabled by default
+        sudo mv ./kamel /usr/local/bin
+    - name: Run IT
+      run: |
+        echo "Installing camel k cluster resources"
+        kamel install --cluster-setup
+
+        # Configure install options
+        export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-        
-        echo "installing camel k cluster resources"
-        ./kamel install --cluster-setup
+        export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
+        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+        export KAMEL_INSTALL_OPERATOR_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
+
+        # Configure test options
+        export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
+        export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
 
         # Then run integration tests
-        export KAMEL_INSTALL_REGISTRY=${CAMEL_K_REGISTRY}:5000
-        export KAMEL_INSTALL_REGISTRY_INSECURE=true
-        export KAMEL_INSTALL_OPERATOR_IMAGE=${IMAGE}
-        export CAMEL_K_TEST_IMAGE_NAME=${CAMEL_K_REGISTRY}:5000/apache/camel-k
-        export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
         make test-knative
 
   yaks:
@@ -214,35 +182,8 @@ jobs:
           curl -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks_${YAKS_VERSION}_Linux_x86_64.tar.gz -o yaks.tar.gz
           tar -zxf yaks.tar.gz
           sudo mv yaks /usr/local/bin/
-      - name: Get KinD (Kubernetes in Docker)
-        uses: engineerd/setup-kind@v0.1.0
-        with:
-          version: v0.6.1
-          skipClusterCreation: "true"
-      - name: Start KinD Cluster with Internal Registry
-        run: |
-          CLUSTER_NAME="kind"
-          REGISTRY_CONTAINER_NAME='kind-registry'
-          REGISTRY_PORT='5000'
-          docker run -d -p "${REGISTRY_PORT}:5000" --restart=always --name "${REGISTRY_CONTAINER_NAME}" registry:2
-
-          REGISTRY_IP=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}")
-          cat <<EOF | kind create cluster --config=-
-          kind: Cluster
-          apiVersion: kind.x-k8s.io/v1alpha4
-          containerdConfigPatches:
-          - |-
-            [plugins."io.containerd.grpc.v1.cri".registry.mirrors."${REGISTRY_IP}:${REGISTRY_PORT}"]
-              endpoint = ["http://${REGISTRY_IP}:${REGISTRY_PORT}"]
-          EOF
-          for node in $(kind get nodes --name ${CLUSTER_NAME}); do
-            docker exec "${node}" sh -c "echo $(docker inspect --format '{{.NetworkSettings.IPAddress }}' "${REGISTRY_CONTAINER_NAME}") registry >> /etc/hosts"
-          done
-      - name: Downgrade Kubectl
-        run: |
-          # It fails with version 1.18
-          sudo apt-get install -y --allow-downgrades kubectl=1.16.3-00
-
+      - name: Kubernetes KinD Cluster
+        uses: container-tools/kind-action@v1
       - name: Info
         run: |
           kubectl version
@@ -294,18 +235,8 @@ jobs:
           while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; kubectl get pod -n knative-eventing; sleep 5; done
           while [ "$(kubectl get pod -n knative-sources -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-sources"; kubectl get pod -n knative-sources; sleep 5; done
 
-      - name: Run IT
+      - name: Build Operator
         run: |
-          # Set the test to periodically cleanup the docker system
-          export KAMEL_TEST_CLEANUP="docker system prune -f"
-
-          # Use spectrum builder (faster):
-          export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
-
-          # Compute registry parameters
-          CAMEL_K_REGISTRY=$(docker inspect --format '{{.NetworkSettings.IPAddress }}' "kind-registry")
-          echo "Using registry ${CAMEL_K_REGISTRY}:5000"
-
           echo "Build project"
           make build-kamel
           echo "Adding maven artifacts to the image context"
@@ -314,25 +245,26 @@ jobs:
           mkdir -p ./build/_output/bin
           cp ./kamel ./build/_output/bin/
           echo "Building the images"
-          export LOCAL_IMAGE=localhost:5000/apache/camel-k:$(make version)
-          export IMAGE=${CAMEL_K_REGISTRY}:5000/apache/camel-k:$(make version)
+          export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
           docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
           docker push ${LOCAL_IMAGE}
 
-          # Make the Apache Snapshots or Apache Staging repository enabled by default
-          export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-
-          echo "Making kamel global"
-          sudo mv kamel /usr/local/bin/
-
-          echo "installing camel k cluster resources"
+          sudo mv ./kamel /usr/local/bin
+      - name: Run IT
+        run: |
+          echo "Installing camel k cluster resources"
           kamel install --cluster-setup
 
-          # Then run integration tests
-          export KAMEL_INSTALL_REGISTRY=${CAMEL_K_REGISTRY}:5000
+          # Configure install options
+          export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
+          export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+          export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
           export KAMEL_INSTALL_REGISTRY_INSECURE=true
-          export KAMEL_INSTALL_OPERATOR_IMAGE=${IMAGE}
-          export CAMEL_K_TEST_IMAGE_NAME=${CAMEL_K_REGISTRY}:5000/apache/camel-k
+          export KAMEL_INSTALL_OPERATOR_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
+
+          # Configure test options
+          export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
           export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
 
+          # Then run integration tests
           yaks test e2e/yaks/common
