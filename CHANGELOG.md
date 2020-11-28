@@ -7,11 +7,15 @@
 **Closed issues:**
 
 - Multiple knative revisions created when integration has multiple spec.configuration items [\#1824](https://github.com/apache/camel-k/issues/1824)
+- Release 1.2.1 [\#1823](https://github.com/apache/camel-k/issues/1823)
+- Move released images to a hub without rate limits [\#1761](https://github.com/apache/camel-k/issues/1761)
+- Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
 **Merged pull requests:**
 
 - Provide tests for ENTESB-14497 [\#1829](https://github.com/apache/camel-k/pull/1829) ([llowinge](https://github.com/llowinge))
 - Sort the integration configurations before returning [\#1825](https://github.com/apache/camel-k/pull/1825) ([kaczyns](https://github.com/kaczyns))
+- Split tests by language [\#1822](https://github.com/apache/camel-k/pull/1822) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(doc\): Shorten monitoring/scaling navigation menu items [\#1819](https://github.com/apache/camel-k/pull/1819) ([astefanutti](https://github.com/astefanutti))
 - Support CLI properties for kamel local run. [\#1817](https://github.com/apache/camel-k/pull/1817) ([doru1004](https://github.com/doru1004))
 - chore\(doc\): Add Camel K operator monitoring documentation [\#1812](https://github.com/apache/camel-k/pull/1812) ([astefanutti](https://github.com/astefanutti))
@@ -74,6 +78,7 @@
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
 - Ability to configure PodDisruptionBudget for integrations [\#1760](https://github.com/apache/camel-k/issues/1760)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
+- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
@@ -104,7 +109,6 @@
 
 **Closed issues:**
 
-- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Propagate Kamelet icon on binding [\#1747](https://github.com/apache/camel-k/issues/1747)
 - Thread blocked calling knative REST [\#1720](https://github.com/apache/camel-k/issues/1720)
 - Automatic changelog update should not be run on forks [\#1717](https://github.com/apache/camel-k/issues/1717)
@@ -564,7 +568,6 @@
 - Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Properly handle platform-http component in routes [\#1411](https://github.com/apache/camel-k/pull/1411) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
-- Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [1.0.0-nightly.202004171040](https://github.com/apache/camel-k/tree/1.0.0-nightly.202004171040) (2020-04-17)
 
@@ -580,6 +583,7 @@
 
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
+- Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1384: allow to define an alternative prometheus config [\#1397](https://github.com/apache/camel-k/pull/1397) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix YAML rest-dsl inspections [\#1392](https://github.com/apache/camel-k/pull/1392) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(builder\): small refactor to image context lookup [\#1391](https://github.com/apache/camel-k/pull/1391) ([lburgazzoli](https://github.com/lburgazzoli))
