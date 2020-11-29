@@ -78,7 +78,6 @@
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
 - Ability to configure PodDisruptionBudget for integrations [\#1760](https://github.com/apache/camel-k/issues/1760)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
-- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
@@ -109,6 +108,7 @@
 
 **Closed issues:**
 
+- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Propagate Kamelet icon on binding [\#1747](https://github.com/apache/camel-k/issues/1747)
 - Thread blocked calling knative REST [\#1720](https://github.com/apache/camel-k/issues/1720)
 - Automatic changelog update should not be run on forks [\#1717](https://github.com/apache/camel-k/issues/1717)
@@ -1631,7 +1631,6 @@
 - Platform options  [\#296](https://github.com/apache/camel-k/pull/296) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): package examples to publish them during release [\#295](https://github.com/apache/camel-k/pull/295) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow to generate install resources if needed [\#294](https://github.com/apache/camel-k/pull/294) ([nicolaferraro](https://github.com/nicolaferraro))
-- Re-add missing commits [\#293](https://github.com/apache/camel-k/pull/293) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(log\): make dev-mode work in Knative [\#280](https://github.com/apache/camel-k/pull/280) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
