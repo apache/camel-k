@@ -70,10 +70,7 @@ func deleteDockerWorkingDirectory() error {
 	return nil
 }
 
-func createAndBuildBaseImage(dockerRegistry string) error {
-	// Set docker registry.
-	docker.RegistryName = dockerRegistry
-
+func createAndBuildBaseImage(containerRegistry string) error {
 	// Create the base image Docker file.
 	err := docker.CreateBaseImageDockerFile()
 	if err != nil {
@@ -95,12 +92,20 @@ func createAndBuildBaseImage(dockerRegistry string) error {
 	return nil
 }
 
-func createAndBuildIntegrationImage(dockerRegistry string, justBaseImage bool, imageName string,
+func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool, image string,
 	propertyFiles []string, dependencies []string, routes []string) error {
-	docker.RegistryName = dockerRegistry
+	docker.RegistryName = containerRegistry
+	if !justBaseImage {
+		registryName, err := docker.ExtractRegistryName(image)
+		if err != nil {
+			return err
+		}
+
+		docker.RegistryName = registryName
+	}
 
 	// Create the Dockerfile and build the base image.
-	err := createAndBuildBaseImage(dockerRegistry)
+	err := createAndBuildBaseImage(containerRegistry)
 	if err != nil {
 		return err
 	}
@@ -130,7 +135,7 @@ func createAndBuildIntegrationImage(dockerRegistry string, justBaseImage bool, i
 		}
 
 		// Get the Docker command arguments for building the base image and create the command.
-		args := docker.BuildIntegrationImageArgs(imageName)
+		args := docker.BuildIntegrationImageArgs(image)
 		cmd := exec.CommandContext(ctx, "docker", args...)
 
 		// Output executed command.
@@ -145,11 +150,9 @@ func createAndBuildIntegrationImage(dockerRegistry string, justBaseImage bool, i
 	return nil
 }
 
-func runIntegrationImage(dockerRegistry string, imageName string) error {
-	docker.RegistryName = dockerRegistry
-
+func runIntegrationImage(image string) error {
 	// Get the docker command line argument for running an image.
-	args := docker.RunIntegrationImageArgs(imageName)
+	args := docker.RunIntegrationImageArgs(image)
 	cmd := exec.CommandContext(ctx, "docker", args...)
 
 	// Output executed command.

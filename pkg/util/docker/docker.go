@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/pkg/errors"
 )
 
 // CreateBaseImageDockerFile --
@@ -101,12 +102,12 @@ func BuildIntegrationImageArgs(imageName string) []string {
 }
 
 // RunIntegrationImageArgs --
-func RunIntegrationImageArgs(imageName string) []string {
+func RunIntegrationImageArgs(image string) []string {
 	// Construct the docker command:
 	//
 	// docker run --network="host" <dockerRegistry>/<ImageName>
 	//
-	return RunImageArgs(imageName, latestTag)
+	return RunImageArgs(image, latestTag)
 }
 
 // GetContainerWorkspaceDir -- directory inside the container where all the integration files are copied.
@@ -138,4 +139,22 @@ func ContainerizeFilePaths(currentFilePaths []string, newDir string) []string {
 	}
 
 	return newFilePaths
+}
+
+// ExtractRegistryName -- Extract registry name from image path.
+func ExtractRegistryName(image string) (string, error) {
+	pathComponents := strings.Split(image, containerFileSeparator)
+
+	// There must be at least two components in the path:
+	//  - docker.io/registry/imageName
+	//  - registry/imageName
+	if len(pathComponents) < 2 {
+		return "", errors.New("image path is too short, usage: docker.io/registry/imageName or registry/imageName")
+	}
+
+	// Check if path starts with docker.io if not, add it.
+	if pathComponents[0] == "docker.io" {
+		return strings.Join(pathComponents[0:2], containerFileSeparator), nil
+	}
+	return "docker.io" + containerFileSeparator + pathComponents[1], nil
 }

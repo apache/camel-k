@@ -56,8 +56,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	}
 
 	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
-	cmd.Flags().String("image-name", "", "Integration image name.")
-	cmd.Flags().String("docker-registry", "", "Docker registry to store intermediate images.")
+	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
@@ -68,8 +67,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 type localRunCmdOptions struct {
 	*RootCmdOptions
 	Containerize           bool     `mapstructure:"containerize"`
-	ImageName              string   `mapstructure:"image-name"`
-	DockerRegistry         string   `mapstructure:"docker-registry"`
+	Image                  string   `mapstructure:"image"`
 	PropertyFiles          []string `mapstructure:"property-files"`
 	Properties             []string `mapstructure:"properties"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
@@ -77,7 +75,7 @@ type localRunCmdOptions struct {
 
 func (command *localRunCmdOptions) validate(args []string) error {
 	// Validate integration files.
-	if command.ImageName == "" || command.Containerize {
+	if command.Image == "" || command.Containerize {
 		err := validateIntegrationFiles(args)
 		if err != nil {
 			return err
@@ -96,19 +94,9 @@ func (command *localRunCmdOptions) validate(args []string) error {
 		return err
 	}
 
-	// If containerize is set then docker registry must be set.
-	if command.Containerize && command.DockerRegistry == "" {
-		return errors.New("containerization is active but no registry has been provided")
-	}
-
 	// If containerize is set then docker image name must be set.
-	if command.Containerize && command.ImageName == "" {
+	if command.Containerize && command.Image == "" {
 		return errors.New("containerization is active but no image name has been provided")
-	}
-
-	// If ImageName is provided then docker registry must be set.
-	if command.ImageName != "" && command.DockerRegistry == "" {
-		return errors.New("cannot get image as no registry has been provided")
 	}
 
 	return nil
@@ -120,9 +108,9 @@ func (command *localRunCmdOptions) init() error {
 
 func (command *localRunCmdOptions) run(args []string) error {
 	// If local run is provided with an image name, it will just run the image locally and exit.
-	if command.ImageName != "" && !command.Containerize {
+	if command.Image != "" && !command.Containerize {
 		// Run image locally.
-		err := runIntegrationImage(command.DockerRegistry, command.ImageName)
+		err := runIntegrationImage(command.Image)
 		if err != nil {
 			return err
 		}
@@ -145,14 +133,13 @@ func (command *localRunCmdOptions) run(args []string) error {
 	// If this is a containerized local run, create, build and run the container image.
 	if command.Containerize {
 		// Create and build integration image.
-		err = createAndBuildIntegrationImage(command.DockerRegistry, false, command.ImageName,
-			propertyFiles, dependencies, args)
+		err = createAndBuildIntegrationImage("", false, command.Image, propertyFiles, dependencies, args)
 		if err != nil {
 			return err
 		}
 
 		// Run integratgion image.
-		err = runIntegrationImage(command.DockerRegistry, command.ImageName)
+		err = runIntegrationImage(command.Image)
 		if err != nil {
 			return err
 		}

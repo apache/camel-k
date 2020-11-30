@@ -56,8 +56,8 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 	}
 
 	cmd.Flags().Bool("base-image", false, "Create base image used as a starting point for any integration.")
-	cmd.Flags().String("image-name", "", "Integration image name.")
-	cmd.Flags().String("docker-registry", "", "Docker registry to store intermediate images.")
+	cmd.Flags().String("container-registry", "", "Registry that holds intermediate images.")
+	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, "Add an additional dependency")
@@ -68,8 +68,8 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 type localCreateCmdOptions struct {
 	*RootCmdOptions
 	BaseImage              bool     `mapstructure:"base-image"`
-	ImageName              string   `mapstructure:"image-name"`
-	DockerRegistry         string   `mapstructure:"docker-registry"`
+	ContainerRegistry      string   `mapstructure:"container-registry"`
+	Image                  string   `mapstructure:"image"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 	Properties             []string `mapstructure:"properties"`
 	PropertyFiles          []string `mapstructure:"property-files"`
@@ -83,8 +83,12 @@ func (command *localCreateCmdOptions) validate(args []string) error {
 			return err
 		}
 
-		if command.ImageName == "" {
-			return errors.New("image name not provided for integration")
+		if command.ContainerRegistry != "" {
+			return errors.New("cannot specify container registry when building integration image")
+		}
+
+		if command.Image == "" {
+			return errors.New("image path not provided for integration")
 		}
 	}
 
@@ -101,8 +105,8 @@ func (command *localCreateCmdOptions) validate(args []string) error {
 	}
 
 	// Docker registry must be set.
-	if command.DockerRegistry == "" {
-		return errors.New("no image can be created as registry has not been provided")
+	if command.BaseImage && command.ContainerRegistry == "" {
+		return errors.New("base image cannot be created as registry has not been provided")
 	}
 
 	return nil
@@ -145,8 +149,8 @@ func (command *localCreateCmdOptions) run(args []string) error {
 	}
 
 	// Create and build integration image.
-	err = createAndBuildIntegrationImage(command.DockerRegistry, command.BaseImage,
-		command.ImageName, propertyFiles, dependencies, args)
+	err = createAndBuildIntegrationImage(command.ContainerRegistry, command.BaseImage,
+		command.Image, propertyFiles, dependencies, args)
 	if err != nil {
 		return err
 	}
