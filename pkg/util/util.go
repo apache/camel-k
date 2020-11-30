@@ -375,6 +375,11 @@ func GetLocalRoutesDir() string {
 
 // CreateLocalPropertiesDirectory --
 func CreateLocalPropertiesDirectory() error {
+	// Do not create a directory unless the maven directory contains a valid value.
+	if MavenWorkingDirectory == "" {
+		return nil
+	}
+
 	directoryExists, err := DirectoryExists(GetLocalPropertiesDir())
 	if err != nil {
 		return err
@@ -391,6 +396,11 @@ func CreateLocalPropertiesDirectory() error {
 
 // CreateLocalDependenciesDirectory --
 func CreateLocalDependenciesDirectory() error {
+	// Do not create a directory unless the maven directory contains a valid value.
+	if MavenWorkingDirectory == "" {
+		return nil
+	}
+
 	directoryExists, err := DirectoryExists(GetLocalDependenciesDir())
 	if err != nil {
 		return err
@@ -407,6 +417,11 @@ func CreateLocalDependenciesDirectory() error {
 
 // CreateLocalRoutesDirectory --
 func CreateLocalRoutesDirectory() error {
+	// Do not create a directory unless the maven directory contains a valid value.
+	if MavenWorkingDirectory == "" {
+		return nil
+	}
+
 	directoryExists, err := DirectoryExists(GetLocalRoutesDir())
 	if err != nil {
 		return err

@@ -136,21 +136,27 @@ func (command *localCreateCmdOptions) init(args []string) error {
 }
 
 func (command *localCreateCmdOptions) run(args []string) error {
-	// Fetch dependencies.
-	dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
-	if err != nil {
-		return err
-	}
+	dependenciesList := []string{}
+	propertyFilesList := []string{}
+	if !command.BaseImage {
+		// Fetch dependencies.
+		dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
+		if err != nil {
+			return err
+		}
+		dependenciesList = dependencies
 
-	// Manage integration properties which may come from files or CLI.
-	propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
-	if err != nil {
-		return err
+		// Manage integration properties which may come from files or CLI.
+		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
+		if err != nil {
+			return err
+		}
+		propertyFilesList = propertyFiles
 	}
 
 	// Create and build integration image.
-	err = createAndBuildIntegrationImage(command.ContainerRegistry, command.BaseImage,
-		command.Image, propertyFiles, dependencies, args)
+	err := createAndBuildIntegrationImage(command.ContainerRegistry, command.BaseImage,
+		command.Image, propertyFilesList, dependenciesList, args)
 	if err != nil {
 		return err
 	}
