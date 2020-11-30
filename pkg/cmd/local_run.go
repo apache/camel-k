@@ -103,6 +103,18 @@ func (command *localRunCmdOptions) validate(args []string) error {
 }
 
 func (command *localRunCmdOptions) init() error {
+	if command.Containerize {
+		err := createDockerBaseWorkingDirectory()
+		if err != nil {
+			return err
+		}
+
+		err = createDockerWorkingDirectory()
+		if err != nil {
+			return err
+		}
+	}
+
 	return createMavenWorkingDirectory()
 }
 
@@ -155,5 +167,17 @@ func (command *localRunCmdOptions) run(args []string) error {
 }
 
 func (command *localRunCmdOptions) deinit() error {
+	if command.Containerize {
+		err := deleteDockerBaseWorkingDirectory()
+		if err != nil {
+			return err
+		}
+
+		err = deleteDockerWorkingDirectory()
+		if err != nil {
+			return err
+		}
+	}
+
 	return deleteMavenWorkingDirectory()
 }

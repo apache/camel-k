@@ -52,6 +52,7 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 
 	// Add path to Dockerfile:
 	dockerFile := path.Join(dockerFileDir, "Dockerfile")
+
 	args = append(args, DockerfilePathArg(dockerFile)...)
 
 	// Image name:
@@ -219,7 +220,7 @@ func CMD(command string) string {
 
 // RUNMavenInstall --
 func RUNMavenInstall() string {
-	return RUN("apk add --update maven && apk update && apk upgrade")
+	return RUN("apt-get update && apt-get install maven -y && apt-get upgrade -y")
 }
 
 // RUNMakeDir --

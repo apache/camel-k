@@ -86,7 +86,7 @@ func createAndBuildBaseImage(containerRegistry string) error {
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
-		errors.Errorf("base image containerization did not run successfully: %v", err)
+		return errors.Errorf("base image containerization did not run successfully: %v", err)
 	}
 
 	return nil
@@ -94,6 +94,11 @@ func createAndBuildBaseImage(containerRegistry string) error {
 
 func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool, image string,
 	propertyFiles []string, dependencies []string, routes []string) error {
+	// This ensures the Dockerfile for the base image will not end up in an undesired location.
+	if docker.BaseWorkingDirectory == "" {
+		return errors.New("base directory that holds the base image Dockerfile has not been set correctly")
+	}
+
 	docker.RegistryName = containerRegistry
 	if !justBaseImage {
 		registryName, err := docker.ExtractRegistryName(image)
@@ -112,6 +117,10 @@ func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool
 
 	if justBaseImage {
 		return nil
+	}
+
+	if docker.IntegrationWorkingDirectory == "" {
+		return errors.New("integration directory that holds the image Dockerfile has not been set correctly")
 	}
 
 	// Create integration image if integration files were provided.
@@ -162,7 +171,7 @@ func runIntegrationImage(image string) error {
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
-		errors.Errorf("integration image did not run successfully: %v", err)
+		return errors.Errorf("integration image did not run successfully: %v", err)
 	}
 
 	return nil
