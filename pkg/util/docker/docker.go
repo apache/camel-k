@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/pkg/errors"
 )
 
@@ -31,7 +32,7 @@ func CreateBaseImageDockerFile() error {
 	dockerFile := []string{}
 
 	// Base image is a java-only image since the integration command is just a java command.
-	dockerFile = append(dockerFile, FROM("adoptopenjdk/openjdk11:alpine"))
+	dockerFile = append(dockerFile, FROM(defaults.BaseImage))
 
 	// Ensure Maven is already installed.
 	dockerFile = append(dockerFile, RUNMavenInstall())
