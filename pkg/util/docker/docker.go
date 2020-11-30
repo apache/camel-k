@@ -102,12 +102,12 @@ func BuildIntegrationImageArgs(imageName string) []string {
 }
 
 // RunIntegrationImageArgs --
-func RunIntegrationImageArgs(image string) []string {
+func RunIntegrationImageArgs(imagePath string) []string {
 	// Construct the docker command:
 	//
 	// docker run --network="host" <dockerRegistry>/<ImageName>
 	//
-	return RunImageArgs(image, latestTag)
+	return RunImageArgs(imagePath, latestTag)
 }
 
 // GetContainerWorkspaceDir -- directory inside the container where all the integration files are copied.

@@ -64,7 +64,7 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 }
 
 // RunImageArgs -- standard docker run arguments.
-func RunImageArgs(imageName string, imageTag string) []string {
+func RunImageArgs(imagePath string, imageTag string) []string {
 	// Construct the docker command:
 	//
 	// docker run --network="host" <image-name>:<tag>
@@ -77,7 +77,7 @@ func RunImageArgs(imageName string, imageTag string) []string {
 	args = append(args, "--network=host")
 
 	// Path to Docker image:
-	args = append(args, ImageArg(imageName, imageTag)...)
+	args = append(args, FullImageArg(imagePath)...)
 
 	return args
 }
@@ -110,6 +110,18 @@ func LatestImageArg(dockerImageName string) []string {
 	return args
 }
 
+// FullImageArg --
+func FullImageArg(dockerImage string) []string {
+	imageComponents := strings.Split(dockerImage, ":")
+	if len(imageComponents) == 2 {
+		// Image has a tag already.
+		return ImageArg(imageComponents[0], imageComponents[1])
+	}
+
+	// Image has no tag, latest tag will be added automatically.
+	return LatestImageArg(dockerImage)
+}
+
 //
 // Docker-spcific helper functions.
 //
@@ -130,7 +142,13 @@ func GetLatestImage(dockerImageName string) string {
 // GetFullDockerImage - <docker-registry>/<image-name>:<tag>
 func GetFullDockerImage(dockerImageName string, tag string) string {
 	fullImagePath := make([]string, 0)
-	fullImagePath = append(fullImagePath, RegistryName)
+
+	// If register is specified, add it.
+	if RegistryName != "" {
+		fullImagePath = append(fullImagePath, RegistryName)
+	}
+
+	// Add image and tag.
 	if tag == "" {
 		fullImagePath = append(fullImagePath, dockerImageName)
 	} else {
@@ -198,13 +216,6 @@ func CMD(command string) string {
 	c := []string{"CMD", command}
 	return strings.Join(c, " ")
 }
-
-// // COPYFromBuilder --
-// func COPYFromBuilder(from string, to string) string {
-// 	flag := []string{"--from", internalBuilderImageName}
-// 	newFrom := []string{strings.Join(flag, "="), from}
-// 	return COPY(strings.Join(newFrom, " "), to)
-// }
 
 // RUNMavenInstall --
 func RUNMavenInstall() string {
