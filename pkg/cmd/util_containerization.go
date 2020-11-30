@@ -110,41 +110,43 @@ func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool
 		return err
 	}
 
+	if justBaseImage {
+		return nil
+	}
+
 	// Create integration image if integration files were provided.
-	if !justBaseImage {
-		// Copy dependencies to a dependencies folder under a local directory.
-		err = updateIntegrationDependencies(dependencies)
-		if err != nil {
-			return err
-		}
+	// Copy dependencies to a dependencies folder under a local directory.
+	err = updateIntegrationDependencies(dependencies)
+	if err != nil {
+		return err
+	}
 
-		// Copy routes to a routes folder under a local directory.
-		err = updateIntegrationRoutes(routes)
-		if err != nil {
-			return err
-		}
+	// Copy routes to a routes folder under a local directory.
+	err = updateIntegrationRoutes(routes)
+	if err != nil {
+		return err
+	}
 
-		// Get integration run command to be run inside the container. This means the command
-		// has to be created with the paths which will be valid inside the container.
-		containerCmd := GetContainerIntegrationRunCommand(propertyFiles, dependencies, routes)
+	// Get integration run command to be run inside the container. This means the command
+	// has to be created with the paths which will be valid inside the container.
+	containerCmd := GetContainerIntegrationRunCommand(propertyFiles, dependencies, routes)
 
-		// Create the integration image Docker file.
-		err = docker.CreateIntegrationImageDockerFile(containerCmd)
-		if err != nil {
-			return err
-		}
+	// Create the integration image Docker file.
+	err = docker.CreateIntegrationImageDockerFile(containerCmd)
+	if err != nil {
+		return err
+	}
 
-		// Get the Docker command arguments for building the base image and create the command.
-		args := docker.BuildIntegrationImageArgs(image)
-		cmd := exec.CommandContext(ctx, "docker", args...)
+	// Get the Docker command arguments for building the base image and create the command.
+	args := docker.BuildIntegrationImageArgs(image)
+	cmd := exec.CommandContext(ctx, "docker", args...)
 
-		// Output executed command.
-		fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
+	// Output executed command.
+	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
 
-		// Run the command.
-		if err := cmd.Run(); err != nil {
-			errors.Errorf("integration image containerization did not run successfully: %v", err)
-		}
+	// Run the command.
+	if err := cmd.Run(); err != nil {
+		return errors.Errorf("integration image containerization did not run successfully: %v", err)
 	}
 
 	return nil
