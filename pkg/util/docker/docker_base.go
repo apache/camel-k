@@ -144,11 +144,6 @@ func GetLatestImage(dockerImageName string) string {
 func GetFullDockerImage(dockerImageName string, tag string) string {
 	fullImagePath := make([]string, 0)
 
-	// If register is specified, add it.
-	if RegistryName != "" {
-		fullImagePath = append(fullImagePath, RegistryName)
-	}
-
 	// Add image and tag.
 	if tag == "" {
 		fullImagePath = append(fullImagePath, dockerImageName)
@@ -157,6 +152,11 @@ func GetFullDockerImage(dockerImageName string, tag string) string {
 	}
 
 	return strings.Join(fullImagePath, dockerEndpointSeparator)
+}
+
+// GetBaseImagePath --
+func GetBaseImagePath() string {
+	return RegistryName + dockerEndpointSeparator + BaseImageName
 }
 
 //

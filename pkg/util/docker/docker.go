@@ -52,7 +52,7 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd) error {
 	dockerFile := []string{}
 
 	// Start from the base image that contains the maven install: <RegistryName>/<BaseImageName>
-	dockerFile = append(dockerFile, FROM(GetFullDockerImage(BaseImageName, latestTag)))
+	dockerFile = append(dockerFile, FROM(GetFullDockerImage(GetBaseImagePath(), latestTag)))
 
 	// Create container workspace directory.
 	dockerFile = append(dockerFile, RUNMakeDir(GetContainerWorkspaceDir()))
@@ -90,16 +90,17 @@ func BuildBaseImageArgs() []string {
 	//
 	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName> <BaseWorkingDirectory>
 	//
-	return BuildImageArgs(BaseWorkingDirectory, BaseImageName, BaseWorkingDirectory)
+	// Add register
+	return BuildImageArgs(BaseWorkingDirectory, GetBaseImagePath(), BaseWorkingDirectory)
 }
 
 // BuildIntegrationImageArgs --
-func BuildIntegrationImageArgs(imageName string) []string {
+func BuildIntegrationImageArgs(imagePath string) []string {
 	// Construct the docker command:
 	//
-	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<ImageName> <MavenWorkingDirectory>
+	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <imagePath> <MavenWorkingDirectory>
 	//
-	return BuildImageArgs(IntegrationWorkingDirectory, imageName, util.MavenWorkingDirectory)
+	return BuildImageArgs(IntegrationWorkingDirectory, imagePath, util.MavenWorkingDirectory)
 }
 
 // RunIntegrationImageArgs --
