@@ -178,8 +178,8 @@ jobs:
           go-version: 1.13.x
       - name: Get YAKS
         run: |
-          export YAKS_VERSION=0.0.33
-          curl -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks_${YAKS_VERSION}_Linux_x86_64.tar.gz -o yaks.tar.gz
+          export YAKS_VERSION=0.1.0
+          curl -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
           tar -zxf yaks.tar.gz
           sudo mv yaks /usr/local/bin/
       - name: Kubernetes KinD Cluster
@@ -265,6 +265,9 @@ jobs:
           # Configure test options
           export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
           export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
+
+          # Install Yaks globally
+          yaks install
 
           # Then run integration tests
           yaks test e2e/yaks/common
