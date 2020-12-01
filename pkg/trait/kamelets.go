@@ -30,6 +30,7 @@ import (
 	kameletutils "github.com/apache/camel-k/pkg/kamelet"
 	"github.com/apache/camel-k/pkg/kamelet/repository"
 	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/flow"
@@ -132,7 +133,7 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 func (t *kameletsTrait) addKamelets(e *Environment) error {
 	kameletKeys := t.getKameletKeys()
 	if len(kameletKeys) > 0 {
-		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace)
+		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 		if err != nil {
 			return err
 		}
@@ -170,7 +171,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 
 func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 	if len(t.getKameletKeys()) > 0 {
-		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace)
+		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 		if err != nil {
 			return err
 		}

@@ -23,6 +23,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/kamelet/repository"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/pkg/errors"
@@ -109,7 +110,7 @@ func (action *initializeAction) findIcon(ctx context.Context, binding *v1alpha1.
 		return "", nil
 	}
 
-	repo, err := repository.New(ctx, action.client, binding.Namespace)
+	repo, err := repository.New(ctx, action.client, binding.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
 		return "", err
 	}

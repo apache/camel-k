@@ -65,7 +65,8 @@ func printVersion() {
 }
 
 // Run starts the Camel K operator
-func Run(healthPort, monitoringPort int32) {rand.Seed(time.Now().UTC().UnixNano())
+func Run(healthPort, monitoringPort int32) {
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()
 
@@ -151,7 +152,8 @@ func Run(healthPort, monitoringPort int32) {rand.Seed(time.Now().UTC().UnixNano(
 	// Try to register the OpenShift CLI Download link if possible
 	installCtx, installCancel := context.WithTimeout(context.TODO(), 1*time.Minute)
 	defer installCancel()
-	install.OperatorStartupOptionalTools(installCtx, c, namespace, log)
+	operatorNamespace := os.Getenv("NAMESPACE")
+	install.OperatorStartupOptionalTools(installCtx, c, namespace, operatorNamespace, log)
 
 	// Setup all Controllers
 	if err := controller.AddToManager(mgr); err != nil {
