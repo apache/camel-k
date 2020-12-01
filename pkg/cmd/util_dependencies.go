@@ -60,6 +60,10 @@ func getDependencies(args []string, additionalDependencies []string, allDependen
 
 	// Compute transitive dependencies.
 	if allDependencies {
+		// Add runtime dependency since this dependency is always required for running
+		// an integration.
+		dependencies = append(dependencies, "camel-k:runtime-quarkus")
+
 		dependencies, err = getTransitiveDependencies(catalog, dependencies)
 		if err != nil {
 			return nil, err
