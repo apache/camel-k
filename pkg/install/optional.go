@@ -26,7 +26,7 @@ import (
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong
-func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, log logr.Logger) {
+func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logr.Logger) {
 
 	// Try to register the OpenShift CLI Download link if possible
 	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
@@ -45,11 +45,28 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 		}
 	}
 
-	// Try to install Kamelet Catalog automatically if operator is namespace scoped
+	// Try to install Kamelet Catalog automatically
+	var kameletNamespace string
+	globalOperator := false
 	if namespace != "" && !strings.Contains(namespace, ",") {
-		if err := KameletCatalog(ctx, c, namespace); err != nil {
+		kameletNamespace = namespace
+	} else {
+		kameletNamespace = operatorNamespace
+		globalOperator = true
+	}
+
+	if kameletNamespace != "" {
+		if err := KameletCatalog(ctx, c, kameletNamespace); err != nil {
 			log.Info("Cannot install bundled Kamelet Catalog: skipping.")
 			log.V(8).Info("Error while installing bundled Kamelet Catalog", "error", err)
+		}
+
+		if globalOperator {
+			// Make sure that Kamelets installed in operator namespace can be used by others
+			if err := KameletViewerRole(ctx, c, kameletNamespace); err != nil {
+				log.Info("Cannot install global Kamelet viewer role: skipping.")
+				log.V(8).Info("Error while installing global Kamelet viewer role", "error", err)
+			}
 		}
 	}
 

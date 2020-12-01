@@ -53,6 +53,7 @@ type KameletRepository interface {
 // If one namespace defines an IntegrationPlatform (only the first IntegrationPlatform in state "Ready" found),
 // then all kamelet repository URIs defined in the IntegrationPlatform are included.
 func New(ctx context.Context, client camel.Interface, namespaces ...string) (KameletRepository, error) {
+	namespaces = makeDistinctNonEmpty(namespaces)
 	platform, err := lookupPlatform(ctx, client, namespaces...)
 	if err != nil {
 		return nil, err
@@ -64,6 +65,7 @@ func New(ctx context.Context, client camel.Interface, namespaces ...string) (Kam
 // Kamelets are first looked up in all the given namespaces, in the order they appear,
 // then repositories defined in the platform are looked up.
 func NewForPlatform(ctx context.Context, client camel.Interface, platform *v1.IntegrationPlatform, namespaces ...string) (KameletRepository, error) {
+	namespaces = makeDistinctNonEmpty(namespaces)
 	repoImpls := make([]KameletRepository, 0)
 	for _, namespace := range namespaces {
 		// Add first a namespace local repository for each namespace
@@ -175,4 +177,17 @@ func newFromURI(uri string) (KameletRepository, error) {
 		return newGithubKameletRepository(owner, repo, path, version), nil
 	}
 	return nil, fmt.Errorf("invalid uri: %s", uri)
+}
+
+func makeDistinctNonEmpty(names []string) []string {
+	res := make([]string, 0, len(names))
+	presence := make(map[string]bool, len(names))
+	for _, n := range names {
+		if n == "" || presence[n] {
+			continue
+		}
+		presence[n] = true
+		res = append(res, n)
+	}
+	return res
 }
