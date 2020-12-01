@@ -9,10 +9,12 @@
 - Multiple knative revisions created when integration has multiple spec.configuration items [\#1824](https://github.com/apache/camel-k/issues/1824)
 - Release 1.2.1 [\#1823](https://github.com/apache/camel-k/issues/1823)
 - Move released images to a hub without rate limits [\#1761](https://github.com/apache/camel-k/issues/1761)
+- Document the --config option in the kamel CLI [\#1185](https://github.com/apache/camel-k/issues/1185)
 - Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
 **Merged pull requests:**
 
+- doc\(cli\): add section for global flags \#1185 [\#1833](https://github.com/apache/camel-k/pull/1833) ([tadayosi](https://github.com/tadayosi))
 - Provide tests for ENTESB-14497 [\#1829](https://github.com/apache/camel-k/pull/1829) ([llowinge](https://github.com/llowinge))
 - Sort the integration configurations before returning [\#1825](https://github.com/apache/camel-k/pull/1825) ([kaczyns](https://github.com/kaczyns))
 - Split tests by language [\#1822](https://github.com/apache/camel-k/pull/1822) ([bouskaJ](https://github.com/bouskaJ))
@@ -1324,8 +1326,7 @@
 - context with status error should not be included when looking up suitable context for an integration [\#585](https://github.com/apache/camel-k/pull/585) ([lburgazzoli](https://github.com/lburgazzoli))
 - Split builder from operator [\#583](https://github.com/apache/camel-k/pull/583) ([astefanutti](https://github.com/astefanutti))
 - Add log4j-slf4j-impl as runtime dependency in default project build [\#578](https://github.com/apache/camel-k/pull/578) ([astefanutti](https://github.com/astefanutti))
-- chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
-- allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
+- dependencies: add support for boms [\#565](https://github.com/apache/camel-k/pull/565) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.2](https://github.com/apache/camel-k/tree/0.3.2) (2019-03-26)
 
@@ -1346,9 +1347,10 @@
 **Merged pull requests:**
 
 - Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
+- allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
 - knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
-- dependencies: add support for boms [\#565](https://github.com/apache/camel-k/pull/565) ([lburgazzoli](https://github.com/lburgazzoli))
 - Upgrade Operator SDK to version 0.6.0 [\#562](https://github.com/apache/camel-k/pull/562) ([astefanutti](https://github.com/astefanutti))
 
 ## [0.3.1](https://github.com/apache/camel-k/tree/0.3.1) (2019-03-15)
