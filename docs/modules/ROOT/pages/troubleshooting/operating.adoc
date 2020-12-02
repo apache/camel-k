@@ -46,7 +46,9 @@ It's firing when some reconciliation requests have failed.
 +
 [source,sh]
 ----
-$ kubectl logs deployment/camel-k-operator --since=1h | jq -R 'fromjson? | select(.level == "error")'
+$ kubectl logs deployment/camel-k-operator --since=1h \
+| jq -R 'fromjson?
+| select(.level == "error")'
 ----
 Check the `error`, `errorVerbose` and `stacktrace` fields.
 
@@ -54,7 +56,14 @@ Check the `error`, `errorVerbose` and `stacktrace` fields.
 +
 [source,sh]
 ----
-$ kubectl logs deployment/camel-k-operator --since=1h | jq -rR 'fromjson? | select(.level == "error") | [{namespace, name, controller}] | unique | .[] | "-n \(.namespace) \(.controller | rtrimstr("-controller"))/\(.name)"' | xargs kubectl describe
+$ kubectl logs deployment/camel-k-operator --since=1h \
+| jq -rR 'fromjson?
+| select(.level == "error")
+| [{namespace, name, controller}]
+| unique
+| .[]
+| "-n \(.namespace) \(.controller | rtrimstr("-controller"))/\(.name)"' \
+| xargs kubectl describe
 ----
 Check the resource events.
 
@@ -73,7 +82,14 @@ It's firing when more than 1% of the successful builds have their duration above
 +
 [source,sh]
 ----
-$ kubectl get builds.camel.apache.org -o json | jq -r '.items[] | select(.status.phase == "Succeeded") | select(.status.duration | "01-Jan-1970 \(sub("(?<time>.*)\\..*"; "\(.time)s"))" | strptime("%d-%b-%Y %Mm%Ss")? // strptime("%d-%b-%Y %Ss") | mktime > 120) | "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' | xargs kubectl describe
+$ kubectl get builds.camel.apache.org -o json \
+| jq -r '.items[]
+| select(.status.phase == "Succeeded")
+| select(.status.duration
+  | "01-Jan-1970 \(sub("(?<time>.*)\\..*"; "\(.time)s"))" | strptime("%d-%b-%Y %Mm%Ss")? // strptime("%d-%b-%Y %Ss")
+  | mktime > 120)
+| "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
+| xargs kubectl describe
 ----
 Check the resource events.
 
