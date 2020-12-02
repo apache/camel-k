@@ -33,9 +33,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/apache/camel-k/deploy"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -214,54 +214,54 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 
 func installOpenShift(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-service-account.yaml",
-		"operator-role-openshift.yaml",
-		"operator-role-binding.yaml",
-		"operator-deployment.yaml",
+		"/manager/operator-service-account.yaml",
+		"/rbac/operator-role-openshift.yaml",
+		"/rbac/operator-role-binding.yaml",
+		"/manager/operator-deployment.yaml",
 	)
 }
 
 func installKubernetes(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-service-account.yaml",
-		"operator-role-kubernetes.yaml",
-		"operator-role-binding.yaml",
-		"operator-deployment.yaml",
+		"/manager/operator-service-account.yaml",
+		"/rbac/operator-role-kubernetes.yaml",
+		"/rbac/operator-role-binding.yaml",
+		"/manager/operator-deployment.yaml",
 	)
 }
 
 func installKnative(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-role-knative.yaml",
-		"operator-role-binding-knative.yaml",
+		"/rbac/operator-role-knative.yaml",
+		"/rbac/operator-role-binding-knative.yaml",
 	)
 }
 
 func installEvents(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-role-events.yaml",
-		"operator-role-binding-events.yaml",
+		"/rbac/operator-role-events.yaml",
+		"/rbac/operator-role-binding-events.yaml",
 	)
 }
 
 func installServiceMonitors(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-role-servicemonitors.yaml",
-		"operator-role-binding-servicemonitors.yaml",
+		"/rbac/operator-role-servicemonitors.yaml",
+		"/rbac/operator-role-binding-servicemonitors.yaml",
 	)
 }
 
 func installStrimziBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-role-strimzi.yaml",
-		"operator-role-binding-strimzi.yaml",
+		"/rbac/operator-role-strimzi.yaml",
+		"/rbac/operator-role-binding-strimzi.yaml",
 	)
 }
 
 func installMonitoringResources(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-pod-monitor.yaml",
-		"operator-prometheus-rule.yaml",
+		"/prometheus/operator-pod-monitor.yaml",
+		"/prometheus/operator-prometheus-rule.yaml",
 	)
 }
 
@@ -285,7 +285,7 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	if err != nil {
 		return nil, err
 	}
-	platformObject, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString("platform-cr.yaml"))
+	platformObject, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/samples/bases/camel_v1_integrationplatform.yaml"))
 	if err != nil {
 		return nil, err
 	}
@@ -321,6 +321,6 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 // ExampleOrCollect --
 func ExampleOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, IdentityResourceCustomizer,
-		"cr-example.yaml",
+		"/samples/bases/camel_v1_integration.yaml",
 	)
 }

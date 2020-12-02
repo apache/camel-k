@@ -34,8 +34,8 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 
-	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -90,37 +90,37 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	}
 
 	// Install CRD for Integration Platform (if needed)
-	if err := installCRD(ctx, c, "IntegrationPlatform", "v1", "crd-integration-platform.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationPlatform", "v1", "camel.apache.org_integrationplatforms.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration Kit (if needed)
-	if err := installCRD(ctx, c, "IntegrationKit", "v1", "crd-integration-kit.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationKit", "v1", "camel.apache.org_integrationkits.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration (if needed)
-	if err := installCRD(ctx, c, "Integration", "v1", "crd-integration.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "Integration", "v1", "camel.apache.org_integrations.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Camel Catalog (if needed)
-	if err := installCRD(ctx, c, "CamelCatalog", "v1", "crd-camel-catalog.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "CamelCatalog", "v1", "camel.apache.org_camelcatalogs.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Build (if needed)
-	if err := installCRD(ctx, c, "Build", "v1", "crd-build.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "Build", "v1", "camel.apache.org_builds.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Kamelet (if needed)
-	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "crd-kamelet.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "camel.apache.org_kamelets.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for KameletBinding (if needed)
-	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "crd-kamelet-binding.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "camel.apache.org_kameletbindings.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
@@ -228,7 +228,7 @@ func IsCRDInstalled(ctx context.Context, c client.Client, kind string, version s
 }
 
 func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, converter ResourceCustomizer, collection *kubernetes.Collection) error {
-	crd, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString(resourceName))
+	crd, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/crd/bases/"+resourceName))
 	if err != nil {
 		return err
 	}
@@ -285,7 +285,7 @@ func IsClusterRoleInstalled(ctx context.Context, c client.Client) (bool, error) 
 }
 
 func installClusterRole(ctx context.Context, c client.Client, collection *kubernetes.Collection) error {
-	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString("/user-cluster-role.yaml"))
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/rbac/user-cluster-role.yaml"))
 	if err != nil {
 		return err
 	}

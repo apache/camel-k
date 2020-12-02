@@ -21,7 +21,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/resources"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -65,7 +65,7 @@ func Resource(ctx context.Context, c client.Client, namespace string, force bool
 // ResourceOrCollect --
 func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
 	force bool, customizer ResourceCustomizer, name string) error {
-	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString(name))
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString(name))
 	if err != nil {
 		return err
 	}

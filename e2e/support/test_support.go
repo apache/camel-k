@@ -817,7 +817,7 @@ func ServiceAccount(ns, name string) func() *corev1.ServiceAccount {
 */
 
 func CreateOperatorServiceAccount(ns string) error {
-	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "operator-service-account.yaml")
+	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/manager/operator-service-account.yaml")
 }
 
 func CreateOperatorRole(ns string) (err error) {
@@ -826,13 +826,13 @@ func CreateOperatorRole(ns string) (err error) {
 		panic(err)
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "operator-role-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-openshift.yaml")
 	}
-	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "operator-role-kubernetes.yaml")
+	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-kubernetes.yaml")
 }
 
 func CreateOperatorRoleBinding(ns string) error {
-	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "operator-role-binding.yaml")
+	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-binding.yaml")
 }
 
 func CreateKamelPod(ns string, name string, command ...string) error {

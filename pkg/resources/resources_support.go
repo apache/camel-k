@@ -15,17 +15,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package deploy
+package resources
 
 import (
 	"bytes"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
+//
+//go:generate go run ../../cmd/util/vfs-gen deploy config
+//
 // ResourceAsString returns the named resource content as string
 func ResourceAsString(name string) string {
 	return string(Resource(name))
@@ -79,6 +83,21 @@ func DirExists(dirName string) bool {
 	return true
 }
 
+// ResourcesWithPrefix lists all file names that begins with the give path prefix
+// If pathPrefix is a path of directories then be sure to end it with a '/'
+func ResourcesWithPrefix(pathPrefix string) []string {
+	dirPath := filepath.Dir(pathPrefix)
+
+	var res []string
+	for _, path := range Resources(dirPath) {
+		if result, _ := filepath.Match(pathPrefix+"*", path); result {
+			res = append(res, path)
+		}
+	}
+
+	return res
+}
+
 // Resources lists all file names in the given path (starts with '/')
 func Resources(dirName string) []string {
 	dir, err := assets.Open(dirName)
@@ -104,7 +123,7 @@ func Resources(dirName string) []string {
 	var res []string
 	for _, f := range files {
 		if !f.IsDir() {
-			res = append(res, f.Name())
+			res = append(res, filepath.Join(dirName, f.Name()))
 		}
 	}
 	return res

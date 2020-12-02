@@ -20,49 +20,52 @@ set -e
 location=$(dirname $0)
 apidir=$location/../pkg/apis/camel
 
-echo "Generating CRDs..."
-
 cd $apidir
-$CONTROLLER_GEN crd paths=./... output:crd:artifacts:config=false output:crd:dir=../../../deploy/crds crd:crdVersions=v1
+$CONTROLLER_GEN crd paths=./... output:crd:artifacts:config=../../../config/crd/bases output:crd:dir=../../../config/crd/bases crd:crdVersions=v1
 
-# cleanup
-rm -r ./config
+# cleanup working directory in $apidir
+rm -rf ./config
 
 # to root
 cd ../../../
 
 version=$(make -s get-version | tr '[:upper:]' '[:lower:]')
-echo "Version for OLM: $version"
 
 deploy_crd_file() {
   source=$1
 
+  # Make a copy to serve as the base for post-processing
+  cp $source "${source}.orig"
+
+  # Post-process source
+  cat ./script/headers/yaml.txt > $source
+  echo "" >> $source
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    cat "${source}.orig" | sed -n '/^---/,/^status/p;/^status/q' \
+      | sed '1d;$d' \
+      | sed '/creationTimestamp:/a\  labels:\n    app: camel-k' >> $source
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    cat "${source}.orig" | sed -n '/^---/,/^status/p;/^status/q' \
+      | sed '1d;$d' \
+      | sed $'s/^  creationTimestamp:/  creationTimestamp:\\\n  labels:\\\n    app: camel-k/' >> $source
+  fi
+
   for dest in ${@:2}; do
-    cat ./script/headers/yaml.txt > $dest
-    echo "" >> $dest
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      cat $source | sed -n '/^---/,/^status/p;/^status/q' \
-        | sed '1d;$d' \
-        | sed 's/^metadata:/metadata:\n  labels:\n    app: "camel-k"/' >> $dest
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-      # Mac OSX
-      cat $source | sed -n '/^---/,/^status/p;/^status/q' \
-        | sed '1d;$d' \
-        | sed $'s/^metadata:/metadata:\\\n  labels:\\\n    app: "camel-k"/' >> $dest
-    fi
+    cp $source $dest
   done
 
+  # Remove the copy as no longer required
+  rm -f "${source}.orig"
 }
 
 deploy_crd() {
   name=$1
   plural=$2
 
-  deploy_crd_file ./deploy/crds/camel.apache.org_$plural.yaml \
-    ./deploy/crd-$name.yaml \
+  deploy_crd_file ./config/crd/bases/camel.apache.org_$plural.yaml \
     ./helm/camel-k/crds/crd-$name.yaml \
-    ./deploy/olm-catalog/camel-k-dev/$version/$plural.camel.apache.org.crd.yaml \
-    ./config/crd/bases/camel.apache.org_$plural.yaml
+    ./deploy/olm-catalog/camel-k-dev/$version/camel.apache.org_$plural.yaml
 }
 
 deploy_crd build builds
@@ -72,5 +75,3 @@ deploy_crd integration-kit integrationkits
 deploy_crd integration-platform integrationplatforms
 deploy_crd kamelet kamelets
 deploy_crd kamelet-binding kameletbindings
-
-rm -r ./deploy/crds

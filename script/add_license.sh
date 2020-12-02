@@ -28,6 +28,7 @@ go build ./cmd/util/license-check/
 
 dir=$1
 header=$2
+ignore=$3
 
 if [ ! -d "$dir" ]; then
   echo "Error: Cannot find directory."
@@ -42,6 +43,10 @@ fi
 set +e
 failed=0
 find "$dir" -type f -print0 | while IFS= read -r -d '' file; do
+  if [ -n "${ignore}" ] && [[ "${file}" == *"${ignore}"* ]]; then
+    continue
+  fi
+
   ./license-check "$file" "$header" &> /dev/null
 	if [ $? -ne 0 ]; then
 		cat "$header" <(echo) "$file" > "${file}.new"
@@ -51,7 +56,3 @@ find "$dir" -type f -print0 | while IFS= read -r -d '' file; do
 	fi
 done
 set -e
-
-#if [ $failed -ne 0 ]; then
-#  exit 1
-#fi

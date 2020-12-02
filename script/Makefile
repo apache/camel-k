@@ -23,6 +23,7 @@ KANIKO_VERSION := 0.17.1
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
+METADATA_IMAGE_NAME := $(IMAGE_NAME)-metadata
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 LINT_GOGC := 10
@@ -170,7 +171,7 @@ build-kamel:
 
 build-resources: bundle-kamelets
 	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION).yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
-	./script/embed_resources.sh deploy
+	go generate ./pkg/...
 
 bundle-kamelets:
 	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_BRANCH)
@@ -178,8 +179,7 @@ bundle-kamelets:
 build-submodules:
 	./script/build_submodules.sh
 
-build-olm:
-	./script/build_olm.sh $(VERSION)
+
 
 build-compile-integration-tests:
 	go test -c -tags="integration" ./e2e/common
@@ -199,6 +199,7 @@ clean:
 	rm -rf build/_output
 	rm -rf camel-k-client-*.tar.gz
 	rm -rf camel-k-examples-*.tar.gz
+	rm -rf bundle
 
 dep:
 	go mod tidy
@@ -336,6 +337,7 @@ $(BUNDLE_CAMEL_APIS):
 	operator-sdk generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
 	@# Adds the licence header to the csv file.
 	./script/add_license.sh config/manifests ./script/headers/yaml.txt
+	./script/add_createdAt.sh config/manifests/bases
 	@# Clean up temporary working api directories
 	rm -rf api_*
 
@@ -350,9 +352,17 @@ else
 endif
 	@# Adds the licence headers to the csv file
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
-	@#operator-sdk bundle validate ./bundle
+	operator-sdk bundle validate ./bundle
 
-# Build the bundle image
-bundle-build:
-	cd bundle
-	docker build -f Dockerfile -t $(BUNDLE_IMG) .
+#
+# Build old csv metadata. This is being phased out (not yet deprecated)
+# use 'make bundle' for newer bundle format
+#
+build-olm: generate-crd $(BUNDLE_CAMEL_APIS)
+	./script/build_olm.sh
+	@# Adds the licence headers to the csv file
+	./script/add_license.sh deploy/olm-catalog/camel-k-dev ./script/headers/yaml.txt
+
+# Build the bundle image.
+bundle-build: bundle
+	cd bundle && docker build -f Dockerfile -t $(METADATA_IMAGE_NAME) .

@@ -43,7 +43,8 @@ This is a high-level overview of the project structure:
 | Path						| Content
 | https://github.com/apache/camel-k/tree/master/build[/build]			| Contains the Docker and Maven build configuration.
 | https://github.com/apache/camel-k/tree/master/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary (manager) and the **kamel** client tool.
-| https://github.com/apache/camel-k/tree/master/deploy[/deploy]		| Contains Kubernetes resource files that are used by the **kamel** client during installation. The `/deploy/resources.go` file is kept in sync with the content of the directory (`make build-embed-resources`), so that resources can be used from within the go code.
+| https://github.com/apache/camel-k/tree/master/config[/config]		| Contains Kubernetes resource files, specifically for use with the operator-sdk, that are used by the **kamel** client during installation. The `/pkg/resources/resources.go` file is kept in sync with the content of the directory (`make build-resources`), so that resources can be used from within the go code.
+| https://github.com/apache/camel-k/tree/master/deploy[/deploy]		| Contains Kubernetes resource files, used by the **kamel** client during installation. The `/pkg/resources.go` file is kept in sync with the content of the directory (`make build-resources`), so that resources can be used from within the go code.
 | https://github.com/apache/camel-k/tree/master/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
 | https://github.com/apache/camel-k/tree/master/e2e[/e2e]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
 | https://github.com/apache/camel-k/tree/master/examples[/examples]			| Various examples of Camel K usage.
@@ -195,3 +196,36 @@ After you set up the IDE task, with Java 11+ to be used by default, you can run 
 
 NOTE: The operator can be fully debugged in Minishift, because it uses OpenShift S2I binary builds under the hood.
 The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator and the publisher pod share a common persistent volume.
+
+[publishing]
+== Building Metadata for Publishing the Operator in Operator Hub
+----
+
+Publishing to an operator hub requires creation and submission of metadata, required in a specific
+https://github.com/operator-framework/operator-registry/#manifest-format[format]. The
+https://sdk.operatorframework.io/docs/cli[operator-sdk] provides tools to help with the creation of this metadata.
+
+There are two formats for the publishing of the metadata:
+=== Package Manifests
+The legacy packaging format used for deploying the operator to an OLM registry. While deprecated in Openshift 4.5+,
+it is still supported and used on that and other cluster types. A single CSV is generated, comprising of the operator
+CRDs, and additional files. All versions of the operator metadata are located into a single directory.
+
+To generate the metadata for camel-k in the legacy format, use the following command:
+----
+make build-olm
+----
+The CSV and accompanying files are located in `deploy/olm-catalog`.
+**Note. these files are under version control.**
+
+
+=== `bundles`
+The latest packaging format used for deploying the operator to an OLM registry. This generates a CSV and related metadata
+files in a directory named `bundle`. The directory contains a Dockerfile that allows for building the bundle into a
+single image. It is this image that is submitted to the OLM registry.
+
+To generate the bundle for camel-k, use the following command:
+----
+make bundle
+----
+The bundle directory is created at the root of the camel-k project filesystem.

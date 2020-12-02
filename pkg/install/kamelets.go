@@ -22,9 +22,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
@@ -40,50 +40,48 @@ const kameletReadOnlyLabel = "camel.apache.org/kamelet.readonly"
 
 // KameletCatalog installs the bundlet KameletCatalog into one namespace
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
-	if deploy.DirExists(kameletDir) {
-		for _, res := range deploy.Resources(kameletDir) {
-			if !strings.HasSuffix(res, ".yaml") && !strings.HasSuffix(res, ".yml") {
-				continue
-			}
+	for _, res := range resources.Resources(kameletDir) {
+		if !strings.HasSuffix(res, ".yaml") && !strings.HasSuffix(res, ".yml") {
+			continue
+		}
 
-			obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString(path.Join(kameletDir, res)))
+		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString(path.Join(kameletDir, res)))
+		if err != nil {
+			return err
+		}
+		if k, ok := obj.(*v1alpha1.Kamelet); ok {
+			existing := &v1alpha1.Kamelet{}
+			err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: k.Name}, existing)
 			if err != nil {
-				return err
-			}
-			if k, ok := obj.(*v1alpha1.Kamelet); ok {
-				existing := &v1alpha1.Kamelet{}
-				err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: k.Name}, existing)
-				if err != nil {
-					if k8serrors.IsNotFound(err) {
-						existing = nil
-					} else {
-						return err
-					}
+				if k8serrors.IsNotFound(err) {
+					existing = nil
+				} else {
+					return err
 				}
+			}
 
-				if existing == nil || existing.Annotations[kamelVersionAnnotation] != defaults.Version {
-					err := Resource(ctx, c, namespace, true, func(object runtime.Object) runtime.Object {
-						if o, ok := object.(metav1.Object); ok {
-							if o.GetAnnotations() == nil {
-								o.SetAnnotations(make(map[string]string))
-							}
-							o.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
-
-							if o.GetLabels() == nil {
-								o.SetLabels(make(map[string]string))
-							}
-							o.GetLabels()[kameletBundledLabel] = "true"
-							o.GetLabels()[kameletReadOnlyLabel] = "true"
+			if existing == nil || existing.Annotations[kamelVersionAnnotation] != defaults.Version {
+				err := Resource(ctx, c, namespace, true, func(object runtime.Object) runtime.Object {
+					if o, ok := object.(metav1.Object); ok {
+						if o.GetAnnotations() == nil {
+							o.SetAnnotations(make(map[string]string))
 						}
-						return object
-					}, path.Join(kameletDir, res))
+						o.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
 
-					if err != nil {
-						return errors.Wrapf(err, "could not create resource %q", res)
+						if o.GetLabels() == nil {
+							o.SetLabels(make(map[string]string))
+						}
+						o.GetLabels()[kameletBundledLabel] = "true"
+						o.GetLabels()[kameletReadOnlyLabel] = "true"
 					}
-				}
+					return object
+				}, path.Join(kameletDir, res))
 
+				if err != nil {
+					return errors.Wrapf(err, "could not create resource %q", res)
+				}
 			}
+
 		}
 	}
 

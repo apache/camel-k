@@ -22,9 +22,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/apache/camel-k/deploy"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/rs/xid"
@@ -59,20 +59,18 @@ func TestCreate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, list.Items)
 
-	for _, k := range deploy.Resources("/") {
-		if strings.HasPrefix(k, "camel-catalog-") {
-			found := false
+	for _, k := range resources.ResourcesWithPrefix("/camel-catelog-") {
+		found := false
 
-			for _, c := range list.Items {
-				n := strings.TrimSuffix(k, ".yaml")
-				n = strings.ToLower(n)
+		for _, c := range list.Items {
+			n := strings.TrimSuffix(k, ".yaml")
+			n = strings.ToLower(n)
 
-				if c.Name == n {
-					found = true
-				}
+			if c.Name == n {
+				found = true
 			}
-
-			assert.True(t, found)
 		}
+
+		assert.True(t, found)
 	}
 }
