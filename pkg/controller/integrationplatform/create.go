@@ -19,9 +19,8 @@ package integrationplatform
 
 import (
 	"context"
-	"strings"
 
-	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/resources"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/install"
@@ -45,13 +44,11 @@ func (action *createAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 }
 
 func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
-	for _, k := range deploy.Resources("/") {
-		if strings.HasPrefix(k, "camel-catalog-") {
-			action.L.Infof("Installing camel catalog: %s", k)
-			err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, k)
-			if err != nil {
-				return nil, err
-			}
+	for _, k := range resources.ResourcesWithPrefix("/camel-catalog-") {
+		action.L.Infof("Installing camel catalog: %s", k)
+		err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, k)
+		if err != nil {
+			return nil, err
 		}
 	}
 

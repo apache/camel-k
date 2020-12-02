@@ -15,19 +15,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+echo "=== This is the deprecated generation of csv metadata. Use 'make bundle' for the newer bundle format ==="
+
 location=$(dirname $0)
 olm_catalog=${location}/../deploy/olm-catalog
-
-if [ "$#" -ne 1 ]; then
-    echo "usage: $0 version"
-    exit 1
-fi
-
-version=$1
+config=${location}/../config
 
 cd $location/..
 
-operator-sdk generate csv --csv-version ${version} --csv-config deploy/olm-catalog/csv-config.yaml --update-crds
+version=$(make -s get-version | tr '[:upper:]' '[:lower:]')
+olm_dest=${olm_catalog}/camel-k-dev
 
-rm $olm_catalog/camel-k-dev/${version}/crd-*.yaml 2>/dev/null || true
-cp $location/../deploy/crd-*.yaml $olm_catalog/camel-k-dev/${version}/
+if [ -d ${olm_dest}/triage ]; then
+  rm -rf ${olm_dest}/triage
+fi
+
+#
+# Use the triage directory for building the csv to avoid
+# overwriting the CRDs and needlessly changing their format
+#
+mkdir -p ${olm_dest}/triage
+
+kustomize build config/manifests | operator-sdk generate packagemanifests \
+  --version ${version} \
+  --output-dir ${olm_dest}/triage \
+  --channel stable \
+  --default-channel
+
+if [ -f ${olm_dest}/triage/${version}/camel-k.clusterserviceversion.yaml ]; then
+  cp -f ${olm_dest}/triage/${version}/camel-k.clusterserviceversion.yaml ${olm_dest}/${version}/camel-k.v${version}.clusterserviceversion.yaml
+else
+  echo "ERROR: Failed to generate the CSV package manifest"
+  exit 1
+fi
+
+if [ ${olm_dest}/triage/camel-k.package.yaml ]; then
+  cp -f ${olm_dest}/triage/camel-k.package.yaml ${olm_dest}/camel-k-dev.package.yaml
+fi
+
+if [ -d ${olm_dest}/triage ]; then
+  rm -rf ${olm_dest}/triage
+fi

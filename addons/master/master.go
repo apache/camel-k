@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/deploy"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -257,7 +257,7 @@ func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationM
 }
 
 func loadResource(e *trait.Environment, name string, params interface{}) (runtime.Object, error) {
-	data, err := deploy.TemplateResource(fmt.Sprintf("/addons/master/%s", name), params)
+	data, err := resources.TemplateResource(fmt.Sprintf("/addons/master/%s", name), params)
 	if err != nil {
 		return nil, err
 	}

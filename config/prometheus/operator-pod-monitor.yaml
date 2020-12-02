@@ -15,16 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
 metadata:
-  name: camel-k-operator-knative
+  name: camel-k-operator
   labels:
     app: "camel-k"
-subjects:
-- kind: ServiceAccount
-  name: camel-k-operator
-roleRef:
-  kind: Role
-  name: camel-k-operator-knative
-  apiGroup: rbac.authorization.k8s.io
+    camel.apache.org/component: operator
+spec:
+  selector:
+    matchLabels:
+      app: "camel-k"
+      camel.apache.org/component: operator
+  podMetricsEndpoints:
+    - port: metrics

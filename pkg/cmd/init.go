@@ -24,7 +24,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/resources"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 )
@@ -90,7 +90,7 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 	params := TemplateParameters{
 		Name: simpleName,
 	}
-	rawData := deploy.ResourceAsString(fmt.Sprintf("/templates/%s.tmpl", language))
+	rawData := resources.ResourceAsString(fmt.Sprintf("/templates/%s.tmpl", language))
 	if rawData == "" {
 		return fmt.Errorf("cannot find template for language %s", string(language))
 	}

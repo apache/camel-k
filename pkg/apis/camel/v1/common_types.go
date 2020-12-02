@@ -53,10 +53,10 @@ type FailureRecovery struct {
 
 // A TraitSpec contains the configuration of a trait
 type TraitSpec struct {
+	// TraitConfiguration --
 	Configuration TraitConfiguration `json:"configuration"`
 }
 
-// TraitConfiguration --
 type TraitConfiguration struct {
 	RawMessage `json:",inline"`
 }

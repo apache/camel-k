@@ -29,7 +29,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/resources"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
@@ -102,7 +102,7 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 	var catalog = trait.NewCatalog(command.Context, nil)
 
 	var traitMetaData = &traitMetaData{}
-	err := yaml.Unmarshal(deploy.Resource("/traits.yaml"), traitMetaData)
+	err := yaml.Unmarshal(resources.Resource("/traits.yaml"), traitMetaData)
 	if err != nil {
 		return err
 	}
