@@ -99,7 +99,7 @@ Check the resource specification and events.
 
 === CamelKSuccessBuildDuration5m
 
-=== Description
+==== Description
 
 This alert has severity level of "critical".
 It's firing when more than 1% of the successful builds have their duration above 5 min.
@@ -125,7 +125,7 @@ Check the resource specification and events.
 
 === CamelKBuildError
 
-=== Description
+==== Description
 
 This alert has severity level of "critical".
 It's firing when more than 1% of the builds have errored over at least 10 min.
@@ -141,6 +141,58 @@ $ kubectl get builds.camel.apache.org -o json \
 | select(.status.phase == "Error")
 | "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
 | xargs -L1 kubectl get -o jsonpath='{.metadata.namespace}{"/"}{.metadata.name}{"\nError: "}{.status.error}{"\n"}'
+----
+Check the error message.
+
+* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+
+=== CamelKBuildQueueDuration1m
+
+==== Description
+
+This alert has severity level of "warning".
+It's firing when more than 1% of the builds have been queued for more than 1 min.
+
+==== Troubleshooting
+
+* Inspect the Builds that have been queued for more than 1 minutes, e.g.:
++
+[source,sh]
+----
+$ kubectl get builds.camel.apache.org -o json \
+| jq -r '.items[]
+| select(
+  (.status.startedAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) -
+  (.status.failure.recovery.attemptTime? // .metadata.creationTimestamp | strptime("%Y-%m-%dT%H:%M:%SZ")
+  | mktime) > 60)
+| "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
+| xargs -L1 kubectl describe
+----
+Check the resource specification and events.
+
+* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+
+=== CamelKBuildQueueDuration5m
+
+==== Description
+
+This alert has severity level of "critical".
+It's firing when more than 1% of the builds have been queued for more than 5 min.
+
+==== Troubleshooting
+
+* Inspect the Builds that have been queued for more than 5 minutes, e.g.:
++
+[source,sh]
+----
+$ kubectl get builds.camel.apache.org -o json \
+| jq -r '.items[]
+| select(
+  (.status.startedAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) -
+  (.status.failure.recovery.attemptTime? // .metadata.creationTimestamp | strptime("%Y-%m-%dT%H:%M:%SZ")
+  | mktime) > 300)
+| "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
+| xargs -L1 kubectl describe
 ----
 Check the resource specification and events.
 
