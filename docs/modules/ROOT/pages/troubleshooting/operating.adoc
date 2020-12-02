@@ -18,6 +18,8 @@ It assumes the operator has been installed according to the xref:observability/o
 It documents the recommended troubleshooting actions to be performed when a particular alert fires.
 It is meant to be a living document, to be improved iteratively over time, as users face problematic situations, and actions to troubleshoot and solve them are perfected.
 
+NOTE: The commands in the following section rely on the `jq` tool, to process the output of the `kubectl` commands. You can refer to the https://stedolan.github.io/jq/download/[download] instructions from the tool Website.
+
 === CamelKReconciliationDuration
 
 ==== Description
