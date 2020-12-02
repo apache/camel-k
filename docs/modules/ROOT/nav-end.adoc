@@ -1,5 +1,6 @@
 * Troubleshooting
 ** xref:troubleshooting/debugging.adoc[Debugging]
+** xref:troubleshooting/operating.adoc[Operating]
 ** xref:troubleshooting/known-issues.adoc[Known Issues]
 * xref:kamelets/kamelets.adoc[Kamelets]
 * xref:architecture/architecture.adoc[Architecture]
