@@ -146,6 +146,7 @@ func TestBindings(t *testing.T) {
 			},
 			uri: "knative:endpoint/sink?ce.override.ce-type=mytype",
 			traits: asTraitSpec("knative", map[string]interface{}{
+				"sinkBinding":   false,
 				"configuration": asKnativeConfig("https://myurl/hey"),
 			}),
 		},

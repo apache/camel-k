@@ -72,6 +72,7 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointType v1
 		return nil, err
 	}
 	knativeConfig["configuration"] = config
+	knativeConfig["sinkBinding"] = false
 	knativeConfigJSON, err := json.Marshal(knativeConfig)
 	if err != nil {
 		return nil, err
