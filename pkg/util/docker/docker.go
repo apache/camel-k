@@ -57,13 +57,10 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd) error {
 	// Create container workspace directory.
 	dockerFile = append(dockerFile, RUNMakeDir(GetContainerWorkspaceDir()))
 
-	// Set workspace directory.
-	dockerFile = append(dockerFile, WORKDIR(GetContainerWorkspaceDir()))
-
 	// Copy files from local directory to container directories.
-	dockerFile = append(dockerFile, COPY(util.DefaultRoutesDirectoryName, util.DefaultRoutesDirectoryName))
-	dockerFile = append(dockerFile, COPY(util.DefaultPropertiesDirectoryName, util.DefaultPropertiesDirectoryName))
-	dockerFile = append(dockerFile, COPY(util.DefaultDependenciesDirectoryName, util.DefaultDependenciesDirectoryName))
+	dockerFile = append(dockerFile, COPY(util.DefaultRoutesDirectoryName, GetContainerRoutesDir()))
+	dockerFile = append(dockerFile, COPY(util.DefaultPropertiesDirectoryName, GetContainerPropertiesDir()))
+	dockerFile = append(dockerFile, COPY(util.DefaultDependenciesDirectoryName, GetContainerDependenciesDir()))
 
 	// All Env variables the command requires need to be set in the container.
 	for _, keyValue := range integrationRunCmd.Env {
@@ -119,17 +116,17 @@ func GetContainerWorkspaceDir() string {
 
 // GetContainerPropertiesDir -- directory inside the container where all the integration property files are copied.
 func GetContainerPropertiesDir() string {
-	return GetContainerWorkspaceDir() + containerFileSeparator + util.DefaultPropertiesDirectoryName
+	return util.ContainerPropertiesDirectory
 }
 
 // GetContainerDependenciesDir -- directory inside the container where all the integration dependencies are copied.
 func GetContainerDependenciesDir() string {
-	return GetContainerWorkspaceDir() + containerFileSeparator + util.DefaultDependenciesDirectoryName
+	return util.ContainerDependenciesDirectory
 }
 
 // GetContainerRoutesDir -- directory inside the container where all the integration routes are copied.
 func GetContainerRoutesDir() string {
-	return GetContainerWorkspaceDir() + containerFileSeparator + util.DefaultRoutesDirectoryName
+	return util.ContainerRoutesDirectory
 }
 
 // ContainerizeFilePaths -- make paths valid container paths given a valid container directory in newDir.
