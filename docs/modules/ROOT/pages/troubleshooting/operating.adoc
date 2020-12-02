@@ -67,7 +67,7 @@ $ kubectl logs deployment/camel-k-operator --since=1h \
 | "-n \(.namespace) \(.controller | rtrimstr("-controller"))/\(.name)"' \
 | xargs kubectl describe
 ----
-Check the resource events.
+Check the resource specification and events.
 
 * Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
 
@@ -76,7 +76,7 @@ Check the resource events.
 ==== Description
 
 This alert has severity level of "warning".
-It's firing when more than 1% of the successful builds have their duration above 2 min.
+It's firing when more than 10% of the successful builds have their duration above 2 min.
 
 ==== Troubleshooting
 
@@ -93,6 +93,55 @@ $ kubectl get builds.camel.apache.org -o json \
 | "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
 | xargs kubectl describe
 ----
-Check the resource events.
+Check the resource specification and events.
+
+* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+
+=== CamelKSuccessBuildDuration5m
+
+=== Description
+
+This alert has severity level of "critical".
+It's firing when more than 1% of the successful builds have their duration above 5 min.
+
+==== Troubleshooting
+
+* Inspect the successful Builds whose duration is longer than 5 minutes, e.g.:
++
+[source,sh]
+----
+$ kubectl get builds.camel.apache.org -o json \
+| jq -r '.items[]
+| select(.status.phase == "Succeeded")
+| select(.status.duration
+  | "01-Jan-1970 \(sub("(?<time>.*)\\..*"; "\(.time)s"))" | strptime("%d-%b-%Y %Mm%Ss")? // strptime("%d-%b-%Y %Ss")
+  | mktime > 300)
+| "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
+| xargs kubectl describe
+----
+Check the resource specification and events.
+
+* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+
+=== CamelKBuildError
+
+=== Description
+
+This alert has severity level of "critical".
+It's firing when more than 1% of the builds have errored over at least 10 min.
+
+==== Troubleshooting
+
+* Inspect the errored Builds, e.g.:
++
+[source,sh]
+----
+$ kubectl get builds.camel.apache.org -o json \
+| jq -r '.items[]
+| select(.status.phase == "Error")
+| "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
+| xargs kubectl get -o jsonpath='{.metadata.namespace}{"/"}{.metadata.name}{"\nError: "}{.status.error}{"\n"}'
+----
+Check the resource specification and events.
 
 * Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
