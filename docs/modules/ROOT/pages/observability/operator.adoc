@@ -118,11 +118,11 @@ As an example, hereafter is the alerting rules that are defined in `PrometheusRu
 
 | `CamelKReconciliationFailure`
 | warning
-| More that 1% of the reconciliation requests have failed over at least 10 min.
+| More than 1% of the reconciliation requests have failed over at least 10 min.
 
 | `CamelKSuccessBuildDuration2m`
 | warning
-| More that 10% of the successful builds have their duration above 2 min over at least 1 min.
+| More than 10% of the successful builds have their duration above 2 min over at least 1 min.
 
 | `CamelKSuccessBuildDuration5m`
 | critical
@@ -130,15 +130,15 @@ As an example, hereafter is the alerting rules that are defined in `PrometheusRu
 
 | `CamelKBuildError`
 | critical
-| More that 1% of the builds for have errored over at least 10 min.
+| More than 1% of the builds have errored over at least 10 min.
 
 | `CamelKBuildQueueDuration1m`
 | warning
-| More that 1% of the builds have been queued for more than 1 min over at least 1 min.
+| More than 1% of the builds have been queued for more than 1 min over at least 1 min.
 
 | `CamelKBuildQueueDuration5m`
 | critical
-| More that 1% of the builds have been queued for more than 5 min over at least 1 min.
+| More than 1% of the builds have been queued for more than 5 min over at least 1 min.
 
 |===
 
