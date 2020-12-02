@@ -65,7 +65,7 @@ $ kubectl logs deployment/camel-k-operator --since=1h \
 | unique
 | .[]
 | "-n \(.namespace) \(.controller | rtrimstr("-controller"))/\(.name)"' \
-| xargs kubectl describe
+| xargs -L1 kubectl describe
 ----
 Check the resource specification and events.
 
@@ -91,7 +91,7 @@ $ kubectl get builds.camel.apache.org -o json \
   | "01-Jan-1970 \(sub("(?<time>.*)\\..*"; "\(.time)s"))" | strptime("%d-%b-%Y %Mm%Ss")? // strptime("%d-%b-%Y %Ss")
   | mktime > 120)
 | "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
-| xargs kubectl describe
+| xargs -L1 kubectl describe
 ----
 Check the resource specification and events.
 
@@ -117,7 +117,7 @@ $ kubectl get builds.camel.apache.org -o json \
   | "01-Jan-1970 \(sub("(?<time>.*)\\..*"; "\(.time)s"))" | strptime("%d-%b-%Y %Mm%Ss")? // strptime("%d-%b-%Y %Ss")
   | mktime > 300)
 | "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
-| xargs kubectl describe
+| xargs -L1 kubectl describe
 ----
 Check the resource specification and events.
 
@@ -140,7 +140,7 @@ $ kubectl get builds.camel.apache.org -o json \
 | jq -r '.items[]
 | select(.status.phase == "Error")
 | "-n \(.metadata.namespace) builds.camel.apache.org/\(.metadata.name)"' \
-| xargs kubectl get -o jsonpath='{.metadata.namespace}{"/"}{.metadata.name}{"\nError: "}{.status.error}{"\n"}'
+| xargs -L1 kubectl get -o jsonpath='{.metadata.namespace}{"/"}{.metadata.name}{"\nError: "}{.status.error}{"\n"}'
 ----
 Check the resource specification and events.
 
