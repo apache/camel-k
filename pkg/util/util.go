@@ -53,6 +53,18 @@ const DefaultRoutesDirectoryName = "routes"
 // DefaultWorkingDirectoryName --
 const DefaultWorkingDirectoryName = "workspace"
 
+// ContainerDependenciesDirectory --
+var ContainerDependenciesDirectory = "/deployments/dependencies"
+
+// ContainerPropertiesDirectory --
+var ContainerPropertiesDirectory = "/etc/camel/conf.d"
+
+// ContainerRoutesDirectory --
+var ContainerRoutesDirectory = "/etc/camel/sources"
+
+// ContainerResourcesDirectory --
+var ContainerResourcesDirectory = "/etc/camel/resources"
+
 // StringSliceJoin --
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0

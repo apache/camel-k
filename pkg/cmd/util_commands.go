@@ -49,7 +49,7 @@ func formatRoutes(files []string) []string {
 	return routes
 }
 
-func assembleClasspatchArgValue(properties []string, dependencies []string, routes []string) string {
+func assembleClasspathArgValue(properties []string, dependencies []string, routes []string) string {
 	classpathContents := []string{}
 	classpathContents = append(classpathContents, properties...)
 	classpathContents = append(classpathContents, routes...)
@@ -59,7 +59,7 @@ func assembleClasspatchArgValue(properties []string, dependencies []string, rout
 
 func assembleIntegrationRunCommand(properties []string, dependencies []string, routes []string, propertiesDir string) *exec.Cmd {
 	// Create classpath value.
-	classpathValue := assembleClasspatchArgValue(properties, dependencies, routes)
+	classpathValue := assembleClasspathArgValue(properties, dependencies, routes)
 
 	// Create java command that runs the integration.
 	javaCmd := "java"
