@@ -15,10 +15,10 @@ The xref:observability/operator.adoc#alerting[default alerts] created for the Ca
 The following section lists the Standard Operating Procedures (SOPs), corresponding to the xref:observability/operator.adoc#alerting[default alerts], created for the Camel K operator.
 It assumes the operator has been installed according to the xref:observability/operator.adoc#installation[installation] section from the operator monitoring documentation.
 
-It documents the recommended troubleshooting actions to be performed when a particular alert fires.
+It documents the recommended troubleshooting actions, to be performed when a particular alert fires.
 It is meant to be a living document, to be improved iteratively over time, as users face problematic situations, and actions to troubleshoot and solve them are perfected.
 
-NOTE: The commands in the following section rely on the `jq` tool, to process the output of the `kubectl` commands. You can refer to the https://stedolan.github.io/jq/download/[download] instructions from the tool Website.
+NOTE: The commands in the following section rely on the `jq` tool, to process the output of the `kubectl` commands. You can refer to the https://stedolan.github.io/jq/download/[download] instructions from the tool website.
 
 === CamelKReconciliationDuration
 
@@ -31,7 +31,7 @@ It's firing when more than 10% of the reconciliation requests have their duratio
 
 * Check the `rate(camel_k_reconciliation_duration_seconds_bucket{le="0.5"}[5m])` SLI, and identify the resource kinds for which the duration is longer than 0.5s.
 
-* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+* Improve this SOP if there's anything missing, and contact the team if there are any changes that could make this easier in the future.
 
 === CamelKReconciliationFailure
 
@@ -69,7 +69,7 @@ $ kubectl logs deployment/camel-k-operator --since=1h \
 ----
 Check the resource specification and events.
 
-* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+* Improve this SOP if there's anything missing, and contact the team if there are any changes that could make this easier in the future.
 
 === CamelKSuccessBuildDuration2m
 
@@ -95,7 +95,7 @@ $ kubectl get builds.camel.apache.org -o json \
 ----
 Check the resource specification and events.
 
-* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+* Improve this SOP if there's anything missing, and contact the team if there are any changes that could make this easier in the future.
 
 === CamelKSuccessBuildDuration5m
 
@@ -121,7 +121,7 @@ $ kubectl get builds.camel.apache.org -o json \
 ----
 Check the resource specification and events.
 
-* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+* Improve this SOP if there's anything missing, and contact the team if there are any changes that could make this easier in the future.
 
 === CamelKBuildError
 
@@ -144,7 +144,7 @@ $ kubectl get builds.camel.apache.org -o json \
 ----
 Check the error message.
 
-* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+* Improve this SOP if there's anything missing, and contact the team if there are any changes that could make this easier in the future.
 
 === CamelKBuildQueueDuration1m
 
@@ -170,7 +170,7 @@ $ kubectl get builds.camel.apache.org -o json \
 ----
 Check the resource specification and events.
 
-* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+* Improve this SOP if there's anything missing, and contact the team if there are any changes that could make this easier in the future.
 
 === CamelKBuildQueueDuration5m
 
@@ -196,4 +196,4 @@ $ kubectl get builds.camel.apache.org -o json \
 ----
 Check the resource specification and events.
 
-* Improve this SOP if there's anything missing, and contact engineering if there are any changes they could make to make this easier in the future.
+* Improve this SOP if there's anything missing, and contact the team if there are any changes that could make this easier in the future.
