@@ -447,3 +447,17 @@ func CreateLocalRoutesDirectory() error {
 	}
 	return nil
 }
+
+// GetEnvironmentVariable --
+func GetEnvironmentVariable(variable string) (string, error) {
+	value, isPresent := os.LookupEnv(variable)
+	if !isPresent {
+		return "", errors.Errorf("environment variable %v does not exist", variable)
+	}
+
+	if value == "" {
+		return "", errors.Errorf("environment variable %v is not set", variable)
+	}
+
+	return value, nil
+}
