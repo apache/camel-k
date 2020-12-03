@@ -21,7 +21,7 @@ metadata:
   labels:
     app: "camel-k"
   annotations:
-    controller-gen.kubebuilder.io/version: v0.0.0-20200528125929-5c0c6ae3b64b
+    controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
   name: kamelets.camel.apache.org
 spec:
@@ -89,6 +89,8 @@ spec:
                     Defaulting is a beta feature under the CustomResourceDefaulting
                     feature gate. Defaulting requires spec.preserveUnknownFields to
                     be false.
+                  format: byte
+                  type: string
                 definitions:
                   additionalProperties: {}
                   description: JSONSchemaDefinitions contains the models explicitly
@@ -104,9 +106,19 @@ spec:
                 description:
                   type: string
                 enum:
-                  items: {}
+                  items:
+                    description: 'JSON represents any valid JSON value. These types
+                      are supported: bool, int64, float64, string, []interface{},
+                      map[string]interface{} and nil.'
+                    format: byte
+                    type: string
                   type: array
-                example: {}
+                example:
+                  description: 'JSON represents any valid JSON value. These types
+                    are supported: bool, int64, float64, string, []interface{}, map[string]interface{}
+                    and nil.'
+                  format: byte
+                  type: string
                 exclusiveMaximum:
                   type: boolean
                 exclusiveMinimum:
@@ -280,7 +292,10 @@ spec:
                 type: string
               type: array
             flow:
-              type: object
+              description: Flow is an unstructured object representing a Camel Flow
+                in YAML/JSON DSL
+              format: byte
+              type: string
             sources:
               items:
                 description: SourceSpec --
@@ -348,6 +363,8 @@ spec:
                           fields. Defaulting is a beta feature under the CustomResourceDefaulting
                           feature gate. Defaulting requires spec.preserveUnknownFields
                           to be false.
+                        format: byte
+                        type: string
                       definitions:
                         additionalProperties: {}
                         description: JSONSchemaDefinitions contains the models explicitly
@@ -364,9 +381,19 @@ spec:
                       description:
                         type: string
                       enum:
-                        items: {}
+                        items:
+                          description: 'JSON represents any valid JSON value. These
+                            types are supported: bool, int64, float64, string, []interface{},
+                            map[string]interface{} and nil.'
+                          format: byte
+                          type: string
                         type: array
-                      example: {}
+                      example:
+                        description: 'JSON represents any valid JSON value. These
+                          types are supported: bool, int64, float64, string, []interface{},
+                          map[string]interface{} and nil.'
+                        format: byte
+                        type: string
                       exclusiveMaximum:
                         type: boolean
                       exclusiveMinimum:

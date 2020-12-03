@@ -21,7 +21,7 @@ metadata:
   labels:
     app: "camel-k"
   annotations:
-    controller-gen.kubebuilder.io/version: v0.0.0-20200528125929-5c0c6ae3b64b
+    controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
   name: kameletbindings.camel.apache.org
 spec:
@@ -86,7 +86,10 @@ spec:
                   type: array
                 flows:
                   items:
-                    type: object
+                    description: Flow is an unstructured object representing a Camel
+                      Flow in YAML/JSON DSL
+                    format: byte
+                    type: string
                   type: array
                 kit:
                   type: string
@@ -168,7 +171,9 @@ spec:
                     description: A TraitSpec contains the configuration of a trait
                     properties:
                       configuration:
-                        type: object
+                        description: TraitConfiguration --
+                        format: byte
+                        type: string
                     required:
                     - configuration
                     type: object
@@ -181,7 +186,8 @@ spec:
                 properties:
                   description: Properties are a key value representation of endpoint
                     properties
-                  type: object
+                  format: byte
+                  type: string
                 ref:
                   description: Ref can be used to declare a Kubernetes resource as
                     source/sink endpoint
@@ -231,7 +237,8 @@ spec:
                 properties:
                   description: Properties are a key value representation of endpoint
                     properties
-                  type: object
+                  format: byte
+                  type: string
                 ref:
                   description: Ref can be used to declare a Kubernetes resource as
                     source/sink endpoint
