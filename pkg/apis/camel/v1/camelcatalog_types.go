@@ -95,15 +95,7 @@ type CamelCatalogList struct {
 	Items           []CamelCatalog `json:"items"`
 }
 
-// RuntimeProvider --
-type RuntimeProvider string
-
 const (
 	// CamelCatalogKind --
 	CamelCatalogKind string = "CamelCatalog"
-
-	// RuntimeProviderMain --
-	RuntimeProviderMain RuntimeProvider = "main"
-	// RuntimeProviderQuarkus --
-	RuntimeProviderQuarkus RuntimeProvider = "quarkus"
 )
