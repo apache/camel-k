@@ -81,6 +81,10 @@ func assembleIntegrationRunCommand(properties []string, dependencies []string, r
 	// Add files to the command line under the CAMEL_K_ROUTES flag.
 	cmd.Env = append(cmd.Env, "CAMEL_K_ROUTES="+strings.Join(formatRoutes(routes), ","))
 
+	// Set stdout and stderr.
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
 	return cmd
 }
 

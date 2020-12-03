@@ -150,6 +150,10 @@ func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool
 	args := docker.BuildIntegrationImageArgs(image)
 	cmd := exec.CommandContext(ctx, "docker", args...)
 
+	// Set stdout and stderr.
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
 	// Output executed command.
 	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
 
@@ -165,6 +169,10 @@ func runIntegrationImage(image string) error {
 	// Get the docker command line argument for running an image.
 	args := docker.RunIntegrationImageArgs(image)
 	cmd := exec.CommandContext(ctx, "docker", args...)
+
+	// Set stdout and stderr.
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 
 	// Output executed command.
 	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
