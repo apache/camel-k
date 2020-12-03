@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/modeline"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -169,6 +171,11 @@ func extractModelineOptions(ctx context.Context, sources []string) ([]modeline.O
 			return opts, err
 		}
 
+		ops, err = expandModelineEnvVarOptions(ops)
+		if err != nil {
+			return opts, err
+		}
+
 		opts = append(opts, ops...)
 	}
 
@@ -197,4 +204,30 @@ func extractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option,
 	}
 
 	return ops, nil
+}
+
+func expandModelineEnvVarOptions(ops []modeline.Option) ([]modeline.Option, error) {
+	listWithExpandedOptions := []modeline.Option{}
+	for _, opt := range ops {
+		// Check if the value contains an environment variable.
+		for strings.Contains(opt.Value, "${") {
+			// Split value into 2 substrings, first contains the start of the string,
+			// second contains the remainder of the string.
+			splitOptBeforeEV := strings.SplitN(opt.Value, "${", 2)
+
+			// Remainer of the string is split into the environment variable we want
+			// to replace with its value, and the tail of the string.
+			splitOptAfterEV := strings.SplitN(splitOptBeforeEV[1], "}", 2)
+			envVarValue, err := util.GetEnvironmentVariable(splitOptAfterEV[0])
+			if err != nil {
+				return nil, err
+			}
+			opt.Value = splitOptBeforeEV[0] + envVarValue + splitOptAfterEV[1]
+		}
+
+		// Add option to list whether it contained environment variables or not.
+		listWithExpandedOptions = append(listWithExpandedOptions, opt)
+	}
+
+	return listWithExpandedOptions, nil
 }
