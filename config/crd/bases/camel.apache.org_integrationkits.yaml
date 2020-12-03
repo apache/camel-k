@@ -21,7 +21,7 @@ metadata:
   labels:
     app: "camel-k"
   annotations:
-    controller-gen.kubebuilder.io/version: v0.0.0-20200528125929-5c0c6ae3b64b
+    controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
   name: integrationkits.camel.apache.org
 spec:
@@ -103,7 +103,9 @@ spec:
                 description: A TraitSpec contains the configuration of a trait
                 properties:
                   configuration:
-                    type: object
+                    description: TraitConfiguration --
+                    format: byte
+                    type: string
                 required:
                 - configuration
                 type: object
