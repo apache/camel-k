@@ -53,7 +53,7 @@ const (
 )
 
 // EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
-// +kubebuilder:validation:Type=object
+// +kubebuilder:validation:Type=string
 type EndpointProperties struct {
 	json.RawMessage `json:",inline"`
 }

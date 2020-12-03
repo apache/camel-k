@@ -58,7 +58,7 @@ type TraitSpec struct {
 	Configuration TraitConfiguration `json:"configuration"`
 }
 
-// +kubebuilder:validation:Type=object
+// +kubebuilder:validation:Type=string
 // TraitConfiguration --
 type TraitConfiguration struct {
 	json.RawMessage `json:",inline"`
@@ -146,7 +146,7 @@ type ResourceCondition interface {
 }
 
 // Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
-// +kubebuilder:validation:Type=object
+// +kubebuilder:validation:Type=string
 type Flow struct {
 	json.RawMessage `json:",inline"`
 }
