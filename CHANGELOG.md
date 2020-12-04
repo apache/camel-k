@@ -11,11 +11,14 @@
 - Support for kamelet repository [\#1818](https://github.com/apache/camel-k/issues/1818)
 - Telegram Kamlet sets CloudEvent source attribute to Knative sink [\#1813](https://github.com/apache/camel-k/issues/1813)
 - Move released images to a hub without rate limits [\#1761](https://github.com/apache/camel-k/issues/1761)
+- Define default global Kamelets [\#1675](https://github.com/apache/camel-k/issues/1675)
 - Document the --config option in the kamel CLI [\#1185](https://github.com/apache/camel-k/issues/1185)
 - Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
 **Merged pull requests:**
 
+- chore\(doc\): Add standard operation procedures to troubleshooting guide [\#1839](https://github.com/apache/camel-k/pull/1839) ([astefanutti](https://github.com/astefanutti))
+- Fix \#1675: use kamelets in the operator namespace [\#1836](https://github.com/apache/camel-k/pull/1836) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(test\): upgrade YAKS to 0.1.0 [\#1835](https://github.com/apache/camel-k/pull/1835) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc\(cli\): add section for global flags \#1185 [\#1833](https://github.com/apache/camel-k/pull/1833) ([tadayosi](https://github.com/tadayosi))
 - Fix \#1818: add support for Kamelet repository [\#1830](https://github.com/apache/camel-k/pull/1830) ([nicolaferraro](https://github.com/nicolaferraro))
