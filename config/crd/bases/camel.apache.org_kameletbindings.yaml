@@ -88,8 +88,7 @@ spec:
                   items:
                     description: Flow is an unstructured object representing a Camel
                       Flow in YAML/JSON DSL
-                    format: byte
-                    type: string
+                    type: object
                   type: array
                 kit:
                   type: string
@@ -172,8 +171,7 @@ spec:
                     properties:
                       configuration:
                         description: TraitConfiguration --
-                        format: byte
-                        type: string
+                        type: object
                     required:
                     - configuration
                     type: object
@@ -186,8 +184,7 @@ spec:
                 properties:
                   description: Properties are a key value representation of endpoint
                     properties
-                  format: byte
-                  type: string
+                  type: object
                 ref:
                   description: Ref can be used to declare a Kubernetes resource as
                     source/sink endpoint
@@ -237,8 +234,7 @@ spec:
                 properties:
                   description: Properties are a key value representation of endpoint
                     properties
-                  format: byte
-                  type: string
+                  type: object
                 ref:
                   description: Ref can be used to declare a Kubernetes resource as
                     source/sink endpoint

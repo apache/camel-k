@@ -294,8 +294,7 @@ spec:
             flow:
               description: Flow is an unstructured object representing a Camel Flow
                 in YAML/JSON DSL
-              format: byte
-              type: string
+              type: object
             sources:
               items:
                 description: SourceSpec --

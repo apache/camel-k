@@ -200,8 +200,7 @@ spec:
                 properties:
                   configuration:
                     description: TraitConfiguration --
-                    format: byte
-                    type: string
+                    type: object
                 required:
                 - configuration
                 type: object
@@ -381,8 +380,7 @@ spec:
                 properties:
                   configuration:
                     description: TraitConfiguration --
-                    format: byte
-                    type: string
+                    type: object
                 required:
                 - configuration
                 type: object

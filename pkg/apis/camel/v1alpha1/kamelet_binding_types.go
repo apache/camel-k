@@ -18,11 +18,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"encoding/json"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // KameletBindingSpec --
@@ -53,9 +52,8 @@ const (
 )
 
 // EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
-// +kubebuilder:validation:Type=string
 type EndpointProperties struct {
-	json.RawMessage `json:",inline"`
+	v1.RawMessage `json:",inline"`
 }
 
 // KameletBindingStatus --
