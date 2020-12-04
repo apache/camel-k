@@ -571,26 +571,6 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	return result
 }
 
-func errorIfKitIsNotAvailable(schema *runtime.Scheme, kit string) error {
-	for _, name := range deploy.Resources("/") {
-		resourceData := deploy.ResourceAsString(name)
-		resource, err := kubernetes.LoadResourceFromYaml(schema, resourceData)
-		if err != nil {
-			// Not one of our registered schemas
-			continue
-		}
-		kind := resource.GetObjectKind().GroupVersionKind()
-		if kind.Kind != "IntegrationKit" {
-			continue
-		}
-		integrationKit := resource.(*v1.IntegrationKit)
-		if integrationKit.Name == kit {
-			return nil
-		}
-	}
-	return errors.Errorf("Unknown kit '%s'", kit)
-}
-
 func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
 	sub := make([]string, 0)
 	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
