@@ -18,8 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"encoding/json"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -58,11 +56,17 @@ type TraitSpec struct {
 	Configuration TraitConfiguration `json:"configuration"`
 }
 
-// +kubebuilder:validation:Type=string
 // TraitConfiguration --
 type TraitConfiguration struct {
-	json.RawMessage `json:",inline"`
+	RawMessage `json:",inline"`
 }
+
+// RawMessage is a raw encoded JSON value.
+// It implements Marshaler and Unmarshaler and can
+// be used to delay JSON decoding or precompute a JSON encoding.
+// +kubebuilder:validation:Type=object
+// +kubebuilder:validation:Format=""
+type RawMessage []byte
 
 // +kubebuilder:object:generate=false
 // Configurable --
@@ -146,9 +150,8 @@ type ResourceCondition interface {
 }
 
 // Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
-// +kubebuilder:validation:Type=string
 type Flow struct {
-	json.RawMessage `json:",inline"`
+	RawMessage `json:",inline"`
 }
 
 // RuntimeProvider --

@@ -96,8 +96,7 @@ spec:
               items:
                 description: Flow is an unstructured object representing a Camel Flow
                   in YAML/JSON DSL
-                format: byte
-                type: string
+                type: object
               type: array
             kit:
               type: string
@@ -180,8 +179,7 @@ spec:
                 properties:
                   configuration:
                     description: TraitConfiguration --
-                    format: byte
-                    type: string
+                    type: object
                 required:
                 - configuration
                 type: object

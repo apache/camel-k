@@ -57,7 +57,7 @@ func (in *EndpointProperties) DeepCopyInto(out *EndpointProperties) {
 	*out = *in
 	if in.RawMessage != nil {
 		in, out := &in.RawMessage, &out.RawMessage
-		*out = make(json.RawMessage, len(*in))
+		*out = make(v1.RawMessage, len(*in))
 		copy(*out, *in)
 	}
 }
