@@ -4197,7 +4197,9 @@
               "type": "array"
             },
             "default": {
-              "description": "default is a default value for undefined object fields. Defaulting is a beta feature under the CustomResourceDefaulting feature gate. Defaulting requires spec.preserveUnknownFields to be false."
+              "description": "default is a default value for undefined object fields. Defaulting is a beta feature under the CustomResourceDefaulting feature gate. Defaulting requires spec.preserveUnknownFields to be false.",
+              "format": "byte",
+              "type": "string"
             },
             "definitions": {
               "additionalProperties": {},
@@ -4218,10 +4220,18 @@
               "type": "string"
             },
             "enum": {
-              "items": {},
+              "items": {
+                "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                "format": "byte",
+                "type": "string"
+              },
               "type": "array"
             },
-            "example": {},
+            "example": {
+              "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+              "format": "byte",
+              "type": "string"
+            },
             "exclusiveMaximum": {
               "type": "boolean"
             },
@@ -4362,6 +4372,8 @@
           "type": "array"
         },
         "flow": {
+          "description": "Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL",
+          "format": "byte",
           "maxProperties": 1,
           "properties": {
             "error-handler": {
@@ -4463,7 +4475,9 @@
                     "type": "array"
                   },
                   "default": {
-                    "description": "default is a default value for undefined object fields. Defaulting is a beta feature under the CustomResourceDefaulting feature gate. Defaulting requires spec.preserveUnknownFields to be false."
+                    "description": "default is a default value for undefined object fields. Defaulting is a beta feature under the CustomResourceDefaulting feature gate. Defaulting requires spec.preserveUnknownFields to be false.",
+                    "format": "byte",
+                    "type": "string"
                   },
                   "definitions": {
                     "additionalProperties": {},
@@ -4484,10 +4498,18 @@
                     "type": "string"
                   },
                   "enum": {
-                    "items": {},
+                    "items": {
+                      "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                      "format": "byte",
+                      "type": "string"
+                    },
                     "type": "array"
                   },
-                  "example": {},
+                  "example": {
+                    "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                    "format": "byte",
+                    "type": "string"
+                  },
                   "exclusiveMaximum": {
                     "type": "boolean"
                   },

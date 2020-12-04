@@ -8476,6 +8476,8 @@
             "description": "A TraitSpec contains the configuration of a trait",
             "properties": {
               "configuration": {
+                "description": "TraitConfiguration --",
+                "format": "byte",
                 "type": "object"
               }
             },
