@@ -6,21 +6,26 @@
 
 **Closed issues:**
 
+- Unable to use Kamelet spec in a custom CRD [\#1837](https://github.com/apache/camel-k/issues/1837)
 - Multiple knative revisions created when integration has multiple spec.configuration items [\#1824](https://github.com/apache/camel-k/issues/1824)
 - Release 1.2.1 [\#1823](https://github.com/apache/camel-k/issues/1823)
 - Support for kamelet repository [\#1818](https://github.com/apache/camel-k/issues/1818)
 - Telegram Kamlet sets CloudEvent source attribute to Knative sink [\#1813](https://github.com/apache/camel-k/issues/1813)
 - Move released images to a hub without rate limits [\#1761](https://github.com/apache/camel-k/issues/1761)
 - Define default global Kamelets [\#1675](https://github.com/apache/camel-k/issues/1675)
+- Enable SinkBinding automatically [\#1654](https://github.com/apache/camel-k/issues/1654)
 - Document the --config option in the kamel CLI [\#1185](https://github.com/apache/camel-k/issues/1185)
 - Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
 **Merged pull requests:**
 
+- fix: Fix kamelet.feature for YAKS version 0.1.0 [\#1844](https://github.com/apache/camel-k/pull/1844) ([astefanutti](https://github.com/astefanutti))
+- Upgrade controller-tools to version 0.4.1 [\#1841](https://github.com/apache/camel-k/pull/1841) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Add standard operation procedures to troubleshooting guide [\#1839](https://github.com/apache/camel-k/pull/1839) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1675: use kamelets in the operator namespace [\#1836](https://github.com/apache/camel-k/pull/1836) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(test\): upgrade YAKS to 0.1.0 [\#1835](https://github.com/apache/camel-k/pull/1835) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc\(cli\): add section for global flags \#1185 [\#1833](https://github.com/apache/camel-k/pull/1833) ([tadayosi](https://github.com/tadayosi))
+- Fix \#1654: enable sinkbinding automatically [\#1832](https://github.com/apache/camel-k/pull/1832) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1818: add support for Kamelet repository [\#1830](https://github.com/apache/camel-k/pull/1830) ([nicolaferraro](https://github.com/nicolaferraro))
 - Provide tests for ENTESB-14497 [\#1829](https://github.com/apache/camel-k/pull/1829) ([llowinge](https://github.com/llowinge))
 - Sort the integration configurations before returning [\#1825](https://github.com/apache/camel-k/pull/1825) ([kaczyns](https://github.com/kaczyns))
