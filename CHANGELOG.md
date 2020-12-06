@@ -1651,6 +1651,7 @@
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
 - trait: add a trait to inject pod metadata as env var [\#276](https://github.com/apache/camel-k/pull/276) ([lburgazzoli](https://github.com/lburgazzoli))
 - Traits lifecycle [\#273](https://github.com/apache/camel-k/pull/273) ([lburgazzoli](https://github.com/lburgazzoli))
+- Support for compressed source blob  [\#266](https://github.com/apache/camel-k/pull/266) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.1.0](https://github.com/apache/camel-k/tree/0.1.0) (2018-12-10)
 
@@ -1681,7 +1682,6 @@
 - chore\(deps\): update kotlin to v1.3.11 [\#271](https://github.com/apache/camel-k/pull/271) ([lburgazzoli](https://github.com/lburgazzoli))
 - builder: wake up event loop when the container image buils is done to seep up deployment time [\#269](https://github.com/apache/camel-k/pull/269) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: rename constant KamelPlatform to IntegrationContextTypePlatform [\#267](https://github.com/apache/camel-k/pull/267) ([lburgazzoli](https://github.com/lburgazzoli))
-- Support for compressed source blob  [\#266](https://github.com/apache/camel-k/pull/266) ([lburgazzoli](https://github.com/lburgazzoli))
 - Better Knative and Istio integration [\#261](https://github.com/apache/camel-k/pull/261) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(runtime\): code cleanup [\#260](https://github.com/apache/camel-k/pull/260) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: add all sorts of linters and pre-commit hook [\#257](https://github.com/apache/camel-k/pull/257) ([zregvart](https://github.com/zregvart))
