@@ -163,4 +163,5 @@ jobs:
         oc login -u developer
 
         # Then run integration tests
+        make test-integration
         make test-builder
