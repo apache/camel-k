@@ -134,7 +134,6 @@
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - Upgrade to Prometheus operator version 0.42.0+ [\#1697](https://github.com/apache/camel-k/issues/1697)
 - Kamel init - Do not include license header [\#1696](https://github.com/apache/camel-k/issues/1696)
-- Add support for Strimzi Topics in KameletBinding [\#1686](https://github.com/apache/camel-k/issues/1686)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
 - Deprecate build kit at platform set-up time [\#1604](https://github.com/apache/camel-k/issues/1604)
@@ -222,6 +221,7 @@
 **Closed issues:**
 
 - Failed to install Camel-K in IKS [\#1687](https://github.com/apache/camel-k/issues/1687)
+- Add support for Strimzi Topics in KameletBinding [\#1686](https://github.com/apache/camel-k/issues/1686)
 - Upgrade base to Knative 0.16 and support 0.17 [\#1670](https://github.com/apache/camel-k/issues/1670)
 - Integration is logged twice in dev mode [\#1668](https://github.com/apache/camel-k/issues/1668)
 - operator.adoc - ascii doc warning [\#1662](https://github.com/apache/camel-k/issues/1662)
@@ -997,7 +997,6 @@
 - Orphan generated XML DSL from OpenAPI JSON after deleting integration [\#839](https://github.com/apache/camel-k/issues/839)
 - All links of the documentation are missing spaces before and after displayed text [\#794](https://github.com/apache/camel-k/issues/794)
 - Update Camel K tagline in Kamel CLI [\#732](https://github.com/apache/camel-k/issues/732)
-- Review reset and delete with --all option for merging similar functions to one place  [\#598](https://github.com/apache/camel-k/issues/598)
 - Able to run maven build with debug and/or extended info [\#85](https://github.com/apache/camel-k/issues/85)
 - Remove references to host that did compilation in stacktraces [\#972](https://github.com/apache/camel-k/issues/972)
 - Integration fails with --dev mode [\#968](https://github.com/apache/camel-k/issues/968)
@@ -1203,6 +1202,7 @@
 - Added KEYS file [\#734](https://github.com/apache/camel-k/pull/734) ([oscerd](https://github.com/oscerd))
 - Bump to 1.0.0-M1-SNAPSHOT and release changes [\#733](https://github.com/apache/camel-k/pull/733) ([nicolaferraro](https://github.com/nicolaferraro))
 - Rename 'context' term used by Camel K. [\#726](https://github.com/apache/camel-k/pull/726) ([lburgazzoli](https://github.com/lburgazzoli))
+-  Allow to provide custom settings.xml [\#720](https://github.com/apache/camel-k/pull/720) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.4](https://github.com/apache/camel-k/tree/0.3.4) (2019-06-07)
 
@@ -1249,7 +1249,6 @@
 - Filter allowed env variables in Knative [\#724](https://github.com/apache/camel-k/pull/724) ([nicolaferraro](https://github.com/nicolaferraro))
 - Automatically configure global build strategy [\#723](https://github.com/apache/camel-k/pull/723) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): remove test artifacts [\#721](https://github.com/apache/camel-k/pull/721) ([lburgazzoli](https://github.com/lburgazzoli))
--  Allow to provide custom settings.xml [\#720](https://github.com/apache/camel-k/pull/720) ([lburgazzoli](https://github.com/lburgazzoli))
 - Don't automatically install contexts upon platform installation [\#719](https://github.com/apache/camel-k/pull/719) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: default to camel-k-runtime v0.3.3 [\#718](https://github.com/apache/camel-k/pull/718) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#707: sign released artifacts [\#713](https://github.com/apache/camel-k/pull/713) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1301,6 +1300,7 @@
 - allow to configure default configurations on platform [\#608](https://github.com/apache/camel-k/issues/608)
 - Script set-version.sh does not honor the registry/repository settings [\#602](https://github.com/apache/camel-k/issues/602)
 - add options to configure affinity [\#601](https://github.com/apache/camel-k/issues/601)
+- Review reset and delete with --all option for merging similar functions to one place  [\#598](https://github.com/apache/camel-k/issues/598)
 - camel-k groovy, jvm, spring-boot gives error pushing image [\#588](https://github.com/apache/camel-k/issues/588)
 - on-premises: mount rwx volume [\#587](https://github.com/apache/camel-k/issues/587)
 - context with status error should not be included when looking up suitable context for an integration [\#584](https://github.com/apache/camel-k/issues/584)
@@ -1651,7 +1651,6 @@
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
 - trait: add a trait to inject pod metadata as env var [\#276](https://github.com/apache/camel-k/pull/276) ([lburgazzoli](https://github.com/lburgazzoli))
 - Traits lifecycle [\#273](https://github.com/apache/camel-k/pull/273) ([lburgazzoli](https://github.com/lburgazzoli))
-- Support for compressed source blob  [\#266](https://github.com/apache/camel-k/pull/266) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.1.0](https://github.com/apache/camel-k/tree/0.1.0) (2018-12-10)
 
@@ -1682,6 +1681,7 @@
 - chore\(deps\): update kotlin to v1.3.11 [\#271](https://github.com/apache/camel-k/pull/271) ([lburgazzoli](https://github.com/lburgazzoli))
 - builder: wake up event loop when the container image buils is done to seep up deployment time [\#269](https://github.com/apache/camel-k/pull/269) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: rename constant KamelPlatform to IntegrationContextTypePlatform [\#267](https://github.com/apache/camel-k/pull/267) ([lburgazzoli](https://github.com/lburgazzoli))
+- Support for compressed source blob  [\#266](https://github.com/apache/camel-k/pull/266) ([lburgazzoli](https://github.com/lburgazzoli))
 - Better Knative and Istio integration [\#261](https://github.com/apache/camel-k/pull/261) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(runtime\): code cleanup [\#260](https://github.com/apache/camel-k/pull/260) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: add all sorts of linters and pre-commit hook [\#257](https://github.com/apache/camel-k/pull/257) ([zregvart](https://github.com/zregvart))
