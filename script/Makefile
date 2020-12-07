@@ -82,9 +82,7 @@ endef
 export LICENSE_HEADER
 default: test
 
-#
 # Generates the version file
-#
 codegen:
 	@echo "/*" > $(VERSIONFILE)
 	@echo "$$LICENSE_HEADER" >> $(VERSIONFILE)
@@ -126,8 +124,8 @@ generate: generate-deepcopy generate-crd generate-client generate-doc generate-j
 generate-client:
 	./script/gen_client.sh
 
-generate-crd:
-	./script/gen_crd.sh
+generate-crd: controller-gen
+	CONTROLLER_GEN=$(CONTROLLER_GEN) ./script/gen_crd.sh
 
 generate-doc:
 	./script/gen_doc.sh
@@ -286,8 +284,7 @@ get-version:
 
 .PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-strimzi
 
-# find or download controller-gen
-# download controller-gen if necessary
+# find or download controller-gen if necessary
 controller-gen:
 ifeq (, $(shell which controller-gen))
 	@{ \
@@ -318,21 +315,12 @@ else
 KUSTOMIZE=$(shell which kustomize)
 endif
 
-.PHONY: manifests $(BUNDLE_CAMEL_APIS) bundle bundle-build
+.PHONY: generate-crd $(BUNDLE_CAMEL_APIS) bundle bundle-build
 
-#
-# This is a workaround as controller-gen is limited to non-moduled api
-# projects, ie. mod.go in api directory
-# - Will cd into api directory first and execute from there
-manifests: controller-gen generate-crd
-
-#
 # - Have to copy pkg/apis since it is a module in its own right
 # - The dependency of v1alpha1 api on v1 results in duplication
 #   of the v1 schema in those CRDs so need to split them up
 # - No way to add a licence header to the CRD other then post-script
-#
-
 BUNDLE_CAMEL_APIS = v1 v1alpha1
 
 $(BUNDLE_CAMEL_APIS):
@@ -347,7 +335,7 @@ $(BUNDLE_CAMEL_APIS):
 	@# Clean up temporary working api directories
 	rm -rf api_*
 
-bundle: manifests $(BUNDLE_CAMEL_APIS)
+bundle: generate-crd $(BUNDLE_CAMEL_APIS)
 	@# Build kustomize manifests
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle --overwrite --version $(OPERATOR_VERSION) $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
@@ -356,7 +344,7 @@ bundle: manifests $(BUNDLE_CAMEL_APIS)
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
 	@#operator-sdk bundle validate ./bundle
 
-# Build the bundle image.
+# Build the bundle image
 bundle-build:
 	cd bundle
 	docker build -f Dockerfile -t $(BUNDLE_IMG) .
