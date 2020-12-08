@@ -43,9 +43,14 @@ func TestPrometheusTrait(t *testing.T) {
 		ocp, err := openshift.IsOpenShift(TestClient)
 		assert.Nil(t, err)
 
+		// suppress Service Monitor for the time being as CI test runs on OCP 3.11
+		createServiceMonitor := false
+
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
-		Expect(Kamel("run", "-n", ns, "files/Java.java", "-t", "prometheus.enabled=true").Execute()).Should(BeNil())
+		Expect(Kamel("run", "-n", ns, "files/Java.java",
+			"-t", "prometheus.enabled=true",
+			"-t", fmt.Sprintf("prometheus.service-monitor=%v", createServiceMonitor)).Execute()).Should(BeNil())
 		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -66,7 +71,7 @@ func TestPrometheusTrait(t *testing.T) {
 			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
 		})
 
-		if ocp {
+		if ocp && createServiceMonitor {
 			t.Run("Service Monitor is created on OpenShift", func(t *testing.T) {
 				sm := serviceMonitor(ns, "java")
 				Eventually(sm, TestTimeoutShort).ShouldNot(BeNil())
