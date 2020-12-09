@@ -188,6 +188,22 @@ type ControllerStrategySelector interface {
 	ControllerStrategySelectorOrder() int
 }
 
+func isTrue(b *bool) bool {
+	return b != nil && *b
+}
+
+func isNilOrTrue(b *bool) bool {
+	return b == nil || *b
+}
+
+func isFalse(b *bool) bool {
+	return b != nil && !*b
+}
+
+func isNilOrFalse(b *bool) bool {
+	return b == nil || !*b
+}
+
 /* Environment */
 
 // A Environment provides the context where the trait is executed

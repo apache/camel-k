@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -171,4 +172,40 @@ func TestRunPropertyFileFlag(t *testing.T) {
 	assert.Equal(t, `c\=d=e`, spec.Configuration[1].Value)
 	assert.Equal(t, `d=c\=e`, spec.Configuration[2].Value)
 	assert.Equal(t, `f=g\:h`, spec.Configuration[3].Value)
+}
+
+func TestConfigureTraits(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+	runCmdOptions := addTestRunCmd(options, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
+	_, err := test.ExecuteCommand(rootCmd, "run",
+		"--trait", "affinity.pod-affinity=false",
+		"--trait", "container.probes-enabled=false",
+		"--trait", "environment.container-meta=false",
+		"--trait", "jvm.print-command=false",
+		"--trait", "prometheus.service-monitor=false",
+		"example.js")
+	if err != nil {
+		t.Error(err)
+	}
+	client, err := runCmdOptions.GetCmdClient()
+	if err != nil {
+		t.Error(err)
+	}
+	catalog := trait.NewCatalog(runCmdOptions.Context, client)
+
+	traits, err := configureTraits(runCmdOptions.Traits, catalog)
+
+	assert.Nil(t, err)
+	assert.Len(t, traits, 5)
+	assertTraitConfiguration(t, traits, "affinity", `{"podAffinity":false}`)
+	assertTraitConfiguration(t, traits, "container", `{"probesEnabled":false}`)
+	assertTraitConfiguration(t, traits, "environment", `{"containerMeta":false}`)
+	assertTraitConfiguration(t, traits, "jvm", `{"printCommand":false}`)
+	assertTraitConfiguration(t, traits, "prometheus", `{"serviceMonitor":false}`)
+}
+
+func assertTraitConfiguration(t *testing.T, traits map[string]v1.TraitSpec, trait string, expected string) {
+	assert.Contains(t, traits, trait)
+	assert.Equal(t, expected, string(traits[trait].Configuration.RawMessage))
 }

@@ -34,12 +34,12 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Prometheus trait configures a Prometheus-compatible endpoint. This trait also exposes the integration with 
-//`Service` and `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the 
+// The Prometheus trait configures a Prometheus-compatible endpoint. This trait also exposes the integration with
+//`Service` and `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the
 // Prometheus Operator.
 //
 // The metrics exposed vary depending on the configured runtime. With the default Quarkus runtime, metrics are
-// exposed using MicroProfile Metrics. While with the Java main runtime, metrics are exposed using the Prometheus 
+// exposed using MicroProfile Metrics. While with the Java main runtime, metrics are exposed using the Prometheus
 // JMX exporter.
 //
 // WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
@@ -54,7 +54,7 @@ type prometheusTrait struct {
 	// The Prometheus endpoint port (default `9779`, or `8080` with Quarkus).
 	Port *int `property:"port" json:"port,omitempty"`
 	// Whether a `ServiceMonitor` resource is created (default `true`).
-	ServiceMonitor bool `property:"service-monitor" json:"serviceMonitor,omitempty"`
+	ServiceMonitor *bool `property:"service-monitor" json:"serviceMonitor,omitempty"`
 	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 	ServiceMonitorLabels []string `property:"service-monitor-labels" json:"serviceMonitorLabels,omitempty"`
 	// To use a custom ConfigMap containing the Prometheus JMX exporter configuration (under the `content` ConfigMap key).
@@ -72,7 +72,7 @@ const (
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait:      NewBaseTrait("prometheus", 1900),
-		ServiceMonitor: true,
+		ServiceMonitor: &[]bool{true}[0],
 	}
 }
 
@@ -182,7 +182,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		condition.Message = fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port) + condition.Message
 
 		// Add the ServiceMonitor resource
-		if t.ServiceMonitor {
+		if isNilOrTrue(t.ServiceMonitor) {
 			smt, err := t.getServiceMonitorFor(e)
 			if err != nil {
 				return err

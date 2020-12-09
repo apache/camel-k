@@ -29,7 +29,7 @@ import (
 // +camel-k:trait=environment
 type environmentTrait struct {
 	BaseTrait     `property:",squash"`
-	ContainerMeta bool `property:"container-meta" json:"containerMeta,omitempty"`
+	ContainerMeta *bool `property:"container-meta" json:"containerMeta,omitempty"`
 }
 
 const (
@@ -53,7 +53,7 @@ func newEnvironmentTrait() Trait {
 	return &environmentTrait{
 		BaseTrait: NewBaseTrait("environment", 800),
 		// Enable injection of NAMESPACE and POD_NAME environment variables.
-		ContainerMeta: true,
+		ContainerMeta: &[]bool{true}[0],
 	}
 }
 
@@ -74,7 +74,7 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, ConfigMapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, SecretsMountPath)
 
-	if t.ContainerMeta {
+	if isNilOrTrue(t.ContainerMeta) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
 	}

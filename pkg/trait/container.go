@@ -75,7 +75,7 @@ type containerTrait struct {
 	Name string `property:"name" json:"name,omitempty"`
 
 	// ProbesEnabled enable/disable probes on the container (default `false`)
-	ProbesEnabled bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
+	ProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
 	// Path to access on the probe ( default `/health`). Note that this property is not supported
 	// on quarkus runtime and setting it will result in the integration failing to start.
 	ProbePath string `property:"probe-path" json:"probePath,omitempty"`
@@ -113,7 +113,7 @@ func newContainerTrait() Trait {
 		ServicePort:     defaultServicePort,
 		ServicePortName: httpPortName,
 		Name:            defaultContainerName,
-		ProbesEnabled:   false,
+		ProbesEnabled:   &[]bool{false}[0],
 		ProbePath:       defaultProbePath,
 	}
 }
@@ -127,7 +127,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if isNilOrTrue(t.Auto) {
 		if t.Expose == nil {
 			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
 			t.Expose = &e
@@ -155,7 +155,7 @@ func (t *containerTrait) IsPlatformTrait() bool {
 }
 
 func (t *containerTrait) configureDependencies(e *Environment) {
-	if !t.ProbesEnabled {
+	if isNilOrFalse(t.ProbesEnabled) {
 		return
 	}
 
@@ -207,7 +207,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Deployment
 	//
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
-		if t.ProbesEnabled && t.PortName == httpPortName {
+		if isTrue(t.ProbesEnabled) && t.PortName == httpPortName {
 			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
@@ -236,7 +236,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Knative Service
 	//
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		if t.ProbesEnabled && t.PortName == httpPortName {
+		if isTrue(t.ProbesEnabled) && t.PortName == httpPortName {
 			// don't set the port on Knative service as it is not allowed.
 			if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
 				return err
@@ -277,7 +277,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// CronJob
 	//
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
-		if t.ProbesEnabled && t.PortName == httpPortName {
+		if isTrue(t.ProbesEnabled) && t.PortName == httpPortName {
 			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
