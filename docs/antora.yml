@@ -1,5 +1,5 @@
 name: camel-k
-title: Apache Camel K
+title: Camel K
 version: latest
 nav:
 - modules/ROOT/nav.adoc
