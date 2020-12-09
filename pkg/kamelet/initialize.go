@@ -55,6 +55,10 @@ func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 }
 
 func recomputeProperties(kamelet *v1alpha1.Kamelet) error {
+	if kamelet.Spec.Definition == nil {
+		return nil
+	}
+
 	kamelet.Status.Properties = make([]v1alpha1.KameletProperty, 0, len(kamelet.Spec.Definition.Properties))
 	propSet := make(map[string]bool)
 	for k, v := range kamelet.Spec.Definition.Properties {

@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"sort"
@@ -360,12 +359,6 @@ func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamele
 	}
 
 	// Create configmaps to avoid storing kamelet definitions in the integration CR
-
-	schema, err := json.Marshal(kamelet.Spec.Definition)
-	if err != nil {
-		return v1.SourceSpec{}, err
-	}
-
 	// Compute the input digest and store it along with the configmap
 	hash, err := digest.ComputeForSource(source)
 	if err != nil {
@@ -395,7 +388,6 @@ func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamele
 		},
 		Data: map[string]string{
 			contentKey: source.Content,
-			schemaKey:  string(schema),
 		},
 	}
 
