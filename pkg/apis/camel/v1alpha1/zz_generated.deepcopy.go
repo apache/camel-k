@@ -602,7 +602,11 @@ func (in *KameletSpec) DeepCopyInto(out *KameletSpec) {
 		*out = new(v1.Flow)
 		(*in).DeepCopyInto(*out)
 	}
-	out.Authorization = in.Authorization
+	if in.Authorization != nil {
+		in, out := &in.Authorization, &out.Authorization
+		*out = new(AuthorizationSpec)
+		**out = **in
+	}
 	if in.Types != nil {
 		in, out := &in.Types, &out.Types
 		*out = make(map[EventSlot]EventTypeSpec, len(*in))

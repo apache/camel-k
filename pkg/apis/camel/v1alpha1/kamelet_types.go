@@ -36,7 +36,7 @@ type KameletSpec struct {
 	Definition    JSONSchemaProps             `json:"definition,omitempty"`
 	Sources       []camelv1.SourceSpec        `json:"sources,omitempty"`
 	Flow          *camelv1.Flow               `json:"flow,omitempty"`
-	Authorization AuthorizationSpec           `json:"authorization,omitempty"`
+	Authorization *AuthorizationSpec          `json:"authorization,omitempty"`
 	Types         map[EventSlot]EventTypeSpec `json:"types,omitempty"`
 	Dependencies  []string                    `json:"dependencies,omitempty"`
 }
