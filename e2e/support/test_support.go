@@ -904,7 +904,7 @@ func CreateTimerKamelet(ns string, name string) func() error {
 				Name:      name,
 			},
 			Spec: v1alpha1.KameletSpec{
-				Definition: v1alpha1.JSONSchemaProps{
+				Definition: &v1alpha1.JSONSchemaProps{
 					Properties: map[string]v1alpha1.JSONSchemaProps{
 						"message": {
 							Type: "string",
