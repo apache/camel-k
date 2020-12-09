@@ -141,7 +141,10 @@ func (in *KameletBindingStatus) RemoveCondition(condType KameletBindingCondition
 }
 
 // GetPropertyMap returns the EndpointProperties as map
-func (p EndpointProperties) GetPropertyMap() (map[string]string, error) {
+func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
+	if p == nil {
+		return nil, nil
+	}
 	if len(p.RawMessage) == 0 {
 		return nil, nil
 	}
