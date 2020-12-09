@@ -39,11 +39,11 @@ import (
 type jvmTrait struct {
 	BaseTrait `property:",squash"`
 	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
-	Debug bool `property:"debug" json:"debug,omitempty"`
+	Debug *bool `property:"debug" json:"debug,omitempty"`
 	// Suspends the target JVM immediately before the main class is loaded
-	DebugSuspend bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
+	DebugSuspend *bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
 	// Prints the command used the start the JVM in the container logs (default `true`)
-	PrintCommand bool `property:"print-command" json:"printCommand,omitempty"`
+	PrintCommand *bool `property:"print-command" json:"printCommand,omitempty"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
 	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
 	// A list of JVM options
@@ -54,7 +54,7 @@ func newJvmTrait() Trait {
 	return &jvmTrait{
 		BaseTrait:    NewBaseTrait("jvm", 2000),
 		DebugAddress: "*:5005",
-		PrintCommand: true,
+		PrintCommand: &[]bool{true}[0],
 	}
 }
 
@@ -115,9 +115,9 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args := container.Args
 
 	// Remote debugging
-	if t.Debug {
+	if isTrue(t.Debug) {
 		suspend := "n"
-		if t.DebugSuspend {
+		if isTrue(t.DebugSuspend) {
 			suspend = "y"
 		}
 		args = append(args,
@@ -167,7 +167,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args = append(args, "-cp", strings.Join(items, ":"))
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
-	if t.PrintCommand {
+	if isNilOrTrue(t.PrintCommand) {
 		args = append([]string{"exec", "java"}, args...)
 		container.Command = []string{"/bin/sh", "-c"}
 		cmd := strings.Join(args, " ")

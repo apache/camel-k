@@ -57,7 +57,7 @@ func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
 
 func newTestContainerTrait() *containerTrait {
 	tr := newContainerTrait().(*containerTrait)
-	tr.ProbesEnabled = true
+	tr.ProbesEnabled = &[]bool{true}[0]
 
 	return tr
 }

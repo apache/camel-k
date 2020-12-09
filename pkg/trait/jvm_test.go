@@ -145,8 +145,8 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 	trait, environment := createNominalJvmTest()
-	trait.Debug = true
-	trait.DebugSuspend = true
+	trait.Debug = &[]bool{true}[0]
+	trait.DebugSuspend = &[]bool{true}[0]
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -204,7 +204,7 @@ func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
 	trait := newJvmTrait().(*jvmTrait)
 	enabled := true
 	trait.Enabled = &enabled
-	trait.PrintCommand = false
+	trait.PrintCommand = &[]bool{false}[0]
 	trait.Ctx = context.TODO()
 	trait.Client = client
 

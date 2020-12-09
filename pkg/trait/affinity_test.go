@@ -40,8 +40,8 @@ func TestConfigureAffinityTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 	affinityTrait, environment, _ := createNominalAffinityTest()
-	affinityTrait.PodAffinity = true
-	affinityTrait.PodAntiAffinity = true
+	affinityTrait.PodAffinity = &[]bool{true}[0]
+	affinityTrait.PodAntiAffinity = &[]bool{true}[0]
 	configured, err := affinityTrait.Configure(environment)
 
 	assert.False(t, configured)
@@ -83,7 +83,7 @@ func TestApplyNodeAffinityLabelsDoesSucceed(t *testing.T) {
 
 func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait, environment, deployment := createNominalAffinityTest()
-	affinityTrait.PodAntiAffinity = true
+	affinityTrait.PodAntiAffinity = &[]bool{true}[0]
 	affinityTrait.PodAntiAffinityLabels = []string{"criteria != value"}
 
 	err := affinityTrait.Apply(environment)
@@ -105,7 +105,7 @@ func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 
 func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait, environment, deployment := createNominalAffinityTest()
-	affinityTrait.PodAffinity = true
+	affinityTrait.PodAffinity = &[]bool{true}[0]
 	affinityTrait.PodAffinityLabels = []string{"!criteria"}
 
 	err := affinityTrait.Apply(environment)

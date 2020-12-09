@@ -39,9 +39,9 @@ import (
 type affinityTrait struct {
 	BaseTrait `property:",squash"`
 	// Always co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAffinity bool `property:"pod-affinity" json:"podAffinity,omitempty"`
+	PodAffinity *bool `property:"pod-affinity" json:"podAffinity,omitempty"`
 	// Never co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAntiAffinity bool `property:"pod-anti-affinity" json:"podAntiAffinity,omitempty"`
+	PodAntiAffinity *bool `property:"pod-anti-affinity" json:"podAntiAffinity,omitempty"`
 	// Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
 	NodeAffinityLabels []string `property:"node-affinity-labels" json:"nodeAffinityLabels,omitempty"`
 	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
@@ -54,16 +54,18 @@ type affinityTrait struct {
 
 func newAffinityTrait() Trait {
 	return &affinityTrait{
-		BaseTrait: NewBaseTrait("affinity", 1300),
+		BaseTrait:       NewBaseTrait("affinity", 1300),
+		PodAffinity:     &[]bool{false}[0],
+		PodAntiAffinity: &[]bool{false}[0],
 	}
 }
 
 func (t *affinityTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled == nil || !*t.Enabled {
+	if isNilOrFalse(t.Enabled) {
 		return false, nil
 	}
 
-	if t.PodAffinity && t.PodAntiAffinity {
+	if isTrue(t.PodAffinity) && isTrue(t.PodAntiAffinity) {
 		return false, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
@@ -136,7 +138,7 @@ func (t *affinityTrait) addNodeAffinity(_ *Environment, deployment *appsv1.Deplo
 }
 
 func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deployment) error {
-	if !t.PodAffinity && len(t.PodAffinityLabels) == 0 {
+	if isNilOrFalse(t.PodAffinity) && len(t.PodAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -161,7 +163,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deploy
 		}
 	}
 
-	if t.PodAffinity {
+	if isTrue(t.PodAffinity) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,
@@ -192,7 +194,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deploy
 }
 
 func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.Deployment) error {
-	if !t.PodAntiAffinity && len(t.PodAntiAffinityLabels) == 0 {
+	if isNilOrFalse(t.PodAntiAffinity) && len(t.PodAntiAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -217,7 +219,7 @@ func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.De
 		}
 	}
 
-	if t.PodAntiAffinity {
+	if isTrue(t.PodAntiAffinity) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,
