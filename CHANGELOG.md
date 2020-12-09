@@ -396,7 +396,6 @@
 - Avoid requirements of a kubeconfig when using `kamel init xxx` command [\#1368](https://github.com/apache/camel-k/issues/1368)
 - Support for local development using containers [\#1339](https://github.com/apache/camel-k/issues/1339)
 - User cannot create resource in API group [\#1302](https://github.com/apache/camel-k/issues/1302)
-- Support of 3rd party camel components, data formats and type converters [\#1285](https://github.com/apache/camel-k/issues/1285)
 - Camel-k with Spring boot  [\#1176](https://github.com/apache/camel-k/issues/1176)
 - routes-rest.js not working [\#1174](https://github.com/apache/camel-k/issues/1174)
 - Unable to run Knative integration [\#1169](https://github.com/apache/camel-k/issues/1169)
@@ -673,6 +672,7 @@
 
 **Closed issues:**
 
+- Support of 3rd party camel components, data formats and type converters [\#1285](https://github.com/apache/camel-k/issues/1285)
 - Buildah support [\#1256](https://github.com/apache/camel-k/issues/1256)
 - Dead link from readme to trait documentation [\#1249](https://github.com/apache/camel-k/issues/1249)
 - When using `camel-opentracing`, \<Log statement in routes.xml is getting logged twice [\#1240](https://github.com/apache/camel-k/issues/1240)
