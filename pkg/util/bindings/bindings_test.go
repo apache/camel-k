@@ -196,12 +196,12 @@ func TestBindings(t *testing.T) {
 	}
 }
 
-func asEndpointProperties(props map[string]string) v1alpha1.EndpointProperties {
+func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
 	serialized, err := json.Marshal(props)
 	if err != nil {
 		panic(err)
 	}
-	return v1alpha1.EndpointProperties{
+	return &v1alpha1.EndpointProperties{
 		RawMessage: serialized,
 	}
 }

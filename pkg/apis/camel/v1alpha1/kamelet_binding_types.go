@@ -41,7 +41,7 @@ type Endpoint struct {
 	// URI can alternatively be used to specify the (Camel) endpoint explicitly
 	URI *string `json:"uri,omitempty"`
 	// Properties are a key value representation of endpoint properties
-	Properties EndpointProperties `json:"properties,omitempty"`
+	Properties *EndpointProperties `json:"properties,omitempty"`
 }
 
 type EndpointType string

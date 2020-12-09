@@ -20,6 +20,8 @@ package strimzi
 import (
 	"context"
 	"encoding/json"
+	"testing"
+
 	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
 	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1/client/internalclientset/fake"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -29,7 +31,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 func TestStrimziDirect(t *testing.T) {
@@ -122,12 +123,12 @@ func TestStrimziLookup(t *testing.T) {
 	assert.Nil(t, binding.Traits)
 }
 
-func asEndpointProperties(props map[string]string) v1alpha1.EndpointProperties {
+func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
 	serialized, err := json.Marshal(props)
 	if err != nil {
 		panic(err)
 	}
-	return v1alpha1.EndpointProperties{
+	return &v1alpha1.EndpointProperties{
 		RawMessage: serialized,
 	}
 }

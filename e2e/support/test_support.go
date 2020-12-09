@@ -56,7 +56,7 @@ import (
 	routev1 "github.com/openshift/api/route/v1"
 
 	"github.com/apache/camel-k/e2e/support/util"
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
 	"github.com/apache/camel-k/pkg/install"
@@ -968,12 +968,12 @@ func asFlow(source map[string]interface{}) *v1.Flow {
 	}
 }
 
-func asEndpointProperties(props map[string]string) v1alpha1.EndpointProperties {
+func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
 	bytes, err := json.Marshal(props)
 	if err != nil {
 		panic(err)
 	}
-	return v1alpha1.EndpointProperties{
+	return &v1alpha1.EndpointProperties{
 		RawMessage: bytes,
 	}
 }
