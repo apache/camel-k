@@ -123,10 +123,35 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 		return nil, nil, errors.Wrap(err, "cannot read sources")
 	}
 
+	// Extract list of property names already specified by the user.
+	userPropertyNames := []string{}
+	index := 0
+	for _, arg := range args {
+		if arg == "-p" || arg == "--property" {
+			// Property is assumed to be in the form: <name>=<value>
+			splitValues := strings.Split(args[index+1], "=")
+			userPropertyNames = append(userPropertyNames, splitValues[0])
+		}
+		index++
+	}
+
 	// filter out in place non-run options
 	nOpts := 0
 	for _, o := range opts {
-		if !nonRunOptions[o.Name] {
+		// Check if property name is given by user.
+		propertyAlreadySpecifiedByUser := false
+		if o.Name == "property" {
+			propertyComponents := strings.Split(o.Value, "=")
+			for _, propName := range userPropertyNames {
+				if propName == propertyComponents[0] {
+					propertyAlreadySpecifiedByUser = true
+					break
+				}
+			}
+		}
+
+		// Skip properties already specified by the user otherwise add all options.
+		if !propertyAlreadySpecifiedByUser && !nonRunOptions[o.Name] {
 			opts[nOpts] = o
 			nOpts++
 		}
