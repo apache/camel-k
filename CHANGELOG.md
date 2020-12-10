@@ -19,6 +19,11 @@
 
 **Merged pull requests:**
 
+- chore\(api\): make KameletSpec.Definition a pointer so it can be omitted [\#1855](https://github.com/apache/camel-k/pull/1855) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(crd\): Regenerate KameletBinding CRD [\#1854](https://github.com/apache/camel-k/pull/1854) ([astefanutti](https://github.com/astefanutti))
+- chore\(api\): make Endpoint.Properties a pointer so it can be omitted [\#1853](https://github.com/apache/camel-k/pull/1853) ([lburgazzoli](https://github.com/lburgazzoli))
+- api: add in/out/error type schema to v1alpha1.Endpoint [\#1852](https://github.com/apache/camel-k/pull/1852) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(api\): make KameletSpec.Authorization a pointer so it can be omitted [\#1851](https://github.com/apache/camel-k/pull/1851) ([lburgazzoli](https://github.com/lburgazzoli))
 - Remove Travis CI build [\#1847](https://github.com/apache/camel-k/pull/1847) ([astefanutti](https://github.com/astefanutti))
 - fix\(api\): Remove controller-tools dependency from API module [\#1846](https://github.com/apache/camel-k/pull/1846) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): add test for Jolokia trait \#1547 [\#1845](https://github.com/apache/camel-k/pull/1845) ([tadayosi](https://github.com/tadayosi))
@@ -31,6 +36,7 @@
 - Fix \#1654: enable sinkbinding automatically [\#1832](https://github.com/apache/camel-k/pull/1832) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1818: add support for Kamelet repository [\#1830](https://github.com/apache/camel-k/pull/1830) ([nicolaferraro](https://github.com/nicolaferraro))
 - Provide tests for ENTESB-14497 [\#1829](https://github.com/apache/camel-k/pull/1829) ([llowinge](https://github.com/llowinge))
+- Add command line support for creating, building and running containerized integrations locally [\#1827](https://github.com/apache/camel-k/pull/1827) ([doru1004](https://github.com/doru1004))
 - Sort the integration configurations before returning [\#1825](https://github.com/apache/camel-k/pull/1825) ([kaczyns](https://github.com/kaczyns))
 - Split tests by language [\#1822](https://github.com/apache/camel-k/pull/1822) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(doc\): Shorten monitoring/scaling navigation menu items [\#1819](https://github.com/apache/camel-k/pull/1819) ([astefanutti](https://github.com/astefanutti))
@@ -396,6 +402,7 @@
 - Avoid requirements of a kubeconfig when using `kamel init xxx` command [\#1368](https://github.com/apache/camel-k/issues/1368)
 - Support for local development using containers [\#1339](https://github.com/apache/camel-k/issues/1339)
 - User cannot create resource in API group [\#1302](https://github.com/apache/camel-k/issues/1302)
+- Support of 3rd party camel components, data formats and type converters [\#1285](https://github.com/apache/camel-k/issues/1285)
 - Camel-k with Spring boot  [\#1176](https://github.com/apache/camel-k/issues/1176)
 - routes-rest.js not working [\#1174](https://github.com/apache/camel-k/issues/1174)
 - Unable to run Knative integration [\#1169](https://github.com/apache/camel-k/issues/1169)
@@ -672,7 +679,6 @@
 
 **Closed issues:**
 
-- Support of 3rd party camel components, data formats and type converters [\#1285](https://github.com/apache/camel-k/issues/1285)
 - Buildah support [\#1256](https://github.com/apache/camel-k/issues/1256)
 - Dead link from readme to trait documentation [\#1249](https://github.com/apache/camel-k/issues/1249)
 - When using `camel-opentracing`, \<Log statement in routes.xml is getting logged twice [\#1240](https://github.com/apache/camel-k/issues/1240)
