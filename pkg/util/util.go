@@ -461,3 +461,32 @@ func GetEnvironmentVariable(variable string) (string, error) {
 
 	return value, nil
 }
+
+/// Bool operations:
+
+// BoolP returns a pointer to a bool value
+func BoolP(b bool) *bool {
+	return &b
+}
+
+// IsTrue checks if the bool pointer is defined and true
+func IsTrue(b *bool) bool {
+	return b != nil && *b
+}
+
+// IsNilOrTrue checks if the bool pointer is nil or true.
+// You can use it if the bool pointer is meant to be true by default.
+func IsNilOrTrue(b *bool) bool {
+	return b == nil || *b
+}
+
+// IsFalse checks if the bool pointer is defined and false
+func IsFalse(b *bool) bool {
+	return b != nil && !*b
+}
+
+// IsNilOrFalse checks if the bool pointer is nil or false.
+// You can use it if the bool pointer is meant to be false by default.
+func IsNilOrFalse(b *bool) bool {
+	return b == nil || !*b
+}

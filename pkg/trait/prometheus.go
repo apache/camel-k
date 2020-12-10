@@ -72,7 +72,7 @@ const (
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait:      NewBaseTrait("prometheus", 1900),
-		ServiceMonitor: &[]bool{true}[0],
+		ServiceMonitor: util.BoolP(true),
 	}
 }
 
@@ -182,7 +182,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		condition.Message = fmt.Sprintf("%s(%s/%d) -> ", service.Name, servicePort.Name, servicePort.Port) + condition.Message
 
 		// Add the ServiceMonitor resource
-		if isNilOrTrue(t.ServiceMonitor) {
+		if util.IsNilOrTrue(t.ServiceMonitor) {
 			smt, err := t.getServiceMonitorFor(e)
 			if err != nil {
 				return err

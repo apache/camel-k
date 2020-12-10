@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 // Allows constraining which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node,
@@ -55,17 +56,17 @@ type affinityTrait struct {
 func newAffinityTrait() Trait {
 	return &affinityTrait{
 		BaseTrait:       NewBaseTrait("affinity", 1300),
-		PodAffinity:     &[]bool{false}[0],
-		PodAntiAffinity: &[]bool{false}[0],
+		PodAffinity:     util.BoolP(false),
+		PodAntiAffinity: util.BoolP(false),
 	}
 }
 
 func (t *affinityTrait) Configure(e *Environment) (bool, error) {
-	if isNilOrFalse(t.Enabled) {
+	if util.IsNilOrFalse(t.Enabled) {
 		return false, nil
 	}
 
-	if isTrue(t.PodAffinity) && isTrue(t.PodAntiAffinity) {
+	if util.IsTrue(t.PodAffinity) && util.IsTrue(t.PodAntiAffinity) {
 		return false, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
@@ -138,7 +139,7 @@ func (t *affinityTrait) addNodeAffinity(_ *Environment, deployment *appsv1.Deplo
 }
 
 func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deployment) error {
-	if isNilOrFalse(t.PodAffinity) && len(t.PodAffinityLabels) == 0 {
+	if util.IsNilOrFalse(t.PodAffinity) && len(t.PodAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -163,7 +164,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deploy
 		}
 	}
 
-	if isTrue(t.PodAffinity) {
+	if util.IsTrue(t.PodAffinity) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,
@@ -194,7 +195,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deploy
 }
 
 func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.Deployment) error {
-	if isNilOrFalse(t.PodAntiAffinity) && len(t.PodAntiAffinityLabels) == 0 {
+	if util.IsNilOrFalse(t.PodAntiAffinity) && len(t.PodAntiAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -219,7 +220,7 @@ func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.De
 		}
 	}
 
-	if isTrue(t.PodAntiAffinity) {
+	if util.IsTrue(t.PodAntiAffinity) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,

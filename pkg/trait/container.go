@@ -113,7 +113,7 @@ func newContainerTrait() Trait {
 		ServicePort:     defaultServicePort,
 		ServicePortName: httpPortName,
 		Name:            defaultContainerName,
-		ProbesEnabled:   &[]bool{false}[0],
+		ProbesEnabled:   util.BoolP(false),
 		ProbePath:       defaultProbePath,
 	}
 }
@@ -127,7 +127,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if isNilOrTrue(t.Auto) {
+	if util.IsNilOrTrue(t.Auto) {
 		if t.Expose == nil {
 			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
 			t.Expose = &e
@@ -155,7 +155,7 @@ func (t *containerTrait) IsPlatformTrait() bool {
 }
 
 func (t *containerTrait) configureDependencies(e *Environment) {
-	if isNilOrFalse(t.ProbesEnabled) {
+	if util.IsNilOrFalse(t.ProbesEnabled) {
 		return
 	}
 
@@ -207,7 +207,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Deployment
 	//
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
-		if isTrue(t.ProbesEnabled) && t.PortName == httpPortName {
+		if util.IsTrue(t.ProbesEnabled) && t.PortName == httpPortName {
 			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
@@ -236,7 +236,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Knative Service
 	//
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		if isTrue(t.ProbesEnabled) && t.PortName == httpPortName {
+		if util.IsTrue(t.ProbesEnabled) && t.PortName == httpPortName {
 			// don't set the port on Knative service as it is not allowed.
 			if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
 				return err
@@ -277,7 +277,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// CronJob
 	//
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
-		if isTrue(t.ProbesEnabled) && t.PortName == httpPortName {
+		if util.IsTrue(t.ProbesEnabled) && t.PortName == httpPortName {
 			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
