@@ -22,6 +22,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 
 	"github.com/scylladb/go-set/strset"
@@ -145,8 +146,8 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 	trait, environment := createNominalJvmTest()
-	trait.Debug = &[]bool{true}[0]
-	trait.DebugSuspend = &[]bool{true}[0]
+	trait.Debug = util.BoolP(true)
+	trait.DebugSuspend = util.BoolP(true)
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -202,9 +203,8 @@ func createJvmTestWithKitType(kitType string) (*jvmTrait, *Environment) {
 	)
 
 	trait := newJvmTrait().(*jvmTrait)
-	enabled := true
-	trait.Enabled = &enabled
-	trait.PrintCommand = &[]bool{false}[0]
+	trait.Enabled = util.BoolP(true)
+	trait.PrintCommand = util.BoolP(false)
 	trait.Ctx = context.TODO()
 	trait.Client = client
 

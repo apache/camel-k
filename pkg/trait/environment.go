@@ -19,6 +19,7 @@ package trait
 
 import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
@@ -28,7 +29,8 @@ import (
 //
 // +camel-k:trait=environment
 type environmentTrait struct {
-	BaseTrait     `property:",squash"`
+	BaseTrait `property:",squash"`
+	// Enables injection of NAMESPACE and POD_NAME environment variables (default `true`)
 	ContainerMeta *bool `property:"container-meta" json:"containerMeta,omitempty"`
 }
 
@@ -51,9 +53,8 @@ const (
 
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
-		BaseTrait: NewBaseTrait("environment", 800),
-		// Enable injection of NAMESPACE and POD_NAME environment variables.
-		ContainerMeta: &[]bool{true}[0],
+		BaseTrait:     NewBaseTrait("environment", 800),
+		ContainerMeta: util.BoolP(true),
 	}
 }
 
@@ -74,7 +75,7 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, ConfigMapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, SecretsMountPath)
 
-	if isNilOrTrue(t.ContainerMeta) {
+	if util.IsNilOrTrue(t.ContainerMeta) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
 	}

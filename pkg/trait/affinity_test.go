@@ -27,6 +27,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -40,8 +41,8 @@ func TestConfigureAffinityTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 	affinityTrait, environment, _ := createNominalAffinityTest()
-	affinityTrait.PodAffinity = &[]bool{true}[0]
-	affinityTrait.PodAntiAffinity = &[]bool{true}[0]
+	affinityTrait.PodAffinity = util.BoolP(true)
+	affinityTrait.PodAntiAffinity = util.BoolP(true)
 	configured, err := affinityTrait.Configure(environment)
 
 	assert.False(t, configured)
@@ -83,7 +84,7 @@ func TestApplyNodeAffinityLabelsDoesSucceed(t *testing.T) {
 
 func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait, environment, deployment := createNominalAffinityTest()
-	affinityTrait.PodAntiAffinity = &[]bool{true}[0]
+	affinityTrait.PodAntiAffinity = util.BoolP(true)
 	affinityTrait.PodAntiAffinityLabels = []string{"criteria != value"}
 
 	err := affinityTrait.Apply(environment)
@@ -105,7 +106,7 @@ func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 
 func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait, environment, deployment := createNominalAffinityTest()
-	affinityTrait.PodAffinity = &[]bool{true}[0]
+	affinityTrait.PodAffinity = util.BoolP(true)
 	affinityTrait.PodAffinityLabels = []string{"!criteria"}
 
 	err := affinityTrait.Apply(environment)
