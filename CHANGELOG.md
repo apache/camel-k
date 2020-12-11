@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Integration with Prometheus trait doesn't deploy on Minikube [\#1848](https://github.com/apache/camel-k/issues/1848)
 - Unable to use Kamelet spec in a custom CRD [\#1837](https://github.com/apache/camel-k/issues/1837)
 - Multiple knative revisions created when integration has multiple spec.configuration items [\#1824](https://github.com/apache/camel-k/issues/1824)
 - Release 1.2.1 [\#1823](https://github.com/apache/camel-k/issues/1823)
@@ -19,11 +20,14 @@
 
 **Merged pull requests:**
 
+- chore\(test\): test that propertyless kamelets can be bound [\#1856](https://github.com/apache/camel-k/pull/1856) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(api\): make KameletSpec.Definition a pointer so it can be omitted [\#1855](https://github.com/apache/camel-k/pull/1855) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(crd\): Regenerate KameletBinding CRD [\#1854](https://github.com/apache/camel-k/pull/1854) ([astefanutti](https://github.com/astefanutti))
 - chore\(api\): make Endpoint.Properties a pointer so it can be omitted [\#1853](https://github.com/apache/camel-k/pull/1853) ([lburgazzoli](https://github.com/lburgazzoli))
 - api: add in/out/error type schema to v1alpha1.Endpoint [\#1852](https://github.com/apache/camel-k/pull/1852) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(api\): make KameletSpec.Authorization a pointer so it can be omitted [\#1851](https://github.com/apache/camel-k/pull/1851) ([lburgazzoli](https://github.com/lburgazzoli))
+- fix\(trait\): bool trait props should be pointer, otherwise omitted in CR \#1848 [\#1850](https://github.com/apache/camel-k/pull/1850) ([tadayosi](https://github.com/tadayosi))
+- chore\(e2e\): add test for Prometheus trait \#1547 [\#1849](https://github.com/apache/camel-k/pull/1849) ([tadayosi](https://github.com/tadayosi))
 - Remove Travis CI build [\#1847](https://github.com/apache/camel-k/pull/1847) ([astefanutti](https://github.com/astefanutti))
 - fix\(api\): Remove controller-tools dependency from API module [\#1846](https://github.com/apache/camel-k/pull/1846) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): add test for Jolokia trait \#1547 [\#1845](https://github.com/apache/camel-k/pull/1845) ([tadayosi](https://github.com/tadayosi))
