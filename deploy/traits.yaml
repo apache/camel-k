@@ -202,7 +202,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common property.
   - name: container-meta
     type: bool
-    description: ""
+    description: Enables injection of NAMESPACE and POD_NAME environment variables (default `true`)
 - name: gc
   platform: false
   profiles:
