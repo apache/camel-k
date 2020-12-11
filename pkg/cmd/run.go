@@ -746,7 +746,15 @@ func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.Tr
 			// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
 			traits[id][prop] = []string{v, value}
 		case nil:
-			traits[id][prop] = value
+			//check if value is a path to the file
+			if _, err := os.Stat(value); err == nil {
+				rsc, errResolve := ResolveSources(context.TODO(), []string{value}, false)
+				if errResolve == nil && len(rsc) > 0 {
+					traits[id][prop] = rsc[0].Content
+				}
+			} else {
+				traits[id][prop] = value
+			}
 		}
 	}
 
