@@ -20,6 +20,7 @@
 
 **Merged pull requests:**
 
+- chore\(doc\): generate doc for environment trait [\#1858](https://github.com/apache/camel-k/pull/1858) ([tadayosi](https://github.com/tadayosi))
 - chore\(test\): test that propertyless kamelets can be bound [\#1856](https://github.com/apache/camel-k/pull/1856) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(api\): make KameletSpec.Definition a pointer so it can be omitted [\#1855](https://github.com/apache/camel-k/pull/1855) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(crd\): Regenerate KameletBinding CRD [\#1854](https://github.com/apache/camel-k/pull/1854) ([astefanutti](https://github.com/astefanutti))
