@@ -60,6 +60,9 @@ func registrySecretFromDataOrCollect(ctx context.Context, c client.Client, names
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      registrySecretName,
 			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
 		},
 		Type: v1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{

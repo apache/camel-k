@@ -56,6 +56,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().Bool("skip-integration-platform", false, "Do not uninstall the Camel K Integration Platform in the current namespace")
 	cmd.Flags().Bool("skip-service-accounts", false, "Do not uninstall the Camel K Service Accounts in the current namespace")
 	cmd.Flags().Bool("skip-config-maps", false, "Do not uninstall the Camel K Config Maps in the current namespace")
+	cmd.Flags().Bool("skip-registry-secret", false, "Do not uninstall the Camel K Registry Secret in the current namespace")
 	cmd.Flags().Bool("global", false, "Indicates that a global installation is going to be uninstalled (affects OLM)")
 	cmd.Flags().Bool("olm", true, "Try to uninstall via OLM (Operator Lifecycle Manager) if available")
 	cmd.Flags().String("olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
@@ -78,6 +79,7 @@ type uninstallCmdOptions struct {
 	SkipIntegrationPlatform bool `mapstructure:"skip-integration-platform"`
 	SkipServiceAccounts     bool `mapstructure:"skip-service-accounts"`
 	SkipConfigMaps          bool `mapstructure:"skip-config-maps"`
+	SkipRegistrySecret      bool `mapstructure:"skip-registry-secret"`
 	Global                  bool `mapstructure:"global"`
 	OlmEnabled              bool `mapstructure:"olm"`
 	UninstallAll            bool `mapstructure:"all"`
@@ -246,6 +248,13 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c
 		fmt.Printf("Camel K Config Maps removed from namespace %s\n", o.Namespace)
 	}
 
+	if !o.SkipRegistrySecret {
+		if err := o.uninstallRegistrySecret(ctx, c); err != nil {
+			return err
+		}
+		fmt.Printf("Camel K Registry Secret removed from namespace %s\n", o.Namespace)
+	}
+
 	return nil
 }
 
@@ -389,6 +398,24 @@ func (o *uninstallCmdOptions) uninstallConfigMaps(ctx context.Context, c client.
 
 	for _, configMap := range configMapsList.Items {
 		err := api.ConfigMaps(o.Namespace).Delete(ctx, configMap.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallRegistrySecret(ctx context.Context, c client.Client) error {
+	api := c.CoreV1()
+
+	secretsList, err := api.Secrets(o.Namespace).List(ctx, defaultListOptions)
+	if err != nil {
+		return err
+	}
+
+	for _, secret := range secretsList.Items {
+		err := api.Secrets(o.Namespace).Delete(ctx, secret.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
