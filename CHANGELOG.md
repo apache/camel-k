@@ -339,7 +339,6 @@
 - Switch to Syndesis backport github action [\#1560](https://github.com/apache/camel-k/pull/1560) ([oscerd](https://github.com/oscerd))
 - fix\(jvm\): Integration do not shutdown gracefully when jvm.print-command is set [\#1558](https://github.com/apache/camel-k/pull/1558) ([astefanutti](https://github.com/astefanutti))
 - fix\(util\): line break after "Monitoring pod ..." message [\#1554](https://github.com/apache/camel-k/pull/1554) ([tadayosi](https://github.com/tadayosi))
-- fix: bug in utility function [\#1553](https://github.com/apache/camel-k/pull/1553) ([nicolaferraro](https://github.com/nicolaferraro))
 - support make install-crc \#1410 [\#1544](https://github.com/apache/camel-k/pull/1544) ([johnpoth](https://github.com/johnpoth))
 - Cannot expose knative endpoints in YAML [\#1540](https://github.com/apache/camel-k/pull/1540) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: add a backport action [\#1531](https://github.com/apache/camel-k/pull/1531) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -387,6 +386,7 @@
 
 **Merged pull requests:**
 
+- fix: bug in utility function [\#1553](https://github.com/apache/camel-k/pull/1553) ([nicolaferraro](https://github.com/nicolaferraro))
 -  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - fix: JVM trait overrides other traits JVM arguments [\#1529](https://github.com/apache/camel-k/pull/1529) ([astefanutti](https://github.com/astefanutti))
 - Backport fix for \#1511 in release-1.0.x [\#1520](https://github.com/apache/camel-k/pull/1520) ([nicolaferraro](https://github.com/nicolaferraro))
