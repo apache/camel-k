@@ -30,7 +30,7 @@ import (
 // +camel-k:trait=environment
 type environmentTrait struct {
 	BaseTrait `property:",squash"`
-	// Enables injection of NAMESPACE and POD_NAME environment variables (default `true`)
+	// Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
 	ContainerMeta *bool `property:"container-meta" json:"containerMeta,omitempty"`
 }
 
