@@ -19,6 +19,7 @@ package trait
 
 import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -50,7 +51,7 @@ func newPullSecretTrait() Trait {
 }
 
 func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if util.IsFalse(t.Enabled) {
 		return false, nil
 	}
 
@@ -58,7 +59,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if util.IsNilOrTrue(t.Auto) {
 		if t.SecretName == "" {
 			secret := e.Platform.Status.Build.Registry.Secret
 			if secret != "" {
