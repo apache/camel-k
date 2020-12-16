@@ -94,7 +94,7 @@ The proposed architecture is illustrated in the diagram below:
 
 image::assets/service-binding.svg[Camel K Integration Service Binding]
 
-where the `Secret` created by the _Service Binding Operator_ holds the binding information. The `Integration` could then reference these properties just like any other `Secret` properties. A special mapping may be created by Camel-k to avoid the user having to reference the `Secret` name in their configuration e.g just `{DB_PORT}` instead of `{secret:secret-name/DB_PORT}`.
+where the `Secret` created by the _Service Binding Operator_ holds the binding information. Quarkus' Service Binding https://github.com/quarkusio/quarkus/issues/13617[support] could then be leveraged to configure the `Integration`.
 
 The steps `2-4` would not happen if the `ServiceBinding` is created beforehand.
 
