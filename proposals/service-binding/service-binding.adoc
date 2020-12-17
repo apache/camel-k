@@ -3,7 +3,7 @@ title: Service Binding
 authors:
   - "@johnpoth"
 reviewers:
-  - TBD
+  - "@lburgazzoli"
 approvers:
   - TBD
 creation-date: 2020-15-12
