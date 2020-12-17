@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Should 'kamel uninstall --all' also delete camel-k-registry-secret? [\#1859](https://github.com/apache/camel-k/issues/1859)
 - Integration with Prometheus trait doesn't deploy on Minikube [\#1848](https://github.com/apache/camel-k/issues/1848)
 - Unable to use Kamelet spec in a custom CRD [\#1837](https://github.com/apache/camel-k/issues/1837)
 - Multiple knative revisions created when integration has multiple spec.configuration items [\#1824](https://github.com/apache/camel-k/issues/1824)
@@ -20,6 +21,9 @@
 
 **Merged pull requests:**
 
+- chore\(e2e\): add test for Pull Secret trait \#1547 [\#1865](https://github.com/apache/camel-k/pull/1865) ([tadayosi](https://github.com/tadayosi))
+- chore\(doc\): quote inline code blocks in environment trait comment [\#1863](https://github.com/apache/camel-k/pull/1863) ([tadayosi](https://github.com/tadayosi))
+- feat\(uninstall\): add --skip-registry-secret option and make uninstall remove registry secret \#1859 [\#1862](https://github.com/apache/camel-k/pull/1862) ([tadayosi](https://github.com/tadayosi))
 - chore\(doc\): generate doc for environment trait [\#1858](https://github.com/apache/camel-k/pull/1858) ([tadayosi](https://github.com/tadayosi))
 - Prioritize user properties over modeline properties. [\#1857](https://github.com/apache/camel-k/pull/1857) ([doru1004](https://github.com/doru1004))
 - chore\(test\): test that propertyless kamelets can be bound [\#1856](https://github.com/apache/camel-k/pull/1856) ([nicolaferraro](https://github.com/nicolaferraro))
