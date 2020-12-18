@@ -132,12 +132,80 @@ spec:
                     items:
                       description: CamelScheme --
                       properties:
+                        consumer:
+                          description: CamelSchemeScope contains scoped information
+                            about a scheme
+                          properties:
+                            dependencies:
+                              items:
+                                description: CamelArtifactDependency represent a maven's
+                                  dependency
+                                properties:
+                                  artifactId:
+                                    type: string
+                                  exclusions:
+                                    items:
+                                      description: CamelArtifactExclusion --
+                                      properties:
+                                        artifactId:
+                                          type: string
+                                        groupId:
+                                          type: string
+                                      required:
+                                      - artifactId
+                                      - groupId
+                                      type: object
+                                    type: array
+                                  groupId:
+                                    type: string
+                                  version:
+                                    type: string
+                                required:
+                                - artifactId
+                                - groupId
+                                type: object
+                              type: array
+                          type: object
                         http:
                           type: boolean
                         id:
                           type: string
                         passive:
                           type: boolean
+                        producer:
+                          description: CamelSchemeScope contains scoped information
+                            about a scheme
+                          properties:
+                            dependencies:
+                              items:
+                                description: CamelArtifactDependency represent a maven's
+                                  dependency
+                                properties:
+                                  artifactId:
+                                    type: string
+                                  exclusions:
+                                    items:
+                                      description: CamelArtifactExclusion --
+                                      properties:
+                                        artifactId:
+                                          type: string
+                                        groupId:
+                                          type: string
+                                      required:
+                                      - artifactId
+                                      - groupId
+                                      type: object
+                                    type: array
+                                  groupId:
+                                    type: string
+                                  version:
+                                    type: string
+                                required:
+                                - artifactId
+                                - groupId
+                                type: object
+                              type: array
+                          type: object
                       required:
                       - http
                       - id

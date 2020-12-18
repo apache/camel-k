@@ -41,7 +41,7 @@ var additionalDependencyUsageMessage = `Additional top-level dependencies are sp
 <type>:<dependency-name>
 where <type> is one of {` + strings.Join(acceptedDependencyTypes, "|") + `}.`
 
-func getDependencies(args []string, additionalDependencies []string, allDependencies bool) ([]string, error) {
+func getDependencies(args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist.
 	catalog, err := createCamelCatalog()
 
@@ -62,18 +62,15 @@ func getDependencies(args []string, additionalDependencies []string, allDependen
 	if allDependencies {
 		// Add runtime dependency since this dependency is always required for running
 		// an integration. Only add this dependency if it has not been added already.
-		runtimeDepExists := false
-		for _, dependency := range dependencies {
-			// TODO: add checks for other runtimes when more are supported.
-			if strings.Contains(dependency, "runtime-quarkus") {
-				runtimeDepExists = true
+		for _, runtimeDep := range catalog.Runtime.Dependencies {
+			dep := fmt.Sprintf("mvn:%s/%s", runtimeDep.GroupID, runtimeDep.ArtifactID)
+			if runtimeDep.Version != "" {
+				dep = dep + "/" + runtimeDep.Version
 			}
-		}
-		if !runtimeDepExists {
-			dependencies = append(dependencies, "camel-k:runtime-quarkus")
+			util.StringSliceUniqueAdd(&dependencies, dep)
 		}
 
-		dependencies, err = getTransitiveDependencies(catalog, dependencies)
+		dependencies, err = getTransitiveDependencies(catalog, dependencies, repositories)
 		if err != nil {
 			return nil, err
 		}
@@ -110,7 +107,7 @@ func getTopLevelDependencies(catalog *camel.RuntimeCatalog, args []string) ([]st
 
 func getTransitiveDependencies(
 	catalog *camel.RuntimeCatalog,
-	dependencies []string) ([]string, error) {
+	dependencies []string, repositories []string) ([]string, error) {
 
 	mvn := v1.MavenSpec{
 		LocalRepository: "",
@@ -131,6 +128,24 @@ func getTransitiveDependencies(
 	mc := maven.NewContext(util.MavenWorkingDirectory, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.GetTimeout().Duration
+
+	if len(repositories) > 0 {
+		var repoList []maven.Repository
+		for i, repo := range repositories {
+			repository := maven.NewRepository(repo)
+			if repository.ID == "" {
+				repository.ID = fmt.Sprintf("repository-%03d", i)
+			}
+			repoList = append(repoList, repository)
+		}
+
+		settings := maven.NewDefaultSettings(repoList)
+		settingsData, err := util.EncodeXML(settings)
+		if err != nil {
+			return nil, err
+		}
+		mc.SettingsContent = settingsData
+	}
 
 	// Make maven command less verbose.
 	mc.AdditionalArguments = append(mc.AdditionalArguments, "-q")

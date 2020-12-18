@@ -18,11 +18,15 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/apache/camel-k/pkg/util/docker"
 	"github.com/pkg/errors"
@@ -70,7 +74,7 @@ func deleteDockerWorkingDirectory() error {
 	return nil
 }
 
-func createAndBuildBaseImage(containerRegistry string) error {
+func createAndBuildBaseImage(ctx context.Context, containerRegistry string) error {
 	// Create the base image Docker file.
 	err := docker.CreateBaseImageDockerFile()
 	if err != nil {
@@ -92,8 +96,8 @@ func createAndBuildBaseImage(containerRegistry string) error {
 	return nil
 }
 
-func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool, image string,
-	propertyFiles []string, dependencies []string, routes []string) error {
+func createAndBuildIntegrationImage(ctx context.Context, containerRegistry string, justBaseImage bool, image string,
+	propertyFiles []string, dependencies []string, routes []string, stdout, stderr io.Writer) error {
 	// This ensures the Dockerfile for the base image will not end up in an undesired location.
 	if docker.BaseWorkingDirectory == "" {
 		return errors.New("base directory that holds the base image Dockerfile has not been set correctly")
@@ -110,7 +114,7 @@ func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool
 	}
 
 	// Create the Dockerfile and build the base image.
-	err := createAndBuildBaseImage(containerRegistry)
+	err := createAndBuildBaseImage(ctx, containerRegistry)
 	if err != nil {
 		return err
 	}
@@ -138,7 +142,7 @@ func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool
 
 	// Get integration run command to be run inside the container. This means the command
 	// has to be created with the paths which will be valid inside the container.
-	containerCmd := GetContainerIntegrationRunCommand(propertyFiles, dependencies, routes)
+	containerCmd := GetContainerIntegrationRunCommand(ctx, propertyFiles, dependencies, routes, stdout, stderr)
 
 	// Create the integration image Docker file.
 	err = docker.CreateIntegrationImageDockerFile(containerCmd)
@@ -151,8 +155,8 @@ func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool
 	cmd := exec.CommandContext(ctx, "docker", args...)
 
 	// Set stdout and stderr.
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+	cmd.Stderr = stderr
+	cmd.Stdout = stdout
 
 	// Output executed command.
 	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
@@ -165,14 +169,23 @@ func createAndBuildIntegrationImage(containerRegistry string, justBaseImage bool
 	return nil
 }
 
-func runIntegrationImage(image string) error {
+func runIntegrationImage(ctx context.Context, image string, stdout, stderr io.Writer) error {
+	// Stop the child process before exiting
+	dockerCtx, cancel := context.WithCancel(ctx)
+	cs := make(chan os.Signal)
+	signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-cs
+		cancel()
+	}()
+
 	// Get the docker command line argument for running an image.
 	args := docker.RunIntegrationImageArgs(image)
-	cmd := exec.CommandContext(ctx, "docker", args...)
+	cmd := exec.CommandContext(dockerCtx, "docker", args...)
 
 	// Set stdout and stderr.
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+	cmd.Stderr = stderr
+	cmd.Stdout = stdout
 
 	// Output executed command.
 	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")

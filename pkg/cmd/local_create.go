@@ -34,14 +34,14 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 		Short:   "Create integration images locally.",
 		Long:    `Create integration images locally for containerized integrations.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
 			}
 			if err := options.init(args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
+			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}
 			if err := options.deinit(args); err != nil {
@@ -61,6 +61,7 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, "Add an additional dependency")
+	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
 
 	return &cmd, &options
 }
@@ -73,6 +74,7 @@ type localCreateCmdOptions struct {
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 	Properties             []string `mapstructure:"properties"`
 	PropertyFiles          []string `mapstructure:"property-files"`
+	MavenRepositories      []string `mapstructure:"maven-repositories"`
 }
 
 func (command *localCreateCmdOptions) validate(args []string) error {
@@ -135,12 +137,12 @@ func (command *localCreateCmdOptions) init(args []string) error {
 	return nil
 }
 
-func (command *localCreateCmdOptions) run(args []string) error {
+func (command *localCreateCmdOptions) run(cmd *cobra.Command, args []string) error {
 	dependenciesList := []string{}
 	propertyFilesList := []string{}
 	if !command.BaseImage {
 		// Fetch dependencies.
-		dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
+		dependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
 		if err != nil {
 			return err
 		}
@@ -155,8 +157,8 @@ func (command *localCreateCmdOptions) run(args []string) error {
 	}
 
 	// Create and build integration image.
-	err := createAndBuildIntegrationImage(command.ContainerRegistry, command.BaseImage,
-		command.Image, propertyFilesList, dependenciesList, args)
+	err := createAndBuildIntegrationImage(command.Context, command.ContainerRegistry, command.BaseImage,
+		command.Image, propertyFilesList, dependenciesList, args, cmd.OutOrStdout(), cmd.ErrOrStderr())
 	if err != nil {
 		return err
 	}

@@ -12,6 +12,7 @@ require (
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v0.1.0
+	github.com/golangplus/testing v0.0.0-20180327235837-af21d9c3145e
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/uuid v1.1.1
 	github.com/jpillora/backoff v1.0.0

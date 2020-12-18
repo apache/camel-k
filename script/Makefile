@@ -157,6 +157,10 @@ test-builder: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/builder -tags=integration
 	#go test -timeout 60m -v ./e2e/builder -tags=integration
 
+test-local: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/local -tags=integration
+	#go test -timeout 60m -v ./e2e/local -tags=integration
+
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
