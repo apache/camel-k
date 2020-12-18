@@ -40,7 +40,7 @@ import (
 
 func TestPrometheusTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient)
+		ocp, err := openshift.IsOpenShift(TestClient())
 		assert.Nil(t, err)
 
 		// suppress Service Monitor for the time being as CI test runs on OCP 3.11
@@ -57,7 +57,7 @@ func TestPrometheusTrait(t *testing.T) {
 
 		t.Run("Metrics endpoint works", func(t *testing.T) {
 			pod := IntegrationPod(ns, "java")
-			response, err := TestClient.CoreV1().RESTClient().Get().
+			response, err := TestClient().CoreV1().RESTClient().Get().
 				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", ns, pod().Name)).DoRaw(TestContext)
 			if err != nil {
 				assert.Fail(t, err.Error())
@@ -89,7 +89,7 @@ func serviceMonitor(ns string, name string) func() *monitoringv1.ServiceMonitor 
 			Namespace: ns,
 			Name:      name,
 		}
-		err := TestClient.Get(TestContext, key, &sm)
+		err := TestClient().Get(TestContext, key, &sm)
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {

@@ -35,7 +35,7 @@ import (
 
 func TestPlatformlessRun(t *testing.T) {
 	needsExternalRepo := os.Getenv("STAGING_RUNTIME_REPO") != "" || os.Getenv("KAMEL_INSTALL_MAVEN_REPOSITORIES") != ""
-	ocp, err := openshift.IsOpenShift(TestClient)
+	ocp, err := openshift.IsOpenShift(TestClient())
 	assert.Nil(t, err)
 	if needsExternalRepo || !ocp {
 		t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")

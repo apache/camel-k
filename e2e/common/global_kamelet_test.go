@@ -35,7 +35,7 @@ import (
 func TestRunGlobalKamelet(t *testing.T) {
 	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
 	if !forceGlobalTest {
-		ocp, err := openshift.IsOpenShift(TestClient)
+		ocp, err := openshift.IsOpenShift(TestClient())
 		assert.Nil(t, err)
 		if ocp {
 			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
