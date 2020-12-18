@@ -21,6 +21,8 @@
 
 **Merged pull requests:**
 
+- Fix typo DigitalOcen --\> DigitalOcean [\#1868](https://github.com/apache/camel-k/pull/1868) ([apupier](https://github.com/apupier))
+- chore\(e2e\): add test for Affinity trait \#1547 [\#1866](https://github.com/apache/camel-k/pull/1866) ([tadayosi](https://github.com/tadayosi))
 - chore\(e2e\): add test for Pull Secret trait \#1547 [\#1865](https://github.com/apache/camel-k/pull/1865) ([tadayosi](https://github.com/tadayosi))
 - chore\(doc\): quote inline code blocks in environment trait comment [\#1863](https://github.com/apache/camel-k/pull/1863) ([tadayosi](https://github.com/tadayosi))
 - feat\(uninstall\): add --skip-registry-secret option and make uninstall remove registry secret \#1859 [\#1862](https://github.com/apache/camel-k/pull/1862) ([tadayosi](https://github.com/tadayosi))
