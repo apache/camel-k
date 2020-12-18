@@ -190,6 +190,13 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		fmt.Println("Warning: the operator will not be able to lookup strimzi kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
 	}
 
+	if errmtr := installLeaseBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
+		if k8serrors.IsAlreadyExists(errmtr) {
+			return errmtr
+		}
+		fmt.Println("Warning: the operator will not be able to perform locking using Camel \"master\" component. Try installing as cluster-admin to allow management of lease resources.")
+	}
+
 	if cfg.Monitoring.Enabled {
 		if err := installMonitoringResources(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			if k8serrors.IsForbidden(err) {
@@ -255,6 +262,13 @@ func installMonitoringResources(ctx context.Context, c client.Client, namespace 
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"operator-pod-monitor.yaml",
 		"operator-prometheus-rule.yaml",
+	)
+}
+
+func installLeaseBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+		"operator-role-leases.yaml",
+		"operator-role-binding-leases.yaml",
 	)
 }
 
