@@ -22,15 +22,28 @@ limitations under the License.
 package common
 
 import (
+	"os"
 	"testing"
 	"time"
 
 	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
 
 func TestAddons(t *testing.T) {
+	forceMasterTest := os.Getenv("CAMEL_K_FORCE_MASTER_TEST") == "true"
+	if !forceMasterTest {
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+		if ocp {
+			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
+			return
+		}
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
