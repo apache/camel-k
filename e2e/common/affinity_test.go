@@ -107,7 +107,7 @@ func TestAffinityTrait(t *testing.T) {
 }
 
 func selectSchedulableNode() (*v1.Node, error) {
-	nodes, err := TestClient.CoreV1().Nodes().List(TestContext, metav1.ListOptions{})
+	nodes, err := TestClient().CoreV1().Nodes().List(TestContext, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}

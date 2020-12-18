@@ -47,7 +47,7 @@ func TestJolokiaTrait(t *testing.T) {
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(ns, "java")
-			response, err := TestClient.CoreV1().RESTClient().Get().
+			response, err := TestClient().CoreV1().RESTClient().Get().
 				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod().Name)).DoRaw(TestContext)
 			if err != nil {
 				assert.Fail(t, err.Error())

@@ -39,7 +39,7 @@ import (
 
 func TestKnativePlatformTest(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		if !knative.IsEnabledInNamespace(TestContext, TestClient, ns) {
+		if !knative.IsEnabledInNamespace(TestContext, TestClient(), ns) {
 			t.Error("Knative not installed in the cluster")
 			t.FailNow()
 		}

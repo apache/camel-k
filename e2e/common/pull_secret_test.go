@@ -35,7 +35,7 @@ import (
 
 func TestPullSecretTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient)
+		ocp, err := openshift.IsOpenShift(TestClient())
 		Expect(err).Should(BeNil())
 
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())

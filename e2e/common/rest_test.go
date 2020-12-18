@@ -37,7 +37,7 @@ import (
 func TestRunREST(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		var profile string
-		ocp, err := openshift.IsOpenShift(TestClient)
+		ocp, err := openshift.IsOpenShift(TestClient())
 		assert.Nil(t, err)
 		if ocp {
 			profile = "OpenShift"
