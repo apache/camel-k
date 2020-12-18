@@ -34,14 +34,14 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 		Short:   "Run integration locally.",
 		Long:    `Run integration locally using the input integration files.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
 			}
 			if err := options.init(); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
+			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}
 			if err := options.deinit(); err != nil {
@@ -60,6 +60,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
+	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
 
 	return &cmd, &options
 }
@@ -71,6 +72,7 @@ type localRunCmdOptions struct {
 	PropertyFiles          []string `mapstructure:"property-files"`
 	Properties             []string `mapstructure:"properties"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
+	MavenRepositories      []string `mapstructure:"maven-repositories"`
 }
 
 func (command *localRunCmdOptions) validate(args []string) error {
@@ -118,11 +120,11 @@ func (command *localRunCmdOptions) init() error {
 	return createMavenWorkingDirectory()
 }
 
-func (command *localRunCmdOptions) run(args []string) error {
+func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 	// If local run is provided with an image name, it will just run the image locally and exit.
 	if command.Image != "" && !command.Containerize {
 		// Run image locally.
-		err := runIntegrationImage(command.Image)
+		err := runIntegrationImage(command.Context, command.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}
@@ -131,7 +133,7 @@ func (command *localRunCmdOptions) run(args []string) error {
 	}
 
 	// Fetch dependencies.
-	dependencies, err := getDependencies(args, command.AdditionalDependencies, true)
+	dependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
 	if err != nil {
 		return err
 	}
@@ -145,19 +147,19 @@ func (command *localRunCmdOptions) run(args []string) error {
 	// If this is a containerized local run, create, build and run the container image.
 	if command.Containerize {
 		// Create and build integration image.
-		err = createAndBuildIntegrationImage("", false, command.Image, propertyFiles, dependencies, args)
+		err = createAndBuildIntegrationImage(command.Context, "", false, command.Image, propertyFiles, dependencies, args, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}
 
 		// Run integratgion image.
-		err = runIntegrationImage(command.Image)
+		err = runIntegrationImage(command.Context, command.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}
 	} else {
 		// Run integration locally.
-		err = RunLocalIntegrationRunCommand(propertyFiles, dependencies, args)
+		err = RunLocalIntegrationRunCommand(command.Context, propertyFiles, dependencies, args, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}

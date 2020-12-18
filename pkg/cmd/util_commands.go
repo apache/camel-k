@@ -20,17 +20,12 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
+	"io"
 	"os/exec"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/docker"
-)
-
-var (
-	ctx9, cancel9 = context.WithCancel(context.Background()) // preemptive: kill subprocess
-	ctx, cancel   = context.WithCancel(ctx9)                 // cooperative: wait for subprocess
 )
 
 func formatRoutes(files []string) []string {
@@ -57,7 +52,7 @@ func assembleClasspathArgValue(properties []string, dependencies []string, route
 	return strings.Join(classpathContents, ":")
 }
 
-func assembleIntegrationRunCommand(properties []string, dependencies []string, routes []string, propertiesDir string) *exec.Cmd {
+func assembleIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer) *exec.Cmd {
 	// Create classpath value.
 	classpathValue := assembleClasspathArgValue(properties, dependencies, routes)
 
@@ -71,8 +66,6 @@ func assembleIntegrationRunCommand(properties []string, dependencies []string, r
 	args = append(args, "io.quarkus.runner.GeneratedMain")
 
 	cmd := exec.CommandContext(ctx, javaCmd, args...)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
 
 	// Add directory where the properties files reside. The directory is the local properties directory
 	// or the properties directory inside the container.
@@ -82,15 +75,15 @@ func assembleIntegrationRunCommand(properties []string, dependencies []string, r
 	cmd.Env = append(cmd.Env, "CAMEL_K_ROUTES="+strings.Join(formatRoutes(routes), ","))
 
 	// Set stdout and stderr.
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+	cmd.Stderr = stderr
+	cmd.Stdout = stdout
 
 	return cmd
 }
 
 // RunLocalIntegrationRunCommand --
-func RunLocalIntegrationRunCommand(properties []string, dependencies []string, routes []string) error {
-	cmd := assembleIntegrationRunCommand(properties, dependencies, routes, util.GetLocalPropertiesDir())
+func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) error {
+	cmd := assembleIntegrationRunCommand(ctx, properties, dependencies, routes, util.GetLocalPropertiesDir(), stdout, stderr)
 
 	// Output command we are about to run.
 	fmt.Printf("Executing: %s", strings.Join(cmd.Args, " "))
@@ -105,7 +98,7 @@ func RunLocalIntegrationRunCommand(properties []string, dependencies []string, r
 }
 
 // GetContainerIntegrationRunCommand --
-func GetContainerIntegrationRunCommand(properties []string, dependencies []string, routes []string) *exec.Cmd {
+func GetContainerIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) *exec.Cmd {
 	// This is the integration command which will be run inside the container. Therefore all paths need to
 	// be valid container paths.
 
@@ -114,5 +107,5 @@ func GetContainerIntegrationRunCommand(properties []string, dependencies []strin
 	containerDependencies := docker.ContainerizeFilePaths(dependencies, docker.GetContainerDependenciesDir())
 	containerRoutes := docker.ContainerizeFilePaths(routes, docker.GetContainerRoutesDir())
 
-	return assembleIntegrationRunCommand(containerProperties, containerDependencies, containerRoutes, docker.GetContainerPropertiesDir())
+	return assembleIntegrationRunCommand(ctx, containerProperties, containerDependencies, containerRoutes, docker.GetContainerPropertiesDir(), stdout, stderr)
 }
