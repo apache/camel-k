@@ -52,7 +52,8 @@ func TestAddons(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "files/Master.java").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "master"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(ConfigMap(ns, "master-lock"), 30*time.Second).ShouldNot(BeNil())
+			// TODO enable check on configmap or lease
+			//Eventually(ConfigMap(ns, "master-lock"), 30*time.Second).ShouldNot(BeNil())
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -66,7 +67,8 @@ func TestAddons(t *testing.T) {
 				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "first"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "first"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(ConfigMap(ns, "first-lock"), 30*time.Second).ShouldNot(BeNil())
+			// TODO enable check on configmap or lease
+			//Eventually(ConfigMap(ns, "first-lock"), 30*time.Second).ShouldNot(BeNil())
 			// Start a second integration with the same lock (it should not start the route)
 			Expect(Kamel("run", "-n", ns, "files/Master.java",
 				"--name", "second",
