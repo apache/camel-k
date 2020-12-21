@@ -225,8 +225,7 @@ func (t *knativeTrait) Apply(e *Environment) error {
 			// Adding required libraries for Camel sources
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-knative")
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-knative")
-			// Adding platform HTTP
-			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-knative-producer")
 		}
 	}
 
