@@ -1701,7 +1701,6 @@
 - Allow using compressed sources in Knative profile [\#272](https://github.com/apache/camel-k/pull/272) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(deps\): update kotlin to v1.3.11 [\#271](https://github.com/apache/camel-k/pull/271) ([lburgazzoli](https://github.com/lburgazzoli))
 - builder: wake up event loop when the container image buils is done to seep up deployment time [\#269](https://github.com/apache/camel-k/pull/269) ([lburgazzoli](https://github.com/lburgazzoli))
-- chore: rename constant KamelPlatform to IntegrationContextTypePlatform [\#267](https://github.com/apache/camel-k/pull/267) ([lburgazzoli](https://github.com/lburgazzoli))
 - Support for compressed source blob  [\#266](https://github.com/apache/camel-k/pull/266) ([lburgazzoli](https://github.com/lburgazzoli))
 - Better Knative and Istio integration [\#261](https://github.com/apache/camel-k/pull/261) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(runtime\): code cleanup [\#260](https://github.com/apache/camel-k/pull/260) ([lburgazzoli](https://github.com/lburgazzoli))
