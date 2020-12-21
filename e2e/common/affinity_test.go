@@ -27,9 +27,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
 	. "github.com/onsi/gomega"
-
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -48,14 +46,16 @@ func TestAffinityTrait(t *testing.T) {
 
 		if hostname != "" {
 			t.Run("Run Java with node affinity", func(t *testing.T) {
+				RegisterTestingT(t)
 				Expect(Kamel("run", "-n", ns, "files/Java.java",
+					"--name", "java1",
 					"-t", "affinity.enabled=true",
 					"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).Should(BeNil())
-				Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-				Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Eventually(IntegrationPodPhase(ns, "java1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+				Eventually(IntegrationCondition(ns, "java1", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+				Eventually(IntegrationLogs(ns, "java1"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-				pod := IntegrationPod(ns, "java")()
+				pod := IntegrationPod(ns, "java1")()
 				Expect(pod.Spec.Affinity).ShouldNot(BeNil())
 				Expect(pod.Spec.Affinity.NodeAffinity).Should(Equal(&v1.NodeAffinity{
 					RequiredDuringSchedulingIgnoredDuringExecution: nodeSelector("kubernetes.io/hostname", v1.NodeSelectorOpIn, hostname),
@@ -67,14 +67,16 @@ func TestAffinityTrait(t *testing.T) {
 		}
 
 		t.Run("Run Java with pod affinity", func(t *testing.T) {
+			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/Java.java",
+				"--name", "java2",
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-affinity-labels=camel.apache.org/integration").Execute()).Should(BeNil())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, "java2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "java2", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "java2"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(ns, "java")()
+			pod := IntegrationPod(ns, "java2")()
 			Expect(pod.Spec.Affinity).ShouldNot(BeNil())
 			Expect(pod.Spec.Affinity.PodAffinity).Should(Equal(&v1.PodAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
@@ -86,14 +88,17 @@ func TestAffinityTrait(t *testing.T) {
 		})
 
 		t.Run("Run Java with pod anti affinity", func(t *testing.T) {
+			RegisterTestingT(t)
+
 			Expect(Kamel("run", "-n", ns, "files/Java.java",
+				"--name", "java3",
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-anti-affinity-labels=camel.apache.org/integration").Execute()).Should(BeNil())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, "java3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "java3", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "java3"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(ns, "java")()
+			pod := IntegrationPod(ns, "java3")()
 			Expect(pod.Spec.Affinity).ShouldNot(BeNil())
 			Expect(pod.Spec.Affinity.PodAntiAffinity).Should(Equal(&v1.PodAntiAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
