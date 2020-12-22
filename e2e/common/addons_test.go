@@ -22,27 +22,15 @@ limitations under the License.
 package common
 
 import (
-	"os"
 	"testing"
 	"time"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
 
 func TestAddons(t *testing.T) {
-	forceMasterTest := os.Getenv("CAMEL_K_FORCE_MASTER_TEST") == "true"
-	if !forceMasterTest {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
-			return
-		}
-	}
 
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
@@ -52,8 +40,6 @@ func TestAddons(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "files/Master.java").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "master"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			// TODO enable check on configmap or lease
-			//Eventually(ConfigMap(ns, "master-lock"), 30*time.Second).ShouldNot(BeNil())
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -67,8 +53,6 @@ func TestAddons(t *testing.T) {
 				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "first"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "first"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			// TODO enable check on configmap or lease
-			//Eventually(ConfigMap(ns, "first-lock"), 30*time.Second).ShouldNot(BeNil())
 			// Start a second integration with the same lock (it should not start the route)
 			Expect(Kamel("run", "-n", ns, "files/Master.java",
 				"--name", "second",

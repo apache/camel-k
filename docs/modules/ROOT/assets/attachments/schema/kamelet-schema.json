@@ -4409,7 +4409,6 @@
         },
         "flow": {
           "description": "Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL",
-          "format": "byte",
           "maxProperties": 1,
           "properties": {
             "error-handler": {

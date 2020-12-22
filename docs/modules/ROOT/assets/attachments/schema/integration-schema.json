@@ -8549,7 +8549,6 @@
             "properties": {
               "configuration": {
                 "description": "TraitConfiguration --",
-                "format": "byte",
                 "type": "object"
               }
             },

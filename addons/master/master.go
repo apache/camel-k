@@ -18,6 +18,7 @@ limitations under the License.
 package master
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -49,7 +50,12 @@ type masterTrait struct {
 	// It's enabled by default.
 	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies" json:"includeDelegateDependencies,omitempty"`
 	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
-	Configmap *string `property:"configmap" json:"configmap,omitempty"`
+	// Deprecated: replaced by "resource-name".
+	DeprecatedConfigMap *string `property:"configmap" json:"configmap,omitempty"`
+	// Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+	ResourceName *string `property:"resource-name" json:"resourceName,omitempty"`
+	// Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease"). Defaults to "Lease".
+	ResourceType *string `property:"resource-type" json:"resourceType,omitempty"`
 	// Label that will be used to identify all pods contending the lock. Defaults to "camel.apache.org/integration".
 	LabelKey *string `property:"label-key" json:"labelKey,omitempty"`
 	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
@@ -68,6 +74,11 @@ const (
 	masterComponent = "master"
 )
 
+var (
+	leaseResourceType     = "Lease"
+	configMapResourceType = "ConfigMap"
+)
+
 func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
@@ -75,6 +86,10 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
+	}
+
+	if t.DeprecatedConfigMap != nil && t.ResourceName != nil {
+		return false, errors.New(`you cannot set both the "configmap" and "resource-name" properties on the "master" trait`)
 	}
 
 	if t.Auto == nil || *t.Auto {
@@ -103,9 +118,28 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 			t.delegateDependencies = findAdditionalDependencies(e, meta)
 		}
 
-		if t.Configmap == nil {
+		if t.DeprecatedConfigMap != nil && t.ResourceName == nil {
+			t.ResourceName = t.DeprecatedConfigMap
+		}
+		if t.ResourceName == nil {
 			val := fmt.Sprintf("%s-lock", e.Integration.Name)
-			t.Configmap = &val
+			t.ResourceName = &val
+		}
+
+		if t.ResourceType == nil {
+			if t.DeprecatedConfigMap != nil {
+				t.ResourceType = &configMapResourceType
+			} else {
+				canUseLeases, err := t.canUseLeases(e)
+				if err != nil {
+					return false, err
+				}
+				if canUseLeases {
+					t.ResourceType = &leaseResourceType
+				} else {
+					t.ResourceType = &configMapResourceType
+				}
+			}
 		}
 
 		if t.LabelKey == nil {
@@ -147,7 +181,13 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 			ServiceAccount: serviceAccount,
 		}
 
-		role, err := loadResource(e, "master-role.tmpl", templateData)
+		roleSuffix := leaseResourceType
+		if t.ResourceType != nil {
+			roleSuffix = *t.ResourceType
+		}
+		roleSuffix = strings.ToLower(roleSuffix)
+
+		role, err := loadResource(e, fmt.Sprintf("master-role-%s.tmpl", roleSuffix), templateData)
 		if err != nil {
 			return err
 		}
@@ -163,9 +203,19 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
 		)
 
-		if t.Configmap != nil {
+		if t.ResourceName != nil || t.DeprecatedConfigMap != nil {
+			resourceName := t.ResourceName
+			if resourceName == nil {
+				resourceName = t.DeprecatedConfigMap
+			}
 			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.configMapName=%s", *t.Configmap)},
+				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.kubernetesResourceName=%s", *resourceName)},
+			)
+		}
+
+		if t.ResourceType != nil {
+			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.leaseResourceType=%s", *t.ResourceType)},
 			)
 		}
 
@@ -183,6 +233,10 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 	}
 
 	return nil
+}
+
+func (t *masterTrait) canUseLeases(e *trait.Environment) (bool, error) {
+	return kubernetes.CheckPermission(t.Ctx, t.Client, "coordination.k8s.io", "leases", e.Integration.Namespace, "", "create")
 }
 
 func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) (dependencies []string) {
