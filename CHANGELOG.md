@@ -649,7 +649,6 @@
 - Unable to run the polyglot sample [\#1300](https://github.com/apache/camel-k/issues/1300)
 - kamel version should report version number in offline mode [\#1298](https://github.com/apache/camel-k/issues/1298)
 - ClassNotFoundException from pom-catalog.xml [\#1293](https://github.com/apache/camel-k/issues/1293)
-- Defining datasource in groovy and using in XML routes [\#892](https://github.com/apache/camel-k/issues/892)
 - Inject CamelContext into Java DSL RouteBuilder [\#563](https://github.com/apache/camel-k/issues/563)
 - Error with Knative probes [\#528](https://github.com/apache/camel-k/issues/528)
 
@@ -1012,6 +1011,7 @@
 - Camel-k-cache not able to create PVC \(pod has unbound immediate PersistentVolumeClaims\) [\#898](https://github.com/apache/camel-k/issues/898)
 - Include modeline in examples [\#895](https://github.com/apache/camel-k/issues/895)
 - Improve kamel "get" to enable specifying integration name [\#893](https://github.com/apache/camel-k/issues/893)
+- Defining datasource in groovy and using in XML routes [\#892](https://github.com/apache/camel-k/issues/892)
 - Publish Camel K 1.0.0-M1 to operator hub [\#887](https://github.com/apache/camel-k/issues/887)
 - Kamel reset should delete builds as well as kits [\#875](https://github.com/apache/camel-k/issues/875)
 - BuildConfig's, ImageStream's and Pod's not labeled with camel-k and can't delete with -l 'app=camel-k' [\#840](https://github.com/apache/camel-k/issues/840)
@@ -1701,6 +1701,7 @@
 - Allow using compressed sources in Knative profile [\#272](https://github.com/apache/camel-k/pull/272) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(deps\): update kotlin to v1.3.11 [\#271](https://github.com/apache/camel-k/pull/271) ([lburgazzoli](https://github.com/lburgazzoli))
 - builder: wake up event loop when the container image buils is done to seep up deployment time [\#269](https://github.com/apache/camel-k/pull/269) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore: rename constant KamelPlatform to IntegrationContextTypePlatform [\#267](https://github.com/apache/camel-k/pull/267) ([lburgazzoli](https://github.com/lburgazzoli))
 - Support for compressed source blob  [\#266](https://github.com/apache/camel-k/pull/266) ([lburgazzoli](https://github.com/lburgazzoli))
 - Better Knative and Istio integration [\#261](https://github.com/apache/camel-k/pull/261) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(runtime\): code cleanup [\#260](https://github.com/apache/camel-k/pull/260) ([lburgazzoli](https://github.com/lburgazzoli))
