@@ -43,6 +43,15 @@ It's enabled by default.
 | master.configmap
 | string
 | Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+Deprecated: replaced by "resource-name".
+
+| master.resource-name
+| string
+| Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+
+| master.resource-type
+| string
+| Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease"). Defaults to "Lease".
 
 | master.label-key
 | string
