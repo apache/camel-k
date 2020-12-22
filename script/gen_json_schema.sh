@@ -28,13 +28,13 @@ mkdir  tmpschema
 
 ./mvnw dependency:copy \
   -f build/maven/pom-catalog.xml \
-  -Dartifact=org.apache.camel.k:camel-k-loader-yaml:$version:json:json-schema \
+  -Dartifact=org.apache.camel.k:camel-k-loader-yaml-impl:$version:json:json-schema \
   -DoutputDirectory=../../tmpschema \
   -Dmdep.stripVersion \
   -Druntime.version=$1 \
   -Dstaging.repo=$repo
 
-schema=./tmpschema/camel-k-loader-yaml-json-schema.json
+schema=./tmpschema/camel-k-loader-yaml-impl-json-schema.json
 
 go run ./cmd/util/json-schema-gen ./deploy/crd-kamelet.yaml $schema .spec.flow false ./docs/modules/ROOT/assets/attachments/schema/kamelet-schema.json
 go run ./cmd/util/json-schema-gen ./deploy/crd-integration.yaml $schema .spec.flows true ./docs/modules/ROOT/assets/attachments/schema/integration-schema.json

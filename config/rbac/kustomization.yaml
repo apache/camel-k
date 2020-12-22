@@ -18,10 +18,12 @@
 resources:
 - operator-role-events.yaml
 - operator-role-knative.yaml
+- operator-role-leases.yaml
 - operator-role-olm.yaml
 - operator-role-olm-cluster.yaml
 - operator-role-servicemonitors.yaml
 - operator-role-strimzi.yaml
+- operator-role-binding-leases.yaml
 - operator-role-binding-servicemonitors.yaml
 - operator-role-binding-strimzi.yaml
 - operator-role-binding.yaml

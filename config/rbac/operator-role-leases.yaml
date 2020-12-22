@@ -15,17 +15,23 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1
-kind: Integration
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: example
-spec:
-  flows:
-  - from:
-      uri: timer:yaml
-      parameters:
-        period: '1000'
-      steps:
-      - set-body:
-          constant: Hello from Camel K
-      - to: log:info
+  name: camel-k-operator-leases
+  labels:
+    app: "camel-k"
+rules:
+- apiGroups:
+  - "coordination.k8s.io"
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch

@@ -133,6 +133,12 @@
         "constant": {
           "$ref": "#/definitions/org.apache.camel.model.language.ConstantExpression"
         },
+        "csimple": {
+          "$ref": "#/definitions/org.apache.camel.model.language.CSimpleExpression"
+        },
+        "datasonnet": {
+          "$ref": "#/definitions/org.apache.camel.model.language.DatasonnetExpression"
+        },
         "exchange-property": {
           "$ref": "#/definitions/org.apache.camel.model.language.ExchangePropertyExpression"
         },
@@ -144,6 +150,9 @@
         },
         "hl7terser": {
           "$ref": "#/definitions/org.apache.camel.model.language.Hl7TerserExpression"
+        },
+        "joor": {
+          "$ref": "#/definitions/org.apache.camel.model.language.JoorExpression"
         },
         "jsonpath": {
           "$ref": "#/definitions/org.apache.camel.model.language.JsonPathExpression"
@@ -231,6 +240,11 @@
           "type": "string"
         },
         {
+          "properties": {
+            "support-transacted": {
+              "type": "boolean"
+            }
+          },
           "type": "object"
         }
       ]
@@ -1336,6 +1350,9 @@
         },
         {
           "properties": {
+            "delimiter": {
+              "type": "string"
+            },
             "executor-service-ref": {
               "type": "string"
             },
@@ -1992,9 +2009,6 @@
             "clazz-name": {
               "type": "string"
             },
-            "content-type-header": {
-              "type": "string"
-            },
             "id": {
               "type": "string"
             },
@@ -2014,9 +2028,6 @@
         {
           "properties": {
             "base-uri": {
-              "type": "string"
-            },
-            "content-type-header": {
               "type": "string"
             },
             "id": {
@@ -2046,9 +2057,6 @@
         },
         {
           "properties": {
-            "content-type-header": {
-              "type": "string"
-            },
             "id": {
               "type": "string"
             },
@@ -2063,9 +2071,6 @@
     "org.apache.camel.model.dataformat.BarcodeDataFormat": {
       "properties": {
         "barcode-format": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "height": {
@@ -2085,9 +2090,6 @@
     },
     "org.apache.camel.model.dataformat.Base64DataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         },
@@ -2106,9 +2108,6 @@
     "org.apache.camel.model.dataformat.BeanioDataFormat": {
       "properties": {
         "bean-reader-error-handler-type": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "encoding": {
@@ -2146,9 +2145,6 @@
         "class-type": {
           "type": "string"
         },
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         },
@@ -2181,9 +2177,6 @@
           "type": "string"
         },
         "collection-type-name": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "disable-features": {
@@ -2224,9 +2217,6 @@
         "buffersize": {
           "type": "string"
         },
-        "content-type-header": {
-          "type": "string"
-        },
         "crypto-provider": {
           "type": "string"
         },
@@ -2265,9 +2255,6 @@
               "type": "string"
             },
             "comment-marker-disabled": {
-              "type": "string"
-            },
-            "content-type-header": {
               "type": "string"
             },
             "delimiter": {
@@ -2365,9 +2352,6 @@
         },
         {
           "properties": {
-            "content-type-header": {
-              "type": "string"
-            },
             "id": {
               "type": "string"
             },
@@ -2510,9 +2494,6 @@
         "allow-short-lines": {
           "type": "string"
         },
-        "content-type-header": {
-          "type": "string"
-        },
         "definition": {
           "type": "string"
         },
@@ -2545,9 +2526,6 @@
         "allow-multiple-matches-per-line": {
           "type": "string"
         },
-        "content-type-header": {
-          "type": "string"
-        },
         "flattened": {
           "type": "string"
         },
@@ -2565,9 +2543,6 @@
     },
     "org.apache.camel.model.dataformat.GzipDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         }
@@ -2576,9 +2551,6 @@
     },
     "org.apache.camel.model.dataformat.HL7DataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         },
@@ -2590,9 +2562,6 @@
     },
     "org.apache.camel.model.dataformat.IcalDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         },
@@ -2727,9 +2696,6 @@
     },
     "org.apache.camel.model.dataformat.JsonApiDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "data-format-types": {
           "items": {
             "type": "string"
@@ -2786,7 +2752,8 @@
             "Jackson",
             "Johnzon",
             "Gson",
-            "Fastjson"
+            "Fastjson",
+            "Jsonb"
           ]
         },
         "module-class-names": {
@@ -2821,9 +2788,6 @@
     },
     "org.apache.camel.model.dataformat.LZFDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         },
@@ -2836,9 +2800,6 @@
     "org.apache.camel.model.dataformat.MimeMultipartDataFormat": {
       "properties": {
         "binary-content": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "headers-inline": {
@@ -2868,9 +2829,6 @@
           "type": "string"
         },
         "compression-algorithm": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "hash-algorithm": {
@@ -2942,9 +2900,6 @@
     },
     "org.apache.camel.model.dataformat.RssDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         }
@@ -2958,9 +2913,6 @@
         },
         {
           "properties": {
-            "content-type-header": {
-              "type": "string"
-            },
             "context-path": {
               "type": "string"
             },
@@ -2989,9 +2941,6 @@
     },
     "org.apache.camel.model.dataformat.SyslogDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         }
@@ -3001,9 +2950,6 @@
     "org.apache.camel.model.dataformat.TarFileDataFormat": {
       "properties": {
         "allow-empty-directory": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "id": {
@@ -3052,9 +2998,6 @@
     },
     "org.apache.camel.model.dataformat.TidyMarkupDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "data-object-type": {
           "type": "string"
         },
@@ -3073,9 +3016,6 @@
           "type": "string"
         },
         "comment": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "delimiter": {
@@ -3137,9 +3077,6 @@
         "comment": {
           "type": "string"
         },
-        "content-type-header": {
-          "type": "string"
-        },
         "empty-value": {
           "type": "string"
         },
@@ -3196,9 +3133,6 @@
         "comment": {
           "type": "string"
         },
-        "content-type-header": {
-          "type": "string"
-        },
         "empty-value": {
           "type": "string"
         },
@@ -3244,9 +3178,6 @@
     "org.apache.camel.model.dataformat.XMLSecurityDataFormat": {
       "properties": {
         "add-key-value-for-encrypted-key": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "digest-algorithm": {
@@ -3324,9 +3255,6 @@
     },
     "org.apache.camel.model.dataformat.XmlRpcDataFormat": {
       "properties": {
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         },
@@ -3345,9 +3273,6 @@
           "type": "string"
         },
         "constructor": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "dumper-options": {
@@ -3387,9 +3312,6 @@
         "compression-level": {
           "type": "string"
         },
-        "content-type-header": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         }
@@ -3399,9 +3321,6 @@
     "org.apache.camel.model.dataformat.ZipFileDataFormat": {
       "properties": {
         "allow-empty-directory": {
-          "type": "string"
-        },
-        "content-type-header": {
           "type": "string"
         },
         "id": {
@@ -3419,6 +3338,33 @@
       },
       "type": "object"
     },
+    "org.apache.camel.model.language.CSimpleExpression": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "properties": {
+            "expression": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "result-type": {
+              "type": "string"
+            },
+            "trim": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "expression"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "org.apache.camel.model.language.ConstantExpression": {
       "anyOf": [
         {
@@ -3430,6 +3376,39 @@
               "type": "string"
             },
             "id": {
+              "type": "string"
+            },
+            "trim": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "expression"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "org.apache.camel.model.language.DatasonnetExpression": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "properties": {
+            "body-media-type": {
+              "type": "string"
+            },
+            "expression": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "output-media-type": {
+              "type": "string"
+            },
+            "result-type": {
               "type": "string"
             },
             "trim": {
@@ -3526,6 +3505,39 @@
               "type": "string"
             },
             "id": {
+              "type": "string"
+            },
+            "trim": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "expression"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "org.apache.camel.model.language.JoorExpression": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "properties": {
+            "expression": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "pre-compile": {
+              "type": "string"
+            },
+            "result-type": {
+              "type": "string"
+            },
+            "single-quotes": {
               "type": "string"
             },
             "trim": {
@@ -3933,6 +3945,9 @@
         },
         {
           "properties": {
+            "configuration-ref": {
+              "type": "string"
+            },
             "expression": {
               "type": "string"
             },
@@ -4366,6 +4381,12 @@
                   "constant": {
                     "$ref": "#/definitions/org.apache.camel.model.language.ConstantExpression"
                   },
+                  "csimple": {
+                    "$ref": "#/definitions/org.apache.camel.model.language.CSimpleExpression"
+                  },
+                  "datasonnet": {
+                    "$ref": "#/definitions/org.apache.camel.model.language.DatasonnetExpression"
+                  },
                   "exchange-property": {
                     "$ref": "#/definitions/org.apache.camel.model.language.ExchangePropertyExpression"
                   },
@@ -4377,6 +4398,9 @@
                   },
                   "hl7terser": {
                     "$ref": "#/definitions/org.apache.camel.model.language.Hl7TerserExpression"
+                  },
+                  "joor": {
+                    "$ref": "#/definitions/org.apache.camel.model.language.JoorExpression"
                   },
                   "jsonpath": {
                     "$ref": "#/definitions/org.apache.camel.model.language.JsonPathExpression"
@@ -4464,6 +4488,11 @@
                     "type": "string"
                   },
                   {
+                    "properties": {
+                      "support-transacted": {
+                        "type": "boolean"
+                      }
+                    },
                     "type": "object"
                   }
                 ]
@@ -5569,6 +5598,9 @@
                   },
                   {
                     "properties": {
+                      "delimiter": {
+                        "type": "string"
+                      },
                       "executor-service-ref": {
                         "type": "string"
                       },
@@ -6225,9 +6257,6 @@
                       "clazz-name": {
                         "type": "string"
                       },
-                      "content-type-header": {
-                        "type": "string"
-                      },
                       "id": {
                         "type": "string"
                       },
@@ -6247,9 +6276,6 @@
                   {
                     "properties": {
                       "base-uri": {
-                        "type": "string"
-                      },
-                      "content-type-header": {
                         "type": "string"
                       },
                       "id": {
@@ -6279,9 +6305,6 @@
                   },
                   {
                     "properties": {
-                      "content-type-header": {
-                        "type": "string"
-                      },
                       "id": {
                         "type": "string"
                       },
@@ -6296,9 +6319,6 @@
               "org.apache.camel.model.dataformat.BarcodeDataFormat": {
                 "properties": {
                   "barcode-format": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "height": {
@@ -6318,9 +6338,6 @@
               },
               "org.apache.camel.model.dataformat.Base64DataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   },
@@ -6339,9 +6356,6 @@
               "org.apache.camel.model.dataformat.BeanioDataFormat": {
                 "properties": {
                   "bean-reader-error-handler-type": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "encoding": {
@@ -6379,9 +6393,6 @@
                   "class-type": {
                     "type": "string"
                   },
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   },
@@ -6414,9 +6425,6 @@
                     "type": "string"
                   },
                   "collection-type-name": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "disable-features": {
@@ -6457,9 +6465,6 @@
                   "buffersize": {
                     "type": "string"
                   },
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "crypto-provider": {
                     "type": "string"
                   },
@@ -6498,9 +6503,6 @@
                         "type": "string"
                       },
                       "comment-marker-disabled": {
-                        "type": "string"
-                      },
-                      "content-type-header": {
                         "type": "string"
                       },
                       "delimiter": {
@@ -6598,9 +6600,6 @@
                   },
                   {
                     "properties": {
-                      "content-type-header": {
-                        "type": "string"
-                      },
                       "id": {
                         "type": "string"
                       },
@@ -6743,9 +6742,6 @@
                   "allow-short-lines": {
                     "type": "string"
                   },
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "definition": {
                     "type": "string"
                   },
@@ -6778,9 +6774,6 @@
                   "allow-multiple-matches-per-line": {
                     "type": "string"
                   },
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "flattened": {
                     "type": "string"
                   },
@@ -6798,9 +6791,6 @@
               },
               "org.apache.camel.model.dataformat.GzipDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   }
@@ -6809,9 +6799,6 @@
               },
               "org.apache.camel.model.dataformat.HL7DataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   },
@@ -6823,9 +6810,6 @@
               },
               "org.apache.camel.model.dataformat.IcalDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   },
@@ -6960,9 +6944,6 @@
               },
               "org.apache.camel.model.dataformat.JsonApiDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "data-format-types": {
                     "items": {
                       "type": "string"
@@ -7019,7 +7000,8 @@
                       "Jackson",
                       "Johnzon",
                       "Gson",
-                      "Fastjson"
+                      "Fastjson",
+                      "Jsonb"
                     ]
                   },
                   "module-class-names": {
@@ -7054,9 +7036,6 @@
               },
               "org.apache.camel.model.dataformat.LZFDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   },
@@ -7069,9 +7048,6 @@
               "org.apache.camel.model.dataformat.MimeMultipartDataFormat": {
                 "properties": {
                   "binary-content": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "headers-inline": {
@@ -7101,9 +7077,6 @@
                     "type": "string"
                   },
                   "compression-algorithm": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "hash-algorithm": {
@@ -7175,9 +7148,6 @@
               },
               "org.apache.camel.model.dataformat.RssDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   }
@@ -7191,9 +7161,6 @@
                   },
                   {
                     "properties": {
-                      "content-type-header": {
-                        "type": "string"
-                      },
                       "context-path": {
                         "type": "string"
                       },
@@ -7222,9 +7189,6 @@
               },
               "org.apache.camel.model.dataformat.SyslogDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   }
@@ -7234,9 +7198,6 @@
               "org.apache.camel.model.dataformat.TarFileDataFormat": {
                 "properties": {
                   "allow-empty-directory": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "id": {
@@ -7285,9 +7246,6 @@
               },
               "org.apache.camel.model.dataformat.TidyMarkupDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "data-object-type": {
                     "type": "string"
                   },
@@ -7306,9 +7264,6 @@
                     "type": "string"
                   },
                   "comment": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "delimiter": {
@@ -7370,9 +7325,6 @@
                   "comment": {
                     "type": "string"
                   },
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "empty-value": {
                     "type": "string"
                   },
@@ -7429,9 +7381,6 @@
                   "comment": {
                     "type": "string"
                   },
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "empty-value": {
                     "type": "string"
                   },
@@ -7477,9 +7426,6 @@
               "org.apache.camel.model.dataformat.XMLSecurityDataFormat": {
                 "properties": {
                   "add-key-value-for-encrypted-key": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "digest-algorithm": {
@@ -7557,9 +7503,6 @@
               },
               "org.apache.camel.model.dataformat.XmlRpcDataFormat": {
                 "properties": {
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   },
@@ -7578,9 +7521,6 @@
                     "type": "string"
                   },
                   "constructor": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "dumper-options": {
@@ -7620,9 +7560,6 @@
                   "compression-level": {
                     "type": "string"
                   },
-                  "content-type-header": {
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   }
@@ -7632,9 +7569,6 @@
               "org.apache.camel.model.dataformat.ZipFileDataFormat": {
                 "properties": {
                   "allow-empty-directory": {
-                    "type": "string"
-                  },
-                  "content-type-header": {
                     "type": "string"
                   },
                   "id": {
@@ -7652,6 +7586,33 @@
                 },
                 "type": "object"
               },
+              "org.apache.camel.model.language.CSimpleExpression": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "properties": {
+                      "expression": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "result-type": {
+                        "type": "string"
+                      },
+                      "trim": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "expression"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              },
               "org.apache.camel.model.language.ConstantExpression": {
                 "anyOf": [
                   {
@@ -7663,6 +7624,39 @@
                         "type": "string"
                       },
                       "id": {
+                        "type": "string"
+                      },
+                      "trim": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "expression"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              },
+              "org.apache.camel.model.language.DatasonnetExpression": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "properties": {
+                      "body-media-type": {
+                        "type": "string"
+                      },
+                      "expression": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "output-media-type": {
+                        "type": "string"
+                      },
+                      "result-type": {
                         "type": "string"
                       },
                       "trim": {
@@ -7759,6 +7753,39 @@
                         "type": "string"
                       },
                       "id": {
+                        "type": "string"
+                      },
+                      "trim": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "expression"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              },
+              "org.apache.camel.model.language.JoorExpression": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "properties": {
+                      "expression": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "pre-compile": {
+                        "type": "string"
+                      },
+                      "result-type": {
+                        "type": "string"
+                      },
+                      "single-quotes": {
                         "type": "string"
                       },
                       "trim": {
@@ -8166,6 +8193,9 @@
                   },
                   {
                     "properties": {
+                      "configuration-ref": {
+                        "type": "string"
+                      },
                       "expression": {
                         "type": "string"
                       },
