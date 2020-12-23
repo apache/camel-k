@@ -1,13 +1,26 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v1.3.0](https://github.com/apache/camel-k/tree/v1.3.0) (2020-12-22)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.2.1...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.3.0...v1.3.0)
+
+## [pkg/client/camel/v1.3.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.3.0) (2020-12-22)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.3.0...pkg/client/camel/v1.3.0)
+
+## [pkg/kamelet/repository/v1.3.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.3.0) (2020-12-22)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.3.0...pkg/kamelet/repository/v1.3.0)
+
+## [pkg/apis/camel/v1.3.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.3.0) (2020-12-22)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.1...pkg/apis/camel/v1.3.0)
 
 **Closed issues:**
 
 - Should 'kamel uninstall --all' also delete camel-k-registry-secret? [\#1859](https://github.com/apache/camel-k/issues/1859)
 - Integration with Prometheus trait doesn't deploy on Minikube [\#1848](https://github.com/apache/camel-k/issues/1848)
+- Groovy example is broken [\#1842](https://github.com/apache/camel-k/issues/1842)
 - Unable to use Kamelet spec in a custom CRD [\#1837](https://github.com/apache/camel-k/issues/1837)
 - Multiple knative revisions created when integration has multiple spec.configuration items [\#1824](https://github.com/apache/camel-k/issues/1824)
 - Release 1.2.1 [\#1823](https://github.com/apache/camel-k/issues/1823)
@@ -59,6 +72,7 @@
 - Fix \#1549: auto-detect json in YAML [\#1809](https://github.com/apache/camel-k/pull/1809) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1771: use registry creds for pull and push and set Spectrum as default [\#1807](https://github.com/apache/camel-k/pull/1807) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add local run subcommand with basic support [\#1805](https://github.com/apache/camel-k/pull/1805) ([doru1004](https://github.com/doru1004))
+- Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
@@ -80,23 +94,19 @@
 - fix: Correct operator leader election ConfigMap lock name [\#1765](https://github.com/apache/camel-k/pull/1765) ([astefanutti](https://github.com/astefanutti))
 - Added workflow dispatch to changelog gh action [\#1764](https://github.com/apache/camel-k/pull/1764) ([oscerd](https://github.com/oscerd))
 - Camel K operator monitoring [\#1762](https://github.com/apache/camel-k/pull/1762) ([astefanutti](https://github.com/astefanutti))
-- Release Helm charts and bump versions [\#1759](https://github.com/apache/camel-k/pull/1759) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(build\): remove reference to staging repo [\#1758](https://github.com/apache/camel-k/pull/1758) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add inspect sub-command with basic support [\#1757](https://github.com/apache/camel-k/pull/1757) ([doru1004](https://github.com/doru1004))
-- Fix \#1537: generate json schema for full Kubernetes resources [\#1756](https://github.com/apache/camel-k/pull/1756) ([nicolaferraro](https://github.com/nicolaferraro))
-- Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
-
-## [v1.2.1](https://github.com/apache/camel-k/tree/v1.2.1) (2020-11-23)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.1...v1.2.1)
-
-## [pkg/client/camel/v1.2.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.1) (2020-11-23)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.1...pkg/client/camel/v1.2.1)
 
 ## [pkg/apis/camel/v1.2.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.2.1) (2020-11-23)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.2.0...pkg/apis/camel/v1.2.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.1...pkg/apis/camel/v1.2.1)
+
+## [pkg/client/camel/v1.2.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.1) (2020-11-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.2.1...pkg/client/camel/v1.2.1)
+
+## [v1.2.1](https://github.com/apache/camel-k/tree/v1.2.1) (2020-11-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.2.0...v1.2.1)
 
 **Closed issues:**
 
@@ -116,6 +126,7 @@
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
+- Remove support for Main runtime for integrations [\#1562](https://github.com/apache/camel-k/issues/1562)
 - Auto-detect json in yaml syntax [\#1549](https://github.com/apache/camel-k/issues/1549)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
 - Expose operator related metrics [\#1267](https://github.com/apache/camel-k/issues/1267)
@@ -131,15 +142,15 @@
 
 ## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.0...v1.2.0)
-
-## [pkg/apis/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.2.0) (2020-10-08)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.0...pkg/apis/camel/v1.2.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.0...v1.2.0)
 
 ## [pkg/client/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.0) (2020-10-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.1...pkg/client/camel/v1.2.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.0...pkg/client/camel/v1.2.0)
+
+## [pkg/apis/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.2.0) (2020-10-08)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.1...pkg/apis/camel/v1.2.0)
 
 **Closed issues:**
 
@@ -230,15 +241,15 @@
 
 ## [pkg/client/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.1) (2020-09-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...pkg/client/camel/v1.1.1)
-
-## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.1...v1.1.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.1...pkg/client/camel/v1.1.1)
 
 ## [pkg/apis/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.1) (2020-09-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...pkg/apis/camel/v1.1.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...pkg/apis/camel/v1.1.1)
+
+## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...v1.1.1)
 
 **Closed issues:**
 
@@ -377,7 +388,6 @@
 - \[regression\]kamel help trait --all -o json returns both yaml and json output [\#1511](https://github.com/apache/camel-k/issues/1511)
 - addRoutes problem when running 01-Basic example from new camel-k-example docs [\#1509](https://github.com/apache/camel-k/issues/1509)
 - CLI - Make kamel run handle github urls that are not raw [\#1497](https://github.com/apache/camel-k/issues/1497)
-- metrics: in quarkus mode, use microprofile metrics in place of the prometheus agent [\#1263](https://github.com/apache/camel-k/issues/1263)
 - Add time it takes to build a kit in the builder pod log [\#1186](https://github.com/apache/camel-k/issues/1186)
 - Saga example [\#1097](https://github.com/apache/camel-k/issues/1097)
 - java.lang.NoSuchMethodError: com.javainuse.route.SimpleRouteBuilder.getContext\(\)Lorg/apache/camel/model/ModelCamelContext; [\#1073](https://github.com/apache/camel-k/issues/1073)
@@ -649,6 +659,7 @@
 - Unable to run the polyglot sample [\#1300](https://github.com/apache/camel-k/issues/1300)
 - kamel version should report version number in offline mode [\#1298](https://github.com/apache/camel-k/issues/1298)
 - ClassNotFoundException from pom-catalog.xml [\#1293](https://github.com/apache/camel-k/issues/1293)
+- Defining datasource in groovy and using in XML routes [\#892](https://github.com/apache/camel-k/issues/892)
 - Inject CamelContext into Java DSL RouteBuilder [\#563](https://github.com/apache/camel-k/issues/563)
 - Error with Knative probes [\#528](https://github.com/apache/camel-k/issues/528)
 
@@ -690,6 +701,7 @@
 
 **Closed issues:**
 
+- metrics: in quarkus mode, use microprofile metrics in place of the prometheus agent [\#1263](https://github.com/apache/camel-k/issues/1263)
 - Buildah support [\#1256](https://github.com/apache/camel-k/issues/1256)
 - Dead link from readme to trait documentation [\#1249](https://github.com/apache/camel-k/issues/1249)
 - When using `camel-opentracing`, \<Log statement in routes.xml is getting logged twice [\#1240](https://github.com/apache/camel-k/issues/1240)
@@ -1011,7 +1023,6 @@
 - Camel-k-cache not able to create PVC \(pod has unbound immediate PersistentVolumeClaims\) [\#898](https://github.com/apache/camel-k/issues/898)
 - Include modeline in examples [\#895](https://github.com/apache/camel-k/issues/895)
 - Improve kamel "get" to enable specifying integration name [\#893](https://github.com/apache/camel-k/issues/893)
-- Defining datasource in groovy and using in XML routes [\#892](https://github.com/apache/camel-k/issues/892)
 - Publish Camel K 1.0.0-M1 to operator hub [\#887](https://github.com/apache/camel-k/issues/887)
 - Kamel reset should delete builds as well as kits [\#875](https://github.com/apache/camel-k/issues/875)
 - BuildConfig's, ImageStream's and Pod's not labeled with camel-k and can't delete with -l 'app=camel-k' [\#840](https://github.com/apache/camel-k/issues/840)
