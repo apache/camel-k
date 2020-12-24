@@ -388,6 +388,7 @@
 - \[regression\]kamel help trait --all -o json returns both yaml and json output [\#1511](https://github.com/apache/camel-k/issues/1511)
 - addRoutes problem when running 01-Basic example from new camel-k-example docs [\#1509](https://github.com/apache/camel-k/issues/1509)
 - CLI - Make kamel run handle github urls that are not raw [\#1497](https://github.com/apache/camel-k/issues/1497)
+- metrics: in quarkus mode, use microprofile metrics in place of the prometheus agent [\#1263](https://github.com/apache/camel-k/issues/1263)
 - Add time it takes to build a kit in the builder pod log [\#1186](https://github.com/apache/camel-k/issues/1186)
 - Saga example [\#1097](https://github.com/apache/camel-k/issues/1097)
 - java.lang.NoSuchMethodError: com.javainuse.route.SimpleRouteBuilder.getContext\(\)Lorg/apache/camel/model/ModelCamelContext; [\#1073](https://github.com/apache/camel-k/issues/1073)
@@ -701,7 +702,6 @@
 
 **Closed issues:**
 
-- metrics: in quarkus mode, use microprofile metrics in place of the prometheus agent [\#1263](https://github.com/apache/camel-k/issues/1263)
 - Buildah support [\#1256](https://github.com/apache/camel-k/issues/1256)
 - Dead link from readme to trait documentation [\#1249](https://github.com/apache/camel-k/issues/1249)
 - When using `camel-opentracing`, \<Log statement in routes.xml is getting logged twice [\#1240](https://github.com/apache/camel-k/issues/1240)
