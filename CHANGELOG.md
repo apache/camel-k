@@ -236,6 +236,7 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+- chore\(doc\): Polish secured monitoring proposal [\#1626](https://github.com/apache/camel-k/pull/1626) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -324,7 +325,6 @@
 - Initial architecture documentation [\#1629](https://github.com/apache/camel-k/pull/1629) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
 - doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
-- chore\(doc\): Polish secured monitoring proposal [\#1626](https://github.com/apache/camel-k/pull/1626) ([astefanutti](https://github.com/astefanutti))
 - doc: Update secured monitoring proposal for Quarkus/Knative single-port [\#1625](https://github.com/apache/camel-k/pull/1625) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1599: generate good trait doc [\#1622](https://github.com/apache/camel-k/pull/1622) ([nicolaferraro](https://github.com/nicolaferraro))
 - Init .asf.yaml file [\#1621](https://github.com/apache/camel-k/pull/1621) ([astefanutti](https://github.com/astefanutti))
@@ -360,6 +360,7 @@
 - fix: bug in utility function [\#1553](https://github.com/apache/camel-k/pull/1553) ([nicolaferraro](https://github.com/nicolaferraro))
 - support make install-crc \#1410 [\#1544](https://github.com/apache/camel-k/pull/1544) ([johnpoth](https://github.com/johnpoth))
 - Cannot expose knative endpoints in YAML [\#1540](https://github.com/apache/camel-k/pull/1540) ([lburgazzoli](https://github.com/lburgazzoli))
+-  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - chore: add a backport action [\#1531](https://github.com/apache/camel-k/pull/1531) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(doc\): remove redundant '/build' entry in project structure [\#1530](https://github.com/apache/camel-k/pull/1530) ([tadayosi](https://github.com/tadayosi))
 - fix: JVM trait overrides other traits JVM arguments [\#1528](https://github.com/apache/camel-k/pull/1528) ([astefanutti](https://github.com/astefanutti))
@@ -405,7 +406,6 @@
 
 **Merged pull requests:**
 
--  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - fix: JVM trait overrides other traits JVM arguments [\#1529](https://github.com/apache/camel-k/pull/1529) ([astefanutti](https://github.com/astefanutti))
 - Backport fix for \#1511 in release-1.0.x [\#1520](https://github.com/apache/camel-k/pull/1520) ([nicolaferraro](https://github.com/nicolaferraro))
 
