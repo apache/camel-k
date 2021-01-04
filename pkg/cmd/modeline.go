@@ -89,7 +89,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 		return nil, nil, err
 	}
 
-	isLocalCreate := target.Parent().Name() == localCmdName && target.Name() == createCmdName
+	isLocalCreate := target.Name() == createCmdName && target.Parent().Name() == localCmdName
 
 	if target.Name() != runCmdName && !isLocalCreate {
 		return rootCmd, args, nil
