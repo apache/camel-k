@@ -76,7 +76,7 @@ func RunImageArgs(imagePath string, imageTag string) []string {
 	args := make([]string, 0)
 	args = append(args, "run")
 
-	// TODO: support other networks.
+	// Add network flag.
 	args = append(args, "--network="+NetworkName)
 
 	// Path to Docker image:
