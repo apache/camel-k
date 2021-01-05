@@ -80,9 +80,12 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
-	// Wait for all CRDs to be installed before proceeding
-	if err := WaitForAllCRDInstallation(ctx, clientProvider, 25*time.Second); err != nil {
-		return err
+	// Don't wait if we're just collecting resources
+	if collection == nil {
+		// Wait for all CRDs to be installed before proceeding
+		if err := WaitForAllCRDInstallation(ctx, clientProvider, 25*time.Second); err != nil {
+			return err
+		}
 	}
 
 	// Installing ClusterRole
