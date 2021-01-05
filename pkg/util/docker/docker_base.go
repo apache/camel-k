@@ -34,6 +34,9 @@ var BaseWorkingDirectory string = ""
 // IntegrationWorkingDirectory -- directory used by Docker to construct the integration image.
 var IntegrationWorkingDirectory string = ""
 
+// NetworkName -- network used by Docker when running the image.
+var NetworkName string = "host"
+
 // Internal variables.
 var (
 	dockerEndpointSeparator = "/"
@@ -68,14 +71,13 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 func RunImageArgs(imagePath string, imageTag string) []string {
 	// Construct the docker command:
 	//
-	// docker run --network="host" <image-name>:<tag>
+	// docker run --network=<network-name> <image-name>:<tag>
 	//
-	// TODO: support other types of network connections.
 	args := make([]string, 0)
 	args = append(args, "run")
 
 	// TODO: support other networks.
-	args = append(args, "--network=host")
+	args = append(args, "--network="+NetworkName)
 
 	// Path to Docker image:
 	args = append(args, FullImageArg(imagePath)...)
