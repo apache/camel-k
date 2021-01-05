@@ -74,6 +74,12 @@ func deleteDockerWorkingDirectory() error {
 	return nil
 }
 
+func setDockerNetworkName(networkName string) {
+	if networkName != "" {
+		docker.NetworkName = networkName
+	}
+}
+
 func createAndBuildBaseImage(ctx context.Context, containerRegistry string) error {
 	// Create the base image Docker file.
 	err := docker.CreateBaseImageDockerFile()

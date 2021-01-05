@@ -104,7 +104,7 @@ func BuildIntegrationImageArgs(imagePath string) []string {
 func RunIntegrationImageArgs(imagePath string) []string {
 	// Construct the docker command:
 	//
-	// docker run --network="host" <dockerRegistry>/<ImageName>
+	// docker run --network=<network-name> <dockerRegistry>/<ImageName>
 	//
 	return RunImageArgs(imagePath, latestTag)
 }
