@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TOKEN=`oc config view --minify --output 'jsonpath={..token}'`
+TOKEN=`oc whoami --show-token`
 echo "openshift.token=${TOKEN}" > openshift-token.properties
 oc -n ${YAKS_NAMESPACE} create secret generic openshift-token-secret-metrics --from-file=openshift-token.properties
 oc -n ${YAKS_NAMESPACE} create secret generic openshift-token-secret-alerting --from-file=openshift-token.properties
