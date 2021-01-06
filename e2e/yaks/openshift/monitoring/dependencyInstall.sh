@@ -19,7 +19,7 @@ SOURCE_DIR=$( dirname "${BASH_SOURCE[0]}")
 APP_FOLDER="${SOURCE_DIR}/app"
 
 VERSION_CAMEL_K_RUNTIME=$(oc -n ${YAKS_NAMESPACE} get IntegrationPlatform camel-k -o 'jsonpath={.status.build.runtimeVersion}')
-VERSION_CAMEL_QUARKUS=$(oc -n ${YAKS_NAMESPACE} get CamelCatalog camel-catalog-${VERSION_CAMEL_K_RUNTIME}-main -o 'jsonpath={.spec.runtime.metadata.camel-quarkus\.version}')
+VERSION_CAMEL_QUARKUS=$(oc -n ${YAKS_NAMESPACE} get CamelCatalog camel-catalog-${VERSION_CAMEL_K_RUNTIME} -o 'jsonpath={.spec.runtime.metadata.camel-quarkus\.version}')
 
 mvn clean install -f $APP_FOLDER -Dversion.camel.quarkus=${VERSION_CAMEL_QUARKUS}
 LOCAL_MVN_HOME=$(mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout)
