@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 
 channels:
-- currentCSV: camel-k-operator.v1.3.0
+- currentCSV: camel-k-operator.v1.3.1-snapshot
   name: stable
 defaultChannel: stable
 packageName: camel-k-dev
