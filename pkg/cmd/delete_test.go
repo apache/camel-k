@@ -18,20 +18,46 @@ limitations under the License.
 package cmd
 
 import (
+	"testing"
+
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
-//nolint:deadcode,unused
+const cmdDelete = "delete"
+
+func initializeDeleteCmdOptions(t *testing.T) (*deleteCmdOptions, *cobra.Command, RootCmdOptions) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+	deleteCmdOptions := addTestDeleteCmd(*options, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	return deleteCmdOptions, rootCmd, *options
+}
+
 func addTestDeleteCmd(options RootCmdOptions, rootCmd *cobra.Command) *deleteCmdOptions {
 	//add a testing version of delete Command
-	deleteCmd, deleteCmdOptions := newCmdDelete(&options)
+	deleteCmd, deleteOptions := newCmdDelete(&options)
 	deleteCmd.RunE = func(c *cobra.Command, args []string) error {
+		return nil
+	}
+	deleteCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
 	deleteCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(deleteCmd)
-	return deleteCmdOptions
+	return deleteOptions
 }
 
-//TODO: add a proper test, take inspiration by run_test.go
+func TestDeleteNonExistingFlag(t *testing.T) {
+	_, rootCmd, _ := initializeDeleteCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdDelete, "--nonExistingFlag")
+	assert.NotNil(t, err)
+}
+
+func TestDeleteAllFlag(t *testing.T) {
+	deleteCmdOptions, rootCmd, _ := initializeDeleteCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdDelete, "--all")
+	assert.Nil(t, err)
+	assert.Equal(t, true, deleteCmdOptions.DeleteAll)
+}
