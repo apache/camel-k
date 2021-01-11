@@ -32,7 +32,7 @@ func CreateBaseImageDockerFile() error {
 	dockerFile := []string{}
 
 	// Base image is a java-only image since the integration command is just a java command.
-	dockerFile = append(dockerFile, FROM(defaults.BaseImage))
+	dockerFile = append(dockerFile, FROM(defaults.BaseImage()))
 
 	// Ensure Maven is already installed.
 	dockerFile = append(dockerFile, RUNMavenInstall())
