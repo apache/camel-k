@@ -18,20 +18,53 @@ limitations under the License.
 package cmd
 
 import (
+	"testing"
+
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
-//nolint:deadcode,unused
+const cmdBuilder = "builder"
+
+func initializeBuilderCmdOptions(t *testing.T) (*builderCmdOptions, *cobra.Command, RootCmdOptions) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+	builderCmdOptions := addTestBuilderCmd(*options, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	return builderCmdOptions, rootCmd, *options
+}
+
 func addTestBuilderCmd(options RootCmdOptions, rootCmd *cobra.Command) *builderCmdOptions {
 	//add a testing version of builder Command
-	builderCmd, builderCmdOptions := newCmdBuilder(&options)
+	builderCmd, builderOptions := newCmdBuilder(&options)
 	builderCmd.RunE = func(c *cobra.Command, args []string) error {
+		return nil
+	}
+	builderCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
 	builderCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(builderCmd)
-	return builderCmdOptions
+	return builderOptions
 }
 
-//TODO: add a proper test, take inspiration by run_test.go
+func TestBuilderNonExistingFlag(t *testing.T) {
+	_, rootCmd, _ := initializeBuilderCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdBuilder, "--nonExistingFlag")
+	assert.NotNil(t, err)
+}
+
+func TestBuilderBuildNameFlag(t *testing.T) {
+	builderCmdOptions, rootCmd, _ := initializeBuilderCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdBuilder, "--build-name", "someBuild")
+	assert.Nil(t, err)
+	assert.Equal(t, "someBuild", builderCmdOptions.BuildName)
+}
+
+func TestBuilderTaskNameFlag(t *testing.T) {
+	builderCmdOptions, rootCmd, _ := initializeBuilderCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdBuilder, "--task-name", "someTask")
+	assert.Nil(t, err)
+	assert.Equal(t, "someTask", builderCmdOptions.TaskName)
+}
