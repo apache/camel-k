@@ -166,7 +166,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	}
 	if p.Status.Build.BaseImage == "" {
-		p.Status.Build.BaseImage = defaults.BaseImage
+		p.Status.Build.BaseImage = defaults.BaseImage()
 	}
 	if p.Status.Build.Maven.LocalRepository == "" {
 		p.Status.Build.Maven.LocalRepository = defaults.LocalRepository
