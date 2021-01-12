@@ -30,9 +30,6 @@ import (
 func LoadCatalog(ctx context.Context, client client.Client, namespace string, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
 	options := []k8sclient.ListOption{
 		k8sclient.InNamespace(namespace),
-		k8sclient.MatchingLabels{
-			"camel.apache.org/runtime.provider": string(runtime.Provider),
-		},
 	}
 
 	list := v1.NewCamelCatalogList()
