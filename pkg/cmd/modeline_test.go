@@ -33,7 +33,7 @@ func TestModelineRunSimple(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	file := `
-		// camel-k: dependency=mvn:org.my/lib:1.0
+		// camel-k: dependency=mvn:org.my:lib:1.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
 	err = ioutil.WriteFile(fileName, []byte(file), 0777)
@@ -42,7 +42,7 @@ func TestModelineRunSimple(t *testing.T) {
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", fileName, "--dependency=mvn:org.my/lib:1.0"}, flags)
+	assert.Equal(t, []string{"run", fileName, "--dependency=mvn:org.my:lib:1.0"}, flags)
 }
 
 func TestModelineRunHelp(t *testing.T) {
@@ -64,16 +64,16 @@ func TestModelineRunChain(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	file := `
-		// camel-k: dependency=mvn:org.my/lib:2.0
+		// camel-k: dependency=mvn:org.my:lib:2.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
 	err = ioutil.WriteFile(fileName, []byte(file), 0777)
 	assert.NoError(t, err)
 
-	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", "-d", "mvn:org.my/lib2:1.0", fileName})
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", "-d", "mvn:org.my:lib2:1.0", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", "-d", "mvn:org.my/lib2:1.0", fileName, "--dependency=mvn:org.my/lib:2.0"}, flags)
+	assert.Equal(t, []string{"run", "-d", "mvn:org.my:lib2:1.0", fileName, "--dependency=mvn:org.my:lib:2.0"}, flags)
 }
 
 func TestModelineRunMultipleFiles(t *testing.T) {
@@ -82,14 +82,14 @@ func TestModelineRunMultipleFiles(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	file := `
-		// camel-k: dependency=mvn:org.my/lib1:3.0
+		// camel-k: dependency=mvn:org.my:lib1:3.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
 	err = ioutil.WriteFile(fileName, []byte(file), 0777)
 	assert.NoError(t, err)
 
 	file2 := `
-		// camel-k: dependency=mvn:org.my/lib2:3.0
+		// camel-k: dependency=mvn:org.my:lib2:3.0
 	`
 	fileName2 := path.Join(dir, "ext.groovy")
 	err = ioutil.WriteFile(fileName2, []byte(file2), 0777)
@@ -98,7 +98,7 @@ func TestModelineRunMultipleFiles(t *testing.T) {
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, fileName2})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", fileName, fileName2, "--dependency=mvn:org.my/lib1:3.0", "--dependency=mvn:org.my/lib2:3.0"}, flags)
+	assert.Equal(t, []string{"run", fileName, fileName2, "--dependency=mvn:org.my:lib1:3.0", "--dependency=mvn:org.my:lib2:3.0"}, flags)
 }
 
 func TestModelineRunPropertyFiles(t *testing.T) {

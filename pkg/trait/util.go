@@ -55,7 +55,6 @@ func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	return &kit, err
 }
 
-// CollectConfigurationValues --
 func CollectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
 	result := strset.New()
 
@@ -83,7 +82,6 @@ func CollectConfigurationValues(configurationType string, configurable ...v1.Con
 	return s
 }
 
-// CollectConfigurationPairs --
 func CollectConfigurationPairs(configurationType string, configurable ...v1.Configurable) map[string]string {
 	result := make(map[string]string)
 
@@ -159,31 +157,30 @@ func toHostDir(host string) string {
 	return toFileName.ReplaceAllString(h, "_")
 }
 
-// AddSourceDependencies --
 func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) *strset.Set {
 	dependencies := strset.New()
 
-	// Add auto-detected dependencies.
+	// Add auto-detected dependencies
 	meta := metadata.Extract(catalog, source)
 	dependencies.Merge(meta.Dependencies)
 
-	// Add loader dependencies.
+	// Add loader dependencies
 	lang := source.InferLanguage()
 	for loader, v := range catalog.Loaders {
 		// add loader specific dependencies
 		if source.Loader != "" && source.Loader == loader {
-			dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
+			dependencies.Add(v.GetDependencyID())
 
 			for _, d := range v.Dependencies {
-				dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+				dependencies.Add(d.GetDependencyID())
 			}
 		} else if source.Loader == "" {
 			// add language specific dependencies
 			if util.StringSliceExists(v.Languages, string(lang)) {
-				dependencies.Add(fmt.Sprintf("mvn:%s/%s", v.GroupID, v.ArtifactID))
+				dependencies.Add(v.GetDependencyID())
 
 				for _, d := range v.Dependencies {
-					dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+					dependencies.Add(d.GetDependencyID())
 				}
 			}
 		}

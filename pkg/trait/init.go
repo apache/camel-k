@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/pkg/errors"
@@ -81,7 +80,7 @@ func (t *initTrait) Apply(e *Environment) error {
 				// add runtime specific dependencies
 				for _, capability := range e.Integration.Status.Capabilities {
 					for _, dependency := range e.CamelCatalog.Runtime.CapabilityDependencies(capability) {
-						util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
+						util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
 					}
 				}
 			}

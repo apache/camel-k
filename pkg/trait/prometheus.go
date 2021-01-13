@@ -85,7 +85,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		switch e.CamelCatalog.Runtime.Provider {
 		case v1.RuntimeProviderQuarkus:
 			// Add the Camel Quarkus MP Metrics extension
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-microprofile-metrics")
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
 		}
 		return nil
 	}

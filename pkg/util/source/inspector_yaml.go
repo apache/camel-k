@@ -67,7 +67,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 	case "marshal":
 		if cm, ok := content.(map[interface{}]interface{}); ok {
 			if js, jsOk := cm["json"]; jsOk {
-				dataFormatID := defaultJsonDataformat
+				dataFormatID := defaultJsonDataFormat
 				if jsContent, jsContentOk := js.(map[interface{}]interface{}); jsContentOk {
 					if lib, libOk := jsContent["library"]; libOk {
 						dataFormatID = strings.ToLower(fmt.Sprintf("json-%s", lib))

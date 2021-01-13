@@ -24,6 +24,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -31,12 +40,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 	knativeutil "github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 // The Knative trait automatically discovers addresses of Knative resources and inject them into the
@@ -223,14 +226,14 @@ func (t *knativeTrait) Apply(e *Environment) error {
 		// Interceptor may have been set by a Knative CamelSource
 		if util.StringSliceExists(e.getAllInterceptors(), "knative-source") {
 			// Adding required libraries for Camel sources
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-knative")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-knative")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-knative-producer")
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-knative")
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative")
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative-producer")
 		}
 	}
 
 	if t.SinkBinding != nil && *t.SinkBinding {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k/camel-k-knative")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative")
 	}
 
 	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {

@@ -36,8 +36,7 @@ func ManageIntegrationDependencies(
 	for _, d := range dependencies {
 		switch {
 		case strings.HasPrefix(d, "bom:"):
-			mid := strings.TrimPrefix(d, "bom:")
-			gav := strings.Replace(mid, "/", ":", -1)
+			gav := strings.TrimPrefix(d, "bom:")
 
 			d, err := maven.ParseGAV(gav)
 			if err != nil {
@@ -76,8 +75,7 @@ func ManageIntegrationDependencies(
 
 			project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
 		case strings.HasPrefix(d, "mvn:"):
-			mid := strings.TrimPrefix(d, "mvn:")
-			gav := strings.Replace(mid, "/", ":", -1)
+			gav := strings.TrimPrefix(d, "mvn:")
 
 			project.AddEncodedDependencyGAV(gav)
 		default:

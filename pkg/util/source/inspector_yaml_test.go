@@ -21,9 +21,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/stretchr/testify/assert"
 )
 
 func NewtestYAMLInspector(t *testing.T) YAMLInspector {
@@ -71,19 +72,22 @@ func TestYAMLDependencies(t *testing.T) {
 		{
 			name:                "consumer",
 			source:              YAMLRouteConsumer,
-			dependencies:        []string{`mvn:org.apache.camel.k/camel-k-knative-consumer`},
-			missingDependencies: []string{`mvn:org.apache.camel.k/camel-k-knative-producer`},
+			dependencies:        []string{`mvn:org.apache.camel.k:camel-k-knative-consumer`},
+			missingDependencies: []string{`mvn:org.apache.camel.k:camel-k-knative-producer`},
 		},
 		{
 			name:                "producer",
 			source:              YAMLRouteProducer,
-			dependencies:        []string{`mvn:org.apache.camel.k/camel-k-knative-producer`},
-			missingDependencies: []string{`mvn:org.apache.camel.k/camel-k-knative-consumer`},
+			dependencies:        []string{`mvn:org.apache.camel.k:camel-k-knative-producer`},
+			missingDependencies: []string{`mvn:org.apache.camel.k:camel-k-knative-consumer`},
 		},
 		{
-			name:         "transformer",
-			source:       YAMLRouteTransformer,
-			dependencies: []string{`mvn:org.apache.camel.k/camel-k-knative-producer`, `mvn:org.apache.camel.k/camel-k-knative-consumer`},
+			name:   "transformer",
+			source: YAMLRouteTransformer,
+			dependencies: []string{
+				`mvn:org.apache.camel.k:camel-k-knative-producer`,
+				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+			},
 		},
 	}
 	for _, test := range tests {

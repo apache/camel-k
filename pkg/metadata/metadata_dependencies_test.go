@@ -373,8 +373,8 @@ func TestRestDependency(t *testing.T) {
 			"camel-quarkus:http",
 			"camel-quarkus:direct",
 			"camel-quarkus:log",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -404,8 +404,8 @@ func TestRestWithPathDependency(t *testing.T) {
 			"camel-quarkus:http",
 			"camel-quarkus:direct",
 			"camel-quarkus:log",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -433,8 +433,8 @@ func TestRestConfigurationDependency(t *testing.T) {
 		t, []string{
 			"camel-quarkus:http",
 			"camel-quarkus:log",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -463,8 +463,8 @@ func TestRestClosureDependencyGroovy(t *testing.T) {
 		[]string{
 			"camel-quarkus:http",
 			"camel-quarkus:log",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
@@ -493,8 +493,8 @@ func TestRestClosureDependencyKotlin(t *testing.T) {
 		[]string{
 			"camel-quarkus:http",
 			"camel-quarkus:log",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus/camel-quarkus-platform-http",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
 		},
 		meta.Dependencies.List())
 }
