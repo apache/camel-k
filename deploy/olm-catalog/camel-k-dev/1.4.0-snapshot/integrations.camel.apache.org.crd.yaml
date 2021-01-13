@@ -1,0 +1,373 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    app: "camel-k"
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: integrations.camel.apache.org
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    description: The integration phase
+    name: Phase
+    type: string
+  - JSONPath: .status.kit
+    description: The integration kit
+    name: Kit
+    type: string
+  - JSONPath: .status.replicas
+    description: The number of pods
+    name: Replicas
+    type: integer
+  group: camel.apache.org
+  names:
+    categories:
+    - kamel
+    - camel
+    kind: Integration
+    listKind: IntegrationList
+    plural: integrations
+    shortNames:
+    - it
+    singular: integration
+  scope: Namespaced
+  subresources:
+    scale:
+      labelSelectorPath: .status.selector
+      specReplicasPath: .spec.replicas
+      statusReplicasPath: .status.replicas
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Integration is the Schema for the integrations API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: IntegrationSpec defines the desired state of Integration
+          properties:
+            configuration:
+              items:
+                description: ConfigurationSpec --
+                properties:
+                  type:
+                    type: string
+                  value:
+                    type: string
+                required:
+                - type
+                - value
+                type: object
+              type: array
+            dependencies:
+              items:
+                type: string
+              type: array
+            flows:
+              items:
+                description: Flow is an unstructured object representing a Camel Flow
+                  in YAML/JSON DSL
+                type: object
+              type: array
+            kit:
+              type: string
+            profile:
+              description: TraitProfile represents lists of traits that are enabled
+                for the specific installation/integration
+              type: string
+            replicas:
+              format: int32
+              type: integer
+            repositories:
+              items:
+                type: string
+              type: array
+            resources:
+              items:
+                description: ResourceSpec --
+                properties:
+                  compression:
+                    type: boolean
+                  content:
+                    type: string
+                  contentKey:
+                    type: string
+                  contentRef:
+                    type: string
+                  mountPath:
+                    type: string
+                  name:
+                    type: string
+                  type:
+                    description: ResourceType --
+                    type: string
+                type: object
+              type: array
+            serviceAccountName:
+              type: string
+            sources:
+              items:
+                description: SourceSpec --
+                properties:
+                  compression:
+                    type: boolean
+                  content:
+                    type: string
+                  contentKey:
+                    type: string
+                  contentRef:
+                    type: string
+                  interceptors:
+                    description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+                      uses to pre/post process sources
+                    items:
+                      type: string
+                    type: array
+                  language:
+                    description: Language --
+                    type: string
+                  loader:
+                    description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                      that will interpret this source at runtime
+                    type: string
+                  name:
+                    type: string
+                  property-names:
+                    description: List of property names defined in the source (e.g.
+                      if type is "template")
+                    items:
+                      type: string
+                    type: array
+                  type:
+                    description: Type defines the kind of source described by this
+                      object
+                    type: string
+                type: object
+              type: array
+            traits:
+              additionalProperties:
+                description: A TraitSpec contains the configuration of a trait
+                properties:
+                  configuration:
+                    description: TraitConfiguration --
+                    type: object
+                required:
+                - configuration
+                type: object
+              type: object
+          type: object
+        status:
+          description: IntegrationStatus defines the observed state of Integration
+          properties:
+            capabilities:
+              items:
+                type: string
+              type: array
+            conditions:
+              items:
+                description: IntegrationCondition describes the state of a resource
+                  at a certain point.
+                properties:
+                  firstTruthyTime:
+                    description: First time the condition status transitioned to True.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  lastUpdateTime:
+                    description: The last time this condition was updated.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of integration condition.
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            configuration:
+              items:
+                description: ConfigurationSpec --
+                properties:
+                  type:
+                    type: string
+                  value:
+                    type: string
+                required:
+                - type
+                - value
+                type: object
+              type: array
+            dependencies:
+              items:
+                type: string
+              type: array
+            digest:
+              type: string
+            failure:
+              description: Failure --
+              properties:
+                reason:
+                  type: string
+                recovery:
+                  description: FailureRecovery --
+                  properties:
+                    attempt:
+                      type: integer
+                    attemptMax:
+                      type: integer
+                    attemptTime:
+                      format: date-time
+                      type: string
+                  required:
+                  - attempt
+                  - attemptMax
+                  type: object
+                time:
+                  format: date-time
+                  type: string
+              required:
+              - reason
+              - recovery
+              - time
+              type: object
+            generatedResources:
+              items:
+                description: ResourceSpec --
+                properties:
+                  compression:
+                    type: boolean
+                  content:
+                    type: string
+                  contentKey:
+                    type: string
+                  contentRef:
+                    type: string
+                  mountPath:
+                    type: string
+                  name:
+                    type: string
+                  type:
+                    description: ResourceType --
+                    type: string
+                type: object
+              type: array
+            generatedSources:
+              items:
+                description: SourceSpec --
+                properties:
+                  compression:
+                    type: boolean
+                  content:
+                    type: string
+                  contentKey:
+                    type: string
+                  contentRef:
+                    type: string
+                  interceptors:
+                    description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+                      uses to pre/post process sources
+                    items:
+                      type: string
+                    type: array
+                  language:
+                    description: Language --
+                    type: string
+                  loader:
+                    description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                      that will interpret this source at runtime
+                    type: string
+                  name:
+                    type: string
+                  property-names:
+                    description: List of property names defined in the source (e.g.
+                      if type is "template")
+                    items:
+                      type: string
+                    type: array
+                  type:
+                    description: Type defines the kind of source described by this
+                      object
+                    type: string
+                type: object
+              type: array
+            image:
+              type: string
+            kit:
+              type: string
+            lastInitTimestamp:
+              description: The timestamp representing the last time when this integration
+                was initialized.
+              format: date-time
+              type: string
+            phase:
+              description: IntegrationPhase --
+              type: string
+            platform:
+              type: string
+            profile:
+              description: TraitProfile represents lists of traits that are enabled
+                for the specific installation/integration
+              type: string
+            replicas:
+              format: int32
+              type: integer
+            runtimeProvider:
+              description: RuntimeProvider --
+              type: string
+            runtimeVersion:
+              type: string
+            selector:
+              type: string
+            version:
+              type: string
+          type: object
+      type: object
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
