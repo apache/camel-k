@@ -18,13 +18,12 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
+	"github.com/scylladb/go-set/strset"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/scylladb/go-set/strset"
 )
 
 // The Dependencies trait is internally used to automatically add runtime dependencies based on the
@@ -60,9 +59,9 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		dependencies.Add(e.Integration.Spec.Dependencies...)
 	}
 
-	// add runtime specific dependencies
+	// Add runtime specific dependencies
 	for _, d := range e.CamelCatalog.Runtime.Dependencies {
-		dependencies.Add(fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+		dependencies.Add(d.GetDependencyID())
 	}
 
 	sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
@@ -70,7 +69,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		return err
 	}
 	for _, s := range sources {
-		// Add source-related dependencies.
+		// Add source-related dependencies
 		dependencies.Merge(AddSourceDependencies(s, e.CamelCatalog))
 
 		meta := metadata.Extract(e.CamelCatalog, s)
@@ -80,7 +79,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		})
 	}
 
-	// add dependencies back to integration
+	// Add dependencies back to integration
 	dependencies.Each(func(item string) bool {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, item)
 		return true

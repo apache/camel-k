@@ -19,7 +19,6 @@ package trait
 
 import (
 	"context"
-	"knative.dev/eventing/pkg/apis/duck/v1beta1"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"knative.dev/eventing/pkg/apis/duck/v1beta1"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
 	"knative.dev/pkg/apis"
@@ -301,7 +301,7 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 	}
 }
 
-func TestKnativePlatformHttpDepdencies(t *testing.T) {
+func TestKnativePlatformHttpDependencies(t *testing.T) {
 	sources := []v1.SourceSpec{
 		{
 			DataSpec: v1.DataSpec{
@@ -344,7 +344,7 @@ func TestKnativePlatformHttpDepdencies(t *testing.T) {
 			assert.Nil(t, err)
 
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
-			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-platform-http")
+			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-platform-http")
 		})
 	}
 }

@@ -27,11 +27,19 @@ func (in *Artifact) String() string {
 	return in.ID
 }
 
+func (in *MavenArtifact) GetDependencyID() string {
+	switch {
+	case in.Version == "":
+		return "mvn:" + in.GroupID + ":" + in.ArtifactID
+	default:
+		return "mvn:" + in.GroupID + ":" + in.ArtifactID + ":" + in.Version
+	}
+}
+
 func (in *ConfigurationSpec) String() string {
 	return fmt.Sprintf("%s=%s", in.Type, in.Value)
 }
 
-// CapabilityDependencies ---
 func (in *RuntimeSpec) CapabilityDependencies(capability string) []MavenArtifact {
 	deps := make([]MavenArtifact, 0)
 

@@ -75,7 +75,7 @@ func TestProbesDepsQuarkus(t *testing.T) {
 
 	err = ctr.Apply(&env)
 	assert.Nil(t, err)
-	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus/camel-quarkus-microprofile-health")
+	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
 }
 
 func TestProbesOnDeployment(t *testing.T) {

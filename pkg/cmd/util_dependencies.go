@@ -42,32 +42,28 @@ var additionalDependencyUsageMessage = `Additional top-level dependencies are sp
 where <type> is one of {` + strings.Join(acceptedDependencyTypes, "|") + `}.`
 
 func getDependencies(args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
-	// Fetch existing catalog or create new one if one does not already exist.
+	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog()
 
-	// Get top-level dependencies.
+	// Get top-level dependencies
 	dependencies, err := getTopLevelDependencies(catalog, args)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add additional user-provided dependencies.
+	// Add additional user-provided dependencies
 	if additionalDependencies != nil {
 		for _, additionalDependency := range additionalDependencies {
 			dependencies = append(dependencies, additionalDependency)
 		}
 	}
 
-	// Compute transitive dependencies.
+	// Compute transitive dependencies
 	if allDependencies {
 		// Add runtime dependency since this dependency is always required for running
 		// an integration. Only add this dependency if it has not been added already.
 		for _, runtimeDep := range catalog.Runtime.Dependencies {
-			dep := fmt.Sprintf("mvn:%s/%s", runtimeDep.GroupID, runtimeDep.ArtifactID)
-			if runtimeDep.Version != "" {
-				dep = dep + "/" + runtimeDep.Version
-			}
-			util.StringSliceUniqueAdd(&dependencies, dep)
+			util.StringSliceUniqueAdd(&dependencies, runtimeDep.GetDependencyID())
 		}
 
 		dependencies, err = getTransitiveDependencies(catalog, dependencies, repositories)
@@ -80,10 +76,10 @@ func getDependencies(args []string, additionalDependencies []string, repositorie
 }
 
 func getTopLevelDependencies(catalog *camel.RuntimeCatalog, args []string) ([]string, error) {
-	// List of top-level dependencies.
+	// List of top-level dependencies
 	dependencies := strset.New()
 
-	// Invoke the dependency inspector code for each source file.
+	// Invoke the dependency inspector code for each source file
 	for _, source := range args {
 		data, _, err := loadContent(source, false, false)
 		if err != nil {
@@ -98,7 +94,7 @@ func getTopLevelDependencies(catalog *camel.RuntimeCatalog, args []string) ([]st
 			},
 		}
 
-		// Extract list of top-level dependencies.
+		// Extract list of top-level dependencies
 		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
 	}
 
@@ -113,18 +109,18 @@ func getTransitiveDependencies(
 		LocalRepository: "",
 	}
 
-	// Create Maven project.
+	// Create Maven project
 	project := runtime.GenerateQuarkusProjectCommon(
 		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
 		defaults.DefaultRuntimeVersion, catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"])
 
-	// Inject dependencies into Maven project.
+	// Inject dependencies into Maven project
 	err := camel.ManageIntegrationDependencies(&project, dependencies, catalog)
 	if err != nil {
 		return nil, err
 	}
 
-	// Maven local context to be used for generating the transitive dependencies.
+	// Maven local context to be used for generating the transitive dependencies
 	mc := maven.NewContext(util.MavenWorkingDirectory, project)
 	mc.LocalRepository = mvn.LocalRepository
 	mc.Timeout = mvn.GetTimeout().Duration
@@ -147,7 +143,7 @@ func getTransitiveDependencies(
 		mc.SettingsContent = settingsData
 	}
 
-	// Make maven command less verbose.
+	// Make maven command less verbose
 	mc.AdditionalArguments = append(mc.AdditionalArguments, "-q")
 
 	err = runtime.BuildQuarkusRunnerCommon(mc)
@@ -155,20 +151,19 @@ func getTransitiveDependencies(
 		return nil, err
 	}
 
-	// Compute dependencies.
 	content, err := runtime.ComputeQuarkusDependenciesCommon(mc, catalog.Runtime.Version)
 	if err != nil {
 		return nil, err
 	}
 
-	// Compose artifacts list.
+	// Compose artifacts list
 	artifacts := []v1.Artifact{}
 	artifacts, err = runtime.ProcessQuarkusTransitiveDependencies(mc, content)
 	if err != nil {
 		return nil, err
 	}
 
-	// Dump dependencies in the dependencies directory and construct the list of dependencies.
+	// Dump dependencies in the dependencies directory and construct the list of dependencies
 	transitiveDependencies := []string{}
 	for _, entry := range artifacts {
 		transitiveDependencies = append(transitiveDependencies, entry.Location)
@@ -178,7 +173,7 @@ func getTransitiveDependencies(
 }
 
 func generateCatalog() (*camel.RuntimeCatalog, error) {
-	// A Camel catalog is requiref for this operatio.
+	// A Camel catalog is required for this operation
 	settings := ""
 	mvn := v1.MavenSpec{
 		LocalRepository: "",
@@ -197,13 +192,13 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 }
 
 func createCamelCatalog() (*camel.RuntimeCatalog, error) {
-	// Attempt to reuse existing Camel catalog if one is present.
+	// Attempt to reuse existing Camel catalog if one is present
 	catalog, err := camel.DefaultCatalog()
 	if err != nil {
 		return nil, err
 	}
 
-	// Generate catalog if one was not found.
+	// Generate catalog if one was not found
 	if catalog == nil {
 		catalog, err = generateCatalog()
 		if err != nil {
@@ -221,7 +216,7 @@ func outputDependencies(dependencies []string, format string) error {
 			return err
 		}
 	} else {
-		// Print output in text form.
+		// Print output in text form
 		for _, dep := range dependencies {
 			fmt.Printf("%v\n", dep)
 		}
@@ -230,16 +225,16 @@ func outputDependencies(dependencies []string, format string) error {
 	return nil
 }
 
-func printDependencies(format string, dependecies []string) error {
+func printDependencies(format string, dependencies []string) error {
 	switch format {
 	case "yaml":
-		data, err := util.DependenciesToYAML(dependecies)
+		data, err := util.DependenciesToYAML(dependencies)
 		if err != nil {
 			return err
 		}
 		fmt.Print(string(data))
 	case "json":
-		data, err := util.DependenciesToJSON(dependecies)
+		data, err := util.DependenciesToJSON(dependencies)
 		if err != nil {
 			return err
 		}
@@ -253,12 +248,10 @@ func printDependencies(format string, dependecies []string) error {
 func validateFile(file string) error {
 	fileExists, err := util.FileExists(file)
 
-	// Report any error.
 	if err != nil {
 		return err
 	}
 
-	// Signal file not found.
 	if !fileExists {
 		return errors.New("File " + file + " file does not exist")
 	}
@@ -267,7 +260,7 @@ func validateFile(file string) error {
 }
 
 func validateFiles(args []string) error {
-	// Ensure source files exist.
+	// Ensure source files exist
 	for _, arg := range args {
 		err := validateFile(arg)
 		if err != nil {
@@ -279,8 +272,7 @@ func validateFiles(args []string) error {
 }
 
 func validateAdditionalDependencies(additionalDependencies []string) error {
-	// Validate list of additional dependencies i.e. make sure that each dependency has
-	// a valid type.
+	// Validate list of additional dependencies i.e. make sure that each dependency has a valid type
 	if additionalDependencies != nil {
 		for _, additionalDependency := range additionalDependencies {
 			isValid := validateDependency(additionalDependency)
@@ -338,8 +330,8 @@ func validatePropertyFiles(propertyFiles []string) error {
 }
 
 func updateIntegrationProperties(properties []string, propertyFiles []string) ([]string, error) {
-	// Create properties directory under Maven working directory. This ensures that
-	// property files of different integrations do not clash.
+	// Create properties directory under Maven working directory.
+	// This ensures that property files of different integrations do not clash.
 	err := util.CreateLocalPropertiesDirectory()
 	if err != nil {
 		return nil, err
@@ -363,59 +355,53 @@ func updateIntegrationProperties(properties []string, propertyFiles []string) ([
 		relocatedPropertyFiles = append(relocatedPropertyFiles, propertyFilePath)
 	}
 
-	// Return relocated PropertyFiles.
 	return relocatedPropertyFiles, nil
 }
 
 func updateIntegrationDependencies(dependencies []string) error {
-	// Create dependencies directory under Maven working directory. This ensures that
-	// dependencies will be removed after they are not needed.
+	// Create dependencies directory under Maven working directory.
+	// This ensures that dependencies will be removed after they are not needed.
 	err := util.CreateLocalDependenciesDirectory()
 	if err != nil {
 		return err
 	}
 
-	// Relocate dependencies files to this integration's dependencies directory.
+	// Relocate dependencies files to this integration's dependencies directory
 	for _, dependency := range dependencies {
 		util.CopyFile(dependency, path.Join(util.GetLocalDependenciesDir(), path.Base(dependency)))
 	}
 
-	// Return relocated PropertyFiles.
 	return nil
 }
 
 func updateIntegrationRoutes(routes []string) error {
-	// Create dependencies directory under Maven working directory. This ensures that
-	// dependencies will be removed after they are not needed.
 	err := util.CreateLocalRoutesDirectory()
 	if err != nil {
 		return err
 	}
 
-	// Relocate dependencies files to this integration's dependencies directory.
 	for _, route := range routes {
 		util.CopyFile(route, path.Join(util.GetLocalRoutesDir(), path.Base(route)))
 	}
 
-	// Return relocated PropertyFiles.
 	return nil
 }
 
 func createMavenWorkingDirectory() error {
-	// Create local Maven context.
+	// Create local Maven context
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
 	if err != nil {
 		return err
 	}
 
-	// Set the Maven directory to the default value.
+	// Set the Maven directory to the default value
 	util.MavenWorkingDirectory = temporaryDirectory
 
 	return nil
 }
 
 func deleteMavenWorkingDirectory() error {
-	// Remove directory used for computing the dependencies.
+	// Remove directory used for computing the dependencies
 	defer os.RemoveAll(util.MavenWorkingDirectory)
 
 	return nil

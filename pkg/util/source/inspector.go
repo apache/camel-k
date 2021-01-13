@@ -18,7 +18,6 @@ limitations under the License.
 package source
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -30,7 +29,7 @@ import (
 type catalog2deps func(*camel.RuntimeCatalog) []string
 
 const (
-	defaultJsonDataformat = "json-jackson"
+	defaultJsonDataFormat = "json-jackson"
 )
 
 var (
@@ -65,14 +64,14 @@ var (
 	sourceDependencies = map[*regexp.Regexp]catalog2deps{
 		jsonLibraryRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			res := make([]string, 0)
-			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataformat); jsonDF != nil {
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
 			return res
 		},
 		jsonLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			res := make([]string, 0)
-			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataformat); jsonDF != nil {
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
 			return res
@@ -81,7 +80,7 @@ var (
 			deps := make([]string, 0)
 			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
 				for _, d := range c.Dependencies {
-					deps = append(deps, fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+					deps = append(deps, d.GetDependencyID())
 				}
 			}
 			return deps
@@ -90,7 +89,7 @@ var (
 			deps := make([]string, 0)
 			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
 				for _, d := range c.Dependencies {
-					deps = append(deps, fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+					deps = append(deps, d.GetDependencyID())
 				}
 			}
 			return deps
@@ -99,7 +98,7 @@ var (
 			deps := make([]string, 0)
 			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
 				for _, d := range c.Dependencies {
-					deps = append(deps, fmt.Sprintf("mvn:%s/%s", d.GroupID, d.ArtifactID))
+					deps = append(deps, d.GetDependencyID())
 				}
 			}
 			return deps

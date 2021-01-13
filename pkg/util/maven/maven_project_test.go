@@ -170,11 +170,11 @@ func TestParseGAVWithClassifierAndType(t *testing.T) {
 }
 
 func TestParseGAVMvnNoVersion(t *testing.T) {
-	dep, err := ParseGAV("mvn:org.apache.camel/camel-core")
+	dep, err := ParseGAV("org.apache.camel:camel-core")
 
 	assert.Nil(t, err)
-	assert.Equal(t, dep.GroupID, "mvn")
-	assert.Equal(t, dep.ArtifactID, "org.apache.camel/camel-core")
+	assert.Equal(t, dep.GroupID, "org.apache.camel")
+	assert.Equal(t, dep.ArtifactID, "camel-core")
 }
 
 func TestParseGAVErrorNoColumn(t *testing.T) {

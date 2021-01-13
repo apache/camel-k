@@ -18,7 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"fmt"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,7 +91,7 @@ func (in *CamelArtifact) getDependencyIDs(schemeID string, scope func(CamelSchem
 	}
 	deps = make([]string, 0, len(ads))
 	for _, ad := range ads {
-		deps = append(deps, fmt.Sprintf("mvn:%s/%s", ad.GroupID, ad.ArtifactID))
+		deps = append(deps, ad.GetDependencyID())
 	}
 	return deps
 }

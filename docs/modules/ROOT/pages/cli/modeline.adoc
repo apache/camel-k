@@ -6,7 +6,7 @@ For example, take the following integration file:
 
 .Hello.java
 ----
-// camel-k: dependency=mvn:org.my/application:1.0 // <1>
+// camel-k: dependency=mvn:org.my:application:1.0 // <1>
 
 import org.apache.camel.builder.RouteBuilder;
 
@@ -32,7 +32,7 @@ The `kamel` CLI will alert you, printing the full command in the shell:
 ----
 $ kamel run Hello.java
 Modeline options have been loaded from source files
-Full command: kamel run Hello.java --dependency mvn:org.my/application:1.0
+Full command: kamel run Hello.java --dependency mvn:org.my:application:1.0
 ...
 ----
 
@@ -66,7 +66,7 @@ The following is a partial list of useful options:
 |Option | Description
 
 |dependency
-|An external library that should be included. E.g. for Maven dependencies "dependency=mvn:org.my/app:1.0"
+|An external library that should be included. E.g. for Maven dependencies "dependency=mvn:org.my:app:1.0"
 
 |env
 |Set an environment variable in the integration container. E.g "env=MY_VAR=my-value"

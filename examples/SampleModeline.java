@@ -1,4 +1,4 @@
-// camel-k: dependency=mvn:com.google.guava/guava:28.0-jre
+// camel-k: dependency=mvn:com.google.guava:guava:28.0-jre
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

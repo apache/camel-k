@@ -66,8 +66,8 @@ func TestAddDependency(t *testing.T) {
 	assert.Equal(t, integration.Dependencies, []string{"camel:file"})
 
 	integration = IntegrationSpec{}
-	integration.AddDependency("mvn:com.my/company")
-	assert.Equal(t, integration.Dependencies, []string{"mvn:com.my/company"})
+	integration.AddDependency("mvn:com.my:company")
+	assert.Equal(t, integration.Dependencies, []string{"mvn:com.my:company"})
 
 	integration = IntegrationSpec{}
 	integration.AddDependency("file:dep")

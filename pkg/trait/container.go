@@ -19,16 +19,19 @@ package trait
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/envvar"
+	"sort"
+
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
-	"sort"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 const (
@@ -160,7 +163,7 @@ func (t *containerTrait) configureDependencies(e *Environment) {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
 			for _, dependency := range capability.Dependencies {
-				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fmt.Sprintf("mvn:%s/%s", dependency.GroupID, dependency.ArtifactID))
+				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
 			}
 
 			// sort the dependencies to get always the same list if they don't change
@@ -398,9 +401,6 @@ func (t *containerTrait) configureHTTP(e *Environment) error {
 	default:
 		return fmt.Errorf("unsupported runtime: %s", e.CamelCatalog.Runtime.Provider)
 	}
-
-	return nil
-
 }
 
 func (t *containerTrait) configureCapabilities(e *Environment) error {
