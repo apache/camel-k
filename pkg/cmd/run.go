@@ -69,6 +69,9 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 		PreRunE:  options.decode,
 		RunE:     options.run,
 		PostRunE: options.postRun,
+		Annotations: map[string]string{
+			versionCompatibilityWarningCommandLabel: "true",
+		},
 	}
 
 	cmd.Flags().String("name", "", "The integration name")
