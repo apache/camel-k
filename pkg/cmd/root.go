@@ -160,6 +160,7 @@ func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
 	if helpCmd == nil {
 		return errors.New("could not find any configured help command")
 	}
+	helpCmd.Annotations = map[string]string{offlineCommandLabel: "true"}
 
 	helpCmd.AddCommand(cmdOnly(newTraitHelpCmd(options)))
 
