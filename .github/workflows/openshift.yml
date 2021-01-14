@@ -150,7 +150,7 @@ jobs:
         cp ./kamel ./build/_output/bin/
 
         echo "Building the images"
-        export IMAGE=docker.io/apache/camel-k:$(make version)
+        export IMAGE=docker.io/apache/camel-k:$(make get-version)
         docker build -t "${IMAGE}" -f build/Dockerfile .
 
         # Make the Apache Snapshots or Apache Staging repository enabled by default
