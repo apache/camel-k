@@ -43,7 +43,8 @@ import (
 )
 
 const (
-	offlineCommandLabel = "camel.apache.org/cmd.offline"
+	offlineCommandLabel                     = "camel.apache.org/cmd.offline"
+	versionCompatibilityWarningCommandLabel = "camel.apache.org/cmd.versionCompatibilityWarning"
 )
 
 // DeleteIntegration --
@@ -199,6 +200,10 @@ func cmdOnly(cmd *cobra.Command, options interface{}) *cobra.Command {
 
 func isOfflineCommand(cmd *cobra.Command) bool {
 	return cmd.Annotations[offlineCommandLabel] == "true"
+}
+
+func showCompatibilityWarning(cmd *cobra.Command) bool {
+	return cmd.Annotations[versionCompatibilityWarningCommandLabel] == "true"
 }
 
 func clone(dst interface{}, src interface{}) error {

@@ -45,6 +45,9 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreate
 		Args:    options.validateArgs,
 		PreRunE: decode(&options),
 		RunE:    options.run,
+		Annotations: map[string]string{
+			versionCompatibilityWarningCommandLabel: "true",
+		},
 	}
 
 	cmd.Flags().String("image", "", "Image used to create the kit")
