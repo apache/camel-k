@@ -127,7 +127,7 @@ func kamelPostAddCommandInit(cmd *cobra.Command) error {
 
 func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(newCmdCompletion(cmd))
-	cmd.AddCommand(newCmdVersion())
+	cmd.AddCommand(cmdOnly(newCmdVersion(options)))
 	cmd.AddCommand(cmdOnly(newCmdRun(options)))
 	cmd.AddCommand(cmdOnly(newCmdGet(options)))
 	cmd.AddCommand(cmdOnly(newCmdDelete(options)))
