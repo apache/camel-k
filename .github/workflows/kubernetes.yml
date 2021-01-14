@@ -83,7 +83,7 @@ jobs:
         mkdir -p ./build/_output/bin
         cp ./kamel ./build/_output/bin/
         echo "Building the images"
-        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
+        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
         docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
         docker push ${LOCAL_IMAGE}
 
@@ -105,11 +105,11 @@ jobs:
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
         export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
         export KAMEL_INSTALL_REGISTRY_INSECURE=true
-        export KAMEL_INSTALL_OPERATOR_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make version)
+        export KAMEL_INSTALL_OPERATOR_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
 
         # Configure test options
         export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
-        export CAMEL_K_TEST_IMAGE_VERSION=$(make version)
+        export CAMEL_K_TEST_IMAGE_VERSION=$(make get-version)
 
         # Then run integration tests
         make test-integration

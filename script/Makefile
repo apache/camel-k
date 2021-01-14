@@ -196,9 +196,6 @@ clean:
 	rm -rf camel-k-client-*.tar.gz
 	rm -rf camel-k-examples-*.tar.gz
 
-version:
-	@echo $(VERSION)
-
 dep:
 	go mod tidy
 
@@ -238,6 +235,9 @@ images-push:
 images-push-staging:
 	docker tag $(IMAGE_NAME):$(VERSION) $(STAGING_IMAGE_NAME):$(VERSION)
 	docker push $(STAGING_IMAGE_NAME):$(VERSION)
+
+get-version:
+	@echo $(VERSION)
 
 set-version:
 	./script/set_version.sh $(VERSION) $(IMAGE_NAME)
@@ -281,9 +281,6 @@ release-notes:
 
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
-
-get-version:
-	@echo $(VERSION)
 
 .PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-strimzi
 
