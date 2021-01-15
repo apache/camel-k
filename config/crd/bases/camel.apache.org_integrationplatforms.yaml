@@ -203,6 +203,7 @@ spec:
                     configuration:
                       description: TraitConfiguration --
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                   required:
                   - configuration
                   type: object
@@ -385,6 +386,7 @@ spec:
                     configuration:
                       description: TraitConfiguration --
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                   required:
                   - configuration
                   type: object

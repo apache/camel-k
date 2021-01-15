@@ -66,6 +66,7 @@ type TraitConfiguration struct {
 // be used to delay JSON decoding or precompute a JSON encoding.
 // +kubebuilder:validation:Type=object
 // +kubebuilder:validation:Format=""
+// +kubebuilder:pruning:PreserveUnknownFields
 type RawMessage []byte
 
 // +kubebuilder:object:generate=false

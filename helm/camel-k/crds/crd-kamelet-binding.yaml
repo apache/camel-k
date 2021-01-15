@@ -89,6 +89,7 @@ spec:
                       description: Flow is an unstructured object representing a Camel
                         Flow in YAML/JSON DSL
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     type: array
                   kit:
                     type: string
@@ -172,6 +173,7 @@ spec:
                         configuration:
                           description: TraitConfiguration --
                           type: object
+                          x-kubernetes-preserve-unknown-fields: true
                       required:
                       - configuration
                       type: object
@@ -185,6 +187,7 @@ spec:
                     description: Properties are a key value representation of endpoint
                       properties
                     type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   ref:
                     description: Ref can be used to declare a Kubernetes resource
                       as source/sink endpoint
@@ -489,6 +492,7 @@ spec:
                     description: Properties are a key value representation of endpoint
                       properties
                     type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   ref:
                     description: Ref can be used to declare a Kubernetes resource
                       as source/sink endpoint
