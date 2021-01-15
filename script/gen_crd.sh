@@ -23,7 +23,7 @@ apidir=$location/../pkg/apis/camel
 echo "Generating CRDs..."
 
 cd $apidir
-$CONTROLLER_GEN crd paths=./... output:crd:artifacts:config=false output:crd:dir=../../../deploy/crds crd:crdVersions=v1beta1
+$CONTROLLER_GEN crd paths=./... output:crd:artifacts:config=false output:crd:dir=../../../deploy/crds crd:crdVersions=v1
 
 # cleanup
 rm -r ./config

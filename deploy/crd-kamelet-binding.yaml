@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
@@ -25,11 +25,6 @@ metadata:
   creationTimestamp: null
   name: kameletbindings.camel.apache.org
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .status.phase
-    description: The Kamelet Binding phase
-    name: Phase
-    type: string
   group: camel.apache.org
   names:
     categories:
@@ -42,777 +37,787 @@ spec:
     - klb
     singular: kameletbinding
   scope: Namespaced
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      description: KameletBinding is the Schema for the kamelets binding API
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          description: KameletBindingSpec --
-          properties:
-            integration:
-              description: Integration is an optional integration used to specify
-                custom parameters
-              properties:
-                configuration:
-                  items:
-                    description: ConfigurationSpec --
-                    properties:
-                      type:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - type
-                    - value
-                    type: object
-                  type: array
-                dependencies:
-                  items:
-                    type: string
-                  type: array
-                flows:
-                  items:
-                    description: Flow is an unstructured object representing a Camel
-                      Flow in YAML/JSON DSL
-                    type: object
-                  type: array
-                kit:
-                  type: string
-                profile:
-                  description: TraitProfile represents lists of traits that are enabled
-                    for the specific installation/integration
-                  type: string
-                replicas:
-                  format: int32
-                  type: integer
-                repositories:
-                  items:
-                    type: string
-                  type: array
-                resources:
-                  items:
-                    description: ResourceSpec --
-                    properties:
-                      compression:
-                        type: boolean
-                      content:
-                        type: string
-                      contentKey:
-                        type: string
-                      contentRef:
-                        type: string
-                      mountPath:
-                        type: string
-                      name:
-                        type: string
-                      type:
-                        description: ResourceType --
-                        type: string
-                    type: object
-                  type: array
-                serviceAccountName:
-                  type: string
-                sources:
-                  items:
-                    description: SourceSpec --
-                    properties:
-                      compression:
-                        type: boolean
-                      content:
-                        type: string
-                      contentKey:
-                        type: string
-                      contentRef:
-                        type: string
-                      interceptors:
-                        description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                          uses to pre/post process sources
-                        items:
-                          type: string
-                        type: array
-                      language:
-                        description: Language --
-                        type: string
-                      loader:
-                        description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                          that will interpret this source at runtime
-                        type: string
-                      name:
-                        type: string
-                      property-names:
-                        description: List of property names defined in the source
-                          (e.g. if type is "template")
-                        items:
-                          type: string
-                        type: array
-                      type:
-                        description: Type defines the kind of source described by
-                          this object
-                        type: string
-                    type: object
-                  type: array
-                traits:
-                  additionalProperties:
-                    description: A TraitSpec contains the configuration of a trait
-                    properties:
-                      configuration:
-                        description: TraitConfiguration --
-                        type: object
-                    required:
-                    - configuration
-                    type: object
-                  type: object
-              type: object
-            sink:
-              description: Sink is the destination of the integration defined by this
-                binding
-              properties:
-                properties:
-                  description: Properties are a key value representation of endpoint
-                    properties
-                  type: object
-                ref:
-                  description: Ref can be used to declare a Kubernetes resource as
-                    source/sink endpoint
-                  properties:
-                    apiVersion:
-                      description: API version of the referent.
-                      type: string
-                    fieldPath:
-                      description: 'If referring to a piece of an object instead of
-                        an entire object, this string should contain a valid JSON/Go
-                        field access statement, such as desiredState.manifest.containers[2].
-                        For example, if the object reference is to a container within
-                        a pod, this would take on a value like: "spec.containers{name}"
-                        (where "name" refers to the name of the container that triggered
-                        the event) or if no container name is specified "spec.containers[2]"
-                        (container with index 2 in this pod). This syntax is chosen
-                        only to have some well-defined way of referencing a part of
-                        an object. TODO: this design is not final and this field is
-                        subject to change in the future.'
-                      type: string
-                    kind:
-                      description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-                      type: string
-                    name:
-                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                      type: string
-                    namespace:
-                      description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
-                      type: string
-                    resourceVersion:
-                      description: 'Specific resourceVersion to which this reference
-                        is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
-                      type: string
-                    uid:
-                      description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
-                      type: string
-                  type: object
-                types:
-                  additionalProperties:
-                    properties:
-                      mediaType:
-                        type: string
-                      schema:
-                        description: JSONSchemaProps is a JSON-Schema definition.
-                        properties:
-                          $ref:
-                            type: string
-                          $schema:
-                            description: JSONSchemaURL represents a schema url.
-                            type: string
-                          additionalItems:
-                            type: boolean
-                          additionalProperties:
-                            type: boolean
-                          allOf:
-                            items: {}
-                            type: array
-                          anyOf:
-                            items: {}
-                            type: array
-                          default:
-                            description: default is a default value for undefined
-                              object fields. Defaulting is a beta feature under the
-                              CustomResourceDefaulting feature gate. Defaulting requires
-                              spec.preserveUnknownFields to be false.
-                            format: byte
-                            type: string
-                          definitions:
-                            additionalProperties: {}
-                            description: JSONSchemaDefinitions contains the models
-                              explicitly defined in this spec.
-                            type: object
-                          dependencies:
-                            additionalProperties:
-                              items:
-                                type: string
-                              type: array
-                            description: JSONSchemaDependencies represent a dependencies
-                              property.
-                            type: object
-                          description:
-                            type: string
-                          enum:
-                            items:
-                              description: 'JSON represents any valid JSON value.
-                                These types are supported: bool, int64, float64, string,
-                                []interface{}, map[string]interface{} and nil.'
-                              format: byte
-                              type: string
-                            type: array
-                          example:
-                            description: 'JSON represents any valid JSON value. These
-                              types are supported: bool, int64, float64, string, []interface{},
-                              map[string]interface{} and nil.'
-                            format: byte
-                            type: string
-                          exclusiveMaximum:
-                            type: boolean
-                          exclusiveMinimum:
-                            type: boolean
-                          externalDocs:
-                            description: ExternalDocumentation allows referencing
-                              an external resource for extended documentation.
-                            properties:
-                              description:
-                                type: string
-                              url:
-                                type: string
-                            type: object
-                          format:
-                            description: "format is an OpenAPI v3 format string. Unknown
-                              formats are ignored. The following formats are validated:
-                              \n - bsonobjectid: a bson object ID, i.e. a 24 characters
-                              hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                              - email: an email address as parsed by Golang net/mail.ParseAddress
-                              - hostname: a valid representation for an Internet host
-                              name, as defined by RFC 1034, section 3.1 [RFC1034].
-                              - ipv4: an IPv4 IP as parsed by Golang net.ParseIP -
-                              ipv6: an IPv6 IP as parsed by Golang net.ParseIP - cidr:
-                              a CIDR as parsed by Golang net.ParseCIDR - mac: a MAC
-                              address as parsed by Golang net.ParseMAC - uuid: an
-                              UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                              - uuid3: an UUID3 that allows uppercase defined by the
-                              regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                              - uuid4: an UUID4 that allows uppercase defined by the
-                              regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                              - uuid5: an UUID5 that allows uppercase defined by the
-                              regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                              - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
-                              or \"978-0321751041\" - isbn10: an ISBN10 number string
-                              like \"0321751043\" - isbn13: an ISBN13 number string
-                              like \"978-0321751041\" - creditcard: a credit card
-                              number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
-                              with any non digit characters mixed in - ssn: a U.S.
-                              social security number following the regex ^\\\\d{3}[-
-                              ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal
-                              color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                              - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\"
-                              - byte: base64 encoded binary data - password: any kind
-                              of string - date: a date string like \"2006-01-02\"
-                              as defined by full-date in RFC3339 - duration: a duration
-                              string like \"22 ns\" as parsed by Golang time.ParseDuration
-                              or compatible with Scala duration format - datetime:
-                              a date time string like \"2014-12-15T19:30:20.000Z\"
-                              as defined by date-time in RFC3339."
-                            type: string
-                          id:
-                            type: string
-                          items: {}
-                          maxItems:
-                            format: int64
-                            type: integer
-                          maxLength:
-                            format: int64
-                            type: integer
-                          maxProperties:
-                            format: int64
-                            type: integer
-                          maximum:
-                            description: A Number represents a JSON number literal.
-                            type: string
-                          minItems:
-                            format: int64
-                            type: integer
-                          minLength:
-                            format: int64
-                            type: integer
-                          minProperties:
-                            format: int64
-                            type: integer
-                          minimum:
-                            description: A Number represents a JSON number literal.
-                            type: string
-                          multipleOf:
-                            description: A Number represents a JSON number literal.
-                            type: string
-                          not: {}
-                          nullable:
-                            type: boolean
-                          oneOf:
-                            items: {}
-                            type: array
-                          pattern:
-                            type: string
-                          patternProperties:
-                            additionalProperties: {}
-                            type: object
-                          properties:
-                            additionalProperties: {}
-                            type: object
-                          required:
-                            items:
-                              type: string
-                            type: array
-                          title:
-                            type: string
-                          type:
-                            type: string
-                          uniqueItems:
-                            type: boolean
-                          x-descriptors:
-                            description: x-descriptors annotates an object to define
-                              additional display options.
-                            items:
-                              type: string
-                            type: array
-                          x-kubernetes-embedded-resource:
-                            description: x-kubernetes-embedded-resource defines that
-                              the value is an embedded Kubernetes runtime.Object,
-                              with TypeMeta and ObjectMeta. The type must be object.
-                              It is allowed to further restrict the embedded object.
-                              kind, apiVersion and metadata are validated automatically.
-                              x-kubernetes-preserve-unknown-fields is allowed to be
-                              true, but does not have to be if the object is fully
-                              specified (up to kind, apiVersion, metadata).
-                            type: boolean
-                          x-kubernetes-int-or-string:
-                            description: "x-kubernetes-int-or-string specifies that
-                              this value is either an integer or a string. If this
-                              is true, an empty type is allowed and type as child
-                              of anyOf is permitted if following one of the following
-                              patterns: \n 1) anyOf:    - type: integer    - type:
-                              string 2) allOf:    - anyOf:      - type: integer      -
-                              type: string    - ... zero or more"
-                            type: boolean
-                          x-kubernetes-list-map-keys:
-                            description: "x-kubernetes-list-map-keys annotates an
-                              array with the x-kubernetes-list-type `map` by specifying
-                              the keys used as the index of the map. \n This tag MUST
-                              only be used on lists that have the \"x-kubernetes-list-type\"
-                              extension set to \"map\". Also, the values specified
-                              for this attribute must be a scalar typed field of the
-                              child structure (no nesting is supported). \n The properties
-                              specified must either be required or have a default
-                              value, to ensure those properties are present for all
-                              list items."
-                            items:
-                              type: string
-                            type: array
-                          x-kubernetes-list-type:
-                            description: "x-kubernetes-list-type annotates an array
-                              to further describe its topology. This extension must
-                              only be used on lists and may have 3 possible values:
-                              \n 1) `atomic`: the list is treated as a single entity,
-                              like a scalar.      Atomic lists will be entirely replaced
-                              when updated. This extension      may be used on any
-                              type of list (struct, scalar, ...). 2) `set`:      Sets
-                              are lists that must not have multiple items with the
-                              same value. Each      value must be a scalar, an object
-                              with x-kubernetes-map-type `atomic` or an      array
-                              with x-kubernetes-list-type `atomic`. 3) `map`:      These
-                              lists are like maps in that their elements have a non-index
-                              key      used to identify them. Order is preserved upon
-                              merge. The map tag      must only be used on a list
-                              with elements of type object. Defaults to atomic for
-                              arrays."
-                            type: string
-                          x-kubernetes-map-type:
-                            description: "x-kubernetes-map-type annotates an object
-                              to further describe its topology. This extension must
-                              only be used when type is object and may have 2 possible
-                              values: \n 1) `granular`:      These maps are actual
-                              maps (key-value pairs) and each fields are independent
-                              \     from each other (they can each be manipulated
-                              by separate actors). This is      the default behaviour
-                              for all maps. 2) `atomic`: the list is treated as a
-                              single entity, like a scalar.      Atomic maps will
-                              be entirely replaced when updated."
-                            type: string
-                          x-kubernetes-preserve-unknown-fields:
-                            description: x-kubernetes-preserve-unknown-fields stops
-                              the API server decoding step from pruning fields which
-                              are not specified in the validation schema. This affects
-                              fields recursively, but switches back to normal pruning
-                              behaviour if nested properties or additionalProperties
-                              are specified in the schema. This can either be true
-                              or undefined. False is forbidden.
-                            type: boolean
-                        type: object
-                    type: object
-                  description: Types defines the schema of the data produced/consumed
-                    by the endpoint
-                  type: object
-                uri:
-                  description: URI can alternatively be used to specify the (Camel)
-                    endpoint explicitly
-                  type: string
-              type: object
-            source:
-              description: Source is the starting point of the integration defined
-                by this binding
-              properties:
-                properties:
-                  description: Properties are a key value representation of endpoint
-                    properties
-                  type: object
-                ref:
-                  description: Ref can be used to declare a Kubernetes resource as
-                    source/sink endpoint
-                  properties:
-                    apiVersion:
-                      description: API version of the referent.
-                      type: string
-                    fieldPath:
-                      description: 'If referring to a piece of an object instead of
-                        an entire object, this string should contain a valid JSON/Go
-                        field access statement, such as desiredState.manifest.containers[2].
-                        For example, if the object reference is to a container within
-                        a pod, this would take on a value like: "spec.containers{name}"
-                        (where "name" refers to the name of the container that triggered
-                        the event) or if no container name is specified "spec.containers[2]"
-                        (container with index 2 in this pod). This syntax is chosen
-                        only to have some well-defined way of referencing a part of
-                        an object. TODO: this design is not final and this field is
-                        subject to change in the future.'
-                      type: string
-                    kind:
-                      description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-                      type: string
-                    name:
-                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                      type: string
-                    namespace:
-                      description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
-                      type: string
-                    resourceVersion:
-                      description: 'Specific resourceVersion to which this reference
-                        is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
-                      type: string
-                    uid:
-                      description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
-                      type: string
-                  type: object
-                types:
-                  additionalProperties:
-                    properties:
-                      mediaType:
-                        type: string
-                      schema:
-                        description: JSONSchemaProps is a JSON-Schema definition.
-                        properties:
-                          $ref:
-                            type: string
-                          $schema:
-                            description: JSONSchemaURL represents a schema url.
-                            type: string
-                          additionalItems:
-                            type: boolean
-                          additionalProperties:
-                            type: boolean
-                          allOf:
-                            items: {}
-                            type: array
-                          anyOf:
-                            items: {}
-                            type: array
-                          default:
-                            description: default is a default value for undefined
-                              object fields. Defaulting is a beta feature under the
-                              CustomResourceDefaulting feature gate. Defaulting requires
-                              spec.preserveUnknownFields to be false.
-                            format: byte
-                            type: string
-                          definitions:
-                            additionalProperties: {}
-                            description: JSONSchemaDefinitions contains the models
-                              explicitly defined in this spec.
-                            type: object
-                          dependencies:
-                            additionalProperties:
-                              items:
-                                type: string
-                              type: array
-                            description: JSONSchemaDependencies represent a dependencies
-                              property.
-                            type: object
-                          description:
-                            type: string
-                          enum:
-                            items:
-                              description: 'JSON represents any valid JSON value.
-                                These types are supported: bool, int64, float64, string,
-                                []interface{}, map[string]interface{} and nil.'
-                              format: byte
-                              type: string
-                            type: array
-                          example:
-                            description: 'JSON represents any valid JSON value. These
-                              types are supported: bool, int64, float64, string, []interface{},
-                              map[string]interface{} and nil.'
-                            format: byte
-                            type: string
-                          exclusiveMaximum:
-                            type: boolean
-                          exclusiveMinimum:
-                            type: boolean
-                          externalDocs:
-                            description: ExternalDocumentation allows referencing
-                              an external resource for extended documentation.
-                            properties:
-                              description:
-                                type: string
-                              url:
-                                type: string
-                            type: object
-                          format:
-                            description: "format is an OpenAPI v3 format string. Unknown
-                              formats are ignored. The following formats are validated:
-                              \n - bsonobjectid: a bson object ID, i.e. a 24 characters
-                              hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                              - email: an email address as parsed by Golang net/mail.ParseAddress
-                              - hostname: a valid representation for an Internet host
-                              name, as defined by RFC 1034, section 3.1 [RFC1034].
-                              - ipv4: an IPv4 IP as parsed by Golang net.ParseIP -
-                              ipv6: an IPv6 IP as parsed by Golang net.ParseIP - cidr:
-                              a CIDR as parsed by Golang net.ParseCIDR - mac: a MAC
-                              address as parsed by Golang net.ParseMAC - uuid: an
-                              UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                              - uuid3: an UUID3 that allows uppercase defined by the
-                              regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                              - uuid4: an UUID4 that allows uppercase defined by the
-                              regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                              - uuid5: an UUID5 that allows uppercase defined by the
-                              regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                              - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
-                              or \"978-0321751041\" - isbn10: an ISBN10 number string
-                              like \"0321751043\" - isbn13: an ISBN13 number string
-                              like \"978-0321751041\" - creditcard: a credit card
-                              number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
-                              with any non digit characters mixed in - ssn: a U.S.
-                              social security number following the regex ^\\\\d{3}[-
-                              ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal
-                              color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                              - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\"
-                              - byte: base64 encoded binary data - password: any kind
-                              of string - date: a date string like \"2006-01-02\"
-                              as defined by full-date in RFC3339 - duration: a duration
-                              string like \"22 ns\" as parsed by Golang time.ParseDuration
-                              or compatible with Scala duration format - datetime:
-                              a date time string like \"2014-12-15T19:30:20.000Z\"
-                              as defined by date-time in RFC3339."
-                            type: string
-                          id:
-                            type: string
-                          items: {}
-                          maxItems:
-                            format: int64
-                            type: integer
-                          maxLength:
-                            format: int64
-                            type: integer
-                          maxProperties:
-                            format: int64
-                            type: integer
-                          maximum:
-                            description: A Number represents a JSON number literal.
-                            type: string
-                          minItems:
-                            format: int64
-                            type: integer
-                          minLength:
-                            format: int64
-                            type: integer
-                          minProperties:
-                            format: int64
-                            type: integer
-                          minimum:
-                            description: A Number represents a JSON number literal.
-                            type: string
-                          multipleOf:
-                            description: A Number represents a JSON number literal.
-                            type: string
-                          not: {}
-                          nullable:
-                            type: boolean
-                          oneOf:
-                            items: {}
-                            type: array
-                          pattern:
-                            type: string
-                          patternProperties:
-                            additionalProperties: {}
-                            type: object
-                          properties:
-                            additionalProperties: {}
-                            type: object
-                          required:
-                            items:
-                              type: string
-                            type: array
-                          title:
-                            type: string
-                          type:
-                            type: string
-                          uniqueItems:
-                            type: boolean
-                          x-descriptors:
-                            description: x-descriptors annotates an object to define
-                              additional display options.
-                            items:
-                              type: string
-                            type: array
-                          x-kubernetes-embedded-resource:
-                            description: x-kubernetes-embedded-resource defines that
-                              the value is an embedded Kubernetes runtime.Object,
-                              with TypeMeta and ObjectMeta. The type must be object.
-                              It is allowed to further restrict the embedded object.
-                              kind, apiVersion and metadata are validated automatically.
-                              x-kubernetes-preserve-unknown-fields is allowed to be
-                              true, but does not have to be if the object is fully
-                              specified (up to kind, apiVersion, metadata).
-                            type: boolean
-                          x-kubernetes-int-or-string:
-                            description: "x-kubernetes-int-or-string specifies that
-                              this value is either an integer or a string. If this
-                              is true, an empty type is allowed and type as child
-                              of anyOf is permitted if following one of the following
-                              patterns: \n 1) anyOf:    - type: integer    - type:
-                              string 2) allOf:    - anyOf:      - type: integer      -
-                              type: string    - ... zero or more"
-                            type: boolean
-                          x-kubernetes-list-map-keys:
-                            description: "x-kubernetes-list-map-keys annotates an
-                              array with the x-kubernetes-list-type `map` by specifying
-                              the keys used as the index of the map. \n This tag MUST
-                              only be used on lists that have the \"x-kubernetes-list-type\"
-                              extension set to \"map\". Also, the values specified
-                              for this attribute must be a scalar typed field of the
-                              child structure (no nesting is supported). \n The properties
-                              specified must either be required or have a default
-                              value, to ensure those properties are present for all
-                              list items."
-                            items:
-                              type: string
-                            type: array
-                          x-kubernetes-list-type:
-                            description: "x-kubernetes-list-type annotates an array
-                              to further describe its topology. This extension must
-                              only be used on lists and may have 3 possible values:
-                              \n 1) `atomic`: the list is treated as a single entity,
-                              like a scalar.      Atomic lists will be entirely replaced
-                              when updated. This extension      may be used on any
-                              type of list (struct, scalar, ...). 2) `set`:      Sets
-                              are lists that must not have multiple items with the
-                              same value. Each      value must be a scalar, an object
-                              with x-kubernetes-map-type `atomic` or an      array
-                              with x-kubernetes-list-type `atomic`. 3) `map`:      These
-                              lists are like maps in that their elements have a non-index
-                              key      used to identify them. Order is preserved upon
-                              merge. The map tag      must only be used on a list
-                              with elements of type object. Defaults to atomic for
-                              arrays."
-                            type: string
-                          x-kubernetes-map-type:
-                            description: "x-kubernetes-map-type annotates an object
-                              to further describe its topology. This extension must
-                              only be used when type is object and may have 2 possible
-                              values: \n 1) `granular`:      These maps are actual
-                              maps (key-value pairs) and each fields are independent
-                              \     from each other (they can each be manipulated
-                              by separate actors). This is      the default behaviour
-                              for all maps. 2) `atomic`: the list is treated as a
-                              single entity, like a scalar.      Atomic maps will
-                              be entirely replaced when updated."
-                            type: string
-                          x-kubernetes-preserve-unknown-fields:
-                            description: x-kubernetes-preserve-unknown-fields stops
-                              the API server decoding step from pruning fields which
-                              are not specified in the validation schema. This affects
-                              fields recursively, but switches back to normal pruning
-                              behaviour if nested properties or additionalProperties
-                              are specified in the schema. This can either be true
-                              or undefined. False is forbidden.
-                            type: boolean
-                        type: object
-                    type: object
-                  description: Types defines the schema of the data produced/consumed
-                    by the endpoint
-                  type: object
-                uri:
-                  description: URI can alternatively be used to specify the (Camel)
-                    endpoint explicitly
-                  type: string
-              type: object
-          type: object
-        status:
-          description: KameletBindingStatus --
-          properties:
-            conditions:
-              description: Conditions --
-              items:
-                description: KameletBindingCondition describes the state of a resource
-                  at a certain point.
-                properties:
-                  lastTransitionTime:
-                    description: Last time the condition transitioned from one status
-                      to another.
-                    format: date-time
-                    type: string
-                  lastUpdateTime:
-                    description: The last time this condition was updated.
-                    format: date-time
-                    type: string
-                  message:
-                    description: A human readable message indicating details about
-                      the transition.
-                    type: string
-                  reason:
-                    description: The reason for the condition's last transition.
-                    type: string
-                  status:
-                    description: Status of the condition, one of True, False, Unknown.
-                    type: string
-                  type:
-                    description: Type of kameletBinding condition.
-                    type: string
-                required:
-                - status
-                - type
-                type: object
-              type: array
-            phase:
-              description: Phase --
-              type: string
-          type: object
-      type: object
-  version: v1alpha1
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: The Kamelet Binding phase
+      jsonPath: .status.phase
+      name: Phase
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: KameletBinding is the Schema for the kamelets binding API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: KameletBindingSpec --
+            properties:
+              integration:
+                description: Integration is an optional integration used to specify
+                  custom parameters
+                properties:
+                  configuration:
+                    items:
+                      description: ConfigurationSpec --
+                      properties:
+                        type:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - type
+                      - value
+                      type: object
+                    type: array
+                  dependencies:
+                    items:
+                      type: string
+                    type: array
+                  flows:
+                    items:
+                      description: Flow is an unstructured object representing a Camel
+                        Flow in YAML/JSON DSL
+                      type: object
+                    type: array
+                  kit:
+                    type: string
+                  profile:
+                    description: TraitProfile represents lists of traits that are
+                      enabled for the specific installation/integration
+                    type: string
+                  replicas:
+                    format: int32
+                    type: integer
+                  repositories:
+                    items:
+                      type: string
+                    type: array
+                  resources:
+                    items:
+                      description: ResourceSpec --
+                      properties:
+                        compression:
+                          type: boolean
+                        content:
+                          type: string
+                        contentKey:
+                          type: string
+                        contentRef:
+                          type: string
+                        mountPath:
+                          type: string
+                        name:
+                          type: string
+                        type:
+                          description: ResourceType --
+                          type: string
+                      type: object
+                    type: array
+                  serviceAccountName:
+                    type: string
+                  sources:
+                    items:
+                      description: SourceSpec --
+                      properties:
+                        compression:
+                          type: boolean
+                        content:
+                          type: string
+                        contentKey:
+                          type: string
+                        contentRef:
+                          type: string
+                        interceptors:
+                          description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+                            uses to pre/post process sources
+                          items:
+                            type: string
+                          type: array
+                        language:
+                          description: Language --
+                          type: string
+                        loader:
+                          description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                            that will interpret this source at runtime
+                          type: string
+                        name:
+                          type: string
+                        property-names:
+                          description: List of property names defined in the source
+                            (e.g. if type is "template")
+                          items:
+                            type: string
+                          type: array
+                        type:
+                          description: Type defines the kind of source described by
+                            this object
+                          type: string
+                      type: object
+                    type: array
+                  traits:
+                    additionalProperties:
+                      description: A TraitSpec contains the configuration of a trait
+                      properties:
+                        configuration:
+                          description: TraitConfiguration --
+                          type: object
+                      required:
+                      - configuration
+                      type: object
+                    type: object
+                type: object
+              sink:
+                description: Sink is the destination of the integration defined by
+                  this binding
+                properties:
+                  properties:
+                    description: Properties are a key value representation of endpoint
+                      properties
+                    type: object
+                  ref:
+                    description: Ref can be used to declare a Kubernetes resource
+                      as source/sink endpoint
+                    properties:
+                      apiVersion:
+                        description: API version of the referent.
+                        type: string
+                      fieldPath:
+                        description: 'If referring to a piece of an object instead
+                          of an entire object, this string should contain a valid
+                          JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                          For example, if the object reference is to a container within
+                          a pod, this would take on a value like: "spec.containers{name}"
+                          (where "name" refers to the name of the container that triggered
+                          the event) or if no container name is specified "spec.containers[2]"
+                          (container with index 2 in this pod). This syntax is chosen
+                          only to have some well-defined way of referencing a part
+                          of an object. TODO: this design is not final and this field
+                          is subject to change in the future.'
+                        type: string
+                      kind:
+                        description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                        type: string
+                      name:
+                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                        type: string
+                      namespace:
+                        description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                        type: string
+                      resourceVersion:
+                        description: 'Specific resourceVersion to which this reference
+                          is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                        type: string
+                      uid:
+                        description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
+                        type: string
+                    type: object
+                  types:
+                    additionalProperties:
+                      properties:
+                        mediaType:
+                          type: string
+                        schema:
+                          description: JSONSchemaProps is a JSON-Schema definition.
+                          properties:
+                            $ref:
+                              type: string
+                            $schema:
+                              description: JSONSchemaURL represents a schema url.
+                              type: string
+                            additionalItems:
+                              type: boolean
+                            additionalProperties:
+                              type: boolean
+                            allOf:
+                              items: {}
+                              type: array
+                            anyOf:
+                              items: {}
+                              type: array
+                            default:
+                              description: default is a default value for undefined
+                                object fields. Defaulting is a beta feature under
+                                the CustomResourceDefaulting feature gate. Defaulting
+                                requires spec.preserveUnknownFields to be false.
+                              format: byte
+                              type: string
+                            definitions:
+                              additionalProperties: {}
+                              description: JSONSchemaDefinitions contains the models
+                                explicitly defined in this spec.
+                              type: object
+                            dependencies:
+                              additionalProperties:
+                                items:
+                                  type: string
+                                type: array
+                              description: JSONSchemaDependencies represent a dependencies
+                                property.
+                              type: object
+                            description:
+                              type: string
+                            enum:
+                              items:
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
+                                format: byte
+                                type: string
+                              type: array
+                            example:
+                              description: 'JSON represents any valid JSON value.
+                                These types are supported: bool, int64, float64, string,
+                                []interface{}, map[string]interface{} and nil.'
+                              format: byte
+                              type: string
+                            exclusiveMaximum:
+                              type: boolean
+                            exclusiveMinimum:
+                              type: boolean
+                            externalDocs:
+                              description: ExternalDocumentation allows referencing
+                                an external resource for extended documentation.
+                              properties:
+                                description:
+                                  type: string
+                                url:
+                                  type: string
+                              type: object
+                            format:
+                              description: "format is an OpenAPI v3 format string.
+                                Unknown formats are ignored. The following formats
+                                are validated: \n - bsonobjectid: a bson object ID,
+                                i.e. a 24 characters hex string - uri: an URI as parsed
+                                by Golang net/url.ParseRequestURI - email: an email
+                                address as parsed by Golang net/mail.ParseAddress
+                                - hostname: a valid representation for an Internet
+                                host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
+                                - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
+                                - cidr: a CIDR as parsed by Golang net.ParseCIDR -
+                                mac: a MAC address as parsed by Golang net.ParseMAC
+                                - uuid: an UUID that allows uppercase defined by the
+                                regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                - uuid3: an UUID3 that allows uppercase defined by
+                                the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                - uuid4: an UUID4 that allows uppercase defined by
+                                the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                - uuid5: an UUID5 that allows uppercase defined by
+                                the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
+                                or \"978-0321751041\" - isbn10: an ISBN10 number string
+                                like \"0321751043\" - isbn13: an ISBN13 number string
+                                like \"978-0321751041\" - creditcard: a credit card
+                                number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                with any non digit characters mixed in - ssn: a U.S.
+                                social security number following the regex ^\\\\d{3}[-
+                                ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal
+                                color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                                - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\"
+                                - byte: base64 encoded binary data - password: any
+                                kind of string - date: a date string like \"2006-01-02\"
+                                as defined by full-date in RFC3339 - duration: a duration
+                                string like \"22 ns\" as parsed by Golang time.ParseDuration
+                                or compatible with Scala duration format - datetime:
+                                a date time string like \"2014-12-15T19:30:20.000Z\"
+                                as defined by date-time in RFC3339."
+                              type: string
+                            id:
+                              type: string
+                            items: {}
+                            maxItems:
+                              format: int64
+                              type: integer
+                            maxLength:
+                              format: int64
+                              type: integer
+                            maxProperties:
+                              format: int64
+                              type: integer
+                            maximum:
+                              description: A Number represents a JSON number literal.
+                              type: string
+                            minItems:
+                              format: int64
+                              type: integer
+                            minLength:
+                              format: int64
+                              type: integer
+                            minProperties:
+                              format: int64
+                              type: integer
+                            minimum:
+                              description: A Number represents a JSON number literal.
+                              type: string
+                            multipleOf:
+                              description: A Number represents a JSON number literal.
+                              type: string
+                            not: {}
+                            nullable:
+                              type: boolean
+                            oneOf:
+                              items: {}
+                              type: array
+                            pattern:
+                              type: string
+                            patternProperties:
+                              additionalProperties: {}
+                              type: object
+                            properties:
+                              additionalProperties: {}
+                              type: object
+                            required:
+                              items:
+                                type: string
+                              type: array
+                            title:
+                              type: string
+                            type:
+                              type: string
+                            uniqueItems:
+                              type: boolean
+                            x-descriptors:
+                              description: x-descriptors annotates an object to define
+                                additional display options.
+                              items:
+                                type: string
+                              type: array
+                            x-kubernetes-embedded-resource:
+                              description: x-kubernetes-embedded-resource defines
+                                that the value is an embedded Kubernetes runtime.Object,
+                                with TypeMeta and ObjectMeta. The type must be object.
+                                It is allowed to further restrict the embedded object.
+                                kind, apiVersion and metadata are validated automatically.
+                                x-kubernetes-preserve-unknown-fields is allowed to
+                                be true, but does not have to be if the object is
+                                fully specified (up to kind, apiVersion, metadata).
+                              type: boolean
+                            x-kubernetes-int-or-string:
+                              description: "x-kubernetes-int-or-string specifies that
+                                this value is either an integer or a string. If this
+                                is true, an empty type is allowed and type as child
+                                of anyOf is permitted if following one of the following
+                                patterns: \n 1) anyOf:    - type: integer    - type:
+                                string 2) allOf:    - anyOf:      - type: integer
+                                \     - type: string    - ... zero or more"
+                              type: boolean
+                            x-kubernetes-list-map-keys:
+                              description: "x-kubernetes-list-map-keys annotates an
+                                array with the x-kubernetes-list-type `map` by specifying
+                                the keys used as the index of the map. \n This tag
+                                MUST only be used on lists that have the \"x-kubernetes-list-type\"
+                                extension set to \"map\". Also, the values specified
+                                for this attribute must be a scalar typed field of
+                                the child structure (no nesting is supported). \n
+                                The properties specified must either be required or
+                                have a default value, to ensure those properties are
+                                present for all list items."
+                              items:
+                                type: string
+                              type: array
+                            x-kubernetes-list-type:
+                              description: "x-kubernetes-list-type annotates an array
+                                to further describe its topology. This extension must
+                                only be used on lists and may have 3 possible values:
+                                \n 1) `atomic`: the list is treated as a single entity,
+                                like a scalar.      Atomic lists will be entirely
+                                replaced when updated. This extension      may be
+                                used on any type of list (struct, scalar, ...). 2)
+                                `set`:      Sets are lists that must not have multiple
+                                items with the same value. Each      value must be
+                                a scalar, an object with x-kubernetes-map-type `atomic`
+                                or an      array with x-kubernetes-list-type `atomic`.
+                                3) `map`:      These lists are like maps in that their
+                                elements have a non-index key      used to identify
+                                them. Order is preserved upon merge. The map tag      must
+                                only be used on a list with elements of type object.
+                                Defaults to atomic for arrays."
+                              type: string
+                            x-kubernetes-map-type:
+                              description: "x-kubernetes-map-type annotates an object
+                                to further describe its topology. This extension must
+                                only be used when type is object and may have 2 possible
+                                values: \n 1) `granular`:      These maps are actual
+                                maps (key-value pairs) and each fields are independent
+                                \     from each other (they can each be manipulated
+                                by separate actors). This is      the default behaviour
+                                for all maps. 2) `atomic`: the list is treated as
+                                a single entity, like a scalar.      Atomic maps will
+                                be entirely replaced when updated."
+                              type: string
+                            x-kubernetes-preserve-unknown-fields:
+                              description: x-kubernetes-preserve-unknown-fields stops
+                                the API server decoding step from pruning fields which
+                                are not specified in the validation schema. This affects
+                                fields recursively, but switches back to normal pruning
+                                behaviour if nested properties or additionalProperties
+                                are specified in the schema. This can either be true
+                                or undefined. False is forbidden.
+                              type: boolean
+                          type: object
+                      type: object
+                    description: Types defines the schema of the data produced/consumed
+                      by the endpoint
+                    type: object
+                  uri:
+                    description: URI can alternatively be used to specify the (Camel)
+                      endpoint explicitly
+                    type: string
+                type: object
+              source:
+                description: Source is the starting point of the integration defined
+                  by this binding
+                properties:
+                  properties:
+                    description: Properties are a key value representation of endpoint
+                      properties
+                    type: object
+                  ref:
+                    description: Ref can be used to declare a Kubernetes resource
+                      as source/sink endpoint
+                    properties:
+                      apiVersion:
+                        description: API version of the referent.
+                        type: string
+                      fieldPath:
+                        description: 'If referring to a piece of an object instead
+                          of an entire object, this string should contain a valid
+                          JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                          For example, if the object reference is to a container within
+                          a pod, this would take on a value like: "spec.containers{name}"
+                          (where "name" refers to the name of the container that triggered
+                          the event) or if no container name is specified "spec.containers[2]"
+                          (container with index 2 in this pod). This syntax is chosen
+                          only to have some well-defined way of referencing a part
+                          of an object. TODO: this design is not final and this field
+                          is subject to change in the future.'
+                        type: string
+                      kind:
+                        description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                        type: string
+                      name:
+                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                        type: string
+                      namespace:
+                        description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                        type: string
+                      resourceVersion:
+                        description: 'Specific resourceVersion to which this reference
+                          is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                        type: string
+                      uid:
+                        description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
+                        type: string
+                    type: object
+                  types:
+                    additionalProperties:
+                      properties:
+                        mediaType:
+                          type: string
+                        schema:
+                          description: JSONSchemaProps is a JSON-Schema definition.
+                          properties:
+                            $ref:
+                              type: string
+                            $schema:
+                              description: JSONSchemaURL represents a schema url.
+                              type: string
+                            additionalItems:
+                              type: boolean
+                            additionalProperties:
+                              type: boolean
+                            allOf:
+                              items: {}
+                              type: array
+                            anyOf:
+                              items: {}
+                              type: array
+                            default:
+                              description: default is a default value for undefined
+                                object fields. Defaulting is a beta feature under
+                                the CustomResourceDefaulting feature gate. Defaulting
+                                requires spec.preserveUnknownFields to be false.
+                              format: byte
+                              type: string
+                            definitions:
+                              additionalProperties: {}
+                              description: JSONSchemaDefinitions contains the models
+                                explicitly defined in this spec.
+                              type: object
+                            dependencies:
+                              additionalProperties:
+                                items:
+                                  type: string
+                                type: array
+                              description: JSONSchemaDependencies represent a dependencies
+                                property.
+                              type: object
+                            description:
+                              type: string
+                            enum:
+                              items:
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
+                                format: byte
+                                type: string
+                              type: array
+                            example:
+                              description: 'JSON represents any valid JSON value.
+                                These types are supported: bool, int64, float64, string,
+                                []interface{}, map[string]interface{} and nil.'
+                              format: byte
+                              type: string
+                            exclusiveMaximum:
+                              type: boolean
+                            exclusiveMinimum:
+                              type: boolean
+                            externalDocs:
+                              description: ExternalDocumentation allows referencing
+                                an external resource for extended documentation.
+                              properties:
+                                description:
+                                  type: string
+                                url:
+                                  type: string
+                              type: object
+                            format:
+                              description: "format is an OpenAPI v3 format string.
+                                Unknown formats are ignored. The following formats
+                                are validated: \n - bsonobjectid: a bson object ID,
+                                i.e. a 24 characters hex string - uri: an URI as parsed
+                                by Golang net/url.ParseRequestURI - email: an email
+                                address as parsed by Golang net/mail.ParseAddress
+                                - hostname: a valid representation for an Internet
+                                host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
+                                - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
+                                - cidr: a CIDR as parsed by Golang net.ParseCIDR -
+                                mac: a MAC address as parsed by Golang net.ParseMAC
+                                - uuid: an UUID that allows uppercase defined by the
+                                regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                - uuid3: an UUID3 that allows uppercase defined by
+                                the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                - uuid4: an UUID4 that allows uppercase defined by
+                                the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                - uuid5: an UUID5 that allows uppercase defined by
+                                the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
+                                or \"978-0321751041\" - isbn10: an ISBN10 number string
+                                like \"0321751043\" - isbn13: an ISBN13 number string
+                                like \"978-0321751041\" - creditcard: a credit card
+                                number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                with any non digit characters mixed in - ssn: a U.S.
+                                social security number following the regex ^\\\\d{3}[-
+                                ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal
+                                color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                                - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\"
+                                - byte: base64 encoded binary data - password: any
+                                kind of string - date: a date string like \"2006-01-02\"
+                                as defined by full-date in RFC3339 - duration: a duration
+                                string like \"22 ns\" as parsed by Golang time.ParseDuration
+                                or compatible with Scala duration format - datetime:
+                                a date time string like \"2014-12-15T19:30:20.000Z\"
+                                as defined by date-time in RFC3339."
+                              type: string
+                            id:
+                              type: string
+                            items: {}
+                            maxItems:
+                              format: int64
+                              type: integer
+                            maxLength:
+                              format: int64
+                              type: integer
+                            maxProperties:
+                              format: int64
+                              type: integer
+                            maximum:
+                              description: A Number represents a JSON number literal.
+                              type: string
+                            minItems:
+                              format: int64
+                              type: integer
+                            minLength:
+                              format: int64
+                              type: integer
+                            minProperties:
+                              format: int64
+                              type: integer
+                            minimum:
+                              description: A Number represents a JSON number literal.
+                              type: string
+                            multipleOf:
+                              description: A Number represents a JSON number literal.
+                              type: string
+                            not: {}
+                            nullable:
+                              type: boolean
+                            oneOf:
+                              items: {}
+                              type: array
+                            pattern:
+                              type: string
+                            patternProperties:
+                              additionalProperties: {}
+                              type: object
+                            properties:
+                              additionalProperties: {}
+                              type: object
+                            required:
+                              items:
+                                type: string
+                              type: array
+                            title:
+                              type: string
+                            type:
+                              type: string
+                            uniqueItems:
+                              type: boolean
+                            x-descriptors:
+                              description: x-descriptors annotates an object to define
+                                additional display options.
+                              items:
+                                type: string
+                              type: array
+                            x-kubernetes-embedded-resource:
+                              description: x-kubernetes-embedded-resource defines
+                                that the value is an embedded Kubernetes runtime.Object,
+                                with TypeMeta and ObjectMeta. The type must be object.
+                                It is allowed to further restrict the embedded object.
+                                kind, apiVersion and metadata are validated automatically.
+                                x-kubernetes-preserve-unknown-fields is allowed to
+                                be true, but does not have to be if the object is
+                                fully specified (up to kind, apiVersion, metadata).
+                              type: boolean
+                            x-kubernetes-int-or-string:
+                              description: "x-kubernetes-int-or-string specifies that
+                                this value is either an integer or a string. If this
+                                is true, an empty type is allowed and type as child
+                                of anyOf is permitted if following one of the following
+                                patterns: \n 1) anyOf:    - type: integer    - type:
+                                string 2) allOf:    - anyOf:      - type: integer
+                                \     - type: string    - ... zero or more"
+                              type: boolean
+                            x-kubernetes-list-map-keys:
+                              description: "x-kubernetes-list-map-keys annotates an
+                                array with the x-kubernetes-list-type `map` by specifying
+                                the keys used as the index of the map. \n This tag
+                                MUST only be used on lists that have the \"x-kubernetes-list-type\"
+                                extension set to \"map\". Also, the values specified
+                                for this attribute must be a scalar typed field of
+                                the child structure (no nesting is supported). \n
+                                The properties specified must either be required or
+                                have a default value, to ensure those properties are
+                                present for all list items."
+                              items:
+                                type: string
+                              type: array
+                            x-kubernetes-list-type:
+                              description: "x-kubernetes-list-type annotates an array
+                                to further describe its topology. This extension must
+                                only be used on lists and may have 3 possible values:
+                                \n 1) `atomic`: the list is treated as a single entity,
+                                like a scalar.      Atomic lists will be entirely
+                                replaced when updated. This extension      may be
+                                used on any type of list (struct, scalar, ...). 2)
+                                `set`:      Sets are lists that must not have multiple
+                                items with the same value. Each      value must be
+                                a scalar, an object with x-kubernetes-map-type `atomic`
+                                or an      array with x-kubernetes-list-type `atomic`.
+                                3) `map`:      These lists are like maps in that their
+                                elements have a non-index key      used to identify
+                                them. Order is preserved upon merge. The map tag      must
+                                only be used on a list with elements of type object.
+                                Defaults to atomic for arrays."
+                              type: string
+                            x-kubernetes-map-type:
+                              description: "x-kubernetes-map-type annotates an object
+                                to further describe its topology. This extension must
+                                only be used when type is object and may have 2 possible
+                                values: \n 1) `granular`:      These maps are actual
+                                maps (key-value pairs) and each fields are independent
+                                \     from each other (they can each be manipulated
+                                by separate actors). This is      the default behaviour
+                                for all maps. 2) `atomic`: the list is treated as
+                                a single entity, like a scalar.      Atomic maps will
+                                be entirely replaced when updated."
+                              type: string
+                            x-kubernetes-preserve-unknown-fields:
+                              description: x-kubernetes-preserve-unknown-fields stops
+                                the API server decoding step from pruning fields which
+                                are not specified in the validation schema. This affects
+                                fields recursively, but switches back to normal pruning
+                                behaviour if nested properties or additionalProperties
+                                are specified in the schema. This can either be true
+                                or undefined. False is forbidden.
+                              type: boolean
+                          type: object
+                      type: object
+                    description: Types defines the schema of the data produced/consumed
+                      by the endpoint
+                    type: object
+                  uri:
+                    description: URI can alternatively be used to specify the (Camel)
+                      endpoint explicitly
+                    type: string
+                type: object
+            type: object
+          status:
+            description: KameletBindingStatus --
+            properties:
+              conditions:
+                description: Conditions --
+                items:
+                  description: KameletBindingCondition describes the state of a resource
+                    at a certain point.
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: The last time this condition was updated.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of kameletBinding condition.
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              phase:
+                description: Phase --
+                type: string
+            type: object
+        type: object
     served: true
     storage: true
+    subresources:
+      status: {}
