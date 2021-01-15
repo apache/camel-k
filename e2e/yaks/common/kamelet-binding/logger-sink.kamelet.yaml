@@ -19,7 +19,7 @@ apiVersion: camel.apache.org/v1alpha1
 kind: Kamelet
 metadata:
   name: logger-sink
-  label:
+  labels:
     camel.apache.org/kamelet.type: "sink"
 spec:
   definition:
