@@ -24,17 +24,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/apache/camel-k/deploy"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-
-	"k8s.io/apimachinery/pkg/util/yaml"
-
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/deploy"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // SetupClusterWideResourcesOrCollect --
@@ -45,38 +44,78 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
+	isApiExtensionsV1 := true
+	_, err = c.Discovery().ServerResourcesForGroupVersion("apiextensions.k8s.io/v1")
+	if err != nil && k8serrors.IsNotFound(err) {
+		isApiExtensionsV1 = false
+	} else if err != nil {
+		return err
+	}
+
+	// Convert the CRD to apiextensions.k8s.io/v1beta1 in case v1 is not available.
+	// This is mainly requires to support OpenShift 3 and older versions of Kubernetes,
+	// and can be removed as soon as they are not supported anymore.
+	downgradeToCRDv1beta1 := func(object runtime.Object) runtime.Object {
+		if !isApiExtensionsV1 {
+			object.GetObjectKind().SetGroupVersionKind(object.GetObjectKind().GroupVersionKind().GroupKind().WithVersion("v1beta1"))
+			o := object.(*unstructured.Unstructured).Object
+			spec := o["spec"].(map[string]interface{})
+			version := spec["versions"].([]interface{})[0].(map[string]interface{})
+
+			spec["validation"] = version["schema"]
+			delete(version, "schema")
+
+			spec["additionalPrinterColumns"] = version["additionalPrinterColumns"]
+			delete(version, "additionalPrinterColumns")
+			additionalPrinterColumns := spec["additionalPrinterColumns"].([]interface{})
+			for i := range additionalPrinterColumns {
+				column := additionalPrinterColumns[i].(map[string]interface{})
+				for k, v := range column {
+					if k == "jsonPath" {
+						column["JSONPath"] = v
+						delete(column, k)
+					}
+				}
+			}
+
+			spec["subresources"] = version["subresources"]
+			delete(version, "subresources")
+		}
+		return object
+	}
+
 	// Install CRD for Integration Platform (if needed)
-	if err := installCRD(ctx, c, "IntegrationPlatform", "v1", "crd-integration-platform.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationPlatform", "v1", "crd-integration-platform.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration Kit (if needed)
-	if err := installCRD(ctx, c, "IntegrationKit", "v1", "crd-integration-kit.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationKit", "v1", "crd-integration-kit.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration (if needed)
-	if err := installCRD(ctx, c, "Integration", "v1", "crd-integration.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "Integration", "v1", "crd-integration.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Camel Catalog (if needed)
-	if err := installCRD(ctx, c, "CamelCatalog", "v1", "crd-camel-catalog.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "CamelCatalog", "v1", "crd-camel-catalog.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Build (if needed)
-	if err := installCRD(ctx, c, "Build", "v1", "crd-build.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "Build", "v1", "crd-build.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for Kamelet (if needed)
-	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "crd-kamelet.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "crd-kamelet.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
 	// Install CRD for KameletBinding (if needed)
-	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "crd-kamelet-binding.yaml", collection); err != nil {
+	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "crd-kamelet-binding.yaml", downgradeToCRDv1beta1, collection); err != nil {
 		return err
 	}
 
@@ -183,18 +222,19 @@ func IsCRDInstalled(ctx context.Context, c client.Client, kind string, version s
 	return false, nil
 }
 
-func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, collection *kubernetes.Collection) error {
-	crd := deploy.Resource(resourceName)
+func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
+	crd, err := kubernetes.LoadRawResourceFromYaml(deploy.ResourceAsString(resourceName))
+	if err != nil {
+		return err
+	}
+
+	crd = customizer(crd)
+
 	if collection != nil {
-		unstr, err := kubernetes.LoadRawResourceFromYaml(string(crd))
-		if err != nil {
-			return err
-		}
-		collection.Add(unstr)
+		collection.Add(crd)
 		return nil
 	}
 
-	// Installing Integration CRD
 	installed, err := IsCRDInstalled(ctx, c, kind, version)
 	if err != nil {
 		return err
@@ -203,23 +243,9 @@ func installCRD(ctx context.Context, c client.Client, kind string, version strin
 		return nil
 	}
 
-	crdJSON, err := yaml.ToJSON(crd)
-	if err != nil {
+	err = c.Create(ctx, crd)
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return err
-	}
-	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1beta1")
-	if err != nil {
-		return err
-	}
-	// Post using dynamic client
-	result := restClient.
-		Post().
-		Body(crdJSON).
-		Resource("customresourcedefinitions").
-		Do(ctx)
-	// Check result
-	if result.Error() != nil && !k8serrors.IsAlreadyExists(result.Error()) {
-		return result.Error()
 	}
 
 	return nil
