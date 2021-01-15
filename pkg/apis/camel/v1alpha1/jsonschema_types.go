@@ -21,8 +21,7 @@ package v1alpha1
 
 import "encoding/json"
 
-// JSONSchemaProps is a JSON-Schema definition.
-type JSONSchemaProps struct {
+type JSONSchemaProp struct {
 	ID          string        `json:"id,omitempty" protobuf:"bytes,1,opt,name=id"`
 	Schema      JSONSchemaURL `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`
 	Ref         *string       `json:"$ref,omitempty" protobuf:"bytes,3,opt,name=ref"`
@@ -69,116 +68,26 @@ type JSONSchemaProps struct {
 	MaxLength        *int64       `json:"maxLength,omitempty" protobuf:"bytes,13,opt,name=maxLength"`
 	MinLength        *int64       `json:"minLength,omitempty" protobuf:"bytes,14,opt,name=minLength"`
 	Pattern          string       `json:"pattern,omitempty" protobuf:"bytes,15,opt,name=pattern"`
-	MaxItems         *int64       `json:"maxItems,omitempty" protobuf:"bytes,16,opt,name=maxItems"`
-	MinItems         *int64       `json:"minItems,omitempty" protobuf:"bytes,17,opt,name=minItems"`
-	UniqueItems      bool         `json:"uniqueItems,omitempty" protobuf:"bytes,18,opt,name=uniqueItems"`
 	MultipleOf       *json.Number `json:"multipleOf,omitempty" protobuf:"bytes,19,opt,name=multipleOf"`
-	Enum             []*JSON      `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
-	MaxProperties    *int64       `json:"maxProperties,omitempty" protobuf:"bytes,21,opt,name=maxProperties"`
-	MinProperties    *int64       `json:"minProperties,omitempty" protobuf:"bytes,22,opt,name=minProperties"`
+	Enum             []JSON       `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
 	Required         []string     `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
 
-	//Items                *JSONSchemaPropsOrArray    `json:"items,omitempty" protobuf:"bytes,24,opt,name=items"`
+	Example  *JSON `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
+	Nullable bool  `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
+}
 
-	Items      *JSONSchemaProps           `json:"items,omitempty" protobuf:"bytes,24,opt,name=items"`
-	AllOf      []JSONSchemaProps          `json:"allOf,omitempty" protobuf:"bytes,25,rep,name=allOf"`
-	OneOf      []JSONSchemaProps          `json:"oneOf,omitempty" protobuf:"bytes,26,rep,name=oneOf"`
-	AnyOf      []JSONSchemaProps          `json:"anyOf,omitempty" protobuf:"bytes,27,rep,name=anyOf"`
-	Not        *JSONSchemaProps           `json:"not,omitempty" protobuf:"bytes,28,opt,name=not"`
-	Properties map[string]JSONSchemaProps `json:"properties,omitempty" protobuf:"bytes,29,rep,name=properties"`
-
-	//AdditionalProperties *JSONSchemaPropsOrBool     `json:"additionalProperties,omitempty" protobuf:"bytes,30,opt,name=additionalProperties"`
-
-	AdditionalProperties *bool                      `json:"additionalProperties,omitempty" protobuf:"bytes,30,opt,name=additionalProperties"`
-	PatternProperties    map[string]JSONSchemaProps `json:"patternProperties,omitempty" protobuf:"bytes,31,rep,name=patternProperties"`
-	Dependencies         JSONSchemaDependencies     `json:"dependencies,omitempty" protobuf:"bytes,32,opt,name=dependencies"`
-
-	//AdditionalItems      *JSONSchemaPropsOrBool     `json:"additionalItems,omitempty" protobuf:"bytes,33,opt,name=additionalItems"`
-
-	AdditionalItems *bool                  `json:"additionalItems,omitempty" protobuf:"bytes,33,opt,name=additionalItems"`
-	Definitions     JSONSchemaDefinitions  `json:"definitions,omitempty" protobuf:"bytes,34,opt,name=definitions"`
-	ExternalDocs    *ExternalDocumentation `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
-	Example         *JSON                  `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
-	Nullable        bool                   `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
-
-	// x-kubernetes-preserve-unknown-fields stops the API server
-	// decoding step from pruning fields which are not specified
-	// in the validation schema. This affects fields recursively,
-	// but switches back to normal pruning behaviour if nested
-	// properties or additionalProperties are specified in the schema.
-	// This can either be true or undefined. False is forbidden.
-	XPreserveUnknownFields *bool `json:"x-kubernetes-preserve-unknown-fields,omitempty" protobuf:"bytes,38,opt,name=xKubernetesPreserveUnknownFields"`
-
-	// x-kubernetes-embedded-resource defines that the value is an
-	// embedded Kubernetes runtime.Object, with TypeMeta and
-	// ObjectMeta. The type must be object. It is allowed to further
-	// restrict the embedded object. kind, apiVersion and metadata
-	// are validated automatically. x-kubernetes-preserve-unknown-fields
-	// is allowed to be true, but does not have to be if the object
-	// is fully specified (up to kind, apiVersion, metadata).
-	XEmbeddedResource bool `json:"x-kubernetes-embedded-resource,omitempty" protobuf:"bytes,39,opt,name=xKubernetesEmbeddedResource"`
-
-	// x-kubernetes-int-or-string specifies that this value is
-	// either an integer or a string. If this is true, an empty
-	// type is allowed and type as child of anyOf is permitted
-	// if following one of the following patterns:
-	//
-	// 1) anyOf:
-	//    - type: integer
-	//    - type: string
-	// 2) allOf:
-	//    - anyOf:
-	//      - type: integer
-	//      - type: string
-	//    - ... zero or more
-	XIntOrString bool `json:"x-kubernetes-int-or-string,omitempty" protobuf:"bytes,40,opt,name=xKubernetesIntOrString"`
-
-	// x-kubernetes-list-map-keys annotates an array with the x-kubernetes-list-type `map` by specifying the keys used
-	// as the index of the map.
-	//
-	// This tag MUST only be used on lists that have the "x-kubernetes-list-type"
-	// extension set to "map". Also, the values specified for this attribute must
-	// be a scalar typed field of the child structure (no nesting is supported).
-	//
-	// The properties specified must either be required or have a default value,
-	// to ensure those properties are present for all list items.
-	//
-	// +optional
-	XListMapKeys []string `json:"x-kubernetes-list-map-keys,omitempty" protobuf:"bytes,41,rep,name=xKubernetesListMapKeys"`
-
-	// x-kubernetes-list-type annotates an array to further describe its topology.
-	// This extension must only be used on lists and may have 3 possible values:
-	//
-	// 1) `atomic`: the list is treated as a single entity, like a scalar.
-	//      Atomic lists will be entirely replaced when updated. This extension
-	//      may be used on any type of list (struct, scalar, ...).
-	// 2) `set`:
-	//      Sets are lists that must not have multiple items with the same value. Each
-	//      value must be a scalar, an object with x-kubernetes-map-type `atomic` or an
-	//      array with x-kubernetes-list-type `atomic`.
-	// 3) `map`:
-	//      These lists are like maps in that their elements have a non-index key
-	//      used to identify them. Order is preserved upon merge. The map tag
-	//      must only be used on a list with elements of type object.
-	// Defaults to atomic for arrays.
-	// +optional
-	XListType *string `json:"x-kubernetes-list-type,omitempty" protobuf:"bytes,42,opt,name=xKubernetesListType"`
-
-	// x-kubernetes-map-type annotates an object to further describe its topology.
-	// This extension must only be used when type is object and may have 2 possible values:
-	//
-	// 1) `granular`:
-	//      These maps are actual maps (key-value pairs) and each fields are independent
-	//      from each other (they can each be manipulated by separate actors). This is
-	//      the default behaviour for all maps.
-	// 2) `atomic`: the list is treated as a single entity, like a scalar.
-	//      Atomic maps will be entirely replaced when updated.
-	// +optional
-	XMapType *string `json:"x-kubernetes-map-type,omitempty" protobuf:"bytes,43,opt,name=xKubernetesMapType"`
-
-	// x-descriptors annotates an object to define additional display options.
-	// +optional
-	XDescriptors []string `json:"x-descriptors,omitempty" protobuf:"bytes,44,opt,name=xDescriptors"`
+// JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
+type JSONSchemaProps struct {
+	JSONSchemaProp `json:",inline"`
+	MaxItems       *int64                    `json:"maxItems,omitempty" protobuf:"bytes,16,opt,name=maxItems"`
+	MinItems       *int64                    `json:"minItems,omitempty" protobuf:"bytes,17,opt,name=minItems"`
+	UniqueItems    bool                      `json:"uniqueItems,omitempty" protobuf:"bytes,18,opt,name=uniqueItems"`
+	MaxProperties  *int64                    `json:"maxProperties,omitempty" protobuf:"bytes,21,opt,name=maxProperties"`
+	MinProperties  *int64                    `json:"minProperties,omitempty" protobuf:"bytes,22,opt,name=minProperties"`
+	Properties     map[string]JSONSchemaProp `json:"properties,omitempty" protobuf:"bytes,29,rep,name=properties"`
+	ExternalDocs   *ExternalDocumentation    `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
+	Example        *JSON                     `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
+	Nullable       bool                      `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
 }
 
 // +kubebuilder:validation:Type=""
@@ -203,12 +112,6 @@ func (_ JSON) OpenAPISchemaFormat() string { return "" }
 
 // JSONSchemaURL represents a schema url.
 type JSONSchemaURL string
-
-// JSONSchemaDependencies represent a dependencies property.
-type JSONSchemaDependencies map[string][]string
-
-// JSONSchemaDefinitions contains the models explicitly defined in this spec.
-type JSONSchemaDefinitions map[string]JSONSchemaProps
 
 // ExternalDocumentation allows referencing an external resource for extended documentation.
 type ExternalDocumentation struct {
