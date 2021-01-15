@@ -35,7 +35,9 @@ Go to https://repository.apache.org/ and close the staging repository.
 A URL will be generated for the repository, like: https://repository.apache.org/content/repositories/orgapachecamel-xxxx. The URL needs to be communicated during the voting process.
 
 
-The apache-camel-k-runtime-<version>-source-release.zip file present in path `/org/apache/camel/k/apache-camel-k-runtime/<version>/` (and related hashes and signatures) will need to be copied in the Apache dev SVN at https://dist.apache.org/repos/dist/dev/camel/camel-k-runtime/<version>.
+The apache-camel-k-runtime-<version>-source-release.zip file present in path `/org/apache/camel/k/apache-camel-k-runtime/<version>/` (and sha512 sum, if present) will need to be copied in the Apache dev SVN at https://dist.apache.org/repos/dist/dev/camel/camel-k-runtime/<version>.
+
+If the sha512 file is missing, one should be generated before committing to SVN.
 
 Commit all files to the SVN.
 
