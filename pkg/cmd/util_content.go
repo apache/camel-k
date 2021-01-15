@@ -30,7 +30,7 @@ func loadContent(source string, compress bool, compressBinary bool) (string, boo
 	var content []byte
 	var err error
 
-	if isLocal(source) {
+	if isLocalAndFileExists(source) {
 		content, err = ioutil.ReadFile(source)
 	} else {
 		u, err := url.Parse(source)
