@@ -101,10 +101,10 @@ func BuildIntegrationImageArgs(imagePath string) []string {
 }
 
 // RunIntegrationImageArgs --
-func RunIntegrationImageArgs(imagePath string) []string {
+func RunIntegrationImageArgs(imagePath string) ([]string, error) {
 	// Construct the docker command:
 	//
-	// docker run --network=<network-name> <dockerRegistry>/<ImageName>
+	// docker run --network=<network-name> --env LAZY_ENV_VAR=value <dockerRegistry>/<ImageName>
 	//
 	return RunImageArgs(imagePath, latestTag)
 }

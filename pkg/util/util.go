@@ -65,6 +65,12 @@ var ContainerRoutesDirectory = "/etc/camel/sources"
 // ContainerResourcesDirectory --
 var ContainerResourcesDirectory = "/etc/camel/resources"
 
+// ListOfLazyEvaluatedEnvVars -- List of unevaluated environment variables.
+// These are sensitive values or values that may have different values depending
+// where the integration is run (locally vs. the cloud). These environment variables
+// are evaluated at the time of the integration invocation.
+var ListOfLazyEvaluatedEnvVars []string = []string{}
+
 // StringSliceJoin --
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0
