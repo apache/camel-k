@@ -52,7 +52,7 @@ func assembleClasspathArgValue(properties []string, dependencies []string, route
 	return strings.Join(classpathContents, ":")
 }
 
-func assembleIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer) *exec.Cmd {
+func assembleIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer, local bool) (*exec.Cmd, error) {
 	// Create classpath value.
 	classpathValue := assembleClasspathArgValue(properties, dependencies, routes)
 
@@ -74,22 +74,48 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 	// Add files to the command line under the CAMEL_K_ROUTES flag.
 	cmd.Env = append(cmd.Env, "CAMEL_K_ROUTES="+strings.Join(formatRoutes(routes), ","))
 
+	// Add any lazily evaluated environment variables.
+	if local {
+		// If we are running locally then this is as late as we can evaluate the
+		// lazy environment variables since we are going to run the command
+		// immediately after the generation of these arguments.
+		for _, lazyEnvVar := range util.ListOfLazyEvaluatedEnvVars {
+			value, err := util.GetEnvironmentVariable(lazyEnvVar)
+			if err != nil {
+				return nil, err
+			}
+			cmd.Env = append(cmd.Env, lazyEnvVar+"="+value)
+		}
+	} else {
+		// If we are running in containerized mode then we should not evaluate the
+		// variables at this point since we are only generating the run command and
+		// not actually running it. Running the command is performed via:
+		// docker run [...] and it will be at that point that we should evaluate the
+		// variables.
+		for _, lazyEnvVar := range util.ListOfLazyEvaluatedEnvVars {
+			cmd.Env = append(cmd.Env, lazyEnvVar+"={{env:"+lazyEnvVar+"}}")
+		}
+	}
+
 	// Set stdout and stderr.
 	cmd.Stderr = stderr
 	cmd.Stdout = stdout
 
-	return cmd
+	return cmd, nil
 }
 
 // RunLocalIntegrationRunCommand --
 func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) error {
-	cmd := assembleIntegrationRunCommand(ctx, properties, dependencies, routes, util.GetLocalPropertiesDir(), stdout, stderr)
+	cmd, err := assembleIntegrationRunCommand(ctx, properties, dependencies, routes, util.GetLocalPropertiesDir(), stdout, stderr, true)
+	if err != nil {
+		return err
+	}
 
 	// Output command we are about to run.
 	fmt.Printf("Executing: %s", strings.Join(cmd.Args, " "))
 
 	// Run integration locally.
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return err
 	}
@@ -98,7 +124,7 @@ func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dep
 }
 
 // GetContainerIntegrationRunCommand --
-func GetContainerIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) *exec.Cmd {
+func GetContainerIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) (*exec.Cmd, error) {
 	// This is the integration command which will be run inside the container. Therefore all paths need to
 	// be valid container paths.
 
@@ -107,5 +133,5 @@ func GetContainerIntegrationRunCommand(ctx context.Context, properties []string,
 	containerDependencies := docker.ContainerizeFilePaths(dependencies, docker.GetContainerDependenciesDir())
 	containerRoutes := docker.ContainerizeFilePaths(routes, docker.GetContainerRoutesDir())
 
-	return assembleIntegrationRunCommand(ctx, containerProperties, containerDependencies, containerRoutes, docker.GetContainerPropertiesDir(), stdout, stderr)
+	return assembleIntegrationRunCommand(ctx, containerProperties, containerDependencies, containerRoutes, docker.GetContainerPropertiesDir(), stdout, stderr, false)
 }

@@ -148,7 +148,10 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 
 	// Get integration run command to be run inside the container. This means the command
 	// has to be created with the paths which will be valid inside the container.
-	containerCmd := GetContainerIntegrationRunCommand(ctx, propertyFiles, dependencies, routes, stdout, stderr)
+	containerCmd, err := GetContainerIntegrationRunCommand(ctx, propertyFiles, dependencies, routes, stdout, stderr)
+	if err != nil {
+		return err
+	}
 
 	// Create the integration image Docker file.
 	err = docker.CreateIntegrationImageDockerFile(containerCmd)
@@ -186,7 +189,11 @@ func runIntegrationImage(ctx context.Context, image string, stdout, stderr io.Wr
 	}()
 
 	// Get the docker command line argument for running an image.
-	args := docker.RunIntegrationImageArgs(image)
+	args, err := docker.RunIntegrationImageArgs(image)
+	if err != nil {
+		return err
+	}
+
 	cmd := exec.CommandContext(dockerCtx, "docker", args...)
 
 	// Set stdout and stderr.

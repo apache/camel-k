@@ -20,6 +20,8 @@ package docker
 import (
 	"path"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 // RegistryName -- the docker registry name.
@@ -68,7 +70,7 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 }
 
 // RunImageArgs -- standard docker run arguments.
-func RunImageArgs(imagePath string, imageTag string) []string {
+func RunImageArgs(imagePath string, imageTag string) ([]string, error) {
 	// Construct the docker command:
 	//
 	// docker run --network=<network-name> <image-name>:<tag>
@@ -79,10 +81,19 @@ func RunImageArgs(imagePath string, imageTag string) []string {
 	// Add network flag.
 	args = append(args, "--network="+NetworkName)
 
+	// Add lazily evaluates environment variables and evaluate them.
+	for _, lazyEnvVar := range util.ListOfLazyEvaluatedEnvVars {
+		value, err := util.GetEnvironmentVariable(lazyEnvVar)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, "--env="+lazyEnvVar+"="+value)
+	}
+
 	// Path to Docker image:
 	args = append(args, FullImageArg(imagePath)...)
 
-	return args
+	return args, nil
 }
 
 //

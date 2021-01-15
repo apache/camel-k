@@ -232,22 +232,48 @@ func extractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option,
 }
 
 func expandModelineEnvVarOptions(ops []modeline.Option) ([]modeline.Option, error) {
+	// List of additional command line options with expanded values for variables
+	// marked as immediate environment variables.
+	//
+	// Immediate values are marked as: ${ENV_VAR}
+	//
+	// Values marked as {{env:ENV_VAR}} should be added too in their un-evaluated state.
+	// Their evaluation will occur at integration runtime.
+	//
 	listWithExpandedOptions := []modeline.Option{}
 	for _, opt := range ops {
-		// Check if the value contains an environment variable.
-		for strings.Contains(opt.Value, "${") {
+		// Eliminate white spaces:
+		compactOptValue := strings.ReplaceAll(opt.Value, " ", "")
+
+		// Check if value can be immediately evaluated.
+		if strings.Contains(compactOptValue, "${") {
 			// Split value into 2 substrings, first contains the start of the string,
 			// second contains the remainder of the string.
-			splitOptBeforeEV := strings.SplitN(opt.Value, "${", 2)
+			splitOptBeforeEV := strings.SplitN(compactOptValue, "${", 2)
 
-			// Remainer of the string is split into the environment variable we want
+			// Remainder of the string is split into the environment variable we want
 			// to replace with its value, and the tail of the string.
 			splitOptAfterEV := strings.SplitN(splitOptBeforeEV[1], "}", 2)
+
+			// Evaluate variable.
 			envVarValue, err := util.GetEnvironmentVariable(splitOptAfterEV[0])
 			if err != nil {
 				return nil, err
 			}
+
+			// Save evaluated version.
 			opt.Value = splitOptBeforeEV[0] + envVarValue + splitOptAfterEV[1]
+		} else if strings.Contains(compactOptValue, "{{env:") {
+			// Split value into 2 substrings, first contains the start of the string,
+			// second contains the remainder of the string.
+			splitOptBeforeEV := strings.SplitN(compactOptValue, "{{env:", 2)
+
+			// Remainder of the string is split into the environment variable we want
+			// to replace with its value, and the tail of the string.
+			splitOptEVName := strings.SplitN(splitOptBeforeEV[1], "}}", 2)
+
+			// Add the variable to a list of lazy environment variables.
+			util.ListOfLazyEvaluatedEnvVars = append(util.ListOfLazyEvaluatedEnvVars, splitOptEVName[0])
 		}
 
 		// Add option to list whether it contained environment variables or not.
