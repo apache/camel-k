@@ -65,7 +65,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 	sources := make([]Source, 0, len(locations))
 
 	for _, location := range locations {
-		if isLocal(location) {
+		if isLocalAndFileExists(location) {
 			answer, err := ResolveLocalSource(location, compress)
 			if err != nil {
 				return sources, err
@@ -176,6 +176,8 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					return sources, err
 				}
 				sources = append(sources, answer)
+			default:
+				return sources, fmt.Errorf("Missing file or unsupported scheme in %s", location)
 			}
 		}
 	}
