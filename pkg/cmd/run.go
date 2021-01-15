@@ -380,7 +380,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	files = append(files, o.OpenAPIs...)
 
 	for _, s := range files {
-		if isLocal(s) {
+		if isLocalAndFileExists(s) {
 			changes, err := sync.File(o.Context, s)
 			if err != nil {
 				return err
@@ -645,7 +645,7 @@ func (*runCmdOptions) configureTraits(integration *v1.Integration, options []str
 	return nil
 }
 
-func isLocal(fileName string) bool {
+func isLocalAndFileExists(fileName string) bool {
 	info, err := os.Stat(fileName)
 	if os.IsNotExist(err) {
 		return false

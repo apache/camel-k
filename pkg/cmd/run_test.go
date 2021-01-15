@@ -416,6 +416,23 @@ func TestRunVolumeFlagWrongPVCFormat(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestRunValidateArgs(t *testing.T) {
+	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	args := []string{}
+	err := runCmdOptions.validateArgs(rootCmd, args)
+	assert.NotNil(t, err)
+	assert.Equal(t, "run expects at least 1 argument, received 0", err.Error())
+
+	args = []string{"run_test.go"}
+	err = runCmdOptions.validateArgs(rootCmd, args)
+	assert.Nil(t, err)
+
+	args = []string{"missing_file"}
+	err = runCmdOptions.validateArgs(rootCmd, args)
+	assert.NotNil(t, err)
+	assert.Equal(t, "One of the provided sources is not reachable: Missing file or unsupported scheme in missing_file", err.Error())
+}
+
 //
 // This test does work when running as single test but fails
 // otherwise as we are using a global viper instance
