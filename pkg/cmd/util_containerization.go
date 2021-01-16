@@ -28,6 +28,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/docker"
 	"github.com/pkg/errors"
 )
@@ -77,6 +78,12 @@ func deleteDockerWorkingDirectory() error {
 func setDockerNetworkName(networkName string) {
 	if networkName != "" {
 		docker.NetworkName = networkName
+	}
+}
+
+func setDockerEnvVars(envVars []string) {
+	if envVars != nil && len(envVars) > 0 {
+		util.CLIEnvVars = envVars
 	}
 }
 

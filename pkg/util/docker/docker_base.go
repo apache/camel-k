@@ -81,13 +81,12 @@ func RunImageArgs(imagePath string, imageTag string) ([]string, error) {
 	// Add network flag.
 	args = append(args, "--network="+NetworkName)
 
-	// Add lazily evaluates environment variables and evaluate them.
-	for _, lazyEnvVar := range util.ListOfLazyEvaluatedEnvVars {
-		value, err := util.GetEnvironmentVariable(lazyEnvVar)
-		if err != nil {
-			return nil, err
-		}
-		args = append(args, "--env="+lazyEnvVar+"="+value)
+	setEnvVars, err := util.EvaluateCLIAndLazyEnvVars()
+	if err != nil {
+		return nil, err
+	}
+	for _, envVar := range setEnvVars {
+		args = append(args, "--env="+envVar)
 	}
 
 	// Path to Docker image:

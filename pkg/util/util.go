@@ -71,6 +71,10 @@ var ContainerResourcesDirectory = "/etc/camel/resources"
 // are evaluated at the time of the integration invocation.
 var ListOfLazyEvaluatedEnvVars []string = []string{}
 
+// CLIEnvVars -- List of CLI provided environment variables. They take precedence over
+// any environment variables with the same name.
+var CLIEnvVars []string = []string{}
+
 // StringSliceJoin --
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0
@@ -495,4 +499,42 @@ func IsFalse(b *bool) bool {
 // You can use it if the bool pointer is meant to be false by default.
 func IsNilOrFalse(b *bool) bool {
 	return b == nil || !*b
+}
+
+// EvaluateCLIAndLazyEnvVars -- Function that creates a list of environment
+// variables with entries VAR=value that can be passed when running the integration.
+func EvaluateCLIAndLazyEnvVars() ([]string, error) {
+	evaluatedEnvVars := []string{}
+
+	// Add CLI environment variables.
+	setEnvVars := []string{}
+	for _, cliEnvVar := range CLIEnvVars {
+		// Mark variable name as set.
+		varAndValue := strings.Split(cliEnvVar, "=")
+		setEnvVars = append(setEnvVars, varAndValue[0])
+
+		evaluatedEnvVars = append(evaluatedEnvVars, cliEnvVar)
+	}
+
+	// Add lazily evaluated environment variables if they have not
+	// already been set via the CLI --env option.
+	for _, lazyEnvVar := range ListOfLazyEvaluatedEnvVars {
+		alreadySet := false
+		for _, setEnvVar := range setEnvVars {
+			if setEnvVar == lazyEnvVar {
+				alreadySet = true
+				break
+			}
+		}
+
+		if !alreadySet {
+			value, err := GetEnvironmentVariable(lazyEnvVar)
+			if err != nil {
+				return nil, err
+			}
+			evaluatedEnvVars = append(evaluatedEnvVars, lazyEnvVar+"="+value)
+		}
+	}
+
+	return evaluatedEnvVars, nil
 }
