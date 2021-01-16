@@ -79,12 +79,12 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 		// If we are running locally then this is as late as we can evaluate the
 		// lazy environment variables since we are going to run the command
 		// immediately after the generation of these arguments.
-		for _, lazyEnvVar := range util.ListOfLazyEvaluatedEnvVars {
-			value, err := util.GetEnvironmentVariable(lazyEnvVar)
-			if err != nil {
-				return nil, err
-			}
-			cmd.Env = append(cmd.Env, lazyEnvVar+"="+value)
+		setEnvVars, err := util.EvaluateCLIAndLazyEnvVars()
+		if err != nil {
+			return nil, err
+		}
+		for _, envVar := range setEnvVars {
+			cmd.Env = append(cmd.Env, envVar)
 		}
 	} else {
 		// If we are running in containerized mode then we should not evaluate the

@@ -58,6 +58,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
 	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().String("network", "", "Custom network name to be used by the underlying Docker command.")
+	cmd.Flags().StringArrayP("env", "e", nil, "Flag to specify an environment variable [--env VARIABLE=value].")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
@@ -71,6 +72,7 @@ type localRunCmdOptions struct {
 	Containerize           bool     `mapstructure:"containerize"`
 	Image                  string   `mapstructure:"image"`
 	Network                string   `mapstructure:"network"`
+	EnvironmentVariables   []string `mapstructure:"envs"`
 	PropertyFiles          []string `mapstructure:"property-files"`
 	Properties             []string `mapstructure:"properties"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
@@ -117,9 +119,11 @@ func (command *localRunCmdOptions) init() error {
 		if err != nil {
 			return err
 		}
-
-		setDockerNetworkName(command.Network)
 	}
+
+	setDockerNetworkName(command.Network)
+
+	setDockerEnvVars(command.EnvironmentVariables)
 
 	return createMavenWorkingDirectory()
 }
