@@ -87,11 +87,9 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 			cmd.Env = append(cmd.Env, envVar)
 		}
 	} else {
-		// If we are running in containerized mode then we should not evaluate the
-		// variables at this point since we are only generating the run command and
-		// not actually running it. Running the command is performed via:
-		// docker run [...] and it will be at that point that we should evaluate the
-		// variables.
+		// If we are running in containerized or just building an image, we should
+		// not evaluate the variables at this point since we are only generating the
+		// run command and not actually running it.
 		for _, lazyEnvVar := range util.ListOfLazyEvaluatedEnvVars {
 			cmd.Env = append(cmd.Env, lazyEnvVar+"={{env:"+lazyEnvVar+"}}")
 		}
