@@ -86,6 +86,7 @@ type JSONSchemaProps struct {
 	Example      *JSON                     `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
 	ExternalDocs *ExternalDocumentation    `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
 	Schema       JSONSchemaURL             `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`
+	Type         string                    `json:"type,omitempty" protobuf:"bytes,5,opt,name=type"`
 }
 
 // RawMessage is a raw encoded JSON value.

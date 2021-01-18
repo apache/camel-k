@@ -200,6 +200,8 @@ spec:
                     type: array
                   title:
                     type: string
+                  type:
+                    type: string
                 type: object
               dependencies:
                 items:
@@ -392,6 +394,8 @@ spec:
                             type: string
                           type: array
                         title:
+                          type: string
+                        type:
                           type: string
                       type: object
                   type: object
