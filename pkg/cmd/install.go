@@ -78,7 +78,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("example", false, "Install example integration")
 	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created.")
 	cmd.Flags().Bool("force", false, "Force replacement of configuration resources when already present.")
-
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().String("organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().String("registry", "", "A Docker registry that can be used to publish images")
@@ -89,7 +88,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("registry-auth-username", "", "The docker registry authentication username")
 	cmd.Flags().String("registry-auth-password", "", "The docker registry authentication password")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
-	cmd.Flags().String("camel-version", "", "Set the camel version")
 	cmd.Flags().String("runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().String("base-image", "", "Set the base Image used to run integrations")
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
