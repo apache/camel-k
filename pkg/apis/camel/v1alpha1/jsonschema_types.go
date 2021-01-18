@@ -22,11 +22,9 @@ package v1alpha1
 import "encoding/json"
 
 type JSONSchemaProp struct {
-	ID          string        `json:"id,omitempty" protobuf:"bytes,1,opt,name=id"`
-	Schema      JSONSchemaURL `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`
-	Ref         *string       `json:"$ref,omitempty" protobuf:"bytes,3,opt,name=ref"`
-	Description string        `json:"description,omitempty" protobuf:"bytes,4,opt,name=description"`
-	Type        string        `json:"type,omitempty" protobuf:"bytes,5,opt,name=type"`
+	ID          string `json:"id,omitempty" protobuf:"bytes,1,opt,name=id"`
+	Description string `json:"description,omitempty" protobuf:"bytes,4,opt,name=description"`
+	Type        string `json:"type,omitempty" protobuf:"bytes,5,opt,name=type"`
 	// format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
 	//
 	// - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
@@ -84,6 +82,7 @@ type JSONSchemaProps struct {
 	Properties     map[string]JSONSchemaProp `json:"properties,omitempty" protobuf:"bytes,29,rep,name=properties"`
 	ExternalDocs   *ExternalDocumentation    `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
 	Example        *JSON                     `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
+	Schema         JSONSchemaURL             `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`
 }
 
 // +kubebuilder:validation:Type=""
