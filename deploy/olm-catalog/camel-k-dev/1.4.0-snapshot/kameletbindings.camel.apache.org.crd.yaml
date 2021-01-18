@@ -375,6 +375,8 @@ spec:
                               type: array
                             title:
                               type: string
+                            type:
+                              type: string
                           type: object
                       type: object
                     description: Types defines the schema of the data produced/consumed
@@ -580,6 +582,8 @@ spec:
                                 type: string
                               type: array
                             title:
+                              type: string
+                            type:
                               type: string
                           type: object
                       type: object
