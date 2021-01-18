@@ -234,8 +234,6 @@ spec:
                           description: JSONSchemaProps is a JSON-Schema following
                             Specification Draft 4 (http://json-schema.org/).
                           properties:
-                            $ref:
-                              type: string
                             $schema:
                               description: JSONSchemaURL represents a schema url.
                               type: string
@@ -351,12 +349,6 @@ spec:
                             properties:
                               additionalProperties:
                                 properties:
-                                  $ref:
-                                    type: string
-                                  $schema:
-                                    description: JSONSchemaURL represents a schema
-                                      url.
-                                    type: string
                                   default:
                                     description: default is a default value for undefined
                                       object fields. Defaulting is a beta feature
@@ -553,8 +545,6 @@ spec:
                           description: JSONSchemaProps is a JSON-Schema following
                             Specification Draft 4 (http://json-schema.org/).
                           properties:
-                            $ref:
-                              type: string
                             $schema:
                               description: JSONSchemaURL represents a schema url.
                               type: string
@@ -670,12 +660,6 @@ spec:
                             properties:
                               additionalProperties:
                                 properties:
-                                  $ref:
-                                    type: string
-                                  $schema:
-                                    description: JSONSchemaURL represents a schema
-                                      url.
-                                    type: string
                                   default:
                                     description: default is a default value for undefined
                                       object fields. Defaulting is a beta feature
