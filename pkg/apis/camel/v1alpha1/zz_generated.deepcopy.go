@@ -171,6 +171,26 @@ func (in *JSONSchemaProp) DeepCopyInto(out *JSONSchemaProp) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.MaxItems != nil {
+		in, out := &in.MaxItems, &out.MaxItems
+		*out = new(int64)
+		**out = **in
+	}
+	if in.MinItems != nil {
+		in, out := &in.MinItems, &out.MinItems
+		*out = new(int64)
+		**out = **in
+	}
+	if in.MaxProperties != nil {
+		in, out := &in.MaxProperties, &out.MaxProperties
+		*out = new(int64)
+		**out = **in
+	}
+	if in.MinProperties != nil {
+		in, out := &in.MinProperties, &out.MinProperties
+		*out = new(int64)
+		**out = **in
+	}
 	if in.MultipleOf != nil {
 		in, out := &in.MultipleOf, &out.MultipleOf
 		*out = new(json.Number)
@@ -209,26 +229,6 @@ func (in *JSONSchemaProp) DeepCopy() *JSONSchemaProp {
 func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 	*out = *in
 	in.JSONSchemaProp.DeepCopyInto(&out.JSONSchemaProp)
-	if in.MaxItems != nil {
-		in, out := &in.MaxItems, &out.MaxItems
-		*out = new(int64)
-		**out = **in
-	}
-	if in.MinItems != nil {
-		in, out := &in.MinItems, &out.MinItems
-		*out = new(int64)
-		**out = **in
-	}
-	if in.MaxProperties != nil {
-		in, out := &in.MaxProperties, &out.MaxProperties
-		*out = new(int64)
-		**out = **in
-	}
-	if in.MinProperties != nil {
-		in, out := &in.MinProperties, &out.MinProperties
-		*out = new(int64)
-		**out = **in
-	}
 	if in.Properties != nil {
 		in, out := &in.Properties, &out.Properties
 		*out = make(map[string]JSONSchemaProp, len(*in))
