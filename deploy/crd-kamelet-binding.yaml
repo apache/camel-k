@@ -432,14 +432,26 @@ spec:
                                     type: string
                                   id:
                                     type: string
+                                  maxItems:
+                                    format: int64
+                                    type: integer
                                   maxLength:
+                                    format: int64
+                                    type: integer
+                                  maxProperties:
                                     format: int64
                                     type: integer
                                   maximum:
                                     description: A Number represents a JSON number
                                       literal.
                                     type: string
+                                  minItems:
+                                    format: int64
+                                    type: integer
                                   minLength:
+                                    format: int64
+                                    type: integer
+                                  minProperties:
                                     format: int64
                                     type: integer
                                   minimum:
@@ -462,6 +474,8 @@ spec:
                                     type: string
                                   type:
                                     type: string
+                                  uniqueItems:
+                                    type: boolean
                                 type: object
                               type: object
                             required:
@@ -737,14 +751,26 @@ spec:
                                     type: string
                                   id:
                                     type: string
+                                  maxItems:
+                                    format: int64
+                                    type: integer
                                   maxLength:
+                                    format: int64
+                                    type: integer
+                                  maxProperties:
                                     format: int64
                                     type: integer
                                   maximum:
                                     description: A Number represents a JSON number
                                       literal.
                                     type: string
+                                  minItems:
+                                    format: int64
+                                    type: integer
                                   minLength:
+                                    format: int64
+                                    type: integer
+                                  minProperties:
                                     format: int64
                                     type: integer
                                   minimum:
@@ -767,6 +793,8 @@ spec:
                                     type: string
                                   type:
                                     type: string
+                                  uniqueItems:
+                                    type: boolean
                                 type: object
                               type: object
                             required:
