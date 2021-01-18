@@ -87,7 +87,7 @@ Unit tests are executed automatically as part of the build. They use the standar
 
 Integration tests (aimed at ensuring that the code integrates correctly with Kubernetes and OpenShift), need special care.
 
-The **convention** used in this repo is to name unit tests `xxx_test.go`, and name integration tests `yyy_integration_test.go`.
+The **convention** used in this repo is to name tests `xxx_test.go`.
 Integration tests are all in the https://github.com/apache/camel-k/tree/master/e2e[/e2e] dir.
 
 Since both names end with `_test.go`, both would be executed by go during the build, so you need to put a special **build tag** to mark
