@@ -198,11 +198,6 @@ func (in *JSONSchemaProp) DeepCopyInto(out *JSONSchemaProp) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.Required != nil {
-		in, out := &in.Required, &out.Required
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
 	if in.Example != nil {
 		in, out := &in.Example, &out.Example
 		*out = new(JSON)
@@ -230,6 +225,11 @@ func (in *JSONSchemaProps) DeepCopyInto(out *JSONSchemaProps) {
 		for key, val := range *in {
 			(*out)[key] = *val.DeepCopy()
 		}
+	}
+	if in.Required != nil {
+		in, out := &in.Required, &out.Required
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 	if in.ExternalDocs != nil {
 		in, out := &in.ExternalDocs, &out.ExternalDocs
