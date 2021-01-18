@@ -71,9 +71,8 @@ type JSONSchemaProp struct {
 	MultipleOf       *json.Number `json:"multipleOf,omitempty" protobuf:"bytes,19,opt,name=multipleOf"`
 	Enum             []JSON       `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
 	Required         []string     `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
-
-	Example  *JSON `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
-	Nullable bool  `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
+	Example          *JSON        `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
+	Nullable         bool         `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
 }
 
 // JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
@@ -87,7 +86,6 @@ type JSONSchemaProps struct {
 	Properties     map[string]JSONSchemaProp `json:"properties,omitempty" protobuf:"bytes,29,rep,name=properties"`
 	ExternalDocs   *ExternalDocumentation    `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
 	Example        *JSON                     `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
-	Nullable       bool                      `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
 }
 
 // +kubebuilder:validation:Type=""
