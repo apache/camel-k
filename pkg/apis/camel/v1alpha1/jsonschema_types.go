@@ -19,7 +19,10 @@ limitations under the License.
 
 package v1alpha1
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+)
 
 type JSONSchemaProp struct {
 	ID          string `json:"id,omitempty" protobuf:"bytes,1,opt,name=id"`
@@ -54,8 +57,6 @@ type JSONSchemaProp struct {
 	Format string `json:"format,omitempty" protobuf:"bytes,6,opt,name=format"`
 	Title  string `json:"title,omitempty" protobuf:"bytes,7,opt,name=title"`
 	// default is a default value for undefined object fields.
-	// Defaulting is a beta feature under the CustomResourceDefaulting feature gate.
-	// Defaulting requires spec.preserveUnknownFields to be false.
 	Default          *JSON        `json:"default,omitempty" protobuf:"bytes,8,opt,name=default"`
 	Maximum          *json.Number `json:"maximum,omitempty" protobuf:"bytes,9,opt,name=maximum"`
 	ExclusiveMaximum bool         `json:"exclusiveMaximum,omitempty" protobuf:"bytes,10,opt,name=exclusiveMaximum"`
@@ -87,25 +88,40 @@ type JSONSchemaProps struct {
 	Schema       JSONSchemaURL             `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`
 }
 
+// RawMessage is a raw encoded JSON value.
+// It implements Marshaler and Unmarshaler and can
+// be used to delay JSON decoding or precompute a JSON encoding.
+// +kubebuilder:validation:Type=""
+// +kubebuilder:validation:Format=""
+// +kubebuilder:pruning:PreserveUnknownFields
+type RawMessage []byte
+
 // +kubebuilder:validation:Type=""
 // JSON represents any valid JSON value.
 // These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
 type JSON struct {
-	json.RawMessage `json:",inline" protobuf:"bytes,1,opt,name=raw"`
+	RawMessage `json:",inline" protobuf:"bytes,1,opt,name=raw"`
 }
 
-// OpenAPISchemaType is used by the kube-openapi generator when constructing
-// the OpenAPI spec of this type.
-//
-// See: https://github.com/kubernetes/kube-openapi/tree/master/pkg/generators
-func (_ JSON) OpenAPISchemaType() []string {
-	// TODO: return actual types when anyOf is supported
+// MarshalJSON returns m as the JSON encoding of m.
+func (m RawMessage) MarshalJSON() ([]byte, error) {
+	if m == nil {
+		return []byte("null"), nil
+	}
+	return m, nil
+}
+
+// UnmarshalJSON sets *m to a copy of data.
+func (m *RawMessage) UnmarshalJSON(data []byte) error {
+	if m == nil {
+		return errors.New("json.RawMessage: UnmarshalJSON on nil pointer")
+	}
+	*m = append((*m)[0:0], data...)
 	return nil
 }
 
-// OpenAPISchemaFormat is used by the kube-openapi generator when constructing
-// the OpenAPI spec of this type.
-func (_ JSON) OpenAPISchemaFormat() string { return "" }
+var _ json.Marshaler = (*RawMessage)(nil)
+var _ json.Unmarshaler = (*RawMessage)(nil)
 
 // JSONSchemaURL represents a schema url.
 type JSONSchemaURL string
