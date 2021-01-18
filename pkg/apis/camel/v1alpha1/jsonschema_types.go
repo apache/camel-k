@@ -71,7 +71,6 @@ type JSONSchemaProp struct {
 	MinProperties    *int64       `json:"minProperties,omitempty" protobuf:"bytes,22,opt,name=minProperties"`
 	MultipleOf       *json.Number `json:"multipleOf,omitempty" protobuf:"bytes,19,opt,name=multipleOf"`
 	Enum             []JSON       `json:"enum,omitempty" protobuf:"bytes,20,rep,name=enum"`
-	Required         []string     `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
 	Example          *JSON        `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
 	Nullable         bool         `json:"nullable,omitempty" protobuf:"bytes,37,opt,name=nullable"`
 }
@@ -80,6 +79,7 @@ type JSONSchemaProp struct {
 type JSONSchemaProps struct {
 	JSONSchemaProp `json:",inline"`
 	Properties     map[string]JSONSchemaProp `json:"properties,omitempty" protobuf:"bytes,29,rep,name=properties"`
+	Required       []string                  `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
 	ExternalDocs   *ExternalDocumentation    `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
 	Example        *JSON                     `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
 	Schema         JSONSchemaURL             `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`

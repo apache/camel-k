@@ -458,10 +458,6 @@ spec:
                                     type: boolean
                                   pattern:
                                     type: string
-                                  required:
-                                    items:
-                                      type: string
-                                    type: array
                                   title:
                                     type: string
                                   type:
@@ -769,10 +765,6 @@ spec:
                                     type: boolean
                                   pattern:
                                     type: string
-                                  required:
-                                    items:
-                                      type: string
-                                    type: array
                                   title:
                                     type: string
                                   type:
