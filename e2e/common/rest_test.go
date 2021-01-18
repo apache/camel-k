@@ -1,6 +1,6 @@
 // +build integration
 
-// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "knative"
+// To enable compilation of this file in Goland, go to "File -> Settings -> Go -> Build Tags & Vendoring -> Build Tags -> Custom tags" and add "knative"
 
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
