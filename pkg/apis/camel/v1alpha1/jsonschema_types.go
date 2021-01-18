@@ -77,12 +77,14 @@ type JSONSchemaProp struct {
 
 // JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 type JSONSchemaProps struct {
-	JSONSchemaProp `json:",inline"`
-	Properties     map[string]JSONSchemaProp `json:"properties,omitempty" protobuf:"bytes,29,rep,name=properties"`
-	Required       []string                  `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
-	ExternalDocs   *ExternalDocumentation    `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
-	Example        *JSON                     `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
-	Schema         JSONSchemaURL             `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`
+	ID           string                    `json:"id,omitempty" protobuf:"bytes,1,opt,name=id"`
+	Description  string                    `json:"description,omitempty" protobuf:"bytes,4,opt,name=description"`
+	Title        string                    `json:"title,omitempty" protobuf:"bytes,7,opt,name=title"`
+	Properties   map[string]JSONSchemaProp `json:"properties,omitempty" protobuf:"bytes,29,rep,name=properties"`
+	Required     []string                  `json:"required,omitempty" protobuf:"bytes,23,rep,name=required"`
+	Example      *JSON                     `json:"example,omitempty" protobuf:"bytes,36,opt,name=example"`
+	ExternalDocs *ExternalDocumentation    `json:"externalDocs,omitempty" protobuf:"bytes,35,opt,name=externalDocs"`
+	Schema       JSONSchemaURL             `json:"$schema,omitempty" protobuf:"bytes,2,opt,name=schema"`
 }
 
 // +kubebuilder:validation:Type=""
