@@ -76,7 +76,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().Bool("skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().Bool("example", false, "Install example integration")
-	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created.")
+	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created. You can run integrations in a namespace by installing an integration platform: 'kamel install --skip-operator-setup -n my-namespace'")
 	cmd.Flags().Bool("force", false, "Force replacement of configuration resources when already present.")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().String("organization", "", "A organization on the Docker registry that can be used to publish images")
