@@ -20,16 +20,13 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"regexp"
 
+	"github.com/Masterminds/semver"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/pkg/errors"
-	v1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/spf13/cobra"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // VersionVariant may be overridden at build time
@@ -89,35 +86,40 @@ func displayClientVersion() {
 	}
 }
 
-func displayOperatorVersion(ctx context.Context, client client.Client, namespace string) {
-	operatorVersion, err := operatorVersion(ctx, client, namespace)
-	if err != nil {
-		fmt.Printf("Some issue happened while looking for camel-k operator in namespace %s (error: %s)\n", namespace, err)
-	} else {
+func displayOperatorVersion(ctx context.Context, c client.Client, namespace string) {
+	operatorVersion, err := operatorVersion(ctx, c, namespace)
+	if err == nil {
 		fmt.Printf("Camel K Operator %s\n", operatorVersion)
+	} else {
+		fmt.Printf("Error while looking for camel-k operator in namespace %s (%s)\n", namespace, err)
 	}
 }
 
 func operatorVersion(ctx context.Context, c client.Client, namespace string) (string, error) {
-	deployment := v1.Deployment{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Deployment",
-			APIVersion: "apps/v1",
-		},
+	platform := v1.NewIntegrationPlatform(namespace, "camel-k")
+	platformKey := k8sclient.ObjectKey{
+		Namespace: namespace,
+		Name:      "camel-k",
 	}
-	key := types.NamespacedName{Namespace: namespace, Name: "camel-k-operator"}
-	err := c.Get(ctx, key, &deployment)
-	if err != nil {
+
+	if err := c.Get(ctx, platformKey, &platform); err == nil {
+		return platform.Status.Version, nil
+	} else {
 		return "", err
 	}
-	return extractVersionFromDockerImage(deployment.Spec.Template.Spec.Containers[0].Image)
 }
 
-func extractVersionFromDockerImage(in string) (string, error) {
-	re := regexp.MustCompile(`docker.io/apache/camel-k:(.*?)$`)
-	match := re.FindStringSubmatch(in)
-	if len(match) == 2 {
-		return match[1], nil
+func compatibleVersions(aVersion, bVersion string) bool {
+	v1, err := semver.NewVersion(aVersion)
+	if err != nil {
+		fmt.Printf("Could not parse %s (error: %s)\n", v1, err)
+		return false
 	}
-	return "", errors.New("Something wrong happened while parsing camel k operator image " + in)
+	v2, err := semver.NewVersion(bVersion)
+	if err != nil {
+		fmt.Printf("Could not parse %s (error: %s)\n", v2, err)
+		return false
+	}
+	// We consider compatible when major and minor are equals
+	return v1.Major() == v2.Major() && v1.Minor() == v2.Minor()
 }

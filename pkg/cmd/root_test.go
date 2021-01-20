@@ -26,7 +26,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
 )
 
 func kamelTestPostAddCommandInit(t *testing.T, rootCmd *cobra.Command) {
@@ -130,14 +129,4 @@ func readViperConfigFromBytes(propertiesFile []byte, t *testing.T) {
 	if unexpectedErr != nil {
 		t.Fatalf("Unexpected error: %v", unexpectedErr)
 	}
-}
-
-func TestCompatibleVersions(t *testing.T) {
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0"))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.1"))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "1.2.0"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa"))
-	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4"))
 }
