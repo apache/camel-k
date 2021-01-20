@@ -153,6 +153,6 @@ func ExtractRegistryName(image string) (string, error) {
 		return "", errors.New("image path is too short, usage: registry/imageName or registry/*/imageName")
 	}
 
-	// Register name is given by the path to the image.
+	// Registry name is given by the path to the image.
 	return strings.Join(pathComponents[0:len(pathComponents)-1], containerFileSeparator), nil
 }
