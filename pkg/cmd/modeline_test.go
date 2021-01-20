@@ -129,3 +129,40 @@ func TestModelineRunPropertyFiles(t *testing.T) {
 	assert.NotNil(t, cmd)
 	assert.Equal(t, []string{"run", fileName, "--property-file=" + propFileName}, flags)
 }
+
+func TestModelineInspectSimple(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	file := `
+		// camel-k: dependency=mvn:org.my:lib:1.0
+	`
+	fileName := path.Join(dir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "inspect", fileName})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"inspect", fileName, "--dependency=mvn:org.my:lib:1.0"}, flags)
+}
+
+func TestModelineInspectMultipleDeps(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	file := `
+		// camel-k: dependency=mvn:org.my:lib:1.0
+		// camel-k: dependency=camel-k:camel-dep
+	`
+	fileName := path.Join(dir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "inspect", fileName})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"inspect", fileName, "--dependency=mvn:org.my:lib:1.0", "--dependency=camel-k:camel-dep"}, flags)
+}
