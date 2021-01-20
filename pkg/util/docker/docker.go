@@ -146,14 +146,13 @@ func ExtractRegistryName(image string) (string, error) {
 
 	// There must be at least two components in the path:
 	//  - docker.io/registry/imageName
-	//  - registry/imageName
+	//  - localhost:5000/<dir>/imageName
+	//  - localhost:5000/<dir>/.../<dir>/imageName
+	//  - localhost:5000/imageName
 	if len(pathComponents) < 2 {
-		return "", errors.New("image path is too short, usage: docker.io/registry/imageName or registry/imageName")
+		return "", errors.New("image path is too short, usage: registry/imageName or registry/*/imageName")
 	}
 
-	// Check if path starts with docker.io if not, add it.
-	if pathComponents[0] == "docker.io" {
-		return strings.Join(pathComponents[0:2], containerFileSeparator), nil
-	}
-	return "docker.io" + containerFileSeparator + pathComponents[1], nil
+	// Register name is given by the path to the image.
+	return strings.Join(pathComponents[0:len(pathComponents)-1], containerFileSeparator), nil
 }

@@ -87,7 +87,7 @@ func setDockerEnvVars(envVars []string) {
 	}
 }
 
-func createAndBuildBaseImage(ctx context.Context, containerRegistry string) error {
+func createAndBuildBaseImage(ctx context.Context) error {
 	// Create the base image Docker file.
 	err := docker.CreateBaseImageDockerFile()
 	if err != nil {
@@ -117,6 +117,9 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	}
 
 	docker.RegistryName = containerRegistry
+
+	// If we build a normal image, i.e. not the base image, we need to parse
+	// the location where images will be pushed.
 	if !justBaseImage {
 		registryName, err := docker.ExtractRegistryName(image)
 		if err != nil {
@@ -127,7 +130,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	}
 
 	// Create the Dockerfile and build the base image.
-	err := createAndBuildBaseImage(ctx, containerRegistry)
+	err := createAndBuildBaseImage(ctx)
 	if err != nil {
 		return err
 	}
