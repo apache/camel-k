@@ -36,6 +36,7 @@ const (
 	createCmdName     = "create"
 	localCmdName      = "local"
 	runCmdSourcesArgs = "source"
+	inspectCmdName    = "inspect"
 )
 
 var (
@@ -90,8 +91,9 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	}
 
 	isLocalCreate := target.Name() == createCmdName && target.Parent().Name() == localCmdName
+	isInspect := target.Name() == inspectCmdName
 
-	if target.Name() != runCmdName && !isLocalCreate {
+	if target.Name() != runCmdName && !isLocalCreate && !isInspect {
 		return rootCmd, args, nil
 	}
 
