@@ -23,7 +23,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Masterminds/semver"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -186,9 +185,7 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 				return err
 			}
 		}
-		if showCompatibilityWarning(cmd) {
-			checkAndShowCompatibilityWarning(command.Context, client, command.Namespace)
-		}
+		checkAndShowCompatibilityWarning(command.Context, client, command.Namespace)
 	}
 
 	return nil
@@ -197,27 +194,12 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 func checkAndShowCompatibilityWarning(ctx context.Context, cli client.Client, namespace string) {
 	operatorVersion, err := operatorVersion(ctx, cli, namespace)
 	if err != nil {
-		fmt.Printf("Some issue happened while looking for camel-k operator in namespace %s (error: %s)\n", namespace, err)
+		fmt.Printf("No Integration Platform available in %s namespace\n", namespace)
 	} else {
 		if !compatibleVersions(operatorVersion, defaults.Version) {
-			fmt.Printf("Warning: you're using Camel K %s client against a %s cluster operator\n", defaults.Version, operatorVersion)
+			fmt.Printf("Warning: you're using Camel K %s client against a %s cluster operator\n\n", defaults.Version, operatorVersion)
 		}
 	}
-}
-
-func compatibleVersions(aVersion, bVersion string) bool {
-	v1, err := semver.NewVersion(aVersion)
-	if err != nil {
-		fmt.Printf("Could not parse %s (error: %s)\n", v1, err)
-		return false
-	}
-	v2, err := semver.NewVersion(bVersion)
-	if err != nil {
-		fmt.Printf("Could not parse %s (error: %s)\n", v2, err)
-		return false
-	}
-	// We consider compatible when major and minor are equals
-	return v1.Major() == v2.Major() && v1.Minor() == v2.Minor()
 }
 
 // GetCmdClient returns the client that can be used from command line tools

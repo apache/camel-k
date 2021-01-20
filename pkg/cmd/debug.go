@@ -46,9 +46,6 @@ func newCmdDebug(rootCmdOptions *RootCmdOptions) (*cobra.Command, *debugCmdOptio
 		Args:    options.validateArgs,
 		PreRunE: decode(&options),
 		RunE:    options.run,
-		Annotations: map[string]string{
-			versionCompatibilityWarningCommandLabel: "true",
-		},
 	}
 
 	cmd.Flags().Bool("suspend", true, "Suspend the integration on startup, to let the debugger attach from the beginning")

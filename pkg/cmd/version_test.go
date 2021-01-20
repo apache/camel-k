@@ -62,19 +62,12 @@ func TestVersionOperatorFlag(t *testing.T) {
 	assert.Equal(t, true, versionCmdOptions.Operator)
 }
 
-func TestExtractVersionFromDockerImage(t *testing.T) {
-	versionOk, err := extractVersionFromDockerImage("docker.io/apache/camel-k:1.3.0")
-	assert.Nil(t, err)
-	assert.Equal(t, "1.3.0", versionOk)
-}
-
-func TestExtractVersionFromDockerImageSnapshot(t *testing.T) {
-	versionOk, err := extractVersionFromDockerImage("docker.io/apache/camel-k:1.3.0-SNAPSHOT")
-	assert.Nil(t, err)
-	assert.Equal(t, "1.3.0-SNAPSHOT", versionOk)
-}
-
-func TestExtractVersionFromDockerImageFail(t *testing.T) {
-	_, err := extractVersionFromDockerImage("dsadsa:1.3.0")
-	assert.NotNil(t, err)
+func TestCompatibleVersions(t *testing.T) {
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0"))
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.1"))
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT"))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "1.2.0"))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0"))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa"))
+	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4"))
 }
