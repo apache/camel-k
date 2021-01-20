@@ -37,7 +37,8 @@ public class Train extends RouteBuilder {
                         .option("id", header("id"))
                         .compensation("direct:cancelPurchase")
                     .log("Buying train seat #${header.id}")
-                    .to("undertow:http://payment/api/pay?bridgeEndpoint=true&type=train")
+                    .removeHeaders("CamelHttp.*")
+                    .to("http://payment/api/pay?httpMethod=POST&type=train")
                     .log("Payment for train #${header.id} done");
 
                from("direct:cancelPurchase")
