@@ -35,8 +35,8 @@ public class Saga extends RouteBuilder {
 			.setHeader("id", header(Exchange.TIMER_COUNTER))
 			.setHeader(Exchange.HTTP_METHOD, constant("POST"))
 			.log("Executing saga #${header.id}")
-			.to("undertow:http://train/api/train/buy/seat")
-			.to("undertow:http://flight/api/flight/buy");
+			.to("http://train/api/train/buy/seat?bridgeEndpoint=true")
+			.to("http://flight/api/flight/buy?bridgeEndpoint=true");
 
 	}
 }

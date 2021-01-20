@@ -37,7 +37,8 @@ public class Flight extends RouteBuilder {
 				.option("id", header("id"))
 				.compensation("direct:cancelPurchase")
 			.log("Buying flight #${header.id}")
-			.to("undertow:http://payment/api/pay?bridgeEndpoint=true&type=flight")
+            .removeHeaders("CamelHttp.*")
+			.to("http://payment/api/pay?httpMethod=POST&type=flight")
 			.log("Payment for flight #${header.id} done");
 
 		from("direct:cancelPurchase")
