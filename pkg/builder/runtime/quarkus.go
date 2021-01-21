@@ -83,7 +83,7 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 	// this to happen as routes are loaded at runtime and looking for
 	// routes at build time may try to load camel-k-runtime routes builder
 	// proxies which in some case may fail
-	p.Properties["quarkus.camel.main.routes-discovery.enabled"] = "false"
+	p.Properties["quarkus.camel.routes-discovery.enabled"] = "false"
 
 	// disable quarkus banner ...
 	p.Properties["quarkus.banner.enabled"] = "false"
