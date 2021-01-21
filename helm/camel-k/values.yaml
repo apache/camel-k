@@ -28,3 +28,4 @@ operator:
 platform:
   build:
     registry: {}
+  cluster: ""
