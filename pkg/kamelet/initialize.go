@@ -30,14 +30,28 @@ import (
 func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 	target := kamelet.DeepCopy()
 
+	ok := true
 	if !v1alpha1.ValidKameletName(kamelet.Name) {
-		target.Status.Phase = v1alpha1.KameletPhaseError
+		ok = false
 		target.Status.SetCondition(
 			v1alpha1.KameletConditionReady,
 			corev1.ConditionFalse,
-			v1alpha1.KameletConditionIllegalName,
+			v1alpha1.KameletConditionReasonInvalidName,
 			fmt.Sprintf("Kamelet name %q is reserved", kamelet.Name),
 		)
+	}
+	if !v1alpha1.ValidKameletProperties(kamelet) {
+		ok = false
+		target.Status.SetCondition(
+			v1alpha1.KameletConditionReady,
+			corev1.ConditionFalse,
+			v1alpha1.KameletConditionReasonInvalidProperty,
+			fmt.Sprintf("Kamelet property %q is reserved and cannot be part of the schema", v1alpha1.KameletIDProperty),
+		)
+	}
+
+	if !ok {
+		target.Status.Phase = v1alpha1.KameletPhaseError
 	} else {
 		target.Status.Phase = v1alpha1.KameletPhaseReady
 		target.Status.SetCondition(

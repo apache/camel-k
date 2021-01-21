@@ -29,6 +29,7 @@ const (
 
 var (
 	reservedKameletNames = map[string]bool{"source": true, "sink": true}
+	KameletIDProperty    = "id"
 )
 
 // KameletSpec defines the desired state of Kamelet
@@ -94,8 +95,10 @@ const (
 )
 
 const (
-	// KameletConditionIllegalName --
-	KameletConditionIllegalName string = "IllegalName"
+	// KameletConditionReasonInvalidName --
+	KameletConditionReasonInvalidName string = "InvalidName"
+	// KameletConditionReasonInvalidProperty --
+	KameletConditionReasonInvalidProperty string = "InvalidProperty"
 )
 
 type KameletPhase string

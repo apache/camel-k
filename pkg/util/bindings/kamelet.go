@@ -50,6 +50,12 @@ func (k KameletBindingProvider) Translate(ctx BindingContext, endpointType v1alp
 		if err != nil {
 			return nil, err
 		}
+
+		if id, ok := props[v1alpha1.KameletIDProperty]; ok && id != "" {
+			delete(props, v1alpha1.KameletIDProperty)
+			kameletURI = fmt.Sprintf("%s/%s", kameletURI, url.PathEscape(id))
+		}
+
 		kameletURI = uri.AppendParameters(kameletURI, props)
 
 		return &Binding{
