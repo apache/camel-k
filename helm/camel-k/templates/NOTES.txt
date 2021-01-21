@@ -1,7 +1,7 @@
 {{/*
 Constraints
 */}}
-{{- if (not .Values.platform.cluster) or (.Values.platform.cluster ne "OpenShift") }}
+{{- if or (not .Values.platform.cluster) (ne .Values.platform.cluster "OpenShift") }}
 {{ required "Field \"platform.build.registry.address\" is required when not running on OpenShift (set \"platform.cluster=OpenShift\" if you're using OpenShift instead)!" .Values.platform.build.registry.address | substr 0 0 }}
 {{- end }}
 
