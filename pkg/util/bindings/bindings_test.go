@@ -137,6 +137,20 @@ func TestBindings(t *testing.T) {
 			uri: "kamelet:mykamelet?encodedkey%3F=encoded%3Dval&mymessage=myval",
 		},
 		{
+			endpoint: v1alpha1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "Kamelet",
+					APIVersion: "camel.apache.org/v1any1",
+					Name:       "mykamelet",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"id":        "myid?",
+					"mymessage": "myval",
+				}),
+			},
+			uri: "kamelet:mykamelet/myid%3F?mymessage=myval",
+		},
+		{
 			endpointType: v1alpha1.EndpointTypeSink,
 			endpoint: v1alpha1.Endpoint{
 				URI: asStringPointer("https://myurl/hey"),

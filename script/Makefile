@@ -31,7 +31,7 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1274
+STAGING_RUNTIME_REPO :=
 
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO :=
