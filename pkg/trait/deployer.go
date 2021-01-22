@@ -19,7 +19,6 @@ package trait
 
 import (
 	"github.com/pkg/errors"
-
 	"k8s.io/apimachinery/pkg/types"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -95,17 +94,22 @@ func (t *deployerTrait) Apply(e *Environment) error {
 					return err
 				}
 
-				p, err := patch.PositiveMergePatch(object, resource)
-				if err != nil {
-					return err
-				} else if len(p) == 0 {
-					// Avoid triggering a patch request for nothing
-					continue
-				}
+				if !patch.SpecEqualDeepDerivative(object, resource) {
+					// If both objects have a "Spec" field and it contains all expected fields
+					// (plus optional others), then avoid patching
 
-				err = env.Client.Patch(env.C, resource, client.RawPatch(types.MergePatchType, p))
-				if err != nil {
-					return errors.Wrap(err, "error during patch resource")
+					p, err := patch.PositiveMergePatch(object, resource)
+					if err != nil {
+						return err
+					} else if len(p) == 0 {
+						// Avoid triggering a patch request for nothing
+						continue
+					}
+
+					err = env.Client.Patch(env.C, resource, client.RawPatch(types.MergePatchType, p))
+					if err != nil {
+						return errors.Wrap(err, "error during patch resource")
+					}
 				}
 			}
 			return nil
