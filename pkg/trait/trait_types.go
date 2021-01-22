@@ -559,6 +559,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
 			MountPath: resPath,
+			ReadOnly:  true,
 		})
 	}
 
@@ -603,6 +604,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
 			MountPath: resPath,
+			ReadOnly:  true,
 		})
 	}
 
@@ -639,6 +641,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 				*mnts = append(*mnts, corev1.VolumeMount{
 					Name:      propertiesType + "-properties",
 					MountPath: mountPath,
+					ReadOnly:  true,
 				})
 			}
 		})
@@ -665,6 +668,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
 			MountPath: path.Join(ConfigMapsMountPath, strings.ToLower(cmName)),
+			ReadOnly:  true,
 		})
 	}
 
@@ -687,6 +691,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
 			MountPath: path.Join(SecretsMountPath, strings.ToLower(secretName)),
+			ReadOnly:  true,
 		})
 	}
 
