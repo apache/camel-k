@@ -192,6 +192,12 @@ spec:
                           type: string
                         uniqueItems:
                           type: boolean
+                        x-descriptors:
+                          description: The list of descriptors that determine which
+                            UI components to use on different views
+                          items:
+                            type: string
+                          type: array
                       type: object
                     type: object
                   required:
@@ -387,6 +393,12 @@ spec:
                                 type: string
                               uniqueItems:
                                 type: boolean
+                              x-descriptors:
+                                description: The list of descriptors that determine
+                                  which UI components to use on different views
+                                items:
+                                  type: string
+                                type: array
                             type: object
                           type: object
                         required:

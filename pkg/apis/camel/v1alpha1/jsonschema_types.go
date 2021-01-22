@@ -74,6 +74,8 @@ type JSONSchemaProp struct {
 	Enum             []JSON       `json:"enum,omitempty"`
 	Example          *JSON        `json:"example,omitempty"`
 	Nullable         bool         `json:"nullable,omitempty"`
+	// The list of descriptors that determine which UI components to use on different views
+	XDescriptors []string `json:"x-descriptors,omitempty"`
 }
 
 // JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
