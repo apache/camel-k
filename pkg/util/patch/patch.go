@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	jsonpatch "github.com/evanphx/json-patch"
+	"k8s.io/apimachinery/pkg/api/equality"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -88,4 +89,23 @@ func removeNilValues(v reflect.Value, parent reflect.Value) {
 			removeNilValues(parent, reflect.Value{})
 		}
 	}
+}
+
+func SpecEqualDeepDerivative(object runtime.Object, expected runtime.Object) (res bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			res = false
+		}
+	}()
+
+	if expected == nil {
+		return true
+	} else if object == nil {
+		return false
+	}
+
+	objectSpec := reflect.ValueOf(object).Elem().FieldByName("Spec").Interface()
+	expectedSpec := reflect.ValueOf(expected).Elem().FieldByName("Spec").Interface()
+
+	return equality.Semantic.DeepDerivative(expectedSpec, objectSpec)
 }
