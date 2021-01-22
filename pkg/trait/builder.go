@@ -485,6 +485,7 @@ func mountRegistrySecret(name string, secret registrySecret, volumes *[]corev1.V
 	*volumeMounts = append(*volumeMounts, corev1.VolumeMount{
 		Name:      "registry-secret",
 		MountPath: secret.mountPath,
+		ReadOnly:  true,
 	})
 
 	if secret.refEnv != "" {
@@ -530,6 +531,7 @@ func mountRegistryConfigMap(name string, config registryConfigMap, volumes *[]co
 	*volumeMounts = append(*volumeMounts, corev1.VolumeMount{
 		Name:      "registry-config",
 		MountPath: config.mountPath,
+		ReadOnly:  true,
 	})
 }
 
