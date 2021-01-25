@@ -22,11 +22,13 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/semver"
+	"github.com/spf13/cobra"
+
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/spf13/cobra"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // VersionVariant may be overridden at build time
@@ -65,13 +67,13 @@ func (o *versionCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 	return o.RootCmdOptions.preRun(cmd, args)
 }
 
-func (o *versionCmdOptions) run(cmd *cobra.Command, _ []string) error {
+func (o *versionCmdOptions) run(_ *cobra.Command, _ []string) error {
 	if o.Operator {
-		client, err := o.GetCmdClient()
+		c, err := o.GetCmdClient()
 		if err != nil {
 			return err
 		}
-		displayOperatorVersion(o.Context, client, o.Namespace)
+		displayOperatorVersion(o.Context, c, o.Namespace)
 	} else {
 		displayClientVersion()
 	}
@@ -88,10 +90,14 @@ func displayClientVersion() {
 
 func displayOperatorVersion(ctx context.Context, c client.Client, namespace string) {
 	operatorVersion, err := operatorVersion(ctx, c, namespace)
-	if err == nil {
-		fmt.Printf("Camel K Operator %s\n", operatorVersion)
+	if err != nil {
+		fmt.Printf("Unable to retrieve operator version: %s\n", err)
 	} else {
-		fmt.Printf("Error while looking for camel-k operator in namespace %s (%s)\n", namespace, err)
+		if operatorVersion == "" {
+		  fmt.Printf("Unable to retrieve operator version: The IntegrationPlatform resource hasn't been reconciled yet!")
+		} else {
+		  fmt.Printf("Camel K Operator %s\n", operatorVersion)
+		}
 	}
 }
 
@@ -110,16 +116,16 @@ func operatorVersion(ctx context.Context, c client.Client, namespace string) (st
 }
 
 func compatibleVersions(aVersion, bVersion string) bool {
-	v1, err := semver.NewVersion(aVersion)
+	a, err := semver.NewVersion(aVersion)
 	if err != nil {
-		fmt.Printf("Could not parse %s (error: %s)\n", v1, err)
+		fmt.Printf("Could not parse %s (error: %s)\n", a, err)
 		return false
 	}
-	v2, err := semver.NewVersion(bVersion)
+	b, err := semver.NewVersion(bVersion)
 	if err != nil {
-		fmt.Printf("Could not parse %s (error: %s)\n", v2, err)
+		fmt.Printf("Could not parse %s (error: %s)\n", b, err)
 		return false
 	}
 	// We consider compatible when major and minor are equals
-	return v1.Major() == v2.Major() && v1.Minor() == v2.Minor()
+	return a.Major() == b.Major() && a.Minor() == b.Minor()
 }
