@@ -186,7 +186,15 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 				return err
 			}
 		}
-		checkAndShowCompatibilityWarning(command.Context, c, command.Namespace)
+		// Check that the Kamel CLI matches that of the operator.
+		// The check relies on the version reported in the IntegrationPlatform status,
+		// which requires the operator is running and the IntegrationPlatform resource
+		// reconciled. Hence the compatibility check is skipped for the install command.
+		// Furthermore, there can be any incompatibilities, as the install command deploys
+		// the operator version it's compatible with.
+		if cmd.Use != installCommand {
+			checkAndShowCompatibilityWarning(command.Context, c, command.Namespace)
+		}
 	}
 
 	return nil
