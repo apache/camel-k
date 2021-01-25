@@ -27,6 +27,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/apache/camel-k/pkg/client"
 	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -73,7 +75,6 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 }
 
 func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
-
 	var cmd = cobra.Command{
 		BashCompletionFunction: bashCompletionFunction,
 		PersistentPreRunE:      options.preRun,
@@ -171,12 +172,12 @@ func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
 
 func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 	if !isOfflineCommand(cmd) {
-		client, err := command.GetCmdClient()
+		c, err := command.GetCmdClient()
 		if err != nil {
 			return errors.Wrap(err, "cannot get command client")
 		}
 		if command.Namespace == "" {
-			current, err := client.GetCurrentNamespace(command.KubeConfig)
+			current, err := c.GetCurrentNamespace(command.KubeConfig)
 			if err != nil {
 				return errors.Wrap(err, "cannot get current namespace")
 			}
@@ -185,19 +186,23 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 				return err
 			}
 		}
-		checkAndShowCompatibilityWarning(command.Context, client, command.Namespace)
+		checkAndShowCompatibilityWarning(command.Context, c, command.Namespace)
 	}
 
 	return nil
 }
 
-func checkAndShowCompatibilityWarning(ctx context.Context, cli client.Client, namespace string) {
-	operatorVersion, err := operatorVersion(ctx, cli, namespace)
+func checkAndShowCompatibilityWarning(ctx context.Context, c client.Client, namespace string) {
+	operatorVersion, err := operatorVersion(ctx, c, namespace)
 	if err != nil {
-		fmt.Printf("No Integration Platform available in %s namespace\n", namespace)
+		if k8serrors.IsNotFound(err) {
+			fmt.Printf("No IntegrationPlatform resource in %s namespace\n", namespace)
+		} else {
+			fmt.Printf("Unable to retrieve the operator version: %s", err.Error())
+		}
 	} else {
-		if !compatibleVersions(operatorVersion, defaults.Version) {
-			fmt.Printf("Warning: you're using Camel K %s client against a %s cluster operator\n\n", defaults.Version, operatorVersion)
+		if operatorVersion != "" && !compatibleVersions(operatorVersion, defaults.Version) {
+			fmt.Printf("You're using Camel K %s client with a %s cluster operator, it's recommended to use the same version to improve compatibility.\n\n", defaults.Version, operatorVersion)
 		}
 	}
 }
