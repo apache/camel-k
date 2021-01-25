@@ -46,12 +46,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
+const installCommand = "install"
+
 func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdOptions) {
 	options := installCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "install",
+		Use:     installCommand,
 		Short:   "Install Camel K on a Kubernetes cluster",
 		Long:    `Install Camel K on a Kubernetes or OpenShift cluster.`,
 		PreRunE: options.decode,
