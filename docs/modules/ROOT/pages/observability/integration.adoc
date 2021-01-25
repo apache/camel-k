@@ -19,8 +19,23 @@ Alternatively, the Prometheus trait can be enabled globally once, by updating th
 
 [source,sh]
 ----
-$ kubectl patch ip camel-k --type=merge -p '{"spec":{"traits":{"prometheus":{"configuration":{"enabled":"true"}}}}}'
+$ kubectl patch ip camel-k --type=merge -p '{"spec":{"traits":{"prometheus":{"configuration":{"enabled":true}}}}}'
 ----
+
+Or by directly editing the `IntegrationPlatform` resource, e.g.:
+[source, yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  traits:
+    prometheus:
+      configuration:
+        enabled: true # <1>
+----
+<1> Actives the Prometheus trait at the platform level
 
 The underlying instrumentation mechanism depends on the configured integration runtime.
 As a result, the set of registered metrics, as well as the naming convention they follow, also depends on it.
