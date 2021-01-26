@@ -155,6 +155,10 @@ To add additional dependencies to your routes:
 ./kamel run -d camel:dns examples/dns.js
 ----
 
+[[local-development]]
+== Local development environment
+If you need to develop and test your Camel K operator locally, you can follow the link:local-development.html[local development procedure].
+
 [[debugging]]
 == Debugging and Running from IDE
 

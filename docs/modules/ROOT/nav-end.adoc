@@ -14,4 +14,5 @@
 ** xref:architecture/traits.adoc[Traits]
 ** xref:architecture/sources.adoc[Sources]
 * xref:uninstalling.adoc[Uninstalling]
-* xref:developers.adoc[Contributing]
+* xref:contributing/developers.adoc[Contributing]
+** xref:contributing/local-development.adoc[Local development]
