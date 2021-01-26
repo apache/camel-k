@@ -27,9 +27,12 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 
 	"github.com/apache/camel-k/deploy"
 	"github.com/apache/camel-k/pkg/client"
@@ -53,33 +56,35 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	}
 
 	// Convert the CRD to apiextensions.k8s.io/v1beta1 in case v1 is not available.
-	// This is mainly requires to support OpenShift 3 and older versions of Kubernetes,
-	// and can be removed as soon as they are not supported anymore.
+	// This is mainly required to support OpenShift 3, and older versions of Kubernetes.
+	// It can be removed as soon as these versions are not supported anymore.
+	err = apiextensionsv1.AddToScheme(c.GetScheme())
+	if err != nil {
+		return err
+	}
+	if !isApiExtensionsV1 {
+		err = apiextensionsv1beta1.AddToScheme(c.GetScheme())
+		if err != nil {
+			return err
+		}
+	}
 	downgradeToCRDv1beta1 := func(object runtime.Object) runtime.Object {
 		if !isApiExtensionsV1 {
-			object.GetObjectKind().SetGroupVersionKind(object.GetObjectKind().GroupVersionKind().GroupKind().WithVersion("v1beta1"))
-			o := object.(*unstructured.Unstructured).Object
-			spec := o["spec"].(map[string]interface{})
-			version := spec["versions"].([]interface{})[0].(map[string]interface{})
+			v1Crd := object.(*apiextensionsv1.CustomResourceDefinition)
+			v1beta1Crd := &apiextensionsv1beta1.CustomResourceDefinition{}
+			crd := &apiextensions.CustomResourceDefinition{}
 
-			spec["validation"] = version["schema"]
-			delete(version, "schema")
-
-			spec["additionalPrinterColumns"] = version["additionalPrinterColumns"]
-			delete(version, "additionalPrinterColumns")
-			additionalPrinterColumns := spec["additionalPrinterColumns"].([]interface{})
-			for i := range additionalPrinterColumns {
-				column := additionalPrinterColumns[i].(map[string]interface{})
-				for k, v := range column {
-					if k == "jsonPath" {
-						column["JSONPath"] = v
-						delete(column, k)
-					}
-				}
+			err := apiextensionsv1.Convert_v1_CustomResourceDefinition_To_apiextensions_CustomResourceDefinition(v1Crd, crd, nil)
+			if err != nil {
+				return nil
 			}
 
-			spec["subresources"] = version["subresources"]
-			delete(version, "subresources")
+			err = apiextensionsv1beta1.Convert_apiextensions_CustomResourceDefinition_To_v1beta1_CustomResourceDefinition(crd, v1beta1Crd, nil)
+			if err != nil {
+				return nil
+			}
+
+			return v1beta1Crd
 		}
 		return object
 	}
@@ -222,13 +227,17 @@ func IsCRDInstalled(ctx context.Context, c client.Client, kind string, version s
 	return false, nil
 }
 
-func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, customizer ResourceCustomizer, collection *kubernetes.Collection) error {
-	crd, err := kubernetes.LoadRawResourceFromYaml(deploy.ResourceAsString(resourceName))
+func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, converter ResourceCustomizer, collection *kubernetes.Collection) error {
+	crd, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), deploy.ResourceAsString(resourceName))
 	if err != nil {
 		return err
 	}
 
-	crd = customizer(crd)
+	crd = converter(crd)
+	if crd == nil {
+		// The conversion has failed
+		return errors.New("cannot convert " + resourceName + " CRD to apiextensions.k8s.io/v1beta1")
+	}
 
 	if collection != nil {
 		collection.Add(crd)
