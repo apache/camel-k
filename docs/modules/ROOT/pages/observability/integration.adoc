@@ -37,25 +37,7 @@ spec:
 ----
 <1> Actives the Prometheus trait at the platform level
 
-The underlying instrumentation mechanism depends on the configured integration runtime.
-As a result, the set of registered metrics, as well as the naming convention they follow, also depends on it.
-
-=== Main
-
-When the default, a.k.a. _main_, runtime is configured for the integration, the https://github.com/prometheus/jmx_exporter[JMX exporter] is responsible for collecting and exposing metrics from JMX mBeans.
-
-A custom configuration for the JMX exporter can be used by setting the `prometheus.configmap` parameter from the Prometheus trait with the name of a ConfigMap containing a `prometheus-jmx-exporter.yaml` key, e.g.:
-
-[source,sh]
-----
-$ kamel run -t prometheus.enabled=true -t prometheus.configmap=<jmx_exporter_config>...
-----
-
-Otherwise, the Prometheus trait uses a default configuration.
-
-=== Quarkus
-
-When the Quarkus runtime is configured for the integration, the xref:latest@camel-quarkus::reference/extensions/microprofile-metrics.adoc[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
+The xref:latest@camel-quarkus::reference/extensions/microprofile-metrics.adoc[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
 
 The MicroProfile Metrics extension registers and exposes the following metrics out-of-the-box:
 
