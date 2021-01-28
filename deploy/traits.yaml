@@ -502,7 +502,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: 'The Prometheus trait configures a Prometheus-compatible endpoint. This trait also exposes the integration with `Service` and `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the Prometheus Operator. The metrics exposed vary depending on the configured runtime. With the default Quarkus runtime, metrics are exposed using MicroProfile Metrics. While with the Java main runtime, metrics are exposed using the Prometheus JMX exporter. WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator] custom resource definition to be installed. You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator. The Prometheus trait is disabled by default.'
+  description: 'The Prometheus trait configures a Prometheus-compatible endpoint. This trait also exposes the integration with `Service` and `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the Prometheus Operator. The metrics are exposed using MicroProfile Metrics. WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator] custom resource definition to be installed. You can set `service-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator. The Prometheus trait is disabled by default.'
   properties:
   - name: enabled
     type: bool

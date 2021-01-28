@@ -31,12 +31,10 @@ import (
 )
 
 // The Prometheus trait configures a Prometheus-compatible endpoint. This trait also exposes the integration with
-//`Service` and `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the
+// `Service` and `ServiceMonitor` resources, so that the endpoint can be scraped automatically, when using the
 // Prometheus Operator.
 //
-// The metrics exposed vary depending on the configured runtime. With the default Quarkus runtime, metrics are
-// exposed using MicroProfile Metrics. While with the Java main runtime, metrics are exposed using the Prometheus
-// JMX exporter.
+// The metrics are exposed using MicroProfile Metrics.
 //
 // WARNING: The creation of the `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
 // custom resource definition to be installed.
