@@ -516,9 +516,6 @@ traits:
   - name: service-monitor-labels
     type: '[]string'
     description: The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
-  - name: configmap
-    type: string
-    description: To use a custom ConfigMap containing the Prometheus JMX exporter configuration (under the `content` ConfigMap key).When this property is left empty (default), Camel K generates a standard Prometheus configuration for the integration.It is not applicable when using Quarkus.
 - name: pull-secret
   platform: false
   profiles:
