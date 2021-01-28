@@ -23,6 +23,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -218,15 +219,18 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch ServiceBindings created
-	err = c.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &v1.Integration{},
-		IsController: true,
-	})
-	if err != nil {
-		return err
+	if IsServiceBindingOperatorInstalled(mgr) {
+		// Watch ServiceBindings created
+		err = c.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
+			OwnerType:    &v1.Integration{},
+			IsController: true,
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		log.Infof("ServiceBinding monitoring is disabled, install Service Binding Operator before camel-k if needed")
 	}
-
 	return nil
 }
 
@@ -336,4 +340,17 @@ func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration,
 	err = r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err
+}
+
+func IsServiceBindingOperatorInstalled(mgr manager.Manager) bool {
+	u := &unstructured.Unstructured{}
+	u.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "apiextensions.k8s.io",
+		Kind:    "CustomResourceDefinition",
+		Version: "v1beta1",
+	})
+	err := mgr.GetClient().Get(context.Background(), k8sclient.ObjectKey{
+		Name: "servicebindings.operators.coreos.com",
+	}, u)
+	return err == nil
 }
