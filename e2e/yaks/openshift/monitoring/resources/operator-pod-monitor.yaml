@@ -15,21 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-config:
-  namespace:
-    temporary: true
-pre:
-  - name: ObtainToken
-    script: ./obtainToken.sh
-  - name: Camel-k install
-    run: |
-      kamel install -w -n ${YAKS_NAMESPACE}
-  - name: Setup monitoring resources
-    script: ./monitoringResources.sh
-  - name: Dependency install
-    script: ./dependencyInstall.sh
-  - name: Integration run
-    run: |
-      set +e
-      kamel run --name metrics Metrics.java -w -n $YAKS_NAMESPACE --dependency mvn:com.github.openshift-integration:camel-k-example-metrics-non-existing:1.0.0-SNAPSHOT
-      kamel run --name metrics Metrics.java -w -n $YAKS_NAMESPACE --dependency mvn:com.github.openshift-integration:camel-k-example-metrics:1.0.0-SNAPSHOT
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+    camel.apache.org/component: operator
+spec:
+  selector:
+    matchLabels:
+      app: "camel-k"
+      camel.apache.org/component: operator
+  podMetricsEndpoints:
+    - port: metrics
