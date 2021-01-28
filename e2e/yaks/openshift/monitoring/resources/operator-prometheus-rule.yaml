@@ -1,0 +1,145 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: camel-k-operator
+spec:
+  groups:
+    - name: camel-k-operator
+      rules:
+        - alert: CamelKReconciliationDuration
+          expr: |
+            (
+            1 - sum(rate(camel_k_reconciliation_duration_seconds_bucket{le="0.5"}[5m])) by (job)
+            /
+            sum(rate(camel_k_reconciliation_duration_seconds_count[5m])) by (job)
+            )
+            * 100
+            > 10
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the reconciliation requests
+              for {{ $labels.job }} have their duration above 0.5s.
+        - alert: CamelKReconciliationFailure
+          expr: |
+            sum(rate(camel_k_reconciliation_duration_seconds_count{result="Errored"}[5m])) by (job)
+            /
+            sum(rate(camel_k_reconciliation_duration_seconds_count[5m])) by (job)
+            * 100
+            > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the reconciliation requests
+              for {{ $labels.job }} have failed.
+        - alert: CamelKSuccessBuildDuration2m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_duration_seconds_bucket{le="120",result="Succeeded"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_duration_seconds_count{result="Succeeded"}[5m])) by (job)
+            )
+            * 100
+            > 10
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the successful builds
+              for {{ $labels.job }} have their duration above 2m.
+        - alert: CamelKSuccessBuildDuration5m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_duration_seconds_bucket{le="300",result="Succeeded"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_duration_seconds_count{result="Succeeded"}[5m])) by (job)
+            )
+            * 100
+            > 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the successful builds
+              for {{ $labels.job }} have their duration above 5m.
+        - alert: CamelKBuildFailure
+          expr: |
+            sum(rate(camel_k_build_duration_seconds_count{result="Failed"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_duration_seconds_count[5m])) by (job)
+            * 100
+            > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }} have failed.
+        - alert: CamelKBuildError
+          expr: |
+            sum(rate(camel_k_build_duration_seconds_count{result="Error"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_duration_seconds_count[5m])) by (job)
+            * 100
+            > 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }} have errored.
+        - alert: CamelKBuildQueueDuration1m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_queue_duration_seconds_bucket{le="60"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_queue_duration_seconds_count[5m])) by (job)
+            )
+            * 100
+            > 1
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }}
+              have been queued for more than 1m.
+        - alert: CamelKBuildQueueDuration5m
+          expr: |
+            (
+            1 - sum(rate(camel_k_build_queue_duration_seconds_bucket{le="300"}[5m])) by (job)
+            /
+            sum(rate(camel_k_build_queue_duration_seconds_count[5m])) by (job)
+            )
+            * 100
+            > 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            message: |
+              {{ printf "%0.0f" $value }}% of the builds for {{ $labels.job }}
+              have been queued for more than 5m.
