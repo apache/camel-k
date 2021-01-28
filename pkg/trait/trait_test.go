@@ -207,7 +207,65 @@ func TestTraitHierarchyDecode(t *testing.T) {
 	assert.Equal(t, 15, *kns.Target)
 }
 
-func TestConfigureVolumesAndMounts(t *testing.T) {
+func TestConfigureVolumesAndMountsSources(t *testing.T) {
+	env := Environment{
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      TestDeploymentName,
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source1.java",
+							ContentRef: "my-cm1",
+							ContentKey: "source1.java",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source2.java",
+							ContentRef: "my-cm2",
+						},
+						Type: "data",
+					},
+				},
+			},
+		},
+	}
+
+	vols := make([]corev1.Volume, 0)
+	mnts := make([]corev1.VolumeMount, 0)
+
+	env.Resources.AddAll(env.ComputeConfigMaps())
+	env.ConfigureVolumesAndMounts(&vols, &mnts)
+
+	assert.Len(t, vols, 2)
+	assert.Len(t, mnts, 2)
+
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "source1.java", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+}
+
+func TestConfigureVolumesAndMountsResourcesAndProperties(t *testing.T) {
 	env := Environment{
 		Resources: kubernetes.NewCollection(),
 		Integration: &v1.Integration{

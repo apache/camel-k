@@ -529,11 +529,14 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	// Volumes :: Sources
 	//
-
 	for i, s := range e.Integration.Sources() {
 		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
 		if s.ContentRef != "" {
 			cmName = s.ContentRef
+		}
+		cmKey := "content"
+		if s.ContentKey != "" {
+			cmKey = s.ContentKey
 		}
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", i)
@@ -548,7 +551,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 					},
 					Items: []corev1.KeyToPath{
 						{
-							Key:  "content",
+							Key:  cmKey,
 							Path: resName,
 						},
 					},
