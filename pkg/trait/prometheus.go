@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -82,12 +83,8 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		switch e.CamelCatalog.Runtime.Provider {
-		case v1.RuntimeProviderQuarkus:
-			// Add the Camel Quarkus MP Metrics extension
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
-		}
-		return nil
+		// Add the Camel Quarkus MP Metrics extension
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
 	}
 
 	container := e.getIntegrationContainer()
@@ -107,12 +104,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 		Reason: v1.IntegrationConditionPrometheusAvailableReason,
 	}
 
-	var port int
-	switch e.CamelCatalog.Runtime.Provider {
-	case v1.RuntimeProviderQuarkus:
-		port = 8080
-	}
-
+	port := 8080
 	if t.Port == nil {
 		t.Port = &port
 	}
