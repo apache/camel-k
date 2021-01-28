@@ -26,7 +26,6 @@ import (
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
-	"github.com/apache/camel-k/deploy"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 )
@@ -54,17 +53,9 @@ type prometheusTrait struct {
 	ServiceMonitor *bool `property:"service-monitor" json:"serviceMonitor,omitempty"`
 	// The `ServiceMonitor` resource labels, applicable when `service-monitor` is `true`.
 	ServiceMonitorLabels []string `property:"service-monitor-labels" json:"serviceMonitorLabels,omitempty"`
-	// To use a custom ConfigMap containing the Prometheus JMX exporter configuration (under the `content` ConfigMap key).
-	// When this property is left empty (default), Camel K generates a standard Prometheus configuration for the integration.
-	// It is not applicable when using Quarkus.
-	ConfigMap string `property:"configmap" json:"configMap,omitempty"`
 }
 
-const (
-	prometheusJmxExporterConfigFileName  = "prometheus-jmx-exporter.yaml"
-	prometheusJmxExporterConfigMountPath = "/etc/prometheus"
-	prometheusPortName                   = "prometheus"
-)
+const prometheusPortName = "prometheus"
 
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
@@ -215,31 +206,4 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 		},
 	}
 	return &smt, nil
-}
-
-func (t *prometheusTrait) getJmxExporterConfigMapOrAdd(e *Environment) string {
-	if t.ConfigMap != "" {
-		return t.ConfigMap
-	}
-
-	// Add a default config if not specified by the user
-	defaultName := e.Integration.Name + "-prometheus"
-	cm := corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      defaultName,
-			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
-			},
-		},
-		Data: map[string]string{
-			"content": deploy.ResourceAsString("/prometheus-jmx-exporter.yaml"),
-		},
-	}
-	e.Resources.Add(&cm)
-	return defaultName
 }
