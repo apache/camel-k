@@ -1,4 +1,4 @@
-// camel-k: language=java trait=quarkus.enabled=true trait=prometheus.enabled=true
+// camel-k: language=java trait=prometheus.enabled=true
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
