@@ -2,8 +2,8 @@
 title: Provided Kamelets
 authors:
   - "@nicolaferraro"
-creation-date: 2020-01-29
-last-updated: 2020-01-29
+creation-date: 2021-01-29
+last-updated: 2021-01-29
 status: implementable
 see-also: []
 replaces: []
@@ -17,7 +17,7 @@ superseded-by: []
 
 As Apache Camel, we offer several components (300+) that can be used out-of-the-box in Camel K. Each one of them implements connection for a single
 system/protocol and usually provides access to several features (hence the component configuration is usually over-complicated).
-We also have defined the concept of Kamelet, that differently from a component, is an higher level resource and satisfies a single single use case and provides a
+We also have defined the concept of Kamelet, that differently from a component, is an higher level resource and satisfies a single use case and provides a
 simple configuration. A Kamelet can also use one or more components in its definition, to make the distinction clearer.
 
 In parallel to the component catalog, I think it's a good idea to offer also a catalog of **"Apache Camel Kamelets"**.
