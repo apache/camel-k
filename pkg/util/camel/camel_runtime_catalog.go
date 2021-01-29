@@ -36,6 +36,15 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 	for id, artifact := range catalog.Artifacts {
 		for _, scheme := range artifact.Schemes {
 			scheme := scheme
+
+			// In case of duplicate only, choose the "org.apache.camel.quarkus" artifact (if present).
+			// Workaround for https://github.com/apache/camel-k-runtime/issues/592
+			if _, duplicate := catalog.artifactByScheme[scheme.ID]; duplicate {
+				if artifact.GroupID != "org.apache.camel.quarkus" {
+					continue
+				}
+			}
+
 			catalog.artifactByScheme[scheme.ID] = id
 			catalog.schemesByID[scheme.ID] = scheme
 		}
