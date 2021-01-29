@@ -45,12 +45,6 @@ func newServiceBindingTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default
-func (t *serviceBindingTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile == v1.TraitProfileKubernetes ||
-		profile == v1.TraitProfileOpenShift
-}
-
 func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
