@@ -207,65 +207,7 @@ func TestTraitHierarchyDecode(t *testing.T) {
 	assert.Equal(t, 15, *kns.Target)
 }
 
-func TestConfigureVolumesAndMountsSources(t *testing.T) {
-	env := Environment{
-		Resources: kubernetes.NewCollection(),
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      TestDeploymentName,
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationSpec{
-				Sources: []v1.SourceSpec{
-					{
-						DataSpec: v1.DataSpec{
-							Name:       "source1.java",
-							ContentRef: "my-cm1",
-							ContentKey: "source1.java",
-						},
-						Type: "data",
-					},
-					{
-						DataSpec: v1.DataSpec{
-							Name:       "source2.java",
-							ContentRef: "my-cm2",
-						},
-						Type: "data",
-					},
-				},
-			},
-		},
-	}
-
-	vols := make([]corev1.Volume, 0)
-	mnts := make([]corev1.VolumeMount, 0)
-
-	env.Resources.AddAll(env.ComputeConfigMaps())
-	env.ConfigureVolumesAndMounts(&vols, &mnts)
-
-	assert.Len(t, vols, 2)
-	assert.Len(t, mnts, 2)
-
-	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "source1.java", v.VolumeSource.ConfigMap.Items[0].Key)
-
-	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
-	assert.NotNil(t, m)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
-	assert.NotNil(t, m)
-}
-
-func TestConfigureVolumesAndMountsResourcesAndProperties(t *testing.T) {
+func TestConfigureVolumesAndMountsTextResourcesAndProperties(t *testing.T) {
 	env := Environment{
 		Resources: kubernetes.NewCollection(),
 		Integration: &v1.Integration{
@@ -423,6 +365,131 @@ func TestConfigureVolumesAndMountsResourcesAndProperties(t *testing.T) {
 	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "testvolume-data" })
 	assert.NotNil(t, m)
 	assert.Equal(t, "/foo/bar", m.MountPath)
+}
+
+func TestConfigureVolumesAndMountsSources(t *testing.T) {
+	env := Environment{
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      TestDeploymentName,
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source1.java",
+							ContentRef: "my-cm1",
+							ContentKey: "source1.java",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source2.java",
+							ContentRef: "my-cm2",
+						},
+						Type: "data",
+					},
+				},
+			},
+		},
+	}
+
+	vols := make([]corev1.Volume, 0)
+	mnts := make([]corev1.VolumeMount, 0)
+
+	env.Resources.AddAll(env.ComputeConfigMaps())
+	env.ConfigureVolumesAndMounts(&vols, &mnts)
+
+	assert.Len(t, vols, 2)
+	assert.Len(t, mnts, 2)
+
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "source1.java", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+}
+
+func TestConfigureVolumesAndMountsBinaryAndTextResources(t *testing.T) {
+	env := Environment{
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      TestDeploymentName,
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationSpec{
+				Resources: []v1.ResourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "res1.bin",
+							RawContent:  []byte{1, 2, 3, 4},
+							ContentRef:  "my-cm1",
+							ContentKey:  "my-binary",
+							ContentType: "application/octet-stream",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "res2.txt",
+							ContentRef:  "my-cm2",
+							Content:     "hello",
+							ContentKey:  "my-text",
+							ContentType: "text/plain",
+						},
+						Type: "data",
+					},
+				},
+			},
+		},
+	}
+
+	vols := make([]corev1.Volume, 0)
+	mnts := make([]corev1.VolumeMount, 0)
+
+	env.Resources.AddAll(env.ComputeConfigMaps())
+	env.ConfigureVolumesAndMounts(&vols, &mnts)
+
+	assert.Len(t, vols, 2)
+	assert.Len(t, mnts, 2)
+
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "my-binary", v.VolumeSource.ConfigMap.Items[0].Key)
+	assert.Equal(t, "res1.bin", v.VolumeSource.ConfigMap.Items[0].Path)
+
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+	assert.Equal(t, "/etc/camel/resources/i-resource-000", m.MountPath)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "my-text", v.VolumeSource.ConfigMap.Items[0].Key)
+	assert.Equal(t, "res2.txt", v.VolumeSource.ConfigMap.Items[0].Path)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+	assert.Equal(t, "/etc/camel/resources/i-resource-001", m.MountPath)
 }
 
 func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {

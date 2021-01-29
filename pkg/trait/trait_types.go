@@ -464,9 +464,20 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 					"camel.apache.org/resource.compression": strconv.FormatBool(r.Compression),
 				},
 			},
-			Data: map[string]string{
+		}
+
+		if r.ContentType != "" {
+			cm.Annotations["camel.apache.org/resource.content-type"] = r.ContentType
+		}
+
+		if r.RawContent != nil {
+			cm.BinaryData = map[string][]byte{
+				cmKey: []byte(r.RawContent),
+			}
+		} else {
+			cm.Data = map[string]string{
 				cmKey: r.Content,
-			},
+			}
 		}
 
 		maps = append(maps, &cm)

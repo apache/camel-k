@@ -495,23 +495,20 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 
 	for _, resource := range o.Resources {
-		data, compressed, err := loadContent(resource, o.Compression, o.CompressBinary)
+		rawData, contentType, err := loadRawContent(resource)
 		if err != nil {
 			return nil, err
 		}
 
-		integration.Spec.AddResources(v1.ResourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:        path.Base(resource),
-				Content:     data,
-				Compression: compressed,
-			},
-			Type: v1.ResourceTypeData,
-		})
+		resourceSpec, err := binaryOrTextResource(path.Base(resource), rawData, contentType, o.Compression)
+		if err != nil {
+			return nil, err
+		}
+		integration.Spec.AddResources(resourceSpec)
 	}
 
 	for _, resource := range o.OpenAPIs {
-		data, compressed, err := loadContent(resource, o.Compression, o.CompressBinary)
+		data, _, compressed, err := loadTextContent(resource, o.Compression)
 		if err != nil {
 			return nil, err
 		}
@@ -621,6 +618,35 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		fmt.Printf("integration \"%s\" updated\n", name)
 	}
 	return &integration, nil
+}
+
+func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool) (v1.ResourceSpec, error) {
+	resourceSpec := v1.ResourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:        fileName,
+			ContentKey:  fileName,
+			ContentType: contentType,
+			Compression: false,
+		},
+		Type: v1.ResourceTypeData,
+	}
+
+	if !base64Compression && isBinary(contentType) {
+		resourceSpec.RawContent = data
+		return resourceSpec, nil
+	}
+	// either is a text resource or base64 compression is enabled
+	if base64Compression {
+		content, err := compressToString(data)
+		if err != nil {
+			return resourceSpec, err
+		}
+		resourceSpec.Content = content
+		resourceSpec.Compression = true
+	} else {
+		resourceSpec.Content = string(data)
+	}
+	return resourceSpec, nil
 }
 
 func (o *runCmdOptions) GetIntegrationName(sources []string) string {

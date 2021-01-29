@@ -207,8 +207,10 @@ const (
 type DataSpec struct {
 	Name        string `json:"name,omitempty"`
 	Content     string `json:"content,omitempty"`
+	RawContent  []byte `json:"rawContent,omitempty"`
 	ContentRef  string `json:"contentRef,omitempty"`
 	ContentKey  string `json:"contentKey,omitempty"`
+	ContentType string `json:"contentType,omitempty"`
 	Compression bool   `json:"compression,omitempty"`
 }
 
