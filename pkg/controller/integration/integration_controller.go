@@ -23,7 +23,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,9 +42,10 @@ import (
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
-    sb "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
+	sb "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
 )
 
 // Add creates a new Integration Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -219,7 +219,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	if IsServiceBindingOperatorInstalled(mgr) {
+	if client, err := client.FromManager(mgr); err != nil {
+		log.Error(err, "cannot check permissions for watching ServiceBindings")
+	} else if ok, err := kubernetes.CheckPermission(context.TODO(), client, "operators.coreos.com", "ServiceBinding", "", "", "create"); err != nil {
+		log.Error(err, "cannot check permissions for watching ServiceBindings")
+	} else if !ok {
+		log.Info("ServiceBinding monitoring is disabled, install Service Binding Operator before camel-k if needed")
+	} else {
 		// Watch ServiceBindings created
 		err = c.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
 			OwnerType:    &v1.Integration{},
@@ -228,8 +234,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		if err != nil {
 			return err
 		}
-	} else {
-		log.Infof("ServiceBinding monitoring is disabled, install Service Binding Operator before camel-k if needed")
 	}
 	return nil
 }
@@ -340,17 +344,4 @@ func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration,
 	err = r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
 
 	return reconcile.Result{}, err
-}
-
-func IsServiceBindingOperatorInstalled(mgr manager.Manager) bool {
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "apiextensions.k8s.io",
-		Kind:    "CustomResourceDefinition",
-		Version: "v1beta1",
-	})
-	err := mgr.GetClient().Get(context.Background(), k8sclient.ObjectKey{
-		Name: "servicebindings.operators.coreos.com",
-	}, u)
-	return err == nil
 }
