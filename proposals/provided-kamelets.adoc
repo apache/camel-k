@@ -1,0 +1,82 @@
+---
+title: Provided Kamelets
+authors:
+  - "@nicolaferraro"
+creation-date: 2020-01-29
+last-updated: 2020-01-29
+status: implementable
+see-also: []
+replaces: []
+superseded-by: []
+---
+
+[[provided-kamelets]]
+= Provided Kamelets
+
+== Summary
+
+As Apache Camel, we offer several components (300+) that can be used out-of-the-box in Camel K. Each one of them implement connection for a single
+system/protocol and usually provides access to several features (hence the component configuration is usually over-complicated).
+We also have defined the concept of Kamelet, that differently from a component, is an higher level resource and satisfies a single single use case and provides a
+simple configuration. A Kamelet can also use one or more components in its definition, to make the distinction clearer.
+
+In parallel to the component catalog, I think it's a good idea to offer also a catalog of **"Apache Camel Kamelets"**.
+
+== Motivation
+
+There are several platforms that may benefit from a Kamelet Catalog that is embedded in Camel K:
+
+- The Knative team is [thinking to integrate Kamelets into the `kn` CLI](https://github.com/knative-sandbox/kn-plugin-source-kamelet): that plugin would query the
+kamelets present in a Cluster and allow to instantiate sources from them.
+- The OpenShift console [has already merged support for Kamelets in next 4.7 release](https://github.com/openshift/console/pull/7344): the console will display
+Kamelets among available sources and allow users to configure them and bind them to a destination.
+- Other platforms are encouraged to use the Kamelet model for ingress/egress use cases.
+
+As we move forward, we may want to build together a Catalog of curated Kamelets that people can leverage when using any platform that is powered by Camel K.
+
+== Goals
+
+- Involve the community into the creation of a Kamelet catalog, giving them means and examples on how to contribute new Kamelets and related tests,
+ to ensure we don't break them as we move forward.
+- Make sure that when Camel K is installed on a cluster, tools and platforms can query the Kubernetes API to find installed Kamelets and use them.
+- Make sure that Kamelets can be also used in `local run` executions.
+
+== Non-Goals
+
+- We don't want to auto-generate Kamelets from components, the Kamelet catalog should focus on common use-cases and grow with users needs.
+
+== Current state
+
+There's a procedure to embedd Kamelets in the operator, but it's not used.
+
+The current implementation currently looks up Kamelets in the current namespace first, then in the operator namespace (in case it's different), then
+it does a lookup on the `master` branch in https://github.com/apache/camel-kamelets to lookup a specific Kamelet when used.
+This causes problems because it's not difficult to hit rate limiting on using the Github APIs. There's a cache to avoid too many requests, but it's not sufficient.
+
+== Proposal
+
+We should start to add Kamelets to https://github.com/apache/camel-kamelets, and help people contributing their own.
+
+The Kamelet Catalog can be periodically versioned upon need by different projects that use Kamelets. We can use semantic version to signal
+when there's some breaking change in one or more Kamelets, or when a Kamelet uses a feature that is not present in the current version of Camel K (or other projects, when they'll support Kamelets).
+
+A Camel K release should always reference a specific tag of the Kamelet catalog. At release time (or before, to let the CI test them),
+the Catalog from the git repository is embedded into the `kamel` binary (both CLI and operator).
+
+When the operator starts, it should sync the embedded Kamelet catalog into the operator namespace, replacing
+old Kamelets in case of name clash (e.g. upgrade).
+
+In case of `kamel local run`, the CLI will use the catalog embedded in the CLI.
+
+The option to use a remote git catalog can be left as optional to let users plug their own Kamelets.
+
+== Problems and alternatives
+
+In this proposal, the Kamelet catalog is the same for the lifetime of a specific Camel K release, there's no way to upgrade the catalog without a new release.
+
+We can leave the dynamic lookup on Github (implemented in 1.3), but multiple users will hit rate limits.
+
+Another issue of dynamic lookup is that tools and platforms cannot query the Kubernetes API to obtain the list of Kamelets, but they need to
+query Github as well.
+
+We can think of a different packaging mechanism for the Kamelet catalog, e.g. an additional container image, but the `local run` use case would be worse.
