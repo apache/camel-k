@@ -65,7 +65,6 @@ func TestRunNoFlag(t *testing.T) {
 	assert.Equal(t, false, runCmdOptions.Dev)
 	assert.Equal(t, true, runCmdOptions.UseFlows)
 	assert.Equal(t, false, runCmdOptions.Compression)
-	assert.Equal(t, true, runCmdOptions.CompressBinary)
 	assert.Equal(t, false, runCmdOptions.Save)
 }
 
@@ -75,18 +74,11 @@ func TestRunNonExistingFlag(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestRunCompressBinaryFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--compress-binary=false", integrationSource)
-	assert.Nil(t, err)
-	assert.Equal(t, false, runCmdOptions.CompressBinary)
-}
-
 func TestRunCompressionFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--compression", integrationSource)
 	assert.Nil(t, err)
-	assert.Equal(t, true, runCmdOptions.CompressBinary)
+	assert.Equal(t, true, runCmdOptions.Compression)
 }
 
 func TestRunConfigMapFlag(t *testing.T) {
