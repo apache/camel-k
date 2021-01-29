@@ -81,7 +81,7 @@ func getTopLevelDependencies(catalog *camel.RuntimeCatalog, args []string) ([]st
 
 	// Invoke the dependency inspector code for each source file
 	for _, source := range args {
-		data, _, err := loadContent(source, false, false)
+		data, _, _, err := loadTextContent(source, false)
 		if err != nil {
 			return []string{}, err
 		}

@@ -26,7 +26,7 @@ import (
 	"strings"
 )
 
-func loadContent(source string, compress bool, compressBinary bool) (string, bool, error) {
+func loadRawContent(source string) ([]byte, string, error) {
 	var content []byte
 	var err error
 
@@ -35,7 +35,7 @@ func loadContent(source string, compress bool, compressBinary bool) (string, boo
 	} else {
 		u, err := url.Parse(source)
 		if err != nil {
-			return "", false, err
+			return nil, "", err
 		}
 
 		switch u.Scheme {
@@ -46,27 +46,36 @@ func loadContent(source string, compress bool, compressBinary bool) (string, boo
 		case "https":
 			content, err = loadContentHTTP(u)
 		default:
-			return "", false, fmt.Errorf("unsupported scheme %s", u.Scheme)
+			return nil, "", fmt.Errorf("unsupported scheme %s", u.Scheme)
 		}
 	}
 
 	if err != nil {
-		return "", false, err
-	}
-	doCompress := compress
-	if !doCompress && compressBinary {
-		contentType := http.DetectContentType(content)
-		if strings.HasPrefix(contentType, "application/octet-stream") {
-			doCompress = true
-		}
+		return nil, "", err
 	}
 
-	if doCompress {
-		answer, err := compressToString(content)
-		return answer, true, err
+	contentType := http.DetectContentType(content)
+	return content, contentType, nil
+}
+
+func isBinary(contentType string) bool {
+	// According the http.DetectContentType method
+	// also json and other "text" application mime types would be reported as text
+	return !strings.HasPrefix(contentType, "text")
+}
+
+func loadTextContent(source string, base64Compression bool) (string, string, bool, error) {
+	content, contentType, err := loadRawContent(source)
+	if err != nil {
+		return "", "", false, err
 	}
 
-	return string(content), false, nil
+	if base64Compression {
+		base64Compressed, err := compressToString(content)
+		return base64Compressed, contentType, true, err
+	}
+
+	return string(content), contentType, false, nil
 }
 
 func loadContentHTTP(u *url.URL) ([]byte, error) {
