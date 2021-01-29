@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/runtime"
 )
@@ -62,6 +61,6 @@ func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }
 
-func (t *quarkusTrait) addBuildSteps(task *v1.BuilderTask) {
-	task.Steps = append(task.Steps, builder.StepIDsFor(runtime.QuarkusSteps...)...)
+func (t *quarkusTrait) addBuildSteps(steps *[]builder.Step) {
+	*steps = append(*steps, runtime.QuarkusSteps...)
 }

@@ -20,11 +20,11 @@ package trait
 import (
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/stretchr/testify/assert"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestConfigureQuarkusTraitShouldSucceed(t *testing.T) {
@@ -57,13 +57,12 @@ func TestApplyQuarkusTraitDoesNothing(t *testing.T) {
 func TestQuarkusTraitAddBuildStepsShouldSucceed(t *testing.T) {
 	quarkusTrait, _ := createNominalQuarkusTest()
 
-	task := &v1.BuilderTask{
-		Steps: builder.StepIDsFor(builder.DefaultSteps...),
-	}
+	steps := make([]builder.Step, 0)
+	steps = append(steps, builder.DefaultSteps...)
 
-	quarkusTrait.addBuildSteps(task)
+	quarkusTrait.addBuildSteps(&steps)
 
-	assert.Len(t, task.Steps, 9)
+	assert.Len(t, steps, 9)
 }
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {

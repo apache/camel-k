@@ -20,10 +20,10 @@ package trait
 import (
 	"fmt"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/builder/spectrum"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +34,7 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/builder/kaniko"
 	"github.com/apache/camel-k/pkg/builder/s2i"
+	"github.com/apache/camel-k/pkg/builder/spectrum"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -179,25 +180,33 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 		BaseImage:    e.Platform.Status.Build.BaseImage,
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
-		//TODO: sort steps for easier read
-		Steps:      builder.StepIDsFor(builder.DefaultSteps...),
-		Properties: e.Platform.Status.Build.Properties,
-		Timeout:    e.Platform.Status.Build.GetTimeout(),
-		Maven:      e.Platform.Status.Build.Maven,
+		Properties:   e.Platform.Status.Build.Properties,
+		Timeout:      e.Platform.Status.Build.GetTimeout(),
+		Maven:        e.Platform.Status.Build.Maven,
 	}
+
+	steps := make([]builder.Step, 0)
+	steps = append(steps, builder.DefaultSteps...)
 
 	switch e.Platform.Status.Build.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah, v1.IntegrationPlatformBuildPublishStrategyKaniko:
 		task.BuildDir = path.Join(builderDir, e.IntegrationKit.Name)
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
-		task.Steps = append(task.Steps, builder.StepIDsFor(s2i.S2iSteps...)...)
+		steps = append(steps, s2i.S2iSteps...)
 	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
-		task.Steps = append(task.Steps, builder.StepIDsFor(spectrum.SpectrumSteps...)...)
+		steps = append(steps, spectrum.SpectrumSteps...)
 	}
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	quarkus.addBuildSteps(task)
+	quarkus.addBuildSteps(&steps)
+
+	// sort steps by phase
+	sort.SliceStable(steps, func(i, j int) bool {
+		return steps[i].Phase() < steps[j].Phase()
+	})
+
+	task.Steps = builder.StepIDsFor(steps...)
 
 	return task
 }
@@ -241,7 +250,7 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 		}
 		mountRegistryConfigMap(e.Platform.Status.Build.Registry.CA, config, &volumes, &volumeMounts)
 		// This is easier to use the --cert-dir option, otherwise Buildah defaults to looking up certificates
-		//into a directory named after the registry address
+		// into a directory named after the registry address
 		bud = append(bud[:2], append([]string{"--cert-dir=/etc/containers/certs.d"}, bud[2:]...)...)
 		push = append(push[:2], append([]string{"--cert-dir=/etc/containers/certs.d"}, push[2:]...)...)
 	}
