@@ -88,7 +88,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("logging-level", nil, "Configure the logging level. e.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
-	cmd.Flags().Bool("compress-binary", true, "Enable compression of sources and resources having a binary content type (to encode them)")
 	cmd.Flags().StringArray("resource", nil, "Add a resource")
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
@@ -108,7 +107,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 type runCmdOptions struct {
 	*RootCmdOptions `json:"-"`
 	Compression     bool     `mapstructure:"compression" yaml:",omitempty"`
-	CompressBinary  bool     `mapstructure:"compress-binary" yaml:",omitempty"`
 	Wait            bool     `mapstructure:"wait" yaml:",omitempty"`
 	Logs            bool     `mapstructure:"logs" yaml:",omitempty"`
 	Sync            bool     `mapstructure:"sync" yaml:",omitempty"`
