@@ -15,7 +15,7 @@ superseded-by: []
 
 == Summary
 
-As Apache Camel, we offer several components (300+) that can be used out-of-the-box in Camel K. Each one of them implement connection for a single
+As Apache Camel, we offer several components (300+) that can be used out-of-the-box in Camel K. Each one of them implements connection for a single
 system/protocol and usually provides access to several features (hence the component configuration is usually over-complicated).
 We also have defined the concept of Kamelet, that differently from a component, is an higher level resource and satisfies a single single use case and provides a
 simple configuration. A Kamelet can also use one or more components in its definition, to make the distinction clearer.
@@ -26,9 +26,9 @@ In parallel to the component catalog, I think it's a good idea to offer also a c
 
 There are several platforms that may benefit from a Kamelet Catalog that is embedded in Camel K:
 
-- The Knative team is [thinking to integrate Kamelets into the `kn` CLI](https://github.com/knative-sandbox/kn-plugin-source-kamelet): that plugin would query the
+- The Knative team is https://github.com/knative-sandbox/kn-plugin-source-kamelet[thinking to integrate Kamelets into the `kn` CLI]: that plugin would query the
 kamelets present in a Cluster and allow to instantiate sources from them.
-- The OpenShift console [has already merged support for Kamelets in next 4.7 release](https://github.com/openshift/console/pull/7344): the console will display
+- The OpenShift console https://github.com/openshift/console/pull/7344[has already merged support for Kamelets in next 4.7 release]: the console will display
 Kamelets among available sources and allow users to configure them and bind them to a destination.
 - Other platforms are encouraged to use the Kamelet model for ingress/egress use cases.
 
@@ -47,11 +47,11 @@ As we move forward, we may want to build together a Catalog of curated Kamelets 
 
 == Current state
 
-There's a procedure to embedd Kamelets in the operator, but it's not used.
+There's a procedure to embed Kamelets in the operator, but it's not used.
 
 The current implementation currently looks up Kamelets in the current namespace first, then in the operator namespace (in case it's different), then
-it does a lookup on the `master` branch in https://github.com/apache/camel-kamelets to lookup a specific Kamelet when used.
-This causes problems because it's not difficult to hit rate limiting on using the Github APIs. There's a cache to avoid too many requests, but it's not sufficient.
+it does a lookup on the `master` branch in https://github.com/apache/camel-kamelets to search for a specific Kamelet when used.
+This causes problems because it's not difficult to hit rate limiting on using the Github APIs. There's a cache to avoid too many requests, but it's not always sufficient.
 
 == Proposal
 
@@ -72,7 +72,8 @@ The option to use a remote git catalog can be left as optional to let users plug
 
 == Problems and alternatives
 
-In this proposal, the Kamelet catalog is the same for the lifetime of a specific Camel K release, there's no way to upgrade the catalog without a new release.
+In this proposal, the Kamelet catalog is the same for the lifetime of a specific Camel K release, there's no way to upgrade the catalog without a new release
+(talking about the provided Kamelets here, people are always free to `kubectl apply` their own Kamelets into the cluster).
 
 We can leave the dynamic lookup on Github (implemented in 1.3), but multiple users will hit rate limits.
 
