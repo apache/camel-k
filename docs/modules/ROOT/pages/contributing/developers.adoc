@@ -152,7 +152,7 @@ To add additional dependencies to your routes:
 
 [source]
 ----
-./kamel run -d camel:dns examples/dns.js
+./kamel run -d camel-dns examples/dns.js
 ----
 
 [[local-development]]
