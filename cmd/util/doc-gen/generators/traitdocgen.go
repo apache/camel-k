@@ -185,7 +185,7 @@ func writeFields(t *types.Type, traitID string, content *[]string) {
 	}
 	res = append(res, "```")
 	res = append(res, "The following configuration options are available:", "")
-	res = append(res, "[cols=\"2,1,5a\"]", "|===")
+	res = append(res, "[cols=\"2m,1m,5a\"]", "|===")
 	res = append(res, "|Property | Type | Description", "")
 	writeMembers(t, traitID, &res)
 	res = append(res, "|===", "", adocConfigurationMarkerEnd)

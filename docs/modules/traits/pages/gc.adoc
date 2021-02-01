@@ -16,7 +16,7 @@ kamel run --trait gc.[key]=[value] --trait gc.[key2]=[value2] integration.groovy
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

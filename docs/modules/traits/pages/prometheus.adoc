@@ -26,7 +26,7 @@ kamel run --trait prometheus.[key]=[value] --trait prometheus.[key2]=[value2] in
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

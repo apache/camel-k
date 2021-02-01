@@ -28,7 +28,7 @@ kamel run --trait cron.[key]=[value] --trait cron.[key2]=[value2] integration.gr
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

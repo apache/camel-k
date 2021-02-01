@@ -18,7 +18,7 @@ kamel run --trait kamelets.[key]=[value] --trait kamelets.[key2]=[value2] integr
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 
