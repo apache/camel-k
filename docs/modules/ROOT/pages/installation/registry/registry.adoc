@@ -1,7 +1,7 @@
 [[configuring-registry]]
 = Configuring Registry
 
-Every Camel K installation needs a container registry that that will be used to host integration container images.
+Every Camel K installation needs a container registry that will be used to host integration container images.
 
 A **default registry** is present in all the following supported installations:
 
@@ -16,7 +16,7 @@ Registry configuration can be set upon installation using command:
 
 [source,bash]
 ----
-kamel install --registry registry-host.io --organization your-user-id-or-org --registry-secret the-push-kubernetes-secret-name
+$ kamel install --registry registry-host.io --organization your-user-id-or-org --registry-secret the-push-kubernetes-secret-name
 ----
 
 Alternatively, the same settings can be set in the `.spec.build.registry` section of the `IntegrationPlatform` resource.
