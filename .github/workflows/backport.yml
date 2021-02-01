@@ -15,8 +15,6 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
-      - name: setup Node
-        uses: actions/setup-node@v2
       - name: Backport
         uses: ./.github/actions/backport
         with:
