@@ -339,7 +339,11 @@ bundle: generate-crd $(BUNDLE_CAMEL_APIS)
 	@# Build kustomize manifests
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle --overwrite --version $(OPERATOR_VERSION) $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
+ifneq ($(uname -s 2>/dev/null || echo Unknown),Darwin)
+	mv bundle.Dockerfile bundle/Dockerfile && sed -i '.bak' 's/bundle\///g' bundle/Dockerfile
+else
 	mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
+endif
 	@# Adds the licence headers to the csv file
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
 	@#operator-sdk bundle validate ./bundle
