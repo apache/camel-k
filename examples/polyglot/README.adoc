@@ -1,8 +1,0 @@
-= Example of route built using multiple DSLs
-
-To run it:
-
-[source,shell]
-----
-$ kamel run --name polyglot routes.xml beans.groovy JavaRoute.java
-----
