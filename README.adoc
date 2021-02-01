@@ -401,4 +401,3 @@ oc delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,cl
 == Licensing
 
 This software is licensed under the terms you may find in the file named LICENSE in this directory.
-
