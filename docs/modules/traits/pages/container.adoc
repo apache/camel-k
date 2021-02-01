@@ -20,7 +20,7 @@ kamel run --trait container.[key]=[value] --trait container.[key2]=[value2] inte
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

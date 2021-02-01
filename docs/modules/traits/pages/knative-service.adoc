@@ -20,7 +20,7 @@ kamel run --trait knative-service.[key]=[value] --trait knative-service.[key2]=[
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

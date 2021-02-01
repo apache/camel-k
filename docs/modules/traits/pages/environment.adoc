@@ -19,7 +19,7 @@ kamel run --trait environment.[key]=[value] --trait environment.[key2]=[value2] 
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

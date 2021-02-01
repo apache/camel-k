@@ -16,7 +16,7 @@ kamel run --trait pdb.[key]=[value] --trait pdb.[key2]=[value2] integration.groo
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

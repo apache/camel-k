@@ -19,7 +19,7 @@ kamel run --trait 3scale.[key]=[value] --trait 3scale.[key2]=[value2] integratio
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

@@ -22,7 +22,7 @@ kamel run --trait knative.[key]=[value] --trait knative.[key2]=[value2] integrat
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 

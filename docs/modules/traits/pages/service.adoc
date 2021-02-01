@@ -19,7 +19,7 @@ kamel run --trait service.[key]=[value] --trait service.[key2]=[value2] integrat
 ```
 The following configuration options are available:
 
-[cols="2,1,5a"]
+[cols="2m,1m,5a"]
 |===
 |Property | Type | Description
 
