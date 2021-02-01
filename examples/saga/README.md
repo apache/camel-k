@@ -1,4 +1,4 @@
-# Saga example
+# Saga Camel K examples
 
 This example is from [camel-saga-quickstart](https://github.com/nicolaferraro/camel-saga-quickstart/) adapted to work with camel-k.
 

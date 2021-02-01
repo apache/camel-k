@@ -1,6 +1,4 @@
-Knative Example (Apache Camel K)
-================================
-
+# Knative Camel K Example
 This example shows how Camel K can be used to connect Knative building blocks to create awesome applications.
 
 A video version of this https://youtu.be/btf_e2GniXM[demo is available on YouTube].
@@ -23,7 +21,7 @@ kubectl create -f words-channel.yaml
 
 We can now proceed to install all camel K integrations.
 
-== Install a "Printer"
+## Install a "Printer"
 
 We'll install a Camel K integration that will print all words from the `words` channel.
 
@@ -48,7 +46,7 @@ Under the hood, the Camel K operator does this:
 
 The resulting integration will be scaled to 0 when not used (if you wait ~5 minutes, you'll see it).
 
-== Install a "Splitter"
+## Install a "Splitter"
 
 We're now going to deploy a splitter, using the Camel core Split EIP. The splitter will take all messages from the `messages` channel,
 split them and push the single words into the `words` channel.
@@ -70,7 +68,7 @@ kamel run splitter.groovy
 
 This integration will be also materialized as a Knative autoscaling service, because the only entrypoint is passive (waits for a push notification).
 
-== Install a "Feed"
+## Install a "Feed"
 
 We're going to feed this chain of functions using a timed feed like this:
 
@@ -92,7 +90,7 @@ kamel run feed.groovy
 This cannot be materialized into an autoscaling service, but the operator understands it automatically and maps it to a plain Kubernetes Deployment
 (Istio sidecar will be injected).
 
-== Playing around
+## Playing around
 
 If you've installed all the services, you'll find that the printer pod will print single words as they arrive from the feed (every 3 seconds, passing by the splitter function).
 
@@ -100,7 +98,7 @@ If you now stop the feed integration (`kamel delete feed`) you will notice that 
 
 And if you reinstall the feed again (`kamel run feed.groovy`), the other integration will scale up again as soon as they receive messages (splitter first, then printer).
 
-== Playing harder
+## Playing harder
 
 You can also play with different kind of feeds. E.g. the following simple feed can be used to bind messages from Telegram to the system:
 

@@ -1,5 +1,4 @@
-Kafka Example (Apache Camel K)
-==============================
+# Kafka Camel K examples
 
 This example shows how Camel K can be used to connect to a Kafka broker.
 
