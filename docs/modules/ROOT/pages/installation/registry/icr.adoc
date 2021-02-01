@@ -8,18 +8,26 @@ In order to push images to `gcr.io`, you need to provide a valid key to Camel K.
 The fast way to obtain create a Namespace on ICR is by https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
 
 - Install https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
-    ```
-    ibmcloud plugin install container-registry -r 'IBM Cloud'
-    ```
++
+[source,console]
+----
+$ ibmcloud plugin install container-registry -r 'IBM Cloud'
+----
 - Log in to your IBM Cloud account.
-    ```
-    ibmcloud login -a https://cloud.ibm.com
-    ```
-- Ensure that you're targeting the correct IBM Cloud Container Registry region.
-    ```
-    ibmcloud cr region-set us-south
-    ```
-- Choose a name for your namespace, and create that namespace.
-    ```
-    ibmcloud cr namespace-add <my_namespace>
-    ```
++
+[source,console]
+----
+$ ibmcloud login -a https://cloud.ibm.com
+----
+- Ensure that you're targeting the correct IBM Cloud Container Registry region:
++
+[source,console]
+----
+$ ibmcloud cr region-set us-south
+----
+- Choose a name for your namespace, and create that namespace:
++
+[source,console]
+----
+$ ibmcloud cr namespace-add <my_namespace>
+----
