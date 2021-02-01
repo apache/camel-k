@@ -335,7 +335,7 @@ $(BUNDLE_CAMEL_APIS):
 	@# Clean up temporary working api directories
 	rm -rf api_*
 
-bundle: generate-crd $(BUNDLE_CAMEL_APIS)
+bundle: generate-crd $(BUNDLE_CAMEL_APIS) kustomize
 	@# Build kustomize manifests
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle --overwrite --version $(OPERATOR_VERSION) $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
