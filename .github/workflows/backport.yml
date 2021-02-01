@@ -1,0 +1,23 @@
+name: Backport
+on:
+  pull_request:
+    types:
+      - closed
+      - labeled
+
+jobs:
+  backport:
+    runs-on: ubuntu-18.04
+    name: Backport
+    steps:
+      - name: "Checkout camel-k"
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: setup Node
+        uses: actions/setup-node@v2
+      - name: Backport
+        uses: ./.github/actions/backport
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
