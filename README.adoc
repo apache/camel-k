@@ -101,7 +101,7 @@ camel-k-groovy-builder   0/1   Completed   0     75s
 ...
 ```
 
-After a couple of minutes you can see your integration runnning. To see the output log of your integration container get the pod id:
+After a couple of minutes you can see your integration running. To see the output log of your integration container get the pod id:
 
 ```
 kubectl get pods | grep sample
