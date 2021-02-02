@@ -39,6 +39,7 @@ func TestBindings(t *testing.T) {
 		profile      camelv1.TraitProfile
 		uri          string
 		traits       map[string]camelv1.TraitSpec
+		props        map[string]string
 	}{
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
@@ -113,6 +114,7 @@ func TestBindings(t *testing.T) {
 			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1beta1&kind=Broker",
 		},
 		{
+			endpointType: v1alpha1.EndpointTypeSource,
 			endpoint: v1alpha1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
@@ -120,9 +122,10 @@ func TestBindings(t *testing.T) {
 					Name:       "mykamelet",
 				},
 			},
-			uri: "kamelet:mykamelet",
+			uri: "kamelet:mykamelet/source",
 		},
 		{
+			endpointType: v1alpha1.EndpointTypeSink,
 			endpoint: v1alpha1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
@@ -134,7 +137,28 @@ func TestBindings(t *testing.T) {
 					"encodedkey?": "encoded=val",
 				}),
 			},
-			uri: "kamelet:mykamelet?encodedkey%3F=encoded%3Dval&mymessage=myval",
+			uri: "kamelet:mykamelet/sink",
+			props: map[string]string{
+				"camel.kamelet.mykamelet.sink.encodedkey?": "encoded=val",
+				"camel.kamelet.mykamelet.sink.mymessage":   "myval",
+			},
+		},
+		{
+			endpoint: v1alpha1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "Kamelet",
+					APIVersion: "camel.apache.org/v1any1",
+					Name:       "mykamelet",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"id":        "myid?",
+					"mymessage": "myval",
+				}),
+			},
+			uri: "kamelet:mykamelet/myid%3F",
+			props: map[string]string{
+				"camel.kamelet.mykamelet.myid?.mymessage": "myval",
+			},
 		},
 		{
 			endpoint: v1alpha1.Endpoint{
@@ -206,6 +230,7 @@ func TestBindings(t *testing.T) {
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)
 			assert.Equal(t, tc.traits, binding.Traits)
+			assert.Equal(t, tc.props, binding.ApplicationProperties)
 		})
 	}
 }
