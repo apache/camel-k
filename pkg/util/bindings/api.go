@@ -38,6 +38,8 @@ type Binding struct {
 	URI string
 	// Traits is a partial trait specification that should be merged into the integration
 	Traits map[string]v1.TraitSpec
+	// ApplicationProperties contain properties that should be set on the integration for the binding to work
+	ApplicationProperties map[string]string
 }
 
 // BindingProvider maps a KameletBinding endpoint into Camel K resources

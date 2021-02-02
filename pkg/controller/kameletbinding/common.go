@@ -20,6 +20,8 @@ package kameletbinding
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"sort"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -87,6 +89,23 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		}
 		for k, v := range to.Traits {
 			it.Spec.Traits[k] = v
+		}
+	}
+
+	if len(from.ApplicationProperties) > 0 || len(to.ApplicationProperties) > 0 {
+		propList := make([]string, 0, len(from.ApplicationProperties)+len(to.ApplicationProperties))
+		for k, v := range from.ApplicationProperties {
+			propList = append(propList, fmt.Sprintf("%s=%s", k, v))
+		}
+		for k, v := range to.ApplicationProperties {
+			propList = append(propList, fmt.Sprintf("%s=%s", k, v))
+		}
+		sort.Strings(propList)
+		for _, p := range propList {
+			it.Spec.Configuration = append(it.Spec.Configuration, v1.ConfigurationSpec{
+				Type:  "property",
+				Value: p,
+			})
 		}
 	}
 
