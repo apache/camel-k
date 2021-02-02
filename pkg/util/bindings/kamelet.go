@@ -22,7 +22,6 @@ import (
 	"net/url"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/uri"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -44,22 +43,35 @@ func (k KameletBindingProvider) Translate(ctx BindingContext, endpointType v1alp
 	}
 	// it translates only Kamelet refs
 	if e.Ref.Kind == v1alpha1.KameletKind && gv.Group == v1alpha1.SchemeGroupVersion.Group {
-		kameletURI := fmt.Sprintf("kamelet:%s", url.PathEscape(e.Ref.Name))
+		kameletName := url.PathEscape(e.Ref.Name)
+		kameletURI := fmt.Sprintf("kamelet:%s", kameletName)
 
 		props, err := e.Properties.GetPropertyMap()
 		if err != nil {
 			return nil, err
 		}
 
-		if id, ok := props[v1alpha1.KameletIDProperty]; ok && id != "" {
+		id, idPresent := props[v1alpha1.KameletIDProperty]
+		if idPresent {
 			delete(props, v1alpha1.KameletIDProperty)
-			kameletURI = fmt.Sprintf("%s/%s", kameletURI, url.PathEscape(id))
+		} else {
+			// Let's use literal "source" or "sink" as ID for the Kamelet
+			id = string(endpointType)
+		}
+		kameletURI = fmt.Sprintf("%s/%s", kameletURI, url.PathEscape(id))
+
+		var applicationProperties map[string]string
+		if len(props) > 0 {
+			applicationProperties = make(map[string]string, len(props))
+			for k, v := range props {
+				propKey := fmt.Sprintf("camel.kamelet.%s.%s.%s", kameletName, id, k)
+				applicationProperties[propKey] = v
+			}
 		}
 
-		kameletURI = uri.AppendParameters(kameletURI, props)
-
 		return &Binding{
-			URI: kameletURI,
+			URI:                   kameletURI,
+			ApplicationProperties: applicationProperties,
 		}, nil
 	}
 	return nil, nil

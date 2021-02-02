@@ -23,8 +23,8 @@ if [ "$#" -ne 2 ]; then
 fi
 
 location=$(dirname $0)
-last_tag=$1
-new_tag=$2
+last_tag=v$1
+new_tag=v$2
 
 echo "Generating release notes for version $new_tag starting from tag $last_tag"
 
