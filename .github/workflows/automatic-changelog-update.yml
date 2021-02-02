@@ -29,10 +29,14 @@ jobs:
     name: Generate changelog for master branch
     if: github.ref == 'refs/heads/master' && github.repository == 'apache/camel-k'
     steps:
-      - uses: actions/checkout@v1
+      - name: "Checkout camel-kafka-connector"
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          submodules: recursive
 
       - name: Generate changelog
-        uses: charmixer/auto-changelog-action@v1.1
+        uses: ./.github/actions/changelog
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
