@@ -345,7 +345,7 @@ bundle: generate-crd $(BUNDLE_CAMEL_APIS) kustomize
 	@# Build kustomize manifests
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle --overwrite --version $(OPERATOR_VERSION) $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
-ifneq ($(uname -s 2>/dev/null || echo Unknown),Darwin)
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
 	mv bundle.Dockerfile bundle/Dockerfile && sed -i '.bak' 's/bundle\///g' bundle/Dockerfile
 else
 	mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
