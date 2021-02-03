@@ -248,7 +248,7 @@ rules:
 - apiGroups:
   - "kafka.strimzi.io"
   resources:
-  - topics
+  - kafkatopics
   - kafkas
   verbs:
   - get
