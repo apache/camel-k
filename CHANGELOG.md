@@ -6,11 +6,15 @@
 
 **Closed issues:**
 
+- Cannot use special characters in KameletBindings [\#1986](https://github.com/apache/camel-k/issues/1986)
 - Make changelog action work again [\#1981](https://github.com/apache/camel-k/issues/1981)
 - Add a Backport Github action  [\#1969](https://github.com/apache/camel-k/issues/1969)
+- Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
 
 **Merged pull requests:**
 
+- Fix a little typo good for testing backport action [\#1989](https://github.com/apache/camel-k/pull/1989) ([oscerd](https://github.com/oscerd))
+- Fix \#1986: use properties instead of URL encoding for Kamelets in bin… [\#1987](https://github.com/apache/camel-k/pull/1987) ([nicolaferraro](https://github.com/nicolaferraro))
 - Re-introduce changelog action [\#1982](https://github.com/apache/camel-k/pull/1982) ([oscerd](https://github.com/oscerd))
 - fix\(OLM\): OLM bundle generation fixes [\#1977](https://github.com/apache/camel-k/pull/1977) ([astefanutti](https://github.com/astefanutti))
 - Backport action: Added license [\#1975](https://github.com/apache/camel-k/pull/1975) ([oscerd](https://github.com/oscerd))
@@ -1522,6 +1526,7 @@
 - knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
 - dependencies: add support for boms [\#565](https://github.com/apache/camel-k/pull/565) ([lburgazzoli](https://github.com/lburgazzoli))
 - Upgrade Operator SDK to version 0.6.0 [\#562](https://github.com/apache/camel-k/pull/562) ([astefanutti](https://github.com/astefanutti))
+- knative: fix copy secrets to env vars [\#555](https://github.com/apache/camel-k/pull/555) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.1](https://github.com/apache/camel-k/tree/0.3.1) (2019-03-15)
 
@@ -1542,7 +1547,6 @@
 
 - Fix \#557: fix generated images [\#560](https://github.com/apache/camel-k/pull/560) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(maven\): Run Maven in batch mode to reduce log noise [\#556](https://github.com/apache/camel-k/pull/556) ([jamesnetherton](https://github.com/jamesnetherton))
-- knative: fix copy secrets to env vars [\#555](https://github.com/apache/camel-k/pull/555) ([lburgazzoli](https://github.com/lburgazzoli))
 - resources: add options to configure mount path and key [\#554](https://github.com/apache/camel-k/pull/554) ([lburgazzoli](https://github.com/lburgazzoli))
 - Timeout in S2I build [\#551](https://github.com/apache/camel-k/pull/551) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix: Improve how SanitizeName handles paths and URLs [\#549](https://github.com/apache/camel-k/pull/549) ([jamesnetherton](https://github.com/jamesnetherton))
@@ -1615,6 +1619,7 @@
 - Aligned the submodule runtime from camel-k-runtime [\#476](https://github.com/apache/camel-k/pull/476) ([oscerd](https://github.com/oscerd))
 - Removed JenkinsFile since it used by the runtime repo now [\#475](https://github.com/apache/camel-k/pull/475) ([oscerd](https://github.com/oscerd))
 - Fixes \#470 [\#474](https://github.com/apache/camel-k/pull/474) ([oscerd](https://github.com/oscerd))
+- fix\(traints\): ensure an error is returned to the caller if a catalog cannot be found [\#472](https://github.com/apache/camel-k/pull/472) ([lburgazzoli](https://github.com/lburgazzoli))
 - Remove unecessary Go dep overrides [\#467](https://github.com/apache/camel-k/pull/467) ([astefanutti](https://github.com/astefanutti))
 - fix\(semver\): support exact version match when looking up camel catalog [\#465](https://github.com/apache/camel-k/pull/465) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix lint errors [\#464](https://github.com/apache/camel-k/pull/464) ([astefanutti](https://github.com/astefanutti))
@@ -1653,7 +1658,6 @@
 
 **Merged pull requests:**
 
-- fix\(traints\): ensure an error is returned to the caller if a catalog cannot be found [\#472](https://github.com/apache/camel-k/pull/472) ([lburgazzoli](https://github.com/lburgazzoli))
 - Added a FailIfNoTests option to Surefire [\#457](https://github.com/apache/camel-k/pull/457) ([oscerd](https://github.com/oscerd))
 - Enable status subresource for integration context [\#456](https://github.com/apache/camel-k/pull/456) ([astefanutti](https://github.com/astefanutti))
 - Enable status subresource for integration platform [\#455](https://github.com/apache/camel-k/pull/455) ([astefanutti](https://github.com/astefanutti))
