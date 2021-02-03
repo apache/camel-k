@@ -144,7 +144,6 @@ spec:
   minKubeVersion: 1.11.0
   provider:
     name: The Apache Software Foundation
-  replaces: camel-k-operator.v1.2.0
   selector:
     matchLabels:
       name: camel-k-operator
