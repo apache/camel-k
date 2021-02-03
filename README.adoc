@@ -221,7 +221,7 @@ As an installation shortcut, additional maven repositories can be alternatively 
 kamel cmd --maven-repository http://repo1.my-company.com --maven-repository http://repo2.my-company.com
 ----
 
-A repository url follow conventions used to configure additional repositories in https://karaf.apache.org[_Apache Karaf_] so it can be appended with zero or more of the following flags:
+A repository url follows conventions used to configure additional repositories in https://karaf.apache.org[_Apache Karaf_] so it can be appended with zero or more of the following flags:
 
 * **@snapshots**: the repository contains snapshots
 * **@noreleases**: the repository does not contain any released artifacts
