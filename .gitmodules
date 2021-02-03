@@ -1,6 +1,6 @@
 [submodule ".github/actions/backport"]
 	path = .github/actions/backport
-	url = https://github.com/m-kuhn/backport.git
+	url = https://github.com/tibdex/backport
 [submodule ".github/actions/changelog"]
 	path = .github/actions/changelog
 	url = https://github.com/CharMixer/auto-changelog-action
