@@ -21,9 +21,10 @@ This trait is available in the following profiles: **Kubernetes, Knative, OpenSh
 == Configuration
 
 Trait properties can be specified when running any integration with the CLI:
-```
-kamel run --trait prometheus.[key]=[value] --trait prometheus.[key2]=[value2] integration.groovy
-```
+[source,console]
+----
+$ kamel run --trait prometheus.[key]=[value] --trait prometheus.[key2]=[value2] integration.groovy
+----
 The following configuration options are available:
 
 [cols="2m,1m,5a"]

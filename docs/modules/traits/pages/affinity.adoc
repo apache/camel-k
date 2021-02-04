@@ -14,9 +14,10 @@ This trait is available in the following profiles: **Kubernetes, Knative, OpenSh
 == Configuration
 
 Trait properties can be specified when running any integration with the CLI:
-```
-kamel run --trait affinity.[key]=[value] --trait affinity.[key2]=[value2] integration.groovy
-```
+[source,console]
+----
+$ kamel run --trait affinity.[key]=[value] --trait affinity.[key2]=[value2] integration.groovy
+----
 The following configuration options are available:
 
 [cols="2m,1m,5a"]
@@ -57,23 +58,23 @@ integration pod(s) should not be co-located with.
 
 * To schedule the integration pod(s) on a specific node using the https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#interlude-built-in-node-labels[built-in node label] `kubernetes.io/hostname`:
 +
-[source,shell]
+[source,console]
 $ kamel run -t affinity.node-affinity-labels="kubernetes.io/hostname in(node-66-50.hosted.k8s.tld)" ...
 
 * To schedule a single integration pod per node (using the `Exists` operator):
 +
-[source,shell]
+[source,console]
 $ kamel run -t affinity.pod-anti-affinity-labels="camel.apache.org/integration" ...
 
 * To co-locate the integration pod(s) with other integration pod(s):
 +
-[source,shell]
+[source,console]
 $ kamel run -t affinity.pod-affinity-labels="camel.apache.org/integration in(it1, it2)" ...
 
 The `*-labels` options follow the requirements from https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors[Label selectors].
 They can be multi-valuated, then the requirements list is ANDed, e.g., to schedule a single integration pod per node AND not co-located with the Camel K operator pod(s):
 
-[source,shell]
+[source,console]
 ----
 $ kamel run -t affinity.pod-anti-affinity-labels="camel.apache.org/integration" -t affinity.pod-anti-affinity-labels="camel.apache.org/component=operator" ...
 ----
