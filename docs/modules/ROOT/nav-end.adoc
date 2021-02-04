@@ -16,3 +16,4 @@
 * xref:uninstalling.adoc[Uninstalling]
 * xref:contributing/developers.adoc[Contributing]
 ** xref:contributing/local-development.adoc[Local development]
+** xref:contributing/local-deployment-olm.adoc[Local OLM deployment]
