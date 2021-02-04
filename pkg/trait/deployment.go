@@ -102,7 +102,7 @@ func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
 func (t *deploymentTrait) Apply(e *Environment) error {
 	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
 		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
-		maps := e.ComputeConfigMaps()
+		maps := e.computeConfigMaps()
 		deployment := t.getDeploymentFor(e)
 
 		e.Resources.AddAll(maps)

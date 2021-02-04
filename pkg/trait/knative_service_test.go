@@ -21,16 +21,17 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
-	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 const (
@@ -172,7 +173,7 @@ func TestKnativeService(t *testing.T) {
 		}
 	})
 
-	assert.Equal(t, "file:/etc/camel/sources/i-source-000/routes.js", environment.ApplicationProperties["camel.k.sources[0].location"])
+	assert.Equal(t, "file:/etc/camel/sources/routes.js", environment.ApplicationProperties["camel.k.sources[0].location"])
 	assert.Equal(t, "js", environment.ApplicationProperties["camel.k.sources[0].language"])
 	assert.Equal(t, "true", environment.ApplicationProperties["camel.k.sources[0].compressed"])
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")

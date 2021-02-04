@@ -185,7 +185,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	// combine Environment of integration with platform, kit, integration
-	for key, value := range e.CollectConfigurationPairs("env") {
+	for key, value := range e.collectConfigurationPairs("env") {
 		envvar.SetVal(&container.Env, key, value)
 	}
 
@@ -193,7 +193,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 
-	e.AddSourcesProperties()
+	e.addSourcesProperties()
 
 	t.configureResources(e, &container)
 
@@ -217,11 +217,11 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props := e.ComputeApplicationProperties(); props != nil {
+		if props := e.computeApplicationProperties(); props != nil {
 			e.Resources.Add(props)
 		}
 
-		e.ConfigureVolumesAndMounts(
+		e.configureVolumesAndMounts(
 			&deployment.Spec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
@@ -258,11 +258,11 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 				envvar.SetVar(&container.Env, env)
 			}
 		}
-		if props := e.ComputeApplicationProperties(); props != nil {
+		if props := e.computeApplicationProperties(); props != nil {
 			e.Resources.Add(props)
 		}
 
-		e.ConfigureVolumesAndMounts(
+		e.configureVolumesAndMounts(
 			&service.Spec.ConfigurationSpec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
@@ -287,11 +287,11 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props := e.ComputeApplicationProperties(); props != nil {
+		if props := e.computeApplicationProperties(); props != nil {
 			e.Resources.Add(props)
 		}
 
-		e.ConfigureVolumesAndMounts(
+		e.configureVolumesAndMounts(
 			&cron.Spec.JobTemplate.Spec.Template.Spec.Volumes,
 			&container.VolumeMounts,
 		)
