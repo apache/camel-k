@@ -291,7 +291,7 @@ func TestConfigureVolumesAndMountsTextResourcesAndProperties(t *testing.T) {
 
 	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
 	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/conf.d", m.MountPath)
+	assert.Equal(t, "/etc/camel/conf.d/user.properties", m.MountPath)
 
 	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
 	assert.NotNil(t, v)

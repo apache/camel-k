@@ -43,7 +43,6 @@ const True = "true"
 
 var (
 	basePath            = "/etc/camel"
-	confPath            = path.Join(basePath, "conf")
 	confDPath           = path.Join(basePath, "conf.d")
 	sourcesMountPath    = path.Join(basePath, "sources")
 	resourcesMountPath  = path.Join(basePath, "resources")
@@ -606,14 +605,15 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
-			var propertiesType string
-			var mountPath string
+			propertiesType := configMap.Labels["camel.apache.org/properties.type"]
+			resName := propertiesType + ".properties"
 
-			switch propertiesType = configMap.Labels["camel.apache.org/properties.type"]; propertiesType {
+			var mountPath string
+			switch propertiesType {
 			case "application":
-				mountPath = confPath
+				mountPath = path.Join(basePath, resName)
 			case "user":
-				mountPath = confDPath
+				mountPath = path.Join(confDPath, resName)
 			}
 
 			if propertiesType != "" {
@@ -627,7 +627,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 							Items: []corev1.KeyToPath{
 								{
 									Key:  "application.properties",
-									Path: propertiesType + ".properties",
+									Path: resName,
 								},
 							},
 						},
@@ -638,6 +638,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 					Name:      propertiesType + "-properties",
 					MountPath: mountPath,
 					ReadOnly:  true,
+					SubPath:   resName,
 				})
 			}
 		})
