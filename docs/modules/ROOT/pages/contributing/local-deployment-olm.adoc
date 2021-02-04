@@ -1,0 +1,127 @@
+[[contributing]]
+= Deploy with OLM from source
+
+The following steps assume that
+
+- you've already built the camel-k image using `make images` and made it available in the cluster as an imagestream
+- you've already built the bundle image using `make bundle` and have pushed it to some registry
+
+To perform OLM (Operator Lifecycle Manager) based deployment of camel-k, built from source locally on an Openshift cluster, you can follow the steps below.
+
+Login to the cluster using the standard "oc" tool, create new project, do other basic setup. Reference commands below
+
+```
+oc login -u <user> -p <password>
+oc new-project camelk || true
+oc policy add-role-to-group system:image-puller system:serviceaccounts --namespace=camelk || true
+oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+HOST=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
+echo $HOST
+podman login -u <user> -p $(oc whoami -t) --tls-verify=false $HOST
+```
+
+Now, you need to build a catalog image (from the previously built bundle image, which has been pushed to some registry) and make it available in the cluster as an imagestream. And to achieve this, you need `opm` binary and the image named `upstream-opm-builder` which is used by opm to build the catalog image. The `opm` binary can be dowloaded from https://github.com/operator-framework/operator-registry/releases[here] and the image is available on https://quay.io/repository/operator-framework/upstream-opm-builder[quay.io]. Add the `opm` binary to the PATH environment. The steps below have been validated with `opm` v1.15.3. However, newer versions may work as expected, with minor changes in command line arguments (if any). If the binary and the image are not available for your platform, you'll need to build those from source.
+
+Now, the catalog image can be built and pushed to the imagestream as:
+
+```
+opm index add -u podman --bundles <registry>/<repo>/camel-k-bundle:<tag> --tag $HOST/camelk/camel-k-catalog:<tag> -p podman
+podman push $HOST/camelk/camel-k-catalog:<tag> --tls-verify=false
+```
+
+Note that the -u and -p options of opm allow usage of different tools for dealing with containers/image registries i.e. docker, podman. Here are the details of the available options for opm index build
+
+```
+opm index add -h
+Add operator bundles to an index.
+
+ This command will add the given set of bundle images (specified by the --bundles option) to an index image (provided by the --from-index option).
+
+ If multiple bundles are given with '--mode=replaces' (the default), bundles are added to the index by order of ascending (semver) version unless the update graph specified by replaces requires a different input order; e.g. 1.0.0 replaces 1.0.1 would result in [1.0.1, 1.0.0] instead of the [1.0.0, 1.0.1] normally expected of semver. However, for most cases (e.g. 1.0.1 replaces 1.0.0) the bundle with the highest version is used to set the default channel of the related package.
+
+Usage:
+  opm index add [flags]
+
+Examples:
+  # Create an index image from scratch with a single bundle image
+  opm index add --bundles quay.io/operator-framework/operator-bundle-prometheus@sha256:a3ee653ffa8a0d2bbb2fabb150a94da6e878b6e9eb07defd40dc884effde11a0 --tag quay.io/operator-framework/monitoring:1.0.0
+
+  # Add a single bundle image to an index image
+  opm index add --bundles quay.io/operator-framework/operator-bundle-prometheus:0.15.0 --from-index quay.io/operator-framework/monitoring:1.0.0 --tag quay.io/operator-framework/monitoring:1.0.1
+
+  # Add multiple bundles to an index and generate a Dockerfile instead of an image
+  opm index add --bundles quay.io/operator-framework/operator-bundle-prometheus:0.15.0,quay.io/operator-framework/operator-bundle-prometheus:0.22.2 --generate
+
+Flags:
+  -i, --binary-image opm        container image for on-image opm command
+  -u, --build-tool string       tool to build container images. One of: [docker, podman]. Defaults to podman. Overrides part of container-tool.
+  -b, --bundles strings         comma separated list of bundles to add
+  -c, --container-tool string   tool to interact with container images (save, build, etc.). One of: [docker, podman]
+  -f, --from-index string       previous index to add to
+      --generate                if enabled, just creates the dockerfile and saves it to local disk
+  -h, --help                    help for add
+      --mode string             graph update mode that defines how channel graphs are updated. One of: [replaces, semver, semver-skippatch] (default "replaces")
+  -d, --out-dockerfile string   if generating the dockerfile, this flag is used to (optionally) specify a dockerfile name
+      --permissive              allow registry load errors
+  -p, --pull-tool string        tool to pull container images. One of: [none, docker, podman]. Defaults to none. Overrides part of container-tool.
+  -t, --tag string              custom tag for container image being built
+
+Global Flags:
+      --skip-tls   skip TLS certificate verification for container image registries while pulling bundles or index
+```
+
+In order to create a catalogsource which will use this custom catalog, create a catalog-source.yaml file
+
+```
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: camel-k-catalog
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: image-registry.openshift-image-registry.svc:5000/camelk/camel-k-catalog:<tag>
+  displayName: Camel K catalog
+  publisher: My publisher
+```
+
+and create the catalogsource and confirm its' creation.
+
+```
+# oc create -f catalog-source.yaml
+catalogsource.operators.coreos.com/camel-k-catalog created
+```
+
+The custom catalog that we created using the yaml file above should be visible in the cluster now, along with the corresponding package manifest.
+
+```
+# oc get catalogsources -A | grep camel
+openshift-marketplace   camel-k-catalog       Camel K catalog       grpc   My publisher   41m
+# oc get packagemanifest -A | grep camel
+openshift-marketplace   knative-camel-operator                               Community Operators   21d
+openshift-marketplace   red-hat-camel-k                                      Red Hat Operators     21d
+openshift-marketplace   camel-k                                              Community Operators   21d
+openshift-marketplace   camel-k                                              Camel K catalog       41m
+```
+
+Now, you can deploy the custom operator using the custom catalog as
+
+```
+# cd $GOPATH/src/github.com/apache/camel-k
+# ./kamel install --olm-source=camel-k-catalog --olm-source-namespace=openshift-marketplace --olm-channel=alpha
+OLM is available in the cluster
+Camel K installed in namespace camelk via OLM subscription
+```
+
+You can confirm the deployment. The sample log for camel-k 1.3.0 is pasted below.
+
+```
+# oc get all -A | grep camel
+camelk                                             pod/camel-k-operator-7fbb745899-qflcb                                 1/1     Running     0          8s
+openshift-marketplace                              pod/camel-k-catalog-m8f9g                                             1/1     Running     0          4m38s
+openshift-marketplace                              service/camel-k-catalog                            ClusterIP      xxx.xx.xx.xxx    <none>                                 50051/TCP                      4m38s
+camelk                                             deployment.apps/camel-k-operator                         1/1     1            1           11s
+camelk                                             replicaset.apps/camel-k-operator-7fbb745899                         1         1         1       9s
+camelk      imagestream.image.openshift.io/camel-k                      default-route-openshift-image-registry.apps.shivani-2-46.openshift.com/camelk/camel-k                         1.3.0                                                    8 hours ago
+camelk      imagestream.image.openshift.io/camel-k-catalog              default-route-openshift-image-registry.apps.shivani-2-46.openshift.com/camelk/camel-k-catalog                 1.3.0                                                    6 hours ago
+```
