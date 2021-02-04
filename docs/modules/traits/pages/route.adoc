@@ -11,9 +11,10 @@ This trait is available in the following profiles: **OpenShift**.
 == Configuration
 
 Trait properties can be specified when running any integration with the CLI:
-```
-kamel run --trait route.[key]=[value] --trait route.[key2]=[value2] integration.groovy
-```
+[source,console]
+----
+$ kamel run --trait route.[key]=[value] --trait route.[key2]=[value2] integration.groovy
+----
 The following configuration options are available:
 
 [cols="2m,1m,5a"]

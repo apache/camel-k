@@ -15,9 +15,10 @@ WARNING: The quarkus trait is a *platform trait*: disabling it may compromise th
 == Configuration
 
 Trait properties can be specified when running any integration with the CLI:
-```
-kamel run --trait quarkus.[key]=[value] --trait quarkus.[key2]=[value2] integration.groovy
-```
+[source,console]
+----
+$ kamel run --trait quarkus.[key]=[value] --trait quarkus.[key2]=[value2] integration.groovy
+----
 The following configuration options are available:
 
 [cols="2m,1m,5a"]

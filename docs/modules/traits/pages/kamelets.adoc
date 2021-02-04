@@ -13,9 +13,10 @@ WARNING: The kamelets trait is a *platform trait*: disabling it may compromise t
 == Configuration
 
 Trait properties can be specified when running any integration with the CLI:
-```
-kamel run --trait kamelets.[key]=[value] --trait kamelets.[key2]=[value2] integration.groovy
-```
+[source,console]
+----
+$ kamel run --trait kamelets.[key]=[value] --trait kamelets.[key2]=[value2] integration.groovy
+----
 The following configuration options are available:
 
 [cols="2m,1m,5a"]
