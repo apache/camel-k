@@ -176,7 +176,7 @@ func TestKnativeService(t *testing.T) {
 	assert.Equal(t, "file:/etc/camel/sources/routes.js", environment.ApplicationProperties["camel.k.sources[0].location"])
 	assert.Equal(t, "js", environment.ApplicationProperties["camel.k.sources[0].language"])
 	assert.Equal(t, "true", environment.ApplicationProperties["camel.k.sources[0].compressed"])
-	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
+	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", "/etc/camel/application.properties")
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
 }
 

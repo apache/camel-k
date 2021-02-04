@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"path"
 	"sort"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -190,8 +191,8 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	envvar.SetVal(&container.Env, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-	envvar.SetVal(&container.Env, "CAMEL_K_CONF", "/etc/camel/conf/application.properties")
-	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", "/etc/camel/conf.d")
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF", path.Join(basePath, "application.properties"))
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", confDPath)
 
 	e.addSourcesProperties()
 
