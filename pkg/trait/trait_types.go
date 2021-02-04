@@ -25,7 +25,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,6 +32,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -42,26 +42,13 @@ import (
 const True = "true"
 
 var (
-	// BasePath --
-	BasePath = "/etc/camel"
-
-	// ConfPath --
-	ConfPath = path.Join(BasePath, "conf")
-
-	// ConfdPath --
-	ConfdPath = path.Join(BasePath, "conf.d")
-
-	// SourcesMountPath --
-	SourcesMountPath = path.Join(BasePath, "sources")
-
-	// ResourcesMountPath --
-	ResourcesMountPath = path.Join(BasePath, "resources")
-
-	// ConfigMapsMountPath --
-	ConfigMapsMountPath = path.Join(ConfdPath, "_configmaps")
-
-	// SecretsMountPath --
-	SecretsMountPath = path.Join(ConfdPath, "_secrets")
+	basePath            = "/etc/camel"
+	confPath            = path.Join(basePath, "conf")
+	confDPath           = path.Join(basePath, "conf.d")
+	sourcesMountPath    = path.Join(basePath, "sources")
+	resourcesMountPath  = path.Join(basePath, "resources")
+	configMapsMountPath = path.Join(confDPath, "_configmaps")
+	secretsMountPath    = path.Join(confDPath, "_secrets")
 )
 
 // Identifiable represent an identifiable type
@@ -336,8 +323,7 @@ func (e *Environment) DetermineNamespace() string {
 	return ""
 }
 
-// ComputeApplicationProperties --
-func (e *Environment) ComputeApplicationProperties() *corev1.ConfigMap {
+func (e *Environment) computeApplicationProperties() *corev1.ConfigMap {
 	// application properties
 	applicationProperties := ""
 
@@ -368,8 +354,7 @@ func (e *Environment) ComputeApplicationProperties() *corev1.ConfigMap {
 	return nil
 }
 
-// ComputeConfigMaps --
-func (e *Environment) ComputeConfigMaps() []runtime.Object {
+func (e *Environment) computeConfigMaps() []runtime.Object {
 	sources := e.Integration.Sources()
 	maps := make([]runtime.Object, 0, len(sources)+1)
 
@@ -377,7 +362,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	// properties have the priority
 	userProperties := ""
 
-	for key, val := range e.CollectConfigurationPairs("property") {
+	for key, val := range e.collectConfigurationPairs("property") {
 		userProperties += fmt.Sprintf("%s=%s\n", key, val)
 	}
 
@@ -472,7 +457,7 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 
 		if r.RawContent != nil {
 			cm.BinaryData = map[string][]byte{
-				cmKey: []byte(r.RawContent),
+				cmKey: r.RawContent,
 			}
 		} else {
 			cm.Data = map[string]string{
@@ -486,17 +471,13 @@ func (e *Environment) ComputeConfigMaps() []runtime.Object {
 	return maps
 }
 
-// AddSourcesProperties --
-func (e *Environment) AddSourcesProperties() {
+func (e *Environment) addSourcesProperties() {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
 	for i, s := range e.Integration.Sources() {
-		root := path.Join(SourcesMountPath, fmt.Sprintf("i-source-%03d", i))
-
 		srcName := strings.TrimPrefix(s.Name, "/")
-		src := path.Join(root, srcName)
-		src = "file:" + src
+		src := "file:" + path.Join(sourcesMountPath, srcName)
 		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", i)] = src
 
 		simpleName := srcName
@@ -516,7 +497,7 @@ func (e *Environment) AddSourcesProperties() {
 			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", i)] = string(s.InferLanguage())
 		}
 		if s.Loader != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", i)] = string(s.Loader)
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", i)] = s.Loader
 		}
 		if s.Compression {
 			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", i)] = "true"
@@ -535,8 +516,7 @@ func (e *Environment) AddSourcesProperties() {
 	}
 }
 
-// ConfigureVolumesAndMounts --
-func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
+func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
 	//
 	// Volumes :: Sources
 	//
@@ -551,7 +531,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		}
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", i)
-		resPath := path.Join(SourcesMountPath, refName)
+		resPath := path.Join(sourcesMountPath, resName)
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
@@ -574,6 +554,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			Name:      refName,
 			MountPath: resPath,
 			ReadOnly:  true,
+			SubPath:   resName,
 		})
 	}
 
@@ -586,7 +567,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := fmt.Sprintf("i-resource-%03d", i)
 		resName := strings.TrimPrefix(r.Name, "/")
 		cmKey := "content"
-		resPath := path.Join(ResourcesMountPath, refName)
+		resPath := path.Join(resourcesMountPath, resName)
 
 		if r.ContentRef != "" {
 			cmName = r.ContentRef
@@ -619,6 +600,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			Name:      refName,
 			MountPath: resPath,
 			ReadOnly:  true,
+			SubPath:   resName,
 		})
 	}
 
@@ -629,9 +611,9 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 			switch propertiesType = configMap.Labels["camel.apache.org/properties.type"]; propertiesType {
 			case "application":
-				mountPath = ConfPath
+				mountPath = confPath
 			case "user":
-				mountPath = ConfdPath
+				mountPath = confDPath
 			}
 
 			if propertiesType != "" {
@@ -664,8 +646,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	// Volumes :: Additional ConfigMaps
 	//
-
-	for _, cmName := range e.CollectConfigurationValues("configmap") {
+	for _, cmName := range e.collectConfigurationValues("configmap") {
 		refName := kubernetes.SanitizeLabel(cmName)
 
 		*vols = append(*vols, corev1.Volume{
@@ -681,7 +662,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(ConfigMapsMountPath, strings.ToLower(cmName)),
+			MountPath: path.Join(configMapsMountPath, strings.ToLower(cmName)),
 			ReadOnly:  true,
 		})
 	}
@@ -689,8 +670,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	// Volumes :: Additional Secrets
 	//
-
-	for _, secretName := range e.CollectConfigurationValues("secret") {
+	for _, secretName := range e.collectConfigurationValues("secret") {
 		refName := kubernetes.SanitizeLabel(secretName)
 
 		*vols = append(*vols, corev1.Volume{
@@ -704,7 +684,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(SecretsMountPath, strings.ToLower(secretName)),
+			MountPath: path.Join(secretsMountPath, strings.ToLower(secretName)),
 			ReadOnly:  true,
 		})
 	}
@@ -712,7 +692,7 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	// Volumes :: Additional user provided volumes
 	//
-	for _, volumeConfig := range e.CollectConfigurationValues("volume") {
+	for _, volumeConfig := range e.collectConfigurationValues("volume") {
 		configParts := strings.Split(volumeConfig, ":")
 
 		if len(configParts) != 2 {
@@ -739,13 +719,11 @@ func (e *Environment) ConfigureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	}
 }
 
-// CollectConfigurationValues --
-func (e *Environment) CollectConfigurationValues(configurationType string) []string {
-	return CollectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
+func (e *Environment) collectConfigurationValues(configurationType string) []string {
+	return collectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
-// CollectConfigurationPairs --
-func (e *Environment) CollectConfigurationPairs(configurationType string) map[string]string {
+func (e *Environment) collectConfigurationPairs(configurationType string) map[string]string {
 	return CollectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 

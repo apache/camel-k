@@ -55,7 +55,7 @@ func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	return &kit, err
 }
 
-func CollectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
+func collectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
 	result := strset.New()
 
 	for _, c := range configurable {
