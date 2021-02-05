@@ -286,6 +286,7 @@ func (r *reconcileIntegration) Reconcile(request reconcile.Request) (reconcile.R
 	targetLog := rlog.ForIntegration(target)
 
 	actions := []Action{
+		NewWaitForBindingsAction(),
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		NewBuildKitAction(),
