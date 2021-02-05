@@ -112,8 +112,8 @@ const (
 	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
 	// IntegrationPhaseResolvingKit --
 	IntegrationPhaseResolvingKit IntegrationPhase = "Resolving Kit"
-	// IntegrationPhaseWaitingForServiceBindingCollectionReady --
-	IntegrationPhaseWaitingForServiceBindingCollectionReady IntegrationPhase = "Waiting For Service binding Collection Ready Status"
+	// IntegrationPhaseWaitingForBindings e.g Service Bindings --
+	IntegrationPhaseWaitingForBindings IntegrationPhase = "Waiting for Bindings"
 	// IntegrationPhaseDeploying --
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --
@@ -135,8 +135,8 @@ const (
 	IntegrationConditionKnativeServiceAvailable IntegrationConditionType = "KnativeServiceAvailable"
 	// IntegrationConditionCronJobAvailable --
 	IntegrationConditionCronJobAvailable IntegrationConditionType = "CronJobAvailable"
-	// IntegrationConditionServiceBindingCollectionReady --
-	IntegrationConditionServiceBindingCollectionReady IntegrationConditionType = "ServiceBindingCollectionReady"
+	// IntegrationConditionServiceBindingsCollectionReady --
+	IntegrationConditionServiceBindingsCollectionReady IntegrationConditionType = "ServiceBindingsCollectionReady"
 	// IntegrationConditionExposureAvailable --
 	IntegrationConditionExposureAvailable IntegrationConditionType = "ExposureAvailable"
 	// IntegrationConditionPrometheusAvailable --

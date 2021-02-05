@@ -56,7 +56,7 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 
 	return e.IntegrationInPhase(
 		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseWaitingForServiceBindingCollectionReady,
+		v1.IntegrationPhaseWaitingForBindings,
 		v1.IntegrationPhaseDeploying,
 		v1.IntegrationPhaseRunning,
 	), nil
@@ -97,12 +97,12 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 		}
 		if !serviceBindingsCollectionReady {
 			e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-				e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForServiceBindingCollectionReady
+				e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForBindings
 				return nil
 			})
 		}
 		return nil
-	} else if e.IntegrationInPhase(v1.IntegrationPhaseWaitingForServiceBindingCollectionReady) {
+	} else if e.IntegrationInPhase(v1.IntegrationPhaseWaitingForBindings) {
 		for _, name := range serviceBindings {
 			serviceBinding, err := t.getServiceBinding(e, name)
 			if err != nil {
@@ -115,10 +115,6 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 				return nil
 			}
 		}
-		e.PostActions = append(e.PostActions, func(environment *Environment) error {
-			e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-			return nil
-		})
 	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		e.ServiceBindings = make(map[string]string)
 		for _, name := range serviceBindings {
@@ -129,7 +125,7 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 			if !isCollectionReady(sb) {
 				setCollectionReady(e, name, corev1.ConditionFalse)
 				e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
-					e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForServiceBindingCollectionReady
+					e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForBindings
 					return nil
 				})
 				return nil
@@ -141,14 +137,14 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 			}
 		}
 		e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
-		e.ApplicationProperties["SERVICE_BINDING_ROOT"] = ServiceBindingsMountPath
+		e.ApplicationProperties["SERVICE_BINDING_ROOT"] = serviceBindingsMountPath
 	}
 	return nil
 }
 
 func setCollectionReady(e *Environment, serviceBinding string, status corev1.ConditionStatus) {
 	e.Integration.Status.SetCondition(
-		v1.IntegrationConditionServiceBindingCollectionReady,
+		v1.IntegrationConditionServiceBindingsCollectionReady,
 		status,
 		"",
 		fmt.Sprintf("Name=%s", serviceBinding),
