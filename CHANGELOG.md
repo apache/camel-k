@@ -8,14 +8,17 @@
 
 - Can't directly access Strimzi Topics in KameletBindings [\#1992](https://github.com/apache/camel-k/issues/1992)
 - Cannot use special characters in KameletBindings [\#1986](https://github.com/apache/camel-k/issues/1986)
+- Options to share state between routes [\#1984](https://github.com/apache/camel-k/issues/1984)
 - Make changelog action work again [\#1981](https://github.com/apache/camel-k/issues/1981)
 - Add a Backport Github action  [\#1969](https://github.com/apache/camel-k/issues/1969)
+- Release 1.3.1 [\#1966](https://github.com/apache/camel-k/issues/1966)
 - Usage of binary data in ConfigMaps [\#1946](https://github.com/apache/camel-k/issues/1946)
 - Corrupted binaries attached as resource [\#1881](https://github.com/apache/camel-k/issues/1881)
 - Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
 
 **Merged pull requests:**
 
+- chore\(doc\): Use Asciidoc style code blocks instead of Markdown style Verified [\#1999](https://github.com/apache/camel-k/pull/1999) ([astefanutti](https://github.com/astefanutti))
 - Revert "Switch to a different backport implementation" [\#1997](https://github.com/apache/camel-k/pull/1997) ([oscerd](https://github.com/oscerd))
 - Picky commit for testing backport action [\#1996](https://github.com/apache/camel-k/pull/1996) ([oscerd](https://github.com/oscerd))
 - Switch to a different backport implementation [\#1995](https://github.com/apache/camel-k/pull/1995) ([oscerd](https://github.com/oscerd))
@@ -272,6 +275,7 @@
 - Expose operator related metrics [\#1267](https://github.com/apache/camel-k/issues/1267)
 - helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
 - Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
+- Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
 - Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
 **Merged pull requests:**
@@ -1142,7 +1146,6 @@
 - remove integration delete action and finalizer [\#996](https://github.com/apache/camel-k/pull/996) ([lburgazzoli](https://github.com/lburgazzoli))
 - Include camel-k-runtime version in camel-catalog [\#993](https://github.com/apache/camel-k/pull/993) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix release issues for 1.0.0-M2 [\#986](https://github.com/apache/camel-k/pull/986) ([asifdxtreme](https://github.com/asifdxtreme))
-- fix: Kaniko cache default spec is not updated when calling the status endpoint [\#975](https://github.com/apache/camel-k/pull/975) ([astefanutti](https://github.com/astefanutti))
 - Kaniko cache warmer and platform multi-tenancy improvements [\#992](https://github.com/apache/camel-k/pull/992) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): Auto cross-compile operator image binary from non-Linux local OS [\#987](https://github.com/apache/camel-k/pull/987) ([astefanutti](https://github.com/astefanutti))
 - Add Kamel CLI download link to OpenShift Web console [\#983](https://github.com/apache/camel-k/pull/983) ([astefanutti](https://github.com/astefanutti))
@@ -1195,6 +1198,7 @@
 - chore\(scale\): Rebuild resources [\#978](https://github.com/apache/camel-k/pull/978) ([astefanutti](https://github.com/astefanutti))
 - fix: Add missing configmaps resource to camel-k-builder role [\#977](https://github.com/apache/camel-k/pull/977) ([jamesnetherton](https://github.com/jamesnetherton))
 - chore: Display Kaniko version in prelude log [\#976](https://github.com/apache/camel-k/pull/976) ([astefanutti](https://github.com/astefanutti))
+- fix: Kaniko cache default spec is not updated when calling the status endpoint [\#975](https://github.com/apache/camel-k/pull/975) ([astefanutti](https://github.com/astefanutti))
 - fix: Add nil check for dev mode intergration phase watch result [\#974](https://github.com/apache/camel-k/pull/974) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Kaniko publisher step fails with IncrementalPackager [\#970](https://github.com/apache/camel-k/pull/970) ([astefanutti](https://github.com/astefanutti))
 - chore\(cli\): Hide builder and operator commands [\#969](https://github.com/apache/camel-k/pull/969) ([astefanutti](https://github.com/astefanutti))
@@ -1266,7 +1270,6 @@
 - Integration naming issues with numbers in them [\#777](https://github.com/apache/camel-k/issues/777)
 - Route trait does not work if route.auto is set to false [\#767](https://github.com/apache/camel-k/issues/767)
 - Switch to Camel 3 [\#755](https://github.com/apache/camel-k/issues/755)
-- Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
 - Do not create a route on top of prometheus service only [\#749](https://github.com/apache/camel-k/issues/749)
 - The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Add a --global install option [\#745](https://github.com/apache/camel-k/issues/745)
