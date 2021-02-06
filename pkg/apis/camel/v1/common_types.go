@@ -230,6 +230,8 @@ const (
 	LanguageKotlin Language = "kts"
 	// LanguageYaml --
 	LanguageYaml Language = "yaml"
+	// LanguageKamelet --
+	LanguageKamelet Language = "kamelet"
 )
 
 // Languages is the list of all supported languages
@@ -240,4 +242,5 @@ var Languages = []Language{
 	LanguageXML,
 	LanguageKotlin,
 	LanguageYaml,
+	LanguageKamelet,
 }

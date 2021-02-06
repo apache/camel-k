@@ -108,6 +108,10 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 }
 
 func (o *initCmdOptions) extractLanguage(fileName string) *v1.Language {
+	if strings.HasSuffix(fileName, ".kamelet.yaml") {
+		language := v1.LanguageKamelet
+		return &language
+	}
 	for _, l := range v1.Languages {
 		if strings.HasSuffix(fileName, fmt.Sprintf(".%s", string(l))) {
 			return &l
