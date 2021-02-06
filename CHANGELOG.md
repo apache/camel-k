@@ -13,11 +13,13 @@
 - Add a Backport Github action  [\#1969](https://github.com/apache/camel-k/issues/1969)
 - Release 1.3.1 [\#1966](https://github.com/apache/camel-k/issues/1966)
 - Usage of binary data in ConfigMaps [\#1946](https://github.com/apache/camel-k/issues/1946)
+- \[ppc64le\] bundle image generated using `bundle` and `bundle-build` targets incompatible with `opm` [\#1923](https://github.com/apache/camel-k/issues/1923)
 - Corrupted binaries attached as resource [\#1881](https://github.com/apache/camel-k/issues/1881)
 - Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
 
 **Merged pull requests:**
 
+- Document OLM based deployment from source [\#2001](https://github.com/apache/camel-k/pull/2001) ([amitsadaphule](https://github.com/amitsadaphule))
 - chore\(doc\): Use Asciidoc style code blocks instead of Markdown style Verified [\#1999](https://github.com/apache/camel-k/pull/1999) ([astefanutti](https://github.com/astefanutti))
 - Revert "Switch to a different backport implementation" [\#1997](https://github.com/apache/camel-k/pull/1997) ([oscerd](https://github.com/oscerd))
 - Picky commit for testing backport action [\#1996](https://github.com/apache/camel-k/pull/1996) ([oscerd](https://github.com/oscerd))
