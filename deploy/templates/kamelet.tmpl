@@ -1,0 +1,39 @@
+# camel-k: language=kamelet
+
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: {{ .Name }}
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+    title: "Timer"
+    description: "Produces periodic events with a custom payload"
+    required:
+      - message
+    properties:
+      period:
+        title: Period
+        description: The time interval between two events
+        type: integer
+        default: 1000
+      message:
+        title: Message
+        description: The message to generate
+        type: string
+  types:
+    out:
+      mediaType: application/json
+      schema:
+        id: text.camel.apache.org
+        type: string
+  flow:
+    from:
+      uri: timer:tick
+      parameters:
+        period: {{`"{{period}}"`}}
+      steps:
+        - set-body:
+            constant: {{`"{{message}}"`}}
+        - to: "kamelet:sink"
