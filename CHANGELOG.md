@@ -840,6 +840,7 @@
 - Add super-fast builds for dev clusters [\#1306](https://github.com/apache/camel-k/pull/1306) ([nicolaferraro](https://github.com/nicolaferraro))
 - Unable to run the polyglot sample  [\#1303](https://github.com/apache/camel-k/pull/1303) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat: Support Buildah builds on OpenShift with internal registry auto-configuration [\#1295](https://github.com/apache/camel-k/pull/1295) ([astefanutti](https://github.com/astefanutti))
+- fix\(platform\): Default to pod build strategy for Kaniko [\#1292](https://github.com/apache/camel-k/pull/1292) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-RC2](https://github.com/apache/camel-k/tree/1.0.0-RC2) (2020-02-24)
 
@@ -911,7 +912,6 @@
 **Merged pull requests:**
 
 - Fix \#1236: upgrade to runtime 1.1.0 and remove camel-bean autodetection [\#1294](https://github.com/apache/camel-k/pull/1294) ([nicolaferraro](https://github.com/nicolaferraro))
-- fix\(platform\): Default to pod build strategy for Kaniko [\#1292](https://github.com/apache/camel-k/pull/1292) ([astefanutti](https://github.com/astefanutti))
 - Related to \#1190: add more logs when patch fails [\#1291](https://github.com/apache/camel-k/pull/1291) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1255: add a global installation test [\#1290](https://github.com/apache/camel-k/pull/1290) ([nicolaferraro](https://github.com/nicolaferraro))
 - Some small Knative fixes [\#1289](https://github.com/apache/camel-k/pull/1289) ([nicolaferraro](https://github.com/nicolaferraro))
