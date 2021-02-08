@@ -48,7 +48,7 @@ deploy_crd_file() {
     # Mac OSX
     cat "${source}.orig" | sed -n '/^---/,/^status/p;/^status/q' \
       | sed '1d;$d' \
-      | sed $'s/^  creationTimestamp:/  creationTimestamp:\\\n  labels:\\\n    app: camel-k/' >> "$source"
+      | sed -e $'/^  creationTimestamp:/a\\\n  labels:\\\n    app: camel-k' >> "$source"
   fi
 
   for dest in "${@:2}"; do
