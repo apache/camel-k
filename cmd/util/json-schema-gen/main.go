@@ -25,7 +25,10 @@ import (
 	"reflect"
 	"strings"
 
-	"sigs.k8s.io/yaml"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	clientscheme "k8s.io/client-go/kubernetes/scheme"
+
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func main() {
@@ -44,46 +47,51 @@ func main() {
 	}
 }
 
-func generate(crd, schema, path string, isArray bool, destination string) error {
-	crdData, err := ioutil.ReadFile(crd)
-	if err != nil {
-		return err
-	}
-
-	var crdObj map[string]interface{}
-	if err := yaml.Unmarshal(crdData, &crdObj); err != nil {
-		return err
-	}
-
-	bigSchema := getSchemaFromCRD(crdObj)
-	ref := bigSchema
-	for _, p := range pathComponents(path) {
-		ref = ref["properties"].(map[string]interface{})[p].(map[string]interface{})
-	}
-
-	dslSchema, err := loadDSLSchema(schema)
-	dslObjectSchema := dslSchema["items"].(map[string]interface{})
+func generate(crdFilename, dslFilename, path string, isArray bool, destination string) error {
+	dslSchema, err := loadDslSchema(dslFilename)
 	if err != nil {
 		return err
 	}
 	if !isArray && dslSchema["type"] == "array" {
-		dslSchema = dslObjectSchema
+		dslSchema = dslSchema["items"].(map[string]interface{})
 	}
 
-	// merge schemas
-	for k, v := range dslSchema {
-		if k != "definitions" {
-			ref[k] = v
-		}
-	}
-	// readd definitions
-	if _, alreadyHasDefs := bigSchema["definitions"]; alreadyHasDefs {
-		panic("unexpected definitions found in CRD")
-	}
-	bigSchema["definitions"] = dslObjectSchema["definitions"]
 	rebaseRefs(dslSchema)
 
-	result, err := json.MarshalIndent(bigSchema, "", "  ")
+	bytes, err := json.Marshal(dslSchema)
+	if err != nil {
+		return err
+	}
+	schema := apiextensionsv1.JSONSchemaProps{}
+	err = json.Unmarshal(bytes, &schema)
+	if err != nil {
+		return err
+	}
+
+	crdSchema, err := loadCrdSchema(crdFilename)
+	if err != nil {
+		return err
+	}
+	// read definitions
+	if len(crdSchema.Definitions) > 0 {
+		panic("unexpected definitions found in CRD")
+	}
+	if isArray {
+		crdSchema.Definitions = schema.Items.Schema.Definitions
+	} else {
+		crdSchema.Definitions = schema.Definitions
+	}
+	schema.Definitions = apiextensionsv1.JSONSchemaDefinitions{}
+
+	// merge schema back into the CRD schema
+	ref := *crdSchema
+	paths := pathComponents(path)
+	for _, p := range paths[:len(paths)-1] {
+		ref = ref.Properties[p]
+	}
+	ref.Properties[paths[len(paths)-1]] = schema
+
+	result, err := json.MarshalIndent(crdSchema, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -110,23 +118,34 @@ func rebaseRefs(schema map[string]interface{}) {
 	}
 }
 
-func loadDSLSchema(schema string) (map[string]interface{}, error) {
-	content, err := ioutil.ReadFile(schema)
+func loadDslSchema(filename string) (map[string]interface{}, error) {
+	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 	var dslSchema map[string]interface{}
-	if err := json.Unmarshal(content, &dslSchema); err != nil {
+	if err := json.Unmarshal(bytes, &dslSchema); err != nil {
 		return nil, err
 	}
 	return dslSchema, nil
 }
 
-func getSchemaFromCRD(crd map[string]interface{}) map[string]interface{} {
-	res := crd["spec"].(map[string]interface{})
-	res = res["validation"].(map[string]interface{})
-	res = res["openAPIV3Schema"].(map[string]interface{})
-	return res
+func loadCrdSchema(filename string) (*apiextensionsv1.JSONSchemaProps, error) {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	scheme := clientscheme.Scheme
+	err = apiextensionsv1.AddToScheme(scheme)
+	if err != nil {
+		return nil, err
+	}
+	obj, err := kubernetes.LoadResourceFromYaml(scheme, string(bytes))
+	if err != nil {
+		return nil, err
+	}
+	crd := obj.(*apiextensionsv1.CustomResourceDefinition)
+	return crd.Spec.Versions[0].Schema.OpenAPIV3Schema, nil
 }
 
 func pathComponents(path string) []string {
