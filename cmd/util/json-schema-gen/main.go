@@ -72,18 +72,19 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 	if err != nil {
 		return err
 	}
-	// read definitions
+	// relocate definitions
 	if len(crdSchema.Definitions) > 0 {
 		panic("unexpected definitions found in CRD")
 	}
 	if isArray {
 		crdSchema.Definitions = schema.Items.Schema.Definitions
+		schema.Items.Schema.Definitions = apiextensionsv1.JSONSchemaDefinitions{}
 	} else {
 		crdSchema.Definitions = schema.Definitions
+		schema.Definitions = apiextensionsv1.JSONSchemaDefinitions{}
 	}
-	schema.Definitions = apiextensionsv1.JSONSchemaDefinitions{}
 
-	// merge schema back into the CRD schema
+	// merge DSL schema into the CRD schema
 	ref := *crdSchema
 	paths := pathComponents(path)
 	for _, p := range paths[:len(paths)-1] {
