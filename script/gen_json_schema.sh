@@ -36,7 +36,7 @@ mkdir  tmpschema
 
 schema=./tmpschema/camel-k-loader-yaml-impl-json-schema.json
 
-go run ./cmd/util/json-schema-gen ./deploy/crd-kamelet.yaml $schema .spec.flow false ./docs/modules/ROOT/assets/attachments/schema/kamelet-schema.json
-go run ./cmd/util/json-schema-gen ./deploy/crd-integration.yaml $schema .spec.flows true ./docs/modules/ROOT/assets/attachments/schema/integration-schema.json
+go run ./cmd/util/json-schema-gen ./config/crd/bases/camel.apache.org_kamelets.yaml $schema .spec.flow false ./docs/modules/ROOT/assets/attachments/schema/kamelet-schema.json
+go run ./cmd/util/json-schema-gen ./config/crd/bases/camel.apache.org_integrations.yaml $schema .spec.flows true ./docs/modules/ROOT/assets/attachments/schema/integration-schema.json
 
 rm -r ./tmpschema
