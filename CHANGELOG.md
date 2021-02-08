@@ -840,7 +840,6 @@
 - Add super-fast builds for dev clusters [\#1306](https://github.com/apache/camel-k/pull/1306) ([nicolaferraro](https://github.com/nicolaferraro))
 - Unable to run the polyglot sample  [\#1303](https://github.com/apache/camel-k/pull/1303) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat: Support Buildah builds on OpenShift with internal registry auto-configuration [\#1295](https://github.com/apache/camel-k/pull/1295) ([astefanutti](https://github.com/astefanutti))
-- fix\(platform\): Default to pod build strategy for Kaniko [\#1292](https://github.com/apache/camel-k/pull/1292) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-RC2](https://github.com/apache/camel-k/tree/1.0.0-RC2) (2020-02-24)
 
@@ -912,6 +911,7 @@
 **Merged pull requests:**
 
 - Fix \#1236: upgrade to runtime 1.1.0 and remove camel-bean autodetection [\#1294](https://github.com/apache/camel-k/pull/1294) ([nicolaferraro](https://github.com/nicolaferraro))
+- fix\(platform\): Default to pod build strategy for Kaniko [\#1292](https://github.com/apache/camel-k/pull/1292) ([astefanutti](https://github.com/astefanutti))
 - Related to \#1190: add more logs when patch fails [\#1291](https://github.com/apache/camel-k/pull/1291) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1255: add a global installation test [\#1290](https://github.com/apache/camel-k/pull/1290) ([nicolaferraro](https://github.com/nicolaferraro))
 - Some small Knative fixes [\#1289](https://github.com/apache/camel-k/pull/1289) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1537,7 +1537,6 @@
 - Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 - allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
-- Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
 - knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
 - dependencies: add support for boms [\#565](https://github.com/apache/camel-k/pull/565) ([lburgazzoli](https://github.com/lburgazzoli))
 - Upgrade Operator SDK to version 0.6.0 [\#562](https://github.com/apache/camel-k/pull/562) ([astefanutti](https://github.com/astefanutti))
@@ -1559,6 +1558,7 @@
 
 **Merged pull requests:**
 
+- Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#557: fix generated images [\#560](https://github.com/apache/camel-k/pull/560) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(maven\): Run Maven in batch mode to reduce log noise [\#556](https://github.com/apache/camel-k/pull/556) ([jamesnetherton](https://github.com/jamesnetherton))
 - knative: fix copy secrets to env vars [\#555](https://github.com/apache/camel-k/pull/555) ([lburgazzoli](https://github.com/lburgazzoli))
