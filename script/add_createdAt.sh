@@ -39,7 +39,7 @@ for file in `find "$dir" -type f`; do
     sed -i "s/createdAt: .*/createdAt: ${created}/" "${file}"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
-    sed -i '.bak' "s/createdAt: .*/createdAt: ${created}/" "${file}"
+    sed -i '' "s/createdAt: .*/createdAt: ${created}/" "${file}"
   fi
 done
 set -e
