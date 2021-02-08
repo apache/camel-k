@@ -31,10 +31,15 @@ if [ ! -d "$dir" ]; then
 	exit 1
 fi
 
-created=$(date --utc +%FT%TZ)
+created=$(date -u +%FT%TZ)
 
 set +e
 for file in `find "$dir" -type f`; do
-  sed -i "s/createdAt: .*/createdAt: ${created}/" ${file}
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sed -i "s/createdAt: .*/createdAt: ${created}/" "${file}"
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    sed -i '.bak' "s/createdAt: .*/createdAt: ${created}/" "${file}"
+  fi
 done
 set -e
