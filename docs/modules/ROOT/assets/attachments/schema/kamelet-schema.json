@@ -1,6 +1,470 @@
 {
+  "description": "Kamelet is the Schema for the kamelets API",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "spec": {
+      "description": "KameletSpec defines the desired state of Kamelet",
+      "type": "object",
+      "properties": {
+        "authorization": {
+          "description": "AuthorizationSpec is TODO (oauth information)",
+          "type": "object"
+        },
+        "definition": {
+          "description": "JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).",
+          "type": "object",
+          "properties": {
+            "$schema": {
+              "description": "JSONSchemaURL represents a schema url.",
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "example": {
+              "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+              "x-kubernetes-preserve-unknown-fields": true
+            },
+            "externalDocs": {
+              "description": "ExternalDocumentation allows referencing an external resource for extended documentation.",
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            },
+            "id": {
+              "type": "string"
+            },
+            "properties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "default": {
+                    "description": "default is a default value for undefined object fields.",
+                    "x-kubernetes-preserve-unknown-fields": true
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "enum": {
+                    "type": "array",
+                    "items": {
+                      "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                      "x-kubernetes-preserve-unknown-fields": true
+                    }
+                  },
+                  "example": {
+                    "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                    "x-kubernetes-preserve-unknown-fields": true
+                  },
+                  "exclusiveMaximum": {
+                    "type": "boolean"
+                  },
+                  "exclusiveMinimum": {
+                    "type": "boolean"
+                  },
+                  "format": {
+                    "description": "format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated: \n - bsonobjectid: a bson object ID, i.e. a 24 characters hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI - email: an email address as parsed by Golang net/mail.ParseAddress - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034]. - ipv4: an IPv4 IP as parsed by Golang net.ParseIP - ipv6: an IPv6 IP as parsed by Golang net.ParseIP - cidr: a CIDR as parsed by Golang net.ParseCIDR - mac: a MAC address as parsed by Golang net.ParseMAC - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - isbn: an ISBN10 or ISBN13 number string like \"0321751043\" or \"978-0321751041\" - isbn10: an ISBN10 number string like \"0321751043\" - isbn13: an ISBN13 number string like \"978-0321751041\" - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$ with any non digit characters mixed in - ssn: a U.S. social security number following the regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\" - byte: base64 encoded binary data - password: any kind of string - date: a date string like \"2006-01-02\" as defined by full-date in RFC3339 - duration: a duration string like \"22 ns\" as parsed by Golang time.ParseDuration or compatible with Scala duration format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\" as defined by date-time in RFC3339.",
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "maxItems": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "maxLength": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "maxProperties": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "maximum": {
+                    "description": "A Number represents a JSON number literal.",
+                    "type": "string"
+                  },
+                  "minItems": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "minLength": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "minProperties": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "minimum": {
+                    "description": "A Number represents a JSON number literal.",
+                    "type": "string"
+                  },
+                  "multipleOf": {
+                    "description": "A Number represents a JSON number literal.",
+                    "type": "string"
+                  },
+                  "nullable": {
+                    "type": "boolean"
+                  },
+                  "pattern": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "uniqueItems": {
+                    "type": "boolean"
+                  },
+                  "x-descriptors": {
+                    "description": "The list of descriptors that determine which UI components to use on different views",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "flow": {
+          "maxProperties": 1,
+          "properties": {
+            "error-handler": {
+              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.ErrorHandlerStepParser$Definition"
+            },
+            "from": {
+              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.FromStepParser$Definition"
+            },
+            "on-exception": {
+              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.OnExceptionStepParser$Definition"
+            },
+            "rest": {
+              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.RestStepParser$Definition"
+            },
+            "route": {
+              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.RouteStepParser$Definition"
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "description": "SourceSpec --",
+            "type": "object",
+            "properties": {
+              "compression": {
+                "type": "boolean"
+              },
+              "content": {
+                "type": "string"
+              },
+              "contentKey": {
+                "type": "string"
+              },
+              "contentRef": {
+                "type": "string"
+              },
+              "contentType": {
+                "type": "string"
+              },
+              "interceptors": {
+                "description": "Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader uses to pre/post process sources",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "language": {
+                "description": "Language --",
+                "type": "string"
+              },
+              "loader": {
+                "description": "Loader is an optional id of the org.apache.camel.k.RoutesLoader that will interpret this source at runtime",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "property-names": {
+                "description": "List of property names defined in the source (e.g. if type is \"template\")",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rawContent": {
+                "type": "string",
+                "format": "byte"
+              },
+              "type": {
+                "description": "Type defines the kind of source described by this object",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "types": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "mediaType": {
+                "type": "string"
+              },
+              "schema": {
+                "description": "JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).",
+                "type": "object",
+                "properties": {
+                  "$schema": {
+                    "description": "JSONSchemaURL represents a schema url.",
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                    "x-kubernetes-preserve-unknown-fields": true
+                  },
+                  "externalDocs": {
+                    "description": "ExternalDocumentation allows referencing an external resource for extended documentation.",
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "default": {
+                          "description": "default is a default value for undefined object fields.",
+                          "x-kubernetes-preserve-unknown-fields": true
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "enum": {
+                          "type": "array",
+                          "items": {
+                            "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                            "x-kubernetes-preserve-unknown-fields": true
+                          }
+                        },
+                        "example": {
+                          "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
+                          "x-kubernetes-preserve-unknown-fields": true
+                        },
+                        "exclusiveMaximum": {
+                          "type": "boolean"
+                        },
+                        "exclusiveMinimum": {
+                          "type": "boolean"
+                        },
+                        "format": {
+                          "description": "format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated: \n - bsonobjectid: a bson object ID, i.e. a 24 characters hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI - email: an email address as parsed by Golang net/mail.ParseAddress - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034]. - ipv4: an IPv4 IP as parsed by Golang net.ParseIP - ipv6: an IPv6 IP as parsed by Golang net.ParseIP - cidr: a CIDR as parsed by Golang net.ParseCIDR - mac: a MAC address as parsed by Golang net.ParseMAC - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - isbn: an ISBN10 or ISBN13 number string like \"0321751043\" or \"978-0321751041\" - isbn10: an ISBN10 number string like \"0321751043\" - isbn13: an ISBN13 number string like \"978-0321751041\" - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$ with any non digit characters mixed in - ssn: a U.S. social security number following the regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\" - byte: base64 encoded binary data - password: any kind of string - date: a date string like \"2006-01-02\" as defined by full-date in RFC3339 - duration: a duration string like \"22 ns\" as parsed by Golang time.ParseDuration or compatible with Scala duration format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\" as defined by date-time in RFC3339.",
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "maxItems": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "maxLength": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "maxProperties": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "maximum": {
+                          "description": "A Number represents a JSON number literal.",
+                          "type": "string"
+                        },
+                        "minItems": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "minLength": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "minProperties": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "minimum": {
+                          "description": "A Number represents a JSON number literal.",
+                          "type": "string"
+                        },
+                        "multipleOf": {
+                          "description": "A Number represents a JSON number literal.",
+                          "type": "string"
+                        },
+                        "nullable": {
+                          "type": "boolean"
+                        },
+                        "pattern": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "uniqueItems": {
+                          "type": "boolean"
+                        },
+                        "x-descriptors": {
+                          "description": "The list of descriptors that determine which UI components to use on different views",
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "description": "KameletStatus defines the observed state of Kamelet",
+      "type": "object",
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "description": "KameletCondition describes the state of a resource at a certain point.",
+            "type": "object",
+            "required": [
+              "status",
+              "type"
+            ],
+            "properties": {
+              "lastTransitionTime": {
+                "description": "Last time the condition transitioned from one status to another.",
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastUpdateTime": {
+                "description": "The last time this condition was updated.",
+                "type": "string",
+                "format": "date-time"
+              },
+              "message": {
+                "description": "A human readable message indicating details about the transition.",
+                "type": "string"
+              },
+              "reason": {
+                "description": "The reason for the condition's last transition.",
+                "type": "string"
+              },
+              "status": {
+                "description": "Status of the condition, one of True, False, Unknown.",
+                "type": "string"
+              },
+              "type": {
+                "description": "Type of kamelet condition.",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "phase": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "default": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "definitions": {
     "dataformats": {
+      "type": "object",
       "properties": {
         "any23": {
           "$ref": "#/definitions/org.apache.camel.model.dataformat.Any23DataFormat"
@@ -125,10 +589,10 @@
         "zipfile": {
           "$ref": "#/definitions/org.apache.camel.model.dataformat.ZipFileDataFormat"
         }
-      },
-      "type": "object"
+      }
     },
     "expressions": {
+      "type": "object",
       "properties": {
         "constant": {
           "$ref": "#/definitions/org.apache.camel.model.language.ConstantExpression"
@@ -190,8 +654,7 @@
         "xtokenize": {
           "$ref": "#/definitions/org.apache.camel.model.language.XMLTokenizerExpression"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.builder.DeadLetterChannelBuilder": {
       "anyOf": [
@@ -199,6 +662,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "async-delayed-redelivery": {
               "type": "boolean"
@@ -212,12 +676,12 @@
             "use-original-message": {
               "type": "boolean"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.builder.DefaultErrorHandlerBuilder": {
+      "type": "object",
       "properties": {
         "async-delayed-redelivery": {
           "type": "boolean"
@@ -231,8 +695,7 @@
         "use-original-message": {
           "type": "boolean"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.builder.ErrorHandlerBuilderRef": {
       "anyOf": [
@@ -240,12 +703,12 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "support-transacted": {
               "type": "boolean"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -256,15 +719,16 @@
       "type": "object"
     },
     "org.apache.camel.k.loader.yaml.parser.AggregateStepParser$CorrelationExpression": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
         },
         {}
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.AggregateStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -345,10 +809,14 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.BeansStepParser$Definition": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -359,42 +827,38 @@
         "type": {
           "type": "string"
         }
-      },
-      "required": [
-        "name",
-        "type"
-      ],
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.ChoiceStepParser$Definition": {
+      "type": "object",
       "properties": {
         "otherwise": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.ChoiceStepParser$Definition$Otherwise"
         },
         "when": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.ChoiceStepParser$Definition$When"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.ChoiceStepParser$Definition$Otherwise": {
+      "type": "object",
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.ChoiceStepParser$Definition$When": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -405,31 +869,31 @@
               "type": "boolean"
             },
             "steps": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/step"
-              },
-              "type": "array"
+              }
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.CircuitBreakerStepParser$CBDefinition": {
+      "type": "object",
       "properties": {
         "on-fallback": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.CircuitBreakerStepParser$FBDefinition"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.CircuitBreakerStepParser$FBDefinition": {
+      "type": "object",
       "properties": {
         "fallback-via-network": {
           "type": "string"
@@ -438,15 +902,15 @@
           "type": "boolean"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.DelayStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -467,43 +931,43 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.DoTryStepParser$DoCatchDefinition": {
+      "type": "object",
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.DoTryStepParser$DoFinallyDefinition": {
+      "type": "object",
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.DoTryStepParser$DoTryDefinition": {
+      "type": "object",
       "properties": {
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.DynamicRouterStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -524,10 +988,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.EnrichStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -560,10 +1024,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.ErrorHandlerStepParser$Definition": {
+      "type": "object",
       "properties": {
         "dead-letter-channel": {
           "$ref": "#/definitions/org.apache.camel.builder.DeadLetterChannelBuilder"
@@ -577,10 +1041,10 @@
         "ref": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.FilterStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -591,38 +1055,38 @@
               "type": "boolean"
             },
             "steps": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/step"
-              },
-              "type": "array"
+              }
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.FromStepParser$Definition": {
+      "type": "object",
+      "required": [
+        "steps",
+        "uri"
+      ],
       "properties": {
         "parameters": {
           "type": "object"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         },
         "uri": {
           "type": "string"
         }
-      },
-      "required": [
-        "steps",
-        "uri"
-      ],
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.IdempotentConsumerParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -648,17 +1112,17 @@
               "type": "string"
             },
             "steps": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/step"
-              },
-              "type": "array"
+              }
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.LoadBalanceStepParser$Definition": {
+      "type": "object",
       "properties": {
         "custom": {
           "$ref": "#/definitions/org.apache.camel.model.loadbalancer.CustomLoadBalancerDefinition"
@@ -676,10 +1140,10 @@
           "$ref": "#/definitions/org.apache.camel.model.loadbalancer.RoundRobinLoadBalancerDefinition"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         },
         "sticky": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.LoadBalanceStepParser$Definition$Sticky"
@@ -693,10 +1157,10 @@
         "weighted": {
           "$ref": "#/definitions/org.apache.camel.model.loadbalancer.WeightedLoadBalancerDefinition"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.LoadBalanceStepParser$Definition$Sticky": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -718,10 +1182,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.LoopStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -738,17 +1202,17 @@
               "type": "boolean"
             },
             "steps": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/step"
-              },
-              "type": "array"
+              }
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.MarshalStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/dataformats"
@@ -760,10 +1224,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.MulticastStepParser$Definition": {
+      "type": "object",
       "properties": {
         "executor-service-ref": {
           "type": "string"
@@ -784,10 +1248,10 @@
           "type": "string"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         },
         "stop-on-aggregate-exception": {
           "type": "string"
@@ -810,39 +1274,39 @@
         "timeout": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.OnExceptionStepParser$Definition": {
+      "type": "object",
       "properties": {
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.OnExceptionStepParser$Definition$ExpressionElement": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
         },
         {}
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.OnExceptionStepParser$Definition$MaybeBooleanExpressionElement": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
         },
         {}
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.OnExceptionStepParser$Definition$When": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -853,28 +1317,28 @@
               "type": "boolean"
             },
             "steps": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/step"
-              },
-              "type": "array"
+              }
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.PipelineStepParser$Definition": {
+      "type": "object",
       "properties": {
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.PollEnrichStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -907,10 +1371,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.ProcessStepParser$Definition": {
+      "type": "object",
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
@@ -918,10 +1382,10 @@
         "ref": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.RecipientListStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -978,10 +1442,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.ResequenceStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -995,20 +1459,20 @@
               "type": "boolean"
             },
             "steps": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/step"
-              },
-              "type": "array"
+              }
             },
             "stream-config": {
               "$ref": "#/definitions/org.apache.camel.model.config.StreamResequencerConfig"
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.RestStepParser$Definition": {
+      "type": "object",
       "properties": {
         "api-docs": {
           "type": "boolean"
@@ -1041,10 +1505,10 @@
           "type": "string"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         },
         "type": {
           "type": "string"
@@ -1055,10 +1519,14 @@
         "verb": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.RouteStepParser$Definition": {
+      "type": "object",
+      "required": [
+        "from",
+        "steps"
+      ],
       "properties": {
         "auto-startup": {
           "type": "boolean"
@@ -1073,17 +1541,12 @@
           "type": "string"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "required": [
-        "from",
-        "steps"
-      ],
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.RouteStepParser$From": {
       "anyOf": [
@@ -1091,6 +1554,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "uri"
+          ],
           "properties": {
             "parameters": {
               "type": "object"
@@ -1098,15 +1565,12 @@
             "uri": {
               "type": "string"
             }
-          },
-          "required": [
-            "uri"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.k.loader.yaml.parser.RoutingSlipStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1127,22 +1591,23 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.SagaStepParser$Definition": {
+      "type": "object",
       "properties": {
         "completion-mode": {
+          "type": "string",
           "enum": [
             "AUTO",
             "MANUAL"
-          ],
-          "type": "string"
+          ]
         },
         "inherit-error-handler": {
           "type": "boolean"
         },
         "propagation": {
+          "type": "string",
           "enum": [
             "REQUIRED",
             "REQUIRES_NEW",
@@ -1150,17 +1615,16 @@
             "SUPPORTS",
             "NOT_SUPPORTED",
             "NEVER"
-          ],
-          "type": "string"
+          ]
         },
         "saga-service-ref": {
           "type": "string"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         },
         "timeout": {
           "type": "string"
@@ -1168,10 +1632,10 @@
         "timeout-in-milliseconds": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.SampleStepParser$Definition": {
+      "type": "object",
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
@@ -1183,12 +1647,13 @@
           "type": "string"
         },
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         },
         "units": {
+          "type": "string",
           "enum": [
             "NANOSECONDS",
             "MICROSECONDS",
@@ -1197,13 +1662,12 @@
             "MINUTES",
             "HOURS",
             "DAYS"
-          ],
-          "type": "string"
+          ]
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.ScriptStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1215,8 +1679,7 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.ServiceCallStepParser$Definition": {
       "anyOf": [
@@ -1224,17 +1687,18 @@
           "type": "string"
         },
         {
+          "type": "object",
           "allOf": [
             {
               "$ref": "#/definitions/expressions"
             },
             {}
-          ],
-          "type": "object"
+          ]
         }
       ]
     },
     "org.apache.camel.k.loader.yaml.parser.ServiceCallStepParser$ServiceCallExpressionDefinition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1252,10 +1716,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.SetBodyStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1267,29 +1731,29 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.SetExchangePatternStepParser$Definition": {
+      "type": "object",
+      "required": [
+        "pattern"
+      ],
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
         },
         "pattern": {
+          "type": "string",
           "enum": [
             "InOnly",
             "InOut",
             "InOptionalOut"
-          ],
-          "type": "string"
+          ]
         }
-      },
-      "required": [
-        "pattern"
-      ],
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.SetHeaderStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1304,10 +1768,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.SetPropertyStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1322,10 +1786,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.SortStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1340,10 +1804,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.SplitStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1372,10 +1836,10 @@
               "type": "string"
             },
             "steps": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/step"
-              },
-              "type": "array"
+              }
             },
             "stop-on-aggregate-exception": {
               "type": "string"
@@ -1400,21 +1864,21 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.StepStepParser$Definition": {
+      "type": "object",
       "properties": {
         "steps": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/step"
-          },
-          "type": "array"
+          }
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.ThrottleStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1441,10 +1905,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.ThrowExceptionStepParser$Definition": {
+      "type": "object",
       "properties": {
         "exception-type": {
           "type": "string"
@@ -1458,8 +1922,7 @@
         "ref": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.ToDynamicStepParser$Definition": {
       "anyOf": [
@@ -1467,6 +1930,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "uri"
+          ],
           "properties": {
             "allow-optimised-components": {
               "type": "string"
@@ -1487,21 +1954,17 @@
               "type": "object"
             },
             "pattern": {
+              "type": "string",
               "enum": [
                 "InOnly",
                 "InOut",
                 "InOptionalOut"
-              ],
-              "type": "string"
+              ]
             },
             "uri": {
               "type": "string"
             }
-          },
-          "required": [
-            "uri"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -1511,6 +1974,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "uri"
+          ],
           "properties": {
             "inherit-error-handler": {
               "type": "boolean"
@@ -1519,25 +1986,22 @@
               "type": "object"
             },
             "pattern": {
+              "type": "string",
               "enum": [
                 "InOnly",
                 "InOut",
                 "InOptionalOut"
-              ],
-              "type": "string"
+              ]
             },
             "uri": {
               "type": "string"
             }
-          },
-          "required": [
-            "uri"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.k.loader.yaml.parser.TransactedStepParser$Definition": {
+      "type": "object",
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
@@ -1545,10 +2009,10 @@
         "ref": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.TransformStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1560,10 +2024,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.UnmarshalStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/dataformats"
@@ -1575,10 +2039,10 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.ValidateStepParser$Definition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1590,10 +2054,13 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.WireTapStepParser$Definition": {
+      "type": "object",
+      "required": [
+        "uri"
+      ],
       "properties": {
         "allow-optimised-components": {
           "type": "string"
@@ -1611,23 +2078,20 @@
           "type": "boolean"
         },
         "pattern": {
+          "type": "string",
           "enum": [
             "InOnly",
             "InOut",
             "InOptionalOut"
-          ],
-          "type": "string"
+          ]
         },
         "uri": {
           "type": "string"
         }
-      },
-      "required": [
-        "uri"
-      ],
-      "type": "object"
+      }
     },
     "org.apache.camel.k.loader.yaml.parser.WireTapStepParser$HeaderDefinition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
@@ -1642,17 +2106,16 @@
             }
           }
         }
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.k.loader.yaml.parser.WireTapStepParser$NewExchangeDefinition": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/expressions"
         },
         {}
-      ],
-      "type": "object"
+      ]
     },
     "org.apache.camel.model.BeanDefinition": {
       "anyOf": [
@@ -1660,6 +2123,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "bean-type": {
               "type": "string"
@@ -1677,19 +2141,19 @@
               "type": "string"
             },
             "scope": {
+              "type": "string",
               "enum": [
                 "Singleton",
                 "Request",
                 "Prototype"
-              ],
-              "type": "string"
+              ]
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.ClaimCheckDefinition": {
+      "type": "object",
       "properties": {
         "filter": {
           "type": "string"
@@ -1701,14 +2165,14 @@
           "type": "string"
         },
         "operation": {
+          "type": "string",
           "enum": [
             "Get",
             "GetAndRemove",
             "Set",
             "Push",
             "Pop"
-          ],
-          "type": "string"
+          ]
         },
         "strategy-method-name": {
           "type": "string"
@@ -1716,8 +2180,7 @@
         "strategy-ref": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.ConvertBodyDefinition": {
       "anyOf": [
@@ -1725,6 +2188,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "charset": {
               "type": "string"
@@ -1735,8 +2199,7 @@
             "type": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -1746,12 +2209,12 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "id": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -1761,6 +2224,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "inherit-error-handler": {
               "type": "boolean"
@@ -1772,6 +2236,7 @@
               "type": "string"
             },
             "logging-level": {
+              "type": "string",
               "enum": [
                 "TRACE",
                 "DEBUG",
@@ -1779,8 +2244,7 @@
                 "WARN",
                 "ERROR",
                 "OFF"
-              ],
-              "type": "string"
+              ]
             },
             "marker": {
               "type": "string"
@@ -1788,8 +2252,7 @@
             "message": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -1799,6 +2262,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "header-name": {
               "type": "string"
@@ -1806,8 +2270,7 @@
             "inherit-error-handler": {
               "type": "boolean"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -1817,6 +2280,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "exclude-pattern": {
               "type": "string"
@@ -1827,8 +2291,7 @@
             "pattern": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -1838,6 +2301,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "exclude-pattern": {
               "type": "string"
@@ -1848,8 +2312,7 @@
             "pattern": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -1859,6 +2322,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "inherit-error-handler": {
               "type": "boolean"
@@ -1866,8 +2330,7 @@
             "property-name": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -1877,6 +2340,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "inherit-error-handler": {
               "type": "boolean"
@@ -1890,20 +2354,20 @@
             "message": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.StopDefinition": {
+      "type": "object",
       "properties": {
         "inherit-error-handler": {
           "type": "boolean"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.ThreadsDefinition": {
+      "type": "object",
       "properties": {
         "allow-core-thread-time-out": {
           "type": "string"
@@ -1930,18 +2394,19 @@
           "type": "string"
         },
         "rejected-policy": {
+          "type": "string",
           "enum": [
             "Abort",
             "CallerRuns",
             "DiscardOldest",
             "Discard"
-          ],
-          "type": "string"
+          ]
         },
         "thread-name": {
           "type": "string"
         },
         "time-unit": {
+          "type": "string",
           "enum": [
             "NANOSECONDS",
             "MICROSECONDS",
@@ -1950,13 +2415,12 @@
             "MINUTES",
             "HOURS",
             "DAYS"
-          ],
-          "type": "string"
+          ]
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.config.BatchResequencerConfig": {
+      "type": "object",
       "properties": {
         "allow-duplicates": {
           "type": "string"
@@ -1973,10 +2437,10 @@
         "reverse": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.config.StreamResequencerConfig": {
+      "type": "object",
       "properties": {
         "capacity": {
           "type": "string"
@@ -1996,8 +2460,7 @@
         "timeout": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.ASN1DataFormat": {
       "anyOf": [
@@ -2005,6 +2468,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "clazz-name": {
               "type": "string"
@@ -2015,8 +2479,7 @@
             "using-iterator": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -2026,6 +2489,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "base-uri": {
               "type": "string"
@@ -2034,6 +2498,7 @@
               "type": "string"
             },
             "output-format": {
+              "type": "string",
               "enum": [
                 "NTRIPLES",
                 "TURTLE",
@@ -2042,11 +2507,9 @@
                 "JSONLD",
                 "RDFJSON",
                 "RDF4JMODEL"
-              ],
-              "type": "string"
+              ]
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -2056,6 +2519,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "id": {
               "type": "string"
@@ -2063,12 +2527,12 @@
             "instance-class-name": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.dataformat.BarcodeDataFormat": {
+      "type": "object",
       "properties": {
         "barcode-format": {
           "type": "string"
@@ -2085,10 +2549,10 @@
         "width": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.Base64DataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
@@ -2102,10 +2566,10 @@
         "url-safe": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.BeanioDataFormat": {
+      "type": "object",
       "properties": {
         "bean-reader-error-handler-type": {
           "type": "string"
@@ -2134,10 +2598,13 @@
         "unmarshal-single-object": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.BindyDataFormat": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
       "properties": {
         "allow-empty-stream": {
           "type": "string"
@@ -2152,23 +2619,20 @@
           "type": "string"
         },
         "type": {
+          "type": "string",
           "enum": [
             "Csv",
             "Fixed",
             "KeyValue"
-          ],
-          "type": "string"
+          ]
         },
         "unwrap-single-instance": {
           "type": "string"
         }
-      },
-      "required": [
-        "type"
-      ],
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.CBORDataFormat": {
+      "type": "object",
       "properties": {
         "allow-jms-type": {
           "type": "string"
@@ -2203,10 +2667,10 @@
         "use-list": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.CryptoDataFormat": {
+      "type": "object",
       "properties": {
         "algorithm": {
           "type": "string"
@@ -2238,8 +2702,7 @@
         "should-append-hmac": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.CsvDataFormat": {
       "anyOf": [
@@ -2247,6 +2710,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "allow-missing-column-names": {
               "type": "string"
@@ -2267,6 +2731,7 @@
               "type": "string"
             },
             "format-name": {
+              "type": "string",
               "enum": [
                 "DEFAULT",
                 "EXCEL",
@@ -2274,8 +2739,7 @@
                 "INFORMIX_UNLOAD_CSV",
                 "MYSQL",
                 "RFC4180"
-              ],
-              "type": "string"
+              ]
             },
             "format-ref": {
               "type": "string"
@@ -2340,8 +2804,7 @@
             "use-ordered-maps": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
@@ -2351,6 +2814,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "id": {
               "type": "string"
@@ -2358,46 +2822,46 @@
             "ref": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.dataformat.FhirJsonDataFormat": {
+      "type": "object",
       "properties": {
         "content-type-header": {
           "type": "string"
         },
         "dont-encode-elements": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
         },
         "dont-strip-versions-from-references-at-paths": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
         },
         "encode-elements": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
         },
         "encode-elements-applies-to-child-resources-only": {
           "type": "string"
         },
         "fhir-version": {
+          "type": "string",
           "enum": [
             "DSTU2",
             "DSTU2_HL7ORG",
             "DSTU2_1",
             "DSTU3",
             "R4"
-          ],
-          "type": "string"
+          ]
         },
         "id": {
           "type": "string"
@@ -2423,44 +2887,44 @@
         "suppress-narratives": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.FhirXmlDataFormat": {
+      "type": "object",
       "properties": {
         "content-type-header": {
           "type": "string"
         },
         "dont-encode-elements": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
         },
         "dont-strip-versions-from-references-at-paths": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
         },
         "encode-elements": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
         },
         "encode-elements-applies-to-child-resources-only": {
           "type": "string"
         },
         "fhir-version": {
+          "type": "string",
           "enum": [
             "DSTU2",
             "DSTU2_HL7ORG",
             "DSTU2_1",
             "DSTU3",
             "R4"
-          ],
-          "type": "string"
+          ]
         },
         "id": {
           "type": "string"
@@ -2486,10 +2950,10 @@
         "suppress-narratives": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.FlatpackDataFormat": {
+      "type": "object",
       "properties": {
         "allow-short-lines": {
           "type": "string"
@@ -2518,10 +2982,10 @@
         "text-qualifier": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.GrokDataFormat": {
+      "type": "object",
       "properties": {
         "allow-multiple-matches-per-line": {
           "type": "string"
@@ -2538,18 +3002,18 @@
         "pattern": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.GzipDataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.HL7DataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
@@ -2557,10 +3021,10 @@
         "validate": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.IcalDataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
@@ -2568,10 +3032,10 @@
         "validating": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.JacksonXMLDataFormat": {
+      "type": "object",
       "properties": {
         "allow-jms-type": {
           "type": "string"
@@ -2621,10 +3085,10 @@
         "xml-mapper": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.JaxbDataFormat": {
+      "type": "object",
       "properties": {
         "content-type-header": {
           "type": "string"
@@ -2681,26 +3145,26 @@
           "type": "string"
         },
         "schema-severity-level": {
+          "type": "string",
           "enum": [
             "0",
             "1",
             "2"
-          ],
-          "type": "string"
+          ]
         },
         "xml-stream-writer-wrapper": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.JsonApiDataFormat": {
+      "type": "object",
       "properties": {
         "data-format-types": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
         },
         "id": {
           "type": "string"
@@ -2708,10 +3172,10 @@
         "main-format-type": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.JsonDataFormat": {
+      "type": "object",
       "properties": {
         "allow-jms-type": {
           "type": "string"
@@ -2783,10 +3247,10 @@
         "use-list": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.LZFDataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
@@ -2794,10 +3258,10 @@
         "using-parallel-compression": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.MimeMultipartDataFormat": {
+      "type": "object",
       "properties": {
         "binary-content": {
           "type": "string"
@@ -2817,10 +3281,10 @@
         "multipart-without-attachment": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.PGPDataFormat": {
+      "type": "object",
       "properties": {
         "algorithm": {
           "type": "string"
@@ -2867,8 +3331,7 @@
         "signature-verification-option": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.ProtobufDataFormat": {
       "anyOf": [
@@ -2876,13 +3339,14 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "content-type-format": {
+              "type": "string",
               "enum": [
                 "native",
                 "json"
-              ],
-              "type": "string"
+              ]
             },
             "content-type-header": {
               "type": "string"
@@ -2893,18 +3357,17 @@
             "instance-class": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.dataformat.RssDataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.SoapJaxbDataFormat": {
       "anyOf": [
@@ -2912,6 +3375,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "context-path": {
               "type": "string"
@@ -2934,20 +3398,20 @@
             "version": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.dataformat.SyslogDataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.TarFileDataFormat": {
+      "type": "object",
       "properties": {
         "allow-empty-directory": {
           "type": "string"
@@ -2964,8 +3428,7 @@
         "using-iterator": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.ThriftDataFormat": {
       "anyOf": [
@@ -2973,14 +3436,15 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "content-type-format": {
+              "type": "string",
               "enum": [
                 "binary",
                 "json",
                 "sjson"
-              ],
-              "type": "string"
+              ]
             },
             "content-type-header": {
               "type": "string"
@@ -2991,12 +3455,12 @@
             "instance-class": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.dataformat.TidyMarkupDataFormat": {
+      "type": "object",
       "properties": {
         "data-object-type": {
           "type": "string"
@@ -3007,10 +3471,10 @@
         "omit-xml-declaration": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.UniVocityCsvDataFormat": {
+      "type": "object",
       "properties": {
         "as-map": {
           "type": "string"
@@ -3066,10 +3530,10 @@
         "skip-empty-lines": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.UniVocityFixedWidthDataFormat": {
+      "type": "object",
       "properties": {
         "as-map": {
           "type": "string"
@@ -3122,10 +3586,10 @@
         "skip-trailing-chars-until-newline": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.UniVocityTsvDataFormat": {
+      "type": "object",
       "properties": {
         "as-map": {
           "type": "string"
@@ -3172,10 +3636,10 @@
         "skip-empty-lines": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.XMLSecurityDataFormat": {
+      "type": "object",
       "properties": {
         "add-key-value-for-encrypted-key": {
           "type": "string"
@@ -3202,8 +3666,8 @@
           "type": "string"
         },
         "pass-phrase-byte": {
-          "format": "binary",
-          "type": "string"
+          "type": "string",
+          "format": "binary"
         },
         "recipient-key-alias": {
           "type": "string"
@@ -3217,8 +3681,7 @@
         "xml-cipher-algorithm": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.XStreamDataFormat": {
       "anyOf": [
@@ -3226,6 +3689,7 @@
           "type": "string"
         },
         {
+          "type": "object",
           "properties": {
             "content-type-header": {
               "type": "string"
@@ -3248,12 +3712,12 @@
             "permissions": {
               "type": "string"
             }
-          },
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.dataformat.XmlRpcDataFormat": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
@@ -3261,10 +3725,10 @@
         "request": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.YAMLDataFormat": {
+      "type": "object",
       "properties": {
         "allow-any-type": {
           "type": "string"
@@ -3304,10 +3768,10 @@
         "use-application-context-class-loader": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.ZipDeflaterDataFormat": {
+      "type": "object",
       "properties": {
         "compression-level": {
           "type": "string"
@@ -3315,10 +3779,10 @@
         "id": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.dataformat.ZipFileDataFormat": {
+      "type": "object",
       "properties": {
         "allow-empty-directory": {
           "type": "string"
@@ -3335,8 +3799,7 @@
         "using-iterator": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.language.CSimpleExpression": {
       "anyOf": [
@@ -3344,6 +3807,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3357,11 +3824,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3371,6 +3834,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3381,11 +3848,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3395,6 +3858,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "body-media-type": {
               "type": "string"
@@ -3414,11 +3881,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3428,6 +3891,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3438,11 +3905,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3452,6 +3915,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3462,11 +3929,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3476,6 +3939,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3486,11 +3953,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3500,6 +3963,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3510,11 +3977,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3524,6 +3987,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3543,11 +4010,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3557,6 +4020,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "allow-easy-predicate": {
               "type": "string"
@@ -3574,14 +4041,14 @@
               "type": "string"
             },
             "option": {
+              "type": "string",
               "enum": [
                 "DEFAULT_PATH_LEAF_TO_NULL",
                 "ALWAYS_RETURN_LIST",
                 "AS_PATH_LIST",
                 "SUPPRESS_EXCEPTIONS",
                 "REQUIRE_PROPERTIES"
-              ],
-              "type": "string"
+              ]
             },
             "result-type": {
               "type": "string"
@@ -3595,15 +4062,15 @@
             "write-as-string": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.language.LanguageExpression": {
+      "type": "object",
+      "required": [
+        "expression"
+      ],
       "properties": {
         "expression": {
           "type": "string"
@@ -3617,11 +4084,7 @@
         "trim": {
           "type": "string"
         }
-      },
-      "required": [
-        "expression"
-      ],
-      "type": "object"
+      }
     },
     "org.apache.camel.model.language.MethodCallExpression": {
       "anyOf": [
@@ -3629,6 +4092,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "bean-type": {
               "type": "string"
@@ -3646,21 +4113,17 @@
               "type": "string"
             },
             "scope": {
+              "type": "string",
               "enum": [
                 "Singleton",
                 "Request",
                 "Prototype"
-              ],
-              "type": "string"
+              ]
             },
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3670,6 +4133,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3680,11 +4147,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3694,6 +4157,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3704,11 +4171,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3718,6 +4181,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3728,11 +4195,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3742,6 +4205,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3755,11 +4222,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3769,6 +4232,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3779,11 +4246,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3793,6 +4256,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "end-token": {
               "type": "string"
@@ -3833,11 +4300,7 @@
             "xml": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3847,6 +4310,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "expression": {
               "type": "string"
@@ -3861,22 +4328,18 @@
               "type": "string"
             },
             "mode": {
+              "type": "string",
               "enum": [
                 "i",
                 "w",
                 "u",
                 "t"
-              ],
-              "type": "string"
+              ]
             },
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3886,6 +4349,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "document-type": {
               "type": "string"
@@ -3912,14 +4379,14 @@
               "type": "string"
             },
             "result-type": {
+              "type": "string",
               "enum": [
                 "NUMBER",
                 "STRING",
                 "BOOLEAN",
                 "NODESET",
                 "NODE"
-              ],
-              "type": "string"
+              ]
             },
             "saxon": {
               "type": "string"
@@ -3930,11 +4397,7 @@
             "trim": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
@@ -3944,6 +4407,10 @@
           "type": "string"
         },
         {
+          "type": "object",
+          "required": [
+            "expression"
+          ],
           "properties": {
             "configuration-ref": {
               "type": "string"
@@ -3963,15 +4430,12 @@
             "type": {
               "type": "string"
             }
-          },
-          "required": [
-            "expression"
-          ],
-          "type": "object"
+          }
         }
       ]
     },
     "org.apache.camel.model.loadbalancer.CustomLoadBalancerDefinition": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
@@ -3979,10 +4443,10 @@
         "ref": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.loadbalancer.FailoverLoadBalancerDefinition": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
@@ -3996,34 +4460,34 @@
         "sticky": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.loadbalancer.RandomLoadBalancerDefinition": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.loadbalancer.RoundRobinLoadBalancerDefinition": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.loadbalancer.TopicLoadBalancerDefinition": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "org.apache.camel.model.loadbalancer.WeightedLoadBalancerDefinition": {
+      "type": "object",
       "properties": {
         "distribution-ratio": {
           "type": "string"
@@ -4037,10 +4501,10 @@
         "round-robin": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
     "step": {
+      "type": "object",
       "maxProperties": 1,
       "properties": {
         "aggregate": {
@@ -4199,570 +4663,7 @@
         "wiretap": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.WireTapStepParser$Definition"
         }
-      },
-      "type": "object"
+      }
     }
-  },
-  "description": "Kamelet is the Schema for the kamelets API",
-  "properties": {
-    "apiVersion": {
-      "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-      "type": "string"
-    },
-    "kind": {
-      "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-      "type": "string"
-    },
-    "metadata": {
-      "type": "object"
-    },
-    "spec": {
-      "description": "KameletSpec defines the desired state of Kamelet",
-      "properties": {
-        "authorization": {
-          "description": "AuthorizationSpec is TODO (oauth information)",
-          "type": "object"
-        },
-        "definition": {
-          "description": "JSONSchemaProps is a JSON-Schema definition.",
-          "properties": {
-            "$ref": {
-              "type": "string"
-            },
-            "$schema": {
-              "description": "JSONSchemaURL represents a schema url.",
-              "type": "string"
-            },
-            "additionalItems": {
-              "type": "boolean"
-            },
-            "additionalProperties": {
-              "type": "boolean"
-            },
-            "allOf": {
-              "items": {},
-              "type": "array"
-            },
-            "anyOf": {
-              "items": {},
-              "type": "array"
-            },
-            "default": {
-              "description": "default is a default value for undefined object fields. Defaulting is a beta feature under the CustomResourceDefaulting feature gate. Defaulting requires spec.preserveUnknownFields to be false.",
-              "format": "byte",
-              "type": "string"
-            },
-            "definitions": {
-              "additionalProperties": {},
-              "description": "JSONSchemaDefinitions contains the models explicitly defined in this spec.",
-              "type": "object"
-            },
-            "dependencies": {
-              "additionalProperties": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "description": "JSONSchemaDependencies represent a dependencies property.",
-              "type": "object"
-            },
-            "description": {
-              "type": "string"
-            },
-            "enum": {
-              "items": {
-                "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
-                "format": "byte",
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "example": {
-              "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
-              "format": "byte",
-              "type": "string"
-            },
-            "exclusiveMaximum": {
-              "type": "boolean"
-            },
-            "exclusiveMinimum": {
-              "type": "boolean"
-            },
-            "externalDocs": {
-              "description": "ExternalDocumentation allows referencing an external resource for extended documentation.",
-              "properties": {
-                "description": {
-                  "type": "string"
-                },
-                "url": {
-                  "type": "string"
-                }
-              },
-              "type": "object"
-            },
-            "format": {
-              "description": "format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated: \n - bsonobjectid: a bson object ID, i.e. a 24 characters hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI - email: an email address as parsed by Golang net/mail.ParseAddress - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034]. - ipv4: an IPv4 IP as parsed by Golang net.ParseIP - ipv6: an IPv6 IP as parsed by Golang net.ParseIP - cidr: a CIDR as parsed by Golang net.ParseCIDR - mac: a MAC address as parsed by Golang net.ParseMAC - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - isbn: an ISBN10 or ISBN13 number string like \"0321751043\" or \"978-0321751041\" - isbn10: an ISBN10 number string like \"0321751043\" - isbn13: an ISBN13 number string like \"978-0321751041\" - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$ with any non digit characters mixed in - ssn: a U.S. social security number following the regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\" - byte: base64 encoded binary data - password: any kind of string - date: a date string like \"2006-01-02\" as defined by full-date in RFC3339 - duration: a duration string like \"22 ns\" as parsed by Golang time.ParseDuration or compatible with Scala duration format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\" as defined by date-time in RFC3339.",
-              "type": "string"
-            },
-            "id": {
-              "type": "string"
-            },
-            "items": {},
-            "maxItems": {
-              "format": "int64",
-              "type": "integer"
-            },
-            "maxLength": {
-              "format": "int64",
-              "type": "integer"
-            },
-            "maxProperties": {
-              "format": "int64",
-              "type": "integer"
-            },
-            "maximum": {
-              "description": "A Number represents a JSON number literal.",
-              "type": "string"
-            },
-            "minItems": {
-              "format": "int64",
-              "type": "integer"
-            },
-            "minLength": {
-              "format": "int64",
-              "type": "integer"
-            },
-            "minProperties": {
-              "format": "int64",
-              "type": "integer"
-            },
-            "minimum": {
-              "description": "A Number represents a JSON number literal.",
-              "type": "string"
-            },
-            "multipleOf": {
-              "description": "A Number represents a JSON number literal.",
-              "type": "string"
-            },
-            "not": {},
-            "nullable": {
-              "type": "boolean"
-            },
-            "oneOf": {
-              "items": {},
-              "type": "array"
-            },
-            "pattern": {
-              "type": "string"
-            },
-            "patternProperties": {
-              "additionalProperties": {},
-              "type": "object"
-            },
-            "properties": {
-              "additionalProperties": {},
-              "type": "object"
-            },
-            "required": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "title": {
-              "type": "string"
-            },
-            "type": {
-              "type": "string"
-            },
-            "uniqueItems": {
-              "type": "boolean"
-            },
-            "x-descriptors": {
-              "description": "x-descriptors annotates an object to define additional display options.",
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "x-kubernetes-embedded-resource": {
-              "description": "x-kubernetes-embedded-resource defines that the value is an embedded Kubernetes runtime.Object, with TypeMeta and ObjectMeta. The type must be object. It is allowed to further restrict the embedded object. kind, apiVersion and metadata are validated automatically. x-kubernetes-preserve-unknown-fields is allowed to be true, but does not have to be if the object is fully specified (up to kind, apiVersion, metadata).",
-              "type": "boolean"
-            },
-            "x-kubernetes-int-or-string": {
-              "description": "x-kubernetes-int-or-string specifies that this value is either an integer or a string. If this is true, an empty type is allowed and type as child of anyOf is permitted if following one of the following patterns: \n 1) anyOf:    - type: integer    - type: string 2) allOf:    - anyOf:      - type: integer      - type: string    - ... zero or more",
-              "type": "boolean"
-            },
-            "x-kubernetes-list-map-keys": {
-              "description": "x-kubernetes-list-map-keys annotates an array with the x-kubernetes-list-type `map` by specifying the keys used as the index of the map. \n This tag MUST only be used on lists that have the \"x-kubernetes-list-type\" extension set to \"map\". Also, the values specified for this attribute must be a scalar typed field of the child structure (no nesting is supported). \n The properties specified must either be required or have a default value, to ensure those properties are present for all list items.",
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "x-kubernetes-list-type": {
-              "description": "x-kubernetes-list-type annotates an array to further describe its topology. This extension must only be used on lists and may have 3 possible values: \n 1) `atomic`: the list is treated as a single entity, like a scalar.      Atomic lists will be entirely replaced when updated. This extension      may be used on any type of list (struct, scalar, ...). 2) `set`:      Sets are lists that must not have multiple items with the same value. Each      value must be a scalar, an object with x-kubernetes-map-type `atomic` or an      array with x-kubernetes-list-type `atomic`. 3) `map`:      These lists are like maps in that their elements have a non-index key      used to identify them. Order is preserved upon merge. The map tag      must only be used on a list with elements of type object. Defaults to atomic for arrays.",
-              "type": "string"
-            },
-            "x-kubernetes-map-type": {
-              "description": "x-kubernetes-map-type annotates an object to further describe its topology. This extension must only be used when type is object and may have 2 possible values: \n 1) `granular`:      These maps are actual maps (key-value pairs) and each fields are independent      from each other (they can each be manipulated by separate actors). This is      the default behaviour for all maps. 2) `atomic`: the list is treated as a single entity, like a scalar.      Atomic maps will be entirely replaced when updated.",
-              "type": "string"
-            },
-            "x-kubernetes-preserve-unknown-fields": {
-              "description": "x-kubernetes-preserve-unknown-fields stops the API server decoding step from pruning fields which are not specified in the validation schema. This affects fields recursively, but switches back to normal pruning behaviour if nested properties or additionalProperties are specified in the schema. This can either be true or undefined. False is forbidden.",
-              "type": "boolean"
-            }
-          },
-          "type": "object"
-        },
-        "dependencies": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "flow": {
-          "description": "Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL",
-          "maxProperties": 1,
-          "properties": {
-            "error-handler": {
-              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.ErrorHandlerStepParser$Definition"
-            },
-            "from": {
-              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.FromStepParser$Definition"
-            },
-            "on-exception": {
-              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.OnExceptionStepParser$Definition"
-            },
-            "rest": {
-              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.RestStepParser$Definition"
-            },
-            "route": {
-              "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.RouteStepParser$Definition"
-            }
-          },
-          "type": "object"
-        },
-        "sources": {
-          "items": {
-            "description": "SourceSpec --",
-            "properties": {
-              "compression": {
-                "type": "boolean"
-              },
-              "content": {
-                "type": "string"
-              },
-              "contentKey": {
-                "type": "string"
-              },
-              "contentRef": {
-                "type": "string"
-              },
-              "interceptors": {
-                "description": "Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader uses to pre/post process sources",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "language": {
-                "description": "Language --",
-                "type": "string"
-              },
-              "loader": {
-                "description": "Loader is an optional id of the org.apache.camel.k.RoutesLoader that will interpret this source at runtime",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "property-names": {
-                "description": "List of property names defined in the source (e.g. if type is \"template\")",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "type": {
-                "description": "Type defines the kind of source described by this object",
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "type": "array"
-        },
-        "types": {
-          "additionalProperties": {
-            "properties": {
-              "mediaType": {
-                "type": "string"
-              },
-              "schema": {
-                "description": "JSONSchemaProps is a JSON-Schema definition.",
-                "properties": {
-                  "$ref": {
-                    "type": "string"
-                  },
-                  "$schema": {
-                    "description": "JSONSchemaURL represents a schema url.",
-                    "type": "string"
-                  },
-                  "additionalItems": {
-                    "type": "boolean"
-                  },
-                  "additionalProperties": {
-                    "type": "boolean"
-                  },
-                  "allOf": {
-                    "items": {},
-                    "type": "array"
-                  },
-                  "anyOf": {
-                    "items": {},
-                    "type": "array"
-                  },
-                  "default": {
-                    "description": "default is a default value for undefined object fields. Defaulting is a beta feature under the CustomResourceDefaulting feature gate. Defaulting requires spec.preserveUnknownFields to be false.",
-                    "format": "byte",
-                    "type": "string"
-                  },
-                  "definitions": {
-                    "additionalProperties": {},
-                    "description": "JSONSchemaDefinitions contains the models explicitly defined in this spec.",
-                    "type": "object"
-                  },
-                  "dependencies": {
-                    "additionalProperties": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array"
-                    },
-                    "description": "JSONSchemaDependencies represent a dependencies property.",
-                    "type": "object"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "enum": {
-                    "items": {
-                      "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
-                      "format": "byte",
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "example": {
-                    "description": "JSON represents any valid JSON value. These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.",
-                    "format": "byte",
-                    "type": "string"
-                  },
-                  "exclusiveMaximum": {
-                    "type": "boolean"
-                  },
-                  "exclusiveMinimum": {
-                    "type": "boolean"
-                  },
-                  "externalDocs": {
-                    "description": "ExternalDocumentation allows referencing an external resource for extended documentation.",
-                    "properties": {
-                      "description": {
-                        "type": "string"
-                      },
-                      "url": {
-                        "type": "string"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "format": {
-                    "description": "format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated: \n - bsonobjectid: a bson object ID, i.e. a 24 characters hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI - email: an email address as parsed by Golang net/mail.ParseAddress - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034]. - ipv4: an IPv4 IP as parsed by Golang net.ParseIP - ipv6: an IPv6 IP as parsed by Golang net.ParseIP - cidr: a CIDR as parsed by Golang net.ParseCIDR - mac: a MAC address as parsed by Golang net.ParseMAC - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$ - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$ - isbn: an ISBN10 or ISBN13 number string like \"0321751043\" or \"978-0321751041\" - isbn10: an ISBN10 number string like \"0321751043\" - isbn13: an ISBN13 number string like \"978-0321751041\" - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$ with any non digit characters mixed in - ssn: a U.S. social security number following the regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor: an hexadecimal color code like \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\" - byte: base64 encoded binary data - password: any kind of string - date: a date string like \"2006-01-02\" as defined by full-date in RFC3339 - duration: a duration string like \"22 ns\" as parsed by Golang time.ParseDuration or compatible with Scala duration format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\" as defined by date-time in RFC3339.",
-                    "type": "string"
-                  },
-                  "id": {
-                    "type": "string"
-                  },
-                  "items": {},
-                  "maxItems": {
-                    "format": "int64",
-                    "type": "integer"
-                  },
-                  "maxLength": {
-                    "format": "int64",
-                    "type": "integer"
-                  },
-                  "maxProperties": {
-                    "format": "int64",
-                    "type": "integer"
-                  },
-                  "maximum": {
-                    "description": "A Number represents a JSON number literal.",
-                    "type": "string"
-                  },
-                  "minItems": {
-                    "format": "int64",
-                    "type": "integer"
-                  },
-                  "minLength": {
-                    "format": "int64",
-                    "type": "integer"
-                  },
-                  "minProperties": {
-                    "format": "int64",
-                    "type": "integer"
-                  },
-                  "minimum": {
-                    "description": "A Number represents a JSON number literal.",
-                    "type": "string"
-                  },
-                  "multipleOf": {
-                    "description": "A Number represents a JSON number literal.",
-                    "type": "string"
-                  },
-                  "not": {},
-                  "nullable": {
-                    "type": "boolean"
-                  },
-                  "oneOf": {
-                    "items": {},
-                    "type": "array"
-                  },
-                  "pattern": {
-                    "type": "string"
-                  },
-                  "patternProperties": {
-                    "additionalProperties": {},
-                    "type": "object"
-                  },
-                  "properties": {
-                    "additionalProperties": {},
-                    "type": "object"
-                  },
-                  "required": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "title": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "type": "string"
-                  },
-                  "uniqueItems": {
-                    "type": "boolean"
-                  },
-                  "x-descriptors": {
-                    "description": "x-descriptors annotates an object to define additional display options.",
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "x-kubernetes-embedded-resource": {
-                    "description": "x-kubernetes-embedded-resource defines that the value is an embedded Kubernetes runtime.Object, with TypeMeta and ObjectMeta. The type must be object. It is allowed to further restrict the embedded object. kind, apiVersion and metadata are validated automatically. x-kubernetes-preserve-unknown-fields is allowed to be true, but does not have to be if the object is fully specified (up to kind, apiVersion, metadata).",
-                    "type": "boolean"
-                  },
-                  "x-kubernetes-int-or-string": {
-                    "description": "x-kubernetes-int-or-string specifies that this value is either an integer or a string. If this is true, an empty type is allowed and type as child of anyOf is permitted if following one of the following patterns: \n 1) anyOf:    - type: integer    - type: string 2) allOf:    - anyOf:      - type: integer      - type: string    - ... zero or more",
-                    "type": "boolean"
-                  },
-                  "x-kubernetes-list-map-keys": {
-                    "description": "x-kubernetes-list-map-keys annotates an array with the x-kubernetes-list-type `map` by specifying the keys used as the index of the map. \n This tag MUST only be used on lists that have the \"x-kubernetes-list-type\" extension set to \"map\". Also, the values specified for this attribute must be a scalar typed field of the child structure (no nesting is supported). \n The properties specified must either be required or have a default value, to ensure those properties are present for all list items.",
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "x-kubernetes-list-type": {
-                    "description": "x-kubernetes-list-type annotates an array to further describe its topology. This extension must only be used on lists and may have 3 possible values: \n 1) `atomic`: the list is treated as a single entity, like a scalar.      Atomic lists will be entirely replaced when updated. This extension      may be used on any type of list (struct, scalar, ...). 2) `set`:      Sets are lists that must not have multiple items with the same value. Each      value must be a scalar, an object with x-kubernetes-map-type `atomic` or an      array with x-kubernetes-list-type `atomic`. 3) `map`:      These lists are like maps in that their elements have a non-index key      used to identify them. Order is preserved upon merge. The map tag      must only be used on a list with elements of type object. Defaults to atomic for arrays.",
-                    "type": "string"
-                  },
-                  "x-kubernetes-map-type": {
-                    "description": "x-kubernetes-map-type annotates an object to further describe its topology. This extension must only be used when type is object and may have 2 possible values: \n 1) `granular`:      These maps are actual maps (key-value pairs) and each fields are independent      from each other (they can each be manipulated by separate actors). This is      the default behaviour for all maps. 2) `atomic`: the list is treated as a single entity, like a scalar.      Atomic maps will be entirely replaced when updated.",
-                    "type": "string"
-                  },
-                  "x-kubernetes-preserve-unknown-fields": {
-                    "description": "x-kubernetes-preserve-unknown-fields stops the API server decoding step from pruning fields which are not specified in the validation schema. This affects fields recursively, but switches back to normal pruning behaviour if nested properties or additionalProperties are specified in the schema. This can either be true or undefined. False is forbidden.",
-                    "type": "boolean"
-                  }
-                },
-                "type": "object"
-              }
-            },
-            "type": "object"
-          },
-          "type": "object"
-        }
-      },
-      "type": "object"
-    },
-    "status": {
-      "description": "KameletStatus defines the observed state of Kamelet",
-      "properties": {
-        "conditions": {
-          "items": {
-            "description": "KameletCondition describes the state of a resource at a certain point.",
-            "properties": {
-              "lastTransitionTime": {
-                "description": "Last time the condition transitioned from one status to another.",
-                "format": "date-time",
-                "type": "string"
-              },
-              "lastUpdateTime": {
-                "description": "The last time this condition was updated.",
-                "format": "date-time",
-                "type": "string"
-              },
-              "message": {
-                "description": "A human readable message indicating details about the transition.",
-                "type": "string"
-              },
-              "reason": {
-                "description": "The reason for the condition's last transition.",
-                "type": "string"
-              },
-              "status": {
-                "description": "Status of the condition, one of True, False, Unknown.",
-                "type": "string"
-              },
-              "type": {
-                "description": "Type of kamelet condition.",
-                "type": "string"
-              }
-            },
-            "required": [
-              "status",
-              "type"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        },
-        "phase": {
-          "type": "string"
-        },
-        "properties": {
-          "items": {
-            "properties": {
-              "default": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "type": "array"
-        }
-      },
-      "type": "object"
-    }
-  },
-  "type": "object"
+  }
 }
