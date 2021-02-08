@@ -158,11 +158,6 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 	var c *cobra.Command
 	var err error
 
-	kamelLocal := os.Getenv("KAMEL_LOCAL")
-	if kamelLocal == "true" && len(args) > 0 && args[0] == "install" {
-		args = append(args, "--olm=false")
-	}
-
 	kamelArgs := os.Getenv("KAMEL_ARGS")
 	kamelDefaultArgs := strings.Fields(kamelArgs)
 	args = append(kamelDefaultArgs, args...)
