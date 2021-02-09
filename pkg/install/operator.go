@@ -281,8 +281,8 @@ func installLeaseBindings(ctx context.Context, c client.Client, namespace string
 
 func installServiceBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-role-service-binding.yaml",
-		"operator-role-binding-service-binding.yaml",
+		"/rbac/operator-role-service-binding.yaml",
+		"/rbac/operator-role-binding-service-binding.yaml",
 	)
 }
 
