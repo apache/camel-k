@@ -145,6 +145,11 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return o
 	}
 
+	if err := installKubernetes(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		return err
+	}
+
+	// Install OpenShift resources (roles and bindings)
 	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
 		return err
@@ -153,11 +158,8 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if err := installOpenShift(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
-	} else {
-		if err := installKubernetes(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
-			return err
-		}
 	}
+
 	// Additionally, install Knative resources (roles and bindings)
 	isKnative, err := knative.IsInstalled(ctx, c)
 	if err != nil {

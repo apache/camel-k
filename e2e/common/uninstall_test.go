@@ -37,7 +37,7 @@ func TestBasicUninstall(t *testing.T) {
 		// should be completely removed on uninstall
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
 		Eventually(Role(ns)).Should(BeNil())
-		Eventually(Rolebinding(ns)).Should(BeNil())
+		Eventually(RoleBinding(ns)).Should(BeNil())
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
 		Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
 		Eventually(OperatorPod(ns)).Should(BeNil())
@@ -73,7 +73,7 @@ func TestUninstallSkipRoleBinding(t *testing.T) {
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except role-bindings
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-role-bindings").Execute()).Should(BeNil())
-		Eventually(Rolebinding(ns)).ShouldNot(BeNil())
+		Eventually(RoleBinding(ns)).ShouldNot(BeNil())
 	})
 }
 
