@@ -6,9 +6,11 @@
 
 **Closed issues:**
 
+- Mount resource ConfigMaps as subPaths instead of volumes [\#1998](https://github.com/apache/camel-k/issues/1998)
 - Can't directly access Strimzi Topics in KameletBindings [\#1992](https://github.com/apache/camel-k/issues/1992)
 - Cannot use special characters in KameletBindings [\#1986](https://github.com/apache/camel-k/issues/1986)
 - Options to share state between routes [\#1984](https://github.com/apache/camel-k/issues/1984)
+- Allow to scaffold a Kamelet via kamel init [\#1983](https://github.com/apache/camel-k/issues/1983)
 - Make changelog action work again [\#1981](https://github.com/apache/camel-k/issues/1981)
 - Add a Backport Github action  [\#1969](https://github.com/apache/camel-k/issues/1969)
 - Release 1.3.1 [\#1966](https://github.com/apache/camel-k/issues/1966)
@@ -19,6 +21,9 @@
 
 **Merged pull requests:**
 
+- chore\(CRD\): Remove old CRDs from the deploy directory [\#2005](https://github.com/apache/camel-k/pull/2005) ([astefanutti](https://github.com/astefanutti))
+- Add scaffold for Kamelet via kamel init [\#2004](https://github.com/apache/camel-k/pull/2004) ([rudeigerc](https://github.com/rudeigerc))
+- feat\(conf\): Mount source and resource ConfigMaps as subPaths instead of volumes [\#2002](https://github.com/apache/camel-k/pull/2002) ([astefanutti](https://github.com/astefanutti))
 - Document OLM based deployment from source [\#2001](https://github.com/apache/camel-k/pull/2001) ([amitsadaphule](https://github.com/amitsadaphule))
 - chore\(doc\): Use Asciidoc style code blocks instead of Markdown style Verified [\#1999](https://github.com/apache/camel-k/pull/1999) ([astefanutti](https://github.com/astefanutti))
 - Revert "Switch to a different backport implementation" [\#1997](https://github.com/apache/camel-k/pull/1997) ([oscerd](https://github.com/oscerd))
@@ -30,6 +35,7 @@
 - Fix \#1986: use properties instead of URL encoding for Kamelets in bin… [\#1987](https://github.com/apache/camel-k/pull/1987) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(OLM\): Add missing internal-objects annotation to Kustomize base CSV manifest [\#1985](https://github.com/apache/camel-k/pull/1985) ([astefanutti](https://github.com/astefanutti))
 - Re-introduce changelog action [\#1982](https://github.com/apache/camel-k/pull/1982) ([oscerd](https://github.com/oscerd))
+- Refactors the deploy directory to make config directory single source of CRD truth [\#1978](https://github.com/apache/camel-k/pull/1978) ([phantomjinx](https://github.com/phantomjinx))
 - fix\(OLM\): OLM bundle generation fixes [\#1977](https://github.com/apache/camel-k/pull/1977) ([astefanutti](https://github.com/astefanutti))
 - Backport action: Added license [\#1975](https://github.com/apache/camel-k/pull/1975) ([oscerd](https://github.com/oscerd))
 - Remove node configuration from backport action. It is not needed [\#1974](https://github.com/apache/camel-k/pull/1974) ([oscerd](https://github.com/oscerd))
@@ -381,7 +387,6 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
-- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
@@ -478,6 +483,7 @@
 - \#1556 - Add the camel category to Camel K CRDs [\#1615](https://github.com/apache/camel-k/pull/1615) ([ipolyzos](https://github.com/ipolyzos))
 - Add examples back into the affinity trait documentation [\#1613](https://github.com/apache/camel-k/pull/1613) ([astefanutti](https://github.com/astefanutti))
 - feat: expose Operator ImagePullPolicy option and set it to Always in … [\#1612](https://github.com/apache/camel-k/pull/1612) ([johnpoth](https://github.com/johnpoth))
+- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc: add toc to readme [\#1606](https://github.com/apache/camel-k/pull/1606) ([tadayosi](https://github.com/tadayosi))
 - Upgrade Knative to version 0.15.0 [\#1605](https://github.com/apache/camel-k/pull/1605) ([oscerd](https://github.com/oscerd))
 - Fix \#1601: add v prefix to future tags [\#1603](https://github.com/apache/camel-k/pull/1603) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1537,6 +1543,7 @@
 - Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 - allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
+- Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
 - knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
 - dependencies: add support for boms [\#565](https://github.com/apache/camel-k/pull/565) ([lburgazzoli](https://github.com/lburgazzoli))
 - Upgrade Operator SDK to version 0.6.0 [\#562](https://github.com/apache/camel-k/pull/562) ([astefanutti](https://github.com/astefanutti))
@@ -1558,7 +1565,6 @@
 
 **Merged pull requests:**
 
-- Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#557: fix generated images [\#560](https://github.com/apache/camel-k/pull/560) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(maven\): Run Maven in batch mode to reduce log noise [\#556](https://github.com/apache/camel-k/pull/556) ([jamesnetherton](https://github.com/jamesnetherton))
 - knative: fix copy secrets to env vars [\#555](https://github.com/apache/camel-k/pull/555) ([lburgazzoli](https://github.com/lburgazzoli))
