@@ -577,6 +577,20 @@ traits:
   - name: tls-insecure-edge-termination-policy
     type: string
     description: To configure how to deal with insecure traffic, e.g. `Allow`, `Disable` or `Redirect` traffic.Refer to the OpenShift documentation for additional information.
+- name: service-binding
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Service Binding trait allows users to connect to Provisioned Services and ServiceBindings in Kubernetes: https://github.com/k8s-service-bindings/spec#service-binding As the specification is still evolving this is subject to change'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common property.
+  - name: service-bindings
+    type: '[]string'
+    description: List of Provisioned Services and ServiceBindings in the form KIND.VERSION.GROUP/NAME[/NAMESPACE]
 - name: service
   platform: false
   profiles:
