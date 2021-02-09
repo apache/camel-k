@@ -230,6 +230,8 @@ spec:
                       type: string
                     contentRef:
                       type: string
+                    contentType:
+                      type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
                         uses to pre/post process sources
@@ -251,6 +253,9 @@ spec:
                       items:
                         type: string
                       type: array
+                    rawContent:
+                      format: byte
+                      type: string
                     type:
                       description: Type defines the kind of source described by this
                         object
