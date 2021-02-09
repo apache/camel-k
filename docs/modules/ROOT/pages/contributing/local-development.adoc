@@ -57,3 +57,12 @@ kubectl port-forward --namespace kube-system registry-fttbv 5000:5000
 ----
 
 A similar procedure may work if you use other local environments. The idea is to expose the docker registry and be able to use it from your local operator.
+
+=== Local Camel K runtime
+
+Camel K integrations are based on https://github.com/apache/camel-k-runtime[Camel K runtime], generally paired with the operator release. If you need to specify a different runtime, or you have a local Camel K runtime that you want to test, then you will need to specify it in the `Integration Platform`:
+----
+./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force --runtime-version 1.7.0-SNAPSHOT
+----
+
+With the above instructions, the operator will pick up and use the snapshot version you have released locally.
