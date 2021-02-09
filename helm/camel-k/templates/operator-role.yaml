@@ -259,28 +259,15 @@ rules:
   - update
   - watch
 - apiGroups:
-    - "operators.coreos.com"
+  - "operators.coreos.com"
   resources:
-    - servicebindings
+  - servicebindings
   verbs:
-    - create
-    - delete
-    - deletecollection
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - "operators.coreos.com"
-  resources:
-    - servicebindings
-  verbs:
-    - create
-    - delete
-    - deletecollection
-    - get
-    - list
-    - patch
-    - update
-    - watch
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
