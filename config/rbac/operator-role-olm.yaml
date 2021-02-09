@@ -48,6 +48,17 @@ rules:
   - update
   - watch
 - apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - delete
+  - get
+  - update
+  - patch
+  - list
+- apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - roles
@@ -242,6 +253,19 @@ rules:
   verbs:
   - get
   - list
+  - watch
+- apiGroups:
+  - "coordination.k8s.io"
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - "operators.coreos.com"
