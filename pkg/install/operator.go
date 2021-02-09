@@ -267,15 +267,9 @@ func installMonitoringResources(ctx context.Context, c client.Client, namespace 
 
 func installLeaseBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"operator-role-leases.yaml",
-		"operator-role-binding-leases.yaml",
+		"/rbac/operator-role-leases.yaml",
+		"/rbac/operator-role-binding-leases.yaml",
 	)
-}
-
-// Platform installs the platform custom resource
-// nolint: lll
-func Platform(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1.IntegrationPlatformRegistrySpec) (*v1.IntegrationPlatform, error) {
-	return PlatformOrCollect(ctx, c, clusterType, namespace, registry, nil)
 }
 
 // PlatformOrCollect --
