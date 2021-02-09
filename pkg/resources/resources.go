@@ -536,8 +536,6 @@ var assets = func() http.FileSystem {
 		fs["/default"].(os.FileInfo),
 		fs["/manager"].(os.FileInfo),
 		fs["/manifests"].(os.FileInfo),
-		fs["/operator-role-binding-leases.yaml"].(os.FileInfo),
-		fs["/operator-role-leases.yaml"].(os.FileInfo),
 		fs["/prometheus"].(os.FileInfo),
 		fs["/rbac"].(os.FileInfo),
 		fs["/samples"].(os.FileInfo),
