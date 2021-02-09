@@ -111,7 +111,6 @@ rules:
   - watch
 - apiGroups:
   - apps
-  attributeRestrictions: null
   resources:
   - daemonsets
   verbs:

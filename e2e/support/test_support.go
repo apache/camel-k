@@ -766,7 +766,7 @@ func Role(ns string) func() *rbacv1.Role {
 	}
 }
 
-func Rolebinding(ns string) func() *rbacv1.RoleBinding {
+func RoleBinding(ns string) func() *rbacv1.RoleBinding {
 	return func() *rbacv1.RoleBinding {
 		lst := rbacv1.RoleBindingList{
 			TypeMeta: metav1.TypeMeta{
@@ -821,18 +821,33 @@ func CreateOperatorServiceAccount(ns string) error {
 }
 
 func CreateOperatorRole(ns string) (err error) {
-	var oc bool
-	if oc, err = openshift.IsOpenShift(TestClient()); err != nil {
+	oc, err := openshift.IsOpenShift(TestClient())
+	if err != nil {
 		panic(err)
+	}
+	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-kubernetes.yaml")
+	if err != nil {
+		return err
 	}
 	if oc {
 		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-openshift.yaml")
 	}
-	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-kubernetes.yaml")
+	return nil
 }
 
 func CreateOperatorRoleBinding(ns string) error {
-	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-binding.yaml")
+	oc, err := openshift.IsOpenShift(TestClient())
+	if err != nil {
+		panic(err)
+	}
+	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-binding.yaml")
+	if err != nil {
+		return err
+	}
+	if oc {
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-binding-openshift.yaml")
+	}
+	return nil
 }
 
 func CreateKamelPod(ns string, name string, command ...string) error {
