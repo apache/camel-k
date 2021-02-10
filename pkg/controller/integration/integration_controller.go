@@ -226,7 +226,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 		return err
 	} else if !ok {
 		log.Info("Service binding is disabled, install the Service Binding Operator if needed")
-	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, sb.SchemeGroupVersion.Group, "servicebindings", "", "", "create"); err != nil {
+	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, sb.SchemeGroupVersion.Group, "servicebindings", platform.GetOperatorWatchNamespace(), "", "create"); err != nil {
 		return err
 	} else if !ok {
 		log.Info("Service binding is disabled, the operator is not granted permission to create ServiceBindings!")
