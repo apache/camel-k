@@ -222,12 +222,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 	}
 
 	// Check the ServiceBinding CRD is present
-	serviceBindingKind := reflect.TypeOf(sb.ServiceBinding{}).Name()
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, sb.SchemeGroupVersion.String(), serviceBindingKind); err != nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, sb.SchemeGroupVersion.String(), reflect.TypeOf(sb.ServiceBinding{}).Name()); err != nil {
 		return err
 	} else if !ok {
 		log.Info("Service binding is disabled, install the Service Binding Operator if needed")
-	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, sb.SchemeGroupVersion.Group, serviceBindingKind, "", "", "create"); err != nil {
+	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, sb.SchemeGroupVersion.Group, "servicebindings", "", "", "create"); err != nil {
 		return err
 	} else if !ok {
 		log.Info("Service binding is disabled, the operator is not granted permission to create ServiceBindings!")
