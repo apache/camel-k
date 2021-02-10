@@ -163,7 +163,7 @@ metadata:
     categories: Integration & Delivery
     certified: "false"
     containerImage: docker.io/apache/camel-k:1.3.0-SNAPSHOT
-    createdAt: "2021-02-09T14:20:54Z"
+    createdAt: "2021-02-10T09:52:57Z"
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
     operators.operatorframework.io/builder: operator-sdk-v1.3.0
     operators.operatorframework.io/internal-objects: '["builds.camel.apache.org","integrationkits.camel.apache.org","camelcatalogs.camel.apache.org"]'
@@ -366,8 +366,8 @@ spec:
           - delete
           - get
           - update
-          - patch
           - list
+          - patch
           - watch
         - apiGroups:
           - rbac.authorization.k8s.io
@@ -382,16 +382,6 @@ spec:
           - list
           - patch
           - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - events
-          verbs:
-          - create
-          - patch
-          - get
-          - list
           - watch
         - apiGroups:
           - apps
@@ -433,6 +423,57 @@ spec:
           - extensions
           resources:
           - ingresses
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - events
+          verbs:
+          - create
+          - patch
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - serving.knative.dev
+          resources:
+          - services
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - eventing.knative.dev
+          - messaging.knative.dev
+          - sources.knative.dev
+          resources:
+          - '*'
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - coordination.k8s.io
+          resources:
+          - leases
           verbs:
           - create
           - delete
@@ -507,130 +548,9 @@ spec:
           verbs:
           - create
         - apiGroups:
-          - serving.knative.dev
-          resources:
-          - services
-          verbs:
-          - create
-          - delete
-          - deletecollection
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - eventing.knative.dev
-          - messaging.knative.dev
-          resources:
-          - '*'
-          verbs:
-          - create
-          - delete
-          - deletecollection
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resourceNames:
-          - system:image-builder
-          resources:
-          - clusterroles
-          verbs:
-          - bind
-        - apiGroups:
-          - monitoring.coreos.com
-          resources:
-          - servicemonitors
-          verbs:
-          - create
-          - delete
-          - deletecollection
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - kafka.strimzi.io
-          resources:
-          - kafkatopics
-          - kafkas
-          verbs:
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - coordination.k8s.io
-          resources:
-          - leases
-          verbs:
-          - create
-          - delete
-          - deletecollection
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
           - operators.coreos.com
           resources:
           - servicebindings
-          verbs:
-          - create
-          - delete
-          - deletecollection
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - events
-          verbs:
-          - create
-          - patch
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - serving.knative.dev
-          resources:
-          - services
-          verbs:
-          - create
-          - delete
-          - deletecollection
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - eventing.knative.dev
-          - messaging.knative.dev
-          - sources.knative.dev
-          resources:
-          - '*'
-          verbs:
-          - create
-          - delete
-          - deletecollection
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - coordination.k8s.io
-          resources:
-          - leases
           verbs:
           - create
           - delete
