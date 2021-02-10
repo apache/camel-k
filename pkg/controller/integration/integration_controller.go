@@ -221,16 +221,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 		return err
 	}
 
-
 	// Check the ServiceBinding CRD is present
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, "operators.coreos.com/v1alpha1", reflect.TypeOf(sb.ServiceBinding{}).Name()); err != nil {
+	serviceBindingKind := reflect.TypeOf(sb.ServiceBinding{}).Name()
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, sb.SchemeGroupVersion.String(), serviceBindingKind); err != nil {
 		return err
 	} else if !ok {
 		log.Info("Service binding is disabled, install the Service Binding Operator if needed")
-	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, "operators.coreos.com", "ServiceBinding", "", "", "create"); err != nil {
-		log.Error(err, "cannot check permissions for watching ServiceBindings")
+	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, sb.SchemeGroupVersion.Group, serviceBindingKind, "", "", "create"); err != nil {
+		return err
 	} else if !ok {
-		log.Info("ServiceBinding monitoring is disabled, install Service Binding Operator before camel-k if needed")
+		log.Info("Service binding is disabled, the operator is not granted permission to create ServiceBindings!")
 	} else {
 		// Watch ServiceBindings and enqueue owning Integrations
 		err = ctrl.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
