@@ -33,6 +33,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -59,7 +60,7 @@ var (
 func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	// Check the ConsoleCLIDownload CRD is present, which should be starting OpenShift version 4.2.
 	// That check is also enough to exclude Kubernetes clusters.
-	ok, err := isAPIResourceInstalled(c, "console.openshift.io/v1", reflect.TypeOf(console.ConsoleCLIDownload{}).Name())
+	ok, err := kubernetes.IsAPIResourceInstalled(c, "console.openshift.io/v1", reflect.TypeOf(console.ConsoleCLIDownload{}).Name())
 	if err != nil {
 		return err
 	} else if !ok {
@@ -160,22 +161,4 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	}
 
 	return nil
-}
-
-func isAPIResourceInstalled(c client.Client, groupVersion string, kind string) (bool, error) {
-	resources, err := c.Discovery().ServerResourcesForGroupVersion(groupVersion)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	for _, resource := range resources.APIResources {
-		if resource.Kind == kind {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }

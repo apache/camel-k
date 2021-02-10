@@ -19,6 +19,7 @@ package integration
 
 import (
 	"context"
+	"reflect"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -37,6 +38,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	sb "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	camelevent "github.com/apache/camel-k/pkg/event"
@@ -45,7 +48,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
-	sb "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
 )
 
 // Add creates a new Integration Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -55,7 +57,7 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
-	return add(mgr, newReconciler(mgr, c))
+	return add(mgr, newReconciler(mgr, c), c)
 }
 
 // newReconciler returns a new reconcile.Reconciler
@@ -75,15 +77,15 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
+func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 	// Create a new controller
-	c, err := controller.New("integration-controller", mgr, controller.Options{Reconciler: r})
+	ctrl, err := controller.New("integration-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
 	// Watch for changes to primary resource Integration
-	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+	err = ctrl.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			oldIntegration := e.ObjectOld.(*v1.Integration)
 			newIntegration := e.ObjectNew.(*v1.Integration)
@@ -105,7 +107,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for IntegrationKit phase transitioning to ready or error and
 	// enqueue requests for any integrations that are in phase waiting for
 	// kit
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = ctrl.Watch(&source.Kind{Type: &v1.IntegrationKit{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 			kit := a.Object.(*v1.IntegrationKit)
 			var requests []reconcile.Request
@@ -140,7 +142,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integrations that are in phase waiting for platform
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = ctrl.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 			platform := a.Object.(*v1.IntegrationPlatform)
 			var requests []reconcile.Request
@@ -177,7 +179,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// the EnqueueRequestForOwner handler as the owner depends on the deployment strategy,
 	// either regular deployment or Knative service. In any case, the integration is not the
 	// direct owner of the ReplicaSet.
-	err = c.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestsFromMapFunc{
+	err = ctrl.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 			rs := a.Object.(*appsv1.ReplicaSet)
 			var requests []reconcile.Request
@@ -211,7 +213,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch cronjob to update the ready condition
-	err = c.Watch(&source.Kind{Type: &v1beta1.CronJob{}}, &handler.EnqueueRequestForOwner{
+	err = ctrl.Watch(&source.Kind{Type: &v1beta1.CronJob{}}, &handler.EnqueueRequestForOwner{
 		OwnerType:    &v1.Integration{},
 		IsController: false,
 	})
@@ -219,15 +221,19 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	if client, err := client.FromManager(mgr); err != nil {
-		log.Error(err, "cannot check permissions for watching ServiceBindings")
-	} else if ok, err := kubernetes.CheckPermission(context.TODO(), client, "operators.coreos.com", "ServiceBinding", "", "", "create"); err != nil {
+
+	// Check the ServiceBinding CRD is present
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, "operators.coreos.com/v1alpha1", reflect.TypeOf(sb.ServiceBinding{}).Name()); err != nil {
+		return err
+	} else if !ok {
+		log.Info("Service binding is disabled, install the Service Binding Operator if needed")
+	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, "operators.coreos.com", "ServiceBinding", "", "", "create"); err != nil {
 		log.Error(err, "cannot check permissions for watching ServiceBindings")
 	} else if !ok {
 		log.Info("ServiceBinding monitoring is disabled, install Service Binding Operator before camel-k if needed")
 	} else {
-		// Watch ServiceBindings created
-		err = c.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
+		// Watch ServiceBindings and enqueue owning Integrations
+		err = ctrl.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
 			OwnerType:    &v1.Integration{},
 			IsController: true,
 		})
