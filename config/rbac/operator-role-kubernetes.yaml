@@ -74,14 +74,6 @@ rules:
   - update
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - apps
   resources:
   - deployments
