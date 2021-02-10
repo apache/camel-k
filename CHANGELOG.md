@@ -18,9 +18,19 @@
 - \[ppc64le\] bundle image generated using `bundle` and `bundle-build` targets incompatible with `opm` [\#1923](https://github.com/apache/camel-k/issues/1923)
 - Corrupted binaries attached as resource [\#1881](https://github.com/apache/camel-k/issues/1881)
 - Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
+- Take a look at service binding [\#1445](https://github.com/apache/camel-k/issues/1445)
 
 **Merged pull requests:**
 
+- fix\(pdb\): Add missing watch verb to PodDisruptionBudget resources RBAC [\#2016](https://github.com/apache/camel-k/pull/2016) ([astefanutti](https://github.com/astefanutti))
+- fix\(helm\): Add missing permissions for PodDisruptionBudget resources [\#2015](https://github.com/apache/camel-k/pull/2015) ([astefanutti](https://github.com/astefanutti))
+- chore\(helm\): Remove duplicated rule for servicebindings [\#2014](https://github.com/apache/camel-k/pull/2014) ([astefanutti](https://github.com/astefanutti))
+- doc: camel k runtime local instructions [\#2013](https://github.com/apache/camel-k/pull/2013) ([squakez](https://github.com/squakez))
+- chore\(olm\): Regenerate current OLM package manifest [\#2012](https://github.com/apache/camel-k/pull/2012) ([astefanutti](https://github.com/astefanutti))
+- fix\(olm\): Add back lost rules to OLM role [\#2011](https://github.com/apache/camel-k/pull/2011) ([astefanutti](https://github.com/astefanutti))
+- chore\(doc\): Add ServiceBinding trait documentation [\#2010](https://github.com/apache/camel-k/pull/2010) ([astefanutti](https://github.com/astefanutti))
+- chore\(install\): Tidy RBAC resources into Kustomize directory [\#2008](https://github.com/apache/camel-k/pull/2008) ([astefanutti](https://github.com/astefanutti))
+- fix\(api\): Fix JSON schemas generation based on CRD apiextensions.k8s.io/v1 [\#2006](https://github.com/apache/camel-k/pull/2006) ([astefanutti](https://github.com/astefanutti))
 - chore\(CRD\): Remove old CRDs from the deploy directory [\#2005](https://github.com/apache/camel-k/pull/2005) ([astefanutti](https://github.com/astefanutti))
 - Add scaffold for Kamelet via kamel init [\#2004](https://github.com/apache/camel-k/pull/2004) ([rudeigerc](https://github.com/rudeigerc))
 - feat\(conf\): Mount source and resource ConfigMaps as subPaths instead of volumes [\#2002](https://github.com/apache/camel-k/pull/2002) ([astefanutti](https://github.com/astefanutti))
@@ -53,6 +63,7 @@
 - chore\(prometheus\): Remove runtime references from the Prometheus trait [\#1956](https://github.com/apache/camel-k/pull/1956) ([astefanutti](https://github.com/astefanutti))
 - Remove references to Quarkus runtime from monitoring and modeline documentation [\#1954](https://github.com/apache/camel-k/pull/1954) ([astefanutti](https://github.com/astefanutti))
 - fix\(trait\): using proper contentKey for sources [\#1953](https://github.com/apache/camel-k/pull/1953) ([squakez](https://github.com/squakez))
+- feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
 - chore\(crd\): Use conversion-gen API for structured conversion of CRDs to v1beta1 [\#1950](https://github.com/apache/camel-k/pull/1950) ([astefanutti](https://github.com/astefanutti))
 - doc: local development environment [\#1949](https://github.com/apache/camel-k/pull/1949) ([squakez](https://github.com/squakez))
 - fix\(cli\): Improve CLI / operator versions compatibility check [\#1944](https://github.com/apache/camel-k/pull/1944) ([astefanutti](https://github.com/astefanutti))
@@ -387,6 +398,7 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
@@ -483,7 +495,6 @@
 - \#1556 - Add the camel category to Camel K CRDs [\#1615](https://github.com/apache/camel-k/pull/1615) ([ipolyzos](https://github.com/ipolyzos))
 - Add examples back into the affinity trait documentation [\#1613](https://github.com/apache/camel-k/pull/1613) ([astefanutti](https://github.com/astefanutti))
 - feat: expose Operator ImagePullPolicy option and set it to Always in … [\#1612](https://github.com/apache/camel-k/pull/1612) ([johnpoth](https://github.com/johnpoth))
-- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc: add toc to readme [\#1606](https://github.com/apache/camel-k/pull/1606) ([tadayosi](https://github.com/tadayosi))
 - Upgrade Knative to version 0.15.0 [\#1605](https://github.com/apache/camel-k/pull/1605) ([oscerd](https://github.com/oscerd))
 - Fix \#1601: add v prefix to future tags [\#1603](https://github.com/apache/camel-k/pull/1603) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -762,7 +773,6 @@
 - Fix for \#1358 [\#1430](https://github.com/apache/camel-k/pull/1430) ([dobozysaurus](https://github.com/dobozysaurus))
 - Fix knative sources [\#1421](https://github.com/apache/camel-k/pull/1421) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add license headers to files generated with kamel init [\#1420](https://github.com/apache/camel-k/pull/1420) ([ipolyzos](https://github.com/ipolyzos))
-- Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Properly handle platform-http component in routes [\#1411](https://github.com/apache/camel-k/pull/1411) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
 
@@ -778,6 +788,7 @@
 
 **Merged pull requests:**
 
+- Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
 - Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
