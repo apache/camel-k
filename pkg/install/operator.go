@@ -145,19 +145,25 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		return o
 	}
 
-	if err := installKubernetes(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+	// Install Kubernetes RBAC resources (roles and bindings)
+	if err := installKubernetesRoles(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 		return err
 	}
 
-	// Install OpenShift resources (roles and bindings)
+	// Install OpenShift RBAC resources if needed (roles and bindings)
 	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
 		return err
 	}
 	if isOpenShift {
-		if err := installOpenShift(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if err := installOpenShiftRoles(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
+	}
+
+	// Deploy the operator
+	if err := installOperator(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		return err
 	}
 
 	// Additionally, install Knative resources (roles and bindings)
@@ -221,20 +227,23 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 	return nil
 }
 
-func installOpenShift(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"/manager/operator-service-account.yaml",
 		"/rbac/operator-role-openshift.yaml",
-		"/rbac/operator-role-binding.yaml",
-		"/manager/operator-deployment.yaml",
+		"/rbac/operator-role-binding-openshift.yaml",
 	)
 }
 
-func installKubernetes(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+func installKubernetesRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"/manager/operator-service-account.yaml",
 		"/rbac/operator-role-kubernetes.yaml",
 		"/rbac/operator-role-binding.yaml",
+	)
+}
+
+func installOperator(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"/manager/operator-deployment.yaml",
 	)
 }
