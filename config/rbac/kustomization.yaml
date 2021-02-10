@@ -21,7 +21,6 @@ resources:
 - operator-role-kubernetes.yaml
 - operator-role-leases.yaml
 - operator-role-openshift.yaml
-- operator-role-olm-cluster.yaml
 - operator-role-service-binding.yaml
 - operator-role-servicemonitors.yaml
 - operator-role-strimzi.yaml
@@ -34,3 +33,4 @@ resources:
 - operator-role-binding-strimzi.yaml
 - operator-role-binding.yaml
 - operator-cluster-role-binding.yaml
+- operator-cluster-role-openshift.yaml
