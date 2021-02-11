@@ -171,12 +171,6 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		}
 	}
 
-	// Install OpenShift Console download links if possible
-	err = OpenShiftConsoleDownloadLink(ctx, c)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
