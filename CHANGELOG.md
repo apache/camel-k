@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- ServiceBinding kind not installed  [\#2018](https://github.com/apache/camel-k/issues/2018)
 - Mount resource ConfigMaps as subPaths instead of volumes [\#1998](https://github.com/apache/camel-k/issues/1998)
 - Can't directly access Strimzi Topics in KameletBindings [\#1992](https://github.com/apache/camel-k/issues/1992)
 - Cannot use special characters in KameletBindings [\#1986](https://github.com/apache/camel-k/issues/1986)
@@ -22,6 +23,9 @@
 
 **Merged pull requests:**
 
+- fix: Resource name must be used instead of kind for SelfSubjectAccessReview request [\#2020](https://github.com/apache/camel-k/pull/2020) ([astefanutti](https://github.com/astefanutti))
+- fix: ServiceBinding SAR check does not guaranty CRD is installed [\#2019](https://github.com/apache/camel-k/pull/2019) ([astefanutti](https://github.com/astefanutti))
+- chore\(config\): Remove RBAC duplications [\#2017](https://github.com/apache/camel-k/pull/2017) ([astefanutti](https://github.com/astefanutti))
 - fix\(pdb\): Add missing watch verb to PodDisruptionBudget resources RBAC [\#2016](https://github.com/apache/camel-k/pull/2016) ([astefanutti](https://github.com/astefanutti))
 - fix\(helm\): Add missing permissions for PodDisruptionBudget resources [\#2015](https://github.com/apache/camel-k/pull/2015) ([astefanutti](https://github.com/astefanutti))
 - chore\(helm\): Remove duplicated rule for servicebindings [\#2014](https://github.com/apache/camel-k/pull/2014) ([astefanutti](https://github.com/astefanutti))
@@ -773,6 +777,7 @@
 - Fix for \#1358 [\#1430](https://github.com/apache/camel-k/pull/1430) ([dobozysaurus](https://github.com/dobozysaurus))
 - Fix knative sources [\#1421](https://github.com/apache/camel-k/pull/1421) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add license headers to files generated with kamel init [\#1420](https://github.com/apache/camel-k/pull/1420) ([ipolyzos](https://github.com/ipolyzos))
+- Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Properly handle platform-http component in routes [\#1411](https://github.com/apache/camel-k/pull/1411) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
 
@@ -788,7 +793,6 @@
 
 **Merged pull requests:**
 
-- Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
 - Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
