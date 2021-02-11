@@ -19,10 +19,12 @@ package kubernetes
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/client"
+
 	authorizationv1 "k8s.io/api/authorization/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/client"
 )
 
 // CheckPermission can be used to check if the current user/service-account is allowed to execute a given operation
@@ -49,8 +51,7 @@ func CheckPermission(ctx context.Context, client client.Client, group, resource,
 			return false, nil
 		}
 		return false, err
-	} else if !sar.Status.Allowed {
-		return false, nil
+	} else {
+		return sar.Status.Allowed, nil
 	}
-	return true, nil
 }
