@@ -15,7 +15,7 @@ Feature: Camel K can load default secrets for Kamelets
 
  Scenario: Verify default binding
     Given HTTP server "stub-service"
-    And HTTP server timeout is 60000 ms
+    And HTTP server timeout is 600000 ms
     Then expect HTTP request body: default
     And receive POST /default
     And delete KameletBinding binding

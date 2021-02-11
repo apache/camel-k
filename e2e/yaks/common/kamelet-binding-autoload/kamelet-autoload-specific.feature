@@ -17,7 +17,7 @@ Feature: Camel K can load specific secrets for Kamelets
 
  Scenario: Verify specific binding
     Given HTTP server "stub-service-2"
-    And HTTP server timeout is 60000 ms
+    And HTTP server timeout is 600000 ms
     Then expect HTTP request body: specific
     And receive POST /specific
     And delete KameletBinding binding-specific
