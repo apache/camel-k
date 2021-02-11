@@ -228,7 +228,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	}
 
 	if !o.SkipClusterSetup && !installViaOLM {
-		err := install.SetupClusterWideResourcesOrCollect(o.Context, clientProvider, collection)
+		err := install.SetupClusterWideResourcesOrCollect(o.Context, clientProvider, collection, o.ClusterType)
 		if err != nil && k8serrors.IsForbidden(err) {
 			fmt.Fprintln(cobraCmd.OutOrStdout(), "Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
 

@@ -40,7 +40,7 @@ import (
 )
 
 // SetupClusterWideResourcesOrCollect --
-func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection) error {
+func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection, clusterType string) error {
 	// Get a client to install the CRD
 	c, err := clientProvider.Get()
 	if err != nil {
@@ -132,15 +132,42 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		}
 	}
 
-	// Installing ClusterRole
-	clusterRoleInstalled, err := IsClusterRoleInstalled(ctx, c)
+	// Installing ClusterRoles
+	ok, err := isClusterRoleInstalled(ctx, c, "camel-k:edit")
 	if err != nil {
 		return err
 	}
-	if !clusterRoleInstalled || collection != nil {
-		err := installClusterRole(ctx, c, collection)
+	if !ok || collection != nil {
+		err := installResource(ctx, c, collection, "/rbac/user-cluster-role.yaml")
 		if err != nil {
 			return err
+		}
+	}
+
+	isOpenShift, err := isOpenShift(c, clusterType)
+	if err != nil {
+		return err
+	}
+	if isOpenShift {
+		ok, err := isClusterRoleInstalled(ctx, c, "camel-k-operator-openshift")
+		if err != nil {
+			return err
+		}
+		if !ok || collection != nil {
+			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-openshift.yaml")
+			if err != nil {
+				return err
+			}
+		}
+		ok, err = isClusterRoleBindingInstalled(ctx, c, "camel-k-operator-openshift")
+		if err != nil {
+			return err
+		}
+		if !ok || collection != nil {
+			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-binding-openshift.yaml")
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -260,22 +287,38 @@ func installCRD(ctx context.Context, c client.Client, kind string, version strin
 	return nil
 }
 
-// IsClusterRoleInstalled check if cluster role camel-k:edit is installed
-func IsClusterRoleInstalled(ctx context.Context, c client.Client) (bool, error) {
+func isClusterRoleInstalled(ctx context.Context, c client.Client, name string) (bool, error) {
 	clusterRole := rbacv1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRole",
 			APIVersion: "rbac.authorization.k8s.io/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "camel-k:edit",
+			Name: name,
 		},
 	}
-	key, err := k8sclient.ObjectKeyFromObject(&clusterRole)
+	return isResourceInstalled(ctx, c, &clusterRole)
+}
+
+func isClusterRoleBindingInstalled(ctx context.Context, c client.Client, name string) (bool, error) {
+	clusterRoleBinding := rbacv1.ClusterRoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ClusterRoleBinding",
+			APIVersion: "rbac.authorization.k8s.io/v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	return isResourceInstalled(ctx, c, &clusterRoleBinding)
+}
+
+func isResourceInstalled(ctx context.Context, c client.Client, object runtime.Object) (bool, error) {
+	key, err := k8sclient.ObjectKeyFromObject(object)
 	if err != nil {
 		return false, err
 	}
-	err = c.Get(ctx, key, &clusterRole)
+	err = c.Get(ctx, key, object)
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -284,8 +327,8 @@ func IsClusterRoleInstalled(ctx context.Context, c client.Client) (bool, error) 
 	return true, nil
 }
 
-func installClusterRole(ctx context.Context, c client.Client, collection *kubernetes.Collection) error {
-	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/rbac/user-cluster-role.yaml"))
+func installResource(ctx context.Context, c client.Client, collection *kubernetes.Collection, resource string) error {
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString(resource))
 	if err != nil {
 		return err
 	}
