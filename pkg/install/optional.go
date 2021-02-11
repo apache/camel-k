@@ -21,8 +21,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/go-logr/logr"
+
+	"github.com/apache/camel-k/pkg/client"
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong
@@ -35,11 +36,11 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 	}
 
 	// Try to register the cluster role for standard admin and edit users
-	if clusterRoleInstalled, err := IsClusterRoleInstalled(ctx, c); err != nil {
+	if clusterRoleInstalled, err := isClusterRoleInstalled(ctx, c, "camel-k:edit"); err != nil {
 		log.Info("Cannot detect user cluster role: skipping.")
 		log.V(8).Info("Error while getting user cluster role", "error", err)
 	} else if !clusterRoleInstalled {
-		if err := installClusterRole(ctx, c, nil); err != nil {
+		if err := installClusterRole(ctx, c, nil, "/rbac/user-cluster-role.yaml"); err != nil {
 			log.Info("Cannot install user cluster role: skipping.")
 			log.V(8).Info("Error while installing user cluster role", "error", err)
 		}
@@ -69,5 +70,4 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 			}
 		}
 	}
-
 }
