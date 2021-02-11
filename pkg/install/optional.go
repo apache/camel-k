@@ -35,17 +35,6 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 		log.V(8).Info("Error while installing OpenShift CLI download link", "error", err)
 	}
 
-	// Try to register the cluster role for standard admin and edit users
-	if clusterRoleInstalled, err := isClusterRoleInstalled(ctx, c, "camel-k:edit"); err != nil {
-		log.Info("Cannot detect user cluster role: skipping.")
-		log.V(8).Info("Error while getting user cluster role", "error", err)
-	} else if !clusterRoleInstalled {
-		if err := installClusterRole(ctx, c, nil, "/rbac/user-cluster-role.yaml"); err != nil {
-			log.Info("Cannot install user cluster role: skipping.")
-			log.V(8).Info("Error while installing user cluster role", "error", err)
-		}
-	}
-
 	// Try to install Kamelet Catalog automatically
 	var kameletNamespace string
 	globalOperator := false
