@@ -12,5 +12,5 @@ Feature: Alerts from Camel-K are propagated to Openshift Prometheus
     Given HTTP request header Authorization is "Bearer ${openshift.token}"
     When send GET /api/v1/rules
     Then verify HTTP response expressions
-      | $..rules[?(@.labels.namespace == '${YAKS_NAMESPACE}' && @.state == 'pending')].name | CamelKBuildFailure |
+      | $..rules[?(@.labels.namespace == '${YAKS_NAMESPACE}' && @.state == 'firing')].name | CamelKBuildFailure |
     And receive HTTP 200

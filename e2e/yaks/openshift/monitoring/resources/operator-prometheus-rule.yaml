@@ -87,12 +87,12 @@ spec:
               for {{ $labels.job }} have their duration above 5m.
         - alert: CamelKBuildFailure
           expr: |
-            sum(rate(camel_k_build_duration_seconds_count{result="Failed"}[5m])) by (job)
+            sum(rate(camel_k_build_duration_seconds_count{result="Failed"}[20m])) by (job)
             /
-            sum(rate(camel_k_build_duration_seconds_count[5m])) by (job)
+            sum(rate(camel_k_build_duration_seconds_count[20m])) by (job)
             * 100
             > 1
-          for: 10m
+          for: 1m
           labels:
             severity: warning
           annotations:
