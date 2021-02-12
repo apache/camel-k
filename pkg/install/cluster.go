@@ -159,16 +159,6 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 				return err
 			}
 		}
-		ok, err = isClusterRoleBindingInstalled(ctx, c, "camel-k-operator-openshift")
-		if err != nil {
-			return err
-		}
-		if !ok || collection != nil {
-			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-binding-openshift.yaml")
-			if err != nil {
-				return err
-			}
-		}
 	}
 
 	return nil
@@ -292,19 +282,6 @@ func isClusterRoleInstalled(ctx context.Context, c client.Client, name string) (
 		},
 	}
 	return isResourceInstalled(ctx, c, &clusterRole)
-}
-
-func isClusterRoleBindingInstalled(ctx context.Context, c client.Client, name string) (bool, error) {
-	clusterRoleBinding := rbacv1.ClusterRoleBinding{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ClusterRoleBinding",
-			APIVersion: "rbac.authorization.k8s.io/v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
-	return isResourceInstalled(ctx, c, &clusterRoleBinding)
 }
 
 func isResourceInstalled(ctx context.Context, c client.Client, object runtime.Object) (bool, error) {

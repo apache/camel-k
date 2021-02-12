@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -33,6 +34,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/resources"
@@ -40,6 +43,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minikube"
+	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 // OperatorConfiguration --
@@ -159,6 +163,13 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if err := installOpenShiftRoles(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
+		if err := installOpenShiftClusterRoleBinding(ctx, c, collection, cfg.Namespace); err != nil {
+			if k8serrors.IsForbidden(err) {
+				fmt.Println("Warning: the operator will not be able to manage ConsoleCLIDownload resources. Try installing the operator as cluster-admin.")
+			} else {
+				return err
+			}
+		}
 	}
 
 	// Deploy the operator
@@ -225,6 +236,66 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 	}
 
 	return nil
+}
+
+func installOpenShiftClusterRoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string) error {
+	var target *rbacv1.ClusterRoleBinding
+	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, "camel-k-operator-openshift", metav1.GetOptions{})
+	if k8serrors.IsNotFound(err) {
+		existing = nil
+		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/rbac/operator-cluster-role-binding-openshift.yaml"))
+		if err != nil {
+			return err
+		}
+		target = obj.(*rbacv1.ClusterRoleBinding)
+	} else if err != nil {
+		return err
+	} else {
+		target = existing.DeepCopy()
+	}
+
+	bound := false
+	for i, subject := range target.Subjects {
+		if subject.Name == "camel-k-operator" {
+			if subject.Namespace == namespace {
+				bound = true
+				break
+			} else if subject.Namespace == "" {
+				target.Subjects[i].Namespace = namespace
+				bound = true
+				break
+			}
+		}
+	}
+
+	if !bound {
+		target.Subjects = append(target.Subjects, rbacv1.Subject{
+			Kind:      "ServiceAccount",
+			Namespace: namespace,
+			Name:      "camel-k-operator",
+		})
+	}
+
+	if collection != nil {
+		collection.Add(target)
+		return nil
+	}
+
+	if existing == nil {
+		return c.Create(ctx, target)
+	} else {
+		// The ClusterRoleBinding.Subjects field does not have a patchStrategy key in its field tag,
+		// so a strategic merge patch would use the default patch strategy, which is replace.
+		// Let's compute a simple JSON merge patch from the existing resource, and patch it.
+		p, err := patch.PositiveMergePatch(existing, target)
+		if err != nil {
+			return err
+		} else if len(p) == 0 {
+			// Avoid triggering a patch request for nothing
+			return nil
+		}
+		return c.Patch(ctx, existing, ctrl.RawPatch(types.MergePatchType, p))
+	}
 }
 
 func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
