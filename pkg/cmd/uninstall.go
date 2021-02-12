@@ -21,17 +21,18 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/apache/camel-k/pkg/util/olm"
-	"github.com/pkg/errors"
 	"k8s.io/client-go/kubernetes"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
-	"github.com/spf13/cobra"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/util/olm"
 )
 
 func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstallCmdOptions) {
@@ -154,7 +155,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		if err = o.uninstallClusterWideResources(o.Context, c); err != nil {
+		if err = o.uninstallClusterWideResources(o.Context, c, o.Namespace); err != nil {
 			return err
 		}
 
@@ -181,7 +182,7 @@ func (o *uninstallCmdOptions) uninstallOperator(ctx context.Context, c client.Cl
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context, c client.Client) error {
+func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context, c client.Client, namespace string) error {
 	if !o.SkipCrd || o.UninstallAll {
 		if err := o.uninstallCrd(ctx, c); err != nil {
 			if k8serrors.IsForbidden(err) {
@@ -190,6 +191,15 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context,
 			return err
 		}
 		fmt.Printf("Camel K Custom Resource Definitions removed from cluster\n")
+	}
+
+	if err := o.removeSubjectFromClusterRoleBindings(ctx, c, namespace); err != nil {
+		if k8serrors.IsForbidden(err) {
+			// Let's print a warning message and continue
+			fmt.Println("Current user is not authorized to remove the operator ServiceAccount from the cluster role bindings")
+		} else if err != nil {
+			return err
+		}
 	}
 
 	if !o.SkipClusterRoleBindings || o.UninstallAll {
@@ -325,6 +335,32 @@ func (o *uninstallCmdOptions) uninstallClusterRoles(ctx context.Context, c clien
 		err := api.ClusterRoles().Delete(ctx, clusterRole.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *uninstallCmdOptions) removeSubjectFromClusterRoleBindings(ctx context.Context, c client.Client, namespace string) error {
+	api := c.RbacV1()
+
+	clusterRoleBindings, err := api.ClusterRoleBindings().List(ctx, defaultListOptions)
+	if err != nil {
+		return err
+	}
+
+	// Remove the subject corresponding to this operator install
+	for _, clusterRoleBinding := range clusterRoleBindings.Items {
+		for i, subject := range clusterRoleBinding.Subjects {
+			if subject.Name == "camel-k-operator" && subject.Namespace == namespace {
+				clusterRoleBinding.Subjects = append(clusterRoleBinding.Subjects[:i], clusterRoleBinding.Subjects[i+1:]...)
+				crb := &clusterRoleBinding
+				crb, err = api.ClusterRoleBindings().Update(ctx, crb, metav1.UpdateOptions{})
+				if err != nil {
+					return err
+				}
+				break
+			}
 		}
 	}
 
