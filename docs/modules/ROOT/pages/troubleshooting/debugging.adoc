@@ -1,9 +1,13 @@
 = Debugging Camel K Integrations
 
 Sometimes integrations can fail or behave unexpectedly for unknown reasons and a developer needs to investigate the cause of such behavior.
-Attaching a debugger to an integration is a common way to start the investigation.
+Attaching a Java debugger to an integration is a common way to start the investigation.
 
-Even if Camel K integrations run on a Kubernetes cluster, it's very easy to attach a debugger to the remote integration using the CLI.
+Even if Camel K integrations run on a Kubernetes cluster, it's very easy to attach a Java debugger to the remote integration using the CLI.
+
+If you're a VS Code user, you can watch this link:https://www.youtube.com/watch?v=cFPuxd1Je3c[video] or follow this link:https://camel.apache.org/blog/2021/01/DebugInVSCodeWithCamelK1.3.0/[blogpost].
+
+Find below a more generic explanation using IntelliJ.
 
 Suppose you just launched an integration using the following command:
 
