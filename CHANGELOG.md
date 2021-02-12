@@ -19,10 +19,13 @@
 - \[ppc64le\] bundle image generated using `bundle` and `bundle-build` targets incompatible with `opm` [\#1923](https://github.com/apache/camel-k/issues/1923)
 - Corrupted binaries attached as resource [\#1881](https://github.com/apache/camel-k/issues/1881)
 - Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
+- Refactor artifacts of deploy directory and continue alignment towards operator-sdk & kustomize [\#1820](https://github.com/apache/camel-k/issues/1820)
 - Take a look at service binding [\#1445](https://github.com/apache/camel-k/issues/1445)
 
 **Merged pull requests:**
 
+- \[fix\] Add bigger flexibility to alerts tests [\#2026](https://github.com/apache/camel-k/pull/2026) ([llowinge](https://github.com/llowinge))
+- fix: Add embedded kamelets directory check back [\#2021](https://github.com/apache/camel-k/pull/2021) ([astefanutti](https://github.com/astefanutti))
 - fix: Resource name must be used instead of kind for SelfSubjectAccessReview request [\#2020](https://github.com/apache/camel-k/pull/2020) ([astefanutti](https://github.com/astefanutti))
 - fix: ServiceBinding SAR check does not guaranty CRD is installed [\#2019](https://github.com/apache/camel-k/pull/2019) ([astefanutti](https://github.com/astefanutti))
 - chore\(config\): Remove RBAC duplications [\#2017](https://github.com/apache/camel-k/pull/2017) ([astefanutti](https://github.com/astefanutti))
