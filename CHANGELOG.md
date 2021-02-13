@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- spectrum publish x509: certificate signed by unknown authority [\#2029](https://github.com/apache/camel-k/issues/2029)
 - ServiceBinding kind not installed  [\#2018](https://github.com/apache/camel-k/issues/2018)
 - Mount resource ConfigMaps as subPaths instead of volumes [\#1998](https://github.com/apache/camel-k/issues/1998)
 - Can't directly access Strimzi Topics in KameletBindings [\#1992](https://github.com/apache/camel-k/issues/1992)
@@ -24,6 +25,8 @@
 
 **Merged pull requests:**
 
+- Increase timeouts [\#2028](https://github.com/apache/camel-k/pull/2028) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(RBAC\): Symmetrical RBAC setup between OLM and CLI [\#2027](https://github.com/apache/camel-k/pull/2027) ([astefanutti](https://github.com/astefanutti))
 - \[fix\] Add bigger flexibility to alerts tests [\#2026](https://github.com/apache/camel-k/pull/2026) ([llowinge](https://github.com/llowinge))
 - fix: Add embedded kamelets directory check back [\#2021](https://github.com/apache/camel-k/pull/2021) ([astefanutti](https://github.com/astefanutti))
 - fix: Resource name must be used instead of kind for SelfSubjectAccessReview request [\#2020](https://github.com/apache/camel-k/pull/2020) ([astefanutti](https://github.com/astefanutti))
