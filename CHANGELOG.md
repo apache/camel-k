@@ -2077,7 +2077,6 @@
 - jvm: improve language detection [\#79](https://github.com/apache/camel-k/pull/79) ([lburgazzoli](https://github.com/lburgazzoli))
 - Context handling improvement [\#76](https://github.com/apache/camel-k/pull/76) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add release commands and bump to 0.0.2-SNAPSHOT [\#72](https://github.com/apache/camel-k/pull/72) ([nicolaferraro](https://github.com/nicolaferraro))
-- Add support for XML routes [\#71](https://github.com/apache/camel-k/pull/71) ([lburgazzoli](https://github.com/lburgazzoli))
 - Support for integration configuration [\#68](https://github.com/apache/camel-k/pull/68) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.0.1](https://github.com/apache/camel-k/tree/0.0.1) (2018-09-13)
@@ -2097,6 +2096,7 @@
 
 **Merged pull requests:**
 
+- Add support for XML routes [\#71](https://github.com/apache/camel-k/pull/71) ([lburgazzoli](https://github.com/lburgazzoli))
 - kamel run runtime/examples/Sample.java fails with java.lang.NoClassDefFoundError [\#64](https://github.com/apache/camel-k/pull/64) ([lburgazzoli](https://github.com/lburgazzoli))
 -  Fix tests and add release scripts up to cross-compilation [\#63](https://github.com/apache/camel-k/pull/63) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow buildless direct deploy [\#61](https://github.com/apache/camel-k/pull/61) ([lburgazzoli](https://github.com/lburgazzoli))
