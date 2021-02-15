@@ -20,27 +20,21 @@ package kubernetes
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/client"
-	routev1 "github.com/openshift/api/route/v1"
 	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-)
 
-// ReplaceResources allows to completely replace a list of resources on Kubernetes, taking care of immutable fields and resource versions
-func ReplaceResources(ctx context.Context, c client.Client, objects []runtime.Object) error {
-	for _, object := range objects {
-		err := ReplaceResource(ctx, c, object)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	routev1 "github.com/openshift/api/route/v1"
+
+	"github.com/apache/camel-k/pkg/client"
+)
 
 // ReplaceResource allows to completely replace a resource on Kubernetes, taking care of immutable fields and resource versions
 func ReplaceResource(ctx context.Context, c client.Client, res runtime.Object) error {

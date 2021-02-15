@@ -21,7 +21,8 @@ import (
 	"reflect"
 
 	jsonpatch "github.com/evanphx/json-patch"
-	"k8s.io/apimachinery/pkg/api/equality"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -63,6 +64,26 @@ func PositiveMergePatch(source runtime.Object, target runtime.Object) ([]byte, e
 	return json.Marshal(positivePatch)
 }
 
+func PositiveApplyPatch(source runtime.Object) (runtime.Object, error) {
+	sourceJSON, err := json.Marshal(source)
+	if err != nil {
+		return nil, err
+	}
+
+	var positivePatch map[string]interface{}
+	err = json.Unmarshal(sourceJSON, &positivePatch)
+	if err != nil {
+		return nil, err
+	}
+
+	// The following is a work-around to remove null fields from the apply patch,
+	// so that ownership is not taken for non-managed fields.
+	// See https://github.com/kubernetes/enhancements/tree/master/keps/sig-api-machinery/2155-clientgo-apply
+	removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
+
+	return &unstructured.Unstructured{Object: positivePatch}, nil
+}
+
 func removeNilValues(v reflect.Value, parent reflect.Value) {
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
@@ -89,42 +110,4 @@ func removeNilValues(v reflect.Value, parent reflect.Value) {
 			removeNilValues(parent, reflect.Value{})
 		}
 	}
-}
-
-func ObjectMetaEqualDeepDerivative(object runtime.Object, expected runtime.Object) (res bool) {
-	defer func() {
-		if r := recover(); r != nil {
-			res = false
-		}
-	}()
-
-	if expected == nil {
-		return true
-	} else if object == nil {
-		return false
-	}
-
-	objectMeta := reflect.ValueOf(object).Elem().FieldByName("ObjectMeta").Interface()
-	expectedMeta := reflect.ValueOf(expected).Elem().FieldByName("ObjectMeta").Interface()
-
-	return equality.Semantic.DeepDerivative(expectedMeta, objectMeta)
-}
-
-func SpecEqualDeepDerivative(object runtime.Object, expected runtime.Object) (res bool) {
-	defer func() {
-		if r := recover(); r != nil {
-			res = false
-		}
-	}()
-
-	if expected == nil {
-		return true
-	} else if object == nil {
-		return false
-	}
-
-	objectSpec := reflect.ValueOf(object).Elem().FieldByName("Spec").Interface()
-	expectedSpec := reflect.ValueOf(expected).Elem().FieldByName("Spec").Interface()
-
-	return equality.Semantic.DeepDerivative(expectedSpec, objectSpec)
 }
